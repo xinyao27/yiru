@@ -1,8 +1,7 @@
-import { Warning as AlertTriangle } from '@phosphor-icons/react'
+import { Warning as AlertTriangle, X } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import {
@@ -40,7 +39,7 @@ export function PendingWorktreeRow({
       className={cn(
         'group flex w-full items-center gap-1 rounded-md transition-colors',
         active
-          ? 'border border-sidebar-ring/35 bg-sidebar-accent/70 ring-1 ring-sidebar-ring/30'
+          ? 'border border-sidebar-ring/35 bg-sidebar-accent/70'
           : 'border border-transparent hover:bg-sidebar-accent/60'
       )}
     >
@@ -54,7 +53,7 @@ export function PendingWorktreeRow({
           store.updatePendingWorktreeCreation(creationId, { loaderVisible: true })
           store.setActiveView('terminal')
         }}
-        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left outline-none"
       >
         <span className="flex size-4 shrink-0 items-center justify-center">
           {isError ? (
@@ -86,6 +85,7 @@ export function PendingWorktreeRow({
         )}
         onClick={() => useAppStore.getState().removePendingWorktreeCreation(creationId)}
         className={cn(
+          'outline-none focus-visible:bg-sidebar-accent focus-visible:text-foreground',
           'mr-1 flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground transition-opacity hover:bg-sidebar-accent hover:text-foreground focus-visible:opacity-100',
           isError ? 'opacity-100' : 'can-hover:opacity-0 group-hover:opacity-100'
         )}

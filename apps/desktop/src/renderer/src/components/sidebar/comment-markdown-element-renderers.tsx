@@ -64,7 +64,7 @@ export function createCompactCommentMarkdownComponents(
         href={href || undefined}
         target="_blank"
         rel="noreferrer"
-        className="text-foreground/80 hover:text-foreground underline underline-offset-2"
+        className="text-foreground/80 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline underline-offset-2 outline-none"
         onClick={(e) => handleMarkdownAnchorClick(e, href, onLinkClick)}
       >
         {children}
@@ -129,7 +129,7 @@ export function createCompactCommentMarkdownComponents(
             href={src || undefined}
             target="_blank"
             rel="noreferrer"
-            className="text-foreground/80 hover:text-foreground underline underline-offset-2"
+            className="text-foreground/80 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline underline-offset-2 outline-none"
             onClick={(e) => handleMarkdownAnchorClick(e, src, onLinkClick)}
           >
             {alt || src}
@@ -141,7 +141,7 @@ export function createCompactCommentMarkdownComponents(
         <img
           src={src}
           alt={alt ?? ''}
-          className="outline-border/70 my-1 max-h-32 max-w-full rounded-sm object-contain outline outline-1"
+          className="my-1 max-h-32 max-w-full rounded-sm object-contain"
         />
       )
       return src ? (
@@ -150,6 +150,7 @@ export function createCompactCommentMarkdownComponents(
           target="_blank"
           rel="noreferrer"
           onClick={(e) => handleMarkdownAnchorClick(e, src, onLinkClick)}
+          className="focus-visible:bg-accent outline-none"
         >
           {image}
         </a>
@@ -185,7 +186,7 @@ export function createDocumentCommentMarkdownComponents(
           href={href || undefined}
           target="_blank"
           rel="noreferrer"
-          className="text-primary hover:text-primary/80 break-all underline underline-offset-2"
+          className="text-primary hover:text-primary/80 focus-visible:text-primary/80 focus-visible:bg-accent break-all underline underline-offset-2 outline-none"
           onClick={(e) => handleMarkdownAnchorClick(e, href, onLinkClick)}
         >
           {children}
@@ -243,7 +244,6 @@ export function createDocumentCommentMarkdownComponents(
       }
       const imageClassName = cn(
         'my-3 max-h-96 max-w-full rounded-md object-contain',
-        'outline outline-1 outline-black/10 dark:outline-white/10',
         onLinkClick && 'cursor-pointer'
       )
 

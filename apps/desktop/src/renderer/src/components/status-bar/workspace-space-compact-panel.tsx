@@ -1,8 +1,12 @@
-import { Warning as AlertTriangle, HardDrive } from '@phosphor-icons/react'
+import {
+  Warning as AlertTriangle,
+  HardDrive,
+  ArrowClockwise as RefreshCw,
+  X
+} from '@phosphor-icons/react'
 import { useCallback } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { useAppStore } from '../../store'

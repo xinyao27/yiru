@@ -1,8 +1,7 @@
-import { Plug, Copy, Trash as Trash2 } from '@phosphor-icons/react'
+import { Plug, Copy, Trash as Trash2, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { SelectedTextCopyMenu } from '@/components/selected-text-copy-menu'
 import { Button } from '@/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
@@ -45,7 +44,7 @@ export function WorktreeCardPortsTrigger({
   return (
     <button
       type="button"
-      className="text-muted-foreground/70 focus-visible:ring-sidebar-ring inline-flex size-3.5 shrink-0 items-center justify-center rounded focus-visible:ring-1 focus-visible:outline-none"
+      className="text-muted-foreground/70 inline-flex size-3.5 shrink-0 items-center justify-center rounded focus-visible:outline-none"
       aria-label={translate(
         'auto.components.sidebar.WorktreeCardPorts.fed49903c9',
         '{{value0}} live {{value1}}',
@@ -266,7 +265,7 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
             </span>
           </TooltipContent>
         </Tooltip>
-        <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 shadow-xs transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
+        <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
           <PortAction
             label={openBrowserLabel}
             tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}

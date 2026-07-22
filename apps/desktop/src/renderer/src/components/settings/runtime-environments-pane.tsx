@@ -6,17 +6,15 @@ import {
   HardDrives as Server,
   HardDrive as ServerOff,
   ShareNetwork as Share2,
-  Trash as Trash2
+  Trash as Trash2,
+  CaretDown as ChevronDown,
+  Plus,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  CaretDown as ChevronDown,
-  Plus,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

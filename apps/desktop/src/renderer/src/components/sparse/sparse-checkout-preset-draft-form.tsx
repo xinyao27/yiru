@@ -56,7 +56,7 @@ export function SparseCheckoutPresetDraftForm({
           >
             {translate('auto.components.sparse.SparseCheckoutPresetSelect.b3a500c623', 'Name')}
           </label>
-          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 focus-within:ring-ring/30 rounded-md border px-2.5 shadow-xs transition focus-within:ring-1">
+          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 rounded-md border px-2.5 transition">
             <input
               id="sparse-preset-name"
               ref={setNameInputNode}
@@ -83,7 +83,7 @@ export function SparseCheckoutPresetDraftForm({
               'Directories'
             )}
           </label>
-          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 focus-within:ring-ring/30 rounded-md border px-2.5 py-1.5 shadow-xs transition focus-within:ring-1">
+          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 rounded-md border px-2.5 py-1.5 transition">
             <textarea
               id="sparse-preset-directories"
               value={draft.directoriesText}

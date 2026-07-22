@@ -9,7 +9,7 @@ export function TerminalSlide(): React.JSX.Element {
         <div className={mobileTerminalPreviewStyles.topbar}>
           <button
             type="button"
-            className={mobileTerminalPreviewStyles.back}
+            className={cn('outline-none focus-visible:bg-accent', mobileTerminalPreviewStyles.back)}
             aria-label={translate('auto.components.mobile.slides.TerminalSlide.8fd998acd3', 'Back')}
           >
             <ChevronLeftIcon />
@@ -33,7 +33,10 @@ export function TerminalSlide(): React.JSX.Element {
           </div>
           <button
             type="button"
-            className={mobileTerminalPreviewStyles.iconButton}
+            className={cn(
+              'outline-none focus-visible:bg-accent',
+              mobileTerminalPreviewStyles.iconButton
+            )}
             aria-label={translate(
               'auto.components.mobile.slides.TerminalSlide.94febb0976',
               'Source control'
@@ -43,7 +46,10 @@ export function TerminalSlide(): React.JSX.Element {
           </button>
           <button
             type="button"
-            className={mobileTerminalPreviewStyles.iconButton}
+            className={cn(
+              'outline-none focus-visible:bg-accent',
+              mobileTerminalPreviewStyles.iconButton
+            )}
             aria-label={translate(
               'auto.components.mobile.slides.TerminalSlide.606aa93192',
               'Files'

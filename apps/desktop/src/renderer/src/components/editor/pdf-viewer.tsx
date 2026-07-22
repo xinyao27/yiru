@@ -2,7 +2,8 @@ import {
   Image as ImageIcon,
   MagnifyingGlass as Search,
   MagnifyingGlassPlus as ZoomIn,
-  MagnifyingGlassMinus as ZoomOut
+  MagnifyingGlassMinus as ZoomOut,
+  ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import * as pdfjsLib from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
@@ -17,7 +18,6 @@ import 'pdfjs-dist/web/pdf_viewer.css'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: PDF loading drives pdf.js document/viewer instances and decode errors through an external worker lifecycle. */
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
@@ -253,7 +253,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
         <div className="flex items-center gap-1">
           <button
             type="button"
-            className="hover:bg-accent hover:text-foreground rounded p-1 disabled:opacity-50"
+            className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
             onClick={zoomOut}
             disabled={scale <= MIN_SCALE}
             title={translate('auto.components.editor.PdfViewer.fa5d096b00', 'Zoom out')}
@@ -262,7 +262,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
           </button>
           <button
             type="button"
-            className="hover:bg-accent hover:text-foreground rounded p-1"
+            className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none"
             onClick={zoomReset}
             title={translate('auto.components.editor.PdfViewer.c0119616d6', 'Fit to width')}
           >
@@ -270,7 +270,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
           </button>
           <button
             type="button"
-            className="hover:bg-accent hover:text-foreground rounded p-1 disabled:opacity-50"
+            className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
             onClick={zoomIn}
             disabled={scale >= MAX_SCALE}
             title={translate('auto.components.editor.PdfViewer.2b6eb1ccd6', 'Zoom in')}
@@ -281,7 +281,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
         </div>
         <button
           type="button"
-          className="hover:bg-accent hover:text-foreground rounded p-1"
+          className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none"
           onClick={() => setFindOpen(true)}
           title={translate(
             'auto.components.editor.PdfViewer.069ff59932',

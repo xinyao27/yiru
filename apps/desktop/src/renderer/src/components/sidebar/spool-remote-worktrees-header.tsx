@@ -26,7 +26,7 @@ export function SpoolRemoteWorktreesHeader({
         icon={<Cloudy aria-hidden="true" className="size-3.5" />}
         iconClassName="text-muted-foreground"
         label={label}
-        className="focus-visible:ring-sidebar-ring cursor-pointer focus-visible:ring-1"
+        className="cursor-pointer"
         onClick={onToggle}
         onKeyDown={(event) => {
           if (event.key !== 'Enter' && event.key !== ' ') {

@@ -1,7 +1,6 @@
-import { Image as ImageIcon, ImageBroken as ImageOff } from '@phosphor-icons/react'
+import { Image as ImageIcon, ImageBroken as ImageOff, X } from '@phosphor-icons/react'
 import type { ClipboardEventHandler, KeyboardEventHandler, RefObject } from 'react'
 
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { basename } from '@/lib/path'
@@ -131,7 +130,7 @@ export function NativeChatComposerField({
           <div
             data-native-file-drop-target={NATIVE_FILE_DROP_TARGET.composer}
             className={cn(
-              'border border-input bg-card p-1.5 shadow-xs transition-colors',
+              'border border-input bg-card p-1.5 transition-colors',
               'focus-within:border-ring dark:bg-input/30'
             )}
           >
@@ -159,7 +158,7 @@ export function NativeChatComposerField({
                         'components.native-chat.composer.removeAttachment',
                         'Remove attachment'
                       )}
-                      className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-4 shrink-0 items-center justify-center rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-4 shrink-0 items-center justify-center rounded-sm transition-colors focus-visible:outline-none"
                     >
                       <X className="size-3" />
                     </button>

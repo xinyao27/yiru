@@ -1,7 +1,6 @@
-import { Download, FolderOpen } from '@phosphor-icons/react'
+import { Download, FolderOpen, ArrowLeft, Plus } from '@phosphor-icons/react'
 import type { ComponentType } from 'react'
 
-import { ArrowLeft, Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -292,10 +291,10 @@ function HostSetupActionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
+        'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:bg-accent disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
         selected
-          ? 'rounded-md border-ring bg-foreground/10 text-foreground focus-visible:ring-0 dark:bg-accent dark:text-accent-foreground'
-          : 'hover:bg-accent focus-visible:bg-accent focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50',
+          ? 'rounded-md border-ring bg-foreground/10 text-foreground dark:bg-accent dark:text-accent-foreground'
+          : 'hover:bg-accent',
         className
       )}
     >

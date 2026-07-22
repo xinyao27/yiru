@@ -12,7 +12,7 @@ import {
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'
 
-const FIELD_CONTROL_CLASS = 'border-input bg-input/30 shadow-xs dark:bg-input/30'
+const FIELD_CONTROL_CLASS = 'border-input bg-input/30 dark:bg-input/30'
 
 export const AUTOMATION_CRON_FIELD_LABELS = ['Minute', 'Hour', 'Day', 'Month', 'Weekday'] as const
 

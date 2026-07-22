@@ -1,4 +1,4 @@
-import { Globe, Terminal as TerminalIcon } from '@phosphor-icons/react'
+import { Globe, SquaresFour, Terminal as TerminalIcon } from '@phosphor-icons/react'
 
 import { AgentIcon } from '@/lib/agent-catalog'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -15,6 +15,9 @@ function LeadingIcon({ drag }: { drag: TabDragItemData }): React.JSX.Element {
     const FileIcon = getFileTypeIcon(drag.iconPath ?? drag.label)
     return <FileIcon className="h-3.5 w-3.5 shrink-0" />
   }
+  if (drag.tabType === 'workspace-panel') {
+    return <SquaresFour className="h-3.5 w-3.5 shrink-0" />
+  }
   if (drag.agent) {
     return <AgentIcon agent={drag.agent} size={14} />
   }
@@ -29,7 +32,7 @@ function LeadingIcon({ drag }: { drag: TabDragItemData }): React.JSX.Element {
 // the wrapper's top-left.
 export default function TabDragPreview({ drag }: { drag: TabDragItemData }): React.JSX.Element {
   return (
-    <div className="border-border bg-accent text-foreground pointer-events-none flex h-full w-full items-center gap-1.5 rounded-sm border px-2 text-xs shadow-md">
+    <div className="border-border bg-accent text-foreground pointer-events-none flex h-full w-full items-center gap-1.5 rounded-sm border px-2 text-xs">
       <span className="inline-flex shrink-0">
         <LeadingIcon drag={drag} />
       </span>

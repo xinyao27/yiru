@@ -1,10 +1,10 @@
-import type { MouseEvent, ReactElement, ReactNode } from 'react'
-
 import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   ArrowSquareOut as ExternalLink
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import type { MouseEvent, ReactElement, ReactNode } from 'react'
+
 import { translate } from '@/i18n/i18n'
 
 export function DiffSectionHeader({
@@ -37,7 +37,7 @@ export function DiffSectionHeader({
         <span
           role="button"
           tabIndex={0}
-          className="cursor-copy hover:underline"
+          className="cursor-copy outline-none hover:underline focus-visible:underline"
           onMouseDown={(event) => {
             event.preventDefault()
             event.stopPropagation()
@@ -77,7 +77,7 @@ export function DiffSectionHeader({
       <div className="ml-2 flex shrink-0 items-center gap-1">
         {trailingContent}
         <button
-          className="text-muted-foreground hover:text-foreground can-hover:opacity-0 rounded p-0.5 transition-opacity group-hover:opacity-100"
+          className="text-muted-foreground hover:text-foreground can-hover:opacity-0 focus-visible:text-foreground focus-visible:bg-accent rounded p-0.5 transition-opacity outline-none group-hover:opacity-100"
           onClick={onOpenSection}
           title={openSectionTitle}
         >

@@ -35,9 +35,8 @@ const StatusIndicator = React.memo(function StatusIndicator({
         title={resolvedTitle}
         {...rest}
       >
-        {/* Why: worktree activity must follow the same user-selected indicator
-            as other loading states instead of maintaining a parallel spinner. */}
-        <LoadingIndicator className="size-2 text-yellow-500" />
+        {/* Why: worktree activity follows the selected indicator, and its 14px size matches adjacent row actions. */}
+        <LoadingIndicator className="size-3.5 text-yellow-500" />
       </span>
     )
   }

@@ -27,7 +27,7 @@ export function SpoolSessionRow({ row, onSelect }: SpoolSessionRowProps): React.
       onClick={onSelect}
       className={cn(
         'worktree-agent-row-hover flex h-6 w-full min-w-0 items-center gap-1 rounded-sm pr-1 text-left text-[11px] leading-none text-muted-foreground',
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
+        'focus-visible:outline-none',
         row.active && 'text-foreground'
       )}
       style={{ paddingLeft: DIRECT_PROJECT_WORKTREE_CONTENT_INDENT + SIDEBAR_TREE_INDENT }}

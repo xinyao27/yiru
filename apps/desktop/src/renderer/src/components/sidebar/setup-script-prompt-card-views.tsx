@@ -1,8 +1,14 @@
-import { Check, Download, Package as PackageCheck, Gear as Settings } from '@phosphor-icons/react'
+import {
+  Check,
+  Download,
+  Package as PackageCheck,
+  Gear as Settings,
+  ArrowClockwise as RefreshCw,
+  X
+} from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -69,7 +75,7 @@ export function DetectedSetupPreview({
         onChange={(event) => onSetupChange(event.target.value)}
         spellCheck={false}
         rows={getDetectedSetupScriptTextareaRows(setup)}
-        className="setup-script-prompt-command scrollbar-sleek border-sidebar-border text-foreground focus-visible:ring-ring max-h-28 w-full resize-y overflow-auto rounded-md border px-2 py-1.5 font-mono text-[11px] leading-5 shadow-xs outline-none focus-visible:ring-1"
+        className="setup-script-prompt-command scrollbar-sleek border-sidebar-border text-foreground max-h-28 w-full resize-y overflow-auto rounded-md border px-2 py-1.5 font-mono text-[11px] leading-5 outline-none"
       />
       {provenance ? (
         <p className="text-muted-foreground mt-1.5 text-[11px]">

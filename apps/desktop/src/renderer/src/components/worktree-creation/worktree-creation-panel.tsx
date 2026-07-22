@@ -1,8 +1,12 @@
-import { Warning as AlertTriangle, GitBranch } from '@phosphor-icons/react'
+import {
+  Warning as AlertTriangle,
+  GitBranch,
+  ArrowCounterClockwise as RotateCcw,
+  X
+} from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowCounterClockwise as RotateCcw, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { getCreationProgressLabel } from '@/lib/pending-worktree-creation'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
@@ -90,7 +94,7 @@ export default function WorktreeCreationPanel({
               'Cancel worktree creation'
             )}
             onClick={dismiss}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm outline-none"
           >
             <X className="size-3" />
           </button>
@@ -138,7 +142,7 @@ export default function WorktreeCreationPanel({
             <button
               type="button"
               onClick={() => retryBackgroundWorktreeCreation(creationId)}
-              className="text-foreground inline-flex items-center gap-1 hover:underline"
+              className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 outline-none hover:underline"
             >
               <RotateCcw className="size-3" />
               {translate(
@@ -149,7 +153,7 @@ export default function WorktreeCreationPanel({
             <button
               type="button"
               onClick={dismiss}
-              className="text-muted-foreground hover:text-foreground hover:underline"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent outline-none hover:underline"
             >
               {translate(
                 'auto.components.worktree.creation.WorktreeCreationPanel.dabd226118',
@@ -209,7 +213,7 @@ function VmProvisioningStatus({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="text-foreground inline-flex items-center gap-1 hover:underline"
+                  className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 outline-none hover:underline"
                 >
                   <RotateCcw className="size-3" />
                   {translate(
@@ -220,7 +224,7 @@ function VmProvisioningStatus({
                 <button
                   type="button"
                   onClick={onDismiss}
-                  className="text-muted-foreground hover:text-foreground hover:underline"
+                  className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent outline-none hover:underline"
                 >
                   {translate(
                     'auto.components.worktree.creation.WorktreeCreationPanel.dabd226118',
@@ -244,7 +248,7 @@ function VmProvisioningStatus({
               <button
                 type="button"
                 onClick={onCancel}
-                className="text-muted-foreground hover:text-foreground text-xs hover:underline"
+                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-xs outline-none hover:underline"
               >
                 {translate(
                   'auto.components.worktree.creation.WorktreeCreationPanel.cancelProvisioning',

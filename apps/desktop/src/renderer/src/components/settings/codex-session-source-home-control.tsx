@@ -120,7 +120,7 @@ export function AgentSessionSourceHomeInput({
                   'auto.components.settings.AgentsPane.codexSessionSourceInfo',
                   'About importing Codex history'
                 )}
-                className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 grid size-4 place-items-center rounded transition-colors outline-none focus-visible:ring-[3px]"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-4 place-items-center rounded transition-colors outline-none"
               >
                 <Info className="size-3" />
               </button>

@@ -357,7 +357,7 @@ export function GitHubMarkdownComposer({
   const attachmentFooter = isTabbed ? (
     <button
       type="button"
-      className="github-markdown-composer-attachment"
+      className="github-markdown-composer-attachment focus-visible:bg-accent outline-none"
       disabled={disabled}
       onClick={openImagePicker}
     >
@@ -375,7 +375,7 @@ export function GitHubMarkdownComposer({
     <div
       ref={rootRef}
       className={cn(
-        'github-markdown-composer relative overflow-hidden rounded-md border border-input bg-background shadow-xs',
+        'github-markdown-composer relative overflow-hidden rounded-md border border-input bg-background',
         isTabbed && 'github-markdown-composer-tabbed',
         disabled && 'opacity-60',
         className

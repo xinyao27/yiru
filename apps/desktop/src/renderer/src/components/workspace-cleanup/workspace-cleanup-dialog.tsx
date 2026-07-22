@@ -2,7 +2,9 @@ import {
   Warning as AlertTriangle,
   MagnifyingGlass as Search,
   SlidersHorizontal,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowCounterClockwise as RefreshCcw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the cleanup dialog keeps scan status,
    filters, row actions, localized review copy, and force-aware confirmation
@@ -12,7 +14,6 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowCounterClockwise as RefreshCcw, X } from '@/components/regular-icons'
 import RepoMultiCombobox from '@/components/repo/repo-multi-combobox'
 import { Button } from '@/components/ui/button'
 import {
@@ -778,7 +779,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                         selected={effectiveRepoSelection}
                         onChange={(next) => setRepoSelection(new Set(next))}
                         onSelectAll={() => setRepoSelection(new Set(eligibleRepoIds))}
-                        triggerClassName="h-8 w-full rounded-md border border-border/60 bg-background px-2 text-xs font-medium shadow-xs hover:bg-accent/60"
+                        triggerClassName="h-8 w-full rounded-md border border-border/60 bg-background px-2 text-xs font-medium hover:bg-accent/60"
                       />
                     </div>
                   ) : null}
@@ -1269,6 +1270,7 @@ function CleanupViewNav({
             key={item.view}
             type="button"
             className={cn(
+              'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
               'flex h-8 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
               activeView === item.view && 'bg-accent text-accent-foreground'
             )}

@@ -156,10 +156,8 @@ export function TerminalSettingsPreview({
     const terminal = new Terminal({
       ...buildDefaultTerminalOptions(),
       disableStdin: true,
-      // Why mirror cursorInactiveStyle: xterm renders the cursor as a hollow
-      // outline when the terminal is not focused. The preview is read-only and
-      // never gets focused, so without mirroring the user wouldn't see their
-      // selected cursor shape on the trailing prompt.
+      // Why mirror cursorInactiveStyle: the read-only preview never receives
+      // focus, but it must still show the user's selected cursor shape.
       cursorInactiveStyle: settings.terminalCursorStyle,
       cursorStyle: settings.terminalCursorStyle,
       cursorBlink: settings.terminalCursorBlink,
@@ -215,8 +213,7 @@ export function TerminalSettingsPreview({
     terminal.options.fontWeightBold = weights.fontWeightBold
     terminal.options.lineHeight = terminalLineHeight
     terminal.options.cursorStyle = settings.terminalCursorStyle
-    // Why: see constructor — mirror so the unfocused cursor reflects the
-    // user's chosen shape (xterm defaults inactive to 'outline').
+    // Why: see constructor — keep the unfocused preview cursor unchanged.
     terminal.options.cursorInactiveStyle = settings.terminalCursorStyle
     terminal.options.cursorBlink = settings.terminalCursorBlink
   }, [
@@ -332,6 +329,7 @@ export function TerminalSettingsPreview({
                       { value0: mode }
                     )}
                     className={cn(
+                      'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                       'rounded-sm p-1 transition-colors',
                       togglePreviewMode === mode
                         ? 'bg-accent text-accent-foreground'
@@ -354,7 +352,7 @@ export function TerminalSettingsPreview({
           <div className="flex min-h-0 flex-1 overflow-hidden" aria-hidden="true">
             <div
               ref={containerRef}
-              className="min-w-0 flex-1 overflow-hidden p-2"
+              className="min-w-0 flex-1 overflow-hidden p-2 outline-none"
               style={{ backgroundColor: paneBackground }}
               tabIndex={-1}
             />

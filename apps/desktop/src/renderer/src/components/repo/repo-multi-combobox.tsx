@@ -1,7 +1,6 @@
-import { Check } from '@phosphor-icons/react'
+import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import {
@@ -175,6 +174,7 @@ export default function RepoMultiCombobox({
               onMouseDown={(event) => event.preventDefault()}
               onMouseEnter={() => setCommandValue('')}
               className={cn(
+                'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
                 'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
                 allSelected && 'opacity-80'
               )}

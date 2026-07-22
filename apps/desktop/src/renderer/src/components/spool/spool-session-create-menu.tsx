@@ -12,17 +12,22 @@ import {
   WorkspaceNewTerminalMenuItem,
   WorkspaceTabCreateMenu
 } from '@/components/tab-bar/workspace-tab-create-menu'
-import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut
+} from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
-import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
 import type {
   SpoolTerminalCreateOperation,
   SpoolTerminalLaunchOptionsResult
 } from '../../../../shared/spool/spool-operation-contract'
+import type { WorkspacePanelTabContentType } from '../../../../shared/types'
+import type { ActivityBarItem } from '../right-sidebar/activity-bar-buttons'
 import {
   parseSpoolTerminalCreateResult,
   parseSpoolTerminalLaunchOptionsResult
@@ -44,14 +49,16 @@ export function SpoolSessionCreateMenu({
   route,
   connected,
   canControl,
-  controlState,
-  onCreated
+  onCreated,
+  panelItems,
+  onOpenPanel
 }: {
   route: SpoolWorkspaceRoute
   connected: boolean
   canControl: boolean
-  controlState: SpoolRequesterControlView['status']
   onCreated: (session: SpoolSessionCatalogEntry) => void
+  panelItems: readonly ActivityBarItem[]
+  onOpenPanel: (panel: WorkspacePanelTabContentType) => void
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -156,24 +163,16 @@ export function SpoolSessionCreateMenu({
       orderTabLaunchAgents(launchOptions.value.defaultAgent, launchOptions.value.agents)
     )
   }, [launchOptions])
-  const disabledTooltip = getCreateMenuDisabledTooltip({
-    connected,
-    canControl,
-    controlState,
-    creating
-  })
+  const terminalCreationDisabled = !connected || !canControl || creating
 
   return (
-    <WorkspaceTabCreateMenu
-      open={open}
-      onOpenChange={handleOpenChange}
-      disabled={disabledTooltip !== null}
-      disabledTooltip={disabledTooltip}
-      finalFocus={() => false}
-    >
-      <WorkspaceNewTerminalMenuItem onSelect={() => void createSession({ kind: 'shell' })} />
+    <WorkspaceTabCreateMenu open={open} onOpenChange={handleOpenChange} finalFocus={() => false}>
+      <WorkspaceNewTerminalMenuItem
+        disabled={terminalCreationDisabled}
+        onSelect={() => void createSession({ kind: 'shell' })}
+      />
       <DropdownMenuSeparator />
-      {launchOptions.status === 'ready' ? (
+      {launchOptions.status === 'ready' && canControl ? (
         <AgentLaunchMenuItems
           options={agentOptions}
           onLaunch={(agent) => void createSession({ kind: 'agent', agent })}
@@ -201,41 +200,17 @@ export function SpoolSessionCreateMenu({
               )}
         </DropdownMenuItem>
       )}
+      <DropdownMenuSeparator />
+      {panelItems.map((item) => {
+        const Icon = item.icon
+        return (
+          <DropdownMenuItem key={item.id} onClick={() => onOpenPanel(item.id)}>
+            <Icon className="size-4" />
+            <span className="flex-1">{item.title}</span>
+            {item.shortcut ? <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut> : null}
+          </DropdownMenuItem>
+        )
+      })}
     </WorkspaceTabCreateMenu>
   )
-}
-
-function getCreateMenuDisabledTooltip({
-  connected,
-  canControl,
-  controlState,
-  creating
-}: {
-  connected: boolean
-  canControl: boolean
-  controlState: SpoolRequesterControlView['status']
-  creating: boolean
-}): string | null {
-  if (!connected) {
-    return translate(
-      'auto.components.spool.SpoolSessionCreateMenu.disconnected',
-      'Reconnect to create terminals.'
-    )
-  }
-  if (!canControl) {
-    if (controlState === 'pending') {
-      return translate(
-        'auto.components.spool.SpoolSessionCreateMenu.controlPending',
-        'Waiting for the owner to approve control.'
-      )
-    }
-    return translate(
-      'auto.components.spool.SpoolSessionCreateMenu.controlRequired',
-      'Request control to create terminals.'
-    )
-  }
-  if (creating) {
-    return translate('auto.components.spool.SpoolSessionCreateMenu.creating', 'Creating terminal…')
-  }
-  return null
 }

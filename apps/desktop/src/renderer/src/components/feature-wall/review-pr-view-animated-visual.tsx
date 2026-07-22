@@ -180,7 +180,11 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
                 'Add local diagnostics error tracking'
               )}
             </div>
-            <button className="ravpr-merge" data-merge-btn type="button">
+            <button
+              className="ravpr-merge focus-visible:bg-accent outline-none"
+              data-merge-btn
+              type="button"
+            >
               <GitBranch className="size-3" />
               {translate(
                 'auto.components.feature.wall.ReviewPRViewAnimatedVisual.2f37142229',

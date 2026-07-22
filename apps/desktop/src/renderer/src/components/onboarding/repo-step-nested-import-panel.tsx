@@ -1,8 +1,7 @@
-import { StopCircle as CircleStop, FolderOpen } from '@phosphor-icons/react'
+import { StopCircle as CircleStop, FolderOpen, ArrowLeft } from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowLeft } from '@/components/regular-icons'
 import { NestedRepoChecklist } from '@/components/repo/nested-repo-checklist'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -59,7 +58,7 @@ export function RepoStepNestedImportPanel({
                         type="button"
                         variant="ghost"
                         size="icon-xs"
-                        className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
+                        className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive"
                         aria-label={translate(
                           'auto.components.onboarding.RepoStep.c3d9d44ca2',
                           'Stop scan'
@@ -119,7 +118,7 @@ export function RepoStepNestedImportPanel({
         <div className="mt-4 flex shrink-0 flex-wrap items-center gap-2">
           <button
             type="button"
-            className="text-muted-foreground hover:bg-muted/60 hover:text-foreground inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm disabled:opacity-40"
+            className="text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60 focus-visible:text-foreground inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm outline-none disabled:opacity-40"
             disabled={disabled && !nestedScanInProgress}
             onClick={onCancelNested}
           >
@@ -128,7 +127,7 @@ export function RepoStepNestedImportPanel({
           </button>
           <button
             type="button"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-auto rounded-lg px-4 py-3 text-sm font-medium disabled:opacity-40"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 ml-auto rounded-lg px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
             disabled={nestedImportDisabled || nestedSelectedPaths.size === 0}
             onClick={onImportNested}
           >

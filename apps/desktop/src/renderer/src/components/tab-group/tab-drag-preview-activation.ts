@@ -1,3 +1,4 @@
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import { useAppStore } from '../../store'
 import type { AppState } from '../../store/types'
 
@@ -55,6 +56,12 @@ function previewActiveSurfacePatch(
     return {
       activeTabType: 'simulator',
       activeTabTypeByWorktree: nextActiveTabTypeByWorktree('simulator')
+    }
+  }
+  if (isWorkspacePanelTabContentType(unifiedTab.contentType)) {
+    return {
+      activeTabType: 'editor',
+      activeTabTypeByWorktree: nextActiveTabTypeByWorktree('editor')
     }
   }
   return {

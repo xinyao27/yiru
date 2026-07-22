@@ -89,8 +89,7 @@ function Popover(props: {
     <div
       className={cn(
         'absolute z-10 flex flex-col gap-[7px] rounded-[10px] border bg-card px-3 py-2.5 not-italic',
-        'border-border text-foreground',
-        'shadow-[0_16px_38px_rgba(24,24,27,0.18),0_2px_6px_rgba(24,24,27,0.08)]'
+        'border-border text-foreground'
       )}
       style={{ left: 40, bottom: 70, width: 320 }}
     >
@@ -306,7 +305,7 @@ function BottomBar(props: { swapped: boolean }): JSX.Element {
   const codexMeta = props.swapped ? '0% used 5h · 4% used wk' : '96% used 47m'
   return (
     <div
-      className="border-border bg-muted/60 absolute bottom-[22px] left-1/2 flex -translate-x-1/2 items-center gap-3.5 rounded-lg border px-3.5 py-1.5 text-[11px] shadow-[0_1px_2px_rgba(24,24,27,0.04)]"
+      className="border-border bg-muted/60 absolute bottom-[22px] left-1/2 flex -translate-x-1/2 items-center gap-3.5 rounded-lg border px-3.5 py-1.5 text-[11px]"
       style={{ width: 340 }}
     >
       <div className="text-muted-foreground inline-flex items-center gap-1.5 font-mono text-[10.5px]">

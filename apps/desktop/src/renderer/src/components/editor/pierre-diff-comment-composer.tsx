@@ -1,7 +1,7 @@
+import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowElbowDownLeft as CornerDownLeft } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import {
@@ -86,7 +86,7 @@ export function PierreDiffCommentComposer({
                 mountedRef.current = false
               }
             }}
-            className="yiru-diff-comment-popover-textarea"
+            className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
             placeholder={placeholder ?? 'Add note for the AI'}
             value={body}
             rows={3}

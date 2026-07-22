@@ -1,6 +1,6 @@
+import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
 import { useState } from 'react'
 
-import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
@@ -41,7 +41,7 @@ export function MobileEmulatorAgentSetupGuide({
         'auto.components.emulator.pane.MobileEmulatorAgentSetupGuide.2fda9ff015',
         'Set up agent control'
       )}
-      className="border-border bg-card text-card-foreground overflow-hidden rounded-lg border shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+      className="border-border bg-card text-card-foreground overflow-hidden rounded-lg border"
     >
       <div className="flex items-center gap-2 px-3 py-2">
         <p className="text-muted-foreground min-w-0 flex-1 text-[11px] leading-4">
@@ -139,7 +139,7 @@ export function MobileEmulatorAgentSetupGuide({
             <button
               type="button"
               onClick={openSettings}
-              className="text-muted-foreground hover:text-foreground text-[11px] underline-offset-2 hover:underline"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-[11px] underline-offset-2 outline-none hover:underline"
             >
               {translate(
                 'auto.components.emulator.pane.MobileEmulatorAgentSetupGuide.3f003507f4',

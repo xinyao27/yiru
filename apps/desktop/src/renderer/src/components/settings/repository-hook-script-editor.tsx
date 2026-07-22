@@ -1,6 +1,6 @@
+import { Plus } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getRepositoryHookScriptTextareaRows } from '@/lib/script-textarea-rows'
@@ -29,7 +29,7 @@ function EnvVarChips(): React.JSX.Element {
                 render={
                   <code
                     tabIndex={0}
-                    className="border-border/50 bg-muted/35 text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:ring-ring cursor-help rounded-md border px-2 py-1 font-mono text-[11px] transition-colors outline-none focus-visible:ring-2"
+                    className="border-border/50 bg-muted/35 text-muted-foreground hover:bg-muted/60 hover:text-foreground cursor-help rounded-md border px-2 py-1 font-mono text-[11px] transition-colors outline-none"
                   >
                     {name}
                   </code>
@@ -127,7 +127,7 @@ export function ScriptEditor({
 
   return (
     <div
-      className="border-border/50 bg-background/80 space-y-3 rounded-2xl border p-4 shadow-sm"
+      className="border-border/50 bg-background/80 space-y-3 rounded-2xl border p-4"
       id={sectionId}
     >
       <div className="space-y-1">
@@ -193,7 +193,7 @@ export function ScriptEditor({
             placeholder={field.placeholder}
             spellCheck={false}
             rows={editorRows}
-            className="border-input bg-muted/20 placeholder:text-muted-foreground/60 focus-visible:border-ring focus-visible:bg-background focus-visible:ring-ring/40 w-full min-w-0 resize-y rounded-lg border px-3 py-2 font-mono text-[12px] leading-[1.55] shadow-xs transition-[color,box-shadow] outline-none placeholder:italic focus-visible:ring-[3px]"
+            className="border-input bg-muted/20 placeholder:text-muted-foreground/60 focus-visible:border-ring focus-visible:bg-background w-full min-w-0 resize-y rounded-lg border px-3 py-2 font-mono text-[12px] leading-[1.55] transition-[color] outline-none placeholder:italic"
           />
           <p className="text-muted-foreground text-[11px]">
             {translate(

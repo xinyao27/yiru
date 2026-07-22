@@ -1,7 +1,7 @@
+import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'

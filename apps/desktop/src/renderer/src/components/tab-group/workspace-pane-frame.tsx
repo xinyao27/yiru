@@ -9,7 +9,7 @@ type WorkspacePaneFrameProps = {
   tabBar: React.ReactNode
   trailingActions?: React.ReactNode
   reserveCollapsedSidebarHeaderSpace?: boolean
-  reserveClosedExplorerToggleSpace?: boolean
+  reserveWindowControlsSpace?: boolean
   rootClassName?: string
   rootProps?: Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'className'>
   bodyClassName?: string
@@ -27,7 +27,7 @@ export function WorkspacePaneFrame({
   tabBar,
   trailingActions,
   reserveCollapsedSidebarHeaderSpace = false,
-  reserveClosedExplorerToggleSpace = false,
+  reserveWindowControlsSpace = false,
   rootClassName,
   rootProps,
   bodyClassName,
@@ -36,7 +36,6 @@ export function WorkspacePaneFrame({
   children
 }: WorkspacePaneFrameProps): React.JSX.Element {
   const sidebarOpen = useAppStore((state) => state.sidebarOpen)
-  const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
 
   return (
     <div
@@ -75,12 +74,16 @@ export function WorkspacePaneFrame({
               {trailingActions}
             </div>
           ) : null}
-          {reserveClosedExplorerToggleSpace && !rightSidebarOpen ? (
+          {reserveWindowControlsSpace ? (
             <div
               className="shrink-0"
+              // Why: native controls overlay the renderer on Windows/Linux;
+              // a collapsed left sidebar also moves the profile control here.
               style={
                 {
-                  width: 'calc(40px + var(--window-controls-width, 0px))',
+                  width: sidebarOpen
+                    ? 'var(--window-controls-width, 0px)'
+                    : 'calc(40px + var(--window-controls-width, 0px))',
                   WebkitAppRegion: 'no-drag'
                 } as React.CSSProperties
               }

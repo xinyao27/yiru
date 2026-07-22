@@ -1,10 +1,11 @@
-import { GitBranch, ListChecks } from '@phosphor-icons/react'
-import { useState } from 'react'
-
 import {
+  GitBranch,
+  ListChecks,
   ArrowsLeftRight as ArrowRightLeft,
   FlowArrow as Workflow
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import { useState } from 'react'
+
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
@@ -135,7 +136,7 @@ export function OrchestrationPane(): React.JSX.Element {
               )}{' '}
               <button
                 type="button"
-                className="text-foreground font-medium underline-offset-2 hover:underline"
+                className="text-foreground focus-visible:bg-accent font-medium underline-offset-2 outline-none hover:underline"
                 onClick={() => {
                   setSkillPromptOpen(true)
                 }}
@@ -184,7 +185,7 @@ export function OrchestrationPane(): React.JSX.Element {
               <button
                 key={example.id}
                 type="button"
-                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring focus-visible:ring-ring/50 rounded-md border px-4 py-3 text-left transition-colors focus-visible:ring-[3px]"
+                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring focus-visible:bg-muted/35 rounded-md border px-4 py-3 text-left transition-colors outline-none"
                 onClick={() => setSelectedExampleId(example.id)}
               >
                 <div className="flex items-start gap-3">

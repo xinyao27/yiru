@@ -1301,7 +1301,7 @@ function Settings(): React.JSX.Element {
                     'Finish the core workflows that make Yiru useful for parallel agent work.'
                   )}
                   searchEntries={getSectionSearchEntries('setup-guide')}
-                  bodyClassName="overflow-hidden rounded-none border-0 bg-transparent p-0 shadow-none"
+                  bodyClassName="overflow-hidden rounded-none border-0 bg-transparent p-0 "
                 >
                   {isSectionMounted('setup-guide') ? <SettingsSetupGuidePane /> : null}
                 </SettingsSection>
@@ -1335,7 +1335,7 @@ function Settings(): React.JSX.Element {
                     'Connect GitHub, GitLab, and source-hosting services.'
                   )}
                   searchEntries={getSectionSearchEntries('integrations')}
-                  bodyClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
+                  bodyClassName="rounded-none border-0 bg-transparent p-0 "
                 >
                   {isSectionMounted('integrations') ? <IntegrationsPane /> : null}
                 </SettingsSection>

@@ -51,6 +51,7 @@ export function RichMarkdownSlashMenu({
             'auto.components.editor.RichMarkdownSlashMenu.dbdd2ad15f',
             'Search blocks...'
           )}
+          className="focus-visible:border-ring outline-none"
         />
       </div>
       <div className="rich-markdown-slash-results scrollbar-sleek" role="listbox">
@@ -75,7 +76,11 @@ export function RichMarkdownSlashMenu({
                   title={command.description}
                   role="option"
                   aria-selected={index === selectedIndex}
-                  className={cn('rich-markdown-slash-item', index === selectedIndex && 'is-active')}
+                  className={cn(
+                    'outline-none focus-visible:bg-accent',
+                    'rich-markdown-slash-item',
+                    index === selectedIndex && 'is-active'
+                  )}
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() =>
                     editor && runSlashCommand(editor, slashMenu, command, onImagePick, onEmojiPick)

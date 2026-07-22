@@ -40,11 +40,13 @@ export function useGitHistoryCommitActions({
   activeWorktreeId,
   worktreePath,
   activeRepoSettings,
+  workspacePanelTabId,
   resolveSplitTargetGroupId
 }: {
   activeWorktreeId: string | null | undefined
   worktreePath: string | null
   activeRepoSettings: RuntimeGitContext['settings']
+  workspacePanelTabId?: string
   resolveSplitTargetGroupId: (event?: SourceControlRowOpenEvent) => string | undefined
 }): GitHistoryCommitActions {
   const openCommitAllDiffs = useAppStore((s) => s.openCommitAllDiffs)
@@ -148,6 +150,7 @@ export function useGitHistoryCommitActions({
         return
       }
       const targetGroupId = resolveSplitTargetGroupId(event)
+      const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       openCommitDiff(
         activeWorktreeId,
         worktreePath,
@@ -161,10 +164,14 @@ export function useGitHistoryCommitActions({
           message: item.message
         },
         detectLanguage(entry.path),
-        { targetGroupId, preview: shouldOpenSourceControlRowAsPreview(event, targetGroupId) }
+        {
+          targetGroupId,
+          workspacePanelTabId: embeddedTargetTabId,
+          preview: shouldOpenSourceControlRowAsPreview(event, targetGroupId)
+        }
       )
     },
-    [activeWorktreeId, openCommitDiff, resolveSplitTargetGroupId, worktreePath]
+    [activeWorktreeId, openCommitDiff, resolveSplitTargetGroupId, workspacePanelTabId, worktreePath]
   )
 
   const copyCommitText = useCallback(async (text: string, label: string): Promise<void> => {

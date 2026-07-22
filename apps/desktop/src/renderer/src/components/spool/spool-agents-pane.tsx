@@ -85,7 +85,7 @@ export function SpoolAgentsPane({
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'absolute left-0 top-0 flex w-full min-w-0 items-center gap-2 border-b border-sidebar-border px-3 py-2 text-left transition-colors',
-                    'hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
+                    'hover:bg-sidebar-accent focus-visible:outline-none',
                     active && 'bg-sidebar-accent text-sidebar-accent-foreground'
                   )}
                   style={{ transform: `translateY(${virtualRow.start}px)` }}

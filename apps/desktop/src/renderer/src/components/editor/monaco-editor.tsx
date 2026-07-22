@@ -1,4 +1,5 @@
 import Editor, { type OnMount } from '@monaco-editor/react'
+import { Plus } from '@phosphor-icons/react'
 import type { editor } from 'monaco-editor'
 /* eslint-disable max-lines -- Why: MonacoEditor centralizes Monaco setup,
 source-mode markdown annotations, persistence-safe content sync, reveal
@@ -7,13 +8,13 @@ handling, and editor-local UI overlays so split-pane state remains coherent. */
 import React, { useRef, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { isMarkdownComment } from '@/lib/diff-comment-compat'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { registerFileSearchSelectedTextProvider } from '@/lib/file-search-selection'
 import { formatMarkdownReviewNotes, type MarkdownReviewNote } from '@/lib/markdown-review-notes'
 import { resolveCursorThemeName } from '@/lib/monaco-setup'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/lib/scroll-cache'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
@@ -492,8 +493,11 @@ export default function MonacoEditor({
           if (!query) {
             return
           }
-          const state = useAppStore.getState()
-          state.showRightSidebarSearch({ query })
+          openWorkspacePanelTab({
+            panel: 'explorer',
+            worktreeId,
+            explorerDestination: { view: 'search', query }
+          })
         }
       })
       const onLargeTextPaste = (event: ClipboardEvent): void => {
@@ -873,7 +877,7 @@ export default function MonacoEditor({
       {selectionAnnotationTarget && shouldShowMarkdownAnnotations && !commentPopover ? (
         <button
           type="button"
-          className="yiru-diff-comment-add-btn"
+          className="yiru-diff-comment-add-btn focus-visible:bg-accent outline-none"
           style={{
             display: 'flex',
             top: Math.max(4, selectionAnnotationTarget.top - 22),

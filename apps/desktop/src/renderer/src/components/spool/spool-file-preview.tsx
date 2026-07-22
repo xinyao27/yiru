@@ -1,7 +1,7 @@
+import { CaretLeft as ChevronLeft } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
 
-import { CaretLeft as ChevronLeft } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -169,7 +169,6 @@ function TextProjection({
         className={cn(
           'scrollbar-editor min-h-0 flex-1 resize-none bg-[var(--editor-surface)] font-mono text-xs leading-5 text-foreground outline-none',
           'p-3',
-          'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
           !editable && 'cursor-default'
         )}
       />

@@ -47,6 +47,7 @@ export function VoiceDictationSettingsSection({
           disabled={permissionPending}
           onClick={() => void onToggleVoiceDictation()}
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             voiceSettings.enabled ? 'bg-foreground' : 'bg-muted-foreground/30',
             permissionPending ? 'cursor-wait opacity-70' : ''
@@ -54,7 +55,7 @@ export function VoiceDictationSettingsSection({
         >
           <span
             className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
               voiceSettings.enabled ? 'translate-x-4' : 'translate-x-0.5'
             )}
           />
@@ -85,6 +86,7 @@ export function VoiceDictationSettingsSection({
               onClick={() => onUpdateVoiceSettings({ dictationMode: mode })}
               disabled={!voiceSettings.enabled}
               className={cn(
+                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                 'rounded-sm px-3 py-1 text-sm transition-colors',
                 voiceSettings.dictationMode === mode
                   ? 'bg-accent font-medium text-accent-foreground'

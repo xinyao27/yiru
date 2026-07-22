@@ -4,7 +4,9 @@ import {
   GitMerge,
   DotsThree as Ellipsis,
   Link,
-  LinkBreak as Unlink
+  LinkBreak as Unlink,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the checks panel co-locates PR header, checks, comments,
 merge actions, and conflict state in one component to keep the data flow straightforward. */
@@ -13,7 +15,6 @@ import { toast } from 'sonner'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { SpoolChecksPane } from '@/components/spool/spool-checks-pane'
 import { Button } from '@/components/ui/button'
 import {
@@ -31,6 +32,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { startFixChecksAgent } from '@/lib/fix-checks-agent-launch'
 import { openHttpLink } from '@/lib/http-link-routing'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { groupPRComments, type PRCommentGroup } from '@/lib/pr-comment-groups'
 import { readSourceControlLaunchRecipeAgentId } from '@/lib/source-control-launch-agent-selection'
 import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
@@ -247,7 +249,7 @@ export function ChecksPanelReviewHeader({
       <ReviewIcon className="text-muted-foreground size-4 shrink-0" />
       <button
         type="button"
-        className="text-foreground decoration-border hover:text-foreground hover:decoration-foreground focus-visible:ring-ring rounded px-0.5 text-[12px] font-semibold underline underline-offset-2 focus-visible:ring-1 focus-visible:outline-none"
+        className="text-foreground decoration-border hover:text-foreground hover:decoration-foreground rounded px-0.5 text-[12px] font-semibold underline underline-offset-2 focus-visible:outline-none"
         title={title}
         onClick={onOpenReview}
       >
@@ -402,13 +404,10 @@ async function resolveGitLabMRDiscussionForChecks(args: {
   })
 }
 
-function LocalChecksPanel(): React.JSX.Element {
-  // Why: the sidebar stays mounted when closed (for performance). Gate
-  // polling on visibility so we don't fetch checks/comments — or poll the
-  // terminal cwd — in the background when the panel isn't visible.
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
-  const rightSidebarTab = useAppStore((s) => s.rightSidebarTab)
-  const isPanelVisible = rightSidebarOpen && rightSidebarTab === 'checks'
+function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Element {
+  // Why: the panel can be hosted by a unified tab, so its owner reports
+  // visibility directly instead of coupling background work to sidebar state.
+  const isPanelVisible = isVisible
 
   // Follow the active terminal's cwd so linked-PR/checks state tracks the
   // worktree the terminal is actually operating in (e.g. across a stack),
@@ -446,8 +445,6 @@ function LocalChecksPanel(): React.JSX.Element {
   const isRemoteOperationActive = useAppStore((s) => s.isRemoteOperationActive)
   const pushBranch = useAppStore((s) => s.pushBranch)
   const fetchUpstreamStatus = useAppStore((s) => s.fetchUpstreamStatus)
-  const setRightSidebarOpen = useAppStore((s) => s.setRightSidebarOpen)
-  const setRightSidebarTab = useAppStore((s) => s.setRightSidebarTab)
   const updateWorktreeMeta = useAppStore((s) => s.updateWorktreeMeta)
   const updateWorktreeGitIdentity = useAppStore((s) => s.updateWorktreeGitIdentity)
   const openModal = useAppStore((s) => s.openModal)
@@ -3245,8 +3242,7 @@ function LocalChecksPanel(): React.JSX.Element {
       if (!repo || !branch) {
         return
       }
-      setRightSidebarOpen(true)
-      setRightSidebarTab('checks')
+      openWorkspacePanelTab({ panel: 'checks', worktreeId: activeWorktreeId })
       try {
         if (activeWorktreeId && result.provider === 'github') {
           await updateWorktreeMeta(activeWorktreeId, { linkedPR: result.number })
@@ -3311,8 +3307,6 @@ function LocalChecksPanel(): React.JSX.Element {
       linkedPR,
       refreshLinkedGitHubPullRequest,
       repo,
-      setRightSidebarOpen,
-      setRightSidebarTab,
       activeWorktreeId,
       updateWorktreeMeta
     ]
@@ -3694,14 +3688,14 @@ function LocalChecksPanel(): React.JSX.Element {
           <div className="flex items-center gap-1">
             <input
               ref={titleInputRef}
-              className="bg-background border-border text-foreground focus:ring-ring flex-1 rounded border px-2 py-1 text-[12px] outline-none focus:ring-1"
+              className="bg-background border-border text-foreground flex-1 rounded border px-2 py-1 text-[12px] outline-none"
               value={titleDraft}
               onChange={(e) => setTitleDraft(e.target.value)}
               onKeyDown={handleTitleKeyDown}
               disabled={titleSaving}
             />
             <button
-              className="hover:bg-accent cursor-pointer rounded p-1 text-emerald-500 transition-colors hover:text-emerald-400 disabled:cursor-default disabled:opacity-50"
+              className="hover:bg-accent focus-visible:bg-accent cursor-pointer rounded p-1 text-emerald-500 transition-colors outline-none hover:text-emerald-400 focus-visible:text-emerald-400 disabled:cursor-default disabled:opacity-50"
               title={translate('auto.components.right.sidebar.ChecksPanel.2ab7fd4b6d', 'Save')}
               onClick={() => void handleSaveTitle()}
               disabled={titleSaving}
@@ -3713,7 +3707,7 @@ function LocalChecksPanel(): React.JSX.Element {
               )}
             </button>
             <button
-              className="text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer rounded p-1 transition-colors disabled:cursor-default disabled:opacity-50"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground cursor-pointer rounded p-1 transition-colors outline-none disabled:cursor-default disabled:opacity-50"
               title={translate('auto.components.right.sidebar.ChecksPanel.058039787c', 'Cancel')}
               onClick={handleCancelEdit}
               disabled={titleSaving}
@@ -3891,12 +3885,14 @@ function LocalChecksPanel(): React.JSX.Element {
 }
 
 export default function ChecksPanel({
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  isVisible = true
 }: {
   source?: RightSidebarPanelSource
+  isVisible?: boolean
 }): React.JSX.Element | null {
   if (source.kind === 'spool') {
     return source.supportsGit ? <SpoolChecksPane state={source.checksState} /> : null
   }
-  return <LocalChecksPanel />
+  return <LocalChecksPanel isVisible={isVisible} />
 }

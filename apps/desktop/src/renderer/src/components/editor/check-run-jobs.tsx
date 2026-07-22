@@ -2,11 +2,11 @@ import {
   CheckCircle as CheckCircle2,
   CircleDashed,
   MinusCircle,
-  XCircle
+  XCircle,
+  CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { CheckJobLogTail } from '@/components/right-sidebar/check-job-log-tail'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -120,7 +120,7 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
           <button
             type="button"
             onClick={() => setShowRest((value) => !value)}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex w-full items-center gap-1.5 rounded py-1 text-xs focus-visible:ring-2 focus-visible:outline-none"
+            className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 rounded py-1 text-xs focus-visible:outline-none"
             aria-expanded={showRest}
           >
             <ChevronDown

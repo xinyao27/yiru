@@ -1,7 +1,6 @@
-import { FloppyDisk as Save } from '@phosphor-icons/react'
+import { FloppyDisk as Save, X } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import type { SparsePresetDirectoryParseResult } from '@/lib/sparse-preset-draft'
 
@@ -36,7 +35,7 @@ export function SparsePresetDraftEditor({
   onSave
 }: SparsePresetDraftEditorProps): React.JSX.Element {
   return (
-    <div className="border-border/60 bg-background/80 rounded-xl border p-4 shadow-sm">
+    <div className="border-border/60 bg-background/80 rounded-xl border p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="space-y-0.5">
           <h5 className="text-sm font-semibold">
@@ -110,7 +109,7 @@ export function SparsePresetDraftEditor({
             )}
             rows={5}
             spellCheck={false}
-            className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full min-w-0 resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+            className="border-input placeholder:text-muted-foreground focus-visible:border-ring w-full min-w-0 resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-xs transition-[color] outline-none"
           />
           {parsedDirectories?.error ? (
             <p className="text-destructive text-xs">{parsedDirectories.error}</p>

@@ -38,7 +38,7 @@ function AutomationTemplateCard({
     <button
       type="button"
       onClick={onSelect}
-      className="border-border/70 bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 rounded-md border px-3 py-2 text-left shadow-xs transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+      className="border-border/70 bg-background hover:bg-accent hover:text-accent-foreground rounded-md border px-3 py-2 text-left transition-colors focus-visible:outline-none"
     >
       <div className="text-muted-foreground text-[11px] font-medium uppercase">
         {template.category}
@@ -100,7 +100,7 @@ export function AutomationEditorDialogHeader({
               'auto.components.automations.AutomationEditorDialogHeader.58f56b73d9',
               'Automation name'
             )}
-            className="border-input bg-input/30 text-foreground placeholder:text-muted-foreground dark:bg-input/30 h-10 max-w-md px-3 text-lg font-semibold shadow-xs"
+            className="border-input bg-input/30 text-foreground placeholder:text-muted-foreground dark:bg-input/30 h-10 max-w-md px-3 text-lg font-semibold"
             onChange={(event) => onDraftNameChange(event.target.value)}
           />
         </div>

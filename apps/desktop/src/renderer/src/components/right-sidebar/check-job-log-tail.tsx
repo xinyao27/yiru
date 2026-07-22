@@ -77,7 +77,7 @@ function CopyButton({
   return (
     <button
       ref={setCopyButtonRef}
-      className="hover:bg-accent text-muted-foreground/40 hover:text-foreground shrink-0 rounded p-1 transition-colors"
+      className="hover:bg-accent text-muted-foreground/40 hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground shrink-0 rounded p-1 transition-colors outline-none"
       title={title}
       onClick={handleCopy}
     >

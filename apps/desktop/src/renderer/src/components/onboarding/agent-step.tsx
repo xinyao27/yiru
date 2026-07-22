@@ -1,7 +1,6 @@
-import { Check, Info } from '@phosphor-icons/react'
+import { Check, Info, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState } from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -133,7 +132,7 @@ export function AgentStep({
           </span>
           <button
             type="button"
-            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-medium text-amber-800 hover:bg-amber-400/20 dark:text-amber-100"
+            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-medium text-amber-800 outline-none hover:bg-amber-400/20 focus-visible:bg-amber-400/20 dark:text-amber-100"
             onClick={() => void window.api.shell.openUrl(selectedEntry.homepageUrl)}
           >
             {translate('auto.components.onboarding.AgentStep.9c163bb0e0', 'Install instructions')}
@@ -173,7 +172,7 @@ export function AgentStep({
             </div>
             {fallbackRest.length > 0 && (
               <Collapsible open={openState} onOpenChange={setOpenState}>
-                <CollapsibleTrigger className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 cursor-pointer text-xs font-medium transition-colors outline-none focus-visible:ring-2 data-[state=open]:mb-3">
+                <CollapsibleTrigger className="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium transition-colors outline-none data-[state=open]:mb-3">
                   {fallbackRestLabel}
                 </CollapsibleTrigger>
                 <CollapsibleContent className="collapsible-height-content">
@@ -237,7 +236,7 @@ function YoloPermissionsControl({
                 'Agent permission info'
               )}
               onPointerDown={(event) => event.preventDefault()}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 grid size-6 shrink-0 place-items-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-6 shrink-0 place-items-center rounded-md transition-colors outline-none"
             >
               <Info className="size-3.5" />
             </button>
@@ -290,15 +289,16 @@ function AgentButton({
       data-agent-card
       aria-pressed={selected}
       className={cn(
+        'outline-none focus-visible:bg-muted/60',
         'group relative overflow-hidden rounded-xl border p-3.5 text-left transition-all',
         selected
-          ? 'border-violet-500/60 bg-violet-500/10 ring-2 ring-violet-500/30'
+          ? 'border-violet-500/60 bg-violet-500/10'
           : 'border-border bg-muted/30 hover:bg-muted/60'
       )}
       onClick={onClick}
     >
       {selected ? (
-        <div className="absolute top-2 right-2 grid size-5 place-items-center rounded-full bg-violet-500 text-white shadow-sm">
+        <div className="absolute top-2 right-2 grid size-5 place-items-center rounded-full bg-violet-500 text-white">
           <Check className="size-3" strokeWidth={3} />
         </div>
       ) : null}

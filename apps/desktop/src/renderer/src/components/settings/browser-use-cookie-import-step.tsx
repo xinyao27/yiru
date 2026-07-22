@@ -128,7 +128,7 @@ export function BrowserUseCookieImportStep({
             <button
               type="button"
               onClick={onConfigureMoreBrowsers}
-              className="text-muted-foreground hover:text-foreground text-[11px] underline underline-offset-2"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-[11px] underline underline-offset-2 outline-none"
             >
               {translate(
                 'auto.components.settings.BrowserUsePane.67d9a53f47',

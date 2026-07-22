@@ -1,7 +1,6 @@
-import { Image as ImageIcon } from '@phosphor-icons/react'
+import { Image as ImageIcon, ArrowDown, ArrowUp } from '@phosphor-icons/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { ArrowDown, ArrowUp } from '@/components/regular-icons'
 import CommentMarkdown, {
   type CommentMarkdownLinkClickHandler
 } from '@/components/sidebar/comment-markdown'
@@ -94,7 +93,7 @@ function AgentControls({
           'Scroll this message to top'
         )}
         title={translate('components.native-chat.scrollMessageToTop', 'Scroll this message to top')}
-        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors outline-none"
       >
         <ArrowUp className="size-3.5" />
       </button>
@@ -173,7 +172,7 @@ function MessageRow({
       <div ref={rowRef} className="flex flex-col items-end gap-1">
         {/* User turns are the bounded surface; assistant prose stays unboxed so
             the transcript hierarchy comes from role rather than nested cards. */}
-        <div className="border-border bg-card text-foreground max-w-[85%] border px-3 py-2 text-sm leading-[1.5] shadow-xs">
+        <div className="border-border bg-card text-foreground max-w-[85%] border px-3 py-2 text-sm leading-[1.5]">
           {markdown ? (
             <>
               <ImageAttachmentRefs blocks={prose} />
@@ -397,7 +396,7 @@ export function NativeChatMessageList({
                 type="button"
                 onClick={loadEarlier}
                 disabled={loadingEarlier}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring rounded-md px-3 py-1 text-xs font-medium focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring rounded-md border border-transparent px-3 py-1 text-xs font-medium outline-none disabled:pointer-events-none disabled:opacity-50"
               >
                 {loadingEarlier
                   ? translate('components.native-chat.loadingEarlier', 'Loading…')
@@ -424,7 +423,7 @@ export function NativeChatMessageList({
           type="button"
           onClick={scrollToBottom}
           aria-label={translate('components.native-chat.jumpToLatest', 'Jump to latest')}
-          className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 border px-3 py-1.5 text-xs shadow-sm focus-visible:ring-2 focus-visible:outline-none"
+          className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 border px-3 py-1.5 text-xs outline-none"
           style={{ bottom: bottomInset + 12 }}
         >
           <ArrowDown className="size-3.5" />

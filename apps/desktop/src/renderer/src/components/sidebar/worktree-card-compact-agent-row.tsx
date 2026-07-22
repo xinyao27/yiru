@@ -1,8 +1,8 @@
+import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
 import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
@@ -176,7 +176,7 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       {hasChildDisclosure ? (
         <button
           type="button"
-          className="compact-agent-child-disclosure-button text-muted-foreground hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-sidebar-ring flex size-4 shrink-0 items-center justify-center rounded-sm focus-visible:ring-1 focus-visible:outline-none"
+          className="compact-agent-child-disclosure-button text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm focus-visible:outline-none"
           aria-label={translate(
             'auto.components.sidebar.worktree.card.compact.agents.a128d7006b',
             '{{value0}} {{value1}} child {{value2}}',

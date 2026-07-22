@@ -1,10 +1,9 @@
-import { Download } from '@phosphor-icons/react'
+import { Download, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 
@@ -179,7 +178,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-foreground underline"
+                className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
               >
                 {translate(
                   'auto.components.settings.GeneralUpdateSettingsSection.8a52ca1d02',
@@ -217,7 +216,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-foreground underline"
+                className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
               >
                 {translate(
                   'auto.components.settings.GeneralUpdateSettingsSection.8a52ca1d02',

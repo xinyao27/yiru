@@ -18,6 +18,7 @@ import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
 import { requestGlobalAssistant } from '@/lib/global-assistant'
 import { useEffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/use-effective-mac-option-as-alt'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import {
   getAllDrivers,
   getDriverForPty,
@@ -1432,10 +1433,16 @@ export default function TerminalPane({
     [executeClosePane, tabId, worktreeId, getCloseDialogCopyKind]
   )
 
-  const handleSearchSelectedText = useCallback((selectedText: string): void => {
-    const state = useAppStore.getState()
-    state.showRightSidebarSearch({ query: selectedText })
-  }, [])
+  const handleSearchSelectedText = useCallback(
+    (selectedText: string): void => {
+      openWorkspacePanelTab({
+        panel: 'explorer',
+        worktreeId,
+        explorerDestination: { view: 'search', query: selectedText }
+      })
+    },
+    [worktreeId]
+  )
 
   const handleConfirmClose = useCallback(
     (dontAskAgain: boolean) => {

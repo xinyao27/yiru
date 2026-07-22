@@ -77,7 +77,7 @@ export function TopActivityOverflowMenu({
             {hiddenChecksStatus && (
               <div
                 className={cn(
-                  'absolute top-[4px] right-[4px] size-[7px] rounded-full ring-1 ring-sidebar',
+                  'absolute top-[4px] right-[4px] size-[7px] rounded-full',
                   STATUS_DOT_COLOR[hiddenChecksStatus] ?? 'bg-muted-foreground'
                 )}
               />
@@ -150,7 +150,7 @@ export function ActivityBarButton({
             {statusIndicator && statusIndicator !== 'neutral' && (
               <div
                 className={cn(
-                  'absolute rounded-full size-[7px] ring-1 ring-sidebar',
+                  'absolute rounded-full size-[7px]',
                   isTop ? 'top-[4px] right-[5px]' : 'top-[7px] right-[7px]',
                   STATUS_DOT_COLOR[statusIndicator] ?? 'bg-muted-foreground'
                 )}

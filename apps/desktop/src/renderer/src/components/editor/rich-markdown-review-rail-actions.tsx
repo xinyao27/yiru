@@ -32,7 +32,7 @@ export function RichMarkdownReviewRailActions({
     <div className="rich-markdown-review-rail-actions">
       <button
         type="button"
-        className="rich-markdown-review-rail-toggle"
+        className="rich-markdown-review-rail-toggle focus-visible:bg-accent outline-none"
         aria-label={
           railOpen
             ? translate(
@@ -63,7 +63,7 @@ export function RichMarkdownReviewRailActions({
       </button>
       <button
         type="button"
-        className="rich-markdown-review-rail-action"
+        className="rich-markdown-review-rail-action focus-visible:bg-accent outline-none"
         title={
           notesCopied
             ? translate(

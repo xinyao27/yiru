@@ -1,8 +1,7 @@
 import { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
-import { CheckIcon, CircleIcon } from '@phosphor-icons/react'
+import { CheckIcon, CircleIcon, CaretRight as ChevronRightIcon } from '@phosphor-icons/react'
 import * as React from 'react'
 
-import { CaretRight as ChevronRightIcon } from '@/components/regular-icons'
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass
@@ -35,11 +34,14 @@ function DropdownMenuContent({
   align,
   alignOffset,
   style,
+  keepMounted,
   ...props
 }: DropdownMenuPrimitive.Popup.Props &
-  Pick<DropdownMenuPrimitive.Positioner.Props, 'side' | 'sideOffset' | 'align' | 'alignOffset'>) {
+  Pick<DropdownMenuPrimitive.Positioner.Props, 'side' | 'sideOffset' | 'align' | 'alignOffset'> & {
+    keepMounted?: boolean
+  }) {
   return (
-    <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Portal keepMounted={keepMounted}>
       {/* Base UI positions via Positioner; forward side/align/offsets here so they hit the anchored element, not the Popup. */}
       <DropdownMenuPrimitive.Positioner
         className="isolate z-[70] outline-none"
@@ -75,6 +77,7 @@ function DropdownMenuItem({
   className,
   inset,
   variant = 'default',
+  style,
   ...props
 }: DropdownMenuPrimitive.Item.Props & {
   inset?: boolean
@@ -86,6 +89,9 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(menuItemClass, 'px-2 data-[inset]:pl-7', className)}
+      // Why: menu rows can overlap Electron titlebar drag regions; marking the
+      // popup alone does not reliably keep native hit-testing from dragging.
+      style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       {...props}
     />
   )

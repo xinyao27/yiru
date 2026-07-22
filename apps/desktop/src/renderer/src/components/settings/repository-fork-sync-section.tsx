@@ -1,8 +1,8 @@
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
 

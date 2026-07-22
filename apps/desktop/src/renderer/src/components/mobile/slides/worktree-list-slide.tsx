@@ -25,7 +25,7 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
         <div className={mobileWorktreePreviewStyles.statusRow}>
           <button
             type="button"
-            className={mobileWorktreePreviewStyles.back}
+            className={cn('outline-none focus-visible:bg-accent', mobileWorktreePreviewStyles.back)}
             aria-label={translate(
               'auto.components.mobile.slides.WorktreeListSlide.cefd048225',
               'Back'
@@ -44,15 +44,30 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
           </div>
         </div>
         <div className={mobileWorktreePreviewStyles.toolbar}>
-          <button type="button" className={mobileWorktreePreviewStyles.chip}>
+          <button
+            type="button"
+            className={cn('outline-none focus-visible:bg-accent', mobileWorktreePreviewStyles.chip)}
+          >
             <FilterIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.0e3e809a4b', 'Filter')}
           </button>
-          <button type="button" className={mobileWorktreePreviewStyles.button}>
+          <button
+            type="button"
+            className={cn(
+              'outline-none focus-visible:bg-accent',
+              mobileWorktreePreviewStyles.button
+            )}
+          >
             <SortIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.17f9e0d226', 'Recent')}
           </button>
-          <button type="button" className={mobileWorktreePreviewStyles.button}>
+          <button
+            type="button"
+            className={cn(
+              'outline-none focus-visible:bg-accent',
+              mobileWorktreePreviewStyles.button
+            )}
+          >
             <GroupIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.22971156df', 'Repo')}
           </button>

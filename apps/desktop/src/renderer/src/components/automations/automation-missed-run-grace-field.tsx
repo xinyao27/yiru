@@ -44,7 +44,7 @@ export function AutomationMissedRunGraceField({
                     'auto.components.automations.AutomationMissedRunGraceField.3df53d554a',
                     'Missed-run grace help'
                   )}
-                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-[3px]"
+                  className="text-muted-foreground hover:text-foreground rounded-sm outline-none"
                 >
                   <Info className="size-3.5" />
                 </button>

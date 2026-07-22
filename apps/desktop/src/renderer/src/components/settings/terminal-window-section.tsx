@@ -1,7 +1,7 @@
+import { ArrowClockwise as RotateCw } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RotateCw } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { clampNumber } from '@/lib/terminal-theme'
@@ -131,6 +131,7 @@ export function TerminalWindowSection({
                 updateSettings({ windowBackgroundBlur: !settings.windowBackgroundBlur })
               }
               className={cn(
+                'outline-none focus-visible:border-ring',
                 'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
                 (settings.windowBackgroundBlur ?? false)
                   ? 'bg-foreground'
@@ -139,7 +140,7 @@ export function TerminalWindowSection({
             >
               <span
                 className={cn(
-                  'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+                  'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
                   (settings.windowBackgroundBlur ?? false) ? 'translate-x-4' : 'translate-x-0.5'
                 )}
               />
@@ -273,6 +274,7 @@ export function TerminalWindowSection({
               })
             }
             className={cn(
+              'outline-none focus-visible:border-ring',
               'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
               (settings.terminalMouseHideWhileTyping ?? false)
                 ? 'bg-foreground'
@@ -281,7 +283,7 @@ export function TerminalWindowSection({
           >
             <span
               className={cn(
-                'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+                'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
                 (settings.terminalMouseHideWhileTyping ?? false)
                   ? 'translate-x-4'
                   : 'translate-x-0.5'
@@ -305,7 +307,7 @@ export function TerminalWindowSection({
           <div className="space-y-2">
             <button
               onClick={() => setColorOverridesExpanded((prev) => !prev)}
-              className="flex items-center gap-2 text-sm font-medium"
+              className="focus-visible:bg-accent flex items-center gap-2 text-sm font-medium outline-none"
             >
               <span
                 className={cn('transition-transform', colorOverridesExpanded ? 'rotate-90' : '')}

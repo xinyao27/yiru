@@ -1,11 +1,11 @@
-import { Check } from '@phosphor-icons/react'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
 import {
+  Check,
   CaretRight as ChevronRight,
   CaretUpDown as ChevronsUpDown,
   FolderPlus
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import { Command, CommandInput, CommandList } from '@/components/ui/command'
@@ -299,7 +299,7 @@ export default function AutomationProjectCombobox({
                     type="button"
                     onClick={() => handleSelect(selectedSource.id)}
                     onMouseDown={(event) => event.preventDefault()}
-                    className="flex min-w-0 flex-1 items-center gap-2 px-3 py-1.5 text-left text-xs"
+                    className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-2 px-3 py-1.5 text-left text-xs outline-none"
                   >
                     <Check
                       className={cn(
@@ -336,7 +336,7 @@ export default function AutomationProjectCombobox({
                               event.stopPropagation()
                             }}
                             onMouseDown={(event) => event.preventDefault()}
-                            className="text-muted-foreground flex w-7 shrink-0 items-center justify-center"
+                            className="text-muted-foreground focus-visible:bg-accent flex w-7 shrink-0 items-center justify-center outline-none"
                           >
                             <ChevronRight className="size-3.5" />
                           </button>
@@ -362,7 +362,7 @@ export default function AutomationProjectCombobox({
                                 type="button"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => handleSelect(source.id)}
-                                className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors"
+                                className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors outline-none"
                               >
                                 <Check
                                   className={cn(

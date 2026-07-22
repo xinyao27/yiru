@@ -1,7 +1,6 @@
-import { PaperPlaneRight as Send } from '@phosphor-icons/react'
+import { PaperPlaneRight as Send, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
-import { CaretDown as ChevronDown, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -76,6 +75,7 @@ export function DashboardAgentRowTrailingControls({
           onKeyDown={stopKeyDown}
           disabled={sendTargetStatus === 'sending'}
           className={cn(
+            'outline-none focus-visible:bg-accent',
             'worktree-agent-send-target-button absolute right-0 top-1/2 z-10 inline-flex h-5 -translate-y-1/2 items-center gap-1 rounded-md border px-1.5 text-[10px] font-medium leading-none transition-[background-color,border-color,color,opacity]',
             sendTargetStatus === 'sending' && 'cursor-progress opacity-75'
           )}
@@ -120,6 +120,7 @@ export function DashboardAgentRowTrailingControls({
             onMouseDown={stopMouseDown}
             onKeyDown={stopKeyDown}
             className={cn(
+              'outline-none focus-visible:text-foreground focus-visible:bg-accent',
               '[grid-area:1/1] inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground',
               'can-hover:opacity-0 transition-opacity duration-150',
               'group-hover/agent-row:opacity-100 focus-visible:opacity-100'
@@ -141,6 +142,7 @@ export function DashboardAgentRowTrailingControls({
           onMouseDown={stopMouseDown}
           onKeyDown={stopKeyDown}
           className={cn(
+            'outline-none focus-visible:text-foreground focus-visible:bg-accent',
             'inline-flex shrink-0 items-center justify-center text-muted-foreground/70 hover:text-foreground',
             'can-hover:opacity-0 transition-opacity duration-150',
             'group-hover/agent-row:opacity-100 focus-visible:opacity-100'
@@ -160,7 +162,7 @@ export function DashboardAgentRowTrailingControls({
           onClick={handleToggleExpand}
           onMouseDown={stopMouseDown}
           onKeyDown={stopKeyDown}
-          className="text-muted-foreground/60 hover:text-foreground inline-flex shrink-0 items-center justify-center"
+          className="text-muted-foreground/60 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex shrink-0 items-center justify-center outline-none"
           aria-label={
             expanded
               ? translate(

@@ -12,7 +12,14 @@ import {
   PencilLine,
   PaperPlaneRight as Send,
   BracketsAngle as SquareCode,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowLeft,
+  ArrowRight,
+  ArrowElbowDownLeft as CornerDownLeft,
+  ArrowSquareOut as ExternalLink,
+  ChatCentered as MessageSquarePlus,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: BrowserPane synchronizes Electron webviews, remote browser drivers, streams, downloads, and annotation overlays; those external lifecycles cannot be derived during render. */
@@ -29,15 +36,6 @@ import { createPortal } from 'react-dom'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowElbowDownLeft as CornerDownLeft,
-  ArrowSquareOut as ExternalLink,
-  ChatCentered as MessageSquarePlus,
-  ArrowClockwise as RefreshCw,
-  X
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -425,7 +423,7 @@ function PendingBrowserAnnotationCard({
         align="center"
         sideOffset={10}
         portalContainer={portalContainer}
-        className="z-40 w-[22rem] max-w-[calc(var(--radix-popover-content-available-width)-1rem)] p-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+        className="z-40 w-[22rem] max-w-[calc(var(--radix-popover-content-available-width)-1rem)] p-3"
         aria-label={translate(
           'auto.components.browser.pane.BrowserPane.b472c5fe03',
           'Add browser annotation'
@@ -453,7 +451,7 @@ function PendingBrowserAnnotationCard({
             'Describe what the agent should change here...'
           )}
           maxLength={GRAB_BUDGET.annotationCommentMaxLength}
-          className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-24 w-full resize-none rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+          className="border-input bg-background placeholder:text-muted-foreground h-24 w-full resize-none rounded-md border px-3 py-2 text-sm outline-none"
           autoFocus
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
@@ -497,7 +495,7 @@ function PendingBrowserAnnotationCard({
                   key={option.value}
                   value={option.value}
                   aria-label={option.label}
-                  className="data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground gap-1.5 text-xs data-[state=on]:shadow-xs"
+                  className="data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground gap-1.5 text-xs"
                 >
                   <Icon className="size-3.5" />
                   <span>{option.label}</span>
@@ -2639,7 +2637,7 @@ function RemoteBrowserPagePane({
       <div
         ref={remoteViewportRef}
         tabIndex={-1}
-        className="bg-background relative min-h-0 flex-1 overflow-hidden"
+        className="bg-background relative min-h-0 flex-1 overflow-hidden outline-none"
       >
         {markup.isActive && markup.baseImage ? (
           <MarkupOverlay
@@ -2730,7 +2728,7 @@ function RemoteBrowserPagePane({
           />
         ) : null}
         {remoteError ? (
-          <div className="border-border bg-popover text-popover-foreground absolute bottom-4 left-1/2 max-w-md -translate-x-1/2 rounded-md border px-3 py-2 text-xs shadow-md">
+          <div className="border-border bg-popover text-popover-foreground absolute bottom-4 left-1/2 max-w-md -translate-x-1/2 rounded-md border px-3 py-2 text-xs">
             {remoteError}
           </div>
         ) : null}
@@ -5394,7 +5392,7 @@ function BrowserPagePane({
             <button
               type="button"
               onClick={() => setResourceNotice(null)}
-              className="text-muted-foreground/60 hover:text-foreground shrink-0"
+              className="text-muted-foreground/60 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 outline-none"
               aria-label={translate(
                 'auto.components.browser.pane.BrowserPane.2fdca7df09',
                 'Dismiss'
@@ -5537,7 +5535,7 @@ function BrowserPagePane({
               </>
             ) : null}
             <button
-              className="text-muted-foreground hover:text-foreground ml-auto shrink-0 rounded px-2 py-0.5 transition-colors"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent ml-auto shrink-0 rounded px-2 py-0.5 transition-colors outline-none"
               onClick={() => {
                 setPendingAnnotationPayload(null)
                 grab.cancel()
@@ -5564,7 +5562,7 @@ function BrowserPagePane({
                 aria-live="polite"
                 aria-hidden={browserZoomIndicatorState.ariaHidden}
                 className={cn(
-                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-xs transition-opacity duration-300 ease-out',
+                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground transition-opacity duration-300 ease-out',
                   browserZoomIndicatorState.opacityClassName
                 )}
               >
@@ -5648,7 +5646,7 @@ function BrowserPagePane({
                 />
               ) : null}
               {browserAnnotations.length > 0 && browserAnnotationTrayOpen ? (
-                <div className="border-border bg-popover text-popover-foreground absolute right-3 bottom-3 z-30 flex max-h-[45%] w-[min(20rem,calc(100%-1.5rem))] flex-col overflow-hidden rounded-lg border shadow-[0_10px_24px_rgba(0,0,0,0.18)]">
+                <div className="border-border bg-popover text-popover-foreground absolute right-3 bottom-3 z-30 flex max-h-[45%] w-[min(20rem,calc(100%-1.5rem))] flex-col overflow-hidden rounded-lg border">
                   <div className="border-border flex items-center gap-2 border-b px-3 py-2">
                     <MessageSquarePlus className="text-muted-foreground size-4" />
                     <div className="min-w-0 flex-1 text-sm font-medium">
@@ -5880,7 +5878,7 @@ function BrowserPagePane({
                   />
                   <div
                     className={cn(
-                      'flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 shadow-lg',
+                      'flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5',
                       grabToast.type === 'success'
                         ? 'bg-white text-gray-900'
                         : 'bg-white text-red-600'
@@ -5906,7 +5904,7 @@ function BrowserPagePane({
                       >
                         <DropdownMenuTrigger
                           render={
-                            <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-black/10 hover:text-gray-700">
+                            <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors outline-none hover:bg-black/10 hover:text-gray-700 focus-visible:bg-black/10 focus-visible:text-gray-700">
                               <span className="text-sm leading-none font-bold">···</span>
                             </button>
                           }

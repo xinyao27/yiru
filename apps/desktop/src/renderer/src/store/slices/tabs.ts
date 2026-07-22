@@ -23,6 +23,7 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 import type { AppState } from '../types'
 import { isPaneColumnSplitDropNoOp } from './pane-column-split-drop-no-op'
@@ -1952,6 +1953,9 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
         return liveBrowserIds.has(tab.entityId)
       }
       if (tab.contentType === 'simulator') {
+        return true
+      }
+      if (isWorkspacePanelTabContentType(tab.contentType)) {
         return true
       }
       return liveEditorIds.has(tab.entityId)

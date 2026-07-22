@@ -1,8 +1,7 @@
-import { Upload } from '@phosphor-icons/react'
+import { Upload, Plus } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import { Plus } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'

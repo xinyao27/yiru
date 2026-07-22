@@ -1,7 +1,11 @@
-import { Prohibit as Ban, Terminal } from '@phosphor-icons/react'
+import {
+  Prohibit as Ban,
+  Terminal,
+  Plus,
+  ArrowCounterClockwise as RotateCcw
+} from '@phosphor-icons/react'
 import React from 'react'
 
-import { Plus, ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import {

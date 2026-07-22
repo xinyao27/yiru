@@ -1,7 +1,7 @@
+import { ArrowUpRight } from '@phosphor-icons/react'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowUpRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { basename, dirname } from '@/lib/path'
@@ -38,7 +38,7 @@ function CommitFileRow({
   return (
     <button
       type="button"
-      className="group hover:bg-accent/40 flex w-full min-w-0 cursor-pointer items-center gap-1 py-1 pr-3 pl-9 text-left text-xs transition-colors"
+      className="group hover:bg-accent/40 focus-visible:bg-accent/40 flex w-full min-w-0 cursor-pointer items-center gap-1 py-1 pr-3 pl-9 text-left text-xs transition-colors outline-none"
       title={entry.path}
       data-testid="git-history-commit-file"
       onClick={(event) => onOpen(entry, toSourceControlRowOpenEvent(event))}
@@ -109,7 +109,7 @@ function CommitFilesBody({
       {onOpenAll && (
         <button
           type="button"
-          className="text-muted-foreground hover:bg-accent/40 hover:text-foreground flex w-full items-center gap-1 py-1 pr-3 pl-9 text-left text-[11px] transition-colors"
+          className="text-muted-foreground hover:bg-accent/40 hover:text-foreground focus-visible:bg-accent/40 focus-visible:text-foreground flex w-full items-center gap-1 py-1 pr-3 pl-9 text-left text-[11px] transition-colors outline-none"
           onClick={onOpenAll}
         >
           <ArrowUpRight className="size-3 shrink-0" />

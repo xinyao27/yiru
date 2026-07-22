@@ -1,7 +1,9 @@
 import {
   DotsThree as MoreHorizontal,
   SidebarSimple as PanelLeft,
-  Sidebar as PanelRight
+  ArrowLeft,
+  ArrowRight,
+  ArrowsIn as Minimize2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 import {
@@ -19,7 +21,6 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
-import { ArrowLeft, ArrowRight, ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -44,8 +45,8 @@ import {
 import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-workspace-tour-interaction-snapshot'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
-import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import { requestScrollToCurrentWorkspaceRevealAndRename } from '@/lib/scroll-to-current-workspace-status'
 import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut-capture-notification'
 import { resolveLeftTitlebarChromeLayout } from '@/lib/titlebar-left-chrome'
@@ -98,7 +99,6 @@ import { shouldShowOnboarding } from './components/onboarding/should-show-onboar
 import { onOnboardingReopened } from './components/onboarding/show-onboarding-event'
 import { shouldRenderPetOverlay } from './components/pet/pet-overlay-visibility'
 import { WorkspacePortScanner } from './components/ports/workspace-port-scanner'
-import RightSidebar from './components/right-sidebar'
 import {
   folderRelativePathToIncludeGlob,
   selectedExplorerFolderRelativePath
@@ -206,7 +206,7 @@ const TITLEBAR_CLASS_NAME =
   'flex h-9 min-h-9 flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 // Why: the inset seam preserves the full 36px content box, keeping controls aligned with traffic lights.
 const TITLEBAR_LEFT_CLASS_NAME =
-  'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar shadow-[inset_0_-1px_0_var(--border)] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+  'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 const WINDOW_CONTROL_BUTTON_CLASS_NAME =
   'h-9 w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 
@@ -300,7 +300,7 @@ function WindowControls(): React.JSX.Element {
             <path d="M2 0v2H0v8h8V8h2V0H2zm6 9H1V3h7v6zM9 7H8V2H3V1h6v6z" fill="currentColor" />
           </svg>
         ) : (
-          // Maximize icon (single square outline)
+          // Maximize icon (single square frame)
           <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
             <path d="M0 0v10h10V0H0zm9 9H1V1h8v8z" fill="currentColor" />
           </svg>
@@ -346,7 +346,6 @@ const WorkspaceCleanupDialog = lazy(
 )
 const Terminal = lazy(() => import('./components/terminal-workspace'))
 const SpoolWorkspaceSurface = lazy(() => import('./components/spool/spool-workspace-surface'))
-const SpoolRightSidebar = lazy(() => import('./components/spool/spool-right-sidebar'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
@@ -486,11 +485,6 @@ function App(): React.JSX.Element {
       setContextualToursAutoEligible: s.setContextualToursAutoEligible,
       setContextualToursOnboardingVisible: s.setContextualToursOnboardingVisible,
       cancelContextualTour: s.cancelContextualTour,
-      toggleRightSidebar: s.toggleRightSidebar,
-      setRightSidebarOpen: s.setRightSidebarOpen,
-      setRightSidebarTab: s.setRightSidebarTab,
-      showRightSidebarFiles: s.showRightSidebarFiles,
-      showRightSidebarSearch: s.showRightSidebarSearch,
       setActiveView: s.setActiveView,
       updateSettings: s.updateSettings,
       pruneLastVisitedTimestamps: s.pruneLastVisitedTimestamps,
@@ -541,7 +535,6 @@ function App(): React.JSX.Element {
   const updateStatus = useAppStore((s) => s.updateStatus)
   const activeContextualTourId = useAppStore((s) => s.activeContextualTourId)
   const leftSidebarShortcutLabel = useShortcutLabel('sidebar.left.toggle')
-  const rightSidebarShortcutLabel = useShortcutLabel('sidebar.right.toggle')
   const historyBackShortcutLabel = useShortcutLabel('worktree.history.back')
   const historyForwardShortcutLabel = useShortcutLabel('worktree.history.forward')
   const floatingTerminalEnabled = useAppStore((s) => s.settings?.floatingTerminalEnabled === true)
@@ -791,15 +784,14 @@ function App(): React.JSX.Element {
   // (agentStatusByPaneKey ticks at PTY event frequency)
   // do not re-render the App tree on every agent status update.
   // Why: git conflict-operation state also drives the worktree cards. Polling
-  // cannot live under RightSidebar because App unmounts that subtree when the
-  // sidebar is closed, which leaves stale "Rebasing"/"Merging" badges behind
-  // until some unrelated view remount happens to refresh them.
+  // cannot live under an individual workspace-panel tab because those tabs
+  // mount on demand, which would leave worktree badges stale until opened.
   // Why: visible-window polling runs immediately on mount. Wait until the
   // workspace session has hydrated so git status work cannot compete with the
   // first window becoming usable.
   useGitStatusPolling({ enabled: workspaceSessionReady })
   // Why: the editor must hear external filesystem changes regardless of
-  // which right-sidebar panel is visible (Explorer unmounts when the user
+  // which workspace-panel tab is visible (Explorer unmounts when the user
   // switches to Source Control or Checks). Wiring this at App level mirrors
   // VSCode's workbench-scoped `TextFileEditorModelManager`, which reloads
   // clean models from a single always-on file-change subscription instead
@@ -912,7 +904,7 @@ function App(): React.JSX.Element {
   // already-fitted cols/rows.
   useLayoutEffect(() => {
     window.dispatchEvent(new CustomEvent(SYNC_FIT_PANES_EVENT))
-  }, [sidebarOpen, rightSidebarOpen])
+  }, [sidebarOpen])
 
   // Fetch initial data + hydrate GitHub cache from disk
   useEffect(() => {
@@ -1595,16 +1587,13 @@ function App(): React.JSX.Element {
   const stackedSidebarOpen =
     !workspaceChromeActive && !creationLayoutActive && showSidebar && sidebarOpen
   // Why: visible creation keeps only the top-left window chrome; workspace tabs
-  // and right-sidebar chrome remain gated by workspaceChromeActive.
+  // chrome remains gated by workspaceChromeActive.
   const leftTitlebarChromeLayout = resolveLeftTitlebarChromeLayout({
     workspaceChromeActive,
     stackedSidebarOpen,
     creationLayoutActive,
     sidebarOpen
   })
-  // Why: suppress right sidebar controls on full-page navigation surfaces
-  // since those surfaces intentionally own the full content area.
-  const showRightSidebarControls = !creationLayoutActive && canShowRightSidebarForView(activeView)
   const showProfileSwitcherInSidebarFooter = showSidebar && sidebarOpen
   const showProfileSwitcherInTopRight = !showProfileSwitcherInSidebarFooter
 
@@ -1705,13 +1694,23 @@ function App(): React.JSX.Element {
         })
       }
 
-      const canRevealRightSidebar = !creationLayoutActive && canShowRightSidebarForView(activeView)
+      const canOpenWorkspacePanel =
+        !creationLayoutActive &&
+        activeView === 'terminal' &&
+        activeWorktreeId !== null &&
+        workspaceChromeActive
 
-      const openSearchSidebar = (query: string | null): void => {
-        actions.showRightSidebarSearch(query ? { query } : undefined)
+      const spoolWorkspaceActive =
+        activeView === 'terminal' && useAppStore.getState().activeSpoolWorkspaceRoute !== null
+
+      const openSearchTab = (query: string | null): void => {
+        openWorkspacePanelTab({
+          panel: 'explorer',
+          explorerDestination: { view: 'search', ...(query ? { query } : {}) }
+        })
       }
 
-      if (matchShortcut('sidebar.search.toggle') && canRevealRightSidebar) {
+      if (matchShortcut('sidebar.search.toggle') && canOpenWorkspacePanel) {
         // Why: when focus is inside the file explorer and a folder is selected,
         // Cmd/Ctrl+Shift+F means "Find in Folder" — seed the include pattern
         // with that folder instead of treating the chord as a text-search seed.
@@ -1722,8 +1721,12 @@ function App(): React.JSX.Element {
         if (selectedFolderRelativePath !== null && activeWorktreeId) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.search.toggle')
-          actions.showRightSidebarSearch({
-            includePattern: folderRelativePathToIncludeGlob(selectedFolderRelativePath)
+          openWorkspacePanelTab({
+            panel: 'explorer',
+            explorerDestination: {
+              view: 'search',
+              includePattern: folderRelativePathToIncludeGlob(selectedFolderRelativePath)
+            }
           })
           return
         }
@@ -1732,7 +1735,7 @@ function App(): React.JSX.Element {
         if (selectedText) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.search.toggle')
-          openSearchSidebar(selectedText)
+          openSearchTab(selectedText)
           return
         }
       }
@@ -1787,7 +1790,7 @@ function App(): React.JSX.Element {
       }
 
       // Cmd/Ctrl+Alt+Arrow — worktree history back/forward. This stays before
-      // right-sidebar shortcuts because it is navigation, not sidebar reveal.
+      // workspace-panel shortcuts because it is navigation, not tab creation.
       if (matchShortcut('worktree.history.back') || matchShortcut('worktree.history.forward')) {
         // Why: Back/Forward traverse mixed worktree + page visits, so the
         // shortcut is active wherever the titlebar button cluster is (terminal
@@ -1882,35 +1885,73 @@ function App(): React.JSX.Element {
       // (contentEditable) or a browser guest webContents, both of which bypass
       // this renderer-side window keydown listener.
 
-      if (!canRevealRightSidebar) {
+      if (spoolWorkspaceActive) {
+        const state = useAppStore.getState()
+        if (matchShortcut('sidebar.right.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.right.toggle')
+          state.showRightSidebarFiles()
+        } else if (matchShortcut('sidebar.explorer.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.explorer.toggle')
+          state.showRightSidebarFiles()
+        } else if (matchShortcut('sidebar.search.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.search.toggle')
+          state.showRightSidebarSearch()
+        } else if (matchShortcut('sidebar.sourceControl.toggle')) {
+          if (document.querySelector('[data-terminal-search-root]')) {
+            return
+          }
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.sourceControl.toggle')
+          state.setRightSidebarTab('source-control')
+          state.setRightSidebarOpen(true)
+        } else if (matchShortcut('sidebar.checks.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.checks.toggle')
+          state.setRightSidebarTab('checks')
+          state.setRightSidebarOpen(true)
+        } else if (matchShortcut('sidebar.ports.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.ports.toggle')
+          state.setRightSidebarTab('ports')
+          state.setRightSidebarOpen(true)
+        }
         return
       }
 
-      // Cmd/Ctrl+L — toggle right sidebar
+      if (!canOpenWorkspacePanel) {
+        return
+      }
+
+      // Why: keep the established shortcut, but route it to the first workspace
+      // panel now that the standalone right-sidebar shell no longer exists.
       if (matchShortcut('sidebar.right.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.right.toggle')
-        actions.toggleRightSidebar()
+        openWorkspacePanelTab({ panel: 'explorer' })
         return
       }
 
-      // Cmd/Ctrl+Shift+E — toggle right sidebar / explorer tab
       if (matchShortcut('sidebar.explorer.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.explorer.toggle')
-        actions.showRightSidebarFiles()
+        openWorkspacePanelTab({
+          panel: 'explorer',
+          explorerDestination: { view: 'files' }
+        })
         return
       }
 
-      // Cmd/Ctrl+Shift+F — toggle right sidebar / search tab
       if (matchShortcut('sidebar.search.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.search.toggle')
-        openSearchSidebar(null)
+        openSearchTab(null)
         return
       }
 
-      // Cmd/Ctrl+Shift+G — toggle right sidebar / source control tab.
+      // Cmd/Ctrl+Shift+G — open Source Control in a workspace tab.
       // Skip when terminal search is open — Cmd+Shift+G means "find previous"
       // in that context (handled by keyboard-handlers.ts). Both listeners share
       // the window capture phase and registration order can vary with React
@@ -1921,27 +1962,24 @@ function App(): React.JSX.Element {
         }
         input.preventDefault()
         notifyTerminalCapture('sidebar.sourceControl.toggle')
-        actions.setRightSidebarTab('source-control')
-        actions.setRightSidebarOpen(true)
+        openWorkspacePanelTab({ panel: 'source-control' })
         return
       }
 
       if (matchShortcut('sidebar.checks.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.checks.toggle')
-        actions.setRightSidebarTab('checks')
-        actions.setRightSidebarOpen(true)
+        openWorkspacePanelTab({ panel: 'checks' })
         return
       }
 
-      // Cmd+Shift+I — toggle right sidebar / ports tab (macOS only).
+      // Cmd+Shift+I — open the Ports workspace tab (macOS only).
       // Why: Ctrl+Shift+I is the built-in DevTools accelerator on Windows/Linux;
       // intercepting it would break an essential developer tool.
       if (matchShortcut('sidebar.ports.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.ports.toggle')
-        actions.setRightSidebarTab('ports')
-        actions.setRightSidebarOpen(true)
+        openWorkspacePanelTab({ panel: 'ports' })
       }
     }
 
@@ -2187,34 +2225,6 @@ function App(): React.JSX.Element {
     </div>
   )
 
-  const rightSidebarToggle = showRightSidebarControls ? (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className={cn(
-              'mr-2 bg-[var(--bg-titlebar,var(--card))] text-muted-foreground dark:bg-[var(--bg-titlebar,var(--card))] dark:hover:bg-accent',
-              TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
-            )}
-            onClick={actions.toggleRightSidebar}
-            aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
-          >
-            {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
-            <PanelRight className="-scale-x-100" />
-          </Button>
-        }
-      />
-      <TooltipContent side="bottom" sideOffset={6}>
-        {translate('auto.App.c184e056de', 'Toggle right sidebar ({{value0}})', {
-          value0: rightSidebarShortcutLabel
-        })}
-      </TooltipContent>
-    </Tooltip>
-  ) : null
-
   const titlebarMainStrip = (
     <>
       {activeView === 'activity' ? (
@@ -2254,10 +2264,6 @@ function App(): React.JSX.Element {
         </Tooltip>
       )}
       {showProfileSwitcherInTopRight ? <YiruProfileSwitcher /> : null}
-      {/* Why: when the right sidebar is open, its own header renders
-      an identical close button — hide this copy so only one is
-      visible at a time. */}
-      {!rightSidebarOpen && rightSidebarToggle}
       {/* Why: reserve space so content is not obscured by the
       fixed-position window-controls overlay on Windows/Linux. */}
       {hasCustomTitleBar && (
@@ -2272,13 +2278,8 @@ function App(): React.JSX.Element {
     leftTitlebarChromeLayout.shouldMount &&
     !stackedSidebarOpen ? (
       <div
-        // Why: clear both the desktop controls and the adjacent sidebar toggle when it is present.
-        className={cn(
-          'absolute top-0 z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]',
-          showRightSidebarControls
-            ? 'right-[calc(var(--window-controls-width)+42px)]'
-            : 'right-[var(--window-controls-width)]'
-        )}
+        // Why: keep the profile control clear of desktop window controls.
+        className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]"
       >
         <YiruProfileSwitcher />
       </div>
@@ -2326,10 +2327,8 @@ function App(): React.JSX.Element {
               )}
             >
               <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
-                {/* Why: the non-workspace titlebar lives inside this left+center
-              wrapper so it does not span over the right-sidebar column —
-              when the right sidebar is open, its own header anchors at the
-              top alongside the titlebar instead of being pushed below it. */}
+                {/* Why: keep the non-workspace titlebar and content in one
+              column so full-page routes retain a stable vertical frame. */}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                   {/* Why: in workspace view (split groups always enabled), the
                 full-width titlebar is removed so tab groups + terminal extend
@@ -2441,21 +2440,6 @@ function App(): React.JSX.Element {
                         <div className={TITLEBAR_CLASS_NAME}>{titlebarMainStrip}</div>
                       ) : null}
                       <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
-                        {/* Why: right sidebar toggle floats at the top-right of the center
-                    column so it's always accessible whether the right sidebar is
-                    open or closed. Match the RightSidebar header's 36px height and
-                    top-0 anchor so the icon's vertical center is identical between
-                    open and closed states — otherwise toggling makes the icon jump
-                    a few pixels, which reads as layout jitter. */}
-                        {workspaceChromeActive && !rightSidebarOpen && (
-                          <div
-                            // Why: this offset clears the desktop controls without adding a spacer
-                            // that could cover the pane-actions button with an unclickable region.
-                            className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]"
-                          >
-                            {rightSidebarToggle}
-                          </div>
-                        )}
                         {workspaceProfileSwitcher}
                         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                           {shouldMountTerminalWorkbench ? (
@@ -2532,41 +2516,6 @@ function App(): React.JSX.Element {
                     </div>
                   </div>
                 </div>
-                {/* Why: keep the right-sidebar shell mounted for layout stability.
-              Its heavy panels disconnect while closed so workspace wake stays
-              responsive. Remote panel state is route-scoped, so its boundary
-              also resets when the owning Desktop/worktree binding changes. */}
-                {showRightSidebarControls ? (
-                  <RecoverableRenderErrorBoundary
-                    boundaryId="right-sidebar"
-                    surface="right-sidebar"
-                    resetKey={
-                      hasActiveSpoolWorkspace && activeSpoolWorkspaceRoute
-                        ? JSON.stringify([
-                            activeSpoolWorkspaceRoute.desktopRef,
-                            activeSpoolWorkspaceRoute.worktreeRef,
-                            activeSpoolWorkspaceRoute.connectionEpoch,
-                            rightSidebarTab
-                          ])
-                        : rightSidebarTab === 'explorer'
-                          ? `${rightSidebarTab}:${rightSidebarExplorerView}`
-                          : rightSidebarTab
-                    }
-                    title={translate('auto.App.ed6b168d00', 'The right sidebar hit an error.')}
-                    description={translate(
-                      'auto.App.8d1e160ed1',
-                      'Retry the sidebar or switch tabs to reload this surface.'
-                    )}
-                  >
-                    <Suspense fallback={null}>
-                      {hasActiveSpoolWorkspace && activeSpoolWorkspaceRoute ? (
-                        <SpoolRightSidebar route={activeSpoolWorkspaceRoute} />
-                      ) : (
-                        <RightSidebar />
-                      )}
-                    </Suspense>
-                  </RecoverableRenderErrorBoundary>
-                ) : null}
               </div>
             </RecoverableRenderErrorBoundary>
             {shouldMountFloatingTerminalPanel ? (

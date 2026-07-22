@@ -1,8 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
-import { PushPin as Pin } from '@phosphor-icons/react'
+import { PushPin as Pin, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -394,6 +393,7 @@ export default function SortableTab({
           // collapse only when that close control exists so hit targets never stack.
           <button
             className={cn(
+              'outline-none focus-visible:bg-muted focus-visible:text-foreground',
               'mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0',
               !isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : '',
               isActive

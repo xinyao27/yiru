@@ -212,7 +212,7 @@ function AddRepoNestedImportStopButton({
             type="button"
             variant="ghost"
             size="icon-xs"
-            className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
+            className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive"
             aria-label={translate(
               'auto.components.sidebar.AddRepoNestedImportStep.2f8298f3c3',
               'Stop scan'

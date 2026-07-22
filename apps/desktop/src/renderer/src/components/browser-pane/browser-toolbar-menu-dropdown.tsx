@@ -3,10 +3,10 @@ import {
   DotsThree as Ellipsis,
   DownloadSimple as Import,
   Monitor,
-  Gear as Settings
+  Gear as Settings,
+  Plus
 } from '@phosphor-icons/react'
 
-import { Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

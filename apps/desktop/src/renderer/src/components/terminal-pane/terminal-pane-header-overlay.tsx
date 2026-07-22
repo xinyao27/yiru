@@ -1,11 +1,11 @@
 import {
   Chat as MessageSquare,
   SquareSplitVertical,
-  TerminalWindow as SquareTerminal
+  TerminalWindow as SquareTerminal,
+  X
 } from '@phosphor-icons/react'
 import type { CSSProperties, RefObject } from 'react'
 
-import { X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -182,7 +182,7 @@ export default function TerminalPaneHeaderOverlay({
             {isEditing ? (
               <input
                 ref={renameInputRef}
-                className="pane-title-input"
+                className="pane-title-input focus-visible:border-ring outline-none"
                 aria-label={translate(
                   'auto.components.terminal.pane.TerminalPane.7dbbfcbecc',
                   'Pane title'
@@ -229,7 +229,7 @@ export default function TerminalPaneHeaderOverlay({
                 {title ? (
                   <button
                     type="button"
-                    className="pane-title-text"
+                    className="pane-title-text focus-visible:bg-accent outline-none"
                     onClick={() => onStartRename(pane.id)}
                     aria-label={translate(
                       'auto.components.terminal.pane.TerminalPane.cc5a2dc706',
@@ -290,7 +290,7 @@ export default function TerminalPaneHeaderOverlay({
                         render={
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="icon-xs"
                             className="pane-title-split-trigger"
                             data-contextual-tour-target={

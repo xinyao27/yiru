@@ -10,13 +10,15 @@ import {
   Pencil,
   MagnifyingGlass as Search,
   TerminalWindow as SquareTerminal,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowSquareOut as ExternalLink,
+  FilePlus,
+  FolderPlus
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the row owns dense file-tree rendering plus its context menu, drag target, and inline-input sibling contract. */
 import React, { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowSquareOut as ExternalLink, FilePlus, FolderPlus } from '@/components/regular-icons'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'
 import {
   ContextMenu,

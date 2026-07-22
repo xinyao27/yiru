@@ -1,6 +1,6 @@
+import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { PRCheckAnnotation } from '../../../../shared/types'
@@ -59,7 +59,7 @@ export function CheckRunAnnotations({
                       'auto.components.editor.CheckRunDetailsPanel.5e2a9c3f88',
                       'Open file at this line'
                     )}
-                    className="group text-primary focus-visible:ring-ring inline-flex min-w-0 items-center gap-1 rounded font-mono text-xs break-all hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                    className="group text-primary inline-flex min-w-0 items-center gap-1 rounded font-mono text-xs break-all hover:underline focus-visible:outline-none"
                   >
                     <span className="min-w-0 text-left break-all">{locationLabel}</span>
                     <ExternalLink className="size-3 shrink-0 opacity-70" />

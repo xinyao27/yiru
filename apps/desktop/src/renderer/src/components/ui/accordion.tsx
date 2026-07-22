@@ -1,9 +1,9 @@
 'use client'
 
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import * as React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { cn } from '@/lib/class-names'
 
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props): React.JSX.Element {
@@ -30,7 +30,7 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          'flex flex-1 items-center justify-between gap-2 py-2 text-left text-sm font-medium outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-panel-open]>svg]:rotate-180',
+          'flex flex-1 items-center justify-between gap-2 py-2 text-left text-sm font-medium outline-none transition-colors hover:text-foreground focus-visible:bg-accent disabled:pointer-events-none disabled:opacity-50 [&[data-panel-open]>svg]:rotate-180',
           className
         )}
         {...props}

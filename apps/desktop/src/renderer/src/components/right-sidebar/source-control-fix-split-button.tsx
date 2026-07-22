@@ -1,8 +1,7 @@
-import { SlidersHorizontal, Sparkle } from '@phosphor-icons/react'
+import { SlidersHorizontal, Sparkle, CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React, { useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

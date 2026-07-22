@@ -1,15 +1,16 @@
-import { Check, Info, Terminal } from '@phosphor-icons/react'
+import {
+  Check,
+  Terminal,
+  CaretDown as ChevronDown,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the Agents pane keeps catalog rows, default
    selection, per-agent controls, and runtime location together so settings
    reconciliation stays visible in one file. */
 import { useId, useMemo, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  CaretDown as ChevronDown,
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
@@ -34,7 +35,6 @@ import {
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { AgentAwakeSetting } from './agent-awake-setting'
 import { AgentCacheTimerSection } from './agent-cache-timer-section'
 import { parseAgentDefaultEnvDraft, stringifyAgentDefaultEnvDraft } from './agent-default-env-draft'
@@ -211,37 +211,22 @@ export function AgentPermissionsSetting({
   return (
     <section className="space-y-3">
       <SettingsSubsectionHeader
-        title={
-          <span className="flex items-center gap-2">
-            {translate('auto.components.settings.AgentsPane.agentPermissions', 'Agent Permissions')}
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <button
-                    type="button"
-                    aria-label={translate(
-                      'auto.components.settings.AgentsPane.agentPermissionsInfo',
-                      'Agent permissions info'
-                    )}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 grid size-5 place-items-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
-                  >
-                    <Info className="size-3.5" />
-                  </button>
-                }
-              />
-              <TooltipContent side="top" sideOffset={6}>
-                {translate(
-                  'auto.components.settings.AgentsPane.agentPermissionsTooltip',
-                  "Doesn't apply to agents where you've overridden launch arguments."
-                )}
-              </TooltipContent>
-            </Tooltip>
-          </span>
-        }
-        description={translate(
-          'auto.components.settings.AgentsPane.agentPermissionsDescription',
-          'Choose whether Yiru launches agents with fewer permission prompts or with manual checks.'
+        title={translate(
+          'auto.components.settings.AgentsPane.agentPermissions',
+          'Agent Permissions'
         )}
+        description={
+          <>
+            {translate(
+              'auto.components.settings.AgentsPane.agentPermissionsDescription',
+              'Choose whether Yiru launches agents with fewer permission prompts or with manual checks.'
+            )}{' '}
+            {translate(
+              'auto.components.settings.AgentsPane.agentPermissionsTooltip',
+              "Doesn't apply to agents where you've overridden launch arguments."
+            )}
+          </>
+        }
         action={
           <SettingsSegmentedControl<AgentPermissionMode>
             value={visibleMode}
@@ -574,7 +559,7 @@ function AgentRow({
                 ? translate('auto.components.settings.AgentsPane.fe4d630c94', 'Docs')
                 : translate('auto.components.settings.AgentsPane.f95b5c79b8', 'Install')
             }
-            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex size-7 items-center justify-center rounded-md transition-colors"
+            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:bg-muted/50 focus-visible:text-foreground flex size-7 items-center justify-center rounded-md transition-colors outline-none"
           >
             <ExternalLink className="size-3.5" />
           </a>
@@ -670,7 +655,7 @@ function DefaultAgentPill({ active, onClick, children }: DefaultAgentPillProps):
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors focus-visible:border-ring',
         active
           ? 'border-muted-foreground/40 bg-accent font-medium text-accent-foreground'
           : 'border-border bg-background/50 text-muted-foreground hover:border-muted-foreground/35 hover:text-foreground'

@@ -4,7 +4,12 @@ import {
   Cloud,
   PlugCharging as PlugZap,
   GearSix as Settings2,
-  HardDrives as Server
+  HardDrives as Server,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CaretUpDown as ChevronsUpDown,
+  ArrowElbowDownLeft as CornerDownLeft,
+  FolderPlus
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: this component intentionally keeps the full
 composer card markup together so the inline and modal variants share one UI
@@ -21,13 +26,6 @@ import SmartWorkspaceNameField, {
   type SmartWorkspaceNameSelection
 } from '@/components/new-workspace/smart-workspace-name-field'
 import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
-import {
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  CaretUpDown as ChevronsUpDown,
-  ArrowElbowDownLeft as CornerDownLeft,
-  FolderPlus
-} from '@/components/regular-icons'
 import type RepoCombobox from '@/components/repo/repo-combobox'
 import { SettingsSwitch } from '@/components/settings/settings-form-controls'
 import SparseCheckoutPresetSelect from '@/components/sparse/sparse-checkout-preset-select'
@@ -288,7 +286,7 @@ function WorkspaceRunTargetCombobox({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="border-input focus:border-ring focus:ring-ring/50 h-9 w-full justify-between px-3 text-sm font-normal focus:ring-[3px]"
+            className="border-input focus:border-ring h-9 w-full justify-between px-3 text-sm font-normal"
           >
             {selectedRecipe ? (
               <span className="inline-flex min-w-0 items-center gap-1.5">
@@ -432,7 +430,7 @@ function SetupCommandPreview({
 }): React.JSX.Element {
   if (setupConfig.source === 'yaml') {
     return (
-      <div className="border-border/60 bg-muted/40 rounded-2xl border shadow-inner">
+      <div className="border-border/60 bg-muted/40 rounded-2xl border">
         <div className="border-border/60 flex items-center justify-between gap-3 border-b px-4 py-2.5">
           <div className="text-muted-foreground font-mono text-[11px]">
             {translate('auto.components.NewWorkspaceComposerCard.23bb365554', 'yiru.yaml')}
@@ -448,7 +446,7 @@ function SetupCommandPreview({
   }
 
   return (
-    <div className="border-border/60 bg-muted/35 rounded-2xl border px-4 py-3 shadow-inner">
+    <div className="border-border/60 bg-muted/35 rounded-2xl border px-4 py-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
           {setupConfig.source === 'both'
@@ -801,8 +799,8 @@ export default function NewWorkspaceComposerCard({
       onDragEnter={dragHandlers.onDragEnter}
       onDragLeave={dragHandlers.onDragLeave}
       className={cn(
-        'grid min-w-0 gap-1 rounded-md transition',
-        isFileDragOver && 'ring-2 ring-ring/30',
+        'grid min-w-0 gap-1 rounded-md border border-transparent transition',
+        isFileDragOver && 'border-ring',
         containerClassName
       )}
     >
@@ -848,10 +846,9 @@ export default function NewWorkspaceComposerCard({
               translate('auto.components.NewWorkspaceComposerCard.dccd26d4e4', 'Choose project')
             }
             // Why: programmatic .focus() does not reliably trigger
-            // :focus-visible in Chromium. Mirror the Input component's
-            // standard ring (border-ring + ring-ring/50, 3px) onto :focus so
-            // keyboard navigation paints the familiar field ring.
-            triggerClassName="h-9 w-full border-input text-sm focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+            // :focus-visible in Chromium, so this control also changes its
+            // border on :focus.
+            triggerClassName="h-9 w-full border-input text-sm focus:border-ring"
             invalid={Boolean(projectError)}
             describedBy={projectDescriptionId}
           />
@@ -1000,9 +997,19 @@ export default function NewWorkspaceComposerCard({
             <div className="min-h-0">
               <div className="space-y-1 pt-1">
                 <label className="group text-foreground flex w-fit items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={reuseSelectedBranch}
+                    onChange={(event) => onReuseSelectedBranchChange(event.target.checked)}
+                    // Why: while collapsed the row is aria-hidden, so disable the
+                    // input too — keeps a hidden control out of the tab order and
+                    // fully inert (no focusable control inside an aria-hidden tree).
+                    disabled={!canReuseSelectedBranch}
+                    className="peer sr-only outline-none"
+                  />
                   <span
                     className={cn(
-                      'flex size-4 items-center justify-center rounded-[3px] border shadow-sm transition',
+                      'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
                       reuseSelectedBranch
                         ? 'border-emerald-500/60 bg-emerald-500 text-white'
                         : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
@@ -1015,16 +1022,6 @@ export default function NewWorkspaceComposerCard({
                       )}
                     />
                   </span>
-                  <input
-                    type="checkbox"
-                    checked={reuseSelectedBranch}
-                    onChange={(event) => onReuseSelectedBranchChange(event.target.checked)}
-                    // Why: while collapsed the row is aria-hidden, so disable the
-                    // input too — keeps a hidden control out of the tab order and
-                    // fully inert (no focusable control inside an aria-hidden tree).
-                    disabled={!canReuseSelectedBranch}
-                    className="sr-only"
-                  />
                   <span>
                     {translate(
                       'auto.components.NewWorkspaceComposerCard.reuseExistingBranch',
@@ -1085,7 +1082,7 @@ export default function NewWorkspaceComposerCard({
             onOpenManageAgents={onOpenAgentSettings}
             defaultAgent={defaultTuiAgent}
             onSetDefault={handleSetDefaultAgent}
-            triggerClassName="h-9 w-full border-input text-sm focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+            triggerClassName="h-9 w-full border-input text-sm focus:border-ring    "
             onTriggerEnter={createDisabled ? undefined : onCreate}
           />
         </div>
@@ -1117,13 +1114,9 @@ export default function NewWorkspaceComposerCard({
           aria-hidden={!advancedOpen}
         >
           <div className="min-h-0">
-            {/* Why: px-1 insets the content 4px on each side so the Note
-                textarea's 3px outset focus ring has horizontal breathing room
-                inside the overflow-hidden drawer above. Without it the ring
-                gets clipped on the right edge when the field is focused. */}
             <div
               className={cn(
-                'space-y-4 px-1 pt-1 pb-3 transition-[opacity,transform] duration-150 ease-out',
+                'space-y-4 pt-1 pb-3 transition-[opacity,transform] duration-150 ease-out',
                 advancedOpen
                   ? 'translate-y-0 opacity-100 delay-200'
                   : '-translate-y-1 opacity-0 delay-0'
@@ -1148,7 +1141,7 @@ export default function NewWorkspaceComposerCard({
                       'auto.components.NewWorkspaceComposerCard.0ee17638fe',
                       'Workspace name'
                     )}
-                    className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full min-w-0 rounded-md border bg-transparent px-3 py-1.5 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                    className="border-input placeholder:text-muted-foreground focus-visible:border-ring w-full min-w-0 rounded-md border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
                   />
                 </div>
               ) : null}
@@ -1180,7 +1173,7 @@ export default function NewWorkspaceComposerCard({
                       'auto.components.NewWorkspaceComposerCard.branchNamePlaceholder',
                       'feature/my-branch'
                     )}
-                    className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full min-w-0 rounded-md border bg-transparent px-3 py-1.5 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                    className="border-input placeholder:text-muted-foreground focus-visible:border-ring w-full min-w-0 rounded-md border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
                   />
                 </div>
               ) : null}
@@ -1206,7 +1199,7 @@ export default function NewWorkspaceComposerCard({
                     'Write a note'
                   )}
                   rows={1}
-                  className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 max-h-40 w-full min-w-0 resize-none overflow-hidden rounded-md border bg-transparent px-3 py-1.5 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                  className="border-input placeholder:text-muted-foreground focus-visible:border-ring max-h-40 w-full min-w-0 resize-none overflow-hidden rounded-md border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
                 />
               </div>
 
@@ -1242,9 +1235,17 @@ export default function NewWorkspaceComposerCard({
                     headerAction={
                       requiresExplicitSetupChoice ? null : (
                         <label className="group text-foreground flex items-center gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={resolvedSetupDecision === 'run'}
+                            onChange={(event) =>
+                              onSetupDecisionChange(event.target.checked ? 'run' : 'skip')
+                            }
+                            className="peer sr-only outline-none"
+                          />
                           <span
                             className={cn(
-                              'flex size-4 items-center justify-center rounded-[3px] border transition shadow-sm',
+                              'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
                               resolvedSetupDecision === 'run'
                                 ? 'border-emerald-500/60 bg-emerald-500 text-white'
                                 : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
@@ -1257,14 +1258,6 @@ export default function NewWorkspaceComposerCard({
                               )}
                             />
                           </span>
-                          <input
-                            type="checkbox"
-                            checked={resolvedSetupDecision === 'run'}
-                            onChange={(event) =>
-                              onSetupDecisionChange(event.target.checked ? 'run' : 'skip')
-                            }
-                            className="sr-only"
-                          />
                           <span>{setupRunLabel}</span>
                         </label>
                       )
@@ -1404,7 +1397,7 @@ export default function NewWorkspaceComposerCard({
             role="switch"
             aria-checked={createMultiple}
             onClick={() => onCreateMultipleChange?.(!createMultiple)}
-            className="group focus-visible:ring-ring/50 flex w-fit cursor-pointer items-center gap-2 rounded-md text-xs outline-none focus-visible:ring-[3px]"
+            className="group flex w-fit cursor-pointer items-center gap-2 rounded-md text-xs outline-none"
           >
             <span
               aria-hidden
@@ -1415,7 +1408,7 @@ export default function NewWorkspaceComposerCard({
             >
               <span
                 className={cn(
-                  'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+                  'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
                   createMultiple ? 'translate-x-4' : 'translate-x-0.5'
                 )}
               />

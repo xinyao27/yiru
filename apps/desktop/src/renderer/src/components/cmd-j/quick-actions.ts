@@ -3,11 +3,11 @@ import {
   Globe,
   Play,
   TerminalWindow as SquareTerminal,
-  Trash as Trash2
+  Trash as Trash2,
+  type Icon as PhosphorIcon,
+  FolderPlus
 } from '@phosphor-icons/react'
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 
-import { FolderPlus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 

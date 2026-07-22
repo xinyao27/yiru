@@ -6,17 +6,15 @@ import {
   ChatText as MessageSquareText,
   Student as School,
   Scroll as ScrollText,
-  Gear as Settings
+  Gear as Settings,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  ArrowClockwise as RotateCw
 } from '@phosphor-icons/react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw,
-  ArrowClockwise as RotateCw
-} from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import {
@@ -184,7 +182,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                 keys={settingsShortcut.keys}
                 doubleTap={settingsShortcut.doubleTap}
                 className="gap-0.5"
-                keyCapClassName="min-w-0 border-background/20 bg-background/10 px-1 py-0 text-[10px] text-background shadow-none"
+                keyCapClassName="min-w-0 border-background/20 bg-background/10 px-1 py-0 text-[10px] text-background "
                 separatorClassName="text-[10px] text-background/70"
               />
             ) : null}

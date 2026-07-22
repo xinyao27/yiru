@@ -19,6 +19,7 @@ import type {
   TabGroup,
   TerminalTab
 } from '../../../../shared/types'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import { focusTerminalTabSurface } from '../../lib/focus-terminal-tab-surface'
 import {
   activateWebRuntimeSessionTab,
@@ -283,7 +284,10 @@ export function useTabGroupWorkspaceModel({
         destroyWorkspaceWebviews(browserState.browserPagesByWorkspace, item.entityId)
         closeBrowserTab(item.entityId)
         closeUnifiedTab(item.id)
-      } else if (item.contentType === 'simulator') {
+      } else if (
+        item.contentType === 'simulator' ||
+        isWorkspacePanelTabContentType(item.contentType)
+      ) {
         closeUnifiedTab(item.id)
       } else {
         const canCloseTab = closeEditorIfUnreferenced(item.entityId, item.id)
@@ -346,7 +350,10 @@ export function useTabGroupWorkspaceModel({
           closeUnifiedTab(item.id)
         } else if (item.contentType === 'terminal') {
           closeTab(item.entityId)
-        } else if (item.contentType === 'simulator') {
+        } else if (
+          item.contentType === 'simulator' ||
+          isWorkspacePanelTabContentType(item.contentType)
+        ) {
           closeUnifiedTab(item.id)
         } else {
           const canCloseTab = closeEditorIfUnreferenced(item.entityId, item.id)
@@ -468,6 +475,25 @@ export function useTabGroupWorkspaceModel({
       setActiveTabType('browser')
     },
     [activateTab, focusGroup, groupId, groupTabs, setActiveBrowserTab, setActiveTabType, worktreeId]
+  )
+
+  const activateWorkspacePanel = useCallback(
+    (tabId: string) => {
+      const item = groupTabs.find(
+        (candidate) =>
+          candidate.id === tabId && isWorkspacePanelTabContentType(candidate.contentType)
+      )
+      if (!item || !isWorkspacePanelTabContentType(item.contentType)) {
+        return
+      }
+      focusGroup(worktreeId, groupId)
+      activateTab(item.id)
+      setActiveTabType('editor')
+      const state = useAppStore.getState()
+      state.setRightSidebarTab(item.contentType)
+      state.setRightSidebarOpen(true)
+    },
+    [activateTab, focusGroup, groupId, groupTabs, setActiveTabType, worktreeId]
   )
 
   const createSplitGroup = useCallback(
@@ -594,6 +620,7 @@ export function useTabGroupWorkspaceModel({
       activateBrowser,
       activateEditor,
       activateTerminal,
+      activateWorkspacePanel,
       closeAllEditorTabsInGroup,
       closeGroup,
       closeItem,

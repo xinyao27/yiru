@@ -6,18 +6,16 @@ import {
   ActivityIcon as Activity,
   Plug,
   Layout as PanelsTopLeft,
-  HardDrives as Server
+  HardDrives as Server,
+  ArrowCounterClockwise as RotateCcw,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/floating-terminal-icon-context-menu'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowCounterClockwise as RotateCcw,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -602,7 +600,7 @@ function CodexRestartStatusPrompt(): React.JSX.Element | null {
         <button
           type="button"
           onClick={() => queueCodexPaneRestarts(staleCodexStatus.stalePtyIds)}
-          className="border-border/70 text-foreground hover:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors"
+          className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
         >
           {staleCodexStatus.staleSessionCount === 1
             ? translate('auto.components.status.bar.StatusBar.6cd6650b4c', 'Restart Session')
@@ -649,7 +647,7 @@ function AccountRuntimeToggle<TGroup extends { key: string; label: string }>({
               aria-checked={active}
               onClick={() => onChange(group)}
               className={cn(
-                'min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                'min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors',
                 active
                   ? 'bg-accent font-medium text-accent-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -1627,7 +1625,7 @@ export function ProviderDetailsMenu({
         render={
           <button
             type="button"
-            className="hover:bg-accent/70 inline-flex cursor-pointer items-center rounded px-1 py-0.5"
+            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center rounded px-1 py-0.5 outline-none"
             aria-label={ariaLabel}
           >
             {iconOnly ? (
@@ -2027,7 +2025,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="hover:bg-accent text-muted-foreground hover:text-foreground rounded p-0.5 transition-colors disabled:opacity-40"
+                  className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-0.5 transition-colors outline-none disabled:opacity-40"
                   aria-label={translate(
                     'auto.components.status.bar.StatusBar.3325d996cb',
                     'Refresh rate limits'
@@ -2072,7 +2070,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                   // Why: this compact status-bar control sits flush with app chrome, so it stays flat.
                   <button
                     type="button"
-                    className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border transition-colors"
+                    className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border transition-colors outline-none"
                     aria-label={
                       showFloatingWorkspaceAttentionDot
                         ? `${floatingTerminalActionLabel}, new activity`
@@ -2084,12 +2082,11 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                   >
                     <PanelsTopLeft className="size-3.5" />
                     {showFloatingWorkspaceAttentionDot ? (
-                      // Why: amber = Yiru's "needs attention" convention; ring
-                      // matches the button fill so the dot reads on the icon.
+                      // Why: amber = Yiru's "needs attention" convention.
                       <span
                         aria-hidden
                         data-floating-terminal-attention
-                        className="ring-secondary pointer-events-none absolute top-0.5 right-0.5 size-1.5 rounded-full bg-amber-500 ring-1"
+                        className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 rounded-full bg-amber-500"
                       />
                     ) : null}
                   </button>

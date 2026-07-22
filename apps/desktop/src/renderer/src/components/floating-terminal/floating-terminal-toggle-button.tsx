@@ -237,12 +237,11 @@ export function FloatingTerminalToggleButton({
             >
               <PanelsTopLeft className="size-4" />
               {showAttentionDot ? (
-                // Why: amber matches Yiru's "needs attention / unread" convention;
-                // the ring matches the standard outline button fill in both themes.
+                // Why: amber matches Yiru's "needs attention / unread" convention.
                 <span
                   aria-hidden
                   data-floating-terminal-attention
-                  className="ring-background pointer-events-none absolute top-1 right-1 size-2 rounded-full bg-amber-500 ring-2"
+                  className="pointer-events-none absolute top-1 right-1 size-2 rounded-full bg-amber-500"
                 />
               ) : null}
             </Button>

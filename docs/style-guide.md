@@ -48,9 +48,9 @@ Tokens come in pairs: a **surface** and a **foreground** that meets contrast on 
 | `muted` / `muted-foreground`             | De-emphasized text, captions, placeholders, disabled chrome | Body copy; primary actions                          |
 | `accent` / `accent-foreground`           | Hover/active backgrounds for ghost buttons and list rows    | Solid filled buttons (use `secondary` instead)      |
 | `destructive` / `destructive-foreground` | Delete, discard, irreversible-action buttons; error states  | Cancel buttons (Cancel is not destructive)          |
-| `border`                                 | All hairlines: dividers, input outlines, card edges         | Heavy emphasis; that's `ring`                       |
+| `border`                                 | All hairlines: dividers, input edges, card edges            | Heavy emphasis; that's `ring`                       |
 | `input`                                  | Form field background only                                  | Anywhere outside form fields                        |
-| `ring`                                   | Focus-visible outlines, active selection halos              | Persistent decoration                               |
+| `ring`                                   | Focus-visible border color, active selection emphasis       | Persistent decoration                               |
 | `sidebar` (+ variants)                   | Secondary panel chrome, including the right sidebar         | Main canvas and floating surfaces                   |
 | `editor-surface`                         | Background of Monaco / markdown editor panes                | App chrome                                          |
 
@@ -94,7 +94,7 @@ A common point of drift. Use these conventions for any list-style row (worktrees
 
 - **Idle:** transparent background.
 - **Hover:** `bg-accent` (in the worktree sidebar, `bg-sidebar-accent`).
-- **Keyboard-selected (cmdk highlight):** `data-[selected=true]:bg-accent` plus a `border-border` outline so the active row stays visible while the user types. The `data-selected` attribute is set by `cmdk` automatically.
+- **Keyboard-selected (cmdk highlight):** `data-[selected=true]:bg-accent` plus a `border-border` edge so the active row stays visible while the user types. The `data-selected` attribute is set by `cmdk` automatically.
 - **Persistent "current" / "active" row** (e.g. the worktree the user is viewing): also `bg-accent`, _plus_ a `data-current="true"` attribute so CSS or future styling can distinguish it from the cmdk highlight.
 - **Don't:** hardcode `bg-[#ededed]` / `bg-[#333333]` or invent a "selected" color. The accent token already adapts to light/dark and matches the rest of the app.
 
@@ -137,20 +137,21 @@ Native chat borrows Cursor's transcript hierarchy while remaining fully rectilin
 
 ## Elevation & shadows
 
-Yiru uses only Tailwind/shadcn shadow tiers:
-
-1. **Hairline** — `border` with the `border` token. The default for inline surfaces.
-2. **Subtle lift** — `shadow-xs` or the shadcn primitive default. Inputs, outline controls, embedded cards.
-3. **Floating** — `shadow-md` for compact popovers and menus; `shadow-lg` for dialogs and sheets.
-
-Do not add a shadow token or arbitrary `shadow-[…]` recipe to a primitive. If a surface needs more emphasis, use the focus `ring` or fix its hierarchy.
+Yiru does not use decorative shadows or visible CSS outlines. Use `border` with
+the `border` token for surface separation and focus state, plus opaque
+backgrounds for overlays. Do not add `shadow-*`, `drop-shadow-*`, `box-shadow`,
+`text-shadow`, or outline styles that draw a stroke; remove legacy declarations
+at their source. A source-local `outline: none` / `outline-none` reset is allowed
+only to suppress the browser's native focus ring when the component supplies a
+border or background focus state. Never implement either policy as a global
+override.
 
 ### Floating surfaces
 
 Floating primitives share the recipes in `components/ui/floating-surface-styles.ts`; the module composes default roles rather than introducing overlay tokens:
 
-- **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border shadow-md`.
-- **Dialog, command dialog, sheet:** `bg-background text-foreground border shadow-lg` with `bg-black/50` backdrop.
+- **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border`.
+- **Dialog, command dialog, sheet:** `bg-background text-foreground border` with `bg-black/50` backdrop.
 
 Foreground floating surfaces are always opaque while visible. Their base must not use `/NN` background alpha, translucent `rgba`, `color-mix(..., transparent)`, resting element opacity below 1, or backdrop blur. Enter/exit opacity motion is allowed; transparency also remains valid for modal backdrops, transcript fade masks, drag/selection affordances, and hover-state tints because those intentionally reveal context rather than carry foreground content.
 
@@ -237,7 +238,7 @@ Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
 - **Default size:** `size-4` (16px). `Button` auto-applies this to any `<svg>` it contains via `[&_svg:not([class*='size-'])]:size-4`, so most call sites don't need to set a size on the icon.
 - **`size-3` / `size-3.5`:** for metadata, captions, and dense list rows where 16px is too loud.
 - **`size-7`+:** for featured/empty-state hero icons only.
-- **Weight:** the renderer-wide `IconContext.Provider` defaults to `duotone`. Add/create icons, close/dismiss `X`, and every Phosphor glyph in the `Arrow` / `Arrows` / `Caret` families—including composite glyphs such as `FlowArrow`—are the exceptions: import them from `components/regular-icons.tsx`, which fixes them at `regular` so duotone background shapes don't make compact controls look selected. All other icons inherit `duotone`; don't override them per-icon unless a state needs a distinct treatment.
+- **Weight:** the renderer-wide `IconContext.Provider` sets every Phosphor icon to `duotone`. Import icons directly from `@phosphor-icons/react` so they inherit that weight; don't override `weight` per icon or introduce alternate-weight wrappers.
 - **Color:** inherit from surrounding text — `text-muted-foreground` for secondary, `text-destructive` for destructive, etc. Don't apply a token to the SVG directly when the parent already carries the right color.
 - **Loader:** the canonical loading icon is `<LoadingIndicator className="size-4" />` from `components/loading-indicator.tsx`. It follows the user's Appearance setting, so don't import a one-off generic spinner. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled loader. See _UX rule 1_.
 
@@ -268,7 +269,7 @@ The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-
 
 - **Outer stack:** `space-y-3` for full-section forms (`ThemePicker`); `space-y-2` for compact single-control fields (`ColorField`, `NumberField`). Pick by density, not preference.
 - **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
-- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; form primitives already map that to a destructive ring — don't paint your own.
+- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; the renderer maps that to a destructive focus border — don't paint your own.
 - **Trailing metadata:** `text-[11px] text-muted-foreground` below the control (e.g., "Current: 14px · Default: 13px"), not next to the label.
 
 ### Scrollbars

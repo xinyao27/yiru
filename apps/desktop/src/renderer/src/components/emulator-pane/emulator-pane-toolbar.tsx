@@ -1,6 +1,10 @@
-import { House as Home, Power, DeviceMobile as Smartphone } from '@phosphor-icons/react'
+import {
+  House as Home,
+  Power,
+  DeviceMobile as Smartphone,
+  ArrowClockwise as RotateCw
+} from '@phosphor-icons/react'
 
-import { ArrowClockwise as RotateCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Select,

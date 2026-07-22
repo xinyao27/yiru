@@ -298,7 +298,7 @@ export function SshStatusSegment({
         render={
           <button
             type="button"
-            className="hover:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5"
+            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
             aria-label={translate(
               'auto.components.status.bar.SshStatusSegment.fdc57e9970',
               'Remote host connection status'

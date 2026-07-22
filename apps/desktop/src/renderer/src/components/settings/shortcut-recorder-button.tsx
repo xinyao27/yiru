@@ -205,9 +205,9 @@ export function ShortcutRecorderButton({
             onKeyDown={handleRecordKeyDown}
             onKeyUp={handleRecordKeyUp}
             className={cn(
-              'flex min-h-7 min-w-[5.5rem] max-w-[14rem] items-center justify-end gap-1.5 overflow-hidden rounded-md border px-2 py-1 text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              'flex min-h-7 min-w-[5.5rem] max-w-[14rem] items-center justify-end gap-1.5 overflow-hidden rounded-md border px-2 py-1 text-xs outline-none transition-colors',
               recording
-                ? 'border-ring bg-accent text-accent-foreground ring-[3px] ring-ring/30'
+                ? 'border-ring bg-accent text-accent-foreground'
                 : 'border-transparent hover:border-border/70 hover:bg-background'
             )}
           >

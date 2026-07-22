@@ -1,7 +1,6 @@
-import { Copy, Eye, Pencil } from '@phosphor-icons/react'
+import { Copy, Eye, Pencil, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,7 +92,7 @@ export function EditorPanelHeaderPath({
             defaultValue={currentFileName}
             // Why: the header is narrow in floating mode; this keeps the
             // edit field aligned with the path label without growing chrome.
-            className="bg-input/40 text-foreground h-6 w-[16ch] max-w-full min-w-[104px] rounded-sm px-1.5 py-0 font-mono text-xs focus-visible:ring-[1px] md:text-xs"
+            className="bg-input/40 text-foreground h-6 w-[16ch] max-w-full min-w-[104px] rounded-sm px-1.5 py-0 font-mono text-xs md:text-xs"
             spellCheck={false}
             onPointerDown={(event) => event.stopPropagation()}
             onMouseDown={(event) => event.stopPropagation()}
@@ -116,6 +115,7 @@ export function EditorPanelHeaderPath({
           <button
             type="button"
             className={cn(
+              'outline-none focus-visible:bg-accent',
               'editor-header-path',
               canCopyHeaderPath ? '' : 'editor-header-path--static'
             )}

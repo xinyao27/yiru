@@ -1,6 +1,6 @@
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -183,13 +183,14 @@ export function AutoRenameBranchFromWorkSetting({
             })
           }
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.autoRenameBranchFromWork ? 'bg-foreground' : 'bg-muted-foreground/30'
           )}
         >
           <span
             className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
               settings.autoRenameBranchFromWork ? 'translate-x-4' : 'translate-x-0.5'
             )}
           />
@@ -245,7 +246,7 @@ export function AutoRenameBranchFromWorkSetting({
                       render={
                         <button
                           type="button"
-                          className="text-foreground decoration-border hover:decoration-foreground focus-visible:ring-ring inline rounded-sm font-medium underline underline-offset-2 focus-visible:ring-1 focus-visible:outline-none"
+                          className="text-foreground decoration-border hover:decoration-foreground inline rounded-sm font-medium underline underline-offset-2 focus-visible:outline-none"
                         >
                           {translate(
                             'auto.components.settings.AutoRenameBranchFromWorkSetting.9c9b54e4ea',
@@ -311,7 +312,7 @@ export function AutoRenameBranchFromWorkSetting({
                   'auto.components.settings.AutoRenameBranchFromWorkSetting.c71770c455',
                   '{basePrompt}'
                 )}
-                className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring w-full resize-y rounded-md border px-2 py-1.5 font-mono text-xs outline-none focus-visible:ring-1"
+                className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 w-full resize-y rounded-md border px-2 py-1.5 font-mono text-xs outline-none"
               />
               <SourceControlActionVariableChips
                 actionId="branchName"

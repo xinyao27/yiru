@@ -1,6 +1,6 @@
+import { X } from '@phosphor-icons/react'
 import React from 'react'
 
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { KeybindingActionId } from '../../../../shared/keybindings'

@@ -106,7 +106,7 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
             )}{' '}
             <button
               type="button"
-              className="hover:text-foreground underline underline-offset-2"
+              className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline underline-offset-2 outline-none"
               onClick={() => void window.api.shell.openUrl(PRIVACY_URL)}
             >
               {translate('auto.components.settings.PrivacyPane.77410e0566', 'Privacy policy')}
@@ -125,6 +125,7 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
           disabled={blocked !== null || inFlight}
           onClick={handleToggle}
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
             toggleChecked ? 'bg-foreground' : 'bg-muted-foreground/30',
             blocked !== null || inFlight ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
@@ -132,7 +133,7 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
         >
           <span
             className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
               toggleChecked ? 'translate-x-4' : 'translate-x-0.5'
             )}
           />

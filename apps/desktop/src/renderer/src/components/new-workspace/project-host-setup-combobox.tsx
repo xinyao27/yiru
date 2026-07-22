@@ -1,7 +1,6 @@
-import { Check, HardDrives as Server } from '@phosphor-icons/react'
+import { Check, HardDrives as Server, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -48,7 +47,7 @@ export default function ProjectHostSetupCombobox({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="border-input focus:border-ring focus:ring-ring/50 h-9 w-full justify-between px-3 text-sm font-normal focus:ring-[3px]"
+            className="border-input focus:border-ring h-9 w-full justify-between px-3 text-sm font-normal"
           >
             {selected ? (
               <span className="inline-flex min-w-0 items-center gap-1.5">

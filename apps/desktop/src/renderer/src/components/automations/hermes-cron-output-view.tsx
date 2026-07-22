@@ -6,12 +6,13 @@ import {
   Fingerprint,
   Chat as MessageSquare,
   Sparkle as Sparkles,
-  Terminal
+  Terminal,
+  type Icon as PhosphorIcon,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight
 } from '@phosphor-icons/react'
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import React, { useMemo, useState } from 'react'
 
-import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -58,27 +59,27 @@ function getMetadataIconStyle(label: string): MetadataIconStyle {
     return {
       icon: Fingerprint,
       iconClass: 'text-violet-400',
-      ringClass: 'bg-violet-500/10 ring-1 ring-violet-500/30'
+      ringClass: 'bg-violet-500/10'
     }
   }
   if (/time|run/.test(normalized)) {
     return {
       icon: Clock,
       iconClass: 'text-sky-400',
-      ringClass: 'bg-sky-500/10 ring-1 ring-sky-500/30'
+      ringClass: 'bg-sky-500/10'
     }
   }
   if (/schedule|cron/.test(normalized)) {
     return {
       icon: CalendarClock,
       iconClass: 'text-amber-400',
-      ringClass: 'bg-amber-500/10 ring-1 ring-amber-500/30'
+      ringClass: 'bg-amber-500/10'
     }
   }
   return {
     icon: Sparkles,
     iconClass: 'text-muted-foreground',
-    ringClass: 'bg-muted/40 ring-1 ring-border/60'
+    ringClass: 'bg-muted/40'
   }
 }
 
@@ -110,7 +111,7 @@ function CollapsibleSection({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="text-foreground hover:bg-muted/40 flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold tracking-wide uppercase transition-colors"
+        className="text-foreground hover:bg-muted/40 focus-visible:bg-muted/40 flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold tracking-wide uppercase transition-colors outline-none"
       >
         {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
         {Icon ? <Icon className={cn('size-3.5', iconClass ?? 'text-muted-foreground')} /> : null}
@@ -132,7 +133,7 @@ function SectionCard({ title, accent = 'default', children }: SectionCardProps):
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-lg border shadow-sm',
+        'relative overflow-hidden rounded-lg border',
         accent === 'error'
           ? 'border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-background to-background'
           : accent === 'response'

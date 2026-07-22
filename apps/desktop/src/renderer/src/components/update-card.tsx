@@ -1,11 +1,17 @@
-import { WarningCircle as AlertCircle, Check, Minus, Network } from '@phosphor-icons/react'
+import {
+  WarningCircle as AlertCircle,
+  Check,
+  Minus,
+  Network,
+  ArrowClockwise as RotateCw,
+  X
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the update card owns the full updater lifecycle in one
    renderer surface. Keeping the state machine and its presentation variants together avoids
    scattering tightly coupled update behavior across multiple files. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RotateCw, X } from '@/components/regular-icons'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -78,7 +84,7 @@ function CompactCardContent({
         <p className="truncate text-sm">{text}</p>
         {action && (
           <button
-            className="text-muted-foreground hover:text-foreground mt-0.5 text-xs underline"
+            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mt-0.5 text-xs underline outline-none"
             onClick={() => void window.api.shell.openUrl(action.url)}
           >
             {action.label}
@@ -705,7 +711,7 @@ function RichCardContent({
           <>
             {' '}
             <button
-              className="text-muted-foreground/70 hover:text-foreground inline text-xs underline"
+              className="text-muted-foreground/70 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline text-xs underline outline-none"
               onClick={() => void window.api.shell.openUrl(release.releaseNotesUrl)}
             >
               +{releasesBehind - 1}{' '}
@@ -716,7 +722,7 @@ function RichCardContent({
       </p>
 
       <button
-        className="text-muted-foreground hover:text-foreground self-start text-xs underline"
+        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-start text-xs underline outline-none"
         onClick={() => void window.api.shell.openUrl(release.releaseNotesUrl)}
       >
         {translate('auto.components.UpdateCard.aad383aecc', 'Read the full release notes')}
@@ -770,7 +776,7 @@ function SimpleCardContent({
       </p>
 
       <button
-        className="text-muted-foreground hover:text-foreground self-start text-xs underline underline-offset-2"
+        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-start text-xs underline underline-offset-2 outline-none"
         onClick={() => void window.api.shell.openUrl(releaseUrl)}
       >
         {translate('auto.components.UpdateCard.44324ef542', 'Release notes')}
@@ -867,7 +873,7 @@ function DownloadingContent({
       </p>
 
       <button
-        className="text-muted-foreground hover:text-foreground self-start text-xs underline"
+        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-start text-xs underline outline-none"
         onClick={() =>
           void window.api.shell.openUrl(
             release ? release.releaseNotesUrl : releaseUrlForVersion(version)

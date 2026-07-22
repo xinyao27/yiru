@@ -1,6 +1,6 @@
+import { Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
-import { Plus } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { parseSparsePresetDirectories } from '@/lib/sparse-preset-draft'

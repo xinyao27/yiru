@@ -1,6 +1,5 @@
-import { Microphone as Mic, Square } from '@phosphor-icons/react'
+import { Microphone as Mic, Square, ArrowUp, Plus } from '@phosphor-icons/react'
 
-import { ArrowUp, Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

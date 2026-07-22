@@ -1,4 +1,23 @@
-export const LOADER_STYLES = ['drawing', 'code', 'macos', 'square', 'flipbook', 'escalade'] as const
+export const THINKING_ORB_LOADER_STYLES = [
+  'thinking-orb-working',
+  'thinking-orb-searching',
+  'thinking-orb-solving',
+  'thinking-orb-listening',
+  'thinking-orb-composing',
+  'thinking-orb-shaping'
+] as const
+
+export type ThinkingOrbLoaderStyle = (typeof THINKING_ORB_LOADER_STYLES)[number]
+
+export const LOADER_STYLES = [
+  'drawing',
+  'code',
+  'macos',
+  'square',
+  'flipbook',
+  'escalade',
+  ...THINKING_ORB_LOADER_STYLES
+] as const
 
 export type LoaderStyle = (typeof LOADER_STYLES)[number]
 

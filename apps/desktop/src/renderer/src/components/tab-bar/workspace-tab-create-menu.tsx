@@ -1,7 +1,6 @@
-import { TerminalWindow as TerminalSquare } from '@phosphor-icons/react'
+import { TerminalWindow as TerminalSquare, Plus } from '@phosphor-icons/react'
 import type React from 'react'
 
-import { Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -35,7 +34,7 @@ export function WorkspaceTabCreateMenu({
   const triggerButton = (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon-xs"
       className={cn(
         'ml-1 my-auto h-7 w-6 shrink-0 text-muted-foreground hover:text-accent-foreground',
@@ -88,7 +87,7 @@ export function WorkspaceTabCreateMenu({
       <DropdownMenuContent
         align="start"
         sideOffset={6}
-        className="border-border/80 w-72 max-w-[calc(100vw-1rem)] rounded-lg p-1 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+        className="border-border/80 w-72 max-w-[calc(100vw-1rem)] rounded-lg p-1"
         finalFocus={finalFocus}
       >
         {children}

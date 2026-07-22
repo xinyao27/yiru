@@ -1,6 +1,11 @@
-import { Check, Sparkle as Sparkles, Warning as TriangleAlert } from '@phosphor-icons/react'
+import {
+  Check,
+  Sparkle as Sparkles,
+  Warning as TriangleAlert,
+  ArrowsDownUp as ArrowDownUp,
+  CaretDown as ChevronDown
+} from '@phosphor-icons/react'
 
-import { ArrowsDownUp as ArrowDownUp, CaretDown as ChevronDown } from '@/components/regular-icons'
 import type { LocalizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -89,7 +94,7 @@ export function CreateHostedReviewComposerFields({
           disabled={fieldsLocked}
           onChange={(event) => setTitle(event.target.value)}
           placeholder={translate('auto.components.right.sidebar.SourceControl.7d6a8f0082', 'Title')}
-          className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring h-8 w-full min-w-0 rounded-md border px-2 text-xs font-medium outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 h-8 w-full min-w-0 rounded-md border px-2 text-xs font-medium outline-none disabled:cursor-not-allowed disabled:opacity-60"
         />
 
         <textarea
@@ -106,7 +111,7 @@ export function CreateHostedReviewComposerFields({
             'auto.components.right.sidebar.SourceControl.a0dc20fc93',
             'Description (optional)'
           )}
-          className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring scrollbar-sleek min-h-[7.5rem] w-full resize-y rounded-md border px-2 py-1.5 text-xs outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 scrollbar-sleek min-h-[7.5rem] w-full resize-y rounded-md border px-2 py-1.5 text-xs outline-none disabled:cursor-not-allowed disabled:opacity-60"
         />
 
         {generating ? (
@@ -116,7 +121,7 @@ export function CreateHostedReviewComposerFields({
             className="bg-background/40 pointer-events-none absolute inset-0 flex items-center justify-center rounded-md"
             aria-hidden="true"
           >
-            <div className="border-border bg-background text-muted-foreground pointer-events-auto flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] shadow-sm">
+            <div className="border-border bg-background text-muted-foreground pointer-events-auto flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px]">
               <Sparkles className="text-foreground size-3 animate-pulse" />
               <span>
                 {translate(
@@ -153,7 +158,7 @@ export function CreateHostedReviewComposerFields({
               'auto.components.right.sidebar.SourceControl.e64a632456',
               'main'
             )}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring h-7 w-full min-w-0 rounded-md border px-2 pr-6 font-mono text-xs outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
+            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 h-7 w-full min-w-0 rounded-md border px-2 pr-6 font-mono text-xs outline-none disabled:cursor-not-allowed disabled:opacity-60"
           />
           <ChevronDown
             className="text-muted-foreground pointer-events-none absolute top-1.5 right-1.5 size-3.5"
@@ -175,7 +180,7 @@ export function CreateHostedReviewComposerFields({
           checked={draft}
           disabled={fieldsLocked}
           onChange={(event) => setDraft(event.target.checked)}
-          className="border-border accent-primary size-3.5 shrink-0 rounded"
+          className="border-border accent-primary focus-visible:border-ring size-3.5 shrink-0 rounded outline-none"
         />
         <span className="min-w-0 flex-1 truncate">
           {translate('auto.components.right.sidebar.SourceControl.78ddfd0bb4', 'Create as draft')}
@@ -190,6 +195,7 @@ export function CreateHostedReviewComposerFields({
               type="button"
               disabled={fieldsLocked}
               className={cn(
+                'outline-none focus-visible:bg-accent',
                 'flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left font-mono text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent',
                 stripBaseRef(base) === ref && 'bg-accent text-accent-foreground'
               )}

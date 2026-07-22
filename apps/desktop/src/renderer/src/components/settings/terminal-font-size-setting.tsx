@@ -1,6 +1,5 @@
-import { Minus } from '@phosphor-icons/react'
+import { Minus, Plus } from '@phosphor-icons/react'
 
-import { Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'

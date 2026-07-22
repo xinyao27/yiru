@@ -12,6 +12,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import { detectLanguage } from '@/lib/language-detect'
 import {
   languageServerWorkspaceEditController,
@@ -80,7 +81,10 @@ function WorkspaceEditContent({
               key={file.filePath}
               type="button"
               aria-pressed={index === selectedIndex}
-              className={`hover:bg-accent flex w-full items-start gap-2 px-3 py-2 text-left text-xs ${index === selectedIndex ? 'bg-accent text-accent-foreground' : 'text-foreground'}`}
+              className={cn(
+                'outline-none focus-visible:bg-accent',
+                `hover:bg-accent flex w-full items-start gap-2 px-3 py-2 text-left text-xs ${index === selectedIndex ? 'bg-accent text-accent-foreground' : 'text-foreground'}`
+              )}
               onClick={() => setSelectedIndex(index)}
             >
               <FileCode className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />

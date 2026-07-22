@@ -1,7 +1,6 @@
-import { CalendarDots as CalendarClock } from '@phosphor-icons/react'
+import { CalendarDots as CalendarClock, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -25,7 +24,7 @@ import { AutomationCustomCronPanel } from './automation-custom-cron-panel'
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'
 
-const FIELD_CONTROL_CLASS = 'border-input bg-input/30 shadow-xs dark:bg-input/30'
+const FIELD_CONTROL_CLASS = 'border-input bg-input/30 dark:bg-input/30'
 
 export const AUTOMATION_SCHEDULE_PRESET_OPTIONS = [
   ['hourly', 'Hourly'],

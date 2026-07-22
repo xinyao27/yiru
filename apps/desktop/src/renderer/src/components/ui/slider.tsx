@@ -27,8 +27,8 @@ function Slider({ className, ...props }: SliderPrimitive.Root.Props): React.Reac
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           className={cn(
-            'block size-4 rounded-full border border-primary/40 bg-background shadow-sm',
-            'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'block size-4 rounded-full border border-primary/40 bg-background',
+            'transition-colors outline-none focus-visible:border-ring',
             'disabled:pointer-events-none disabled:opacity-50'
           )}
         />

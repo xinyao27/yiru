@@ -1,12 +1,11 @@
 import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
-import { Check, XCircle as CircleX } from '@phosphor-icons/react'
+import { Check, XCircle as CircleX, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: these small settings form primitives and controls
 co-locate shared layout and keyboard interaction logic, which keeps the settings
 panel wiring simple even though the file exceeds the default line limit. */
 import type React from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
-import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { normalizeColor, type TerminalThemeOption } from '@/lib/terminal-theme'
@@ -169,7 +168,7 @@ export function SettingsSegmentedControl<T extends string | number>({
               }
             }}
             className={cn(
-              'rounded-sm text-center outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              'rounded-sm text-center outline-none transition-colors',
               size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm',
               equalWidth && 'flex-1',
               active
@@ -386,7 +385,7 @@ export function ThemePicker({
                   ref={isImported ? importedGroupRef : undefined}
                   className={cn(
                     'space-y-1 rounded-md transition-colors duration-500',
-                    isImported && highlightImported && 'bg-accent/40 ring-1 ring-accent'
+                    isImported && highlightImported && 'bg-accent/40    '
                   )}
                 >
                   <p className="text-muted-foreground px-3 pt-2 text-[11px] font-semibold tracking-[0.05em] uppercase">
@@ -397,6 +396,7 @@ export function ThemePicker({
                       key={theme.value}
                       onClick={() => onSelectTheme(theme.value)}
                       className={cn(
+                        'outline-none focus-visible:bg-accent',
                         'flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors',
                         selectedTheme === theme.value
                           ? 'bg-accent font-medium text-accent-foreground'
@@ -487,7 +487,7 @@ export function ColorField({
             type="color"
             value={normalized}
             onChange={(e) => onChange(e.target.value)}
-            className="border-input h-8 w-10 rounded-md border bg-transparent p-1"
+            className="border-input focus-visible:border-ring h-8 w-10 rounded-md border bg-transparent p-1 outline-none"
           />
           <Input
             value={value}
@@ -794,7 +794,7 @@ export function FontAutocomplete({
                       setOpen(true)
                       focusInput()
                     }}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm p-1 transition-colors"
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground rounded-sm p-1 transition-colors outline-none"
                     aria-label={translate(
                       'auto.components.settings.SettingsFormControls.a4ff6143f8',
                       'Clear font selection'
@@ -821,7 +821,7 @@ export function FontAutocomplete({
                       focusInput()
                     }
                   }}
-                  className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm p-1 transition-colors"
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground rounded-sm p-1 transition-colors outline-none"
                   aria-label={translate(
                     'auto.components.settings.SettingsFormControls.c766f8ac75',
                     'Toggle font suggestions'
@@ -870,6 +870,7 @@ export function FontAutocomplete({
                     onMouseEnter={() => setHighlightedIndex(sourceIndex)}
                     onClick={() => commitValue(font)}
                     className={cn(
+                      'outline-none focus-visible:bg-muted/60',
                       'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors',
                       sourceIndex === highlightedIndex
                         ? 'bg-accent text-accent-foreground'

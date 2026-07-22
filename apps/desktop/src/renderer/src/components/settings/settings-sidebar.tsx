@@ -1,8 +1,7 @@
-import { MagnifyingGlass as Search, HardDrives as Server } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, HardDrives as Server, ArrowLeft } from '@phosphor-icons/react'
 import type { CSSProperties, RefObject } from 'react'
 import { useMemo } from 'react'
 
-import { ArrowLeft } from '@/components/regular-icons'
 import { useShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -97,7 +96,7 @@ function SettingsSetupGuideNavRow({
         })
       }
       className={cn(
-        'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50',
+        'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left outline-none transition-colors',
         setupActive
           ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
           : 'text-sidebar-foreground/60 hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground'
@@ -144,9 +143,9 @@ export function SettingsSidebar({
   const searchShortcutCombos = useShortcutKeyComboDetails('settings.search')
   const navItemClassName = (isActive: boolean): string =>
     cn(
-      'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150 focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50',
+      'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
       isActive
-        ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground ring-1 ring-sidebar-ring/25'
+        ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
         : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
     )
   const installStatusLabel = (status: SettingsNavInstallStatus): string => {
@@ -264,7 +263,10 @@ export function SettingsSidebar({
                             altKey: event.altKey
                           })
                         }
-                        className={navItemClassName(isActive)}
+                        className={cn(
+                          'outline-none focus-visible:bg-accent',
+                          navItemClassName(isActive)
+                        )}
                       >
                         <Icon className="size-4 shrink-0" />
                         <span className="truncate">{section.title}</span>
@@ -307,7 +309,10 @@ export function SettingsSidebar({
                           altKey: event.altKey
                         })
                       }
-                      className={navItemClassName(isActive)}
+                      className={cn(
+                        'outline-none focus-visible:bg-accent',
+                        navItemClassName(isActive)
+                      )}
                     >
                       <RepoIconGlyph
                         repoIcon={section.repoIcon}

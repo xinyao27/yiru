@@ -3,7 +3,11 @@ import {
   Globe,
   Memory as MemoryStick,
   Terminal,
-  Trash as Trash2
+  Trash as Trash2,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RotateCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: consolidating memory + sessions into one
    surface deliberately co-locates the sparkline, worktree tree, session list,
@@ -14,12 +18,6 @@ import {
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RotateCw,
-  X
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -258,7 +256,7 @@ function AppSection({
         <button
           type="button"
           onClick={onToggle}
-          className="hover:bg-muted/50 py-2 pr-0.5 pl-2 transition-colors"
+          className="hover:bg-muted/50 focus-visible:bg-muted/50 py-2 pr-0.5 pl-2 transition-colors outline-none"
           aria-label={
             isCollapsed
               ? translate(
@@ -384,8 +382,8 @@ function SessionRow({
   return (
     <div
       className={cn(
-        'group/sessrow flex items-center gap-2 pl-10 pr-3 py-1.5',
-        clickable && 'cursor-pointer hover:bg-accent/40'
+        'group/sessrow flex items-center gap-2 pl-10 pr-3 py-1.5 outline-none',
+        clickable && 'cursor-pointer hover:bg-accent/40 focus-visible:bg-accent/40'
       )}
       onClick={clickable ? handleClick : undefined}
       role={clickable ? 'button' : undefined}
@@ -425,6 +423,7 @@ function SessionRow({
             onKill(session)
           }}
           className={cn(
+            'outline-none focus-visible:bg-destructive/10 focus-visible:text-destructive',
             'rounded p-0.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive',
             session.bound &&
               'can-hover:opacity-0 group-hover/sessrow:opacity-100 group-focus-within/sessrow:opacity-100 focus-visible:opacity-100'
@@ -501,7 +500,7 @@ export function WorktreeRow({
           <button
             type="button"
             onClick={onToggle}
-            className="shrink-0 py-2 pr-0.5 pl-2"
+            className="focus-visible:bg-accent shrink-0 py-2 pr-0.5 pl-2 outline-none"
             aria-label={
               isCollapsed
                 ? translate(
@@ -534,7 +533,7 @@ export function WorktreeRow({
             'Resume workspace {{value0}}',
             { value0: rowLabel }
           )}
-          className="flex min-w-0 flex-1 items-center gap-1.5 py-2 pr-2 pl-1 text-left"
+          className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1.5 py-2 pr-2 pl-1 text-left outline-none"
           disabled={!isNavigable}
         >
           <span className="truncate text-xs font-medium">{rowLabel}</span>
@@ -580,6 +579,7 @@ export function WorktreeRow({
                           { value0: rowLabel }
                         )}
                         className={cn(
+                          'outline-none focus-visible:bg-destructive/10 focus-visible:text-destructive',
                           'p-0.5 rounded text-muted-foreground transition-colors',
                           isMainWorktree
                             ? 'opacity-40 cursor-not-allowed'
@@ -699,7 +699,7 @@ function ResourceTree({
               <button
                 type="button"
                 onClick={() => toggleRepo(group.repoId)}
-                className="hover:bg-muted/50 py-2 pr-0.5 pl-2 transition-colors"
+                className="hover:bg-muted/50 focus-visible:bg-muted/50 py-2 pr-0.5 pl-2 transition-colors outline-none"
                 aria-label={
                   repoCollapsed
                     ? translate(
@@ -1209,7 +1209,7 @@ export function ResourceUsageStatusSegment({
                 <button
                   type="button"
                   {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                  className="hover:bg-accent/70 relative inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5"
+                  className="hover:bg-accent/70 focus-visible:bg-accent/70 relative inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
                   aria-label={
                     daemonUnreachable
                       ? translate(
@@ -1304,7 +1304,7 @@ export function ResourceUsageStatusSegment({
                       'auto.components.status.bar.ResourceUsageStatusSegment.c9382662bb',
                       'Restart daemon'
                     )}
-                    className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors disabled:opacity-40"
+                    className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors outline-none disabled:opacity-40"
                   >
                     <RotateCw className="size-3" />
                   </button>
@@ -1328,7 +1328,7 @@ export function ResourceUsageStatusSegment({
                       'auto.components.status.bar.ResourceUsageStatusSegment.bd19fd7a59',
                       'Kill all sessions'
                     )}
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive inline-flex size-6 items-center justify-center rounded transition-colors disabled:opacity-40"
+                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive inline-flex size-6 items-center justify-center rounded transition-colors outline-none disabled:opacity-40"
                   >
                     <Trash2 className="size-3" />
                   </button>
@@ -1400,7 +1400,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-foreground focus-visible:ring-ring font-medium focus-visible:rounded focus-visible:ring-1 focus-visible:outline-none"
+                      className="text-foreground font-medium focus-visible:rounded focus-visible:outline-none"
                     >
                       {formatCpu(totalCpu)}
                     </span>
@@ -1419,7 +1419,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-foreground focus-visible:ring-ring font-medium focus-visible:rounded focus-visible:ring-1 focus-visible:outline-none"
+                      className="text-foreground font-medium focus-visible:rounded focus-visible:outline-none"
                     >
                       {formatMemory(totalMemory)}
                     </span>
@@ -1438,7 +1438,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-muted-foreground focus-visible:ring-ring focus-visible:rounded focus-visible:ring-1 focus-visible:outline-none"
+                      className="text-muted-foreground focus-visible:rounded focus-visible:outline-none"
                     >
                       {formatPercent(hostShare)}{' '}
                       {translate(
@@ -1489,6 +1489,7 @@ export function ResourceUsageStatusSegment({
                 type="button"
                 onClick={() => setSortOption('name')}
                 className={cn(
+                  'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                   'hover:text-foreground transition-colors',
                   sortOption === 'name'
                     ? 'font-semibold text-foreground'
@@ -1507,6 +1508,7 @@ export function ResourceUsageStatusSegment({
                     type="button"
                     onClick={() => setSortOption('cpu')}
                     className={cn(
+                      'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                       CPU_COLUMN_CLS,
                       'hover:text-foreground transition-colors',
                       sortOption === 'cpu'
@@ -1524,6 +1526,7 @@ export function ResourceUsageStatusSegment({
                     type="button"
                     onClick={() => setSortOption('memory')}
                     className={cn(
+                      'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                       MEM_COLUMN_CLS,
                       'hover:text-foreground transition-colors',
                       sortOption === 'memory'
@@ -1595,7 +1598,7 @@ export function ResourceUsageStatusSegment({
           <button
             type="button"
             onClick={handleOpenWorkspaceCleanup}
-            className="border-border/70 text-foreground hover:bg-accent/60 relative inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors"
+            className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 relative inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
           >
             <span className="min-w-0 truncate px-4 text-center">
               {translate(
@@ -1613,7 +1616,7 @@ export function ResourceUsageStatusSegment({
             <button
               type="button"
               onClick={() => void handleKillOrphans()}
-              className="border-border/70 text-foreground hover:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors"
+              className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
             >
               {orphanCount === 1
                 ? translate(

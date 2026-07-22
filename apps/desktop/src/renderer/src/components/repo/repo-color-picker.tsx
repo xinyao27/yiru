@@ -71,11 +71,7 @@ export function RepoColorPicker({
             type="button"
             variant="outline"
             size="sm"
-            className={cn(
-              'h-8 gap-2 px-2.5',
-              selected ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background' : null,
-              className
-            )}
+            className={cn('h-8 gap-2 px-2.5', selected ? 'border-foreground' : null, className)}
             aria-label={label}
             aria-pressed={selected}
           >
@@ -101,7 +97,7 @@ export function RepoColorPicker({
               '{{value0}} picker',
               { value0: label }
             )}
-            className="[&_.react-colorful__interactive:focus_.react-colorful__pointer]:ring-ring/50 [&_.react-colorful__pointer]:border-popover [&_.react-colorful__hue]:rounded-b-md [&_.react-colorful__interactive:focus_.react-colorful__pointer]:ring-[3px]"
+            className="[&_.react-colorful__pointer]:border-popover [&_.react-colorful__hue]:rounded-b-md"
             style={{ width: '100%', height: 180 }}
           />
           <div className="flex items-center justify-between gap-3">

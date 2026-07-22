@@ -49,7 +49,7 @@ export function HostedReviewHeaderLink({
     return (
       <button
         type="button"
-        className={className}
+        className={cn('outline-none focus-visible:bg-accent', className)}
         onClick={(e) => {
           e.stopPropagation()
           // Why: GitHub PR and GitLab MR details live in Yiru's Checks tab; keep
@@ -67,7 +67,7 @@ export function HostedReviewHeaderLink({
       href={review.url}
       target="_blank"
       rel="noreferrer"
-      className={className}
+      className={cn('outline-none focus-visible:bg-accent', className)}
       onClick={(e) => e.stopPropagation()}
     >
       {label}

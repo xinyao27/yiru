@@ -27,7 +27,7 @@ export function WorktreeCardSurface({
   return (
     <div
       className={cn(
-        'relative flex cursor-pointer flex-col transition-[background-color,border-color,opacity,box-shadow] duration-200 outline-none select-none',
+        'relative flex cursor-pointer flex-col transition-[background-color,border-color,opacity] duration-200 outline-none select-none',
         trailing ? 'pr-7' : 'pr-1.5',
         density === 'title-only' ? 'py-2' : 'pt-1.25 pb-1.5',
         flush ? 'ml-1 w-[calc(100%-0.25rem)]' : 'ml-1',
@@ -36,12 +36,11 @@ export function WorktreeCardSurface({
           ? 'border border-accent-foreground/20 bg-accent/80'
           : activeVariant
             ? activeVariant === 'secondary'
-              ? 'border border-sidebar-ring/25 bg-sidebar-accent/45 shadow-none ring-1 ring-sidebar-ring/15'
-              : 'bg-black/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.04)] border border-black/[0.015] dark:bg-white/[0.10] dark:border-border/40 dark:shadow-[0_1px_2px_rgba(0,0,0,0.03)]'
+              ? 'border border-sidebar-ring/25 bg-sidebar-accent/45'
+              : 'border border-black/[0.015] bg-black/[0.08] dark:border-border/40 dark:bg-white/[0.10]'
             : multiSelected
-              ? 'border border-sidebar-ring/35 bg-sidebar-accent/70 ring-1 ring-sidebar-ring/30'
+              ? 'border border-sidebar-ring/35 bg-sidebar-accent/70'
               : 'border border-transparent worktree-sidebar-card-hover',
-        activeVariant && multiSelected && 'ring-1 ring-sidebar-ring/35',
         className
       )}
       data-worktree-card-surface="true"

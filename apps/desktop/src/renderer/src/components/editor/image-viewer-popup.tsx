@@ -1,6 +1,6 @@
+import { X } from '@phosphor-icons/react'
 import type { CSSProperties, JSX } from 'react'
 
-import { X } from '@/components/regular-icons'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -32,7 +32,7 @@ export default function ImageViewerPopup({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="border-border/60 bg-background top-1/2 left-1/2 flex h-[80vh] w-[70vw] max-w-[70vw] -translate-x-1/2 -translate-y-1/2 flex-col gap-0 overflow-hidden border p-0 shadow-2xl sm:max-w-[70vw]"
+        className="border-border/60 bg-background top-1/2 left-1/2 flex h-[80vh] w-[70vw] max-w-[70vw] -translate-x-1/2 -translate-y-1/2 flex-col gap-0 overflow-hidden border p-0 sm:max-w-[70vw]"
       >
         <DialogTitle className="sr-only">{filename}</DialogTitle>
         <DialogDescription className="sr-only">
@@ -45,7 +45,7 @@ export default function ImageViewerPopup({
           <div className="text-foreground min-w-0 truncate text-sm font-medium">{filename}</div>
           <button
             type="button"
-            className="border-border/60 bg-background text-muted-foreground hover:bg-accent hover:text-foreground inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs"
+            className="border-border/60 bg-background text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs outline-none"
             onClick={() => onOpenChange(false)}
           >
             <X size={14} />

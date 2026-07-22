@@ -125,7 +125,7 @@ export function QuickOpenInstallRgGuidance({
             ref={setCopyButtonRef}
             type="button"
             onClick={handleCopy}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors outline-none"
             aria-label={translate('auto.components.QuickOpen.73b44e7bde', 'Copy install command')}
           >
             {copied ? <Check size={12} /> : <Copy size={12} />}

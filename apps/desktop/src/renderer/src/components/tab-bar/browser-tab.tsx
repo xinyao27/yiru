@@ -4,11 +4,12 @@ import {
   Copy,
   PushPin as Pin,
   PushPinSlash as PinOff,
-  Sidebar as PanelRightClose
+  Sidebar as PanelRightClose,
+  ArrowSquareOut as ExternalLink,
+  X
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
-import { ArrowSquareOut as ExternalLink, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,9 +102,7 @@ function BrowserTabFavicon({
         alt=""
         aria-hidden
         draggable={false}
-        // Why: transparent dark/light-mode favicons can disappear against tab
-        // chrome; a token-colored 1px shadow keeps the 16px mark legible.
-        className="mr-1 size-4 shrink-0 rounded-sm object-contain drop-shadow-[0_0_1px_var(--foreground)]"
+        className="mr-1 size-4 shrink-0 rounded-sm object-contain"
         onError={() => setFailedFavicon({ tabId, faviconUrl: displayFaviconUrl })}
       />
     )
@@ -287,7 +286,7 @@ export default function BrowserTab({
           }
         />
         <DropdownMenuContent
-          className="border-border/80 min-w-[11rem] rounded-[11px] p-1 shadow-[0_16px_36px_rgba(0,0,0,0.24)]"
+          className="border-border/80 min-w-[11rem] rounded-[11px] p-1"
           sideOffset={0}
           align="start"
         >

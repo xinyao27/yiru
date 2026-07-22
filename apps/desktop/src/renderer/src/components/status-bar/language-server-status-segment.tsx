@@ -69,7 +69,7 @@ export function LanguageServerStatusSegment({
                 <button
                   type="button"
                   {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                  className="hover:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 px-1 py-0.5"
+                  className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 px-1 py-0.5 outline-none"
                   aria-label={translate(
                     'auto.components.status.bar.LanguageServerStatusSegment.aria',
                     'Language server: {{value0}}',

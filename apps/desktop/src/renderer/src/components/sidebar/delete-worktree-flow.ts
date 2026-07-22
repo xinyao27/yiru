@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { useAppStore } from '@/store'
 import { getWorktreeMapFromState } from '@/store/selectors'
@@ -37,9 +38,7 @@ type WorktreeDeleteWithToastOptions = {
 // blocking work is visible.
 function viewWorktreeDiff(worktreeId: string): void {
   activateAndRevealWorktree(worktreeId)
-  const state = useAppStore.getState()
-  state.setRightSidebarTab('source-control')
-  state.setRightSidebarOpen(true)
+  openWorkspacePanelTab({ panel: 'source-control', worktreeId })
 }
 
 function isStrictDescendantPath(parentPath: string, childPath: string): boolean {

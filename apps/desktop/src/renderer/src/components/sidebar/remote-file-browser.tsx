@@ -1,9 +1,14 @@
-import { Folder, House as Home, MagnifyingGlass as Search } from '@phosphor-icons/react'
+import {
+  Folder,
+  House as Home,
+  MagnifyingGlass as Search,
+  CaretRight as ChevronRight,
+  ArrowUp
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the remote file browser centralizes filter state, path-mode preview state, cache, debounce, request gen, and click/keyboard handling in one component so picker navigation stays coherent. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretRight as ChevronRight, ArrowUp } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -629,7 +634,7 @@ export function RemoteFileBrowser({
           type="button"
           onClick={navigateUp}
           disabled={resolvedPath === '/' || loading}
-          className="hover:bg-accent shrink-0 cursor-pointer rounded p-1 transition-colors disabled:cursor-default disabled:opacity-30"
+          className="hover:bg-accent focus-visible:bg-accent shrink-0 cursor-pointer rounded p-1 transition-colors outline-none disabled:cursor-default disabled:opacity-30"
         >
           <ArrowUp className="size-3.5" />
         </button>
@@ -637,7 +642,7 @@ export function RemoteFileBrowser({
           type="button"
           onClick={() => navigate('~')}
           disabled={loading}
-          className="hover:bg-accent shrink-0 cursor-pointer rounded p-1 transition-colors"
+          className="hover:bg-accent focus-visible:bg-accent shrink-0 cursor-pointer rounded p-1 transition-colors outline-none"
         >
           <Home className="size-3.5" />
         </button>
@@ -645,7 +650,7 @@ export function RemoteFileBrowser({
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="hover:text-foreground shrink-0 cursor-pointer px-0.5 transition-colors"
+            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 cursor-pointer px-0.5 transition-colors outline-none"
           >
             /
           </button>
@@ -656,6 +661,7 @@ export function RemoteFileBrowser({
                 type="button"
                 onClick={() => navigate(`/${pathSegments.slice(0, i + 1).join('/')}`)}
                 className={cn(
+                  'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                   'truncate max-w-[120px] hover:text-foreground transition-colors cursor-pointer px-0.5',
                   i === pathSegments.length - 1 && 'text-foreground font-medium'
                 )}
@@ -686,8 +692,8 @@ export function RemoteFileBrowser({
           aria-describedby={preview?.error ? 'remote-file-browser-path-error' : undefined}
           className={cn(
             'w-full h-7 pl-7 pr-7 text-xs rounded-md bg-background',
-            'border border-border focus:outline-none focus:ring-1 focus:ring-ring',
-            preview?.error && 'border-destructive/60 focus:ring-destructive/60'
+            'border border-border outline-none focus:border-ring',
+            preview?.error && 'border-destructive/60'
           )}
         />
         {showPreviewLoading && (
@@ -753,6 +759,7 @@ export function RemoteFileBrowser({
                     inputRef.current?.focus()
                   }}
                   className={cn(
+                    'outline-none focus-visible:bg-accent/60',
                     'w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left transition-colors cursor-pointer',
                     'hover:bg-accent/60'
                   )}

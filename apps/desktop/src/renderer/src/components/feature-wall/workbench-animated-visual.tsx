@@ -50,14 +50,7 @@ function SplitDownIcon(): JSX.Element {
 
 function CursorIcon(): JSX.Element {
   return (
-    <svg
-      width={16}
-      height={16}
-      viewBox="0 0 16 16"
-      aria-hidden
-      focusable="false"
-      className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]"
-    >
+    <svg width={16} height={16} viewBox="0 0 16 16" aria-hidden focusable="false">
       <path
         d="M2 1.5 L2 12 L5 9 L7.2 14.5 L9.5 13.6 L7.3 8 L11.5 8 Z"
         fill="#fff"
@@ -428,7 +421,7 @@ export function WorkbenchAnimatedVisual(props: {
   return (
     <div
       ref={panelRef}
-      className="border-border bg-card text-foreground relative overflow-hidden rounded-xl border shadow-[0_1px_2px_rgba(24,24,27,0.04)]"
+      className="border-border bg-card text-foreground relative overflow-hidden rounded-xl border"
     >
       {/* Faux titlebar — three traffic lights, nothing else. */}
       <div className="border-border bg-muted/40 flex h-7 items-center gap-1.5 border-b px-3">
@@ -717,7 +710,7 @@ function ContextMenu(props: {
   return (
     <div
       className={cn(
-        'absolute left-[110px] top-[78px] z-10 min-w-[218px] origin-top-left rounded-lg border border-border bg-card p-1.5 font-sans text-[12px] text-foreground shadow-[0_16px_38px_rgba(24,24,27,0.18),0_2px_6px_rgba(24,24,27,0.08)] transition-[opacity,transform] duration-[160ms] ease-out',
+        'absolute left-[110px] top-[78px] z-10 min-w-[218px] origin-top-left rounded-lg border border-border bg-card p-1.5 font-sans text-[12px] text-foreground   transition-[opacity,transform] duration-[160ms] ease-out',
         props.shown ? 'opacity-100' : '-translate-y-[3px] scale-[0.985] opacity-0'
       )}
       style={{ pointerEvents: 'none' }}
@@ -729,9 +722,7 @@ function ContextMenu(props: {
         ref={props.splitRowRef}
         className={cn(
           'grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 rounded-[5px] px-1.5 py-1 pl-1.5',
-          props.splitRowActive
-            ? 'bg-foreground/[0.07] shadow-[inset_0_0_0_1px_rgba(24,24,27,0.06)]'
-            : null
+          props.splitRowActive ? 'bg-foreground/[0.07]  ' : null
         )}
       >
         <span className="text-muted-foreground inline-flex items-center justify-center">

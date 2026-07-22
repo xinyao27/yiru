@@ -5,10 +5,10 @@ import {
   PushPinSlash as PinOff,
   Pencil,
   TerminalWindow as SquareTerminal,
-  List as ListX
+  List as ListX,
+  X
 } from '@phosphor-icons/react'
 
-import { X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -234,8 +234,12 @@ export function SortableTabContextMenu({
                   key={color.label}
                   className={cn(
                     'relative h-4 w-4 min-w-4 p-0 rounded-full border',
-                    isSelected ? 'ring-1 ring-foreground/70 ring-offset-1 ring-offset-popover' : '',
-                    color.value ? 'border-transparent' : 'border-muted-foreground/50 bg-transparent'
+                    // Why: selection reuses the existing edge because Yiru does not use CSS outlines.
+                    isSelected
+                      ? 'border-ring'
+                      : color.value
+                        ? 'border-transparent'
+                        : 'border-muted-foreground/50 bg-transparent'
                   )}
                   style={color.value ? { backgroundColor: color.value } : undefined}
                   onClick={() => {

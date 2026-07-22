@@ -1,6 +1,6 @@
+import { FolderPlus, Plus } from '@phosphor-icons/react'
 import React from 'react'
 
-import { FolderPlus, Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'

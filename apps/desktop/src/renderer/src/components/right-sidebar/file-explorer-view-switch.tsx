@@ -58,7 +58,7 @@ export function FileExplorerViewSwitch({
           'auto.components.right.sidebar.FileExplorerViewSwitch.f8a2c4d1e0',
           'Explorer search mode'
         )}
-        className="border-sidebar-border bg-sidebar w-full border p-0.5 shadow-xs group-data-[orientation=horizontal]/tabs:h-7"
+        className="border-sidebar-border bg-sidebar w-full border p-0.5 group-data-[orientation=horizontal]/tabs:h-7"
       >
         {options.map((option) => (
           <TabsTrigger

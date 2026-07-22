@@ -1,4 +1,13 @@
-import { Check, Copy, Chat as MessageSquare } from '@phosphor-icons/react'
+import {
+  Check,
+  Copy,
+  Chat as MessageSquare,
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
+  ArrowElbowDownLeft as CornerDownLeft,
+  Plus,
+  X
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: MarkdownPreview owns rendering, link interception,
 search, and viewport state for the preview surface in one place so markdown
 behavior stays coherent across split panes and preview tabs. */
@@ -25,13 +34,6 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
 
-import {
-  CaretDown as ChevronDown,
-  CaretUp as ChevronUp,
-  ArrowElbowDownLeft as CornerDownLeft,
-  Plus,
-  X
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
@@ -1123,7 +1125,7 @@ export default function MarkdownPreview({
         <div className="markdown-annotation-controls">
           <button
             type="button"
-            className="markdown-annotation-add"
+            className="markdown-annotation-add focus-visible:bg-accent outline-none"
             aria-label={translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
             title={translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
             onClick={(event) => {
@@ -1170,7 +1172,7 @@ export default function MarkdownPreview({
                     <>
                       <button
                         type="button"
-                        className="yiru-diff-comment-pill-btn"
+                        className="yiru-diff-comment-pill-btn focus-visible:bg-accent outline-none"
                         title={
                           copiedReviewNoteId === comment.id
                             ? translate(
@@ -1304,6 +1306,7 @@ export default function MarkdownPreview({
               {...props}
               href={href}
               className={cn(
+                'outline-none focus-visible:bg-accent',
                 className,
                 resolvedDocument ? 'markdown-doc-link' : 'markdown-doc-link-broken'
               )}
@@ -1596,7 +1599,7 @@ export default function MarkdownPreview({
           <a
             {...props}
             href={href}
-            className={className}
+            className={cn('outline-none focus-visible:bg-accent', className)}
             onClick={handleClick}
             style={{ cursor: 'pointer' }}
           >
@@ -1717,7 +1720,7 @@ export default function MarkdownPreview({
         return wrapAnnotatedBlock(
           'h1',
           node as MarkdownPreviewPositionNode,
-          <h1 {...props} tabIndex={-1}>
+          <h1 {...props} tabIndex={-1} className="outline-none">
             {children}
           </h1>
         )
@@ -1726,7 +1729,7 @@ export default function MarkdownPreview({
         return wrapAnnotatedBlock(
           'h2',
           node as MarkdownPreviewPositionNode,
-          <h2 {...props} tabIndex={-1}>
+          <h2 {...props} tabIndex={-1} className="outline-none">
             {children}
           </h2>
         )
@@ -1735,7 +1738,7 @@ export default function MarkdownPreview({
         return wrapAnnotatedBlock(
           'h3',
           node as MarkdownPreviewPositionNode,
-          <h3 {...props} tabIndex={-1}>
+          <h3 {...props} tabIndex={-1} className="outline-none">
             {children}
           </h3>
         )
@@ -1744,7 +1747,7 @@ export default function MarkdownPreview({
         return wrapAnnotatedBlock(
           'h4',
           node as MarkdownPreviewPositionNode,
-          <h4 {...props} tabIndex={-1}>
+          <h4 {...props} tabIndex={-1} className="outline-none">
             {children}
           </h4>
         )
@@ -1753,7 +1756,7 @@ export default function MarkdownPreview({
         return wrapAnnotatedBlock(
           'h5',
           node as MarkdownPreviewPositionNode,
-          <h5 {...props} tabIndex={-1}>
+          <h5 {...props} tabIndex={-1} className="outline-none">
             {children}
           </h5>
         )
@@ -1762,7 +1765,7 @@ export default function MarkdownPreview({
         return wrapAnnotatedBlock(
           'h6',
           node as MarkdownPreviewPositionNode,
-          <h6 {...props} tabIndex={-1}>
+          <h6 {...props} tabIndex={-1} className="outline-none">
             {children}
           </h6>
         )
@@ -1843,7 +1846,7 @@ export default function MarkdownPreview({
                   'auto.components.editor.MarkdownPreview.517aea303b',
                   'Find in preview'
                 )}
-                className="markdown-preview-search-input h-7 !border-0 bg-transparent px-2 shadow-none focus-visible:!border-0 focus-visible:ring-0"
+                className="markdown-preview-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
                 aria-label={translate(
                   'auto.components.editor.MarkdownPreview.ec77985138',
                   'Find in markdown preview'
@@ -1909,7 +1912,7 @@ export default function MarkdownPreview({
           <div className="markdown-review-toolbar">
             <button
               type="button"
-              className="markdown-review-toolbar-button"
+              className="markdown-review-toolbar-button focus-visible:bg-accent outline-none"
               onClick={() => {
                 const firstNote = markdownReviewNotes[0]
                 if (firstNote) {
@@ -1934,7 +1937,7 @@ export default function MarkdownPreview({
             </button>
             <button
               type="button"
-              className="markdown-review-icon-button"
+              className="markdown-review-icon-button focus-visible:bg-accent outline-none"
               onClick={() => void handleCopyMarkdownReviewNotes()}
               disabled={markdownReviewNotes.length === 0}
               title={translate(
@@ -2093,7 +2096,7 @@ function MarkdownAnnotationComposer({
       </div>
       <textarea
         ref={focusTextareaRef}
-        className="yiru-diff-comment-popover-textarea"
+        className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
         placeholder={translate(
           'auto.components.editor.MarkdownPreview.d737791433',
           'Add note for the AI'

@@ -71,7 +71,13 @@ import { useFileExplorerVisibleRowProjection } from './use-file-explorer-visible
 import { useFileExplorerWatch } from './use-file-explorer-watch'
 import { useFileSearchPanel } from './use-file-search-panel'
 
-function FileExplorerFiles(): React.JSX.Element {
+function FileExplorerFiles({
+  isVisible,
+  workspacePanelTabId
+}: {
+  isVisible: boolean
+  workspacePanelTabId?: string
+}): React.JSX.Element {
   const explorerView = useAppStore((s) => s.rightSidebarExplorerView)
   const showRightSidebarFiles = useAppStore((s) => s.showRightSidebarFiles)
   const showRightSidebarSearch = useAppStore((s) => s.showRightSidebarSearch)
@@ -79,7 +85,7 @@ function FileExplorerFiles(): React.JSX.Element {
   const [nameFilterCollapsedPaths, setNameFilterCollapsedPaths] = useState<Set<string>>(
     () => new Set()
   )
-  const searchPanel = useFileSearchPanel(explorerView)
+  const searchPanel = useFileSearchPanel(explorerView, workspacePanelTabId)
 
   const handleSelectExplorerView = useCallback(
     (view: RightSidebarExplorerView) => {
@@ -112,7 +118,6 @@ function FileExplorerFiles(): React.JSX.Element {
   const openFiles = useAppStore((s) => s.openFiles)
   const closeFile = useAppStore((s) => s.closeFile)
   const openModal = useAppStore((s) => s.openModal)
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
   const showDotfiles = useAppStore((s) =>
     activeWorktreeId ? (s.showDotfilesByWorktree[activeWorktreeId] ?? true) : true
   )
@@ -134,7 +139,7 @@ function FileExplorerFiles(): React.JSX.Element {
   const isFilesViewActive = explorerView === 'files'
   const visibleFilesWorktreePath = getVisibleFileExplorerWorktreePath({
     explorerView,
-    rightSidebarOpen,
+    rightSidebarOpen: isVisible,
     worktreePath
   })
   const repoName = activeRepo?.displayName ?? (worktreePath ? basename(worktreePath) : '')
@@ -487,6 +492,7 @@ function FileExplorerFiles(): React.JSX.Element {
   const { handleClick, handleDoubleClick } = useFileExplorerHandlers({
     activeWorktreeId,
     runtimeEnvironmentId: activeRuntimeEnvironmentId,
+    workspacePanelTabId,
     openFile,
     makePreviewFilePermanent,
     toggleDir: hasNameFilter ? handleToggleNameFilterDir : toggleDir,
@@ -871,14 +877,18 @@ function FileExplorerFiles(): React.JSX.Element {
 const FileExplorerFilesMemo = React.memo(FileExplorerFiles)
 
 function FileExplorer({
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  isVisible = true,
+  workspacePanelTabId
 }: {
   source?: RightSidebarPanelSource
+  isVisible?: boolean
+  workspacePanelTabId?: string
 }): React.JSX.Element {
   if (source.kind === 'spool') {
     return <SpoolFilesPane route={source.route} supportsDiff={source.supportsGit} />
   }
-  return <FileExplorerFilesMemo />
+  return <FileExplorerFilesMemo isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }
 
 export default React.memo(FileExplorer)

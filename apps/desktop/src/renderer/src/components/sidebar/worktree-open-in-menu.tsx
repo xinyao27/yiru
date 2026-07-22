@@ -1,8 +1,7 @@
-import { FolderOpen } from '@phosphor-icons/react'
+import { FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -227,7 +226,8 @@ export function WorktreeOpenInMenuContent({
 export function WorktreeOpenInSubMenu({
   worktreePath,
   connectionId,
-  disabled
+  disabled,
+  onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   return (
     <DropdownMenuSub>
@@ -244,6 +244,7 @@ export function WorktreeOpenInSubMenu({
           worktreePath={worktreePath}
           connectionId={connectionId}
           disabled={disabled}
+          onEntryOpen={onEntryOpen}
         />
       </DropdownMenuSubContent>
     </DropdownMenuSub>

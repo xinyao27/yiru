@@ -62,7 +62,7 @@ export function SessionInlineDetails({
   return (
     <div
       id={id}
-      className="border-sidebar-border/80 bg-background/50 mt-2 overflow-hidden rounded-lg border shadow-xs"
+      className="border-sidebar-border/80 bg-background/50 mt-2 overflow-hidden rounded-lg border"
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => event.stopPropagation()}

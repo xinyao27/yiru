@@ -1,12 +1,14 @@
-import { PersonArmsSpread as Accessibility, Camera, ShieldCheck } from '@phosphor-icons/react'
+import {
+  PersonArmsSpread as Accessibility,
+  Camera,
+  ShieldCheck,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
@@ -355,7 +357,7 @@ export function ComputerUsePane(): React.JSX.Element {
               type="button"
               disabled={resetAccessDisabled}
               onClick={() => void resetAccess()}
-              className="text-muted-foreground hover:text-foreground mr-4 ml-auto block w-28 text-right text-xs underline underline-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mr-4 ml-auto block w-28 text-right text-xs underline underline-offset-2 outline-none disabled:pointer-events-none disabled:opacity-50"
             >
               {resetting
                 ? translate(

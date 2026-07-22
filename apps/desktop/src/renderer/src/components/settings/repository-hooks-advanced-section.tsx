@@ -1,6 +1,5 @@
-import { Warning as AlertTriangle } from '@phosphor-icons/react'
+import { Warning as AlertTriangle, CaretRight as ChevronRight } from '@phosphor-icons/react'
 
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -65,7 +64,7 @@ export function RepositoryHooksAdvancedSection({
       ]}
     >
       <details
-        className="group border-border/50 bg-background/80 rounded-2xl border shadow-sm"
+        className="group border-border/50 bg-background/80 rounded-2xl border"
         open={advancedMatchesSearch || isAdvancedOpen}
         onToggle={(event) => {
           if (advancedMatchesSearch) {
@@ -76,7 +75,7 @@ export function RepositoryHooksAdvancedSection({
         }}
       >
         <summary
-          className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden"
+          className="focus-visible:bg-accent flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 outline-none [&::-webkit-details-marker]:hidden"
           onClick={(event) => {
             if (advancedMatchesSearch) {
               event.preventDefault()

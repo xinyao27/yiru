@@ -4,7 +4,10 @@ import {
   GitBranch,
   GitMerge,
   GitPullRequest,
-  MagnifyingGlass as Search
+  MagnifyingGlass as Search,
+  ArrowSquareOut as ExternalLink,
+  GitBranch as GitBranchPlus,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the smart name field owns source tabs,
 search orchestration, and result rendering so the unified create flow stays
@@ -14,11 +17,6 @@ import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  GitBranch as GitBranchPlus,
-  X
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import {
@@ -1293,7 +1291,7 @@ export default function SmartWorkspaceNameField({
                     event.preventDefault()
                     onPlainEnter?.()
                   }}
-                  className="border-input focus-within:border-ring focus-within:ring-ring/50 flex h-9 w-full min-w-0 items-center gap-2 rounded-md border bg-transparent px-2.5 text-sm shadow-xs outline-none focus-within:ring-[3px]"
+                  className="border-input focus-within:border-ring flex h-9 w-full min-w-0 items-center gap-2 rounded-md border bg-transparent px-2.5 text-sm outline-none"
                 >
                   <SelectionIcon kind={selectedSource.kind} />
                   <span className="text-foreground min-w-0 flex-1 truncate leading-none font-medium">

@@ -48,7 +48,7 @@ export function EditorPanelMarkdownActionsMenu({
         render={
           <button
             type="button"
-            className="hover:bg-accent text-muted-foreground hover:text-foreground flex-shrink-0 rounded p-1 transition-colors"
+            className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground flex-shrink-0 rounded p-1 transition-colors outline-none"
             aria-label={translate(
               'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
               'More actions'

@@ -55,8 +55,6 @@ export function useFileExplorerKeys(opts: {
   activeWorktreeId: string | null
   nativeTreeNavigation?: boolean
 }): void {
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
-  const rightSidebarTab = useAppStore((s) => s.rightSidebarTab)
   const rightSidebarExplorerView = useAppStore((s) => s.rightSidebarExplorerView)
   const keybindings = useAppStore((s) => s.keybindings)
 
@@ -141,11 +139,7 @@ export function useFileExplorerKeys(opts: {
     }
 
     const onKeyDown = (e: KeyboardEvent): void => {
-      if (
-        !rightSidebarOpen ||
-        rightSidebarTab !== 'explorer' ||
-        rightSidebarExplorerView !== 'files'
-      ) {
+      if (rightSidebarExplorerView !== 'files') {
         return
       }
       if (inlineInputRef.current) {
@@ -306,12 +300,5 @@ export function useFileExplorerKeys(opts: {
 
     window.addEventListener('keydown', onKeyDown, { capture: true })
     return () => window.removeEventListener('keydown', onKeyDown, { capture: true })
-  }, [
-    keybindings,
-    opts.containerRef,
-    opts.nativeTreeNavigation,
-    rightSidebarExplorerView,
-    rightSidebarOpen,
-    rightSidebarTab
-  ])
+  }, [keybindings, opts.containerRef, opts.nativeTreeNavigation, rightSidebarExplorerView])
 }

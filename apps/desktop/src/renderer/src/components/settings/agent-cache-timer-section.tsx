@@ -1,4 +1,3 @@
-import { Timer } from '@phosphor-icons/react'
 import type React from 'react'
 
 import { translate } from '@/i18n/i18n'
@@ -50,15 +49,9 @@ export function AgentCacheTimerSection({
         className="flex items-center justify-between gap-4 py-2"
       >
         <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="flex items-center gap-2">
-            <Timer className="text-muted-foreground size-4" />
-            <Label>
-              {translate(
-                'auto.components.settings.AgentCacheTimerSection.b4e7302944',
-                'Cache Timer'
-              )}
-            </Label>
-          </div>
+          <Label>
+            {translate('auto.components.settings.AgentCacheTimerSection.b4e7302944', 'Cache Timer')}
+          </Label>
           <p className="text-muted-foreground text-xs">
             {translate(
               'auto.components.settings.AgentCacheTimerSection.487b176240',

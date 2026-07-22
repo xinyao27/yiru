@@ -1,7 +1,6 @@
-import { TreeStructure as ListTree } from '@phosphor-icons/react'
+import { TreeStructure as ListTree, CaretRight as ChevronRight, X } from '@phosphor-icons/react'
 import React, { useEffect, useState } from 'react'
 
-import { CaretRight as ChevronRight, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { useSidebarResize } from '@/hooks/use-sidebar-resize'
 import { translate } from '@/i18n/i18n'
@@ -63,7 +62,7 @@ function MarkdownTocRow({
         {hasChildren ? (
           <button
             type="button"
-            className="markdown-toc-disclosure"
+            className="markdown-toc-disclosure focus-visible:bg-accent outline-none"
             aria-label={
               expanded
                 ? translate(
@@ -90,7 +89,7 @@ function MarkdownTocRow({
         ) : null}
         <button
           type="button"
-          className="markdown-toc-title-button"
+          className="markdown-toc-title-button focus-visible:bg-accent outline-none"
           onClick={() => onNavigate(item.id)}
         >
           <span className="markdown-toc-title">{item.title}</span>

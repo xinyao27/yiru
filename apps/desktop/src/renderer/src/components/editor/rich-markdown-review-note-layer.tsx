@@ -91,7 +91,7 @@ export function RichMarkdownReviewNoteLayer({
               <>
                 <button
                   type="button"
-                  className="rich-markdown-review-note-action"
+                  className="rich-markdown-review-note-action focus-visible:bg-accent outline-none"
                   title={
                     copiedCommentId === comment.id
                       ? translate(

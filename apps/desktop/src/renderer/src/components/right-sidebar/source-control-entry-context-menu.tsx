@@ -1,7 +1,6 @@
-import { Copy, Eye, FolderOpen } from '@phosphor-icons/react'
+import { Copy, Eye, FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import {
   getWorktreeOpenInEntries,
   openOpenInAppsSettings,

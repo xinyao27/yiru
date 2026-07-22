@@ -4,14 +4,15 @@ import {
   GitMerge,
   HardDrives as Server,
   HardDrive as ServerOff,
-  Trash as Trash2
+  Trash as Trash2,
+  CaretDown as ChevronDown,
+  FlowArrow as Workflow
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
 import React, { useEffect, useCallback, useState } from 'react'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown, FlowArrow as Workflow } from '@/components/regular-icons'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -1189,6 +1190,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                         onPointerDown={stopQuickActionPointerPropagation}
                         onClick={handleWorkspaceQuickAction}
                         className={cn(
+                          'outline-none',
                           'inline-flex size-4 items-center justify-center rounded bg-transparent opacity-0 transition-colors transition-opacity',
                           'group-hover/worktree-card:opacity-100 group-focus-within/worktree-card:opacity-100 focus-visible:opacity-100',
                           'text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive'
@@ -1313,7 +1315,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     type="button"
                     variant="ghost"
                     size="xs"
-                    className="border-sidebar-border bg-sidebar text-muted-foreground hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-sidebar-ring relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border px-1.5 text-[10px] leading-none font-medium shadow-none focus-visible:ring-1"
+                    className="border-sidebar-border bg-sidebar text-muted-foreground hover:bg-sidebar-accent hover:text-foreground relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border px-1.5 text-[10px] leading-none font-medium"
                     aria-label={lineageChildAriaLabel}
                     aria-expanded={!lineageCollapsed}
                     onClick={onLineageToggle}
@@ -1396,7 +1398,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           'scroll-to-current-workspace-reveal-highlight',
           revealHighlightTone === 'ai' && 'scroll-to-current-workspace-reveal-highlight--ai'
         ],
-        titleRenaming && '!border-transparent !bg-transparent !shadow-none !ring-0',
+        titleRenaming && '!border-transparent !bg-transparent    ',
         isDeleting && 'opacity-50 grayscale cursor-not-allowed',
         (isSshDisconnected || isRuntimeDisconnected) && !isDeleting && 'opacity-60'
       )}
@@ -1410,7 +1412,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
     >
       {isDeleting && (
         <div className="bg-background/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-[1px]">
-          <div className="bg-background text-foreground border-border/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium shadow-sm">
+          <div className="bg-background text-foreground border-border/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium">
             {!isQueuedForDeletion ? (
               <LoadingIndicator className="text-muted-foreground size-3.5" />
             ) : null}

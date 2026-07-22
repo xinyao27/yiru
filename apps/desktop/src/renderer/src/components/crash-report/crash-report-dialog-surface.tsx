@@ -284,7 +284,7 @@ export function CrashReportDialogSurface({
             onChange={(event) => setNotes(event.target.value)}
             rows={4}
             placeholder={getNotesPlaceholder(report)}
-            className="border-border bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="border-border bg-background placeholder:text-muted-foreground min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none"
           />
           <div className="border-border/70 bg-muted/20 flex items-start gap-2 rounded-md border p-3">
             <Checkbox

@@ -1,10 +1,9 @@
 // Why: every portaled surface must use one opaque elevation recipe so content
 // behind menus never bleeds through or drifts across headless wrappers.
 export const floatingSurfaceClass =
-  'border border-border !bg-popover text-popover-foreground shadow-md !backdrop-blur-none'
+  'border border-border !bg-popover text-popover-foreground !backdrop-blur-none'
 
-export const modalSurfaceClass =
-  'border-border bg-background text-foreground shadow-lg !backdrop-blur-none'
+export const modalSurfaceClass = 'border-border bg-background text-foreground !backdrop-blur-none'
 
 export const modalBackdropClass = 'bg-black/50'
 

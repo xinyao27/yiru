@@ -17,7 +17,14 @@ import {
   Warning as TriangleAlert,
   CheckCircle as CircleCheck,
   DotsThree as MoreHorizontal,
-  type Icon as PhosphorIcon
+  type Icon as PhosphorIcon,
+  ArrowsDownUp as ArrowDownUp,
+  ArrowUp,
+  CaretDown as ChevronDown,
+  CloudArrowUp as CloudUpload,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  ArrowCounterClockwise as Undo2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -31,15 +38,6 @@ import {
   requestEditorSaveQuiesce
 } from '@/components/editor/editor-autosave'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowsDownUp as ArrowDownUp,
-  ArrowUp,
-  CaretDown as ChevronDown,
-  CloudArrowUp as CloudUpload,
-  Plus,
-  ArrowClockwise as RefreshCw,
-  ArrowCounterClockwise as Undo2
-} from '@/components/regular-icons'
 import { BaseRefPicker } from '@/components/settings/base-ref-picker'
 import { SpoolGitPane } from '@/components/spool/spool-git-pane'
 import { Button } from '@/components/ui/button'
@@ -72,6 +70,7 @@ import { formatDiffComment, formatDiffComments } from '@/lib/diff-comments-forma
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { detectLanguage } from '@/lib/language-detect'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { basename, dirname, joinPath } from '@/lib/path'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
 import {
@@ -815,7 +814,13 @@ export function clearRemoteActionErrorsForCompletedConflictOperations({
   return next ?? remoteActionErrors
 }
 
-function SourceControlInner(): React.JSX.Element {
+function SourceControlInner({
+  isVisible,
+  workspacePanelTabId
+}: {
+  isVisible: boolean
+  workspacePanelTabId?: string
+}): React.JSX.Element {
   const sourceControlRef = useRef<HTMLDivElement | null>(null)
   // Why: the changed-file sections virtualize against the panel's shared
   // scroller rather than owning a nested scroll container. State (not a ref)
@@ -953,8 +958,6 @@ function SourceControlInner(): React.JSX.Element {
   const clearDiffComments = useAppStore((s) => s.clearDiffComments)
   const clearDiffCommentsForFile = useAppStore((s) => s.clearDiffCommentsForFile)
   const setScrollToDiffCommentId = useAppStore((s) => s.setScrollToDiffCommentId)
-  const setRightSidebarOpen = useAppStore((s) => s.setRightSidebarOpen)
-  const setRightSidebarTab = useAppStore((s) => s.setRightSidebarTab)
   // Why: pass activeWorktreeId directly (even when null/undefined) so the
   // selector returns its stable empty sentinel. An
   // inline `[]` fallback would allocate a new array each store update, break
@@ -1282,12 +1285,9 @@ function SourceControlInner(): React.JSX.Element {
     recordKey: activePullRequestGenerationKey,
     record: activePullRequestGenerationRecord
   })
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
-  // Why: gate polling on both the active tab AND the sidebar being open.
-  // The sidebar now stays mounted when closed (for performance), so without
-  // this guard the branchCompare interval and PR fetch would keep running
-  // with no visible consumer, wasting git process spawns and API calls.
-  const isBranchVisible = rightSidebarTab === 'source-control' && rightSidebarOpen
+  // Why: panel content can now live in a unified tab or the legacy remote
+  // shell, so visibility must come from its owning surface rather than a route.
+  const isBranchVisible = isVisible
 
   const refreshActiveGitStatus = useCallback(async (): Promise<void> => {
     if (!activeWorktreeId || !worktreePath || isFolder) {
@@ -2822,8 +2822,7 @@ function SourceControlInner(): React.JSX.Element {
         resolveSupportedHostedReviewCopyProvider(result.provider)
       )
       if (openChecks) {
-        setRightSidebarOpen(true)
-        setRightSidebarTab('checks')
+        openWorkspacePanelTab({ panel: 'checks', worktreeId })
       }
       try {
         if (worktreeId && result.provider === 'github') {
@@ -2908,16 +2907,13 @@ function SourceControlInner(): React.JSX.Element {
       linkedGiteaPR,
       linkedGitHubPR,
       linkedGitLabMR,
-      setRightSidebarOpen,
-      setRightSidebarTab,
       updateWorktreeMeta
     ]
   )
 
   const openHostedReviewInChecks = useCallback(() => {
-    setRightSidebarOpen(true)
-    setRightSidebarTab('checks')
-  }, [setRightSidebarOpen, setRightSidebarTab])
+    openWorkspacePanelTab({ panel: 'checks', worktreeId: activeWorktreeId })
+  }, [activeWorktreeId])
 
   const handleBranchChangedByPullRequestGeneration = useCallback(async (): Promise<void> => {
     // Why: AI PR detail generation may rebase before summarizing; if HEAD moved,
@@ -4453,6 +4449,7 @@ function SourceControlInner(): React.JSX.Element {
         return
       }
       const targetGroupId = resolveSplitTargetGroupId(event)
+      const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       const openAsPreview = shouldOpenSourceControlRowAsPreview(event, targetGroupId)
       if (entry.conflictKind && entry.conflictStatus) {
         if (entry.conflictStatus === 'unresolved') {
@@ -4460,17 +4457,18 @@ function SourceControlInner(): React.JSX.Element {
         }
         openConflictFile(activeWorktreeId, worktreePath, entry, detectLanguage(entry.path), {
           targetGroupId,
+          workspacePanelTabId: embeddedTargetTabId,
           preview: openAsPreview
         })
         return
       }
       const language = detectLanguage(entry.path)
       const filePath = joinPath(worktreePath, entry.path)
-      // Why: unstaged markdown diffs open as a normal edit tab in Changes
-      // view mode rather than a dedicated diff tab. This unifies sidebar
+      // Why: unstaged markdown diffs open as a normal editable file in Changes
+      // view mode rather than a dedicated diff entity. This unifies tree
       // clicks with the header's Edit|Changes toggle: there is exactly one
-      // tab per markdown file, and the sidebar click flips that tab's view
-      // mode. Staged diffs still open as a separate diff tab because the
+      // editor entity per markdown file, and the click flips that entity's
+      // mode. Staged diffs still use a separate diff entity because the
       // staged content is not what the editor would be editing. Non-markdown
       // files keep the existing diff-tab flow until the diff-tab type is
       // eventually collapsed (see reviews/changes-view-mode-plan.md §"Follow-up").
@@ -4483,13 +4481,14 @@ function SourceControlInner(): React.JSX.Element {
             language,
             mode: 'edit'
           },
-          { targetGroupId, preview: openAsPreview }
+          { targetGroupId, workspacePanelTabId: embeddedTargetTabId, preview: openAsPreview }
         )
         setEditorViewMode(filePath, 'changes')
         return
       }
       openDiff(activeWorktreeId, filePath, entry.path, language, entry.area === 'staged', {
         targetGroupId,
+        workspacePanelTabId: embeddedTargetTabId,
         preview: openAsPreview
       })
     },
@@ -4501,7 +4500,8 @@ function SourceControlInner(): React.JSX.Element {
       openConflictFile,
       openDiff,
       openFile,
-      setEditorViewMode
+      setEditorViewMode,
+      workspacePanelTabId
     ]
   )
 
@@ -5133,16 +5133,28 @@ function SourceControlInner(): React.JSX.Element {
         return
       }
       const targetGroupId = resolveSplitTargetGroupId(event)
+      const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       openBranchDiff(
         activeWorktreeId,
         worktreePath,
         entry,
         branchSummary,
         detectLanguage(entry.path),
-        { targetGroupId, preview: shouldOpenSourceControlRowAsPreview(event, targetGroupId) }
+        {
+          targetGroupId,
+          workspacePanelTabId: embeddedTargetTabId,
+          preview: shouldOpenSourceControlRowAsPreview(event, targetGroupId)
+        }
       )
     },
-    [activeWorktreeId, branchSummary, openBranchDiff, resolveSplitTargetGroupId, worktreePath]
+    [
+      activeWorktreeId,
+      branchSummary,
+      openBranchDiff,
+      resolveSplitTargetGroupId,
+      workspacePanelTabId,
+      worktreePath
+    ]
   )
 
   const { loadCommitFiles, openHistoryCommitDiff, openCommitFile, handleCommitAction } =
@@ -5150,6 +5162,7 @@ function SourceControlInner(): React.JSX.Element {
       activeWorktreeId,
       worktreePath,
       activeRepoSettings,
+      workspacePanelTabId,
       resolveSplitTargetGroupId
     })
 
@@ -5158,11 +5171,11 @@ function SourceControlInner(): React.JSX.Element {
   // currently owns that file. Prefer the `unstaged` entry when a path is also
   // staged — diff comments are authored against the working-tree (unstaged)
   // diff card. Fall back to the branch compare, and finally just open the
-  // file as a normal editor tab so the user still gets navigation when
+  // file in the editor so the user still gets navigation when
   // neither side has the path anymore. When `commentId` is supplied and the
   // route lands on a diff surface, also stamp scrollToDiffCommentId so the
   // diff decorator scrolls that note into view; we clear any prior request
-  // first, so the editor-tab fallback then leaves the global null and a
+  // first, so the editor fallback then leaves the global null and a
   // future DiffViewer mount can't accidentally consume a stale id.
   const handleOpenComment = useCallback(
     (comment: DiffComment) => {
@@ -5180,13 +5193,16 @@ function SourceControlInner(): React.JSX.Element {
         const language = detectLanguage(filePath)
         setEditorViewMode(absPath, 'edit')
         setMarkdownViewMode(absPath, 'source')
-        openFile({
-          filePath: absPath,
-          relativePath: filePath,
-          worktreeId: activeWorktreeId,
-          language,
-          mode: 'edit'
-        })
+        openFile(
+          {
+            filePath: absPath,
+            relativePath: filePath,
+            worktreeId: activeWorktreeId,
+            language,
+            mode: 'edit'
+          },
+          { workspacePanelTabId }
+        )
         setPendingEditorReveal(null)
         requestSourceControlEditorRevealFrame(pendingCommentEditorRevealFrameIdsRef, () => {
           requestSourceControlEditorRevealFrame(pendingCommentEditorRevealFrameIdsRef, () => {
@@ -5221,7 +5237,7 @@ function SourceControlInner(): React.JSX.Element {
         }
         return
       }
-      // Why: fall through to a normal editor tab when neither the working-tree
+      // Why: fall through to a normal editor when neither the working-tree
       // nor branch-compare diff has the file (e.g. the change has since been
       // committed and merged, but the note still references the file). Force
       // the editor tab into 'changes' mode and stamp scrollToDiffCommentId so
@@ -5230,13 +5246,16 @@ function SourceControlInner(): React.JSX.Element {
       // via the editor's Edit/Changes toggle.
       const absPath = joinPath(worktreePath, filePath)
       const language = detectLanguage(filePath)
-      openFile({
-        filePath: absPath,
-        relativePath: filePath,
-        worktreeId: activeWorktreeId,
-        language,
-        mode: 'edit'
-      })
+      openFile(
+        {
+          filePath: absPath,
+          relativePath: filePath,
+          worktreeId: activeWorktreeId,
+          language,
+          mode: 'edit'
+        },
+        { workspacePanelTabId }
+      )
       if (commentId) {
         setEditorViewMode(absPath, 'changes')
         setScrollToDiffCommentId(commentId)
@@ -5254,6 +5273,7 @@ function SourceControlInner(): React.JSX.Element {
       setScrollToDiffCommentId,
       setMarkdownViewMode,
       setPendingEditorReveal,
+      workspacePanelTabId,
       worktreePath
     ]
   )
@@ -5619,7 +5639,7 @@ function SourceControlInner(): React.JSX.Element {
             <div className="flex items-center gap-1 py-1.5 pr-2 pl-3">
               <button
                 type="button"
-                className="text-muted-foreground hover:text-foreground flex min-w-0 flex-1 items-center gap-1.5 text-left text-xs transition-colors"
+                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1.5 text-left text-xs transition-colors outline-none"
                 onClick={() => setDiffCommentsExpanded((prev) => !prev)}
                 aria-expanded={diffCommentsExpanded}
                 title={
@@ -5664,7 +5684,7 @@ function SourceControlInner(): React.JSX.Element {
                         render={
                           <button
                             type="button"
-                            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors"
+                            className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors outline-none"
                             onClick={() => void handleCopyDiffComments()}
                             aria-label={translate(
                               'auto.components.right.sidebar.SourceControl.3baf6c77b4',
@@ -5697,7 +5717,7 @@ function SourceControlInner(): React.JSX.Element {
                             render={
                               <button
                                 type="button"
-                                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors"
+                                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors outline-none"
                                 aria-label={translate(
                                   'auto.components.right.sidebar.SourceControl.2fe2a67580',
                                   'More note actions'
@@ -6525,14 +6545,18 @@ function SourceControlInner(): React.JSX.Element {
 }
 
 function SourceControl({
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  isVisible = true,
+  workspacePanelTabId
 }: {
   source?: RightSidebarPanelSource
+  isVisible?: boolean
+  workspacePanelTabId?: string
 }): React.JSX.Element | null {
   if (source.kind === 'spool') {
     return source.supportsGit ? <SpoolGitPane route={source.route} /> : null
   }
-  return <SourceControlInner />
+  return <SourceControlInner isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }
 
 const SourceControlMemo = React.memo(SourceControl)
@@ -6801,9 +6825,9 @@ export function CommitArea({
             // Why: reserve right padding so typed text does not slide under the
             // absolute-positioned Generate icon in the top-right corner.
             // Why: match Input surface tokens and pin disabled:border-input so
-            // Chromium's UA disabled styles don't wash out the field outline.
+            // Chromium's UA disabled styles don't wash out the field edge.
             className={cn(
-              'mt-0.5 min-h-14 w-full resize-none appearance-none rounded-md border border-input bg-background shadow-xs px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:border-input disabled:bg-background disabled:text-foreground disabled:shadow-xs dark:bg-input/30 dark:disabled:bg-input/30',
+              'mt-0.5 min-h-14 w-full resize-none appearance-none rounded-md border border-input bg-background px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring disabled:cursor-not-allowed disabled:border-input disabled:bg-background disabled:text-foreground dark:bg-input/30 dark:disabled:bg-input/30',
               showGenerate ? 'pr-8' : ''
             )}
           />
@@ -6828,7 +6852,7 @@ export function CommitArea({
                         'auto.components.right.sidebar.SourceControl.ddc1fbd690',
                         'Stop generating commit message'
                       )}
-                      className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40 absolute top-1.5 right-1.5 inline-flex size-5 items-center justify-center rounded transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                      className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive absolute top-1.5 right-1.5 inline-flex size-5 items-center justify-center rounded transition-colors focus-visible:outline-none"
                     >
                       <LoadingIndicator className="size-3.5 group-hover:hidden group-focus-visible:hidden" />
                       <Square className="hidden size-3.5 fill-current group-hover:block group-focus-visible:block" />
@@ -6868,7 +6892,7 @@ export function CommitArea({
                         'Generate commit message with AI'
                       )}
                       className={cn(
-                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded border border-transparent text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:border-ring',
                         isGenerateDisabled &&
                           'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted-foreground'
                       )}
@@ -7057,7 +7081,7 @@ export function CommitArea({
           {createPrIntentNotice.action === 'settings' && onOpenSourceControlAiSettings ? (
             <button
               type="button"
-              className="text-foreground decoration-border hover:decoration-foreground shrink-0 font-medium underline underline-offset-2"
+              className="text-foreground decoration-border hover:decoration-foreground focus-visible:bg-accent shrink-0 font-medium underline underline-offset-2 outline-none"
               onClick={() => onOpenSourceControlAiSettings()}
             >
               {translate(
@@ -7412,7 +7436,7 @@ function DiffCommentsInlineList({
           <div className="group/file flex items-center gap-1">
             <button
               type="button"
-              className="text-muted-foreground hover:text-foreground block min-w-0 flex-1 truncate text-left text-[10px] font-medium"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent block min-w-0 flex-1 truncate text-left text-[10px] font-medium outline-none"
               onClick={() => {
                 const first = list[0]
                 if (first) {
@@ -7429,7 +7453,7 @@ function DiffCommentsInlineList({
             </button>
             <button
               type="button"
-              className="text-muted-foreground can-hover:opacity-0 hover:text-destructive shrink-0 rounded p-0.5 transition-opacity group-hover/file:opacity-100 focus-visible:opacity-100"
+              className="text-muted-foreground can-hover:opacity-0 hover:text-destructive focus-visible:text-destructive focus-visible:bg-accent shrink-0 rounded p-0.5 transition-opacity outline-none group-hover/file:opacity-100 focus-visible:opacity-100"
               onClick={() => onClearFile(filePath)}
               title={translate(
                 'auto.components.right.sidebar.SourceControl.59654650d3',
@@ -7459,7 +7483,7 @@ function DiffCommentsInlineList({
                   // pattern violates ARIA's no-interactive-descendants rule
                   // for buttons and lets bubbled key events from the children
                   // fire the row's open handler.
-                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 rounded text-left"
+                  className="focus-visible:bg-accent flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 rounded text-left outline-none"
                   onClick={() => onOpen(c)}
                   title={translate(
                     'auto.components.right.sidebar.SourceControl.0b5b8c234c',
@@ -7491,7 +7515,7 @@ function DiffCommentsInlineList({
                 </button>
                 <button
                   type="button"
-                  className="text-muted-foreground can-hover:opacity-0 hover:text-foreground shrink-0 rounded p-0.5 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="text-muted-foreground can-hover:opacity-0 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 rounded p-0.5 transition-opacity outline-none group-hover:opacity-100 focus-visible:opacity-100"
                   onClick={() => void handleCopyOne(c)}
                   title={translate(
                     'auto.components.right.sidebar.SourceControl.1623bf4e19',
@@ -7507,7 +7531,7 @@ function DiffCommentsInlineList({
                 </button>
                 <button
                   type="button"
-                  className="text-muted-foreground can-hover:opacity-0 hover:text-destructive shrink-0 rounded p-0.5 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="text-muted-foreground can-hover:opacity-0 hover:text-destructive focus-visible:text-destructive focus-visible:bg-accent shrink-0 rounded p-0.5 transition-opacity outline-none group-hover:opacity-100 focus-visible:opacity-100"
                   onClick={() => onDelete(c.id)}
                   title={translate(
                     'auto.components.right.sidebar.SourceControl.b656381c18',
@@ -7733,7 +7757,7 @@ function SourceControlTreeDirectoryRow({
     >
       <button
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-1 text-left"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 text-left outline-none"
         onClick={onToggle}
         aria-expanded={!isCollapsed}
       >
@@ -7828,7 +7852,7 @@ function SourceControlBranchTreeDirectoryRow({
     >
       <button
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-1 text-left"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 text-left outline-none"
         onClick={onToggle}
         aria-expanded={!isCollapsed}
       >

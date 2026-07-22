@@ -339,14 +339,14 @@ function PreferenceCard({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'group relative min-h-28 rounded-xl border p-4 text-left outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60',
+        'group relative min-h-28 rounded-xl border p-4 text-left outline-none transition-all disabled:cursor-not-allowed disabled:opacity-60',
         selected
-          ? 'border-foreground/55 bg-foreground/[0.06] ring-2 ring-ring/35'
+          ? 'border-foreground/55 bg-foreground/[0.06]'
           : 'border-border bg-muted/25 hover:bg-muted/45'
       )}
     >
       {selected ? (
-        <span className="bg-primary text-primary-foreground absolute top-3 right-3 grid size-5 place-items-center rounded-full shadow-sm">
+        <span className="bg-primary text-primary-foreground absolute top-3 right-3 grid size-5 place-items-center rounded-full">
           <Check className="size-3" strokeWidth={3} />
         </span>
       ) : null}

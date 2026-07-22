@@ -1,6 +1,6 @@
+import { CaretRight as ChevronRight, X } from '@phosphor-icons/react'
 import React, { useState } from 'react'
 
-import { CaretRight as ChevronRight, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -185,7 +185,7 @@ export default function ImportedWorktreesVisibilityLine({
                     render={
                       <span
                         tabIndex={0}
-                        className="text-muted-foreground focus-visible:ring-sidebar-ring block min-w-0 flex-1 truncate font-mono text-[10px] leading-4 outline-none focus-visible:ring-1"
+                        className="text-muted-foreground block min-w-0 flex-1 truncate font-mono text-[10px] leading-4 outline-none"
                       >
                         {group.path}
                       </span>

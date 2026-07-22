@@ -1,8 +1,8 @@
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React, { useCallback, useRef } from 'react'
 
 import { AgentStateDot } from '@/components/agent-state-dot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentTypeToIconAgent } from '@/lib/agent-status'
@@ -107,7 +107,7 @@ export function CompactAgentSummaryButton({
       className={cn(
         'compact-agent-summary-button group/agent-summary flex h-6 w-full min-w-0 items-center gap-1 rounded-sm',
         'px-1 text-left text-[11px] leading-none text-muted-foreground',
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
+        'focus-visible:outline-none',
         // Why: the scoped sidebar accent is near-white in light mode and dark in dark
         // mode, so hover lightening needs a theme-specific token mix.
         'hover:bg-sidebar-accent/55 dark:hover:bg-sidebar-foreground/[0.035]',

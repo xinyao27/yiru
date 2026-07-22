@@ -1,8 +1,7 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, Plus } from '@phosphor-icons/react'
 import { Fragment, useEffect, useState, type JSX } from 'react'
 
 import { usePrefersReducedMotion } from '@/components/feature-wall/feature-wall-modal-helpers'
-import { Plus } from '@/components/regular-icons'
 import { formatShortcutKeyComboDetails, useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -147,7 +146,7 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
               ) : null}
               <span
                 className={cn(
-                  'inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-border/80 px-2 text-xs font-semibold text-muted-foreground shadow-xs transition-[transform,background-color] duration-150 ease-out',
+                  'inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-border/80 px-2 text-xs font-semibold text-muted-foreground transition-[transform,background-color] duration-150 ease-out',
                   isPressed
                     ? 'translate-y-[1.5px] bg-foreground/[0.18]'
                     : 'translate-y-0 bg-foreground/[0.08]'
@@ -163,7 +162,7 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
 
       <div
         className={cn(
-          'relative mt-3 h-[12.75rem] w-full max-w-[21rem] overflow-hidden rounded-xl border border-border bg-card text-left shadow-lg transition-opacity duration-300 ease-out',
+          'relative mt-3 h-[12.75rem] w-full max-w-[21rem] overflow-hidden rounded-xl border border-border bg-card text-left transition-opacity duration-300 ease-out',
           !paletteMounted
             ? 'pointer-events-none invisible opacity-0'
             : paletteOpaque

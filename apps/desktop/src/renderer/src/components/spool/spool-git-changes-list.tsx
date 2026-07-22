@@ -193,7 +193,7 @@ function SpoolChangeRow({
     >
       <button
         type="button"
-        className="focus-visible:ring-sidebar-ring flex min-w-0 flex-1 items-center gap-2 px-3 py-1 text-left focus-visible:ring-1 focus-visible:outline-none"
+        className="flex min-w-0 flex-1 items-center gap-2 px-3 py-1 text-left focus-visible:outline-none"
         onClick={onSelect}
       >
         <span

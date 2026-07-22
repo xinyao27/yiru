@@ -38,7 +38,6 @@
   border: 1px solid var(--border);
   border-radius: 0 0 0 4px;
   background: var(--background);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
 }
 
 .markdown-preview-search-field {
@@ -233,7 +232,6 @@
     left: 0;
     bottom: 0;
     z-index: 30;
-    box-shadow: 10px 0 24px rgb(0 0 0 / 0.14);
   }
 }
 
@@ -264,7 +262,6 @@
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: 6px;
   background: color-mix(in srgb, var(--background) 94%, var(--editor-surface));
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 12%, transparent);
 }
 
 .markdown-review-toolbar-button,
@@ -379,6 +376,7 @@
   color: var(--muted-foreground);
   cursor: pointer;
   opacity: 0;
+  outline: none;
   transition:
     opacity 100ms ease,
     color 100ms ease,
@@ -391,8 +389,7 @@
 }
 
 .markdown-annotation-add:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 1px;
+  border-color: var(--ring);
   opacity: 1;
 }
 
@@ -426,21 +423,14 @@
 @keyframes markdown-note-attention {
   0% {
     transform: translateX(0);
-    box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--ring) 55%, transparent),
-      0 0 0 8px color-mix(in srgb, var(--ring) 16%, transparent);
   }
 
   35% {
     transform: translateX(-3px);
-    box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--ring) 45%, transparent),
-      0 0 0 5px color-mix(in srgb, var(--ring) 12%, transparent);
   }
 
   100% {
     transform: translateX(0);
-    box-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 15%, transparent);
   }
 }
 
@@ -449,7 +439,6 @@
   border-radius: 6px;
   background: var(--editor-surface);
   padding: 8px;
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 12%, transparent);
 }
 
 @container (max-width: 760px) {
@@ -528,6 +517,12 @@
   cursor: pointer;
   font-weight: 600;
   line-height: 1.35;
+  outline: none;
+}
+
+/* Why: rendered markdown creates native summaries outside the shared primitives. */
+.markdown-body details.yiru-details > summary:focus-visible {
+  background: var(--accent);
 }
 
 .markdown-body details.yiru-details > summary::before {

@@ -12,7 +12,7 @@
   height: 100% !important;
 }
 
-/* Reset the global border/outline base rule inside terminal panes */
+/* Why: terminal internals manage focus themselves; suppress Chromium's native ring locally. */
 .pane-manager-root *,
 .pane-manager-root *::before,
 .pane-manager-root *::after {
@@ -159,14 +159,10 @@
   pointer-events: none;
   border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 68%, transparent);
   border-radius: 2px;
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--terminal-pane-locate) 34%, transparent),
-    0 0 18px color-mix(in srgb, var(--terminal-pane-locate) 36%, transparent);
   animation: pane-focus-rim-flash 1.5s ease-out forwards;
 }
 
 .pane[data-terminal-attention] .xterm-container {
-  box-shadow: none;
 }
 
 .pane[data-terminal-attention] .xterm-container::after {
@@ -175,10 +171,8 @@
   inset: 0 4px 4px 0;
   z-index: 5;
   pointer-events: none;
+  border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 64%, transparent);
   border-radius: 2px;
-  box-shadow:
-    inset 0 0 0 1.5px color-mix(in srgb, var(--terminal-pane-locate) 64%, transparent),
-    inset 0 0 0 3px color-mix(in srgb, var(--terminal-pane-locate) 18%, transparent);
 }
 
 @keyframes pane-focus-rim-flash {
@@ -353,8 +347,7 @@
 }
 
 .pane-title-text:focus-visible {
-  outline: 1px solid var(--ring);
-  outline-offset: 1px;
+  background: var(--accent);
 }
 
 .pane-title-bar[data-chromeless] {
@@ -379,24 +372,6 @@
 
 .pane-title-bar[data-chromeless] .pane-title-close {
   margin-left: -1px;
-}
-
-.pane-title-bar[data-chromeless] .pane-title-split-trigger::before,
-.pane-title-bar[data-chromeless] .pane-title-close::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 23px;
-  height: 23px;
-  background: radial-gradient(
-    circle,
-    var(--yiru-pane-title-bg, var(--background)) 0 44%,
-    color-mix(in srgb, var(--yiru-pane-title-bg, var(--background)) 74%, transparent) 62%,
-    transparent 100%
-  );
-  border-radius: 9999px;
-  transform: translate(-50%, -50%);
 }
 
 .pane-title-close {
@@ -424,9 +399,8 @@
 
 .pane-title-bar[data-chromeless] .pane-title-split-trigger svg,
 .pane-title-bar[data-chromeless] .pane-title-close svg {
-  /* Why: chromeless controls overlap row-one terminal text; the rounded backing
-     clears text inside open glyphs without adding one shared toolbar fill. */
-  position: relative;
+  /* Why: chromeless controls overlap terminal text, so their glyphs need a
+     heavier stroke to remain legible without a backing glow. */
   stroke-width: 2.75px;
 }
 

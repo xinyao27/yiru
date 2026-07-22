@@ -1,8 +1,12 @@
-import { Copy, FolderOpen, Trash as Trash2 } from '@phosphor-icons/react'
+import {
+  Copy,
+  FolderOpen,
+  Trash as Trash2,
+  ArrowSquareOut as ExternalLink
+} from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -242,7 +246,7 @@ export function PortRow({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 shadow-xs transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
+          <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
             <PortAction
               label={openBrowserLabel}
               tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}

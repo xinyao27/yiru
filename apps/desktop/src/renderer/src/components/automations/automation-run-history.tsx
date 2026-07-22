@@ -48,7 +48,7 @@ export function AutomationRunHistory({
   const selectedRun = runs.find((run) => run.id === selectedRunId) ?? runs[0] ?? null
 
   return (
-    <div className="border-border/50 bg-muted/20 rounded-md border shadow-sm">
+    <div className="border-border/50 bg-muted/20 rounded-md border">
       <div className="border-border/50 flex items-center justify-between border-b px-3 py-2">
         <div className="text-sm font-medium">
           {translate('auto.components.automations.AutomationRunHistory.53fc5f07ab', 'Run history')}
@@ -87,7 +87,7 @@ export function AutomationRunHistory({
                 type="button"
                 data-current={selectedRun?.id === run.id}
                 className={cn(
-                  'grid w-full grid-cols-[minmax(9rem,1fr)_minmax(10rem,1.1fr)_minmax(5rem,.55fr)_minmax(5rem,.55fr)_minmax(6rem,auto)] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                  'grid w-full grid-cols-[minmax(9rem,1fr)_minmax(10rem,1.1fr)_minmax(5rem,.55fr)_minmax(5rem,.55fr)_minmax(6rem,auto)] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none',
                   selectedRun?.id === run.id && 'bg-accent text-accent-foreground'
                 )}
                 onClick={() => {

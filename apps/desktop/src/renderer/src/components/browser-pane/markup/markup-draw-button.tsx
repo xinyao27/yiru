@@ -64,10 +64,7 @@ export function MarkupDrawButton({
       variant={active ? 'default' : 'outline'}
       className={cn(
         className ?? 'h-8 w-8',
-        active && 'bg-foreground text-background hover:bg-foreground',
-        // Why: soft ring while the discovery callout is open — points at the
-        // control without the harsh solid highlight of a force-open tooltip.
-        showHint && 'ring-2 ring-ring/45 ring-offset-1 ring-offset-background'
+        active && 'bg-foreground text-background hover:bg-foreground'
       )}
       onClick={startMarkup}
       disabled={disabled}
@@ -152,7 +149,7 @@ export function MarkupDrawButton({
             <button
               type="button"
               onClick={dismissHint}
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm text-xs focus-visible:ring-1 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground rounded-sm text-xs focus-visible:outline-none"
             >
               {translate('auto.components.browser-pane.markup.drawHintDismiss', 'Got it')}
             </button>

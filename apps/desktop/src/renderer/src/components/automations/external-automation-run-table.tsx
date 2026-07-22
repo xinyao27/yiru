@@ -1,9 +1,13 @@
-import { WarningCircle as AlertCircle, FileText } from '@phosphor-icons/react'
+import {
+  WarningCircle as AlertCircle,
+  FileText,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight
+} from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: run rows are fetched from the external automation store; the loading state tracks that async request lifecycle. */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@/components/regular-icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -248,7 +252,7 @@ export function ExternalAutomationRunTable({
                     onOpenRun?.(run)
                   }}
                   className={cn(
-                    'grid w-full grid-cols-[minmax(7.5rem,.45fr)_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                    'grid w-full grid-cols-[minmax(7.5rem,.45fr)_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none',
                     selectedRun?.id === run.id && 'bg-accent text-accent-foreground'
                   )}
                 >

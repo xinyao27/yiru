@@ -1,6 +1,6 @@
+import { ArrowLeft } from '@phosphor-icons/react'
 import React from 'react'
 
-import { ArrowLeft } from '@/components/regular-icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
@@ -27,7 +27,7 @@ export function AutomationRunPageFrame({
   onBack
 }: AutomationRunPageFrameProps): React.JSX.Element {
   return (
-    <div className="border-border/50 bg-background flex min-h-full flex-col rounded-md border shadow-sm">
+    <div className="border-border/50 bg-background flex min-h-full flex-col rounded-md border">
       <div className="border-border/50 flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 flex-1 items-start gap-2">
           <div className="shrink-0">

@@ -1,9 +1,9 @@
-import { GitMerge } from '@phosphor-icons/react'
-
 import {
+  GitMerge,
   CaretRight as ChevronRight,
   ArrowSquareOut as ExternalLink
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -64,7 +64,7 @@ export function FolderWorkspacePrChecksRow({
       <div
         role="button"
         tabIndex={0}
-        className="focus-visible:ring-ring flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left focus-visible:ring-1 focus-visible:outline-none"
+        className="flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left focus-visible:outline-none"
         onClick={onToggle}
         onKeyDown={(event) => {
           if (event.key !== 'Enter' && event.key !== ' ') {
@@ -106,7 +106,7 @@ export function FolderWorkspacePrChecksRow({
               render={
                 <button
                   type="button"
-                  className="text-muted-foreground hover:bg-accent hover:text-foreground rounded p-1 opacity-80 group-hover:opacity-100"
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 opacity-80 outline-none group-hover:opacity-100"
                   aria-label={openExternalLabel}
                   onClick={(event) => {
                     event.stopPropagation()

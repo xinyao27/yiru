@@ -1,8 +1,8 @@
+import { FolderPlus } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { FolderPlus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

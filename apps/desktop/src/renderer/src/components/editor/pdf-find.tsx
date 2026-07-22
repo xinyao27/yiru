@@ -1,7 +1,7 @@
+import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
 import type { EventBus } from 'pdfjs-dist/web/pdf_viewer.mjs'
 import { useCallback, useEffect, useState } from 'react'
 
-import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { getFindRequestQuery } from '@/lib/find-query-bounds'
@@ -119,7 +119,7 @@ export default function PdfFind({
 
   return (
     <div
-      className="absolute top-2 right-2 z-50 flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1 shadow-lg"
+      className="absolute top-2 right-2 z-50 flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1"
       style={{ width: 300 }}
       onKeyDown={handleKeyDown}
     >

@@ -1,7 +1,7 @@
+import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { useState } from 'react'
 import type { JSX } from 'react'
 
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { track } from '@/lib/telemetry'
 
@@ -88,7 +88,7 @@ export function RelatedFeatures(props: {
                 track('feature_wall_tile_clicked', { tile_id: tile.id })
                 void window.api.shell.openUrl(tile.docsUrl)
               }}
-              className="inline-flex items-center gap-1.5 text-left text-[13px] hover:underline hover:underline-offset-2"
+              className="focus-visible:bg-accent inline-flex items-center gap-1.5 text-left text-[13px] outline-none hover:underline hover:underline-offset-2"
             >
               {tile.title}
               <ChevronRight className="text-muted-foreground size-3" />

@@ -1,12 +1,13 @@
-import { Warning as AlertTriangle, Star } from '@phosphor-icons/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-
 import {
+  Warning as AlertTriangle,
+  Star,
   ArrowSquareOut as ExternalLink,
   FolderPlus,
   GitBranch as GitBranchPlus,
   X
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -108,6 +109,7 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
     <div ref={wrapperRef} className="relative inline-block">
       <button
         className={cn(
+          'outline-none focus-visible:border-amber-500/80 focus-visible:bg-amber-400/10 dark:focus-visible:border-amber-400/50 dark:focus-visible:bg-amber-400/[0.08]',
           'inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[13px] font-medium transition-all duration-300',
           state === 'loading' && 'pointer-events-none opacity-0',
           state !== 'starred' &&
@@ -137,9 +139,9 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
             : translate('auto.components.Landing.0d0ace8861', 'Star on GitHub')}
       </button>
       {state === 'starred' && menuOpen && (
-        <div className="border-border bg-popover absolute top-[calc(100%+4px)] right-0 z-10 min-w-[100px] rounded-md border py-1 shadow-md">
+        <div className="border-border bg-popover absolute top-[calc(100%+4px)] right-0 z-10 min-w-[100px] rounded-md border py-1">
           <button
-            className="text-foreground hover:bg-muted w-full px-3 py-1.5 text-left text-[13px]"
+            className="text-foreground hover:bg-muted focus-visible:bg-muted w-full px-3 py-1.5 text-left text-[13px] outline-none"
             onClick={() => {
               setMenuOpen(false)
               setState('hidden')
@@ -212,7 +214,7 @@ function PreflightBanner({
             <p className="text-foreground text-[13px] leading-snug font-medium">{issue.title}</p>
             <p className="text-muted-foreground text-xs leading-snug">{issue.description}</p>
             <button
-              className="text-primary mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium underline-offset-4 hover:underline"
+              className="text-primary focus-visible:bg-accent mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium underline-offset-4 outline-none hover:underline"
               onClick={() => window.api.shell.openUrl(issue.fixUrl)}
             >
               {issue.fixLabel}
@@ -221,7 +223,7 @@ function PreflightBanner({
           </div>
           {issue.dismissible && (
             <button
-              className="text-muted-foreground/70 hover:bg-accent hover:text-foreground -mt-0.5 -mr-1 shrink-0 cursor-pointer rounded p-1 transition-colors"
+              className="text-muted-foreground/70 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground -mt-0.5 -mr-1 shrink-0 cursor-pointer rounded p-1 transition-colors outline-none"
               onClick={() => dismiss(issue)}
               aria-label={translate('auto.components.Landing.preflightDismiss', 'Dismiss')}
             >
@@ -325,7 +327,7 @@ export default function Landing(): React.JSX.Element {
       <div className="w-full max-w-lg px-6">
         <div className="flex flex-col items-center gap-4 py-8">
           <div
-            className="border-border/80 flex size-20 items-center justify-center rounded-2xl border shadow-lg shadow-black/40"
+            className="border-border/80 flex size-20 items-center justify-center rounded-2xl border"
             style={{ backgroundColor: '#12181e' }}
           >
             <img
@@ -351,7 +353,7 @@ export default function Landing(): React.JSX.Element {
 
           <div className="flex flex-wrap items-center justify-center gap-2.5">
             <button
-              className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors"
+              className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors outline-none"
               onClick={() => openModal('add-repo')}
             >
               <FolderPlus className="size-3.5" />
@@ -359,7 +361,7 @@ export default function Landing(): React.JSX.Element {
             </button>
 
             <button
-              className="bg-secondary/70 border-border/80 text-foreground enabled:hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+              className="bg-secondary/70 border-border/80 text-foreground enabled:hover:bg-accent enabled:focus-visible:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors outline-none enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
               disabled={!canCreateWorktree}
               title={
                 !canCreateWorktree

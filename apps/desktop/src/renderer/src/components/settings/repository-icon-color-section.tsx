@@ -36,10 +36,8 @@ export function RepositoryIconColorSection({
             )}
             aria-pressed={selectedBadgeColor === color}
             className={cn(
-              'size-7 rounded-[4px] outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring/50',
-              selectedBadgeColor === color
-                ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background'
-                : 'hover:ring-1 hover:ring-muted-foreground hover:ring-offset-2 hover:ring-offset-background'
+              'size-7 rounded-[4px] border border-transparent outline-none transition-colors',
+              selectedBadgeColor === color ? 'border-foreground' : 'hover:border-muted-foreground'
             )}
             style={{ backgroundColor: color }}
           />

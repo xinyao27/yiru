@@ -1,9 +1,8 @@
-import { Minus } from '@phosphor-icons/react'
+import { Minus, ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
-import { ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'
@@ -30,7 +29,7 @@ type FloatingTerminalWindowControlsProps = {
 }
 
 const controlButtonClassName =
-  'border-border bg-secondary text-secondary-foreground shadow-xs hover:bg-accent hover:text-accent-foreground'
+  'border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
 
 // Why: matches the repo convention (e.g. ReviewPRViewAnimatedVisual) of
 // surfacing the live keybinding in a tooltip as "Label (shortcut)", while

@@ -5,12 +5,12 @@ import {
   Database as DatabaseZap,
   FolderSimple as FolderUsage,
   SlidersHorizontal,
-  Sparkle as Sparkles
+  Sparkle as Sparkles,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useEffect } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { CodexUsageRange, CodexUsageScope } from '../../../../shared/codex-usage-types'
@@ -111,9 +111,9 @@ export function CodexUsagePane(): React.JSX.Element {
               'Enable Codex usage analytics'
             )}
             onClick={() => handleSetEnabled(true)}
-            className="bg-muted-foreground/30 relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors"
+            className="bg-muted-foreground/30 focus-visible:border-ring relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors outline-none"
           >
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-0.5 rounded-full shadow-sm transition-transform" />
+            <span className="bg-background pointer-events-none block size-3.5 translate-x-0.5 rounded-full transition-transform" />
           </button>
         </div>
       </div>
@@ -246,9 +246,9 @@ export function CodexUsagePane(): React.JSX.Element {
               'Enable Codex usage analytics'
             )}
             onClick={() => handleSetEnabled(false)}
-            className="bg-foreground relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors"
+            className="bg-foreground focus-visible:border-ring relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors outline-none"
           >
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full shadow-sm transition-transform" />
+            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full transition-transform" />
           </button>
         </div>
       </div>

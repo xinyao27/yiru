@@ -75,13 +75,12 @@ const MARKDOWN_BASE =
 // Why: in light mode card and canvas are both #fff, so border-border alone disappears.
 // overflow-clip preserves rounded clipping without letting focused row actions scroll content.
 const COMMENT_CARD_SURFACE =
-  'overflow-clip rounded-lg border border-border bg-secondary shadow-xs dark:bg-card dark:shadow-none'
+  'overflow-clip rounded-lg border border-border bg-secondary dark:bg-card'
 
 const COMMENT_CARD_DIVIDER = 'border-border dark:border-border/60'
 
 // Why: placeholders used bg-muted on bg-secondary cards — same grey in light mode.
-const COMMENT_AVATAR =
-  'shrink-0 rounded-full border border-border bg-background object-cover shadow-xs dark:shadow-none'
+const COMMENT_AVATAR = 'shrink-0 rounded-full border border-border bg-background object-cover'
 
 const RESOLVED_SECTION_LABEL =
   'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground'
@@ -97,7 +96,7 @@ const CARD_COMMENT_META_SELECTION_INDENT = 'pl-[3.25rem]'
 
 const RESOLVED_SECTION_TRIGGER = cn(
   RESOLVED_SECTION_LABEL,
-  'rounded-none border-0 bg-transparent px-3 py-2 shadow-none hover:bg-accent/40 hover:text-foreground hover:no-underline'
+  'rounded-none border-0 bg-transparent px-3 py-2 hover:bg-accent/40 hover:text-foreground hover:no-underline'
 )
 
 function isVariant(value: string | null): value is PRCommentPresentationVariant {
@@ -164,7 +163,7 @@ export function getPRCommentPresentationClasses(
       commentHeaderMeta: '',
       commentHeaderMetaWithSelection: '',
       groupOpen: 'border-l-2 border-l-green-700 dark:border-l-green-300',
-      groupQueued: 'ring-1 ring-ring/50',
+      groupQueued: '',
       groupResolved: ''
     }
   }
@@ -211,7 +210,7 @@ export function getPRCommentPresentationClasses(
     audienceTabs: 'grid grid-cols-3 rounded-md border border-border bg-background p-0.5',
     audienceTab:
       'flex h-7 items-center justify-center gap-1 rounded-md px-1.5 text-[11px] font-medium text-muted-foreground transition-colors',
-    audienceTabActive: 'bg-muted text-foreground shadow-xs',
+    audienceTabActive: 'bg-muted text-foreground',
     sectionTriageLabel: cn('px-3 pt-1', RESOLVED_SECTION_LABEL),
     statusBadgeResolved:
       'shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground',
@@ -229,7 +228,7 @@ export function getPRCommentPresentationClasses(
     ),
     // Why: open state is conveyed by the status badge; a green card rail reads noisy in the sidebar.
     groupOpen: '',
-    groupQueued: 'ring-1 ring-ring/50',
+    groupQueued: '',
     groupResolved: ''
   }
 }

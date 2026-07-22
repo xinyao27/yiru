@@ -144,7 +144,7 @@ export function TerminalSshReconnectOverlay({
       className="bg-background/75 pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6 py-8 backdrop-blur-[1px]"
       data-terminal-ssh-reconnect-overlay="true"
     >
-      <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-sm flex-col gap-3 rounded-md border px-4 py-4 shadow-xs">
+      <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-sm flex-col gap-3 rounded-md border px-4 py-4">
         <div className="flex items-start gap-3">
           <div className="border-border bg-muted text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border">
             {isConnecting ? (

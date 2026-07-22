@@ -1,10 +1,7 @@
+import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -31,7 +28,7 @@ function BaseRefButton({
   return (
     <button
       type="button"
-      className="text-foreground/90 decoration-border hover:text-foreground hover:decoration-foreground max-w-full min-w-0 truncate rounded-sm border-0 bg-transparent p-0 text-left font-mono text-[10.5px] font-medium underline underline-offset-2"
+      className="text-foreground/90 decoration-border hover:text-foreground hover:decoration-foreground focus-visible:text-foreground focus-visible:bg-accent max-w-full min-w-0 truncate rounded-sm border-0 bg-transparent p-0 text-left font-mono text-[10.5px] font-medium underline underline-offset-2 outline-none"
       onClick={onClick}
       title={`${title} (${baseRef})`}
     >

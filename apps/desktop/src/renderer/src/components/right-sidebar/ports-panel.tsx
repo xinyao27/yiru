@@ -5,7 +5,11 @@ import {
   Pencil,
   HardDrives as Server,
   Cube as Box,
-  Info
+  Info,
+  ArrowSquareOut as ExternalLink,
+  Plus,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 /* oxlint-disable max-lines -- Why: co-locates forwarded list, detected list, modal form, and
 per-entry actions in one file to keep the data flow straightforward. */
@@ -13,12 +17,6 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  Plus,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   ContextMenu,
@@ -120,7 +118,7 @@ function workspacePortAsExternal(port: WorkspacePort & { kind: 'workspace' }): W
 }
 
 const LOCAL_PORT_MENU_CONTENT_CLASS =
-  '!rounded-md !border-border/60 !bg-popover !text-popover-foreground !shadow-[0_10px_24px_rgba(0,0,0,0.18)] !backdrop-blur-none'
+  '!rounded-md !border-border/60 !bg-popover !text-popover-foreground !backdrop-blur-none'
 const LOCAL_PORT_MENU_ITEM_CLASS =
   'rounded-md focus:bg-accent focus:text-accent-foreground dark:focus:bg-accent'
 const LOCAL_PORT_MENU_LABEL_CLASS = 'px-2 py-1 text-[11px] font-semibold text-muted-foreground'
@@ -478,7 +476,7 @@ function LocalPortSection({
     <div className="px-3 pt-2">
       <button
         type="button"
-        className="border-border/40 bg-background text-muted-foreground hover:text-foreground sticky top-0 z-10 mb-1 flex w-full items-center gap-1 border-b py-1 text-left transition-colors"
+        className="border-border/40 bg-background text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent sticky top-0 z-10 mb-1 flex w-full items-center gap-1 border-b py-1 text-left transition-colors outline-none"
         onClick={onToggle}
         aria-expanded={!collapsed}
         aria-controls={`local-port-section-${id}`}
@@ -590,7 +588,7 @@ function LocalPortRow({
         <ContextMenuTrigger
           render={
             <div
-              className="focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-2 rounded focus:outline-none focus-visible:ring-1"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded focus:outline-none"
               tabIndex={0}
               aria-label={translate(
                 'auto.components.right.sidebar.PortsPanel.5be4f7f727',
@@ -928,7 +926,7 @@ function SshPortsPanel(): React.JSX.Element {
         </span>
         <button
           type="button"
-          className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+          className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent flex items-center gap-1 text-xs transition-colors outline-none"
           onClick={() =>
             setDialogState({ mode: 'add', defaults: { targetId: activeConnectionId ?? undefined } })
           }
@@ -943,7 +941,7 @@ function SshPortsPanel(): React.JSX.Element {
         <div className="px-3 pt-2">
           <button
             type="button"
-            className="mb-1 flex w-full items-center gap-1 text-left"
+            className="focus-visible:bg-accent mb-1 flex w-full items-center gap-1 text-left outline-none"
             onClick={() => setForwardedCollapsed((v) => !v)}
           >
             <ChevronRight
@@ -975,7 +973,7 @@ function SshPortsPanel(): React.JSX.Element {
         <div className="px-3 pt-2">
           <button
             type="button"
-            className="mb-1 flex w-full items-center gap-1 text-left"
+            className="focus-visible:bg-accent mb-1 flex w-full items-center gap-1 text-left outline-none"
             onClick={() => setDetectedCollapsed((v) => !v)}
           >
             <ChevronRight
@@ -1015,7 +1013,7 @@ function SshPortsPanel(): React.JSX.Element {
           </p>
           <button
             type="button"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded px-3 py-1.5 text-xs transition-colors"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 rounded px-3 py-1.5 text-xs transition-colors outline-none"
             onClick={() =>
               setDialogState({
                 mode: 'add',
@@ -1159,7 +1157,7 @@ function ForwardedPortRow({
       <div className="can-hover:opacity-0 flex items-center gap-0.5 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
         <button
           type="button"
-          className="hover:bg-accent text-muted-foreground hover:text-foreground rounded p-1 transition-colors"
+          className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 transition-colors outline-none"
           onClick={handleOpenBrowserButtonClick}
           title={openBrowserTitle}
         >
@@ -1167,7 +1165,7 @@ function ForwardedPortRow({
         </button>
         <button
           type="button"
-          className="hover:bg-accent text-muted-foreground hover:text-foreground rounded p-1 transition-colors"
+          className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 transition-colors outline-none"
           onClick={handleCopyButtonClick}
           title={translate(
             'auto.components.right.sidebar.PortsPanel.1004af16ab',
@@ -1179,7 +1177,7 @@ function ForwardedPortRow({
         </button>
         <button
           type="button"
-          className="hover:bg-accent text-muted-foreground hover:text-foreground rounded p-1 transition-colors"
+          className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 transition-colors outline-none"
           onClick={handleEditButtonClick}
           title={translate('auto.components.right.sidebar.PortsPanel.b3548e59f4', 'Edit')}
         >
@@ -1188,6 +1186,7 @@ function ForwardedPortRow({
         <button
           type="button"
           className={cn(
+            'outline-none focus-visible:bg-accent focus-visible:text-foreground',
             'p-1 rounded hover:bg-accent transition-colors text-muted-foreground hover:text-foreground',
             removing && 'opacity-50'
           )}
@@ -1231,7 +1230,7 @@ function DetectedPortRow({
       </div>
       <button
         type="button"
-        className="can-hover:opacity-0 bg-accent hover:bg-accent/80 text-foreground rounded px-2 py-0.5 text-[11px] transition-opacity group-hover:opacity-100"
+        className="can-hover:opacity-0 bg-accent hover:bg-accent/80 text-foreground focus-visible:bg-accent/80 rounded px-2 py-0.5 text-[11px] transition-opacity outline-none group-hover:opacity-100"
         onClick={onForward}
       >
         {translate('auto.components.right.sidebar.PortsPanel.c9d106547a', 'Forward')}
@@ -1245,7 +1244,7 @@ function digitsOnly(value: string): string {
 }
 
 const INPUT_CLASS =
-  'block w-full mt-0.5 px-2 py-1.5 text-xs rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring'
+  'block w-full mt-0.5 px-2 py-1.5 text-xs rounded border border-border bg-background text-foreground outline-none focus:border-ring'
 
 function PortForwardDialog({
   state,
@@ -1448,7 +1447,7 @@ function PortForwardForm({
                 setLocalPort(Number.isNaN(parsed) ? '' : safeLocalPort(parsed).toString())
               }
             }}
-            className={INPUT_CLASS}
+            className={cn('outline-none focus-visible:border-ring', INPUT_CLASS)}
             placeholder="3000"
             autoFocus
             required
@@ -1464,7 +1463,7 @@ function PortForwardForm({
             inputMode="numeric"
             value={localPort}
             onChange={(e) => setLocalPort(digitsOnly(e.target.value))}
-            className={INPUT_CLASS}
+            className={cn('outline-none focus-visible:border-ring', INPUT_CLASS)}
             placeholder={translate(
               'auto.components.right.sidebar.PortsPanel.d57545ff92',
               'Same as remote'
@@ -1480,7 +1479,7 @@ function PortForwardForm({
             type="text"
             value={remoteHost}
             onChange={(e) => setRemoteHost(e.target.value)}
-            className={INPUT_CLASS}
+            className={cn('outline-none focus-visible:border-ring', INPUT_CLASS)}
             placeholder={translate(
               'auto.components.right.sidebar.PortsPanel.17bea6e391',
               'localhost'
@@ -1496,7 +1495,7 @@ function PortForwardForm({
             type="text"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            className={INPUT_CLASS}
+            className={cn('outline-none focus-visible:border-ring', INPUT_CLASS)}
             placeholder={translate(
               'auto.components.right.sidebar.PortsPanel.4eb801ce93',
               'dev-server'

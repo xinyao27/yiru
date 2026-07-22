@@ -3,13 +3,13 @@ import {
   Info,
   Gear as Settings,
   Sparkle as Sparkles,
-  Warning as TriangleAlert
+  Warning as TriangleAlert,
+  ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import React from 'react'
 
 import AgentCombobox from '@/components/agent/agent-combobox'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -251,7 +251,7 @@ export function SourceControlAgentActionDialogForm({
             rows={7}
             value={commandTemplate}
             onChange={(event) => onCommandTemplateChange(event.target.value)}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring box-border min-h-[6.5rem] w-full max-w-full min-w-0 resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none focus-visible:ring-1"
+            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 box-border min-h-[6.5rem] w-full max-w-full min-w-0 resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none"
             spellCheck={false}
           />
           <SourceControlActionVariableChips
@@ -296,7 +296,7 @@ export function SourceControlAgentActionDialogForm({
           <div
             className={cn(
               'space-y-2 rounded-md border border-border bg-background p-3',
-              saveLaunchRecipe && 'border-foreground shadow-[inset_0_0_0_1px_var(--foreground)]'
+              saveLaunchRecipe && 'border-foreground  '
             )}
           >
             <label className="grid cursor-pointer grid-cols-[1rem_1fr] items-start gap-2.5">
@@ -304,7 +304,7 @@ export function SourceControlAgentActionDialogForm({
                 type="checkbox"
                 checked={saveLaunchRecipe}
                 onChange={(event) => onSaveLaunchRecipeChange(event.target.checked)}
-                className="accent-foreground mt-0.5 size-3.5"
+                className="accent-foreground focus-visible:border-ring mt-0.5 size-3.5 outline-none"
               />
               <span>
                 <span className="block text-xs font-semibold">

@@ -4,15 +4,13 @@ import {
   Pencil,
   Square,
   Trash as Trash2,
-  TextT as Type
-} from '@phosphor-icons/react'
-import React from 'react'
-
-import {
+  TextT as Type,
   ArrowUpRight,
   ArrowClockwise as Redo2,
   ArrowCounterClockwise as Undo2
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import React from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -100,7 +98,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
 }: MarkupToolbarProps) {
   return (
     <TooltipProvider delay={300}>
-      <div className="border-border bg-card flex items-center gap-1 rounded-md border px-1.5 py-1 shadow-md">
+      <div className="border-border bg-card flex items-center gap-1 rounded-md border px-1.5 py-1">
         {toolItems().map((item) => (
           <IconButton
             key={item.kind}
@@ -151,8 +149,9 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   aria-label={swatch}
                   onClick={() => onColorChange(swatch)}
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     'size-6 rounded-full border',
-                    color === swatch ? 'border-ring ring-1 ring-ring' : 'border-border'
+                    color === swatch ? 'border-ring' : 'border-border'
                   )}
                   style={{ backgroundColor: swatch }}
                 />
@@ -170,6 +169,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   )}
                   onClick={() => onWidthChange(option)}
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     'flex h-6 flex-1 items-center justify-center rounded-sm border',
                     width === option
                       ? 'border-ring bg-accent'
@@ -226,6 +226,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   )}
                   onClick={() => onFontSizeChange(size)}
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     'flex h-6 min-w-7 items-center justify-center rounded-sm border px-1 text-[11px] tabular-nums',
                     fontSize === size
                       ? 'border-ring bg-accent'

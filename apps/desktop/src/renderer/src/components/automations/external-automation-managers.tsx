@@ -115,7 +115,7 @@ export function ExternalAutomationManagers({
   const automationCount = managers.reduce((sum, manager) => sum + manager.jobs.length, 0)
 
   return (
-    <div className="border-border/50 bg-muted/20 rounded-md border shadow-sm">
+    <div className="border-border/50 bg-muted/20 rounded-md border">
       <div className="border-border/50 flex items-center justify-between border-b px-3 py-2">
         <div>
           <div className="text-sm font-medium">

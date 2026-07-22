@@ -15,20 +15,18 @@ import {
   DotsThree as MoreHorizontal,
   Pencil,
   SlidersHorizontal,
-  Trash
+  Trash,
+  Plus,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowSquareOut as ExternalLink,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: legacy checks-panel sub-components for checks, conflicts,
 and threaded PR comments still share tightly coupled selection and composer state. */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  Plus,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  ArrowSquareOut as ExternalLink,
-  X
-} from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import {
   Accordion,
@@ -1154,7 +1152,7 @@ export function ChecksList({
       {checks.length > 0 && (
         <button
           type="button"
-          className="border-border text-muted-foreground hover:bg-accent/40 hover:text-foreground flex w-full items-center gap-3 border-b px-3 py-2 text-left text-[10px] transition-colors"
+          className="border-border text-muted-foreground hover:bg-accent/40 hover:text-foreground focus-visible:bg-accent/40 focus-visible:text-foreground flex w-full items-center gap-3 border-b px-3 py-2 text-left text-[10px] transition-colors outline-none"
           onClick={() => setChecksExpanded((expanded) => !expanded)}
           aria-expanded={checksExpanded}
         >
@@ -1368,7 +1366,7 @@ function CopyButton({
   return (
     <button
       ref={setCopyButtonRef}
-      className="hover:bg-accent text-muted-foreground/40 hover:text-foreground shrink-0 rounded p-1 transition-colors"
+      className="hover:bg-accent text-muted-foreground/40 hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground shrink-0 rounded p-1 transition-colors outline-none"
       title={title}
       onClick={handleCopy}
     >
@@ -1421,7 +1419,7 @@ function ResolveButton({
         <LoadingIndicator className="text-muted-foreground size-3 shrink-0" />
       ) : (
         <button
-          className="text-muted-foreground hover:text-foreground hover:bg-accent shrink-0 rounded px-1.5 py-0.5 text-[10px] transition-colors"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:text-foreground focus-visible:bg-accent shrink-0 rounded px-1.5 py-0.5 text-[10px] transition-colors outline-none"
           onClick={handleClick}
         >
           {isResolved
@@ -1490,7 +1488,7 @@ function CommentMoreMenu({
         render={
           <button
             type="button"
-            className="text-muted-foreground/40 hover:bg-accent hover:text-foreground shrink-0 rounded p-1 transition-colors"
+            className="text-muted-foreground/40 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground shrink-0 rounded p-1 transition-colors outline-none"
             aria-label={translate(
               'auto.components.right.sidebar.checks.panel.content.74c6885b8a',
               'More comment actions'
@@ -1594,7 +1592,7 @@ function QueueForAgentButton({
     <button
       type="button"
       className={cn(
-        'inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] text-muted-foreground transition-[background-color,color,opacity] hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+        'inline-flex shrink-0 items-center gap-0.5 rounded border border-transparent px-1.5 py-0.5 text-[10px] text-muted-foreground transition-[background-color,color,opacity] outline-none hover:bg-accent hover:text-foreground focus-visible:border-ring',
         className
       )}
       aria-label={label}
@@ -1759,7 +1757,7 @@ function CommentRow({
         )}
       {showReply && onReply && (
         <button
-          className="text-muted-foreground hover:bg-accent hover:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px] transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px] transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
           title={
             replyDisabled
               ? replyDisabledReason
@@ -1902,7 +1900,7 @@ function CommentRow({
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               onClick={(event) => event.stopPropagation()}
-              className="border-border bg-background text-foreground min-h-[60px] w-full resize-y rounded-md border px-2 py-1.5 text-[11px] leading-snug"
+              className="border-border bg-background text-foreground focus-visible:border-ring min-h-[60px] w-full resize-y rounded-md border px-2 py-1.5 text-[11px] leading-snug outline-none"
             />
             <div className="flex justify-end gap-1">
               <Button
@@ -2610,6 +2608,7 @@ export function PRCommentsList({
                   key={filter.value}
                   type="button"
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     presentation.audienceTab,
                     isActive && presentation.audienceTabActive
                   )}

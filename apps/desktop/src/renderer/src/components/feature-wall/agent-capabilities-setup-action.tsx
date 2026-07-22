@@ -1,9 +1,14 @@
-import { Check, Globe as Globe2, Monitor as MonitorCog, Terminal } from '@phosphor-icons/react'
+import {
+  Check,
+  Globe as Globe2,
+  Monitor as MonitorCog,
+  Terminal,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { FlowArrow as Workflow } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -267,9 +272,9 @@ function AgentCapabilitySetupChecklist(props: {
               aria-label={`${selected ? 'Disable' : 'Enable'} ${row.title}`}
               className={cn(
                 'flex min-h-24 flex-col rounded-lg border px-4 py-3 text-left transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'outline-none focus-visible:border-ring',
                 selected
-                  ? 'border-ring bg-accent text-foreground ring-2 ring-ring/25'
+                  ? 'border-ring bg-accent text-foreground'
                   : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
               )}
               onClick={() => props.onChange({ ...props.value, [row.id]: !selected })}

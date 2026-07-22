@@ -1,7 +1,6 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
 import React from 'react'
 
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
@@ -189,7 +188,7 @@ export function ShortcutFilterRail({
               type="button"
               onClick={() => onFilterChange(option.id)}
               className={cn(
-                'flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                'flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none transition-colors',
                 filter === option.id
                   ? 'bg-accent font-medium text-accent-foreground'
                   : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'

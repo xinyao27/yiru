@@ -5,17 +5,18 @@ import * as React from 'react'
 import { cn } from '@/lib/class-names'
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md cursor-pointer text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  // Why: every button suppresses the UA ring locally and replaces it with a flat border focus state.
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent cursor-pointer text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
           'bg-primary text-primary-foreground hover:bg-[color-mix(in_srgb,var(--primary)_90%,var(--background))]',
         destructive:
-          'bg-destructive text-white hover:bg-[color-mix(in_srgb,var(--destructive)_90%,var(--background))] focus-visible:ring-destructive/20 dark:bg-destructive dark:focus-visible:ring-destructive/40',
+          'bg-destructive text-white hover:bg-[color-mix(in_srgb,var(--destructive)_90%,var(--background))] dark:bg-destructive',
         // Why: toolbar controls must keep an opaque resting surface in both themes.
         outline:
-          'border border-border bg-background text-foreground shadow-xs hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
+          'border border-border bg-background text-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',

@@ -1,29 +1,21 @@
 import { useDroppable } from '@dnd-kit/core'
-import { DotsThree as Ellipsis } from '@phosphor-icons/react'
 import { Suspense, useMemo } from 'react'
 
-import { X } from '@/components/regular-icons'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import TabBar from '../tab-bar/tab-bar'
+import { TabBarMoreButton } from '../tab-bar/tab-bar-more-button'
 import { TabBarOpenInMenuButton } from '../tab-bar/tab-bar-open-in-menu-button'
-import { TabBarQuickCommandsButton } from '../tab-bar/tab-bar-quick-commands-button'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
 import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
 import { resolveGroupTabFromVisibleId } from './tab-group-visible-id'
 import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './use-tab-drag-split'
 import { useTabGroupWorkspaceModel } from './use-tab-group-workspace-model'
 import { WorkspacePaneFrame } from './workspace-pane-frame'
+import { WorkspacePanelTabContent } from './workspace-panel-tab-content'
 
 const EditorPanel = lazy(() => import('../editor/editor-panel'))
 
@@ -38,7 +30,7 @@ export default function TabGroupPanel({
   suppressLeftBorder = false,
   suppressRightBorder = false,
   suppressBottomBorder = false,
-  reserveClosedExplorerToggleSpace,
+  reserveWindowControlsSpace,
   reserveCollapsedSidebarHeaderSpace,
   isTabDragActive = false,
   hoveredTabInsertion = null
@@ -53,13 +45,17 @@ export default function TabGroupPanel({
   suppressLeftBorder?: boolean
   suppressRightBorder?: boolean
   suppressBottomBorder?: boolean
-  reserveClosedExplorerToggleSpace: boolean
+  reserveWindowControlsSpace: boolean
   reserveCollapsedSidebarHeaderSpace: boolean
   isTabDragActive?: boolean
   hoveredTabInsertion?: HoveredTabInsertion | null
 }): React.JSX.Element {
   const model = useTabGroupWorkspaceModel({ groupId, worktreeId })
   const { activeTab, browserItems, commands, editorItems, tabBarOrder, terminalTabs } = model
+  const activeWorkspacePanelType =
+    activeTab && isWorkspacePanelTabContentType(activeTab.contentType)
+      ? activeTab.contentType
+      : null
   const { setNodeRef: setBodyDropRef } = useDroppable({
     id: getTabPaneBodyDroppableId(groupId),
     data: {
@@ -132,14 +128,17 @@ export default function TabGroupPanel({
       editorFiles={editorItems}
       browserTabs={browserItems}
       activeFileId={
-        activeTab?.contentType === 'terminal' ||
+        !activeTab ||
+        activeTab.contentType === 'terminal' ||
         activeTab?.contentType === 'browser' ||
-        activeTab?.contentType === 'simulator'
+        activeTab?.contentType === 'simulator' ||
+        isWorkspacePanelTabContentType(activeTab.contentType)
           ? null
-          : activeTab?.id
+          : activeTab.id
       }
       activeBrowserTabId={activeTab?.contentType === 'browser' ? activeTab.entityId : null}
       activeSimulatorTabId={activeTab?.contentType === 'simulator' ? activeTab.id : null}
+      activeWorkspacePanelTabId={activeWorkspacePanelType ? activeTab?.id : null}
       activeTabType={
         activeTab?.contentType === 'terminal'
           ? 'terminal'
@@ -152,6 +151,7 @@ export default function TabGroupPanel({
       onActivateFile={commands.activateEditor}
       onCloseFile={commands.closeItem}
       onActivateBrowserTab={commands.activateBrowser}
+      onActivateWorkspacePanelTab={commands.activateWorkspacePanel}
       onCloseBrowserTab={(browserTabId) => {
         const item = model.groupTabs.find(
           (candidate) => candidate.entityId === browserTabId && candidate.contentType === 'browser'
@@ -187,7 +187,6 @@ export default function TabGroupPanel({
     />
   )
 
-  const menuButtonClassName = 'my-auto h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground'
   // Why: focused-only — workspace actions and Close split pane stay with the
   // active pane so unfocused strips stay compact.
   const focusedActionChromeClassName = cn(
@@ -213,60 +212,18 @@ export default function TabGroupPanel({
       tabBar={tabBar}
       trailingActions={
         <div className={focusedActionChromeClassName}>
-          {isFocused ? (
-            <TabBarQuickCommandsButton worktreeId={worktreeId} groupId={groupId} />
-          ) : null}
           {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
-          {isFocused && hasSplitGroups ? (
-            <Tooltip>
-              <DropdownMenu modal={false}>
-                <TooltipTrigger
-                  render={
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon-xs"
-                          aria-label={translate(
-                            'auto.components.tab.group.TabGroupPanel.9acaf92093',
-                            'Pane Actions'
-                          )}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                          }}
-                          className={menuButtonClassName}
-                        >
-                          <Ellipsis className="size-4" />
-                        </Button>
-                      }
-                    />
-                  }
-                />
-                <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => {
-                      commands.closeGroup()
-                    }}
-                  >
-                    <X className="size-4" />
-                    {translate(
-                      'auto.components.tab.group.TabGroupPanel.closePaneColumn',
-                      'Close split pane'
-                    )}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <TooltipContent side="bottom" sideOffset={6}>
-                {translate('auto.components.tab.group.TabGroupPanel.9acaf92093', 'Pane Actions')}
-              </TooltipContent>
-            </Tooltip>
+          {isFocused ? (
+            <TabBarMoreButton
+              worktreeId={worktreeId}
+              groupId={groupId}
+              onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
+            />
           ) : null}
         </div>
       }
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}
-      reserveClosedExplorerToggleSpace={reserveClosedExplorerToggleSpace}
+      reserveWindowControlsSpace={reserveWindowControlsSpace}
       rootClassName={splitFrameClassName}
       rootProps={{
         onPointerDown: commands.focusGroup,
@@ -290,7 +247,8 @@ export default function TabGroupPanel({
       {activeTab &&
         activeTab.contentType !== 'terminal' &&
         activeTab.contentType !== 'browser' &&
-        activeTab.contentType !== 'simulator' && (
+        activeTab.contentType !== 'simulator' &&
+        !isWorkspacePanelTabContentType(activeTab.contentType) && (
           <div className="absolute inset-0 flex min-h-0 min-w-0">
             {/* Why: split groups render editor content inside a plain relative pane body
                 instead of the legacy flex column in Terminal.tsx. */}
@@ -308,6 +266,10 @@ export default function TabGroupPanel({
             </Suspense>
           </div>
         )}
+
+      {activeWorkspacePanelType && activeTab ? (
+        <WorkspacePanelTabContent panel={activeWorkspacePanelType} panelTabId={activeTab.id} />
+      ) : null}
 
       {/* Why: terminal/browser/simulator panes are rendered at the worktree level by
           overlay layers and absolutely positioned over this body element

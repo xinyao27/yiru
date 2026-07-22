@@ -1,12 +1,13 @@
-import { Check, Pencil } from '@phosphor-icons/react'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
 import {
+  Check,
+  Pencil,
   CaretUpDown as ChevronsUpDown,
   Plus,
   ArrowCounterClockwise as RefreshCcw
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
@@ -273,7 +274,7 @@ export default function SparseCheckoutPresetSelect({
             ) : null}
             <button
               type="button"
-              className="hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-xs"
+              className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-xs outline-none"
               onClick={handleRetryLoadPresets}
             >
               <RefreshCcw className="text-muted-foreground size-3.5" />
@@ -295,7 +296,7 @@ export default function SparseCheckoutPresetSelect({
             <div className="py-1">
               <button
                 type="button"
-                className="hover:bg-accent hover:text-accent-foreground mx-1 flex h-9 w-[calc(100%-0.5rem)] items-center gap-2 rounded-md px-2 text-left text-xs"
+                className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground mx-1 flex h-9 w-[calc(100%-0.5rem)] items-center gap-2 rounded-md px-2 text-left text-xs outline-none"
                 onClick={handleSelectOff}
               >
                 <Check className={cn('size-4', selectedPreset ? 'opacity-0' : 'opacity-100')} />
@@ -313,7 +314,7 @@ export default function SparseCheckoutPresetSelect({
                     >
                       <button
                         type="button"
-                        className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-l-md px-2 text-left text-xs"
+                        className="focus-visible:bg-accent flex h-9 min-w-0 flex-1 items-center gap-2 rounded-l-md px-2 text-left text-xs outline-none"
                         onClick={() => handleSelectPreset(preset)}
                       >
                         <Check

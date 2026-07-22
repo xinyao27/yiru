@@ -1,13 +1,16 @@
 import { createContext, useContext } from 'react'
 import type React from 'react'
+import type { OrbState } from 'thinking-orbs'
 
 import { cn } from '@/lib/class-names'
 
 import {
   DEFAULT_LOADER_STYLE,
   normalizeLoaderStyle,
-  type LoaderStyle
+  type LoaderStyle,
+  type ThinkingOrbLoaderStyle
 } from '../../../shared/loader-style'
+import { ThinkingOrbLoader } from './thinking-orb-loader'
 
 const LoadingIndicatorStyleContext = createContext<LoaderStyle>(DEFAULT_LOADER_STYLE)
 
@@ -128,7 +131,24 @@ function EscaladeLoader(): React.JSX.Element {
   )
 }
 
+const THINKING_ORB_STATE_BY_LOADER_STYLE = {
+  'thinking-orb-working': 'working',
+  'thinking-orb-searching': 'searching',
+  'thinking-orb-solving': 'solving',
+  'thinking-orb-listening': 'listening',
+  'thinking-orb-composing': 'composing',
+  'thinking-orb-shaping': 'shaping'
+} satisfies Record<ThinkingOrbLoaderStyle, OrbState>
+
+function isThinkingOrbLoaderStyle(loaderStyle: LoaderStyle): loaderStyle is ThinkingOrbLoaderStyle {
+  return loaderStyle in THINKING_ORB_STATE_BY_LOADER_STYLE
+}
+
 function LoaderVisual({ loaderStyle }: { loaderStyle: LoaderStyle }): React.JSX.Element {
+  if (isThinkingOrbLoaderStyle(loaderStyle)) {
+    return <ThinkingOrbLoader state={THINKING_ORB_STATE_BY_LOADER_STYLE[loaderStyle]} />
+  }
+
   switch (loaderStyle) {
     case 'drawing':
       return <DrawingLoader />

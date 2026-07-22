@@ -1,7 +1,6 @@
-import { FolderOpen } from '@phosphor-icons/react'
+import { FolderOpen, FileArrowUp as FileUp } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { FileArrowUp as FileUp } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -170,7 +169,7 @@ export function WarpThemeImportModal({
                 </span>
                 <button
                   type="button"
-                  className="text-foreground text-xs font-medium hover:underline"
+                  className="text-foreground focus-visible:bg-accent text-xs font-medium outline-none hover:underline"
                   onClick={() => handleToggleAll(!allSelected)}
                 >
                   {allSelected
@@ -197,6 +196,7 @@ export function WarpThemeImportModal({
                           aria-pressed={selected}
                           onClick={() => handleToggleTheme(theme.id)}
                           className={cn(
+                            'outline-none focus-visible:bg-accent',
                             'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors',
                             selected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
                           )}

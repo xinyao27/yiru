@@ -1,8 +1,13 @@
-import { Folder, FolderOpen, Link, Prohibit as CircleSlash } from '@phosphor-icons/react'
+import {
+  Folder,
+  FolderOpen,
+  Link,
+  Prohibit as CircleSlash,
+  CaretRight as ChevronRight
+} from '@phosphor-icons/react'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -52,10 +57,11 @@ export function FileExplorerTreeRowButton({
       data-file-explorer-row=""
       data-selected={isSelected ? 'true' : undefined}
       className={cn(
+        'outline-none focus-visible:bg-accent focus-visible:text-foreground',
         'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
         !isSelected && 'hover:bg-accent hover:text-foreground',
         isSelected && 'text-accent-foreground',
-        isFlashing && 'bg-accent ring-1 ring-inset ring-ring',
+        isFlashing && 'bg-accent',
         className
       )}
       style={{ ...style, paddingLeft: `${node.depth * 16 + 8}px` }}

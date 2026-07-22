@@ -11,7 +11,10 @@ import {
   HardDrive as ServerOff,
   Shapes,
   SlidersHorizontal,
-  Trash as Trash2
+  Trash as Trash2,
+  CaretDown as ChevronDown,
+  FolderPlus,
+  Plus
 } from '@phosphor-icons/react'
 import {
   measureElement as measureVirtualElementSize,
@@ -24,7 +27,6 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown, FolderPlus, Plus } from '@/components/regular-icons'
 import { RepoForkIndicator } from '@/components/repo/repo-fork-indicator'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'
@@ -808,7 +810,7 @@ function HostSectionHeader({
         data-host-header-drag-id={row.hostId}
         aria-expanded={!row.collapsed}
         className={cn(
-          'group/host-header flex h-8 w-full cursor-pointer items-center gap-2 rounded-md border px-2 text-left transition-all',
+          'group/host-header flex h-8 w-full cursor-pointer items-center gap-2 rounded-md border px-2 text-left transition-all outline-none focus-visible:border-ring',
           onDragPointerDown && 'cursor-grab active:cursor-grabbing',
           isBlocked
             ? 'border-destructive/40 bg-destructive/10'
@@ -4016,7 +4018,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         onWheel={markDirectScrollInput}
         onDragOver={handleWorktreeDragOver}
         onDrop={handleWorktreeDrop}
-        className="worktree-sidebar-scrollbar scrollbar-sleek focus-visible:ring-ring h-full overflow-x-hidden overflow-y-auto pt-px pl-1 outline-none focus-visible:ring-1 focus-visible:ring-inset"
+        className="worktree-sidebar-scrollbar scrollbar-sleek h-full overflow-x-hidden overflow-y-auto pt-px pl-1 outline-none"
         style={WORKTREE_SIDEBAR_SCROLL_STYLE}
       >
         <div
@@ -4288,16 +4290,13 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       isDraggableRepoHeader || isDraggableProjectGroupHeader
                         ? 'cursor-grab active:cursor-grabbing'
                         : 'cursor-pointer',
-                      highlightedRevealRowKey === row.key &&
-                        'rounded-md bg-sidebar-accent ring-1 ring-sidebar-ring/50',
+                      highlightedRevealRowKey === row.key && 'rounded-md bg-sidebar-accent    ',
                       (isDraggingThis || isDraggingThisProjectGroup) &&
-                        'bg-accent/80 ring-1 ring-ring/40 shadow-md rounded-md scale-[1.01]',
+                        'bg-accent/80       rounded-md scale-[1.01]',
                       headerWorkspaceStatus &&
                         dragOverStatus === headerWorkspaceStatus &&
-                        'rounded-md bg-sidebar-accent ring-1 ring-sidebar-ring/40',
-                      isPinnedHeader &&
-                        pinDragOver &&
-                        'rounded-md bg-sidebar-accent ring-1 ring-sidebar-ring/40',
+                        'rounded-md bg-sidebar-accent    ',
+                      isPinnedHeader && pinDragOver && 'rounded-md bg-sidebar-accent    ',
                       row.repo && 'overflow-hidden'
                     )}
                     icon={
@@ -4716,7 +4715,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                               createState?.disabled ? (
                                 <span
                                   className={cn(
-                                    'inline-flex cursor-not-allowed transition-[margin,max-width,opacity]',
+                                    'inline-flex cursor-not-allowed transition-[margin,max-width,opacity] outline-none focus-visible:bg-accent',
                                     REPO_HEADER_ACTION_REVEAL_CLASS
                                   )}
                                   data-repo-header-action=""
@@ -6775,7 +6774,7 @@ const WorktreeList = React.memo(function WorktreeList({
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors"
+                className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors outline-none"
               >
                 <CircleX className="size-3.5" />
                 {translate('auto.components.sidebar.WorktreeList.370c6a55dd', 'Clear Filters')}

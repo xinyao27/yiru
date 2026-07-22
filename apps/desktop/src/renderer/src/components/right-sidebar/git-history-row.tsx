@@ -1,6 +1,6 @@
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -159,7 +159,7 @@ export const GitHistoryRow = React.forwardRef<HTMLElement, GitHistoryRowProps>(
         {...rootProps}
         ref={ref as React.Ref<HTMLButtonElement>}
         type="button"
-        className={rowClassName}
+        className={cn('outline-none focus-visible:bg-accent', rowClassName)}
         title={rowTooltip}
         aria-expanded={canExpand ? expanded : undefined}
         aria-label={

@@ -331,10 +331,10 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
   },
   {
     id: 'sidebar.right.toggle',
-    title: 'Toggle Right Sidebar',
+    title: 'Open Explorer Tab',
     group: 'Global',
     scope: 'global',
-    searchKeywords: ['shortcut', 'sidebar', 'right'],
+    searchKeywords: ['shortcut', 'explorer', 'tab', 'files'],
     defaultBindings: platformBindings(['Mod+L'])
   },
   {

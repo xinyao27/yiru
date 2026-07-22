@@ -103,7 +103,7 @@ function SuggestionToastBody({
         <button
           type="button"
           onClick={openSetting}
-          className="text-popover-foreground hover:text-primary cursor-pointer font-medium underline underline-offset-2"
+          className="text-popover-foreground hover:text-primary focus-visible:text-primary focus-visible:bg-accent cursor-pointer font-medium underline underline-offset-2 outline-none"
         >
           {translate(
             'auto.components.sidebar.local.base.ref.suggestion.toast.3d260e1a5d',

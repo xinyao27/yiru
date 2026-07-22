@@ -1,9 +1,8 @@
-import { GithubLogo as Github } from '@phosphor-icons/react'
+import { GithubLogo as Github, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -199,7 +198,7 @@ export function SidebarFeedbackDialog({
             'What could we improve?'
           )}
           rows={7}
-          className="border-border bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring min-h-32 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="border-border bg-background placeholder:text-muted-foreground min-h-32 w-full rounded-md border px-3 py-2 text-sm outline-none"
         />
 
         <div className="border-border/70 bg-muted/30 min-h-9 rounded-md border px-3 py-2">
@@ -218,6 +217,7 @@ export function SidebarFeedbackDialog({
                   checked={submitAnonymously}
                   onChange={(event) => setSubmitAnonymously(event.target.checked)}
                   className={cn(
+                    'outline-none focus-visible:border-ring',
                     'size-3.5 rounded border border-border bg-background align-middle',
                     'accent-foreground'
                   )}

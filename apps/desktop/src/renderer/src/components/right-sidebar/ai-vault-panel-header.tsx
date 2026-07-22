@@ -1,7 +1,6 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, ArrowClockwise as RefreshCw, X } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -160,7 +159,7 @@ export function AiVaultPanelHeader({
         />
       </div>
 
-      <div className="border-sidebar-border bg-input/50 focus-within:border-sidebar-ring focus-within:ring-sidebar-ring/30 mt-2 flex h-8 items-center gap-1.5 rounded-md border px-2 focus-within:ring-[2px]">
+      <div className="border-sidebar-border bg-input/50 focus-within:border-sidebar-ring mt-2 flex h-8 items-center gap-1.5 rounded-md border px-2">
         <Search className="text-muted-foreground size-3.5 shrink-0" />
         <input
           value={query}

@@ -4,7 +4,11 @@ import {
   Lock,
   LockOpen,
   ShieldCheck,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowSquareOut as ExternalLink,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: AccountsPane owns all per-provider account UI
    (Claude, Codex, Gemini, OpenCode Go, and future providers). Each provider's
@@ -15,12 +19,6 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  Plus,
-  ArrowClockwise as RefreshCw,
-  X
-} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { markLiveCodexSessionsForRestart } from '@/lib/codex-session-restart'
@@ -838,6 +836,7 @@ export function AccountsPane({
               }
               disabled={claudeAction !== 'idle' || accountRuntimeUnavailable}
               className={cn(
+                'outline-none focus-visible:border-border focus-visible:bg-accent/8',
                 'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                 systemClaudeActive
                   ? 'border-foreground/20 bg-accent/15'
@@ -922,7 +921,7 @@ export function AccountsPane({
                           )
                         }}
                         disabled={isBusy}
-                        className="flex min-w-0 flex-1 flex-col gap-0.5 text-left disabled:cursor-default"
+                        className="focus-visible:bg-accent flex min-w-0 flex-1 flex-col gap-0.5 text-left outline-none disabled:cursor-default"
                       >
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="truncate text-sm font-medium">{account.email}</span>
@@ -1133,6 +1132,7 @@ export function AccountsPane({
               }
               disabled={codexAction !== 'idle' || accountRuntimeUnavailable}
               className={cn(
+                'outline-none focus-visible:border-border focus-visible:bg-accent/8',
                 'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                 systemCodexNeedsReauthentication
                   ? 'border-destructive/50 bg-destructive/5'
@@ -1256,7 +1256,7 @@ export function AccountsPane({
                           )
                         }}
                         disabled={isBusy}
-                        className="flex min-w-0 flex-1 flex-col gap-0.5 text-left disabled:cursor-default"
+                        className="focus-visible:bg-accent flex min-w-0 flex-1 flex-col gap-0.5 text-left outline-none disabled:cursor-default"
                       >
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="truncate text-sm font-medium">{account.email}</span>
@@ -1435,13 +1435,14 @@ export function AccountsPane({
               })
             }}
             className={cn(
+              'outline-none focus-visible:border-ring',
               'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
               settings.geminiCliOAuthEnabled ? 'bg-foreground' : 'bg-muted-foreground/30'
             )}
           >
             <span
               className={cn(
-                'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+                'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
                 settings.geminiCliOAuthEnabled ? 'translate-x-4' : 'translate-x-0.5'
               )}
             />
@@ -1612,7 +1613,7 @@ export function AccountsPane({
             href={MINIMAX_CONSOLE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
+            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
           >
             {translate('auto.components.settings.AccountsPane.0d8e77bc40', 'Open console')}
             <ExternalLink className="size-3" />

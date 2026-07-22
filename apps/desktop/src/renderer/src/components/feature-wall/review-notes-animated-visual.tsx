@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react'
-import type { JSX } from 'react'
+import { type JSX, useEffect, useRef } from 'react'
 
 import { translate } from '@/i18n/i18n'
 
@@ -12,6 +11,7 @@ import {
   MessageIcon,
   NOTE_TARGETS,
   PlusIcon,
+  ReviewAnimatedVisualButton,
   SendIcon
 } from './review-animated-visual-shared'
 import { ReviewDiffRows } from './review-notes-diff-rows'
@@ -350,7 +350,7 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
           )}
         </span>
         <span className="ravs-ai-chip" data-ai-notes-chip>
-          <button type="button" className="ravs-count-btn">
+          <ReviewAnimatedVisualButton className="ravs-count-btn">
             <MessageIcon />{' '}
             {translate(
               'auto.components.feature.wall.ReviewNotesAnimatedVisual.5cb213f967',
@@ -359,11 +359,11 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
             <span className="ravs-count-num" data-ai-count>
               0
             </span>
-          </button>
-          <button type="button" className="ravs-send-btn" data-send-btn>
+          </ReviewAnimatedVisualButton>
+          <ReviewAnimatedVisualButton className="ravs-send-btn" data-send-btn>
             <SendIcon />
             <span className="ravs-send-glow" />
-          </button>
+          </ReviewAnimatedVisualButton>
         </span>
       </div>
       <div className="ravs-diffbody" data-diff-body>
@@ -389,19 +389,19 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
           </div>
           <div className="ravs-pop-input" data-pop-input />
           <div className="ravs-pop-footer">
-            <button type="button" className="ravs-pop-btn is-cancel">
+            <ReviewAnimatedVisualButton className="ravs-pop-btn is-cancel">
               {translate(
                 'auto.components.feature.wall.ReviewNotesAnimatedVisual.271ea0cbf3',
                 'Cancel'
               )}
-            </button>
-            <button type="button" className="ravs-pop-btn is-add">
+            </ReviewAnimatedVisualButton>
+            <ReviewAnimatedVisualButton className="ravs-pop-btn is-add" focusBorder>
               {translate(
                 'auto.components.feature.wall.ReviewNotesAnimatedVisual.ea4e45b71b',
                 'Add note'
               )}
               <CornerEnterIcon />
-            </button>
+            </ReviewAnimatedVisualButton>
           </div>
         </div>
         <div className="ravs-send-menu" data-send-menu>

@@ -105,7 +105,6 @@ export function FeatureWallRail(props: {
                 className={cn(
                   'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm outline-none transition-colors',
                   'hover:bg-accent',
-                  'focus-visible:ring-[3px] focus-visible:ring-ring/50',
                   isSelected && 'bg-accent text-accent-foreground'
                 )}
               >
@@ -153,7 +152,6 @@ export function FeatureWallRail(props: {
                             className={cn(
                               'flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[13px] outline-none transition-colors',
                               'hover:bg-accent',
-                              'focus-visible:ring-[3px] focus-visible:ring-ring/50',
                               isStepActive && 'bg-accent text-accent-foreground'
                             )}
                           >

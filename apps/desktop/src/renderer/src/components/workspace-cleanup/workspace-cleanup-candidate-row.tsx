@@ -9,11 +9,11 @@ import {
   MagnifyingGlass as Search,
   TerminalWindow as SquareTerminal,
   Trash as Trash2,
-  type Icon as PhosphorIcon
+  type Icon as PhosphorIcon,
+  CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -152,7 +152,7 @@ export const CandidateRow = React.memo(function CandidateRow({
               { value0: candidate.displayName }
             )}
             onClick={() => onToggleSelected(candidate.worktreeId)}
-            className="border-border bg-background text-primary hover:bg-accent focus-visible:ring-ring mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border focus-visible:ring-1 focus-visible:outline-none"
+            className="border-border bg-background text-primary hover:bg-accent mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border focus-visible:outline-none"
           >
             {selected ? <Check className="size-3" strokeWidth={3} /> : null}
           </button>

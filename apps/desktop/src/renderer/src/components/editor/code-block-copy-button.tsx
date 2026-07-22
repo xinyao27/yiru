@@ -72,7 +72,7 @@ export default function CodeBlockCopyButton({
       <button
         ref={setCopyButtonRef}
         type="button"
-        className="code-block-copy-btn"
+        className="code-block-copy-btn focus-visible:bg-accent outline-none"
         onClick={handleCopy}
         aria-label={translate('auto.components.editor.CodeBlockCopyButton.1f9f4def45', 'Copy code')}
         title={translate('auto.components.editor.CodeBlockCopyButton.1f9f4def45', 'Copy code')}

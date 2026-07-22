@@ -1,12 +1,12 @@
 import {
   CheckCircle as CheckCircle2,
   WarningCircle as CircleAlert,
-  FolderOpen
+  FolderOpen,
+  X
 } from '@phosphor-icons/react'
 import type React from 'react'
 import { toast } from 'sonner'
 
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { Button } from '../ui/button'

@@ -4,12 +4,12 @@ import {
   Pencil,
   HardDrives as Server,
   HardDrive as ServerOff,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import { useCallback, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

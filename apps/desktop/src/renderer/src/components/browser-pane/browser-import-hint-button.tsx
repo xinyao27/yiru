@@ -266,7 +266,7 @@ export function BrowserImportHintButton({
             <button
               type="button"
               onClick={handleOpenBrowserSettings}
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm text-xs focus-visible:ring-1 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground rounded-sm text-xs focus-visible:outline-none"
             >
               {translate(
                 'auto.components.browser.pane.BrowserImportHintButton.77351d22f5',
@@ -277,7 +277,7 @@ export function BrowserImportHintButton({
             <button
               type="button"
               onClick={handleHideHint}
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring ml-auto rounded-sm text-xs focus-visible:ring-1 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground ml-auto rounded-sm text-xs focus-visible:outline-none"
             >
               {translate(
                 'auto.components.browser.pane.BrowserImportHintButton.05e675fe96',

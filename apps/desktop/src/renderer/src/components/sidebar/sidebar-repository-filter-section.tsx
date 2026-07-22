@@ -1,7 +1,6 @@
-import { HardDrives as Server } from '@phosphor-icons/react'
+import { HardDrives as Server, X } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { X } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -285,7 +284,7 @@ function ProjectFilterHeader({
       <button
         type="button"
         onClick={onClear}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-full px-2 py-0.5 text-[11px] focus-visible:ring-1 focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
         disabled={!hasRepoFilter}
       >
         {translate('auto.components.sidebar.SidebarRepositoryFilterSection.d3a9c4cea1', 'Clear')}

@@ -85,10 +85,7 @@ export function SettingsSection({
           rounded corners and tight inner padding — so each row group reads as
           contained inside the section, not as a continuation of the sidebar. */}
       <div
-        className={cn(
-          'rounded-xl border border-border/50 bg-card/50 px-7 py-6 shadow-xs',
-          bodyClassName
-        )}
+        className={cn('rounded-xl border border-border/50 bg-card/50 px-7 py-6  ', bodyClassName)}
       >
         {children}
       </div>

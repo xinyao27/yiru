@@ -37,7 +37,7 @@ export function WorkspaceSelectableTab({
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
         className={cn(
-          'group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+          'group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none',
           getTabDividerClasses(hasTabsToRight),
           getTabRootStateClasses(active)
         )}

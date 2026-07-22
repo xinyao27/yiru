@@ -5,12 +5,12 @@ import {
   FolderOpen,
   Funnel as ListFilter,
   Layout as PanelsTopLeft,
-  HardDrives as Server
+  HardDrives as Server,
+  CaretRight as ChevronRight
 } from '@phosphor-icons/react'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -49,7 +49,7 @@ const VAULT_SCOPE_SELECTED_EDGE_CLASS =
 // Why: the group owns the 28px outer border, so items must fit its 26px content box
 // instead of painting over the horizontal edges.
 const VAULT_SCOPE_TOGGLE_ITEM_CLASS = cn(
-  'h-full min-h-0 min-w-0 flex-1 basis-0 shrink border border-transparent bg-sidebar px-2.5 text-[11px] font-medium leading-none text-foreground shadow-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-sidebar-accent aria-[checked=true]:text-sidebar-accent-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-sidebar-accent data-[state=on]:border-foreground/20 data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-sidebar-accent',
+  'h-full min-h-0 min-w-0 flex-1 basis-0 shrink border border-transparent bg-sidebar px-2.5 text-[11px] font-medium leading-none text-foreground   hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-sidebar-accent aria-[checked=true]:text-sidebar-accent-foreground   aria-[checked=true]:hover:bg-sidebar-accent data-[state=on]:border-foreground/20 data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground   data-[state=on]:hover:bg-sidebar-accent',
   VAULT_SCOPE_SELECTED_EDGE_CLASS,
   '@max-[300px]/ai-vault:px-1.5'
 )
@@ -66,7 +66,7 @@ export function VaultGroupHeader({
   return (
     <button
       type="button"
-      className="border-sidebar-border bg-sidebar-accent/60 text-foreground hover:bg-sidebar-accent flex h-8 w-full items-center gap-2 border-y px-3 text-left text-xs font-semibold transition-colors"
+      className="border-sidebar-border bg-sidebar-accent/60 text-foreground hover:bg-sidebar-accent focus-visible:bg-sidebar-accent flex h-8 w-full items-center gap-2 border-y px-3 text-left text-xs font-semibold transition-colors outline-none"
       onClick={onToggle}
       aria-expanded={!collapsed}
     >
@@ -77,7 +77,7 @@ export function VaultGroupHeader({
         )}
       />
       <span className="min-w-0 flex-1 truncate">{group.label}</span>
-      <span className="border-sidebar-border bg-background text-foreground rounded-md border px-2 py-0.5 text-[11px] leading-none font-semibold tabular-nums shadow-xs">
+      <span className="border-sidebar-border bg-background text-foreground rounded-md border px-2 py-0.5 text-[11px] leading-none font-semibold tabular-nums">
         {group.sessions.length}
       </span>
     </button>
@@ -143,7 +143,7 @@ export function VaultScopeSwitch({
         }
       }}
       variant="outline"
-      className="border-sidebar-border bg-sidebar h-7 w-full rounded-md border shadow-xs"
+      className="border-sidebar-border bg-sidebar h-7 w-full rounded-md border"
       aria-label={translate(
         'auto.components.right.sidebar.AiVaultPanelControls.scopeAriaLabel',
         'Session History scope: {{value0}}',

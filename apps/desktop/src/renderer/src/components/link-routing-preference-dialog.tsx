@@ -1,7 +1,6 @@
-import { Gear as Settings } from '@phosphor-icons/react'
+import { Gear as Settings, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -210,7 +209,7 @@ export function LinkRoutingPreferenceDialogProvider({
                   </span>
                   <ShortcutKeyCombo
                     keys={systemBrowserShortcutKeys}
-                    keyCapClassName="min-w-0 px-1 py-0 text-[10px] shadow-none"
+                    keyCapClassName="min-w-0 px-1 py-0 text-[10px] "
                     separatorClassName="text-[10px] text-muted-foreground"
                   />
                   <span>

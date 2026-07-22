@@ -23,7 +23,7 @@ export function DeleteWorktreeSkipConfirmOption({
       role="checkbox"
       aria-checked={dontAskAgain}
       onClick={onToggleDontAskAgain}
-      className="text-foreground/80 hover:text-foreground focus-visible:ring-ring flex items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      className="text-foreground/80 hover:text-foreground flex items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors focus-visible:outline-none"
     >
       <span
         className={cn(

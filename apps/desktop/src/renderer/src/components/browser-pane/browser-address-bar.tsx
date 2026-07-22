@@ -361,7 +361,7 @@ export default function BrowserAddressBar({
         render={
           <form
             ref={setAddressBarFormRef}
-            className="border-border bg-background flex min-w-0 flex-1 items-center gap-2 rounded-xl border px-3 py-1 shadow-sm"
+            className="border-border bg-background flex min-w-0 flex-1 items-center gap-2 rounded-xl border px-3 py-1"
             onSubmit={(event) => {
               event.preventDefault()
               setOpen(false)
@@ -378,7 +378,7 @@ export default function BrowserAddressBar({
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
               data-yiru-browser-address-bar="true"
-              className="h-auto border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
+              className="h-auto border-0 bg-transparent px-0 text-sm"
               spellCheck={false}
               autoCapitalize="none"
               autoCorrect="off"

@@ -92,6 +92,7 @@ export function SetupGuideSidebarEntry(): React.JSX.Element | null {
             }
             aria-current={setupActive ? 'page' : undefined}
             className={cn(
+              'outline-none focus-visible:bg-sidebar-foreground/8',
               'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
               setupActive
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground'

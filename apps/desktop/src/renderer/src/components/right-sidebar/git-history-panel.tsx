@@ -1,8 +1,11 @@
-import { Question as CircleHelp } from '@phosphor-icons/react'
+import {
+  Question as CircleHelp,
+  CaretDown as ChevronDown,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -242,7 +245,7 @@ export function GitHistoryPanel({
         <div className="flex h-full items-stretch rounded-md pr-1">
           <button
             type="button"
-            className="text-foreground/70 flex min-w-0 flex-1 items-center gap-1 px-0.5 text-left text-[11px] font-semibold tracking-wider uppercase"
+            className="text-foreground/70 focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 px-0.5 text-left text-[11px] font-semibold tracking-wider uppercase outline-none"
             onClick={onToggle}
           >
             <ChevronDown

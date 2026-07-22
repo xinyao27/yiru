@@ -6,7 +6,10 @@ import {
   Pause,
   Pencil,
   Play,
-  Trash as Trash2
+  Trash as Trash2,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: this page owns the automations list/detail
  * orchestration while the form and detail presentation live in sibling files. */
@@ -15,7 +18,6 @@ import { toast } from 'sonner'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { Plus, ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import type { Badge } from '@/components/ui/badge'
@@ -2278,7 +2280,7 @@ export default function AutomationsPage(): React.JSX.Element {
             role="checkbox"
             aria-checked={dontAskDeleteAgain}
             onClick={() => setDontAskDeleteAgain((prev) => !prev)}
-            className="text-foreground/80 hover:text-foreground focus-visible:ring-ring flex items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="text-foreground/80 hover:text-foreground flex items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors focus-visible:outline-none"
           >
             <span
               className={cn(
@@ -2441,9 +2443,10 @@ export default function AutomationsPage(): React.JSX.Element {
                           selectAutomationId(automation.id)
                         }}
                         className={cn(
+                          'outline-none focus-visible:bg-muted/50',
                           'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
                           selectedExternal === null && selected?.id === automation.id
-                            ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
+                            ? 'border-foreground/30 bg-muted/70 text-foreground  '
                             : 'border-transparent hover:bg-muted/50'
                         )}
                       >
@@ -2571,9 +2574,10 @@ export default function AutomationsPage(): React.JSX.Element {
                       setActivePaneTab('overview')
                     }}
                     className={cn(
+                      'outline-none focus-visible:bg-muted/50',
                       'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
                       selectedExternal?.key === entry.key
-                        ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
+                        ? 'border-foreground/30 bg-muted/70 text-foreground  '
                         : 'border-transparent hover:bg-muted/50'
                     )}
                   >
@@ -2631,9 +2635,10 @@ export default function AutomationsPage(): React.JSX.Element {
                           setActivePaneTab('overview')
                         }}
                         className={cn(
+                          'outline-none focus-visible:bg-muted/50',
                           'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
                           selectedExternal?.key === entry.key
-                            ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
+                            ? 'border-foreground/30 bg-muted/70 text-foreground  '
                             : 'border-transparent hover:bg-muted/50'
                         )}
                       >
@@ -2757,7 +2762,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     key={template.id}
                     type="button"
                     onClick={() => openCreateDialog(template)}
-                    className="border-border/70 bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 rounded-md border px-3 py-2 text-left shadow-xs transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+                    className="border-border/70 bg-background hover:bg-accent hover:text-accent-foreground rounded-md border px-3 py-2 text-left transition-colors focus-visible:outline-none"
                   >
                     <div className="text-muted-foreground text-[11px] font-medium uppercase">
                       {template.category}
@@ -2818,7 +2823,7 @@ export default function AutomationsPage(): React.JSX.Element {
                   onEdit={openEditExternalDialog}
                 />
               ) : (
-                <div className="border-border/50 bg-muted/20 rounded-md border shadow-sm">
+                <div className="border-border/50 bg-muted/20 rounded-md border">
                   <div className="border-border/50 flex items-center justify-between border-b px-3 py-2">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium">

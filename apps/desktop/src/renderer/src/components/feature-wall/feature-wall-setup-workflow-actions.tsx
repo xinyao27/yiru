@@ -1,8 +1,7 @@
-import { FloppyDisk as Save, Gear as Settings } from '@phosphor-icons/react'
+import { FloppyDisk as Save, Gear as Settings, ArrowUpRight, Plus } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowUpRight, Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'

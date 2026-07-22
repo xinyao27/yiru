@@ -1,7 +1,7 @@
+import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
 
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -41,7 +41,7 @@ export function AppearanceAdvancedDisclosure({
         // Why: while searching the disclosure is forced open, so disable the
         // toggle's collapse affordance rather than letting it fight the search.
         disabled={isSearching}
-        className="text-foreground focus-visible:ring-ring/50 flex w-full items-center gap-2 py-1 text-sm font-semibold focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
+        className="text-foreground flex w-full items-center gap-2 py-1 text-sm font-semibold focus-visible:outline-none disabled:cursor-default"
       >
         <ChevronRight
           className={cn(

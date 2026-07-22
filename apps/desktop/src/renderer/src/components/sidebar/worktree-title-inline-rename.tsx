@@ -120,8 +120,8 @@ export function WorktreeTitleInlineRename({
   // hovercard can use a compact field that reads more like native rename UI.
   const editingInputClassName =
     editingPresentation === 'field'
-      ? 'h-6 rounded-sm border border-input bg-input/40 px-1.5 py-0 shadow-xs selection:bg-[Highlight] selection:text-[HighlightText] focus-visible:border-ring focus-visible:ring-[1px] focus-visible:ring-ring/50 dark:bg-input/30'
-      : 'h-[1lh] rounded-none border-0 !border-transparent !bg-transparent p-0 !shadow-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none dark:!bg-transparent'
+      ? 'h-6 rounded-sm border border-input bg-input/40 px-1.5 py-0 selection:bg-[Highlight] selection:text-[HighlightText] focus-visible:border-ring dark:bg-input/30'
+      : 'h-[1lh] rounded-none border-0 !border-transparent !bg-transparent p-0 focus-visible:border-transparent focus-visible:outline-none dark:!bg-transparent'
   const savingInputClassName = editingPresentation === 'field' ? 'pr-6' : 'pr-4'
   const savingSpinnerClassName = editingPresentation === 'field' ? 'right-1.5' : 'right-0'
 
@@ -309,7 +309,7 @@ export function WorktreeTitleInlineRename({
       key={`title:${titleElementKey}`}
       ref={handleRootRef}
       className={cn(
-        'block min-w-0 leading-tight focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
+        'block min-w-0 leading-tight focus-visible:outline-none',
         wrapTitle ? 'break-words whitespace-normal' : 'truncate',
         titleEmphasisClassName,
         className

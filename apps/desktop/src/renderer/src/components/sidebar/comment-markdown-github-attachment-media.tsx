@@ -42,7 +42,7 @@ function AttachmentFallbackLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="text-primary hover:text-primary/80 break-all underline underline-offset-2"
+      className="text-primary hover:text-primary/80 focus-visible:text-primary/80 focus-visible:bg-accent break-all underline underline-offset-2 outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       {children}
@@ -69,11 +69,16 @@ export function GitHubUserAttachmentVideo({
       controls
       preload="metadata"
       playsInline
-      className="my-3 max-h-[28rem] max-w-full rounded-md bg-black/80 outline outline-1 outline-black/10 dark:outline-white/10"
+      className="my-3 max-h-[28rem] max-w-full rounded-md bg-black/80 outline-none"
       onClick={(e) => e.stopPropagation()}
       onError={() => setFailed(true)}
     >
-      <a href={href} target="_blank" rel="noreferrer">
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="focus-visible:bg-accent outline-none"
+      >
         {children}
       </a>
     </video>
@@ -102,13 +107,13 @@ export function GitHubUserAttachmentImage({
       href={src}
       target="_blank"
       rel="noreferrer"
-      className="inline-block max-w-full"
+      className="focus-visible:bg-accent inline-block max-w-full outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       <img
         src={src}
         alt={alt ?? ''}
-        className="my-3 max-h-96 max-w-full rounded-md object-contain outline outline-1 outline-black/10 dark:outline-white/10"
+        className="my-3 max-h-96 max-w-full rounded-md object-contain"
         onError={() => setFailed(true)}
       />
     </a>

@@ -295,7 +295,7 @@ export default function EditorFileTab({
             defaultValue={basename(file.filePath)}
             // Why: keep the inline field compact enough for the titlebar while
             // giving filenames a little more room than the static tab label.
-            className="bg-input/40 text-foreground mr-1 h-5 w-[12ch] max-w-[132px] min-w-[72px] rounded-sm px-1 py-0 text-xs focus-visible:ring-[1px] md:text-xs"
+            className="bg-input/40 text-foreground mr-1 h-5 w-[12ch] max-w-[132px] min-w-[72px] rounded-sm px-1 py-0 text-xs md:text-xs"
             spellCheck={false}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}

@@ -5,7 +5,11 @@ import {
   FileCode as FileCode2,
   Play,
   FloppyDisk as Save,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowLineDown as ArrowDownToLine,
+  ArrowLineUp as ArrowUpToLine,
+  ArrowDown as MoveDown,
+  ArrowUp as MoveUp
 } from '@phosphor-icons/react'
 import DOMPurify from 'dompurify'
 /* eslint-disable max-lines -- Why: notebook editing, output rendering, and cell
@@ -28,12 +32,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowLineDown as ArrowDownToLine,
-  ArrowLineUp as ArrowUpToLine,
-  ArrowDown as MoveDown,
-  ArrowUp as MoveUp
-} from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import {
@@ -188,7 +186,7 @@ function NotebookCellHeader({
       <select
         value={cell.kind}
         onChange={(event) => onKindChange(event.target.value as IpynbCellKind)}
-        className="border-input bg-background text-foreground h-7 rounded-md border px-2 text-xs"
+        className="border-input bg-background text-foreground focus-visible:border-ring h-7 rounded-md border px-2 text-xs outline-none"
       >
         <option value="code">
           {translate('auto.components.editor.IpynbViewer.7005960d73', 'Code')}
@@ -384,7 +382,7 @@ function CodeCell({
       <div
         role="button"
         tabIndex={0}
-        className="block w-full cursor-text bg-[var(--editor-surface)] text-left"
+        className="focus-visible:bg-accent block w-full cursor-text bg-[var(--editor-surface)] text-left outline-none"
         onClick={onActivate}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
@@ -404,7 +402,7 @@ function CodeCell({
   }
 
   return (
-    <div className="focus-within:ring-ring bg-[var(--editor-surface)] focus-within:ring-1">
+    <div className="bg-[var(--editor-surface)]">
       <Editor
         height={editorHeight}
         defaultLanguage={cell.language}
@@ -451,7 +449,7 @@ function EditableTextCell({
     <textarea
       value={source}
       onChange={(event) => onChange(event.target.value)}
-      className="bg-background text-foreground focus:ring-ring block min-h-24 w-full resize-y border-0 px-4 py-3 text-sm outline-none focus:ring-1"
+      className="bg-background text-foreground block min-h-24 w-full resize-y border-0 px-4 py-3 text-sm outline-none"
     />
   )
 }
@@ -486,7 +484,7 @@ function OutputItem({ item }: { item: IpynbOutputItem }): React.JSX.Element | nu
         sandbox=""
         referrerPolicy="no-referrer"
         loading="lazy"
-        className="bg-background block h-80 w-full border-0"
+        className="bg-background block h-80 w-full border-0 outline-none"
         srcDoc={html}
       />
     )

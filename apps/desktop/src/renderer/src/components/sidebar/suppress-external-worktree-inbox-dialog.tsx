@@ -54,7 +54,7 @@ export default function SuppressExternalWorktreeInboxDialog({
           )}
           <button
             type="button"
-            className="text-foreground mt-1 block font-medium underline underline-offset-2"
+            className="text-foreground focus-visible:bg-accent mt-1 block font-medium underline underline-offset-2 outline-none"
             onClick={onOpenRecovery}
           >
             {translate(

@@ -1,7 +1,11 @@
-import { Check, HardDrives as Server } from '@phosphor-icons/react'
+import {
+  Check,
+  HardDrives as Server,
+  CaretUpDown as ChevronsUpDown,
+  FolderPlus
+} from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { CaretUpDown as ChevronsUpDown, FolderPlus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Command,

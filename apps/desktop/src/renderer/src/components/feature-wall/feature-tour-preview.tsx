@@ -248,7 +248,7 @@ function ReviewFrame(): JSX.Element {
                 </svg>
               </span>
             </span>
-            {/* Why: cursor + ring live inside the row so they anchor to the
+            {/* Why: cursor + click ring live inside the row so they anchor to the
                 pill's right-edge ml-auto, instead of using fixed pixel offsets
                 that drift when the preview is resized. */}
             <span className="feature-tour-review-cursor">

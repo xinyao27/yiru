@@ -1,11 +1,11 @@
 import {
   GitPullRequest as GitPullRequestArrow,
-  MagnifyingGlass as Search
+  MagnifyingGlass as Search,
+  X
 } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

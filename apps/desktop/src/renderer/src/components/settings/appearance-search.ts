@@ -37,7 +37,7 @@ export const getLoaderStyleEntries = createLocalizedCatalog((): SettingsSearchEn
     title: translate('settings.appearance.loader.title', 'Loader'),
     description: translate(
       'settings.appearance.loader.description',
-      'Choose the animation used across Yiru. The drawn icons option cycles through a piggy bank, calculator, wallet, and kitten.'
+      'Choose the animation used across Yiru. Drawn icons cycle through four sketches, and Thinking Orbs adds six dotted agent-state animations.'
     ),
     keywords: [
       ...translateSearchKeyword('settings.appearance.loader.keyword.loader', 'loader'),
@@ -49,7 +49,14 @@ export const getLoaderStyleEntries = createLocalizedCatalog((): SettingsSearchEn
       ...translateSearchKeyword('settings.appearance.loader.keyword.macos', 'macos'),
       ...translateSearchKeyword('settings.appearance.loader.keyword.square', 'square'),
       ...translateSearchKeyword('settings.appearance.loader.keyword.flipbook', 'flipbook'),
-      ...translateSearchKeyword('settings.appearance.loader.keyword.escalade', 'escalade')
+      ...translateSearchKeyword('settings.appearance.loader.keyword.escalade', 'escalade'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.orb', 'orb'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.working', 'working'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.searching', 'searching'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.solving', 'solving'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.listening', 'listening'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.composing', 'composing'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.shaping', 'shaping')
     ]
   }
 ])
