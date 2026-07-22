@@ -290,7 +290,7 @@ export default function TerminalPaneHeaderOverlay({
                         render={
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="icon-xs"
                             className="pane-title-split-trigger"
                             data-contextual-tour-target={
