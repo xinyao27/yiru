@@ -1,6 +1,6 @@
-import { getSelectableControlStateClasses } from '@/components/selectable-control-state-classes'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
+import { cn } from '@/lib/class-names'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import { useAppStore } from '@/store'
@@ -55,14 +55,16 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className={`size-5 ${getSelectableControlStateClasses(active)}`}
+                  // Why: compact status actions mark selection through icon
+                  // contrast only; ghost hover/focus remains transient.
+                  className={cn('size-5', active ? 'text-foreground' : 'text-muted-foreground')}
                   aria-label={label}
                   aria-current={active ? 'page' : undefined}
                   onClick={() =>
                     openWorkspacePanelTab({ panel: item.id, worktreeId: activeWorktreeId })
                   }
                 >
-                  <Icon className={`size-3.5 ${active ? 'text-primary' : ''}`} />
+                  <Icon className="size-3.5" />
                 </Button>
               }
             />
