@@ -56,7 +56,7 @@ export default function WorktreeCreationPanel({
   const elapsedLabel = formatElapsedTime(now - entry.startedAt)
 
   return (
-    <div className="bg-background absolute inset-0 flex flex-col [[data-native-sidebar-material=true]_&]:bg-[linear-gradient(to_bottom,transparent_40px,var(--background)_40px)]">
+    <div className="workspace-native-material-frame absolute inset-0 flex flex-col">
       {/* Faux tab strip: mirrors the real tab row (height, border, bg) so the
           create reads as a workspace tab. Carries only the worktree name + a
           cancel control — the live status lives in the body below. */}

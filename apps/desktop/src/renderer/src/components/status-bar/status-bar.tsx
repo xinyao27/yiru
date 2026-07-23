@@ -1916,6 +1916,8 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const showFloatingWorkspaceAttentionDot = !floatingTerminalOpen && hasFloatingUnread
 
   return (
+    // Why: the footer extends supported native window material across the same
+    // chrome layer as the workspace titlebar, with an opaque fallback elsewhere.
     <div
       ref={containerRefCallback}
       className="border-border relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t bg-[var(--bg-titlebar,var(--card))] px-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"

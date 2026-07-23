@@ -235,6 +235,16 @@
   --sidebar-ring: var(--ring);
 }
 
+.workspace-native-material-frame {
+  background: var(--background);
+}
+
+/* Why: workspace frames reveal native material only through the shared 40px
+   titlebar while keeping their content body on the canonical app surface. */
+[data-native-sidebar-material='true'] .workspace-native-material-frame {
+  background: linear-gradient(to bottom, transparent 40px, var(--background) 40px);
+}
+
 [data-sonner-toaster] {
   font-family: var(--font-sans);
 }

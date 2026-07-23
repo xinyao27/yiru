@@ -2489,9 +2489,8 @@ function App(): React.JSX.Element {
                         'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
                         windowBackgroundBlurEnabled || settingsNativeSidebarMaterialActive
                           ? 'bg-transparent'
-                          : hasNativeSidebarMaterial &&
-                              (workspaceChromeActive || creationLayoutActive)
-                            ? 'bg-[linear-gradient(to_bottom,transparent_40px,var(--background)_40px)]'
+                          : workspaceChromeActive || creationLayoutActive
+                            ? 'workspace-native-material-frame'
                             : 'bg-background'
                       )}
                     >
@@ -2606,6 +2605,8 @@ function App(): React.JSX.Element {
             {statusBarVisible && !hasActiveSpoolWorkspace ? (
               <Suspense
                 fallback={
+                  // Why: Suspense must not flash an opaque footer while the real
+                  // status bar reveals supported native window material.
                   <div className="border-border h-6 min-h-[24px] shrink-0 border-t bg-[var(--bg-titlebar,var(--card))] [[data-native-sidebar-material=true]_&]:bg-transparent" />
                 }
               >
