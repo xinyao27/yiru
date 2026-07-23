@@ -60,7 +60,7 @@ export default function WorktreeCreationPanel({
       {/* Faux tab strip: mirrors the real tab row (height, border, bg) so the
           create reads as a workspace tab. Carries only the worktree name + a
           cancel control — the live status lives in the body below. */}
-      <div className="border-border bg-card flex h-10 shrink-0 items-stretch border-b [[data-native-sidebar-material=true]_&]:bg-transparent">
+      <div className="border-border bg-card flex h-[var(--titlebar-height)] shrink-0 items-stretch border-b [[data-native-sidebar-material=true]_&]:bg-transparent">
         {reserveCollapsedSidebarHeaderSpace ? (
           // Why: collapsed sidebar chrome floats above this strip, so reserve
           // the same measured width real tabs use to keep title/cancel clear.

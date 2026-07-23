@@ -48,7 +48,7 @@ export function WorkspacePaneFrame({
       {/* Why: every workspace strip reveals the same native material as the left
           sidebar when available, while unsupported platforms keep the card fallback. */}
       <div
-        className="border-border bg-card h-10 shrink-0 border-b [[data-native-sidebar-material=true]_&]:bg-transparent"
+        className="border-border bg-card h-[var(--titlebar-height)] shrink-0 border-b [[data-native-sidebar-material=true]_&]:bg-transparent"
         data-tab-group-strip-id={stripId}
         data-terminal-focus-release-surface="true"
         data-worktree-id={worktreeId}
