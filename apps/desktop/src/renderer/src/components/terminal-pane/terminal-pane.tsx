@@ -1,4 +1,6 @@
 import type { IDisposable } from '@xterm/xterm'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: terminal pane component co-locates title state, layout serialization, and portal rendering to keep pane lifecycle consistent. */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
@@ -75,7 +77,6 @@ import {
 } from '@/store/slices/runtime-environment-ssh'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
@@ -88,7 +89,6 @@ import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal-s
 import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal-zero-dimensions-diagnostic'
 import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
 import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace-session-terminal-buffers'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { useAppStore } from '../../store'
 import { canToggleNativeChat } from '../native-chat/native-chat-availability'
 import {

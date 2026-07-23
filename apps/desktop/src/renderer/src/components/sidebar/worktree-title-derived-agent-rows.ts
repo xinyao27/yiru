@@ -1,3 +1,9 @@
+import type {
+  AgentStatusEntry,
+  AgentStatusOrchestrationContext,
+  AgentStatusState
+} from '@yiru/workbench-model/agent'
+
 import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
 import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
@@ -7,11 +13,6 @@ import {
 } from '@/lib/terminal-title-agent-type'
 
 import { isClaudeManagementTitle } from '../../../../shared/agent-detection'
-import type {
-  AgentStatusEntry,
-  AgentStatusOrchestrationContext,
-  AgentStatusState
-} from '../../../../shared/agent-status-types'
 import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent-title-owner'
 import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
 import type {

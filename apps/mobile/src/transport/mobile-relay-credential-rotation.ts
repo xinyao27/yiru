@@ -1,11 +1,11 @@
-import * as ExpoCrypto from 'expo-crypto'
-
 import {
   DeviceCredentialInstalledSchema,
   PairingGetEndpointsResultSchema,
   type DeviceResumeConfirmed,
   type MobileRelayEndpoint
-} from '../../../desktop/src/shared/mobile-relay-credential-contract'
+} from '@yiru/mobile-relay-protocol/credential-contract'
+import * as ExpoCrypto from 'expo-crypto'
+
 import {
   MobileRelayCredentialBundleSchema,
   type MobileRelayCredentialBundle

@@ -6,6 +6,8 @@ files without a cleaner ownership seam. */
 import { basename, delimiter } from 'node:path'
 import { win32 as pathWin32 } from 'node:path'
 
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import * as pty from 'node-pty'
 
 import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
@@ -13,8 +15,6 @@ import { shouldUseShellReadyStartupDelivery } from '../../shared/codex-startup-d
 import { mergeGitConfigEnvProtocol } from '../../shared/git-credential-prompt-env'
 import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
 import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
-import { WINDOWS_GIT_BASH_SHELL } from '../../shared/windows-terminal-shell'
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
 import {
   isWindowsGitBashShellPath,
   resolveGitBashPath,

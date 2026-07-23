@@ -1,3 +1,9 @@
+import {
+  normalizeExecutionHostOrder,
+  normalizeExecutionHostScope,
+  normalizeVisibleExecutionHostIds,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
@@ -24,12 +30,6 @@ import {
   normalizeContextualTourIds,
   type ContextualTourId
 } from '../../../../shared/contextual-tours'
-import {
-  normalizeExecutionHostOrder,
-  normalizeExecutionHostScope,
-  normalizeVisibleExecutionHostIds,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import {
   hasFeatureInteraction,
   normalizeFeatureInteractions,

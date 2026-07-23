@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+
 import type { SpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
 import type { SpoolLiveSessionIdentity } from './spool-live-session-display-identity'
 import type {

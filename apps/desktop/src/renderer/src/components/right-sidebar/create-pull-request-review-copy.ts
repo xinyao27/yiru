@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import type { CreateHostedReviewResult } from '@yiru/workbench-model/review'
 
-import type { CreateHostedReviewResult } from '../../../../shared/hosted-review'
+import { translate } from '@/i18n/i18n'
 
 export type { LocalizedHostedReviewCopy as CreatePullRequestReviewCopy } from '@/i18n/hosted-review-localized-copy'
 

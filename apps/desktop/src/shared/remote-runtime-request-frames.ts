@@ -1,9 +1,10 @@
-import { RemoteRuntimeClientError } from './remote-runtime-client'
 import {
   RuntimeRpcEnvelopeSchema,
   type RuntimeRpcResponse,
   isKeepaliveFrame
-} from './runtime-rpc-envelope'
+} from '@yiru/runtime-protocol/rpc-envelope'
+
+import { RemoteRuntimeClientError } from './remote-runtime-client'
 
 export type ParsedRemoteRuntimeFrame =
   | { type: 'keepalive' }

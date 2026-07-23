@@ -4,6 +4,18 @@ import { access, mkdir, readdir, rm } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { isAbsolute, join, posix } from 'node:path'
 
+import {
+  isRuntimePathAbsolute,
+  normalizeRuntimePathForComparison,
+  relativePathInsideRoot
+} from '@yiru/workbench-model/platform'
+import {
+  getRepoExecutionHostId,
+  normalizeExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: repo IPC is intentionally centralized so SSH
 routing, clone lifecycle, and store persistence stay behind a single audited
 boundary. Splitting by line count would scatter tightly coupled repo behavior. */
@@ -12,22 +24,10 @@ import { dialog, ipcMain } from 'electron'
 import { z } from 'zod'
 
 import { DEFAULT_REPO_BADGE_COLOR } from '../../shared/constants'
-import {
-  isRuntimePathAbsolute,
-  normalizeRuntimePathForComparison,
-  relativePathInsideRoot
-} from '../../shared/cross-platform-path'
-import {
-  getRepoExecutionHostId,
-  normalizeExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../shared/execution-host'
 import type { FolderWorkspacePathStatusRequest } from '../../shared/folder-workspace-path-status'
 import { getGitCloneFailureMessage } from '../../shared/git-clone-failure-message'
 import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
 import { normalizeRepoBadgeColor } from '../../shared/repo-badge-color'
-import { sanitizeRepoIcon } from '../../shared/repo-icon'
 import { isFolderRepo } from '../../shared/repo-kind'
 import { normalizeRepoSourceControlAiOverrides } from '../../shared/source-control-ai'
 import type { RepoMethod } from '../../shared/telemetry-events'

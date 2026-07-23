@@ -1,6 +1,6 @@
 import { createHash, hkdfSync } from 'node:crypto'
 
-import { MOBILE_E2EE_V2_KDF_DOMAIN } from '../../../shared/mobile-e2ee-v2-contract'
+import { MOBILE_E2EE_V2_KDF_DOMAIN } from '@yiru/mobile-relay-protocol/e2ee-contract'
 
 const SALT_LABEL = new TextEncoder().encode(`${MOBILE_E2EE_V2_KDF_DOMAIN}/salt\0`)
 const INFO_LABEL = new TextEncoder().encode(`${MOBILE_E2EE_V2_KDF_DOMAIN}/session\0`)

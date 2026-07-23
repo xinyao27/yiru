@@ -2,8 +2,8 @@ import './xterm-env-polyfill'
 import { SerializeAddon } from '@xterm/addon-serialize'
 import { Unicode11Addon } from '@xterm/addon-unicode11'
 import { Terminal } from '@xterm/headless'
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 
-import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
 import { advancePartialEscapeTail } from '../../shared/terminal-partial-escape-tail'
 import {
   readSavedCursorRegister,

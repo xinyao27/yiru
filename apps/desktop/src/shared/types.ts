@@ -1,16 +1,30 @@
-import type { SleepingAgentLaunchConfig, SleepingAgentSessionRecord } from './agent-session-resume'
+import type * as RuntimeMobileTypes from '@yiru/runtime-protocol/mobile-runtime-types'
+import type {
+  RemovedSshTargetTombstone,
+  SshRemotePtyLease,
+  SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
+import type {
+  SleepingAgentLaunchConfig,
+  SleepingAgentSessionRecord
+} from '@yiru/workbench-model/agent'
 import type {
   AgentStatusState,
   AgentType,
   MigrationUnsupportedPtyEntry
-} from './agent-status-types'
+} from '@yiru/workbench-model/agent'
+import type * as WorkbenchAgentTypes from '@yiru/workbench-model/agent'
+import type * as WorkbenchReviewTypes from '@yiru/workbench-model/review'
+/* eslint-disable max-lines */
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import type * as WorkbenchWorkspaceTypes from '@yiru/workbench-model/workspace'
+
 import type { AppIconId } from './app-icon'
 import type { Automation, AutomationExecutionTargetType, AutomationRun } from './automations-types'
 import type { ClaudeAgentTeamsMode } from './claude-agent-teams-tmux-compat'
 import type { StartupCommandDelivery } from './codex-startup-delivery'
 import type { ContextualTourId } from './contextual-tours'
-/* eslint-disable max-lines */
-import type { ExecutionHostId } from './execution-host'
 import type {
   FeatureInteractionState,
   FeatureInteractionTelemetryBucketState
@@ -18,7 +32,6 @@ import type {
 import type { FeatureTipId } from './feature-tips'
 import type { ForkSyncMode } from './git-fork-sync'
 import type { GitRemoteIdentity } from './git-remote-identity'
-import type { GitBranchChangeStatus } from './git-status-types'
 import type { KeybindingOverrides, TerminalShortcutPolicy } from './keybindings'
 import type { LanguageServerSettings } from './language-server'
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
@@ -28,13 +41,11 @@ import type {
   GlobalWindowsRuntimeDefault,
   LocalWindowsRuntimePreference
 } from './project-execution-runtime'
-import type { RepoIcon } from './repo-icon'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
 } from './source-control-ai-types'
 import type { VoiceSettings } from './speech-types'
-import type { RemovedSshTargetTombstone, SshRemotePtyLease, SshTarget } from './ssh-types'
 import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
 import type { TerminalCustomTheme } from './terminal-custom-themes'
 import type { UiLanguage } from './ui-language'
@@ -58,7 +69,7 @@ export type {
   GitSubmoduleStatus,
   GitUncommittedEntry,
   GitUpstreamStatus
-} from './git-status-types'
+} from '@yiru/workbench-model/review'
 
 // ─── Shell PATH hydration ────────────────────────────────────────────
 // Why: shared so the main-side `HydrationResult` discriminator and the
@@ -76,7 +87,7 @@ export type ShellHydrationFailureReason =
 export type PathSource = 'shell_hydrate' | 'sync_seed_only'
 
 // ─── Repo ────────────────────────────────────────────────────────────
-export type RepoKind = 'git' | 'folder'
+export type RepoKind = WorkbenchWorkspaceTypes.RepoKind
 
 /** Per-repo remote preference for hosted forge metadata. */
 export type ForgeRemotePreference = 'upstream' | 'origin' | 'auto'
@@ -373,7 +384,7 @@ export type ProjectGroupImportResult = {
 
 export type SetupRunPolicy = 'ask' | 'run-by-default' | 'skip-by-default'
 export type SetupAgentStartupPolicy = 'start-immediately' | 'wait-for-setup'
-export type SetupDecision = 'inherit' | 'run' | 'skip'
+export type SetupDecision = WorkbenchWorkspaceTypes.SetupDecision
 export type HookCommandSourcePolicy = 'shared-only' | 'local-only' | 'run-both'
 
 /**
@@ -397,10 +408,7 @@ export type BaseRefDefaultResult = {
   remoteCount: number
 }
 
-export type BaseRefSearchResult = {
-  refName: string
-  localBranchName: string
-}
+export type BaseRefSearchResult = WorkbenchWorkspaceTypes.BaseRefSearchResult
 
 // ─── Worktree (git-level) ────────────────────────────────────────────
 export type GitWorktreeInfo = {
@@ -433,14 +441,8 @@ export type WorktreeHeadIdentity = {
 }
 
 // ─── Worktree (app-level, enriched) ──────────────────────────────────
-export type WorkspaceStatus = string
-
-export type WorkspaceStatusDefinition = {
-  id: WorkspaceStatus
-  label: string
-  color?: string
-  icon?: string
-}
+export type WorkspaceStatus = WorkbenchWorkspaceTypes.WorkspaceStatus
+export type WorkspaceStatusDefinition = WorkbenchWorkspaceTypes.WorkspaceStatusDefinition
 
 export type Worktree = {
   id: string // `${repoId}::${path}`
@@ -520,26 +522,8 @@ export type AutomationWorkspaceProvenanceRequest = {
   createRequestId: string
 }
 
-export type GitPushTarget = {
-  remoteName: string
-  branchName: string
-  remoteUrl?: string
-  /** True when Yiru added this remote while preparing a fork-PR worktree. */
-  remoteCreated?: boolean
-}
-
-export type GitHubPrStartPoint = {
-  baseBranch: string
-  /** Review target branch to use for Source Control compare after creating from a PR head SHA. */
-  compareBaseRef?: string
-  pushTarget?: GitPushTarget
-  /** Verified PR head commit. Present when checkout can be tied to a stable SHA. */
-  headSha?: string
-  /** Exact local branch name to create/reuse when the PR head is a safe same-repo branch. */
-  branchNameOverride?: string
-  /** Fork PRs: false when "Allow edits from maintainers" is off; a push to the fork may be rejected. */
-  maintainerCanModify?: boolean
-}
+export type GitPushTarget = WorkbenchWorkspaceTypes.GitPushTarget
+export type GitHubPrStartPoint = WorkbenchWorkspaceTypes.GitHubPrStartPoint
 
 // ─── Worktree metadata (persisted user-authored fields only) ─────────
 export type WorktreeMeta = {
@@ -685,49 +669,11 @@ export type WorktreeLineageWarning = {
 // a diff so they can be handed back to an AI agent (pasted into a terminal
 // or used to bootstrap a new agent session). Stored on WorktreeMeta so the
 // existing persistence layer writes them to yiru-data.json automatically.
-export type DiffCommentSource = 'diff' | 'markdown'
-export type DiffReviewScope = 'unstaged' | 'staged' | 'branch'
-
-export type MobileDiffReviewFileState = {
-  key: string
-  filePath: string
-  oldPath?: string
-  scope: DiffReviewScope
-  lastOpenedAt?: number
-  lastSeenDiffIdentity?: string
-  reviewedAt?: number
-  reviewDiffIdentity?: string
-}
-
-export type MobileDiffReviewState = {
-  version: 1
-  updatedAt?: number
-  completedAt?: number
-  files: Record<string, MobileDiffReviewFileState>
-}
-
-export type DiffComment = {
-  id: string
-  worktreeId: string
-  filePath: string
-  /** Undefined means a legacy diff note. */
-  source?: DiffCommentSource
-  /** Exact text selected when creating a markdown note, when available. */
-  selectedText?: string
-  /** Inclusive range start. Must be <= lineNumber when present. */
-  startLine?: number
-  lineNumber: number
-  body: string
-  createdAt: number
-  updatedAt?: number
-  /** Set after the note has been handed to an agent. Edits clear it. */
-  sentAt?: number
-  scope?: DiffReviewScope
-  oldPath?: string
-  diffIdentity?: string
-  // Reserved for future "comments on the original side" — always 'modified' in v1.
-  side: 'modified'
-}
+export type DiffCommentSource = WorkbenchWorkspaceTypes.DiffCommentSource
+export type DiffReviewScope = WorkbenchWorkspaceTypes.DiffReviewScope
+export type MobileDiffReviewFileState = WorkbenchWorkspaceTypes.MobileDiffReviewFileState
+export type MobileDiffReviewState = WorkbenchWorkspaceTypes.MobileDiffReviewState
+export type DiffComment = WorkbenchWorkspaceTypes.DiffComment
 
 // ─── Tab Group Layout ───────────────────────────────────────────────
 export type TabGroupSplitDirection = 'horizontal' | 'vertical'
@@ -1122,431 +1068,45 @@ export type WorkspaceSessionState = {
 
 export type WorkspaceSessionPatch = Partial<WorkspaceSessionState>
 
-// ─── GitHub ──────────────────────────────────────────────────────────
-export type PRState = 'open' | 'closed' | 'merged' | 'draft'
-export type CheckStatus = 'pending' | 'success' | 'failure' | 'neutral'
-
-export type PRMergeableState = 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN'
-export type PRReviewDecision = 'APPROVED' | 'CHANGES_REQUESTED' | 'REVIEW_REQUIRED'
-
-export type PRConflictSummary = {
-  baseRef: string
-  baseCommit: string
-  commitsBehind: number
-  files: string[]
-  localMergeState?: 'clean'
-}
-
-export type GitHubRepositoryIdentity = { owner: string; repo: string }
-
-export type GitHubPRMergeMethod = 'merge' | 'squash' | 'rebase'
-
-export type GitHubPRMergeMethodSettings = {
-  defaultMethod: GitHubPRMergeMethod
-  allowedMethods: Record<GitHubPRMergeMethod, boolean>
-}
-
-export type PRInfo = {
-  number: number
-  title: string
-  state: PRState
-  url: string
-  checksStatus: CheckStatus
-  updatedAt: string
-  mergeable: PRMergeableState
-  reviewDecision?: PRReviewDecision | null
-  autoMergeEnabled?: boolean
-  autoMergeAllowed?: boolean | null
-  mergeQueueRequired?: boolean | null
-  mergeMethodSettings?: GitHubPRMergeMethodSettings
-  mergeStateStatus?: string | null
-  // Why: check-runs are keyed by the PR head commit, not the mutable branch name.
-  // Keeping the head SHA in cached PR metadata lets the checks panel poll the
-  // correct commit without re-querying GitHub or guessing from local branch refs.
-  headSha?: string
-  // Why: a merged branch-matched PR stays visible when the worktree head is one
-  // of the PR's own commits (behind update-branch/web commits). Cache staleness
-  // checks must honor that confirmation without re-querying GitHub.
-  confirmedContainedHeadOid?: string
-  // Why: the worktree HEAD OID this merged linked PR was confirmed to have
-  // diverged from (a definite not-contained probe). Head-scoped, not a bare
-  // boolean, so a PR-number-coalesced refresh broadcast cannot clear a sibling
-  // worktree whose own head is still on the PR's line of work. Clearing a
-  // durable linked PR requires this positive signal for that exact head, never
-  // the mere absence of a containment confirmation after a rate-limit/error.
-  headDivergedFromMergedPRAtOid?: string
-  /** Target branch name for PR-created worktree compare-base repair. */
-  baseRefName?: string
-  /** PR head branch name. Lets linked-PR consumers detect that the worktree
-   *  has switched to a different branch and the durable link is stale. */
-  headRefName?: string
-  prRepo?: GitHubRepositoryIdentity
-  headRepo?: GitHubRepositoryIdentity
-  conflictSummary?: PRConflictSummary
-}
-
-export type PRRefreshOutcome =
-  | { kind: 'found'; pr: PRInfo; fetchedAt: number }
-  | { kind: 'no-pr'; fetchedAt: number }
-  | {
-      kind: 'upstream-error'
-      errorType:
-        | 'rate_limited'
-        | 'auth'
-        | 'network'
-        | 'permission'
-        | 'repo_unavailable'
-        | 'gh_unavailable'
-        | 'unknown'
-      message: string
-      fetchedAt: number
-    }
-
-export type GitHubPRRefreshReason = 'visible' | 'active' | 'post-push' | 'manual' | 'swr'
-
-export type GitHubPRRefreshEnqueueResult =
-  | { kind: 'queued' }
-  | { kind: 'skipped'; skippedReason: 'validation-denied' | 'validation-backoff' }
-  | { kind: 'fallback' }
-
-export type GitHubPRRefreshAlias = {
-  cacheKey: string
-  repoId?: string
-  repoPath: string
-  branch: string
-  worktreeId?: string
-  connectionId?: string | null
-  executionHostId?: string | null
-  linkedPRNumber?: number | null
-  fallbackPRNumber?: number | null
-  fallbackPRSource?: 'explicit' | 'pr-cache' | 'hosted-review' | null
-  // Why: request-time worktree HEAD. Merged branch-matched PRs are only visible
-  // for heads that belong to the PR, and refresh consumers need this snapshot to
-  // clear a durable linked PR once main confirms the head diverged.
-  currentHeadOid?: string | null
-}
-
-export type GitHubPRRefreshCandidate = GitHubPRRefreshAlias & {
-  repoKind: RepoKind
-  repoId: string
-  isBare?: boolean
-  isArchived?: boolean
-  connectionId?: string | null
-  executionHostId?: string | null
-  connectionState?: 'connected' | 'disconnected' | 'unknown'
-  cachedFetchedAt?: number | null
-  cachedHasPR?: boolean | null
-  cachedPRState?: PRState | null
-  cachedChecksStatus?: CheckStatus | null
-  cachedMergeable?: PRMergeableState | null
-  cachedMergeStateStatus?: string | null
-  localGitOptions?: { wslDistro?: string }
-}
-
-export type GitHubPRRefreshSkippedReason =
-  | 'fresh'
-  | 'not-git'
-  | 'bare'
-  | 'archived'
-  | 'disconnected'
-  | 'remote'
-  | 'rate-limit'
-
-type GitHubPRRefreshEventBase = {
-  sequence: number
-  reason: GitHubPRRefreshReason
-  aliases: GitHubPRRefreshAlias[]
-  requestStartedAt?: number
-}
-
-export type GitHubPRRefreshEvent =
-  | (GitHubPRRefreshEventBase & {
-      outcome: PRRefreshOutcome
-      status?: never
-      pausedUntil?: never
-      skippedReason?: never
-    })
-  | (GitHubPRRefreshEventBase & {
-      status: 'queued' | 'in-flight'
-      outcome?: never
-      pausedUntil?: never
-      skippedReason?: never
-    })
-  | (GitHubPRRefreshEventBase & {
-      status: 'paused'
-      pausedUntil: number
-      skippedReason: 'rate-limit'
-      outcome?: never
-    })
-  | (GitHubPRRefreshEventBase & {
-      status: 'skipped'
-      skippedReason: GitHubPRRefreshSkippedReason
-      outcome?: never
-      pausedUntil?: never
-    })
-
-export type PRCheckDetail = {
-  name: string
-  status: 'queued' | 'in_progress' | 'completed'
-  conclusion:
-    | 'success'
-    | 'failure'
-    | 'cancelled'
-    | 'timed_out'
-    | 'neutral'
-    | 'skipped'
-    | 'pending'
-    // Why: a check suite needing manual action (e.g. a workflow awaiting "Approve
-    // and run") has no check run and is absent from statusCheckRollup, yet blocks
-    // auto-merge (GitHub returns "unstable status"). Surface it as its own state.
-    | 'action_required'
-    | null
-  url: string | null
-  checkRunId?: number
-  workflowRunId?: number
-}
-
-export type PRCheckAnnotation = {
-  path: string | null
-  startLine: number | null
-  endLine: number | null
-  annotationLevel: string | null
-  title: string | null
-  message: string
-  rawDetails: string | null
-}
-
-export type PRCheckStep = {
-  name: string
-  status: string | null
-  conclusion: string | null
-  startedAt: string | null
-  completedAt: string | null
-}
-
-export type PRCheckJob = {
-  id: number | null
-  name: string
-  status: string | null
-  conclusion: string | null
-  startedAt: string | null
-  completedAt: string | null
-  url: string | null
-  logTail: string | null
-  steps: PRCheckStep[]
-}
-
-export type PRCheckRunDetails = {
-  name: string
-  status: PRCheckDetail['status'] | string | null
-  conclusion: PRCheckDetail['conclusion'] | string | null
-  url: string | null
-  detailsUrl: string | null
-  startedAt: string | null
-  completedAt: string | null
-  title: string | null
-  summary: string | null
-  text: string | null
-  annotations: PRCheckAnnotation[]
-  jobs: PRCheckJob[]
-}
-
-export type GitHubRerunPRChecksResult = { ok: true; count: number } | { ok: false; error: string }
-
-export type GitHubReactionContent =
-  | '+1'
-  | '-1'
-  | 'laugh'
-  | 'confused'
-  | 'heart'
-  | 'hooray'
-  | 'rocket'
-  | 'eyes'
-
-export type GitHubReaction = {
-  content: GitHubReactionContent
-  count: number
-}
-
-export type PRComment = {
-  id: number
-  author: string
-  authorAvatarUrl: string
-  body: string
-  createdAt: string
-  url: string
-  reactions?: GitHubReaction[]
-  /** File path for inline review comments (absent for top-level conversation comments). */
-  path?: string
-  /** GraphQL node ID of the review thread — present only for inline review comments.
-   *  Used to resolve/unresolve the thread via GitHub's GraphQL API. */
-  threadId?: string
-  /** Whether the review thread has been resolved. Only meaningful when threadId is set. */
-  isResolved?: boolean
-  /** True when GitHub no longer maps the thread to the current diff. */
-  isOutdated?: boolean
-  /** End line of the review annotation (1-based). */
-  line?: number
-  /** Start line of the review annotation range (1-based). Absent for single-line comments. */
-  startLine?: number
-  /** True when GitHub identifies the author as a bot (REST `user.type === 'Bot'` or
-   *  GraphQL `__typename === 'Bot'`). Preferred over login-string heuristics because
-   *  third-party review bots (e.g. qodo-ai-reviewer, coderabbitai) don't follow a
-   *  predictable naming convention. Absent when the data source can't report it
-   *  (non-GitHub fallbacks via `gh pr view`). */
-  isBot?: boolean
-}
-
-export type GitHubCommentResult = { ok: true; comment: PRComment } | { ok: false; error: string }
-
-export type GitHubViewer = {
-  login: string
-  email: string | null
-}
-
-export type GitHubAssignableUser = {
-  login: string
-  name: string | null
-  avatarUrl: string
-}
-
-export type GitHubPRCheckSummary = {
-  state: 'success' | 'failure' | 'pending' | 'none'
-  total: number
-  passed: number
-  failed: number
-  pending: number
-}
-
-export type GitHubPRReviewSummary = {
-  login: string
-  state?: string | null
-  avatarUrl?: string | null
-}
-
-export type GitHubPRFileViewedState = 'DISMISSED' | 'VIEWED' | 'UNVIEWED'
-
-export type GitHubWorkItem = {
-  id: string
-  type: 'pr'
-  number: number
-  title: string
-  state: 'open' | 'closed' | 'merged' | 'draft'
-  url: string
-  labels: string[]
-  updatedAt: string
-  author: string | null
-  // Why: GHE user logins don't exist on github.com, so the github.com/{login}.png
-  // fallback 404s. Carry the API-provided avatar_url so github.com + Enterprise
-  // both render; absent on the gh-pr-view path (gh omits avatar), then the UI
-  // falls back to the login URL and finally an initials placeholder. See #8784.
-  authorAvatarUrl?: string
-  branchName?: string
-  baseRefName?: string
-  // Why: PR checks are keyed by head commit; carrying this lets review rows use
-  // the cached check-runs endpoint instead of one `gh pr checks` call per row.
-  headSha?: string
-  prRepo?: GitHubRepositoryIdentity
-  additions?: number
-  deletions?: number
-  changedFiles?: number
-  reviewDecision?: PRReviewDecision | null
-  reviewRequests?: GitHubAssignableUser[]
-  latestReviews?: GitHubPRReviewSummary[]
-  assignees?: GitHubAssignableUser[]
-  checksSummary?: GitHubPRCheckSummary
-  mergeable?: PRMergeableState
-  autoMergeEnabled?: boolean
-  autoMergeAllowed?: boolean | null
-  mergeQueueRequired?: boolean | null
-  mergeMethodSettings?: GitHubPRMergeMethodSettings
-  mergeStateStatus?: string | null
-  maintainerCanModify?: boolean
-  // Why: true when a PR's head lives on a fork (headRepositoryOwner !== selected repo owner).
-  // The Start-from picker passes this to resolvePrBase so fork heads use
-  // refs/pull/<N>/head for creation and a separate PR-head push target.
-  isCrossRepository?: boolean
-  /** Why: required because the cross-repo view merges items from every selected
-   *  repo — the table row's repo pill and the "open in browser" fallback need
-   *  to know which repo an item came from. Stamped by the renderer fetcher
-   *  (`fetchWorkItems`) and by optimistic stubs on the new-issue path. */
-  repoId: string
-}
-
-export type GitHubPRFile = {
-  path: string
-  oldPath?: string
-  status: 'added' | 'modified' | 'removed' | 'renamed' | 'copied' | 'changed' | 'unchanged'
-  additions: number
-  deletions: number
-  /** GitHub marks files above its diff size limit as binary-like; we skip content fetches for these. */
-  isBinary: boolean
-  /** Modified-side line numbers that GitHub accepts for inline review comments. */
-  reviewCommentLineNumbers?: number[]
-  /** GitHub's per-viewer review state. DISMISSED means new changes arrived after the file was viewed. */
-  viewerViewedState?: GitHubPRFileViewedState
-}
-
-export type GitHubPRFileContents = {
-  original: string
-  modified: string
-  originalIsBinary: boolean
-  modifiedIsBinary: boolean
-  originalTooLarge?: boolean
-  modifiedTooLarge?: boolean
-}
-
-export type GitHubPRReviewCommentInput = {
-  repoPath: string
-  prNumber: number
-  commitId: string
-  path: string
-  line: number
-  startLine?: number
-  body: string
-}
-
-export type GitHubWorkItemDetails = {
-  // Why: main-process doesn't know Yiru's Repo.id, so this inner item omits
-  // repoId. The renderer stamps it when routing the details through the store.
-  item: Omit<GitHubWorkItem, 'repoId'>
-  body: string
-  comments: PRComment[]
-  /** Only set for PRs. Head/base SHAs used by the Files tab to fetch per-file content. */
-  headSha?: string
-  baseSha?: string
-  /** GraphQL node ID required by GitHub's file-viewed mutations. Only set for PRs. */
-  pullRequestId?: string
-  checks?: PRCheckDetail[]
-  files?: GitHubPRFile[]
-  /** Only set for PRs. True when the file fetch failed (rate limit, auth,
-   *  unresolved remote) rather than the PR genuinely having no changed files. */
-  filesUnavailable?: boolean
-  participants?: GitHubAssignableUser[]
-  /** Logins of current pull-request assignees. */
-  assignees?: string[]
-}
-
-export type GitHubPullRequestStateUpdate = {
-  state: 'open' | 'closed'
-}
-
-export type ClassifiedError = {
-  type:
-    | 'permission_denied'
-    | 'not_found'
-    | 'validation_error'
-    | 'rate_limited'
-    | 'network_error'
-    | 'unknown'
-  message: string
-}
-
-// Why: declared here as a shared shape so IPC return envelopes and renderer
-// slices can reference the same structural type without importing from main.
-// Aliased as `OwnerRepo` in `src/main/github/gh-utils.ts` so main call sites
-// can continue using the short local name.
-export type GitHubOwnerRepo = GitHubRepositoryIdentity
+export type PRState = WorkbenchReviewTypes.PRState
+export type CheckStatus = WorkbenchReviewTypes.CheckStatus
+export type PRMergeableState = WorkbenchReviewTypes.PRMergeableState
+export type PRReviewDecision = WorkbenchReviewTypes.PRReviewDecision
+export type PRConflictSummary = WorkbenchReviewTypes.PRConflictSummary
+export type GitHubRepositoryIdentity = WorkbenchReviewTypes.GitHubRepositoryIdentity
+export type GitHubPRMergeMethod = WorkbenchReviewTypes.GitHubPRMergeMethod
+export type GitHubPRMergeMethodSettings = WorkbenchReviewTypes.GitHubPRMergeMethodSettings
+export type PRInfo = WorkbenchReviewTypes.PRInfo
+export type PRRefreshOutcome = WorkbenchReviewTypes.PRRefreshOutcome
+export type GitHubPRRefreshReason = WorkbenchReviewTypes.GitHubPRRefreshReason
+export type GitHubPRRefreshEnqueueResult = WorkbenchReviewTypes.GitHubPRRefreshEnqueueResult
+export type GitHubPRRefreshAlias = WorkbenchReviewTypes.GitHubPRRefreshAlias
+export type GitHubPRRefreshCandidate = WorkbenchReviewTypes.GitHubPRRefreshCandidate
+export type GitHubPRRefreshSkippedReason = WorkbenchReviewTypes.GitHubPRRefreshSkippedReason
+export type GitHubPRRefreshEvent = WorkbenchReviewTypes.GitHubPRRefreshEvent
+export type PRCheckDetail = WorkbenchReviewTypes.PRCheckDetail
+export type PRCheckAnnotation = WorkbenchReviewTypes.PRCheckAnnotation
+export type PRCheckStep = WorkbenchReviewTypes.PRCheckStep
+export type PRCheckJob = WorkbenchReviewTypes.PRCheckJob
+export type PRCheckRunDetails = WorkbenchReviewTypes.PRCheckRunDetails
+export type GitHubRerunPRChecksResult = WorkbenchReviewTypes.GitHubRerunPRChecksResult
+export type GitHubReactionContent = WorkbenchReviewTypes.GitHubReactionContent
+export type GitHubReaction = WorkbenchReviewTypes.GitHubReaction
+export type PRComment = WorkbenchReviewTypes.PRComment
+export type GitHubCommentResult = WorkbenchReviewTypes.GitHubCommentResult
+export type GitHubViewer = WorkbenchReviewTypes.GitHubViewer
+export type GitHubAssignableUser = WorkbenchReviewTypes.GitHubAssignableUser
+export type GitHubPRCheckSummary = WorkbenchReviewTypes.GitHubPRCheckSummary
+export type GitHubPRReviewSummary = WorkbenchReviewTypes.GitHubPRReviewSummary
+export type GitHubPRFileViewedState = WorkbenchReviewTypes.GitHubPRFileViewedState
+export type GitHubWorkItem = WorkbenchReviewTypes.GitHubWorkItem
+export type GitHubPRFile = WorkbenchReviewTypes.GitHubPRFile
+export type GitHubPRFileContents = WorkbenchReviewTypes.GitHubPRFileContents
+export type GitHubPRReviewCommentInput = WorkbenchReviewTypes.GitHubPRReviewCommentInput
+export type GitHubWorkItemDetails = WorkbenchReviewTypes.GitHubWorkItemDetails
+export type GitHubPullRequestStateUpdate = WorkbenchReviewTypes.GitHubPullRequestStateUpdate
+export type ClassifiedError = WorkbenchReviewTypes.ClassifiedError
+export type GitHubOwnerRepo = WorkbenchReviewTypes.GitHubOwnerRepo
 
 // Why: GitLab-specific types live in `./gitlab-types` so they can grow
 // independently from the central types file (which is touched by every
@@ -1582,7 +1142,7 @@ export type {
   MRListState,
   MRMergeableState,
   MRState
-} from './gitlab-types'
+} from '@yiru/workbench-model/review'
 
 /**
  * GitHub API rate-limit buckets used to guard pull-request refreshes. `core`
@@ -1692,13 +1252,7 @@ export type WorktreeCreateTiming = {
   phases: WorktreeCreateTimingPhase[]
 }
 
-export type CreateSparseCheckoutRequest = {
-  directories: string[]
-  /** Set when the directories came from a saved preset and the user did not
-   *  modify them — recorded on WorktreeMeta so the worktree can show "from
-   *  preset X" later. Cleared if the user edited the textarea. */
-  presetId?: string
-}
+export type CreateSparseCheckoutRequest = WorkbenchWorkspaceTypes.CreateSparseCheckoutRequest
 
 /** A reusable per-repo sparse directory list. Saved by the user from the
  *  composer; surfaced again the next time they create a worktree in the same
@@ -1981,43 +1535,7 @@ export type ClaudeManagedAccountRuntimeSelection = {
   wsl: Record<string, string | null>
 }
 
-/** All AI coding agents Yiru knows how to launch. Used for the agent picker in the new-workspace
- *  flow and for the default-agent setting. Extend this union as new agents are added. */
-export type TuiAgent =
-  | 'claude' // Claude Code
-  | 'claude-agent-teams' // Claude Code Agent Teams via Yiru native panes
-  | 'openclaude' // OpenClaude
-  | 'codex' // OpenAI Codex
-  | 'autohand' // Autohand Code CLI
-  | 'opencode' // OpenCode
-  | 'mimo-code'
-  | 'pi' // Pi (pi.dev)
-  | 'omp' // OMP (omp.sh)
-  | 'gemini' // Gemini CLI
-  | 'antigravity' // Google Antigravity CLI
-  | 'aider' // Aider
-  | 'goose' // Goose
-  | 'amp' // Amp
-  | 'kilo' // Kilocode
-  | 'kiro' // Kiro
-  | 'crush' // Charm/Crush
-  | 'aug' // Augment/Auggie
-  | 'cline' // Cline
-  | 'codebuff' // Codebuff
-  | 'command-code' // Command Code
-  | 'continue' // Continue
-  | 'cursor' // Cursor
-  | 'droid' // Factory Droid
-  | 'kimi' // Kimi
-  | 'mistral-vibe' // Mistral Vibe
-  | 'qwen-code' // Qwen Code
-  | 'rovo' // Rovo Dev
-  | 'hermes' // Hermes Agent
-  | 'openclaw' // OpenClaw
-  | 'copilot' // GitHub Copilot CLI
-  | 'grok' // xAI Grok CLI
-  | 'devin' // Devin CLI
-  | 'ante' // Ante (Antigma Labs)
+export type TuiAgent = WorkbenchAgentTypes.TuiAgent
 
 /** Where the repo setup script runs when a worktree is created.
  *  - 'new-tab': open a background tab titled "Setup" and leave focus on the first tab (default).
@@ -2028,34 +1546,7 @@ export type SetupScriptLaunchMode = 'split-vertical' | 'split-horizontal' | 'new
 /** Direction used when the setup script launch mode is a split. */
 export type SetupSplitDirection = 'vertical' | 'horizontal'
 
-export type TerminalColorOverrides = {
-  foreground?: string
-  background?: string
-  cursor?: string
-  cursorAccent?: string
-  selectionBackground?: string
-  selectionForeground?: string
-  black?: string
-  red?: string
-  green?: string
-  yellow?: string
-  blue?: string
-  magenta?: string
-  cyan?: string
-  white?: string
-  brightBlack?: string
-  brightRed?: string
-  brightGreen?: string
-  brightYellow?: string
-  brightBlue?: string
-  brightMagenta?: string
-  brightCyan?: string
-  brightWhite?: string
-  // Why: xterm.js ITheme does not expose a `bold` key, but Ghostty users
-  // expect the setting to be preserved so a future renderer CSS override
-  // or xterm upgrade can honour it without a migration.
-  bold?: string
-}
+export type TerminalColorOverrides = RuntimeMobileTypes.TerminalColorOverrides
 
 export type TerminalQuickCommandScope =
   | {
@@ -3109,21 +2600,9 @@ export type SpriteAnimation = {
   frameDurationsMs?: number[]
 }
 
-export type PersistedTrustedYiruHookEntry = {
-  contentHash: string
-  approvedAt: number
-}
-
-export type PersistedTrustedYiruHookRepo = {
-  all?: {
-    approvedAt: number
-  }
-  setup?: PersistedTrustedYiruHookEntry
-  archive?: PersistedTrustedYiruHookEntry
-  vmRecipe?: PersistedTrustedYiruHookEntry
-}
-
-export type PersistedTrustedYiruHooks = Record<string, PersistedTrustedYiruHookRepo>
+export type PersistedTrustedYiruHookEntry = WorkbenchWorkspaceTypes.PersistedTrustedYiruHookEntry
+export type PersistedTrustedYiruHookRepo = WorkbenchWorkspaceTypes.PersistedTrustedYiruHookRepo
+export type PersistedTrustedYiruHooks = WorkbenchWorkspaceTypes.PersistedTrustedYiruHooks
 
 export type LegacyPaneKeyAliasEntry = {
   ptyId: string
@@ -3215,30 +2694,9 @@ export type FsChangedPayload = {
 // Re-exported from git-status-types.ts so mobile can share the runtime git
 // wire contract without importing this desktop-oriented aggregate type module.
 
-export type GitBranchChangeEntry = {
-  path: string
-  status: GitBranchChangeStatus
-  oldPath?: string
-  added?: number
-  removed?: number
-}
-
-export type GitBranchCompareSummary = {
-  baseRef: string
-  baseOid: string | null
-  compareRef: string
-  headOid: string | null
-  mergeBase: string | null
-  changedFiles: number
-  commitsAhead?: number
-  status: 'ready' | 'invalid-base' | 'unborn-head' | 'no-merge-base' | 'loading' | 'error'
-  errorMessage?: string
-}
-
-export type GitBranchCompareResult = {
-  summary: GitBranchCompareSummary
-  entries: GitBranchChangeEntry[]
-}
+export type GitBranchChangeEntry = WorkbenchReviewTypes.GitBranchChangeEntry
+export type GitBranchCompareSummary = WorkbenchReviewTypes.GitBranchCompareSummary
+export type GitBranchCompareResult = WorkbenchReviewTypes.GitBranchCompareResult
 
 export type GitCommitCompareSummary = {
   commitOid: string

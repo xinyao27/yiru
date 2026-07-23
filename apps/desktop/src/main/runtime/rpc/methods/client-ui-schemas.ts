@@ -1,3 +1,4 @@
+import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
 import { z } from 'zod'
 
 import {
@@ -5,7 +6,6 @@ import {
   type FeatureInteractionId
 } from '../../../../shared/feature-interactions'
 import { isFeatureTipId } from '../../../../shared/feature-tips'
-import { normalizePRBotAuthorOverrides } from '../../../../shared/pr-bot-author-overrides'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import {
   normalizeTuiAgentArgsRecord,

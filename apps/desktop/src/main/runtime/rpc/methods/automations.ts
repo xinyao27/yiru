@@ -1,3 +1,4 @@
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
 import {
@@ -5,7 +6,6 @@ import {
   normalizeAutomationPrecheckTimeoutSeconds
 } from '../../../../shared/automation-precheck'
 import { isValidAutomationSchedule } from '../../../../shared/automation-schedules'
-import { normalizeExecutionHostId } from '../../../../shared/execution-host'
 import type { ProjectSourceIdentity as SharedProjectSourceIdentity } from '../../../../shared/project-source-context'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import { defineMethod, type RpcMethod } from '../core'

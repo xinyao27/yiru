@@ -1,6 +1,5 @@
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-
-import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
 
 export type MobileNativeChatPendingMessage = {
   id: string

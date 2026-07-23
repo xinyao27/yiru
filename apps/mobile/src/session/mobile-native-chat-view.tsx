@@ -1,3 +1,4 @@
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -19,7 +20,6 @@ import { GestureDetector, GestureHandlerRootView } from '@/components/uniwind-na
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
 import { MobileAgentWorkingIndicator } from './mobile-agent-working-indicator'
 import type { AskAnswerSelection, AskPrompt } from './mobile-native-chat-ask'
 import { MobileNativeChatAsk } from './mobile-native-chat-ask-wizard'

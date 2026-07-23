@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 
-import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
+import { translate } from '@/i18n/i18n'
 const SSH_PREFIX = 'SSH connection is not active'
 const STALE_NODE_PTY_DAEMON_MARKERS = [
   "Daemon's node-pty install is gone",

@@ -1,3 +1,9 @@
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import {
+  normalizeAgentStatusPayload,
+  type AgentStatusIpcPayload,
+  type ParsedAgentStatusPayload
+} from '@yiru/workbench-model/agent'
 /* oxlint-disable max-lines -- Why: this App-level IPC bridge intentionally keeps the renderer's main-process event contract in one place so shortcut, runtime, updater, and agent-status wiring do not drift across files. */
 import { useEffect } from 'react'
 import { toast } from 'sonner'
@@ -86,11 +92,6 @@ import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../../shared/agent-status-identity'
-import {
-  normalizeAgentStatusPayload,
-  type AgentStatusIpcPayload,
-  type ParsedAgentStatusPayload
-} from '../../../shared/agent-status-types'
 import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../../shared/constants'
 import type { RateLimitState } from '../../../shared/rate-limit-types'
 import { importRemoteWorkspaceSession } from '../../../shared/remote-workspace-session-projection'
@@ -104,7 +105,6 @@ import type {
   RuntimeTerminalPresentation,
   RuntimeTerminalDriverState
 } from '../../../shared/runtime-types'
-import type { SshConnectionState } from '../../../shared/ssh-types'
 import { makePaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,

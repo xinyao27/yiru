@@ -1,4 +1,5 @@
 import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -12,7 +13,6 @@ import {
 } from '@/runtime/runtime-environment-ssh-state'
 import { useAppStore } from '@/store'
 
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { runWorktreeDelete } from '../sidebar/delete-worktree-flow'
 
 type TerminalSshReconnectOverlayProps = {

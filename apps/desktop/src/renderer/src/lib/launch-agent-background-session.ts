@@ -1,3 +1,5 @@
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
+
 import { subscribeToPtyData } from '@/components/terminal-pane/pty-data-sidecar-subscriptions'
 import {
   registerEagerPtyBuffer,
@@ -40,7 +42,6 @@ import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
 } from '../../../shared/tui-agent-launch-defaults'
-import { resolveLocalWindowsAgentStartupShell } from '../../../shared/windows-terminal-shell'
 
 export async function launchAgentBackgroundSession(
   args: LaunchAgentBackgroundSessionArgs

@@ -1,7 +1,7 @@
 import { realpath, stat } from 'node:fs/promises'
 import { isAbsolute } from 'node:path'
 
-import { isPathInsideOrEqual } from '../shared/cross-platform-path'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 
 export type WorkspacePathOpenErrorCode =
   | 'path_not_absolute'

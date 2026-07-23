@@ -1,4 +1,5 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+
 import { normalizeTitleText, parseJsonObject, timestampMs } from './session-scanner-values'
 
 const HISTORY_MATCH_WINDOW_MS = 2_000

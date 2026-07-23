@@ -1,3 +1,5 @@
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+import { isWslUncPath, parseWslUncPath } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
@@ -10,8 +12,6 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { importExternalPathsToRuntime } from '@/runtime/runtime-file-client'
 import { useAppStore } from '@/store'
 
-import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
-import { isWslUncPath, parseWslUncPath } from '../../../../shared/wsl-paths'
 import type { PtyTransport } from './pty-transport'
 import { resolveNativeTerminalDropPane } from './terminal-drop-pane-resolution'
 import { writeTerminalDropPathsToCapturedTarget } from './terminal-drop-path-writer'

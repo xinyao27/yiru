@@ -1,7 +1,8 @@
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+
 import type { PtyDataMeta } from '@/runtime/pty-data-meta'
 
-import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
-import type { ParsedAgentStatusPayload } from '../../../../shared/agent-status-types'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import type { EventProps } from '../../../../shared/telemetry-events'

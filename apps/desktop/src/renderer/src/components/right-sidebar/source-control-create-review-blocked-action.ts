@@ -1,13 +1,13 @@
-import {
-  localizedHostedReviewCopy,
-  resolveSupportedHostedReviewCopyProvider
-} from '@/i18n/hosted-review-localized-copy'
-
 import type {
   HostedReviewCreationBlockedReason,
   HostedReviewCreationEligibility,
   HostedReviewProvider
-} from '../../../../shared/hosted-review'
+} from '@yiru/workbench-model/review'
+
+import {
+  localizedHostedReviewCopy,
+  resolveSupportedHostedReviewCopyProvider
+} from '@/i18n/hosted-review-localized-copy'
 
 export function canClickBlockedCreateReviewReason(
   reason: HostedReviewCreationBlockedReason | undefined

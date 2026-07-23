@@ -1,4 +1,4 @@
-import type { ReadClipboardTextOptions } from '../../../shared/clipboard-text'
+import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 
 export const PRIMARY_SELECTION_MAX_LENGTH = 65_536
 const PRIMARY_SELECTION_MAX_BYTES = PRIMARY_SELECTION_MAX_LENGTH * 4

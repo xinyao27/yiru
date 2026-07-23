@@ -1,4 +1,4 @@
-import { isRuntimeOwnedSshTargetId } from '../../../shared/execution-host'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 /**
  * Tear down the ephemeral-VM runtimes backing a set of deleted workspaces (and,

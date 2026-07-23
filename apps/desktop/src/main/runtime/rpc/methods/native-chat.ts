@@ -1,7 +1,7 @@
+import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
+import type { AgentType } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
-import type { NativeChatBlock, NativeChatMessage } from '../../../../shared/native-chat-types'
-import type { AgentType } from '../../../../shared/native-chat-types'
 import {
   readNativeChatTranscriptTail,
   subscribeNativeChatTranscript

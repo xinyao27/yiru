@@ -1,4 +1,4 @@
-import { measureClipboardTextByteLength } from './clipboard-text'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
 
 export const YIRU_INTERNAL_FILE_DRAG_TYPE = 'text/x-yiru-file-path'
 

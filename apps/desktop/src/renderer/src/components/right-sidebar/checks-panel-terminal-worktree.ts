@@ -2,10 +2,11 @@ import {
   isPathInsideOrEqual,
   isRuntimePathAbsolute,
   normalizeRuntimePathForComparison
-} from '../../../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import type { TerminalLayoutSnapshot, Worktree } from '../../../../shared/types'
-import { splitWorktreeIdForFilesystem } from '../../../../shared/worktree-id'
-import { parseWslUncPath } from '../../../../shared/wsl-paths'
 
 type TerminalPtyContext = {
   activeTabId: string | null

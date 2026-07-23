@@ -1,6 +1,6 @@
+import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
 import { useEffect, useRef, useState } from 'react'
 
-import type { HostedReviewCreationEligibility } from '../../../desktop/src/shared/hosted-review'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import type { MobileCreatePrEligibilityState } from './mobile-create-pr-action'

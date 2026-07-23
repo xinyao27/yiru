@@ -1,4 +1,18 @@
 import type { IBuffer, IDisposable } from '@xterm/xterm'
+import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
+import {
+  isResumableTuiAgent,
+  normalizeAgentProviderSession,
+  type ResumableTuiAgent,
+  type SleepingAgentSessionRecord
+} from '@yiru/workbench-model/agent'
+import {
+  isFreshNonDoneAgentStatus,
+  type AgentStatusEntry,
+  type AgentType
+} from '@yiru/workbench-model/agent'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 import { dispatchTerminalCommandFinishedEvent } from '@/hooks/terminal-command-finished-event'
 import { sendAgentDraftPasteContent } from '@/lib/agent-draft-paste-content'
@@ -102,24 +116,12 @@ import {
   recognizeAgentProcessFromCommandLine
 } from '../../../../shared/agent-process-recognition'
 import {
-  isResumableTuiAgent,
-  normalizeAgentProviderSession,
-  type ResumableTuiAgent,
-  type SleepingAgentSessionRecord
-} from '../../../../shared/agent-session-resume'
-import {
-  isFreshNonDoneAgentStatus,
-  type AgentStatusEntry,
-  type AgentType
-} from '../../../../shared/agent-status-types'
-import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
 } from '../../../../shared/agent-title-owner'
 import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
 import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { resolvePaneAgentOwner } from '../../../../shared/pane-agent-owner'
 import { redactPtyIdForDiagnostics } from '../../../../shared/pty-delivery-diagnostics'
 import { resolveSetupAgentSequenceLaunchCommand } from '../../../../shared/setup-agent-sequencing'
@@ -133,7 +135,6 @@ import {
 import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal-github-pr-link-detector'
 import { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
 import { parseTerminalOscColorQuery } from '../../../../shared/terminal-osc-color-reply'
-import { isTerminalQueryReply } from '../../../../shared/terminal-query-reply'
 import {
   HIDDEN_STARTUP_RENDERER_QUERY_PENDING_CHARS,
   containsCsiRendererQuery,
@@ -152,7 +153,6 @@ import {
 } from '../../../../shared/tui-agent-launch-defaults'
 import type { SetupSplitDirection, TuiAgent } from '../../../../shared/types'
 import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
 import { createAgentCompletionCoordinator } from './agent-completion-coordinator'
 import type {
   AgentCompletionDispatchMeta,

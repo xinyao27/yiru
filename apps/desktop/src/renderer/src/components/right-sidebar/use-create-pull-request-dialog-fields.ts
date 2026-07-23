@@ -1,3 +1,4 @@
+import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
 /* eslint-disable max-lines -- Why: field state, base search, AI generation,
    and cancellation share request guards that need to stay in one hook. */
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -19,7 +20,6 @@ import type {
   PullRequestFieldRevisions
 } from '@/store/slices/pull-request-generation'
 
-import type { HostedReviewCreationEligibility } from '../../../../shared/hosted-review'
 import { normalizeHostedReviewBaseRef } from '../../../../shared/hosted-review-refs'
 import {
   DEFAULT_SOURCE_CONTROL_AI_PR_CREATION_DEFAULTS,

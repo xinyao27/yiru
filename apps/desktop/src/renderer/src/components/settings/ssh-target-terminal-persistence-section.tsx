@@ -1,10 +1,11 @@
-import { translate } from '@/i18n/i18n'
-
 import {
   DEFAULT_BOUNDED_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MIN_SSH_RELAY_GRACE_PERIOD_SECONDS
-} from '../../../../shared/ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
+
+import { translate } from '@/i18n/i18n'
+
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { SettingsSwitch } from './settings-form-controls'

@@ -1,4 +1,4 @@
-import type { PRComment, PRState } from '../../../desktop/src/shared/types'
+import type { PRComment, PRState } from '@yiru/workbench-model/review'
 
 // Pure helpers for the interactive PR comment timeline (reply / resolve / add
 // root comment), kept independent of React and native rendering concerns.

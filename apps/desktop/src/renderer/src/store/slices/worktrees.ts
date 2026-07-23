@@ -1,3 +1,18 @@
+import { isPositiveHostedReviewNumber } from '@yiru/workbench-model/review'
+import {
+  CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
+  getClientWorktreeCreateCandidate,
+  isRetryableWorktreeCreateConflict
+} from '@yiru/workbench-model/review'
+import {
+  getRepoExecutionHostId,
+  getSettingsFocusedExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId,
+  toSshExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
@@ -18,21 +33,7 @@ import { publishRendererCommandResult } from '@/runtime/renderer-command-result-
 import { requestVirtualizedScrollAnchorRecord } from '@/runtime/virtualized-scroll-anchor-record-request'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import {
-  getRepoExecutionHostId,
-  getSettingsFocusedExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID,
-  parseExecutionHostId,
-  toSshExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import { isPositiveHostedReviewNumber } from '../../../../shared/hosted-review'
-import {
-  CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
-  getClientWorktreeCreateCandidate,
-  isRetryableWorktreeCreateConflict
-} from '../../../../shared/new-workspace/worktree-create-retry-policy'
 import type { RuntimeWorktreeListResult } from '../../../../shared/runtime-types'
 import type {
   DetectedWorktreeListResult,
@@ -58,7 +59,6 @@ import {
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace-scope'
-import { splitWorktreeIdForFilesystem } from '../../../../shared/worktree-id'
 import {
   classifyWorktreeForceDeleteReason,
   getLockedWorktreeRemovalReason,

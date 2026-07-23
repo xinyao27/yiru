@@ -1,9 +1,9 @@
 import { Plus, X } from '@phosphor-icons/react'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import type {
   ProjectHostSetup,
   ProjectHostSetupCreateResult,

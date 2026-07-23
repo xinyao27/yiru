@@ -1,6 +1,7 @@
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { translate } from '@/i18n/i18n'
 
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import type { GlobalSettings, Repo } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'

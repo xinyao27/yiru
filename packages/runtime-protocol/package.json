@@ -1,0 +1,108 @@
+{
+  "name": "@yiru/runtime-protocol",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Yiru cross-client runtime RPC and compatibility contracts",
+  "type": "commonjs",
+  "sideEffects": false,
+  "exports": {
+    "./capabilities": {
+      "types": "./src/capabilities.ts",
+      "react-native": "./src/capabilities.ts",
+      "browser": "./src/capabilities.ts",
+      "development": "./src/capabilities.ts",
+      "import": "./dist/esm/capabilities.mjs",
+      "require": "./dist/capabilities.js",
+      "default": "./dist/capabilities.js"
+    },
+    "./client-invalidations": {
+      "types": "./src/runtime-client-invalidations.ts",
+      "react-native": "./src/runtime-client-invalidations.ts",
+      "browser": "./src/runtime-client-invalidations.ts",
+      "development": "./src/runtime-client-invalidations.ts",
+      "import": "./dist/esm/client-invalidations.mjs",
+      "require": "./dist/runtime-client-invalidations.js",
+      "default": "./dist/runtime-client-invalidations.js"
+    },
+    "./rpc-envelope": {
+      "types": "./src/runtime-rpc-envelope.ts",
+      "react-native": "./src/runtime-rpc-envelope.ts",
+      "browser": "./src/runtime-rpc-envelope.ts",
+      "development": "./src/runtime-rpc-envelope.ts",
+      "import": "./dist/esm/rpc-envelope.mjs",
+      "require": "./dist/runtime-rpc-envelope.js",
+      "default": "./dist/runtime-rpc-envelope.js"
+    },
+    "./mobile-runtime-types": {
+      "types": "./src/mobile-runtime-types.ts",
+      "react-native": "./src/mobile-runtime-types.ts",
+      "browser": "./src/mobile-runtime-types.ts",
+      "development": "./src/mobile-runtime-types.ts",
+      "import": "./dist/esm/mobile-runtime-types.mjs",
+      "require": "./dist/mobile-runtime-types.js",
+      "default": "./dist/mobile-runtime-types.js"
+    },
+    "./ssh-connection": {
+      "types": "./src/ssh-types.ts",
+      "react-native": "./src/ssh-types.ts",
+      "browser": "./src/ssh-types.ts",
+      "development": "./src/ssh-types.ts",
+      "import": "./dist/esm/ssh-connection.mjs",
+      "require": "./dist/ssh-types.js",
+      "default": "./dist/ssh-types.js"
+    },
+    "./subscription-replay": {
+      "types": "./src/runtime-subscription-replay.ts",
+      "react-native": "./src/runtime-subscription-replay.ts",
+      "browser": "./src/runtime-subscription-replay.ts",
+      "development": "./src/runtime-subscription-replay.ts",
+      "import": "./dist/esm/subscription-replay.mjs",
+      "require": "./dist/runtime-subscription-replay.js",
+      "default": "./dist/runtime-subscription-replay.js"
+    },
+    "./tailscale-endpoint": {
+      "types": "./src/remote-runtime-tailscale-hint.ts",
+      "react-native": "./src/remote-runtime-tailscale-hint.ts",
+      "browser": "./src/remote-runtime-tailscale-hint.ts",
+      "development": "./src/remote-runtime-tailscale-hint.ts",
+      "import": "./dist/esm/tailscale-endpoint.mjs",
+      "require": "./dist/remote-runtime-tailscale-hint.js",
+      "default": "./dist/remote-runtime-tailscale-hint.js"
+    },
+    "./terminal-osc-links": {
+      "types": "./src/terminal-osc-link-ranges.ts",
+      "react-native": "./src/terminal-osc-link-ranges.ts",
+      "browser": "./src/terminal-osc-link-ranges.ts",
+      "development": "./src/terminal-osc-link-ranges.ts",
+      "import": "./dist/esm/terminal-osc-links.mjs",
+      "require": "./dist/terminal-osc-link-ranges.js",
+      "default": "./dist/terminal-osc-link-ranges.js"
+    },
+    "./terminal-query-reply": {
+      "types": "./src/terminal-query-reply.ts",
+      "react-native": "./src/terminal-query-reply.ts",
+      "browser": "./src/terminal-query-reply.ts",
+      "development": "./src/terminal-query-reply.ts",
+      "import": "./dist/esm/terminal-query-reply.mjs",
+      "require": "./dist/terminal-query-reply.js",
+      "default": "./dist/terminal-query-reply.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
+    "fmt": "pnpm --workspace-root exec vp fmt packages/runtime-protocol",
+    "lint": "pnpm --workspace-root exec vp lint packages/runtime-protocol --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm --workspace-root exec vp test packages/runtime-protocol"
+  },
+  "dependencies": {
+    "@yiru/workbench-model": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:desktop",
+    "vite": "catalog:"
+  },
+  "packageManager": "pnpm@11.15.0"
+}

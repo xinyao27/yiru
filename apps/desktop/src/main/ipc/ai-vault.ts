@@ -1,14 +1,12 @@
 import { resolve } from 'node:path'
 
-import { app, ipcMain } from 'electron'
-
 import type {
   AiVaultListArgs,
   AiVaultListResult,
   AiVaultSubagentListArgs,
   AiVaultSubagentListResult
-} from '../../shared/ai-vault-types'
-import { isPathInsideOrEqual } from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/agent'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import {
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostScope,
@@ -16,7 +14,9 @@ import {
   toRuntimeExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostScope
-} from '../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+import { app, ipcMain } from 'electron'
+
 import {
   configureAiVaultSessionSources,
   getAiVaultWslHomeDirs,

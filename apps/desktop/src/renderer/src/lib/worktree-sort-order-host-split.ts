@@ -1,4 +1,5 @@
-import { LOCAL_EXECUTION_HOST_ID, toRuntimeExecutionHostId } from '../../../shared/execution-host'
+import { LOCAL_EXECUTION_HOST_ID, toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState

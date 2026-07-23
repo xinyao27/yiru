@@ -2,7 +2,7 @@ import {
   isTextBlock,
   type NativeChatBlock,
   type NativeChatMessage
-} from '../../../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
 
 const IMAGE_SOURCE_MARKER = /^\[Image:\s*source:\s*(.+?)\]\s*$/
 const IMAGE_PROMPT_MARKER = /^\[Image #\d+\]\s*/

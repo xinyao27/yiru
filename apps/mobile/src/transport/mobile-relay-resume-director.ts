@@ -1,6 +1,5 @@
+import type { MobileRelayEndpoint } from '@yiru/mobile-relay-protocol/credential-contract'
 import { z } from 'zod'
-
-import type { MobileRelayEndpoint } from '../../../desktop/src/shared/mobile-relay-credential-contract'
 
 const MAX_RESPONSE_BYTES = 16 * 1024
 const ResolveResponseSchema = z

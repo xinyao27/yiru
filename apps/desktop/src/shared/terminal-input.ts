@@ -2,7 +2,7 @@ import {
   CLIPBOARD_TEXT_MEASURE_YIELD_CODE_UNITS,
   isClipboardTextByteLengthOverLimitWithYield,
   measureClipboardTextByteLength
-} from './clipboard-text'
+} from '@yiru/workbench-model/ui'
 
 export const TERMINAL_INPUT_CHUNK_MAX_BYTES = 16 * 1024
 export const TERMINAL_INPUT_MAX_BYTES = 16 * 1024 * 1024

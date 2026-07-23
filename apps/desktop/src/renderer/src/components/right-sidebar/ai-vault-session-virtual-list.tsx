@@ -1,12 +1,12 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
+import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 import type { AiVaultResumeStartup } from '@/lib/ai-vault-resume-command'
 import { cn } from '@/lib/class-names'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
-import type { AiVaultScope, AiVaultSession } from '../../../../shared/ai-vault-types'
 import { getActiveStickyHeaderIndexForScroll } from '../sidebar/worktree-list-virtual-rows'
 import type { AiVaultOriginalPaneTarget } from './ai-vault-original-pane'
 import { EmptyState, SessionLoadingState, VaultGroupHeader } from './ai-vault-panel-controls'

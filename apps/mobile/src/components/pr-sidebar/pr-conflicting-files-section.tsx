@@ -1,3 +1,4 @@
+import type { PRInfo } from '@yiru/workbench-model/review'
 import * as Clipboard from 'expo-clipboard'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
@@ -5,7 +6,6 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { Check, Copy, FileX as FileWarning, Sparkle as Sparkles } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { PRInfo } from '../../../../desktop/src/shared/types'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { resolveConflictDisplay } from './pr-conflict-presentation'
 import { prConflictStyles as styles } from './pr-conflict-styles'

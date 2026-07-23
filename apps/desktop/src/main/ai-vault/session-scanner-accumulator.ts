@@ -6,8 +6,9 @@ import {
   type AiVaultAgent,
   type AiVaultSession,
   type AiVaultSessionPreviewMessage
-} from '../../shared/ai-vault-types'
-import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type {
   FileWithMtime,
   ResumableSessionParseState,

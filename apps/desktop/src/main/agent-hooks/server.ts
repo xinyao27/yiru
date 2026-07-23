@@ -15,6 +15,16 @@ import { chmodSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSy
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { join } from 'node:path'
 
+import { normalizeAgentProviderSession } from '@yiru/workbench-model/agent'
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  type AgentStatusIpcPayload,
+  type AgentType,
+  type AgentStatusState,
+  type ParsedAgentStatusPayload,
+  normalizeAgentStatusPayload
+} from '@yiru/workbench-model/agent'
+
 import {
   clearAllListenerCaches,
   clearPaneCacheState,
@@ -41,19 +51,10 @@ import {
   isAgentInterruptInputIntent,
   type AgentInterruptInferenceRequest
 } from '../../shared/agent-interrupt-intent'
-import { normalizeAgentProviderSession } from '../../shared/agent-session-resume'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../shared/agent-status-identity'
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusIpcPayload,
-  type AgentType,
-  type AgentStatusState,
-  type ParsedAgentStatusPayload,
-  normalizeAgentStatusPayload
-} from '../../shared/agent-status-types'
 import { isCommandCodeNewTurnWhileWorking } from '../../shared/command-code-turn-boundary'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../shared/stable-pane-id'
 import { AGENT_KIND_VALUES, type AgentKind } from '../../shared/telemetry-events'

@@ -11,6 +11,13 @@ import {
   ArrowClockwise as RefreshCw,
   X
 } from '@phosphor-icons/react'
+import { PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import {
+  getLocalExecutionHostLabel,
+  getRepoExecutionHostId,
+  parseExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: this page owns the automations list/detail
  * orchestration while the form and detail presentation live in sibling files. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -72,18 +79,11 @@ import type {
   AutomationRun,
   AutomationUpdateInput
 } from '../../../../shared/automations-types'
-import {
-  getLocalExecutionHostLabel,
-  getRepoExecutionHostId,
-  parseExecutionHostId
-} from '../../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import { PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '../../../../shared/protocol-version'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { YiruHooks, Repo, Worktree } from '../../../../shared/types'
-import { getWorktreePathBasenameFromId } from '../../../../shared/worktree-id'
 import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import {
   getRepoBackedProviderAvailability,

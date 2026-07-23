@@ -1,16 +1,16 @@
-import * as ExpoCrypto from 'expo-crypto'
-
 import {
   encodeMobileE2EEV2Transcript,
   MOBILE_E2EE_V2_PROTOCOL,
   validateMobileE2EEV2Handshake,
   type MobileE2EETransport,
   type MobileE2EEV2Hello
-} from '../../../desktop/src/shared/mobile-e2ee-v2-contract'
+} from '@yiru/mobile-relay-protocol/e2ee-contract'
 import {
   openMobileE2EEV2Frame,
   sealMobileE2EEV2Frame
-} from '../../../desktop/src/shared/mobile-e2ee-v2-framing'
+} from '@yiru/mobile-relay-protocol/e2ee-framing'
+import * as ExpoCrypto from 'expo-crypto'
+
 import { deriveSharedKey, generateKeyPair, publicKeyFromBase64, publicKeyToBase64 } from './e2ee'
 import { deriveMobileE2EEV2KeySchedule } from './mobile-e2ee-v2-key-schedule'
 

@@ -1,7 +1,8 @@
 import { extname } from 'node:path'
 
-import type { AiVaultAgent, AiVaultScanIssue } from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { FileStat, IFilesystemProvider } from '../providers/types'
 import { joinRemotePath } from '../ssh/ssh-remote-platform'
 import type {

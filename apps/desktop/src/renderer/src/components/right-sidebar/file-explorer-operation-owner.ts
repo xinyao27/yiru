@@ -1,3 +1,9 @@
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+
 import { translate } from '@/i18n/i18n'
 import { getConnectionIdFromState } from '@/lib/connection-context'
 import {
@@ -8,11 +14,6 @@ import { useAppStore } from '@/store'
 import { getRepoIdFromWorktreeId } from '@/store/slices/worktree-helpers'
 import type { AppState } from '@/store/types'
 
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import type { FileExplorerOperationOwner } from './file-explorer-types'
 

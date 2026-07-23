@@ -1,4 +1,5 @@
-import type { ExecutionHostId } from '../../../../shared/execution-host'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { HostSectionOption } from './host-section-rows'
 
 export function orderHostSectionOptions(

@@ -1,4 +1,5 @@
-import type { HostedReviewInfo, HostedReviewQueueSummary } from './hosted-review'
+import type { HostedReviewInfo, HostedReviewQueueSummary } from '@yiru/workbench-model/review'
+
 import type { PRCheckDetail, PRComment } from './types'
 
 export type HostedReviewFromGitLabInfoArgs = {

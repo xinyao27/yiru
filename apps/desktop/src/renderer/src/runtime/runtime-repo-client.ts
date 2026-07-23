@@ -1,5 +1,6 @@
-import { legacyBaseRefSearchResult } from '../../../shared/base-ref-search-result'
-import type { ExecutionHostId } from '../../../shared/execution-host'
+import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { BaseRefSearchResult, GlobalSettings } from '../../../shared/types'
 import { isRuntimeRepoRefSearchQueryWithinLimit } from './runtime-repo-search-bounds'
 import { callRuntimeRpc, getActiveRuntimeTarget } from './runtime-rpc-client'

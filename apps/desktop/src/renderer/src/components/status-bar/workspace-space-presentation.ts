@@ -1,12 +1,13 @@
-import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
-
 import {
   AGENT_STATUS_STALE_AFTER_MS,
   type AgentStatusEntry,
   type MigrationUnsupportedPtyEntry
-} from '../../../../shared/agent-status-types'
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+} from '@yiru/workbench-model/agent'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
+import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
+import { tabHasLivePty } from '@/lib/tab-has-live-pty'
+
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalTab } from '../../../../shared/types'
 import type {

@@ -1,4 +1,5 @@
 import { StopCircle as CircleStop, FolderOpen, ArrowLeft } from '@phosphor-icons/react'
+import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -7,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 
-import { getRuntimePathBasename } from '../../../../shared/cross-platform-path'
 import type { NestedRepoScanResult } from '../../../../shared/types'
 import { NestedRepoScanLimitNotice } from '../repo/nested-repo-scan-limit-notice'
 

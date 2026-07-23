@@ -1,11 +1,4 @@
 import {
-  AGY_AGENT_NAME_RE,
-  DROID_AGENT_NAME_RE,
-  HERMES_AGENT_NAME_RE,
-  titleHasAnyLegacyAgentName
-} from './agent-name-token-match'
-import { getPiCompatibleSyntheticAgentStatus } from './pi-compatible-synthetic-title'
-import {
   CLAUDE_IDLE,
   containsBrailleSpinner,
   GEMINI_IDLE,
@@ -14,7 +7,14 @@ import {
   GEMINI_WORKING,
   isClaudeManagementTitle,
   isPiTerminalTitle
-} from './terminal-title-agent-type'
+} from '@yiru/workbench-model/agent'
+import {
+  AGY_AGENT_NAME_RE,
+  DROID_AGENT_NAME_RE,
+  HERMES_AGENT_NAME_RE,
+  titleHasAnyLegacyAgentName
+} from '@yiru/workbench-model/agent'
+import { getPiCompatibleSyntheticAgentStatus } from '@yiru/workbench-model/agent'
 
 export type AgentStatus = 'working' | 'permission' | 'idle'
 

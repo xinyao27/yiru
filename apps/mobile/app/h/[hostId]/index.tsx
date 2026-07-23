@@ -1,3 +1,9 @@
+import {
+  evaluateMobileRuntimeCompat as evaluateCompat,
+  type MobileRuntimeCompatVerdict as CompatVerdict
+} from '@yiru/runtime-protocol/capabilities'
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 import { useFocusEffect, useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
@@ -29,8 +35,6 @@ import {
 import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import type { RepoIcon } from '../../../../desktop/src/shared/repo-icon'
-import type { WorkspaceStatusDefinition } from '../../../../desktop/src/shared/types'
 import { buildWorktreeNavigationActions } from '../../../src/agent-history/worktree-navigation-actions'
 import { setCachedRepos } from '../../../src/cache/repo-cache'
 import { getCachedWorktrees, setCachedWorktrees } from '../../../src/cache/worktree-cache'
@@ -72,7 +76,6 @@ import {
 } from '../../../src/transport/connection-health'
 import { removeHostAndCloseClient } from '../../../src/transport/host-removal-lifecycle'
 import { loadHosts, updateLastConnected } from '../../../src/transport/host-store'
-import { evaluateCompat, type CompatVerdict } from '../../../src/transport/protocol-compat'
 import type { RpcClient } from '../../../src/transport/rpc-client'
 import type { RpcSuccess } from '../../../src/transport/types'
 import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'

@@ -1,9 +1,9 @@
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
 import {
   findYiruDispatchTaskMarkerIndex,
   YIRU_DISPATCH_STATUS_PREAMBLE_PREFIX,
   YIRU_DISPATCH_STATUS_TASK_MARKER
-} from '../../../shared/yiru-dispatch-status-prompt'
+} from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
 export const YIRU_DISPATCH_PREAMBLE_PREFIX = YIRU_DISPATCH_STATUS_PREAMBLE_PREFIX
 const YIRU_DISPATCH_TASK_MARKER = YIRU_DISPATCH_STATUS_TASK_MARKER

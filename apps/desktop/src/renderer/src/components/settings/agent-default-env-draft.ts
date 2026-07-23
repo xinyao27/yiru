@@ -1,4 +1,4 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 
 // Why: environment overrides are pasteable settings text; reject huge drafts before tokenizing.
 export const AGENT_DEFAULT_ENV_DRAFT_MAX_BYTES = 8 * 1024

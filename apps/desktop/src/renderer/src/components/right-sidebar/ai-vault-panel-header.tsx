@@ -1,17 +1,17 @@
 import { MagnifyingGlass as Search, ArrowClockwise as RefreshCw, X } from '@phosphor-icons/react'
+import type {
+  AiVaultAgent,
+  AiVaultGroup,
+  AiVaultScope,
+  AiVaultSort
+} from '@yiru/workbench-model/agent'
+import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type {
-  AiVaultAgent,
-  AiVaultGroup,
-  AiVaultScope,
-  AiVaultSort
-} from '../../../../shared/ai-vault-types'
-import type { ExecutionHostScope } from '../../../../shared/execution-host'
 import type { AiVaultHostScopeOption } from './ai-vault-host-scope'
 import { VaultHostScopeMenu, VaultScopeSwitch, VaultViewMenu } from './ai-vault-panel-controls'
 import {

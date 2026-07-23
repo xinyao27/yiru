@@ -1,3 +1,5 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import {
   findCatalogModel,
   findCatalogOption,
@@ -6,7 +8,6 @@ import {
   type CatalogModel,
   type CatalogOptionApply
 } from '../../../../shared/agent-session-option-catalog'
-import type { AgentType } from '../../../../shared/agent-status-types'
 import type {
   SessionOptionDescriptor,
   SessionOptionsSurface,

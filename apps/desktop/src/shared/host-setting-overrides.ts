@@ -1,4 +1,5 @@
-import type { ExecutionHostId } from './execution-host'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings, HostSettingOverrides } from './types'
 
 // Why: per-host preferences follow `effective = host override ?? client default`.

@@ -1,3 +1,26 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
+import { buildNativeChatUnsubscribe } from '@yiru/workbench-model/agent'
+import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
+import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
+import {
+  applyPRBotAuthorOverride,
+  normalizePRBotAuthorOverrides
+} from '@yiru/workbench-model/review'
+import {
+  assertClipboardTextWriteWithinLimitWithYield,
+  assertClipboardTextWithinLimitWithYield,
+  type ReadClipboardTextOptions
+} from '@yiru/workbench-model/ui'
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostScope,
+  normalizeExecutionHostId,
+  toRuntimeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+
 import { getDefaultCreateProjectParent } from '@/components/sidebar/create-project-defaults'
 import { translate } from '@/i18n/i18n'
 
@@ -12,9 +35,7 @@ import type {
   NativeChatReadSessionResult,
   NativeChatAppendedMessages
 } from '../../../preload/api-types'
-import type { AiVaultListArgs, AiVaultListResult } from '../../../shared/ai-vault-types'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../../../shared/auto-rename-branch-from-work-settings'
-import { legacyBaseRefSearchResult } from '../../../shared/base-ref-search-result'
 import {
   CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
   CLIPBOARD_IMAGE_MAX_PIXELS,
@@ -23,11 +44,6 @@ import {
   assertClipboardImageByteLengthWithinLimit,
   assertClipboardImageDimensionsWithinLimit
 } from '../../../shared/clipboard-image'
-import {
-  assertClipboardTextWriteWithinLimitWithYield,
-  assertClipboardTextWithinLimitWithYield,
-  type ReadClipboardTextOptions
-} from '../../../shared/clipboard-text'
 import type {
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
@@ -42,14 +58,6 @@ import {
   ONBOARDING_FLOW_VERSION
 } from '../../../shared/constants'
 import { normalizeContextualTourIds, type ContextualTourId } from '../../../shared/contextual-tours'
-import { relativePathInsideRoot } from '../../../shared/cross-platform-path'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  normalizeExecutionHostScope,
-  normalizeExecutionHostId,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../../shared/execution-host'
 import {
   normalizeFeatureInteractions,
   type FeatureInteractionId,
@@ -67,19 +75,12 @@ import {
   type KeybindingOverrides,
   type KeybindingPlatform
 } from '../../../shared/keybindings'
-import { buildNativeChatUnsubscribe } from '../../../shared/native-chat-stream-unsubscribe'
-import {
-  applyPRBotAuthorOverride,
-  normalizePRBotAuthorOverrides
-} from '../../../shared/pr-bot-author-overrides'
 import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '../../../shared/pty-delivery-diagnostics'
 import type { RateLimitState } from '../../../shared/rate-limit-types'
 import { RuntimeRpcCallQueuePool } from '../../../shared/runtime-rpc-call-queue'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type { RuntimeStatus, RuntimeSyncWindowGraph } from '../../../shared/runtime-types'
 import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
 import type { SkillDiscoveryResult } from '../../../shared/skills'
-import type { SshConnectionState, SshTarget } from '../../../shared/ssh-types'
 import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal-cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '../../../shared/terminal-custom-themes'
 import {

@@ -1,4 +1,5 @@
 import { GithubLogo as Github, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
+import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -17,7 +18,6 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { GitHubViewer } from '../../../../shared/types'
-import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
 
 type SubmitIdentity = {
   githubLogin: string | null

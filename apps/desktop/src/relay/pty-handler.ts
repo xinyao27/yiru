@@ -1,6 +1,13 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS } from '@yiru/runtime-protocol/ssh-connection'
+import {
+  isPathInsideOrEqual,
+  normalizeRuntimePathForComparison
+} from '@yiru/workbench-model/platform'
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import type { IPty } from 'node-pty'
 import type * as NodePty from 'node-pty'
@@ -15,21 +22,14 @@ import {
 } from '../main/shell-ready-marker-scanner'
 import { shouldUseShellReadyStartupDelivery } from '../shared/codex-startup-delivery'
 import {
-  isPathInsideOrEqual,
-  normalizeRuntimePathForComparison
-} from '../shared/cross-platform-path'
-import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
 } from '../shared/git-credential-prompt-env'
 import { PhysicalExitTracker } from '../shared/physical-exit-tracker'
 import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
-import { DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS } from '../shared/ssh-types'
 import { buildStartupCommandSubmission } from '../shared/startup-command-submission'
 import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal-git-credential-guard'
 import { isTuiAgent } from '../shared/tui-agent-config'
-import { WINDOWS_GIT_BASH_SHELL } from '../shared/windows-terminal-shell'
-import { splitWorktreeId } from '../shared/worktree-id'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { getRelayShellLaunchConfig } from './pty-shell-launch'
 import {

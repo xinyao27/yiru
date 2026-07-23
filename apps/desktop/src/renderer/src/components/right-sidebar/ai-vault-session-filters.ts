@@ -7,7 +7,7 @@ export type {
   AiVaultSessionProject,
   AiVaultSessionFilterState,
   AiVaultSessionGroup
-} from '../../../../shared/ai-vault-session-filters'
+} from '@yiru/workbench-model/agent'
 export {
   AI_VAULT_SESSION_FILTER_QUERY_MAX_BYTES,
   agentLabel,
@@ -16,4 +16,4 @@ export {
   groupAiVaultSessions,
   isAiVaultSessionFilterQueryTooLarge,
   parseVaultQuery
-} from '../../../../shared/ai-vault-session-filters'
+} from '@yiru/workbench-model/agent'

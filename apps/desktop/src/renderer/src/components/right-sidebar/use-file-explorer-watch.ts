@@ -1,3 +1,8 @@
+import {
+  isPathInsideOrEqual,
+  normalizeRuntimePathForComparison,
+  relativePathInsideRoot
+} from '@yiru/workbench-model/platform'
 import { useEffect, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
@@ -7,11 +12,6 @@ import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-client'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 
-import {
-  isPathInsideOrEqual,
-  normalizeRuntimePathForComparison,
-  relativePathInsideRoot
-} from '../../../../shared/cross-platform-path'
 import type { FsChangedPayload } from '../../../../shared/types'
 import type { InlineInput } from './file-explorer-row'
 import type { DirCache } from './file-explorer-types'

@@ -1,4 +1,5 @@
-import { parseExecutionHostId } from '../../shared/execution-host'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { gitExecFileAsync } from '../git/runner'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'

@@ -1,9 +1,8 @@
+import type { AiVaultListResult, AiVaultSession } from '@yiru/workbench-model/agent'
+import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useAppStore } from '@/store'
-
-import type { AiVaultListResult, AiVaultSession } from '../../../../shared/ai-vault-types'
-import type { ExecutionHostScope } from '../../../../shared/execution-host'
 
 const SESSION_LIMIT = 500
 

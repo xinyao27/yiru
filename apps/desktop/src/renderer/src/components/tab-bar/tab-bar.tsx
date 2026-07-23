@@ -1,5 +1,9 @@
 import { SortableContext } from '@dnd-kit/sortable'
 import { DeviceMobile as Smartphone, FileText, Globe, FilePlus } from '@phosphor-icons/react'
+import {
+  type BuiltInWindowsTerminalShell,
+  WINDOWS_GIT_BASH_SHELL
+} from '@yiru/workbench-model/platform'
 /* oxlint-disable max-lines -- Why: rendering the drop-indicator prop on each
  * of three distinct tab components (terminal, browser, editor) adds 3 lines
  * to a file that was already ~398 code lines on main. The per-type render
@@ -43,10 +47,6 @@ import type {
   WorkspacePanelTabContentType,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import {
-  type BuiltInWindowsTerminalShell,
-  WINDOWS_GIT_BASH_SHELL
-} from '../../../../shared/windows-terminal-shell'
 import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import { useAppStore } from '../../store'
 import type { OpenFile } from '../../store/slices/editor'

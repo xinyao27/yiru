@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import { readFile, stat } from 'node:fs/promises'
 
+import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import type { BrowserWindow } from 'electron'
 import { ipcMain } from 'electron'
 
-import { getRepoExecutionHostId, type ExecutionHostId } from '../../shared/execution-host'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { isFolderRepo } from '../../shared/repo-kind'
 import { inspectSetupScriptImportCandidates } from '../../shared/setup-script-imports'
@@ -158,12 +158,13 @@ function getRepoForWorktreeRemoval(
     ? legacyMatch
     : undefined
 }
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import {
   FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
   getRepoIdFromWorktreeId
-} from '../../shared/worktree-id'
+} from '@yiru/workbench-model/workspace'
+
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
 import {
   getLocalWorktreePathAccess,
   removeLocalWorktreePath,

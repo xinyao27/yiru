@@ -1,4 +1,5 @@
-import type { ExecutionHostId } from '../../../../shared/execution-host'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { AutomationWorkspaceProvenance } from '../../../../shared/types'
 import type { WorktreeCardDetailsHoverControl } from './worktree-card-details-hover-state'
 import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'

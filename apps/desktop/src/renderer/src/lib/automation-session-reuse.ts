@@ -1,6 +1,7 @@
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import type { AppState } from '@/store/types'
 
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
 import type { AutomationRun } from '../../../shared/automations-types'
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { TuiAgent } from '../../../shared/types'

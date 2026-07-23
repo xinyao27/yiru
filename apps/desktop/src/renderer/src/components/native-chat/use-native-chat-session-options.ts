@@ -1,6 +1,6 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 
-import type { AgentType } from '../../../../shared/agent-status-types'
 import { updateNativeChatSessionOptionDefaults } from '../../../../shared/native-chat-session-option-defaults'
 import type { SessionOptionDescriptor } from '../../../../shared/native-chat-session-options'
 import { useAppStore } from '../../store'

@@ -1,4 +1,3 @@
-import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat-streaming'
 import {
   isTextBlock,
   NATIVE_CHAT_SOURCE_PRIORITY,
@@ -6,7 +5,9 @@ import {
   type NativeChatMessage,
   type NativeChatSession,
   type NativeChatSessionStatus
-} from '../../../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+
+import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat-streaming'
 import { isNativeChatActivePromptMessageId } from './native-chat-active-prompt'
 import { normalizeImageTranscriptMessages } from './native-chat-image-transcript-markers'
 import { isLaunchPromptMessageId, isPendingMessageId } from './native-chat-pending'

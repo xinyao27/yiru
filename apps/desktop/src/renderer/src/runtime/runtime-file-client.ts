@@ -1,10 +1,8 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
+
 import { basename, joinPath, normalizeRelativePath } from '@/lib/path'
 
-import {
-  isWindowsAbsolutePathLike,
-  relativePathInsideRoot
-} from '../../../shared/cross-platform-path'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type {
   RuntimeFilePreviewResult,
   RuntimeFileReadChunkResult,

@@ -1,4 +1,5 @@
-import { parseWslUncPath } from '../../../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import type { TerminalPasteRuntime } from './terminal-paste-model'
 
 const REMOTE_PTY_ID_PREFIX = 'remote:'

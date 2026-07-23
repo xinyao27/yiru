@@ -1,12 +1,25 @@
 import type { ElectronAPI } from '@electron-toolkit/preload'
-
-import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
-import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type {
   AgentStatusIpcPayload,
   MigrationUnsupportedPtyEntry
-} from '../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+/* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
+import type {
+  CreateHostedReviewArgs,
+  CreateHostedReviewResult,
+  HostedReviewCreationEligibility,
+  HostedReviewCreationEligibilityArgs,
+  HostedReviewForBranchArgs,
+  HostedReviewInfo,
+  HostedReviewProvider
+} from '@yiru/workbench-model/review'
+import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
+import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser-annotation-viewport-bridge'
 import type {
@@ -30,7 +43,6 @@ import type {
   BrowserPopupEvent
 } from '../shared/browser-guest-events'
 import type { CliInstallStatus } from '../shared/cli-install-types'
-import type { ReadClipboardTextOptions } from '../shared/clipboard-text'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
@@ -50,7 +62,6 @@ import type {
   EphemeralVmRecipeResultWarning
 } from '../shared/ephemeral-vm-recipes'
 import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm-runtimes'
-import type { ExecutionHostId } from '../shared/execution-host'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '../shared/feature-interactions'
 import type {
@@ -59,16 +70,6 @@ import type {
 } from '../shared/folder-workspace-path-status'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
-/* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
-import type {
-  CreateHostedReviewArgs,
-  CreateHostedReviewResult,
-  HostedReviewCreationEligibility,
-  HostedReviewCreationEligibilityArgs,
-  HostedReviewForBranchArgs,
-  HostedReviewInfo,
-  HostedReviewProvider
-} from '../shared/hosted-review'
 import type {
   LanguageServerDocumentUriArgs,
   LanguageServerDocumentUriResult,
@@ -103,7 +104,6 @@ import type {
 import type { RichMarkdownContextMenuCommandPayload } from '../shared/rich-markdown-context-menu'
 import type { RuntimeAccessGrant } from '../shared/runtime-access-grants'
 import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
-import type { RuntimeRpcResponse } from '../shared/runtime-rpc-envelope'
 import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
@@ -304,11 +304,21 @@ type RuntimeEnvironmentSubscriptionHandle = {
   sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => void
 }
 import type {
+  SshConnectionState,
+  SshConfigImportResult,
+  SshTargetAddResult,
+  SshTarget,
+  PortForwardEntry,
+  EnrichedDetectedPort
+} from '@yiru/runtime-protocol/ssh-connection'
+import type {
   AiVaultListArgs,
   AiVaultListResult,
   AiVaultSubagentListArgs,
   AiVaultSubagentListResult
-} from '../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import type {
   Automation,
   AutomationCreateInput,
@@ -364,7 +374,6 @@ import type {
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
 } from '../shared/mobile-markdown-document'
-import type { AgentType, NativeChatMessage } from '../shared/native-chat-types'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -395,14 +404,6 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '../shared/speech-types'
-import type {
-  SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '../shared/ssh-types'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {

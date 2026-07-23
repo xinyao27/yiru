@@ -1,5 +1,6 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { YIRU_BROWSER_PARTITION } from './constants'
-import type { ExecutionHostId } from './execution-host'
 
 export const YIRU_PROFILE_INDEX_SCHEMA_VERSION = 1
 export const DEFAULT_LOCAL_YIRU_PROFILE_ID = 'local-default'

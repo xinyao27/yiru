@@ -1,4 +1,5 @@
-import { isPathInsideOrEqual } from '../../../shared/cross-platform-path'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+
 import { getProjectGroupSubtreeIds } from '../../../shared/project-groups'
 import type { FolderWorkspace, ProjectGroup, Repo } from '../../../shared/types'
 

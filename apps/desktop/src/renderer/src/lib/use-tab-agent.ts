@@ -1,3 +1,4 @@
+import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useRef, useState } from 'react'
 
 import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
@@ -8,7 +9,6 @@ import { isShellProcess } from '../../../shared/agent-detection'
 import { resolveCompatibleAgentTypeForOwner } from '../../../shared/agent-title-owner'
 import { resolvePaneAgentOwner } from '../../../shared/pane-agent-owner'
 import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
-import { resolveExplicitTerminalTitleAgentType } from '../../../shared/terminal-title-agent-type'
 import type { TerminalTab, TuiAgent } from '../../../shared/types'
 import {
   resolveFocusedCompletedTabAgent,

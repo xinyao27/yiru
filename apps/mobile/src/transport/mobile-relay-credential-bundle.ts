@@ -1,8 +1,8 @@
+import type { DeviceCredentialInstalled } from '@yiru/mobile-relay-protocol/credential-contract'
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 import { z } from 'zod'
 
-import type { DeviceCredentialInstalled } from '../../../desktop/src/shared/mobile-relay-credential-contract'
 import type { MobileRelayPairingJournal } from './mobile-relay-pairing-journal'
 
 const Base64Url32ByteSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/)

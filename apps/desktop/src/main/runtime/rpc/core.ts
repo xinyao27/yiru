@@ -1,15 +1,15 @@
+import type {
+  DeviceCredentialInstalled,
+  PairingGetEndpointsParams,
+  PairingGetEndpointsResult,
+  PairingProvisionRelayParams
+} from '@yiru/mobile-relay-protocol/credential-contract'
 // Why: this is the single boundary between raw RPC frames and the YiruRuntimeService.
 // Keeping the schema, handler, and result type attached to one object makes the
 // CLI-facing contract greppable and lets the dispatcher verify every payload
 // against the same shape the handler consumed during development.
 import { ZodError, type ZodType } from 'zod'
 
-import type {
-  DeviceCredentialInstalled,
-  PairingGetEndpointsParams,
-  PairingGetEndpointsResult,
-  PairingProvisionRelayParams
-} from '../../../shared/mobile-relay-credential-contract'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
 import type { MobileNotificationChannel } from '../mobile-notification-channel'

@@ -1,4 +1,4 @@
-import type { RuntimeRpcResponse } from '../shared/runtime-rpc-envelope'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 
 type RuntimeEnvironmentSubscribeArgs = {
   selector: string

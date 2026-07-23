@@ -1,5 +1,6 @@
-import { buildAgentNameRe } from '../../../shared/agent-name-token-match'
-import { isCursorAgentTitle } from '../../../shared/agent-title-core'
+import { buildAgentNameRe } from '@yiru/workbench-model/agent'
+import { isCursorAgentTitle } from '@yiru/workbench-model/agent'
+
 import type { RuntimeTerminalSummary } from '../../../shared/runtime-types'
 
 // Why: group addresses enable broadcast messaging to logical groups of agents.

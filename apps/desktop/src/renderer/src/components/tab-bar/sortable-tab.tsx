@@ -1,5 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { PushPin as Pin, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
+import { stripLeadingAgentTitleDecoration } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
@@ -9,7 +10,6 @@ import { cn } from '@/lib/class-names'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 import { useTabAgent } from '@/lib/use-tab-agent'
 
-import { stripLeadingAgentTitleDecoration } from '../../../../shared/agent-title-decoration'
 import type { TerminalTab } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'

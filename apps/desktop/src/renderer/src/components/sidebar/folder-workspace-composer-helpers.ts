@@ -1,22 +1,23 @@
-import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
-import { translate } from '@/i18n/i18n'
-import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
-
-import { isPathInsideOrEqual } from '../../../../shared/cross-platform-path'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
 import {
   buildGitHubWorkspaceSource,
   buildGitLabWorkspaceSource,
   buildWorkspaceSourceSelection,
   getWorkspaceSourceName,
   getWorkspaceSourceProvider
-} from '../../../../shared/new-workspace/workspace-source'
+} from '@yiru/workbench-model/workspace'
+
+import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
+import { translate } from '@/i18n/i18n'
+import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
+
 import { getProjectGroupSubtreeIds } from '../../../../shared/project-groups'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type {

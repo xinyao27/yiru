@@ -1,6 +1,6 @@
+import type { PRComment } from '@yiru/workbench-model/review'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import type { PRComment } from '../../../desktop/src/shared/types'
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'

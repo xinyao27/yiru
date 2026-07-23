@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { DiscoveredSkill, SkillProvider, SkillSourceKind } from '../../../../shared/skills'
 
 export type SkillsFilterState = {

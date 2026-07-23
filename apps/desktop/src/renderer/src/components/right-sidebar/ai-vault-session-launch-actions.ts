@@ -1,3 +1,4 @@
+import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -19,7 +20,6 @@ import {
 } from '@/lib/worktree-activation'
 import { useAppStore } from '@/store'
 
-import type { AiVaultAgent, AiVaultSession } from '../../../../shared/ai-vault-types'
 import type { Worktree } from '../../../../shared/types'
 import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { agentLabel } from './ai-vault-session-filters'

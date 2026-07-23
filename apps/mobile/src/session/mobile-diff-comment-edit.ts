@@ -1,4 +1,4 @@
-import type { DiffComment } from '../../../desktop/src/shared/types'
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 
 export type UpdateMobileDiffCommentInput = {
   id: string

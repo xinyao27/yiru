@@ -1,6 +1,6 @@
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { app, ipcMain } from 'electron'
 
-import { normalizeExecutionHostId } from '../../shared/execution-host'
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,

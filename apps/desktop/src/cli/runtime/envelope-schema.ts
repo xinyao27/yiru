@@ -2,4 +2,4 @@ export {
   isKeepaliveFrame,
   RuntimeRpcEnvelopeSchema,
   type RuntimeRpcKeepaliveFrame
-} from '../../shared/runtime-rpc-envelope'
+} from '@yiru/runtime-protocol/rpc-envelope'

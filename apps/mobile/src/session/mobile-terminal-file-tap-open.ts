@@ -1,5 +1,6 @@
-import { filesystemPathToFileUri } from '../../../desktop/src/shared/file-uri-path'
-import type { RuntimeTerminalPathResolution } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeTerminalPathResolution } from '@yiru/runtime-protocol/mobile-runtime-types'
+import { filesystemPathToFileUri } from '@yiru/workbench-model/platform'
+
 import { createMobileFilePreviewHref } from '../files/mobile-file-preview-route'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'

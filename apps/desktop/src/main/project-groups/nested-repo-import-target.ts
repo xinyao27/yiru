@@ -1,4 +1,5 @@
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+
 import type { GitWorktreeInfo } from '../../shared/types'
 import { listWorktreeGraph } from '../git/worktree'
 

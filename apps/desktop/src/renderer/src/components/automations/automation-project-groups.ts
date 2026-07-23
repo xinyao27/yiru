@@ -1,4 +1,5 @@
-import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+
 import { getProjectIdentityKey } from '../../../../shared/project-host-setup-projection'
 import type { Repo } from '../../../../shared/types'
 

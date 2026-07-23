@@ -1,3 +1,5 @@
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { isFolderRepo } from '../../shared/repo-kind'
 import type { GitWorktreeInfo, Repo, Worktree } from '../../shared/types'
 import type {
@@ -7,7 +9,6 @@ import type {
   WorkspaceCleanupScanProgress,
   WorkspaceCleanupScanResult
 } from '../../shared/workspace-cleanup'
-import { splitWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import type { IGitProvider } from '../providers/types'

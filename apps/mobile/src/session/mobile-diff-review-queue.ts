@@ -2,7 +2,8 @@ import type {
   DiffComment,
   DiffReviewScope,
   MobileDiffReviewState
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/workspace'
+
 import type { MobileGitBranchChangeEntry } from '../source-control/mobile-branch-compare'
 import {
   isMobileGitDiscardableEntry,

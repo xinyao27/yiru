@@ -1,11 +1,9 @@
+import { formatResetCountdown, formatResetDuration } from '@yiru/workbench-model/ui'
+
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
 
-import {
-  formatResetCountdown,
-  formatResetDuration
-} from '../../../../shared/rate-limit-reset-format'
 import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
 import {
   clampUsedPercent,

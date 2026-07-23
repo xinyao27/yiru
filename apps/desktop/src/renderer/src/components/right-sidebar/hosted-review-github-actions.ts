@@ -1,6 +1,7 @@
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { callRuntimeRpc, type RuntimeClientTarget } from '@/runtime/runtime-rpc-client'
 
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import type { GitHubPRMergeMethod, PRInfo, Repo } from '../../../../shared/types'
 
 type GitHubPRRepo = PRInfo['prRepo']

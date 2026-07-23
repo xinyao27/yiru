@@ -1,5 +1,6 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { RuntimeMobileSessionTabsResult } from '../../shared/runtime-types'
 import type {
   SpoolLiveSessionIdentity,

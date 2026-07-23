@@ -1,3 +1,5 @@
+import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
+
 import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
 import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import {
@@ -16,10 +18,9 @@ import { useAppStore } from '@/store'
 
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import type { FolderWorkspaceLinkedReview, YiruHooks } from '../../../shared/types'
-import { slugifyForWorkspaceName } from '../../../shared/workspace-name'
-export { getLinkedWorkItemSuggestedName } from '../../../shared/workspace-name'
-export { getLinkedWorkItemWorkspaceName } from '../../../shared/workspace-name'
-export { getWorkspaceIntentName } from '../../../shared/workspace-name'
+export { getLinkedWorkItemSuggestedName } from '@yiru/workbench-model/workspace'
+export { getLinkedWorkItemWorkspaceName } from '@yiru/workbench-model/workspace'
+export { getWorkspaceIntentName } from '@yiru/workbench-model/workspace'
 export { PER_REPO_FETCH_LIMIT, CROSS_REPO_DISPLAY_LIMIT } from '../../../shared/work-items'
 
 export const CLIENT_PLATFORM: NodeJS.Platform = navigator.userAgent.includes('Windows')

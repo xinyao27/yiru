@@ -1,6 +1,7 @@
+import { getLocalExecutionHostLabel } from '@yiru/workbench-model/workspace'
+
 import { translate } from '@/i18n/i18n'
 
-import { getLocalExecutionHostLabel } from '../../../../shared/execution-host'
 import type { GlobalSettings } from '../../../../shared/types'
 
 export type ProviderAccountScope = {

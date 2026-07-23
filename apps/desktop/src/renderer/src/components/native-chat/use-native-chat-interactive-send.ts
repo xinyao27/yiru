@@ -1,10 +1,10 @@
+import { shouldStepNativeChatAskAnswer } from '@yiru/workbench-model/agent'
+import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useLayoutEffect, useRef } from 'react'
 
 import { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
 import { sendRuntimePtyInput } from '@/runtime/runtime-terminal-inspection'
 
-import { shouldStepNativeChatAskAnswer } from '../../../../shared/native-chat-agent-support'
-import type { AgentType } from '../../../../shared/native-chat-types'
 import {
   buildAskAnswerKeys,
   formatAskAnswer,

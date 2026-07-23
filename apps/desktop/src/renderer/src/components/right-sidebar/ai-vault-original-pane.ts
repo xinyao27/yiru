@@ -1,8 +1,9 @@
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+
 import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
 import type { AppState } from '@/store/types'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
-import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../../../shared/types'
 

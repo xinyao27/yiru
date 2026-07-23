@@ -1,3 +1,4 @@
+import { ALL_EXECUTION_HOSTS_SCOPE, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type React from 'react'
 
 import {
@@ -10,7 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 
-import { ALL_EXECUTION_HOSTS_SCOPE, type ExecutionHostId } from '../../../../shared/execution-host'
 import type { VisibleWorkspaceHostIds, WorkspaceHostScope } from '../../../../shared/types'
 import { getSidebarHostHealthLabel, type SidebarHostOption } from './sidebar-host-options'
 

@@ -1,3 +1,5 @@
+import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '@yiru/workbench-model/product'
+
 import { translate } from '@/i18n/i18n'
 
 import type {
@@ -5,7 +7,6 @@ import type {
   ClaudeUsageSummary
 } from '../../../../shared/claude-usage-types'
 import type { CodexUsageDailyPoint, CodexUsageSummary } from '../../../../shared/codex-usage-types'
-import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '../../../../shared/yiru-github-repository'
 
 export type ClaudeShareData = {
   provider: 'claude'

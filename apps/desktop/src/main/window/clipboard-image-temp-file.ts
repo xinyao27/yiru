@@ -2,10 +2,10 @@ import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
 
 import { assertClipboardImageByteLengthWithinLimit } from '../../shared/clipboard-image'
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 
 export type SaveClipboardImageAsTempFileArgs = {

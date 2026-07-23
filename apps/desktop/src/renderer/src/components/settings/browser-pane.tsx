@@ -1,13 +1,13 @@
+import {
+  getSettingsFocusedExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo, useRef, useState, type MutableRefObject } from 'react'
 
 import { isMacUserAgent } from '@/components/terminal-pane/pane-helpers'
 import { translate } from '@/i18n/i18n'
 
-import {
-  getSettingsFocusedExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'

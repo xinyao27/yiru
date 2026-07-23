@@ -1,3 +1,4 @@
+import { isFreshNonDoneAgentStatus, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useCallback } from 'react'
 
 import { showBlockedNotificationFallbackToast } from '@/lib/blocked-notification-fallback'
@@ -7,10 +8,6 @@ import { useAppStore } from '@/store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'
 
 import { buildAgentNotificationId } from '../../../../shared/agent-notification-id'
-import {
-  isFreshNonDoneAgentStatus,
-  type AgentStatusEntry
-} from '../../../../shared/agent-status-types'
 import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent-title-owner'
 import type {
   AgentCompletionDispatchMeta,

@@ -11,6 +11,7 @@ import {
   ArrowElbowDownLeft as CornerDownLeft,
   FolderPlus
 } from '@phosphor-icons/react'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 /* eslint-disable max-lines -- Why: this component intentionally keeps the full
 composer card markup together so the inline and modal variants share one UI
 surface without splitting the controlled form into hard-to-follow fragments. */
@@ -54,7 +55,6 @@ import { WORKSPACE_FILE_PATH_MIME } from '@/lib/workspace-file-drag'
 import { useAppStore } from '@/store'
 
 import type { ProjectSourceContext } from '../../../shared/project-source-context'
-import type { SshConnectionStatus } from '../../../shared/ssh-types'
 import { filterEnabledTuiAgents } from '../../../shared/tui-agent-selection'
 import type {
   GitHubWorkItem,

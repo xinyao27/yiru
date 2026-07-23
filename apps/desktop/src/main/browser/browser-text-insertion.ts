@@ -1,4 +1,5 @@
-import { measureClipboardTextByteLength } from '../../shared/clipboard-text'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
+
 import type { CdpCommandSender } from './snapshot-engine'
 
 export const BROWSER_TEXT_INSERT_CHUNK_BYTES = 64 * 1024

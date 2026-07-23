@@ -1,12 +1,14 @@
-import { resolveComposerBranchPick as resolveSharedComposerBranchPick } from '../../../desktop/src/shared/composer-branch-selection'
+import { resolveComposerBranchPick as resolveSharedComposerBranchPick } from '@yiru/workbench-model/review'
+import type { GitLabWorkItem } from '@yiru/workbench-model/review'
+import type { GitHubWorkItem } from '@yiru/workbench-model/review'
 import {
   buildGitHubWorkspaceSource,
   buildGitLabWorkspaceSource,
   buildWorkspaceSourceSelection,
   getWorkspaceSourceName,
   shouldApplyWorkspaceSourceAutoName
-} from '../../../desktop/src/shared/new-workspace/workspace-source'
-import type { GitHubWorkItem, GitLabWorkItem } from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/workspace'
+
 import type {
   MobileComposerCreateSelection,
   MobileLinkedWorkItem,

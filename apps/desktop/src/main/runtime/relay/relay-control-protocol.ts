@@ -1,10 +1,9 @@
-import type { RawData } from 'ws'
-import { z } from 'zod'
-
 import {
   DeviceCredentialInstalledSchema,
   DeviceResumeConfirmedSchema
-} from '../../../shared/mobile-relay-credential-contract'
+} from '@yiru/mobile-relay-protocol/credential-contract'
+import type { RawData } from 'ws'
+import { z } from 'zod'
 
 const OpaqueIdSchema = z.string().min(1).max(128)
 const Base64Url32ByteSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/)

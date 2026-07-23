@@ -1,7 +1,8 @@
+import type { AiVaultScope } from '@yiru/workbench-model/agent'
+import { normalizeRuntimePathSeparators } from '@yiru/workbench-model/platform'
+
 import { translate } from '@/i18n/i18n'
 
-import type { AiVaultScope } from '../../../../shared/ai-vault-types'
-import { normalizeRuntimePathSeparators } from '../../../../shared/cross-platform-path'
 import type {
   AiVaultSessionWorktreeInfo,
   AiVaultSessionWorktreeStatus

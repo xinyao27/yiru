@@ -1,4 +1,5 @@
-import type { PortForwardEntry } from '../../shared/ssh-types'
+import type { PortForwardEntry } from '@yiru/runtime-protocol/ssh-connection'
+
 import type { SshConnection } from './ssh-connection'
 import type {
   PortForwardCloseReason,

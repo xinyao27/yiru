@@ -1,12 +1,12 @@
-import { Platform } from 'react-native'
-
 import {
   DeviceCredentialInstalledSchema,
   PairingGetEndpointsResultSchema,
   type DeviceCredentialInstalled,
   type MobileRelayEndpoint
-} from '../../../desktop/src/shared/mobile-relay-credential-contract'
-import type { PairingRelay } from '../../../desktop/src/shared/mobile-relay-pairing-offer'
+} from '@yiru/mobile-relay-protocol/credential-contract'
+import type { PairingRelay } from '@yiru/mobile-relay-protocol/pairing-offer'
+import { Platform } from 'react-native'
+
 import { loadHosts, saveHost } from './host-store'
 import {
   promotePairingJournalCredential,

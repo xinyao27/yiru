@@ -1,4 +1,5 @@
-import type { ExecutionHostId } from '../../../../shared/execution-host'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
 import type { SpoolPairedRuntimeSessionWorktree } from '../../../../shared/spool/spool-paired-runtime-session-contract'
 import type { SpoolHistoricalSessionPurpose } from '../../../spool/spool-session-source'

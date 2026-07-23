@@ -1,3 +1,6 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { isRuntimeSubscriptionReplayResponse } from '@yiru/runtime-protocol/subscription-replay'
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: web session-tab sync reconciles terminal,
  * unified-tab, group, and PTY maps atomically so host-published surfaces don't
  * leave the web client in a split-brain tab state. */
@@ -10,17 +13,11 @@ import {
 } from '@/lib/worktree-runtime-owner'
 
 import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../shared/agent-status-types'
-import {
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
 } from '../../../shared/agent-title-owner'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import { resolvePaneAgentOwner } from '../../../shared/pane-agent-owner'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
-import { isRuntimeSubscriptionReplayResponse } from '../../../shared/runtime-subscription-replay'
 import type {
   RuntimeMobileSessionTabsResult,
   RuntimeMobileSessionBrowserTab,

@@ -1,0 +1,77 @@
+{
+  "name": "@yiru/workbench-model",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Yiru cross-client workbench models and pure product policies",
+  "type": "commonjs",
+  "sideEffects": false,
+  "exports": {
+    "./agent": {
+      "types": "./src/agent.ts",
+      "react-native": "./src/agent.ts",
+      "browser": "./src/agent.ts",
+      "development": "./src/agent.ts",
+      "import": "./dist/esm/agent.mjs",
+      "require": "./dist/agent.js",
+      "default": "./dist/agent.js"
+    },
+    "./platform": {
+      "types": "./src/platform.ts",
+      "react-native": "./src/platform.ts",
+      "browser": "./src/platform.ts",
+      "development": "./src/platform.ts",
+      "import": "./dist/esm/platform.mjs",
+      "require": "./dist/platform.js",
+      "default": "./dist/platform.js"
+    },
+    "./product": {
+      "types": "./src/product.ts",
+      "react-native": "./src/product.ts",
+      "browser": "./src/product.ts",
+      "development": "./src/product.ts",
+      "import": "./dist/esm/product.mjs",
+      "require": "./dist/product.js",
+      "default": "./dist/product.js"
+    },
+    "./review": {
+      "types": "./src/review.ts",
+      "react-native": "./src/review.ts",
+      "browser": "./src/review.ts",
+      "development": "./src/review.ts",
+      "import": "./dist/esm/review.mjs",
+      "require": "./dist/review.js",
+      "default": "./dist/review.js"
+    },
+    "./ui": {
+      "types": "./src/ui.ts",
+      "react-native": "./src/ui.ts",
+      "browser": "./src/ui.ts",
+      "development": "./src/ui.ts",
+      "import": "./dist/esm/ui.mjs",
+      "require": "./dist/ui.js",
+      "default": "./dist/ui.js"
+    },
+    "./workspace": {
+      "types": "./src/workspace.ts",
+      "react-native": "./src/workspace.ts",
+      "browser": "./src/workspace.ts",
+      "development": "./src/workspace.ts",
+      "import": "./dist/esm/workspace.mjs",
+      "require": "./dist/workspace.js",
+      "default": "./dist/workspace.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
+    "fmt": "pnpm --workspace-root exec vp fmt packages/workbench-model",
+    "lint": "pnpm --workspace-root exec vp lint packages/workbench-model --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm --workspace-root exec vp test packages/workbench-model"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:desktop",
+    "vite": "catalog:"
+  },
+  "packageManager": "pnpm@11.15.0"
+}

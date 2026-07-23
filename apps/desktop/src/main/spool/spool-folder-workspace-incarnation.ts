@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto'
 import { realpath, stat } from 'node:fs/promises'
 
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
-import { parseExecutionHostId } from '../../shared/execution-host'
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { SpoolActualHostPathResolver } from './spool-actual-host-path-resolver'
 import {

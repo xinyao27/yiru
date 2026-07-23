@@ -1,7 +1,8 @@
 import {
   RelayPhoneHelloSchema,
   type RelayPhoneHello
-} from '../../../desktop/src/shared/mobile-relay-phone-protocol'
+} from '@yiru/mobile-relay-protocol/phone-protocol'
+
 import { MobileE2EEV2ClientSession } from './mobile-e2ee-v2-client-session'
 import { MobileE2EEV2PhysicalChannel } from './mobile-e2ee-v2-physical-channel'
 import { websocketPayloadToUint8 } from './websocket-payload-bytes'

@@ -1,4 +1,6 @@
 import { Check } from '@phosphor-icons/react'
+import type { BuiltInWindowsTerminalShell } from '@yiru/workbench-model/platform'
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import { useCallback, useState } from 'react'
 
 import {
@@ -13,8 +15,6 @@ import { cn } from '@/lib/class-names'
 import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import type { BuiltInWindowsTerminalShell } from '../../../../shared/windows-terminal-shell'
-import { WINDOWS_GIT_BASH_SHELL } from '../../../../shared/windows-terminal-shell'
 import { SettingsSegmentedControl } from '../settings/settings-form-controls'
 import { ShellIcon } from '../tab-bar/shell-icons'
 

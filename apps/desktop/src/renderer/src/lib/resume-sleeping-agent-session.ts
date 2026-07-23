@@ -1,10 +1,11 @@
-import { useAppStore } from '@/store'
-
 import type {
   AgentProviderSessionMetadata,
   SleepingAgentSessionRecord
-} from '../../../shared/agent-session-resume'
-import { AGENT_STATUS_STALE_AFTER_MS } from '../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
+
+import { useAppStore } from '@/store'
+
 import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence,

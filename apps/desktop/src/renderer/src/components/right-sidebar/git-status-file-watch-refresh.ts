@@ -1,3 +1,7 @@
+import {
+  normalizeRuntimePathForComparison,
+  relativePathInsideRoot
+} from '@yiru/workbench-model/platform'
 import { useEffect, useRef } from 'react'
 
 import {
@@ -10,10 +14,6 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 
-import {
-  normalizeRuntimePathForComparison,
-  relativePathInsideRoot
-} from '../../../../shared/cross-platform-path'
 import type {
   ActiveRightSidebarTab,
   FsChangedPayload,

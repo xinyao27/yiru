@@ -1,1 +1,1 @@
-export * from '../../../shared/new-workspace/work-item-lookup-text'
+export { isWorkItemLookupText } from '@yiru/workbench-model/review'

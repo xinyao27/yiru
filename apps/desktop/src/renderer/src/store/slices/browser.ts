@@ -1,3 +1,9 @@
+import {
+  getSettingsFocusedExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  toRuntimeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
@@ -23,12 +29,6 @@ import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh
 import { GRAB_BUDGET, type BrowserPageAnnotation } from '../../../../shared/browser-grab-types'
 import { redactKagiSessionToken } from '../../../../shared/browser-url'
 import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
-import {
-  getSettingsFocusedExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import type {
   BrowserDetectProfilesResult,
   BrowserProfileClearDefaultCookiesResult,

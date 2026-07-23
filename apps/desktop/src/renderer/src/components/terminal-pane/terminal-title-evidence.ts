@@ -1,4 +1,5 @@
-import type { AgentType } from '../../../../shared/agent-status-types'
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent-title-owner'
 import {
   resolvePaneRendererPolicy,

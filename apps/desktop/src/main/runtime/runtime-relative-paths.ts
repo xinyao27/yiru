@@ -1,6 +1,6 @@
 import { posix, win32 } from 'node:path'
 
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 
 export function joinWorktreeRelativePath(rootPath: string, relativePath: string): string {
   const normalizedRelativePath = relativePath.replace(/\\/g, '/')

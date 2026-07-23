@@ -1,9 +1,9 @@
 import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 import React from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import { formatKeybindingList, type KeybindingDefinition } from '../../../../shared/keybindings'
 import { cn } from '../../lib/class-names'
 import { Button } from '../ui/button'

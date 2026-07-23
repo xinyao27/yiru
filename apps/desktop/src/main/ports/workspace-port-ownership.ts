@@ -1,5 +1,7 @@
 import path from 'node:path'
 
+import { splitWorktreeId, splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { isFolderRepo } from '../../shared/repo-kind'
 import type {
   WorkspacePortKillRequest,
@@ -7,7 +9,6 @@ import type {
   WorkspacePortProbe,
   WorkspacePortScanResult
 } from '../../shared/workspace-ports'
-import { splitWorktreeId, splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import { scanWorkspacePorts } from './local-workspace-port-scanner'
 

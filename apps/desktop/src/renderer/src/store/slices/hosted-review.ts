@@ -1,17 +1,17 @@
-/* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
-and race protection are kept together so branch review lookup invariants stay testable. */
-import type { StateCreator } from 'zustand'
-
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
-
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import type {
   CreateHostedReviewInput,
   CreateHostedReviewResult,
   HostedReviewCreationEligibility,
   HostedReviewCreationEligibilityArgs,
   HostedReviewInfo
-} from '../../../../shared/hosted-review'
+} from '@yiru/workbench-model/review'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+/* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
+and race protection are kept together so branch review lookup invariants stay testable. */
+import type { StateCreator } from 'zustand'
+
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+
 import type { Repo } from '../../../../shared/types'
 import type { AppState } from '../types'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'

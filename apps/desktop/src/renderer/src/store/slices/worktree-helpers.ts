@@ -1,3 +1,5 @@
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type {
   PendingWorktreeCreation,
   WorktreeCreationPhase
@@ -26,9 +28,8 @@ import type {
   WorktreeMeta,
   WorkspaceKey
 } from '../../../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import type { WorktreeForceDeleteReason } from '../../../../shared/worktree-removal'
-export { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
+export { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
 export type WorktreeDeleteState = {
   isDeleting: boolean

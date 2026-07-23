@@ -1,3 +1,4 @@
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
@@ -6,7 +7,6 @@ import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 import type { AppState } from '@/store/types'
 
-import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 import { canOpenAiVaultSessionLogInYiru } from './ai-vault-session-path-actions'
 

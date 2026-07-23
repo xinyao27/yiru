@@ -1,9 +1,10 @@
-import { withRemoteRuntimeTailscaleHint } from '../../../shared/remote-runtime-tailscale-hint'
 /* eslint-disable max-lines -- Why: this browser runtime client owns the E2EE
    WebSocket state machine, JSON-RPC request routing, streaming callbacks, and
    binary frame forwarding as one transport boundary. */
-import type { RuntimeRpcResponse, RuntimeRpcSuccess } from '../../../shared/runtime-rpc-envelope'
-import { isKeepaliveFrame } from '../../../shared/runtime-rpc-envelope'
+import type { RuntimeRpcResponse, RuntimeRpcSuccess } from '@yiru/runtime-protocol/rpc-envelope'
+import { isKeepaliveFrame } from '@yiru/runtime-protocol/rpc-envelope'
+import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
+
 import {
   decrypt,
   decryptBytes,

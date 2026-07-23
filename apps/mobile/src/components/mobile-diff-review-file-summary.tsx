@@ -1,9 +1,9 @@
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
 import { ArrowDown, ArrowUp } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { DiffComment } from '../../../desktop/src/shared/types'
 import type { MobileDiffReviewQueueItem } from '../session/mobile-diff-review-queue'
 import {
   mobileReviewCountLabel,

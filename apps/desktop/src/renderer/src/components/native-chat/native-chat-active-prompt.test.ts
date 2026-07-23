@@ -1,7 +1,7 @@
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { describe, expect, it } from 'vite-plus/test'
 
 import { nativeChatStreamingMessage } from '../../../../shared/native-chat-streaming'
-import type { NativeChatMessage } from '../../../../shared/native-chat-types'
 import {
   deriveNativeChatActivePrompt,
   pruneConfirmedNativeChatActivePrompt

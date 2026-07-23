@@ -1,4 +1,6 @@
 import { Robot as Bot, FileCode as FileJson } from '@phosphor-icons/react'
+import type { AiVaultSession, AiVaultSubagentRunStatus } from '@yiru/workbench-model/agent'
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { useEffect, useState } from 'react'
 import type React from 'react'
 
@@ -7,8 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
-import type { AiVaultSession, AiVaultSubagentRunStatus } from '../../../../shared/ai-vault-types'
-import { LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
 import { openAiVaultSessionLogInYiru } from './ai-vault-session-log-open'
 import { canOpenAiVaultSessionLogInYiru } from './ai-vault-session-path-actions'
 

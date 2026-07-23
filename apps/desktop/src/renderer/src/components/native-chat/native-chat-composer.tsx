@@ -1,10 +1,10 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
 import { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
 import { emitNativeChatMessageSent } from '@/lib/native-chat-telemetry'
 import { sendRuntimePtyInput } from '@/runtime/runtime-terminal-inspection'
 
-import type { AgentType } from '../../../../shared/agent-status-types'
 import { useAppStore } from '../../store'
 import { getAgentSlashCommands } from './native-chat-agent-commands'
 import { NativeChatComposerField } from './native-chat-composer-field'

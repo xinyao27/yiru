@@ -4,6 +4,8 @@ import {
   CaretUpDown as ChevronsUpDown,
   Plus
 } from '@phosphor-icons/react'
+import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -13,8 +15,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
-import { describeRuntimeCompatBlock } from '../../../../shared/protocol-compat'
 import { canConnectAddRepoHost, canSelectAddRepoHost } from './add-repo-host-availability'
 import type { SidebarHostOption } from './sidebar-host-options'
 import { getSidebarHostHealthLabel, shouldShowHostScopeControls } from './sidebar-host-options'

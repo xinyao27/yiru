@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { writeFileAtomically } from '../codex-accounts/fs-utils'
 import { rewriteRelativePathConfigValues } from './codex-config-path-reference-rewrite'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'

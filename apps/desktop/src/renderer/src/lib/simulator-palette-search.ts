@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { Tab, TabGroup, Worktree } from '../../../shared/types'
 import type { MatchRange } from './worktree-palette-search'
 

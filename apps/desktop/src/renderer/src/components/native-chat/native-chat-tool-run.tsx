@@ -1,14 +1,14 @@
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
+import {
+  isToolCallBlock,
+  isToolResultBlock,
+  type NativeChatBlock
+} from '@yiru/workbench-model/agent'
 import { useEffect, useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import {
-  isToolCallBlock,
-  isToolResultBlock,
-  type NativeChatBlock
-} from '../../../../shared/native-chat-types'
 import { diffFromText, diffFromToolCall, type DiffLine } from './native-chat-diff'
 import { NativeChatDiffView } from './native-chat-diff-view'
 import {

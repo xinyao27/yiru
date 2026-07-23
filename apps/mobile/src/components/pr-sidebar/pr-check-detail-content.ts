@@ -3,7 +3,7 @@ import type {
   PRCheckJob,
   PRCheckRunDetails,
   PRCheckStep
-} from '../../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
 
 // Pure mapping from the github.prCheckDetails payload to the rows the mobile
 // expanded check detail renders. Ports the desktop CheckDetailExpanded logic

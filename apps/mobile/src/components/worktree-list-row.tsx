@@ -1,3 +1,5 @@
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
 import {
@@ -9,8 +11,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { RepoIcon } from '../../../desktop/src/shared/repo-icon'
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
 import { triggerMediumImpact } from '../platform/haptics'
 import { spacing } from '../theme/uniwind-theme-values'
 import { AgentSpinner } from './agent-spinner'

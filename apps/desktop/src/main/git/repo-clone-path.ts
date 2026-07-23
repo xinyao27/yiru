@@ -6,7 +6,7 @@ import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathForComparison,
   normalizeRuntimePathSeparators
-} from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
 
 export type ClaimedCloneTarget = {
   canCleanup: boolean

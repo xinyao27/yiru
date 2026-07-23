@@ -1,5 +1,5 @@
-import { isRuntimeOwnedSshTargetId } from '../../../shared/execution-host'
-import type { SshConnectionStatus } from '../../../shared/ssh-types'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 export type SelectedRepoSshGate = {
   selectedRepoConnectionId: string | null

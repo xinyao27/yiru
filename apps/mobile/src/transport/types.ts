@@ -1,10 +1,7 @@
+import { MobileRelayEndpointSchema } from '@yiru/mobile-relay-protocol/credential-contract'
+import { PairingOfferSchema, type PairingOffer } from '@yiru/mobile-relay-protocol/pairing-offer'
 import { z } from 'zod'
 
-import { MobileRelayEndpointSchema } from '../../../desktop/src/shared/mobile-relay-credential-contract'
-import {
-  PairingOfferSchema,
-  type PairingOffer
-} from '../../../desktop/src/shared/mobile-relay-pairing-offer'
 import {
   MobileAccessEndpointSchema,
   type MobileAccessEndpoint,

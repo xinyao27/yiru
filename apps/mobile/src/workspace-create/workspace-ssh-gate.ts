@@ -1,4 +1,4 @@
-import type { SshConnectionState, SshConnectionStatus } from '../../../desktop/src/shared/ssh-types'
+import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 
 export type WorkspaceSshGate = {
   status: SshConnectionStatus | null

@@ -1,10 +1,4 @@
 import {
-  AGY_AGENT_NAME_RE,
-  DROID_AGENT_NAME_RE,
-  HERMES_AGENT_NAME_RE,
-  titleHasAnyLegacyAgentName
-} from './agent-name-token-match'
-import {
   GEMINI_IDLE,
   GEMINI_PERMISSION,
   GEMINI_SILENT_WORKING,
@@ -12,7 +6,14 @@ import {
   isGeminiTerminalTitle,
   isGrokRotatingWorkingTitle,
   isPiAgentTitle
-} from './terminal-title-agent-type'
+} from '@yiru/workbench-model/agent'
+import {
+  AGY_AGENT_NAME_RE,
+  DROID_AGENT_NAME_RE,
+  HERMES_AGENT_NAME_RE,
+  titleHasAnyLegacyAgentName
+} from '@yiru/workbench-model/agent'
+
 import {
   detectAgentStatusFromTitle,
   STRONG_WORKING_KEYWORDS_RE_GLOBAL

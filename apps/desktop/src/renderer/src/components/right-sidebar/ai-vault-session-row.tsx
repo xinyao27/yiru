@@ -1,3 +1,5 @@
+import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useCallback } from 'react'
 import type React from 'react'
 
@@ -11,8 +13,6 @@ import {
 } from '@/lib/ai-vault-session-drag'
 import { cn } from '@/lib/class-names'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
-import type { AiVaultScope, AiVaultSession } from '../../../../shared/ai-vault-types'
 import { SessionActionMenuItems } from './ai-vault-session-action-menu-items'
 import { SessionInlineDetails } from './ai-vault-session-details'
 import { latestSessionConversationTurn } from './ai-vault-session-display'

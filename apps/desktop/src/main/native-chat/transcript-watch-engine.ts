@@ -2,7 +2,8 @@ import { watch, type FSWatcher } from 'node:fs'
 import { open, stat } from 'node:fs/promises'
 import { basename, dirname } from 'node:path'
 
-import type { AgentType, NativeChatMessage } from '../../shared/native-chat-types'
+import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import type { ResolveSessionFileOptions } from './session-file-resolver'
 import {
   readIncrementalTranscriptMessages,

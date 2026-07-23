@@ -1,6 +1,7 @@
-import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type {
   BrowserTabCreateResult,
   RuntimeMobileSessionCreateTerminalResult

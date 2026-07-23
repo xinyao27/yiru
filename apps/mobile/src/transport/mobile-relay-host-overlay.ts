@@ -1,6 +1,5 @@
+import { MobileRelayEndpointSchema } from '@yiru/mobile-relay-protocol/credential-contract'
 import { z } from 'zod'
-
-import { MobileRelayEndpointSchema } from '../../../desktop/src/shared/mobile-relay-credential-contract'
 
 export const MobileAccessEndpointSchema = z
   .object({

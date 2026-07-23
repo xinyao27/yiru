@@ -1,5 +1,6 @@
-import { parseExecutionHostId } from '../../shared/execution-host'
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { gitExecFileAsync } from '../git/runner'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'

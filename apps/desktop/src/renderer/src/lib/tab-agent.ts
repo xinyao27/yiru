@@ -1,4 +1,5 @@
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TuiAgent } from '../../../shared/types'
 import { agentTypeToIconAgent } from './agent-status'

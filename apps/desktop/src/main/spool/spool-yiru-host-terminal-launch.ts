@@ -1,4 +1,5 @@
-import { parseExecutionHostId } from '../../shared/execution-host'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { isSpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
 import type {
   SpoolExecutionOperation,

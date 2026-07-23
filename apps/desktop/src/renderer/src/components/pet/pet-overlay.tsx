@@ -1,9 +1,9 @@
+import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import type { DetectedSpriteCacheEntry } from '@/runtime/custom-pet-blob-cache'
 
-import { AGENT_STATUS_STALE_AFTER_MS } from '../../../../shared/agent-status-types'
 import type { CustomPet } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import {

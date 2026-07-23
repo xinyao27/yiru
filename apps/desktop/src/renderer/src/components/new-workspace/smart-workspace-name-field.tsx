@@ -9,6 +9,11 @@ import {
   GitBranch as GitBranchPlus,
   X
 } from '@phosphor-icons/react'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the smart name field owns source tabs,
 search orchestration, and result rendering so the unified create flow stays
 in one predictable form control instead of splitting state across fragments. */
@@ -56,11 +61,6 @@ import {
 } from '@/runtime/runtime-repo-client'
 import { useAppStore } from '@/store'
 
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext

@@ -1,16 +1,15 @@
-import type { Automation } from '../../../../shared/automations-types'
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
-import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import {
   describeRuntimeCompatBlock,
-  evaluateRuntimeCompat
-} from '../../../../shared/protocol-compat'
-import {
+  evaluateRuntimeCompat,
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
   RUNTIME_PROTOCOL_VERSION
-} from '../../../../shared/protocol-version'
+} from '@yiru/runtime-protocol/capabilities'
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
+import type { Automation } from '../../../../shared/automations-types'
+import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { SshConnectionState } from '../../../../shared/ssh-types'
 import type { ProjectHostSetup, Repo, Worktree } from '../../../../shared/types'
 import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import type { AutomationHostTarget } from './automation-host-client'

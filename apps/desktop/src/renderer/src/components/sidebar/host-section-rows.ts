@@ -1,3 +1,5 @@
+import type { RuntimeCompatVerdict } from '@yiru/runtime-protocol/capabilities'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
   LOCAL_EXECUTION_HOST_ID,
@@ -6,10 +8,9 @@ import {
   type ExecutionHostId,
   type ExecutionHostKind,
   type ExecutionHostScope
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { ExecutionHostHealth } from '../../../../shared/execution-host-registry'
-import type { RuntimeCompatVerdict } from '../../../../shared/protocol-compat'
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import type { FolderWorkspace, ProjectGroup, Repo } from '../../../../shared/types'
 import { PINNED_GROUP_KEY } from './worktree-list-groups'
 import type { Row } from './worktree-list-groups'

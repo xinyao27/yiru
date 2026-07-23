@@ -7,18 +7,18 @@ import {
   Trash as Trash2,
   ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
+import {
+  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type SshConnectionState,
+  type SshConnectionStatus,
+  type SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import {
-  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  type SshConnectionState,
-  type SshConnectionStatus,
-  type SshTarget
-} from '../../../../shared/ssh-types'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { isSshTargetConnecting, type SshTargetBusyAction } from './ssh-target-action-state'

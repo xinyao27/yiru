@@ -1,10 +1,11 @@
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { getConnectionIdFromState } from '@/lib/connection-context'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import type { AppState } from '@/store/types'
 
-import { parseExecutionHostId } from '../../../../shared/execution-host'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
 import type { PtyTransport } from './pty-transport-types'
 import { isWslShellOverride } from './terminal-paste-runtime'
 

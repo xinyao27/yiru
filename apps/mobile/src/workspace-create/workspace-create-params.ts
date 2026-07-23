@@ -1,10 +1,11 @@
-import { getWorkspaceSourceName } from '../../../desktop/src/shared/new-workspace/workspace-source'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+import { getWorkspaceSourceName } from '@yiru/workbench-model/workspace'
 import type {
   CreateSparseCheckoutRequest,
   GitPushTarget,
-  SetupDecision,
-  TuiAgent
-} from '../../../desktop/src/shared/types'
+  SetupDecision
+} from '@yiru/workbench-model/workspace'
+
 import { resolveMobileWorkspaceCreateName } from './mobile-workspace-name'
 import type { WorkspaceAgentChoice } from './workspace-agent-selection'
 

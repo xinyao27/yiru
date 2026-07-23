@@ -1,15 +1,16 @@
+import type {
+  HostedReviewCreationEligibility,
+  HostedReviewInfo,
+  HostedReviewProvider
+} from '@yiru/workbench-model/review'
+import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
+
 import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
 } from '@/i18n/hosted-review-localized-copy'
 import { translate } from '@/i18n/i18n'
 
-import type {
-  HostedReviewCreationEligibility,
-  HostedReviewInfo,
-  HostedReviewProvider
-} from '../../../../shared/hosted-review'
-import { supportsHostedReviewCreation } from '../../../../shared/hosted-review-creation-providers'
 import { resolveCreatePrIntentEligibility } from './source-control-create-pr-intent-state'
 import { canClickBlockedCreateReviewReason } from './source-control-create-review-blocked-action'
 import type { PrimaryAction, PrimaryActionInputs } from './source-control-primary-action-types'

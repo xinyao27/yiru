@@ -1,4 +1,5 @@
 import { StopCircle as CircleStop, FolderOpen, Gear as Settings } from '@phosphor-icons/react'
+import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -6,7 +7,6 @@ import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/di
 import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 
-import type { SshConnectionState, SshTarget } from '../../../../shared/ssh-types'
 import { RemoteFileBrowser } from './remote-file-browser'
 import { SshTargetRow } from './ssh-target-row'
 

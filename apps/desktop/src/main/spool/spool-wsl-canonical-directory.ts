@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { toLinuxPath, toWindowsWslPath } from '../wsl'
 
 const WSL_CANONICAL_PATH_PREFIX = '__YIRU_SPOOL_CANONICAL_PATH__'

@@ -1,10 +1,10 @@
 import { FolderOpen, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useId, useRef, useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 
-import { LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
 import {
   getEffectiveHostSetting,
   getHostSettingOverride,

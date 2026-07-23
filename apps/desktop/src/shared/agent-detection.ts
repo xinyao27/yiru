@@ -8,7 +8,7 @@
  * direct `resolveTerminalTitleAgentType`/`synthetic-agent-title` consumers.)
  */
 
-export type { AgentStatus } from './agent-title-core'
+export type { AgentStatus } from '@yiru/workbench-model/agent'
 export {
   isClaudeManagementTitle,
   isCursorAgentTitle,
@@ -17,8 +17,11 @@ export {
   isPiTerminalTitle,
   STRONG_IDLE_KEYWORDS_RE,
   STRONG_WORKING_KEYWORDS_RE
-} from './agent-title-core'
-export { isOpenCodeNativeTitle, isMeaningfulOpenCodeTerminalTitle } from './opencode-terminal-title'
+} from '@yiru/workbench-model/agent'
+export {
+  isOpenCodeNativeTitle,
+  isMeaningfulOpenCodeTerminalTitle
+} from '@yiru/workbench-model/agent'
 export { getAgentLabel, isClaudeAgent } from './agent-title-identity'
 export {
   clearWorkingIndicators,
@@ -28,7 +31,7 @@ export {
 } from './agent-title-status'
 
 // Re-export so existing `agent-detection` importers keep working.
-export { AGENT_NAMES, titleHasAgentName } from './agent-name-token-match'
+export { AGENT_NAMES, titleHasAgentName } from '@yiru/workbench-model/agent'
 export {
   extractAllOscTitles,
   extractLastOscTitle,

@@ -1,4 +1,4 @@
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
 export function getAgentForegroundContextPaths(options: {
   cwd?: string

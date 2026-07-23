@@ -1,11 +1,11 @@
-import * as ExpoCrypto from 'expo-crypto'
-
 import {
   DeviceCredentialInstalledSchema,
   PairingGetEndpointsResultSchema,
   type DeviceCredentialInstalled,
   type PairingGetEndpointsResult
-} from '../../../desktop/src/shared/mobile-relay-credential-contract'
+} from '@yiru/mobile-relay-protocol/credential-contract'
+import * as ExpoCrypto from 'expo-crypto'
+
 import { MobileRelayUpgradeHostRemovedError, saveExistingHostRelayUpgrade } from './host-store'
 import { persistRelayHost } from './mobile-endpoint-supervisor-support'
 import {

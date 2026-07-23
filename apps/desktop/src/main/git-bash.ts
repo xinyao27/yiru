@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { win32 as pathWin32 } from 'node:path'
 
-import { WINDOWS_GIT_BASH_SHELL } from '../shared/windows-terminal-shell'
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 
 type GitBashPathOptions = {
   env?: NodeJS.ProcessEnv

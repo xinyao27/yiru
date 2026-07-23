@@ -1,4 +1,4 @@
-import type { PRInfo } from '../../../../desktop/src/shared/types'
+import type { PRInfo } from '@yiru/workbench-model/review'
 
 type MobilePRAutoMergeAvailabilityInput = Pick<
   PRInfo,

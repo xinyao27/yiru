@@ -8,6 +8,11 @@ import {
   ArrowClockwise as RefreshCw,
   X
 } from '@phosphor-icons/react'
+import type {
+  HostedReviewCreationEligibility,
+  HostedReviewProvider
+} from '@yiru/workbench-model/review'
+import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
 /* eslint-disable max-lines -- Why: the checks panel co-locates PR header, checks, comments,
 merge actions, and conflict state in one component to keep the data flow straightforward. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -78,11 +83,6 @@ import {
 
 import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message-host-key'
 import { gitLabPipelineJobsToPRChecks } from '../../../../shared/gitlab-pipeline-checks'
-import type {
-  HostedReviewCreationEligibility,
-  HostedReviewProvider
-} from '../../../../shared/hosted-review'
-import { resolveHostedReviewCreationProvider } from '../../../../shared/hosted-review-creation-providers'
 import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import {

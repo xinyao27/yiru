@@ -1,6 +1,5 @@
 import type { Terminal } from '@xterm/headless'
-
-import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 
 type TerminalWithOscLinks = Terminal & {
   _core?: {

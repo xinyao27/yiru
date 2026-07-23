@@ -1,7 +1,8 @@
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { getDefaultWorkspaceSession } from './constants'
 import type { RemoteWorkspaceSession, RemoteWorkspaceTerminalTab } from './remote-workspace-types'
 import type { TerminalTab, WorkspaceSessionState } from './types'
-import { splitWorktreeId } from './worktree-id'
 
 type ExportOptions = {
   isTargetWorktree: (worktreeId: string) => boolean

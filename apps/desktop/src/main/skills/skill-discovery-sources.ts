@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
 
-import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../shared/execution-host'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+
 import type { SkillDiscoverySource, SkillProvider, SkillSourceKind } from '../../shared/skills'
 import type { Repo } from '../../shared/types'
 

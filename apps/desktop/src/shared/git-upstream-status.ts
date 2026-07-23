@@ -1,4 +1,4 @@
-import type { GitUpstreamStatus } from './git-status-types'
+import type { GitUpstreamStatus } from '@yiru/workbench-model/review'
 
 export function upstreamOnlyCommitsArePatchEquivalent(cherryMarkOutput: string): boolean {
   let hasCommit = false

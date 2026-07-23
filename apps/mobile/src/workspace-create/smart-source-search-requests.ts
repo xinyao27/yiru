@@ -1,8 +1,7 @@
-import type {
-  BaseRefSearchResult,
-  GitHubWorkItem,
-  GitLabWorkItem
-} from '../../../desktop/src/shared/types'
+import type { GitLabWorkItem } from '@yiru/workbench-model/review'
+import type { GitHubWorkItem } from '@yiru/workbench-model/review'
+import type { BaseRefSearchResult } from '@yiru/workbench-model/workspace'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import type { MrStateFilter } from './mobile-composer-source-types'

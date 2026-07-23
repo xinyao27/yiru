@@ -1,10 +1,8 @@
-import type { AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
-import {
-  isPathInsideOrEqual,
-  isRuntimePathAbsolute
-} from '../../../desktop/src/shared/cross-platform-path'
-import { splitWorktreeIdForFilesystem } from '../../../desktop/src/shared/worktree-id'
-import { parseWslUncPath } from '../../../desktop/src/shared/wsl-paths'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import { isPathInsideOrEqual, isRuntimePathAbsolute } from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import type { Worktree } from '../worktree/workspace-list-types'
 
 export type MobileAgentHistorySessionWorktreeStatus = 'current' | 'active' | 'archived'

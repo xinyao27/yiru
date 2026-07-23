@@ -1,4 +1,5 @@
-import { getRuntimePathBasename } from '../../../shared/cross-platform-path'
+import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
+
 import type { LspServerCapabilities } from './language-server-protocol'
 
 export function validateSynchronizationCapability(capabilities: LspServerCapabilities): void {

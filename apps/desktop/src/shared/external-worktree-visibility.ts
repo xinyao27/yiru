@@ -1,4 +1,4 @@
-import { normalizeRuntimePathSeparators } from './cross-platform-path'
+import { normalizeRuntimePathSeparators } from '@yiru/workbench-model/platform'
 
 export const UNKNOWN_EXTERNAL_WORKTREE_PARENT_PATH = 'Unknown location'
 

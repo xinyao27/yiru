@@ -1,4 +1,9 @@
 import { Image as ImageIcon, ArrowDown, ArrowUp } from '@phosphor-icons/react'
+import {
+  isTextBlock,
+  type NativeChatBlock,
+  type NativeChatMessage
+} from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import CommentMarkdown, {
@@ -9,11 +14,6 @@ import { cn } from '@/lib/class-names'
 import { basename } from '@/lib/path'
 
 import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat-streaming'
-import {
-  isTextBlock,
-  type NativeChatBlock,
-  type NativeChatMessage
-} from '../../../../shared/native-chat-types'
 import { isNearBottom, shouldShowJumpToLatest, type ScrollGeometry } from './native-chat-autoscroll'
 import { NativeChatCopyButton } from './native-chat-copy-button'
 import { isNativeChatPastedImagePath } from './native-chat-image-paste'

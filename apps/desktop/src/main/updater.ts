@@ -1,9 +1,9 @@
 import { is } from '@electron-toolkit/utils'
+import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '@yiru/workbench-model/product'
 /* eslint-disable max-lines */
 import { app, BrowserWindow, powerMonitor } from 'electron'
 
 import type { UpdateCheckOptions, UpdateStatus } from '../shared/types'
-import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '../shared/yiru-github-repository'
 import { writeMainThreadDiagnosticMarker } from './diagnostics/main-thread-churn-probe'
 import { loadElectronAutoUpdater, type ElectronAutoUpdater } from './electron-updater-loader'
 import { killAllPty } from './ipc/pty'

@@ -1,10 +1,10 @@
+import type { GitHubWorkItemDetails, PRState } from '@yiru/workbench-model/review'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { GitHubWorkItemDetails, PRState } from '../../../../desktop/src/shared/types'
 import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
 import { canAddRootComment } from '../../session/pr-comment-actions'
 import type { MobilePrCommentActions } from '../../session/use-mobile-pr-comment-actions'

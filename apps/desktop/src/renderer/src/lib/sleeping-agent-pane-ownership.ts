@@ -1,6 +1,7 @@
+import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
+
 import type { useAppStore } from '@/store'
 
-import type { SleepingAgentSessionRecord } from '../../../shared/agent-session-resume'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,

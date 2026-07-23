@@ -1,6 +1,7 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import { isGeminiTerminalTitle } from '@/lib/agent-status'
 
-import type { AgentType } from '../../../../shared/agent-status-types'
 import type { GlobalSettings } from '../../../../shared/types'
 
 export type TerminalGpuAccelerationMode = GlobalSettings['terminalGpuAcceleration']

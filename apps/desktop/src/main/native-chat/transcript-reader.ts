@@ -1,7 +1,8 @@
 import { createReadStream } from 'node:fs'
 
-import { resolveNativeChatTranscriptAgent } from '../../shared/native-chat-agent-support'
-import type { AgentType, NativeChatMessage } from '../../shared/native-chat-types'
+import { resolveNativeChatTranscriptAgent } from '@yiru/workbench-model/agent'
+import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { errorMessage } from '../ai-vault/session-scanner-values'
 import { resolveSessionFilePath, type ResolveSessionFileOptions } from './session-file-resolver'
 import {

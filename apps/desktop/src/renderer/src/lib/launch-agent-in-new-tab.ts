@@ -1,3 +1,4 @@
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
@@ -31,7 +32,6 @@ import {
   resolveTuiAgentLaunchEnv
 } from '../../../shared/tui-agent-launch-defaults'
 import type { TuiAgent } from '../../../shared/types'
-import { resolveLocalWindowsAgentStartupShell } from '../../../shared/windows-terminal-shell'
 
 export type LaunchAgentInNewTabArgs = {
   agent: TuiAgent

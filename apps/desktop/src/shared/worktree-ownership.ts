@@ -5,7 +5,9 @@ import {
   normalizeRuntimePathSeparators,
   relativePathInsideRoot,
   resolveRuntimePath
-} from './cross-platform-path'
+} from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { isExplicitlyImportedExternalWorktreePath } from './external-worktree-inbox'
 import type {
   DetectedWorktree,
@@ -17,7 +19,6 @@ import type {
   WorktreeMeta,
   WorktreeOwnership
 } from './types'
-import { parseWslUncPath } from './wsl-paths'
 
 export const EXTERNAL_WORKTREE_VISIBILITY_ROLLOUT_AT = Date.UTC(2026, 4, 23)
 

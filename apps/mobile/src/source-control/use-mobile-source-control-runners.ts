@@ -1,7 +1,7 @@
+import type { RuntimeGitLocalBranches } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { useRouter } from 'expo-router'
 import { useCallback, type MutableRefObject } from 'react'
 
-import type { RuntimeGitLocalBranches } from '../../../desktop/src/shared/runtime-types'
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import type { RpcClient } from '../transport/rpc-client'
 import type {

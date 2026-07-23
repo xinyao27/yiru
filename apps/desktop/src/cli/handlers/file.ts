@@ -1,4 +1,5 @@
-import type { GitStatusEntry, GitStatusResult } from '../../shared/git-status-types'
+import type { GitStatusEntry, GitStatusResult } from '@yiru/workbench-model/review'
+
 import type { RuntimeFileOpenResult } from '../../shared/runtime-types'
 import type { CommandHandler, HandlerContext } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'

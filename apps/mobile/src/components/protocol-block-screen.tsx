@@ -1,14 +1,10 @@
+import type { MobileRuntimeCompatVerdict as CompatVerdict } from '@yiru/runtime-protocol/capabilities'
+import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import { router } from 'expo-router'
 import { Linking, Platform, Pressable, Text, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
-
-import { YIRU_GITHUB_RELEASES_URL } from '../../../desktop/src/shared/yiru-github-repository'
-import {
-  YIRU_ANDROID_LATEST_APK_URL,
-  YIRU_IOS_TESTFLIGHT_URL
-} from '../../../desktop/src/shared/yiru-mobile-downloads'
-import type { CompatVerdict } from '../transport/protocol-compat'
 
 type Props = {
   verdict: Extract<CompatVerdict, { kind: 'blocked' }>

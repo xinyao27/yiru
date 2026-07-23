@@ -1,4 +1,4 @@
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 
 // Mirrors the desktop AGENT_STATUS_STALE_AFTER_MS (src/shared/agent-status-types.ts:
 // 30 min). Defined locally because Metro cannot resolve this desktop runtime value;

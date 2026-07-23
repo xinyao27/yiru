@@ -1,6 +1,6 @@
+import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 
-import type { SshConnectionState, SshTarget } from '../../../../shared/ssh-types'
 import type { NestedRepoScanResult } from '../../../../shared/types'
 import { CloneStep } from './add-repo-clone-step'
 import { CreateStep } from './add-repo-create-step'

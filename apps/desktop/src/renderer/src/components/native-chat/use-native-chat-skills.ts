@@ -1,6 +1,6 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useState } from 'react'
 
-import type { AgentType } from '../../../../shared/agent-status-types'
 import type { DiscoveredSkill } from '../../../../shared/skills'
 import { useAppStore } from '../../store'
 

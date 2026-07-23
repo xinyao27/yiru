@@ -1,3 +1,4 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
@@ -30,7 +31,6 @@ import {
 import { track } from '@/lib/telemetry'
 import { useAppStore } from '@/store'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 
 type OrderedSendTarget = {

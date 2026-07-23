@@ -1,5 +1,6 @@
+import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
+
 import { shouldForcePushWithLeaseForUpstream } from './git-upstream-status'
-import { supportsHostedReviewCreation } from './hosted-review-creation-providers'
 import { resolveCreateReviewIntentEligibility } from './source-control-create-review-intent'
 import type {
   SourceControlPrimaryActionDecision,

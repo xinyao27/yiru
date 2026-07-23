@@ -1,12 +1,14 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { isResumableTuiAgent } from '../../shared/agent-session-resume'
-import { isAiVaultSessionResumableContent } from '../../shared/ai-vault-types'
+import { isResumableTuiAgent } from '@yiru/workbench-model/agent'
+import { isAiVaultSessionResumableContent } from '@yiru/workbench-model/agent'
+import { isNativeChatSupportedAgent } from '@yiru/workbench-model/agent'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
+
 import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../shared/constants'
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
 import type { GlobalAssistantSession } from '../../shared/global-assistant-types'
-import { isNativeChatSupportedAgent } from '../../shared/native-chat-agent-support'
 import { isTuiAgent, TUI_AGENT_CONFIG } from '../../shared/tui-agent-config'
 import {
   getTuiAgentDefaultArgs,
@@ -20,7 +22,6 @@ import {
 } from '../../shared/tui-agent-startup'
 import type { AgentStartupShell } from '../../shared/tui-agent-startup-shell'
 import type { TuiAgent } from '../../shared/types'
-import { resolveLocalWindowsAgentStartupShell } from '../../shared/windows-terminal-shell'
 import {
   markCodexProjectTrusted,
   markCopilotFolderTrusted,

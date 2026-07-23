@@ -1,6 +1,6 @@
+import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
 import { ipcMain, type IpcMainEvent, type WebContents } from 'electron'
 
-import type { AgentType, NativeChatMessage } from '../../shared/native-chat-types'
 import type { ReadTranscriptResult } from '../native-chat/transcript-reader'
 import {
   subscribeNativeChatTranscript,

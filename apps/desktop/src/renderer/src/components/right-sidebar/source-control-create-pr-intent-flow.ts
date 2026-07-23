@@ -1,5 +1,6 @@
+import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
+
 import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
-import type { HostedReviewCreationEligibility } from '../../../../shared/hosted-review'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef

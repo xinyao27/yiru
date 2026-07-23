@@ -1,10 +1,8 @@
+import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
+
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import {
-  YIRU_ANDROID_LATEST_APK_URL,
-  YIRU_IOS_TESTFLIGHT_URL
-} from '../../../../shared/yiru-mobile-downloads'
 import { MobilePane } from './mobile-pane'
 import {
   getMobileOverviewSearchEntry,

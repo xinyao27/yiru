@@ -4,6 +4,12 @@
  * abstraction emerges. */
 import { randomUUID } from 'node:crypto'
 
+import { createWsOutboundBackpressureQueue } from '@yiru/mobile-relay-protocol/outbound-backpressure'
+import {
+  isKeepaliveFrame,
+  RuntimeRpcEnvelopeSchema,
+  type RuntimeRpcResponse
+} from '@yiru/runtime-protocol/rpc-envelope'
 import WebSocket from 'ws'
 
 import {
@@ -26,12 +32,6 @@ import {
   type RemoteRuntimeSocketLivenessMonitor,
   type RemoteRuntimeSocketLivenessOptions
 } from './remote-runtime-socket-liveness'
-import {
-  isKeepaliveFrame,
-  RuntimeRpcEnvelopeSchema,
-  type RuntimeRpcResponse
-} from './runtime-rpc-envelope'
-import { createWsOutboundBackpressureQueue } from './ws-outbound-backpressure-queue'
 
 export { RemoteRuntimeClientError } from './remote-runtime-client-error'
 

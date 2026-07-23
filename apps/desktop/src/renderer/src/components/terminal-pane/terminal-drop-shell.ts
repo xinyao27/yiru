@@ -1,5 +1,6 @@
-import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+
 import { isWindowsUserAgent } from './pane-helpers'
 
 export type TerminalTargetShell = 'posix' | 'windows'

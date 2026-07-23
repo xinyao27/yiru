@@ -1,10 +1,10 @@
-import type { AiVaultAgent } from '../../shared/ai-vault-types'
+import type { AiVaultAgent } from '@yiru/workbench-model/agent'
 import type {
   AiVaultScanIssue,
   AiVaultSession,
   AiVaultSessionPreviewMessage
-} from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type AiVaultScanOptions = {
   claudeProjectsDir?: string

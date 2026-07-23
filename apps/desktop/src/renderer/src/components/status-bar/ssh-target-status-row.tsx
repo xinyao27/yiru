@@ -1,4 +1,5 @@
 import { Warning as AlertTriangle, Cloud } from '@phosphor-icons/react'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -7,7 +8,6 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { useAppStore } from '../../store'
 import type { RemoteWorkspaceSyncStatus } from '../../store/slices/ssh'
 import { STATUS_LABELS, statusColor } from '../settings/ssh-target-card'

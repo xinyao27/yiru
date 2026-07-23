@@ -5,7 +5,8 @@ import {
   githubAvatarIcon,
   MAX_REPO_ICON_UPLOAD_BYTES,
   type RepoIcon
-} from '../shared/repo-icon'
+} from '@yiru/workbench-model/workspace'
+
 import type { GitHubRepositoryIdentity, RepoKind } from '../shared/types'
 import { getRepoSlug, getRepoUpstream } from './github/client'
 import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'

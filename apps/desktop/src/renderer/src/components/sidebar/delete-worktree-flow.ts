@@ -1,3 +1,7 @@
+import {
+  isPathInsideOrEqual,
+  normalizeRuntimePathForComparison
+} from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
@@ -8,10 +12,6 @@ import { useAppStore } from '@/store'
 import { getWorktreeMapFromState } from '@/store/selectors'
 import { findRepoForHost } from '@/store/slices/repo-host-identity'
 
-import {
-  isPathInsideOrEqual,
-  normalizeRuntimePathForComparison
-} from '../../../../shared/cross-platform-path'
 import type { Worktree } from '../../../../shared/types'
 import { prepareActiveWorktreeFocusAfterDelete } from './active-worktree-focus-after-delete'
 import { showDeleteWorktreeFailureToast } from './delete-worktree-failure-toast'

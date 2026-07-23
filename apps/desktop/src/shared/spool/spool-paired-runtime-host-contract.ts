@@ -1,6 +1,6 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
-import type { ExecutionHostId } from '../execution-host'
 import { SpoolAgentLaunchIdSchema } from './spool-agent-launch-contract'
 import type { SpoolExecutionOperation } from './spool-operation-contract'
 import type { SpoolWorktreeKind } from './spool-worktree-kind'

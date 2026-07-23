@@ -1,3 +1,10 @@
+import {
+  isAiVaultSessionRecoverableEmpty,
+  type AiVaultScope,
+  type AiVaultSession
+} from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import type React from 'react'
 
 import { AgentStateDot } from '@/components/agent-state-dot'
@@ -7,14 +14,7 @@ import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { useRepoById } from '@/store/selectors'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
-import {
-  isAiVaultSessionRecoverableEmpty,
-  type AiVaultScope,
-  type AiVaultSession
-} from '../../../../shared/ai-vault-types'
 import { resolveRepoBadgeColor } from '../../../../shared/repo-badge-color'
-import { splitWorktreeIdForFilesystem } from '../../../../shared/worktree-id'
 import { SessionTime } from './ai-vault-session-details'
 import { sessionModelLabel } from './ai-vault-session-display'
 import { agentLabel } from './ai-vault-session-filters'

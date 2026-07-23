@@ -1,7 +1,8 @@
 import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathSeparators
-} from '../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
 import type { AgentTrustPreset } from './agent-trust-presets'
 import { upsertProjectTrustLevelInContent } from './codex/config-toml-trust'
 import { getActiveMultiplexer } from './ipc/ssh'

@@ -1,3 +1,6 @@
+import type { AiVaultAgent } from '@yiru/workbench-model/agent'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
 import type { TabSplitDirection } from '@/lib/tab-split-direction'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
@@ -7,9 +10,6 @@ import {
   isWebRuntimeSessionActive
 } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
-
-import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
-import type { AiVaultAgent } from '../../../shared/ai-vault-types'
 
 export type LaunchAiVaultSessionInNewTabResult =
   | { tabId: string; groupId?: string }

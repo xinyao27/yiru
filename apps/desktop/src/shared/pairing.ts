@@ -2,7 +2,7 @@ import {
   PAIRING_OFFER_VERSION,
   PairingOfferSchema,
   type PairingOffer
-} from './mobile-relay-pairing-offer'
+} from '@yiru/mobile-relay-protocol/pairing-offer'
 
 export { PAIRING_OFFER_VERSION, PairingOfferSchema }
 export type { PairingOffer }

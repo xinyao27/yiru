@@ -1,7 +1,8 @@
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 
-import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
 import type {
   LspResourceOperation,
   LspTextDocumentEdit,

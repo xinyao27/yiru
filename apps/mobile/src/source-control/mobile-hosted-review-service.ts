@@ -4,7 +4,8 @@ import type {
   HostedReviewCreationEligibility,
   HostedReviewCreationNextAction,
   HostedReviewProvider
-} from '../../../desktop/src/shared/hosted-review'
+} from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import { hostedReviewCopy } from './hosted-review-copy'

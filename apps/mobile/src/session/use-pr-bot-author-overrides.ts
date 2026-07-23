@@ -1,6 +1,6 @@
+import { createBotAuthorOverrideSet } from '@yiru/workbench-model/review'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { createBotAuthorOverrideSet } from '../../../desktop/src/shared/pr-bot-author-overrides'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import type { RpcSuccess } from '../transport/types'

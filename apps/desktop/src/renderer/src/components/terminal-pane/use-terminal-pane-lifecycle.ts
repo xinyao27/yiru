@@ -1,4 +1,6 @@
 import type { IDisposable, Terminal } from '@xterm/xterm'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: terminal pane lifecycle wiring is intentionally co-located so PTY attach, theme sync, and runtime graph publication remain consistent for live terminals. */
 import { useEffect, useRef } from 'react'
 
@@ -46,8 +48,6 @@ import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/
 import { consumePendingWebRuntimeSplitMirrorTelemetry } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
 
-import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
-import type { ParsedAgentStatusPayload } from '../../../../shared/agent-status-types'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { TerminalPaneSplitSource } from '../../../../shared/feature-education-telemetry'
 import { makePaneKey } from '../../../../shared/stable-pane-id'

@@ -1,6 +1,6 @@
 import { execFile, execFileSync } from 'node:child_process'
 
-import { parseWslUncPath } from '../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
 export type WslPathInfo = {
   distro: string

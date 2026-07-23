@@ -1,15 +1,15 @@
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
+import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
 /* oxlint-disable max-lines -- Why: terminal RPC methods are co-located for discoverability; splitting would scatter related handlers across files. */
 import { z } from 'zod'
 
-import { measureClipboardTextByteLength } from '../../../../shared/clipboard-text'
 import { TERMINAL_PANE_SPLIT_SOURCES } from '../../../../shared/feature-education-telemetry'
 import {
   TERMINAL_INPUT_MAX_BYTES,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   isTerminalInputTooLargeWithYield
 } from '../../../../shared/terminal-input'
-import type { TerminalOscLinkRange } from '../../../../shared/terminal-osc-link-ranges'
-import { isTerminalQueryReply } from '../../../../shared/terminal-query-reply'
 import {
   EMPTY_TERMINAL_REPLY_QUERY_SCAN_STATE,
   scanTerminalReplyQuerySequences,

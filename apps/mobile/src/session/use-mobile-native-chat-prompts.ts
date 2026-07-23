@@ -1,7 +1,7 @@
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useMemo } from 'react'
 
-import type { AgentStatusEntry } from '../../../desktop/src/shared/agent-status-types'
-import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
 import { extractPendingAsk, parseAskFromStatus } from './mobile-native-chat-ask'
 import { detectAgentPermission, parseApprovalFromStatus } from './mobile-native-chat-permission'
 import { parseAgentQuestion } from './mobile-native-chat-question'

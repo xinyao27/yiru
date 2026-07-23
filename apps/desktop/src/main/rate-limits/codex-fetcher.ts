@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { extractCodexAuthError, isCodexAuthError } from '../../shared/codex-auth-errors'
 /* eslint-disable max-lines -- Why: keeping both Codex RPC and PTY fallback
 paths together in one file makes it easier to audit the protocol/parsing
@@ -16,7 +18,6 @@ import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
 } from '../../shared/wsl-login-shell-command'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { resolveCodexCommand } from '../codex-cli/command'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import { getCmdExePath, getSpawnArgsForWindows } from '../win32-utils'

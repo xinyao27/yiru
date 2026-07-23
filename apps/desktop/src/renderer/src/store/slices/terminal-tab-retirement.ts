@@ -1,10 +1,11 @@
+import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
+
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
 } from '@/lib/worktree-runtime-owner'
 import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
 
-import type { SleepingAgentSessionRecord } from '../../../../shared/agent-session-resume'
 import type { AppState } from '../types'
 
 export type TerminalTabCloseReason = 'user' | 'cleanup' | 'pty-exit'

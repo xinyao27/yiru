@@ -1,4 +1,5 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -18,7 +19,6 @@ import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import { getAllWorktreesFromState } from '@/store/selectors'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import { removeSshTargetWithBestEffortCleanup } from '../settings/ssh-target-remove'
 import { clearHostRename } from './host-rename-remove'
 import type { HostRemovalTarget } from './host-rename-remove'

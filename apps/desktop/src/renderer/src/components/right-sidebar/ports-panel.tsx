@@ -11,6 +11,7 @@ import {
   CaretRight as ChevronRight,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import type { PortForwardEntry, EnrichedDetectedPort } from '@yiru/runtime-protocol/ssh-connection'
 /* oxlint-disable max-lines -- Why: co-locates forwarded list, detected list, modal form, and
 per-entry actions in one file to keep the data flow straightforward. */
 import React, { useCallback, useMemo, useState } from 'react'
@@ -59,7 +60,6 @@ import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 import { useActiveWorktree, useRepoById } from '@/store/selectors'
 
-import type { PortForwardEntry, EnrichedDetectedPort } from '../../../../shared/ssh-types'
 import type { WorkspacePort } from '../../../../shared/workspace-ports'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 

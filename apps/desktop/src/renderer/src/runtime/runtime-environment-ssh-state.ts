@@ -1,6 +1,7 @@
+import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import { useAppStore } from '@/store'
 
-import type { SshConnectionState, SshTarget } from '../../../shared/ssh-types'
 import { callRuntimeRpc } from './runtime-rpc-client'
 
 /**

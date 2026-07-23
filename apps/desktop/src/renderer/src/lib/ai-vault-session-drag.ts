@@ -1,7 +1,7 @@
-import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
-import { AI_VAULT_AGENTS, type AiVaultAgent } from '../../../shared/ai-vault-types'
-import { measureClipboardTextByteLength } from '../../../shared/clipboard-text'
-import { normalizeExecutionHostId, type ExecutionHostId } from '../../../shared/execution-host'
+import { AI_VAULT_AGENTS, type AiVaultAgent } from '@yiru/workbench-model/agent'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
+import { normalizeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export const AI_VAULT_SESSION_DRAG_TYPE = 'application/x-yiru-ai-vault-session'
 export const AI_VAULT_SESSION_DRAG_START_EVENT = 'yiru-ai-vault-session-drag-start'

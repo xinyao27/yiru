@@ -1,6 +1,7 @@
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import { basename } from '@/lib/path'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../shared/types'
 
 export type CombinedDiffFileTreeMode = 'all' | 'uncommitted' | 'branch' | 'commit'

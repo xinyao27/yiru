@@ -1,6 +1,6 @@
+import type { AiVaultAgent, AiVaultGroup, AiVaultSort } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import type { AiVaultAgent, AiVaultGroup, AiVaultSort } from '../../../../shared/ai-vault-types'
 import {
   createDefaultAiVaultViewOptions,
   enabledAiVaultAgents,

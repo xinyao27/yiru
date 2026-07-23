@@ -7,10 +7,17 @@ import {
   type GitHubPullRequestLink,
   parseGitHubPullRequestLink,
   parseGitHubPullRequestNumber
-} from '../../../shared/github-links'
+} from '@yiru/workbench-model/review'
+
 import { isWorkItemLinkQueryTooLarge } from './work-item-link-query-bounds'
 
-export * from '../../../shared/github-links'
+export {
+  buildGitHubRepoUrl,
+  parseGitHubPullRequestLink,
+  parseGitHubPullRequestNumber,
+  type GitHubPullRequestLink,
+  type RepoSlug
+} from '@yiru/workbench-model/review'
 
 const HTTP_URL_PREFIX_RE = /^https?:\/\//i
 

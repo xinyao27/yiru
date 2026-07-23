@@ -1,4 +1,4 @@
-import type { AgentType } from './agent-status-types'
+import type { AgentType } from '@yiru/workbench-model/agent'
 
 /**
  * The owner-evidence signals a terminal pane can carry, strongest launch intent

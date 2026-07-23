@@ -1,9 +1,9 @@
 import { GitMerge } from '@phosphor-icons/react'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import React from 'react'
 
 import { cn } from '@/lib/class-names'
 
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import { PullRequestIcon } from './checks-panel-content'
 
 function hostedReviewStateClass(review: HostedReviewInfo): string {

@@ -1,8 +1,8 @@
 import { Plus } from '@phosphor-icons/react'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import { translate } from '@/i18n/i18n'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import type { BrowserSessionProfile } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'

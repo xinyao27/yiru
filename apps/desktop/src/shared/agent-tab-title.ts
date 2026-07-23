@@ -2,7 +2,7 @@ import {
   extractWorkIdentifier,
   formatIdentifierFirst,
   stripWorkIdentifierEcho
-} from './work-item-reference'
+} from '@yiru/workbench-model/review'
 
 export const GENERATED_TAB_TITLE_MAX_LENGTH = 40
 export const GENERATED_TAB_TITLE_SOURCE_SCAN_LIMIT = 512

@@ -1,4 +1,5 @@
-import type { RuntimeSpeechSetupState } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeSpeechSetupState } from '@yiru/runtime-protocol/mobile-runtime-types'
+
 import type { RpcClient } from '../transport/rpc-client'
 import { LogicalClientCutoverError } from '../transport/stable-logical-rpc-client'
 import type { RpcSuccess } from '../transport/types'

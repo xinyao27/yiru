@@ -36,6 +36,10 @@ All six architecture-review candidates and the identified low-risk cleanup are i
   store contracts are import-free leaves, state no longer owns view registries or presentation,
   and typed command/result owners preserve remote-session and user-feedback behavior without a
   store-crossing dependency cycle.
+- [05 — Promote cross-app domain and protocol ownership](issues/05-promote-cross-app-domain-protocol.md):
+  three workspace packages now own cross-client contracts through stable domain entries; mobile has
+  zero desktop-source imports, desktop compatibility facades are smaller, and real CJS/ESM/Metro
+  build paths are verified.
 
 ## Not yet specified
 

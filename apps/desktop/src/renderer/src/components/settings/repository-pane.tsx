@@ -1,10 +1,10 @@
 import { Trash as Trash2 } from '@phosphor-icons/react'
+import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useCallback, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { translate } from '@/i18n/i18n'
 
-import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { getRepoKindLabel, isFolderRepo } from '../../../../shared/repo-kind'
 import type {
   YiruHooks,

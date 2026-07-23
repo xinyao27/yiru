@@ -1,3 +1,6 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+
 import { getConnectionIdFromState } from '@/lib/connection-context'
 import { isLocalNativeWindowsConpty } from '@/lib/pane-manager/windows-pty-compatibility'
 import {
@@ -5,8 +8,6 @@ import {
   type WorktreeRuntimeOwnerState
 } from '@/lib/worktree-runtime-owner'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
-import { LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
 import type { PtyTransport } from './pty-transport-types'
 import type { PaneCwdMap } from './resolve-split-cwd'
 

@@ -1,3 +1,5 @@
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+
 import {
   buildFixBrokenChecksPrompt,
   getBrokenChecks,
@@ -11,7 +13,6 @@ import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review-cache-identity'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import type { PRCheckDetail, PRCheckRunDetails, Repo } from '../../../../shared/types'
 
 export function resolveCheckRunDetailsFixCheck(

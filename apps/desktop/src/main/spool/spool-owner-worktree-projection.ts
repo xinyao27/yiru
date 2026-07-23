@@ -1,8 +1,9 @@
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../shared/execution-host'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
 import { getRepoKind } from '../../shared/repo-kind'
 import type { DetectedWorktree, ProjectHostSetup, Repo, WorktreeMeta } from '../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
 
 export function projectRegisteredSpoolWorktree(

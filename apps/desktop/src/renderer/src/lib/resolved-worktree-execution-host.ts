@@ -1,10 +1,11 @@
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import {
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
 import type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner'
 import {

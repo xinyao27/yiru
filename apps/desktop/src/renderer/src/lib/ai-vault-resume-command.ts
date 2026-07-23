@@ -1,3 +1,13 @@
+import {
+  buildAiVaultResumeCommand,
+  buildAiVaultResumeShellCommand,
+  type AiVaultSession
+} from '@yiru/workbench-model/agent'
+import { isResumableTuiAgent, type SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { resolveWindowsShellStartupFamily } from '@yiru/workbench-model/platform'
+import { LOCAL_EXECUTION_HOST_ID, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
 import { buildAgentResumeStartupPlan } from '@/lib/tui-agent-startup'
@@ -5,23 +15,11 @@ import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import type { AppState } from '@/store/types'
 
 import {
-  isResumableTuiAgent,
-  type SleepingAgentLaunchConfig
-} from '../../../shared/agent-session-resume'
-import {
-  buildAiVaultResumeCommand,
-  buildAiVaultResumeShellCommand,
-  type AiVaultSession
-} from '../../../shared/ai-vault-types'
-import { LOCAL_EXECUTION_HOST_ID, parseExecutionHostId } from '../../../shared/execution-host'
-import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
 } from '../../../shared/tui-agent-launch-defaults'
 import type { AgentStartupShell } from '../../../shared/tui-agent-startup-shell'
-import { resolveWindowsShellStartupFamily } from '../../../shared/windows-terminal-shell'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { parseWslUncPath } from '../../../shared/wsl-paths'
 
 type AiVaultResumeCommandSession = Pick<
   AiVaultSession,

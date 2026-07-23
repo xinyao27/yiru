@@ -1,2 +1,8 @@
 // Re-export shim: the implementation moved to src/shared so mobile can share it.
-export * from '../../../shared/new-workspace/gitlab-links'
+export {
+  normalizeGitLabMergeRequestQuery,
+  parseGitLabMergeRequestLink,
+  parseGitLabMergeRequestNumber,
+  type GitLabMergeRequestQuery,
+  type ProjectSlug
+} from '@yiru/workbench-model/review'

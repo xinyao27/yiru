@@ -1,4 +1,4 @@
-import { YIRU_GITHUB_REPOSITORY_URL } from './yiru-github-repository'
+import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 
 export const YIRU_SKILLS_REPOSITORY_URL = YIRU_GITHUB_REPOSITORY_URL
 

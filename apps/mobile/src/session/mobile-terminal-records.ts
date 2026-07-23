@@ -1,4 +1,5 @@
-import type { AgentStatusEntry } from '../../../desktop/src/shared/agent-status-types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import type { MobileTerminalTheme } from '../terminal/terminal-webview-contract'
 
 export type TerminalRecord = {

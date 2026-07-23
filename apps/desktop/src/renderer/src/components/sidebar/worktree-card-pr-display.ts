@@ -1,4 +1,5 @@
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+
 import type { PRInfo, Worktree } from '../../../../shared/types'
 
 type LinkedReviewMetadataProvider = Exclude<HostedReviewInfo['provider'], 'unsupported'>

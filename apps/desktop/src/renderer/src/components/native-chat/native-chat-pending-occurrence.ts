@@ -1,8 +1,5 @@
-import {
-  isImageRefBlock,
-  isTextBlock,
-  type NativeChatMessage
-} from '../../../../shared/native-chat-types'
+import { isImageRefBlock, isTextBlock, type NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { stripImagePromptMarker } from './native-chat-image-transcript-markers'
 
 export type NativeChatPendingOccurrence = {

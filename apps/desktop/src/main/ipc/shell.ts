@@ -3,9 +3,9 @@ import { constants, copyFile, readFile, stat } from 'node:fs/promises'
 import { basename, extname, isAbsolute, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { MAX_REPO_ICON_UPLOAD_BYTES } from '@yiru/workbench-model/workspace'
 import { ipcMain, shell, dialog } from 'electron'
 
-import { MAX_REPO_ICON_UPLOAD_BYTES } from '../../shared/repo-icon'
 import type { ShellOpenLocalPathResult } from '../../shared/shell-open-types'
 import {
   EXTERNAL_EDITOR_CLI_COMMAND,

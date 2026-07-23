@@ -2,12 +2,12 @@
    error capture, diagnostic upload, and crash-store submission state. */
 import os from 'node:os'
 
-import { app, clipboard, ipcMain } from 'electron'
-
 import {
   assertClipboardTextWriteWithinLimit,
   isClipboardTextWriteTooLargeError
-} from '../../shared/clipboard-text'
+} from '@yiru/workbench-model/ui'
+import { app, clipboard, ipcMain } from 'electron'
+
 import {
   type CrashReportBreadcrumbData,
   type CrashReportCopyDiagnosticsArgs,

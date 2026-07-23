@@ -1,14 +1,15 @@
-import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
-import type { RetainedAgentEntry } from '@/store/slices/agent-status'
-
 import {
   AGENT_STATUS_STALE_AFTER_MS,
   type AgentType,
   type AgentStatusEntry,
   type AgentStatusOrchestrationContext
-} from '../../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+
+import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
+import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
+import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
+import type { RetainedAgentEntry } from '@/store/slices/agent-status'
+
 import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent-title-owner'
 import {
   makePaneKey,

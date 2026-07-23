@@ -1,5 +1,6 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { getDefaultWorkspaceSession } from '../../shared/constants'
-import type { ExecutionHostId } from '../../shared/execution-host'
 import type { WorkspaceSessionState } from '../../shared/types'
 import { parseWorkspaceKey } from '../../shared/workspace-scope'
 import {

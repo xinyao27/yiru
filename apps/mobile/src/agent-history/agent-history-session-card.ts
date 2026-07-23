@@ -1,7 +1,8 @@
-import { latestSessionConversationTurn } from '../../../desktop/src/shared/ai-vault-session-display'
-import { aiVaultAgentLabel } from '../../../desktop/src/shared/ai-vault-types'
-import type { AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
-import { isPathInsideOrEqual } from '../../../desktop/src/shared/cross-platform-path'
+import { latestSessionConversationTurn } from '@yiru/workbench-model/agent'
+import { aiVaultAgentLabel } from '@yiru/workbench-model/agent'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+
 import { formatTimeAgo } from '../worktree/agent-row-display'
 
 export type MobileAgentHistoryCard = {

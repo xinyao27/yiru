@@ -3,12 +3,13 @@ import { readdir, stat } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { createInterface } from 'node:readline'
 
-import type { AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
 import {
   isPathInsideOrEqual,
   normalizeRuntimePathForComparison
-} from '../../shared/cross-platform-path'
-import { parseWslUncPath } from '../../shared/wsl-paths'
+} from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import type { FileWithMtime } from './session-scanner-types'
 import { errorMessage, extractString, parseJsonObject } from './session-scanner-values'
 

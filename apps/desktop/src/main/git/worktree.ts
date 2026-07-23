@@ -2,6 +2,8 @@
 import { stat } from 'node:fs/promises'
 import { join, posix, win32 } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import {
   branchHasNoUnmergedChangesOnAnyTarget,
   getBranchCleanupTargetRefs,
@@ -23,7 +25,6 @@ import type {
 import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
 import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
 import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/worktree-submodule-removal'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { getLocalGitCapabilityCache } from './git-capability-state'
 import { gitExecFileAsync, translateWslOutputPaths } from './runner'
 import { resolveGitDir, runWithGitReadCacheInvalidation } from './status'

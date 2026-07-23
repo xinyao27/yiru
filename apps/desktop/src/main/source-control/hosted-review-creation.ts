@@ -1,4 +1,3 @@
-import { isNoUpstreamError, normalizeGitErrorMessage } from '../../shared/git-remote-error'
 /* eslint-disable max-lines -- Why: provider detection, eligibility, and creation
    preflight share one boundary so renderer and main-process gating cannot drift. */
 import type {
@@ -8,11 +7,13 @@ import type {
   HostedReviewCreationEligibility,
   HostedReviewCreationEligibilityArgs,
   HostedReviewProvider
-} from '../../shared/hosted-review'
+} from '@yiru/workbench-model/review'
 import {
   supportsHostedReviewCreation,
   type HostedReviewCreationProvider
-} from '../../shared/hosted-review-creation-providers'
+} from '@yiru/workbench-model/review'
+
+import { isNoUpstreamError, normalizeGitErrorMessage } from '../../shared/git-remote-error'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef

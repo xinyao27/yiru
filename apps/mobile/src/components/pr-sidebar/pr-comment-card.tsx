@@ -1,3 +1,4 @@
+import type { GitHubReaction, GitHubReactionContent, PRComment } from '@yiru/workbench-model/review'
 import { memo, useState } from 'react'
 import { Image, Linking, Pressable, Text, View } from 'react-native'
 
@@ -9,11 +10,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type {
-  GitHubReaction,
-  GitHubReactionContent,
-  PRComment
-} from '../../../../desktop/src/shared/types'
 import { isResolvableComment } from '../../session/pr-comment-actions'
 import { CommentMarkdown } from './comment-markdown'
 import { PRCommentComposer } from './pr-comment-composer'

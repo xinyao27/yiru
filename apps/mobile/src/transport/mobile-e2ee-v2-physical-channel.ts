@@ -1,7 +1,8 @@
 import {
   createWsOutboundBackpressureQueue,
   type WsOutboundBackpressureQueue
-} from '../../../desktop/src/shared/ws-outbound-backpressure-queue'
+} from '@yiru/mobile-relay-protocol/outbound-backpressure'
+
 import type { MobileE2EEV2ClientSession } from './mobile-e2ee-v2-client-session'
 
 type ChannelState = 'awaiting-ready' | 'awaiting-authenticated' | 'ready'

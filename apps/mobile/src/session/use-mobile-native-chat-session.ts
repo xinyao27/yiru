@@ -1,7 +1,7 @@
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+import { buildNativeChatSubscriptionId } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { buildNativeChatSubscriptionId } from '../../../desktop/src/shared/native-chat-stream-unsubscribe'
-import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
 import type { RpcClient } from '../transport/rpc-client'
 import { createNativeChatMerger, replaceList } from './mobile-native-chat-merge'
 import {

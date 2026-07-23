@@ -1,4 +1,4 @@
-import type { SleepingAgentLaunchConfig } from './agent-session-resume'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 
 export function buildSleepingAgentLaunchConfig(args: {
   agentCommand?: string | null

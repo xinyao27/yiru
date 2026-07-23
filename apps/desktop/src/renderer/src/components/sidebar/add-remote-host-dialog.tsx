@@ -1,3 +1,7 @@
+import {
+  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -13,7 +17,6 @@ import {
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import { MAX_SSH_RELAY_GRACE_PERIOD_SECONDS, type SshTarget } from '../../../../shared/ssh-types'
 import {
   EMPTY_FORM,
   getSshTargetDraftConnectionFields,

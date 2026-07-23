@@ -1,4 +1,4 @@
-import type { PRInfo } from '../../../../desktop/src/shared/types'
+import type { PRInfo } from '@yiru/workbench-model/review'
 
 // Pure presentation logic for the PR sidebar's conflicting-files section.
 // Ports the logic of the desktop ConflictingFilesSection / MergeConflictNotice,

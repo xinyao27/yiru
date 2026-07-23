@@ -1,13 +1,14 @@
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+
 import type { AppState } from '@/store/types'
 
-import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../../shared/execution-host'
 import {
   deriveGlobalWindowsRuntimeDefaultFromLegacySettings,
   resolveProjectExecutionRuntime,
   type ProjectExecutionRuntimeResolution
 } from '../../../shared/project-execution-runtime'
 import type { Repo, Worktree } from '../../../shared/types'
-import { parseWslUncPath } from '../../../shared/wsl-paths'
 import {
   getProjectRuntimePreflightContext,
   getWslPreflightContext,

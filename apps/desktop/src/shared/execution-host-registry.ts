@@ -1,4 +1,11 @@
 import {
+  evaluateRuntimeCompat,
+  MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
+  RUNTIME_PROTOCOL_VERSION,
+  type RuntimeCompatVerdict
+} from '@yiru/runtime-protocol/capabilities'
+import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import {
   LOCAL_EXECUTION_HOST_ID,
   getLocalExecutionHostLabel,
   getSettingsFocusedExecutionHostId,
@@ -8,12 +15,10 @@ import {
   toSshExecutionHostId,
   type ExecutionHostId,
   type ExecutionHostKind
-} from './execution-host'
-import { evaluateRuntimeCompat, type RuntimeCompatVerdict } from './protocol-compat'
-import { MIN_COMPATIBLE_RUNTIME_SERVER_VERSION, RUNTIME_PROTOCOL_VERSION } from './protocol-version'
+} from '@yiru/workbench-model/workspace'
+
 import type { RuntimeEnvironmentSource } from './runtime-environments'
 import type { RuntimeStatus } from './runtime-types'
-import type { SshConnectionState, SshConnectionStatus } from './ssh-types'
 import type { GlobalSettings, Repo } from './types'
 
 export type ExecutionHostHealth =

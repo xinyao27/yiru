@@ -1,4 +1,5 @@
-import { getRepoExecutionHostId, normalizeExecutionHostId } from './execution-host'
+import { getRepoExecutionHostId, normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { ManualRepoOrderEntry, Repo } from './types'
 
 function getEntryKey(entry: ManualRepoOrderEntry): string {

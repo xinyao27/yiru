@@ -1,11 +1,12 @@
-import type { HostedReviewInfo } from '../../../desktop/src/shared/hosted-review'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import type {
   GitHubAssignableUser,
   GitHubWorkItemDetails,
   PRCheckDetail,
   PRCheckRunDetails,
   PRInfo
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
+
 import { mobileRepoSelectorFromWorktreeId } from '../source-control/mobile-pr-create'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'

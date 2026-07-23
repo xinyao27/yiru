@@ -2,9 +2,10 @@
 // a worktree is deleted we prune that remote, but only when it's truly unused.
 // This module accepts the host-specific `execGit` boundary used by remote cleanup.
 
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { iterateProcessOutputLines } from '../../shared/process-output-field-scanner'
 import type { GitPushTarget } from '../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import { parseGitHubOwnerRepo } from '../github/gh-utils'
 import type { Store } from '../persistence'
 

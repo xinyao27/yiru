@@ -1,4 +1,4 @@
-import { isWindowsAbsolutePathLike } from './cross-platform-path'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 
 export type SetupRunnerCommandPlatform = 'windows' | 'posix'
 export type SetupRunnerCommandShell = 'posix' | 'windows'

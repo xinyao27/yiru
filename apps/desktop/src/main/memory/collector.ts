@@ -24,6 +24,7 @@ import os from 'node:os'
 import { basename } from 'node:path'
 import { promisify } from 'node:util'
 
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import { app } from 'electron'
 
 import { ORPHAN_WORKTREE_ID } from '../../shared/constants'
@@ -38,7 +39,6 @@ import type {
   SessionMemory,
   WorktreeMemory
 } from '../../shared/types'
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import { listRegisteredPtys } from './pty-registry'
 

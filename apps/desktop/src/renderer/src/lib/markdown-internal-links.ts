@@ -1,12 +1,9 @@
-import {
-  isWindowsAbsolutePathLike,
-  relativePathInsideRoot
-} from '../../../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
 import {
   filesystemPathHrefToFileUri,
   filesystemPathToFileUri,
   fileUriToFilesystemPath
-} from '../../../shared/file-uri-path'
+} from '@yiru/workbench-model/platform'
 
 // Pure classifier for markdown link targets. Called by the link-activation
 // dispatcher (activateMarkdownLink slice action) from three call sites —

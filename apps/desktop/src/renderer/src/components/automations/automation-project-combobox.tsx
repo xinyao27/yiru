@@ -4,6 +4,7 @@ import {
   CaretUpDown as ChevronsUpDown,
   FolderPlus
 } from '@phosphor-icons/react'
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
@@ -16,7 +17,6 @@ import { cn } from '@/lib/class-names'
 import { isRepoSearchQueryTooLarge, searchRepos } from '@/lib/repo-search'
 import { useAppStore } from '@/store'
 
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type { Repo } from '../../../../shared/types'
 import {

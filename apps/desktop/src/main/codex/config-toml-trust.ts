@@ -10,7 +10,8 @@ import {
 } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import { foldWslUncPathCaseInsensitiveParts } from '../../shared/wsl-paths'
+import { foldWslUncPathCaseInsensitiveParts } from '@yiru/workbench-model/platform'
+
 import { copyFileWithWindowsRetry, renameFileWithWindowsRetry } from '../codex-accounts/fs-utils'
 import {
   createTomlLineScanState,

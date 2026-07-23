@@ -1,7 +1,8 @@
 import { opendir, stat } from 'node:fs/promises'
 import { basename, delimiter, extname, join } from 'node:path'
 
-import type { AiVaultAgent, AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent'
+
 import type { FileWithMtime, SessionFileDiscovery } from './session-scanner-types'
 import { errorMessage } from './session-scanner-values'
 

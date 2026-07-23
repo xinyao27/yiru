@@ -2,10 +2,10 @@ export {
   isImageRefBlock,
   isTextBlock,
   NATIVE_CHAT_SOURCE_PRIORITY
-} from '../../../desktop/src/shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
 export {
   foldToolMessages,
   pairToolBlocks,
   splitNativeChatBlocks,
   type NativeChatToolPair as ToolPair
-} from '../../../desktop/src/shared/native-chat-tool-fold'
+} from '@yiru/workbench-model/agent'

@@ -1,6 +1,7 @@
 import type { Readable } from 'node:stream'
 
-import type { NativeChatMessage } from '../../shared/native-chat-types'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { transcriptFallbackId } from './transcript-fallback-id'
 
 type TranscriptDecoder = (line: string, fallbackId: string) => NativeChatMessage | null

@@ -1,7 +1,8 @@
+import type { HostedReviewState } from '@yiru/workbench-model/review'
+import { isPositiveHostedReviewNumber } from '@yiru/workbench-model/review'
+
 import { getPublishTargetDisplayName } from '../../../../shared/git-publish-target-status'
 import { gitRefTargetsBranchName } from '../../../../shared/git-remote-branch-name'
-import type { HostedReviewState } from '../../../../shared/hosted-review'
-import { isPositiveHostedReviewNumber } from '../../../../shared/hosted-review'
 import type { GitPushTarget, GitUpstreamStatus } from '../../../../shared/types'
 
 export function hasUsableHostedReviewPushTarget(args: {

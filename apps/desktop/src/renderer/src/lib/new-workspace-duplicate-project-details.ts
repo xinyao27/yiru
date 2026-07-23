@@ -1,4 +1,5 @@
-import { getExecutionHostLabel, type ExecutionHostId } from '../../../shared/execution-host'
+import { getExecutionHostLabel, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { NewWorkspaceProjectOption } from './new-workspace-project-options'
 
 export type ProjectSetupDirectory = {

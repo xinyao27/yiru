@@ -1,7 +1,6 @@
+import { foldToolMessages } from '@yiru/workbench-model/agent'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { describe, expect, it } from 'vite-plus/test'
-
-import { foldToolMessages } from './native-chat-tool-fold'
-import type { NativeChatMessage } from './native-chat-types'
 
 function assistant(id: string, text: string): NativeChatMessage {
   return {

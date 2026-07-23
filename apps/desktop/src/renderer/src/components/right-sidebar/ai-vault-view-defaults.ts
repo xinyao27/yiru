@@ -3,7 +3,7 @@ import {
   type AiVaultAgent,
   type AiVaultGroup,
   type AiVaultSort
-} from '../../../../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
 
 // Why: hide-empty used to default true; keep initial state, badge count, and Reset view
 // on one constant so a default flip cannot leave Reset pointing at the old value.

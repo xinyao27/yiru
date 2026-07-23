@@ -1,4 +1,4 @@
-import type { SshConnectionState } from '../../../shared/ssh-types'
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 
 export type SshStartupReconnectResult = {
   timedOut: boolean

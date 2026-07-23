@@ -1,16 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import {
-  applyAppend,
-  createNativeChatMerger,
-  replaceList
-} from '../../../../shared/native-chat-merge'
+import { applyAppend, createNativeChatMerger, replaceList } from '@yiru/workbench-model/agent'
 import {
   NATIVE_CHAT_SOURCE_PRIORITY,
   type AgentType,
   type NativeChatMessage,
   type NativeChatSession
-} from '../../../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import { useAppStore } from '../../store'
 import {
   applyAppends,

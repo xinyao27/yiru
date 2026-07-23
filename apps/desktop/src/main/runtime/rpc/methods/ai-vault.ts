@@ -1,7 +1,7 @@
+import { AI_VAULT_SCOPE_PATHS_MAX_COUNT } from '@yiru/workbench-model/agent'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
-import { AI_VAULT_SCOPE_PATHS_MAX_COUNT } from '../../../../shared/ai-vault-types'
-import { parseExecutionHostId } from '../../../../shared/execution-host'
 import { restampAiVaultListResult } from '../../../ai-vault/session-list-results'
 import { defineMethod, type RpcMethod } from '../core'
 import { OptionalBoolean } from '../schemas'

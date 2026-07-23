@@ -1,3 +1,9 @@
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  type AgentStatusEntry,
+  type AgentStatusOrchestrationContext
+} from '@yiru/workbench-model/agent'
+
 import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import {
   mergeAgentStatusOrchestration,
@@ -6,12 +12,6 @@ import {
 } from '@/lib/agent-status-worktree-attribution'
 import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
 import type { AppState } from '@/store'
-
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry,
-  type AgentStatusOrchestrationContext
-} from '../../../../shared/agent-status-types'
 
 export type WorktreeAgentActivitySummary = {
   hasPermission: boolean

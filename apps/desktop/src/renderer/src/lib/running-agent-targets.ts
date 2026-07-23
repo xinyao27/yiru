@@ -1,6 +1,7 @@
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import { resolvePaneAgentActivity } from '@/lib/pane-agent-evidence'
 
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TerminalTab } from '../../../shared/types'
 import { detectAgentSendTitleStatus } from './agent-send-title-status'

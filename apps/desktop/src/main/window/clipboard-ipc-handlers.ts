@@ -2,6 +2,11 @@ import { spawn } from 'node:child_process'
 import { stat } from 'node:fs/promises'
 
 import {
+  assertClipboardTextWriteWithinLimitWithYield,
+  assertClipboardTextWithinLimitWithYield,
+  type ReadClipboardTextOptions
+} from '@yiru/workbench-model/ui'
+import {
   app,
   clipboard,
   ipcMain,
@@ -15,11 +20,6 @@ import {
   assertClipboardImageByteLengthWithinLimit,
   assertClipboardImageDimensionsWithinLimit
 } from '../../shared/clipboard-image'
-import {
-  assertClipboardTextWriteWithinLimitWithYield,
-  assertClipboardTextWithinLimitWithYield,
-  type ReadClipboardTextOptions
-} from '../../shared/clipboard-text'
 import { isENOENT, PATH_ACCESS_DENIED_MESSAGE, resolveAuthorizedPath } from '../ipc/filesystem-auth'
 import type { Store } from '../persistence'
 import {

@@ -1,3 +1,4 @@
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { Image, Text, View } from 'react-native'
 
 import {
@@ -25,7 +26,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { RepoIcon } from '../../../desktop/src/shared/repo-icon'
 import { useThemeColors } from '../theme/uniwind-theme-values'
 
 // The desktop payload keeps historical icon names; map them to Phosphor so

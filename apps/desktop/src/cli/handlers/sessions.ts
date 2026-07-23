@@ -3,7 +3,8 @@ import {
   type AiVaultAgent,
   type AiVaultListResult,
   type AiVaultSession
-} from '../../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalPositiveIntegerFlag,

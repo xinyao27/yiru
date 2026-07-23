@@ -3,6 +3,7 @@ import {
   MagnifyingGlass as Search,
   X
 } from '@phosphor-icons/react'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -11,7 +12,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import type {
   GitBranchCompareSummary,
   GitUpstreamStatus,

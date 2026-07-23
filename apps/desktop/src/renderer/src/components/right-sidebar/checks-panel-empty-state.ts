@@ -1,6 +1,6 @@
-import { translate } from '@/i18n/i18n'
+import type { HostedReviewCreationBlockedReason } from '@yiru/workbench-model/review'
 
-import type { HostedReviewCreationBlockedReason } from '../../../../shared/hosted-review'
+import { translate } from '@/i18n/i18n'
 
 type PRRefreshStatus = 'queued' | 'in-flight' | 'paused' | 'error' | 'skipped' | undefined
 

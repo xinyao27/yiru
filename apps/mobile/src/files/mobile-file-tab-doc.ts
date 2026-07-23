@@ -1,4 +1,5 @@
-import { buildImageDataUri } from '../../../desktop/src/shared/image-data-uri'
+import { buildImageDataUri } from '@yiru/workbench-model/ui'
+
 import { classifyMobileArtifact } from '../session/mobile-artifact-kind'
 import { buildMobileDiffLines, type MobileDiffLine } from '../session/mobile-diff-lines'
 import type { RpcClient } from '../transport/rpc-client'

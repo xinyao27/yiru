@@ -1,11 +1,12 @@
-import { translate } from '@/i18n/i18n'
-
-import { getExecutionHostLabel, type ExecutionHostId } from '../../../../shared/execution-host'
-import type { ExecutionHostRegistryEntry } from '../../../../shared/execution-host-registry'
 import {
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-} from '../../../../shared/protocol-version'
+} from '@yiru/runtime-protocol/capabilities'
+import { getExecutionHostLabel, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+
+import { translate } from '@/i18n/i18n'
+
+import type { ExecutionHostRegistryEntry } from '../../../../shared/execution-host-registry'
 import type { ProjectHostSetup, ProjectHostSetupState } from '../../../../shared/types'
 
 export type SetupHostOption = {

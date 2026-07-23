@@ -8,6 +8,7 @@ import {
   Plus,
   X
 } from '@phosphor-icons/react'
+import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: MarkdownPreview owns rendering, link interception,
 search, and viewport state for the preview surface in one place so markdown
 behavior stays coherent across split panes and preview tabs. */
@@ -63,7 +64,6 @@ import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { relativePathInsideRoot } from '../../../../shared/cross-platform-path'
 import type { DiffComment, MarkdownDocument, Worktree } from '../../../../shared/types'
 import { DiffCommentCard } from '../diff-comments/diff-comment-card'
 import CodeBlockCopyButton from './code-block-copy-button'

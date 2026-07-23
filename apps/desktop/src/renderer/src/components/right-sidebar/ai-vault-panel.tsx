@@ -1,3 +1,4 @@
+import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
@@ -14,7 +15,6 @@ import {
   useRepos
 } from '@/store/selectors'
 
-import type { AiVaultScope, AiVaultSession } from '../../../../shared/ai-vault-types'
 import {
   buildAiVaultHostScopeOptions,
   buildRuntimeAiVaultHostScopeOptions,

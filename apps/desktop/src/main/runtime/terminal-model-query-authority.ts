@@ -1,3 +1,5 @@
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+
 /**
  * Phase 5 of the terminal model/view architecture: main-side terminal query
  * authority (docs/reference/terminal-query-authority.md).
@@ -9,7 +11,6 @@
  * so the runtime emulator can register the DA1 override before byte zero.
  */
 import type { GlobalSettings } from '../../shared/types'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import {
   isHiddenPtyDeliveryGateEnabled,
   shouldDropHiddenRendererPtyData

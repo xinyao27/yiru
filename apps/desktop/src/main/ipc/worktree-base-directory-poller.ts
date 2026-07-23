@@ -1,7 +1,8 @@
 import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+
 import type {
   WorktreeBaseRepoWatchConfig,
   WorktreeBaseWatchTarget

@@ -11,6 +11,16 @@ import {
   Plus,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import {
+  describeRuntimeCompatBlock,
+  evaluateRuntimeCompat,
+  MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
+  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
+  RUNTIME_PROTOCOL_VERSION,
+  PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
+  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY,
+  type RuntimeCompatVerdict
+} from '@yiru/runtime-protocol/capabilities'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -21,18 +31,6 @@ import { cn } from '@/lib/class-names'
 import { unwrapRuntimeRpcResult } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 
-import {
-  describeRuntimeCompatBlock,
-  evaluateRuntimeCompat,
-  type RuntimeCompatVerdict
-} from '../../../../shared/protocol-compat'
-import {
-  MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
-  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-  RUNTIME_PROTOCOL_VERSION,
-  PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
-  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-} from '../../../../shared/protocol-version'
 import {
   isUserManagedRuntimeEnvironment,
   type PublicKnownRuntimeEnvironment

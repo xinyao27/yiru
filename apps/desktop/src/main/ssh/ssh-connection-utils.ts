@@ -2,9 +2,9 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import type { Socket as NetSocket } from 'node:net'
 import { Duplex } from 'node:stream'
 
+import type { SshTarget, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import type { ConnectConfig } from 'ssh2'
 
-import type { SshTarget, SshConnectionState } from '../../shared/ssh-types'
 import {
   resolveAgentConfigValue,
   resolveAgentSocket,

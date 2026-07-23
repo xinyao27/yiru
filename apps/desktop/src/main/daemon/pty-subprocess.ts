@@ -1,6 +1,7 @@
 import { statSync } from 'node:fs'
 import { delimiter, win32 as pathWin32 } from 'node:path'
 
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: daemon PTY spawning centralizes platform launch setup,
    preflight validation, and lifecycle guards that must stay in one execution path. */
 import * as pty from 'node-pty'
@@ -22,7 +23,6 @@ import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query
 import { isShellProcess } from '../../shared/shell-process-detection'
 import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../../shared/terminal-git-credential-guard'
 import type { TuiAgent } from '../../shared/types'
-import { WINDOWS_GIT_BASH_SHELL } from '../../shared/windows-terminal-shell'
 import { isWindowsGitBashShellPath, resolveWindowsGitBashShellPath } from '../git-bash'
 import { getAgentForegroundContextPaths } from '../providers/agent-foreground-context-paths'
 import { resolveAgentForegroundProcessWithAvailability } from '../providers/agent-foreground-process'

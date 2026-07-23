@@ -7,6 +7,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSyn
 import { homedir } from 'node:os'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
 
 import type {
@@ -14,7 +15,6 @@ import type {
   CodexManagedAccountSummary,
   CodexRateLimitAccountsState
 } from '../../shared/types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { resolveCodexCommand } from '../codex-cli/command'
 import { rewriteRelativePathConfigValues } from '../codex/codex-config-path-reference-rewrite'
 import type { Store } from '../persistence'

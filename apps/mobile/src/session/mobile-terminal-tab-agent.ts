@@ -1,7 +1,8 @@
-import type { AgentStatusEntry } from '../../../desktop/src/shared/agent-status-types'
-import { stripLeadingAgentTitleDecorationOrEmpty } from '../../../desktop/src/shared/agent-title-decoration'
-import { resolveExplicitTerminalTitleAgentType } from '../../../desktop/src/shared/terminal-title-agent-type'
-import type { TuiAgent } from '../../../desktop/src/shared/types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
+import { stripLeadingAgentTitleDecorationOrEmpty } from '@yiru/workbench-model/agent'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+
 import type { MobileSessionTab } from '../../app/h/[hostId]/session/mobile-session-route-types'
 import { isBlankBrowserUrl } from '../browser/browser-url'
 

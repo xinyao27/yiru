@@ -8,6 +8,14 @@
 // for relay session state, eliminating the class of bugs where one path
 // forgets a step that another path handles.
 
+import {
+  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type DetectedPort,
+  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  MIN_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
+} from '@yiru/runtime-protocol/ssh-connection'
+import { toSshExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { BrowserWindow } from 'electron'
 
 import {
@@ -16,15 +24,7 @@ import {
   AGENT_HOOK_REQUEST_REPLAY_METHOD,
   isRemoteAgentHooksEnabled
 } from '../../shared/agent-hook-relay'
-import { toSshExecutionHostId, type ExecutionHostId } from '../../shared/execution-host'
 import type { PtyModelRestoreNeededEvent } from '../../shared/pty-model-restore-marker'
-import {
-  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  type DetectedPort,
-  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  MIN_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
-} from '../../shared/ssh-types'
 import { isTerminalLeafId, makePaneKey } from '../../shared/stable-pane-id'
 import { isValidTerminalTabId } from '../../shared/terminal-tab-id'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'

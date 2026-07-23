@@ -2,7 +2,8 @@ import {
   getRepoExecutionHostId,
   getSettingsFocusedExecutionHostId,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings, Repo } from '../../../../shared/types'
 
 type RepoIdentityParts = Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>

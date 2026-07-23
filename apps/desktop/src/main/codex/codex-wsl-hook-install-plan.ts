@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import { win32 as pathWin32 } from 'node:path'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
 export type CodexWslRuntimeHookTarget = {
   runtime?: 'host' | 'wsl'

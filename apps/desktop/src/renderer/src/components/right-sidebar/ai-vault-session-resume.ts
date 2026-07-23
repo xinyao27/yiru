@@ -1,3 +1,5 @@
+import { isAiVaultSessionResumableContent, type AiVaultSession } from '@yiru/workbench-model/agent'
+
 import { translate } from '@/i18n/i18n'
 import {
   canResumeAiVaultSessionOnTarget,
@@ -6,10 +8,6 @@ import {
 } from '@/lib/ai-vault-resume-target'
 import type { AppState } from '@/store/types'
 
-import {
-  isAiVaultSessionResumableContent,
-  type AiVaultSession
-} from '../../../../shared/ai-vault-types'
 import type { Repo, Worktree } from '../../../../shared/types'
 import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import {

@@ -1,5 +1,6 @@
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
-import type { SshConnectionState } from '../../../../shared/ssh-types'
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+
 import type { Repo } from '../../../../shared/types'
 
 /**

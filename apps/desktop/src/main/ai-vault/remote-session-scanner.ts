@@ -2,9 +2,10 @@ import type {
   AiVaultListResult,
   AiVaultScanIssue,
   AiVaultSession
-} from '../../shared/ai-vault-types'
-import { isPathInsideOrEqual } from '../../shared/cross-platform-path'
-import type { ExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { IFilesystemProvider } from '../providers/types'
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import { discoverRemoteSourceCandidates } from './remote-session-scanner-discovery'

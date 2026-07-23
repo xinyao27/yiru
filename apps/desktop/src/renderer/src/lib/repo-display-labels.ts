@@ -1,4 +1,4 @@
-import { getRepoExecutionHostId, type ExecutionHostId } from '../../../shared/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 type RepoDisplayLabelItem = {
   path: string

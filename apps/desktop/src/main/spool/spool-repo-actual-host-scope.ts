@@ -1,6 +1,7 @@
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../shared/execution-host'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { Repo } from '../../shared/types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import { spoolActualHostScopeKey, spoolLocalActualHostScopeKey } from './spool-canonical-host-path'

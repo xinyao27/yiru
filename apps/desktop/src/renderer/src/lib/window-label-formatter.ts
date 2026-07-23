@@ -1,4 +1,4 @@
-import { formatResetDuration } from '../../../shared/rate-limit-reset-format'
+import { formatResetDuration } from '@yiru/workbench-model/ui'
 
 /**
  * Returns a short human-readable label for a usage window duration.

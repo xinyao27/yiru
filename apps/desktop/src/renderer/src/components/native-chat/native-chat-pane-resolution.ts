@@ -1,4 +1,5 @@
-import type { AgentStatusEntry, AgentType } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
+
 import type { TuiAgent } from '../../../../shared/types'
 import { isNativeChatSupportedAgent } from './native-chat-availability'
 

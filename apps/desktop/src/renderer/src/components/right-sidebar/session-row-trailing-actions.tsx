@@ -5,6 +5,7 @@ import {
   Play,
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import type React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import { SessionActionMenuItems } from './ai-vault-session-action-menu-items'
 import { agentLabel } from './ai-vault-session-filters'
 import {

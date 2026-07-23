@@ -1,4 +1,5 @@
 import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -16,8 +17,6 @@ import {
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 
 type SshDisconnectedDialogProps = {
   open: boolean

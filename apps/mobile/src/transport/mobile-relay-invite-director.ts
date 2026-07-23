@@ -1,5 +1,5 @@
-import type { PairingRelay } from '../../../desktop/src/shared/mobile-relay-pairing-offer'
-import { RelayMovedSchema } from '../../../desktop/src/shared/mobile-relay-phone-protocol'
+import type { PairingRelay } from '@yiru/mobile-relay-protocol/pairing-offer'
+import { RelayMovedSchema } from '@yiru/mobile-relay-protocol/phone-protocol'
 
 export function resolvePairingInviteThroughDirector(args: {
   relay: PairingRelay

@@ -1,4 +1,5 @@
-import type { AiVaultAgent, AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent'
+
 import { discoverFiles, type SessionFileDiscoveryBudget } from './session-scanner-discovery'
 import {
   claudeProjectsRootDirs,

@@ -1,3 +1,6 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { tagRuntimeSubscriptionReplayResponse } from '@yiru/runtime-protocol/subscription-replay'
+
 import type { RemoteRuntimeClientError } from './remote-runtime-client-error'
 import { remoteRuntimeUnavailableError } from './remote-runtime-request-frames'
 import { getSubscriptionId, isEndResult } from './remote-runtime-shared-control-protocol'
@@ -8,8 +11,6 @@ import type {
   SharedControlPendingRequest,
   SharedControlReadyWaiter
 } from './remote-runtime-shared-control-types'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
-import { tagRuntimeSubscriptionReplayResponse } from './runtime-subscription-replay'
 
 export function buildSharedControlDiagnostics(args: {
   state: SharedControlConnectionState

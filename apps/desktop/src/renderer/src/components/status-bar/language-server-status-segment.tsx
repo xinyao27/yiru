@@ -1,4 +1,5 @@
 import { Code, WarningCircle } from '@phosphor-icons/react'
+import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useState, useSyncExternalStore } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -12,7 +13,6 @@ import {
 } from '@/lib/monaco-language-server-manager'
 import { useAppStore } from '@/store'
 
-import { getWorktreePathBasenameFromId } from '../../../../shared/worktree-id'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './status-bar-context-menu-policy'
 
 type LanguageServerStatusSegmentProps = {

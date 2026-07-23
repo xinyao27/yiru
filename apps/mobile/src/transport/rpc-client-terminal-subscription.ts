@@ -1,4 +1,4 @@
-import { buildNativeChatUnsubscribe } from '../../../desktop/src/shared/native-chat-stream-unsubscribe'
+import { buildNativeChatUnsubscribe } from '@yiru/workbench-model/agent'
 
 type TerminalStreamParams = {
   terminal?: unknown

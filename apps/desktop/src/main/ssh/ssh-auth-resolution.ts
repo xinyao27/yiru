@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import { utils, type BaseAgent, type ParsedKey } from 'ssh2'
 
-import type { SshTarget } from '../../shared/ssh-types'
 import { createIdentityFilteredAgent } from './ssh-agent-identity-filter'
 import type { SshResolvedConfig } from './ssh-config-parser'
 import { resolveSshConfigHomePath } from './ssh-config-path-expansion'

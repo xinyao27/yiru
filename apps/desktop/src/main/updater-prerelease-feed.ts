@@ -1,11 +1,11 @@
-import { net } from 'electron'
-import { parse } from 'yaml'
-
 import {
   YIRU_GITHUB_RELEASE_DOWNLOADS_URL,
   YIRU_GITHUB_RELEASES_URL,
   YIRU_GITHUB_REPOSITORY_URL
-} from '../shared/yiru-github-repository'
+} from '@yiru/workbench-model/product'
+import { net } from 'electron'
+import { parse } from 'yaml'
+
 import { compareVersions, isPrereleaseVersion, isValidVersion } from './updater-fallback'
 
 const ATOM_FEED_URL = `${YIRU_GITHUB_RELEASES_URL}.atom`

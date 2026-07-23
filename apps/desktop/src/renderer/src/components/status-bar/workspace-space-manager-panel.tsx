@@ -20,6 +20,7 @@ import {
   ArrowClockwise as RefreshCw,
   X
 } from '@phosphor-icons/react'
+import type { AgentStatusEntry, MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the analyzer's private treemap, selection,
    breakdown, and table pieces share one scan state and should evolve as one resource-manager surface. */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: the relative time clock advances from a wall-clock interval, which is an external timer rather than render-derived state. */
@@ -32,10 +33,6 @@ import { cn } from '@/lib/class-names'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 
-import type {
-  AgentStatusEntry,
-  MigrationUnsupportedPtyEntry
-} from '../../../../shared/agent-status-types'
 import type { GitStatusResult, Repo, TerminalTab, Worktree } from '../../../../shared/types'
 import type {
   WorkspaceSpaceItem,

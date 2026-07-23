@@ -1,13 +1,13 @@
-import { z } from 'zod'
-
 import {
   AI_VAULT_AGENTS,
   AI_VAULT_SCOPE_PATHS_MAX_COUNT,
   type AiVaultListArgs,
   type AiVaultListResult,
   type AiVaultSession
-} from '../../shared/ai-vault-types'
-import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
+import { z } from 'zod'
+
 import { listEnvironments } from '../../shared/runtime-environment-store'
 import { callRuntimeEnvironment } from '../ipc/runtime-environment-transport-routing'
 

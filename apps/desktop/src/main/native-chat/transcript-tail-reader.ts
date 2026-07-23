@@ -1,7 +1,8 @@
 import { open, stat } from 'node:fs/promises'
 
-import { resolveNativeChatTranscriptAgent } from '../../shared/native-chat-agent-support'
-import type { AgentType, NativeChatMessage } from '../../shared/native-chat-types'
+import { resolveNativeChatTranscriptAgent } from '@yiru/workbench-model/agent'
+import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { resolveSessionFilePath, type ResolveSessionFileOptions } from './session-file-resolver'
 import { transcriptFallbackId } from './transcript-fallback-id'
 import {

@@ -1,7 +1,8 @@
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+
 import type { RuntimeTerminalProcessInspection } from '@/runtime/runtime-terminal-inspection'
 
 import type { RecognizedAgentProcess } from '../../../../shared/agent-process-recognition'
-import type { ParsedAgentStatusPayload } from '../../../../shared/agent-status-types'
 import type { GlobalSettings } from '../../../../shared/types'
 
 export type AgentCompletionStatusSnapshot = ParsedAgentStatusPayload & {

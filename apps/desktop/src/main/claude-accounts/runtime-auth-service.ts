@@ -5,10 +5,10 @@ import { execFileSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
 
 import type { ClaudeManagedAccount } from '../../shared/types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
 import { writeFileAtomically } from '../codex-accounts/fs-utils'
 import type { Store } from '../persistence'

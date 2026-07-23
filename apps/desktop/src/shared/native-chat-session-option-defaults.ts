@@ -1,5 +1,6 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import { sessionOptionValueIsValid } from './agent-session-option-catalog'
-import type { AgentType } from './agent-status-types'
 import type {
   PersistedNativeChatSessionOptions,
   SessionOptionValue

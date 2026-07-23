@@ -1,3 +1,8 @@
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import {
   lazy,
@@ -49,11 +54,6 @@ import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 
 import { DEFAULT_APP_FONT_FAMILY, getDefaultVoiceSettings } from '../../../../shared/constants'
-import {
-  getRepoExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID,
-  parseExecutionHostId
-} from '../../../../shared/execution-host'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { SkillFreshnessInventory } from '../../../../shared/skill-freshness'

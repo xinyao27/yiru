@@ -3,7 +3,8 @@ import { lstatSync, mkdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { isAbsolute, join as pathJoin } from 'node:path'
 
-import type { SshTarget } from '../../shared/ssh-types'
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import type { SshResolvedConfig } from './ssh-config-parser'
 
 export type SystemSshResolvedConfig = Pick<

@@ -1,4 +1,5 @@
-import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
+
 import type { TerminalModes } from './types'
 
 /** On-disk shape of checkpoint.json. Written by history-manager, read by

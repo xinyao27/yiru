@@ -31,10 +31,10 @@ import {
   win32 as pathWin32
 } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
 
 import type { CodexManagedAccount } from '../../shared/types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import {
   prepareSystemConfigForFreshRuntimeMirror,
   syncSystemConfigIntoManagedCodexHome

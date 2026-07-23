@@ -1,4 +1,4 @@
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
 const MAX_CONCURRENT_WSL_AUTH_OPERATIONS = 2
 const activeWslOperationDistros = new Set<string>()

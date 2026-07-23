@@ -5,7 +5,8 @@ discovery, canonicalization, and registered-worktree cache checks together so
 the security boundary is auditable end to end. */
 import { resolve, relative, dirname, basename, isAbsolute, sep } from 'node:path'
 
-import { isPathInsideOrEqual } from '../../shared/cross-platform-path'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+
 import { getProjectGroupSubtreeIds } from '../../shared/project-groups'
 import type { FolderWorkspace, ProjectGroup, Repo } from '../../shared/types'
 import type { Store } from '../persistence'

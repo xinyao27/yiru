@@ -8,6 +8,8 @@ import {
   CaretDown as ChevronDown,
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
 import React, { useEffect, useCallback, useState } from 'react'
 
@@ -30,8 +32,6 @@ import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 
 import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../shared/constants'
-import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '../../../../shared/execution-host'
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'

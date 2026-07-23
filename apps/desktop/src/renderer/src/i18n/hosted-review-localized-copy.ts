@@ -1,10 +1,10 @@
-import { translate } from '@/i18n/i18n'
-
-import type { HostedReviewProvider } from '../../../shared/hosted-review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import {
   resolveHostedReviewCreationProvider,
   type HostedReviewCreationProvider
-} from '../../../shared/hosted-review-creation-providers'
+} from '@yiru/workbench-model/review'
+
+import { translate } from '@/i18n/i18n'
 
 export type SupportedHostedReviewCopyProvider = HostedReviewCreationProvider
 

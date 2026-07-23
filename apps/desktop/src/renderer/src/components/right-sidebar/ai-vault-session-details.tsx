@@ -4,6 +4,11 @@ import {
   Chat as MessageSquare,
   Play
 } from '@phosphor-icons/react'
+import {
+  isAiVaultSessionResumableContent,
+  type AiVaultScope,
+  type AiVaultSession
+} from '@yiru/workbench-model/agent'
 import type React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -11,11 +16,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import {
-  isAiVaultSessionResumableContent,
-  type AiVaultScope,
-  type AiVaultSession
-} from '../../../../shared/ai-vault-types'
 import { sessionDetailConversationTurns } from './ai-vault-session-display'
 import { SessionSubagentsSection } from './ai-vault-session-subagents'
 import { SessionUnsavedConversationNotice } from './ai-vault-session-unsaved-notice'

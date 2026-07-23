@@ -1,4 +1,5 @@
-import type { AgentStatusEntry, AgentType } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
+
 import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 import {
   isNativeChatTabWideFallbackSafe,

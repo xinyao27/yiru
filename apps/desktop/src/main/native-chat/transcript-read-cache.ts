@@ -1,6 +1,7 @@
 import { stat } from 'node:fs/promises'
 
-import type { AgentType } from '../../shared/native-chat-types'
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import { resolveSessionFilePath } from './session-file-resolver'
 import { readNativeChatTranscript, type ReadTranscriptResult } from './transcript-reader'
 

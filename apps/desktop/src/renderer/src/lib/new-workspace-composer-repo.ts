@@ -1,4 +1,5 @@
-import { isRuntimeOwnedSshTargetId, type ExecutionHostScope } from '../../../shared/execution-host'
+import { isRuntimeOwnedSshTargetId, type ExecutionHostScope } from '@yiru/workbench-model/workspace'
+
 import {
   getNewWorkspaceDialogEligibleRepos,
   resolveNewWorkspaceDialogGitRepoId,

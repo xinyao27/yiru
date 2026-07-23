@@ -3,9 +3,10 @@
 // user turn lands in the transcript. Kept separate from the view so the prune
 // rule (match on normalized user-message content) is unit-testable without React.
 
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import type { NativeChatLaunchPrompt } from '@/lib/native-chat-launch-prompt'
 
-import type { NativeChatMessage } from '../../../../shared/native-chat-types'
 import { setBoundedScopeCacheEntry } from './native-chat-composer-scope-cache'
 import {
   advancedNativeChatUserContentCounts,

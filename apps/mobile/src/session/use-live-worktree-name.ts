@@ -1,8 +1,8 @@
+import type { RuntimeClientInvalidationStreamMessage } from '@yiru/runtime-protocol/client-invalidations'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 
-import type { RuntimeClientEventStreamMessage } from '../../../desktop/src/shared/runtime-client-events'
-import { getRepoIdFromWorktreeId } from '../../../desktop/src/shared/worktree-id'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState, RpcSuccess } from '../transport/types'
 import { getLiveWorktreeDisplayName, type WorktreeDisplayNameSource } from './worktree-display-name'
@@ -93,7 +93,7 @@ export function useLiveWorktreeName({ client, connState, routeName, worktreeId }
           if (stale || !payload || typeof payload !== 'object') {
             return
           }
-          const event = payload as RuntimeClientEventStreamMessage | { type: 'error' }
+          const event = payload as RuntimeClientInvalidationStreamMessage | { type: 'error' }
           if (event.type === 'ready') {
             const replayedAfterReconnect = eventStreamReady
             eventStreamReady = true

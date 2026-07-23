@@ -1,4 +1,5 @@
 import { Star, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
+import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -7,7 +8,6 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { YIRU_GITHUB_STARGAZERS_URL } from '../../../../shared/yiru-github-repository'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'

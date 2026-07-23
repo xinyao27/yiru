@@ -1,11 +1,11 @@
 import { Star, ArrowSquareOut as ExternalLink, X } from '@phosphor-icons/react'
+import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { YIRU_GITHUB_REPOSITORY_URL } from '../../../shared/yiru-github-repository'
 import { useAppStore } from '../store'
 import { Button } from './ui/button'
 import { Card } from './ui/card'

@@ -1,4 +1,7 @@
-import { getClipboardTextByteLength, isClipboardTextByteLengthOverLimit } from './clipboard-text'
+import {
+  getClipboardTextByteLength,
+  isClipboardTextByteLengthOverLimit
+} from '@yiru/workbench-model/ui'
 
 export const GITHUB_PROJECT_REF_INPUT_MAX_BYTES = 2 * 1024
 export const GITHUB_PROJECT_REF_INPUT_TOO_LARGE_ERROR = 'Project reference is too large to resolve.'

@@ -1,4 +1,5 @@
-import type { MobileRelayEndpoint } from '../../../desktop/src/shared/mobile-relay-credential-contract'
+import type { MobileRelayEndpoint } from '@yiru/mobile-relay-protocol/credential-contract'
+
 import { MobileE2EEAuthenticationError } from './mobile-e2ee-v2-physical-channel'
 import { RelayOuterError } from './mobile-relay-e2ee-link'
 import type { HostProfile } from './types'

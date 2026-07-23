@@ -1,13 +1,14 @@
+import {
+  isPathInsideOrEqual,
+  normalizeRuntimePathForComparison
+} from '@yiru/workbench-model/platform'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { AppState } from '@/store/types'
 import { getIndexedRepoMap, getIndexedWorktreeMap } from '@/store/worktree-repo-index'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import {
-  isPathInsideOrEqual,
-  normalizeRuntimePathForComparison
-} from '../../../shared/cross-platform-path'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../../shared/worktree-id'
 import {
   getFolderWorkspaceCandidateRepos,
   getFolderWorkspaceConnectionId

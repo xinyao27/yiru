@@ -1,13 +1,14 @@
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+import { getComposerRepoWorktreeBranches } from '@yiru/workbench-model/review'
+import { shouldPreserveWorkspaceSourceOnRepoChange } from '@yiru/workbench-model/workspace'
+import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { View, Text, TextInput, Pressable, Switch, ActivityIndicator, Keyboard } from 'react-native'
 
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { getComposerRepoWorktreeBranches } from '../../../desktop/src/shared/composer-branch-selection'
-import { shouldPreserveWorkspaceSourceOnRepoChange } from '../../../desktop/src/shared/new-workspace/workspace-source'
-import type { SshConnectionState } from '../../../desktop/src/shared/ssh-types'
-import type { PersistedTrustedYiruHooks, TuiAgent } from '../../../desktop/src/shared/types'
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcResponse, RpcSuccess } from '../transport/types'

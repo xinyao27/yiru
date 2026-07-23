@@ -6,6 +6,8 @@ import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import type {
   ExternalAutomationAction,
   ExternalAutomationActionInput,
@@ -16,7 +18,6 @@ import type {
   ExternalAutomationRunsPage,
   ExternalAutomationUpdateInput
 } from '../../shared/automations-types'
-import type { SshTarget } from '../../shared/ssh-types'
 import { getActiveMultiplexer } from '../ipc/ssh'
 import type { Store } from '../persistence'
 import { isRuntimeOwnedSshTarget } from '../ssh/ssh-connection-store'

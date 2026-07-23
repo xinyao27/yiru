@@ -1,6 +1,7 @@
-import { isPathInsideOrEqual } from '../../shared/cross-platform-path'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { mapWithConcurrency } from '../../shared/map-with-concurrency'
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
 import { listRegisteredPtys } from '../memory/pty-registry'
 import type { IPtyProvider } from '../providers/types'
 import type { YiruRuntimeService } from './yiru-runtime'

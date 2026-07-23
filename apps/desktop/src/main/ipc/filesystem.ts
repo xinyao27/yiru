@@ -4,15 +4,16 @@ import { readdir, readFile, writeFile, stat, lstat, open, rename, rm } from 'nod
 import type { FileHandle } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 
+import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 
 import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message-host-key'
-import { getRuntimePathBasename } from '../../shared/cross-platform-path'
 import { validateGitForkSyncExpectedUpstream } from '../../shared/git-fork-sync'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git-history'
 import { assertGitPushTargetShape } from '../../shared/git-push-target-validation'
-import type { HostedReviewProvider } from '../../shared/hosted-review'
 import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control-ai'
 import {
   buildRgArgs,
@@ -41,7 +42,6 @@ import type {
   Repo,
   TuiAgent
 } from '../../shared/types'
-import { splitWorktreeId } from '../../shared/worktree-id'
 import { localLogFileIdentity } from '../ai-vault/local-log-tail-reader'
 import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
 import { checkIgnoredPaths } from '../git/check-ignored-paths'

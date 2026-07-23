@@ -1,4 +1,5 @@
-import type { TuiAgent } from '../../../desktop/src/shared/types'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { WorkspaceCreateSetupDecision } from './workspace-create-params'
 import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'

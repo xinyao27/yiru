@@ -26,6 +26,12 @@ import {
   ArrowClockwise as RefreshCw,
   ArrowCounterClockwise as Undo2
 } from '@phosphor-icons/react'
+import type {
+  HostedReviewCreationEligibility,
+  HostedReviewInfo,
+  HostedReviewProvider
+} from '@yiru/workbench-model/review'
+import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
 /* eslint-disable max-lines */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -123,12 +129,6 @@ import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comment
 
 import { isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
 import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
-import type {
-  HostedReviewCreationEligibility,
-  HostedReviewInfo,
-  HostedReviewProvider
-} from '../../../../shared/hosted-review'
-import { resolveHostedReviewCreationProvider } from '../../../../shared/hosted-review-creation-providers'
 import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type {

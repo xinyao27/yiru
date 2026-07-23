@@ -1,8 +1,9 @@
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+
 import type {
   ExternalAutomationManager,
   ExternalAutomationProvider
 } from '../../../../shared/automations-types'
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 
 export type ExternalAutomationSourceAvailability = {
   statusLabel: string

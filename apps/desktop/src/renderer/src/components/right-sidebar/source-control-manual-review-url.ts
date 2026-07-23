@@ -1,4 +1,5 @@
-import type { HostedReviewProvider } from '../../../../shared/hosted-review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+
 import type { GitPushTarget } from '../../../../shared/types'
 import {
   branchFromRef,

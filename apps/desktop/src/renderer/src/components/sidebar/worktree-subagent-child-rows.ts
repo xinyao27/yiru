@@ -1,6 +1,7 @@
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
 
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { TerminalTab } from '../../../../shared/types'
 
 /** Row-identity key for an in-process subagent child row. The NUL separator

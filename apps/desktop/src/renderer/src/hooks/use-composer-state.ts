@@ -1,3 +1,14 @@
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
+import {
+  normalizeExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import {
+  buildWorkspaceSourceSelection,
+  shouldApplyWorkspaceSourceAutoName
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: this hook co-locates every piece of state
 the NewWorkspaceComposerCard reads or mutates, so both the full-page composer
 and the global quick-composer modal can consume a single unified source of
@@ -112,24 +123,14 @@ import { useAppStore } from '@/store'
 
 import { repoIsRemote } from '../../../shared/agent-launch-remote'
 import { getDefaultRepoHookSettings } from '../../../shared/constants'
-import {
-  normalizeExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../shared/execution-host'
 import { buildExecutionHostRegistry } from '../../../shared/execution-host-registry'
 import { getHostDisplayLabelOverrides } from '../../../shared/host-setting-overrides'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
-import {
-  buildWorkspaceSourceSelection,
-  shouldApplyWorkspaceSourceAutoName
-} from '../../../shared/new-workspace/workspace-source'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
 } from '../../../shared/project-source-context'
 import { isGitRepoKind } from '../../../shared/repo-kind'
-import type { SshConnectionStatus } from '../../../shared/ssh-types'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
@@ -152,7 +153,6 @@ import type {
   WorkspaceCreateTelemetrySource,
   ProjectGroup
 } from '../../../shared/types'
-import { resolveLocalWindowsAgentStartupShell } from '../../../shared/windows-terminal-shell'
 import { isWorkspaceStatusId } from '../../../shared/workspace-statuses'
 import {
   resolveComposerBranchNameOverrideForCreate,

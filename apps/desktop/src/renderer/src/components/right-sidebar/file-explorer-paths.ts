@@ -1,11 +1,12 @@
-import { joinPath, normalizeRelativePath } from '@/lib/path'
-
 import {
   isPathInsideOrEqual,
   normalizeRuntimePathForComparison,
   normalizeRuntimePathSeparators,
   relativePathInsideRoot
-} from '../../../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
+import { joinPath, normalizeRelativePath } from '@/lib/path'
+
 import { splitPathSegments } from './path-tree'
 
 export function normalizeAbsolutePath(path: string): string {

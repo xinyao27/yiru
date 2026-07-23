@@ -1,12 +1,11 @@
+import type { GitLabWorkItem } from '@yiru/workbench-model/review'
+import type { GitHubWorkItem } from '@yiru/workbench-model/review'
 import {
   isSmartWorkspaceSourceQueryWithinLimit,
   type SmartNameMode
-} from '../../../desktop/src/shared/new-workspace/smart-workspace-source-results'
-import type {
-  BaseRefSearchResult,
-  GitHubWorkItem,
-  GitLabWorkItem
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/workspace'
+import type { BaseRefSearchResult } from '@yiru/workbench-model/workspace'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { MrStateFilter } from './mobile-composer-source-types'
 import { isGitHubWorkItemsSshRemoteRequiredError } from './mobile-work-items'

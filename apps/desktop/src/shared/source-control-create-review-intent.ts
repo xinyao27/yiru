@@ -1,7 +1,8 @@
-import type { GitUpstreamStatus } from './git-status-types'
+import type { GitUpstreamStatus } from '@yiru/workbench-model/review'
+import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
+import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
+
 import { shouldForcePushWithLeaseForUpstream } from './git-upstream-status'
-import type { HostedReviewCreationEligibility } from './hosted-review'
-import { supportsHostedReviewCreation } from './hosted-review-creation-providers'
 import type { SourceControlPrimaryActionDecision } from './source-control-primary-action-decision-types'
 
 export type CreateReviewIntentKind =

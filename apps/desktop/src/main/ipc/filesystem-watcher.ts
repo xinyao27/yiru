@@ -2,6 +2,10 @@ import { stat } from 'node:fs/promises'
 import * as path from 'node:path'
 
 import type { Event as WatcherEvent } from '@parcel/watcher'
+import {
+  isWindowsAbsolutePathLike,
+  normalizeRuntimePathForComparison
+} from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: filesystem-watcher centralizes native
 (@parcel/watcher), WSL-native snapshot, and SSH remote watcher lifecycles in
 one module so subscription/cleanup invariants stay auditable from a single
@@ -9,10 +13,6 @@ file. Splitting by transport would scatter the shared debounce/coalesce
 helpers and the common batch-flush path across three files. */
 import { ipcMain, type WebContents } from 'electron'
 
-import {
-  isWindowsAbsolutePathLike,
-  normalizeRuntimePathForComparison
-} from '../../shared/cross-platform-path'
 import type { FsChangeEvent, FsChangedPayload } from '../../shared/types'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { isWslPath } from '../wsl'

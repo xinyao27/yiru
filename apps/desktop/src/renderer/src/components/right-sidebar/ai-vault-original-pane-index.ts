@@ -1,5 +1,6 @@
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
-import type { AiVaultSession } from '../../../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+
 import {
   promptsMatchSession,
   resolveOriginalPaneTarget,

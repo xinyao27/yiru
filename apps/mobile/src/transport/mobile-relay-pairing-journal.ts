@@ -1,8 +1,8 @@
 import { sha256 } from '@noble/hashes/sha256'
+import type { PairingRelay } from '@yiru/mobile-relay-protocol/pairing-offer'
 import * as ExpoCrypto from 'expo-crypto'
 import { z } from 'zod'
 
-import type { PairingRelay } from '../../../desktop/src/shared/mobile-relay-pairing-offer'
 import { hashMobileRelayCredential } from './mobile-relay-credential-hash'
 import type { PairingOffer } from './types'
 

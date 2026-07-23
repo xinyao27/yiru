@@ -2,10 +2,14 @@ import type { ChildProcess } from 'node:child_process'
 /* eslint-disable max-lines -- Why: SSH connection lifecycle, credential retries, reconnect policy, and transport fallback are intentionally co-located so state transitions stay auditable in one file. */
 import * as net from 'node:net'
 
+import type {
+  SshTarget,
+  SshConnectionState,
+  SshConnectionStatus
+} from '@yiru/runtime-protocol/ssh-connection'
 import { Client as SshClient } from 'ssh2'
 import type { ClientChannel, ConnectConfig, SFTPWrapper } from 'ssh2'
 
-import type { SshTarget, SshConnectionState, SshConnectionStatus } from '../../shared/ssh-types'
 import type { FileUploadSession } from '../providers/types'
 import { resolveWithSshG, type SshResolvedConfig } from './ssh-config-parser'
 import {

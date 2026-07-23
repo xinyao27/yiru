@@ -1,4 +1,7 @@
-import { getClipboardTextByteLength, isClipboardTextByteLengthOverLimit } from './clipboard-text'
+import {
+  getClipboardTextByteLength,
+  isClipboardTextByteLengthOverLimit
+} from '@yiru/workbench-model/ui'
 
 export const MOBILE_MARKDOWN_EDIT_MAX_BYTES = 256 * 1024
 

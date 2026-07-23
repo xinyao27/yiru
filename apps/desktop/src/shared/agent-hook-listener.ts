@@ -27,19 +27,21 @@ import type { IncomingMessage } from 'node:http'
 import { homedir } from 'node:os'
 import { isAbsolute, join } from 'node:path'
 
-import { REMOTE_AGENT_HOOK_ENV, type AgentHookSource } from './agent-hook-relay'
-import { YIRU_HOOK_PROTOCOL_VERSION } from './agent-hook-types'
+import { isKnownHarnessInjectedUserTurnText } from '@yiru/workbench-model/agent'
 import {
   extractAgentProviderSession,
   type AgentProviderSessionMetadata
-} from './agent-session-resume'
+} from '@yiru/workbench-model/agent'
 import {
   normalizeAgentStatusPayload,
   parseAgentStatusPayload,
   type AgentStatusState,
   type AgentSubagentSnapshot,
   type ParsedAgentStatusPayload
-} from './agent-status-types'
+} from '@yiru/workbench-model/agent'
+
+import { REMOTE_AGENT_HOOK_ENV, type AgentHookSource } from './agent-hook-relay'
+import { YIRU_HOOK_PROTOCOL_VERSION } from './agent-hook-types'
 import {
   claudeRosterHasWorkingSubagent,
   claudeRosterToSnapshots,
@@ -60,7 +62,6 @@ import {
   resolveGrokChatHistoryPathSync,
   resolveGrokSessionsDir
 } from './grok-session-paths'
-import { isKnownHarnessInjectedUserTurnText } from './harness-injected-user-turns'
 import { parsePaneKey } from './stable-pane-id'
 
 /** Maximum request body size accepted by the listener (1 MB). */

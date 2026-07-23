@@ -1,3 +1,4 @@
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines */
 import type { StateCreator, StoreApi } from 'zustand'
 
@@ -43,7 +44,6 @@ import {
 import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { isPathInsideOrEqual } from '../../../../shared/cross-platform-path'
 import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
 import type { SourceControlRemoteOpKind } from '../../../../shared/source-control-primary-action-decision-types'

@@ -1,3 +1,5 @@
+import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
+
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
 import {
   WAKE_HIBERNATED_AGENTS_WORKTREE_EVENT,
@@ -5,7 +7,6 @@ import {
 } from '@/constants/terminal'
 import { useAppStore } from '@/store'
 
-import type { SleepingAgentSessionRecord } from '../../../shared/agent-session-resume'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import { resumeSleepingAgentSessionsForWorktree } from './resume-sleeping-agent-session'
 import {

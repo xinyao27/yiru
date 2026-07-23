@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react'
-
-import { translate } from '@/i18n/i18n'
-
 import {
   getExecutionHostLabel,
   getRepoExecutionHostId,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+import { useMemo, useState } from 'react'
+
+import { translate } from '@/i18n/i18n'
+
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { Repo } from '../../../../shared/types'

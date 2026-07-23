@@ -1,4 +1,5 @@
-import { isPositiveHostedReviewNumber, type HostedReviewInfo } from '../../shared/hosted-review'
+import { isPositiveHostedReviewNumber, type HostedReviewInfo } from '@yiru/workbench-model/review'
+
 import {
   getForgeProviderById,
   getForgeProviderForRepository,

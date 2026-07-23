@@ -1,4 +1,5 @@
-import type { MobileRelayEndpoint } from '../../../desktop/src/shared/mobile-relay-credential-contract'
+import type { MobileRelayEndpoint } from '@yiru/mobile-relay-protocol/credential-contract'
+
 import { openAuthenticatedDirectEndpoint } from './mobile-direct-endpoint-probe'
 import { MobileEndpointHysteresis } from './mobile-endpoint-hysteresis'
 import {

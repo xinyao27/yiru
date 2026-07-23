@@ -1,4 +1,5 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+
 import { parseAntigravitySessionFile } from './session-scanner-antigravity-parser'
 import { parseCodexSessionFile } from './session-scanner-codex-parser'
 import { parseDevinSessionFile } from './session-scanner-devin-parser'

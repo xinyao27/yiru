@@ -1,3 +1,10 @@
+import {
+  isWindowsAbsolutePathLike,
+  relativePathInsideRoot,
+  resolveRuntimePath
+} from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { getConnectionIdForFileFromState } from '@/lib/connection-owner-resolution'
 import { basename, dirname, joinPath } from '@/lib/path'
 import {
@@ -8,13 +15,7 @@ import {
 import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 
-import {
-  isWindowsAbsolutePathLike,
-  relativePathInsideRoot,
-  resolveRuntimePath
-} from '../../../../shared/cross-platform-path'
 import type { DirEntry } from '../../../../shared/types'
-import { splitWorktreeIdForFilesystem } from '../../../../shared/worktree-id'
 import { isRelativeModuleSpecifier } from './import-module-specifier'
 import type { EditorNavigationTarget } from './open-editor-navigation-target'
 

@@ -1,4 +1,4 @@
-import type { AiVaultScope } from '../../../desktop/src/shared/ai-vault-types'
+import type { AiVaultScope } from '@yiru/workbench-model/agent'
 
 export function shouldShowMobileCurrentWorktreeBadge(scope: AiVaultScope): boolean {
   // Why: Workspace is already the current-worktree-only view; Project and All

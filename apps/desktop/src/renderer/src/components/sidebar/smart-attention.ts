@@ -1,15 +1,16 @@
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  type AgentStateHistoryEntry,
+  type AgentStatusEntry,
+  type MigrationUnsupportedPtyEntry
+} from '@yiru/workbench-model/agent'
+
 import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
 import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
 import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 
 import type { AgentStatus } from '../../../../shared/agent-detection'
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStateHistoryEntry,
-  type AgentStatusEntry,
-  type MigrationUnsupportedPtyEntry
-} from '../../../../shared/agent-status-types'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TerminalTab, Worktree } from '../../../../shared/types'
 

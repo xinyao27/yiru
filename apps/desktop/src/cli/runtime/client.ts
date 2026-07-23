@@ -1,9 +1,11 @@
-import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
-import { describeRuntimeCompatBlock, evaluateRuntimeCompat } from '../../shared/protocol-compat'
 import {
+  describeRuntimeCompatBlock,
+  evaluateRuntimeCompat,
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
   RUNTIME_PROTOCOL_VERSION
-} from '../../shared/protocol-version'
+} from '@yiru/runtime-protocol/capabilities'
+
+import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
 import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
 import { markEnvironmentUsed, resolveEnvironmentPairingOffer } from './environments'
 import { launchYiruApp } from './launch'

@@ -1,4 +1,5 @@
-import { measureClipboardTextByteLength } from '../../../../shared/clipboard-text'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
+
 import {
   buildServeSimKeyboardFramesForKey,
   type ServeSimKeyboardFrame

@@ -1,7 +1,6 @@
 import type { ITerminalOptions } from '@xterm/xterm'
-
-import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../../shared/execution-host'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type WindowsPtyCompatibilityContext = {
   userAgent?: string

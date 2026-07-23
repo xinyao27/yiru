@@ -1,20 +1,20 @@
-import { useMemo } from 'react'
-
-import type { AiVaultSession } from '../../../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import {
   isPathInsideOrEqual,
   isRuntimePathAbsolute,
   normalizeRuntimePathForComparison
-} from '../../../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+import { useMemo } from 'react'
+
 import type { Repo, Worktree } from '../../../../shared/types'
-import { splitWorktreeIdForFilesystem } from '../../../../shared/worktree-id'
-import { parseWslUncPath } from '../../../../shared/wsl-paths'
 import { aiVaultWorktreeCompactPath } from './ai-vault-session-worktree-affordances'
 
 export {

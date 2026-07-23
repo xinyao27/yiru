@@ -1,11 +1,12 @@
-import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
-
 import {
   getAgentResumeArgv,
   isResumableTuiAgent,
   type SleepingAgentSessionRecord
-} from '../../../shared/agent-session-resume'
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
+import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
+
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { GlobalSettings, TerminalLayoutSnapshot, TerminalTab } from '../../../shared/types'
 import { lastInputBlocksHibernation } from './agent-hibernation-input-guard'

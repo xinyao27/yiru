@@ -1,5 +1,6 @@
-import type { GitUpstreamStatus } from './git-status-types'
-import type { HostedReviewCreationEligibility } from './hosted-review'
+import type { GitUpstreamStatus } from '@yiru/workbench-model/review'
+import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
+
 import type { PRState } from './types'
 
 export type SourceControlPrimaryActionKind =

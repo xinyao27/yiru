@@ -2,7 +2,7 @@ import type {
   DiffReviewScope,
   MobileDiffReviewFileState,
   MobileDiffReviewState
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/workspace'
 
 export type MobileDiffReviewFileDescriptor = {
   key: string

@@ -1,4 +1,4 @@
-import { normalizeExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
+import { normalizeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type HostHeaderRect = {
   hostId: ExecutionHostId

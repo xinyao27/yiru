@@ -7,10 +7,11 @@ import os from 'node:os'
 import { isAbsolute, join } from 'node:path'
 
 import { electronApp, is } from '@electron-toolkit/utils'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'electron'
 import * as QRCode from 'qrcode'
 
-import type { AgentStatusState } from '../shared/agent-status-types'
 import {
   HEADLESS_RUNTIME_WINDOW_ID,
   type RuntimeDesktopWindowStatus
@@ -24,7 +25,6 @@ import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-fac
 import { resolveTuiAgentPermissionMode } from '../shared/tui-agent-permissions'
 import type { UpdateCheckOptions } from '../shared/types'
 import { parseWorkspaceKey } from '../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../shared/worktree-id'
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 import { AgentAwakeService } from './agent-awake-service'
 import { rememberBranchRenameFailureOutput } from './agent-hooks/branch-rename-failure-output'

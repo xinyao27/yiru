@@ -9,9 +9,9 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import { StringDecoder } from 'node:string_decoder'
 
 import type { Event as WatcherEvent } from '@parcel/watcher'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import type { WebContents } from 'electron'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { queueWatcherEvents } from './filesystem-watcher-event-batch'
 import { reserveWatcherChild, WatcherChildCapacityError } from './parcel-watcher-child-registry'
 import { createWslWatcherProcessExit, createWslWatcherStartup } from './wsl-watcher-process-exit'

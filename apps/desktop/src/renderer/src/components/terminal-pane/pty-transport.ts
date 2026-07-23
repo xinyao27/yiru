@@ -1,3 +1,5 @@
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import type { PtyDataMeta } from '@/runtime/pty-data-meta'
 import {
@@ -23,7 +25,6 @@ import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
 } from '../../../../shared/agent-status-osc'
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { createBellDetector } from '../../../../shared/terminal-bell-detector'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,

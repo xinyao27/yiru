@@ -1,7 +1,7 @@
+import type { DiffComment, MobileDiffReviewState } from '@yiru/workbench-model/workspace'
 import * as Clipboard from 'expo-clipboard'
 import { useCallback, type Dispatch, type SetStateAction } from 'react'
 
-import type { DiffComment, MobileDiffReviewState } from '../../../desktop/src/shared/types'
 import { triggerSuccess } from '../platform/haptics'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'

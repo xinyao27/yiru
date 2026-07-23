@@ -1,4 +1,5 @@
-import { toSshExecutionHostId } from '../../shared/execution-host'
+import { toSshExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { normalizeManualRepoOrder } from '../../shared/manual-repo-order'
 import { parseAppSshPtyId, toAppSshPtyId } from '../../shared/ssh-pty-id'
 import type { PersistedUIState, WorkspaceSessionState } from '../../shared/types'

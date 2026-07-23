@@ -3,6 +3,59 @@ import { mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { isAbsolute, join, resolve } from 'node:path'
 
+import {
+  BROWSER_HEADLESS_RUNTIME_CAPABILITY,
+  BROWSER_CERTIFICATE_TRUST_RUNTIME_CAPABILITY,
+  MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION,
+  RUNTIME_CAPABILITIES,
+  RUNTIME_PROTOCOL_VERSION,
+  type RuntimeCapability
+} from '@yiru/runtime-protocol/capabilities'
+import type {
+  RuntimeWorktreeAgentRow,
+  RuntimeSpeechModelSummary,
+  RuntimeSpeechSetupState
+} from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
+import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  isFreshNonDoneAgentStatus,
+  type AgentStatusIpcPayload,
+  type ParsedAgentStatusPayload,
+  type AgentStatusOrchestrationContext,
+  type AgentStatusEntry
+} from '@yiru/workbench-model/agent'
+import {
+  isWindowsAbsolutePathLike,
+  isPathInsideOrEqual,
+  normalizeRuntimePathForComparison
+} from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
+import { applyPRBotAuthorOverride } from '@yiru/workbench-model/review'
+import type {
+  CreateHostedReviewInput,
+  CreateHostedReviewResult,
+  HostedReviewCreationEligibility,
+  HostedReviewCreationEligibilityArgs,
+  HostedReviewInfo
+} from '@yiru/workbench-model/review'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { parsePtySessionId } from '@yiru/workbench-model/workspace'
+import { githubAvatarIcon } from '@yiru/workbench-model/workspace'
+import {
+  FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
+  WORKTREE_ID_SEPARATOR,
+  splitWorktreeId,
+  splitWorktreeIdForFilesystem
+} from '@yiru/workbench-model/workspace'
 import { BrowserWindow, ipcMain } from 'electron'
 
 /* eslint-disable max-lines -- Why: YiruRuntimeService still coordinates terminal output analysis, mobile session projections, worktree lifecycle, and automation. Terminal session state now lives behind TerminalSessionAuthority; later tickets split the remaining workflows before enforcing max-lines. */
@@ -29,25 +82,15 @@ import {
   AGENT_PROMPT_SUBMIT_DELAY_MS,
   buildAgentPromptPasteBytes
 } from '../../shared/agent-prompt-injection'
-import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
 } from '../../shared/agent-status-osc'
 import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  isFreshNonDoneAgentStatus,
-  type AgentStatusIpcPayload,
-  type ParsedAgentStatusPayload,
-  type AgentStatusOrchestrationContext,
-  type AgentStatusEntry
-} from '../../shared/agent-status-types'
-import {
   hasCompatibleAgentTitleIdentity,
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
 } from '../../shared/agent-title-owner'
-import type { AiVaultListArgs, AiVaultListResult } from '../../shared/ai-vault-types'
 import type {
   Automation,
   AutomationCreateInput,
@@ -67,17 +110,7 @@ import {
   GLOBAL_ASSISTANT_WORKTREE_ID,
   getDefaultVoiceSettings
 } from '../../shared/constants'
-import {
-  isWindowsAbsolutePathLike,
-  isPathInsideOrEqual,
-  normalizeRuntimePathForComparison
-} from '../../shared/cross-platform-path'
 import { createDraftPasteReadyScanner } from '../../shared/draft-paste-ready-scanner'
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../shared/execution-host'
 import { mergeExternalWorktreeInboxPaths } from '../../shared/external-worktree-inbox'
 import type { TerminalPaneSplitSource } from '../../shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '../../shared/feature-interactions'
@@ -88,33 +121,15 @@ import type {
 import { folderWorkspaceToWorktree } from '../../shared/folder-workspace-worktree'
 import { getGitCloneFailureMessage } from '../../shared/git-clone-failure-message'
 import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git-fetch-auto-maintenance'
-import type {
-  CreateHostedReviewInput,
-  CreateHostedReviewResult,
-  HostedReviewCreationEligibility,
-  HostedReviewCreationEligibilityArgs,
-  HostedReviewInfo
-} from '../../shared/hosted-review'
 import { buildOrchestrationTaskDisplayMetadata } from '../../shared/orchestration-task-display'
 import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
 import { FIRST_PANE_ID } from '../../shared/pane-key'
-import { applyPRBotAuthorOverride } from '../../shared/pr-bot-author-overrides'
 import type { ProjectExecutionRuntimeResolution } from '../../shared/project-execution-runtime'
 import {
   getProjectHostSetupForRepo,
   getProjectHostSetupWorktreeMeta
 } from '../../shared/project-host-setup-projection'
-import {
-  BROWSER_HEADLESS_RUNTIME_CAPABILITY,
-  BROWSER_CERTIFICATE_TRUST_RUNTIME_CAPABILITY,
-  MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION,
-  RUNTIME_CAPABILITIES,
-  RUNTIME_PROTOCOL_VERSION,
-  type RuntimeCapability
-} from '../../shared/protocol-version'
-import { parsePtySessionId } from '../../shared/pty-session-id-format'
 import type { RateLimitState } from '../../shared/rate-limit-types'
-import { githubAvatarIcon } from '../../shared/repo-icon'
 import { isFolderRepo } from '../../shared/repo-kind'
 import type { RuntimeClientEvent } from '../../shared/runtime-client-events'
 import { toRuntimeActivateWorktreeEvent } from '../../shared/runtime-client-events'
@@ -142,10 +157,7 @@ import type {
   RuntimeTerminalWaitBlockedReason,
   RuntimeTerminalWaitCondition,
   RuntimeWorktreePsSummary,
-  RuntimeWorktreeAgentRow,
   RuntimeWorktreeStatus,
-  RuntimeSpeechModelSummary,
-  RuntimeSpeechSetupState,
   RuntimeTerminalShow,
   RuntimeTerminalSummary,
   RuntimeTerminalVisualGroupNode,
@@ -191,7 +203,6 @@ import type {
   SpoolPairedRuntimeWorktreeSelector
 } from '../../shared/spool/spool-paired-runtime-host-contract'
 import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
-import type { SshConnectionState } from '../../shared/ssh-types'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
 import type { TerminalGitHubPRLink } from '../../shared/terminal-github-pr-link-detector'
 import {
@@ -200,7 +211,6 @@ import {
   iterateTerminalInputChunks
 } from '../../shared/terminal-input'
 import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal-kitty-keyboard-mode-tracker'
-import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
 import {
   createTerminalTitleTracker,
   stripBrailleSpinnerGlyphs,
@@ -286,7 +296,6 @@ import type {
   MRListState
 } from '../../shared/types'
 import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '../../shared/types'
-import { resolveLocalWindowsAgentStartupShell } from '../../shared/windows-terminal-shell'
 import type {
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
@@ -303,18 +312,11 @@ import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace-sessi
 import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
 import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
 import {
-  FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
-  WORKTREE_ID_SEPARATOR,
-  splitWorktreeId,
-  splitWorktreeIdForFilesystem
-} from '../../shared/worktree-id'
-import {
   buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
   toDetectedWorktree
 } from '../../shared/worktree-ownership'
 import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   markCodexProjectTrusted,

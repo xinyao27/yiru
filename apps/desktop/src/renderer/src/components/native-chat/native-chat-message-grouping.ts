@@ -13,7 +13,8 @@ import {
   type NativeChatMessage,
   type NativeChatToolCallBlock,
   type NativeChatToolResultBlock
-} from '../../../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+
 import { compareMessages } from './native-chat-session-assembler'
 
 /** A tool-call block paired with the result that answered it, when one exists.

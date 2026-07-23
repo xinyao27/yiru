@@ -5,13 +5,13 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { app } from 'electron'
-
 import {
   DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MIN_SSH_RELAY_GRACE_PERIOD_SECONDS
-} from '../../shared/ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
+import { app } from 'electron'
+
 import type { RelayPlatform } from './relay-protocol'
 import type { MultiplexerTransport } from './ssh-channel-multiplexer'
 import type { SshConnection } from './ssh-connection'

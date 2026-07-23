@@ -1,4 +1,5 @@
-import type { PairingRelay } from '../../../desktop/src/shared/mobile-relay-pairing-offer'
+import type { PairingRelay } from '@yiru/mobile-relay-protocol/pairing-offer'
+
 import type { MobileRelayPairingJournal } from './mobile-relay-pairing-journal'
 import { RelayOuterError, type PairingCandidateClient } from './mobile-relay-physical-client'
 

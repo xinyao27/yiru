@@ -1,6 +1,7 @@
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+
 import { translate } from '@/i18n/i18n'
 
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import type { CheckStatus } from '../../../../shared/types'
 import type {
   ParentPrChecksGroupKey,

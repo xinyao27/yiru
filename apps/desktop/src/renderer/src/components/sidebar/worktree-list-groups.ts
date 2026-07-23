@@ -5,13 +5,14 @@ import {
   List,
   PushPin as Pin
 } from '@phosphor-icons/react'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { getExecutionHostLabel, getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 import type React from 'react'
 
 import { translate } from '@/i18n/i18n'
 import { getRepoDisplayLabelKey, getRepoDisplayLabelsByPath } from '@/lib/repo-display-labels'
 
-import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
-import { getExecutionHostLabel, getRepoExecutionHostId } from '../../../../shared/execution-host'
 import {
   getEffectiveProjectGroupManualRank,
   UNGROUPED_PROJECT_GROUP_KEY
@@ -30,7 +31,6 @@ import type {
   WorkspaceStatusDefinition
 } from '../../../../shared/types'
 import { cloneDefaultWorkspaceStatuses } from '../../../../shared/workspace-statuses'
-import { parseWslUncPath } from '../../../../shared/wsl-paths'
 import { branchName } from '../../lib/git-utils'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from '../../store/slices/github-cache-key'
 import type { AppState } from '../../store/types'

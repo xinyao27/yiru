@@ -1,4 +1,5 @@
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+
 import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
 import type { FsChangeEvent } from '../../shared/types'
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'

@@ -1,7 +1,7 @@
 import {
   normalizeRuntimePathForComparison,
   relativePathInsideRoot
-} from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
 
 type WorktreeBaseWatcherEvent = {
   type: 'create' | 'update' | 'delete'

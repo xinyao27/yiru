@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import { keybindingMatchesAction, type KeybindingOverrides } from '../../../../shared/keybindings'
 
 export const MARKDOWN_PREVIEW_SEARCH_QUERY_MAX_BYTES = 2 * 1024

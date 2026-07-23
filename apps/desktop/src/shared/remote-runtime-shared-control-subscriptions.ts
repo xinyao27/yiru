@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import type { RemoteRuntimeClientError } from './remote-runtime-client-error'
 import { getCleanupRequest, getSubscriptionId } from './remote-runtime-shared-control-protocol'
 import {
@@ -10,7 +12,6 @@ import type {
   SharedControlLogicalSubscription,
   SharedControlSubscriptionCallbacks
 } from './remote-runtime-shared-control-types'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 
 export function createSharedControlSubscription<TResult>(args: {
   requestId: string

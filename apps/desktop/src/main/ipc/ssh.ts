@@ -1,9 +1,3 @@
-/* oxlint-disable max-lines -- Why: co-locates SSH IPC handlers, port-forward
-broadcasting, and session lifecycle in one file to keep the data flow obvious. */
-import { ipcMain, powerMonitor, type BrowserWindow } from 'electron'
-
-import { SSH_TERMINATE_RECONNECT_REQUIRED } from '../../shared/constants'
-import { isRuntimeOwnedSshTargetId } from '../../shared/execution-host'
 import type {
   DetectedPort,
   EnrichedDetectedPort,
@@ -12,7 +6,13 @@ import type {
   SshTarget,
   SshConnectionStatus,
   SshConnectionState
-} from '../../shared/ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+/* oxlint-disable max-lines -- Why: co-locates SSH IPC handlers, port-forward
+broadcasting, and session lifecycle in one file to keep the data flow obvious. */
+import { ipcMain, powerMonitor, type BrowserWindow } from 'electron'
+
+import { SSH_TERMINATE_RECONNECT_REQUIRED } from '../../shared/constants'
 import type { Store } from '../persistence'
 import { advertisedUrlWatcher } from '../ports/advertised-url-watcher'
 import {

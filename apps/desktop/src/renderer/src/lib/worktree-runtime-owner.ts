@@ -1,10 +1,12 @@
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import {
   getRepoExecutionHostId,
   parseExecutionHostId,
   toSshExecutionHostId
-} from '../../../shared/execution-host'
-import type { ExecutionHostId, ParsedExecutionHost } from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+import type { ExecutionHostId, ParsedExecutionHost } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import type {
   FolderWorkspace,
   GlobalSettings,
@@ -13,7 +15,6 @@ import type {
   Worktree
 } from '../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../../shared/worktree-id'
 import {
   findIndexedFolderWorkspaceOwner,
   findIndexedProjectGroupOwner,

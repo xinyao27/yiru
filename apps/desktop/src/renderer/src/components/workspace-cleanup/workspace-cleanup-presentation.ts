@@ -1,9 +1,10 @@
+import type { HostedReviewInfo, HostedReviewProvider } from '@yiru/workbench-model/review'
+
 import { translate } from '@/i18n/i18n'
 import { getWorktreeMapFromState } from '@/store/selectors'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 import type { AppState } from '@/store/types'
 
-import type { HostedReviewInfo, HostedReviewProvider } from '../../../../shared/hosted-review'
 import type { Repo, Worktree } from '../../../../shared/types'
 import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
 

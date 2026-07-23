@@ -1,13 +1,13 @@
 import { randomUUID } from 'node:crypto'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 
-import { PTY_SESSION_ID_SEPARATOR } from '../../shared/pty-session-id-format'
+import { PTY_SESSION_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
 
 // Why: re-exported here so main-side callers can keep importing
 // `parsePtySessionId` from this module (next to `mintPtySessionId`). The
 // implementation lives in `src/shared/` because the renderer-side merge
 // helper also needs it and cannot import node-only modules.
-export { parsePtySessionId } from '../../shared/pty-session-id-format'
+export { parsePtySessionId } from '@yiru/workbench-model/workspace'
 
 /**
  * Session IDs use the format `${worktreeId}@@${shortUuid}` so that

@@ -6,12 +6,13 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join, relative, resolve, sep } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import type {
   ClaudeManagedAccount,
   ClaudeManagedAccountSummary,
   ClaudeRateLimitAccountsState
 } from '../../shared/types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { resolveClaudeCommand } from '../codex-cli/command'
 import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'

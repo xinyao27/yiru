@@ -1,4 +1,5 @@
-import { getRepoExecutionHostId } from './execution-host'
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type {
   Project,
   ProjectHostSetup,

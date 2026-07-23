@@ -8,16 +8,16 @@ import { randomBytes } from 'node:crypto'
 import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { WebSocket } from 'ws'
-
-import type { MobilePairingConnectionMode } from '../../shared/mobile-pairing-connection-mode'
 import type {
   DeviceCredentialInstalled,
   PairingGetEndpointsParams,
   PairingGetEndpointsResult,
   PairingProvisionRelayParams
-} from '../../shared/mobile-relay-credential-contract'
-import type { PairingRelay } from '../../shared/mobile-relay-pairing-offer'
+} from '@yiru/mobile-relay-protocol/credential-contract'
+import type { PairingRelay } from '@yiru/mobile-relay-protocol/pairing-offer'
+import type { WebSocket } from 'ws'
+
+import type { MobilePairingConnectionMode } from '../../shared/mobile-pairing-connection-mode'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '../../shared/pairing'
 import {
   readRemoteRuntimeCancellationRequestId,

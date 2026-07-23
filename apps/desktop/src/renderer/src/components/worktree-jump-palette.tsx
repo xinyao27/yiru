@@ -8,6 +8,7 @@ import {
   TerminalWindow as SquareTerminal,
   Plus
 } from '@phosphor-icons/react'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -116,7 +117,6 @@ import { getRepoMapFromState, useAllWorktrees } from '@/store/selectors'
 import { getRepoHostIdentity } from '@/store/slices/repo-host-identity'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { isRuntimeOwnedSshTargetId } from '../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../shared/host-setting-overrides'
 import { buildProjectSourceContextFromRepo } from '../../../shared/project-source-context'
 import { isGitRepoKind } from '../../../shared/repo-kind'

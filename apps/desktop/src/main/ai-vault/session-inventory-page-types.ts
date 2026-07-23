@@ -1,4 +1,4 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
 
 export type AiVaultSessionInventorySnapshot = {
   scannedAt: string

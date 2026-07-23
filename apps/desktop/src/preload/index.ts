@@ -1,4 +1,23 @@
 import { electronAPI } from '@electron-toolkit/preload'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type {
+  SshConnectionState,
+  SshConfigImportResult,
+  SshTargetAddResult,
+  SshTarget,
+  PortForwardEntry,
+  EnrichedDetectedPort
+} from '@yiru/runtime-protocol/ssh-connection'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import type {
+  AgentStatusIpcPayload,
+  MigrationUnsupportedPtyEntry
+} from '@yiru/workbench-model/agent'
+import type { AiVaultListArgs, AiVaultSubagentListArgs } from '@yiru/workbench-model/agent'
+import type { AgentType } from '@yiru/workbench-model/agent'
+import type { HostedReviewForBranchArgs } from '@yiru/workbench-model/review'
+import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the preload bridge is the audited contract between
 renderer and Electron. Keeping the IPC surface co-located in one file makes security
 review and type drift checks easier than scattering these bindings across modules. */
@@ -6,12 +25,6 @@ import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
 
 import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
 import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
-import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
-import type {
-  AgentStatusIpcPayload,
-  MigrationUnsupportedPtyEntry
-} from '../shared/agent-status-types'
-import type { AiVaultListArgs, AiVaultSubagentListArgs } from '../shared/ai-vault-types'
 import type { AppIdentity } from '../shared/app-identity'
 import type {
   Automation,
@@ -29,7 +42,6 @@ import type {
   AutomationUpdateInput
 } from '../shared/automations-types'
 import type { CliInstallStatus } from '../shared/cli-install-types'
-import type { ReadClipboardTextOptions } from '../shared/clipboard-text'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
   CrashReportBreadcrumbData,
@@ -43,13 +55,11 @@ import {
   YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT,
   type EditorPrepareHotExitDetail
 } from '../shared/editor-save-events'
-import type { ExecutionHostId } from '../shared/execution-host'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { AppStarSource } from '../shared/gh-star-source'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
-import type { HostedReviewForBranchArgs } from '../shared/hosted-review'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
 import type { LanguageServerEvent } from '../shared/language-server'
 import type {
@@ -68,7 +78,6 @@ import type {
 } from '../shared/mobile-markdown-document'
 import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
 import type { MobileRelayStatus } from '../shared/mobile-relay-status'
-import type { AgentType } from '../shared/native-chat-types'
 import {
   YIRU_INTERNAL_FILE_DRAG_TYPE,
   createNativeFileDropPayload,
@@ -99,7 +108,6 @@ import {
   type RichMarkdownContextMenuCommandPayload
 } from '../shared/rich-markdown-context-menu'
 import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
-import type { RuntimeRpcResponse } from '../shared/runtime-rpc-envelope'
 import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
@@ -138,14 +146,6 @@ import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
 } from '../shared/spool/spool-windows-firewall-contract'
-import type {
-  SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '../shared/ssh-types'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {

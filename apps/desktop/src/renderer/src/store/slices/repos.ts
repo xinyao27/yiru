@@ -1,3 +1,21 @@
+import {
+  FOLDER_WORKSPACE_PATH_STATUS_RUNTIME_CAPABILITY,
+  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
+  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
+} from '@yiru/runtime-protocol/capabilities'
+import type { SshRepoReadoption } from '@yiru/runtime-protocol/ssh-connection'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import {
+  getRepoExecutionHostId,
+  isRuntimeOwnedSshTargetId,
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId,
+  toRuntimeExecutionHostId,
+  toSshExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: repo slice owns local/runtime routing,
 add/remove/reorder side effects, and cross-slice teardown. Splitting it during
 the client-server refactor would obscure the invariants this file is currently
@@ -11,16 +29,6 @@ import { filterSetupScriptPromptDismissalsToValidRepos } from '@/lib/setup-scrip
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
-import { isPathInsideOrEqual } from '../../../../shared/cross-platform-path'
-import {
-  getRepoExecutionHostId,
-  isRuntimeOwnedSshTargetId,
-  LOCAL_EXECUTION_HOST_ID,
-  parseExecutionHostId,
-  toRuntimeExecutionHostId,
-  toSshExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import {
   FOLDER_WORKSPACE_PATH_STATUS_TTL_MS,
   type FolderWorkspacePathStatus,
@@ -33,15 +41,8 @@ import {
   projectHostSetupProjectionFromRepos,
   type ProjectHostSetupProjection
 } from '../../../../shared/project-host-setup-projection'
-import {
-  FOLDER_WORKSPACE_PATH_STATUS_RUNTIME_CAPABILITY,
-  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-} from '../../../../shared/protocol-version'
 import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
-import { sanitizeRepoIcon } from '../../../../shared/repo-icon'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { SshRepoReadoption } from '../../../../shared/ssh-types'
 import type {
   GlobalSettings,
   Project,
@@ -63,7 +64,6 @@ import type {
   ProjectHostSetupUpdateResult
 } from '../../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { formatFolderWorkspaceCreateError } from '../../lib/folder-workspace-path-status'
 import { syncRuntimeGitForkDefaultBranch } from '../../runtime/runtime-git-client'
 import {

@@ -1,7 +1,7 @@
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { describe, expect, it } from 'vite-plus/test'
 
 import { deriveNativeChatStreamingText } from './native-chat-streaming'
-import type { NativeChatMessage } from './native-chat-types'
 
 function message(id: string, role: NativeChatMessage['role'], text: string): NativeChatMessage {
   return {

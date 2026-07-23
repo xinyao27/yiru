@@ -1,3 +1,7 @@
+import {
+  YIRU_GITHUB_REPOSITORY_SLUG,
+  YIRU_GITHUB_REPOSITORY_URL
+} from '@yiru/workbench-model/product'
 import Constants from 'expo-constants'
 import { useRouter } from 'expo-router'
 import { View, Text, Pressable, Linking, Platform } from 'react-native'
@@ -5,10 +9,6 @@ import { View, Text, Pressable, Linking, Platform } from 'react-native'
 import { CaretLeft as ChevronLeft, GithubLogo, Globe } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import {
-  YIRU_GITHUB_REPOSITORY_SLUG,
-  YIRU_GITHUB_REPOSITORY_URL
-} from '../../desktop/src/shared/yiru-github-repository'
 import { YiruLogo } from '../src/components/yiru-logo'
 
 // Why: read version + native build identifier from expo-constants at

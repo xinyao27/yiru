@@ -1,3 +1,11 @@
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  getRepoExecutionHostId,
+  getSettingsFocusedExecutionHostId,
+  normalizeExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the GitHub slice co-locates pull-request cache,
 checks, comments, and refresh orchestration so invalidation stays consistent. */
 import type { StateCreator } from 'zustand'
@@ -6,14 +14,6 @@ import { translate } from '@/i18n/i18n'
 import { isMacAppDataPath } from '@/lib/passive-macos-app-data-access'
 import { rightSidebarShowsPullRequestData } from '@/lib/right-sidebar-visibility'
 
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  getRepoExecutionHostId,
-  getSettingsFocusedExecutionHostId,
-  normalizeExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
 import {
   getProjectSourceCacheScope,

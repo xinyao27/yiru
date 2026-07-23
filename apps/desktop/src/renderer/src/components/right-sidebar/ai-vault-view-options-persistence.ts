@@ -3,7 +3,8 @@ import {
   type AiVaultAgent,
   type AiVaultGroup,
   type AiVaultSort
-} from '../../../../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+
 import {
   DEFAULT_AI_VAULT_GROUP,
   DEFAULT_AI_VAULT_HIDE_EMPTY_SESSIONS,

@@ -11,9 +11,9 @@ import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { posix, win32 } from 'node:path'
 
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import type { BrowserWindow } from 'electron'
 
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
 import { assertGitPushTargetShape } from '../../shared/git-push-target-validation'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { TUI_AGENT_CONFIG, isTuiAgent } from '../../shared/tui-agent-config'
@@ -75,6 +75,8 @@ import { runWorktreeChangeInvalidators } from './worktree-change-invalidators'
 type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
   automationProvenance?: AutomationWorkspaceProvenance
 }
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { createSequencedSetupAgentCommands } from '../../shared/setup-agent-sequencing'
 import { shouldWaitForSetupBeforeAgentStartup } from '../../shared/setup-agent-startup-policy'
 import {
@@ -82,7 +84,6 @@ import {
   getSetupRunnerCommandPlatformForPath
 } from '../../shared/setup-runner-command'
 import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import {
   markCodexProjectTrusted,
   markCopilotFolderTrusted,

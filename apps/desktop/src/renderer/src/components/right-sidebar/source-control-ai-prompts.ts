@@ -3,7 +3,7 @@ export { buildPushFailureAgentCommandInput } from '../../../../shared/source-con
 export {
   appendCommitFailureCustomInstruction,
   buildFixCommitFailurePrompt
-} from '../../../../shared/source-control-commit-failure'
+} from '@yiru/workbench-model/review'
 export {
   appendPushFailureCustomInstruction,
   buildFixPushFailurePrompt
@@ -11,4 +11,4 @@ export {
 export {
   buildResolveConflictsPrompt,
   buildResolvePullRequestConflictsPrompt
-} from '../../../../shared/source-control-conflict-prompts'
+} from '@yiru/workbench-model/review'

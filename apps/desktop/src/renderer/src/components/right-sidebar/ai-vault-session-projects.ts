@@ -1,22 +1,23 @@
-import type { AiVaultSessionProject } from '../../../../shared/ai-vault-session-filters'
-import type { AiVaultSession } from '../../../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import type { AiVaultSessionProject } from '@yiru/workbench-model/agent'
 import {
   isPathInsideOrEqual,
   normalizeRuntimePathForComparison,
   normalizeRuntimePathSeparators
-} from '../../../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { ProjectHostSetupProjection } from '../../../../shared/project-host-setup-projection'
 import type { ProjectHostSetup, Repo, Worktree } from '../../../../shared/types'
 
 // Why: the plain project descriptor moved to /shared (so the lifted filter core
 // stays renderer-free). Re-export it here for renderer import parity.
-export type { AiVaultSessionProject } from '../../../../shared/ai-vault-session-filters'
+export type { AiVaultSessionProject } from '@yiru/workbench-model/agent'
 
 export type AiVaultProjectContext = {
   activeProjectKey: string | null

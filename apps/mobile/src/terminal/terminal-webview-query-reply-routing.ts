@@ -1,4 +1,4 @@
-import { isTerminalQueryReply } from '../../../desktop/src/shared/terminal-query-reply'
+import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
 
 export function routeTerminalQueryReply(
   message: Record<string, unknown>,

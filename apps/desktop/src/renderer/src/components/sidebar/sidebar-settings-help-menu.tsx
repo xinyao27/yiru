@@ -11,6 +11,7 @@ import {
   ArrowClockwise as RefreshCw,
   ArrowClockwise as RotateCw
 } from '@phosphor-icons/react'
+import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -32,7 +33,6 @@ import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-che
 import { useAppStore } from '@/store'
 
 import logo from '../../../../../resources/logo.svg'
-import { YIRU_GITHUB_REPOSITORY_URL } from '../../../../shared/yiru-github-repository'
 import { showOnboardingFromRenderer } from '../onboarding/show-onboarding-event'
 import { SetupGuideProgressRing } from '../setup-guide/setup-guide-progress-ring'
 import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'

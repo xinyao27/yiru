@@ -1,3 +1,4 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import React, { useState, useCallback } from 'react'
 
 import { AgentStateDot, agentStateLabel, type AgentDotState } from '@/components/agent-state-dot'
@@ -7,7 +8,6 @@ import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
 import { agentTypeToIconAgent, formatAgentTypeLabel } from '@/lib/agent-status'
 import { cn } from '@/lib/class-names'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 import { DashboardAgentChildDisclosure } from './dashboard-agent-child-disclosure'
 import { DashboardAgentRowMessage } from './dashboard-agent-row-message'
 import { DashboardAgentRowToolStep } from './dashboard-agent-row-tool-step'

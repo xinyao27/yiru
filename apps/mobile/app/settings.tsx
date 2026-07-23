@@ -1,3 +1,4 @@
+import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
 import { View, Text, Pressable, Linking, ActivityIndicator, ScrollView } from 'react-native'
@@ -17,7 +18,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { YIRU_GITHUB_ISSUES_URL } from '../../desktop/src/shared/yiru-github-repository'
 import {
   loadPendingHostCredentialCleanup,
   subscribePendingHostCredentialCleanup

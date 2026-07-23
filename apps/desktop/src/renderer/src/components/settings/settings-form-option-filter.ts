@@ -1,6 +1,6 @@
-import type { TerminalThemeOption } from '@/lib/terminal-theme'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import type { TerminalThemeOption } from '@/lib/terminal-theme'
 
 export const SETTINGS_FORM_OPTION_QUERY_MAX_BYTES = 2 * 1024
 export const FONT_SUGGESTION_RENDER_LIMIT = 320

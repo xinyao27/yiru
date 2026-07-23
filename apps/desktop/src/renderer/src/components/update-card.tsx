@@ -6,6 +6,7 @@ import {
   ArrowClockwise as RotateCw,
   X
 } from '@phosphor-icons/react'
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 /* eslint-disable max-lines -- Why: the update card owns the full updater lifecycle in one
    renderer surface. Keeping the state machine and its presentation variants together avoids
    scattering tightly coupled update behavior across multiple files. */
@@ -17,7 +18,6 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { ChangelogData } from '../../../shared/types'
-import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { useAppStore } from '../store'
 import { Button } from './ui/button'
 import { Card } from './ui/card'

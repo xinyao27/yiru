@@ -1,7 +1,8 @@
 import { homedir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 
-import type { AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
+
 import { discoverFiles } from './session-scanner-discovery'
 import { resolveKimiSessionsDir } from './session-scanner-kimi-paths'
 import type { AiVaultScanOptions, SessionFileDiscovery } from './session-scanner-types'

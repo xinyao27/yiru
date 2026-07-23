@@ -1,10 +1,10 @@
+import type { GitHubPRMergeMethod, PRInfo } from '@yiru/workbench-model/review'
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import { GitMerge, LinkBreak as Link2Off } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { GitHubPRMergeMethod, PRInfo } from '../../../../desktop/src/shared/types'
 import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
 import { unlinkMobilePr } from '../../source-control/mobile-pr-link'
 import type { RpcClient } from '../../transport/rpc-client'

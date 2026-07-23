@@ -1,11 +1,9 @@
-import {
-  AI_VAULT_SCOPE_PATHS_MAX_COUNT,
-  type AiVaultScope
-} from '../../../desktop/src/shared/ai-vault-types'
+import { AI_VAULT_SCOPE_PATHS_MAX_COUNT, type AiVaultScope } from '@yiru/workbench-model/agent'
 import {
   isRuntimePathAbsolute,
   normalizeRuntimePathForComparison
-} from '../../../desktop/src/shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
 import type { Worktree } from '../worktree/workspace-list-types'
 
 // Why: the renderer's deriveAiVault* helpers are renderer-located and

@@ -177,7 +177,13 @@ export default defineConfig({
       // directory cannot reach into app.asar, so pure-JS dependencies used
       // by the daemon must be bundled rather than externalized.
       externalizeDeps: {
-        exclude: ['@xterm/headless', '@xterm/addon-serialize']
+        exclude: [
+          '@xterm/headless',
+          '@xterm/addon-serialize',
+          '@yiru/mobile-relay-protocol',
+          '@yiru/runtime-protocol',
+          '@yiru/workbench-model'
+        ]
       },
       rollupOptions: {
         // Why: CLI and plain-Node sidecars share the out/ tree, whose package

@@ -1,5 +1,6 @@
-import type { RuntimeCapability } from '../../../shared/protocol-version'
-import type { RuntimeRpcFailure, RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
+import type { RuntimeCapability } from '@yiru/runtime-protocol/capabilities'
+import type { RuntimeRpcFailure, RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import { withBrowserPaneUiRuntimeRpcSource } from '../../../shared/runtime-rpc-feature-interaction-source'
 import type { RuntimeStatus } from '../../../shared/runtime-types'
 import type { GlobalSettings } from '../../../shared/types'

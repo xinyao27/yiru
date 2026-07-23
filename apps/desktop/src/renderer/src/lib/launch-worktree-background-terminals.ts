@@ -1,3 +1,5 @@
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+
 import {
   registerEagerPtyBuffer,
   type EagerPtyHandle
@@ -10,7 +12,6 @@ import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 
-import { isWindowsAbsolutePathLike } from '../../../shared/cross-platform-path'
 import { buildSetupRunnerCommand } from '../../../shared/setup-runner-command'
 import { makePaneKey } from '../../../shared/stable-pane-id'
 import type {

@@ -1,7 +1,8 @@
 import {
   PairingGetEndpointsParamsSchema,
   PairingProvisionRelayParamsSchema
-} from '../../../../shared/mobile-relay-credential-contract'
+} from '@yiru/mobile-relay-protocol/credential-contract'
+
 import { defineMethod, type RpcAnyMethod } from '../core'
 
 export const PAIRING_METHODS: readonly RpcAnyMethod[] = [

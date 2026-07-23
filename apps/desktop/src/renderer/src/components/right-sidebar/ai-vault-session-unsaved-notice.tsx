@@ -1,13 +1,12 @@
 import { Archive } from '@phosphor-icons/react'
-import type React from 'react'
-
-import { translate } from '@/i18n/i18n'
-
 import {
   aiVaultSessionRecoverableSignalCount,
   isAiVaultSessionRecoverableEmpty,
   type AiVaultSession
-} from '../../../../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+import type React from 'react'
+
+import { translate } from '@/i18n/i18n'
 
 // Distinct state for a zero-turn transcript: the conversation was not persisted,
 // but queued prompts and/or subagent transcripts may still be recoverable.

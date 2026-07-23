@@ -12,7 +12,8 @@
 // Correctness invariant: applyAppends output deep-equals a full rebuild over
 // base ++ all-appends for every prefix (locked by the oracle differential test).
 
-import type { NativeChatMessage } from '../../../../shared/native-chat-types'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { compareMessages, mergeOne } from './native-chat-session-assembler'
 
 export type IncrementalChatAssembler = {

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { app, ipcMain } from 'electron'
 
 import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime-client'
@@ -13,7 +14,6 @@ import {
   redactRuntimeEnvironment,
   type PublicKnownRuntimeEnvironment
 } from '../../shared/runtime-environments'
-import type { RuntimeRpcResponse } from '../../shared/runtime-rpc-envelope'
 import type { RuntimeStatus } from '../../shared/runtime-types'
 import type { Store } from '../persistence'
 import { clearActiveRuntimeEnvironmentFocusIfMatches } from '../runtime-environment-focus-self-heal'

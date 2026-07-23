@@ -1,6 +1,7 @@
 // xterm.js WebView document + default Tokyonight theme. Extracted from
 // terminal-web-view.tsx to keep that file within the max-lines budget.
-import type { RuntimeMobileTerminalTheme } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-runtime-types'
+
 import { TERMINAL_TEXT_SCALES } from '../storage/preferences'
 import { colors } from '../theme/uniwind-theme-values'
 import { TERMINAL_PATH_TAP_JS } from './terminal-path-tap-injected'

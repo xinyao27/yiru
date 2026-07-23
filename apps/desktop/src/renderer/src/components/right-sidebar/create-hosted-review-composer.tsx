@@ -5,6 +5,7 @@ import {
   Square,
   CaretDown as ChevronDown
 } from '@phosphor-icons/react'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,6 @@ import {
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { HostedReviewProvider } from '../../../../shared/hosted-review'
 import { CreateHostedReviewComposerFields } from './create-hosted-review-composer-fields'
 import {
   RIGHT_SIDEBAR_MORPHING_PRIMARY_BUTTON_CLASS,

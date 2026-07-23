@@ -9,6 +9,7 @@ import {
   ArrowClockwise as RotateCw,
   X
 } from '@phosphor-icons/react'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: consolidating memory + sessions into one
    surface deliberately co-locates the sparkline, worktree tree, session list,
    daemon actions, and kill-confirm dialog so the popover body and badge stay
@@ -36,7 +37,6 @@ import { cn } from '@/lib/class-names'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 
 import { ORPHAN_WORKTREE_ID } from '../../../../shared/constants'
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { AppMemory, BrowserWorkspace, UsageValues, Worktree } from '../../../../shared/types'
 import { isWorkspaceOldForCleanup } from '../../../../shared/workspace-cleanup'

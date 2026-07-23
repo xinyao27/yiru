@@ -1,4 +1,4 @@
-import type { DiffComment, DiffReviewScope } from '../../../desktop/src/shared/types'
+import type { DiffComment, DiffReviewScope } from '@yiru/workbench-model/workspace'
 
 export type CreateMobileDiffCommentInput = {
   worktreeId: string

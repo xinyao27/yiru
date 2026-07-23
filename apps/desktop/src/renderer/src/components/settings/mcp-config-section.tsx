@@ -4,6 +4,7 @@ import {
   Plus,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -18,7 +19,6 @@ import {
   MCP_STARTER_CONFIG
 } from '../../../../shared/mcp-config'
 import type { Repo, Worktree } from '../../../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { extractIpcErrorMessage } from '../../lib/ipc-error'
 import { joinPath } from '../../lib/path'
 import { useAppStore } from '../../store'

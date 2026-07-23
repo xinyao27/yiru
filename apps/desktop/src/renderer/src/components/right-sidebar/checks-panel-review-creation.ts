@@ -1,4 +1,5 @@
-import type { HostedReviewCreationEligibility } from '../../../../shared/hosted-review'
+import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
+
 import { normalizeHostedReviewBaseRef } from '../../../../shared/hosted-review-refs'
 
 export function resolveChecksPanelHostedReviewBaseRef(input: {

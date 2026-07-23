@@ -1,7 +1,7 @@
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import type * as monaco from 'monaco-editor'
 import type { Disposable } from 'vscode-jsonrpc/browser'
 
-import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
 import type { LspPosition, LspServerCapabilities } from './language-server-protocol'
 
 type DocumentState = {

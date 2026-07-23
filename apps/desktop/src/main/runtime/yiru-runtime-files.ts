@@ -21,6 +21,7 @@ import {
 import { homedir, tmpdir } from 'node:os'
 import { basename, dirname, extname, join } from 'node:path'
 
+import type { RuntimeTerminalPathResolution } from '@yiru/runtime-protocol/mobile-runtime-types'
 import {
   isPathInsideOrEqual,
   isRuntimePathAbsolute,
@@ -28,7 +29,8 @@ import {
   normalizeRuntimePathForComparison,
   relativePathInsideRoot,
   resolveRuntimePath
-} from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
 import { assertNoClobberRenameDestinationAvailable } from '../../shared/filesystem-rename-collision'
 import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
 import type {
@@ -36,8 +38,7 @@ import type {
   RuntimeFileOpenResult,
   RuntimeFileReadChunkResult,
   RuntimeFilePreviewResult,
-  RuntimeFileReadResult,
-  RuntimeTerminalPathResolution
+  RuntimeFileReadResult
 } from '../../shared/runtime-types'
 import {
   buildRgArgs,

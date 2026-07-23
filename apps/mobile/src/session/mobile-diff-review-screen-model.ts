@@ -1,4 +1,5 @@
-import type { DiffComment, MobileDiffReviewState } from '../../../desktop/src/shared/types'
+import type { DiffComment, MobileDiffReviewState } from '@yiru/workbench-model/workspace'
+
 import type { MobileGitBranchCompareResult } from '../source-control/mobile-branch-compare'
 import type { MobileGitStatusResult } from '../source-control/mobile-git-status'
 import type { MobileDiffHunk } from './mobile-diff-hunks'

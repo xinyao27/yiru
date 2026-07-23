@@ -1,4 +1,6 @@
 import { Upload, Plus } from '@phosphor-icons/react'
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+import { toSshExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -8,8 +10,6 @@ import { useAppStore } from '@/store'
 import { getAllWorktreesFromState } from '@/store/selectors'
 
 import { SSH_TERMINATE_RECONNECT_REQUIRED } from '../../../../shared/constants'
-import { toSshExecutionHostId } from '../../../../shared/execution-host'
-import type { SshTarget } from '../../../../shared/ssh-types'
 import { HostRemoveDialog } from '../sidebar/host-remove-dialog'
 import { resolveSshHostRemoval } from '../sidebar/ssh-host-remove-resolution'
 import { Button } from '../ui/button'

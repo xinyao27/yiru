@@ -1,10 +1,11 @@
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+
 import { MAX_BATCHED_WATCHER_EVENTS } from '../main/ipc/filesystem-watcher-event-batch'
 import {
   WATCHER_IGNORE_DIRS,
   buildParcelWatcherIgnoreOptions
 } from '../main/ipc/filesystem-watcher-ignore'
 import { isWatcherProcessFailure } from '../main/ipc/parcel-watcher-process-failure'
-import { normalizeRuntimePathForComparison } from '../shared/cross-platform-path'
 import { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { emitRelayWatcherEvents, emitRelayWatcherOverflow } from './relay-watcher-event-emitter'

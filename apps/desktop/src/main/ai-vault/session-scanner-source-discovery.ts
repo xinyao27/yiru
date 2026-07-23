@@ -1,7 +1,8 @@
 import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
 
-import type { AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
+
 import { resolveGrokSessionsDir } from '../../shared/grok-session-paths'
 import { antigravityDiscoveries } from './session-scanner-antigravity-sources'
 import { uniqueCodexSessionsDirs } from './session-scanner-codex-paths'

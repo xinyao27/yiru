@@ -1,9 +1,9 @@
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { useMemo } from 'react'
 import { View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
 import { flattenAgentRowLineage } from '../worktree/agent-row-lineage'
 import { WorktreeAgentRow } from './worktree-agent-row'
 

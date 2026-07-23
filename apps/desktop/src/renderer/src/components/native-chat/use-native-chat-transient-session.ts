@@ -1,6 +1,6 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useMemo } from 'react'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 import {
   deriveNativeChatStreamingText,
   nativeChatStreamingMessage

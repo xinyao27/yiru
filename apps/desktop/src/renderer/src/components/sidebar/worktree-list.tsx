@@ -21,6 +21,12 @@ import {
   useVirtualizer
 } from '@tanstack/react-virtual'
 import type { Range } from '@tanstack/react-virtual'
+import {
+  ALL_EXECUTION_HOSTS_SCOPE,
+  getRepoExecutionHostId,
+  getSettingsFocusedExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { toast } from 'sonner'
@@ -80,12 +86,6 @@ import type { PendingSidebarRowReveal, PendingSidebarWorktreeReveal } from '@/st
 import type { AppState } from '@/store/types'
 
 import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
-import {
-  ALL_EXECUTION_HOSTS_SCOPE,
-  getRepoExecutionHostId,
-  getSettingsFocusedExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import {
   isConfirmedStaleFolderPathStatus,
   type FolderWorkspacePathStatus

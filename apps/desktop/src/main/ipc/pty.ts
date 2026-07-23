@@ -17,14 +17,17 @@ import {
   powerMonitor
 } from 'electron'
 export { getBashShellReadyRcfileContent } from '../providers/local-pty-shell-ready'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { isRemoteAgentHooksEnabled } from '../../shared/agent-hook-relay'
-import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import {
   getCommandTokenPathBasename,
   getFirstCommandToken
 } from '../../shared/command-token-scanner'
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
 import {
   isWslShellName,
   resolveLocalWindowsTerminalRuntimeOptions
@@ -73,8 +76,6 @@ import { validateTerminalViewAttributes } from '../../shared/terminal-view-attri
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import type { GlobalSettings, TuiAgent } from '../../shared/types'
 import { parseWorkspaceKey } from '../../shared/workspace-scope'
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   clearMigrationUnsupportedPty,

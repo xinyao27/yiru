@@ -1,18 +1,19 @@
-import { translate } from '@/i18n/i18n'
-
+import type { RuntimeCompatVerdict } from '@yiru/runtime-protocol/capabilities'
+import type { SshConnectionState, SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
   LOCAL_EXECUTION_HOST_ID,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
+import { translate } from '@/i18n/i18n'
+
 import {
   buildExecutionHostRegistry,
   type ExecutionHostHealth
 } from '../../../../shared/execution-host-registry'
-import type { RuntimeCompatVerdict } from '../../../../shared/protocol-compat'
 import type { PublicKnownRuntimeEnvironment } from '../../../../shared/runtime-environments'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { SshConnectionState, SshConnectionStatus } from '../../../../shared/ssh-types'
 import type { GlobalSettings, Repo, WorkspaceHostScope } from '../../../../shared/types'
 
 export type SidebarHostOption = {

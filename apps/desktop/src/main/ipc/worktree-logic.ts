@@ -1,9 +1,10 @@
 import { resolve, relative, isAbsolute, posix, sep, win32 } from 'node:path'
 
-import { isWindowsAbsolutePathLike, resolveRuntimePath } from '../../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike, resolveRuntimePath } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings, YiruWorkspaceLayout, Repo } from '../../shared/types'
-import { splitWorktreeId } from '../../shared/worktree-id'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import { getWslHome, parseWslPath } from '../wsl'
 
 type WorktreePathSettings = Pick<GlobalSettings, 'nestWorkspaces' | 'workspaceDir'>

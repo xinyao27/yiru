@@ -1,3 +1,4 @@
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: repository hook saves synchronize debounced persistence state with external repo settings. */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -5,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { resolveHookCommandSourcePolicy } from '../../../../shared/hook-command-source-policy'
 import type {
   HookCommandSourcePolicy,

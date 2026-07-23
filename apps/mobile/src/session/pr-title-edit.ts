@@ -1,4 +1,4 @@
-import type { PRState } from '../../../desktop/src/shared/types'
+import type { PRState } from '@yiru/workbench-model/review'
 
 // Pure helpers for the inline PR-title edit affordance, independent of React
 // and native rendering concerns.

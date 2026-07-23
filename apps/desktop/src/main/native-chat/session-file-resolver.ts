@@ -2,12 +2,13 @@ import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, extname, join } from 'node:path'
 
+import { resolveNativeChatTranscriptAgent } from '@yiru/workbench-model/agent'
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import {
   findGrokChatHistoryBySessionId,
   resolveGrokSessionsDir
 } from '../../shared/grok-session-paths'
-import { resolveNativeChatTranscriptAgent } from '../../shared/native-chat-agent-support'
-import type { AgentType } from '../../shared/native-chat-types'
 import { walkSessionFiles } from '../ai-vault/session-scanner-discovery'
 import { getYiruManagedCodexHomePath } from '../codex/codex-home-paths'
 

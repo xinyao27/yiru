@@ -1,4 +1,5 @@
-import { normalizeExecutionHostId } from '../../../../shared/execution-host'
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { RuntimeMobileSessionTerminalClientTab } from '../../../../shared/runtime-types'
 import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
 import {

@@ -1,3 +1,5 @@
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import {
   clearSelfWrite,
   getEditorSelfWriteHostId,
@@ -5,8 +7,6 @@ import {
   SELF_WRITE_REMOTE_TTL_MS
 } from '@/components/editor/editor-self-write-registry'
 import { readRuntimeFileContent, writeRuntimeFile } from '@/runtime/runtime-file-client'
-
-import { splitWorktreeIdForFilesystem } from '../../../shared/worktree-id'
 
 export class LanguageServerWorkspaceFiles {
   constructor(

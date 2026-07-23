@@ -1,4 +1,4 @@
-import type { AgentStatusState, AgentType } from './agent-status-types'
+import type { AgentStatusState, AgentType } from '@yiru/workbench-model/agent'
 
 export type SyntheticAgentTitleProfile = {
   workingLabel: string

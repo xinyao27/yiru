@@ -10,7 +10,8 @@ import {
 } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { writeFileAtomically } from '../codex-accounts/fs-utils'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
 import {

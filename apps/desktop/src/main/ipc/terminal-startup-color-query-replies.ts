@@ -1,5 +1,6 @@
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
 import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
-import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
 import { agentKindSchema } from '../../shared/telemetry-events'
 import {
   parseTerminalOscColorQuery,

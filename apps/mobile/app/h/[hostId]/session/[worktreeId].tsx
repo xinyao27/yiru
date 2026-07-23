@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 import * as Clipboard from 'expo-clipboard'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
@@ -47,8 +49,6 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '../../../../../desktop/src/shared/protocol-version'
-import type { DiffComment } from '../../../../../desktop/src/shared/types'
 import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/agent-history-capability'
 import { normalizeBrowserUrl } from '../../../../src/browser/browser-url'
 import { MobileBrowserPane } from '../../../../src/browser/mobile-browser-pane'

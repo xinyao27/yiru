@@ -3,7 +3,8 @@ import {
   parseExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { FolderWorkspacePathStatusRequest } from '../../../../shared/folder-workspace-path-status'
 import type { FolderWorkspace, ProjectGroup } from '../../../../shared/types'
 

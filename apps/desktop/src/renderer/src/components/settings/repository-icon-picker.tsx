@@ -1,4 +1,6 @@
 import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -7,9 +9,7 @@ import { translate } from '@/i18n/i18n'
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 
 import { DEFAULT_REPO_BADGE_COLOR } from '../../../../shared/constants'
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
-import type { RepoIcon } from '../../../../shared/repo-icon'
 import type { Repo } from '../../../../shared/types'
 import { RepoIconGlyph, getRepoLucideIconOptions } from '../repo/repo-icon'
 import { Button } from '../ui/button'

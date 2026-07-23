@@ -8,6 +8,14 @@ import {
   HardDrives as Server,
   CaretRight as ChevronRight
 } from '@phosphor-icons/react'
+import {
+  AI_VAULT_AGENTS,
+  type AiVaultAgent,
+  type AiVaultGroup,
+  type AiVaultScope,
+  type AiVaultSort
+} from '@yiru/workbench-model/agent'
+import { getExecutionHostLabel, type ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -28,14 +36,6 @@ import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
 
-import {
-  AI_VAULT_AGENTS,
-  type AiVaultAgent,
-  type AiVaultGroup,
-  type AiVaultScope,
-  type AiVaultSort
-} from '../../../../shared/ai-vault-types'
-import { getExecutionHostLabel, type ExecutionHostScope } from '../../../../shared/execution-host'
 import type { AiVaultHostScopeOption } from './ai-vault-host-scope'
 import { agentLabel, type AiVaultSessionGroup } from './ai-vault-session-filters'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'

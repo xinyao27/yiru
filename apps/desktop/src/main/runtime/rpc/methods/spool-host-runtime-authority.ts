@@ -1,4 +1,5 @@
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type {
   SpoolPairedRuntimeBoundWorktree,
   SpoolPairedRuntimeResolvedWorktree,

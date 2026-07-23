@@ -1,4 +1,5 @@
-import type { RuntimeTerminalPathResolution } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeTerminalPathResolution } from '@yiru/runtime-protocol/mobile-runtime-types'
+
 import type { RpcClient } from '../transport/rpc-client'
 
 export async function resolveMobileNativeChatWorktreePath(args: {

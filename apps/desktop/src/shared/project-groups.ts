@@ -1,4 +1,5 @@
-import { normalizeExecutionHostId } from './execution-host'
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { Repo, ProjectGroup, ProjectGroupCreatedFrom } from './types'
 
 export const UNGROUPED_PROJECT_GROUP_KEY = 'project-group:ungrouped'

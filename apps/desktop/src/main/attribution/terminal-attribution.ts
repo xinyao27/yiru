@@ -5,8 +5,9 @@ instead of scattering generated shell fragments across files. */
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, win32 as pathWin32 } from 'node:path'
 
+import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
+
 import { YIRU_GIT_COMMIT_TRAILER } from '../../shared/yiru-attribution'
-import { YIRU_GITHUB_REPOSITORY_URL } from '../../shared/yiru-github-repository'
 
 const ATTRIBUTION_ROOT_DIR = 'yiru-terminal-attribution'
 // Why: v8 rewrites persisted wrappers so retired issue-create attribution

@@ -5,6 +5,11 @@ import {
   ArrowRight,
   ArrowsIn as Minimize2
 } from '@phosphor-icons/react'
+import {
+  isRuntimeOwnedSshTargetId,
+  toRuntimeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import {
   Suspense,
@@ -59,11 +64,6 @@ import {
 
 import logo from '../../../resources/logo.svg'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../shared/constants'
-import {
-  isRuntimeOwnedSshTargetId,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../shared/execution-host'
 import {
   keybindingMatchesAction,
   type KeybindingActionId,

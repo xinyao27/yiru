@@ -1,9 +1,9 @@
+import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
 import { TextAa as CaseSensitive, GitBranch, Sparkle as Sparkles } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { SmartWorkspaceSourceRow as SourceRow } from '../../../desktop/src/shared/new-workspace/smart-workspace-source-results'
 import { SourceProviderLogo } from './source-provider-logo'
 
 type Props = {

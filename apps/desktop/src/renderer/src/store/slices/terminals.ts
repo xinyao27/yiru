@@ -1,3 +1,14 @@
+import type {
+  AgentProviderSessionMetadata,
+  SleepingAgentLaunchConfig
+} from '@yiru/workbench-model/agent'
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoIdFromWorktreeId,
+  splitWorktreeIdForFilesystem
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
@@ -45,17 +56,12 @@ import {
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
 
 import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent-decorative-title-signature'
-import type {
-  AgentProviderSessionMetadata,
-  SleepingAgentLaunchConfig
-} from '../../../../shared/agent-session-resume'
 import { deriveGeneratedTabTitle } from '../../../../shared/agent-tab-title'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import {
   DEFAULT_REPO_BADGE_COLOR,
   FLOATING_TERMINAL_WORKTREE_ID
 } from '../../../../shared/constants'
-import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { resolveLocalWindowsTerminalShellOverrideForTab } from '../../../../shared/local-windows-terminal-runtime'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import {
@@ -75,17 +81,11 @@ import type {
   WorkspaceKey,
   WorkspaceSessionState
 } from '../../../../shared/types'
-import { WINDOWS_GIT_BASH_SHELL } from '../../../../shared/windows-terminal-shell'
 import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace-scope'
-import {
-  getRepoIdFromWorktreeId,
-  splitWorktreeIdForFilesystem
-} from '../../../../shared/worktree-id'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
 import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
 import type { AppState } from '../types'
 import {

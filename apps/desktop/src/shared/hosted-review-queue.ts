@@ -4,7 +4,7 @@ import type {
   HostedReviewQueueState,
   HostedReviewQueueSummary,
   HostedReviewUser
-} from './hosted-review'
+} from '@yiru/workbench-model/review'
 
 export type HostedReviewClassificationOptions = {
   viewer?: HostedReviewUser | null

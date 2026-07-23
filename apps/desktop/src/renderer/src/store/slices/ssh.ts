@@ -1,11 +1,11 @@
-import type { StateCreator } from 'zustand'
-
 import type {
   SshConnectionState,
   PortForwardEntry,
   EnrichedDetectedPort,
   SshTarget
-} from '../../../../shared/ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
+import type { StateCreator } from 'zustand'
+
 import type { AppState } from '../types'
 import {
   buildRemovedSshTargetCleanupPatch,

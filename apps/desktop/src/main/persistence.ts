@@ -14,12 +14,40 @@ import { writeFile, rename, mkdir, rm, copyFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join, dirname, isAbsolute, resolve, sep } from 'node:path'
 
+import {
+  LEGACY_DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type RemovedSshTargetTombstone,
+  type SshRemotePtyLease,
+  type SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
+import type { MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
+import {
+  isPathInsideOrEqual,
+  isWindowsAbsolutePathLike,
+  normalizeRuntimePathForComparison
+} from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostOrder,
+  normalizeExecutionHostId,
+  normalizeVisibleExecutionHostIds,
+  toSshExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
+import {
+  FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
+  getRepoIdFromWorktreeId,
+  getWorktreePathBasenameFromId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: persistence keeps schema defaults, migration,
 load/save, and flush logic in one file so the full storage contract is reviewable
 as a unit instead of being scattered across modules. */
 import { app, safeStorage } from 'electron'
 
-import type { MigrationUnsupportedPtyEntry } from '../shared/agent-status-types'
 import { normalizeAppIconId } from '../shared/app-icon'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../shared/auto-rename-branch-from-work-settings'
 import { normalizeAutomationPrecheck } from '../shared/automation-precheck'
@@ -60,20 +88,6 @@ import {
 } from '../shared/constants'
 import { normalizeContextualTourIds } from '../shared/contextual-tours'
 import {
-  isPathInsideOrEqual,
-  isWindowsAbsolutePathLike,
-  normalizeRuntimePathForComparison
-} from '../shared/cross-platform-path'
-import { getRepoExecutionHostId, parseExecutionHostId } from '../shared/execution-host'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  normalizeExecutionHostOrder,
-  normalizeExecutionHostId,
-  normalizeVisibleExecutionHostIds,
-  toSshExecutionHostId,
-  type ExecutionHostId
-} from '../shared/execution-host'
-import {
   compareFeatureInteractionUsageBuckets,
   getFeatureInteractionCategory,
   getFeatureInteractionUsageBucket,
@@ -94,7 +108,6 @@ import { normalizeManualRepoOrder } from '../shared/manual-repo-order'
 import { clampMarkdownTocPanelWidth } from '../shared/markdown-toc-panel-width'
 import { normalizeOpenInApplications } from '../shared/open-in-applications'
 import { persistedUIValuesEqual } from '../shared/persisted-ui-equality'
-import { normalizePRBotAuthorOverrides } from '../shared/pr-bot-author-overrides'
 import {
   deriveGlobalWindowsRuntimeDefaultFromLegacySettings,
   normalizeProjectRuntimePreference
@@ -114,7 +127,6 @@ import {
   buildWorkspaceRunContext
 } from '../shared/project-source-context'
 import { normalizeRepoBadgeColor } from '../shared/repo-badge-color'
-import { sanitizeRepoIcon } from '../shared/repo-icon'
 import { isFolderRepo } from '../shared/repo-kind'
 import { hardenExistingSecureFile } from '../shared/secure-file'
 import {
@@ -129,12 +141,6 @@ import {
   SOURCE_CONTROL_TEXT_ACTION_IDS
 } from '../shared/source-control-ai-actions'
 import { normalizeSourceControlGroupOrder } from '../shared/source-control-group-order'
-import {
-  LEGACY_DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  type RemovedSshTargetTombstone,
-  type SshRemotePtyLease,
-  type SshTarget
-} from '../shared/ssh-types'
 import {
   isTerminalLeafId,
   makePaneKey,
@@ -207,13 +213,7 @@ import {
   normalizePersistedWorkspaceStatuses,
   normalizeWorkspaceStatuses
 } from '../shared/workspace-statuses'
-import {
-  FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
-  getRepoIdFromWorktreeId,
-  getWorktreePathBasenameFromId
-} from '../shared/worktree-id'
 import { isLegacyRepoForExternalWorktreeVisibility } from '../shared/worktree-ownership'
-import { isWslUncPath } from '../shared/wsl-paths'
 import {
   setMigrationUnsupportedPty,
   setMigrationUnsupportedPtyPersistenceListener

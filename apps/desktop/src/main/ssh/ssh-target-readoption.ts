@@ -2,7 +2,8 @@ import type {
   RemovedSshTargetTombstone,
   SshRepoReadoption,
   SshTarget
-} from '../../shared/ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
+
 import type { Store } from '../persistence'
 
 /**

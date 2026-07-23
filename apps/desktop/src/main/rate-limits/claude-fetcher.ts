@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { net, session } from 'electron'
 
 import type { NetworkProxySettings } from '../../shared/network-proxy'
@@ -16,7 +17,6 @@ import type {
   UsageRateLimitMetadata,
   UsageRateLimitSource
 } from '../../shared/rate-limit-types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import {
   deleteActiveClaudeKeychainCredentialsStrict,
   readActiveClaudeKeychainCredentials,

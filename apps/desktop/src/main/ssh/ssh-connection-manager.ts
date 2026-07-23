@@ -1,4 +1,5 @@
-import type { SshTarget, SshConnectionState } from '../../shared/ssh-types'
+import type { SshTarget, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+
 import { SshConnection, type SshConnectionCallbacks } from './ssh-connection'
 
 // ── Connection Manager ──────────────────────────────────────────────

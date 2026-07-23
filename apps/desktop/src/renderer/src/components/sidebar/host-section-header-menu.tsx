@@ -8,6 +8,8 @@ import {
   Trash as Trash2,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -30,8 +32,6 @@ import {
 } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 
-import { parseExecutionHostId } from '../../../../shared/execution-host'
-import { describeRuntimeCompatBlock } from '../../../../shared/protocol-compat'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { buildHostHeaderMenuModel } from './host-header-menu-items'
 import { HostRemoveDialog } from './host-remove-dialog'

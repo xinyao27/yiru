@@ -4,7 +4,8 @@ import {
   getRuntimePathBasename,
   normalizeRuntimePathSeparators,
   resolveRuntimePath
-} from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
 import type { Repo } from '../../shared/types'
 import type { FileStat } from '../providers/types'
 

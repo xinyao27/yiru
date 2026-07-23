@@ -1,9 +1,9 @@
-import type { WebSocket } from 'ws'
-
 import {
   createWsOutboundBackpressureQueue,
   type WsOutboundBackpressureQueue
-} from '../../../shared/ws-outbound-backpressure-queue'
+} from '@yiru/mobile-relay-protocol/outbound-backpressure'
+import type { WebSocket } from 'ws'
+
 import type { DesktopMobileE2EEV2Session } from './mobile-e2ee-v2-desktop-session'
 
 export type DesktopMobileE2EEV2OutboundItem =

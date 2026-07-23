@@ -1,12 +1,13 @@
-import type { AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
-import { isPathInsideOrEqual } from '../../../desktop/src/shared/cross-platform-path'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   normalizeExecutionHostId,
   parseExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../../../desktop/src/shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { Worktree } from '../worktree/workspace-list-types'
 import {
   canResumeInMobileSessionWorktree,

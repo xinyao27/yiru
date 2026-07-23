@@ -1,3 +1,7 @@
+import type {
+  AgentProviderSessionMetadata,
+  SleepingAgentLaunchConfig
+} from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
@@ -33,10 +37,6 @@ import {
 
 import { agentKindToTuiAgent } from '../../../shared/agent-kind'
 import { repoIsRemote } from '../../../shared/agent-launch-remote'
-import type {
-  AgentProviderSessionMetadata,
-  SleepingAgentLaunchConfig
-} from '../../../shared/agent-session-resume'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
 import type { SessionOptionValue } from '../../../shared/native-chat-session-options'

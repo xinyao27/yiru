@@ -4,7 +4,7 @@ import type {
   GitStatusEntry,
   GitStatusResult,
   GitUpstreamStatus
-} from '../../../desktop/src/shared/git-status-types'
+} from '@yiru/workbench-model/review'
 
 export type MobileGitFileStatus = GitFileStatus
 export type MobileGitStagingArea = GitStagingArea

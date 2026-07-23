@@ -1,4 +1,5 @@
-import type { GitLabPipelineJob } from './gitlab-types'
+import type { GitLabPipelineJob } from '@yiru/workbench-model/review'
+
 import type { PRCheckDetail } from './types'
 
 export function mapGitLabPipelineJobStatusToCheckStatus(status: string): PRCheckDetail['status'] {

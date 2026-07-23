@@ -1,6 +1,7 @@
 import { basename, extname, join } from 'node:path'
 
-import type { AiVaultAgent, AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent'
+
 import { columnExists, tableExists } from '../opencode-usage/schema-helpers'
 import SyncDatabase from '../sqlite/sync-database'
 import { discoverFiles } from './session-scanner-discovery'

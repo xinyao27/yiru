@@ -1,11 +1,8 @@
+import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
 import type { StateCreator } from 'zustand'
 
 import { getExplicitRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 
-import {
-  isWindowsAbsolutePathLike,
-  relativePathInsideRoot
-} from '../../../../shared/cross-platform-path'
 import type { AppState } from '../types'
 
 /** Snapshot of a terminal tab captured at user-initiated close time. Reopen

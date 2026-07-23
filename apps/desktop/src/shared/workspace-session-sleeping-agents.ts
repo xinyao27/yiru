@@ -1,6 +1,6 @@
+import { normalizeAgentProviderSession, RESUMABLE_TUI_AGENTS } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
-import { normalizeAgentProviderSession, RESUMABLE_TUI_AGENTS } from './agent-session-resume'
 import { isValidTerminalTabId } from './terminal-tab-id'
 
 const terminalTabIdSchema = z

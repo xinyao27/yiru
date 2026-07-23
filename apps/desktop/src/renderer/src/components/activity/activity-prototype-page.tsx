@@ -7,6 +7,15 @@ import {
   TerminalWindow as TerminalSquare,
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  type AgentStateHistoryEntry,
+  type AgentStatusEntry,
+  type AgentStatusState,
+  type AgentType,
+  type MigrationUnsupportedPtyEntry
+} from '@yiru/workbench-model/agent'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 /* eslint-disable max-lines -- Why: this prototype keeps the real-data adapter
 and current visual skeleton together until the next refinement pass decides
 which pieces become production modules. */
@@ -56,15 +65,6 @@ import { useAppStore } from '@/store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'
 import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStateHistoryEntry,
-  type AgentStatusEntry,
-  type AgentStatusState,
-  type AgentType,
-  type MigrationUnsupportedPtyEntry
-} from '../../../../shared/agent-status-types'
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { Repo, TerminalTab, Worktree } from '../../../../shared/types'

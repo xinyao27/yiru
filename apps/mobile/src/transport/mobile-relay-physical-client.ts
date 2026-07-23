@@ -1,5 +1,6 @@
-import type { PairingRelay } from '../../../desktop/src/shared/mobile-relay-pairing-offer'
-import { RelayPhoneHelloSchema } from '../../../desktop/src/shared/mobile-relay-phone-protocol'
+import type { PairingRelay } from '@yiru/mobile-relay-protocol/pairing-offer'
+import { RelayPhoneHelloSchema } from '@yiru/mobile-relay-protocol/phone-protocol'
+
 import { MobileE2EEV2ClientSession } from './mobile-e2ee-v2-client-session'
 import { MobileE2EEV2PhysicalChannel } from './mobile-e2ee-v2-physical-channel'
 import { isRpcResponse } from './rpc-response-shape'

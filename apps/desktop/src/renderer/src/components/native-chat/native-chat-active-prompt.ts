@@ -1,5 +1,6 @@
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
-import { isTextBlock, type NativeChatMessage } from '../../../../shared/native-chat-types'
+import { isTextBlock, type NativeChatMessage } from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+
 import { isPendingMessageId, type NativeChatPendingSend } from './native-chat-pending'
 import { normalizeNativeChatPendingText } from './native-chat-pending-occurrence'
 

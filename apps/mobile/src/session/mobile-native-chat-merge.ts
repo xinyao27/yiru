@@ -6,4 +6,4 @@ export {
   mergeNativeChatMessages,
   replaceList,
   type NativeChatMerger
-} from '../../../desktop/src/shared/native-chat-merge'
+} from '@yiru/workbench-model/agent'

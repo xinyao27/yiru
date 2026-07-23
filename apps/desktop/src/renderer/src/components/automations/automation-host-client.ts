@@ -1,3 +1,5 @@
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 
 import type {
@@ -6,7 +8,6 @@ import type {
   AutomationRun,
   AutomationUpdateInput
 } from '../../../../shared/automations-types'
-import { parseExecutionHostId } from '../../../../shared/execution-host'
 import type { GlobalSettings } from '../../../../shared/types'
 
 type RuntimeAutomationCreateInput = Omit<

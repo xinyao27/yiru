@@ -1,8 +1,8 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { emitNativeChatMessageSent } from '@/lib/native-chat-telemetry'
 
-import type { AgentType } from '../../../../shared/agent-status-types'
 import {
   createClaudeModelSwitchConfirmationObserver,
   type ClaudeModelSwitchConfirmationObserver

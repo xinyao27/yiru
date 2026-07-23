@@ -1,4 +1,5 @@
-import type { RuntimeRpcResponse } from '../../shared/runtime-rpc-envelope'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import { getRemoteRuntimeSharedControlDiagnostics } from './runtime-environment-request-connections'
 
 export function attachRemoteControlDiagnostics<TResult extends object>(

@@ -1,6 +1,7 @@
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import { joinPath, normalizeRelativePath } from '@/lib/path'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import { isDotfileRelativePath } from './file-explorer-entries'
 import {
   createFileExplorerRowProjectionFromParts,

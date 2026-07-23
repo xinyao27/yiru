@@ -2,7 +2,8 @@ import {
   CLIPBOARD_TEXT_WRITE_TOO_LARGE_ERROR,
   assertClipboardTextWriteWithinLimitWithYield,
   isClipboardTextWriteTooLargeError
-} from '../../../shared/clipboard-text'
+} from '@yiru/workbench-model/ui'
+
 import { InvalidArgumentError } from './core'
 
 export async function assertRpcClipboardTextWriteWithinLimit(text: string): Promise<void> {

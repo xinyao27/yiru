@@ -1,6 +1,7 @@
 // Codex JSONL line → NativeChatMessage decoder.
 
-import type { NativeChatBlock, NativeChatMessage } from '../../shared/native-chat-types'
+import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import {
   asRecord,
   extractString,

@@ -1,3 +1,4 @@
+import type { SshTarget, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 /**
  * Row used in the "Open project on SSH host" step to pick an SSH target.
  *
@@ -9,8 +10,6 @@ import React, { useCallback, useRef, useState } from 'react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-
-import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 
 type Props = {
   target: SshTarget & { state?: SshConnectionState }

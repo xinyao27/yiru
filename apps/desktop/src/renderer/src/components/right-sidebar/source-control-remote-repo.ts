@@ -1,4 +1,4 @@
-import type { HostedReviewProvider } from '../../../../shared/hosted-review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
 export type ManualReviewProvider = Exclude<HostedReviewProvider, 'unsupported'>
 

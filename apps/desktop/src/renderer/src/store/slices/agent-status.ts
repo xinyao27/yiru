@@ -1,3 +1,21 @@
+import {
+  getAgentResumeArgv,
+  isResumableTuiAgent,
+  type AgentProviderSessionMetadata,
+  type SleepingAgentLaunchConfig,
+  type SleepingAgentSessionRecord
+} from '@yiru/workbench-model/agent'
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  AGENT_STATE_HISTORY_MAX,
+  agentSubagentsEqual,
+  type AgentStateHistoryEntry,
+  type AgentStatusEntry,
+  type AgentStatusOrchestrationContext,
+  type AgentType,
+  type MigrationUnsupportedPtyEntry,
+  type ParsedAgentStatusPayload
+} from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the agent-status slice co-locates live map, retained snapshots, retention-suppression, and tab-prefix sweep so the teardown contract stays readable end-to-end. Splitting across files would scatter the drop/remove/retain interactions that must stay in lockstep. */
 import type { StateCreator } from 'zustand'
 
@@ -10,27 +28,9 @@ import {
 import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 
 import {
-  getAgentResumeArgv,
-  isResumableTuiAgent,
-  type AgentProviderSessionMetadata,
-  type SleepingAgentLaunchConfig,
-  type SleepingAgentSessionRecord
-} from '../../../../shared/agent-session-resume'
-import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../../../shared/agent-status-identity'
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  AGENT_STATE_HISTORY_MAX,
-  agentSubagentsEqual,
-  type AgentStateHistoryEntry,
-  type AgentStatusEntry,
-  type AgentStatusOrchestrationContext,
-  type AgentType,
-  type MigrationUnsupportedPtyEntry,
-  type ParsedAgentStatusPayload
-} from '../../../../shared/agent-status-types'
 import { isCommandCodeNewTurnWhileWorking } from '../../../../shared/command-code-turn-boundary'
 import type { TerminalTab } from '../../../../shared/types'
 import type { AppState } from '../types'

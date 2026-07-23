@@ -1,6 +1,7 @@
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+
 import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
 
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type {
   GitHubRepositoryIdentity,
