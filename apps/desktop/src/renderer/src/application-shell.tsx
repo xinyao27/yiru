@@ -2409,13 +2409,9 @@ function App(): React.JSX.Element {
                           <div
                             data-testid="titlebar-left"
                             // Why: when the sidebar is collapsed, titlebar-left floats
-                            // absolutely on top of the center column's own `border-l`
-                            // (see TabGroupSplitLayout), occluding that seam. Add a
-                            // `border-r` in the floating state so the vertical line
-                            // between the traffic-light/nav cluster and the tab strip
-                            // stays visible in both states. w-max keeps the floating
-                            // header sized to its own controls instead of the w-0
-                            // sidebar wrapper.
+                            // above the now-open tab edge. Its border keeps the control
+                            // cluster distinct, while w-max preserves the full hit area
+                            // inside the zero-width sidebar wrapper.
                             className={cn(
                               TITLEBAR_LEFT_CLASS_NAME,
                               leftTitlebarChromeLayout.isFloating &&
@@ -2485,14 +2481,18 @@ function App(): React.JSX.Element {
                         </RecoverableRenderErrorBoundary>
                       )
                     ) : null}
-                    {/* Why: window blur may expose native material through translucent
-                    terminals, while Settings reserves it only for the left rail. */}
+                    {/* Why: native sidebar material may continue through the top 40px
+                    without making the workspace body translucent; full-window blur
+                    still leaves the complete surface transparent. */}
                     <div
                       className={cn(
                         'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
                         windowBackgroundBlurEnabled || settingsNativeSidebarMaterialActive
                           ? 'bg-transparent'
-                          : 'bg-background'
+                          : hasNativeSidebarMaterial &&
+                              (workspaceChromeActive || creationLayoutActive)
+                            ? 'bg-[linear-gradient(to_bottom,transparent_40px,var(--background)_40px)]'
+                            : 'bg-background'
                       )}
                     >
                       {stackedSidebarOpen ? (
@@ -2606,7 +2606,7 @@ function App(): React.JSX.Element {
             {statusBarVisible && !hasActiveSpoolWorkspace ? (
               <Suspense
                 fallback={
-                  <div className="border-border h-6 min-h-[24px] shrink-0 border-t bg-[var(--bg-titlebar,var(--card))]" />
+                  <div className="border-border h-6 min-h-[24px] shrink-0 border-t bg-[var(--bg-titlebar,var(--card))] [[data-native-sidebar-material=true]_&]:bg-transparent" />
                 }
               >
                 <RecoverableRenderErrorBoundary

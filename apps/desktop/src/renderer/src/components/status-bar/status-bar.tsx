@@ -1918,7 +1918,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   return (
     <div
       ref={containerRefCallback}
-      className="border-border relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t bg-[var(--bg-titlebar,var(--card))] px-3 text-xs select-none"
+      className="border-border relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t bg-[var(--bg-titlebar,var(--card))] px-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
       onContextMenuCapture={(event) => {
         if (!shouldOpenStatusBarContextMenu(event.target)) {
           return

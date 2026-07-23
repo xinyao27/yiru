@@ -56,11 +56,11 @@ export default function WorktreeCreationPanel({
   const elapsedLabel = formatElapsedTime(now - entry.startedAt)
 
   return (
-    <div className="bg-background absolute inset-0 flex flex-col">
+    <div className="bg-background absolute inset-0 flex flex-col [[data-native-sidebar-material=true]_&]:bg-[linear-gradient(to_bottom,transparent_40px,var(--background)_40px)]">
       {/* Faux tab strip: mirrors the real tab row (height, border, bg) so the
           create reads as a workspace tab. Carries only the worktree name + a
           cancel control — the live status lives in the body below. */}
-      <div className="border-border bg-card flex h-10 shrink-0 items-stretch border-b">
+      <div className="border-border bg-card flex h-10 shrink-0 items-stretch border-b [[data-native-sidebar-material=true]_&]:bg-transparent">
         {reserveCollapsedSidebarHeaderSpace ? (
           // Why: collapsed sidebar chrome floats above this strip, so reserve
           // the same measured width real tabs use to keep title/cancel clear.
