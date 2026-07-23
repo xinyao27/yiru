@@ -12,7 +12,10 @@ import type {
   HostedReviewCreationEligibility,
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
-import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
+import {
+  interpretSourceControlHostedReviewCreateResult,
+  resolveHostedReviewCreationProvider
+} from '@yiru/workbench-model/review'
 /* eslint-disable max-lines -- Why: the checks panel co-locates PR header, checks, comments,
 merge actions, and conflict state in one component to keep the data flow straightforward. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -3379,14 +3382,15 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
       if (!isCurrentCreateRequest()) {
         return
       }
-      if (result.ok) {
+      const outcome = interpretSourceControlHostedReviewCreateResult(result)
+      if (outcome.kind === 'created') {
         await handlePullRequestCreated({
           provider: hostedReviewCreateProvider,
-          number: result.number,
-          url: result.url
+          number: outcome.number,
+          url: outcome.url
         })
         if (prCreationDefaults.openAfterCreate) {
-          openHttpLink(result.url, { worktreeId: activeWorktreeId })
+          openHttpLink(outcome.url, { worktreeId: activeWorktreeId })
         }
         if (activePullRequestGenerationKey) {
           updatePullRequestGenerationRecord(
@@ -3396,8 +3400,8 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
         }
         return
       }
-      if (result.existingReview?.url) {
-        const number = result.existingReview.number
+      if (outcome.kind === 'existing') {
+        const number = outcome.number
         toast.success(
           number
             ? translate(
@@ -3417,7 +3421,7 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
                 'Open on {{value0}}',
                 { value0: hostedReviewCreateCopy.providerName }
               ),
-              onClick: () => window.api.shell.openUrl(result.existingReview!.url)
+              onClick: () => window.api.shell.openUrl(outcome.url)
             }
           }
         )
@@ -3425,7 +3429,7 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
           await handlePullRequestCreated({
             provider: hostedReviewCreateProvider,
             number,
-            url: result.existingReview.url
+            url: outcome.url
           })
           if (activePullRequestGenerationKey) {
             updatePullRequestGenerationRecord(
@@ -3436,7 +3440,7 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
           return
         }
       }
-      setCreatePrError(formatCreateError(result, pushed, hostedReviewCreateCopy.shortLabel))
+      setCreatePrError(formatCreateError(outcome.error, pushed, hostedReviewCreateCopy.shortLabel))
     } catch (error) {
       if (!isCurrentCreateRequest()) {
         return

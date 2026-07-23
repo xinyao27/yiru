@@ -26,21 +26,24 @@ export function repoMatchesHostIdentity(
   return repo.id === repoId && getRepoExecutionHostId(repo) === hostId
 }
 
-export function findRepoForHost(
-  repos: readonly RepoIdentityParts[],
+export function findRepoForHost<T extends RepoIdentityParts>(
+  repos: readonly T[],
   repoId: string,
   options: {
     hostId?: ExecutionHostId | string | null
     settings?: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null
   } = {}
-): RepoIdentityParts | null {
+): T | null {
   const matchingRepos = repos.filter((repo) => repo.id === repoId)
   if (matchingRepos.length === 0) {
     return null
   }
 
   if (options.hostId) {
-    return matchingRepos.find((repo) => getRepoExecutionHostId(repo) === options.hostId) ?? null
+    const hostMatches = matchingRepos.filter(
+      (repo) => getRepoExecutionHostId(repo) === options.hostId
+    )
+    return hostMatches.length === 1 ? hostMatches[0] : null
   }
 
   if (matchingRepos.length === 1) {

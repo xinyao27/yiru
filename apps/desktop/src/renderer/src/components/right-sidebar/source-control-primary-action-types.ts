@@ -1,9 +1,9 @@
-import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
-
 import type {
+  HostedReviewCreationEligibility,
   SourceControlPrimaryActionKind,
   SourceControlRemoteOpKind
-} from '../../../../shared/source-control-primary-action-decision-types'
+} from '@yiru/workbench-model/review'
+
 import type { GitUpstreamStatus, PRState } from '../../../../shared/types'
 
 // Why: the primary button collapses to one-label-per-action. Compound
@@ -13,7 +13,10 @@ import type { GitUpstreamStatus, PRState } from '../../../../shared/types'
 // `handlePrimaryClick` switch exhaustively over only the kinds the
 // primary can actually emit, and it kills the compound-commit branch in
 // the isRemoteOperationActive tooltip below at compile time.
-export type PrimaryActionKind = SourceControlPrimaryActionKind
+export type PrimaryActionKind =
+  | Exclude<SourceControlPrimaryActionKind, 'create_review_intent' | 'create_review'>
+  | 'create_pr_intent'
+  | 'create_pr'
 
 // Why: the in-flight remote op tracker stores which action the user actually
 // triggered, so the primary button can mirror that label/spinner instead of

@@ -1,19 +1,10 @@
-import type { CreateHostedReviewResult } from '@yiru/workbench-model/review'
-
 import { translate } from '@/i18n/i18n'
 
 export type { LocalizedHostedReviewCopy as CreatePullRequestReviewCopy } from '@/i18n/hosted-review-localized-copy'
 
 export { localizedHostedReviewCopy as reviewCopy } from '@/i18n/hosted-review-localized-copy'
 
-export function formatCreateError(
-  result: CreateHostedReviewResult,
-  pushed: boolean,
-  shortLabel: string
-): string {
-  if (result.ok) {
-    return ''
-  }
+export function formatCreateError(error: string, pushed: boolean, shortLabel: string): string {
   if (pushed) {
     const prefix = new RegExp(`^Create ${shortLabel} failed:\\s*`, 'i')
     return translate(
@@ -21,9 +12,9 @@ export function formatCreateError(
       'Push succeeded, but {{value0}} creation failed: {{value1}}',
       {
         value0: shortLabel,
-        value1: result.error.replace(prefix, '')
+        value1: error.replace(prefix, '')
       }
     )
   }
-  return result.error
+  return error
 }

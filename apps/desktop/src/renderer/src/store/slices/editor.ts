@@ -1,4 +1,11 @@
 import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import {
+  resolveSourceControlRemoteOperationFailureOutcome,
+  resolveSourceControlSyncAfterPull,
+  resolveSourceControlSyncStart,
+  type SourceControlRemoteOperationOutcome,
+  type SourceControlRemoteOpKind
+} from '@yiru/workbench-model/review'
 /* eslint-disable max-lines */
 import type { StateCreator, StoreApi } from 'zustand'
 
@@ -17,10 +24,7 @@ import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/loc
 import { resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
 import { joinPath } from '@/lib/path'
 import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/lib/push-target-upstream-refresh-cache'
-import {
-  isNonFastForwardRemoteError,
-  markSyncPushStageError
-} from '@/lib/source-control-remote-error'
+import { markSyncPushStageError } from '@/lib/source-control-remote-error'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
@@ -44,9 +48,7 @@ import {
 import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
-import type { SourceControlRemoteOpKind } from '../../../../shared/source-control-primary-action-decision-types'
 import type {
   GitBranchChangeEntry,
   GitBranchCompareSummary,
@@ -72,6 +74,7 @@ import type {
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 import type { AppState } from '../types'
 import { pushRecentlyClosedTabKind } from './recently-closed-tabs'
+import { applyRemoteOperationFollowUp } from './source-control-operation-follow-up'
 import { findWorktreeById, getRepoIdFromWorktreeId } from './worktree-helpers'
 
 type RemoteOpKind = SourceControlRemoteOpKind
@@ -3878,7 +3881,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     get().beginRemoteOperation(
       publish ? 'publish' : options.forceWithLease === true ? 'force_push' : 'push'
     )
-    let shouldRefreshAfterRejectedPush = false
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     const runtimeSettings = options.runtimeTargetSettings ?? get().settings
     try {
       await pushRuntimeGit(
@@ -3886,7 +3889,10 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         { publish, pushTarget, forceWithLease: options.forceWithLease }
       )
     } catch (error) {
-      shouldRefreshAfterRejectedPush = isNonFastForwardRemoteError(error)
+      outcome = resolveSourceControlRemoteOperationFailureOutcome({
+        operation: publish ? 'publish' : options.forceWithLease === true ? 'force_push' : 'push',
+        error
+      })
       publishRendererCommandResult({
         type: 'source-control-remote-operation-failed',
         error,
@@ -3899,59 +3905,54 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       throw error
     } finally {
       get().endRemoteOperation()
-      if (shouldRefreshAfterRejectedPush) {
-        const context = { settings: runtimeSettings, worktreeId, worktreePath, connectionId }
-        // Why: the rejected push proved the publish branch moved. Fetch first
-        // so legacy base-tracking worktrees can discover origin/<branch>, then
-        // refresh ahead/behind so Pull/Sync become actionable immediately.
-        void fetchRuntimeGit(context, pushTarget)
-          .catch(() => undefined)
-          .then(() =>
-            get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-              runtimeTargetSettings: runtimeSettings
-            })
-          )
-      }
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: publish ? 'publish' : options.forceWithLease === true ? 'force_push' : 'push',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   pullBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
     get().beginRemoteOperation('pull')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await pullRuntimeGit(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         pushTarget
       )
     } catch (error) {
+      outcome = 'failed'
       publishRendererCommandResult({ type: 'source-control-remote-operation-failed', error })
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: 'pull',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   fastForwardBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
     get().beginRemoteOperation('fast_forward')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await fastForwardRuntimeGit(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         pushTarget
       )
     } catch (error) {
+      outcome = 'failed'
       publishRendererCommandResult({
         type: 'source-control-remote-operation-failed',
         error,
@@ -3960,13 +3961,15 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: 'fast_forward',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   syncBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
@@ -3980,12 +3983,13 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     // outer catch must skip publishing the same failure twice.
     let pushStageFailurePublished = false
     let pushed = false
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
     try {
       const context = { settings: runtimeSettings, worktreeId, worktreePath, connectionId }
       await fetchRuntimeGit(context, pushTarget)
       const upstreamStatusBeforePull = await getRuntimeGitUpstreamStatus(context, pushTarget)
-      if (shouldForcePushWithLeaseForUpstream(upstreamStatusBeforePull)) {
+      if (resolveSourceControlSyncStart(upstreamStatusBeforePull) === 'force_push') {
         try {
           await pushRuntimeGit(context, { pushTarget, forceWithLease: true })
           pushed = true
@@ -4005,7 +4009,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         // the new merge commit) or 0 (pure fast-forward), and we avoid a
         // no-op push round-trip in the fast-forward case.
         const upstreamStatus = await getRuntimeGitUpstreamStatus(context, pushTarget)
-        if (upstreamStatus.ahead > 0) {
+        if (resolveSourceControlSyncAfterPull(upstreamStatus) === 'push') {
           try {
             await pushRuntimeGit(context, { pushTarget })
             pushed = true
@@ -4024,6 +4028,11 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         }
       }
     } catch (error) {
+      outcome = resolveSourceControlRemoteOperationFailureOutcome({
+        operation: 'sync',
+        error,
+        isPushStage: pushStageFailurePublished
+      })
       if (!pushStageFailurePublished) {
         // Why: same isSync framing for fetch/pull/upstream-status failures so
         // every sync failure path consistently reads as "Sync failed..." (or
@@ -4038,26 +4047,29 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    if (pushed) {
-      const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-      if (typeof refreshGitHubForWorktree === 'function') {
-        refreshGitHubForWorktree(worktreeId)
-      }
+      applyRemoteOperationFollowUp(get, {
+        operation: 'sync',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings,
+        syncPushed: pushed
+      })
     }
   },
   rebaseFromBase: async (worktreeId, worktreePath, baseRef, connectionId, pushTarget, options) => {
     get().beginRemoteOperation('rebase')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await rebaseRuntimeGitFromBase(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         baseRef
       )
     } catch (error) {
+      outcome = 'failed'
       publishRendererCommandResult({
         type: 'source-control-remote-operation-failed',
         error,
@@ -4066,13 +4078,15 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: 'rebase',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   fetchBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
@@ -4082,12 +4096,14 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     // ahead/behind counts on the upstream-status payload.
     get().beginRemoteOperation('fetch')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await fetchRuntimeGit(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         pushTarget
       )
     } catch (error) {
+      outcome = 'failed'
       publishRendererCommandResult({
         type: 'source-control-remote-operation-failed',
         error,
@@ -4096,10 +4112,16 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       throw error
     } finally {
       get().endRemoteOperation()
+      applyRemoteOperationFollowUp(get, {
+        operation: 'fetch',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
   },
   gitBranchChangesByWorktree: {},
   gitBranchCompareSummaryByWorktree: {},

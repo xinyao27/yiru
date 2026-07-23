@@ -1,3 +1,6 @@
+import { resolveSourceControlReviewRemoteStep } from '@yiru/workbench-model/review'
+import type { SourceControlRemoteOpKind } from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { MobileGitStatusResult } from './mobile-git-status'
 import type { MobileHostedReviewCreateIntentProgress } from './mobile-hosted-review-create-intent'
@@ -9,14 +12,25 @@ type RemotePrerequisiteInput = {
   onProgress?: (progress: MobileHostedReviewCreateIntentProgress) => void
 }
 
+type RemotePrerequisiteResult =
+  | { ok: true; ran: boolean }
+  | { ok: false; error: string; remoteOperation: SourceControlRemoteOpKind }
+
 export async function applyMobileHostedReviewRemotePrerequisite(
   client: Pick<RpcClient, 'sendRequest'>,
   worktreeId: string,
   prefill: MobilePrPrefill,
   input: RemotePrerequisiteInput
-): Promise<{ ok: true; ran: boolean } | { ok: false; error: string }> {
-  switch (prefill.blockedReason) {
-    case 'no_upstream': {
+): Promise<RemotePrerequisiteResult> {
+  const remoteStep = resolveSourceControlReviewRemoteStep({
+    upstreamStatus: input.status?.upstreamStatus,
+    hostedReviewCreation: prefill,
+    // Mobile historically attempts publish when compare counts are unavailable;
+    // the paired runtime remains the authority on whether HEAD is publishable.
+    allowPublishWhenCommitCountUnknown: true
+  })
+  switch (remoteStep) {
+    case 'publish': {
       input.onProgress?.('publishing')
       const result = await sendMobileHostedReviewGitMutation(
         client,
@@ -24,9 +38,9 @@ export async function applyMobileHostedReviewRemotePrerequisite(
         { worktree: `id:${worktreeId}`, publish: true },
         'Failed to publish branch'
       )
-      return result.ok ? { ok: true, ran: true } : result
+      return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'publish' }
     }
-    case 'needs_push': {
+    case 'push': {
       input.onProgress?.('pushing')
       const result = await sendMobileHostedReviewGitMutation(
         client,
@@ -34,12 +48,9 @@ export async function applyMobileHostedReviewRemotePrerequisite(
         { worktree: `id:${worktreeId}` },
         'Failed to push commits'
       )
-      return result.ok ? { ok: true, ran: true } : result
+      return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'push' }
     }
-    case 'needs_sync': {
-      if (input.status?.upstreamStatus?.behindCommitsArePatchEquivalent !== true) {
-        return { ok: true, ran: false }
-      }
+    case 'force_push': {
       input.onProgress?.('force_pushing')
       const result = await sendMobileHostedReviewGitMutation(
         client,
@@ -47,9 +58,10 @@ export async function applyMobileHostedReviewRemotePrerequisite(
         { worktree: `id:${worktreeId}`, forceWithLease: true },
         'Failed to force push with lease'
       )
-      return result.ok ? { ok: true, ran: true } : result
+      return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'force_push' }
     }
-    default:
+    case 'blocked':
+    case 'none':
       return { ok: true, ran: false }
   }
 }

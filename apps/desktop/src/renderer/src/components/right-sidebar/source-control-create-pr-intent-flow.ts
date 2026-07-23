@@ -1,15 +1,10 @@
-import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
-
-import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
 } from '../../../../shared/hosted-review-refs'
-import type { GitStatusEntry, GitUpstreamStatus } from '../../../../shared/types'
+import type { GitStatusEntry } from '../../../../shared/types'
 import { summarizeCommitFailure } from './commit-failure-summary'
 import { getStageAllPaths } from './discard-all-sequence'
-
-export type CreatePrIntentRemoteStep = 'publish' | 'push' | 'force_push' | 'blocked' | 'none'
 
 export type CreatePrIntentRunToken = {
   repoId: string
@@ -114,43 +109,6 @@ export function resolveCreatePrIntentReviewBase({
   return normalizeHostedReviewBaseRef(
     eligibilityDefaultBaseRef?.trim() || currentBaseRef?.trim() || composerBaseRef?.trim() || ''
   )
-}
-
-export function resolveCreatePrIntentRemoteStep({
-  upstreamStatus,
-  hostedReviewCreation,
-  branchCommitsAhead,
-  hasCurrentBranch
-}: {
-  upstreamStatus: GitUpstreamStatus | undefined
-  hostedReviewCreation?: HostedReviewCreationEligibility | null
-  branchCommitsAhead?: number
-  hasCurrentBranch: boolean
-}): CreatePrIntentRemoteStep {
-  if (!hasCurrentBranch || !hostedReviewCreation || hostedReviewCreation.canCreate) {
-    return 'none'
-  }
-
-  if (hostedReviewCreation.blockedReason === 'no_upstream') {
-    return branchCommitsAhead && branchCommitsAhead > 0 ? 'publish' : 'blocked'
-  }
-
-  if (hostedReviewCreation.blockedReason === 'needs_push') {
-    return 'push'
-  }
-
-  if (
-    hostedReviewCreation.blockedReason === 'needs_sync' &&
-    shouldForcePushWithLeaseForUpstream(upstreamStatus)
-  ) {
-    return 'force_push'
-  }
-
-  if (hostedReviewCreation.blockedReason === 'needs_sync') {
-    return 'blocked'
-  }
-
-  return 'none'
 }
 
 export function getCreatePrIntentCommitFailureNoticeMessage(

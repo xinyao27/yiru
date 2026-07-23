@@ -31,7 +31,11 @@ import type {
   HostedReviewInfo,
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
-import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
+import {
+  resolveHostedReviewCreationProvider,
+  resolveSourceControlReviewRemoteStep,
+  shouldForcePushWithLeaseForUpstream
+} from '@yiru/workbench-model/review'
 /* eslint-disable max-lines */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -128,7 +132,6 @@ import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 
 import { isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
-import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type {
@@ -193,7 +196,6 @@ import {
   getCreatePrIntentCommitFailureNoticeMessage,
   getCreatePrIntentStagePaths,
   resolveCreatePrIntentReviewBase,
-  resolveCreatePrIntentRemoteStep,
   type CreatePrIntentRunToken
 } from './source-control-create-pr-intent-flow'
 import { resolveVisibleCreatePrHeaderAction } from './source-control-create-pr-intent-state'
@@ -4017,7 +4019,7 @@ function SourceControlInner({
         return
       }
 
-      const remoteStep = resolveCreatePrIntentRemoteStep({
+      const remoteStep = resolveSourceControlReviewRemoteStep({
         upstreamStatus: latestUpstreamStatus,
         hostedReviewCreation: eligibility,
         branchCommitsAhead: branchAhead,

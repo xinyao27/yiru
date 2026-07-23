@@ -19,6 +19,7 @@ type Props = {
   isGithubRepo?: boolean
   branchContextLoaded?: boolean
   controller: MobilePrSidebarController
+  onSourceControlRefresh: () => void | Promise<void>
 }
 
 // Chromeless PR sidebar body for the source-control hub's Pull Request segment.
@@ -33,7 +34,8 @@ export function MobilePrViewPanelBody({
   gitStatus,
   isGithubRepo = true,
   branchContextLoaded = true,
-  controller
+  controller,
+  onSourceControlRefresh
 }: Props) {
   const insets = useSafeAreaInsets()
 
@@ -57,6 +59,7 @@ export function MobilePrViewPanelBody({
         state={sidebarState}
         onRetry={controller.retryPRSidebar}
         refetch={controller.refetchPRSidebar}
+        onSourceControlRefresh={onSourceControlRefresh}
         client={client}
         connState={connState}
         worktreeId={worktreeId}

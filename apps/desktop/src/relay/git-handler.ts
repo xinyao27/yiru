@@ -5,6 +5,7 @@ import * as path from 'node:path'
 import { promisify } from 'node:util'
 
 import { GitCapabilityCache } from '../shared/git-capability-cache'
+import { upstreamOnlyCommitsArePatchEquivalent } from '../shared/git-cherry-patch-equivalence'
 import { getGitCloneFailureMessage } from '../shared/git-clone-failure-message'
 import {
   removeSafeUntrackedDiscardTarget,
@@ -28,7 +29,6 @@ import {
 } from '../shared/git-remote-error'
 import { clearGitStatusLineStatsCache } from '../shared/git-status-line-stats-cache'
 import { parseNumstat } from '../shared/git-uncommitted-line-stats'
-import { upstreamOnlyCommitsArePatchEquivalent } from '../shared/git-upstream-status'
 import {
   hasUnsupportedRevParsePathFormatEcho,
   isUnsupportedRevParsePathFormatError

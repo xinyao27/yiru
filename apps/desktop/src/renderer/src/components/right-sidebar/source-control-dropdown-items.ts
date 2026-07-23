@@ -1,7 +1,10 @@
 /* eslint-disable max-lines -- Why: this dropdown state machine keeps every action row in one table so priority and disabled-state ordering stays visible. */
 // Why: split from source-control-primary-action because the primary and dropdown are independent derivations with different priority ladders; together they exceed the max-lines budget and tangle unrelated concerns.
 
-import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
+import {
+  shouldForcePushWithLeaseForUpstream,
+  supportsHostedReviewCreation
+} from '@yiru/workbench-model/review'
 
 import {
   localizedHostedReviewCopy,
@@ -9,7 +12,6 @@ import {
 } from '@/i18n/hosted-review-localized-copy'
 import { translate } from '@/i18n/i18n'
 
-import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import type { GitConflictOperation } from '../../../../shared/types'
 import { canSubmitCommit, resolveCommitDisabledReason } from './source-control-commit-eligibility'
 import {

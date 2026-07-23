@@ -20,6 +20,7 @@ import {
   isMobileHostedReviewCommitFailure,
   runMobileHostedReviewCreateIntent
 } from '../../source-control/mobile-hosted-review-create-intent-runner'
+import { recoverMobileHostedReviewRejectedPush } from '../../source-control/mobile-hosted-review-rejected-push-recovery'
 import { fetchWorktreeLinkedPR } from '../../source-control/mobile-pr-link'
 import { useMobileCommitFailureRecovery } from '../../source-control/use-mobile-commit-failure-recovery'
 import type { RpcClient } from '../../transport/rpc-client'
@@ -36,6 +37,7 @@ type Props = {
   connState: ConnectionState
   // Refetches the sidebar after create or an explicit empty-state refresh.
   onCreated: () => void
+  onSourceControlRefresh: () => void | Promise<void>
 }
 
 type Mode = 'choose' | 'link'
@@ -49,7 +51,8 @@ export function PrSidebarCreateEmptyState({
   gitBranch,
   gitStatus,
   connState,
-  onCreated
+  onCreated,
+  onSourceControlRefresh
 }: Props) {
   const [mode, setMode] = useState<Mode>('choose')
   const [loading, setLoading] = useState(false)
@@ -119,6 +122,18 @@ export function PrSidebarCreateEmptyState({
         }
       })
       if (!outcome.ok) {
+        if (outcome.remoteOperation) {
+          const recovered = await recoverMobileHostedReviewRejectedPush({
+            client,
+            worktreeId,
+            error: outcome.error,
+            operation: outcome.remoteOperation,
+            onStatusRefresh: onSourceControlRefresh
+          })
+          if (recovered) {
+            onCreated()
+          }
+        }
         if (isMobileHostedReviewCommitFailure(outcome, progress)) {
           const outcomeStagedEntries = getMobileCommitFailureStagedEntries(outcome.status?.entries)
           setCommitFailureRecovery({

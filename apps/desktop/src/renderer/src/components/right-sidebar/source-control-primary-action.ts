@@ -1,16 +1,18 @@
 // Why: split from the combined primary+dropdown module because the primary and dropdown are independent derivations with different priority ladders; together they exceed the max-lines budget and tangle unrelated concerns.
 
 import {
+  resolveSourceControlCommitAreaPrimaryActionDecision,
+  resolveSourceControlPrimaryActionDecision,
+  type SourceControlPrimaryActionDecision,
+  type SourceControlPrimaryActionDecisionInputs
+} from '@yiru/workbench-model/review'
+
+import {
   localizedHostedReviewCopy,
   resolveSupportedHostedReviewCopyProvider
 } from '@/i18n/hosted-review-localized-copy'
 import { translate } from '@/i18n/i18n'
 
-import {
-  resolveSourceControlCommitAreaPrimaryActionDecision,
-  resolveSourceControlPrimaryActionDecision
-} from '../../../../shared/source-control-primary-action-decision'
-import type { SourceControlPrimaryActionDecision } from '../../../../shared/source-control-primary-action-decision-types'
 import {
   describeForcePushWithLease,
   describePullCount,
@@ -50,14 +52,26 @@ export type {
  * through "Publish Branch" on every worktree switch.
  */
 export function resolvePrimaryAction(inputs: PrimaryActionInputs): PrimaryAction {
-  return toRendererPrimaryAction(resolveSourceControlPrimaryActionDecision(inputs), inputs)
+  return toRendererPrimaryAction(
+    resolveSourceControlPrimaryActionDecision(toWorkflowInputs(inputs)),
+    inputs
+  )
 }
 
 export function resolveCommitAreaPrimaryAction(inputs: PrimaryActionInputs): PrimaryAction {
   return toRendererPrimaryAction(
-    resolveSourceControlCommitAreaPrimaryActionDecision(inputs),
+    resolveSourceControlCommitAreaPrimaryActionDecision(toWorkflowInputs(inputs)),
     inputs
   )
+}
+
+function toWorkflowInputs(inputs: PrimaryActionInputs): SourceControlPrimaryActionDecisionInputs {
+  return {
+    ...inputs,
+    hostedReviewState: inputs.prState,
+    isHostedReviewStateLoading: inputs.isPRStateLoading,
+    isReviewIntentInFlight: inputs.isPrIntentInFlight
+  }
 }
 
 function toRendererPrimaryAction(
@@ -65,7 +79,12 @@ function toRendererPrimaryAction(
   inputs: PrimaryActionInputs
 ): PrimaryAction {
   return {
-    kind: decision.kind,
+    kind:
+      decision.kind === 'create_review_intent'
+        ? 'create_pr_intent'
+        : decision.kind === 'create_review'
+          ? 'create_pr'
+          : decision.kind,
     label: resolvePrimaryActionLabel(decision, inputs),
     title: resolvePrimaryActionTitle(decision, inputs),
     disabled: decision.disabled
@@ -82,7 +101,7 @@ function resolvePrimaryActionLabel(
       'Force Push'
     )
   }
-  if (decision.labelIntent === 'create_pr') {
+  if (decision.labelIntent === 'create_review') {
     const copy = localizedHostedReviewCopy(
       resolveSupportedHostedReviewCopyProvider(inputs.hostedReviewCreation?.provider)
     )
@@ -123,8 +142,8 @@ function resolvePrimaryActionLabel(
         'auto.components.right.sidebar.source.control.primary.action.7b4d02e6b8',
         'Publish Branch'
       )
-    case 'create_pr_intent':
-      return resolvePrimaryActionLabel({ ...decision, labelIntent: 'create_pr' }, inputs)
+    case 'create_review_intent':
+      return resolvePrimaryActionLabel({ ...decision, labelIntent: 'create_review' }, inputs)
   }
 }
 

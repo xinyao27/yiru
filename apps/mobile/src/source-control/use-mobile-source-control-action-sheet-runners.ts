@@ -2,16 +2,16 @@ import { useCallback } from 'react'
 
 import type { RpcClient } from '../transport/rpc-client'
 import { resolveMobileBranchCompareBaseRef } from './mobile-branch-base-ref'
+import type { RunMobileSourceControlWorkflow } from './mobile-source-control-operation'
 
 type GitStep = { method: string; params?: Record<string, unknown> }
 type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
-type RunGitWorkflow = (actionId: string, runner: () => Promise<void>) => Promise<boolean>
 
 type Params = {
   client: RpcClient | null
   worktreeId: string
   sendGitRequest: SendGitRequest
-  runGitWorkflow: RunGitWorkflow
+  runGitWorkflow: RunMobileSourceControlWorkflow
   runGitSequence: (actionId: string, steps: GitStep[]) => Promise<boolean>
   runGitSync: (actionId: string) => Promise<boolean>
   commit: () => Promise<boolean>

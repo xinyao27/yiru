@@ -1,5 +1,3 @@
-import type { GitUpstreamStatus } from '@yiru/workbench-model/review'
-
 export function upstreamOnlyCommitsArePatchEquivalent(cherryMarkOutput: string): boolean {
   let hasCommit = false
   for (const rawLine of iterateGitOutputLines(cherryMarkOutput)) {
@@ -34,15 +32,4 @@ function* iterateGitOutputLines(output: string): Generator<string> {
   if (lineStart <= output.length) {
     yield output.slice(lineStart)
   }
-}
-
-export function shouldForcePushWithLeaseForUpstream(
-  status: GitUpstreamStatus | undefined
-): boolean {
-  return (
-    status?.hasUpstream === true &&
-    status.ahead > 0 &&
-    status.behind > 0 &&
-    status.behindCommitsArePatchEquivalent === true
-  )
 }

@@ -2,7 +2,8 @@ import {
   resolveCreateReviewIntentEligibility,
   type CreateReviewIntentEligibility,
   type CreateReviewIntentKind
-} from '../../../../shared/source-control-create-review-intent'
+} from '@yiru/workbench-model/review'
+
 import type { PrimaryAction } from './source-control-primary-action-types'
 
 // Why: renderer APIs keep PR terminology for compatibility, while shared logic

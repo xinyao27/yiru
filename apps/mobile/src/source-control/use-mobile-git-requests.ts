@@ -1,3 +1,7 @@
+import {
+  resolveSourceControlSyncAfterPull,
+  resolveSourceControlSyncStart
+} from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
 
 import type { RpcClient } from '../transport/rpc-client'
@@ -7,6 +11,10 @@ import {
   type MobileGitStatusResult,
   type MobileGitUpstreamStatus
 } from './mobile-git-status'
+import {
+  markMobileSyncPushStageError,
+  type MobileSourceControlWorkflowResult
+} from './mobile-source-control-operation'
 import type { GitCommitResult, GitRequestError } from './mobile-source-control-screen-state'
 
 type Params = {
@@ -67,13 +75,28 @@ export function useMobileGitRequests({ client, connState, worktreeId }: Params) 
     }
   }, [sendGitRequest])
 
-  const runGitSyncSteps = useCallback(async () => {
+  const runGitSyncSteps = useCallback(async (): Promise<MobileSourceControlWorkflowResult> => {
     await sendGitRequest<unknown>('git.fetch')
-    await sendGitRequest<unknown>('git.pull')
-    const nextUpstream = await readUpstreamStatusForSync()
-    if (nextUpstream.ahead > 0) {
-      await sendGitRequest<unknown>('git.push')
+    const upstreamBeforePull = await readUpstreamStatusForSync()
+    if (resolveSourceControlSyncStart(upstreamBeforePull) === 'force_push') {
+      try {
+        await sendGitRequest<unknown>('git.push', { forceWithLease: true })
+      } catch (error) {
+        throw markMobileSyncPushStageError(error)
+      }
+      return { syncPushed: true }
     }
+    await sendGitRequest<unknown>('git.pull')
+    const upstreamAfterPull = await readUpstreamStatusForSync()
+    if (resolveSourceControlSyncAfterPull(upstreamAfterPull) === 'push') {
+      try {
+        await sendGitRequest<unknown>('git.push')
+      } catch (error) {
+        throw markMobileSyncPushStageError(error)
+      }
+      return { syncPushed: true }
+    }
+    return { syncPushed: false }
   }, [readUpstreamStatusForSync, sendGitRequest])
 
   return { sendGitRequest, sendCommitRequest, runGitSyncSteps }

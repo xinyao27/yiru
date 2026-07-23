@@ -1,7 +1,5 @@
-import type { GitUpstreamStatus } from '@yiru/workbench-model/review'
-import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
-
-import type { PRState } from './types'
+import type { GitUpstreamStatus } from './git-status-types'
+import type { HostedReviewCreationEligibility, HostedReviewState } from './hosted-review'
 
 export type SourceControlPrimaryActionKind =
   | 'commit'
@@ -10,8 +8,8 @@ export type SourceControlPrimaryActionKind =
   | 'pull'
   | 'sync'
   | 'publish'
-  | 'create_pr_intent'
-  | 'create_pr'
+  | 'create_review_intent'
+  | 'create_review'
 
 export type SourceControlRemoteOpKind =
   | 'push'
@@ -61,23 +59,35 @@ export type SourceControlPrimaryActionDecision = {
   requiresForceWithLease?: boolean
 }
 
+export type SourceControlCommitAreaPrimaryActionKind = Exclude<
+  SourceControlPrimaryActionKind,
+  'create_review_intent' | 'create_review'
+>
+
+export type SourceControlCommitAreaPrimaryActionDecision = Omit<
+  SourceControlPrimaryActionDecision,
+  'kind' | 'labelIntent'
+> & {
+  kind: SourceControlCommitAreaPrimaryActionKind
+  labelIntent: SourceControlCommitAreaPrimaryActionKind | 'force_push'
+}
+
 export type SourceControlPrimaryActionDecisionInputs = {
   stagedCount: number
   hasUnstagedChanges: boolean
   hasStageableChanges: boolean
-  hasPartiallyStagedChanges: boolean
   hasMessage: boolean
   hasUnresolvedConflicts: boolean
   isCommitting: boolean
   isRemoteOperationActive: boolean
   upstreamStatus: GitUpstreamStatus | undefined
-  prState?: PRState | null
-  isPRStateLoading?: boolean
+  hostedReviewState?: HostedReviewState | null
+  isHostedReviewStateLoading?: boolean
   inFlightRemoteOpKind?: SourceControlRemoteOpKind | null
   hostedReviewCreation?: HostedReviewCreationEligibility | null
   branchCommitsAhead?: number
   hasCurrentBranch?: boolean
   canPushLinkedReviewWithoutUpstream?: boolean
-  isPrIntentInFlight?: boolean
+  isReviewIntentInFlight?: boolean
   isHostedReviewCreationLoading?: boolean
 }
