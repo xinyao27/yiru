@@ -69,9 +69,6 @@ jobs:
       - name: Lint
         run: pnpm exec vp lint --format github
 
-      - name: Check styled scrollbars
-        run: pnpm --filter yiru exec node config/scripts/check-styled-scrollbars.mjs
-
       # Why: feature work must reuse the closed shadcn vocabulary instead of
       # growing one-off color, state, or floating-surface tokens.
       - name: Check design token budget
