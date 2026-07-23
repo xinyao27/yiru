@@ -34,10 +34,10 @@ export function WorkspaceTabCreateMenu({
   const triggerButton = (
     <Button
       type="button"
-      variant="outline"
-      size="icon-lg"
+      variant="ghost"
+      size="icon-sm"
       className={cn(
-        '-ml-px h-full w-16 shrink-0 border-border border-b-0 bg-transparent text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground dark:border-border dark:bg-transparent dark:hover:bg-accent',
+        'my-auto ml-1 text-muted-foreground',
         disabled && 'cursor-not-allowed opacity-50 hover:bg-background hover:text-muted-foreground'
       )}
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -61,7 +61,7 @@ export function WorkspaceTabCreateMenu({
         }
       }}
     >
-      {/* Why: the reference add segment uses the same compact glyph scale as tab identities. */}
+      {/* Why: the compact glyph matches adjacent tab identities without recreating a tab cell. */}
       <Plus className="size-3.5" />
     </Button>
   )
