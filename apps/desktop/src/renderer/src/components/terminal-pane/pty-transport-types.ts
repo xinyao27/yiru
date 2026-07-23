@@ -1,3 +1,5 @@
+import type { PtyDataMeta } from '@/runtime/pty-data-meta'
+
 import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
 import type { ParsedAgentStatusPayload } from '../../../../shared/agent-status-types'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
@@ -5,7 +7,6 @@ import type { ProjectExecutionRuntimeResolution } from '../../../../shared/proje
 import type { EventProps } from '../../../../shared/telemetry-events'
 import type { TerminalOscColorQueryReplyColors } from '../../../../shared/terminal-osc-color-reply'
 import type { TuiAgent } from '../../../../shared/types'
-import type { PtyDataMeta } from './pty-dispatcher'
 
 export type PtyBufferSnapshot = {
   data: string

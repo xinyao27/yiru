@@ -1,5 +1,6 @@
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { flushTerminalOutput } from '@/lib/pane-manager/pane-terminal-output-scheduler'
+import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 
 import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal-scrollback-limits'
 import { serializeWithAbsoluteCursor } from '../../../../shared/terminal-serialize-absolute-cursor'
@@ -8,7 +9,6 @@ import { measureUtf8ByteLength } from '../../../../shared/utf8-byte-limits'
 import { serializeTerminalLayout } from './layout-serialization'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
 import type { PtyTransport } from './pty-transport'
-import { resolveTerminalLayoutActiveLeafId } from './terminal-layout-leaf-ids'
 
 const MAX_BUFFER_BYTES = TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT
 

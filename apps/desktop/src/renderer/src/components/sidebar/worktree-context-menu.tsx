@@ -36,11 +36,11 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/hooks/use-virtualized-scroll-anchor'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoById, useRepoMap, useWorktreeMap } from '@/store/selectors'
 import type { AppState } from '@/store/types'

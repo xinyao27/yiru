@@ -2,12 +2,18 @@ import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
 } from '@/lib/worktree-runtime-owner'
-import type { OpenFile } from '@/store/slices/editor'
 
 import type { Tab } from '../../../shared/types'
+import { closeWebSessionTabCommand } from './web-session-commands'
+import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
+
+type MirroredEditorFile = {
+  id: string
+  mirroredFromRuntimeSession?: boolean
+}
 
 export type MirroredEditorCloseState = WorktreeRuntimeOwnerState & {
-  openFiles: readonly OpenFile[]
+  openFiles: readonly MirroredEditorFile[]
   unifiedTabsByWorktree: Record<string, Tab[]>
 }
 
@@ -41,15 +47,17 @@ export function notifyHostOfMirroredEditorClose(
   if (!unifiedTab) {
     return false
   }
-  // Why: this helper is imported by the editor slice during store creation.
-  // Importing web-runtime-session eagerly would import the store back and can
-  // trip cyclic initialization in full-suite test/import order.
-  void import('./web-runtime-session').then(({ closeWebRuntimeSessionTab }) =>
-    closeWebRuntimeSessionTab({
-      worktreeId,
-      tabId: unifiedTab.id,
-      environmentId: runtimeEnvironmentId
-    })
-  )
+  void closeWebSessionTabCommand({
+    worktreeId,
+    tabId: unifiedTab.id,
+    environmentId: runtimeEnvironmentId
+  }).then(async (result) => {
+    if (result.status === 'completed') {
+      await requestWebSessionTabsRefresh({
+        environmentId: runtimeEnvironmentId,
+        worktreeId
+      })
+    }
+  })
   return true
 }

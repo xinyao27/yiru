@@ -1,18 +1,18 @@
 import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
-import { isClaudeManagementTitle } from '@/lib/agent-status'
 import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
+import {
+  resolveAgentTypeFromTerminalTitle,
+  resolveTitleDerivedAgentType
+} from '@/lib/terminal-title-agent-type'
 
+import { isClaudeManagementTitle } from '../../../../shared/agent-detection'
 import type {
   AgentStatusEntry,
   AgentStatusOrchestrationContext,
-  AgentStatusState,
-  AgentType
+  AgentStatusState
 } from '../../../../shared/agent-status-types'
-import {
-  normalizeCompatibleAgentTitleForOwner,
-  resolveCompatibleAgentTypeForOwner
-} from '../../../../shared/agent-title-owner'
+import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent-title-owner'
 import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,
@@ -23,26 +23,6 @@ import type {
 const EMPTY_RUNTIME_TITLES: Record<string, Record<number, string>> = {}
 const EMPTY_LIVE_PTY_IDS: Record<string, string[]> = {}
 const EMPTY_TERMINAL_LAYOUTS: Record<string, TerminalLayoutSnapshot | undefined> = {}
-
-const TITLE_AGENT_LABEL_TO_TYPE: Record<string, AgentType> = {
-  'Claude Code': 'claude',
-  OpenClaude: 'openclaude',
-  Codex: 'codex',
-  'Gemini CLI': 'gemini',
-  'GitHub Copilot': 'copilot',
-  Grok: 'grok',
-  Devin: 'devin',
-  Antigravity: 'antigravity',
-  OpenCode: 'opencode',
-  Aider: 'aider',
-  Cursor: 'cursor',
-  Droid: 'droid',
-  Hermes: 'hermes',
-  Pi: 'pi',
-  OMP: 'omp'
-}
-
-const CLAUDE_AGENT_TOKEN_RE = /(?<![\w./\\-])claude(?![\w./\\-])/i
 
 export function buildTitleDerivedAgentRows(args: {
   tabs: TerminalTab[]
@@ -174,37 +154,7 @@ function buildTitleDerivedAgentRow(args: {
   }
 }
 
-export function resolveTitleDerivedAgentType(title: string, label: string): AgentType | null {
-  const agentType = TITLE_AGENT_LABEL_TO_TYPE[label] ?? 'unknown'
-  if (agentType !== 'claude') {
-    return agentType
-  }
-  // Why: Claude's task-title spinner heuristic has no provider identity. In
-  // split panes it can match arbitrary terminal spinners, so sidebar rows only
-  // accept Claude when the title itself names Claude.
-  return CLAUDE_AGENT_TOKEN_RE.test(title) ? agentType : null
-}
-
-/**
- * Determines the agent type from a terminal title, normalising Pi-compatible
- * agents to their authoritative owner if specified.
- */
-export function resolveAgentTypeFromTerminalTitle(
-  title: string | null | undefined,
-  ownerAgentType?: AgentType | null
-): AgentType | null {
-  if (!title) {
-    return null
-  }
-  const normalizedTitle = normalizeCompatibleAgentTitleForOwner(title, ownerAgentType)
-  const label = resolveTitleActivityLabel(normalizedTitle)
-  return label
-    ? (resolveCompatibleAgentTypeForOwner(
-        resolveTitleDerivedAgentType(normalizedTitle, label),
-        ownerAgentType
-      ) ?? null)
-    : null
-}
+export { resolveAgentTypeFromTerminalTitle, resolveTitleDerivedAgentType }
 
 function titleStatusToRowState(
   status: 'working' | 'permission' | 'idle'

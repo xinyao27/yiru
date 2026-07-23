@@ -6,7 +6,6 @@ import {
   acquireBrowserAutomationVisibility,
   releaseBrowserAutomationVisibility
 } from '@/components/browser-pane/browser-automation-visibility'
-import { destroyPersistentWebview } from '@/components/browser-pane/webview-registry'
 import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/settings-constants'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
@@ -62,6 +61,7 @@ import { persistWorkspaceSessionByHost } from '@/lib/workspace-session-host-pers
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
+import { destroyPersistentWebview } from '@/runtime/browser-webview-registry'
 import { attachMobileMarkdownBridge } from '@/runtime/mobile-markdown-bridge'
 import { closeMobileSessionTabInStore } from '@/runtime/mobile-session-tab-close'
 import { subscribeRuntimeClientEvents } from '@/runtime/runtime-client-events'

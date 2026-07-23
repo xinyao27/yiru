@@ -1,5 +1,3 @@
-import { getRepoIdFromWorktreeId } from '@/store/slices/worktree-helpers'
-
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import {
   getRepoExecutionHostId,
@@ -15,6 +13,7 @@ import type {
   Worktree
 } from '../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
+import { getRepoIdFromWorktreeId } from '../../../shared/worktree-id'
 import {
   findIndexedFolderWorkspaceOwner,
   findIndexedProjectGroupOwner,

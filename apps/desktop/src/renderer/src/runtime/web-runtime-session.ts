@@ -4,11 +4,8 @@ import type { TerminalPaneSplitSource } from '../../../shared/feature-education-
 /* eslint-disable max-lines */
 import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type {
-  BrowserTabCreateResult,
-  RuntimeMobileSessionCreateTerminalResult,
   RuntimeMobileSessionTabMove,
   RuntimeMobileSessionTabMoveResult,
-  RuntimeMobileSessionTabsResult,
   RuntimeTerminalClose,
   RuntimeTerminalSplit
 } from '../../../shared/runtime-types'
@@ -20,8 +17,13 @@ import { unwrapRuntimeRpcResult } from './runtime-rpc-client'
 import { parseRemoteRuntimePtyId } from './runtime-terminal-stream'
 import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
 import { recordWebSessionCloseIntent } from './web-session-close-intent'
-import { recordWebSessionFocusIntent } from './web-session-focus-intent'
+import {
+  closeWebSessionTabCommand,
+  createWebSessionBrowserTabCommand,
+  createWebSessionTerminalCommand
+} from './web-session-commands'
 import { recordWebSessionReorderIntent } from './web-session-reorder-intent'
+import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
 import { isWebTerminalSurfaceTabId, toHostSessionTabId } from './web-terminal-surface-id'
 
 export {
@@ -71,43 +73,19 @@ export async function createWebRuntimeSessionTerminal(args: {
   if (args.selectWorktree !== false) {
     selectWebRuntimeSessionWorktree(args.worktreeId)
   }
-  try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method: 'session.tabs.createTerminal',
-      params: {
-        worktree: toRuntimeWorktreeSelector(args.worktreeId),
-        afterTabId: args.afterTabId ? toHostSessionTabId(args.afterTabId) : undefined,
-        targetGroupId: args.targetGroupId,
-        command: args.command,
-        cwd: args.cwd,
-        ...(args.env ? { env: args.env } : {}),
-        startupCommandDelivery: args.startupCommandDelivery,
-        ...(args.launchConfig ? { launchConfig: args.launchConfig } : {}),
-        agent: args.agent,
-        ...(args.launchAgent ? { launchAgent: args.launchAgent } : {}),
-        ...(args.viewMode ? { viewMode: args.viewMode } : {}),
-        activate: args.activate !== false
-      },
-      timeoutMs: 15_000
-    })
-    const createdTerminal = unwrapRuntimeRpcResult(
-      response as RuntimeRpcResponse<RuntimeMobileSessionCreateTerminalResult>
-    )
-    if (args.activate !== false) {
-      // Why: record focus intent so the reconcile follows the snapshot's active
-      // tab to THIS new terminal, instead of sticky-keeping the prior tab.
-      recordWebSessionFocusIntent(args.worktreeId, createdTerminal.tab.id)
-    }
-    await refreshWebRuntimeSessionTabsSnapshot(environmentId, args.worktreeId)
-    return true
-  } catch (error) {
+  const result = await createWebSessionTerminalCommand({
+    ...args,
+    environmentId
+  })
+  if (result.status === 'failed') {
     console.warn(
       '[web-runtime-session] failed to create terminal:',
-      error instanceof Error ? error.message : String(error)
+      result.error instanceof Error ? result.error.message : String(result.error)
     )
     return false
   }
+  await requestWebSessionTabsRefresh({ environmentId, worktreeId: args.worktreeId })
+  return true
 }
 
 export async function createWebRuntimeSessionBrowserTab(args: {
@@ -131,53 +109,33 @@ export async function createWebRuntimeSessionBrowserTab(args: {
   if (shouldSelectWorktree) {
     selectWebRuntimeSessionWorktree(args.worktreeId)
   }
-  try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method: 'browser.tabCreate',
-      params: {
-        worktree: toRuntimeWorktreeSelector(args.worktreeId),
-        url: args.url,
-        profileId: args.profileId ?? undefined,
-        // Why: this is the user clicking "New Browser Tab", so focus it. On a
-        // headless host this marks the tab active in the session snapshot so the
-        // reconcile keeps focus on it instead of snapping back to a terminal.
-        activate: true,
-        // Why: place the new browser in the split group whose "+" was clicked,
-        // so the host snapshot is authoritative for its group (no left-snap).
-        ...(args.targetGroupId ? { targetGroupId: args.targetGroupId } : {}),
-        // Why: paired web clients need the local tab immediately. The remote
-        // pane will stream once the host webview registers; waiting here makes
-        // the workspace appear to close while the host finishes mounting.
-        waitForRegistration: false
-      },
-      timeoutMs: 15_000
-    })
-    const created = unwrapRuntimeRpcResult(response as RuntimeRpcResponse<BrowserTabCreateResult>)
-    // Why: record focus intent (browser session tab id === browserPageId on a
-    // headless host) so the reconcile follows the snapshot's active tab to this
-    // new browser tab rather than sticky-keeping the prior one.
-    recordWebSessionFocusIntent(args.worktreeId, created.browserPageId)
-    stageWebRuntimeBrowserTab({
-      environmentId,
-      worktreeId: args.worktreeId,
-      remotePageId: created.browserPageId,
-      url: args.url,
-      targetGroupId: args.targetGroupId,
-      restoreFocus:
-        shouldSelectWorktree &&
-        (stagedFromWorktreeId === args.worktreeId ||
-          useAppStore.getState().activeWorktreeId === args.worktreeId)
-    })
-    void refreshWebRuntimeSessionTabsSnapshot(environmentId, args.worktreeId)
-    return true
-  } catch (error) {
+  const result = await createWebSessionBrowserTabCommand({
+    environmentId,
+    worktreeId: args.worktreeId,
+    url: args.url,
+    profileId: args.profileId,
+    targetGroupId: args.targetGroupId
+  })
+  if (result.status === 'failed') {
     console.warn(
       '[web-runtime-session] failed to create browser tab:',
-      error instanceof Error ? error.message : String(error)
+      result.error instanceof Error ? result.error.message : String(result.error)
     )
     return false
   }
+  stageWebRuntimeBrowserTab({
+    environmentId,
+    worktreeId: args.worktreeId,
+    remotePageId: result.value.browserPageId,
+    url: args.url,
+    targetGroupId: args.targetGroupId,
+    restoreFocus:
+      shouldSelectWorktree &&
+      (stagedFromWorktreeId === args.worktreeId ||
+        useAppStore.getState().activeWorktreeId === args.worktreeId)
+  })
+  void requestWebSessionTabsRefresh({ environmentId, worktreeId: args.worktreeId })
+  return true
 }
 
 function stageWebRuntimeBrowserTab(args: {
@@ -249,40 +207,6 @@ function findLocalBrowserPageForRemotePage(
     }
   }
   return null
-}
-
-async function refreshWebRuntimeSessionTabsSnapshot(
-  environmentId: string,
-  worktreeId: string
-): Promise<void> {
-  try {
-    const response = await window.api.runtimeEnvironments.call({
-      selector: environmentId,
-      method: 'session.tabs.list',
-      params: {
-        worktree: toRuntimeWorktreeSelector(worktreeId)
-      },
-      timeoutMs: 15_000
-    })
-    const snapshot = unwrapRuntimeRpcResult(
-      response as RuntimeRpcResponse<RuntimeMobileSessionTabsResult>
-    )
-    const { applyFreshWebSessionTabsSnapshot, applyWebSessionTabsStorePatch } =
-      await import('./web-session-tabs-sync')
-    applyWebSessionTabsStorePatch((state) => {
-      // Why: eager refreshes can resolve after the user has selected another
-      // worktree; session parity should update tabs without stealing focus.
-      const patch = applyFreshWebSessionTabsSnapshot(state, snapshot, environmentId)
-      return patch === state ? state : patch
-    })
-  } catch (error) {
-    // Why: browser creation already succeeded on the host. If the eager parity
-    // refresh fails, the long-lived session.tabs subscription can still catch up.
-    console.warn(
-      '[web-runtime-session] failed to refresh browser tab snapshot:',
-      error instanceof Error ? error.message : String(error)
-    )
-  }
 }
 
 export async function activateWebRuntimeSessionWorktree(args: {
@@ -476,6 +400,16 @@ async function callWebRuntimeSessionTabMethod(
       // host tab in the reconcile until the host snapshot confirms removal —
       // otherwise an in-flight pre-close snapshot makes the tab flash back.
       recordWebSessionCloseIntent(args.worktreeId, hostTabId, Date.now())
+      const result = await closeWebSessionTabCommand({
+        environmentId,
+        worktreeId: args.worktreeId,
+        tabId: hostTabId
+      })
+      if (result.status === 'failed') {
+        throw result.error
+      }
+      await requestWebSessionTabsRefresh({ environmentId, worktreeId: args.worktreeId })
+      return true
     }
     const response = await window.api.runtimeEnvironments.call({
       selector: environmentId,
@@ -487,9 +421,6 @@ async function callWebRuntimeSessionTabMethod(
       timeoutMs: 15_000
     })
     unwrapRuntimeRpcResult(response as RuntimeRpcResponse<unknown>)
-    if (method === 'session.tabs.close') {
-      await refreshWebRuntimeSessionTabsSnapshot(environmentId, args.worktreeId)
-    }
     return true
   } catch (error) {
     console.warn(

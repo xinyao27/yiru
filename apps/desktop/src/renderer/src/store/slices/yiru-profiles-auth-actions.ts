@@ -1,7 +1,6 @@
-import { toast } from 'sonner'
 import type { StateCreator } from 'zustand'
 
-import { translate } from '@/i18n/i18n'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
 import type {
   ConnectCurrentYiruProfileResult,
@@ -45,28 +44,34 @@ export const createYiruProfilesAuthActions: StateCreator<
           : {})
       })
       if (result.status === 'created') {
-        toast.success(
-          translate('auto.store.slices.yiru.profiles.319d7cf39b', 'Cloud profile created')
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'create-cloud',
+          outcome: 'succeeded'
+        })
       } else if (result.status === 'reconnect-required') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.d6e764e7db', 'Reconnect this profile')
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'create-cloud',
+          outcome: 'reconnect-required'
+        })
       } else if (result.status === 'failed') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.f0c9e11a6d', 'Failed to create cloud profile'),
-          { description: result.error }
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'create-cloud',
+          outcome: 'failed',
+          error: result.error
+        })
       }
       return result
     } catch (err) {
       console.error('Failed to create Yiru cloud profile:', err)
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.f0c9e11a6d', 'Failed to create cloud profile'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'create-cloud',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   },
@@ -89,33 +94,36 @@ export const createYiruProfilesAuthActions: StateCreator<
           : {})
       })
       if (result.status === 'unconfigured') {
-        toast.error(
-          translate(
-            'auto.store.slices.yiru.profiles.8b8fa73174',
-            'Yiru Cloud sign-in is not configured'
-          ),
-          {
-            description: result.auth.setupMessage
-          }
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'connect',
+          outcome: 'unconfigured',
+          error: result.auth.setupMessage
+        })
       } else if (result.status === 'failed') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.33290e88ed', 'Failed to connect profile'),
-          { description: result.error }
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'connect',
+          outcome: 'failed',
+          error: result.error
+        })
       } else if (result.status === 'connected') {
-        toast.success(translate('auto.store.slices.yiru.profiles.9fcb07a796', 'Profile connected'))
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'connect',
+          outcome: 'succeeded'
+        })
       }
       return result
     } catch (err) {
       console.error('Failed to connect Yiru profile:', err)
       set({ yiruProfileConnecting: false })
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.33290e88ed', 'Failed to connect profile'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'connect',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   },
@@ -133,24 +141,28 @@ export const createYiruProfilesAuthActions: StateCreator<
           : {})
       })
       if (result.status === 'reconnect-required') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.d6e764e7db', 'Reconnect this profile')
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'refresh-auth',
+          outcome: 'reconnect-required'
+        })
       } else if (result.status === 'failed') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.2f6c78a039', 'Failed to refresh profile auth'),
-          { description: result.error }
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'refresh-auth',
+          outcome: 'failed',
+          error: result.error
+        })
       }
       return result
     } catch (err) {
       console.error('Failed to refresh Yiru profile auth:', err)
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.2f6c78a039', 'Failed to refresh profile auth'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'refresh-auth',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   },
@@ -163,14 +175,19 @@ export const createYiruProfilesAuthActions: StateCreator<
         yiruProfiles: result.profiles,
         yiruProfileAuthStatus: result.auth
       })
-      toast.success(
-        translate('auto.store.slices.yiru.profiles.a37b5e6d37', 'Signed out of profile')
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'sign-out',
+        outcome: 'succeeded'
+      })
       return result
     } catch (err) {
       console.error('Failed to sign out of Yiru profile:', err)
-      toast.error(translate('auto.store.slices.yiru.profiles.83600521e7', 'Failed to sign out'), {
-        description: err instanceof Error ? err.message : String(err)
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'sign-out',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
       })
       return null
     }
@@ -189,24 +206,28 @@ export const createYiruProfilesAuthActions: StateCreator<
           : {})
       })
       if (result.status === 'reconnect-required') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.d6e764e7db', 'Reconnect this profile')
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'select-org',
+          outcome: 'reconnect-required'
+        })
       } else if (result.status === 'failed') {
-        toast.error(
-          translate('auto.store.slices.yiru.profiles.76deec8f58', 'Failed to switch organization'),
-          { description: result.error }
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'select-org',
+          outcome: 'failed',
+          error: result.error
+        })
       }
       return result
     } catch (err) {
       console.error('Failed to switch Yiru profile org:', err)
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.76deec8f58', 'Failed to switch organization'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'select-org',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   }

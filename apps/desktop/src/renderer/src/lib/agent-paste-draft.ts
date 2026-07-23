@@ -1,8 +1,9 @@
+import { POST_PASTE_SUBMIT_DELAY_MS } from '@/lib/agent-paste-submit-delay'
 import {
   BRACKETED_PASTE_END,
   BRACKETED_PASTE_START,
   sanitizeTerminalPasteText
-} from '@/components/terminal-pane/terminal-bracketed-paste'
+} from '@/lib/terminal-bracketed-paste'
 import {
   inspectRuntimeTerminalProcess,
   sendRuntimePtyInputVerified
@@ -33,7 +34,7 @@ export {
 // line-edit shortcuts. Callers choose whether to append Enter after the paste.
 export const BRACKETED_PASTE_BEGIN = BRACKETED_PASTE_START
 export { BRACKETED_PASTE_END }
-export const POST_PASTE_SUBMIT_DELAY_MS = 50
+export { POST_PASTE_SUBMIT_DELAY_MS }
 
 export function sanitizeBracketedPasteContent(content: string): string {
   return sanitizeTerminalPasteText(content)

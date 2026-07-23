@@ -1,4 +1,4 @@
-import type { ContextualTour, ContextualTourStep } from '../../../../shared/contextual-tours'
+import type { ContextualTour, ContextualTourStep } from '../../../shared/contextual-tours'
 
 export type ContextualTourTarget = {
   element: Element

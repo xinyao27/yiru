@@ -1,8 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import { applyCodexSpriteTimingDefaults } from '../../../../shared/codex-pet-sprite-defaults'
-import type { CustomPet } from '../../../../shared/types'
-import { useAppStore } from '../../store'
 import {
   detectedSpriteCache,
   loadCustomBlobUrl,
@@ -10,12 +7,16 @@ import {
   readCustomPetBlobUrl,
   retainCustomPetBlobCacheEntry,
   type DetectedSpriteCacheEntry
-} from './pet-blob-cache'
+} from '@/runtime/custom-pet-blob-cache'
+
+import { applyCodexSpriteTimingDefaults } from '../../../../shared/codex-pet-sprite-defaults'
+import type { CustomPet } from '../../../../shared/types'
+import { useAppStore } from '../../store'
 import { BUNDLED_PET, findBundledPet, isBundledPetId } from './pet-models'
 
 // Re-export so existing callers (the store slice) that point at this module
 // keep working without knowing about the cache module split.
-export { revokeCustomPetBlobUrl } from './pet-blob-cache'
+export { revokeCustomPetBlobUrl } from '@/runtime/custom-pet-blob-cache'
 
 export type ResolvedPet =
   | { url: string; ready: boolean; sprite: null; detected: null }

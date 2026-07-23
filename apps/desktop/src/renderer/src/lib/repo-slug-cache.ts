@@ -13,6 +13,14 @@ export type SlugIndex = Map<string, Repo[]>
  *  failed resolution is recorded as `null` so it is not retried on re-mount. */
 export const slugByRepoId = new Map<string, string | null>()
 
+export function clearRepoSlugCacheEntry(repoId: string): void {
+  for (const key of slugByRepoId.keys()) {
+    if (key.endsWith(`:${repoId}`)) {
+      slugByRepoId.delete(key)
+    }
+  }
+}
+
 export function slugCacheKey(
   repoId: string,
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined

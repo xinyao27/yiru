@@ -3,7 +3,7 @@ import type {
   GitStatusResult,
   GitUpstreamStatus,
   GlobalSettings
-} from '../../../../shared/types'
+} from '../../../shared/types'
 
 const AUTOMATIC_PUSH_TARGET_UPSTREAM_REFRESH_TTL_MS = 60_000
 const MAX_AUTOMATIC_PUSH_TARGET_UPSTREAM_CACHE_ENTRIES = 1024

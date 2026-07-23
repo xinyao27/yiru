@@ -1,9 +1,10 @@
-import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../../../shared/types'
 import {
   collectLeafIdsInOrder,
   normalizeTerminalLayoutSnapshot,
   resolveTerminalLayoutActiveLeafId
-} from './terminal-layout-leaf-ids'
+} from '@/lib/terminal-layout-leaf-ids'
+
+import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../../../shared/types'
 
 export type DetachedTerminalLayoutLeaf = {
   sourceLayout: TerminalLayoutSnapshot

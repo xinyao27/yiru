@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { isYiruCliAvailableOnPath } from '@/lib/agent-skill-cli-prerequisite'
 import { cn } from '@/lib/class-names'
+import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
 import { IntegrationStatusPill } from '../integration-status-pill'
 import { OnboardingInlineCommandTerminal } from '../onboarding/onboarding-inline-command-terminal'

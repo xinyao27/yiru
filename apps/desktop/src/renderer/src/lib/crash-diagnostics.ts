@@ -2,7 +2,7 @@ import type {
   CrashReportBreadcrumbData,
   CrashReportDetailValue
 } from '../../../shared/crash-reporting'
-import { getBrowserWebviewMemoryProfile } from '../components/browser-pane/webview-registry'
+import { getBrowserWebviewMemoryProfile } from '../runtime/browser-webview-registry'
 import { recordRendererCrashBreadcrumb } from './crash-breadcrumb-recorder'
 
 const RENDERER_MEMORY_SAMPLE_INTERVAL_MS = 60_000

@@ -1,4 +1,4 @@
-import type { PtyDataMeta } from './pty-dispatcher'
+import type { PtyDataMeta } from './pty-data-meta'
 import { clampUtf8Tail } from './pty-eager-buffer-clamp'
 
 type BufferedPreHandlerPtyData = {

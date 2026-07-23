@@ -1,6 +1,6 @@
-import { absolutePathToFileUri } from '@/components/editor/markdown-internal-links'
 import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
+import { absolutePathToFileUri } from '@/lib/markdown-internal-links'
 import { isPathInsideWorktree, toWorktreeRelativePath } from '@/lib/terminal-links'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import {

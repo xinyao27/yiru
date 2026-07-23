@@ -42,7 +42,6 @@ import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-c
 import type { SessionOptionValue } from '../../../shared/native-chat-session-options'
 import { createSequencedSetupAgentCommands } from '../../../shared/setup-agent-sequencing'
 import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup-runner-command'
-import type { EventProps } from '../../../shared/telemetry-events'
 import { isTuiAgent } from '../../../shared/tui-agent-config'
 import {
   resolveTuiAgentLaunchArgs,
@@ -60,6 +59,7 @@ import type {
   WorktreeSetupLaunch
 } from '../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
+import type { AgentStartedTelemetry } from './agent-started-telemetry'
 import {
   folderWorkspaceActivationBlocked,
   getFolderWorkspacePathStatusDescription,
@@ -74,7 +74,7 @@ import { buildAgentStartupPlan } from './tui-agent-startup'
 /** Telemetry payload threaded from the launch site to `pty:spawn`. Main
  *  fires `agent_started` only after the spawn succeeds — see
  *  telemetry-plan.md§Agent launch semantics. */
-export type AgentStartedTelemetry = EventProps<'agent_started'>
+export type { AgentStartedTelemetry } from './agent-started-telemetry'
 
 /** Startup command threaded onto a worktree's first terminal at activation. */
 export type WorktreeStartupPayload = {

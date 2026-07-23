@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
 
+import './slice-contracts'
 import { createAgentStatusSlice } from './slices/agent-status'
 import { createBrowserSlice } from './slices/browser'
 import { createClaudeUsageSlice } from './slices/claude-usage'

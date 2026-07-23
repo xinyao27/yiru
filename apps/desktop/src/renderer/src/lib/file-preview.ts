@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 
-import { absolutePathToFileUri } from '@/components/editor/markdown-internal-links'
 import { getConnectionId } from '@/lib/connection-context'
+import { absolutePathToFileUri } from '@/lib/markdown-internal-links'
 import { useAppStore } from '@/store'
 import { findSiblingGroupId } from '@/store/slices/tabs'
 

@@ -181,7 +181,7 @@ export function useCreateRepo(
         await onGitRepoReady?.(repo.id)
       } else {
         // Why: folder repos skip the Git default-checkout handoff, so activate the synthetic
-        // root workspace before closing. Matches addNonGitFolder's behavior.
+        // root workspace before closing. Matches the folder-add command's behavior.
         await fetchWorktrees(repo.id)
         if (
           gen !== createGenRef.current ||

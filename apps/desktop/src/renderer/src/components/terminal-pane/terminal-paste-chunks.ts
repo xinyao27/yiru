@@ -2,7 +2,8 @@ import {
   BRACKETED_PASTE_END,
   BRACKETED_PASTE_START,
   normalizeTerminalPasteLineEndings
-} from './terminal-bracketed-paste'
+} from '@/lib/terminal-bracketed-paste'
+
 import type { TerminalPastePlan } from './terminal-paste-coordinator'
 import { TERMINAL_PASTE_CHUNK_MAX_BYTES } from './terminal-paste-limits'
 

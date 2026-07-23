@@ -40,6 +40,7 @@ import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/pane-manager
 import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
 import { clearTerminalScrollbackAndFollowOutput } from '@/lib/pane-manager/terminal-scrollback-clear'
 import { isPrimarySelectionEnabled, readPrimarySelectionText } from '@/lib/primary-selection'
+import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
   sanitizeTerminalLayoutPaneTitles
@@ -133,7 +134,6 @@ import { handleInternalTerminalFileDrop } from './terminal-drop-handler'
 import { TerminalErrorToast } from './terminal-error-toast'
 import { restoreTerminalFitToDesktop, restoreTerminalFitsToDesktop } from './terminal-fit-restore'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
-import { resolveTerminalLayoutActiveLeafId } from './terminal-layout-leaf-ids'
 import {
   isHostAuthoritativeLayout,
   planTerminalLiveLayoutInsertions
@@ -166,6 +166,11 @@ function isInsideNativeChatRoot(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(NATIVE_CHAT_ROOT_SELECTOR) !== null
 }
 
+import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
+// Why: registry lives in a leaf module so the store slice can import it
+// without re-entering the `slice → TerminalPane → store → slice` cycle
+// that otherwise leaves createTerminalSlice undefined at store-init time.
+import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
 import { useRepoById } from '@/store/selectors'
 
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
@@ -177,11 +182,6 @@ import {
   resyncTerminalFocusForWindowFocus,
   setRegularTerminalInputFocusAttribute
 } from './regular-terminal-focus-ownership'
-// Why: registry lives in a leaf module so the store slice can import it
-// without re-entering the `slice → TerminalPane → store → slice` cycle
-// that otherwise leaves createTerminalSlice undefined at store-init time.
-import { shutdownBufferCaptures } from './shutdown-buffer-captures'
-import { pasteTerminalText } from './terminal-bracketed-paste'
 import { refreshTerminalImeInputContext } from './terminal-ime-input-context-refresh'
 import {
   applyTerminalPaneAttentionToManager,

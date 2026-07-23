@@ -32,6 +32,10 @@ All six architecture-review candidates and the identified low-risk cleanup are i
 - [03a — Remove implementation-detail tests](issues/03a-remove-implementation-detail-tests.md):
   class-literal, exact-source, registry-count, and self-normalizing checks are gone; remaining tests
   exercise behavior or real build, compatibility, and release contracts.
+- [04 — Restore renderer state direction](issues/04-restore-renderer-state-direction.md):
+  store contracts are import-free leaves, state no longer owns view registries or presentation,
+  and typed command/result owners preserve remote-session and user-feedback behavior without a
+  store-crossing dependency cycle.
 
 ## Not yet specified
 

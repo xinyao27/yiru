@@ -71,6 +71,20 @@ import {
   WORKSPACE_FILE_PATH_MIME
 } from '@/lib/workspace-file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { rememberLiveBrowserUrl } from '@/runtime/browser-live-url'
+import {
+  applyBrowserPageViewportLayout,
+  ensureBrowserPageViewport,
+  getBrowserOverlaySlotViewport,
+  parkBrowserPageViewport,
+  subscribeBrowserOverlaySlotViewport,
+  syncBrowserPageChromeInset
+} from '@/runtime/browser-page-viewport'
+import {
+  destroyPersistentWebview,
+  moveFocusToRendererBeforeWebviewDetach,
+  registeredWebContentsIds
+} from '@/runtime/browser-webview-registry'
 import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
@@ -149,14 +163,6 @@ import { BrowserLoadFailureOverlay } from './browser-load-failure-overlay'
 import { BrowserMobileDriverOverlay } from './browser-mobile-driver-overlay'
 import { formatByteCount, formatPermissionNotice, formatPopupNotice } from './browser-notices'
 import { isBrowserPagePanePaintable } from './browser-page-paintability'
-import {
-  applyBrowserPageViewportLayout,
-  ensureBrowserPageViewport,
-  getBrowserOverlaySlotViewport,
-  parkBrowserPageViewport,
-  subscribeBrowserOverlaySlotViewport,
-  syncBrowserPageChromeInset
-} from './browser-page-viewport'
 import { ensureBrowserPageWebview } from './browser-page-webview'
 import {
   addBrowserPageZoomEventListener,
@@ -169,7 +175,6 @@ import {
   type BrowserPageZoomDirection
 } from './browser-page-zoom'
 import { getBrowserPagesForWorkspace } from './browser-pane-page-selection'
-import { rememberLiveBrowserUrl } from './browser-runtime'
 import { BrowserToolbarMenu } from './browser-toolbar-menu'
 import { shouldPollChromiumErrorPage } from './chromium-error-page-polling'
 import { formatGrabPayloadAsText } from './grab-confirmation-sheet'
@@ -183,11 +188,6 @@ import {
   getRemoteBrowserKeypressKey
 } from './remote-browser-keyboard'
 import { useGrabMode } from './use-grab-mode'
-import {
-  destroyPersistentWebview,
-  moveFocusToRendererBeforeWebviewDetach,
-  registeredWebContentsIds
-} from './webview-registry'
 
 type BrowserTabPageState = Partial<
   Pick<

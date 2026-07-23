@@ -1,5 +1,5 @@
+import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
-import type { AgentStartedTelemetry } from '@/lib/worktree-activation'
 
 import type {
   ProjectSourceContext,

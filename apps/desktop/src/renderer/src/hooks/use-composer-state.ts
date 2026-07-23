@@ -29,6 +29,7 @@ import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
+import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { ensureHooksConfirmed } from '@/lib/ensure-hooks-confirmed'
 import { parseGitHubPullRequestLink, normalizeGitHubLinkQuery } from '@/lib/github-links'
@@ -101,7 +102,7 @@ import {
   getWorkspaceCreateErrorToastMessage,
   type WorkspaceCreateErrorDisplay
 } from '@/lib/workspace-create-error-format'
-import { activateAndRevealWorktree, type AgentStartedTelemetry } from '@/lib/worktree-activation'
+import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { runBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'
 import { importExternalPathsToRuntime } from '@/runtime/runtime-file-client'
 import { checkRuntimeHooks, type HookCheckResult } from '@/runtime/runtime-hooks-client'

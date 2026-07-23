@@ -44,7 +44,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
-  VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT,
   useVirtualizedScrollAnchor,
   type VirtualizedScrollAnchor
 } from '@/hooks/use-virtualized-scroll-anchor'
@@ -67,6 +66,7 @@ import { track } from '@/lib/telemetry'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getWorktreeIdsWithLiveAgent } from '@/lib/worktree-activity-state'
 import { persistWorktreeSortOrderByHost } from '@/lib/worktree-sort-order-persistence'
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import {
   getAllWorktreesFromState,

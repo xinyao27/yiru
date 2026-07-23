@@ -1,9 +1,9 @@
 import type { PasteTerminalTextDetail } from '@/constants/terminal'
 import { getConnectionId } from '@/lib/connection-context'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
 
 import type { PtyTransport } from './pty-transport'
-import { pasteTerminalText } from './terminal-bracketed-paste'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 import { executeTerminalPastePlan, planTerminalPasteWithYield } from './terminal-paste-coordinator'
 import { resolveTerminalPasteRuntime } from './terminal-paste-runtime'

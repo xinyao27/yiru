@@ -1,4 +1,5 @@
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
+import type { TabSplitDirection } from '@/lib/tab-split-direction'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import {
@@ -6,7 +7,6 @@ import {
   isWebRuntimeSessionActive
 } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
-import type { TabSplitDirection } from '@/store/slices/tabs'
 
 import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
 import type { AiVaultAgent } from '../../../shared/ai-vault-types'

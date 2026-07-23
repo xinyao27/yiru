@@ -2,7 +2,7 @@
 // without importing usePetUrl (which itself imports the store). Keeps
 // the dependency graph acyclic.
 
-import { detectFramesFromImageData, type DetectedFrame } from './sprite-frame-detection'
+import { detectFramesFromImageData, type DetectedFrame } from '@/lib/sprite-frame-detection'
 
 // Why: sandbox=true + webSecurity=true block the renderer from reading user
 // files directly. For custom pet images we fetch the bytes over IPC and

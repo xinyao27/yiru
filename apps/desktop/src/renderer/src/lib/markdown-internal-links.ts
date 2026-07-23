@@ -1,12 +1,12 @@
 import {
   isWindowsAbsolutePathLike,
   relativePathInsideRoot
-} from '../../../../shared/cross-platform-path'
+} from '../../../shared/cross-platform-path'
 import {
   filesystemPathHrefToFileUri,
   filesystemPathToFileUri,
   fileUriToFilesystemPath
-} from '../../../../shared/file-uri-path'
+} from '../../../shared/file-uri-path'
 
 // Pure classifier for markdown link targets. Called by the link-activation
 // dispatcher (activateMarkdownLink slice action) from three call sites —

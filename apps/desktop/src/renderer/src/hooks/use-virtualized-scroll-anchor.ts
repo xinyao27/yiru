@@ -8,6 +8,8 @@ import {
   type RefObject
 } from 'react'
 
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
+
 import type { ProgrammaticScrollMarks } from './programmatic-scroll-marks'
 import { createVirtualizedScrollAnchorListener } from './virtualized-scroll-anchor-listener'
 import {
@@ -25,7 +27,6 @@ export type VirtualizedScrollAnchor = {
   // recorded. Optional: anchors persisted before this field existed lack it.
   scrollTop?: number
 } | null
-export const VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT = 'yiru-record-virtualized-scroll-anchor'
 const RECORD_ANCHOR_SCROLL_IDLE_DELAY_MS = 150
 
 type UseVirtualizedScrollAnchorOptions<

@@ -2,6 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
 import { markOrchestrationSetupComplete } from '@/lib/orchestration-setup-state'
+import {
+  cachedDiscoveryByTarget,
+  INSTALLED_AGENT_SKILLS_CHANGED_EVENT,
+  pendingDiscoveryByTarget,
+  pendingDiscoverySatisfiesForcedRefreshByTarget
+} from '@/runtime/installed-agent-skill-discovery-state'
 
 import type {
   DiscoveredSkill,
@@ -9,7 +15,6 @@ import type {
   SkillDiscoveryTarget,
   SkillSourceKind
 } from '../../../shared/skills'
-import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from './installed-agent-skills-change-event'
 import { useMountedRef } from './use-mounted-ref'
 
 export const GLOBAL_AGENT_SKILL_SOURCE_KINDS = [
@@ -33,10 +38,6 @@ export type InstalledAgentSkillState = {
   skills: readonly DiscoveredSkill[]
   refresh: () => Promise<boolean>
 }
-
-let cachedDiscoveryByTarget = new Map<string, SkillDiscoveryResult>()
-let pendingDiscoveryByTarget = new Map<string, Promise<SkillDiscoveryResult>>()
-let pendingDiscoverySatisfiesForcedRefreshByTarget = new Map<string, boolean>()
 
 function normalizeSkillName(value: string): string {
   return value.trim().toLowerCase()
@@ -76,13 +77,6 @@ export function hasInstalledAgentSkillNamed(
       expected.has(normalizeSkillName(basenameFromPath(skill.directoryPath)))
     )
   })
-}
-
-export function notifyInstalledAgentSkillsChanged(): void {
-  cachedDiscoveryByTarget.clear()
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent(INSTALLED_AGENT_SKILLS_CHANGED_EVENT))
-  }
 }
 
 function normalizeSkillDiscoveryTarget(

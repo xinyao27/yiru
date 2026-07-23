@@ -1,6 +1,6 @@
+import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-import type { AgentStartedTelemetry } from '@/lib/worktree-activation'
 
 import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'

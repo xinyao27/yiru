@@ -32,7 +32,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { createProgrammaticScrollMarks } from '@/hooks/programmatic-scroll-marks'
 import {
   useVirtualizedScrollAnchor,
-  VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT,
   type VirtualizedScrollAnchor
 } from '@/hooks/use-virtualized-scroll-anchor'
 import { getVirtualizedScrollAnchorForOffset } from '@/hooks/virtualized-scroll-anchor-recording'
@@ -43,8 +42,8 @@ import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
 import { formatDiffComments } from '@/lib/diff-comments-format'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
-import '@/lib/monaco-setup'
 import { setWithLRU } from '@/lib/scroll-cache'
+import '@/lib/monaco-setup'
 import { writeRuntimeFile } from '@/runtime/runtime-file-client'
 import {
   getRuntimeGitBranchDiff,
@@ -52,6 +51,7 @@ import {
   getRuntimeGitDiff
 } from '@/runtime/runtime-git-client'
 import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'

@@ -37,8 +37,10 @@ import {
   isPrimarySelectionEnabled,
   setPrimarySelectionText
 } from '@/lib/primary-selection'
+import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import { resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
 import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
 import { consumePendingWebRuntimeSplitMirrorTelemetry } from '@/runtime/web-runtime-session'
@@ -64,7 +66,6 @@ import type {
   TerminalLayoutSnapshot,
   TuiAgent
 } from '../../../../shared/types'
-import { acquireWebviewsDragPassthrough } from '../browser-pane/webview-registry'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
 import { applyExpandedLayoutTo, restoreExpandedLayoutFrom } from './expand-collapse'
 import {
@@ -105,7 +106,6 @@ import { installTerminalImeLinuxCandidateState } from './terminal-ime-linux-cand
 import { installTerminalImeNativeTextForwarder } from './terminal-ime-native-text-forwarder'
 import { resolveTerminalJisYenInput } from './terminal-jis-yen-input'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'
-import { resolveTerminalLayoutActiveLeafId } from './terminal-layout-leaf-ids'
 import {
   createFilePathLinkProvider,
   getTerminalFileOpenHint,

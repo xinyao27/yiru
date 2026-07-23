@@ -1,11 +1,8 @@
+import { clearLiveBrowserUrl } from './browser-live-url'
 import { removeBrowserPageViewport } from './browser-page-viewport'
-import { clearLiveBrowserUrl } from './browser-runtime'
 
-// Why: the webview registry is shared coordination state between BrowserPane
-// (React component) and store-layer cleanup helpers (shutdownWorktreeBrowsers,
-// subscriber diff). Keeping it in its own non-React module breaks the cycle
-// store/slices → components → @/store that would otherwise appear if
-// destroyPersistentWebview lived in browser-pane.tsx.
+// Why: Electron guests outlive individual React panes, so their registry belongs
+// to the renderer runtime that coordinates view mounts and store cleanup.
 export const webviewRegistry = new Map<string, Electron.WebviewTag>()
 export const registeredWebContentsIds = new Map<string, number>()
 

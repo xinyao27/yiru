@@ -22,18 +22,7 @@ import type { Repo } from '../../../shared/types'
 import type { GlobalSettings } from '../../../shared/types'
 import { settingsForRepoOwner, slugByRepoId, slugCacheKey, type SlugIndex } from './repo-slug-cache'
 
-export { lookupReposBySlugFromCache } from './repo-slug-cache'
-
-/** Drop a repo's cached slug result. Call when a repo is removed or its
- *  remote URL is known to have changed (e.g. after `git remote set-url`),
- *  so the next index build re-resolves rather than serving a stale entry. */
-export function clearRepoSlugCacheEntry(repoId: string): void {
-  for (const key of slugByRepoId.keys()) {
-    if (key.endsWith(`:${repoId}`)) {
-      slugByRepoId.delete(key)
-    }
-  }
-}
+export { clearRepoSlugCacheEntry, lookupReposBySlugFromCache } from './repo-slug-cache'
 
 async function resolveRepoSlug(
   repo: Repo,

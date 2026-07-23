@@ -1,4 +1,4 @@
-import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
+import type { PRCheckDetail, PRCheckRunDetails } from '../../../shared/types'
 
 export type OpenCheckRunDetailsState = {
   contextKey: string

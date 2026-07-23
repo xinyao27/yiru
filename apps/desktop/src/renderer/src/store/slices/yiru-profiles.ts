@@ -1,7 +1,6 @@
-import { toast } from 'sonner'
 import type { StateCreator } from 'zustand'
 
-import { translate } from '@/i18n/i18n'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
 import type {
   YiruProfileAuthStatus,
@@ -88,12 +87,12 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
       return state.profile
     } catch (err) {
       console.error('Failed to create Yiru profile:', err)
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.612f7f6861', 'Failed to create profile'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'create-local',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   },
@@ -116,12 +115,12 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
     } catch (err) {
       console.error('Failed to switch Yiru profile:', err)
       set({ yiruProfileSwitching: false })
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.7d4bc516ee', 'Failed to switch profile'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'switch',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   },
@@ -130,12 +129,11 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
     try {
       const result = await window.api.yiruProfiles.transferProject(args)
       if (result.status === 'duplicate-target') {
-        toast.error(
-          translate(
-            'auto.store.slices.yiru.profiles.f518e89aa5',
-            'Project already exists in that profile'
-          )
-        )
+        publishRendererCommandResult({
+          type: 'yiru-profile',
+          operation: 'transfer',
+          outcome: 'duplicate-target'
+        })
       }
       if (result.status === 'transferred' && result.willRelaunch) {
         set({ yiruProfileSwitching: true })
@@ -143,12 +141,12 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
       return result
     } catch (err) {
       console.error('Failed to transfer Yiru profile project:', err)
-      toast.error(
-        translate('auto.store.slices.yiru.profiles.f03ae7f27b', 'Failed to transfer project'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'yiru-profile',
+        operation: 'transfer',
+        outcome: 'failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   }

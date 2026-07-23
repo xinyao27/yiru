@@ -70,6 +70,10 @@ import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence
 } from '@/lib/sleeping-agent-pane-ownership'
+import {
+  markTerminalBracketedPasteInterrupted,
+  observeTerminalBracketedPasteModeOutput
+} from '@/lib/terminal-bracketed-paste'
 import { getSystemPrefersDark } from '@/lib/terminal-theme'
 import { buildAgentResumeStartupPlan } from '@/lib/tui-agent-startup'
 import {
@@ -81,6 +85,7 @@ import {
   getSettingsForWorktreeRuntimeOwner,
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
+import type { PtyDataMeta } from '@/runtime/pty-data-meta'
 import { inspectRuntimeTerminalProcess } from '@/runtime/runtime-terminal-inspection'
 import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
@@ -195,7 +200,6 @@ import {
   registerPtyTitleSource
 } from './pty-buffer-serializer'
 import type { PtyConnectionDeps } from './pty-connection-types'
-import type { PtyDataMeta } from './pty-dispatcher'
 import { getEagerPtyBufferHandle } from './pty-dispatcher'
 import { registerPtyModelRestoreNeededHandler } from './pty-model-restore-channel'
 import {
@@ -222,10 +226,6 @@ import {
   isDocumentVisibilityProvenStale,
   registerStaleDocumentVisibilityRecovery
 } from './stale-document-visibility'
-import {
-  markTerminalBracketedPasteInterrupted,
-  observeTerminalBracketedPasteModeOutput
-} from './terminal-bracketed-paste'
 import {
   CONPTY_DA1_RESPONSE,
   DEFAULT_DA1_RESPONSE,

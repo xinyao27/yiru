@@ -157,6 +157,7 @@ export function ReviewNotesSendMenuContent({
       runNotesSend(
         () =>
           sendNotesToActiveAgentSession({
+            state: useAppStore.getState(),
             worktreeId,
             prompt,
             noteTarget: { tabId: target.tabId, leafId: target.leafId }

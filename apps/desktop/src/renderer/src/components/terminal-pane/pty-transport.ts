@@ -1,4 +1,12 @@
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
+import type { PtyDataMeta } from '@/runtime/pty-data-meta'
+import {
+  clearConsumedPreHandlerPtyExit,
+  drainPreHandlerPtyData,
+  drainPreHandlerPtyExit,
+  hasPreHandlerPtyExit,
+  isPreHandlerPtyStateDiscarded
+} from '@/runtime/pty-pre-handler-buffer'
 
 /* oxlint-disable max-lines -- Why: the PTY transport manages lifecycle, data flow,
 agent status extraction, and title tracking for terminal panes. Splitting would
@@ -30,15 +38,7 @@ import {
   ensurePtyDispatcher,
   getEagerPtyBufferHandle
 } from './pty-dispatcher'
-import type { PtyDataMeta } from './pty-dispatcher'
 import { createPtyInputWriteQueue } from './pty-input-write-queue'
-import {
-  clearConsumedPreHandlerPtyExit,
-  drainPreHandlerPtyData,
-  drainPreHandlerPtyExit,
-  hasPreHandlerPtyExit,
-  isPreHandlerPtyStateDiscarded
-} from './pty-pre-handler-buffer'
 import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty-transport-types'
 import {
   hasTerminalDisplayContent,

@@ -100,6 +100,7 @@ import { shouldShowOnboarding } from './components/onboarding/should-show-onboar
 import { onOnboardingReopened } from './components/onboarding/show-onboarding-event'
 import { shouldRenderPetOverlay } from './components/pet/pet-overlay-visibility'
 import { WorkspacePortScanner } from './components/ports/workspace-port-scanner'
+import { installRendererCommandToasts } from './components/renderer-command-toasts'
 import {
   folderRelativePathToIncludeGlob,
   selectedExplorerFolderRelativePath
@@ -115,7 +116,6 @@ import { StarNagToastHost } from './components/star-nag/star-nag-toast-host'
 import RecentTabSwitcher from './components/tab-bar/recent-tab-switcher'
 import { TelemetryFirstLaunchSurface } from './components/telemetry-first-launch-surface'
 import PinnedTabCloseDialog from './components/terminal-pane/pinned-tab-close-dialog'
-import { shutdownBufferCaptures } from './components/terminal-pane/shutdown-buffer-captures'
 import { publishTerminalViewAttributesAtAppStart } from './components/terminal-pane/terminal-appearance'
 import {
   getSystemPrefersDarkSnapshot,
@@ -175,6 +175,7 @@ import {
   setRuntimeGraphStoreStateGetter,
   setRuntimeGraphSyncEnabled
 } from './runtime/sync-runtime-graph'
+import { shutdownBufferCaptures } from './runtime/terminal-shutdown-buffer-captures'
 import { useWebSessionTabsSync } from './runtime/web-session-tabs-sync'
 import { reconnectSshTargetForRendererStartup } from './startup/ssh-startup-reconnect'
 import {
@@ -185,6 +186,10 @@ import {
 import { useAppStore } from './store'
 import { selectActiveTerminalChromeState } from './store/active-terminal-chrome-selector'
 import { selectFloatingVisibleTabCount } from './store/selectors'
+
+// Why: presentation must exist before any bootstrap action can publish a result,
+// and it must not disappear during React remounts.
+installRendererCommandToasts()
 
 // Why: agents alive during a hard kill (crash, forced update install) need a
 // reasonably fresh resume record on disk; one minute bounds the lost window

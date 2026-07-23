@@ -1,8 +1,8 @@
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
-import { translate } from '@/i18n/i18n'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
 import { buildAgentNotificationId } from '../../../../shared/agent-notification-id'
 import {
@@ -79,15 +79,8 @@ import {
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
 } from '../../../../shared/workspace-statuses'
-import {
-  getContextualTourRequestDecision,
-  hasContextualTourTarget,
-  getNextVisibleContextualTourStepIndex,
-  getPreviousVisibleContextualTourStepIndex
-} from '../../components/contextual-tours/contextual-tour-gate'
-import { revokeCustomPetBlobUrl } from '../../components/pet/pet-blob-cache'
-import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/pet-models'
 import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
+import { DEFAULT_PET_ID, isBundledPetId } from '../../lib/pet-id'
 import {
   deriveRunningAgentSendTargets,
   resolveRunningAgentSendTarget
@@ -98,6 +91,13 @@ import {
   sanitizeSetupScriptPromptDismissals
 } from '../../lib/setup-script-prompt'
 import type { YiruHookScriptKind } from '../../lib/yiru-hook-trust'
+import {
+  getContextualTourRequestDecision,
+  hasContextualTourTarget,
+  getNextVisibleContextualTourStepIndex,
+  getPreviousVisibleContextualTourStepIndex
+} from '../../runtime/contextual-tour-gate'
+import { revokeCustomPetBlobUrl } from '../../runtime/custom-pet-blob-cache'
 import { normalizeRightSidebarRoute } from '../right-sidebar-route'
 import type { AppState } from '../types'
 import { findPrevLiveWorktreeHistoryIndex } from './worktree-nav-history'
@@ -916,6 +916,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     const { activeAgentNotesSendFailureMessage, sendNotesToActiveAgentSession } =
       await import('@/lib/active-agent-note-send')
     const result = await sendNotesToActiveAgentSession({
+      state: get(),
       worktreeId: mode.worktreeId,
       prompt: mode.prompt,
       noteTarget: { tabId: target.tabId, leafId: target.leafId }
@@ -948,20 +949,19 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
             }
           : s
       )
-      const { toast } = await import('sonner')
       if (!stillCurrent()) {
         return false
       }
-      toast.error(
-        translate('auto.store.slices.ui.53883b7bc3', "Couldn't send to {{value0}}", {
-          value0: label
-        }),
-        { description: message }
-      )
+      publishRendererCommandResult({
+        type: 'agent-note-send',
+        outcome: 'failed',
+        label,
+        error: message
+      })
       return false
     }
 
-    const [{ toast }, { track }] = await Promise.all([import('sonner'), import('@/lib/telemetry')])
+    const { track } = await import('@/lib/telemetry')
     if (!stillCurrent()) {
       return false
     }
@@ -971,9 +971,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       launch_source: mode.launchSource,
       request_kind: 'followup'
     })
-    toast.success(
-      translate('auto.store.slices.ui.66e3bd7ce6', 'Sent to {{value0}}', { value0: label })
-    )
+    publishRendererCommandResult({ type: 'agent-note-send', outcome: 'succeeded', label })
     get().closeAgentSendPopoverTargetMode(mode.id, mode.instanceId)
     return true
   },

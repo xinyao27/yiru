@@ -20,11 +20,11 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+import { getLiveBrowserUrl } from '@/runtime/browser-live-url'
 
 import { redactKagiSessionToken } from '../../../../shared/browser-url'
 import { YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
 import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
-import { getLiveBrowserUrl } from '../browser-pane/browser-runtime'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import {
   getDropIndicatorClasses,

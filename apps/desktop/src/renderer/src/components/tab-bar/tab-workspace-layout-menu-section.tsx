@@ -14,8 +14,8 @@ import {
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
+import type { TabSplitDirection } from '@/lib/tab-split-direction'
 
-import type { TabSplitDirection } from '../../store/slices/tabs'
 import { canMoveTabToNewPaneColumn, moveTabToNewPaneColumn } from './tab-move-to-pane-column'
 
 const PANE_COLUMN_DIRECTIONS: TabSplitDirection[] = ['right', 'left', 'down', 'up']

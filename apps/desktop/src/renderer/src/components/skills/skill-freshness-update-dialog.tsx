@@ -25,9 +25,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { useSkillFreshness } from '@/hooks/use-skill-freshness'
 import { translate } from '@/i18n/i18n'
+import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
 import type { SkillFreshnessInventory } from '../../../../shared/skill-freshness'
 import { buildTargetedSkillUpdateCommand } from '../../../../shared/skill-freshness'

@@ -1,3 +1,9 @@
+import {
+  clearAutomaticPushTargetUpstreamStatusCache,
+  getCachedAutomaticPushTargetUpstreamStatus,
+  invalidateAutomaticPushTargetUpstreamStatusCache,
+  storeCachedAutomaticPushTargetUpstreamStatus
+} from '@/lib/push-target-upstream-refresh-cache'
 import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/runtime-git-client'
 
 import type {
@@ -14,12 +20,6 @@ import {
   shouldApplyAutomaticUpstreamRefresh,
   type AutomaticRefreshOrder
 } from './git-status-refresh-ordering'
-import {
-  clearAutomaticPushTargetUpstreamStatusCache,
-  getCachedAutomaticPushTargetUpstreamStatus,
-  invalidateAutomaticPushTargetUpstreamStatusCache,
-  storeCachedAutomaticPushTargetUpstreamStatus
-} from './push-target-upstream-refresh-cache'
 
 export type GitStatusRefreshDeps = {
   setGitStatus: (worktreeId: string, status: GitStatusResult) => void

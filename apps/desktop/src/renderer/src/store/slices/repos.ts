@@ -1,16 +1,15 @@
-import { toast } from 'sonner'
 /* eslint-disable max-lines -- Why: repo slice owns local/runtime routing,
 add/remove/reorder side effects, and cross-slice teardown. Splitting it during
 the client-server refactor would obscure the invariants this file is currently
 auditing and preserving. */
 import type { StateCreator } from 'zustand'
 
-import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { translate } from '@/i18n/i18n'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
-import { buildDismissedOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
-import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
+import { clearRepoSlugCacheEntry } from '@/lib/repo-slug-cache'
 import { filterSetupScriptPromptDismissalsToValidRepos } from '@/lib/setup-script-prompt'
+import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
 import { isPathInsideOrEqual } from '../../../../shared/cross-platform-path'
 import {
@@ -91,7 +90,6 @@ import {
   type SshRepoReconciliation
 } from './superseded-ssh-repo-rows'
 
-const ERROR_TOAST_DURATION = 60_000
 const SAFE_AUTO_FORK_SYNC_COOLDOWN_MS = 10 * 60 * 1000
 const safeAutoForkSyncAttempts = new Map<string, { attemptedAt: number; promise?: Promise<void> }>()
 
@@ -308,10 +306,7 @@ async function warnIfProjectKnownInAnotherProfile(
     if (!description) {
       return
     }
-    toast.warning(
-      translate('auto.store.slices.repos.2dcd706774', 'Project also exists in another profile'),
-      { description }
-    )
+    publishRendererCommandResult({ type: 'repository-cross-profile-duplicate', description })
   } catch (err) {
     // Why: adding a project should not fail because an advisory profile scan failed.
     console.warn('Failed to check project presence in other profiles:', err)
@@ -1419,7 +1414,7 @@ export type RepoSlice = {
     args: ProjectHostSetupDeleteArgs
   ) => Promise<ProjectHostSetupDeleteResult | null>
   setupProjectClone: (args: ProjectHostSetupCloneArgs) => Promise<ProjectHostSetupResult | null>
-  addNonGitFolder: (path: string, options?: AddRepoPathRouteOptions) => Promise<Repo | null>
+  registerNonGitFolder: (path: string, options?: AddRepoPathRouteOptions) => Promise<Repo | null>
   scanNestedRepos: (
     path: string,
     connectionId?: string,
@@ -2025,12 +2020,10 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       return result
     } catch (err) {
       console.error('Failed to import nested repos:', err)
-      toast.error(
-        translate('auto.store.slices.repos.6d3318e813', 'Failed to import repositories'),
-        {
-          description: err instanceof Error ? err.message : String(err)
-        }
-      )
+      publishRendererCommandResult({
+        type: 'repository-import-failed',
+        error: err instanceof Error ? err.message : String(err)
+      })
       return null
     }
   },
@@ -2367,27 +2360,18 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
           const status = await fetchRuntimeAddProjectPathStatus({ target, path })
           if (status?.exists !== true) {
             const hostName = getRuntimeEnvironmentDisplayName(get(), target.environmentId)
-            toast.error(
-              translate(
-                'auto.store.slices.repos.3be0f7df04',
-                'Cannot open folder on selected runtime'
-              ),
-              {
-                description: translate(
-                  'auto.store.slices.repos.15cf5319ec',
-                  '{{path}} was checked on {{hostName}}, but that host did not report a usable folder.',
-                  { path, hostName }
-                ),
-                duration: ERROR_TOAST_DURATION
-              }
-            )
+            publishRendererCommandResult({
+              type: 'repository-runtime-folder-unavailable',
+              path,
+              hostName
+            })
             return null
           }
         }
         // Why: folder mode is a capability downgrade, not a silent fallback.
         // Show an in-app confirmation dialog so users understand that worktrees,
         // SCM, PRs, and checks will be unavailable for this root. The dialog's
-        // OK handler calls addNonGitFolder to complete the flow.
+        // The dialog routes the accepted path through the folder-add command.
         const { openModal } = get()
         openModal('confirm-non-git-folder', {
           folderPath: path,
@@ -2418,18 +2402,18 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         }
       })
       if (alreadyAdded) {
-        toast.info(translate('auto.store.slices.repos.a8e4b3af5b', 'Project already added'), {
-          description: repo.displayName
+        publishRendererCommandResult({
+          type: 'repository-add',
+          outcome: 'already-added',
+          displayName: repo.displayName
         })
       } else {
-        toast.success(
-          isGitRepoKind(repo)
-            ? translate('auto.store.slices.repos.8bb3ad7935', 'Project added')
-            : translate('auto.store.slices.repos.90d129b48b', 'Folder added'),
-          {
-            description: repo.displayName
-          }
-        )
+        publishRendererCommandResult({
+          type: 'repository-add',
+          outcome: 'added',
+          projectKind: isGitRepoKind(repo) ? 'git' : 'folder',
+          displayName: repo.displayName
+        })
         // Why: the design requires the cross-profile advisory for SSH-added
         // projects too — the presence lookup already keys on connection/host.
         await warnIfProjectKnownInAnotherProfile(repo, get().activeYiruProfileId)
@@ -2438,11 +2422,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     } catch (err) {
       console.error('Failed to add project:', err)
       const message = err instanceof Error ? err.message : String(err)
-      const duration = ERROR_TOAST_DURATION
-      toast.error(translate('auto.store.slices.repos.c6e022ddfc', 'Failed to add project'), {
-        description: message,
-        duration
-      })
+      publishRendererCommandResult({ type: 'repository-add', outcome: 'failed', error: message })
       return null
     }
   },
@@ -2485,17 +2465,17 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
           projectHostSetups: nextSetups
         }
       })
-      toast.success(translate('auto.store.slices.repos.8bb3ad7935', 'Project added'), {
-        description: repo.displayName
+      publishRendererCommandResult({
+        type: 'repository-add',
+        outcome: 'added',
+        projectKind: 'git',
+        displayName: repo.displayName
       })
       return { ...result, repo, setup }
     } catch (err) {
       console.error('Failed to set up project on host:', err)
       const message = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.repos.c6e022ddfc', 'Failed to add project'), {
-        description: message,
-        duration: ERROR_TOAST_DURATION
-      })
+      publishRendererCommandResult({ type: 'repository-add', outcome: 'failed', error: message })
       return null
     }
   },
@@ -2528,10 +2508,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     } catch (err) {
       console.error('Failed to create project host setup:', err)
       const message = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.repos.c6e022ddfc', 'Failed to add project'), {
-        description: message,
-        duration: ERROR_TOAST_DURATION
-      })
+      publishRendererCommandResult({ type: 'repository-add', outcome: 'failed', error: message })
       return null
     }
   },
@@ -2576,10 +2553,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     } catch (err) {
       console.error('Failed to update project host setup:', err)
       const message = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.repos.c6e022ddfc', 'Failed to add project'), {
-        description: message,
-        duration: ERROR_TOAST_DURATION
-      })
+      publishRendererCommandResult({ type: 'repository-add', outcome: 'failed', error: message })
       return null
     }
   },
@@ -2629,10 +2603,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     } catch (err) {
       console.error('Failed to delete project host setup:', err)
       const message = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.repos.c6e022ddfc', 'Failed to add project'), {
-        description: message,
-        duration: ERROR_TOAST_DURATION
-      })
+      publishRendererCommandResult({ type: 'repository-add', outcome: 'failed', error: message })
       return null
     }
   },
@@ -2678,10 +2649,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     } catch (err) {
       console.error('Failed to clone project on host:', err)
       const message = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.repos.c6e022ddfc', 'Failed to add project'), {
-        description: message,
-        duration: ERROR_TOAST_DURATION
-      })
+      publishRendererCommandResult({ type: 'repository-add', outcome: 'failed', error: message })
       return null
     }
   },
@@ -2691,12 +2659,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     if (target.kind !== 'local') {
       // Why: OS folder pickers return client-local paths. Remote environments
       // need an explicit host path, which the Add Project dialog handles.
-      toast.error(
-        translate(
-          'auto.store.slices.repos.e649269645',
-          'Use Add Project to enter a path on the selected host.'
-        )
-      )
+      publishRendererCommandResult({ type: 'repository-add-route-required' })
       return null
     }
     const path = await window.api.repos.pickFolder()
@@ -2706,46 +2669,13 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     return get().addRepoPath(path)
   },
 
-  addNonGitFolder: async (path, options) => {
+  registerNonGitFolder: async (path, options) => {
     try {
-      const hadProjectBeforeAdd = get().repos.length > 0
-      const repo = await get().addRepoPath(path, 'folder', options)
-      if (!repo) {
-        return null
-      }
-      await markOnboardingProjectAdded('addedFolder')
-      // Why: without focusing the new folder, the UI looks unchanged after
-      // the dialog closes and users think nothing happened. Fetch the
-      // synthetic folder worktree and route through the standard activation
-      // sequence so the sidebar reveals and opens the folder the same way
-      // clicking a worktree card does. Lazy-imported to avoid a circular
-      // module load (worktree-activation imports the store root).
-      await get().fetchWorktrees(repo.id)
-      const folderWorktree = get().worktreesByRepo[repo.id]?.[0]
-      if (folderWorktree) {
-        const { activateAndRevealWorktree } = await import('../../lib/worktree-activation')
-        const onboarding = await window.api.onboarding.get().catch(() => null)
-        // Why: a new user can dismiss the wizard, then immediately add their
-        // first folder from Landing. That path skips onboarding's completeRepo
-        // hook, so carry the selected default agent into the first terminal here.
-        const startup = buildDismissedOnboardingFolderAgentStartup(
-          get().settings,
-          onboarding,
-          hadProjectBeforeAdd
-        )
-        activateAndRevealWorktree(folderWorktree.id, {
-          sidebarRevealBehavior: 'auto',
-          ...(startup ? { startup } : {})
-        })
-      }
-      return repo
+      return await get().addRepoPath(path, 'folder', options)
     } catch (err) {
       console.error('Failed to add folder:', err)
       const message = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.repos.b7e14472ae', 'Failed to add folder'), {
-        description: message,
-        duration: ERROR_TOAST_DURATION
-      })
+      publishRendererCommandResult({ type: 'repository-folder-add-failed', error: message })
       return null
     }
   },
@@ -2797,7 +2727,6 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         repoMatchesHostIdentity(repo, projectId, ownerHostId)
       )?.path
       get().evictGitHubRepoCaches(projectId, repoPath)
-      const { clearRepoSlugCacheEntry } = await import('../../lib/repo-slug-index')
       clearRepoSlugCacheEntry(projectId)
 
       // Kill PTYs for all worktrees belonging to this repo

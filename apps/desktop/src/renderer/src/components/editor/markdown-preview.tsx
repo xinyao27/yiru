@@ -46,6 +46,7 @@ import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { detectLanguage } from '@/lib/language-detect'
 import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
+import { absolutePathToFileUri, resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
 import { copyMarkdownReviewNotesForAgent } from '@/lib/markdown-review-note-copy'
 import {
   formatMarkdownReviewCardQuote,
@@ -74,7 +75,6 @@ import {
   resolveMarkdownDocLink
 } from './markdown-doc-links'
 import { extractFrontMatter } from './markdown-frontmatter'
-import { absolutePathToFileUri, resolveMarkdownLinkTarget } from './markdown-internal-links'
 import {
   getMarkdownAnnotationBlockKeyForSelection,
   isMarkdownPreviewAddReviewNoteShortcut

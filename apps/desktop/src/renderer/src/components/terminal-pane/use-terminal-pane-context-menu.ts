@@ -11,6 +11,7 @@ import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import type { ManagedPane, PaneManager } from '@/lib/pane-manager/pane-manager'
 import { runQuickCommandInNewTab } from '@/lib/run-quick-command-in-new-tab'
+import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 
@@ -24,7 +25,6 @@ import {
   prepareAgentSessionForkFromPane,
   type PreparedAgentSessionFork
 } from './terminal-agent-session-fork'
-import { pasteTerminalText } from './terminal-bracketed-paste'
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import { copyTerminalHandleForPane } from './terminal-handle-copy'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
