@@ -13,15 +13,11 @@ import { useTabAgent } from '@/lib/use-tab-agent'
 import type { TerminalTab } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
-import {
-  getDropIndicatorClasses,
-  getTitlebarTabStateClasses,
-  type DropIndicator
-} from './drop-indicator'
+import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { SortableTabContextMenu } from './sortable-tab-context-menu'
+import { getTitlebarTabStateClasses, TAB_ROOT_CLASSES } from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 import {

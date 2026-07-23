@@ -13,17 +13,3 @@ export function getDropIndicatorClasses(dropIndicator: DropIndicator): string {
   }
   return ''
 }
-
-export function getTabRootStateClasses(isActive: boolean): string {
-  return isActive
-    ? 'bg-accent text-accent-foreground'
-    : 'bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground'
-}
-
-export function getTitlebarTabStateClasses(isActive: boolean): string {
-  // Why: selected titlebar tabs in the reference differ from the strip only
-  // slightly; mixing the existing roles keeps that quiet contrast theme-safe.
-  return isActive
-    ? 'bg-[color-mix(in_srgb,var(--accent)_50%,var(--card))] text-muted-foreground'
-    : 'bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground'
-}

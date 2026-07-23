@@ -3,8 +3,11 @@ import type React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'
 
-import { getTitlebarTabStateClasses } from './drop-indicator'
-import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
+import {
+  getTitlebarTabStateClasses,
+  TAB_LEADING_ICON_CLASSES,
+  TAB_ROOT_CLASSES
+} from './tab-chrome-classes'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
 type WorkspaceSelectableTabProps = {

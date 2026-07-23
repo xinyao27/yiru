@@ -1,6 +1,7 @@
 import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
 import React from 'react'
 
+import { getSelectableControlStateClasses } from '@/components/selectable-control-state-classes'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,7 +16,6 @@ import { cn } from '@/lib/class-names'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
 import type { CheckStatus } from '../../../../shared/types'
-import { getTabRootStateClasses } from '../tab-bar/drop-indicator'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import { RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME } from './right-sidebar-titlebar-drag-regions'
 
@@ -136,7 +136,7 @@ export function ActivityBarButton({
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
               isTop ? 'my-auto h-7 w-9' : 'w-10 h-10',
               isTop
-                ? getTabRootStateClasses(active)
+                ? getSelectableControlStateClasses(active)
                 : active
                   ? 'text-foreground'
                   : 'text-muted-foreground/60 hover:text-muted-foreground'

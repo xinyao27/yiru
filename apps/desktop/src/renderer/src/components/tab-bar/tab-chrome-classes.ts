@@ -6,3 +6,11 @@ export const TAB_ROOT_CLASSES =
 // Why: the reference chrome uses compact 14px identity glyphs with an 8px
 // title gap; sharing the rule keeps every tab content type aligned.
 export const TAB_LEADING_ICON_CLASSES = 'mr-2 size-3.5 shrink-0'
+
+export function getTitlebarTabStateClasses(isActive: boolean): string {
+  // Why: selected titlebar tabs in the reference differ from the strip only
+  // slightly; mixing the existing roles keeps that quiet contrast theme-safe.
+  return isActive
+    ? 'bg-[color-mix(in_srgb,var(--accent)_50%,var(--card))] text-muted-foreground'
+    : 'bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground'
+}

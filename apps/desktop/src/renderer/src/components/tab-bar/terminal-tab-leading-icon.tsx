@@ -6,7 +6,7 @@ import { cn } from '@/lib/class-names'
 import type { TerminalTab, TuiAgent } from '../../../../shared/types'
 import { FilledBellIcon } from '../sidebar/worktree-card-helpers'
 import { ShellIcon } from './shell-icons'
-import { TAB_LEADING_ICON_CLASSES } from './tab-root-classes'
+import { TAB_LEADING_ICON_CLASSES } from './tab-chrome-classes'
 import type { TerminalTabActivityStatus } from './terminal-tab-activity-status'
 
 type TerminalTabLeadingIconProps = {

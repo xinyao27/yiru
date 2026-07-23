@@ -27,16 +27,16 @@ import type { GitFileStatus } from '../../../../shared/types'
 import type { OpenFile } from '../../store/slices/editor'
 import { STATUS_COLORS, STATUS_LABELS } from '../right-sidebar/status-display'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
-import {
-  getDropIndicatorClasses,
-  getTitlebarTabStateClasses,
-  type DropIndicator
-} from './drop-indicator'
+import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { EditorFileTabContextMenu } from './editor-file-tab-context-menu'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './sortable-tab'
+import {
+  getTitlebarTabStateClasses,
+  TAB_LEADING_ICON_CLASSES,
+  TAB_ROOT_CLASSES
+} from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 

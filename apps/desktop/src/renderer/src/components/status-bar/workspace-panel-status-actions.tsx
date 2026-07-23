@@ -1,3 +1,4 @@
+import { getSelectableControlStateClasses } from '@/components/selectable-control-state-classes'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
@@ -5,7 +6,6 @@ import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import { useAppStore } from '@/store'
 
 import { useRightSidebarActivityItems } from '../right-sidebar/use-right-sidebar-activity-items'
-import { getTabRootStateClasses } from '../tab-bar/drop-indicator'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
@@ -55,7 +55,7 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className={`size-5 ${getTabRootStateClasses(active)}`}
+                  className={`size-5 ${getSelectableControlStateClasses(active)}`}
                   aria-label={label}
                   aria-current={active ? 'page' : undefined}
                   onClick={() =>

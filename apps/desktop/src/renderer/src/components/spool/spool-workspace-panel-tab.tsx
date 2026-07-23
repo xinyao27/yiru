@@ -1,10 +1,13 @@
 import type React from 'react'
 
 import type { ActivityBarItem } from '@/components/right-sidebar/activity-bar-buttons'
-import { getTitlebarTabStateClasses } from '@/components/tab-bar/drop-indicator'
 import { preventMiddleButtonDefault } from '@/components/tab-bar/middle-button-default-guard'
+import {
+  getTitlebarTabStateClasses,
+  TAB_LEADING_ICON_CLASSES,
+  TAB_ROOT_CLASSES
+} from '@/components/tab-bar/tab-chrome-classes'
 import { TabCloseButton } from '@/components/tab-bar/tab-close-button'
-import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from '@/components/tab-bar/tab-root-classes'
 import {
   TAB_CONTAINER_WIDTH_CLASSES,
   TAB_LABEL_WIDTH_CLASSES

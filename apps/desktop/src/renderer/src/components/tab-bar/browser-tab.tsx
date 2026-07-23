@@ -26,15 +26,15 @@ import { redactKagiSessionToken } from '../../../../shared/browser-url'
 import { YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
 import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
-import {
-  getDropIndicatorClasses,
-  getTitlebarTabStateClasses,
-  type DropIndicator
-} from './drop-indicator'
+import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './sortable-tab'
+import {
+  getTitlebarTabStateClasses,
+  TAB_LEADING_ICON_CLASSES,
+  TAB_ROOT_CLASSES
+} from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 import { TabWorkspaceLayoutMenuSection } from './tab-workspace-layout-menu-section'
