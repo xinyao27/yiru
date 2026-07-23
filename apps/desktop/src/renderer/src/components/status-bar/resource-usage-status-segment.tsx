@@ -1242,11 +1242,6 @@ export function ResourceUsageStatusSegment({
                       </span>
                     </>
                   )}
-                  {iconOnly && triggerSessionCount > 0 && (
-                    <span className="text-muted-foreground text-[11px] tabular-nums">
-                      {triggerSessionCount}
-                    </span>
-                  )}
                   {daemonUnreachable && (
                     <AlertTriangle
                       className="size-3 text-yellow-500"

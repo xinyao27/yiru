@@ -69,7 +69,6 @@ import {
   selectTabAgentTypesByTabId
 } from './tab-agent-types-by-tab-id'
 import TabBarCreateEntry from './tab-bar-create-entry'
-import { TabBarWorkspacePanelMenuItems } from './tab-bar-workspace-panel-menu-items'
 import type { TabCreateEntryArgs } from './tab-create-entry-action'
 import { buildTabCreateMenuOptions, type TabCreateMenuOption } from './tab-create-menu-options'
 import { resolveWindowsShellLaunchTarget } from './windows-shell-launch'
@@ -1274,9 +1273,6 @@ function TabBarInner({
               onFocusTerminal={queueTerminalTabFocusAfterNewTabMenuClose}
             />
           </>
-        ) : null}
-        {showStaticCreateMenuItems && !terminalOnly ? (
-          <TabBarWorkspacePanelMenuItems worktreeId={worktreeId} groupId={resolvedGroupId} />
         ) : null}
       </WorkspaceTabCreateMenu>
     </div>

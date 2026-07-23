@@ -38,7 +38,6 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
   const workspaceGroups = useMemo(() => getWorkspacePortGroups(scan), [scan])
   const externalPorts = useMemo(() => getExternalWorkspacePorts(scan), [scan])
   const workspacePortCount = workspaceGroups.reduce((count, group) => count + group.ports.length, 0)
-  const totalCount = workspacePortCount + externalPorts.length
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
       setOpen(nextOpen)
@@ -103,11 +102,6 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                     )}
                     {!iconOnly && (
                       <span className="text-muted-foreground text-[11px] font-medium tabular-nums">
-                        {workspacePortCount}
-                      </span>
-                    )}
-                    {iconOnly && totalCount > 0 && (
-                      <span className="text-muted-foreground text-[11px] tabular-nums">
                         {workspacePortCount}
                       </span>
                     )}
