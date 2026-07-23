@@ -544,10 +544,6 @@ function getProviderForStartupTerminalColorReply(ptyId: string): IPtyProvider | 
   return localProvider
 }
 
-export function answerStartupTerminalColorQueriesForPty(ptyId: string, data: string): string {
-  return answerStartupTerminalColorQueries(ptyId, data, getProviderForStartupTerminalColorReply)
-}
-
 function normalizeNodePtySpawnError(err: unknown): Error {
   const rawMessage = err instanceof Error ? err.message : String(err)
   const hintedMessage = addNodePtyRecoveryHint(rawMessage)
@@ -1681,8 +1677,7 @@ export function registerPtyHandlers(
         ptyOwnership.delete(id)
         markClaudePtyExited(id)
         runtime?.onPtyExit(id, code)
-      },
-      onData: (id, data, timestamp) => runtime?.onPtyData(id, data, timestamp)
+      }
     })
   }
 
@@ -2694,24 +2689,30 @@ export function registerPtyHandlers(
         runtime?.emitDaemonPtyTransientFact(payload.id, payload.fact)
       }) ?? null
 
-    // Why: LocalPtyProvider routes data to the runtime via configure().onData,
-    // but daemon-backed providers don't have configure(). Without this, daemon
-    // PTY data never reaches the runtime's tail buffer, so terminal.read returns
-    // empty and agent-detection from raw data never fires. Runtime tails also
-    // power mobile read/stream, so they must be notified regardless of window
-    // state.
+    // Why: LocalPtyProvider reports exit through its configured cleanup hook;
+    // daemon adapters report it only through the provider event below.
     const isLocalProvider = localProvider instanceof LocalPtyProvider
 
     localDataUnsub = localProvider.onData((payload) => {
-      const outputSeq = isLocalProvider
-        ? runtime?.getPtyOutputSequence(payload.id)
-        : runtime?.onPtyData(
-            payload.id,
-            payload.data,
-            Date.now(),
-            payload.sequenceChars ?? payload.data.length
-          )
-      const rendererData = answerStartupTerminalColorQueriesForPty(payload.id, payload.data)
+      // Why: capture authority before synchronous ingestion so the model and
+      // startup shim cannot both answer if gate/subscriber state later changes.
+      const queryReplyOwner =
+        runtime?.getTerminalQueryReplyOwnerForLiveChunk(payload.id) ?? 'renderer'
+      const outputSeq = runtime?.onPtyData(
+        payload.id,
+        payload.data,
+        Date.now(),
+        payload.sequenceChars ?? payload.data.length,
+        queryReplyOwner
+      )
+      const rendererData =
+        queryReplyOwner === 'renderer'
+          ? answerStartupTerminalColorQueries(
+              payload.id,
+              payload.data,
+              getProviderForStartupTerminalColorReply
+            )
+          : payload.data
       const preservesSeq =
         rendererData === payload.data &&
         (payload.sequenceChars === undefined || payload.sequenceChars === payload.data.length)

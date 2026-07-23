@@ -6,7 +6,7 @@ vi.mock('../telemetry/client', () => ({ track: () => undefined }))
 vi.mock('./terminal-model-query-authority', () => ({
   isNativeWindowsConptyPty: () => false,
   registerConptyDa1OverrideInstaller: () => undefined,
-  shouldModelAnswerHiddenPtyQueries: () => false
+  resolveTerminalQueryReplyOwner: () => 'renderer'
 }))
 vi.mock('./terminal-view-attribute-store', () => ({
   getTerminalViewAttributes: () => null,

@@ -443,7 +443,6 @@ export type LocalPtyProviderOptions = {
   pwshAvailable?: () => boolean
   onSpawned?: (id: string) => void
   onExit?: (id: string, code: number) => void
-  onData?: (id: string, data: string, timestamp: number) => void
 }
 
 export class LocalPtyProvider implements IPtyProvider {
@@ -876,7 +875,6 @@ export class LocalPtyProvider implements IPtyProvider {
       if (heldBytes.length === 0) {
         return
       }
-      this.opts.onData?.(id, heldBytes, Date.now())
       for (const cb of dataListeners) {
         cb({ id, data: heldBytes })
       }
@@ -918,7 +916,6 @@ export class LocalPtyProvider implements IPtyProvider {
       if (data.length === 0) {
         return
       }
-      this.opts.onData?.(id, data, Date.now())
       for (const cb of dataListeners) {
         cb({ id, data })
       }

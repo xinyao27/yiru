@@ -38,14 +38,14 @@ import {
   clearPtyOwnershipForConnection,
   clearProviderPtyState,
   deletePtyOwnership,
-  setPtyOwnership,
-  answerStartupTerminalColorQueriesForPty
+  setPtyOwnership
 } from '../ipc/pty'
 import {
   recordHiddenRendererPtyDataDrop,
   shouldDropHiddenRendererPtyData
 } from '../ipc/pty-hidden-delivery-gate'
 import { notifyRemoteWorkspaceHandlers } from '../ipc/remote-workspace-events'
+import { answerStartupTerminalColorQueries } from '../ipc/terminal-startup-color-query-replies'
 import { getOpenCodePluginSource } from '../opencode/hook-service'
 import type { Store } from '../persistence'
 import { getPiAgentStatusExtensionSource } from '../pi/agent-status-extension-source'
@@ -1106,8 +1106,21 @@ export class SshRelaySession {
 
   private wireUpPtyEvents(ptyProvider: SshPtyProvider): void {
     ptyProvider.onData((payload) => {
-      const seq = this.runtime?.onPtyData(payload.id, payload.data, Date.now())
-      const rendererData = answerStartupTerminalColorQueriesForPty(payload.id, payload.data)
+      // Why: capture authority before synchronous ingestion so the model and
+      // startup shim cannot both answer if gate/subscriber state later changes.
+      const queryReplyOwner =
+        this.runtime?.getTerminalQueryReplyOwnerForLiveChunk(payload.id) ?? 'renderer'
+      const seq = this.runtime?.onPtyData(
+        payload.id,
+        payload.data,
+        Date.now(),
+        payload.data.length,
+        queryReplyOwner
+      )
+      const rendererData =
+        queryReplyOwner === 'renderer'
+          ? answerStartupTerminalColorQueries(payload.id, payload.data, () => ptyProvider)
+          : payload.data
       const win = this.getMainWindow()
       if (!win || win.isDestroyed()) {
         return

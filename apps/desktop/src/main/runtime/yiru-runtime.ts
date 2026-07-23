@@ -605,7 +605,8 @@ import { MOBILE_SUBSCRIBE_SCROLLBACK_ROWS } from './scrollback-limits'
 import {
   isNativeWindowsConptyPty,
   registerConptyDa1OverrideInstaller,
-  shouldModelAnswerHiddenPtyQueries
+  resolveTerminalQueryReplyOwner,
+  type TerminalQueryReplyOwner
 } from './terminal-model-query-authority'
 import { TerminalSessionAuthority } from './terminal-session-authority/terminal-session-authority'
 import type {
@@ -5184,7 +5185,13 @@ export class YiruRuntimeService {
    * Handles incoming data from a PTY process, running agent detection,
    * updating terminal tail buffers, and triggering foreground agent refreshes.
    */
-  onPtyData(ptyId: string, data: string, at: number, sequenceChars = data.length): number {
+  onPtyData(
+    ptyId: string,
+    data: string,
+    at: number,
+    sequenceChars = data.length,
+    queryReplyOwner = this.getTerminalQueryReplyOwnerForLiveChunk(ptyId)
+  ): number {
     const outputSequence = (this.ptyOutputSequenceById.get(ptyId) ?? 0) + sequenceChars
     this.ptyOutputSequenceById.set(ptyId, outputSequence)
     this.providerModeTrackersByPtyId.get(ptyId)?.scan(data)
@@ -5208,7 +5215,7 @@ export class YiruRuntimeService {
     // the writeChain link. A mark/setting/subscriber flip before the queued
     // emulator write runs must not change who answers (terminal-query-
     // authority.md invariant 1).
-    const forwardQueryReplies = this.shouldAnswerQueriesForLiveChunk(ptyId)
+    const forwardQueryReplies = queryReplyOwner === 'model'
     // Ordering invariant (DO NOT REORDER): maybeHydrateHeadlessFromRenderer
     // MUST run before trackHeadlessTerminalData so the eager-state pattern
     // (set headlessTerminals + writeChain head = seedPromise) is in place
@@ -6597,10 +6604,10 @@ export class YiruRuntimeService {
     this.terminalSessions.commitPtyState(ptyId, { leaves: updatedLeaves })
   }
 
-  /** Per-chunk reply-ownership capture (Phase 5). Evaluated synchronously at
-   *  ingestion only — never re-read at reply time. */
-  private shouldAnswerQueriesForLiveChunk(ptyId: string): boolean {
-    return shouldModelAnswerHiddenPtyQueries({
+  /** Per-chunk reply ownership is captured synchronously before ingestion so
+   *  provider adapters and the queued emulator write use the same decision. */
+  getTerminalQueryReplyOwnerForLiveChunk(ptyId: string): TerminalQueryReplyOwner {
+    return resolveTerminalQueryReplyOwner({
       ptyId,
       settings: this.store?.getSettings(),
       hasRemoteViewSubscriber: this.hasRemoteTerminalViewSubscriber(ptyId)
