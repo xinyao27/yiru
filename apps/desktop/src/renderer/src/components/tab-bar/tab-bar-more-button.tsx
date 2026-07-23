@@ -46,10 +46,10 @@ export function TabBarMoreButton({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon-xs"
                   aria-label={label}
-                  className="text-muted-foreground hover:text-foreground my-auto size-7 shrink-0"
+                  className="text-muted-foreground my-auto size-7 shrink-0"
                   onClick={(event) => event.stopPropagation()}
                 >
                   <MoreHorizontal className="size-4" />
