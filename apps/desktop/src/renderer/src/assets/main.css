@@ -1158,6 +1158,24 @@
   animation: settings-shell-enter 180ms ease-out;
 }
 
+[data-native-sidebar-material='true'] .settings-view-shell {
+  /* Why: fading the Settings root would briefly expose OS material through
+     the opaque content pane as the page enters. */
+  animation: none;
+}
+
+.settings-titlebar-native-sidebar-material {
+  /* Why: Settings owns its sidebar below the shared titlebar, so split the
+     titlebar surface at the same seam to keep the native material continuous. */
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(
+    to right,
+    transparent 0 var(--settings-sidebar-width),
+    var(--bg-titlebar, var(--card)) var(--settings-sidebar-width) 100%
+  );
+}
+
 .collapsible-height-content {
   overflow: hidden;
 }

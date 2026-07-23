@@ -724,10 +724,11 @@ function App(): React.JSX.Element {
   }, [settings, startupWindowBackgroundBlur])
   const windowBackgroundBlurEnabled =
     hasNativeSidebarMaterial && startupWindowBackgroundBlur === true
-  const leftSidebarStyle = useMemo(
+  const leftSidebarVariables = useMemo(
     () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark, hasNativeSidebarMaterial),
     [settings, systemPrefersDark]
-  ) as React.CSSProperties | undefined
+  )
+  const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
   const dictationState = useAppStore((s) => s.dictationState)
   const hasSshCredentialRequest = useAppStore((s) => s.sshCredentialQueue.length > 0)
   const shouldMountDictationController =
@@ -1601,6 +1602,7 @@ function App(): React.JSX.Element {
     activeView !== 'activity' &&
     activeView !== 'space' &&
     activeView !== 'skills'
+  const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
   // Why: Landing keep the full titlebar only when the sidebar is
   // collapsed; with it open, mirror workspace view so titlebar-left sits flush
   // above nav. Creation layout suppresses the full-width titlebar.
@@ -2314,6 +2316,9 @@ function App(): React.JSX.Element {
       style={
         {
           '--collapsed-sidebar-header-width': `${collapsedSidebarHeaderWidth}px`,
+          // Why: Settings renders its titlebar and navigation in sibling trees;
+          // one seam value keeps their native-material boundary aligned.
+          '--settings-sidebar-width': '280px',
           // Why: consumed by anything that needs to avoid the fixed-position
           // window-controls overlay on Windows/Linux (floating sidebar toggle,
           // right sidebar header, etc.) without hardcoding 138px in multiple
@@ -2357,8 +2362,32 @@ function App(): React.JSX.Element {
                 header above the sidebar. Settings, landing, and the tasks
                 page keep the titlebar. */}
                   {!leftTitlebarChromeLayout.shouldMount ? (
-                    <div className={TITLEBAR_CLASS_NAME}>
-                      <div className="mr-2 flex shrink-0 items-center">{titlebarLeftControls}</div>
+                    <div
+                      className={cn(
+                        TITLEBAR_CLASS_NAME,
+                        settingsNativeSidebarMaterialActive &&
+                          'settings-titlebar-native-sidebar-material'
+                      )}
+                    >
+                      {settingsNativeSidebarMaterialActive ? (
+                        <div
+                          aria-hidden
+                          className="bg-sidebar pointer-events-none absolute inset-y-0 left-0 -z-10 w-[var(--settings-sidebar-width)]"
+                          style={leftSidebarStyle}
+                        />
+                      ) : null}
+                      <div
+                        className={cn(
+                          'mr-2 flex shrink-0 items-center',
+                          settingsNativeSidebarMaterialActive &&
+                            'mr-0 w-[var(--settings-sidebar-width)]'
+                        )}
+                        // Why: only controls over the Settings rail should inherit
+                        // custom sidebar foreground and interaction colors.
+                        style={settingsNativeSidebarMaterialActive ? leftSidebarStyle : undefined}
+                      >
+                        {titlebarLeftControls}
+                      </div>
                       {titlebarMainStrip}
                     </div>
                   ) : null}
@@ -2458,12 +2487,14 @@ function App(): React.JSX.Element {
                         </RecoverableRenderErrorBoundary>
                       )
                     ) : null}
-                    {/* Why: window blur may expose the native material through
-                    translucent terminals; the default canvas stays opaque. */}
+                    {/* Why: window blur may expose native material through translucent
+                    terminals, while Settings reserves it only for the left rail. */}
                     <div
                       className={cn(
                         'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
-                        windowBackgroundBlurEnabled ? 'bg-transparent' : 'bg-background'
+                        windowBackgroundBlurEnabled || settingsNativeSidebarMaterialActive
+                          ? 'bg-transparent'
+                          : 'bg-background'
                       )}
                     >
                       {stackedSidebarOpen ? (
@@ -2510,7 +2541,9 @@ function App(): React.JSX.Element {
                                 'Retry the page or navigate to another Yiru surface.'
                               )}
                             >
-                              {activeView === 'settings' ? <Settings /> : null}
+                              {activeView === 'settings' ? (
+                                <Settings sidebarAppearanceStyle={leftSidebarStyle} />
+                              ) : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
                               {activeView === 'activity' ? <ActivityPrototypePage /> : null}

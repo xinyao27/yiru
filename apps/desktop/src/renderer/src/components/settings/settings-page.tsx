@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MutableRefObject
 } from 'react'
 import { toast } from 'sonner'
@@ -291,7 +292,11 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
 }
 
-function Settings(): React.JSX.Element {
+type SettingsProps = {
+  sidebarAppearanceStyle?: CSSProperties
+}
+
+function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element {
   const settings = useAppStore((s) => s.settings)
   const keybindings = useAppStore((s) => s.keybindings)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -1154,10 +1159,10 @@ function Settings(): React.JSX.Element {
   return (
     <div
       ref={setSettingsRootNode}
-      className="settings-view-shell bg-background flex min-h-0 flex-1 overflow-hidden"
+      className="settings-view-shell flex min-h-0 flex-1 overflow-hidden bg-transparent"
     >
       <SettingsSidebar
-        settings={settings}
+        appearanceStyle={sidebarAppearanceStyle}
         activeSectionId={activeSectionId}
         generalGroups={generalNavGroups}
         repoSections={repoNavSections}
@@ -1169,7 +1174,9 @@ function Settings(): React.JSX.Element {
         onSelectSection={scrollToSection}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      {/* Why: only the left rail should reveal the OS material; Settings content
+          remains an opaque canvas for contrast and cross-platform parity. */}
+      <div className="bg-background flex min-h-0 flex-1 flex-col">
         <div
           ref={setContentScrollNode}
           className={cn(

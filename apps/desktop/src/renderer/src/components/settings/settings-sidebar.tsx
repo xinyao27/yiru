@@ -1,20 +1,17 @@
 import { MagnifyingGlass as Search, HardDrives as Server, ArrowLeft } from '@phosphor-icons/react'
 import type { CSSProperties, RefObject } from 'react'
-import { useMemo } from 'react'
 
 import { useShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import type { SettingsNavIcon, SettingsNavInstallStatus } from '@/lib/settings-navigation-types'
 
 import type { RepoIcon } from '../../../../shared/repo-icon'
-import type { GitHubRepositoryIdentity, GlobalSettings } from '../../../../shared/types'
+import type { GitHubRepositoryIdentity } from '../../../../shared/types'
 import { RepoForkIndicator } from '../repo/repo-fork-indicator'
 import { RepoIconGlyph } from '../repo/repo-icon'
 import { SetupGuideProgressRing } from '../setup-guide/setup-guide-progress-ring'
 import { ShortcutKeyCombo } from '../shortcut-key-combo'
-import { useSystemPrefersDark } from '../terminal-pane/use-system-prefers-dark'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { useSettingsSetupGuideProgress } from './settings-setup-guide-progress'
@@ -43,7 +40,7 @@ type RepoNavSection = NavSection & {
 
 type SettingsSidebarProps = {
   activeSectionId: string
-  settings: GlobalSettings | null
+  appearanceStyle?: CSSProperties
   generalGroups: NavGroup[]
   repoSections: RepoNavSection[]
   hasRepos: boolean
@@ -119,7 +116,7 @@ function SettingsSetupGuideNavRow({
 
 export function SettingsSidebar({
   activeSectionId,
-  settings,
+  appearanceStyle,
   generalGroups,
   repoSections,
   hasRepos,
@@ -130,11 +127,6 @@ export function SettingsSidebar({
   onSelectSection
 }: SettingsSidebarProps): React.JSX.Element {
   const setupGuideProgress = useSettingsSetupGuideProgress(true)
-  const systemPrefersDark = useSystemPrefersDark()
-  const leftSidebarStyle = useMemo(
-    () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark),
-    [settings, systemPrefersDark]
-  ) as CSSProperties | undefined
   const setupActive = activeSectionId === 'setup-guide'
   // Why: "Hide from sidebar" only hides the top-left app sidebar prompt;
   // Settings should remain a stable place to reopen the checklist.
@@ -182,8 +174,8 @@ export function SettingsSidebar({
 
   return (
     <aside
-      className="worktree-sidebar-theme border-sidebar-border bg-sidebar flex w-[280px] shrink-0 flex-col border-r"
-      style={leftSidebarStyle}
+      className="worktree-sidebar-theme border-sidebar-border bg-sidebar flex w-[var(--settings-sidebar-width)] shrink-0 flex-col border-r"
+      style={appearanceStyle}
     >
       <div className="border-sidebar-border border-b px-3 py-3">
         <Button
