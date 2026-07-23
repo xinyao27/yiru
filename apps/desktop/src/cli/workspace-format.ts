@@ -7,8 +7,7 @@ import type {
   RuntimeRepoList,
   RuntimeRepoSearchRefs,
   RuntimeWorktreeListResult,
-  RuntimeWorktreePsResult,
-  RuntimeWorktreeRecord
+  RuntimeWorktreePsResult
 } from '../shared/runtime-types'
 import type { MemorySnapshot, WorktreeMemory } from '../shared/types'
 
@@ -155,7 +154,7 @@ export function formatWorktreeList(result: RuntimeWorktreeListResult): string {
     : body
 }
 
-export function formatWorktreeShow(result: { worktree: RuntimeWorktreeRecord }): string {
+export function formatWorktreeShow(result: { worktree: object }): string {
   const worktree = result.worktree
   return Object.entries(worktree)
     .map(

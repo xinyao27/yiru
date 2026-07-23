@@ -1,4 +1,8 @@
-import type { RuntimeRepoList, RuntimeRepoSearchRefs } from '../../shared/runtime-types'
+import {
+  REPO_ADD_CONTRACT,
+  REPO_LIST_CONTRACT,
+  REPO_SEARCH_REFS_CONTRACT
+} from '../../shared/runtime-method-contracts/workspace-contracts'
 import type { CommandHandler } from '../dispatch'
 import { getOptionalPositiveIntegerFlag, getRequiredStringFlag } from '../flags'
 import { formatRepoList, formatRepoRefs, formatRepoShow, printResult } from '../format'
@@ -6,12 +10,12 @@ import { resolveRepoPathArgument } from '../repo-path-arguments'
 
 export const REPO_HANDLERS: Record<string, CommandHandler> = {
   'repo list': async ({ client, json }) => {
-    const result = await client.call<RuntimeRepoList>('repo.list')
+    const result = await client.call(REPO_LIST_CONTRACT, undefined)
     printResult(result, json, formatRepoList)
   },
   'repo add': async ({ flags, client, cwd, json }) => {
     const repoPath = getRequiredStringFlag(flags, 'path')
-    const result = await client.call<{ repo: Record<string, unknown> }>('repo.add', {
+    const result = await client.call(REPO_ADD_CONTRACT, {
       path: resolveRepoPathArgument(repoPath, cwd, client.isRemote, 'Remote repo add')
     })
     printResult(result, json, formatRepoShow)
@@ -30,7 +34,7 @@ export const REPO_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatRepoShow)
   },
   'repo search-refs': async ({ flags, client, json }) => {
-    const result = await client.call<RuntimeRepoSearchRefs>('repo.searchRefs', {
+    const result = await client.call(REPO_SEARCH_REFS_CONTRACT, {
       repo: getRequiredStringFlag(flags, 'repo'),
       query: getRequiredStringFlag(flags, 'query'),
       limit: getOptionalPositiveIntegerFlag(flags, 'limit')

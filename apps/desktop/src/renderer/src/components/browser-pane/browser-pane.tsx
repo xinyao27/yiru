@@ -131,14 +131,14 @@ import {
 } from '../../../../shared/browser-viewport-presets'
 import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '../../../../shared/constants'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
+import { STATUS_GET_CONTRACT } from '../../../../shared/runtime-method-contracts/runtime-control-contracts'
 import { withBrowserPaneUiRuntimeRpcSource } from '../../../../shared/runtime-rpc-feature-interaction-source'
 import type {
   BrowserBackResult,
   BrowserGotoResult,
   BrowserReloadResult,
   BrowserScreencastResult,
-  BrowserTabInfo,
-  RuntimeStatus
+  BrowserTabInfo
 } from '../../../../shared/runtime-types'
 import type {
   BrowserCertificateProceedResult,
@@ -1634,7 +1634,7 @@ function RemoteBrowserPagePane({
       if (!operationToken || !isCurrentRemoteOperationToken(operationToken)) {
         return null
       }
-      const status = await callRuntimeRpc<RuntimeStatus>(target, 'status.get', undefined, {
+      const status = await callRuntimeRpc(target, STATUS_GET_CONTRACT, undefined, {
         timeoutMs: 15_000
       })
       if (!status.capabilities?.includes('browser.screencast.v1')) {

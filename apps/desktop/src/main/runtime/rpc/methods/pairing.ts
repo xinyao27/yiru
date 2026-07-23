@@ -8,6 +8,7 @@ import { defineMethod, type RpcAnyMethod } from '../core'
 export const PAIRING_METHODS: readonly RpcAnyMethod[] = [
   defineMethod({
     name: 'pairing.getEndpoints',
+    mobile: true,
     params: PairingGetEndpointsParamsSchema,
     handler: async (params, ctx) => {
       if (!ctx.pairing) {
@@ -18,6 +19,7 @@ export const PAIRING_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'pairing.provisionRelay',
+    mobile: true,
     params: PairingProvisionRelayParamsSchema,
     handler: async (params, ctx) => {
       if (!ctx.pairing) {

@@ -12,7 +12,12 @@ import {
   getPreferredPairingOffer,
   type KnownRuntimeEnvironment
 } from '../../shared/runtime-environments'
-import type { RuntimeStatus } from '../../shared/runtime-types'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
 import { enqueueRuntimeCall } from './runtime-environment-call-queue'
 import {
   sendRemoteRuntimeConnectionRequest,
@@ -23,6 +28,7 @@ import { attachRemoteControlDiagnostics } from './runtime-environment-status-dia
 
 const DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS = 15_000
 const sharedControlSupport = new Map<string, { cacheKey: string; check: Promise<boolean> }>()
+type RuntimeEnvironmentStatus = RuntimeMethodResult<typeof STATUS_GET_CONTRACT>
 
 export function resetSharedControlSupport(): void {
   sharedControlSupport.clear()
@@ -54,14 +60,14 @@ export async function getRuntimeEnvironmentStatus(
   userDataPath: string,
   selector: string,
   timeoutMs?: number
-): Promise<RuntimeRpcResponse<RuntimeStatus>> {
+): Promise<RuntimeRpcResponse<RuntimeEnvironmentStatus>> {
   const environment = resolveEnvironment(userDataPath, selector)
   const pairing = getPreferredPairingOffer(environment)
-  let response: RuntimeRpcResponse<RuntimeStatus>
+  let response: RuntimeRpcResponse<RuntimeEnvironmentStatus>
   try {
-    response = await sendRemoteRuntimeRequest<RuntimeStatus>(
+    response = await sendRemoteRuntimeRequest(
       pairing,
-      'status.get',
+      STATUS_GET_CONTRACT,
       undefined,
       timeoutMs ?? DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS
     )
@@ -71,7 +77,7 @@ export async function getRuntimeEnvironmentStatus(
     return attachRemoteControlDiagnostics(
       withTailscaleHintForResponse(
         {
-          id: 'status.get',
+          id: STATUS_GET_CONTRACT.name,
           ok: false,
           error: {
             code: 'runtime_unavailable',
@@ -93,14 +99,18 @@ export async function getRuntimeEnvironmentStatus(
   )
 }
 
-export async function callRuntimeEnvironment(
+type RuntimeEnvironmentResult<TContract extends string | RuntimeMethodContract> =
+  TContract extends RuntimeMethodContract ? RuntimeMethodResult<TContract> : unknown
+
+export async function callRuntimeEnvironment<TContract extends string | RuntimeMethodContract>(
   userDataPath: string,
   selector: string,
-  method: string,
-  params: unknown,
+  contract: TContract,
+  params: TContract extends RuntimeMethodContract ? RuntimeMethodParams<TContract> : unknown,
   timeoutMs?: number,
   options: { beforeSend?: () => void | Promise<void> } = {}
-): Promise<RuntimeRpcResponse<unknown>> {
+): Promise<RuntimeRpcResponse<RuntimeEnvironmentResult<TContract>>> {
+  const method = typeof contract === 'string' ? contract : contract.name
   const environment = resolveEnvironment(userDataPath, selector)
   // Why: connection failures reject (they don't resolve as ok:false), so the
   // Tailscale hint is applied to the thrown error here — wrapping the resolved
@@ -109,7 +119,7 @@ export async function callRuntimeEnvironment(
   // environment, so a re-pair between enqueue and dispatch can change it.
   let endpoint = getPreferredPairingOffer(environment).endpoint
   try {
-    return await enqueueRuntimeCall(environment.id, method, async () => {
+    return (await enqueueRuntimeCall(environment.id, method, async () => {
       const currentEnvironment = resolveEnvironment(userDataPath, environment.id)
       const pairing = getPreferredPairingOffer(currentEnvironment)
       endpoint = pairing.endpoint
@@ -122,7 +132,7 @@ export async function callRuntimeEnvironment(
         return response
       }
       if (
-        method !== 'status.get' &&
+        method !== STATUS_GET_CONTRACT.name &&
         (await supportsSharedControl(userDataPath, currentEnvironment, pairing, effectiveTimeoutMs))
       ) {
         const response = await sendRemoteRuntimeSharedControlRequest(...connectionRequest, options)
@@ -134,7 +144,7 @@ export async function callRuntimeEnvironment(
       const response = await sendRemoteRuntimeRequest(...runtimeRequest, options)
       markEnvironmentUsedFromResponse(userDataPath, currentEnvironment.id, response)
       return response
-    })
+    })) as RuntimeRpcResponse<RuntimeEnvironmentResult<TContract>>
   } catch (error) {
     if (error instanceof Error) {
       error.message = withRemoteRuntimeTailscaleHint(error.message, endpoint)
@@ -266,9 +276,9 @@ async function supportsSharedControl(
   }
   let resolvedCacheKey = cacheKey
   const check = (async () => {
-    const response = await sendRemoteRuntimeRequest<RuntimeStatus>(
+    const response = await sendRemoteRuntimeRequest(
       pairing,
-      'status.get',
+      STATUS_GET_CONTRACT,
       undefined,
       timeoutMs
     )

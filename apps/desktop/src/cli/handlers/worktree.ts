@@ -1,11 +1,12 @@
-import type {
-  RuntimeWorktreeListResult,
-  RuntimeWorktreePsResult,
-  RuntimeWorktreeRecord,
-  RuntimeWorktreeCreateResult,
-  RuntimeWorktreeRemoveResult
-} from '../../shared/runtime-types'
+import {
+  WORKTREE_CREATE_CONTRACT,
+  WORKTREE_LIST_CONTRACT,
+  WORKTREE_REMOVE_CONTRACT,
+  WORKTREE_SET_CONTRACT
+} from '../../shared/runtime-method-contracts/workspace-contracts'
+import type { RuntimeWorktreePsResult, RuntimeWorktreeRecord } from '../../shared/runtime-types'
 import { isTuiAgent } from '../../shared/tui-agent-config'
+import type { TuiAgent } from '../../shared/types'
 import { isWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace-scope'
 import type { CommandHandler } from '../dispatch'
 import {
@@ -98,7 +99,7 @@ function getPresentStringFlag(
   throw new RuntimeClientError('invalid_argument', `Missing value for --${name}`)
 }
 
-function getOptionalStartupAgent(flags: Map<string, string | boolean>): string | undefined {
+function getOptionalStartupAgent(flags: Map<string, string | boolean>): TuiAgent | undefined {
   const agent = getPresentStringFlag(flags, 'agent')
   if (agent === undefined) {
     if (flags.has('prompt')) {
@@ -174,7 +175,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatWorktreePs)
   },
   'worktree list': async ({ flags, client, json }) => {
-    const result = await client.call<RuntimeWorktreeListResult>('worktree.list', {
+    const result = await client.call(WORKTREE_LIST_CONTRACT, {
       repo: getOptionalStringFlag(flags, 'repo'),
       limit: getOptionalPositiveIntegerFlag(flags, 'limit')
     })
@@ -225,7 +226,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
         cwdParentWorktree = undefined
       }
     }
-    const result = await client.call<RuntimeWorktreeCreateResult>('worktree.create', {
+    const result = await client.call(WORKTREE_CREATE_CONTRACT, {
       repo: await getCreateRepoSelector(flags, cwdParentWorktree, client),
       name: getRequiredStringFlag(flags, 'name'),
       baseBranch: getOptionalStringFlag(flags, 'base-branch'),
@@ -253,7 +254,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
   },
   'worktree set': async ({ flags, client, cwd, json }) => {
     assertParentWorktreeFlagsCompatible(flags)
-    const result = await client.call<{ worktree: RuntimeWorktreeRecord }>('worktree.set', {
+    const result = await client.call(WORKTREE_SET_CONTRACT, {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client),
       displayName: getOptionalStringFlag(flags, 'display-name'),
       comment: getOptionalStringFlag(flags, 'comment'),
@@ -264,7 +265,7 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatWorktreeShow)
   },
   'worktree rm': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<RuntimeWorktreeRemoveResult>('worktree.rm', {
+    const result = await client.call(WORKTREE_REMOVE_CONTRACT, {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client),
       force: flags.get('force') === true,
       runHooks: flags.get('run-hooks') === true

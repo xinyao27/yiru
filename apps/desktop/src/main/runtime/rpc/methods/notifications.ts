@@ -32,6 +32,7 @@ const NotificationGetMissedSinceParams = z.object({
 export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'notifications.subscribe',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime, mobileNotifications, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
@@ -59,6 +60,7 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'notifications.unsubscribe',
+    mobile: true,
     params: NotificationUnsubscribeParams,
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)
@@ -67,6 +69,7 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'notifications.getMissedSince',
+    mobile: true,
     params: NotificationGetMissedSinceParams,
     // Why: returns only notifications with seq > lastSeenSeq. The runtime owns
     // the monotonic seq, so this is the single source of truth for what the

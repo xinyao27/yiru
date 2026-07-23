@@ -32,6 +32,11 @@ import {
   type RemoteRuntimeSocketLivenessMonitor,
   type RemoteRuntimeSocketLivenessOptions
 } from './remote-runtime-socket-liveness'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from './runtime-method-contract'
 
 export { RemoteRuntimeClientError } from './remote-runtime-client-error'
 
@@ -66,13 +71,28 @@ export type RemoteRuntimeSubscriptionCallbacks<TResult = unknown> = {
   onClose?: () => void
 }
 
-export async function sendRemoteRuntimeRequest<TResult>(
+export function sendRemoteRuntimeRequest<TContract extends RuntimeMethodContract>(
+  pairing: PairingOffer,
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>,
+  timeoutMs: number,
+  options?: { beforeSend?: () => void | Promise<void> }
+): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
+export function sendRemoteRuntimeRequest<TResult>(
   pairing: PairingOffer,
   method: string,
   params: unknown,
   timeoutMs: number,
+  options?: { beforeSend?: () => void | Promise<void> }
+): Promise<RuntimeRpcResponse<TResult>>
+export async function sendRemoteRuntimeRequest<TResult>(
+  pairing: PairingOffer,
+  contract: string | RuntimeMethodContract,
+  params: unknown,
+  timeoutMs: number,
   options: { beforeSend?: () => void | Promise<void> } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
+  const method = typeof contract === 'string' ? contract : contract.name
   return await new Promise((resolve, reject) => {
     const requestId = randomUUID()
     const keyPair = generateKeyPair()

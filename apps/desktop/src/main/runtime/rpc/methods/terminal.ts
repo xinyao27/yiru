@@ -6,6 +6,11 @@ import { z } from 'zod'
 
 import { TERMINAL_PANE_SPLIT_SOURCES } from '../../../../shared/feature-education-telemetry'
 import {
+  OptionalFiniteNumber,
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+import {
   TERMINAL_INPUT_MAX_BYTES,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   isTerminalInputTooLargeWithYield
@@ -37,7 +42,6 @@ import {
   defineStreamingMethod,
   type RpcAnyMethod
 } from '../core'
-import { OptionalFiniteNumber, OptionalString, requiredString } from '../schemas'
 
 const REQUESTED_SNAPSHOT_BYTE_BUDGET = 2 * 1024 * 1024
 const TERMINAL_STREAM_CHUNK_BYTES = 48 * 1024
@@ -1107,6 +1111,7 @@ const TerminalSetAutoRestoreFit = z.object({
 export const TERMINAL_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'terminal.list',
+    mobile: true,
     params: TerminalListParams,
     handler: async (params, { runtime }) =>
       runtime.listTerminals(params.worktree, params.limit, {
@@ -1136,6 +1141,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.read',
+    mobile: true,
     params: TerminalRead,
     handler: async (params, { runtime }) => ({
       terminal: await runtime.readTerminal(params.terminal, {
@@ -1153,6 +1159,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.isRunningAgent',
+    mobile: true,
     params: TerminalHandle,
     handler: async (params, { runtime }) => ({
       isRunningAgent: await runtime.isTerminalRunningAgent(params.terminal)
@@ -1160,6 +1167,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.agentStatus',
+    mobile: true,
     params: TerminalHandle,
     handler: async (params, { runtime }) => ({
       agentStatus: await runtime.getTerminalAgentStatus(params.terminal)
@@ -1167,6 +1175,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.rename',
+    mobile: true,
     params: TerminalRename,
     handler: async (params, { runtime }) => ({
       rename: await runtime.renameTerminal(params.terminal, params.title || null)
@@ -1174,6 +1183,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.clearBuffer',
+    mobile: true,
     params: TerminalHandle,
     handler: async (params, { runtime }) => ({
       clear: await runtime.clearTerminalBuffer(params.terminal)
@@ -1181,6 +1191,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.send',
+    mobile: true,
     params: TerminalSend,
     handler: async (params, { runtime, clientId }) => {
       await assertTerminalSendTextWithinLimit(params.text)
@@ -1389,6 +1400,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.wait',
+    mobile: true,
     params: TerminalWait,
     handler: async (params, { runtime, signal }) => ({
       wait: await runtime.waitForTerminal(params.terminal, {
@@ -1400,6 +1412,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.create',
+    mobile: true,
     params: TerminalCreateParams,
     handler: async (params, { runtime }) => ({
       terminal: await runtime.createTerminal(params.worktree, {
@@ -1473,6 +1486,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.focus',
+    mobile: true,
     params: TerminalHandle,
     handler: async (params, { runtime }) => ({
       focus: await runtime.focusTerminal(params.terminal)
@@ -1480,6 +1494,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.close',
+    mobile: true,
     params: TerminalHandle,
     handler: async (params, { runtime }) => ({
       close: await runtime.closeTerminal(params.terminal)
@@ -1487,6 +1502,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.closeTab',
+    mobile: true,
     params: TerminalHandle,
     handler: async (params, { runtime }) => ({
       close: await runtime.closeTerminalTab(params.terminal)
@@ -1494,6 +1510,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'agentTeams.tmuxCompat',
+    mobile: true,
     params: AgentTeamsTmuxCompat,
     handler: async (params, { runtime }) => ({
       tmux: await runtime.handleAgentTeamsTmuxCompat(params)
@@ -1501,6 +1518,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'agentTeams.prepareLaunch',
+    mobile: true,
     params: AgentTeamsPrepareLaunch,
     handler: async (params, { runtime }) => ({
       launch: await runtime.prepareClaudeAgentTeamsLeader({
@@ -1511,6 +1529,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.setDisplayMode',
+    mobile: true,
     params: TerminalSetDisplayMode,
     handler: async (params, { runtime }) => {
       // Why: guarded resolution — a stale handle must fail with
@@ -1560,6 +1579,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.updateViewport',
+    mobile: true,
     params: TerminalUpdateViewport,
     handler: async (params, { runtime }) => {
       // Why: guarded resolution — a stale handle must fail with
@@ -1589,6 +1609,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   // legacy subscribe as the compatibility fallback.
   defineStreamingMethod({
     name: 'terminal.multiplex',
+    mobile: true,
     params: TerminalMultiplex,
     handler: async (
       _params,
@@ -2466,6 +2487,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   // Mobile clients pass client+viewport params for server-side auto-fit.
   defineStreamingMethod({
     name: 'terminal.subscribe',
+    mobile: true,
     params: TerminalSubscribe,
     handler: async (
       params,
@@ -3347,6 +3369,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.unsubscribe',
+    mobile: true,
     params: TerminalUnsubscribe,
     handler: async (params, { runtime }) => {
       // Why: the subscribe handler now registers cleanup under a composite
@@ -3364,6 +3387,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.getAutoRestoreFit',
+    mobile: true,
     params: z.object({}),
     handler: async (_params, { runtime }) => ({
       ms: runtime.getMobileAutoRestoreFitMs()
@@ -3371,6 +3395,7 @@ export const TERMINAL_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'terminal.setAutoRestoreFit',
+    mobile: true,
     params: TerminalSetAutoRestoreFit,
     handler: async (params, { runtime }) => ({
       ms: runtime.setMobileAutoRestoreFitMs(params.ms)

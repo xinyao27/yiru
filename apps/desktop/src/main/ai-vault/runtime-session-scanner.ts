@@ -9,6 +9,7 @@ import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '@yiru/workbe
 import { z } from 'zod'
 
 import { listEnvironments } from '../../shared/runtime-environment-store'
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../shared/runtime-method-contracts/ai-vault-contracts'
 import { callRuntimeEnvironment } from '../ipc/runtime-environment-transport-routing'
 
 export type RuntimeAiVaultHostInfo = {
@@ -119,7 +120,7 @@ export async function scanRuntimeAiVaultSessions(
   const response = await callRuntimeEnvironment(
     userDataPath,
     environmentId,
-    'aiVault.listSessions',
+    AI_VAULT_LIST_SESSIONS_CONTRACT,
     {
       limit: args.limit,
       force: args.force,

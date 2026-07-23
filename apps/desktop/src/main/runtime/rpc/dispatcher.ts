@@ -30,11 +30,10 @@ import {
   mapRuntimeError,
   successResponse
 } from './errors'
-import { ALL_RPC_METHODS } from './methods'
 
 export type DispatcherOptions = {
   runtime: YiruRuntimeService
-  methods?: readonly RpcAnyMethod[]
+  methods: readonly RpcAnyMethod[]
 }
 
 export class RpcDispatcher {
@@ -42,7 +41,7 @@ export class RpcDispatcher {
   private readonly registry: RpcRegistry
   private readonly moduleContext: RpcContext
 
-  constructor({ runtime, methods = ALL_RPC_METHODS }: DispatcherOptions) {
+  constructor({ runtime, methods }: DispatcherOptions) {
     this.runtime = runtime
     this.registry = buildRegistry(methods)
     this.moduleContext = {
@@ -53,6 +52,10 @@ export class RpcDispatcher {
       emulatorCommands: runtime.emulatorCommands,
       mobileNotifications: runtime.mobileNotifications
     }
+  }
+
+  isAvailableToMobile(method: string): boolean {
+    return this.registry.get(method)?.mobile === true
   }
 
   async dispatch(request: RpcRequest, options?: { signal?: AbortSignal }): Promise<RpcResponse> {

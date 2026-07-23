@@ -3,17 +3,18 @@ import { BrowserWindow, ipcMain } from 'electron'
 
 import type {
   RuntimeBrowserDriverState,
-  RuntimeStatus,
   RuntimeSyncWindowGraphResult,
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
 } from '../../shared/runtime-types'
 import { RpcDispatcher } from '../runtime/rpc/dispatcher'
+import { ALL_RPC_METHODS } from '../runtime/rpc/methods'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 
 export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
+  const dispatcher = new RpcDispatcher({ runtime, methods: ALL_RPC_METHODS })
+
   ipcMain.removeHandler('runtime:syncWindowGraph')
-  ipcMain.removeHandler('runtime:getStatus')
   ipcMain.removeHandler('runtime:call')
 
   ipcMain.handle(
@@ -27,17 +28,13 @@ export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
     }
   )
 
-  ipcMain.handle('runtime:getStatus', (): RuntimeStatus => {
-    return runtime.getStatus()
-  })
-
   ipcMain.handle(
     'runtime:call',
     async (
       _event,
       args: { method: string; params?: unknown }
     ): Promise<RuntimeRpcResponse<unknown>> => {
-      return (await new RpcDispatcher({ runtime }).dispatch({
+      return (await dispatcher.dispatch({
         id: 'desktop-ipc',
         authToken: 'desktop-ipc',
         method: args.method,

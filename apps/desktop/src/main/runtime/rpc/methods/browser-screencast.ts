@@ -10,12 +10,14 @@ const ScreencastUnsubscribe = z.object({
 export const BROWSER_SCREENCAST_METHODS: RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'browser.screencast',
+    mobile: true,
     params: Screencast,
     handler: async (params, { browserCommands, connectionId, sendBinary, signal }, emit) =>
       browserCommands.browserScreencast(params, { connectionId, sendBinary, signal, emit })
   }),
   defineMethod({
     name: 'browser.screencast.unsubscribe',
+    mobile: true,
     params: ScreencastUnsubscribe,
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)

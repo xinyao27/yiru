@@ -43,6 +43,10 @@ import {
 } from '../../../../shared/project-host-setup-projection'
 import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
+import {
+  REPO_ADD_CONTRACT,
+  REPO_LIST_CONTRACT
+} from '../../../../shared/runtime-method-contracts/workspace-contracts'
 import type {
   GlobalSettings,
   Project,
@@ -920,7 +924,7 @@ async function fetchRepoCatalogForTarget(
     target.kind === 'local'
       ? await window.api.repos.list()
       : (
-          await callRuntimeRpc<{ repos: Repo[] }>(target, 'repo.list', undefined, {
+          await callRuntimeRpc(target, REPO_LIST_CONTRACT, undefined, {
             timeoutMs: 15_000,
             reuseRecentCompatibilityFailure: true
           })
@@ -2343,12 +2347,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
           repo = result.repo
         } else {
           repo = (
-            await callRuntimeRpc<{ repo: Repo }>(
-              target,
-              'repo.add',
-              { path, kind },
-              { timeoutMs: 15_000 }
-            )
+            await callRuntimeRpc(target, REPO_ADD_CONTRACT, { path, kind }, { timeoutMs: 15_000 })
           ).repo
         }
       } catch (err) {

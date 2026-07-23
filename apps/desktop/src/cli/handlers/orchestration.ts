@@ -8,6 +8,7 @@ import {
 } from '../flags'
 import { printResult } from '../format'
 import { RuntimeClientError } from '../runtime-client'
+import type { RuntimeRpcSuccess } from '../runtime/types'
 import { getTerminalHandle } from '../selectors'
 
 // Why: 15 s is well under Claude Code's empirical ~2 min Bash-tool silence
@@ -416,7 +417,7 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
       count: number
       formatted?: string
     }
-    let result: Awaited<ReturnType<typeof client.call<CheckResult>>>
+    let result: RuntimeRpcSuccess<CheckResult>
     try {
       result = await client.call<CheckResult>('orchestration.check', {
         terminal,

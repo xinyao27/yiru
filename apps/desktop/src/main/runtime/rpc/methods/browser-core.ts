@@ -1,5 +1,8 @@
+import {
+  BrowserTarget,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
-import { BrowserTarget, requiredString } from '../schemas'
 import {
   Check,
   Drag,
@@ -51,6 +54,7 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.goto',
+    mobile: true,
     params: Goto,
     handler: async (params, { browserCommands }) => browserCommands.browserGoto(params)
   }),
@@ -73,11 +77,13 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.back',
+    mobile: true,
     params: BrowserTarget,
     handler: async (params, { browserCommands }) => browserCommands.browserBack(params)
   }),
   defineMethod({
     name: 'browser.reload',
+    mobile: true,
     params: BrowserTarget,
     handler: async (params, { browserCommands }) => browserCommands.browserReload(params)
   }),
@@ -113,6 +119,7 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.tabCreate',
+    mobile: true,
     params: TabCreate,
     handler: async (params, { browserCommands }) => browserCommands.browserTabCreate(params)
   }),
@@ -210,6 +217,7 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.keypress',
+    mobile: true,
     params: Keypress,
     handler: async (params, { browserCommands }) => browserCommands.browserKeypress(params)
   }),
@@ -230,6 +238,7 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.forward',
+    mobile: true,
     params: BrowserTarget,
     handler: async (params, { browserCommands }) => browserCommands.browserForward(params)
   }),

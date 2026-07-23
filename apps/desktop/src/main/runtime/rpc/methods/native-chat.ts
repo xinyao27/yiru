@@ -181,6 +181,7 @@ function windowForClient(
 export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
   defineMethod({
     name: 'nativeChat.readSession',
+    mobile: true,
     params: NativeChatSession,
     handler: async (params, { clientKind }) => {
       const limit = params.limit ?? MOBILE_NATIVE_CHAT_DEFAULT_WINDOW
@@ -202,6 +203,7 @@ export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineStreamingMethod({
     name: 'nativeChat.subscribe',
+    mobile: true,
     params: NativeChatSession,
     handler: async (params, { runtime, connectionId, clientKind }, emit) => {
       let closed = false
@@ -278,6 +280,7 @@ export const NATIVE_CHAT_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'nativeChat.unsubscribe',
+    mobile: true,
     params: NativeChatUnsubscribe,
     handler: async (params, { runtime, connectionId }) => {
       const connection = connectionId ?? 'local'

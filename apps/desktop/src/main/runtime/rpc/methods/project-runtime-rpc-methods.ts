@@ -1,8 +1,11 @@
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
+import {
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalString, requiredString } from '../schemas'
 
 const ProjectHostSetupExistingFolder = z.object({
   projectId: requiredString('Missing project ID'),

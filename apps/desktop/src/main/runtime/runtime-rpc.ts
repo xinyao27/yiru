@@ -24,6 +24,7 @@ import {
   REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
 } from '../../shared/remote-runtime-request-cancellation'
 import type { RuntimeMetadata, RuntimeTransportMetadata } from '../../shared/runtime-bootstrap'
+import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
 import {
   decodeTerminalStreamFrame,
   type TerminalStreamFrame
@@ -38,6 +39,7 @@ import {
 import type { RpcRequest, RpcResponse } from './rpc/core'
 import { RpcDispatcher } from './rpc/dispatcher'
 import { errorResponse, successResponse } from './rpc/errors'
+import { ALL_RPC_METHODS } from './rpc/methods'
 import {
   MobileSocketWiring,
   type AuthenticatedMobileSocket,
@@ -152,207 +154,6 @@ function webClientPathForEndpoint(pathname: string): string {
   return `${pathname.replace(/\/$/, '')}/web-index.html`
 }
 
-const MOBILE_RPC_METHOD_ALLOWLIST = new Set([
-  'accounts.list',
-  'accounts.selectClaude',
-  'accounts.selectCodex',
-  'accounts.subscribe',
-  'accounts.unsubscribe',
-  'aiVault.listSessions',
-  'browser.back',
-  'browser.dialogAccept',
-  'browser.dialogDismiss',
-  'browser.forward',
-  'browser.goto',
-  'browser.keyboardInsertText',
-  'browser.keypress',
-  'browser.mouseDown',
-  'browser.mouseClick',
-  'browser.mouseMove',
-  'browser.mouseUp',
-  'browser.mouseWheel',
-  'browser.reload',
-  'browser.screencast',
-  'browser.screencast.unsubscribe',
-  'browser.tabCreate',
-  'browser.viewport',
-  'clipboard.abortImageUpload',
-  'clipboard.appendImageUploadChunk',
-  'clipboard.commitImageUpload',
-  'clipboard.saveImageAsTempFile',
-  'clipboard.startImageUpload',
-  'diagnostics.memory',
-  'files.browseServerDir',
-  'files.createFile',
-  'files.list',
-  'files.open',
-  'files.openDiff',
-  'files.read',
-  'files.readChunk',
-  'files.readDir',
-  'files.readPreview',
-  'files.readTerminalArtifact',
-  'files.readTerminalArtifactPreview',
-  'files.resolveTerminalPath',
-  'files.searchPaths',
-  'files.writeTerminalArtifact',
-  'folderWorkspace.list',
-  'git.abortMerge',
-  'git.abortRebase',
-  'git.bulkStage',
-  'git.bulkUnstage',
-  'git.branchCompare',
-  'git.branchDiff',
-  'git.cancelGenerateCommitMessage',
-  'git.cancelGeneratePullRequestFields',
-  'git.checkout',
-  'git.commit',
-  'git.commitCompare',
-  'git.commitDiff',
-  'git.discard',
-  'git.discoverCommitMessageModels',
-  'git.diff',
-  'git.fetch',
-  'git.forkSync',
-  'git.fastForward',
-  'git.generateCommitMessage',
-  'git.generatePullRequestFields',
-  'git.history',
-  'git.localBranches',
-  'git.pull',
-  'git.push',
-  'git.rebaseFromBase',
-  'git.stage',
-  'git.status',
-  'git.unstage',
-  'git.upstreamStatus',
-  'github.addPRComment',
-  'github.addPRReviewComment',
-  'github.addPRReviewCommentReply',
-  'github.listAssignableUsers',
-  'github.listLabels',
-  'github.listWorkItems',
-  'github.mergePR',
-  'github.setPRAutoMerge',
-  'github.requestPRReviewers',
-  'github.removePRReviewers',
-  'github.prForBranch',
-  'github.prFileContents',
-  'github.prChecks',
-  'github.prCheckDetails',
-  'github.rerunPRChecks',
-  'github.resolveReviewThread',
-  'github.setPRFileViewed',
-  'github.updatePR',
-  'github.updatePRTitle',
-  'github.updatePRState',
-  'github.repoSlug',
-  'github.workItem',
-  'github.workItemByOwnerRepo',
-  'github.workItemDetails',
-  'gitlab.addMRComment',
-  'gitlab.listMRs',
-  'gitlab.workItemByPath',
-  'gitlab.mergeMR',
-  'gitlab.resolveMRDiscussion',
-  'gitlab.updateMR',
-  'gitlab.updateMRState',
-  'gitlab.workItemDetails',
-  'host.gitBash.isAvailable',
-  'host.platform',
-  'host.pwsh.isAvailable',
-  'host.wsl.isAvailable',
-  'host.wsl.listDistros',
-  'hostedReview.create',
-  'hostedReview.forBranch',
-  'hostedReview.getCreationEligibility',
-  'markdown.readTab',
-  'markdown.saveTab',
-  'notifications.getMissedSince',
-  'notifications.subscribe',
-  'notifications.unsubscribe',
-  'pairing.getEndpoints',
-  'pairing.provisionRelay',
-  'preflight.check',
-  'preflight.detectAgents',
-  'preflight.detectRemoteAgents',
-  'projectGroup.list',
-  'repo.baseRefDefault',
-  'repo.gitAvailable',
-  'repo.hooks',
-  'repo.list',
-  'repo.saveSparsePreset',
-  'repo.searchRefs',
-  'repo.sparsePresets',
-  'repo.update',
-  'runtime.clientEvents.subscribe',
-  'runtime.clientEvents.unsubscribe',
-  'session.tabs.activate',
-  'session.tabs.close',
-  'session.tabs.createTerminal',
-  'session.tabs.list',
-  'session.tabs.listAll',
-  'session.tabs.move',
-  'session.tabs.subscribe',
-  'session.tabs.subscribeAll',
-  'session.tabs.unsubscribe',
-  'session.tabs.unsubscribeAll',
-  'nativeChat.readSession',
-  'nativeChat.subscribe',
-  'nativeChat.unsubscribe',
-  'settings.get',
-  'settings.update',
-  'ssh.connect',
-  'ssh.getState',
-  'ssh.listRemovedTargetLabels',
-  'ssh.listTargets',
-  'speech.dictation.cancel',
-  'speech.dictation.chunk',
-  'speech.dictation.finish',
-  'speech.dictation.setup',
-  'speech.dictation.start',
-  'speech.models.delete',
-  'speech.models.download',
-  'speech.models.list',
-  'stats.summary',
-  'status.get',
-  'agentTeams.prepareLaunch',
-  'agentTeams.tmuxCompat',
-  'terminal.clearBuffer',
-  'terminal.close',
-  'terminal.closeTab',
-  'terminal.create',
-  'terminal.focus',
-  'terminal.agentStatus',
-  'terminal.getAutoRestoreFit',
-  'terminal.isRunningAgent',
-  'terminal.list',
-  'terminal.multiplex',
-  'terminal.read',
-  'terminal.rename',
-  'terminal.send',
-  'terminal.setAutoRestoreFit',
-  'terminal.setDisplayMode',
-  'terminal.subscribe',
-  'terminal.unsubscribe',
-  'terminal.updateViewport',
-  'terminal.wait',
-  'ui.get',
-  'ui.recordFeatureInteraction',
-  'ui.set',
-  'worktree.activate',
-  'worktree.create',
-  'worktree.forceDeleteBranch',
-  'worktree.prefetchCreateBase',
-  'worktree.ps',
-  'worktree.show',
-  'worktree.resolveMrBase',
-  'worktree.resolvePrBase',
-  'worktree.rm',
-  'worktree.set',
-  'worktree.sleep'
-])
-
 // Why: a long-poll request is one whose handler blocks waiting for an external
 // event. This function is the single place that classifies it — the long-poll
 // counter, abort wiring, keepalives, and runtime_busy admission check all
@@ -432,7 +233,7 @@ export class YiruRuntimeRpcServer {
     webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
-    this.dispatcher = new RpcDispatcher({ runtime })
+    this.dispatcher = new RpcDispatcher({ runtime, methods: ALL_RPC_METHODS })
     this.userDataPath = userDataPath
     this.pid = pid
     this.platform = platform
@@ -1037,7 +838,7 @@ export class YiruRuntimeRpcServer {
       reply(JSON.stringify(this.buildError(request.id, 'unauthorized', 'Invalid device token')))
       return
     }
-    if (device.scope === 'mobile' && !MOBILE_RPC_METHOD_ALLOWLIST.has(request.method)) {
+    if (device.scope === 'mobile' && !this.dispatcher.isAvailableToMobile(request.method)) {
       reply(
         JSON.stringify(
           this.buildError(
@@ -1107,7 +908,7 @@ export class YiruRuntimeRpcServer {
     // Why: older/saved WebSocket pairings may not carry scope metadata, so
     // stamp the authenticated scope onto the one method that probes the runtime.
     const replyForRequest =
-      request.method === 'status.get'
+      request.method === STATUS_GET_CONTRACT.name
         ? (response: string): void => reply(injectDeviceScope(response, device.scope))
         : reply
 

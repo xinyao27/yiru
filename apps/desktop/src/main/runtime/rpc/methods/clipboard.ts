@@ -132,6 +132,7 @@ const AbortImageUpload = z.object({
 export const CLIPBOARD_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'clipboard.saveImageAsTempFile',
+    mobile: true,
     params: SaveImageAsTempFile,
     handler: async (params) =>
       saveClipboardImageBufferAsTempFile(Buffer.from(params.contentBase64, 'base64'), {
@@ -140,6 +141,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'clipboard.startImageUpload',
+    mobile: true,
     params: StartImageUpload,
     handler: (params) => {
       pruneExpiredUploads()
@@ -160,6 +162,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'clipboard.appendImageUploadChunk',
+    mobile: true,
     params: AppendImageUploadChunk,
     handler: (params) => {
       const upload = getUpload(params.uploadId)
@@ -178,6 +181,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'clipboard.commitImageUpload',
+    mobile: true,
     params: CommitImageUpload,
     handler: async (params) => {
       const upload = getUpload(params.uploadId)
@@ -199,6 +203,7 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'clipboard.abortImageUpload',
+    mobile: true,
     params: AbortImageUpload,
     handler: (params) => {
       deleteUpload(params.uploadId)

@@ -1,8 +1,11 @@
 import { z } from 'zod'
 
+import {
+  BrowserTarget,
+  OptionalFiniteNumber
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
 import { assertRpcClipboardTextWriteWithinLimit } from '../rpc-clipboard-text-validation'
-import { BrowserTarget, OptionalFiniteNumber } from '../schemas'
 import {
   ClipboardWrite,
   CookieDelete,
@@ -53,6 +56,7 @@ export const BROWSER_EXTRA_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.viewport',
+    mobile: true,
     params: Viewport,
     handler: async (params, { browserCommands }) => browserCommands.browserSetViewport(params)
   }),
@@ -78,26 +82,31 @@ export const BROWSER_EXTRA_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.mouseMove',
+    mobile: true,
     params: MouseXY,
     handler: async (params, { browserCommands }) => browserCommands.browserMouseMove(params)
   }),
   defineMethod({
     name: 'browser.mouseDown',
+    mobile: true,
     params: MouseButton,
     handler: async (params, { browserCommands }) => browserCommands.browserMouseDown(params)
   }),
   defineMethod({
     name: 'browser.mouseClick',
+    mobile: true,
     params: MouseClick,
     handler: async (params, { browserCommands }) => browserCommands.browserMouseClick(params)
   }),
   defineMethod({
     name: 'browser.mouseUp',
+    mobile: true,
     params: MouseButton,
     handler: async (params, { browserCommands }) => browserCommands.browserMouseUp(params)
   }),
   defineMethod({
     name: 'browser.mouseWheel',
+    mobile: true,
     params: MouseWheel,
     handler: async (params, { browserCommands }) => browserCommands.browserMouseWheel(params)
   }),
@@ -141,11 +150,13 @@ export const BROWSER_EXTRA_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.dialogAccept',
+    mobile: true,
     params: DialogAccept,
     handler: async (params, { browserCommands }) => browserCommands.browserDialogAccept(params)
   }),
   defineMethod({
     name: 'browser.dialogDismiss',
+    mobile: true,
     params: BrowserTarget,
     handler: async (params, { browserCommands }) => browserCommands.browserDialogDismiss(params)
   }),

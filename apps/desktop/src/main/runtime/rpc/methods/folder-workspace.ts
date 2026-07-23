@@ -1,8 +1,12 @@
 import { z } from 'zod'
 
+import {
+  OptionalFiniteNumber,
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalFiniteNumber, OptionalString, requiredString } from '../schemas'
 
 const FolderWorkspaceLinkedReview = z
   .object({
@@ -68,6 +72,7 @@ const FolderWorkspacePathStatus = z.discriminatedUnion('scope', [
 export const FOLDER_WORKSPACE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'folderWorkspace.list',
+    mobile: true,
     params: null,
     handler: (_params, { runtime }) => ({
       folderWorkspaces: runtime.listFolderWorkspaces()

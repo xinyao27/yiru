@@ -1,7 +1,3 @@
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control-ai'
-import type { GlobalSettings } from '../../../../shared/types'
-/* eslint-disable max-lines -- Why: this table is the runtime git RPC contract; splitting it would make method coverage harder to audit. */
-import { defineMethod, type RpcMethod } from '../core'
 import {
   GitBranchCompare,
   GitBranchDiff,
@@ -22,11 +18,15 @@ import {
   GitRebaseFromBase,
   GitRemoteCommitUrl,
   GitRemoteFileUrl,
-  GitStatusParams,
   GitSubmoduleStatus,
   GitTargetedRemote,
   WorktreeSelector
-} from './git-params'
+} from '../../../../shared/runtime-method-contracts/git-method-params'
+/* eslint-disable max-lines -- Why: this table is the runtime git RPC contract; splitting it would make method coverage harder to audit. */
+import { GIT_STATUS_CONTRACT } from '../../../../shared/runtime-method-contracts/source-control-contracts'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control-ai'
+import type { GlobalSettings } from '../../../../shared/types'
+import { defineMethod, type RpcMethod } from '../core'
 
 type CommitMessageGenerationOverride = {
   commitMessageAi?: GlobalSettings['commitMessageAi']
@@ -86,8 +86,7 @@ function buildCommitMessageGenerationOverride(params: {
 
 export const GIT_METHODS: RpcMethod[] = [
   defineMethod({
-    name: 'git.status',
-    params: GitStatusParams,
+    contract: GIT_STATUS_CONTRACT,
     handler: async (params, { gitCommands, signal }) => {
       const options =
         params.includeIgnored === undefined &&
@@ -124,6 +123,7 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.history',
+    mobile: true,
     params: GitHistory,
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitHistory(params.worktree, {
@@ -139,28 +139,33 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.abortMerge',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitMerge(params.worktree)
   }),
   defineMethod({
     name: 'git.abortRebase',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { gitCommands }) => gitCommands.abortRuntimeGitRebase(params.worktree)
   }),
   defineMethod({
     name: 'git.checkout',
+    mobile: true,
     params: GitCheckout,
     handler: async (params, { gitCommands }) =>
       gitCommands.checkoutRuntimeGitBranch(params.worktree, params.branch)
   }),
   defineMethod({
     name: 'git.localBranches',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { gitCommands }) =>
       gitCommands.listRuntimeGitLocalBranches(params.worktree)
   }),
   defineMethod({
     name: 'git.diff',
+    mobile: true,
     params: GitDiff,
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitDiff(
@@ -172,18 +177,21 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.branchCompare',
+    mobile: true,
     params: GitBranchCompare,
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitBranchCompare(params.worktree, params.baseRef)
   }),
   defineMethod({
     name: 'git.commitCompare',
+    mobile: true,
     params: GitCommitCompare,
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitCommitCompare(params.worktree, params.commitId)
   }),
   defineMethod({
     name: 'git.upstreamStatus',
+    mobile: true,
     params: GitTargetedRemote,
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
@@ -192,6 +200,7 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.fetch',
+    mobile: true,
     params: GitTargetedRemote,
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
@@ -200,12 +209,14 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.forkSync',
+    mobile: true,
     params: GitForkSync,
     handler: async (params, { gitCommands }) =>
       gitCommands.syncRuntimeGitForkDefaultBranch(params.worktree, params.expectedUpstream)
   }),
   defineMethod({
     name: 'git.pull',
+    mobile: true,
     params: GitTargetedRemote,
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
@@ -214,6 +225,7 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.fastForward',
+    mobile: true,
     params: GitTargetedRemote,
     handler: async (params, { gitCommands }) =>
       params.pushTarget === undefined
@@ -222,12 +234,14 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.rebaseFromBase',
+    mobile: true,
     params: GitRebaseFromBase,
     handler: async (params, { gitCommands }) =>
       gitCommands.rebaseRuntimeGitFromBase(params.worktree, params.baseRef)
   }),
   defineMethod({
     name: 'git.push',
+    mobile: true,
     params: GitPush,
     handler: async (params, { gitCommands }) =>
       gitCommands.pushRuntimeGit(
@@ -239,6 +253,7 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.branchDiff',
+    mobile: true,
     params: GitBranchDiff,
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitBranchDiff(
@@ -250,6 +265,7 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.commitDiff',
+    mobile: true,
     params: GitCommitDiff,
     handler: async (params, { gitCommands }) =>
       gitCommands.getRuntimeGitCommitDiff(params.worktree, {
@@ -261,12 +277,14 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.commit',
+    mobile: true,
     params: GitCommit,
     handler: async (params, { gitCommands }) =>
       gitCommands.commitRuntimeGit(params.worktree, params.message)
   }),
   defineMethod({
     name: 'git.generateCommitMessage',
+    mobile: true,
     params: GitGenerateCommitMessage,
     handler: async (params, { gitCommands }) => {
       const override = buildCommitMessageGenerationOverride(params)
@@ -278,6 +296,7 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.discoverCommitMessageModels',
+    mobile: true,
     params: GitDiscoverCommitMessageModels,
     handler: async (params, { gitCommands }) =>
       gitCommands.discoverRuntimeCommitMessageModels(
@@ -292,12 +311,14 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.cancelGenerateCommitMessage',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { gitCommands }) =>
       gitCommands.cancelRuntimeGenerateCommitMessage(params.worktree)
   }),
   defineMethod({
     name: 'git.generatePullRequestFields',
+    mobile: true,
     params: GitGeneratePullRequestFields,
     handler: async (params, { gitCommands }) => {
       const input = {
@@ -317,36 +338,42 @@ export const GIT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'git.cancelGeneratePullRequestFields',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { gitCommands }) =>
       gitCommands.cancelRuntimeGeneratePullRequestFields(params.worktree)
   }),
   defineMethod({
     name: 'git.stage',
+    mobile: true,
     params: GitFilePath,
     handler: async (params, { gitCommands }) =>
       gitCommands.stageRuntimeGitPath(params.worktree, params.filePath)
   }),
   defineMethod({
     name: 'git.bulkStage',
+    mobile: true,
     params: GitBulkPaths,
     handler: async (params, { gitCommands }) =>
       gitCommands.bulkStageRuntimeGitPaths(params.worktree, params.filePaths)
   }),
   defineMethod({
     name: 'git.unstage',
+    mobile: true,
     params: GitFilePath,
     handler: async (params, { gitCommands }) =>
       gitCommands.unstageRuntimeGitPath(params.worktree, params.filePath)
   }),
   defineMethod({
     name: 'git.bulkUnstage',
+    mobile: true,
     params: GitBulkPaths,
     handler: async (params, { gitCommands }) =>
       gitCommands.bulkUnstageRuntimeGitPaths(params.worktree, params.filePaths)
   }),
   defineMethod({
     name: 'git.discard',
+    mobile: true,
     params: GitFilePath,
     handler: async (params, { gitCommands }) =>
       gitCommands.discardRuntimeGitPath(params.worktree, params.filePath)

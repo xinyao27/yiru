@@ -1,6 +1,6 @@
 import { callRuntimeRpc, type RuntimeClientTarget } from '@/runtime/runtime-rpc-client'
 
-import type { RuntimeStatus } from '../../../shared/runtime-types'
+import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import type { WindowsTerminalCapabilities } from './windows-terminal-capabilities'
 
 export type WindowsTerminalCapabilityLoadTarget = RuntimeClientTarget
@@ -73,7 +73,7 @@ export async function readWindowsTerminalCapabilities(
       callRuntimeRpc<boolean>(target, 'host.gitBash.isAvailable', undefined, {
         timeoutMs: 15_000
       }).catch(() => false),
-      callRuntimeRpc<RuntimeStatus>(target, 'status.get', undefined, { timeoutMs: 15_000 })
+      callRuntimeRpc(target, STATUS_GET_CONTRACT, undefined, { timeoutMs: 15_000 })
         .then((status) => status.hostPlatform ?? null)
         .catch(() => null)
     ])

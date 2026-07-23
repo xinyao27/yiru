@@ -6,6 +6,7 @@ import type { StateCreator } from 'zustand'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 
+import { WORKTREE_SET_CONTRACT } from '../../../../shared/runtime-method-contracts/workspace-contracts'
 import type { DiffComment, Worktree } from '../../../../shared/types'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/runtime-rpc-client'
 import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-selector'
@@ -112,7 +113,7 @@ async function persist(
   }
   await callRuntimeRpc(
     target,
-    'worktree.set',
+    WORKTREE_SET_CONTRACT,
     { worktree: toRuntimeWorktreeSelector(worktreeId), diffComments },
     { timeoutMs: 15_000 }
   )

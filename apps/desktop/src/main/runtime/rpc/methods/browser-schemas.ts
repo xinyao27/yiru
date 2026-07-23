@@ -10,7 +10,7 @@ import {
   OptionalString,
   requiredStringAllowingEmpty,
   requiredString
-} from '../schemas'
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 
 export const Element = BrowserTarget.extend({
   element: requiredString('Missing required --element')

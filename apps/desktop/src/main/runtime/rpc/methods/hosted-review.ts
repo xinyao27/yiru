@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
+import { requiredString } from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
-import { requiredString } from '../schemas'
 
 const HostedReviewForBranch = z.object({
   repo: requiredString('Missing repo selector'),
@@ -47,6 +47,7 @@ const HostedReviewCreate = z.object({
 export const HOSTED_REVIEW_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'hostedReview.forBranch',
+    mobile: true,
     params: HostedReviewForBranch,
     handler: async (params, { runtime }) => {
       const fallbackGitHubPR =
@@ -66,6 +67,7 @@ export const HOSTED_REVIEW_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'hostedReview.getCreationEligibility',
+    mobile: true,
     params: HostedReviewCreationEligibility,
     handler: async (params, { runtime }) => {
       const fallbackGitHubPR =
@@ -90,6 +92,7 @@ export const HOSTED_REVIEW_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'hostedReview.create',
+    mobile: true,
     params: HostedReviewCreate,
     handler: async (params, { runtime }) =>
       runtime.createHostedReview({

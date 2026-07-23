@@ -2,13 +2,18 @@
 import { z } from 'zod'
 
 import { abbreviateOrchestrationTasks } from '../../../../shared/orchestration-task-summary'
+import {
+  OptionalFiniteNumber,
+  OptionalString,
+  OptionalBoolean,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import type { MessageType, MessagePriority, TaskStatus } from '../../orchestration/db'
 import { formatMessageBanner } from '../../orchestration/formatter'
 import { isGroupAddress, resolveGroupAddress } from '../../orchestration/groups'
 import { reconcileLifecycleMessage } from '../../orchestration/lifecycle-reconciliation'
 import { buildDispatchPreamble } from '../../orchestration/preamble'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalFiniteNumber, OptionalString, OptionalBoolean, requiredString } from '../schemas'
 import { ORCHESTRATION_GATE_METHODS } from './orchestration-gates'
 
 const MESSAGE_TYPES: MessageType[] = [

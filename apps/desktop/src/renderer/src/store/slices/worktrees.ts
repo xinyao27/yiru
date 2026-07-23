@@ -34,7 +34,12 @@ import { requestVirtualizedScrollAnchorRecord } from '@/runtime/virtualized-scro
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import type { RuntimeWorktreeListResult } from '../../../../shared/runtime-types'
+import {
+  WORKTREE_CREATE_CONTRACT,
+  WORKTREE_LIST_CONTRACT,
+  WORKTREE_REMOVE_CONTRACT,
+  WORKTREE_SET_CONTRACT
+} from '../../../../shared/runtime-method-contracts/workspace-contracts'
 import type {
   DetectedWorktreeListResult,
   TerminalLayoutSnapshot,
@@ -46,7 +51,6 @@ import type {
   Worktree,
   WorkspaceVisibleTabType,
   GitPushTarget,
-  RemoveWorktreeResult,
   WorktreeLineage,
   WorkspaceLineage,
   ProjectHostSetup,
@@ -860,9 +864,9 @@ async function listDetectedWorktreesForRepo(
     if (!isRuntimeMethodNotFoundError(error)) {
       throw error
     }
-    const legacy = await callRuntimeRpc<RuntimeWorktreeListResult>(
+    const legacy = await callRuntimeRpc(
       target,
-      'worktree.list',
+      WORKTREE_LIST_CONTRACT,
       { repo: repoId, limit: REMOTE_WORKTREE_LIST_PARITY_LIMIT },
       {
         timeoutMs: 15_000,
@@ -1013,9 +1017,9 @@ async function setWorktreeLineageForRuntime(
       lineage: await window.api.worktrees.updateLineage({ worktreeId, ...args })
     }
   }
-  const result = await callRuntimeRpc<{ worktree: WorktreeWithLineage }>(
+  const result = await callRuntimeRpc(
     target,
-    'worktree.set',
+    WORKTREE_SET_CONTRACT,
     {
       worktree: toRuntimeWorktreeSelector(worktreeId),
       ...(args.parentWorktreeId
@@ -1218,7 +1222,7 @@ async function persistWorktreeMeta(
   }
   await callRuntimeRpc(
     target,
-    'worktree.set',
+    WORKTREE_SET_CONTRACT,
     {
       worktree: toRuntimeWorktreeSelector(worktreeId),
       ...encodePushTargetClearForRuntimeRpc(updates)
@@ -2991,9 +2995,9 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           const result =
             target.kind === 'local'
               ? await window.api.worktrees.create(createArgs)
-              : await callRuntimeRpc<Awaited<ReturnType<typeof window.api.worktrees.create>>>(
+              : await callRuntimeRpc(
                   target,
-                  'worktree.create',
+                  WORKTREE_CREATE_CONTRACT,
                   {
                     repo: repoId,
                     name: candidateName,
@@ -3009,9 +3013,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
                     ...(linkedPR !== undefined ? { linkedPR } : {}),
                     ...(pushTarget ? { pushTarget } : {}),
                     ...(createdWithAgent ? { createdWithAgent } : {}),
-                    ...(pendingFirstAgentMessageRename === true && createdWithAgent
-                      ? { pendingFirstAgentMessageRename: true }
-                      : {}),
                     ...(manualOrder !== undefined ? { manualOrder } : {}),
                     ...(parentWorkspace ? { parentWorkspace } : {}),
                     ...(workspaceStatus !== undefined ? { workspaceStatus } : {}),
@@ -3245,9 +3246,9 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         ? window.api.worktrees.forgetLocal({ worktreeId, hostId })
         : target.kind === 'local'
           ? window.api.worktrees.remove({ worktreeId, hostId, force, skipArchive })
-          : callRuntimeRpc<RemoveWorktreeResult>(
+          : callRuntimeRpc(
               target,
-              'worktree.rm',
+              WORKTREE_REMOVE_CONTRACT,
               {
                 worktree: toRuntimeWorktreeSelector(worktreeId),
                 force,

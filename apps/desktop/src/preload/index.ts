@@ -109,6 +109,12 @@ import {
 } from '../shared/rich-markdown-context-menu'
 import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
 import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '../shared/runtime-method-contracts/runtime-control-contracts'
+import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
   RuntimeStatus,
@@ -451,6 +457,20 @@ document.addEventListener(
 )
 
 const startupDiagnosticsEnabled = process.env.YIRU_STARTUP_DIAGNOSTICS === '1'
+
+async function invokeRuntimeMethod<TContract extends RuntimeMethodContract>(
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>
+): Promise<RuntimeMethodResult<TContract>> {
+  const response = (await ipcRenderer.invoke('runtime:call', {
+    method: contract.name,
+    params
+  })) as RuntimeRpcResponse<RuntimeMethodResult<TContract>>
+  if (!response.ok) {
+    throw new Error(response.error.message)
+  }
+  return response.result
+}
 
 // Custom APIs for renderer
 const api = {
@@ -3613,7 +3633,7 @@ const api = {
   runtime: {
     syncWindowGraph: (graph: RuntimeSyncWindowGraph): Promise<RuntimeSyncWindowGraphResult> =>
       ipcRenderer.invoke('runtime:syncWindowGraph', graph),
-    getStatus: (): Promise<RuntimeStatus> => ipcRenderer.invoke('runtime:getStatus'),
+    getStatus: (): Promise<RuntimeStatus> => invokeRuntimeMethod(STATUS_GET_CONTRACT, undefined),
     call: (args: { method: string; params?: unknown }): Promise<RuntimeRpcResponse<unknown>> =>
       ipcRenderer.invoke('runtime:call', args),
     getTerminalFitOverrides: (): Promise<

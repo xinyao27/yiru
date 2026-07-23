@@ -14,6 +14,7 @@ const ClientEventsUnsubscribeParams = z.object({
 export const CLIENT_EVENT_METHODS: readonly RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'runtime.clientEvents.subscribe',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
@@ -39,6 +40,7 @@ export const CLIENT_EVENT_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'runtime.clientEvents.unsubscribe',
+    mobile: true,
     params: ClientEventsUnsubscribeParams,
     handler: async (params, { runtime, connectionId }) => {
       const expectedPrefix = `runtime-client-events-${connectionId ?? 'inproc'}-`

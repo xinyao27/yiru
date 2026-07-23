@@ -1,7 +1,10 @@
 import { z } from 'zod'
 
+import {
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalString, requiredString } from '../schemas'
 
 const AUDIO_BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/
 const DICTATION_SAMPLE_RATE = 16_000
@@ -52,21 +55,25 @@ const DictationSetup = z.object({
 export const SPEECH_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'speech.models.list',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime }) => runtime.listMobileSpeechModels()
   }),
   defineMethod({
     name: 'speech.models.download',
+    mobile: true,
     params: SpeechModelAction,
     handler: async (params, { runtime }) => runtime.downloadMobileSpeechModel(params.modelId)
   }),
   defineMethod({
     name: 'speech.models.delete',
+    mobile: true,
     params: SpeechModelAction,
     handler: async (params, { runtime }) => runtime.deleteMobileSpeechModel(params.modelId)
   }),
   defineMethod({
     name: 'speech.dictation.setup',
+    mobile: true,
     params: DictationSetup,
     handler: async (params, { runtime }) =>
       runtime.configureMobileDictation({
@@ -77,24 +84,28 @@ export const SPEECH_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'speech.dictation.start',
+    mobile: true,
     params: DictationStart,
     handler: async (params, { runtime, clientId, connectionId }) =>
       runtime.startMobileDictation({ ...params, clientId, connectionId })
   }),
   defineMethod({
     name: 'speech.dictation.chunk',
+    mobile: true,
     params: DictationChunk,
     handler: (params, { runtime, clientId, connectionId }) =>
       runtime.feedMobileDictation({ ...params, clientId, connectionId })
   }),
   defineMethod({
     name: 'speech.dictation.finish',
+    mobile: true,
     params: DictationHandle,
     handler: async (params, { runtime, clientId, connectionId }) =>
       runtime.finishMobileDictation({ ...params, clientId, connectionId })
   }),
   defineMethod({
     name: 'speech.dictation.cancel',
+    mobile: true,
     params: DictationHandle,
     handler: async (params, { runtime, clientId, connectionId }) =>
       runtime.cancelMobileDictation({ ...params, clientId, connectionId })

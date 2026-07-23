@@ -15,11 +15,13 @@ import {
 export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'session.tabs.list',
+    mobile: true,
     params: WorktreeTabSelector,
     handler: async (params, { runtime }) => runtime.listMobileSessionTabs(params.worktree)
   }),
   defineMethod({
     name: 'session.tabs.listAll',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime }) => ({
       snapshots: await runtime.listAllMobileSessionTabs()
@@ -27,6 +29,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'session.tabs.activate',
+    mobile: true,
     params: ActivateTab,
     handler: async (params, { runtime }) =>
       runtime.activateMobileSessionTab(params.worktree, params.tabId, params.leafId, {
@@ -35,12 +38,14 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'session.tabs.close',
+    mobile: true,
     params: ActivateTab,
     handler: async (params, { runtime }) =>
       runtime.closeMobileSessionTab(params.worktree, params.tabId)
   }),
   defineMethod({
     name: 'session.tabs.createTerminal',
+    mobile: true,
     params: CreateTerminalTab,
     handler: async (params, { runtime, signal }) =>
       runtime.createMobileSessionTerminal(params.worktree, {
@@ -64,6 +69,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'session.tabs.move',
+    mobile: true,
     params: MoveTab,
     handler: async (params, { runtime }) => {
       const base = {
@@ -115,6 +121,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineStreamingMethod({
     name: 'session.tabs.subscribe',
+    mobile: true,
     params: WorktreeTabSelector,
     handler: async (params, { runtime, connectionId, requestId }, emit) => {
       let subscribedWorktree: string | null = null
@@ -162,6 +169,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'session.tabs.unsubscribe',
+    mobile: true,
     params: SessionTabsUnsubscribe,
     handler: async (params, { runtime, connectionId }) => {
       const snapshot = await runtime.listMobileSessionTabs(params.worktree)
@@ -180,6 +188,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineStreamingMethod({
     name: 'session.tabs.subscribeAll',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime, connectionId, requestId }, emit) => {
       let unsubscribe = (): void => {}
@@ -226,6 +235,7 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'session.tabs.unsubscribeAll',
+    mobile: true,
     params: z
       .object({
         subscriptionId: z.string().min(1).optional()
@@ -244,12 +254,14 @@ export const SESSION_TAB_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'markdown.readTab',
+    mobile: true,
     params: ActivateTab,
     handler: async (params, { runtime }) =>
       runtime.readMobileMarkdownTab(params.worktree, params.tabId)
   }),
   defineMethod({
     name: 'markdown.saveTab',
+    mobile: true,
     params: SaveMarkdownTab,
     handler: async (params, { runtime }) =>
       runtime.saveMobileMarkdownTab(

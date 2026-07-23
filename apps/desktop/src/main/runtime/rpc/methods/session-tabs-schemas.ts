@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
+import { OptionalBoolean } from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import type { TuiAgent } from '../../../../shared/types'
 import { sleepingAgentLaunchConfigSchema } from '../../../../shared/workspace-session-sleeping-agents'
-import { OptionalBoolean } from '../schemas'
 
 export const WorktreeTabSelector = z.object({
   worktree: z

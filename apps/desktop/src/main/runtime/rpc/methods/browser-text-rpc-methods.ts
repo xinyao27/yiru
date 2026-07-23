@@ -21,6 +21,7 @@ export const BROWSER_TEXT_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'browser.keyboardInsertText',
+    mobile: true,
     params: KeyboardInsert,
     handler: async (params, { browserCommands }) => {
       await assertRpcClipboardTextWriteWithinLimit(params.text)

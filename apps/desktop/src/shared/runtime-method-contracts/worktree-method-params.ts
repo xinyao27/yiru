@@ -1,16 +1,16 @@
 import { z } from 'zod'
 
-import { workspaceSourceSchema } from '../../../../shared/telemetry-events'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
-import type { TuiAgent } from '../../../../shared/types'
-import { sleepingAgentLaunchConfigSchema } from '../../../../shared/workspace-session-sleeping-agents'
+import { workspaceSourceSchema } from '../telemetry-events'
+import { isTuiAgent } from '../tui-agent-config'
+import type { TuiAgent } from '../types'
+import { sleepingAgentLaunchConfigSchema } from '../workspace-session-sleeping-agents'
 import {
   OptionalBoolean,
   OptionalFiniteNumber,
   OptionalPlainString,
   OptionalString,
   TriStateLinkedReviewNumber
-} from '../schemas'
+} from './runtime-method-params'
 
 const OptionalTuiAgent = z
   .unknown()

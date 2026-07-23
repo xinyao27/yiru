@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { translate } from '@/i18n/i18n'
 
-import type { RuntimeStatus } from '../../../shared/runtime-types'
+import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import { parseWebPairingInput } from './web-pairing'
 import { WebRuntimeClient } from './web-runtime-client'
 import {
@@ -64,13 +64,15 @@ export default function WebConnect({
     const environment = createStoredWebRuntimeEnvironment({ name, offer: parsedOffer })
     const client = new WebRuntimeClient(parsedOffer)
     try {
-      const response = await client.call('status.get', undefined, { timeoutMs: 15_000 })
+      const response = await client.call(STATUS_GET_CONTRACT, undefined, {
+        timeoutMs: 15_000
+      })
       if (!response.ok) {
         throw new Error(response.error.message)
       }
       // Why: older pairing offers may not carry scope metadata. The server
       // stamps it onto status.get so those links still fail before app entry.
-      if ((response.result as RuntimeStatus | null)?.deviceScope === 'mobile') {
+      if (response.result.deviceScope === 'mobile') {
         setError(
           translate(
             'auto.web.WebConnect.mobileScopeRejected',

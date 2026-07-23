@@ -179,35 +179,41 @@ const FileUnwatch = z.object({
 export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.list',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { fileCommands }) => fileCommands.listMobileFiles(params.worktree)
   }),
   defineMethod({
     name: 'files.searchPaths',
+    mobile: true,
     params: FilePathSearch,
     handler: async (params, { fileCommands }) =>
       fileCommands.searchMobileFilePaths(params.worktree, params.query, params.limit)
   }),
   defineMethod({
     name: 'files.open',
+    mobile: true,
     params: FileOpen,
     handler: async (params, { fileCommands }) =>
       fileCommands.openMobileFile(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.openDiff',
+    mobile: true,
     params: FileOpenDiff,
     handler: async (params, { fileCommands }) =>
       fileCommands.openMobileDiff(params.worktree, params.relativePath, params.staged === true)
   }),
   defineMethod({
     name: 'files.read',
+    mobile: true,
     params: FileOpen,
     handler: async (params, { fileCommands }) =>
       fileCommands.readMobileFile(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.resolveTerminalPath',
+    mobile: true,
     params: ResolveTerminalPath,
     handler: async (params, { fileCommands, clientId }) =>
       fileCommands.resolveTerminalPath(
@@ -220,6 +226,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'files.readTerminalArtifact',
+    mobile: true,
     params: TerminalArtifactFile,
     handler: async (params, { fileCommands, clientId }) =>
       fileCommands.readTerminalArtifactFile(
@@ -231,6 +238,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'files.readTerminalArtifactPreview',
+    mobile: true,
     params: TerminalArtifactFile,
     handler: async (params, { fileCommands, clientId }) =>
       fileCommands.readTerminalArtifactPreview(
@@ -242,6 +250,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'files.writeTerminalArtifact',
+    mobile: true,
     params: TerminalArtifactFileWrite,
     handler: async (params, { fileCommands, clientId }) =>
       fileCommands.writeTerminalArtifactFile(
@@ -254,12 +263,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'files.readPreview',
+    mobile: true,
     params: FileOpen,
     handler: async (params, { fileCommands }) =>
       fileCommands.readFileExplorerPreview(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.readChunk',
+    mobile: true,
     params: FileReadChunk,
     handler: async (params, { fileCommands }) =>
       fileCommands.readFileExplorerChunk(
@@ -271,12 +282,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'files.readDir',
+    mobile: true,
     params: FileTreePath,
     handler: async (params, { fileCommands }) =>
       fileCommands.readFileExplorerDir(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.browseServerDir',
+    mobile: true,
     params: ServerDirectoryBrowse,
     handler: async (params, { runtime }) => runtime.browseServerDir(params.path)
   }),
@@ -309,6 +322,7 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'files.createFile',
+    mobile: true,
     params: FileOpen,
     handler: async (params, { fileCommands }) =>
       fileCommands.createFileExplorerFile(params.worktree, params.relativePath)

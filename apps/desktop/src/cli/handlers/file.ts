@@ -1,5 +1,6 @@
-import type { GitStatusEntry, GitStatusResult } from '@yiru/workbench-model/review'
+import type { GitStatusEntry } from '@yiru/workbench-model/review'
 
+import { GIT_STATUS_CONTRACT } from '../../shared/runtime-method-contracts/source-control-contracts'
 import type { RuntimeFileOpenResult } from '../../shared/runtime-types'
 import type { CommandHandler, HandlerContext } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'
@@ -160,7 +161,7 @@ export const FILE_HANDLERS: Record<string, CommandHandler> = {
   'file open-changed': async (ctx) => {
     const mode = getOpenChangedMode(ctx.flags)
     const worktree = await getFileWorktreeSelector(ctx)
-    const status = await ctx.client.call<GitStatusResult>('git.status', { worktree })
+    const status = await ctx.client.call(GIT_STATUS_CONTRACT, { worktree })
     const opened: FileOpenRecord[] = []
     const skipped: FileOpenRecord[] = []
     const openedEditPaths = new Set<string>()
