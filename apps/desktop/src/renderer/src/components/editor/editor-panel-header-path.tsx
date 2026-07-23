@@ -70,9 +70,9 @@ export function EditorPanelHeaderPath({
   }, [])
 
   return (
-    <div className="editor-header-text">
+    <div className="min-w-0 flex-1">
       <div
-        className="editor-header-path-row"
+        className="flex min-w-0 items-center gap-2"
         onContextMenuCapture={(event) => {
           event.preventDefault()
           window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
@@ -115,9 +115,7 @@ export function EditorPanelHeaderPath({
           <button
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent',
-              'editor-header-path',
-              canCopyHeaderPath ? '' : 'editor-header-path--static'
+              'block min-w-0 max-w-full flex-[0_1_auto] cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left font-mono text-xs leading-[1.2] text-ellipsis whitespace-nowrap text-muted-foreground outline-none hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground disabled:cursor-default disabled:text-muted-foreground disabled:hover:text-muted-foreground'
             )}
             onClick={canCopyHeaderPath ? onCopyPath : undefined}
             disabled={!canCopyHeaderPath}
@@ -127,7 +125,10 @@ export function EditorPanelHeaderPath({
           </button>
         )}
         <span
-          className={cn('editor-header-copy-toast', copiedPathVisible ? 'is-visible' : '')}
+          className={cn(
+            'pointer-events-none translate-y-0.5 shrink-0 bg-[color-mix(in_srgb,var(--accent)_72%,transparent)] px-1.5 py-0.5 text-[11px] leading-[1.2] whitespace-nowrap text-foreground opacity-0 transition-[opacity,transform] duration-[120ms] ease-[ease]',
+            copiedPathVisible && 'translate-y-0 opacity-100'
+          )}
           aria-live="polite"
         >
           {headerCopyState.copyToastLabel}

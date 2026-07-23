@@ -67,6 +67,7 @@ export function DetectedSetupPreview({
         )}
       </div>
       <textarea
+        // Why: the mixed fill keeps this editable command distinct without overpowering the prompt.
         value={setup}
         aria-label={translate(
           'auto.components.sidebar.SetupScriptPromptCardViews.fdbc6cb064',
@@ -75,7 +76,7 @@ export function DetectedSetupPreview({
         onChange={(event) => onSetupChange(event.target.value)}
         spellCheck={false}
         rows={getDetectedSetupScriptTextareaRows(setup)}
-        className="setup-script-prompt-command scrollbar-sleek border-sidebar-border text-foreground max-h-28 w-full resize-y overflow-auto rounded-md border px-2 py-1.5 font-mono text-[11px] leading-5 outline-none"
+        className="scrollbar-sleek border-sidebar-border text-foreground max-h-28 w-full resize-y overflow-auto rounded-md border bg-[color-mix(in_srgb,var(--sidebar-foreground)_2%,var(--sidebar))] px-2 py-1.5 font-mono text-[11px] leading-5 outline-none dark:bg-[color-mix(in_srgb,var(--sidebar-foreground)_8%,var(--sidebar))]"
       />
       {provenance ? (
         <p className="text-muted-foreground mt-1.5 text-[11px]">

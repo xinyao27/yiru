@@ -143,9 +143,8 @@ export function UsagePercentageDisplayChangeNotice({
       ? createPortal(
           <div
             role="status"
-            // Why: dropdowns/context menus use z-[70]; this callout must sit
-            // under them so status-bar provider menus stay clickable.
-            className="status-bar-change-notice-card fixed z-[50] w-[320px] max-w-[calc(100vw-16px)] rounded-lg p-3.5"
+            // Why: the opaque callout sits under menus, and its caret points back to the usage meter.
+            className="border-border bg-popover text-popover-foreground after:border-border after:bg-popover fixed z-[50] w-[320px] max-w-[calc(100vw-16px)] rounded-lg border p-3.5 after:absolute after:bottom-[-6px] after:left-5 after:size-3 after:rotate-45 after:border-r after:border-b after:content-['']"
             style={{
               bottom: anchorPosition.bottom,
               left: anchorPosition.left

@@ -52,10 +52,11 @@ export function CompactAgentExpansion({
   const shouldRenderChildren = expanded || hasRenderedChildrenRef.current
 
   return (
+    // Why: grid-track motion keeps virtualized card height CSS-owned and interruptible.
     <div
       className={cn(
-        'compact-agent-expansion-grid',
-        expanded && 'compact-agent-expansion-grid-expanded'
+        'grid grid-rows-[0fr] transition-[grid-template-rows] duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
+        expanded && 'grid-rows-[1fr]'
       )}
       aria-hidden={!expanded}
       inert={!expanded}
@@ -64,7 +65,9 @@ export function CompactAgentExpansion({
         {shouldRenderChildren && (
           <div
             className={cn(
-              'compact-agent-expansion-content flex flex-col gap-0.5 pt-0.5',
+              'flex flex-col gap-0.5 pt-0.5',
+              expanded &&
+                'animate-[compact-agent-expansion-reveal_180ms_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:animate-none',
               contentClassName
             )}
           >
@@ -105,7 +108,7 @@ export function CompactAgentSummaryButton({
       type="button"
       draggable={false}
       className={cn(
-        'compact-agent-summary-button group/agent-summary flex h-6 w-full min-w-0 items-center gap-1 rounded-sm',
+        'flex h-6 w-full min-w-0 items-center gap-1 rounded-sm',
         'px-1 text-left text-[11px] leading-none text-muted-foreground',
         'focus-visible:outline-none',
         // Why: the scoped sidebar accent is near-white in light mode and dark in dark
@@ -113,9 +116,7 @@ export function CompactAgentSummaryButton({
         'hover:bg-sidebar-accent/55 dark:hover:bg-sidebar-foreground/[0.035]',
         // Why: expanded is a tree header inside the card, so only the
         // standalone collapsed pill gets a resting surface and border.
-        expanded
-          ? 'compact-agent-summary-button-expanded'
-          : 'border border-sidebar-border/70 bg-sidebar-accent/35'
+        !expanded && 'border border-sidebar-border/70 bg-sidebar-accent/35'
       )}
       aria-label={
         expanded

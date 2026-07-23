@@ -128,7 +128,6 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   const hideIcon = hideIdentityIcon || agent.rowSource === 'subagent'
   const dotState = getAgentDotState(agent)
   const primary = getCompactAgentPrimary(agent)
-  const isLineageChild = agent.lineage?.depth === 1
   const secondary = getCompactAgentSecondary(agent)
   const shortTime = getCompactAgentTime(agent, now)
   const cacheTimer = usePromptCacheCountdownForPane(agent.paneKey, cacheTimerActive)
@@ -176,7 +175,7 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       {hasChildDisclosure ? (
         <button
           type="button"
-          className="compact-agent-child-disclosure-button text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm focus-visible:outline-none"
+          className="text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm focus-visible:outline-none"
           aria-label={translate(
             'auto.components.sidebar.worktree.card.compact.agents.a128d7006b',
             '{{value0}} {{value1}} child {{value2}}',
@@ -249,12 +248,12 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     <div
       draggable={false}
       className={cn(
-        'compact-agent-row group/compact-agent-row min-w-0 cursor-pointer rounded-sm px-1 text-[11px] leading-none',
-        'text-muted-foreground worktree-agent-row-hover',
-        hasChildDisclosure && 'worktree-agent-lineage-parent-row',
-        isLineageChild && 'worktree-agent-lineage-child-row',
+        'min-w-0 cursor-pointer rounded-sm px-1 text-[11px] leading-none',
+        'text-muted-foreground',
+        isFocusedPane
+          ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
+          : 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_1.25%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]',
         'flex h-6 items-center gap-1',
-        isFocusedPane && 'bg-sidebar-accent',
         sendTargetStatus === 'sending' && 'cursor-progress opacity-75',
         sendTargetStatus === 'disabled' && 'cursor-default opacity-60'
       )}

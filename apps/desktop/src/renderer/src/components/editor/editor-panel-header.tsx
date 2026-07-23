@@ -112,7 +112,7 @@ export function EditorPanelHeader({
   const nextChangeShortcut = useShortcutKeyDetails('editor.nextChange')
 
   return (
-    <div className="editor-header">
+    <div className="flex min-h-9 shrink-0 items-center gap-1 border-b border-b-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[var(--editor-surface)] px-3.5 py-1.5">
       <EditorPanelHeaderPath
         activeFile={activeFile}
         copiedPathVisible={copiedPathVisible}

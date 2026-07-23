@@ -566,60 +566,6 @@
   overflow: hidden;
 }
 
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  width: 100vw;
-  overflow: hidden;
-}
-
-/* Tab-group split resize handle — wide hit area, visible center line. */
-.tab-group-split-resize-handle {
-  flex-shrink: 0;
-  position: relative;
-  background: transparent;
-}
-
-.tab-group-split-resize-handle.is-vertical {
-  width: 6px;
-  cursor: col-resize;
-}
-
-.tab-group-split-resize-handle.is-horizontal {
-  height: 6px;
-  cursor: row-resize;
-}
-
-.tab-group-split-resize-handle::after {
-  content: '';
-  position: absolute;
-  border-radius: 1px;
-  background: var(--tab-group-split-divider);
-  transition: background 100ms ease;
-}
-
-.tab-group-split-resize-handle.is-vertical::after {
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 3px;
-  transform: translateX(-50%);
-}
-
-.tab-group-split-resize-handle.is-horizontal::after {
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 3px;
-  transform: translateY(-50%);
-}
-
-.tab-group-split-resize-handle:hover::after,
-.tab-group-split-resize-handle.is-dragging::after {
-  background: var(--tab-group-split-divider-strong);
-}
-
 /* ── Titlebar ────────────────────────────────────────── */
 
 /* Why: Radix portals (dropdowns, popovers, dialogs, sheets) render at the
@@ -647,355 +593,6 @@
   -webkit-app-region: no-drag;
 }
 
-.editor-header {
-  display: flex;
-  align-items: center;
-  /* Keep adjacent actions aligned with the app's compact toolbar spacing. */
-  gap: 4px;
-  min-height: 36px;
-  padding: 6px 14px;
-  background: var(--editor-surface);
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  flex-shrink: 0;
-}
-
-.editor-header-text {
-  min-width: 0;
-  flex: 1;
-}
-
-.editor-header-path {
-  display: block;
-  min-width: 0;
-  flex: 0 1 auto;
-  padding: 0;
-  max-width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1.2;
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    SF Mono,
-    Menlo,
-    Consolas,
-    monospace;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
-}
-
-.editor-header-path:hover,
-.editor-header-path:focus-visible {
-  color: var(--foreground);
-}
-
-.editor-header-path--static {
-  cursor: default;
-}
-
-.editor-header-path--static:hover,
-.editor-header-path--static:focus-visible {
-  color: var(--muted-foreground);
-}
-
-.editor-header-path-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.editor-header-copy-toast {
-  opacity: 0;
-  transform: translateY(2px);
-  transition:
-    opacity 120ms ease,
-    transform 120ms ease;
-  pointer-events: none;
-  flex-shrink: 0;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 72%, transparent);
-  color: var(--foreground);
-  font-size: 11px;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.editor-header-copy-toast.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── Content ─────────────────────────────────────────── */
-
-.content-area {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* ── Sidebar ─────────────────────────────────────────── */
-
-[data-file-explorer-row][data-selected='true'] {
-  /* Why: flat bg-accent ≈ panel background in light mode, so selection mixes
-     foreground into accent and adds an inset ring to stay legible in both themes. */
-  background: color-mix(in srgb, var(--foreground) 8%, var(--accent));
-  color: var(--accent-foreground);
-}
-
-[data-file-explorer-row][data-selected='true']:hover {
-  background: color-mix(in srgb, var(--foreground) 10%, var(--accent));
-}
-
-.dark [data-file-explorer-row][data-selected='true'] {
-  background: color-mix(in srgb, var(--accent) 70%, transparent);
-}
-
-.dark [data-file-explorer-row][data-selected='true']:hover {
-  background: color-mix(in srgb, var(--accent) 80%, transparent);
-}
-
-.sidebar {
-  width: 240px;
-  flex-shrink: 0;
-  background: var(--sidebar);
-  border-right: 1px solid var(--sidebar-border, var(--border));
-  overflow-y: auto;
-  overflow-x: hidden;
-  transition: width 200ms ease;
-}
-
-/* Why: light-mode sidebar-accent/40 is nearly invisible on the sidebar, while
-   agent rows stack on top of the card hover. Keep nested rows quieter than the
-   workspace card without changing the established dark-mode balance. */
-.worktree-sidebar-card-hover:hover {
-  background: color-mix(in srgb, var(--sidebar-foreground) 4%, transparent);
-}
-
-.dark .worktree-sidebar-card-hover:hover {
-  background: color-mix(in srgb, var(--sidebar-accent) 40%, transparent);
-}
-
-[data-worktree-card-surface][data-worktree-card-active='primary'] {
-  border-color: color-mix(in srgb, var(--sidebar-border) 40%, transparent);
-  background: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
-}
-
-.dark [data-worktree-card-surface][data-worktree-card-active='primary'] {
-  background: color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
-}
-
-[data-worktree-card-surface][data-worktree-card-active='secondary'] {
-  border-color: color-mix(in srgb, var(--sidebar-ring) 25%, transparent);
-  background: color-mix(in srgb, var(--sidebar-accent) 45%, transparent);
-}
-
-.dark [data-worktree-card-surface][data-worktree-card-active='secondary'] {
-  border-color: color-mix(in srgb, var(--sidebar-ring) 28%, transparent);
-  background: color-mix(in srgb, var(--sidebar-accent) 34%, transparent);
-}
-
-.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--sidebar-foreground) 1.25%, transparent);
-}
-
-.worktree-agent-row-hover[data-focused-agent-pane='true'] {
-  /* Why: a borderless fill. --sidebar-accent ≈ --sidebar in light mode, so the
-     selection wash mixes sidebar-foreground into the accent to stay legible
-     without going so dark that muted text (timestamp) drops out. */
-  background: color-mix(in srgb, var(--sidebar-foreground) 12%, var(--sidebar-accent));
-}
-
-.dark .worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-.dark .worktree-agent-row-hover[data-focused-agent-pane='true'] {
-  background: color-mix(in srgb, var(--accent) 70%, transparent);
-}
-
-/* Why: sidebar-accent sits too close to sidebar for this persistent prompt;
-   a foreground mix creates the requested light/dark separation without a new token. */
-.setup-script-prompt-card {
-  background: color-mix(in srgb, var(--sidebar-foreground) 5%, var(--sidebar));
-}
-
-.dark .setup-script-prompt-card {
-  background: color-mix(in srgb, var(--sidebar-foreground) 12%, var(--sidebar));
-}
-
-/* Why: one-shot sidebar education cards need stronger separation than the
-   scoped sidebar accent, which sits close to the left-rail surface. */
-.worktree-sidebar-notice-card {
-  position: relative;
-  border: 1px solid color-mix(in srgb, var(--sidebar-foreground) 24%, var(--sidebar-border));
-  background: color-mix(in srgb, var(--sidebar-foreground) 9%, var(--sidebar));
-}
-
-.dark .worktree-sidebar-notice-card {
-  border-color: color-mix(in srgb, var(--sidebar-foreground) 32%, var(--sidebar-border));
-  background: color-mix(in srgb, var(--sidebar-foreground) 14%, var(--sidebar));
-}
-
-/* Why: the project-order notice sits directly under the Projects header; a
-   caret aligned to that label reads as a callout instead of a random card. */
-.worktree-sidebar-notice-card--to-section-title::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: 1.75rem;
-  width: 10px;
-  height: 10px;
-  transform: rotate(45deg);
-  border-left: 1px solid color-mix(in srgb, var(--sidebar-foreground) 24%, var(--sidebar-border));
-  border-top: 1px solid color-mix(in srgb, var(--sidebar-foreground) 24%, var(--sidebar-border));
-  background: color-mix(in srgb, var(--sidebar-foreground) 9%, var(--sidebar));
-}
-
-.dark .worktree-sidebar-notice-card--to-section-title::before {
-  border-left-color: color-mix(in srgb, var(--sidebar-foreground) 32%, var(--sidebar-border));
-  border-top-color: color-mix(in srgb, var(--sidebar-foreground) 32%, var(--sidebar-border));
-  background: color-mix(in srgb, var(--sidebar-foreground) 14%, var(--sidebar));
-}
-
-/* Why: one-shot status-bar callout is portaled fixed above the meters.
-   Its opaque popover surface keeps titlebar and terminal chrome from bleeding through. */
-.status-bar-change-notice-card {
-  border: 1px solid var(--border);
-  background: var(--popover);
-  color: var(--popover-foreground);
-}
-
-/* Why: caret points down at the usage meters this notice explains. */
-.status-bar-change-notice-card::after {
-  content: '';
-  position: absolute;
-  left: 1.25rem;
-  bottom: -6px;
-  width: 12px;
-  height: 12px;
-  transform: rotate(45deg);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  background: var(--popover);
-}
-
-/* Why: anchor the optional setup card over the emulator without blurring the
-   device preview, which read as a rendering glitch. */
-.mobile-emulator-agent-setup-guide-scrim {
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--background) 92%, transparent),
-    transparent
-  );
-  pointer-events: none;
-}
-
-/* Why: the detected command is editable, but a pure app-background fill reads
-   like a black box in dark mode and overpowers the prompt card. */
-.setup-script-prompt-command {
-  background: color-mix(in srgb, var(--sidebar-foreground) 2%, var(--sidebar));
-}
-
-.dark .setup-script-prompt-command {
-  background: color-mix(in srgb, var(--sidebar-foreground) 8%, var(--sidebar));
-}
-
-.worktree-agent-lineage-parent-row {
-  /* Why: inline orchestration trees have two chevron levels; the manager row
-     needs a structural cue that is quieter than the workspace card chrome. */
-  background: color-mix(in srgb, var(--sidebar-foreground) 3%, var(--sidebar));
-}
-
-.worktree-agent-lineage-parent-row.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--sidebar-foreground) 6%, var(--sidebar));
-}
-
-.dark .worktree-agent-lineage-parent-row {
-  background: color-mix(in srgb, var(--accent) 22%, var(--sidebar));
-}
-
-.dark .worktree-agent-lineage-parent-row.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--accent) 30%, var(--sidebar));
-}
-
-.worktree-agent-lineage-child-row {
-  position: relative;
-  background: color-mix(in srgb, var(--sidebar) 74%, var(--background));
-}
-
-.worktree-agent-lineage-child-row.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--sidebar-foreground) 4%, var(--sidebar));
-}
-
-.worktree-agent-lineage-child-row::before {
-  content: '';
-  position: absolute;
-  left: 0.15rem;
-  top: 50%;
-  width: 0.35rem;
-  border-top: 1px solid color-mix(in srgb, var(--sidebar-foreground) 20%, transparent);
-}
-
-.dark .worktree-agent-lineage-child-row {
-  background: color-mix(in srgb, var(--accent) 10%, var(--sidebar));
-}
-
-.dark .worktree-agent-lineage-child-row.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--accent) 18%, var(--sidebar));
-}
-
-.dark .worktree-agent-lineage-child-row::before {
-  border-top-color: color-mix(in srgb, var(--accent) 42%, transparent);
-}
-
-.worktree-agent-lineage-children {
-  margin-left: 0.75rem;
-  padding-left: 0.25rem;
-  border-left: 1px solid color-mix(in srgb, var(--sidebar-foreground) 22%, transparent);
-}
-
-.dark .worktree-agent-lineage-children {
-  border-left-color: color-mix(in srgb, var(--accent) 28%, transparent);
-}
-
-.worktree-agent-send-target-button {
-  /* Why: the row remains an ordinary agent row during send-target mode; the
-     action itself carries the AI target border so the clickable affordance
-     is explicit without boxing the whole session. */
-  border-color: color-mix(in srgb, var(--ai-action-accent) 72%, transparent);
-  background: color-mix(in srgb, var(--ai-action-accent) 12%, transparent);
-  color: var(--foreground);
-}
-
-.worktree-agent-send-target-button:hover {
-  border-color: color-mix(in srgb, var(--ai-action-accent) 88%, transparent);
-  background: color-mix(in srgb, var(--ai-action-accent) 18%, transparent);
-}
-
-.worktree-agent-send-target-button:focus-visible {
-  outline: none;
-}
-
-/* Why: the virtualized card row is height-measured; animate the grid track
-   instead of explicit height so the reveal stays CSS-owned and interruptible. */
-.compact-agent-expansion-grid {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.compact-agent-expansion-grid-expanded {
-  grid-template-rows: 1fr;
-}
-
 /* Why: keyframes run when the content mounts already in its final state. */
 @keyframes compact-agent-expansion-reveal {
   from {
@@ -1005,89 +602,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.compact-agent-expansion-grid-expanded .compact-agent-expansion-content {
-  animation: compact-agent-expansion-reveal 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Why: the collapsed summary still uses pill spacing, while expanded compact
-   agents read as a quiet tree inside the existing worktree card. */
-.compact-agent-summary-panel {
-  padding: 2px;
-  border-radius: var(--radius-sm, 0.25rem);
-  background: transparent;
-  transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.compact-agent-summary-panel-expanded {
-  background: transparent;
-}
-
-[data-compact-agent-list='true'] {
-  margin-inline-start: -0.5rem;
-  width: calc(100% + 0.5rem);
-}
-
-/* Why: compact expanded agents live inside an already-framed worktree card.
-   Keep the tree legible with indentation and interaction states instead of
-   stacking row cards and shaded panels. */
-[data-compact-agent-list='true'] .compact-agent-row.worktree-agent-lineage-parent-row,
-[data-compact-agent-list='true'] .compact-agent-row.worktree-agent-lineage-child-row {
-  background: transparent;
-}
-
-[data-compact-agent-list='true'] .compact-agent-row.worktree-agent-lineage-child-row::before {
-  content: none;
-}
-
-[data-compact-agent-list='true']
-  .compact-agent-row.worktree-agent-lineage-parent-row.worktree-agent-row-hover:hover,
-[data-compact-agent-list='true']
-  .compact-agent-row.worktree-agent-lineage-child-row.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--sidebar-foreground) 1.25%, transparent);
-}
-
-.dark
-  [data-compact-agent-list='true']
-  .compact-agent-row.worktree-agent-lineage-parent-row.worktree-agent-row-hover:hover,
-.dark
-  [data-compact-agent-list='true']
-  .compact-agent-row.worktree-agent-lineage-child-row.worktree-agent-row-hover:hover {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-[data-compact-agent-list='true']
-  .compact-agent-row.worktree-agent-row-hover[data-focused-agent-pane='true'] {
-  background: color-mix(in srgb, var(--sidebar-foreground) 12%, var(--sidebar-accent));
-}
-
-.dark
-  [data-compact-agent-list='true']
-  .compact-agent-row.worktree-agent-row-hover[data-focused-agent-pane='true'] {
-  background: color-mix(in srgb, var(--accent) 70%, transparent);
-}
-
-[data-compact-agent-list='true'] .worktree-agent-lineage-children {
-  border-left-color: color-mix(in srgb, var(--sidebar-foreground) 16%, transparent);
-}
-
-.dark [data-compact-agent-list='true'] .worktree-agent-lineage-children {
-  border-left-color: color-mix(in srgb, var(--accent) 20%, transparent);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .compact-agent-expansion-grid {
-    transition-duration: 0ms;
-  }
-
-  .compact-agent-expansion-grid-expanded .compact-agent-expansion-content {
-    animation-duration: 0ms;
-  }
-
-  .compact-agent-summary-panel {
-    transition-duration: 0ms;
   }
 }
 
@@ -1154,22 +668,6 @@
   }
 }
 
-.settings-view-shell {
-  animation: settings-shell-enter 180ms ease-out;
-}
-
-.collapsible-height-content {
-  overflow: hidden;
-}
-
-.collapsible-height-content[data-state='open'] {
-  animation: collapsible-down 200ms ease-out;
-}
-
-.collapsible-height-content[data-state='closed'] {
-  animation: collapsible-up 180ms ease-out;
-}
-
 @keyframes collapsible-down {
   from {
     height: 0;
@@ -1192,12 +690,6 @@
     height: 0;
     opacity: 0;
   }
-}
-
-.sidebar.collapsed {
-  width: 0;
-  border-right: none;
-  overflow: hidden;
 }
 
 [data-worktree-sidebar-drag-preview='true'] {
@@ -1228,54 +720,6 @@
   font-weight: 700;
 }
 
-.sidebar-header {
-  padding: 12px 16px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted-foreground);
-}
-
-.worktree-list {
-  padding: 0 4px;
-}
-
-.worktree-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 120ms;
-}
-
-.worktree-item:hover {
-  background: var(--accent);
-}
-
-.worktree-item.active {
-  background: var(--accent);
-}
-
-.worktree-branch {
-  font-size: 13px;
-  font-family: inherit;
-  color: var(--foreground);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.worktree-path {
-  font-size: 11px;
-  color: var(--muted-foreground);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* ── Misc ────────────────────────────────────────────── */
 
 .number-input-clean {
@@ -1286,51 +730,6 @@
 .number-input-clean::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-
-/* ── Landing ─────────────────────────────────────────── */
-
-.landing {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--background);
-}
-
-.landing-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.landing-title {
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--muted-foreground);
-  letter-spacing: -0.02em;
-}
-
-.landing-action {
-  background: var(--secondary);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  font-family: inherit;
-  font-size: 14px;
-  padding: 8px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 150ms;
-}
-
-.landing-action:hover {
-  background: var(--accent);
-}
-
-.landing-hint {
-  font-size: 12px;
-  color: var(--muted-foreground);
 }
 
 /* ── fix: ensure Monaco find widget layout is not reversed ── */
@@ -1530,14 +929,6 @@
   }
 }
 
-.animate-update-card-enter {
-  animation: update-card-enter 200ms ease-out both;
-}
-
-.animate-update-card-exit {
-  animation: update-card-exit 150ms ease-in both;
-}
-
 /* Waveform bars in the FeatureTipsModal voice tip — purely decorative. */
 @keyframes waveform {
   0%,
@@ -1549,11 +940,6 @@
     transform: scaleY(1);
     opacity: 1;
   }
-}
-
-.animate-waveform {
-  animation: waveform 1.4s ease-in-out infinite;
-  transform-origin: center;
 }
 
 /* CLI feature tip — terminal cursor inside the agent-control command. */
@@ -1568,10 +954,6 @@
   }
 }
 
-.animate-cli-tip-caret {
-  animation: cli-tip-caret 0.9s steps(1, end) infinite;
-}
-
 @keyframes cli-tip-command-line {
   0% {
     opacity: 0;
@@ -1580,22 +962,6 @@
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.animate-cli-tip-command-line {
-  animation: cli-tip-command-line 160ms ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-cli-tip-caret {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-
-  .animate-cli-tip-command-line {
-    animation: none;
   }
 }
 
@@ -1633,22 +999,7 @@
 
 /* Cmd+J feature tip — JS-driven sequence (keypress → palette → typing → results).
    The keypress press-down and palette entrance are handled inline by React state
-   transitions; this file only defines the caret blink and the results fade-in. */
-
-/* Blinking caret for the simulated command-palette input while "typing". */
-@keyframes cmd-j-tip-caret {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-
-.animate-cmd-j-tip-caret {
-  animation: cmd-j-tip-caret 1s step-end infinite;
-}
+   transitions; this file only defines the results fade-in keyframes. */
 
 /* Worktree rows fade in when the palette opens — mirrors the real palette,
    which shows recent worktrees on empty query and filters synchronously. */
@@ -1660,23 +1011,6 @@
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.animate-cmd-j-tip-result-in {
-  animation: cmd-j-tip-result-in 120ms ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-cmd-j-tip-caret {
-    animation: none;
-    opacity: 1;
-  }
-
-  .animate-cmd-j-tip-result-in {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
 }
 

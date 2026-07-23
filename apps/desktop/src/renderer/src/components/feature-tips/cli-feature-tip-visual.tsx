@@ -78,14 +78,19 @@ export function CliFeatureTipVisual(): JSX.Element {
             return (
               <div
                 key={command}
-                className={cn('truncate', isVisible ? 'animate-cli-tip-command-line' : 'invisible')}
+                className={cn(
+                  'truncate',
+                  isVisible
+                    ? 'animate-[cli-tip-command-line_160ms_ease-out_both] motion-reduce:animate-none'
+                    : 'invisible'
+                )}
               >
                 <span className="text-foreground">
                   {translate('auto.components.feature.tips.CliFeatureTipVisual.badb4fc342', '>')}
                 </span>
                 <span>{command}</span>
                 {isCurrentLine ? (
-                  <span className="animate-cli-tip-caret bg-foreground/70 ml-0.5 inline-block h-3 w-1 translate-y-0.5 rounded-sm" />
+                  <span className="bg-foreground/70 ml-0.5 inline-block h-3 w-1 translate-y-0.5 animate-[cli-tip-caret_0.9s_steps(1,end)_infinite] rounded-sm motion-reduce:translate-y-0 motion-reduce:animate-none" />
                 ) : null}
               </div>
             )

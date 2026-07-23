@@ -175,7 +175,7 @@ export function AgentStep({
                 <CollapsibleTrigger className="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium transition-colors outline-none data-[state=open]:mb-3">
                   {fallbackRestLabel}
                 </CollapsibleTrigger>
-                <CollapsibleContent className="collapsible-height-content">
+                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-[collapsible-up_180ms_ease-out] data-[state=open]:animate-[collapsible-down_200ms_ease-out]">
                   <div data-agent-grid className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
                     {fallbackRest.map((agent) => (
                       <AgentButton

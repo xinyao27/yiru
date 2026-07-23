@@ -46,7 +46,7 @@ export function SshTargetFormCollapsibleSection({
           </Button>
         }
       />
-      <CollapsibleContent className="collapsible-height-content">
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-[collapsible-up_180ms_ease-out] data-[state=open]:animate-[collapsible-down_200ms_ease-out]">
         <div className="space-y-4 pt-3">{children}</div>
       </CollapsibleContent>
     </Collapsible>

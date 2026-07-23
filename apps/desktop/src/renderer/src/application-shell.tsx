@@ -724,10 +724,11 @@ function App(): React.JSX.Element {
   }, [settings, startupWindowBackgroundBlur])
   const windowBackgroundBlurEnabled =
     hasNativeSidebarMaterial && startupWindowBackgroundBlur === true
-  const leftSidebarStyle = useMemo(
+  const leftSidebarVariables = useMemo(
     () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark, hasNativeSidebarMaterial),
     [settings, systemPrefersDark]
-  ) as React.CSSProperties | undefined
+  )
+  const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
   const dictationState = useAppStore((s) => s.dictationState)
   const hasSshCredentialRequest = useAppStore((s) => s.sshCredentialQueue.length > 0)
   const shouldMountDictationController =
@@ -1601,6 +1602,8 @@ function App(): React.JSX.Element {
     activeView !== 'activity' &&
     activeView !== 'space' &&
     activeView !== 'skills'
+  const settingsChromeOverlayActive = activeView === 'settings'
+  const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
   // Why: Landing keep the full titlebar only when the sidebar is
   // collapsed; with it open, mirror workspace view so titlebar-left sits flush
   // above nav. Creation layout suppresses the full-width titlebar.
@@ -2314,6 +2317,9 @@ function App(): React.JSX.Element {
       style={
         {
           '--collapsed-sidebar-header-width': `${collapsedSidebarHeaderWidth}px`,
+          // Why: Settings renders its overlaid window controls and navigation in
+          // sibling trees; one seam value keeps their left-column widths aligned.
+          '--settings-sidebar-width': '280px',
           // Why: consumed by anything that needs to avoid the fixed-position
           // window-controls overlay on Windows/Linux (floating sidebar toggle,
           // right sidebar header, etc.) without hardcoding 138px in multiple
@@ -2351,14 +2357,30 @@ function App(): React.JSX.Element {
                 {/* Why: keep the non-workspace titlebar and content in one
               column so full-page routes retain a stable vertical frame. */}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                  {/* Why: in workspace view (split groups always enabled), the
-                full-width titlebar is removed so tab groups + terminal extend
-                to the top of the window. Left titlebar controls move to a
-                header above the sidebar. Settings, landing, and the tasks
-                page keep the titlebar. */}
+                  {/* Why: workspace moves window controls into its sidebar header;
+                Settings overlays them on its own full-height surfaces, while
+                other full-page routes keep the shared titlebar row. */}
                   {!leftTitlebarChromeLayout.shouldMount ? (
-                    <div className={TITLEBAR_CLASS_NAME}>
-                      <div className="mr-2 flex shrink-0 items-center">{titlebarLeftControls}</div>
+                    <div
+                      className={cn(
+                        TITLEBAR_CLASS_NAME,
+                        // Why: Settings owns both full-height surfaces; window chrome
+                        // overlays them instead of reserving a blank titlebar row.
+                        settingsChromeOverlayActive &&
+                          'absolute inset-x-0 top-0 z-20 border-b-0 bg-transparent'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'mr-2 flex shrink-0 items-center',
+                          settingsChromeOverlayActive && 'mr-0 w-[var(--settings-sidebar-width)]'
+                        )}
+                        // Why: controls over the Settings rail inherit its custom
+                        // foreground and interaction colors on every platform.
+                        style={settingsChromeOverlayActive ? leftSidebarStyle : undefined}
+                      >
+                        {titlebarLeftControls}
+                      </div>
                       {titlebarMainStrip}
                     </div>
                   ) : null}
@@ -2458,12 +2480,14 @@ function App(): React.JSX.Element {
                         </RecoverableRenderErrorBoundary>
                       )
                     ) : null}
-                    {/* Why: window blur may expose the native material through
-                    translucent terminals; the default canvas stays opaque. */}
+                    {/* Why: window blur may expose native material through translucent
+                    terminals, while Settings reserves it only for the left rail. */}
                     <div
                       className={cn(
                         'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
-                        windowBackgroundBlurEnabled ? 'bg-transparent' : 'bg-background'
+                        windowBackgroundBlurEnabled || settingsNativeSidebarMaterialActive
+                          ? 'bg-transparent'
+                          : 'bg-background'
                       )}
                     >
                       {stackedSidebarOpen ? (
@@ -2510,7 +2534,9 @@ function App(): React.JSX.Element {
                                 'Retry the page or navigate to another Yiru surface.'
                               )}
                             >
-                              {activeView === 'settings' ? <Settings /> : null}
+                              {activeView === 'settings' ? (
+                                <Settings sidebarAppearanceStyle={leftSidebarStyle} />
+                              ) : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
                               {activeView === 'activity' ? <ActivityPrototypePage /> : null}

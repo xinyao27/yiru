@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MutableRefObject
 } from 'react'
 import { toast } from 'sonner'
@@ -168,6 +169,9 @@ const SETTINGS_NAV_GROUP_BY_ID = new Map<string, SettingsNavGroupDefinition>(
 
 const SHORTCUTS_ESCAPE_CONFIRM_TOAST_ID = 'shortcuts-escape-confirm'
 const SHORTCUTS_ESCAPE_CONFIRM_WINDOW_MS = 2200
+// Why: native material must not flash through the opaque Settings canvas during entry.
+const SETTINGS_SHELL_ANIMATION_CLASS_NAME =
+  "animate-[settings-shell-enter_180ms_ease-out] [[data-native-sidebar-material='true']_&]:animate-none"
 
 function getSettingsSectionId(
   pane: SettingsNavTarget,
@@ -291,7 +295,11 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
 }
 
-function Settings(): React.JSX.Element {
+type SettingsProps = {
+  sidebarAppearanceStyle?: CSSProperties
+}
+
+function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element {
   const settings = useAppStore((s) => s.settings)
   const keybindings = useAppStore((s) => s.keybindings)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -1112,9 +1120,19 @@ function Settings(): React.JSX.Element {
     return (
       <div
         ref={setSettingsRootNode}
-        className="settings-view-shell bg-background flex min-h-0 flex-1 overflow-hidden"
+        className={cn(
+          'flex min-h-0 flex-1 overflow-hidden bg-transparent',
+          SETTINGS_SHELL_ANIMATION_CLASS_NAME
+        )}
       >
-        <div className="text-muted-foreground flex flex-1 items-center justify-center">
+        {/* Why: preserve the final split surfaces while settings load so native
+            sidebar material never flashes to an opaque full-window canvas. */}
+        <div
+          aria-hidden
+          className="worktree-sidebar-theme border-sidebar-border bg-sidebar w-[var(--settings-sidebar-width)] shrink-0 border-r"
+          style={sidebarAppearanceStyle}
+        />
+        <div className="bg-background text-muted-foreground flex min-w-0 flex-1 items-center justify-center">
           {translate('auto.components.settings.Settings.c7ad095d96', 'Loading settings...')}
         </div>
       </div>
@@ -1154,10 +1172,13 @@ function Settings(): React.JSX.Element {
   return (
     <div
       ref={setSettingsRootNode}
-      className="settings-view-shell bg-background flex min-h-0 flex-1 overflow-hidden"
+      className={cn(
+        'flex min-h-0 flex-1 overflow-hidden bg-transparent',
+        SETTINGS_SHELL_ANIMATION_CLASS_NAME
+      )}
     >
       <SettingsSidebar
-        settings={settings}
+        appearanceStyle={sidebarAppearanceStyle}
         activeSectionId={activeSectionId}
         generalGroups={generalNavGroups}
         repoSections={repoNavSections}
@@ -1169,7 +1190,9 @@ function Settings(): React.JSX.Element {
         onSelectSection={scrollToSection}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      {/* Why: only the left rail should reveal the OS material; Settings content
+          remains an opaque canvas for contrast and cross-platform parity. */}
+      <div className="bg-background flex min-h-0 flex-1 flex-col">
         <div
           ref={setContentScrollNode}
           className={cn(
