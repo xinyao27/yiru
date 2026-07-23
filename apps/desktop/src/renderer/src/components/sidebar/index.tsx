@@ -1,14 +1,12 @@
 import { FolderPlus } from '@phosphor-icons/react'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useSidebarResize } from '@/hooks/use-sidebar-resize'
 import type { VirtualizedScrollAnchor } from '@/hooks/use-virtualized-scroll-anchor'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
-import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { useAppStore } from '@/store'
 
 import SetupScriptPromptCard from './setup-script-prompt-card'
@@ -36,24 +34,20 @@ export const WORKTREE_SIDEBAR_RESIZE_HANDLE_LINE_CLASS_NAME =
 type SidebarProps = {
   worktreeScrollOffsetRef: React.MutableRefObject<number>
   worktreeScrollAnchorRef: React.MutableRefObject<VirtualizedScrollAnchor>
+  appearanceStyle?: React.CSSProperties
 }
 
 function Sidebar({
   worktreeScrollOffsetRef,
-  worktreeScrollAnchorRef
+  worktreeScrollAnchorRef,
+  appearanceStyle
 }: SidebarProps): React.JSX.Element {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
   const sidebarWidth = useAppStore((s) => s.sidebarWidth)
   const setSidebarWidth = useAppStore((s) => s.setSidebarWidth)
   const repos = useAppStore((s) => s.repos)
-  const settings = useAppStore((s) => s.settings)
   const fetchAllWorktrees = useAppStore((s) => s.fetchAllWorktrees)
   const activeModal = useAppStore((s) => s.activeModal)
-  const systemPrefersDark = useSystemPrefersDark()
-  const leftSidebarStyle = useMemo(
-    () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark),
-    [settings, systemPrefersDark]
-  ) as React.CSSProperties | undefined
   const { nativeDropTarget, dropHandlers, affordance } = useSidebarProjectDrop()
 
   const setLiveSidebarWidth = React.useCallback((width: number) => {
@@ -117,7 +111,7 @@ function Sidebar({
         ref={containerRef}
         data-native-file-drop-target={sidebarOpen ? nativeDropTarget : undefined}
         className="worktree-sidebar-theme bg-sidebar scrollbar-sleek-parent relative flex min-h-0 flex-shrink-0 flex-col overflow-hidden"
-        style={leftSidebarStyle}
+        style={appearanceStyle}
         {...dropHandlers}
       >
         {sidebarOpen && (

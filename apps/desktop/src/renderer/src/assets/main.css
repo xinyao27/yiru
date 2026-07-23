@@ -342,6 +342,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Why: the main content paints its own opaque canvas; clearing only the
+     window base lets the left rail reveal Electron's native OS material. */
+  body:has([data-native-sidebar-material='true']) {
+    background-color: transparent;
+  }
+
   ul {
     list-style: none;
   }

@@ -74,6 +74,7 @@ import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
 } from '../../shared/modifier-double-tap-detector'
+import { supportsNativeSidebarMaterial } from '../../shared/native-sidebar-material-support'
 import type { RemoteWorkspacePatchResult } from '../../shared/remote-workspace-types'
 import type { OnboardingState, UpdateStatus } from '../../shared/types'
 import { ActivityTitlebarControls } from './components/activity/activity-titlebar-controls'
@@ -192,13 +193,20 @@ const SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS = 60_000
 
 const shortcutPlatform = getRendererAppPlatform()
 const isMac = shortcutPlatform === 'darwin'
+const isWebClient = isPairedWebClientWindow()
+const rendererOsRelease =
+  typeof window === 'undefined' ? '' : window.api?.platform?.get?.().osRelease
+// Why: Electron exposes native sidebar material on macOS and supported Windows
+// builds. Paired web clients and other platforms keep the opaque surface.
+const hasNativeSidebarMaterial =
+  !isWebClient && supportsNativeSidebarMaterial(shortcutPlatform, rendererOsRelease ?? '')
 // Why: Windows and Linux both run with the native title bar removed (Windows
 // via titleBarStyle: 'hidden', Linux via frame: false), so the renderer draws
 // its own logo/menu anchor and min/max/close controls on both. Paired web
 // clients run in a browser tab, so they must not render desktop window chrome.
 const hasCustomTitleBar = shouldRenderDesktopWindowChrome({
   platform: shortcutPlatform,
-  isWebClient: isPairedWebClientWindow()
+  isWebClient
 })
 // Why: Electron drag regions swallow clicks even when a control is visibly above them.
 const TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME = '[-webkit-app-region:no-drag]'
@@ -704,8 +712,20 @@ function App(): React.JSX.Element {
   const isFullScreen = useAppStore((s) => s.isFullScreen)
   const settings = useAppStore((s) => s.settings)
   const systemPrefersDark = useSystemPrefersDark()
+  const [startupWindowBackgroundBlur, setStartupWindowBackgroundBlur] = useState<boolean | null>(
+    null
+  )
+  useEffect(() => {
+    if (settings !== null && startupWindowBackgroundBlur === null) {
+      // Why: BrowserWindow material is fixed at creation, so renderer opacity
+      // must keep using the first hydrated value until the requested restart.
+      setStartupWindowBackgroundBlur(settings.windowBackgroundBlur === true)
+    }
+  }, [settings, startupWindowBackgroundBlur])
+  const windowBackgroundBlurEnabled =
+    hasNativeSidebarMaterial && startupWindowBackgroundBlur === true
   const leftSidebarStyle = useMemo(
-    () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark),
+    () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark, hasNativeSidebarMaterial),
     [settings, systemPrefersDark]
   ) as React.CSSProperties | undefined
   const dictationState = useAppStore((s) => s.dictationState)
@@ -2290,6 +2310,7 @@ function App(): React.JSX.Element {
       loaderStyle={settings?.loaderStyle}
       ref={setAppRootNode}
       className="flex h-dvh w-screen flex-col overflow-hidden"
+      data-native-sidebar-material={hasNativeSidebarMaterial ? 'true' : undefined}
       style={
         {
           '--collapsed-sidebar-header-width': `${collapsedSidebarHeaderWidth}px`,
@@ -2410,6 +2431,7 @@ function App(): React.JSX.Element {
                               <Sidebar
                                 worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
                                 worktreeScrollAnchorRef={worktreeSidebarScrollAnchorRef}
+                                appearanceStyle={leftSidebarStyle}
                               />
                             </RecoverableRenderErrorBoundary>
                           </div>
@@ -2431,11 +2453,19 @@ function App(): React.JSX.Element {
                           <Sidebar
                             worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
                             worktreeScrollAnchorRef={worktreeSidebarScrollAnchorRef}
+                            appearanceStyle={leftSidebarStyle}
                           />
                         </RecoverableRenderErrorBoundary>
                       )
                     ) : null}
-                    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                    {/* Why: window blur may expose the native material through
+                    translucent terminals; the default canvas stays opaque. */}
+                    <div
+                      className={cn(
+                        'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
+                        windowBackgroundBlurEnabled ? 'bg-transparent' : 'bg-background'
+                      )}
+                    >
                       {stackedSidebarOpen ? (
                         <div className={TITLEBAR_CLASS_NAME}>{titlebarMainStrip}</div>
                       ) : null}
