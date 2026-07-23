@@ -1,4 +1,9 @@
-import type { RuntimeCapability } from '@yiru/runtime-protocol/capabilities'
+import {
+  RuntimeCapabilityAdvertisementSchema,
+  RuntimeCapabilityCache,
+  type RuntimeCapability,
+  type RuntimeCapabilityScope
+} from '@yiru/runtime-protocol/capabilities'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 
 import type { RuntimeMethodResult } from '../../../shared/runtime-method-contract'
@@ -7,6 +12,44 @@ import { assertRuntimeStatusCompatible } from './runtime-protocol-compat'
 import { unwrapRuntimeRpcResult } from './runtime-rpc-response'
 
 type RuntimeEnvironmentStatus = RuntimeMethodResult<typeof STATUS_GET_CONTRACT>
+
+const runtimeCapabilityCache = new RuntimeCapabilityCache()
+const runtimeCapabilityScopeByEnvironmentId = new Map<string, RuntimeCapabilityScope>()
+
+function clearRuntimeEnvironmentCapabilityState(environmentId: string): void {
+  runtimeCapabilityCache.clearHost({ provider: 'paired-runtime', hostIdentity: environmentId })
+  runtimeCapabilityScopeByEnvironmentId.delete(environmentId)
+}
+
+function normalizeRuntimeCapabilityAdvertisement(
+  status: RuntimeEnvironmentStatus
+): RuntimeEnvironmentStatus {
+  const advertisement = RuntimeCapabilityAdvertisementSchema.parse(status)
+  return {
+    ...status,
+    runtimeId: advertisement.runtimeId,
+    capabilities: advertisement.capabilities
+  }
+}
+
+function rememberRuntimeCapabilityAdvertisement(
+  environmentId: string,
+  status: RuntimeEnvironmentStatus
+): void {
+  const previousScope = runtimeCapabilityScopeByEnvironmentId.get(environmentId)
+  const connectionGeneration =
+    previousScope?.runtimeIncarnation === status.runtimeId
+      ? previousScope.connectionGeneration
+      : (previousScope?.connectionGeneration ?? 0) + 1
+  const scope: RuntimeCapabilityScope = {
+    provider: 'paired-runtime',
+    hostIdentity: environmentId,
+    runtimeIncarnation: status.runtimeId,
+    connectionGeneration
+  }
+  runtimeCapabilityCache.replace({ ...scope, capabilities: status.capabilities ?? [] })
+  runtimeCapabilityScopeByEnvironmentId.set(environmentId, scope)
+}
 
 const RUNTIME_COMPATIBILITY_CACHE_MAX = 32
 const RECENT_RUNTIME_COMPATIBILITY_FAILURE_TTL_MS = 60_000
@@ -46,12 +89,19 @@ export async function ensureRuntimeEnvironmentCompatible(
       method: STATUS_GET_CONTRACT.name,
       timeoutMs: options.timeoutMs
     })
-    const status = unwrapRuntimeRpcResult<RuntimeEnvironmentStatus>(
-      response as RuntimeRpcResponse<RuntimeEnvironmentStatus>
+    const status = normalizeRuntimeCapabilityAdvertisement(
+      unwrapRuntimeRpcResult<RuntimeEnvironmentStatus>(
+        response as RuntimeRpcResponse<RuntimeEnvironmentStatus>
+      )
     )
     assertRuntimeStatusCompatible(status)
     entry.status = status
     entry.statusCheckedAt = Date.now()
+    // Why: a cleared or replaced probe belongs to an older connection view and
+    // must not repopulate capability state after a reconnect.
+    if (runtimeCompatibilityChecks.get(environmentId) === entry) {
+      rememberRuntimeCapabilityAdvertisement(environmentId, status)
+    }
   })()
   entry.check = check
   rememberRuntimeEnvironmentCompatibility(environmentId, entry)
@@ -62,6 +112,7 @@ export async function ensureRuntimeEnvironmentCompatible(
     }
   } catch (error) {
     if (runtimeCompatibilityChecks.get(environmentId) === entry) {
+      clearRuntimeEnvironmentCapabilityState(environmentId)
       // Why: startup asks each remote for repos, groups, then folders; an
       // offline runtime should pay one timeout during that burst, not three.
       entry.failedAt = Date.now()
@@ -107,6 +158,7 @@ function rememberRuntimeEnvironmentCompatibility(
       break
     }
     runtimeCompatibilityChecks.delete(oldest)
+    clearRuntimeEnvironmentCapabilityState(oldest)
   }
 }
 
@@ -127,7 +179,11 @@ export function clearRuntimeCompatibilityCache(environmentId?: string | null): v
   const trimmed = environmentId?.trim()
   if (trimmed) {
     runtimeCompatibilityChecks.delete(trimmed)
+    clearRuntimeEnvironmentCapabilityState(trimmed)
     return
+  }
+  for (const cachedEnvironmentId of runtimeCapabilityScopeByEnvironmentId.keys()) {
+    clearRuntimeEnvironmentCapabilityState(cachedEnvironmentId)
   }
   runtimeCompatibilityChecks.clear()
 }
@@ -166,13 +222,18 @@ export async function getRuntimeEnvironmentStatus(
       method: STATUS_GET_CONTRACT.name,
       timeoutMs
     })
-    const status = unwrapRuntimeRpcResult<RuntimeEnvironmentStatus>(
-      response as RuntimeRpcResponse<RuntimeEnvironmentStatus>
+    const status = normalizeRuntimeCapabilityAdvertisement(
+      unwrapRuntimeRpcResult<RuntimeEnvironmentStatus>(
+        response as RuntimeRpcResponse<RuntimeEnvironmentStatus>
+      )
     )
     assertRuntimeStatusCompatible(status)
     entry.status = status
     entry.statusCheckedAt = Date.now()
     entry.provenCompatible = true
+    if (runtimeCompatibilityChecks.get(trimmed) === entry) {
+      rememberRuntimeCapabilityAdvertisement(trimmed, status)
+    }
   })()
   entry.check = check
   rememberRuntimeEnvironmentCompatibility(trimmed, entry)
@@ -182,6 +243,7 @@ export async function getRuntimeEnvironmentStatus(
     // Why: this probe always re-fetches, so a failure must not linger as a
     // cached verdict; drop the entry so the next call re-probes cleanly.
     if (runtimeCompatibilityChecks.get(trimmed) === entry) {
+      clearRuntimeEnvironmentCapabilityState(trimmed)
       runtimeCompatibilityChecks.delete(trimmed)
     }
     throw error
@@ -211,10 +273,13 @@ export async function runtimeEnvironmentSupportsCapability(
         cached.statusCheckedAt !== null &&
         Date.now() - cached.statusCheckedAt < RUNTIME_CAPABILITY_STATUS_TTL_MS
       ) {
-        const supported = cached.status.capabilities?.includes(capability) === true
+        const scope = runtimeCapabilityScopeByEnvironmentId.get(trimmed)
+        const supported =
+          scope !== undefined && runtimeCapabilityCache.verdict(scope, capability) === 'supported'
         if (!supported) {
           // Why: an unsupported verdict must not survive a remote upgrade.
           runtimeCompatibilityChecks.delete(trimmed)
+          clearRuntimeEnvironmentCapabilityState(trimmed)
         }
         return supported
       }
@@ -223,9 +288,12 @@ export async function runtimeEnvironmentSupportsCapability(
     }
   }
   const status = await getRuntimeEnvironmentStatus(trimmed, timeoutMs)
-  const supported = status.capabilities?.includes(capability) === true
+  const scope = runtimeCapabilityScopeByEnvironmentId.get(trimmed)
+  const supported =
+    scope !== undefined && runtimeCapabilityCache.verdict(scope, capability) === 'supported'
   if (!supported && runtimeCompatibilityChecks.get(trimmed)?.status === status) {
     runtimeCompatibilityChecks.delete(trimmed)
+    clearRuntimeEnvironmentCapabilityState(trimmed)
   }
   return supported
 }

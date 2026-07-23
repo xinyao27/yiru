@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand'
 
 import {
   clearRecentRuntimeCompatibilityFailure,
+  clearRuntimeCompatibilityCache,
   unwrapRuntimeRpcResult
 } from '@/runtime/runtime-rpc-client'
 
@@ -48,8 +49,17 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
   runtimeStatusByEnvironmentId: new Map(),
 
   setRuntimeEnvironments: (environments) => {
+    const keep = new Set(environments.map((environment) => environment.id))
+    const previousIds = new Set([
+      ...get().runtimeEnvironments.map((environment) => environment.id),
+      ...get().runtimeStatusByEnvironmentId.keys()
+    ])
+    for (const environmentId of previousIds) {
+      if (!keep.has(environmentId)) {
+        clearRuntimeCompatibilityCache(environmentId)
+      }
+    }
     set((s) => {
-      const keep = new Set(environments.map((environment) => environment.id))
       const nextStatuses = new Map(s.runtimeStatusByEnvironmentId)
       let statusesChanged = false
       for (const id of nextStatuses.keys()) {
@@ -73,10 +83,17 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
   },
 
   setRuntimeEnvironmentStatus: (environmentId, status) => {
-    // Why: a non-null status proves the runtime just answered, so drop any stale
-    // "offline" compat failure before this online transition fires the
-    // reuse-flagged background refetches — a recovered host must re-probe.
-    if (status.status !== null) {
+    const previousStatus = get().runtimeStatusByEnvironmentId.get(environmentId)?.status
+    const connectionBoundary =
+      status.status === null ||
+      previousStatus === undefined ||
+      previousStatus === null ||
+      previousStatus.runtimeId !== status.status.runtimeId
+    // Why: an offline, first-observed, or replaced host view starts a new
+    // capability generation; no supported verdict may survive that boundary.
+    if (connectionBoundary) {
+      clearRuntimeCompatibilityCache(environmentId)
+    } else {
       clearRecentRuntimeCompatibilityFailure(environmentId)
     }
     set((s) => {
@@ -86,7 +103,8 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
     })
   },
 
-  clearRuntimeEnvironmentStatus: (environmentId) =>
+  clearRuntimeEnvironmentStatus: (environmentId) => {
+    clearRuntimeCompatibilityCache(environmentId)
     set((s) => {
       if (!s.runtimeStatusByEnvironmentId.has(environmentId)) {
         return s
@@ -94,11 +112,17 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
       const next = new Map(s.runtimeStatusByEnvironmentId)
       next.delete(environmentId)
       return { runtimeStatusByEnvironmentId: next }
-    }),
+    })
+  },
 
-  retainRuntimeEnvironmentStatuses: (environmentIds) =>
+  retainRuntimeEnvironmentStatuses: (environmentIds) => {
+    const keep = new Set(environmentIds)
+    for (const environmentId of get().runtimeStatusByEnvironmentId.keys()) {
+      if (!keep.has(environmentId)) {
+        clearRuntimeCompatibilityCache(environmentId)
+      }
+    }
     set((s) => {
-      const keep = new Set(environmentIds)
       let changed = false
       const next = new Map(s.runtimeStatusByEnvironmentId)
       for (const id of next.keys()) {
@@ -108,7 +132,8 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
         }
       }
       return changed ? { runtimeStatusByEnvironmentId: next } : s
-    }),
+    })
+  },
 
   refreshRuntimeEnvironmentStatus: async (environmentId, timeoutMs = 10_000) => {
     try {
