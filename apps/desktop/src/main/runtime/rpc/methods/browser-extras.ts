@@ -39,144 +39,145 @@ export const BROWSER_EXTRA_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'browser.cookie.get',
     params: CookieGet,
-    handler: async (params, { runtime }) => runtime.browserCookieGet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserCookieGet(params)
   }),
   defineMethod({
     name: 'browser.cookie.set',
     params: CookieSet,
-    handler: async (params, { runtime }) => runtime.browserCookieSet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserCookieSet(params)
   }),
   defineMethod({
     name: 'browser.cookie.delete',
     params: CookieDelete,
-    handler: async (params, { runtime }) => runtime.browserCookieDelete(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserCookieDelete(params)
   }),
   defineMethod({
     name: 'browser.viewport',
     params: Viewport,
-    handler: async (params, { runtime }) => runtime.browserSetViewport(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetViewport(params)
   }),
   defineMethod({
     name: 'browser.geolocation',
     params: Geolocation,
-    handler: async (params, { runtime }) => runtime.browserSetGeolocation(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetGeolocation(params)
   }),
   defineMethod({
     name: 'browser.intercept.enable',
     params: InterceptEnable,
-    handler: async (params, { runtime }) => runtime.browserInterceptEnable(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserInterceptEnable(params)
   }),
   defineMethod({
     name: 'browser.intercept.disable',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserInterceptDisable(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserInterceptDisable(params)
   }),
   defineMethod({
     name: 'browser.intercept.list',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserInterceptList(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserInterceptList(params)
   }),
   defineMethod({
     name: 'browser.mouseMove',
     params: MouseXY,
-    handler: async (params, { runtime }) => runtime.browserMouseMove(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserMouseMove(params)
   }),
   defineMethod({
     name: 'browser.mouseDown',
     params: MouseButton,
-    handler: async (params, { runtime }) => runtime.browserMouseDown(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserMouseDown(params)
   }),
   defineMethod({
     name: 'browser.mouseClick',
     params: MouseClick,
-    handler: async (params, { runtime }) => runtime.browserMouseClick(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserMouseClick(params)
   }),
   defineMethod({
     name: 'browser.mouseUp',
     params: MouseButton,
-    handler: async (params, { runtime }) => runtime.browserMouseUp(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserMouseUp(params)
   }),
   defineMethod({
     name: 'browser.mouseWheel',
     params: MouseWheel,
-    handler: async (params, { runtime }) => runtime.browserMouseWheel(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserMouseWheel(params)
   }),
   defineMethod({
     name: 'browser.setDevice',
     params: SetDevice,
-    handler: async (params, { runtime }) => runtime.browserSetDevice(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetDevice(params)
   }),
   defineMethod({
     name: 'browser.setOffline',
     params: SetOffline,
-    handler: async (params, { runtime }) => runtime.browserSetOffline(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetOffline(params)
   }),
   defineMethod({
     name: 'browser.setHeaders',
     params: SetHeaders,
-    handler: async (params, { runtime }) => runtime.browserSetHeaders(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetHeaders(params)
   }),
   defineMethod({
     name: 'browser.setCredentials',
     params: SetCredentials,
-    handler: async (params, { runtime }) => runtime.browserSetCredentials(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetCredentials(params)
   }),
   defineMethod({
     name: 'browser.setMedia',
     params: SetMedia,
-    handler: async (params, { runtime }) => runtime.browserSetMedia(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSetMedia(params)
   }),
   defineMethod({
     name: 'browser.clipboardRead',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserClipboardRead(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserClipboardRead(params)
   }),
   defineMethod({
     name: 'browser.clipboardWrite',
     params: ClipboardWrite,
-    handler: async (params, { runtime }) => {
+    handler: async (params, { browserCommands }) => {
       await assertRpcClipboardTextWriteWithinLimit(params.text)
-      return runtime.browserClipboardWrite(params)
+      return browserCommands.browserClipboardWrite(params)
     }
   }),
   defineMethod({
     name: 'browser.dialogAccept',
     params: DialogAccept,
-    handler: async (params, { runtime }) => runtime.browserDialogAccept(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserDialogAccept(params)
   }),
   defineMethod({
     name: 'browser.dialogDismiss',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserDialogDismiss(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserDialogDismiss(params)
   }),
   defineMethod({
     name: 'browser.storage.local.get',
     params: StorageKey,
-    handler: async (params, { runtime }) => runtime.browserStorageLocalGet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserStorageLocalGet(params)
   }),
   defineMethod({
     name: 'browser.storage.local.set',
     params: StorageKeyValue,
-    handler: async (params, { runtime }) => runtime.browserStorageLocalSet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserStorageLocalSet(params)
   }),
   defineMethod({
     name: 'browser.storage.local.clear',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserStorageLocalClear(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserStorageLocalClear(params)
   }),
   defineMethod({
     name: 'browser.storage.session.get',
     params: StorageKey,
-    handler: async (params, { runtime }) => runtime.browserStorageSessionGet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserStorageSessionGet(params)
   }),
   defineMethod({
     name: 'browser.storage.session.set',
     params: StorageKeyValue,
-    handler: async (params, { runtime }) => runtime.browserStorageSessionSet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserStorageSessionSet(params)
   }),
   defineMethod({
     name: 'browser.storage.session.clear',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserStorageSessionClear(params)
+    handler: async (params, { browserCommands }) =>
+      browserCommands.browserStorageSessionClear(params)
   })
 ]

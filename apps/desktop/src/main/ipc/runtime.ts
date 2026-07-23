@@ -76,7 +76,7 @@ export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
   ipcMain.handle(
     'runtime:getBrowserDrivers',
     (): { browserPageId: string; driver: RuntimeBrowserDriverState }[] => {
-      const drivers = runtime.getAllBrowserDrivers()
+      const drivers = runtime.browserCommands.getDrivers()
       return Array.from(drivers.entries()).map(([browserPageId, driver]) => ({
         browserPageId,
         driver
@@ -115,7 +115,7 @@ export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
     'runtime:reclaimBrowserForDesktop',
     (_event, args: { browserPageId: string }): { reclaimed: boolean } => {
       try {
-        return { reclaimed: runtime.reclaimBrowserForDesktop(args.browserPageId) }
+        return { reclaimed: runtime.browserCommands.reclaimForDesktop(args.browserPageId) }
       } catch {
         return { reclaimed: false }
       }

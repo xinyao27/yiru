@@ -11,8 +11,8 @@ export const BROWSER_SCREENCAST_METHODS: RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'browser.screencast',
     params: Screencast,
-    handler: async (params, { runtime, connectionId, sendBinary, signal }, emit) =>
-      runtime.browserScreencast(params, { connectionId, sendBinary, signal, emit })
+    handler: async (params, { browserCommands, connectionId, sendBinary, signal }, emit) =>
+      browserCommands.browserScreencast(params, { connectionId, sendBinary, signal, emit })
   }),
   defineMethod({
     name: 'browser.screencast.unsubscribe',

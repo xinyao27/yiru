@@ -12,7 +12,12 @@ import type {
 } from '../../../shared/mobile-relay-credential-contract'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
+import type { MobileNotificationChannel } from '../mobile-notification-channel'
 import type { YiruRuntimeService } from '../yiru-runtime'
+import type { RuntimeBrowserCommands } from '../yiru-runtime-browser'
+import type { RuntimeEmulatorCommands } from '../yiru-runtime-emulator'
+import type { RuntimeFileCommands } from '../yiru-runtime-files'
+import type { RuntimeGitCommands } from '../yiru-runtime-git'
 
 export type PairingRpcContext = {
   getEndpoints(params: PairingGetEndpointsParams): Promise<PairingGetEndpointsResult>
@@ -53,6 +58,11 @@ export type RpcRequest = {
 
 export type RpcContext = {
   runtime: YiruRuntimeService
+  fileCommands: RuntimeFileCommands
+  gitCommands: RuntimeGitCommands
+  browserCommands: RuntimeBrowserCommands
+  emulatorCommands: RuntimeEmulatorCommands
+  mobileNotifications: MobileNotificationChannel
   /** Immutable identity established by the encrypted transport, when present. */
   principal?: AuthenticatedRpcPrincipal
   // Why: long-poll handlers (e.g. orchestration.check with wait=true) need to

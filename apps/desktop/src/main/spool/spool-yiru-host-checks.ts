@@ -8,14 +8,14 @@ import type {
 } from '../../shared/spool/spool-operation-contract'
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import type { RuntimeGitCommands } from '../runtime/yiru-runtime-git'
 import { SpoolChecksReadCache } from './spool-checks-read-cache'
 import { SpoolExecutionError } from './spool-execution-error'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 
-type SpoolChecksRuntime = Pick<
-  YiruRuntimeService,
-  'getHostedReviewForBranch' | 'getRepoPRChecks' | 'getRuntimeGitStatus'
->
+type SpoolChecksRuntime = Pick<YiruRuntimeService, 'getHostedReviewForBranch' | 'getRepoPRChecks'>
+
+type SpoolChecksGitCommands = Pick<RuntimeGitCommands, 'getRuntimeGitStatus'>
 
 const MAX_CHECKS = 256
 
@@ -25,7 +25,8 @@ export class YiruSpoolHostChecks {
 
   constructor(
     private readonly store: Store,
-    private readonly runtime: SpoolChecksRuntime
+    private readonly runtime: SpoolChecksRuntime,
+    private readonly gitCommands: SpoolChecksGitCommands
   ) {}
 
   async invoke(
@@ -60,7 +61,9 @@ export class YiruSpoolHostChecks {
     target: SpoolPublicWorktreeInstance,
     signal: AbortSignal
   ): Promise<SpoolChecksReadResult> {
-    const status = await this.runtime.getRuntimeGitStatus(`id:${target.worktreeId}`, { signal })
+    const status = await this.gitCommands.getRuntimeGitStatus(`id:${target.worktreeId}`, {
+      signal
+    })
     const branch = status.branch?.trim()
     const meta = this.store.getWorktreeMeta(target.worktreeId)
     const linkedReviewNumbers = [

@@ -39,6 +39,7 @@ import type {
   BrowserSelectAllResult,
   BrowserSelectResult,
   BrowserSnapshotResult,
+  RuntimeBrowserDriverState,
   BrowserTabCurrentResult,
   BrowserTabListResult,
   BrowserTabProfileCloneResult,
@@ -67,6 +68,10 @@ import {
 import { browserSessionRegistry } from '../browser/browser-session-registry'
 import { BrowserError } from '../browser/cdp-bridge'
 import { waitForTabRegistration, waitForWorktreeTabRegistration } from '../ipc/browser'
+import {
+  BrowserRemoteScreencastAuthority,
+  type BrowserRemoteScreencastStartResult
+} from './browser-remote-screencast-authority'
 
 export type BrowserCommandTargetParams = {
   worktree?: string
@@ -95,12 +100,6 @@ type BrowserScreencastParams = {
   everyNthFrame?: number
   minFrameIntervalMs?: number
 } & BrowserCommandTargetParams
-
-type BrowserScreencastStartResult = {
-  subscriptionId: string
-  ready: Extract<BrowserScreencastResult, { type: 'ready' }>
-  session: BrowserScreencastSession
-}
 
 type ActiveBrowserScreencastPage = {
   stop: () => void
@@ -160,14 +159,39 @@ export type RuntimeBrowserCommandHost = {
     browserPageId: string,
     targetGroupId?: string
   ): void
+  registerSubscriptionCleanup(
+    subscriptionId: string,
+    cleanup: () => void | Promise<void>,
+    connectionId?: string
+  ): void
+  cleanupSubscription(subscriptionId: string): void
+  notifyBrowserDriverChanged(browserPageId: string, driver: RuntimeBrowserDriverState): void
 }
 
 export class RuntimeBrowserCommands {
   private readonly activeScreencastPageIds = new Set<string>()
   private readonly activeScreencastsByPageId = new Map<string, ActiveBrowserScreencastPage>()
   private readonly stoppingScreencastPageIds = new Map<string, Promise<void>>()
+  private readonly remoteScreencasts: BrowserRemoteScreencastAuthority<BrowserScreencastParams>
 
-  constructor(private readonly host: RuntimeBrowserCommandHost) {}
+  constructor(private readonly host: RuntimeBrowserCommandHost) {
+    this.remoteScreencasts = new BrowserRemoteScreencastAuthority({
+      startScreencast: (params, stream) => this.startScreencastSession(params, stream),
+      registerSubscriptionCleanup: (subscriptionId, cleanup, connectionId) =>
+        this.host.registerSubscriptionCleanup(subscriptionId, cleanup, connectionId),
+      cleanupSubscription: (subscriptionId) => this.host.cleanupSubscription(subscriptionId),
+      notifyDriverChanged: (browserPageId, driver) =>
+        this.host.notifyBrowserDriverChanged(browserPageId, driver)
+    })
+  }
+
+  getDrivers(): Map<string, RuntimeBrowserDriverState> {
+    return this.remoteScreencasts.getDrivers()
+  }
+
+  reclaimForDesktop(browserPageId: string): boolean {
+    return this.remoteScreencasts.reclaimForDesktop(browserPageId)
+  }
 
   private requireAgentBrowserBridge(): AgentBrowserBridge {
     const bridge = this.host.getAgentBrowserBridge()
@@ -489,11 +513,23 @@ export class RuntimeBrowserCommands {
 
   async browserScreencast(
     params: BrowserScreencastParams,
+    options: {
+      connectionId?: string
+      sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
+      signal?: AbortSignal
+      emit: (result: BrowserScreencastResult) => void
+    }
+  ): Promise<void> {
+    return await this.remoteScreencasts.screencast(params, options)
+  }
+
+  private async startScreencastSession(
+    params: BrowserScreencastParams,
     stream: {
       sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
       emit?: (event: BrowserScreencastResult) => void
     }
-  ): Promise<BrowserScreencastStartResult> {
+  ): Promise<BrowserRemoteScreencastStartResult> {
     const target = await this.resolveBrowserCommandTarget(params)
     const { browserPageId, webContents: guest } = this.resolveBrowserPageWebContents(
       target.worktreeId,
@@ -585,8 +621,9 @@ export class RuntimeBrowserCommands {
       }
       // Why: mobile can unsubscribe and immediately resubscribe on rotation.
       // New streams wait for CDP teardown instead of failing with already-active.
-      stoppingPromise = session.done.finally(clearPageGate)
-      this.stoppingScreencastPageIds.set(browserPageId, stoppingPromise)
+      const completion = session.done.finally(clearPageGate)
+      stoppingPromise = completion
+      this.stoppingScreencastPageIds.set(browserPageId, completion)
     }
     void session.done.finally(() => {
       clearPageGate()

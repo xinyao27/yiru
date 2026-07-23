@@ -6,25 +6,25 @@ export const BROWSER_TEXT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'browser.fill',
     params: Fill,
-    handler: async (params, { runtime }) => {
+    handler: async (params, { browserCommands }) => {
       await assertRpcClipboardTextWriteWithinLimit(params.value)
-      return runtime.browserFill(params)
+      return browserCommands.browserFill(params)
     }
   }),
   defineMethod({
     name: 'browser.type',
     params: Type,
-    handler: async (params, { runtime }) => {
+    handler: async (params, { browserCommands }) => {
       await assertRpcClipboardTextWriteWithinLimit(params.input)
-      return runtime.browserType(params)
+      return browserCommands.browserType(params)
     }
   }),
   defineMethod({
     name: 'browser.keyboardInsertText',
     params: KeyboardInsert,
-    handler: async (params, { runtime }) => {
+    handler: async (params, { browserCommands }) => {
       await assertRpcClipboardTextWriteWithinLimit(params.text)
-      return runtime.browserKeyboardInsertText(params)
+      return browserCommands.browserKeyboardInsertText(params)
     }
   })
 ]

@@ -15,6 +15,7 @@ import {
   formatZodError,
   isStreamingMethod,
   type RpcAnyMethod,
+  type RpcContext,
   type RpcEnvelopeMeta,
   type PairingRpcContext,
   type RpcRegistry,
@@ -39,10 +40,19 @@ export type DispatcherOptions = {
 export class RpcDispatcher {
   private readonly runtime: YiruRuntimeService
   private readonly registry: RpcRegistry
+  private readonly moduleContext: RpcContext
 
   constructor({ runtime, methods = ALL_RPC_METHODS }: DispatcherOptions) {
     this.runtime = runtime
     this.registry = buildRegistry(methods)
+    this.moduleContext = {
+      runtime,
+      fileCommands: runtime.fileCommands,
+      gitCommands: runtime.gitCommands,
+      browserCommands: runtime.browserCommands,
+      emulatorCommands: runtime.emulatorCommands,
+      mobileNotifications: runtime.mobileNotifications
+    }
   }
 
   async dispatch(request: RpcRequest, options?: { signal?: AbortSignal }): Promise<RpcResponse> {
@@ -80,7 +90,7 @@ export class RpcDispatcher {
     }
     try {
       const result = await method.handler(parsedParams.value, {
-        runtime: this.runtime,
+        ...this.moduleContext,
         signal: options?.signal
       })
       this.recordRuntimeFeatureInteraction(request.method, result, undefined, request.params)
@@ -133,7 +143,7 @@ export class RpcDispatcher {
     if (!isStreamingMethod(method)) {
       try {
         const result = await method.handler(parsedParams.value, {
-          runtime: this.runtime,
+          ...this.moduleContext,
           signal: options?.signal,
           requestId: request.id,
           connectionId: options?.connectionId,
@@ -169,7 +179,7 @@ export class RpcDispatcher {
       const result = await method.handler(
         parsedParams.value,
         {
-          runtime: this.runtime,
+          ...this.moduleContext,
           signal: options?.signal,
           requestId: request.id,
           connectionId: options?.connectionId,

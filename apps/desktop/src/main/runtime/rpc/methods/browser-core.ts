@@ -42,247 +42,250 @@ export const BROWSER_CORE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'browser.snapshot',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserSnapshot(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSnapshot(params)
   }),
   defineMethod({
     name: 'browser.click',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserClick(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserClick(params)
   }),
   defineMethod({
     name: 'browser.goto',
     params: Goto,
-    handler: async (params, { runtime }) => runtime.browserGoto(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserGoto(params)
   }),
   defineMethod({
     name: 'browser.certificate.proceed',
     params: CertificateProceed,
-    handler: async (params, { runtime }) => runtime.browserProceedCertificate(params)
+    handler: async (params, { browserCommands }) =>
+      browserCommands.browserProceedCertificate(params)
   }),
   ...BROWSER_TEXT_METHODS,
   defineMethod({
     name: 'browser.select',
     params: Select,
-    handler: async (params, { runtime }) => runtime.browserSelect(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSelect(params)
   }),
   defineMethod({
     name: 'browser.scroll',
     params: Scroll,
-    handler: async (params, { runtime }) => runtime.browserScroll(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserScroll(params)
   }),
   defineMethod({
     name: 'browser.back',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserBack(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserBack(params)
   }),
   defineMethod({
     name: 'browser.reload',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserReload(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserReload(params)
   }),
   defineMethod({
     name: 'browser.screenshot',
     params: Screenshot,
-    handler: async (params, { runtime }) => runtime.browserScreenshot(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserScreenshot(params)
   }),
   defineMethod({
     name: 'browser.eval',
     params: Eval,
-    handler: async (params, { runtime }) => runtime.browserEval(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserEval(params)
   }),
   defineMethod({
     name: 'browser.tabList',
     params: TabList,
-    handler: async (params, { runtime }) => runtime.browserTabList(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabList(params)
   }),
   defineMethod({
     name: 'browser.tabShow',
     params: TabShow,
-    handler: async (params, { runtime }) => runtime.browserTabShow(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabShow(params)
   }),
   defineMethod({
     name: 'browser.tabCurrent',
     params: TabCurrent,
-    handler: async (params, { runtime }) => runtime.browserTabCurrent(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabCurrent(params)
   }),
   defineMethod({
     name: 'browser.tabSwitch',
     params: TabSwitch,
-    handler: async (params, { runtime }) => runtime.browserTabSwitch(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabSwitch(params)
   }),
   defineMethod({
     name: 'browser.tabCreate',
     params: TabCreate,
-    handler: async (params, { runtime }) => runtime.browserTabCreate(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabCreate(params)
   }),
   defineMethod({
     name: 'browser.tabSetProfile',
     params: TabSetProfile,
-    handler: async (params, { runtime }) => runtime.browserTabSetProfile(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabSetProfile(params)
   }),
   defineMethod({
     name: 'browser.tabProfileShow',
     params: TabShow,
-    handler: async (params, { runtime }) => runtime.browserTabProfileShow(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabProfileShow(params)
   }),
   defineMethod({
     name: 'browser.tabProfileClone',
     params: TabProfileClone,
-    handler: async (params, { runtime }) => runtime.browserTabProfileClone(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabProfileClone(params)
   }),
   defineMethod({
     name: 'browser.tabClose',
     params: TabClose,
-    handler: async (params, { runtime }) => runtime.browserTabClose(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserTabClose(params)
   }),
   defineMethod({
     name: 'browser.profileList',
     params: null,
-    handler: async (_params, { runtime }) => runtime.browserProfileList()
+    handler: async (_params, { browserCommands }) => browserCommands.browserProfileList()
   }),
   defineMethod({
     name: 'browser.profileCreate',
     params: ProfileCreate,
-    handler: async (params, { runtime }) => runtime.browserProfileCreate(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserProfileCreate(params)
   }),
   defineMethod({
     name: 'browser.profileDelete',
     params: ProfileDelete,
-    handler: async (params, { runtime }) => runtime.browserProfileDelete(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserProfileDelete(params)
   }),
   defineMethod({
     name: 'browser.profileDetectBrowsers',
     params: null,
-    handler: async (_params, { runtime }) => runtime.browserProfileDetectBrowsers()
+    handler: async (_params, { browserCommands }) => browserCommands.browserProfileDetectBrowsers()
   }),
   defineMethod({
     name: 'browser.profileImportFromBrowser',
     params: ProfileImportFromBrowser,
-    handler: async (params, { runtime }) => runtime.browserProfileImportFromBrowser(params)
+    handler: async (params, { browserCommands }) =>
+      browserCommands.browserProfileImportFromBrowser(params)
   }),
   defineMethod({
     name: 'browser.profileClearDefaultCookies',
     params: null,
-    handler: async (_params, { runtime }) => runtime.browserProfileClearDefaultCookies()
+    handler: async (_params, { browserCommands }) =>
+      browserCommands.browserProfileClearDefaultCookies()
   }),
   defineMethod({
     name: 'browser.hover',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserHover(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserHover(params)
   }),
   defineMethod({
     name: 'browser.drag',
     params: Drag,
-    handler: async (params, { runtime }) => runtime.browserDrag(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserDrag(params)
   }),
   defineMethod({
     name: 'browser.upload',
     params: Upload,
-    handler: async (params, { runtime }) => runtime.browserUpload(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserUpload(params)
   }),
   defineMethod({
     name: 'browser.wait',
     params: Wait,
-    handler: async (params, { runtime }) => runtime.browserWait(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserWait(params)
   }),
   defineMethod({
     name: 'browser.check',
     params: Check,
-    handler: async (params, { runtime }) => runtime.browserCheck(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserCheck(params)
   }),
   defineMethod({
     name: 'browser.focus',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserFocus(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserFocus(params)
   }),
   defineMethod({
     name: 'browser.clear',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserClear(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserClear(params)
   }),
   defineMethod({
     name: 'browser.selectAll',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserSelectAll(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserSelectAll(params)
   }),
   defineMethod({
     name: 'browser.keypress',
     params: Keypress,
-    handler: async (params, { runtime }) => runtime.browserKeypress(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserKeypress(params)
   }),
   defineMethod({
     name: 'browser.pdf',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserPdf(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserPdf(params)
   }),
   defineMethod({
     name: 'browser.fullScreenshot',
     params: FullScreenshot,
-    handler: async (params, { runtime }) => runtime.browserFullScreenshot(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserFullScreenshot(params)
   }),
   defineMethod({
     name: 'browser.dblclick',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserDblclick(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserDblclick(params)
   }),
   defineMethod({
     name: 'browser.forward',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserForward(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserForward(params)
   }),
   defineMethod({
     name: 'browser.scrollIntoView',
     params: Element,
-    handler: async (params, { runtime }) => runtime.browserScrollIntoView(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserScrollIntoView(params)
   }),
   defineMethod({
     name: 'browser.get',
     params: Get,
-    handler: async (params, { runtime }) => runtime.browserGet(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserGet(params)
   }),
   defineMethod({
     name: 'browser.is',
     params: Is,
-    handler: async (params, { runtime }) => runtime.browserIs(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserIs(params)
   }),
   defineMethod({
     name: 'browser.find',
     params: Find,
-    handler: async (params, { runtime }) => runtime.browserFind(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserFind(params)
   }),
   defineMethod({
     name: 'browser.console',
     params: LimitParam,
-    handler: async (params, { runtime }) => runtime.browserConsoleLog(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserConsoleLog(params)
   }),
   defineMethod({
     name: 'browser.network',
     params: LimitParam,
-    handler: async (params, { runtime }) => runtime.browserNetworkLog(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserNetworkLog(params)
   }),
   defineMethod({
     name: 'browser.exec',
     params: Exec,
-    handler: async (params, { runtime }) => runtime.browserExec(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserExec(params)
   }),
   defineMethod({
     name: 'browser.capture.start',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserCaptureStart(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserCaptureStart(params)
   }),
   defineMethod({
     name: 'browser.capture.stop',
     params: BrowserTarget,
-    handler: async (params, { runtime }) => runtime.browserCaptureStop(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserCaptureStop(params)
   }),
   defineMethod({
     name: 'browser.download',
     params: SelectorPath,
-    handler: async (params, { runtime }) => runtime.browserDownload(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserDownload(params)
   }),
   defineMethod({
     name: 'browser.highlight',
     params: Highlight,
-    handler: async (params, { runtime }) => runtime.browserHighlight(params)
+    handler: async (params, { browserCommands }) => browserCommands.browserHighlight(params)
   })
 ]

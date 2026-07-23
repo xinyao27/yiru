@@ -26,6 +26,9 @@ All six architecture-review candidates and the identified low-risk cleanup are i
 - [02 — Extract Terminal session authority](issues/02-extract-terminal-session-authority.md):
   one deep main-process module now owns graph, handle, PTY, driver, layout, subscription, recovery,
   presence, waiter, and exit-cleanup state; runtime and transport layers are adapters.
+- [03 — Shrink YiruRuntimeService to composition](issues/03-shrink-yiru-runtime-to-composition.md):
+  RPC and spool consume real command owners directly; browser screencast lifecycle/driver state and
+  mobile notification live/replay sequencing now have single authorities.
 
 ## Not yet specified
 

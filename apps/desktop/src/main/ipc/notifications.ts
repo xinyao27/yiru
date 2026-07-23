@@ -419,7 +419,7 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
         entry.release()
         dismissed += 1
       }
-      runtime?.dismissMobileNotification(id)
+      runtime?.mobileNotifications.dismiss(id)
     }
     return { dismissed }
   })
@@ -466,7 +466,7 @@ export function registerNotificationHandlers(store: Store, runtime?: YiruRuntime
       if (runtime && args.source !== 'test') {
         const dedupeKey = args.worktreeId ?? args.worktreeLabel ?? 'global'
         if (reserveNotificationCooldown(recentMobileNotifications, dedupeKey, Date.now())) {
-          runtime.dispatchMobileNotification({
+          runtime.mobileNotifications.dispatch({
             type: 'notification',
             source: args.source,
             title: notificationOptions.title,

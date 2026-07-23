@@ -180,37 +180,37 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.list',
     params: WorktreeSelector,
-    handler: async (params, { runtime }) => runtime.listMobileFiles(params.worktree)
+    handler: async (params, { fileCommands }) => fileCommands.listMobileFiles(params.worktree)
   }),
   defineMethod({
     name: 'files.searchPaths',
     params: FilePathSearch,
-    handler: async (params, { runtime }) =>
-      runtime.searchMobileFilePaths(params.worktree, params.query, params.limit)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.searchMobileFilePaths(params.worktree, params.query, params.limit)
   }),
   defineMethod({
     name: 'files.open',
     params: FileOpen,
-    handler: async (params, { runtime }) =>
-      runtime.openMobileFile(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.openMobileFile(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.openDiff',
     params: FileOpenDiff,
-    handler: async (params, { runtime }) =>
-      runtime.openMobileDiff(params.worktree, params.relativePath, params.staged === true)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.openMobileDiff(params.worktree, params.relativePath, params.staged === true)
   }),
   defineMethod({
     name: 'files.read',
     params: FileOpen,
-    handler: async (params, { runtime }) =>
-      runtime.readMobileFile(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.readMobileFile(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.resolveTerminalPath',
     params: ResolveTerminalPath,
-    handler: async (params, { runtime, clientId }) =>
-      runtime.resolveTerminalPath(
+    handler: async (params, { fileCommands, clientId }) =>
+      fileCommands.resolveTerminalPath(
         params.worktree,
         params.pathText,
         params.cwd ?? null,
@@ -221,8 +221,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.readTerminalArtifact',
     params: TerminalArtifactFile,
-    handler: async (params, { runtime, clientId }) =>
-      runtime.readTerminalArtifactFile(
+    handler: async (params, { fileCommands, clientId }) =>
+      fileCommands.readTerminalArtifactFile(
         params.worktree,
         params.grantId,
         params.absolutePath,
@@ -232,8 +232,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.readTerminalArtifactPreview',
     params: TerminalArtifactFile,
-    handler: async (params, { runtime, clientId }) =>
-      runtime.readTerminalArtifactPreview(
+    handler: async (params, { fileCommands, clientId }) =>
+      fileCommands.readTerminalArtifactPreview(
         params.worktree,
         params.grantId,
         params.absolutePath,
@@ -243,8 +243,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.writeTerminalArtifact',
     params: TerminalArtifactFileWrite,
-    handler: async (params, { runtime, clientId }) =>
-      runtime.writeTerminalArtifactFile(
+    handler: async (params, { fileCommands, clientId }) =>
+      fileCommands.writeTerminalArtifactFile(
         params.worktree,
         params.grantId,
         params.absolutePath,
@@ -255,14 +255,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.readPreview',
     params: FileOpen,
-    handler: async (params, { runtime }) =>
-      runtime.readFileExplorerPreview(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.readFileExplorerPreview(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.readChunk',
     params: FileReadChunk,
-    handler: async (params, { runtime }) =>
-      runtime.readFileExplorerChunk(
+    handler: async (params, { fileCommands }) =>
+      fileCommands.readFileExplorerChunk(
         params.worktree,
         params.relativePath,
         params.offset,
@@ -272,8 +272,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.readDir',
     params: FileTreePath,
-    handler: async (params, { runtime }) =>
-      runtime.readFileExplorerDir(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.readFileExplorerDir(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.browseServerDir',
@@ -283,14 +283,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.write',
     params: FileWrite,
-    handler: async (params, { runtime }) =>
-      runtime.writeFileExplorerFile(params.worktree, params.relativePath, params.content)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.writeFileExplorerFile(params.worktree, params.relativePath, params.content)
   }),
   defineMethod({
     name: 'files.writeBase64',
     params: FileWriteBase64,
-    handler: async (params, { runtime }) =>
-      runtime.writeFileExplorerFileBase64(
+    handler: async (params, { fileCommands }) =>
+      fileCommands.writeFileExplorerFileBase64(
         params.worktree,
         params.relativePath,
         params.contentBase64
@@ -299,8 +299,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.writeBase64Chunk',
     params: FileWriteBase64Chunk,
-    handler: async (params, { runtime }) =>
-      runtime.writeFileExplorerFileBase64Chunk(
+    handler: async (params, { fileCommands }) =>
+      fileCommands.writeFileExplorerFileBase64Chunk(
         params.worktree,
         params.relativePath,
         params.contentBase64,
@@ -310,26 +310,26 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.createFile',
     params: FileOpen,
-    handler: async (params, { runtime }) =>
-      runtime.createFileExplorerFile(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.createFileExplorerFile(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.createDir',
     params: FileOpen,
-    handler: async (params, { runtime }) =>
-      runtime.createFileExplorerDir(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.createFileExplorerDir(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.createDirNoClobber',
     params: FileOpen,
-    handler: async (params, { runtime }) =>
-      runtime.createFileExplorerDirNoClobber(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.createFileExplorerDirNoClobber(params.worktree, params.relativePath)
   }),
   defineMethod({
     name: 'files.commitUpload',
     params: FileCommitUpload,
-    handler: async (params, { runtime }) =>
-      runtime.commitFileExplorerUpload(
+    handler: async (params, { fileCommands }) =>
+      fileCommands.commitFileExplorerUpload(
         params.worktree,
         params.tempRelativePath,
         params.finalRelativePath
@@ -338,8 +338,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.rename',
     params: FileRename,
-    handler: async (params, { runtime }) =>
-      runtime.renameFileExplorerPath(
+    handler: async (params, { fileCommands }) =>
+      fileCommands.renameFileExplorerPath(
         params.worktree,
         params.oldRelativePath,
         params.newRelativePath
@@ -348,8 +348,8 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.copy',
     params: FileCopy,
-    handler: async (params, { runtime }) =>
-      runtime.copyFileExplorerPath(
+    handler: async (params, { fileCommands }) =>
+      fileCommands.copyFileExplorerPath(
         params.worktree,
         params.sourceRelativePath,
         params.destinationRelativePath
@@ -358,14 +358,14 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.delete',
     params: FileDelete,
-    handler: async (params, { runtime }) =>
-      runtime.deleteFileExplorerPath(params.worktree, params.relativePath, params.recursive)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.deleteFileExplorerPath(params.worktree, params.relativePath, params.recursive)
   }),
   defineMethod({
     name: 'files.search',
     params: FileSearch,
-    handler: async (params, { runtime }) =>
-      runtime.searchRuntimeFiles(params.worktree, {
+    handler: async (params, { fileCommands }) =>
+      fileCommands.searchRuntimeFiles(params.worktree, {
         query: params.query,
         caseSensitive: params.caseSensitive,
         wholeWord: params.wholeWord,
@@ -378,28 +378,30 @@ export const FILE_METHODS: RpcAnyMethod[] = [
   defineMethod({
     name: 'files.listAll',
     params: FileListAll,
-    handler: async (params, { runtime }) =>
-      runtime.listRuntimeFiles(params.worktree, { excludePaths: params.excludePaths })
+    handler: async (params, { fileCommands }) =>
+      fileCommands.listRuntimeFiles(params.worktree, { excludePaths: params.excludePaths })
   }),
   defineMethod({
     name: 'files.listMarkdownDocuments',
     params: WorktreeSelector,
-    handler: async (params, { runtime }) => runtime.listRuntimeMarkdownDocuments(params.worktree)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.listRuntimeMarkdownDocuments(params.worktree)
   }),
   defineMethod({
     name: 'files.stat',
     params: FileTreePath,
-    handler: async (params, { runtime }) =>
-      runtime.statRuntimeFile(params.worktree, params.relativePath)
+    handler: async (params, { fileCommands }) =>
+      fileCommands.statRuntimeFile(params.worktree, params.relativePath)
   }),
   defineStreamingMethod({
     name: 'files.watch',
     params: WorktreeSelector,
-    handler: async (params, { runtime, connectionId, signal }, emit) => {
+    handler: async (params, { runtime, fileCommands, connectionId, signal }, emit) => {
       const seq = ++filesWatchSubscriptionSeq
       const subscriptionId = `files-watch-${connectionId ?? 'inproc'}-${seq}`
       await runFileWatchStream({
         runtime,
+        fileCommands,
         worktree: params.worktree,
         connectionId,
         signal,
