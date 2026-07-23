@@ -24,7 +24,7 @@ existing file retains the existing-user telemetry cohort without incorrectly com
 
 ### Resolution
 
-- Reduced `persistence.ts` by more than 2,300 lines while preserving its atomic Store facade.
+- Reduced `persistence.ts` by a net 2,288 lines while preserving its atomic Store facade.
 - Extracted encryption, atomic writes, backup rotation/recovery, generation fencing, flush/freeze,
   and GitHub cache sidecar persistence from domain state behavior.
 - Split persisted-state decoding into versioned and domain-specific codecs for settings, UI,
@@ -51,4 +51,3 @@ existing file retains the existing-user telemetry cohort without incorrectly com
   settings/UI mutation semantics with no residual findings.
 - Standards review confirmed module boundaries, platform/SSH safety, naming, lint, and test value;
   its sole closure finding renamed `GithubCacheFile` to the repository-standard `GitHubCacheFile`.
-

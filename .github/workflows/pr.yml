@@ -129,6 +129,30 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Why: real old Git diagnostics differ from mocked errors. Keep the
+      # fallback predicates executable across the baseline and transition shapes.
+      - name: Verify Git binary compatibility matrix
+        run: |
+          archive="$RUNNER_TEMP/git-2.25.5.tar.gz"
+          source="$RUNNER_TEMP/git-2.25.5"
+          curl -fsSL https://www.kernel.org/pub/software/scm/git/git-2.25.5.tar.gz -o "$archive"
+          echo "41662c52fc16fec4963bfc41075e71f8ead6b5e386797eb6f9a1111ff95a8ddf  $archive" \
+            | sha256sum --check
+          mkdir -p "$source"
+          tar -xzf "$archive" -C "$source" --strip-components=1
+          make -C "$source" -j2 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease NO_PYTHON=YesPlease git
+          YIRU_GIT_COMPAT_BINARY="$source/git" YIRU_GIT_COMPAT_VERSION="2.25.5" \
+            pnpm exec vp test apps/desktop/src/shared/git-binary-compatibility.test.ts --run
+
+          for spec in \
+            "alpine/git:edge-2.38.1@sha256:37088a64dbc2b87bd6df18dd10949b3391f63dd04c215bfef4f61c5e2015fc50|2.38.1" \
+            "alpine/git:v2.54.0@sha256:77418e6e7c7f434c4a98eaff04ef16840cf03649c881c03948e3e213923e3136|2.54.0"; do
+            image="${spec%%|*}"
+            version="${spec#*|}"
+            YIRU_GIT_COMPAT_IMAGE="$image" YIRU_GIT_COMPAT_VERSION="$version" \
+              pnpm exec vp test apps/desktop/src/shared/git-binary-compatibility.test.ts --run
+          done
+
       - name: Test
         run: pnpm exec vp test --run
 
