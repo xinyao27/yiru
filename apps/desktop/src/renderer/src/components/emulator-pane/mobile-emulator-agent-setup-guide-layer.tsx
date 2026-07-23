@@ -41,7 +41,7 @@ export function MobileEmulatorAgentSetupGuideLayer({
               simulator preview, which read as a rendering glitch. */}
           <div
             aria-hidden="true"
-            className="mobile-emulator-agent-setup-guide-scrim absolute inset-x-0 bottom-0 h-40"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_top,color-mix(in_srgb,var(--background)_92%,transparent),transparent)]"
           />
           <div className="pointer-events-auto relative">
             <MobileEmulatorAgentSetupGuide setup={setup} worktreeId={worktreeId} />

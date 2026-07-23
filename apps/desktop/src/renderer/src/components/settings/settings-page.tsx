@@ -169,6 +169,9 @@ const SETTINGS_NAV_GROUP_BY_ID = new Map<string, SettingsNavGroupDefinition>(
 
 const SHORTCUTS_ESCAPE_CONFIRM_TOAST_ID = 'shortcuts-escape-confirm'
 const SHORTCUTS_ESCAPE_CONFIRM_WINDOW_MS = 2200
+// Why: native material must not flash through the opaque Settings canvas during entry.
+const SETTINGS_SHELL_ANIMATION_CLASS_NAME =
+  "animate-[settings-shell-enter_180ms_ease-out] [[data-native-sidebar-material='true']_&]:animate-none"
 
 function getSettingsSectionId(
   pane: SettingsNavTarget,
@@ -1117,7 +1120,10 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     return (
       <div
         ref={setSettingsRootNode}
-        className="settings-view-shell bg-background flex min-h-0 flex-1 overflow-hidden"
+        className={cn(
+          'bg-background flex min-h-0 flex-1 overflow-hidden',
+          SETTINGS_SHELL_ANIMATION_CLASS_NAME
+        )}
       >
         <div className="text-muted-foreground flex flex-1 items-center justify-center">
           {translate('auto.components.settings.Settings.c7ad095d96', 'Loading settings...')}
@@ -1159,7 +1165,10 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
   return (
     <div
       ref={setSettingsRootNode}
-      className="settings-view-shell flex min-h-0 flex-1 overflow-hidden bg-transparent"
+      className={cn(
+        'flex min-h-0 flex-1 overflow-hidden bg-transparent',
+        SETTINGS_SHELL_ANIMATION_CLASS_NAME
+      )}
     >
       <SettingsSidebar
         appearanceStyle={sidebarAppearanceStyle}

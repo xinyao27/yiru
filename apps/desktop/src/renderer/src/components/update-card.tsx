@@ -473,8 +473,8 @@ export function UpdateCard() {
   const animationClass = prefersReducedMotion
     ? ''
     : exiting
-      ? 'animate-update-card-exit'
-      : 'animate-update-card-enter'
+      ? 'animate-[update-card-exit_150ms_ease-in_both]'
+      : 'animate-[update-card-enter_200ms_ease-out_both]'
 
   const cardContent = (() => {
     // ── Compact transient states (user-initiated check feedback) ──────

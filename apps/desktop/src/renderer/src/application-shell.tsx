@@ -2362,11 +2362,12 @@ function App(): React.JSX.Element {
                 header above the sidebar. Settings, landing, and the tasks
                 page keep the titlebar. */}
                   {!leftTitlebarChromeLayout.shouldMount ? (
+                    // Why: split Settings titlebar at the sidebar seam so native material stays continuous.
                     <div
                       className={cn(
                         TITLEBAR_CLASS_NAME,
                         settingsNativeSidebarMaterialActive &&
-                          'settings-titlebar-native-sidebar-material'
+                          'relative isolate bg-[linear-gradient(to_right,transparent_0_var(--settings-sidebar-width),var(--bg-titlebar,var(--card))_var(--settings-sidebar-width)_100%)]'
                       )}
                     >
                       {settingsNativeSidebarMaterialActive ? (

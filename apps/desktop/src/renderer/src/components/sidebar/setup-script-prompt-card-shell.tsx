@@ -50,7 +50,8 @@ export function SetupScriptPromptCardShell({
 }: SetupScriptPromptCardShellProps): React.JSX.Element {
   return (
     <div className="shrink-0 px-3 pb-2">
-      <div className="setup-script-prompt-card border-sidebar-border text-sidebar-accent-foreground rounded-lg border p-3">
+      {/* Why: sidebar accent is too close to the rail surface for a persistent prompt. */}
+      <div className="border-sidebar-border text-sidebar-accent-foreground rounded-lg border bg-[color-mix(in_srgb,var(--sidebar-foreground)_5%,var(--sidebar))] p-3 dark:bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar))]">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm leading-snug font-semibold">
             {translate(

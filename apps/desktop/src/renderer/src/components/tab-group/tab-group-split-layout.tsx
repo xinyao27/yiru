@@ -111,9 +111,11 @@ function ResizeHandle({
   return (
     <div
       className={cn(
-        'tab-group-split-resize-handle',
-        isHorizontal ? 'is-vertical' : 'is-horizontal',
-        dragging ? 'is-dragging' : ''
+        "relative shrink-0 bg-transparent after:absolute after:bg-[var(--tab-group-split-divider)] after:transition-colors after:duration-100 after:ease-[ease] after:content-[''] hover:after:bg-[var(--tab-group-split-divider-strong)]",
+        isHorizontal
+          ? 'w-1.5 cursor-col-resize after:inset-y-0 after:left-1/2 after:w-[3px] after:-translate-x-1/2'
+          : 'h-1.5 cursor-row-resize after:inset-x-0 after:top-1/2 after:h-[3px] after:-translate-y-1/2',
+        dragging && 'after:bg-[var(--tab-group-split-divider-strong)]'
       )}
       onPointerDown={onPointerDown}
     />

@@ -80,7 +80,9 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
   const paletteMounted = reducedMotion || phase === 'open' || phase === 'typing'
   const paletteOpaque = reducedMotion || paletteMounted
   const resultEnterClass =
-    showWorktreeList && !reducedMotion && phase === 'open' ? 'animate-cmd-j-tip-result-in' : ''
+    showWorktreeList && !reducedMotion && phase === 'open'
+      ? 'animate-[cmd-j-tip-result-in_120ms_ease-out_both]'
+      : ''
 
   useEffect(() => {
     if (reducedMotion) {

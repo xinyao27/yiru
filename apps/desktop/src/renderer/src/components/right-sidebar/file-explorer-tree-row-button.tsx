@@ -57,11 +57,13 @@ export function FileExplorerTreeRowButton({
       data-file-explorer-row=""
       data-selected={isSelected ? 'true' : undefined}
       className={cn(
-        'outline-none focus-visible:bg-accent focus-visible:text-foreground',
+        'outline-none',
         'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
-        !isSelected && 'hover:bg-accent hover:text-foreground',
-        isSelected && 'text-accent-foreground',
-        isFlashing && 'bg-accent',
+        // Why: flat accent nearly disappears against the light explorer panel.
+        isSelected
+          ? 'bg-[color-mix(in_srgb,var(--foreground)_8%,var(--accent))] text-accent-foreground hover:bg-[color-mix(in_srgb,var(--foreground)_10%,var(--accent))] dark:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_80%,transparent)]'
+          : 'hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground',
+        isFlashing && !isSelected && 'bg-accent',
         className
       )}
       style={{ ...style, paddingLeft: `${node.depth * 16 + 8}px` }}

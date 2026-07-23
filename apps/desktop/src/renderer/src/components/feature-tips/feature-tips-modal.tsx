@@ -68,7 +68,7 @@ function FeatureTipVisual({ tip }: { tip: FeatureTip }): JSX.Element {
             {WAVEFORM_BAR_HEIGHTS.map((height, i) => (
               <span
                 key={i}
-                className="bg-foreground/60 animate-waveform block w-[3px] rounded-[2px]"
+                className="bg-foreground/60 block w-[3px] origin-center animate-[waveform_1.4s_ease-in-out_infinite] rounded-[2px]"
                 style={{ height: `${height}%`, animationDelay: `${i * 0.1}s` }}
               />
             ))}

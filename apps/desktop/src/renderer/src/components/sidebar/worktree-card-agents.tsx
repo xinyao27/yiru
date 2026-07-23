@@ -352,7 +352,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
           hideLineageConnectors
         />
         {hasChildAgents && expanded ? (
-          <div className="worktree-agent-lineage-children">
+          <div className="ml-3 border-l border-l-[color:color-mix(in_srgb,var(--sidebar-foreground)_22%,transparent)] pl-1 dark:border-l-[color:color-mix(in_srgb,var(--accent)_28%,transparent)]">
             {childAgents.map((childAgent) =>
               renderAgentBranch(childAgent, descendantAncestorPaneKeys)
             )}
@@ -404,7 +404,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
         />
         {hasChildAgents ? (
           <CompactAgentExpansion expanded={expanded}>
-            <div className="worktree-agent-lineage-children flex flex-col gap-0.5">
+            <div className="ml-3 flex flex-col gap-0.5 border-l border-l-[color:color-mix(in_srgb,var(--sidebar-foreground)_16%,transparent)] pl-1 dark:border-l-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
               {childAgents.map((childAgent) =>
                 renderCompactAgentBranch(
                   childAgent,
@@ -430,7 +430,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
     return (
       <div
         ref={compactAgentListRootRef}
-        className={cn('flex flex-col mt-1 gap-0.5', className)}
+        className={cn('-ms-2 mt-1 flex w-[calc(100%+0.5rem)] flex-col gap-0.5', className)}
         onClick={stopBubble}
         onDoubleClick={stopBubble}
         onMouseDown={stopBubble}
@@ -442,12 +442,7 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
         {agents.length === 0 ? null : shouldUseSummaryRow ? (
           // Why: the worktree card is already the surface. Expanded compact
           // agents stay a quiet tree; only the collapsed summary reads as a pill.
-          <div
-            className={cn(
-              'compact-agent-summary-panel',
-              compactRootListExpanded && 'compact-agent-summary-panel-expanded'
-            )}
-          >
+          <div className="bg-transparent p-0.5 transition-colors duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none">
             <CompactAgentSummaryButton
               agents={summaryAgents}
               subjectLabel={subjectLabel}

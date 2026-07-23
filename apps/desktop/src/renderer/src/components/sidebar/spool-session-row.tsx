@@ -26,9 +26,11 @@ export function SpoolSessionRow({ row, onSelect }: SpoolSessionRowProps): React.
       aria-current={row.active ? 'page' : undefined}
       onClick={onSelect}
       className={cn(
-        'worktree-agent-row-hover flex h-6 w-full min-w-0 items-center gap-1 rounded-sm pr-1 text-left text-[11px] leading-none text-muted-foreground',
+        'flex h-6 w-full min-w-0 items-center gap-1 rounded-sm pr-1 text-left text-[11px] leading-none text-muted-foreground',
         'focus-visible:outline-none',
-        row.active && 'text-foreground'
+        row.active
+          ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] text-foreground hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
+          : 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_1.25%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]'
       )}
       style={{ paddingLeft: DIRECT_PROJECT_WORKTREE_CONTENT_INDENT + SIDEBAR_TREE_INDENT }}
     >

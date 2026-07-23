@@ -68,6 +68,7 @@ export function DashboardAgentRowTrailingControls({
   return (
     <span className="relative ml-auto flex h-3.5 w-12 shrink-0 items-center justify-end">
       {(sendTargetStatus === 'eligible' || sendTargetStatus === 'sending') && (
+        // Why: target styling belongs on the action so the surrounding agent row stays ordinary.
         <button
           type="button"
           onClick={handleInlineSendTargetClick}
@@ -75,8 +76,7 @@ export function DashboardAgentRowTrailingControls({
           onKeyDown={stopKeyDown}
           disabled={sendTargetStatus === 'sending'}
           className={cn(
-            'outline-none focus-visible:bg-accent',
-            'worktree-agent-send-target-button absolute right-0 top-1/2 z-10 inline-flex h-5 -translate-y-1/2 items-center gap-1 rounded-md border px-1.5 text-[10px] font-medium leading-none transition-[background-color,border-color,color,opacity]',
+            'absolute top-1/2 right-0 z-10 inline-flex h-5 -translate-y-1/2 items-center gap-1 rounded-md border border-[color:color-mix(in_srgb,var(--ai-action-accent)_72%,transparent)] bg-[color-mix(in_srgb,var(--ai-action-accent)_12%,transparent)] px-1.5 text-[10px] leading-none font-medium text-foreground transition-[background-color,border-color,color,opacity] outline-none hover:border-[color:color-mix(in_srgb,var(--ai-action-accent)_88%,transparent)] hover:bg-[color-mix(in_srgb,var(--ai-action-accent)_18%,transparent)] focus-visible:bg-accent',
             sendTargetStatus === 'sending' && 'cursor-progress opacity-75'
           )}
           aria-label={translate(
