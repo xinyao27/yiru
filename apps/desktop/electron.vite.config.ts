@@ -7,6 +7,14 @@ import { defineConfig } from 'electron-vite'
 import { createElectronViteRolldownOptionsBridge } from './build-plugins/electron-vite-rolldown-options-bridge'
 import { createPlainNodeEntryGuardPlugin } from './build-plugins/plain-node-entry-guard'
 
+// Why: source-owned workspace packages are not sandbox preload dependencies.
+// Inline runtime subpath imports anywhere Electron cannot resolve node_modules.
+const CROSS_CLIENT_WORKSPACE_PACKAGES = [
+  '@yiru/mobile-relay-protocol',
+  '@yiru/runtime-protocol',
+  '@yiru/workbench-model'
+]
+
 // Why: the telemetry transport is gated by two compile-time constants that
 // only the official CI release workflow sets. Contributor / `pnpm dev` /
 // third-party rebuilds must substitute literal `null` at these sites so
@@ -177,13 +185,7 @@ export default defineConfig({
       // directory cannot reach into app.asar, so pure-JS dependencies used
       // by the daemon must be bundled rather than externalized.
       externalizeDeps: {
-        exclude: [
-          '@xterm/headless',
-          '@xterm/addon-serialize',
-          '@yiru/mobile-relay-protocol',
-          '@yiru/runtime-protocol',
-          '@yiru/workbench-model'
-        ]
+        exclude: ['@xterm/headless', '@xterm/addon-serialize', ...CROSS_CLIENT_WORKSPACE_PACKAGES]
       },
       rollupOptions: {
         // Why: CLI and plain-Node sidecars share the out/ tree, whose package
@@ -234,7 +236,7 @@ export default defineConfig({
     plugins: [createElectronViteRolldownOptionsBridge()],
     build: {
       externalizeDeps: {
-        exclude: ['@electron-toolkit/preload']
+        exclude: ['@electron-toolkit/preload', ...CROSS_CLIENT_WORKSPACE_PACKAGES]
       },
       // Why: preload is packaged beside the CommonJS main-process output.
       rollupOptions: {
