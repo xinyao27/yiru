@@ -1,3 +1,4 @@
+import { release } from 'node:os'
 import { join } from 'node:path'
 
 import { is } from '@electron-toolkit/utils'
@@ -29,6 +30,7 @@ import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
 } from '../../shared/modifier-double-tap-detector'
+import { supportsNativeSidebarMaterial } from '../../shared/native-sidebar-material-support'
 import {
   getWindowShortcutActionId,
   matchesRecentTabSwitcherChord,
@@ -221,16 +223,17 @@ export function createMainWindow(
     return false
   })
   const blur = settings?.windowBackgroundBlur ?? false
-  // Why: native blur requires platform-specific Electron APIs. macOS uses
-  // vibrancy (needs transparent: true), Windows uses backgroundMaterial.
-  // Linux has no native equivalent. Blur only applies at window creation;
-  // changing the setting requires a restart.
-  const platformBlurOptions = blur
+  const nativeSidebarMaterial = supportsNativeSidebarMaterial(process.platform, release())
+  // Why: supported platforms always draw material for the left rail; macOS
+  // broadens it beyond the sidebar when window blur is enabled.
+  const platformBlurOptions = nativeSidebarMaterial
     ? process.platform === 'darwin'
-      ? { vibrancy: 'under-window' as const, transparent: true }
-      : process.platform === 'win32'
-        ? { backgroundMaterial: 'acrylic' as const }
-        : {}
+      ? {
+          vibrancy: blur ? ('under-window' as const) : ('sidebar' as const),
+          visualEffectState: 'followWindow' as const,
+          transparent: true
+        }
+      : { backgroundMaterial: 'acrylic' as const }
     : {}
 
   const mainWindow = new BrowserWindow({
@@ -252,7 +255,14 @@ export function createMainWindow(
     // Window/Help menus by pressing Alt, matching native Windows/Linux
     // conventions (File Explorer, Firefox, etc.).
     autoHideMenuBar: true,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0a0a0a' : '#ffffff',
+    // Why: macOS vibrancy needs a clear renderer base; other platforms keep an
+    // opaque fallback for unsupported Windows versions and Linux compositors.
+    backgroundColor:
+      nativeSidebarMaterial && process.platform === 'darwin'
+        ? '#00000000'
+        : nativeTheme.shouldUseDarkColors
+          ? '#0a0a0a'
+          : '#ffffff',
     // Why: on macOS 'hiddenInset' keeps the native traffic lights positioned
     // inside our custom 42px titlebar. On Windows 'hidden' removes the default
     // OS title bar (which would otherwise stack on top of our renderer titlebar

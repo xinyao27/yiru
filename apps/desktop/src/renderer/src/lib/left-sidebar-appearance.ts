@@ -97,28 +97,33 @@ function resolveTerminalSurfaceVariables(
 }
 
 function resolveTintedSurfaceVariables(
-  settings: LeftSidebarAppearanceSettings
+  settings: LeftSidebarAppearanceSettings,
+  nativeMaterial: boolean
 ): LeftSidebarStyleVariables {
   const tintColor = normalizeLeftSidebarTintColor(settings.leftSidebarTintColor)
   const tintOpacity = normalizeLeftSidebarTintOpacity(settings.leftSidebarTintOpacity)
   const tintPercent = Number((tintOpacity * 100).toFixed(2))
-  const background = `color-mix(in srgb, ${tintColor} ${tintPercent}%, var(--background))`
+  // Why: native material already supplies the base surface; tinted mode should
+  // add only the requested wash instead of covering the OS blur with an opaque fill.
+  const background = `color-mix(in srgb, ${tintColor} ${tintPercent}%, ${nativeMaterial ? 'transparent' : 'var(--background)'})`
   return buildSurfaceVariables({ background, foreground: 'var(--foreground)' })
 }
 
 export function resolveLeftSidebarStyleVariables(
   settings: LeftSidebarAppearanceSettings | null | undefined,
-  systemPrefersDark: boolean
+  systemPrefersDark: boolean,
+  nativeMaterial = false
 ): LeftSidebarStyleVariables | undefined {
+  const defaultSurface = nativeMaterial ? { '--sidebar': 'transparent' } : undefined
   if (!settings) {
-    return undefined
+    return defaultSurface
   }
   switch (settings.leftSidebarAppearanceMode) {
     case 'default':
-      return undefined
+      return defaultSurface
     case 'match-terminal':
       return resolveTerminalSurfaceVariables(settings, systemPrefersDark)
     case 'tinted':
-      return resolveTintedSurfaceVariables(settings)
+      return resolveTintedSurfaceVariables(settings, nativeMaterial)
   }
 }
