@@ -174,7 +174,9 @@ export function SettingsSidebar({
 
   return (
     <aside
-      className="worktree-sidebar-theme border-sidebar-border bg-sidebar flex w-[var(--settings-sidebar-width)] shrink-0 flex-col border-r"
+      // Why: window chrome overlays Settings, so keep its controls clear while
+      // allowing the sidebar material to continue behind the traffic lights.
+      className="worktree-sidebar-theme border-sidebar-border bg-sidebar flex w-[var(--settings-sidebar-width)] shrink-0 flex-col border-r pt-9"
       style={appearanceStyle}
     >
       <div className="border-sidebar-border border-b px-3 py-3">

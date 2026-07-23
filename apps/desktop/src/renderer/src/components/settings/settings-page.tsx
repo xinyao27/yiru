@@ -1121,11 +1121,18 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
       <div
         ref={setSettingsRootNode}
         className={cn(
-          'bg-background flex min-h-0 flex-1 overflow-hidden',
+          'flex min-h-0 flex-1 overflow-hidden bg-transparent',
           SETTINGS_SHELL_ANIMATION_CLASS_NAME
         )}
       >
-        <div className="text-muted-foreground flex flex-1 items-center justify-center">
+        {/* Why: preserve the final split surfaces while settings load so native
+            sidebar material never flashes to an opaque full-window canvas. */}
+        <div
+          aria-hidden
+          className="worktree-sidebar-theme border-sidebar-border bg-sidebar w-[var(--settings-sidebar-width)] shrink-0 border-r"
+          style={sidebarAppearanceStyle}
+        />
+        <div className="bg-background text-muted-foreground flex min-w-0 flex-1 items-center justify-center">
           {translate('auto.components.settings.Settings.c7ad095d96', 'Loading settings...')}
         </div>
       </div>

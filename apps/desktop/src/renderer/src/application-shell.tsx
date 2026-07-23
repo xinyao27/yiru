@@ -1602,6 +1602,7 @@ function App(): React.JSX.Element {
     activeView !== 'activity' &&
     activeView !== 'space' &&
     activeView !== 'skills'
+  const settingsChromeOverlayActive = activeView === 'settings'
   const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
   // Why: Landing keep the full titlebar only when the sidebar is
   // collapsed; with it open, mirror workspace view so titlebar-left sits flush
@@ -2316,8 +2317,8 @@ function App(): React.JSX.Element {
       style={
         {
           '--collapsed-sidebar-header-width': `${collapsedSidebarHeaderWidth}px`,
-          // Why: Settings renders its titlebar and navigation in sibling trees;
-          // one seam value keeps their native-material boundary aligned.
+          // Why: Settings renders its overlaid window controls and navigation in
+          // sibling trees; one seam value keeps their left-column widths aligned.
           '--settings-sidebar-width': '280px',
           // Why: consumed by anything that needs to avoid the fixed-position
           // window-controls overlay on Windows/Linux (floating sidebar toggle,
@@ -2356,36 +2357,27 @@ function App(): React.JSX.Element {
                 {/* Why: keep the non-workspace titlebar and content in one
               column so full-page routes retain a stable vertical frame. */}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                  {/* Why: in workspace view (split groups always enabled), the
-                full-width titlebar is removed so tab groups + terminal extend
-                to the top of the window. Left titlebar controls move to a
-                header above the sidebar. Settings, landing, and the tasks
-                page keep the titlebar. */}
+                  {/* Why: workspace moves window controls into its sidebar header;
+                Settings overlays them on its own full-height surfaces, while
+                other full-page routes keep the shared titlebar row. */}
                   {!leftTitlebarChromeLayout.shouldMount ? (
-                    // Why: split Settings titlebar at the sidebar seam so native material stays continuous.
                     <div
                       className={cn(
                         TITLEBAR_CLASS_NAME,
-                        settingsNativeSidebarMaterialActive &&
-                          'relative isolate bg-[linear-gradient(to_right,transparent_0_var(--settings-sidebar-width),var(--bg-titlebar,var(--card))_var(--settings-sidebar-width)_100%)]'
+                        // Why: Settings owns both full-height surfaces; window chrome
+                        // overlays them instead of reserving a blank titlebar row.
+                        settingsChromeOverlayActive &&
+                          'absolute inset-x-0 top-0 z-20 border-b-0 bg-transparent'
                       )}
                     >
-                      {settingsNativeSidebarMaterialActive ? (
-                        <div
-                          aria-hidden
-                          className="bg-sidebar pointer-events-none absolute inset-y-0 left-0 -z-10 w-[var(--settings-sidebar-width)]"
-                          style={leftSidebarStyle}
-                        />
-                      ) : null}
                       <div
                         className={cn(
                           'mr-2 flex shrink-0 items-center',
-                          settingsNativeSidebarMaterialActive &&
-                            'mr-0 w-[var(--settings-sidebar-width)]'
+                          settingsChromeOverlayActive && 'mr-0 w-[var(--settings-sidebar-width)]'
                         )}
-                        // Why: only controls over the Settings rail should inherit
-                        // custom sidebar foreground and interaction colors.
-                        style={settingsNativeSidebarMaterialActive ? leftSidebarStyle : undefined}
+                        // Why: controls over the Settings rail inherit its custom
+                        // foreground and interaction colors on every platform.
+                        style={settingsChromeOverlayActive ? leftSidebarStyle : undefined}
                       >
                         {titlebarLeftControls}
                       </div>
