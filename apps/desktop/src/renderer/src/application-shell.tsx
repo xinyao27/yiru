@@ -2171,7 +2171,7 @@ function App(): React.JSX.Element {
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon-xs"
                   className={cn(
                     'bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
                     TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
