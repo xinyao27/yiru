@@ -20,6 +20,10 @@ All six architecture-review candidates and the identified low-risk cleanup are i
 
 <!-- Resolved tickets are indexed here with a one-line gist and link. -->
 
+- [01 — Terminal authority characterization](issues/01-terminal-authority-characterization.md):
+  public runtime state transitions plus real SSH relay and daemon adapter boundaries are executable,
+  and PR CI now runs the repository test suite.
+
 ## Not yet specified
 
 - Exact follow-on runtime state owners revealed after Terminal authority leaves `YiruRuntimeService`.
@@ -33,4 +37,3 @@ All six architecture-review candidates and the identified low-risk cleanup are i
 - Dependency upgrades unrelated to enabling the refactor.
 - Replacing Electron, Zustand, Expo, or the existing runtime transport stack.
 - Broad test-coverage targets unrelated to the changed seams.
-
