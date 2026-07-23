@@ -276,10 +276,8 @@ export default function TabGroupSplitLayout({
         // so disabling it is the simplest fix.
         autoScroll={false}
       >
-        {/* Why `border-l` on the wrapper: paint the single full-height divider
-          between the left sidebar and the terminal area, regardless of split
-          state. The leftmost pane suppresses its own `border-l` via
-          `touchesLeftEdge`, so the seam is always exactly 1px. */}
+        {/* Why: the wrapper keeps the sidebar edge open while each split pane
+          uses its edge flags to paint only internal dividers. */}
         <div ref={dragSplit.setDragRootNode} className={WORKSPACE_COLUMN_FRAME_CLASS_NAME}>
           <div className={WORKSPACE_COLUMN_BODY_CLASS_NAME}>
             <SplitNode
