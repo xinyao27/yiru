@@ -1,22 +1,13 @@
-import {
-  Warning as AlertTriangle,
-  Devices as MonitorSmartphone,
-  HardDrives as Server,
-  HardDrive as ServerOff
-} from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 import {
   isRuntimeOwnedSshTargetId,
@@ -28,6 +19,7 @@ import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-envi
 import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { useAppStore } from '../../store'
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './runtime-host-status-row'
+import { SshStatusTrigger } from './ssh-status-trigger'
 import { SshTargetStatusRow } from './ssh-target-status-row'
 
 function isConnecting(status: SshConnectionStatus): boolean {
@@ -285,6 +277,12 @@ export function SshStatusSegment({
       ? 'Workspace conflict'
       : 'Workspace sync error'
     : null
+  const statusLabel =
+    syncProblemLabel ??
+    (anyConnecting ? 'Connecting…' : connectedHostCountLabel(connectedHostCount))
+  const statusDotClass = syncProblem
+    ? 'bg-destructive'
+    : overallDotColor(overall, connectedHostCount)
   return (
     <DropdownMenu
       onOpenChange={(open) => {
@@ -294,65 +292,14 @@ export function SshStatusSegment({
         }
       }}
     >
-      <DropdownMenuTrigger
-        render={
-          <button
-            type="button"
-            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
-            aria-label={translate(
-              'auto.components.status.bar.SshStatusSegment.fdc57e9970',
-              'Remote host connection status'
-            )}
-          >
-            {iconOnly ? (
-              <span className="inline-flex items-center gap-1">
-                <span
-                  className={cn(
-                    'inline-block size-2 rounded-full',
-                    syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
-                  )}
-                />
-                {syncProblem ? (
-                  <AlertTriangle className="text-destructive size-3" />
-                ) : anyConnecting ? (
-                  <LoadingIndicator className="text-muted-foreground size-3" />
-                ) : (
-                  <MonitorSmartphone className="text-muted-foreground size-3" />
-                )}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5">
-                {syncProblem ? (
-                  <AlertTriangle className="text-destructive size-3" />
-                ) : anyConnecting ? (
-                  <LoadingIndicator className="size-3 text-yellow-500" />
-                ) : overall === 'connected' ? (
-                  <Server className="size-3 text-emerald-500" />
-                ) : overall === 'partial' ? (
-                  <Server className="text-muted-foreground size-3" />
-                ) : (
-                  <ServerOff className="text-muted-foreground size-3" />
-                )}
-                {!compact && (
-                  <span className="text-[11px]">
-                    <span className={syncProblem ? 'text-destructive' : 'text-muted-foreground'}>
-                      {syncProblemLabel ??
-                        (anyConnecting
-                          ? 'Connecting…'
-                          : connectedHostCountLabel(connectedHostCount))}
-                    </span>
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    'inline-block size-1.5 rounded-full',
-                    syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
-                  )}
-                />
-              </span>
-            )}
-          </button>
-        }
+      <SshStatusTrigger
+        anyConnecting={anyConnecting}
+        compact={compact}
+        hasSyncProblem={Boolean(syncProblem)}
+        iconOnly={iconOnly}
+        overall={overall}
+        statusDotClass={statusDotClass}
+        statusLabel={statusLabel}
       />
       <DropdownMenuContent
         side="top"
