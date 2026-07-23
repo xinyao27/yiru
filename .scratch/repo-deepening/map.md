@@ -23,6 +23,9 @@ All six architecture-review candidates and the identified low-risk cleanup are i
 - [01 — Terminal authority characterization](issues/01-terminal-authority-characterization.md):
   public runtime state transitions plus real SSH relay and daemon adapter boundaries are executable,
   and PR CI now runs the repository test suite.
+- [02 — Extract Terminal session authority](issues/02-extract-terminal-session-authority.md):
+  one deep main-process module now owns graph, handle, PTY, driver, layout, subscription, recovery,
+  presence, waiter, and exit-cleanup state; runtime and transport layers are adapters.
 
 ## Not yet specified
 

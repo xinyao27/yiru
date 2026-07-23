@@ -220,4 +220,29 @@ describe('YiruRuntimeService terminal authority', () => {
     expect(runtime.getTerminalFitOverride('pty-mobile')).toBeNull()
     expect(runtime.hasRemoteTerminalViewSubscriber('pty-mobile')).toBe(false)
   })
+
+  it('preserves newer output while an older foreground-agent probe resolves', async () => {
+    const runtime = new YiruRuntimeService()
+    const ptyId = 'pty-interleaved-output'
+    const handle = runtime.preAllocateHandleForPty(ptyId)
+    let finishProbe: (process: string | null) => void = () => undefined
+    const foregroundProcess = new Promise<string | null>((resolve) => {
+      finishProbe = resolve
+    })
+    const { controller } = createPtyController({ cols: 100, rows: 30 })
+    controller.getForegroundProcess = () => foregroundProcess
+    runtime.setPtyController(controller)
+    runtime.registerPty(ptyId, 'worktree-interleaved')
+
+    runtime.onPtyData(ptyId, '\u001b]0;⠋ Claude Code\u0007before\n', 1)
+    runtime.onPtyData(ptyId, 'after\n', 2)
+    finishProbe('claude')
+    await foregroundProcess
+    await new Promise<void>((resolve) => setImmediate(resolve))
+
+    await expect(runtime.readTerminal(handle)).resolves.toMatchObject({
+      status: 'running',
+      tail: ['before', 'after']
+    })
+  })
 })
