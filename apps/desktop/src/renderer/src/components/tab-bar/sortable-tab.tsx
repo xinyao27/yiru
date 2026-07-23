@@ -15,8 +15,7 @@ import { useAppStore } from '../../store'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import {
   getDropIndicatorClasses,
-  getTabDividerClasses,
-  getTabRootStateClasses,
+  getTitlebarTabStateClasses,
   type DropIndicator
 } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
@@ -259,9 +258,8 @@ export default function SortableTab({
       // pseudo-element stays free for the drop indicator.
       className={cn(
         TAB_ROOT_CLASSES,
-        getTabDividerClasses(hasTabsToRight),
         getDropIndicatorClasses(dropIndicator ?? null),
-        getTabRootStateClasses(isActive)
+        getTitlebarTabStateClasses(isActive)
       )}
       onDoubleClick={(e) => {
         if (isEditing) {
@@ -313,7 +311,7 @@ export default function SortableTab({
         isActive={isActive}
       />
       {isPinned && !isEditing && (
-        <Pin className="text-muted-foreground mr-1 size-4 shrink-0" aria-hidden />
+        <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />
       )}
       {isEditing ? (
         <Input
@@ -411,7 +409,7 @@ export default function SortableTab({
               'Collapse pane'
             )}
           >
-            <Minimize2 className="size-4" />
+            <Minimize2 className="size-3.5" />
           </button>
         )}
       {/* Why: terminal tabs keep trailing close chrome compact beside activity controls. */}

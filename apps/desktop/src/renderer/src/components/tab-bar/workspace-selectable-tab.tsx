@@ -3,14 +3,14 @@ import type React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'
 
-import { getTabDividerClasses, getTabRootStateClasses } from './drop-indicator'
+import { getTitlebarTabStateClasses } from './drop-indicator'
+import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
 type WorkspaceSelectableTabProps = {
   id: string
   title: string
   active: boolean
-  hasTabsToRight: boolean
   icon: React.ReactNode
   onSelect: (id: string) => void
   tabIndex: 0 | -1
@@ -20,7 +20,6 @@ export function WorkspaceSelectableTab({
   id,
   title,
   active,
-  hasTabsToRight,
   icon,
   onSelect,
   tabIndex
@@ -36,14 +35,13 @@ export function WorkspaceSelectableTab({
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={cn(
-          'group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none',
-          getTabDividerClasses(hasTabsToRight),
-          getTabRootStateClasses(active)
-        )}
+        className={cn(TAB_ROOT_CLASSES, 'w-full text-left', getTitlebarTabStateClasses(active))}
         onClick={() => onSelect(id)}
       >
-        <span className="mr-1.5 flex size-4 shrink-0 items-center justify-center" aria-hidden>
+        <span
+          className={cn(TAB_LEADING_ICON_CLASSES, 'flex items-center justify-center')}
+          aria-hidden
+        >
           {icon}
         </span>
         <Tooltip>

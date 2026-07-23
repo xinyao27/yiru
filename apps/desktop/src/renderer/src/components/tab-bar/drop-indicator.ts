@@ -20,8 +20,10 @@ export function getTabRootStateClasses(isActive: boolean): string {
     : 'bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground'
 }
 
-export function getTabDividerClasses(hasTabsToRight: boolean): string {
-  // Why: inset dividers keep adjacent idle tabs scannable without restoring
-  // the full-height bordered-card treatment this compact strip replaces.
-  return hasTabsToRight ? 'border-r border-border/70' : ''
+export function getTitlebarTabStateClasses(isActive: boolean): string {
+  // Why: selected titlebar tabs in the reference differ from the strip only
+  // slightly; mixing the existing roles keeps that quiet contrast theme-safe.
+  return isActive
+    ? 'bg-[color-mix(in_srgb,var(--accent)_50%,var(--card))] text-muted-foreground'
+    : 'bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground'
 }

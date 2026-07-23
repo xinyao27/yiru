@@ -216,12 +216,12 @@ const hasCustomTitleBar = shouldRenderDesktopWindowChrome({
 // Why: Electron drag regions swallow clicks even when a control is visibly above them.
 const TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME = '[-webkit-app-region:no-drag]'
 const TITLEBAR_CLASS_NAME =
-  'flex h-9 min-h-9 flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
-// Why: the inset seam preserves the full 36px content box, keeping controls aligned with traffic lights.
+  'flex h-10 min-h-10 flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+// Why: the reference tabs occupy the full 40px titlebar without vertical inset.
 const TITLEBAR_LEFT_CLASS_NAME =
-  'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+  'worktree-sidebar-theme flex h-10 min-h-10 shrink-0 flex-row items-center overflow-hidden bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 const WINDOW_CONTROL_BUTTON_CLASS_NAME =
-  'h-9 w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
+  'h-10 w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 
 async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
   try {
@@ -281,7 +281,7 @@ function WindowControls(): React.JSX.Element {
   return (
     <div
       data-testid="window-controls"
-      className="fixed top-0 right-0 z-[9999] flex h-9 flex-row [-webkit-app-region:no-drag]"
+      className="fixed top-0 right-0 z-[9999] flex h-10 flex-row [-webkit-app-region:no-drag]"
     >
       <Button
         type="button"
@@ -2307,7 +2307,7 @@ function App(): React.JSX.Element {
     !stackedSidebarOpen ? (
       <div
         // Why: keep the profile control clear of desktop window controls.
-        className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]"
+        className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-10 items-center [-webkit-app-region:no-drag]"
       >
         <YiruProfileSwitcher />
       </div>
@@ -2332,7 +2332,7 @@ function App(): React.JSX.Element {
           '--window-controls-width': hasCustomTitleBar ? '138px' : '0px',
           // Why: consumed by the side-position activity bar to push icons below
           // the fixed-position window-controls overlay on Windows/Linux.
-          '--window-controls-height': hasCustomTitleBar ? '36px' : '0px'
+          '--window-controls-height': hasCustomTitleBar ? '40px' : '0px'
         } as React.CSSProperties
       }
     >
@@ -2396,7 +2396,7 @@ function App(): React.JSX.Element {
                      header above it. The header holds the same controls
                      (traffic lights, sidebar toggle, agent badge)
                      that the full-width titlebar held while the center and right
-                     columns keep their own top strips at the same 36px height.
+                     columns keep their own top strips at the same 40px height.
                      When the sidebar is collapsed, take this header out of flex
                      layout so the terminal/editor reclaim the left edge instead of
                      leaving behind a content-width blank strip. */
@@ -2437,7 +2437,7 @@ function App(): React.JSX.Element {
                             {titlebarLeftControls}
                           </div>
                           <div className="flex min-h-0 flex-1">
-                            {/* Why: the workspace-view wrapper adds a fixed 36px header
+                            {/* Why: the workspace-view wrapper adds a fixed 40px header
                           above the sidebar. Without a flex-1/min-h-0 slot here,
                           the sidebar falls back to its content height, so the
                           worktree list loses its scroll viewport and the fixed

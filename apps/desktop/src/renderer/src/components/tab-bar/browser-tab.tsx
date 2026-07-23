@@ -28,14 +28,13 @@ import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import {
   getDropIndicatorClasses,
-  getTabDividerClasses,
-  getTabRootStateClasses,
+  getTitlebarTabStateClasses,
   type DropIndicator
 } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './sortable-tab'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_ROOT_CLASSES } from './tab-root-classes'
+import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 import { TabWorkspaceLayoutMenuSection } from './tab-workspace-layout-menu-section'
@@ -102,13 +101,13 @@ function BrowserTabFavicon({
         alt=""
         aria-hidden
         draggable={false}
-        className="mr-1 size-4 shrink-0 rounded-sm object-contain"
+        className={cn(TAB_LEADING_ICON_CLASSES, 'rounded-sm object-contain')}
         onError={() => setFailedFavicon({ tabId, faviconUrl: displayFaviconUrl })}
       />
     )
   }
 
-  return <Globe className="mr-1 size-4 shrink-0 text-blue-500" />
+  return <Globe className={cn(TAB_LEADING_ICON_CLASSES, 'text-blue-500')} />
 }
 
 export default function BrowserTab({
@@ -191,9 +190,8 @@ export default function BrowserTab({
       {...listeners}
       className={cn(
         TAB_ROOT_CLASSES,
-        getTabDividerClasses(hasTabsToRight),
         getDropIndicatorClasses(dropIndicator ?? null),
-        getTabRootStateClasses(isActive)
+        getTitlebarTabStateClasses(isActive)
       )}
       onPointerDown={(e) => {
         onTabPointerDown(
@@ -226,7 +224,7 @@ export default function BrowserTab({
           keep full color on both active and inactive tabs — dimming to
           muted-foreground made the icon read as "disabled" in practice. */}
       <BrowserTabFavicon tabId={tab.id} faviconUrl={tab.faviconUrl} />
-      {isPinned && <Pin className="text-muted-foreground mr-1 size-4 shrink-0" aria-hidden />}
+      {isPinned && <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />}
       {menuOpen ? (
         <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{tabLabel}</span>
       ) : (

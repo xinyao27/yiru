@@ -29,15 +29,14 @@ import { STATUS_COLORS, STATUS_LABELS } from '../right-sidebar/status-display'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import {
   getDropIndicatorClasses,
-  getTabDividerClasses,
-  getTabRootStateClasses,
+  getTitlebarTabStateClasses,
   type DropIndicator
 } from './drop-indicator'
 import { EditorFileTabContextMenu } from './editor-file-tab-context-menu'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './sortable-tab'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_ROOT_CLASSES } from './tab-root-classes'
+import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
@@ -222,10 +221,9 @@ export default function EditorFileTab({
     onActivate,
     disabled: isRenaming
   })
-  const tabIconTone = isActive ? 'text-foreground' : 'text-muted-foreground'
-  const tabIconClassName = cn('mr-1 size-4 shrink-0', tabIconTone)
+  const tabIconClassName = cn(TAB_LEADING_ICON_CLASSES, 'text-muted-foreground')
   const conflictIconClassName = cn(
-    'mr-1 size-4 shrink-0',
+    TAB_LEADING_ICON_CLASSES,
     isActive ? 'text-orange-400' : 'text-orange-400/70'
   )
 
@@ -238,9 +236,8 @@ export default function EditorFileTab({
       {...dragListeners}
       className={cn(
         TAB_ROOT_CLASSES,
-        getTabDividerClasses(hasTabsToRight),
         getDropIndicatorClasses(dropIndicator ?? null),
-        getTabRootStateClasses(isActive)
+        getTitlebarTabStateClasses(isActive)
       )}
       onPointerDown={(e) => {
         onTabPointerDown(
@@ -281,7 +278,7 @@ export default function EditorFileTab({
       ) : (
         <FileIcon className={tabIconClassName} />
       )}
-      {isPinned && <Pin className="text-muted-foreground mr-1 size-4 shrink-0" aria-hidden />}
+      {isPinned && <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />}
       <span className="mr-1 flex min-w-0 flex-1 items-baseline gap-1">
         {isRenaming ? (
           <Input

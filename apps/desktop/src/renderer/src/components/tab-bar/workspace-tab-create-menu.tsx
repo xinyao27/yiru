@@ -34,10 +34,10 @@ export function WorkspaceTabCreateMenu({
   const triggerButton = (
     <Button
       type="button"
-      variant="ghost"
-      size="icon-xs"
+      variant="outline"
+      size="icon-lg"
       className={cn(
-        'ml-1 my-auto h-7 w-6 shrink-0 text-muted-foreground hover:text-accent-foreground',
+        '-ml-px h-full w-16 shrink-0 border-border border-b-0 bg-transparent text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground dark:border-border dark:bg-transparent dark:hover:bg-accent',
         disabled && 'cursor-not-allowed opacity-50 hover:bg-background hover:text-muted-foreground'
       )}
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -61,7 +61,8 @@ export function WorkspaceTabCreateMenu({
         }
       }}
     >
-      <Plus className="size-4" />
+      {/* Why: the reference add segment uses the same compact glyph scale as tab identities. */}
+      <Plus className="size-3.5" />
     </Button>
   )
   const trigger = <TooltipTrigger render={<DropdownMenuTrigger render={triggerButton} />} />

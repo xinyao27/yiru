@@ -94,7 +94,6 @@ export function SpoolSessionTabStrip({
             id={session.sessionRef}
             title={session.title}
             active={activePanel === null && session.sessionRef === activeSessionRef}
-            hasTabsToRight={index < visibleSessions.length - 1}
             tabIndex={
               (activePanel === null && session.sessionRef === activeSessionRef) ||
               (!activeTabIsVisible && index === 0)

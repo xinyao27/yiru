@@ -10,17 +10,17 @@ import { AgentSessionHistoryIcon } from '../right-sidebar/agent-session-history-
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import {
   getDropIndicatorClasses,
-  getTabRootStateClasses,
+  getTitlebarTabStateClasses,
   type DropIndicator
 } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_ROOT_CLASSES } from './tab-root-classes'
+import { TAB_LEADING_ICON_CLASSES, TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
 function WorkspacePanelIcon({ panel }: { panel: WorkspacePanelTabContentType }): React.JSX.Element {
-  const className = 'mr-1 size-4 shrink-0'
+  const className = TAB_LEADING_ICON_CLASSES
   switch (panel) {
     case 'explorer':
       return <Files className={className} />
@@ -70,7 +70,7 @@ export function WorkspacePanelTab({
         className={cn(
           TAB_ROOT_CLASSES,
           getDropIndicatorClasses(dropIndicator ?? null),
-          getTabRootStateClasses(isActive)
+          getTitlebarTabStateClasses(isActive)
         )}
         onPointerDown={(event) => {
           onPointerDown(
