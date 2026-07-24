@@ -106,7 +106,7 @@ export function BitbucketIntegrationCard(): React.JSX.Element {
                 )
               }
             >
-              <ExternalLink className="mr-1.5 size-3.5" />
+              <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
               {translate(
                 'auto.components.settings.token.source.control.integration.cards.1a9475dace',
                 'Learn more'
@@ -235,7 +235,7 @@ export function AzureDevOpsIntegrationCard(): React.JSX.Element {
                 )
               }
             >
-              <ExternalLink className="mr-1.5 size-3.5" />
+              <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
               {translate(
                 'auto.components.settings.token.source.control.integration.cards.1a9475dace',
                 'Learn more'
@@ -350,7 +350,7 @@ export function GiteaIntegrationCard(): React.JSX.Element {
                 window.api.shell.openUrl('https://docs.gitea.com/next/development/api-usage')
               }
             >
-              <ExternalLink className="mr-1.5 size-3.5" />
+              <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
               {translate(
                 'auto.components.settings.token.source.control.integration.cards.1a9475dace',
                 'Learn more'

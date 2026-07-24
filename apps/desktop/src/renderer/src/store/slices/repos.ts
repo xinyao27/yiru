@@ -24,7 +24,6 @@ import type { StateCreator } from 'zustand'
 
 import { translate } from '@/i18n/i18n'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
-import { clearRepoSlugCacheEntry } from '@/lib/repo-slug-cache'
 import { filterSetupScriptPromptDismissalsToValidRepos } from '@/lib/setup-script-prompt'
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
@@ -2726,7 +2725,6 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         repoMatchesHostIdentity(repo, projectId, ownerHostId)
       )?.path
       get().evictGitHubRepoCaches(projectId, repoPath)
-      clearRepoSlugCacheEntry(projectId)
 
       // Kill PTYs for all worktrees belonging to this repo
       const worktreeIds = getKnownRepoWorktreeIds(get(), projectId, ownerHostId)

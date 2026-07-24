@@ -320,21 +320,21 @@ export function OrchestrationPage(props: {
           }}
         >
           <span
-            className="border-border bg-card text-muted-foreground inline-flex items-center gap-1 rounded-md border px-1.5"
+            className="border-border bg-card text-muted-foreground inline-flex items-center gap-1 border px-1.5"
             style={{ height: 18, fontSize: 10, fontWeight: 500 }}
             aria-label={translate(
               'auto.components.feature.wall.agents.orchestration.OrchestrationPage.862605d066',
               '2 child workspaces'
             )}
           >
-            <Workflow className="size-2.5" aria-hidden />
+            <Workflow weight="regular" className="size-2.5" aria-hidden />
             <span className="truncate">
               {translate(
                 'auto.components.feature.wall.agents.orchestration.OrchestrationPage.30b509a467',
                 '2 children'
               )}
             </span>
-            <ChevronDown className="size-2.5" aria-hidden />
+            <ChevronDown weight="regular" className="size-2.5" aria-hidden />
           </span>
         </div>
 

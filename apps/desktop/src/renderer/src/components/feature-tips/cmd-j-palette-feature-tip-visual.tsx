@@ -148,7 +148,7 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
               ) : null}
               <span
                 className={cn(
-                  'inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-border/80 px-2 text-xs font-semibold text-muted-foreground transition-[transform,background-color] duration-150 ease-out',
+                  'inline-flex h-7 min-w-7 items-center justify-center border border-border/80 px-2 text-xs font-semibold text-muted-foreground transition-[transform,background-color] duration-150 ease-out',
                   isPressed
                     ? 'translate-y-[1.5px] bg-foreground/[0.18]'
                     : 'translate-y-0 bg-foreground/[0.08]'
@@ -164,7 +164,7 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
 
       <div
         className={cn(
-          'relative mt-3 h-[12.75rem] w-full max-w-[21rem] overflow-hidden rounded-xl border border-border bg-card text-left transition-opacity duration-300 ease-out',
+          'relative mt-3 h-[12.75rem] w-full max-w-[21rem] overflow-hidden border border-border bg-card text-left transition-opacity duration-300 ease-out',
           !paletteMounted
             ? 'pointer-events-none invisible opacity-0'
             : paletteOpaque
@@ -194,17 +194,17 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
               <div
                 key={result.key}
                 className={cn(
-                  'flex shrink-0 items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-1.5',
+                  'flex shrink-0 items-center gap-2.5 border border-transparent px-2.5 py-1.5',
                   resultEnterClass
                 )}
               >
                 <span className="flex w-4 shrink-0 items-center justify-center">
                   {result.status === 'done' ? (
-                    <span className="size-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                    <span className="size-2.5 bg-emerald-500" aria-hidden="true" />
                   ) : (
                     // Why: this tip can stay mounted while Yiru is idle; mirror
                     // the sidebar's static working ring instead of spinning.
-                    <span className="block size-2.5 rounded-full border-[1.5px] border-yellow-500 bg-yellow-500/15" />
+                    <span className="block size-2.5 border-[1.5px] border-yellow-500 bg-yellow-500/15" />
                   )}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -220,11 +220,11 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
             {renderShowCreate ? (
               <div
                 className={cn(
-                  'mt-0.5 flex shrink-0 items-center gap-2.5 rounded-lg border border-dashed border-border/60 bg-muted/10 px-2.5 py-1.5',
+                  'mt-0.5 flex shrink-0 items-center gap-2.5 border border-dashed border-border/60 bg-muted/10 px-2.5 py-1.5',
                   resultEnterClass
                 )}
               >
-                <div className="border-border/60 bg-muted/25 text-muted-foreground/70 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-dashed">
+                <div className="border-border/60 bg-muted/25 text-muted-foreground/70 flex h-5 w-5 shrink-0 items-center justify-center border border-dashed">
                   <Plus size={13} aria-hidden="true" />
                 </div>
                 <div className="text-foreground min-w-0 flex-1 truncate text-[12.5px] font-semibold tracking-[-0.01em]">

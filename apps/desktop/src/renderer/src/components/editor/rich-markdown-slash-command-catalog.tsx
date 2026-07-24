@@ -142,7 +142,7 @@ export const slashCommands: SlashCommand[] = [
       )
     },
     aliases: ['toggle', 'details', 'collapse', 'toggle-text'],
-    icon: icon(ChevronRight),
+    icon: icon(ChevronRight, 'regular'),
     group: 'Basic blocks',
     get description() {
       return translate(
@@ -220,7 +220,7 @@ export const slashCommands: SlashCommand[] = [
       )
     },
     aliases: ['diagram', 'flowchart', 'chart', 'graph'],
-    icon: icon(Workflow),
+    icon: icon(Workflow, 'regular'),
     group: 'Advanced',
     get description() {
       return translate(

@@ -133,6 +133,8 @@ describe('decodePersistedState', () => {
     legacySettings.terminalScrollbackBytes = 50_000_000
     legacySettings.terminalTuiScrollSensitivity = 3
     legacySettings.terminalTuiScrollSensitivityDefaultedToOne = false
+    legacySettings.terminalDividerThicknessPx = 3
+    legacySettings.terminalDividerThicknessDefaultedToHairline = false
     legacySettings.agentDefaultArgs = {
       ...legacySettings.agentDefaultArgs,
       opencode: '--dangerously-skip-permissions --model test'
@@ -152,11 +154,31 @@ describe('decodePersistedState', () => {
       terminalScrollbackRows: 25_000,
       terminalTuiScrollSensitivity: 1,
       terminalTuiScrollSensitivityDefaultedToOne: true,
+      terminalDividerThicknessPx: 1,
+      terminalDividerThicknessDefaultedToHairline: true,
       experimentalPet: true,
       agentDefaultArgs: { opencode: '--model test' }
     })
     expect(decoded.state.settings).not.toHaveProperty('terminalScrollbackBytes')
     expect(decoded.state.settings).not.toHaveProperty('compactWorktreeCards')
+  })
+
+  it('preserves a custom terminal divider thickness during the hairline migration', () => {
+    const legacy = getDefaultPersistedState('/home/tester')
+    legacy.settings.terminalDividerThicknessPx = 6
+    legacy.settings.terminalDividerThicknessDefaultedToHairline = false
+
+    const decoded = decodePersistedState(legacy, {
+      homeDir: '/home/tester',
+      platform: 'linux',
+      fileExistedOnLoad: true,
+      createInstallId: () => 'install-id'
+    })
+
+    expect(decoded.state.settings).toMatchObject({
+      terminalDividerThicknessPx: 6,
+      terminalDividerThicknessDefaultedToHairline: true
+    })
   })
 
   it('migrates existing-profile onboarding and worktree-card defaults once', () => {

@@ -70,7 +70,7 @@ export function AddRepoHostSelector({
               variant="ghost"
               role="combobox"
               aria-expanded={open}
-              className="border-border bg-muted/30 text-foreground hover:bg-accent hover:text-accent-foreground h-7 max-w-[18rem] min-w-0 gap-1.5 rounded-md border px-2 text-xs font-medium"
+              className="border-border bg-muted/30 text-foreground hover:bg-accent hover:text-accent-foreground h-7 max-w-[18rem] min-w-0 gap-1.5 border px-2 text-xs font-medium"
             >
               <span className="min-w-0 truncate">{selectedHost.label}</span>
               {selectedHost.health !== 'local' ? (
@@ -81,7 +81,7 @@ export function AddRepoHostSelector({
                   {getSidebarHostHealthLabel(selectedHost.health)}
                 </span>
               ) : null}
-              <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+              <ChevronsUpDown weight="regular" className="size-3.5 shrink-0 opacity-50" />
             </Button>
           }
         />
@@ -117,15 +117,17 @@ export function AddRepoHostSelector({
                             )}
                           </span>
                         </span>
-                        <ChevronRight className="mt-0.5 size-3.5 shrink-0" />
+                        <ChevronRight weight="regular" className="mt-0.5 size-3.5 shrink-0" />
                       </CommandItem>
                     }
                   />
                   <PopoverContent align="start" side="right" className="w-72 p-1" sideOffset={8}>
                     {onAddSshHost ? (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="default"
                         type="button"
-                        className="hover:bg-accent hover:text-accent-foreground flex w-full flex-col rounded-sm px-2.5 py-2 text-left focus-visible:outline-none"
+                        className="flex w-full flex-col justify-start gap-0 border-0 px-2.5 text-left font-normal whitespace-normal"
                         onClick={() => {
                           setAddHostOpen(false)
                           onOpenChange(false)
@@ -144,12 +146,14 @@ export function AddRepoHostSelector({
                             'Use an existing machine over SSH.'
                           )}
                         </span>
-                      </button>
+                      </Button>
                     ) : null}
                     {onAddRemoteServer ? (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="default"
                         type="button"
-                        className="hover:bg-accent hover:text-accent-foreground flex w-full flex-col rounded-sm px-2.5 py-2 text-left focus-visible:outline-none"
+                        className="flex w-full flex-col justify-start gap-0 border-0 px-2.5 text-left font-normal whitespace-normal"
                         onClick={() => {
                           setAddHostOpen(false)
                           onOpenChange(false)
@@ -168,7 +172,7 @@ export function AddRepoHostSelector({
                             'Pair with Yiru running on another computer.'
                           )}
                         </span>
-                      </button>
+                      </Button>
                     ) : null}
                   </PopoverContent>
                 </Popover>

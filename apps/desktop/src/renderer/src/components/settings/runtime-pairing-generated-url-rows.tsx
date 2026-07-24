@@ -22,7 +22,7 @@ export function GeneratedUrlRow({
     <div className="space-y-1">
       <Label>{label}</Label>
       {description ? <p className="text-muted-foreground text-xs">{description}</p> : null}
-      <div className="border-border/60 bg-background/70 flex min-w-0 items-center gap-2 rounded-md border px-2 py-1.5">
+      <div className="border-border/60 bg-background/70 flex min-w-0 items-center gap-2 border px-2 py-1.5">
         <code className="text-muted-foreground min-w-0 flex-1 overflow-x-auto text-[11px] whitespace-nowrap">
           {value}
         </code>
@@ -54,7 +54,7 @@ export function UnavailableUrlRow({
   return (
     <div className="space-y-1">
       <Label>{label}</Label>
-      <div className="border-border/60 rounded-md border px-2 py-1.5">
+      <div className="border-border/60 border px-2 py-1.5">
         <p className="text-muted-foreground text-xs">{description}</p>
       </div>
     </div>

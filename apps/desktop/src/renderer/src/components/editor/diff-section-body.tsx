@@ -103,7 +103,7 @@ export function DiffSectionBody({
       ) : null}
       {section.loading ? (
         <div className="bg-muted/10 text-muted-foreground flex h-full items-center gap-2 px-3 text-[11px]">
-          <span className="bg-muted-foreground/50 h-1.5 w-1.5 rounded-full" />
+          <span className="bg-muted-foreground/50 h-1.5 w-1.5" />
           <span>
             {translate('auto.components.editor.DiffSectionBody.f5cf81cec2', 'Loading diff...')}
           </span>
@@ -124,7 +124,7 @@ export function DiffSectionBody({
               onRetrySection(index)
             }}
           >
-            <RefreshCw className="size-3" />
+            <RefreshCw weight="regular" className="size-3" />
             {translate('auto.components.editor.DiffSectionBody.cef4cf0ff5', 'Retry')}
           </Button>
         </div>

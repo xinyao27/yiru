@@ -1,12 +1,14 @@
+import { ClockCounterClockwise, Folder, FolderOpen } from '@phosphor-icons/react'
+
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import { useAppStore } from '@/store'
 
-import { useRightSidebarActivityItems } from '../right-sidebar/use-right-sidebar-activity-items'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { useRightSidebarActivityItems } from '../workspace-panel/use-right-sidebar-activity-items'
 
 export function WorkspacePanelStatusActions(): React.JSX.Element | null {
   const activeWorktreeId = useAppStore((state) => state.activeWorktreeId)
@@ -32,8 +34,15 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
   return (
     <div className="flex h-full shrink-0 items-center gap-0.5">
       {items.map((item) => {
-        const Icon = item.icon
         const active = activeTabContentType === item.id
+        const Icon =
+          item.id === 'explorer'
+            ? active
+              ? FolderOpen
+              : Folder
+            : item.id === 'vault'
+              ? ClockCounterClockwise
+              : item.icon
         const label = item.shortcut ? `${item.title} (${item.shortcut})` : item.title
         const shortcut =
           item.id === 'explorer'
@@ -53,7 +62,7 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
                 <Button
                   type="button"
                   variant="status-bar-icon"
-                  size="icon-status-bar"
+                  size="icon-status-bar-wide"
                   // Why: compact status actions mark selection through icon
                   // contrast only; the footer variant keeps hover/focus transient.
                   aria-label={label}

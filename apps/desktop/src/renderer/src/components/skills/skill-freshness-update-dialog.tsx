@@ -338,7 +338,10 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
                   size="xs"
                   className="group text-muted-foreground -ml-2 gap-1.5"
                 >
-                  <ChevronDown className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                  <ChevronDown
+                    weight="regular"
+                    className="size-3.5 transition-transform group-data-[state=open]:rotate-180"
+                  />
                   {translate(
                     'auto.components.skills.SkillFreshnessUpdateDialog.details',
                     'Update details'
@@ -346,7 +349,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
                 </Button>
               }
             />
-            <CollapsibleContent className="divide-border/40 border-border/60 mt-1 divide-y rounded-md border p-3">
+            <CollapsibleContent className="divide-border/40 border-border/60 mt-1 divide-y border p-3">
               <TooltipProvider>
                 {groups.map((group) => (
                   <SkillFreshnessGroup key={group.name} group={group} />
@@ -364,7 +367,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
             disabled={state.loading}
             onClick={() => void state.refresh()}
           >
-            {state.loading ? <LoadingIndicator /> : <RefreshCw />}
+            {state.loading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
             {translate('auto.components.skills.SkillFreshnessUpdateDialog.checkNow', 'Re-check')}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(false)}>

@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { PhosphorIconContextProvider } from '@/components/phosphor-icon-context-provider'
 import { cn } from '@/lib/class-names'
 
 type SidebarProjectHeaderIconProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -38,29 +39,33 @@ export const SidebarProjectHeader = React.forwardRef<HTMLDivElement, SidebarProj
       <div
         ref={ref}
         className={cn(
-          'group relative flex h-7 w-full items-center gap-1.5 pr-2 text-left transition-all outline-none focus-visible:bg-sidebar-accent',
+          'group relative flex h-7 w-full items-center gap-1.5 pr-2 text-left transition-all outline-none hover:bg-accent focus-visible:bg-accent',
           className
         )}
         style={{ ...style, paddingLeft }}
         {...props}
       >
         {icon ? (
-          <div
-            className={cn(
-              'flex size-4 shrink-0 items-center justify-center rounded-[4px]',
-              iconClassName,
-              iconPropsClassName
-            )}
-            {...restIconProps}
-          >
-            {icon}
-          </div>
+          // Why: project-header identity glyphs are regular, while action-menu
+          // portals outside the visible row retain the renderer default.
+          <PhosphorIconContextProvider weight="regular">
+            <div
+              className={cn(
+                'flex size-4 shrink-0 items-center justify-center',
+                iconClassName,
+                iconPropsClassName
+              )}
+              {...restIconProps}
+            >
+              {icon}
+            </div>
+          </PhosphorIconContextProvider>
         ) : null}
 
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1.5">
             <div className="min-w-0 truncate text-[13px] leading-none font-semibold">{label}</div>
-            {labelAfter}
+            <PhosphorIconContextProvider weight="regular">{labelAfter}</PhosphorIconContextProvider>
           </div>
         </div>
 

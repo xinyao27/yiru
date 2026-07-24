@@ -35,7 +35,7 @@ export function ClaudeUsageDailyChart({ daily }: ClaudeUsageDailyChartProps): Re
   const maxDailyTotal = getMaxDailyTotal(daily)
 
   return (
-    <section className="border-border/60 bg-card/40 rounded-lg border p-4">
+    <section className="border-border/60 bg-card/40 border p-4">
       <div className="mb-3">
         <h4 className="text-foreground text-sm font-semibold">
           {translate('auto.components.stats.ClaudeUsageDailyChart.c9f7cd30e9', 'Daily usage')}
@@ -88,7 +88,7 @@ export function ClaudeUsageDailyChart({ daily }: ClaudeUsageDailyChartProps): Re
                 {formatTokens(total)}
               </span>
               <div className="flex min-h-0 flex-1 items-end justify-center">
-                <div className="bg-muted/60 flex h-full w-full max-w-12 overflow-hidden rounded-t-sm">
+                <div className="bg-muted/60 flex h-full w-full max-w-12 overflow-hidden">
                   <div className="flex h-full w-full flex-col justify-end">
                     {segments.map((segment) =>
                       segment.value > 0 ? (
@@ -130,19 +130,19 @@ export function ClaudeUsageDailyChart({ daily }: ClaudeUsageDailyChartProps): Re
       </div>
       <div className="text-muted-foreground mt-3 flex flex-wrap gap-4 text-xs">
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-sky-500/80" />
+          <span className="size-2 bg-sky-500/80" />
           {translate('auto.components.stats.ClaudeUsageDailyChart.d7fb787e6b', 'Input')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-500/80" />
+          <span className="size-2 bg-emerald-500/80" />
           {translate('auto.components.stats.ClaudeUsageDailyChart.7d2efeff5e', 'Output')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-amber-500/70" />
+          <span className="size-2 bg-amber-500/70" />
           {translate('auto.components.stats.ClaudeUsageDailyChart.61c58f8976', 'Cache read')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-fuchsia-500/70" />
+          <span className="size-2 bg-fuchsia-500/70" />
           {translate('auto.components.stats.ClaudeUsageDailyChart.2a6360c7cb', 'Cache write')}
         </span>
       </div>

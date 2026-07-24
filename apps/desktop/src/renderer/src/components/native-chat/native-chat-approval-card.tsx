@@ -1,5 +1,6 @@
 import { Shield as ShieldQuestion } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 
 import type { ChatApproval } from './native-chat-interactive-prompt'
@@ -39,19 +40,16 @@ export function NativeChatApprovalCard({
             </div>
             <div className="flex flex-wrap gap-2">
               {approval.options.map((opt, i) => (
-                <button
+                <Button
+                  variant={i === 0 ? 'default' : 'outline'}
+                  size="sm"
                   key={`${opt.label}-${i}`}
                   type="button"
                   onClick={() => onChoose(opt.send)}
-                  className={cn(
-                    'rounded-md border border-transparent px-4 py-1.5 text-sm font-semibold transition-colors outline-none focus-visible:border-ring',
-                    i === 0
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'border border-border bg-background text-foreground hover:bg-accent'
-                  )}
+                  className="h-auto px-4 py-1.5 font-semibold"
                 >
                   {opt.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

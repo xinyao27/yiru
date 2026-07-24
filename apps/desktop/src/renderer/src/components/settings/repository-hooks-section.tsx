@@ -191,7 +191,7 @@ export function RepositoryHooksSection({
         forceVisible={forceVisible}
         keywords={['setup run policy', 'ask', 'run by default', 'skip by default']}
       >
-        <div className="border-border/50 bg-background/80 space-y-4 rounded-2xl border p-4">
+        <div className="border-border/50 bg-background/80 space-y-4 border p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               <h5 className="text-sm font-semibold">

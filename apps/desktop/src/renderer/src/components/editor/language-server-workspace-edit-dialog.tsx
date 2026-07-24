@@ -77,13 +77,15 @@ function WorkspaceEditContent({
       <div className="flex min-h-0 flex-1">
         <div className="border-border scrollbar-sleek w-56 shrink-0 overflow-y-auto border-r py-1">
           {files.map((file, index) => (
-            <button
+            <Button
+              variant="ghost"
+              size="default"
               key={file.filePath}
               type="button"
               aria-pressed={index === selectedIndex}
               className={cn(
-                'outline-none focus-visible:bg-accent',
-                `hover:bg-accent flex w-full items-start gap-2 px-3 py-2 text-left text-xs ${index === selectedIndex ? 'bg-accent text-accent-foreground' : 'text-foreground'}`
+                'border-0 justify-start whitespace-normal font-normal focus-visible:bg-accent',
+                `flex w-full items-start px-3 text-left text-xs ${index === selectedIndex ? 'bg-accent text-accent-foreground' : 'text-foreground'}`
               )}
               onClick={() => setSelectedIndex(index)}
             >
@@ -104,7 +106,7 @@ function WorkspaceEditContent({
                     : ''}
                 </span>
               </span>
-            </button>
+            </Button>
           ))}
         </div>
 

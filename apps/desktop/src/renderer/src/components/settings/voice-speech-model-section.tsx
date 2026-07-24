@@ -82,7 +82,7 @@ export function VoiceSpeechModelSection({
               {selectedModel && selectedIsReady
                 ? selectedModel.label
                 : translate('auto.components.settings.VoicePane.fbe5990716', 'Select Model')}
-              <ChevronDown className="size-3 opacity-50" />
+              <ChevronDown weight="regular" className="size-3 opacity-50" />
             </Button>
           }
         />
@@ -141,7 +141,7 @@ export function VoiceSpeechModelSection({
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-medium">{manifest.label}</span>
                     {!isCloud && (
-                      <span className="bg-muted text-muted-foreground rounded-full px-1 py-px text-[10px] leading-none">
+                      <span className="bg-muted text-muted-foreground px-1 py-px text-[10px] leading-none">
                         {manifest.streaming
                           ? translate('auto.components.settings.VoicePane.d504ab05f0', 'streaming')
                           : translate('auto.components.settings.VoicePane.8f4d2a51d7', 'offline')}

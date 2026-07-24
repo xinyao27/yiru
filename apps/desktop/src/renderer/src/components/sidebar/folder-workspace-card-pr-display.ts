@@ -1,7 +1,7 @@
 import {
   buildParentPrChecksRows,
   type ParentPrChecksRow
-} from '@/components/right-sidebar/parent-pr-checks-rows'
+} from '@/components/workspace-panel/parent-pr-checks-rows'
 import type { AppState } from '@/store/types'
 
 import type { Repo, Worktree, WorktreeLineage, WorkspaceLineage } from '../../../../shared/types'

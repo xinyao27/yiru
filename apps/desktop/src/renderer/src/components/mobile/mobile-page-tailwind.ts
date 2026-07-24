@@ -1,9 +1,8 @@
 export const mobilePageStyles = {
   root: 'relative block size-full overflow-hidden text-foreground',
-  toolbar: 'absolute inset-x-3 top-3 z-[3] flex items-start justify-between gap-3',
-  toolbarPrimary: 'max-w-[min(100%,22rem)]',
-  sidebarToggle: 'max-w-full justify-start whitespace-normal text-left font-semibold',
-  toolbarClose: 'mt-px size-7 shrink-0',
+  toolbar:
+    'absolute top-3 right-[calc(0.75rem+var(--window-controls-width,0px))] left-3 z-[3] flex items-start gap-3 [-webkit-app-region:drag]',
+  toolbarClose: 'mt-px size-7 shrink-0 [-webkit-app-region:no-drag]',
   hero: 'relative grid size-full grid-cols-[minmax(360px,560px)_minmax(300px,420px)] items-center justify-center gap-[clamp(56px,7vw,112px)] overflow-hidden bg-[radial-gradient(circle,color-mix(in_srgb,var(--foreground)_8%,transparent)_1px,transparent_1.2px)] bg-[length:5px_5px] bg-repeat p-14 max-[920px]:grid-cols-1 max-[920px]:grid-rows-[auto_minmax(0,1fr)] max-[920px]:items-start max-[920px]:gap-6 max-[920px]:px-7 max-[920px]:pb-7 max-[920px]:pt-[52px] min-[921px]:max-[1180px]:grid-cols-[minmax(330px,520px)_minmax(280px,360px)] min-[921px]:max-[1180px]:gap-10 min-[921px]:max-[1180px]:px-10 min-[921px]:max-[1180px]:pb-10 min-[921px]:max-[1180px]:pt-[52px] [@media(max-height:840px)_and_(min-width:921px)]:p-12',
   heroCopy:
     'relative z-[1] flex min-h-[400px] max-w-[560px] flex-col [&>*]:flex [&>*]:flex-1 [&>*]:flex-col max-[920px]:min-h-0',

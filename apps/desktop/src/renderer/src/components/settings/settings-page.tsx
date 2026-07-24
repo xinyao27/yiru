@@ -1208,7 +1208,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
             )}
           >
             {visibleNavSections.length === 0 ? (
-              <div className="border-border/60 bg-card/30 text-muted-foreground flex min-h-[24rem] items-center justify-center rounded-2xl border border-dashed text-sm">
+              <div className="border-border/60 bg-card/30 text-muted-foreground flex min-h-[24rem] items-center justify-center border border-dashed text-sm">
                 {translate(
                   'auto.components.settings.Settings.3c88ec55d6',
                   'No settings found for "'
@@ -1324,7 +1324,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                     'Finish the core workflows that make Yiru useful for parallel agent work.'
                   )}
                   searchEntries={getSectionSearchEntries('setup-guide')}
-                  bodyClassName="overflow-hidden rounded-none border-0 bg-transparent p-0 "
+                  bodyClassName="overflow-hidden border-0 bg-transparent p-0"
                 >
                   {isSectionMounted('setup-guide') ? <SettingsSetupGuidePane /> : null}
                 </SettingsSection>
@@ -1360,7 +1360,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                     'Connect GitHub, GitLab, and source-hosting services.'
                   )}
                   searchEntries={getSectionSearchEntries('integrations')}
-                  bodyClassName="rounded-none border-0 bg-transparent p-0 "
+                  bodyClassName="border-0 bg-transparent p-0"
                 >
                   {isSectionMounted('integrations') ? <IntegrationsPane /> : null}
                 </SettingsSection>

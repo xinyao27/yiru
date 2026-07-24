@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { ActivityBarItem } from '@/components/right-sidebar/activity-bar-buttons'
-import { createRightSidebarActivityItems } from '@/components/right-sidebar/right-sidebar-activity-items'
-import { getVisibleRightSidebarActivityItems } from '@/components/right-sidebar/right-sidebar-activity-visibility'
+import type { ActivityBarItem } from '@/components/workspace-panel/activity-bar-buttons'
+import { createRightSidebarActivityItems } from '@/components/workspace-panel/right-sidebar-activity-items'
+import { getVisibleRightSidebarActivityItems } from '@/components/workspace-panel/right-sidebar-activity-visibility'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { useAppStore } from '@/store'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'

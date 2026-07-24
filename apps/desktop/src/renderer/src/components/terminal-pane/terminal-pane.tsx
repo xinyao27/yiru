@@ -3152,7 +3152,7 @@ export default function TerminalPane({
       />
       {effectiveChatViewMode && chatPane?.container
         ? createPortal(
-            <div className="bg-background absolute inset-0 z-10 flex min-h-0 min-w-0">
+            <div className="bg-background text-foreground absolute inset-0 z-10 flex min-h-0 min-w-0">
               <NativeChatView
                 terminalTabId={tabId}
                 paneKey={makePaneKey(tabId, chatPane.leafId)}

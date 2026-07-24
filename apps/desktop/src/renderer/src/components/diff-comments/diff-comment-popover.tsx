@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import {
@@ -232,7 +233,7 @@ export function DiffCommentPopover({
                   { value0: lineNumber }
                 ))}
         </div>
-        <textarea
+        <Textarea
           ref={focusTextareaRef}
           className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
           placeholder={placeholder}
@@ -273,7 +274,7 @@ export function DiffCommentPopover({
           </Button>
           <Button size="sm" onClick={handleSubmit} disabled={submitting || !canSubmitComment}>
             {submitting ? submittingLabel : submitLabel}
-            {!submitting && <CornerDownLeft className="ml-1 size-3 opacity-70" />}
+            {!submitting && <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />}
           </Button>
         </div>
       </div>

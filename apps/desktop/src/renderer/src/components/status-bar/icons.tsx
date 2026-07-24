@@ -330,7 +330,7 @@ export function ClaudeIcon({ size = 14 }: { size?: number }): React.JSX.Element 
 
 export function DroidIcon({ size = 14 }: { size?: number }): React.JSX.Element {
   // Why: Factory.ai's favicon is a white glyph on transparent bg — unreadable on
-  // light surfaces (README kbd pills, light-mode UI). Bake in a black rounded
+  // light surfaces (README kbd pills, light-mode UI). Bake in a black
   // square backdrop so the icon is self-contained across themes.
   return (
     <svg height={size} width={size} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

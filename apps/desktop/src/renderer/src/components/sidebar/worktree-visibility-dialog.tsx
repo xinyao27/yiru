@@ -80,8 +80,8 @@ export default function WorktreeVisibilityDialog(): React.JSX.Element | null {
           <DialogDescription>{repo.displayName}</DialogDescription>
         </DialogHeader>
 
-        <div className="border-border bg-muted/30 flex items-center gap-3 rounded-lg border p-3">
-          <div className="bg-background text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-md">
+        <div className="border-border bg-muted/30 flex items-center gap-3 border p-3">
+          <div className="bg-background text-muted-foreground flex size-8 shrink-0 items-center justify-center">
             {showOther ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
           </div>
           <div className="min-w-0 flex-1">

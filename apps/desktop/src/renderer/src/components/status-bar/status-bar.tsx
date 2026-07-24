@@ -618,10 +618,12 @@ function CodexRestartStatusPrompt(): React.JSX.Element | null {
             </span>
           ) : null}
         </div>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
           onClick={() => queueCodexPaneRestarts(staleCodexStatus.stalePtyIds)}
-          className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
+          className="border-border/70 hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 w-full gap-0 px-2.5 py-1.5 text-xs whitespace-normal transition-colors"
         >
           {staleCodexStatus.staleSessionCount === 1
             ? translate('auto.components.status.bar.StatusBar.6cd6650b4c', 'Restart Session')
@@ -630,7 +632,7 @@ function CodexRestartStatusPrompt(): React.JSX.Element | null {
                 'Restart {{value0}} Sessions',
                 { value0: staleCodexStatus.staleSessionCount }
               )}
-        </button>
+        </Button>
       </div>
     </>
   )
@@ -656,26 +658,26 @@ function AccountRuntimeToggle<TGroup extends { key: string; label: string }>({
       <div
         role="radiogroup"
         aria-label={ariaLabel}
-        className="border-border bg-background/50 inline-flex w-full items-center rounded-md border p-0.5"
+        className="border-border bg-background/50 inline-flex w-full items-center border p-0.5"
       >
         {groups.map((group) => {
           const active = group.key === value
           return (
-            <button
+            <Button
+              variant="quiet"
+              size="xs"
               key={group.key}
               type="button"
               role="radio"
               aria-checked={active}
               onClick={() => onChange(group)}
               className={cn(
-                'min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors',
-                active
-                  ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                'h-auto border-0 gap-0 min-w-0 flex-1 py-1 text-center ',
+                active ? 'bg-accent text-accent-foreground' : ' '
               )}
             >
               <span className="block truncate">{group.label}</span>
-            </button>
+            </Button>
           )
         })}
       </div>
@@ -903,9 +905,9 @@ export function ClaudeSwitcherMenu({
             translate('auto.components.status.bar.StatusBar.c676918adc', 'System default')}
         </span>
         {accountsExpanded ? (
-          <ChevronDown className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronDown weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
         ) : (
-          <ChevronRight className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronRight weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
         )}
       </DropdownMenuItem>
       {accountsExpanded ? (
@@ -913,7 +915,7 @@ export function ClaudeSwitcherMenu({
           <div className="text-muted-foreground px-2 py-1 text-[10px] font-medium tracking-[0.08em] uppercase">
             {translate('auto.components.status.bar.StatusBar.9332ba8684', 'Switch to')}
           </div>
-          <div className="border-border/60 bg-accent/5 scrollbar-sleek max-h-[220px] overflow-y-auto rounded-md border p-1">
+          <div className="border-border/60 bg-accent/5 scrollbar-sleek max-h-[220px] overflow-y-auto border p-1">
             {selectedGroup?.targets.length === 0 ? (
               <div className="text-muted-foreground px-2 py-1.5 text-[11px]">
                 {translate('auto.components.status.bar.StatusBar.c98ea88392', 'No other accounts')}
@@ -1030,10 +1032,10 @@ export function InlineUsageBars({
     >
       {usageWindows.map((window) => (
         <div key={window.key} className="flex min-w-0 items-center gap-1">
-          <div className="bg-muted h-[4px] min-w-0 flex-1 overflow-hidden rounded-full">
+          <div className="bg-muted h-[4px] min-w-0 flex-1 overflow-hidden">
             {/* Why: fill follows the selected percentage; color still signals consumption urgency. */}
             <div
-              className={cn('h-full rounded-full', barColor(window.used))}
+              className={cn('h-full', barColor(window.used))}
               style={{ width: `${getDisplayedUsagePercentage(window.used, display)}%` }}
             />
           </div>
@@ -1075,10 +1077,10 @@ function InlineUsageSignInAction({
       </span>
       <Button
         type="button"
-        variant="ghost"
+        variant="quiet"
         size="xs"
         disabled={disabled}
-        className="text-muted-foreground hover:text-foreground h-6 shrink-0 px-2"
+        className="h-6 shrink-0 px-2"
         onPointerDown={(event) => {
           event.preventDefault()
           event.stopPropagation()
@@ -1090,7 +1092,11 @@ function InlineUsageSignInAction({
           onSignIn()
         }}
       >
-        {isSigningIn ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
+        {isSigningIn ? (
+          <LoadingIndicator className="size-3" />
+        ) : (
+          <RefreshCw weight="regular" className="size-3" />
+        )}
         {translate('auto.components.status.bar.StatusBar.c35af53b73', 'Sign in')}
       </Button>
     </div>
@@ -1100,8 +1106,8 @@ function InlineUsageSignInAction({
 function InlineUsageSkeleton(): React.JSX.Element {
   return (
     <div className="flex w-full animate-pulse items-center gap-2">
-      <div className="bg-muted h-[4px] flex-1 rounded-full" />
-      <div className="bg-muted h-[4px] flex-1 rounded-full" />
+      <div className="bg-muted h-[4px] flex-1" />
+      <div className="bg-muted h-[4px] flex-1" />
     </div>
   )
 }
@@ -1439,7 +1445,7 @@ export function CodexSwitcherMenu({
               )}
             </DialogDescription>
           </DialogHeader>
-          <label className="text-foreground/80 hover:text-foreground flex cursor-pointer items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors">
+          <label className="text-foreground/80 hover:text-foreground flex cursor-pointer items-center gap-2 px-1 py-1 text-xs transition-colors">
             <Checkbox
               checked={skipFutureResetConfirm}
               onCheckedChange={(checked) => setSkipFutureResetConfirm(checked === true)}
@@ -1456,7 +1462,7 @@ export function CodexSwitcherMenu({
               {isRedeemingReset ? (
                 <LoadingIndicator className="size-4" />
               ) : (
-                <RotateCcw className="size-4" />
+                <RotateCcw weight="regular" className="size-4" />
               )}
               {isRedeemingReset
                 ? translate('auto.components.status.bar.StatusBar.25d8bbde69', 'Using reset…')
@@ -1525,14 +1531,14 @@ export function CodexSwitcherMenu({
           </div>
         </div>
         {accountsExpanded ? (
-          <ChevronDown className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronDown weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
         ) : (
-          <ChevronRight className="text-muted-foreground/85 ml-auto size-3.5" />
+          <ChevronRight weight="regular" className="text-muted-foreground/85 ml-auto size-3.5" />
         )}
       </DropdownMenuItem>
       {accountsExpanded ? (
         <div className="px-1 pb-1">
-          <div className="border-border/60 bg-accent/5 scrollbar-sleek max-h-[220px] overflow-y-auto rounded-md border p-1">
+          <div className="border-border/60 bg-accent/5 scrollbar-sleek max-h-[220px] overflow-y-auto border p-1">
             {selectedGroup ? (
               <>
                 {selectedGroup.targets.map((target) => {
@@ -2044,7 +2050,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     // chrome layer as the workspace titlebar, with an opaque fallback elsewhere.
     <div
       ref={containerRefCallback}
-      className="border-border relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t bg-[var(--bg-titlebar,var(--card))] pr-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
+      className="border-border bg-background relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t pr-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
       onContextMenuCapture={(event) => {
         if (!shouldOpenStatusBarContextMenu(event.target)) {
           return
@@ -2213,7 +2219,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                         <span
                           aria-hidden
                           data-floating-terminal-attention
-                          className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 rounded-full bg-amber-500"
+                          className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 bg-amber-500"
                         />
                       ) : null}
                     </Button>
@@ -2235,10 +2241,12 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none absolute size-px opacity-0"
+              className="pointer-events-none absolute size-px border-0 opacity-0"
               style={{ left: menuPoint.x, top: menuPoint.y }}
             />
           }

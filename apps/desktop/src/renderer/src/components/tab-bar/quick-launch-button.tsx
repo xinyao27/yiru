@@ -179,7 +179,7 @@ function QuickLaunchAgentMenuItemsInner({
       />
       <DropdownMenuItem
         onClick={openAgentSettings}
-        className="text-muted-foreground gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+        className="text-muted-foreground gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <SettingsIcon className="size-4" />
         {translate('auto.components.tab.bar.QuickLaunchButton.348a04c1ad', 'Agent settings…')}

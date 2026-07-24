@@ -84,7 +84,7 @@ export class RecoverableRenderErrorBoundary extends React.Component<Props, State
         )}
         role="alert"
       >
-        <div className="border-destructive/25 bg-destructive/10 text-destructive flex size-8 items-center justify-center rounded-full border">
+        <div className="border-destructive/25 bg-destructive/10 text-destructive flex size-8 items-center justify-center border">
           <AlertTriangle className="size-4" />
         </div>
         <div className="space-y-1">
@@ -104,7 +104,7 @@ export class RecoverableRenderErrorBoundary extends React.Component<Props, State
           </div>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={this.handleReset}>
-          <RotateCw className="size-3.5" />
+          <RotateCw weight="regular" className="size-3.5" />
           {translate(
             'auto.components.error.boundaries.RecoverableRenderErrorBoundary.55001880db',
             'Retry'

@@ -1,9 +1,10 @@
 import { ShieldCheck } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 import type { TelemetryConsentState } from '../../../../shared/telemetry-consent-types'
 import type { GlobalSettings } from '../../../../shared/types'
@@ -104,40 +105,28 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
               'auto.components.settings.PrivacyPane.8bfdd23a88',
               'Help us figure out what to build next. Yiru sends anonymous counts of which features you use and where things break.'
             )}{' '}
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline underline-offset-2 outline-none"
+              className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
               onClick={() => void window.api.shell.openUrl(PRIVACY_URL)}
             >
               {translate('auto.components.settings.PrivacyPane.77410e0566', 'Privacy policy')}
-            </button>
+            </Button>
             .
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={toggleChecked}
+        <Switch
+          checked={toggleChecked}
           aria-label={translate(
             'auto.components.settings.PrivacyPane.fe904ac984',
             'Share anonymous usage data'
           )}
           aria-describedby={blocked ? PRIVACY_PANE_BLOCKED_HELPER_ID : undefined}
           disabled={blocked !== null || inFlight}
-          onClick={handleToggle}
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
-            toggleChecked ? 'bg-foreground' : 'bg-muted-foreground/30',
-            blocked !== null || inFlight ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              toggleChecked ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+          onCheckedChange={handleToggle}
+        />
       </div>
 
       {blocked ? <BlockedHelper blocked={blocked} id={PRIVACY_PANE_BLOCKED_HELPER_ID} /> : null}
@@ -162,7 +151,7 @@ function BlockedHelper({ blocked, id }: { blocked: BlockedReason; id: string }):
             'auto.components.settings.PrivacyPane.79a0f3c16c',
             'Telemetry is disabled by the'
           )}{' '}
-          <code className="bg-muted rounded px-1 py-0.5 font-mono text-[11px]">
+          <code className="bg-muted px-1 py-0.5 font-mono text-[11px]">
             {envVarNameForReason(blocked.reason)}
           </code>{' '}
           {translate(

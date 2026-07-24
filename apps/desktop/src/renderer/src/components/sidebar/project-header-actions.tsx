@@ -7,7 +7,7 @@ import { cn } from '@/lib/class-names'
 export const PROJECT_HEADER_ACTIONS_CLASS_NAME = cn(
   'flex shrink-0 items-center gap-0.5',
   'can-hover:absolute can-hover:right-1 can-hover:top-1/2 can-hover:z-10 can-hover:-translate-y-1/2',
-  'can-hover:rounded-md can-hover:bg-sidebar can-hover:pl-1',
+  'can-hover: can-hover:bg-sidebar can-hover:pl-1',
   'can-hover:pointer-events-none can-hover:opacity-0 can-hover:transition-opacity',
   'group-hover:pointer-events-auto group-hover:opacity-100',
   'has-[:focus-visible]:pointer-events-auto has-[:focus-visible]:opacity-100',

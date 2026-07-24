@@ -5,7 +5,7 @@ import {
   getBrokenChecks,
   getCheckDetailsPromptKey
 } from '@/components/pr-checks-fix-prompt'
-import { gitHubPRToChecksPanelReview } from '@/components/right-sidebar/checks-panel-review'
+import { gitHubPRToChecksPanelReview } from '@/components/workspace-panel/checks-panel-review'
 import { translate } from '@/i18n/i18n'
 import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
 import { useAppStore } from '@/store'

@@ -166,7 +166,7 @@ const SidebarRepositoryFilterSection = React.memo(function SidebarRepositoryFilt
           onValueChange={setQuery}
           onKeyDown={handleInputKeyDown}
           className="h-8 py-2 text-xs"
-          wrapperClassName="mx-1 rounded-[7px] border border-border/70 px-2"
+          wrapperClassName="mx-1 border border-border/70 px-2"
           iconClassName="h-3.5 w-3.5"
         />
         <CommandList className="max-h-40 py-1">
@@ -187,7 +187,7 @@ const SidebarRepositoryFilterSection = React.memo(function SidebarRepositoryFilt
               value={repo.id}
               keywords={[repo.displayName, repo.path]}
               onSelect={() => handleSelectRepo(repo.id)}
-              className="mx-1 my-0.5 items-center gap-2 rounded-[7px] px-2 py-1 text-[12px] leading-5 font-medium data-[selected=true]:bg-black/8 dark:data-[selected=true]:bg-white/14"
+              className="data-[selected=true]:bg-accent mx-1 my-0.5 items-center gap-2 px-2 py-1 text-[12px] leading-5 font-medium"
             >
               <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
                 <RepoBadgeLabel
@@ -196,7 +196,7 @@ const SidebarRepositoryFilterSection = React.memo(function SidebarRepositoryFilt
                   className="max-w-full"
                 />
                 {repo.connectionId && (
-                  <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 rounded px-1 py-0.5 text-[9px] leading-none font-medium">
+                  <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
                     <Server className="size-2.5" />
                     {translate(
                       'auto.components.sidebar.SidebarRepositoryFilterSection.2656053db4',
@@ -225,7 +225,7 @@ function SelectedProjectPills({
   }
 
   return (
-    <div className="scrollbar-sleek border-border/70 bg-muted/25 mx-1 mb-1 flex max-h-16 flex-wrap gap-1 overflow-y-auto rounded-[7px] border p-1">
+    <div className="scrollbar-sleek border-border/70 bg-muted/25 mx-1 mb-1 flex max-h-16 flex-wrap gap-1 overflow-y-auto border p-1">
       {selectedRepos.map((repo) => (
         <Badge
           key={repo.id}
@@ -240,18 +240,18 @@ function SelectedProjectPills({
           />
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-xs"
             aria-label={translate(
               'auto.components.sidebar.SidebarRepositoryFilterSection.f10ca29601',
               'Remove {{value0}} filter',
               { value0: repo.displayName }
             )}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground -mr-1 size-4 rounded-full"
+            className="hover:bg-muted -mr-1 size-4"
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onRemoveProject(repo.id)}
           >
-            <X className="size-2.5" strokeWidth={2.5} />
+            <X weight="regular" className="size-2.5" strokeWidth={2.5} />
           </Button>
         </Badge>
       ))}
@@ -281,14 +281,16 @@ function ProjectFilterHeader({
           </Badge>
         )}
       </span>
-      <button
+      <Button
+        variant="quiet"
+        size="xs"
         type="button"
         onClick={onClear}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+        className="hover:bg-muted h-auto border-0 py-0.5 text-[11px] disabled:opacity-40 disabled:hover:bg-transparent"
         disabled={!hasRepoFilter}
       >
         {translate('auto.components.sidebar.SidebarRepositoryFilterSection.d3a9c4cea1', 'Clear')}
-      </button>
+      </Button>
     </div>
   )
 }

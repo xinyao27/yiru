@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { SpoolWorktreeVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -699,10 +700,12 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpenState} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none absolute size-px opacity-0"
+              className="pointer-events-none absolute size-px border-0 opacity-0"
               style={{ left: menuPoint.x, top: menuPoint.y }}
             />
           }
@@ -870,7 +873,7 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
                 <>
                   {validParentWorktreeId && (
                     <DropdownMenuItem onClick={handleOpenParent} disabled={isDeleting}>
-                      <Workflow className="size-3.5" />
+                      <Workflow weight="regular" className="size-3.5" />
                       {translate(
                         'auto.components.sidebar.WorktreeContextMenu.8d9cd19d09',
                         'Open Parent Worktree'

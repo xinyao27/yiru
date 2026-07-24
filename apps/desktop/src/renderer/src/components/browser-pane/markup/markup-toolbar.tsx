@@ -7,7 +7,8 @@ import {
   TextT as Type,
   ArrowUpRight,
   ArrowClockwise as Redo2,
-  ArrowCounterClockwise as Undo2
+  ArrowCounterClockwise as Undo2,
+  type IconProps
 } from '@phosphor-icons/react'
 import React from 'react'
 
@@ -26,7 +27,8 @@ import {
 
 type ToolItem = {
   kind: MarkupTool
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<IconProps>
+  iconWeight?: IconProps['weight']
   label: string
 }
 
@@ -45,6 +47,7 @@ function toolItems(): ToolItem[] {
     {
       kind: 'arrow',
       icon: ArrowUpRight,
+      iconWeight: 'regular',
       label: translate('auto.components.browser-pane.markup.tool.arrow', 'Arrow')
     },
     {
@@ -98,7 +101,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
 }: MarkupToolbarProps) {
   return (
     <TooltipProvider delay={300}>
-      <div className="border-border bg-card flex items-center gap-1 rounded-md border px-1.5 py-1">
+      <div className="border-border bg-card flex items-center gap-1 border px-1.5 py-1">
         {toolItems().map((item) => (
           <IconButton
             key={item.kind}
@@ -106,7 +109,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
             active={tool === item.kind}
             onClick={() => onToolChange(item.kind)}
           >
-            <item.icon className="size-4" />
+            <item.icon className="size-4" weight={item.iconWeight} />
           </IconButton>
         ))}
 
@@ -128,7 +131,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                       )}
                     >
                       <span
-                        className="border-border size-4 rounded-full border"
+                        className="border-border size-4 border"
                         style={{ backgroundColor: color }}
                       />
                     </Button>
@@ -143,15 +146,17 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
           <PopoverContent side="top" align="start" className="w-auto p-2">
             <div className="flex flex-wrap gap-1">
               {MARKUP_COLORS.map((swatch) => (
-                <button
+                <Button
+                  variant="outline"
+                  size="icon-xs"
                   key={swatch}
                   type="button"
                   aria-label={swatch}
                   onClick={() => onColorChange(swatch)}
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
-                    'size-6 rounded-full border',
-                    color === swatch ? 'border-ring' : 'border-border'
+                    'focus-visible:bg-accent',
+                    '',
+                    color === swatch ? 'border-ring' : ''
                   )}
                   style={{ backgroundColor: swatch }}
                 />
@@ -159,7 +164,9 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
             </div>
             <div className="mt-2 flex items-center gap-1">
               {MARKUP_WIDTHS.map((option) => (
-                <button
+                <Button
+                  variant="outline"
+                  size="xs"
                   key={option}
                   type="button"
                   aria-label={translate(
@@ -169,18 +176,16 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   )}
                   onClick={() => onWidthChange(option)}
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
-                    'flex h-6 flex-1 items-center justify-center rounded-sm border',
-                    width === option
-                      ? 'border-ring bg-accent'
-                      : 'border-border bg-background hover:bg-accent'
+                    'p-0 focus-visible:bg-accent',
+                    'flex flex-1',
+                    width === option ? 'border-ring bg-accent' : ''
                   )}
                 >
                   <span
-                    className="bg-foreground rounded-full"
+                    className="bg-foreground"
                     style={{ width: option + 2, height: option + 2 }}
                   />
-                </button>
+                </Button>
               ))}
             </div>
           </PopoverContent>
@@ -216,7 +221,9 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
           <PopoverContent side="top" align="start" className="w-auto p-2">
             <div className="flex items-center gap-1">
               {MARKUP_FONT_SIZES.map((size) => (
-                <button
+                <Button
+                  variant="outline"
+                  size="xs"
                   key={size}
                   type="button"
                   aria-label={translate(
@@ -226,15 +233,13 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   )}
                   onClick={() => onFontSizeChange(size)}
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
-                    'flex h-6 min-w-7 items-center justify-center rounded-sm border px-1 text-[11px] tabular-nums',
-                    fontSize === size
-                      ? 'border-ring bg-accent'
-                      : 'border-border bg-background hover:bg-accent'
+                    'focus-visible:bg-accent',
+                    'flex min-w-7 px-1 text-[11px] tabular-nums',
+                    fontSize === size ? 'border-ring bg-accent' : ''
                   )}
                 >
                   {size}
-                </button>
+                </Button>
               ))}
             </div>
           </PopoverContent>
@@ -247,14 +252,14 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
           disabled={!canUndo}
           onClick={onUndo}
         >
-          <Undo2 className="size-4" />
+          <Undo2 weight="regular" className="size-4" />
         </IconButton>
         <IconButton
           label={translate('auto.components.browser-pane.markup.redo', 'Redo')}
           disabled={!canRedo}
           onClick={onRedo}
         >
-          <Redo2 className="size-4" />
+          <Redo2 weight="regular" className="size-4" />
         </IconButton>
         <IconButton
           label={translate('auto.components.browser-pane.markup.clear', 'Clear all')}

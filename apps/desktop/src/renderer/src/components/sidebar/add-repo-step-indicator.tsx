@@ -1,5 +1,6 @@
 import { ArrowLeft } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import type { AddRepoDialogStep } from './add-repo-dialog-types'
@@ -28,14 +29,16 @@ export function AddRepoStepIndicator({
 
   return (
     <div className="-mt-1 flex min-h-5 items-center">
-      <button
-        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex cursor-pointer items-center gap-1 text-xs transition-colors outline-none disabled:cursor-default disabled:opacity-40"
+      <Button
+        variant="quiet"
+        size="xs"
+        className="h-auto border-0 p-0 disabled:cursor-default disabled:opacity-40"
         disabled={step === 'nested' && isAdding}
         onClick={onBack}
       >
-        <ArrowLeft className="size-3" />
+        <ArrowLeft weight="regular" className="size-3" />
         {translate('auto.components.sidebar.AddRepoStepIndicator.3bb655c117', 'Back')}
-      </button>
+      </Button>
     </div>
   )
 }

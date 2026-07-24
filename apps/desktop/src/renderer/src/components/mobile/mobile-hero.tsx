@@ -1,7 +1,8 @@
 import { Copy, ArrowLeft, ArrowRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { type ComponentProps, useLayoutEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 
 import { cn } from '../../lib/class-names'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
@@ -16,6 +17,14 @@ import { translate } from '@/i18n/i18n'
 import { mobilePageStyles } from './mobile-page-tailwind'
 
 export type StepIndex = 0 | 1
+
+// Why: mobilePageStyles owns these bespoke hit targets; Button supplies interaction styling only.
+function MobileHeroButton({
+  className,
+  ...props
+}: ComponentProps<typeof Button>): React.JSX.Element {
+  return <Button variant="ghost" size="xs" className={cn('h-auto p-0', className)} {...props} />
+}
 
 // Why: header copy needs to refer to the *user's* device by its native name.
 function getDeviceLabel(): string {
@@ -137,10 +146,10 @@ export function HeroFlow({
                   'Supported mobile platforms'
                 )}
               >
-                <button
+                <MobileHeroButton
                   type="button"
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
+                    'border-0 focus-visible:bg-accent',
                     mobilePageStyles.platformTab,
                     platform === 'ios' && mobilePageStyles.platformTabActive
                   )}
@@ -149,11 +158,11 @@ export function HeroFlow({
                 >
                   <IosBrandIcon />
                   {translate('auto.components.mobile.MobileHero.711e6f4b47', 'iOS')}
-                </button>
-                <button
+                </MobileHeroButton>
+                <MobileHeroButton
                   type="button"
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
+                    'border-0 focus-visible:bg-accent',
                     mobilePageStyles.platformTab,
                     platform === 'android' && mobilePageStyles.platformTabActive
                   )}
@@ -162,27 +171,24 @@ export function HeroFlow({
                 >
                   <AndroidLogo />
                   {translate('auto.components.mobile.MobileHero.ac1eb64952', 'Android')}
-                </button>
+                </MobileHeroButton>
               </div>
               <div className={mobilePageStyles.inlineActions}>
-                <button
+                <MobileHeroButton
                   type="button"
-                  className={cn(
-                    'outline-none focus-visible:bg-accent',
-                    mobilePageStyles.ghostAction
-                  )}
+                  className={cn('border-0 focus-visible:bg-accent', mobilePageStyles.ghostAction)}
                   onClick={onOpenInstallUrl}
                 >
                   {installCopy.ctaLabel}
-                </button>
-                <button
+                </MobileHeroButton>
+                <MobileHeroButton
                   type="button"
-                  className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.textLink)}
+                  className={cn('border-0 focus-visible:bg-accent', mobilePageStyles.textLink)}
                   onClick={onCopyInstallUrl}
                 >
                   <Copy className="size-3.5" />
                   {translate('auto.components.mobile.MobileHero.aa97420ba4', 'Copy install link')}
-                </button>
+                </MobileHeroButton>
               </div>
             </div>
             <div
@@ -259,9 +265,9 @@ export function HeroFlow({
                   </span>
                 ) : null}
               </div>
-              <button
+              <MobileHeroButton
                 type="button"
-                className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.linkUnder)}
+                className={cn('border-0 focus-visible:bg-accent', mobilePageStyles.linkUnder)}
                 onClick={onRegeneratePairing}
                 disabled={pairLoading}
               >
@@ -270,7 +276,7 @@ export function HeroFlow({
                   : pairQrDataUrl
                     ? translate('auto.components.mobile.MobileHero.e59a252eca', 'Regenerate code')
                     : translate('auto.components.mobile.MobileHero.a6cffbbb0b', 'Generate code')}
-              </button>
+              </MobileHeroButton>
             </div>
             <div className={mobilePageStyles.pairingControls}>
               <div className={mobilePageStyles.networkRow}>
@@ -286,10 +292,10 @@ export function HeroFlow({
                   disabled={false}
                   className={mobilePageStyles.networkSelect}
                 />
-                <button
+                <MobileHeroButton
                   type="button"
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
+                    'border-0 focus-visible:bg-accent',
                     mobilePageStyles.networkRefresh
                   )}
                   onClick={onRefreshNetworkInterfaces}
@@ -306,24 +312,24 @@ export function HeroFlow({
                   {refreshingNetworkInterfaces ? (
                     <LoadingIndicator className="size-3.5" />
                   ) : (
-                    <RefreshCw className="size-3.5" />
+                    <RefreshCw weight="regular" className="size-3.5" />
                   )}
-                </button>
+                </MobileHeroButton>
               </div>
 
               <div className={mobilePageStyles.inlineActions}>
                 <span className={mobilePageStyles.actionDivider}>
                   {translate('auto.components.mobile.MobileHero.4c1df4eba7', "Can't scan?")}
                 </span>
-                <button
+                <MobileHeroButton
                   type="button"
-                  className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.textLink)}
+                  className={cn('border-0 focus-visible:bg-accent', mobilePageStyles.textLink)}
                   onClick={onCopyPairingCode}
                   disabled={!pairingUrl || pairLoading}
                 >
                   <Copy className="size-3.5" />
                   {translate('auto.components.mobile.MobileHero.010dddcf27', 'Copy pairing code')}
-                </button>
+                </MobileHeroButton>
               </div>
               <WindowsFirewallNotice
                 pairingReady={pairQrDataUrl != null}
@@ -336,44 +342,44 @@ export function HeroFlow({
       </div>
 
       <div className={mobilePageStyles.flowActions}>
-        <button
+        <MobileHeroButton
           type="button"
-          className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.flowBack)}
+          className={cn('border-0 focus-visible:bg-accent', mobilePageStyles.flowBack)}
           onClick={onBack}
         >
-          <ArrowLeft className="size-3" />
+          <ArrowLeft weight="regular" className="size-3" />
           {translate('auto.components.mobile.MobileHero.b622eba64d', 'Back')}
-        </button>
+        </MobileHeroButton>
         {isLast ? (
           onDone ? (
-            <button
+            <MobileHeroButton
               type="button"
               className={cn(
-                'outline-none border border-transparent focus-visible:border-ring',
+                'border',
                 mobilePageStyles.primaryAction,
                 mobilePageStyles.flowPrimaryAction
               )}
               onClick={onDone}
             >
               {translate('auto.components.mobile.MobileHero.3f90dbd274', 'Done')}
-              <ArrowRight className="size-3.5" />
-            </button>
+              <ArrowRight weight="regular" className="size-3.5" />
+            </MobileHeroButton>
           ) : (
             <span />
           )
         ) : (
-          <button
+          <MobileHeroButton
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent',
+              'border-0 focus-visible:bg-accent',
               mobilePageStyles.flowContinue,
               mobilePageStyles.flowPrimaryAction
             )}
             onClick={onContinue}
           >
             {translate('auto.components.mobile.MobileHero.a8fb43cf1c', 'Continue')}
-            <ArrowRight className="size-3.5" />
-          </button>
+            <ArrowRight weight="regular" className="size-3.5" />
+          </MobileHeroButton>
         )}
       </div>
     </div>

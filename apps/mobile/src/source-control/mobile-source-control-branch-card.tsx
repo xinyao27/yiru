@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
 
-import { GitBranch } from '@/components/uniwind-icons'
+import { GitMerge } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import type { MobilePrChipSummary } from './mobile-pr-chip-summary'
@@ -46,7 +46,7 @@ export function MobileSourceControlBranchCard({
     <View className={styles.summaryCard}>
       <View className={styles.summaryHeader}>
         <View className={styles.branchLine}>
-          <GitBranch size={15} colorClassName="accent-muted-foreground" />
+          <GitMerge size={15} colorClassName="accent-muted-foreground" />
           <Text className={styles.branchText} numberOfLines={1}>
             {branchLabel}
           </Text>

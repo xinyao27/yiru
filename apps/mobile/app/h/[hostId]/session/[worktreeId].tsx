@@ -34,7 +34,7 @@ import {
   Folder,
   File,
   FileText,
-  GitBranch,
+  GitMerge,
   Globe,
   Keyboard as KeyboardIcon,
   Chat as MessageSquare,
@@ -4668,7 +4668,7 @@ export default function SessionScreen() {
               <MobileSessionHeaderIconButton
                 active={activePanel === 'sourceControl'}
                 accessibilityLabel="Open source control"
-                icon={GitBranch}
+                icon={GitMerge}
                 onPress={() => handlePanelTap('sourceControl')}
               />
             )}

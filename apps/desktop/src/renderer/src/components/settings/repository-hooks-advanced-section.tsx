@@ -64,7 +64,7 @@ export function RepositoryHooksAdvancedSection({
       ]}
     >
       <details
-        className="group border-border/50 bg-background/80 rounded-2xl border"
+        className="group border-border/50 bg-background/80 border"
         open={advancedMatchesSearch || isAdvancedOpen}
         onToggle={(event) => {
           if (advancedMatchesSearch) {
@@ -83,7 +83,10 @@ export function RepositoryHooksAdvancedSection({
           }}
         >
           <div className="flex items-center gap-2">
-            <ChevronRight className="text-muted-foreground size-3.5 transition-transform group-open:rotate-90" />
+            <ChevronRight
+              weight="regular"
+              className="text-muted-foreground size-3.5 transition-transform group-open:rotate-90"
+            />
             <h5 className="text-sm font-semibold">
               {translate('auto.components.settings.RepositoryHooksSection.c9bc1bfd8f', 'Advanced')}
             </h5>
@@ -94,7 +97,7 @@ export function RepositoryHooksAdvancedSection({
               )}
             </span>
           </div>
-          <span className="border-border bg-muted text-foreground rounded-full border px-2 py-0.5 text-[11px] font-medium">
+          <span className="border-border bg-muted text-foreground border px-2 py-0.5 text-[11px] font-medium">
             {getCommandSourceLabel(selectedCommandSourcePolicy)}
           </span>
         </summary>
@@ -113,7 +116,7 @@ export function RepositoryHooksAdvancedSection({
                   'auto.components.settings.RepositoryHooksSection.ac9038d2cc',
                   'When both'
                 )}
-                <code className="bg-muted rounded px-1 py-0.5">
+                <code className="bg-muted px-1 py-0.5">
                   {translate(
                     'auto.components.settings.RepositoryHooksSection.39da2ae12f',
                     'yiru.yaml'
@@ -133,7 +136,7 @@ export function RepositoryHooksAdvancedSection({
             />
           </div>
 
-          <div className={cn('space-y-3 rounded-xl border p-3', YAML_STATE_STYLES[yamlState].card)}>
+          <div className={cn('space-y-3 border p-3', YAML_STATE_STYLES[yamlState].card)}>
             <div className="space-y-1">
               <p className={cn('text-sm font-medium', YAML_STATE_STYLES[yamlState].titleClassName)}>
                 {yamlStateCopy.heading}
@@ -145,7 +148,7 @@ export function RepositoryHooksAdvancedSection({
               <YamlScriptBlock content={renderYamlScriptPreview(yamlHooks)} />
             ) : yamlState === 'invalid' ? (
               <div className="space-y-4">
-                <div className="bg-background/60 flex items-start gap-3 rounded-lg border border-amber-500/20 p-3">
+                <div className="bg-background/60 flex items-start gap-3 border border-amber-500/20 p-3">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-300" />
                   <div className="text-muted-foreground space-y-2 text-xs">
                     <p>

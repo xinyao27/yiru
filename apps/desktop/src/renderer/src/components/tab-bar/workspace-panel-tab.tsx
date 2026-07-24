@@ -1,12 +1,19 @@
 import { useSortable } from '@dnd-kit/sortable'
-import { Files, FlowArrow as Workflow, GitBranch, ListChecks, Plug } from '@phosphor-icons/react'
+import {
+  ClockCounterClockwise,
+  Folder,
+  FolderOpen,
+  FlowArrow as Workflow,
+  GitMerge,
+  ListChecks,
+  Plug
+} from '@phosphor-icons/react'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
-import { AgentSessionHistoryIcon } from '../right-sidebar/agent-session-history-icon'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
@@ -19,20 +26,26 @@ import { TabCloseButton } from './tab-close-button'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
-function WorkspacePanelIcon({ panel }: { panel: WorkspacePanelTabContentType }): React.JSX.Element {
+function WorkspacePanelIcon({
+  panel,
+  isActive
+}: {
+  panel: WorkspacePanelTabContentType
+  isActive: boolean
+}): React.JSX.Element {
   const className = TAB_LEADING_ICON_CLASSES
   switch (panel) {
     case 'explorer':
-      return <Files className={className} />
+      return isActive ? <FolderOpen className={className} /> : <Folder className={className} />
     case 'vault':
-      return <AgentSessionHistoryIcon className={className} />
+      return <ClockCounterClockwise className={className} />
     case 'workspaces':
-      return <Workflow className={className} />
+      return <Workflow weight="regular" className={className} />
     case 'pr-checks':
     case 'checks':
       return <ListChecks className={className} />
     case 'source-control':
-      return <GitBranch className={className} />
+      return <GitMerge className={className} />
     case 'ports':
       return <Plug className={className} />
   }
@@ -94,7 +107,7 @@ export function WorkspacePanelTab({
           }
         }}
       >
-        <WorkspacePanelIcon panel={panel} />
+        <WorkspacePanelIcon panel={panel} isActive={isActive} />
         <Tooltip>
           <TooltipTrigger
             render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{label}</span>}

@@ -1,4 +1,4 @@
-import { normalizeAbsolutePathForComparison } from '@/components/right-sidebar/file-explorer-paths'
+import { normalizeAbsolutePathForComparison } from '@/components/workspace-panel/file-explorer-paths'
 
 // Why: the editor's own save path writes to disk, which fans out as an
 // fs:changed event back to useEditorExternalWatch a few ms later. Treating

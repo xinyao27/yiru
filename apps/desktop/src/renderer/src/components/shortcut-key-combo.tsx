@@ -7,7 +7,7 @@ import { cn } from '@/lib/class-names'
 // Why: tooltips invert the app surface, so the shortcut component owns the
 // matching palette instead of making each tooltip style its internal parts.
 const shortcutKeyCapVariants = cva(
-  'inline-flex min-w-6 items-center justify-center rounded border px-1.5 py-0.5 text-xs font-medium',
+  'inline-flex min-w-6 items-center justify-center border px-1.5 py-0.5 text-xs font-medium',
   {
     variants: {
       variant: {

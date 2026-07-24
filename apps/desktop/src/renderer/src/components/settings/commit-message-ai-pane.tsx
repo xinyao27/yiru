@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import type React from 'react'
 
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 import {
   CUSTOM_AGENT_ID,
@@ -202,23 +202,7 @@ export function CommitMessageAiPane({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={config.enabled}
-          onClick={onToggleEnabled}
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            config.enabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              config.enabled ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        <Switch checked={config.enabled} onCheckedChange={onToggleEnabled} />
       </SearchableSetting>
     )
   }

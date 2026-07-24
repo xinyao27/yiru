@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -91,7 +92,7 @@ export function RuntimeHostStatusRow({
 
   return (
     <div className="flex items-center gap-2.5 px-2 py-1.5">
-      <span className={cn('size-1.5 shrink-0 rounded-full', runtimeDotColor(state))} />
+      <span className={cn('size-1.5 shrink-0', runtimeDotColor(state))} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[12px] font-medium">{label}</div>
         <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-[10px]">
@@ -119,13 +120,15 @@ export function RuntimeHostStatusRow({
       {busy ? (
         <LoadingIndicator className="text-muted-foreground size-3 shrink-0" />
       ) : actionLabel && (state === 'connected' ? onDisconnect : onConnect) ? (
-        <button
+        <Button
+          variant="quiet"
+          size="xs"
           type="button"
           onClick={() => void handleAction()}
-          className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px] outline-none"
+          className="/70 /70 h-auto gap-0 border-0 px-1.5 py-0.5 text-[10px] font-normal"
         >
           {actionLabel}
-        </button>
+        </Button>
       ) : null}
     </div>
   )

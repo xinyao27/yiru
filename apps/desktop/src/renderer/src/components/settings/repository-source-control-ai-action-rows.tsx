@@ -1,6 +1,7 @@
 import { Terminal } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 
@@ -113,7 +114,7 @@ export function RepositorySourceControlAiActionRows({
               repoId,
               actionId
             )}
-            className="border-border scroll-mt-8 space-y-3 rounded-md border px-3 py-3"
+            className="border-border scroll-mt-8 space-y-3 border px-3 py-3"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 space-y-0.5">
@@ -234,14 +235,14 @@ export function RepositorySourceControlAiActionRows({
                     'Command template'
                   )}
                 </Label>
-                <textarea
+                <Textarea
                   rows={3}
                   value={templateValue}
                   onChange={(event) => onActionTemplateChange(actionId, event.target.value)}
                   disabled={!hasOverride}
                   placeholder={inheritedTemplate}
                   spellCheck={false}
-                  className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 disabled:bg-muted/40 w-full resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none disabled:cursor-not-allowed"
+                  className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 disabled:bg-muted/40 w-full resize-y border px-2.5 py-2 font-mono text-xs outline-none disabled:cursor-not-allowed"
                 />
                 <SourceControlActionVariableChips
                   actionId={actionId}

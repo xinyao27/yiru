@@ -41,7 +41,7 @@ export function MobilePairedDevicesSection({
           {devices.map((device) => (
             <div
               key={device.deviceId}
-              className="border-border/60 flex items-center justify-between rounded-lg border px-3 py-2"
+              className="border-border/60 flex items-center justify-between border px-3 py-2"
             >
               <div>
                 <div className="text-sm font-medium">{device.name}</div>

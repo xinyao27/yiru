@@ -56,7 +56,7 @@ export function MobilePairingSetupSection({
         {loading ? (
           <LoadingIndicator className="size-3.5" />
         ) : hasQrCode ? (
-          <RefreshCw className="size-3.5" />
+          <RefreshCw weight="regular" className="size-3.5" />
         ) : (
           <QrCode className="size-3.5" />
         )}
@@ -105,7 +105,11 @@ export function MobilePairingSetupSection({
                   )}
                   className="text-muted-foreground"
                 >
-                  {refreshingNetworkInterfaces ? <LoadingIndicator /> : <RefreshCw />}
+                  {refreshingNetworkInterfaces ? (
+                    <LoadingIndicator />
+                  ) : (
+                    <RefreshCw weight="regular" />
+                  )}
                 </Button>
               }
             />
@@ -134,17 +138,19 @@ export function MobilePairingSetupSection({
                 'Install Tailscale on this computer and your phone, sign in to the same tailnet, then select its 100.x.y.z address above.'
               )}
             </p>
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               onClick={() => void window.api.shell.openUrl(TAILSCALE_DOWNLOAD_URL)}
-              className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 font-medium underline-offset-2 outline-none hover:underline"
+              className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline-offset-2 hover:underline"
             >
               {translate(
                 'auto.components.settings.MobilePairingSetupSection.getTailscale',
                 'Get Tailscale'
               )}
-              <ExternalLink className="size-3" />
-            </button>
+              <ExternalLink weight="regular" className="size-3" />
+            </Button>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

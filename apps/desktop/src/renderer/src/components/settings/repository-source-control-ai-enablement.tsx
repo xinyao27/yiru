@@ -34,7 +34,7 @@ export function RepositorySourceControlAiEnablement({
   onChange
 }: RepositorySourceControlAiEnablementProps): React.JSX.Element {
   return (
-    <div className="border-border flex flex-col gap-2 rounded-md border px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-border flex flex-col gap-2 border px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-0.5">
         <Label className="text-xs font-medium">
           {translate(

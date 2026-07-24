@@ -244,12 +244,12 @@ export function SpoolTerminalPane({
   ])
 
   return (
-    <div className="pane-manager-root relative min-h-0 min-w-0 flex-1 overflow-hidden bg-[var(--editor-surface)]">
+    <div className="pane-manager-root bg-background relative min-h-0 min-w-0 flex-1 overflow-hidden">
       <div ref={containerRef} className="xterm-container" />
       {mutationUncertain ? (
         <div
           role="status"
-          className="border-border bg-card text-card-foreground absolute top-2 right-3 left-3 flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-xs"
+          className="border-border bg-card text-card-foreground absolute top-2 right-3 left-3 flex items-center justify-between gap-3 border px-3 py-2 text-xs"
         >
           <span className="text-muted-foreground">
             {translate(
@@ -271,7 +271,7 @@ export function SpoolTerminalPane({
           </Button>
         </div>
       ) : status !== 'live' ? (
-        <div className="border-border bg-card text-card-foreground pointer-events-none absolute top-2 right-3 rounded-md border px-2 py-1 text-[11px]">
+        <div className="border-border bg-card text-card-foreground pointer-events-none absolute top-2 right-3 border px-2 py-1 text-[11px]">
           <span className="text-muted-foreground">{getSpoolTerminalStatusLabel(status)}</span>
         </div>
       ) : null}

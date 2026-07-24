@@ -1,6 +1,6 @@
+import { Switch } from '@/components/ui/switch'
 import { isDefaultPrimarySelectionMiddleClickPasteUserAgent } from '@/hooks/use-primary-selection-paste'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
@@ -57,28 +57,12 @@ export function InputPane({ settings, updateSettings }: InputPaneProps): React.J
             )}
           </p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          onClick={() =>
-            updateSettings({
-              primarySelectionMiddleClickPaste: !enabled
-            })
+        <Switch
+          checked={enabled}
+          onCheckedChange={(checked) =>
+            updateSettings({ primarySelectionMiddleClickPaste: checked })
           }
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            enabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              enabled ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        />
       </SearchableSetting>
     </section>
   )

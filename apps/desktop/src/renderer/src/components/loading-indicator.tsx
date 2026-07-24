@@ -184,6 +184,7 @@ function LoadingIndicatorVisual({
   ...props
 }: LoadingIndicatorPreviewProps): React.JSX.Element {
   const dimension = typeof size === 'number' ? `${size}px` : size
+  // Why: loading is neutral process chrome, so every variant stays monochrome across themes.
   return (
     <span
       {...props}
@@ -194,7 +195,8 @@ function LoadingIndicatorVisual({
       aria-hidden={ariaLabel ? undefined : (ariaHidden ?? true)}
       className={cn(
         'inline-block size-4 shrink-0 overflow-visible align-middle',
-        removeLegacySpinClass(className)
+        removeLegacySpinClass(className),
+        'text-foreground'
       )}
       style={{
         ...style,

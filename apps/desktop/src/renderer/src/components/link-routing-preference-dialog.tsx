@@ -131,7 +131,7 @@ export function LinkRoutingPreferenceDialogProvider({
           overlayClassName="!z-[140]"
           className="!z-[150] gap-4 p-0 sm:max-w-[520px]"
         >
-          <div className="border-border bg-muted/30 rounded-t-lg border-b px-6 pt-5 pb-4">
+          <div className="border-border bg-muted/30 border-b px-6 pt-5 pb-4">
             <DialogHeader className="gap-3">
               <div className="flex items-center justify-between gap-3">
                 <Badge variant="outline" className="bg-background/70 text-muted-foreground">
@@ -179,13 +179,13 @@ export function LinkRoutingPreferenceDialogProvider({
                 <span>
                   {translate('auto.components.link.routing.preference.dialog.link.label', 'Link')}
                 </span>
-                <span className="border-border bg-muted/30 rounded-md border px-2 py-1 font-mono">
+                <span className="border-border bg-muted/30 border px-2 py-1 font-mono">
                   {displayHost}
                 </span>
               </div>
             ) : null}
 
-            <div className="border-border bg-muted/20 text-muted-foreground flex gap-2 rounded-lg border p-3 text-xs leading-relaxed">
+            <div className="border-border bg-muted/20 text-muted-foreground flex gap-2 border p-3 text-xs leading-relaxed">
               <Settings className="mt-0.5 size-3.5 shrink-0" />
               <div className="space-y-1">
                 <p>
@@ -225,7 +225,7 @@ export function LinkRoutingPreferenceDialogProvider({
 
           <DialogFooter className="border-border bg-muted/20 border-t px-6 py-4 sm:justify-between">
             <Button variant="outline" onClick={() => settleActiveRequest(false)}>
-              <ExternalLink className="size-4" />
+              <ExternalLink weight="regular" className="size-4" />
               {translate(
                 'auto.components.link.routing.preference.dialog.system.button',
                 'Use system browser'

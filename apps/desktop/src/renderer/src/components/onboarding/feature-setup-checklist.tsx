@@ -6,6 +6,7 @@ import {
 } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -77,7 +78,7 @@ const FEATURE_SETUP_ROWS: readonly FeatureSetupRow[] = [
       )
     },
     setupSummary: 'Registers the Yiru CLI, enables orchestration, and prepares the skill.',
-    icon: <Workflow className="size-4" />
+    icon: <Workflow weight="regular" className="size-4" />
   }
 ]
 
@@ -91,24 +92,26 @@ export function FeatureSetupChecklist({
         {FEATURE_SETUP_ROWS.map((row) => {
           const selected = value[row.id]
           return (
-            <button
+            <Button
+              variant="outline"
+              size="default"
               key={row.id}
               type="button"
               role="checkbox"
               aria-checked={selected}
               className={cn(
-                'flex min-h-40 flex-col rounded-lg border px-4 py-3 text-left transition-colors',
+                'h-auto justify-start gap-0 whitespace-normal font-normal flex min-h-40 flex-col py-3 text-left transition-colors',
                 'focus-visible:outline-none',
                 selected
-                  ? 'border-ring bg-accent text-foreground'
-                  : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
+                  ? 'border-ring bg-accent'
+                  : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
               )}
               onClick={() => onChange({ ...value, [row.id]: !selected })}
             >
               <span className="flex items-start justify-between gap-3">
                 <span
                   className={cn(
-                    'flex size-8 items-center justify-center rounded-lg border',
+                    'flex size-8 items-center justify-center border',
                     selected
                       ? 'border-border bg-muted text-foreground'
                       : 'border-border bg-muted/40'
@@ -119,7 +122,7 @@ export function FeatureSetupChecklist({
                 <span
                   aria-hidden
                   className={cn(
-                    'flex size-5 items-center justify-center rounded-full border transition-colors',
+                    'flex size-5 items-center justify-center border transition-colors',
                     selected
                       ? 'border-primary bg-primary text-primary-foreground'
                       : 'border-border bg-background'
@@ -135,7 +138,7 @@ export function FeatureSetupChecklist({
               <span className="text-muted-foreground mt-auto pt-3 text-[11px] leading-relaxed">
                 {row.setupSummary}
               </span>
-            </button>
+            </Button>
           )
         })}
       </div>

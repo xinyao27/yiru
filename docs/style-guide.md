@@ -1,26 +1,48 @@
 # Yiru UI Style Guide
 
-This is the **UI/visual design** doc for Yiru — color tokens, typography, component selection, and UX rules. It is _not_ an architecture doc; for system-level design see code and inline comments. Token values live in `apps/desktop/src/renderer/src/assets/main.css` (canonical); this file documents the _roles and rules_ for using them.
+This is the **UI/visual design** doc for Yiru — how to choose components, tokens, typography, and UX behavior. It is _not_ an architecture doc. Token values live in `apps/desktop/src/renderer/src/assets/main.css` (canonical). The reusable component inventory lives in [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md).
 
-## Overview
+## First principle: reuse `@/components/ui`
 
-Yiru is an Electron desktop app for orchestrating coding agents across git worktrees. The visual identity is **monochrome and quiet** — neutral grays carry the chrome, color is reserved for state (selection ring, destructive, git decorations). The product spends most of its time hosting other people's tools (Monaco, xterm, Markdown previews), so Yiru's own UI should recede and frame.
+**Before writing a native control or hand-rolled class recipe, use a primitive from `apps/desktop/src/renderer/src/components/ui/`.**
 
-When in doubt:
+Import from the module (`@/components/ui/button`), not a barrel. Screens compose rendered primitives; they do not reimplement Base UI focus/keyboard behavior, and they do not import private recipe files such as `floating-surface-styles.ts` or `menu-item-styles.ts`.
 
-- Reach for **muted/accent/border** before reaching for color.
+CI enforces the contract via `apps/desktop/config/scripts/check-ui-style-drift.mjs` (wired into `verify:repository-contracts`): no feature-TSX native `<button>`/`<input>`/`<textarea>`/`<select>` outside the documented allowlist, no dead `rounded-*`, no black/white alpha interactive washes, and no private ui style imports. Button classNames that look like the old quiet/`sidebar-accent` stacks warn today and may ratchet to errors later.
+
+### Decision fork
+
+When building UI, resolve in this order:
+
+1. **Reuse** the nearest primitive (`Button`, `Input`, `Switch`, `Select`, `Dialog`, `DropdownMenu`, `ContextMenu`, `Tabs`, `Badge`, …). Match with `variant` and `size` props.
+2. **Extend the primitive** (add a CVA `variant` or `size` in `components/ui/`) when the same exception would appear more than once at call sites.
+3. **Domain composite** in the feature folder when the control needs product data/copy (e.g. repo combobox) but still composes primitives for chrome.
+4. **Colocated CSS** only for host surfaces (Monaco, xterm, markdown), keyframes, pseudo-elements, or Electron drag chrome — never as an escape hatch for buttons and forms.
+
+### Compose, don't restyle
+
+Call sites may add **layout** classes: placement, flex behavior, `w-full`, stacking. They must not re-specify color, hover/focus, height, padding, or icon size already owned by `variant` / `size`.
+
+If you find yourself adding `bg-*`, `text-*`, `border-*`, `hover:*`, `focus-*`, `dark:*`, fixed `h-*` / `w-*` / `size-*`, or padding utilities to a primitive's `className`, stop: extend the primitive instead.
+
+## Visual identity
+
+Yiru is an Electron desktop app for orchestrating coding agents across git worktrees. The visual identity is **monochrome and quiet** — neutral grays carry the chrome; color is reserved for state (selection, destructive, git decorations). The product hosts other tools (Monaco, xterm, Markdown), so Yiru's own UI should recede and frame.
+
+After the ui-first fork, when still choosing paint:
+
+- Reach for **muted / accent / border** before color.
 - Reach for **existing shadcn roles or Tailwind palette colors** before hardcoding hex.
-- Match the nearest **shadcn primitive** before writing custom CSS.
 
 ## Source of truth
 
-| Concern                                       | Canonical location                                    |
-| --------------------------------------------- | ----------------------------------------------------- |
-| Color tokens                                  | `apps/desktop/src/renderer/src/assets/main.css` (`:root`, `.dark`) |
-| Tailwind theme bindings                       | Same file, `@theme inline { … }` block                |
-| Component primitives                          | `apps/desktop/src/renderer/src/components/ui/` (shadcn-style)      |
-| Component catalog and ownership                | [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) |
-| App typography / scrollbars / titlebar chrome | Same `main.css`                                       |
+| Concern | Canonical location |
+| --- | --- |
+| Component primitives | `apps/desktop/src/renderer/src/components/ui/` |
+| Component catalog and ownership | [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) |
+| Color tokens | `apps/desktop/src/renderer/src/assets/main.css` (`:root`, `.dark`) |
+| Tailwind theme bindings | Same file, `@theme inline { … }` block |
+| App typography / scrollbars / titlebar chrome | Same `main.css` |
 
 ### Token budget
 
@@ -38,37 +60,39 @@ Never hardcode a hex value in TSX. Reusable product-domain colors belong in `mai
 
 Tokens come in pairs: a **surface** and a **foreground** that meets contrast on it. Always use them together.
 
-| Role                                     | Use it for                                                  | Don't use it for                                    |
-| ---------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------- |
-| `background` / `foreground`              | App canvas, default text                                    | Cards, popovers, sidebar (have their own)           |
-| `card` / `card-foreground`               | Panels lifted off the canvas                                | The canvas itself                                   |
-| `popover` / `popover-foreground`         | Floating menus, dropdowns, hovercards                       | Inline UI                                           |
-| `primary` / `primary-foreground`         | The single affirmative action in a flow (Save, Confirm)     | Decorative accents; hover states; secondary actions |
-| `secondary` / `secondary-foreground`     | Lower-emphasis actions next to a primary                    | The affirmative action                              |
-| `muted` / `muted-foreground`             | De-emphasized text, captions, placeholders, disabled chrome | Body copy; primary actions                          |
-| `accent` / `accent-foreground`           | Hover/active backgrounds for ghost buttons and list rows    | Solid filled buttons (use `secondary` instead)      |
-| `destructive` / `destructive-foreground` | Delete, discard, irreversible-action buttons; error states  | Cancel buttons (Cancel is not destructive)          |
-| `border`                                 | All hairlines: dividers, input edges, card edges            | Heavy emphasis; that's `ring`                       |
-| `input`                                  | Form field background only                                  | Anywhere outside form fields                        |
-| `ring`                                   | Focus-visible border color, active selection emphasis       | Persistent decoration                               |
-| `sidebar` (+ variants)                   | Secondary panel chrome, including the right sidebar         | Main canvas and floating surfaces                   |
-| `editor-surface`                         | Background of Monaco / markdown editor panes                | App chrome                                          |
+| Role | Use it for | Don't use it for |
+| --- | --- | --- |
+| `background` / `foreground` | App canvas, default text | Cards, popovers, sidebar (have their own) |
+| `card` / `card-foreground` | Panels lifted off the canvas | The canvas itself |
+| `popover` / `popover-foreground` | Floating menus, dropdowns, hovercards | Inline UI |
+| `primary` / `primary-foreground` | The single affirmative action in a flow (Save, Confirm) | Decorative accents; hover states; secondary actions |
+| `secondary` / `secondary-foreground` | Lower-emphasis actions next to a primary | The affirmative action |
+| `muted` / `muted-foreground` | De-emphasized text, captions, placeholders, disabled chrome | Body copy; primary actions |
+| `accent` / `accent-foreground` | Hover/active backgrounds for ghost buttons and list rows | Solid filled buttons (use `secondary` instead) |
+| `destructive` / `destructive-foreground` | Delete, discard, irreversible-action buttons; error states | Cancel buttons (Cancel is not destructive) |
+| `border` | All hairlines: dividers, input edges, card edges | Heavy emphasis; that's `ring` |
+| `input` | Form field background only | Anywhere outside form fields |
+| `ring` | Focus-visible border color, active selection emphasis | Persistent decoration |
+| `sidebar` (+ variants) | Secondary panel chrome, including the right sidebar | Main canvas and floating surfaces |
+| `editor-surface` | Host styles inside Monaco / markdown panes; it follows the app canvas | App chrome (use `background` directly) |
 
-The standard `sidebar` family expands into `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-primary-foreground`, `--sidebar-accent`, `--sidebar-accent-foreground`, `--sidebar-border`, and `--sidebar-ring`. The left workspace rail uses `.worktree-sidebar-theme` as the scope for user appearance overrides while consuming this same family; it does not maintain a second token family. `editor-surface` is an intentional product-domain exception because Monaco and markdown panes need a stable host surface distinct from app chrome. In JSX use `bg-[var(--editor-surface)]`; do not promote the exception into the general Tailwind theme.
+The standard `sidebar` family expands into `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-primary-foreground`, `--sidebar-accent`, `--sidebar-accent-foreground`, `--sidebar-border`, and `--sidebar-ring`. The left workspace rail uses `.worktree-sidebar-theme` as the scope for user appearance overrides while consuming this same family; it does not maintain a second token family. `editor-surface` remains a host-integration alias for Monaco and markdown CSS, but it resolves to `background` so tab chrome and content form one canvas. JSX pane roots use `bg-background`; host styles may consume `var(--editor-surface)` where a CSS variable is required.
+
+Ordinary interactive chrome (buttons, list-row hover, nav selection) uses **`accent`**, not sidebar-specific hover tokens. Sidebar tokens paint panel surfaces and borders; they are not a second interaction system.
 
 ### Git decoration colors
 
 For diff status, file-tree decorations, and the changes view, use the git decoration tokens (mirroring VS Code's palette so users transferring from VS Code aren't surprised):
 
-| Token                        | State          |
-| ---------------------------- | -------------- |
-| `--git-decoration-added`     | Added / new    |
-| `--git-decoration-modified`  | Modified       |
-| `--git-decoration-deleted`   | Deleted        |
-| `--git-decoration-renamed`   | Renamed        |
-| `--git-decoration-untracked` | Untracked      |
-| `--git-decoration-copied`    | Copied         |
-| `--git-decoration-ignored`   | Ignored by git |
+| Token | State |
+| --- | --- |
+| `--git-decoration-added` | Added / new |
+| `--git-decoration-modified` | Modified |
+| `--git-decoration-deleted` | Deleted |
+| `--git-decoration-renamed` | Renamed |
+| `--git-decoration-untracked` | Untracked |
+| `--git-decoration-copied` | Copied |
+| `--git-decoration-ignored` | Ignored by git |
 
 Use these _only_ for git status. Don't reuse them for unrelated state colors — that breaks the convention.
 
@@ -76,15 +100,15 @@ Use these _only_ for git status. Don't reuse them for unrelated state colors —
 
 Monaco and Pierre diffs share Cursor's diff palette through the `--editor-diff-*` variables. These are separate from git status decorations because Cursor deliberately uses different colors for resource status, gutters, full changed lines, and changed text within a line.
 
-| Token                                      | Diff role                    |
-| ------------------------------------------ | ---------------------------- |
-| `--editor-diff-inserted-line-background`   | Full inserted-line fill      |
-| `--editor-diff-inserted-text-background`   | Inserted word/character fill |
-| `--editor-diff-removed-line-background`    | Full removed-line fill       |
-| `--editor-diff-removed-text-background`    | Removed word/character fill  |
-| `--editor-diff-added-gutter`                | Added gutter indicator       |
-| `--editor-diff-modified-gutter`             | Modified gutter indicator    |
-| `--editor-diff-deleted-gutter`              | Deleted gutter indicator     |
+| Token | Diff role |
+| --- | --- |
+| `--editor-diff-inserted-line-background` | Full inserted-line fill |
+| `--editor-diff-inserted-text-background` | Inserted word/character fill |
+| `--editor-diff-removed-line-background` | Full removed-line fill |
+| `--editor-diff-removed-text-background` | Removed word/character fill |
+| `--editor-diff-added-gutter` | Added gutter indicator |
+| `--editor-diff-modified-gutter` | Modified gutter indicator |
+| `--editor-diff-deleted-gutter` | Deleted gutter indicator |
 
 Use these only inside editor/diff surfaces. File status labels and trees continue to use `--git-decoration-*`.
 
@@ -93,10 +117,10 @@ Use these only inside editor/diff surfaces. File status labels and trees continu
 A common point of drift. Use these conventions for any list-style row (worktrees, command palette items, settings nav):
 
 - **Idle:** transparent background.
-- **Hover:** `bg-accent` (in the worktree sidebar, `bg-sidebar-accent`).
+- **Hover:** `bg-accent` (via the control's primitive, or on the row itself).
 - **Keyboard-selected (cmdk highlight):** `data-[selected=true]:bg-accent` plus a `border-border` edge so the active row stays visible while the user types. The `data-selected` attribute is set by `cmdk` automatically.
 - **Persistent "current" / "active" row** (e.g. the worktree the user is viewing): also `bg-accent`, _plus_ a `data-current="true"` attribute so CSS or future styling can distinguish it from the cmdk highlight.
-- **Don't:** hardcode `bg-[#ededed]` / `bg-[#333333]` or invent a "selected" color. The accent token already adapts to light/dark and matches the rest of the app.
+- **Don't:** hardcode `bg-[#ededed]` / `bg-[#333333]`, `bg-black/N dark:bg-white/N`, or invent a "selected" color. The accent token already adapts to light/dark and matches the rest of the app.
 
 ### Color mixing
 
@@ -106,7 +130,7 @@ When you need a tint (e.g. a 12% primary wash on hover), use `color-mix` against
 background: color-mix(in srgb, var(--primary) 12%, var(--background));
 ```
 
-This keeps light/dark parity automatic.
+This keeps light/dark parity automatic. Prefer a theme-agnostic mix over a `dark:` twin that recomputes the same role.
 
 ## Typography
 
@@ -122,7 +146,7 @@ This keeps light/dark parity automatic.
 
 ## Radius
 
-Yiru is fully rectilinear: `--radius: 0`, and every rendered element is held to `border-radius: 0`. This global rule intentionally covers legacy `rounded-*` utilities, arbitrary and inline values, pseudo-elements, and third-party components that do not use the token. New code must not introduce corner rounding; badges, status markers, avatars, buttons, inputs, cards, floating surfaces, and scrollbars all stay square.
+Yiru is fully rectilinear: `--radius: 0`, and every rendered element is held to `border-radius: 0`. This global rule intentionally covers legacy `rounded-*` utilities, arbitrary and inline values, pseudo-elements, and third-party components that do not use the token. New code must not introduce corner rounding; do not add `rounded-*` to class strings — they are no-ops under the global reset and signal copy-paste drift.
 
 ## Native chat geometry
 
@@ -148,7 +172,7 @@ override.
 
 ### Floating surfaces
 
-Floating primitives share the recipes in `components/ui/floating-surface-styles.ts`; the module composes default roles rather than introducing overlay tokens:
+Floating primitives share private recipes in `components/ui/floating-surface-styles.ts`; screens import the rendered wrappers (`Popover`, `DropdownMenu`, …), not that module:
 
 - **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border`.
 - **Dialog, command dialog, sheet:** `bg-background text-foreground border` with `bg-black/50` backdrop.
@@ -159,52 +183,72 @@ Keep placement and z-index in each headless wrapper. Shared color, elevation, an
 
 ## Components
 
-Use the shadcn primitives in `apps/desktop/src/renderer/src/components/ui/` before writing anything custom. The shadcn-style wrappers in this folder follow a consistent pattern:
+Primitives live in `apps/desktop/src/renderer/src/components/ui/`. Full inventory: [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md).
+
+Wrapper conventions:
 
 - Shadcn-style primitive parts carry `data-slot="<name>"` for CSS targeting — do not strip it. Third-party wrappers such as Sonner keep their library-owned data attributes.
-- Use `cn()` for class merging. Pass user `className` last so callers can override.
+- Use `cn()` for class merging. Pass user `className` last so callers can override _layout_, not to invent a parallel visual system.
 - Use `class-variance-authority` (CVA) for variants when there are multiple.
+- Interactive headless behavior uses Base UI; `command` wraps `cmdk`, `sonner` wraps Sonner. Never reimplement headless behavior; extend the existing wrapper.
 
 ### Buttons (`button.tsx`)
 
+Do not use a raw `<button>` for app chrome. Use `Button`.
+
 Variants in priority order:
 
-| Variant       | Use case                                                           |
-| ------------- | ------------------------------------------------------------------ |
-| `default`     | The single affirmative action in a flow.                           |
-| `secondary`   | Lower-emphasis sibling next to a `default`.                        |
-| `outline`     | Toolbar / standalone actions where a filled button feels heavy.    |
-| `ghost`       | Icon buttons, list-row triggers, anywhere chrome should disappear. |
-| `status-bar`  | Full-height footer actions with background focus and no border seam. |
-| `status-bar-icon` | Muted footer icons with selected state from `aria-current`.         |
-| `status-bar-quiet` | Muted footer labels with quiet hover and focus states.              |
-| `link`        | Inline text actions inside paragraphs.                             |
-| `destructive` | Delete, discard, irreversible. Never for Cancel.                   |
+| Variant | Use case |
+| --- | --- |
+| `default` | The single affirmative action in a flow. |
+| `secondary` | Lower-emphasis sibling next to a `default`. |
+| `outline` | Toolbar / standalone actions where a filled button feels heavy. |
+| `outline-transparent` | Titlebar controls with vertical separators that must reveal the host material. |
+| `ghost` | Icon buttons, list-row triggers, anywhere chrome should disappear. |
+| `quiet` | Muted icon/toolbar controls that rest quieter than `ghost` (muted foreground, accent on hover/focus). |
+| `status-bar` | Full-height footer actions with a background focus state and no border seam. |
+| `status-bar-icon` | Muted full-height footer icons with selected state from `aria-current`. |
+| `status-bar-quiet` | Muted full-height footer labels with quiet hover and focus states. |
+| `link` | Inline text actions inside paragraphs. |
+| `destructive` | Delete, discard, irreversible. Never for Cancel. |
 
-Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), full-height `status-bar`, plus `icon`, `icon-xs`, `icon-status-bar`, `icon-sm`, `icon-lg`. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar. Use `status-bar` / `icon-status-bar` for footer actions.
+Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), content-driven `list-row`, full-height `status-bar`, plus `icon`, `icon-xs`, `icon-status-bar`, `icon-status-bar-wide`, `icon-sm`, `icon-lg`, `icon-titlebar`, `icon-titlebar-compact`, `icon-titlebar-wide`, and `icon-titlebar-extra-wide`. The status-bar sizes fill their footer row while preserving compact content widths; `icon-status-bar-wide` provides a 24px target for grouped footer navigation, while titlebar sizes fill their row at 28px, 24px, 32px, and 36px widths. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar. Use `status-bar` / `icon-status-bar` for footer actions, `list-row` for multi-line list actions, and prefer `xs` / `icon-xs` for dense chrome instead of overriding height in `className`.
 
-### Other primitives in this repo
+### Forms
 
-See [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) for the categorized inventory. Interactive headless behavior uses Base UI; `command` wraps `cmdk`, `sonner` wraps Sonner, and visual-only modules such as `badge`, `card`, `input`, and `textarea` apply shadcn roles directly. Never reimplement headless behavior; extend the existing wrapper.
+Use `Input`, `Textarea`, `Label`, `Checkbox`, `Switch`, `Select`, `Slider` — not raw `<input>` / `<textarea>` / `<select>` — unless a host editor or IME contract cannot be preserved (document that why in a short comment).
+
+The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-controls.tsx` is the house style for any label + control + helper text:
+
+- **Outer stack:** `space-y-3` for full-section forms; `space-y-2` for compact single-control fields.
+- **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
+- **Control:** the shadcn primitive. Errors surface via `aria-invalid`; the renderer maps that to a destructive focus border — don't paint your own.
+- **Trailing metadata:** `text-[11px] text-muted-foreground` below the control, not next to the label.
+
+Immediate on/off settings use `Switch`, not `Button role="switch"`. Independent booleans use `Checkbox`.
+
+### Badges
+
+Use `Badge` for compact persistent metadata. Prefer `size="xs"` for dense chips and status tones (`success`, `warning`) instead of hand-rolled pill class strings.
 
 ### Picking the right primitive
 
-When a control has multiple plausible primitives, use this fork:
-
-| You want…                                                    | Reach for                                                            | Don't use                             |
-| ------------------------------------------------------------ | -------------------------------------------------------------------- | ------------------------------------- |
-| Hover-only label on an icon-only button                      | `Tooltip`                                                            | `HoverCard` (too heavy), title attr   |
-| Hover preview of richer content (avatar + summary)           | `HoverCard`                                                          | `Tooltip` (no rich content)           |
-| Click-revealed menu with actions                             | `DropdownMenu`                                                       | `Popover` with hand-rolled list       |
-| Right-click contextual actions                               | `ContextMenu`                                                        | `DropdownMenu` (different invocation) |
-| Click-revealed surface with arbitrary content (form, picker) | `Popover`                                                            | `Dialog` (it traps focus and dims)    |
-| Modal that demands a decision before you continue            | `Dialog`                                                             | `Popover`, inline overlay             |
-| Drawer / panel sliding in from an edge                       | `Sheet`                                                              | `Dialog` centered                     |
-| Single choice from a known list                              | `Select`                                                             | Custom listbox                        |
-| Single choice with search / fuzzy filtering                  | `Command` inside `Popover`                                           | `Select` (no search)                  |
-| Multi-select with search                                     | Compose `Command` inside `Popover`; follow the nearest domain combobox | Put domain data in `components/ui/`   |
-| Transient confirmation ("Saved", "Copied")                   | `sonner` toast                                                       | `Dialog`, inline banner               |
-| Persistent inline status ("3 errors")                        | inline text + `Badge`                                                | toast (toasts disappear)              |
+| You want… | Reach for | Don't use |
+| --- | --- | --- |
+| App action / toolbar control | `Button` | Native `<button>` with copied classes |
+| Hover-only label on an icon-only button | `Tooltip` | `HoverCard` (too heavy), title attr |
+| Hover preview of richer content (avatar + summary) | `HoverCard` | `Tooltip` (no rich content) |
+| Click-revealed menu with actions | `DropdownMenu` | `Popover` with hand-rolled list |
+| Right-click contextual actions | `ContextMenu` | Hand-rolled `role="menu"` portal |
+| Click-revealed surface with arbitrary content (form, picker) | `Popover` | `Dialog` (it traps focus and dims) |
+| Modal that demands a decision before you continue | `Dialog` | `Popover`, inline overlay |
+| Drawer / panel sliding in from an edge | `Sheet` | `Dialog` centered |
+| Peer views in one region | `Tabs` | Custom tablist + panels |
+| Single choice from a known list | `Select` | Native `<select>` / custom listbox |
+| Single choice with search / fuzzy filtering | `Command` inside `Popover` | `Select` (no search) |
+| Multi-select with search | Compose `Command` inside `Popover`; follow the nearest domain combobox | Put domain data in `components/ui/` |
+| Transient confirmation ("Saved", "Copied") | `sonner` toast | `Dialog`, inline banner |
+| Persistent inline status ("3 errors") | inline text + `Badge` | toast (toasts disappear) |
 
 If you find yourself styling around a primitive (`<Popover>` to act like a `<Dialog>`, or vice versa), stop and reconsider — the focus-management semantics differ and a future contributor will be misled by the mismatch.
 
@@ -241,9 +285,9 @@ Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
 - **Default size:** `size-4` (16px). `Button` auto-applies this to any `<svg>` it contains via `[&_svg:not([class*='size-'])]:size-4`, so most call sites don't need to set a size on the icon.
 - **`size-3` / `size-3.5`:** for metadata, captions, and dense list rows where 16px is too loud.
 - **`size-7`+:** for featured/empty-state hero icons only.
-- **Weight:** the renderer-wide `IconContext.Provider` sets every Phosphor icon to `duotone`. Import icons directly from `@phosphor-icons/react` so they inherit that weight; don't override `weight` per icon or introduce alternate-weight wrappers.
+- **Weight:** the renderer-wide `IconContext.Provider` defaults Phosphor icons to `duotone`. Every Phosphor icon whose exported name contains `Arrow` or `Caret` uses `regular`, including aliased imports such as `ChevronDown`, `ExternalLink`, `RefreshCw`, and `Workflow`. Standalone `X` glyphs and close-action glyphs use `regular` as well. The explicitly quieter compact chrome also uses `regular`: the new-workspace, new-tab, and tab-strip More glyphs, terminal-tab chrome, and project headers. Scope multi-icon composites with the existing provider; outside these rules, inherit the default instead of adding one-off overrides or wrappers.
 - **Color:** inherit from surrounding text — `text-muted-foreground` for secondary, `text-destructive` for destructive, etc. Don't apply a token to the SVG directly when the parent already carries the right color.
-- **Loader:** the canonical loading icon is `<LoadingIndicator className="size-4" />` from `components/loading-indicator.tsx`. It follows the user's Appearance setting, so don't import a one-off generic spinner. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled loader. See _UX rule 1_.
+- **Loader:** the canonical loading icon is `<LoadingIndicator className="size-4" />` from `components/loading-indicator.tsx`. It follows the user's Appearance setting and always uses `foreground` (black in light mode, white in dark mode), so call sites set only size/layout and never a state color. Don't import a one-off generic spinner. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled loader. See _UX rule 1_.
 
 ### Keyboard shortcut chips
 
@@ -265,15 +309,6 @@ See `apps/desktop/src/renderer/src/components/landing-page.tsx` for the canonica
 - **Never on Cancel, Dismiss, or `link`-variant inline actions** — see _UX rule 3_.
 
 **The label MUST match the actual binding for the platform.** If the keyboard handler reads `metaKey` on Mac and `ctrlKey` elsewhere, the chip must show `⌘` on Mac and `Ctrl` elsewhere. Mismatched chips are worse than no chip.
-
-### Form anatomy
-
-The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-controls.tsx` is the house style for any label + control + helper text. Match it for new forms:
-
-- **Outer stack:** `space-y-3` for full-section forms (`ThemePicker`); `space-y-2` for compact single-control fields (`ColorField`, `NumberField`). Pick by density, not preference.
-- **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
-- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; the renderer maps that to a destructive focus border — don't paint your own.
-- **Trailing metadata:** `text-[11px] text-muted-foreground` below the control (e.g., "Current: 14px · Default: 13px"), not next to the label.
 
 ### Scrollbars
 
@@ -314,7 +349,7 @@ Use this rubric when reviewing any Yiru IDE screen, screenshot, or prototype. A 
 - **Shortcut labels:** show shortcut chips only for shortcuts that are actually implemented and useful at that location. Labels must match the platform binding. If a shortcut strategy is undecided, do not expose a placeholder label in product UI.
 - **Alignment:** rows and columns must line up to a visible grid. Left-align text and labels for scanability; right-align numbers, counts, shortcuts, and trailing metadata when comparison matters; center-align only compact icon controls, empty states, and table cells where symmetry is the clearest read.
 - **Copy quality:** displayed text must be typo-free, concise, and specific. Prefer direct verbs and concrete nouns. Remove filler like "please", "simply", "just", "you can", and generic success language that is not backed by state.
-- **Dialogs and overlays:** choose a dialog size that matches the amount of input. Short confirmations stay compact; forms with multi-line text, path pickers, provider setup, or review content need a larger dialog or sheet. Floating surfaces must use the documented shadow/elevation and background treatment so they read as above the page.
+- **Dialogs and overlays:** choose a dialog size that matches the amount of input. Short confirmations stay compact; forms with multi-line text, path pickers, provider setup, or review content need a larger dialog or sheet. Floating surfaces must use the documented elevation and background treatment so they read as above the page.
 - **Empty and error states:** when data is missing, show a direct action to acquire or configure that data. Use toasts for transient failures or confirmations; persist errors inline when the user needs to read, retry, copy, or act on the message.
 - **External links:** add direct links when the user may need provider docs, token settings, billing/setup pages, Git provider resources, or troubleshooting context. Put links near the relevant empty state, error, helper text, or setup step instead of burying them in a generic menu.
 - **Affordance:** users should be able to discover available features without intrusive education. Use familiar Phosphor icons, visible hover/focus states, clear labels where needed, and tooltips for icon-only controls. Prefer the simple icon already used by a sibling surface over an obscure alternative.
@@ -328,11 +363,11 @@ Use this rubric when reviewing any Yiru IDE screen, screenshot, or prototype. A 
 
 The right question isn't _"should this control change while it's working?"_ — it's _"how long does the action take, and what does the user need to know during that time?"_
 
-| Duration           | Feedback                                      |
-| ------------------ | --------------------------------------------- |
-| 0–100 ms           | None. Anything visible reads as a glitch.     |
-| 100 ms–1 s         | Disabled state only.                          |
-| 1 s–3 s            | Disabled + spinner or label swap.             |
+| Duration | Feedback |
+| --- | --- |
+| 0–100 ms | None. Anything visible reads as a glitch. |
+| 100 ms–1 s | Disabled state only. |
+| 1 s–3 s | Disabled + spinner or label swap. |
 | 3 s+ or multi-step | Stage labels, progress, optional reassurance. |
 
 Two corollaries:
@@ -358,14 +393,14 @@ Yiru runs on macOS, Linux, and Windows. Every UI change must hold up on all thre
 
 - **Modifier keys:** Never hardcode `e.metaKey`. Use `navigator.userAgent.includes('Mac')` to choose `metaKey` on Mac and `ctrlKey` on Linux/Windows. Electron menu accelerators should use `CmdOrCtrl`.
 - **Shortcut labels:** Display `⌘` / `⇧` on Mac; display `Ctrl+` / `Shift+` on other platforms. The label must reflect the actual binding for that platform.
-- **Window chrome:** macOS shows traffic lights; the titlebar reserves an 80px gutter (`titlebar-traffic-light-pad`) so they don't overlap content. Don't put hit targets in that band on Mac.
+- **Window chrome:** macOS shows traffic lights; the titlebar reserves a 92px gutter (`titlebar-traffic-light-pad`) so its outer spacing stays symmetric and content cannot overlap it. Don't put hit targets in that band on Mac.
 - **SSH:** Many users run Yiru on a remote machine. Loading states, focus management, and animations must hold up under 50–200 ms of extra latency. Test under simulated latency (or actual SSH) — local-only verification isn't enough. See _UX rules → 1_.
 
 ## When this guide is silent
 
 If you have a UI question this doc doesn't answer:
 
-1. Look at adjacent code in `apps/desktop/src/renderer/src/components/` for the closest sibling, and follow its lead.
-2. Check `apps/desktop/src/renderer/src/components/ui/` for a primitive that already encodes the pattern.
+1. Check [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) for a primitive that already encodes the pattern.
+2. Look at adjacent code in `apps/desktop/src/renderer/src/components/` for the closest sibling, and follow its lead — as long as that sibling already uses primitives correctly.
 3. If it's a token question, stay inside the default shadcn roles or Tailwind palette; check `main.css` only for an existing product-domain exception.
-4. If none of those resolve it, ask before adding a token or inventing a visual rule.
+4. If none of those resolve it, ask before adding a token, inventing a visual rule, or shipping a new native control.

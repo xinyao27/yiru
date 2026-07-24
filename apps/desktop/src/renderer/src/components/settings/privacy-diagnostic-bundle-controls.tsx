@@ -100,14 +100,17 @@ export function PrivacyDiagnosticBundleControls({
           disabled={!previewOpened || uploading}
           onClick={() => void onUpload()}
         >
-          <ActionIcon busy={uploading} icon={<UploadCloud className="size-3.5" />} />
+          <ActionIcon
+            busy={uploading}
+            icon={<UploadCloud weight="regular" className="size-3.5" />}
+          />
           {translate(
             'auto.components.settings.PrivacyDiagnosticBundleControls.aca2c8a367',
             'Send to support'
           )}
         </Button>
         <Button variant="ghost" size="sm" disabled={discarding} onClick={() => void onDiscard()}>
-          <ActionIcon busy={discarding} icon={<X className="size-3.5" />} />
+          <ActionIcon busy={discarding} icon={<X weight="regular" className="size-3.5" />} />
           {translate(
             'auto.components.settings.PrivacyDiagnosticBundleControls.a5acaffdb6',
             'Discard'

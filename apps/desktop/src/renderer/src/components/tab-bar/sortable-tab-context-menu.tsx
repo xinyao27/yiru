@@ -9,6 +9,7 @@ import {
   X
 } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -149,10 +150,12 @@ export function SortableTabContextMenu({
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             aria-hidden
             tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
+            className="pointer-events-none fixed size-px border-0 opacity-0"
             style={{ left: point.x, top: point.y }}
           />
         }
@@ -201,16 +204,16 @@ export function SortableTabContextMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => !isPinned && onClose(tab.id)} disabled={isPinned}>
-          <X className="size-3.5" />
+          <X weight="regular" className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.89359a36f7', 'Close')}
           {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onCloseOthers(tab.id)} disabled={tabCount <= 1}>
-          <ListX className="size-3.5" />
+          <ListX weight="regular" className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.8d16f9cd30', 'Close Others')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onCloseToRight(tab.id)} disabled={!hasTabsToRight}>
-          <PanelRightClose className="size-3.5" />
+          <PanelRightClose weight="regular" className="size-3.5" />
           {translate(
             'auto.components.tab.bar.SortableTabContextMenu.c1ee099c7e',
             'Close Tabs To The Right'
@@ -233,7 +236,7 @@ export function SortableTabContextMenu({
                 <DropdownMenuItem
                   key={color.label}
                   className={cn(
-                    'relative h-4 w-4 min-w-4 p-0 rounded-full border',
+                    'relative h-4 w-4 min-w-4 p-0 border',
                     // Why: selection reuses the existing edge because Yiru does not use CSS outlines.
                     isSelected
                       ? 'border-ring'

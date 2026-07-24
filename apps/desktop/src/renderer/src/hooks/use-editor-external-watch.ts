@@ -19,7 +19,7 @@ import {
   getRecentSelfWrite,
   type RecentSelfWrite
 } from '@/components/editor/editor-self-write-registry'
-import { getExternalFileChangeRelativePath } from '@/components/right-sidebar/use-file-explorer-watch'
+import { getExternalFileChangeRelativePath } from '@/components/workspace-panel/use-file-explorer-watch'
 import { basename, joinPath } from '@/lib/path'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '@/runtime/runtime-file-client'

@@ -137,7 +137,7 @@ export function WindowsFirewallNotice({
   }
 
   return (
-    <div className={cn('rounded-lg border border-border bg-muted/40 p-3', className)}>
+    <div className={cn('border border-border bg-muted/40 p-3', className)}>
       <div className="flex items-start gap-2.5">
         <CircleAlert className="text-muted-foreground mt-0.5 size-4 shrink-0" />
         <div className="min-w-0 flex-1 space-y-2">

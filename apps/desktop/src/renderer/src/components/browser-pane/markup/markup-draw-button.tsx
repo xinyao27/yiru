@@ -146,13 +146,15 @@ export function MarkupDrawButton({
               <PenTool className="size-3.5" />
               {translate('auto.components.browser-pane.markup.drawHintTry', 'Try it')}
             </Button>
-            <button
+            <Button
+              variant="quiet"
+              size="xs"
               type="button"
               onClick={dismissHint}
-              className="text-muted-foreground hover:text-foreground rounded-sm text-xs focus-visible:outline-none"
+              className="h-auto border-0 p-0"
             >
               {translate('auto.components.browser-pane.markup.drawHintDismiss', 'Got it')}
-            </button>
+            </Button>
           </div>
         </div>
       </PopoverContent>

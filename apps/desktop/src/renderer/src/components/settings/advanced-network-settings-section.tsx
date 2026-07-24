@@ -241,24 +241,20 @@ export function AdvancedNetworkSettingsSection({
       <Collapsible open={proxyConfigExpanded} onOpenChange={setProxyConfigOpen}>
         <CollapsibleTrigger
           render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground -ml-2 h-7 px-2 text-xs"
-            >
+            <Button type="button" variant="quiet" size="sm" className="-ml-2 h-7 px-2 text-xs">
               {translate(
                 'auto.components.settings.AdvancedNetworkSettingsSection.configureProxy',
                 'Configure proxy'
               )}
               <ChevronDown
+                weight="regular"
                 className={cn('size-3.5 transition-transform', proxyConfigExpanded && 'rotate-180')}
               />
             </Button>
           }
         />
         <CollapsibleContent>
-          <div className="border-border/60 bg-muted/20 mt-2 space-y-4 rounded-md border px-3 py-3">
+          <div className="border-border/60 bg-muted/20 mt-2 space-y-4 border px-3 py-3">
             <div className="space-y-2">
               <Label htmlFor="settings-http-proxy-url">
                 {translate(

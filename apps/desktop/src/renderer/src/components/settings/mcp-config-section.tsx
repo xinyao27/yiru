@@ -270,7 +270,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
             {loading ? (
               <LoadingIndicator className="size-3.5" />
             ) : (
-              <RefreshCw className="size-3.5" />
+              <RefreshCw weight="regular" className="size-3.5" />
             )}
           </Button>
           {canCreateStarter ? (
@@ -295,7 +295,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
         </div>
       </div>
 
-      <div className="border-border/50 bg-muted/20 rounded-md border">
+      <div className="border-border/50 bg-muted/20 border">
         <div className="border-border/50 text-muted-foreground flex items-center justify-between border-b px-3 py-2 text-xs">
           <span>
             {detectedCount}{' '}

@@ -272,8 +272,8 @@ export function PierreDiffViewer({
   const diffStyle = useMemo(
     () =>
       ({
-        '--diffs-light-bg': 'var(--editor-surface)',
-        '--diffs-dark-bg': 'var(--editor-surface)',
+        '--diffs-light-bg': 'var(--background)',
+        '--diffs-dark-bg': 'var(--background)',
         '--diffs-light': 'var(--foreground)',
         '--diffs-dark': 'var(--foreground)',
         '--diffs-font-family': buildEditorFontFamily(fontFamily),
@@ -361,7 +361,7 @@ export function PierreDiffViewer({
         render={
           <div
             ref={scrollRef}
-            className="scrollbar-editor h-full min-h-0 overflow-auto bg-[var(--editor-surface)]"
+            className="scrollbar-editor bg-background h-full min-h-0 overflow-auto"
           >
             <div ref={diffRef} className="min-w-full">
               <MultiFileDiff

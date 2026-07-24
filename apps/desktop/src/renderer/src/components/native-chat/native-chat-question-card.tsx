@@ -1,6 +1,8 @@
 import { Check, Pencil, X } from '@phosphor-icons/react'
 import { useState, type RefObject } from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -132,16 +134,16 @@ export function NativeChatQuestionCard({
           {total > 1 ? (
             <div className="scrollbar-sleek mb-2 flex gap-1 overflow-x-auto pb-1">
               {prompt.questions.map((qq, i) => (
-                <button
+                <Button
+                  variant="quiet"
+                  size="xs"
                   key={i}
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setIndex(i)}
                   className={cn(
-                    'flex shrink-0 items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs font-medium outline-none focus-visible:border-ring disabled:pointer-events-none',
-                    i === index
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                    'h-auto flex border py-1',
+                    i === index ? 'bg-accent text-accent-foreground' : ' '
                   )}
                 >
                   <span className="max-w-[10rem] truncate">
@@ -153,7 +155,7 @@ export function NativeChatQuestionCard({
                   {answerFor(i).length > 0 ? (
                     <Check className="text-primary size-3" strokeWidth={3} />
                   ) : null}
-                </button>
+                </Button>
               ))}
             </div>
           ) : null}
@@ -166,14 +168,16 @@ export function NativeChatQuestionCard({
               >
                 {q.question}
               </p>
-              <button
+              <Button
+                variant="ghost"
+                size="icon-xs"
                 type="button"
                 onClick={onCancel}
                 aria-label={translate('components.native-chat.question.cancel', 'Cancel')}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors outline-none"
+                className="text-muted-foreground flex border transition-colors"
               >
-                <X className="size-4" />
-              </button>
+                <X weight="regular" className="size-4" />
+              </Button>
             </div>
 
             {/* Scroll only kicks in on long option lists; the sleek scrollbar rides
@@ -190,12 +194,14 @@ export function NativeChatQuestionCard({
                   onSelect={() => pickOption(i)}
                 />
               ))}
-              <div className="flex items-center gap-3 px-3.5 py-2.5">
-                <span className="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-md">
+              <div className="focus-within:bg-accent flex items-center gap-3 px-3.5 py-2.5">
+                <span className="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center">
                   <Pencil className="size-3.5" />
                 </span>
-                <input
+                <Input
                   ref={answerInputRef}
+                  variant="chrome-free"
+                  size="sm"
                   disabled={isSubmitting}
                   value={otherText[index]}
                   onChange={(e) => setOther(index, e.target.value)}
@@ -209,16 +215,18 @@ export function NativeChatQuestionCard({
                     'components.native-chat.question.otherPlaceholder',
                     'Type your answer'
                   )}
-                  className="text-foreground placeholder:text-muted-foreground/60 focus:bg-accent min-w-0 flex-1 bg-transparent text-sm outline-none disabled:cursor-default disabled:opacity-50"
+                  className="flex-1 disabled:cursor-default"
                 />
-                <button
+                <Button
+                  variant={currentAnswered ? 'default' : 'ghost'}
+                  size="xs"
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => confirm()}
                   className={cn(
-                    'w-24 shrink-0 rounded-md border border-transparent px-3 py-1 text-xs font-semibold transition-colors outline-none focus-visible:border-ring disabled:cursor-default disabled:opacity-50',
+                    'h-auto w-24 px-3 py-1 font-semibold disabled:cursor-default',
                     currentAnswered
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      ? ''
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
@@ -229,7 +237,7 @@ export function NativeChatQuestionCard({
                         ? translate('components.native-chat.question.send', 'Send answer')
                         : translate('components.native-chat.question.next', 'Next')
                       : translate('components.native-chat.question.skip', 'Skip')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -261,7 +269,9 @@ function OptionRow({
   onSelect: () => void
 }): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="default"
       type="button"
       disabled={disabled}
       onClick={onSelect}
@@ -269,13 +279,13 @@ function OptionRow({
       // assistive tech.
       aria-pressed={selected}
       className={cn(
-        'flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors outline-none focus-visible:bg-accent disabled:pointer-events-none',
-        selected ? 'bg-accent' : 'hover:bg-accent'
+        'h-auto border-0 justify-start whitespace-normal font-normal flex w-full gap-3 px-3.5 py-2.5 text-left transition-colors focus-visible:bg-accent',
+        selected ? 'bg-accent' : ''
       )}
     >
       <span
         className={cn(
-          'flex size-6 shrink-0 items-center justify-center rounded-md text-xs font-medium',
+          'flex size-6 shrink-0 items-center justify-center text-xs font-medium',
           selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
         )}
       >
@@ -291,6 +301,6 @@ function OptionRow({
           </span>
         ) : null}
       </span>
-    </button>
+    </Button>
   )
 }

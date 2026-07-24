@@ -3,6 +3,7 @@ import React, { useCallback, useRef } from 'react'
 
 import { AgentStateDot } from '@/components/agent-state-dot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentTypeToIconAgent } from '@/lib/agent-status'
@@ -104,19 +105,18 @@ export function CompactAgentSummaryButton({
     [onToggle]
   )
   return (
-    <button
+    <Button
+      variant="outline"
+      size="xs"
       type="button"
       draggable={false}
       className={cn(
-        'flex h-6 w-full min-w-0 items-center gap-1 rounded-sm',
+        'justify-start whitespace-normal font-normal flex w-full min-w-0',
         'px-1 text-left text-[11px] leading-none text-muted-foreground',
         'focus-visible:outline-none',
-        // Why: the scoped sidebar accent is near-white in light mode and dark in dark
-        // mode, so hover lightening needs a theme-specific token mix.
-        'hover:bg-sidebar-accent/55 dark:hover:bg-sidebar-foreground/[0.035]',
         // Why: expanded is a tree header inside the card, so only the
         // standalone collapsed pill gets a resting surface and border.
-        !expanded && 'border border-sidebar-border/70 bg-sidebar-accent/35'
+        !expanded && 'border-sidebar-border/70 bg-sidebar-accent/35'
       )}
       aria-label={
         expanded
@@ -151,7 +151,7 @@ export function CompactAgentSummaryButton({
               return (
                 <span
                   key={group.state}
-                  className="bg-sidebar/70 inline-flex min-w-0 shrink-0 items-center gap-0.5 rounded-sm px-1 py-0.5"
+                  className="bg-sidebar/70 inline-flex min-w-0 shrink-0 items-center gap-0.5 px-1 py-0.5"
                 >
                   <AgentStateDot state={group.state} size="sm" />
                   {/* Why: same-state agent identities read as one status cluster;
@@ -160,7 +160,7 @@ export function CompactAgentSummaryButton({
                     {iconAgents.map((agent) => (
                       <span
                         key={agent.paneKey}
-                        className="border-sidebar-border/70 bg-sidebar inline-flex size-4 items-center justify-center rounded-full border"
+                        className="border-sidebar-border/70 bg-sidebar inline-flex size-4 items-center justify-center border"
                       >
                         <AgentIcon agent={agentTypeToIconAgent(agent.agentType)} size={13} />
                       </span>
@@ -183,12 +183,13 @@ export function CompactAgentSummaryButton({
         </>
       )}
       <ChevronDown
+        weight="regular"
         className={cn(
           'size-3 shrink-0 transition-transform duration-150',
           !expanded && '-rotate-90'
         )}
         aria-hidden
       />
-    </button>
+    </Button>
   )
 }

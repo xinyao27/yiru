@@ -84,7 +84,7 @@ export function WorkspaceCombobox({
                   'Select workspace'
                 )}
             </span>
-            <ChevronsUpDown className="size-4 opacity-50" />
+            <ChevronsUpDown weight="regular" className="size-4 opacity-50" />
           </Button>
         }
       />

@@ -10,6 +10,17 @@ const DEFAULT_ICON_CONTEXT_VALUE = {
   mirrored: false
 } as const
 
-export function PhosphorIconContextProvider({ children }: PropsWithChildren): JSX.Element {
-  return <IconContext.Provider value={DEFAULT_ICON_CONTEXT_VALUE}>{children}</IconContext.Provider>
+const REGULAR_ICON_CONTEXT_VALUE = {
+  ...DEFAULT_ICON_CONTEXT_VALUE,
+  weight: 'regular'
+} as const
+
+export function PhosphorIconContextProvider({
+  children,
+  weight = 'duotone'
+}: PropsWithChildren<{ weight?: 'duotone' | 'regular' }>): JSX.Element {
+  // Why: selected dense chrome uses regular icons without losing the other
+  // renderer-wide Phosphor defaults when a nested provider replaces context.
+  const value = weight === 'regular' ? REGULAR_ICON_CONTEXT_VALUE : DEFAULT_ICON_CONTEXT_VALUE
+  return <IconContext.Provider value={value}>{children}</IconContext.Provider>
 }

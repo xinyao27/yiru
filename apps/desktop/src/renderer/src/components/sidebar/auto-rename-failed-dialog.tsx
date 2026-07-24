@@ -127,7 +127,7 @@ export function AutoRenameFailedDialog({
           <div className="relative">
             <Button
               type="button"
-              variant="ghost"
+              variant="quiet"
               size="icon-xs"
               onClick={handleCopy}
               aria-label={
@@ -140,11 +140,11 @@ export function AutoRenameFailedDialog({
               }
               // Why: float over the scroll region's top-right; pad the text so
               // long lines never slide under the button.
-              className="text-muted-foreground hover:text-foreground absolute top-1.5 right-1.5"
+              className="absolute top-1.5 right-1.5"
             >
               {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
             </Button>
-            <pre className="scrollbar-sleek border-border/60 bg-muted/40 text-foreground max-h-[40vh] overflow-auto rounded-md border py-3 pr-9 pl-3 font-mono text-[11px] leading-4 break-words whitespace-pre-wrap">
+            <pre className="scrollbar-sleek border-border/60 bg-muted/40 text-foreground max-h-[40vh] overflow-auto border py-3 pr-9 pl-3 font-mono text-[11px] leading-4 break-words whitespace-pre-wrap">
               {detailText}
             </pre>
           </div>

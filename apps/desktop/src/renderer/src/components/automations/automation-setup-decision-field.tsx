@@ -1,7 +1,8 @@
-import { Check, CaretDown as ChevronDown } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -60,7 +61,10 @@ export function AutomationSetupDecisionField({
           'auto.components.automations.AutomationSetupDecisionField.18f000ad4e',
           'Advanced'
         )}
-        <ChevronDown className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')} />
+        <ChevronDown
+          weight="regular"
+          className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
+        />
       </Button>
       <div
         className={cn(
@@ -78,31 +82,17 @@ export function AutomationSetupDecisionField({
                 : '-translate-y-1 opacity-0 delay-0'
             )}
           >
-            <label className="group text-foreground flex items-center gap-2 text-xs">
-              <input
-                type="checkbox"
+            <label className="text-foreground flex items-center gap-2 text-xs">
+              <Checkbox
                 checked={checked}
-                onChange={(event) => {
+                onCheckedChange={(nextChecked) => {
                   onSetupDecisionTouched()
                   onDraftChange((current) => ({
                     ...current,
-                    setupDecision: event.target.checked ? 'run' : 'skip'
+                    setupDecision: nextChecked ? 'run' : 'skip'
                   }))
                 }}
-                className="peer sr-only outline-none"
               />
-              <span
-                className={cn(
-                  'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
-                  checked
-                    ? 'border-emerald-500/60 bg-emerald-500 text-white'
-                    : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
-                )}
-              >
-                <Check
-                  className={cn('size-3 transition-opacity', checked ? 'opacity-100' : 'opacity-0')}
-                />
-              </span>
               <span>{label}</span>
             </label>
             <p className="text-muted-foreground pl-6 text-xs">

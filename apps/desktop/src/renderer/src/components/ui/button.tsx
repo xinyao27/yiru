@@ -17,9 +17,16 @@ const buttonVariants = cva(
         // Why: toolbar controls must keep an opaque resting surface in both themes.
         outline:
           'border border-border bg-background text-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
+        // Why: titlebar chrome shares the row seams, so controls only draw vertical separators.
+        'outline-transparent':
+          'border border-y-0 border-border bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
+        // Why: muted toolbar/icon chrome that should rest quieter than ghost without
+        // call sites repeating text-muted-foreground + hover/focus overrides.
+        quiet:
+          'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
         // Why: command/listbox rows share selected-state chrome, including a
         // border that remains legible while the user types.
         'picker-row':
@@ -38,6 +45,8 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+        // Why: multi-line list actions need content-driven height without bypassing Button chrome.
+        'list-row': 'h-auto px-3 py-2',
         'picker-row': 'h-auto gap-2 px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
         'popover-hint': 'h-auto gap-2 px-3 py-1.5 text-left',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
@@ -48,8 +57,14 @@ const buttonVariants = cva(
         icon: 'size-9',
         'icon-xs': "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         'icon-status-bar': "h-full w-5 [&_svg:not([class*='size-'])]:size-3",
+        'icon-status-bar-wide': "h-full w-6 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
-        'icon-lg': 'size-10'
+        'icon-lg': 'size-10',
+        // Why: titlebar controls share the row height while retaining compact horizontal rhythm.
+        'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-3.5",
+        'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-3.5",
+        'icon-titlebar-wide': "h-full w-8 [&_svg:not([class*='size-'])]:size-3.5",
+        'icon-titlebar-extra-wide': "h-full w-9 [&_svg:not([class*='size-'])]:size-3.5"
       }
     },
     defaultVariants: {

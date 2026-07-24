@@ -268,7 +268,7 @@ export function ComputerUsePane(): React.JSX.Element {
     <div className="space-y-5">
       {isMac ? (
         <>
-          <div className="border-border/60 bg-muted/25 flex flex-wrap items-start justify-between gap-4 rounded-lg border px-4 py-3">
+          <div className="border-border/60 bg-muted/25 flex flex-wrap items-start justify-between gap-4 border px-4 py-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <ShieldCheck className="size-4" />
@@ -294,14 +294,14 @@ export function ComputerUsePane(): React.JSX.Element {
               {loading ? (
                 <LoadingIndicator className="size-3.5" />
               ) : (
-                <RefreshCw className="size-3.5" />
+                <RefreshCw weight="regular" className="size-3.5" />
               )}
               {translate('auto.components.settings.ComputerUsePane.d95d1cfab8', 'Refresh')}
             </Button>
           </div>
 
           <div className="space-y-2">
-            <div className="divide-border/60 border-border/60 divide-y rounded-lg border">
+            <div className="divide-border/60 border-border/60 divide-y border">
               {PERMISSIONS.map((permission) => {
                 const status = stateById.get(permission.id)
                 const pending = pendingId === permission.id
@@ -320,7 +320,7 @@ export function ComputerUsePane(): React.JSX.Element {
                           </span>
                           <span
                             className={cn(
-                              'rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+                              'border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
                               statusClass(status)
                             )}
                           >
@@ -345,7 +345,7 @@ export function ComputerUsePane(): React.JSX.Element {
                         onClick={() => void openPermission(permission.id)}
                         className="gap-1.5"
                       >
-                        <ExternalLink className="size-3.5" />
+                        <ExternalLink weight="regular" className="size-3.5" />
                         {translate('auto.components.settings.ComputerUsePane.45f8e22c2e', 'Open')}
                       </Button>
                     </div>
@@ -353,11 +353,13 @@ export function ComputerUsePane(): React.JSX.Element {
                 )
               })}
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               disabled={resetAccessDisabled}
               onClick={() => void resetAccess()}
-              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mr-4 ml-auto block w-28 text-right text-xs underline underline-offset-2 outline-none disabled:pointer-events-none disabled:opacity-50"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mr-4 ml-auto block h-auto w-28 border-0 p-0 text-right underline underline-offset-2"
             >
               {resetting
                 ? translate(
@@ -365,7 +367,7 @@ export function ComputerUsePane(): React.JSX.Element {
                     'Resetting access...'
                   )
                 : translate('auto.components.settings.ComputerUsePane.6b17602073', 'Reset access')}
-            </button>
+            </Button>
           </div>
         </>
       ) : null}

@@ -33,11 +33,9 @@ type MobilePageContentProps = {
   revokingDeviceIds: string[]
   selectedAddress: string | undefined
   onPlatformChange: (platform: MobilePlatform) => void
-  showMobileButton: boolean
   showPairedDevices: (deviceCount: number) => void
   stage: MobilePageStage | null
   stepIdx: StepIndex
-  toggleMobileSidebarButton: () => void
 }
 
 export function MobilePageContent({
@@ -64,19 +62,13 @@ export function MobilePageContent({
   revokingDeviceIds,
   selectedAddress,
   onPlatformChange,
-  showMobileButton,
   showPairedDevices,
   stage,
-  stepIdx,
-  toggleMobileSidebarButton
+  stepIdx
 }: MobilePageContentProps): React.JSX.Element {
   return (
     <div className={mobilePageStyles.root}>
-      <MobilePageToolbar
-        showMobileButton={showMobileButton}
-        onClose={closeMobilePage}
-        onToggleMobileSidebarButton={toggleMobileSidebarButton}
-      />
+      <MobilePageToolbar onClose={closeMobilePage} />
       <section className={mobilePageStyles.hero}>
         <div className={mobilePageStyles.heroCopy}>
           {stage === null ? null : stage === 'intro' ? (

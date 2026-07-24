@@ -9,7 +9,7 @@ import { AgentIcon } from '@/lib/agent-catalog'
 
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
-import type { ActivityBarItem } from '../right-sidebar/activity-bar-buttons'
+import type { ActivityBarItem } from '../workspace-panel/activity-bar-buttons'
 import { getSpoolWorkspacePanelTabId, SpoolWorkspacePanelTab } from './spool-workspace-panel-tab'
 
 const MAX_VISIBLE_SPOOL_SESSION_TABS = 24

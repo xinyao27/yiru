@@ -10,6 +10,7 @@ import {
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,7 +102,7 @@ function BrowserTabFavicon({
         alt=""
         aria-hidden
         draggable={false}
-        className={cn(TAB_LEADING_ICON_CLASSES, 'rounded-sm object-contain')}
+        className={cn(TAB_LEADING_ICON_CLASSES, 'object-contain')}
         onError={() => setFailedFavicon({ tabId, faviconUrl: displayFaviconUrl })}
       />
     )
@@ -242,7 +243,7 @@ export default function BrowserTab({
         </Tooltip>
       )}
       {tab.loading && !tab.loadError && !isBlankBrowserTab(tab) && (
-        <span className="mr-1 size-1.5 shrink-0 rounded-full bg-sky-500/80" />
+        <span className="mr-1 size-1.5 shrink-0 bg-sky-500/80" />
       )}
       {!isPinned && (
         <TabCloseButton
@@ -275,16 +276,18 @@ export default function BrowserTab({
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none fixed size-px opacity-0"
+              className="pointer-events-none fixed size-px border-0 opacity-0"
               style={{ left: menuPoint.x, top: menuPoint.y }}
             />
           }
         />
         <DropdownMenuContent
-          className="border-border/80 min-w-[11rem] rounded-[11px] p-1"
+          className="border-border/80 min-w-[11rem] p-1"
           sideOffset={0}
           align="start"
         >
@@ -306,18 +309,18 @@ export default function BrowserTab({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
-            <X className="size-4" />
+            <X weight="regular" className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
-            <PanelRightClose className="size-4" />
+            <PanelRightClose weight="regular" className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
             disabled={!isHttpUrl}
           >
-            <ExternalLink className="size-4" />
+            <ExternalLink weight="regular" className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.6e0bc8f3a8', 'Open In Browser')}
           </DropdownMenuItem>
         </DropdownMenuContent>

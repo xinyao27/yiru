@@ -712,7 +712,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                           {loading ? (
                             <LoadingIndicator className="size-3.5" />
                           ) : (
-                            <RefreshCcw className="size-3.5" />
+                            <RefreshCcw weight="regular" className="size-3.5" />
                           )}
                         </Button>
                       }
@@ -733,7 +733,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                     )}
                     onClick={() => closeModal()}
                   >
-                    <X className="size-4" />
+                    <X weight="regular" className="size-4" />
                   </Button>
                 </div>
               </div>
@@ -779,7 +779,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                         selected={effectiveRepoSelection}
                         onChange={(next) => setRepoSelection(new Set(next))}
                         onSelectAll={() => setRepoSelection(new Set(eligibleRepoIds))}
-                        triggerClassName="h-8 w-full rounded-md border border-border/60 bg-background px-2 text-xs font-medium hover:bg-accent/60"
+                        triggerClassName="h-8 w-full border border-border/60 bg-background px-2 text-xs font-medium hover:bg-accent/60"
                       />
                     </div>
                   ) : null}
@@ -1041,7 +1041,7 @@ function WorkspaceCleanupFilterToolbar({
                     {hasHiddenControls ? (
                       <span
                         aria-hidden="true"
-                        className="bg-primary absolute -top-0.5 -right-0.5 size-2 rounded-full"
+                        className="bg-primary absolute -top-0.5 -right-0.5 size-2"
                       />
                     ) : null}
                   </Button>
@@ -1266,19 +1266,21 @@ function CleanupViewNav({
     <aside className="border-border bg-background border-t md:border-t-0">
       <div className="space-y-1 p-2">
         {items.map((item) => (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             key={item.view}
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
-              'flex h-8 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+              'border-0 whitespace-normal font-normal focus-visible:bg-accent focus-visible:text-accent-foreground',
+              'flex w-full justify-between gap-2 px-2 text-left text-xs text-muted-foreground transition-colors',
               activeView === item.view && 'bg-accent text-accent-foreground'
             )}
             onClick={() => onViewChange(item.view)}
           >
             <span className="truncate">{item.label}</span>
             <span className="text-muted-foreground tabular-nums">{counts[item.view]}</span>
-          </button>
+          </Button>
         ))}
       </div>
     </aside>
@@ -1308,7 +1310,7 @@ function ConfirmRemove({
       <DialogHeader className="border-border border-b px-5 py-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="border-destructive/25 bg-destructive/10 text-destructive mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border">
+            <div className="border-destructive/25 bg-destructive/10 text-destructive mt-0.5 flex size-8 shrink-0 items-center justify-center border">
               {deleting ? (
                 <LoadingIndicator className="size-4" />
               ) : (
@@ -1351,7 +1353,7 @@ function ConfirmRemove({
             )}
             onClick={onCancel}
           >
-            <X className="size-4" />
+            <X weight="regular" className="size-4" />
           </Button>
         </div>
       </DialogHeader>
@@ -1562,10 +1564,7 @@ function SkeletonRows(): React.JSX.Element {
   return (
     <div className="space-y-2">
       {[0, 1, 2].map((index) => (
-        <div
-          key={index}
-          className="border-border bg-muted/35 h-24 animate-pulse rounded-lg border"
-        />
+        <div key={index} className="border-border bg-muted/35 h-24 animate-pulse border" />
       ))}
     </div>
   )
@@ -1581,7 +1580,7 @@ function EmptyState({
   onAction?: () => void
 }): React.JSX.Element {
   return (
-    <div className="border-border bg-muted/20 text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 rounded-lg border text-sm">
+    <div className="border-border bg-muted/20 text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 border text-sm">
       <span>{title}</span>
       {actionLabel && onAction ? (
         <Button variant="outline" size="sm" onClick={onAction}>

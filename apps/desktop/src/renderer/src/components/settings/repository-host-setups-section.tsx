@@ -159,7 +159,7 @@ export function RepositoryHostSetupsSection({
           )}
         </p>
       </div>
-      <div className="divide-border border-border divide-y rounded-md border">
+      <div className="divide-border border-border divide-y border">
         {projectHostSetups.map((setup) => {
           const isCurrentSetup = setup.hostId === selectedHostId
           const canOpenSetup = setup.repoId.trim().length > 0

@@ -4,6 +4,7 @@ import React, { useCallback } from 'react'
 import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
 import { useAgentRowConversationName } from '@/components/dashboard/use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
@@ -187,9 +188,11 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   const rowBody = (
     <>
       {hasChildDisclosure ? (
-        <button
+        <Button
+          variant="quiet"
+          size="icon-xs"
           type="button"
-          className="text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm focus-visible:outline-none"
+          className="flex size-4"
           aria-label={translate(
             'auto.components.sidebar.worktree.card.compact.agents.a128d7006b',
             '{{value0}} {{value1}} child {{value2}}',
@@ -204,13 +207,14 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
           onKeyDown={stopActivationKeyPropagation}
         >
           <ChevronRight
+            weight="regular"
             className={cn(
               'size-3 transition-transform duration-150',
               childAgentsExpanded && 'rotate-90'
             )}
             aria-hidden
           />
-        </button>
+        </Button>
       ) : reserveDisclosureGutter ? (
         <span className="size-4 shrink-0" aria-hidden />
       ) : null}
@@ -273,11 +277,9 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     <div
       draggable={false}
       className={cn(
-        'min-w-0 cursor-pointer rounded-sm px-1 text-[11px] leading-none',
+        'min-w-0 cursor-pointer px-1 text-[11px] leading-none',
         'text-muted-foreground',
-        isFocusedPane
-          ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
-          : 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_1.25%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]',
+        isFocusedPane ? 'bg-accent text-accent-foreground hover:bg-accent' : 'hover:bg-accent',
         'flex h-6 items-center gap-1',
         sendTargetStatus === 'sending' && 'cursor-progress opacity-75',
         sendTargetStatus === 'disabled' && 'cursor-default opacity-60'

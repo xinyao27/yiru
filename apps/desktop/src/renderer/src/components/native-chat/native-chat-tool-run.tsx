@@ -6,6 +6,7 @@ import {
 } from '@yiru/workbench-model/agent'
 import { useEffect, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -56,13 +57,15 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
 
   return (
     <div>
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         type="button"
         onClick={() => hasDetail && setExpanded((v) => !v)}
         className={cn(
-          'outline-none focus-visible:bg-accent',
-          'group flex w-full items-center gap-1.5 py-0.5 text-left',
-          hasDetail ? 'cursor-pointer' : 'cursor-default'
+          'h-auto border-0 justify-start whitespace-normal font-normal focus-visible:bg-accent',
+          'group flex w-full gap-1.5 py-0.5 text-left',
+          hasDetail ? '' : 'cursor-default'
         )}
       >
         <code className="text-foreground/90 group-hover:text-foreground shrink-0 font-mono text-xs font-semibold transition-colors">
@@ -80,13 +83,14 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
           // Chevron sits on the right; hidden until hover when collapsed, always
           // shown (pointing down) when expanded — mirrors Codex's disclosure affordance.
           <ChevronRight
+            weight="regular"
             className={cn(
               'ml-auto size-3.5 shrink-0 text-muted-foreground transition-all',
               expanded ? 'rotate-90 opacity-100' : 'opacity-0 group-hover:opacity-100'
             )}
           />
         ) : null}
-      </button>
+      </Button>
       {hasDetail && expanded ? (
         <div className="space-y-1.5 py-1">
           {diff ? <NativeChatDiffView lines={diff} /> : null}
@@ -142,10 +146,12 @@ export function NativeChatToolRun({
     // Extra top margin sets the tool run apart from the assistant prose above it
     // so the turn's activity doesn't crowd the message text.
     <div className="mt-2">
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group focus-visible:bg-accent flex w-full items-center gap-1.5 py-0.5 text-left outline-none"
+        className="group focus-visible:bg-accent flex h-auto w-full justify-start gap-1.5 border-0 py-0.5 text-left font-normal whitespace-normal"
       >
         <span className="text-muted-foreground group-hover:text-foreground/80 shrink-0 font-mono text-[11px] font-bold transition-colors">
           {callCount}×
@@ -156,12 +162,13 @@ export function NativeChatToolRun({
         {/* Chevron on the right, revealed on hover when collapsed and pointing
             down when open — matches Codex's tool-run disclosure. */}
         <ChevronRight
+          weight="regular"
           className={cn(
             'ml-auto size-3.5 shrink-0 text-muted-foreground transition-all',
             open ? 'rotate-90 opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
         />
-      </button>
+      </Button>
       {open ? (
         <div className="mt-1">
           {blocks.map((block, i) => (

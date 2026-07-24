@@ -20,8 +20,8 @@ export function NativeChatEmptyState({
       <div
         className={
           kind === 'error'
-            ? 'bg-destructive/10 text-destructive flex size-12 items-center justify-center rounded-full'
-            : 'bg-accent text-accent-foreground flex size-12 items-center justify-center rounded-full'
+            ? 'bg-destructive/10 text-destructive flex size-12 items-center justify-center'
+            : 'bg-accent text-accent-foreground flex size-12 items-center justify-center'
         }
       >
         {kind === 'error' ? (

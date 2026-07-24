@@ -73,15 +73,16 @@ export function TabBarOpenInMenuButton({
 
   return (
     <DropdownMenu modal={false}>
-      <ButtonGroup className="my-auto shrink-0" aria-label={openLabel}>
+      {/* Why: the repeat action and chooser read as one control, so their shared edge is unpainted. */}
+      <ButtonGroup className="h-full shrink-0 [&>*:first-child]:border-r-0" aria-label={openLabel}>
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="text-muted-foreground size-7"
+                variant="outline-transparent"
+                size="icon-titlebar"
+                className="text-muted-foreground"
                 aria-label={openLabel}
                 onClick={() => openEntry(preferredEntry)}
               >
@@ -128,6 +129,7 @@ export function TabBarOpenInMenuButton({
         <WorktreeOpenInMenuContent
           worktreePath={worktree.path}
           connectionId={repo?.connectionId ?? null}
+          runtimeEnvironmentId={runtimeEnvironmentId}
           onEntryOpen={rememberEntry}
         />
       </DropdownMenuContent>

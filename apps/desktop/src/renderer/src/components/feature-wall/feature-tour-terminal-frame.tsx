@@ -14,11 +14,11 @@ export function FeatureTourTerminalFrame(): JSX.Element {
           'Splittable terminal'
         )}
       </div>
-      <div className="border-border bg-background mx-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border">
+      <div className="border-border bg-background mx-4 flex min-h-0 flex-1 flex-col overflow-hidden border">
         <div className="border-border bg-muted/40 flex items-center gap-1.5 border-b px-2 py-1">
-          <span className="bg-foreground/15 size-1.5 rounded-full" />
-          <span className="bg-foreground/15 size-1.5 rounded-full" />
-          <span className="bg-foreground/15 size-1.5 rounded-full" />
+          <span className="bg-foreground/15 size-1.5" />
+          <span className="bg-foreground/15 size-1.5" />
+          <span className="bg-foreground/15 size-1.5" />
           <span className="text-muted-foreground ml-2 font-mono text-[13.5px] leading-none">
             {translate('auto.components.feature.wall.FeatureTourPreview.04d54d50ec', 'yiru · zsh')}
           </span>

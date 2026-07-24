@@ -1,6 +1,6 @@
 import {
   Check,
-  GitBranch,
+  GitMerge,
   Funnel as ListFilter,
   Moon,
   HardDrives as Server,
@@ -25,10 +25,10 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 import { searchRepos } from '@/lib/repo-search'
 import { useAppStore } from '@/store'
 
@@ -171,7 +171,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
                     // applied — without it the list can silently hide workspaces.
                     <span
                       aria-hidden
-                      className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-0.5 text-[9px] leading-none font-medium"
+                      className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center px-0.5 text-[9px] leading-none font-medium"
                     >
                       {activeFilterCount > 9 ? '9+' : activeFilterCount}
                     </span>
@@ -196,7 +196,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
           shortcutLabel={sleepingShortcut === 'Unassigned' ? undefined : sleepingShortcut}
         />
         <FilterToggleRow
-          icon={<GitBranch className="size-3.5" />}
+          icon={<GitMerge className="size-3.5" />}
           label={translate(
             'auto.components.sidebar.SidebarFilter.e5cb32a898',
             'Hide default branch'
@@ -205,7 +205,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
           onChange={setHideDefaultBranchWorkspace}
         />
         <FilterToggleRow
-          icon={<Workflow className="size-3.5" />}
+          icon={<Workflow weight="regular" className="size-3.5" />}
           label={translate(
             'auto.components.sidebar.SidebarFilter.automationCreated',
             'Hide automation-created'
@@ -227,22 +227,26 @@ const SidebarFilter = React.memo(function SidebarFilter({
                 )}
               </span>
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant="quiet"
+                  size="xs"
                   type="button"
                   onClick={selectAllRepos}
-                  className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+                  className="hover:bg-muted h-auto border-0 py-0.5 text-[11px] disabled:opacity-40 disabled:hover:bg-transparent"
                   disabled={allSelected}
                 >
                   {translate('auto.components.sidebar.SidebarFilter.139877b384', 'Select all')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="quiet"
+                  size="xs"
                   type="button"
                   onClick={clearRepos}
-                  className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+                  className="hover:bg-muted h-auto border-0 py-0.5 text-[11px] disabled:opacity-40 disabled:hover:bg-transparent"
                   disabled={!hasRepoFilter}
                 >
                   {translate('auto.components.sidebar.SidebarFilter.779b7ba05d', 'Clear')}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -267,7 +271,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
                 }}
                 onKeyDown={(event) => event.stopPropagation()}
                 className="h-8 py-2 text-xs"
-                wrapperClassName="mx-1 rounded-[7px] border border-border/70 px-2"
+                wrapperClassName="mx-1 border border-border/70 px-2"
                 iconClassName="h-3.5 w-3.5"
               />
               <CommandList className="max-h-64 py-1">
@@ -284,7 +288,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
                       key={r.id}
                       value={r.id}
                       onSelect={() => handleToggleRepo(r.id)}
-                      className="mx-1 my-0.5 items-center gap-2 rounded-[7px] px-2 py-1 text-[12px] leading-5 font-medium data-[selected=true]:bg-black/8 dark:data-[selected=true]:bg-white/14"
+                      className="data-[selected=true]:bg-accent mx-1 my-0.5 items-center gap-2 px-2 py-1 text-[12px] leading-5 font-medium"
                     >
                       <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
                         <RepoBadgeLabel
@@ -293,7 +297,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
                           className="max-w-full"
                         />
                         {r.connectionId && (
-                          <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 rounded px-1 py-0.5 text-[9px] leading-none font-medium">
+                          <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
                             <Server className="size-2.5" />
                             {translate('auto.components.sidebar.SidebarFilter.81ded53722', 'SSH')}
                           </span>
@@ -316,24 +320,28 @@ const SidebarFilter = React.memo(function SidebarFilter({
             hidden. Reset sits beside it only when a filter is active. */}
         <div className="flex items-center justify-between gap-1 px-1 py-1">
           {hasAnyFilter ? (
-            <button
+            <Button
+              variant="quiet"
+              size="xs"
               type="button"
               onClick={clearAll}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-[5px] px-2 py-1 text-[11px] focus-visible:outline-none"
+              className="hover:bg-muted h-auto border-0 py-1 text-[11px]"
             >
               {translate('auto.components.sidebar.SidebarFilter.92a23e6d07', 'Reset filters')}
-            </button>
+            </Button>
           ) : (
             <span />
           )}
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
             onClick={() => addRepo()}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[11px] focus-visible:outline-none"
+            className="hover:bg-muted h-auto gap-1.5 border-0 py-1 text-[11px]"
           >
             <FolderPlus className="size-3.5" />
             {translate('auto.components.sidebar.SidebarFilter.e3b3898218', 'Add project')}
-          </button>
+          </Button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -354,35 +362,16 @@ function FilterToggleRow({
   shortcutLabel?: string
 }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="hover:bg-muted flex w-full items-center justify-between gap-2 rounded-[5px] px-2 py-1.5 text-[12px] font-medium focus-visible:outline-none"
-    >
+    <div className="flex w-full items-center justify-between gap-2 py-1.5 text-[12px]">
       <span className="text-foreground inline-flex items-center gap-2">
         <span className="text-muted-foreground">{icon}</span>
         {label}
       </span>
       <span className="inline-flex items-center gap-2">
         {shortcutLabel ? <DropdownMenuShortcut>{shortcutLabel}</DropdownMenuShortcut> : null}
-        <span
-          aria-hidden
-          className={cn(
-            'relative h-3.5 w-6 shrink-0 rounded-full transition-colors',
-            checked ? 'bg-primary' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'absolute top-0.5 left-0.5 size-2.5 rounded-full bg-background   transition-transform',
-              checked && 'translate-x-2.5'
-            )}
-          />
-        </span>
+        <Switch checked={checked} aria-label={label} onCheckedChange={onChange} />
       </span>
-    </button>
+    </div>
   )
 }
 

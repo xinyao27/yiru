@@ -46,7 +46,7 @@ function ThemeSwatches({ theme }: { theme: WarpThemeImportPreviewTheme }): React
     theme.terminal.white
   ]
   return (
-    <span className="border-border/60 flex shrink-0 overflow-hidden rounded-sm border">
+    <span className="border-border/60 flex shrink-0 overflow-hidden border">
       {colors.map((color, index) => (
         <span
           key={index}
@@ -115,7 +115,7 @@ export function WarpThemeImportModal({
                 disabled={loading}
                 onClick={() => void handlePreviewSource({ kind: 'chooseFile' })}
               >
-                <FileUp className="size-4" />
+                <FileUp weight="regular" className="size-4" />
                 {translate(
                   'auto.components.settings.WarpThemeImportModal.choose_file',
                   'Choose File'
@@ -167,9 +167,11 @@ export function WarpThemeImportModal({
                       )
                     : ''}
                 </span>
-                <button
+                <Button
+                  variant="ghost"
+                  size="xs"
                   type="button"
-                  className="text-foreground focus-visible:bg-accent text-xs font-medium outline-none hover:underline"
+                  className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
                   onClick={() => handleToggleAll(!allSelected)}
                 >
                   {allSelected
@@ -181,30 +183,32 @@ export function WarpThemeImportModal({
                         'auto.components.settings.WarpThemeImportModal.select_all',
                         'Select all'
                       )}
-                </button>
+                </Button>
               </div>
 
-              <div className="border-border/50 rounded-lg border">
+              <div className="border-border/50 border">
                 <ScrollArea className="h-72">
                   <div className="space-y-1 p-2">
                     {themes.map((theme) => {
                       const selected = selectedThemeIds.has(theme.id)
                       return (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="default"
                           type="button"
                           key={theme.id}
                           aria-pressed={selected}
                           onClick={() => handleToggleTheme(theme.id)}
                           className={cn(
-                            'outline-none focus-visible:bg-accent',
-                            'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors',
-                            selected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
+                            'border-0 justify-start whitespace-normal font-normal focus-visible:bg-accent',
+                            'flex w-full gap-3 px-3 text-left transition-colors',
+                            selected ? 'bg-accent text-accent-foreground' : ''
                           )}
                         >
                           <span
                             aria-hidden="true"
                             className={cn(
-                              'flex size-4 shrink-0 items-center justify-center rounded-sm border text-[10px] leading-none',
+                              'flex size-4 shrink-0 items-center justify-center border text-[10px] leading-none',
                               selected
                                 ? 'border-accent-foreground bg-accent-foreground text-accent'
                                 : 'border-border bg-background'
@@ -233,7 +237,7 @@ export function WarpThemeImportModal({
                             )}
                           </div>
                           <ThemeSwatches theme={theme} />
-                        </button>
+                        </Button>
                       )
                     })}
                   </div>
@@ -282,7 +286,7 @@ export function WarpThemeImportModal({
           )}
 
           {!loading && preview && skippedCount > 0 ? (
-            <div className="border-border/50 rounded-lg border p-3">
+            <div className="border-border/50 border p-3">
               <p className="mb-2 text-xs font-medium">
                 {translate(
                   'auto.components.settings.WarpThemeImportModal.skipped_files',

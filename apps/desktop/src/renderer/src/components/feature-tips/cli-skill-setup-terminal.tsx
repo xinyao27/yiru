@@ -31,7 +31,7 @@ export function CliSkillSetupTerminal(): React.JSX.Element {
 
   return (
     <div className="min-w-0">
-      <div className="border-border bg-muted/35 flex min-w-0 items-center gap-2 rounded-md border px-3 py-2">
+      <div className="border-border bg-muted/35 flex min-w-0 items-center gap-2 border px-3 py-2">
         <code className="scrollbar-sleek text-muted-foreground min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap">
           {YIRU_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND}
         </code>

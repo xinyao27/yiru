@@ -256,7 +256,7 @@ export function WorkspaceDirectorySetting({
               className="h-7 gap-1.5 text-xs"
               onClick={resetOverride}
             >
-              <RotateCcw className="size-3.5" />
+              <RotateCcw weight="regular" className="size-3.5" />
               {translate('auto.components.settings.WorkspaceDirectorySetting.5e6f7a8b9c', 'Reset')}
             </Button>
           )}

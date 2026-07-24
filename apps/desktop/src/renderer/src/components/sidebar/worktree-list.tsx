@@ -721,7 +721,7 @@ function SectionMetricsBadge({ count }: { count: number }): React.JSX.Element {
 
   return (
     <span
-      className="border-sidebar-border bg-sidebar-accent text-muted-foreground/90 inline-flex h-4 shrink-0 overflow-hidden rounded-full border text-[9px] leading-none font-medium"
+      className="border-sidebar-border bg-sidebar-accent text-muted-foreground/90 inline-flex h-4 shrink-0 overflow-hidden border text-[9px] leading-none font-medium"
       aria-label={totalLabel}
     >
       <Tooltip>
@@ -815,7 +815,7 @@ function HostSectionHeader({
         data-host-header-drag-id={row.hostId}
         aria-expanded={!row.collapsed}
         className={cn(
-          'group/host-header flex h-8 w-full cursor-pointer items-center gap-2 rounded-md border px-2 text-left transition-all outline-none focus-visible:border-ring',
+          'group/host-header flex h-8 w-full cursor-pointer items-center gap-2 border px-2 text-left transition-all outline-none focus-visible:border-ring',
           onDragPointerDown && 'cursor-grab active:cursor-grabbing',
           isBlocked
             ? 'border-destructive/40 bg-destructive/10'
@@ -864,6 +864,7 @@ function HostSectionHeader({
         </div>
         <div className="text-muted-foreground/60 can-hover:opacity-0 flex size-4 shrink-0 items-center justify-center transition-opacity group-hover/host-header:opacity-100">
           <ChevronDown
+            weight="regular"
             className={cn('size-3.5 transition-transform', row.collapsed && '-rotate-90')}
           />
         </div>
@@ -891,7 +892,7 @@ function FolderPathStatusIndicator({
         render={
           <span
             className={cn(
-              'inline-flex size-4 shrink-0 items-center justify-center rounded-[4px]',
+              'inline-flex size-4 shrink-0 items-center justify-center',
               destructive ? 'text-destructive' : 'text-muted-foreground'
             )}
             aria-label={title}
@@ -4342,13 +4343,12 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       isDraggableRepoHeader || isDraggableProjectGroupHeader
                         ? 'cursor-grab active:cursor-grabbing'
                         : 'cursor-pointer',
-                      highlightedRevealRowKey === row.key && 'rounded-md bg-sidebar-accent    ',
-                      (isDraggingThis || isDraggingThisProjectGroup) &&
-                        'bg-accent/80       rounded-md scale-[1.01]',
+                      highlightedRevealRowKey === row.key && 'bg-sidebar-accent',
+                      (isDraggingThis || isDraggingThisProjectGroup) && 'bg-accent/80 scale-[1.01]',
                       headerWorkspaceStatus &&
                         dragOverStatus === headerWorkspaceStatus &&
-                        'rounded-md bg-sidebar-accent    ',
-                      isPinnedHeader && pinDragOver && 'rounded-md bg-sidebar-accent    ',
+                        'bg-sidebar-accent',
+                      isPinnedHeader && pinDragOver && 'bg-sidebar-accent',
                       row.repo && 'overflow-hidden'
                     )}
                     icon={
@@ -4427,6 +4427,8 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                     }}
                   >
                     <ProjectHeaderActions>
+                      {/* Why: only visible project-header actions use regular weight;
+                          portalled menu content keeps the renderer's duotone default. */}
                       {showHeaderCollapseAffordance ? (
                         <SidebarDisclosure
                           expanded={!isHeaderCollapsed}
@@ -4460,7 +4462,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                 onKeyDown={stopRepoHeaderKeyboardToggle}
                                 onPointerDown={handleRepoHeaderActionPointerDown}
                               >
-                                <Ellipsis className="size-3.5" />
+                                <Ellipsis className="size-3.5" weight="regular" />
                               </Button>
                             }
                           />
@@ -4548,7 +4550,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                   }
                                 }}
                               >
-                                <Plus className="size-3" />
+                                <Plus className="size-3" weight="regular" />
                               </Button>
                             }
                           />
@@ -4586,7 +4588,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                       onKeyDown={stopRepoHeaderKeyboardToggle}
                                       onPointerDown={handleRepoHeaderActionPointerDown}
                                     >
-                                      <Ellipsis className="size-3.5" />
+                                      <Ellipsis className="size-3.5" weight="regular" />
                                     </Button>
                                   }
                                 />
@@ -4781,11 +4783,11 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                     type="button"
                                     variant="ghost"
                                     size="icon-xs"
-                                    className="text-muted-foreground pointer-events-none size-5 shrink-0 rounded-md opacity-60 transition-opacity"
+                                    className="text-muted-foreground pointer-events-none size-5 shrink-0 opacity-60 transition-opacity"
                                     aria-label={createState.ariaLabel}
                                     disabled
                                   >
-                                    <Plus className="size-3" />
+                                    <Plus className="size-3" weight="regular" />
                                   </Button>
                                 </span>
                               ) : (
@@ -4812,7 +4814,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                     }
                                   }}
                                 >
-                                  <Plus className="size-3" />
+                                  <Plus className="size-3" weight="regular" />
                                 </Button>
                               )
                             }
@@ -6821,13 +6823,15 @@ const WorktreeList = React.memo(function WorktreeList({
               {translate('auto.components.sidebar.WorktreeList.b7acbf038b', 'No workspaces found')}
             </span>
             {hasFilters && (
-              <button
+              <Button
+                variant="secondary"
+                size="xs"
                 onClick={clearFilters}
-                className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors outline-none"
+                className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent h-auto gap-1.5 border px-2.5 py-1 text-[11px]"
               >
                 <CircleX className="size-3.5" />
                 {translate('auto.components.sidebar.WorktreeList.370c6a55dd', 'Clear Filters')}
-              </button>
+              </Button>
             )}
           </div>
         </div>

@@ -69,7 +69,7 @@ export function GitHubUserAttachmentVideo({
       controls
       preload="metadata"
       playsInline
-      className="my-3 max-h-[28rem] max-w-full rounded-md bg-black/80 outline-none"
+      className="bg-muted my-3 max-h-[28rem] max-w-full outline-none"
       onClick={(e) => e.stopPropagation()}
       onError={() => setFailed(true)}
     >
@@ -113,7 +113,7 @@ export function GitHubUserAttachmentImage({
       <img
         src={src}
         alt={alt ?? ''}
-        className="my-3 max-h-96 max-w-full rounded-md object-contain"
+        className="my-3 max-h-96 max-w-full object-contain"
         onError={() => setFailed(true)}
       />
     </a>

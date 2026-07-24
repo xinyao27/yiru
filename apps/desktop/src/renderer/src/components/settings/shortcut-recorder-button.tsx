@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import {
@@ -190,7 +191,9 @@ export function ShortcutRecorderButton({
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             ref={recordButtonRef}
             type="button"
             aria-label={recorderLabel}
@@ -205,10 +208,10 @@ export function ShortcutRecorderButton({
             onKeyDown={handleRecordKeyDown}
             onKeyUp={handleRecordKeyUp}
             className={cn(
-              'flex min-h-7 min-w-[5.5rem] max-w-[14rem] items-center justify-end gap-1.5 overflow-hidden rounded-md border px-2 py-1 text-xs outline-none transition-colors',
+              'h-auto flex min-h-7 min-w-[5.5rem] max-w-[14rem] justify-end gap-1.5 overflow-hidden border py-1 transition-colors',
               recording
                 ? 'border-ring bg-accent text-accent-foreground'
-                : 'border-transparent hover:border-border/70 hover:bg-background'
+                : 'hover:border-border/70 hover:bg-background'
             )}
           >
             {recording || binding === null ? (
@@ -226,7 +229,7 @@ export function ShortcutRecorderButton({
                 />
               </span>
             )}
-          </button>
+          </Button>
         }
       />
       <TooltipContent side="top" sideOffset={4}>

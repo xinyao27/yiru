@@ -160,13 +160,13 @@ export function KeybindingsFileActions(): React.JSX.Element {
   return (
     <div
       ref={setActionsRootNode}
-      className="border-border bg-background inline-flex shrink-0 overflow-hidden rounded-md border"
+      className="border-border bg-background inline-flex shrink-0 overflow-hidden border"
     >
       <Button
         type="button"
         variant="ghost"
         size="xs"
-        className="rounded-none border-0"
+        className="border-0"
         onClick={() => void editKeybindingsInYiru()}
       >
         <FileText className="size-3" />
@@ -182,19 +182,19 @@ export function KeybindingsFileActions(): React.JSX.Element {
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="border-border rounded-none border-l"
+              className="border-border border-l"
               aria-label={translate(
                 'auto.components.settings.KeybindingsFileActions.400397a10d',
                 'Open keybindings file menu'
               )}
             >
-              <ChevronDown className="size-3" />
+              <ChevronDown weight="regular" className="size-3" />
             </Button>
           }
         />
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => void openKeybindingsFile()}>
-            <ExternalLink className="size-3.5" />
+            <ExternalLink weight="regular" className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.98f1a23e1c',
               'Open with Default App'
@@ -223,7 +223,7 @@ export function KeybindingsFileActions(): React.JSX.Element {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => void reloadKeybindings()}>
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.abc49853fb',
               'Reload from Disk'

@@ -12,6 +12,7 @@ import {
 import { useEffect } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
 
 import type { ClaudeUsageRange, ClaudeUsageScope } from '../../../../shared/claude-usage-types'
@@ -90,7 +91,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
 
   if (!scanState?.enabled) {
     return (
-      <div className="border-border/60 bg-card/40 rounded-lg border p-4">
+      <div className="border-border/60 bg-card/40 border p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <h3 className="text-foreground text-sm font-semibold">
@@ -106,19 +107,14 @@ export function ClaudeUsagePane(): React.JSX.Element {
               )}
             </p>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={false}
+          <Switch
+            checked={false}
             aria-label={translate(
               'auto.components.stats.ClaudeUsagePane.424cd50412',
               'Enable Claude usage analytics'
             )}
-            onClick={() => handleSetEnabled(true)}
-            className="bg-muted-foreground/30 focus-visible:border-ring relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors outline-none"
-          >
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-0.5 rounded-full transition-transform" />
-          </button>
+            onCheckedChange={(checked) => handleSetEnabled(checked)}
+          />
         </div>
       </div>
     )
@@ -131,7 +127,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
   const hasAnyData = summary?.hasAnyClaudeData ?? scanState.hasAnyClaudeData
 
   return (
-    <div className="border-border/60 bg-card/30 space-y-4 rounded-lg border p-4">
+    <div className="border-border/60 bg-card/30 space-y-4 border p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h3 className="text-foreground text-sm font-semibold">
@@ -225,7 +221,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
                     {scanState.isScanning ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <RefreshCw className="size-3.5" />
+                      <RefreshCw weight="regular" className="size-3.5" />
                     )}
                   </Button>
                 }
@@ -235,19 +231,14 @@ export function ClaudeUsagePane(): React.JSX.Element {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={true}
+          <Switch
+            checked={true}
             aria-label={translate(
               'auto.components.stats.ClaudeUsagePane.424cd50412',
               'Enable Claude usage analytics'
             )}
-            onClick={() => handleSetEnabled(false)}
-            className="bg-foreground focus-visible:border-ring relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors outline-none"
-          >
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full transition-transform" />
-          </button>
+            onCheckedChange={(checked) => handleSetEnabled(checked)}
+          />
         </div>
       </div>
 
@@ -258,7 +249,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
       </div>
 
       {!hasAnyData ? (
-        <div className="border-border/60 bg-card/30 text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-sm">
+        <div className="border-border/60 bg-card/30 text-muted-foreground border border-dashed px-4 py-6 text-sm">
           {translate(
             'auto.components.stats.ClaudeUsagePane.7dde9331fd',
             'No local Claude usage found yet for this scope.'

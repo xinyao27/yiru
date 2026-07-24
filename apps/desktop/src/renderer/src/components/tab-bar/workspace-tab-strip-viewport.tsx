@@ -111,10 +111,10 @@ function TabStripScrollButton({
       <TooltipTrigger
         render={
           <Button
-            variant="outline"
+            variant="quiet"
             size="icon-xs"
             className={cn(
-              'text-muted-foreground hover:text-foreground h-full w-8 border-b-0 disabled:opacity-35',
+              ' h-full w-8 border-b-0 disabled:opacity-35',
               isStart ? 'mr-[-1px]' : '-ml-px'
             )}
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -125,7 +125,7 @@ function TabStripScrollButton({
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
           >
-            <Icon className="size-3.5" />
+            <Icon className="size-3.5" weight="regular" />
           </Button>
         }
       />

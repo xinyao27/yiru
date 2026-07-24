@@ -2,6 +2,7 @@ import { Warning as AlertTriangle, X } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import {
@@ -37,13 +38,13 @@ export function PendingWorktreeRow({
   return (
     <div
       className={cn(
-        'group flex w-full items-center gap-1 rounded-md transition-colors',
-        active
-          ? 'border border-sidebar-ring/35 bg-sidebar-accent/70'
-          : 'border border-transparent hover:bg-sidebar-accent/60'
+        'group flex w-full items-center gap-1 transition-colors',
+        active ? 'border-ring/35 bg-accent border' : 'border border-transparent hover:bg-accent'
       )}
     >
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
         // Why: never route this through setActiveWorktree — there is no real
         // worktree yet. activePendingCreationId drives the content loader instead.
@@ -53,7 +54,7 @@ export function PendingWorktreeRow({
           store.updatePendingWorktreeCreation(creationId, { loaderVisible: true })
           store.setActiveView('terminal')
         }}
-        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left outline-none"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 justify-start gap-2 border-0 px-2 py-1.5 text-left font-normal whitespace-normal"
       >
         <span className="flex size-4 shrink-0 items-center justify-center">
           {isError ? (
@@ -75,8 +76,10 @@ export function PendingWorktreeRow({
             {statusLabel(entry)}
           </span>
         </span>
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="quiet"
+        size="icon-xs"
         type="button"
         title={translate('auto.components.sidebar.PendingWorktreeRow.188f6922a0', 'Cancel')}
         aria-label={translate(
@@ -85,13 +88,13 @@ export function PendingWorktreeRow({
         )}
         onClick={() => useAppStore.getState().removePendingWorktreeCreation(creationId)}
         className={cn(
-          'outline-none focus-visible:bg-sidebar-accent focus-visible:text-foreground',
-          'mr-1 flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground transition-opacity hover:bg-sidebar-accent hover:text-foreground focus-visible:opacity-100',
+          ' ',
+          'mr-1 flex size-5 transition-opacity focus-visible:opacity-100',
           isError ? 'opacity-100' : 'can-hover:opacity-0 group-hover:opacity-100'
         )}
       >
-        <X className="size-3.5" />
-      </button>
+        <X weight="regular" className="size-3.5" />
+      </Button>
     </div>
   )
 }

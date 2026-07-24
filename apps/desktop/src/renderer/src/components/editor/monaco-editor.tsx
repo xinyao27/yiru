@@ -8,6 +8,7 @@ handling, and editor-local UI overlays so split-pane state remains coherent. */
 import React, { useRef, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { isMarkdownComment } from '@/lib/diff-comment-compat'
 import { resolveEditorFontFamily } from '@/lib/editor-font-family'
@@ -877,9 +878,11 @@ export default function MonacoEditor({
         />
       )}
       {selectionAnnotationTarget && shouldShowMarkdownAnnotations && !commentPopover ? (
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className="yiru-diff-comment-add-btn focus-visible:bg-accent outline-none"
+          className="yiru-diff-comment-add-btn focus-visible:bg-accent h-auto border-0 p-0"
           style={{
             display: 'flex',
             top: Math.max(4, selectionAnnotationTarget.top - 22),
@@ -905,7 +908,7 @@ export default function MonacoEditor({
           }}
         >
           <Plus className="size-3" />
-        </button>
+        </Button>
       ) : null}
       <Editor
         height={renderedEditorHeight === null ? '100%' : `${renderedEditorHeight}px`}

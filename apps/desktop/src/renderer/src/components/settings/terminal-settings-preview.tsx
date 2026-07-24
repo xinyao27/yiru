@@ -3,9 +3,11 @@ import { LigaturesAddon } from '@xterm/addon-ligatures'
 import { Terminal } from '@xterm/xterm'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import '@xterm/xterm/css/xterm.css'
 import { buildFontFamily } from '@/components/terminal-pane/layout-serialization'
+
+import '@xterm/xterm/css/xterm.css'
 import { composeActiveTerminalTheme } from '@/components/terminal-pane/terminal-appearance'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -287,7 +289,7 @@ export function TerminalSettingsPreview({
             {description ? <CardDescription>{description}</CardDescription> : null}
           </div>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-            <div className="border-border/50 bg-background/40 flex items-center gap-2 rounded-md border px-2 py-1">
+            <div className="border-border/50 bg-background/40 flex items-center gap-2 border px-2 py-1">
               <span className="text-muted-foreground text-xs font-medium">
                 {translate(
                   'auto.components.settings.TerminalSettingsPreview.50419052fe',
@@ -305,7 +307,7 @@ export function TerminalSettingsPreview({
             </div>
             {showToggle ? (
               <div
-                className="border-border/50 flex gap-0.5 rounded-md border p-0.5"
+                className="border-border/50 flex gap-0.5 border p-0.5"
                 role="group"
                 aria-label={translate(
                   'auto.components.settings.TerminalSettingsPreview.2c248fcc27',
@@ -313,7 +315,9 @@ export function TerminalSettingsPreview({
                 )}
               >
                 {(['dark', 'light'] as const).map((mode) => (
-                  <button
+                  <Button
+                    variant="quiet"
+                    size="xs"
                     key={mode}
                     type="button"
                     onClick={() => setTogglePreviewMode(mode)}
@@ -329,15 +333,13 @@ export function TerminalSettingsPreview({
                       { value0: mode }
                     )}
                     className={cn(
-                      'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                      'rounded-sm p-1 transition-colors',
-                      togglePreviewMode === mode
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                      'h-auto border-0 ',
+                      'p-1 ',
+                      togglePreviewMode === mode ? 'bg-accent text-accent-foreground' : ' '
                     )}
                   >
                     {mode === 'dark' ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
-                  </button>
+                  </Button>
                 ))}
               </div>
             ) : null}
@@ -348,7 +350,7 @@ export function TerminalSettingsPreview({
         {/* Why: flex layout with xterm on the left and a stub pane on the
             right keeps inactive-pane opacity visible. The divider stays
             preview-only and opt-in so the default preview remains clean. */}
-        <div className="border-border/50 flex h-[300px] flex-col overflow-hidden rounded-md border">
+        <div className="border-border/50 flex h-[300px] flex-col overflow-hidden border">
           <div className="flex min-h-0 flex-1 overflow-hidden" aria-hidden="true">
             <div
               ref={containerRef}

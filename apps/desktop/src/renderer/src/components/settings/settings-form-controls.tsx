@@ -6,6 +6,8 @@ panel wiring simple even though the file exceeds the default line limit. */
 import type React from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { normalizeColor, type TerminalThemeOption } from '@/lib/terminal-theme'
@@ -148,14 +150,16 @@ export function SettingsSegmentedControl<T extends string | number>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex items-center rounded-md border border-border bg-background/50 p-0.5',
+        'inline-flex items-center border border-border bg-background/50 p-0.5',
         equalWidth && 'w-full'
       )}
     >
       {options.map((opt) => {
         const active = opt.value === value
         return (
-          <button
+          <Button
+            variant="quiet"
+            size={size === 'sm' ? 'xs' : 'sm'}
             key={String(opt.value)}
             type="button"
             role="radio"
@@ -168,18 +172,18 @@ export function SettingsSegmentedControl<T extends string | number>({
               }
             }}
             className={cn(
-              'rounded-sm text-center outline-none transition-colors',
-              size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm',
+              'h-auto gap-0 border-0 text-center',
+              size === 'sm' ? 'px-2.5 py-0.5' : 'py-1',
               equalWidth && 'flex-1',
               active
-                ? 'bg-accent font-medium text-accent-foreground'
+                ? 'bg-accent text-accent-foreground'
                 : opt.disabled
-                  ? 'cursor-not-allowed text-muted-foreground/50'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'cursor-not-allowed opacity-50'
+                  : undefined
             )}
           >
             {opt.label}
-          </button>
+          </Button>
         )
       })}
     </div>
@@ -199,9 +203,11 @@ export function SettingsBadge({
   className
 }: SettingsBadgeProps): React.JSX.Element {
   return (
-    <span
+    <Badge
+      size="xs"
+      variant="outline"
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium',
+        'h-auto py-0.5 text-[10px]',
         tone === 'accent'
           ? 'border-foreground/20 bg-foreground/10 text-foreground'
           : tone === 'muted'
@@ -211,7 +217,7 @@ export function SettingsBadge({
       )}
     >
       {children}
-    </span>
+    </Badge>
   )
 }
 
@@ -348,7 +354,7 @@ export function ThemePicker({
           'Search terminal themes'
         )}
       />
-      <div className="border-border/50 rounded-lg border">
+      <div className="border-border/50 border">
         <div className="border-border/50 text-muted-foreground flex items-center justify-between border-b px-3 py-2 text-xs">
           <span>
             {translate('auto.components.settings.SettingsFormControls.fbb428db98', 'Selected:')}{' '}
@@ -384,7 +390,7 @@ export function ThemePicker({
                   key={group.label}
                   ref={isImported ? importedGroupRef : undefined}
                   className={cn(
-                    'space-y-1 rounded-md transition-colors duration-500',
+                    'space-y-1 transition-colors duration-500',
                     isImported && highlightImported && 'bg-accent/40    '
                   )}
                 >
@@ -392,15 +398,15 @@ export function ThemePicker({
                     {group.label}
                   </p>
                   {group.themes.map((theme) => (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="default"
                       key={theme.value}
                       onClick={() => onSelectTheme(theme.value)}
                       className={cn(
-                        'outline-none focus-visible:bg-accent',
-                        'flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors',
-                        selectedTheme === theme.value
-                          ? 'bg-accent font-medium text-accent-foreground'
-                          : 'hover:bg-accent'
+                        'border-0 whitespace-normal text-sm focus-visible:bg-accent',
+                        'flex w-full justify-between gap-3 px-3 text-left transition-colors',
+                        selectedTheme === theme.value ? 'bg-accent text-accent-foreground' : ''
                       )}
                     >
                       <span className="min-w-0 flex-1">
@@ -421,7 +427,7 @@ export function ThemePicker({
                       {theme.group === 'imported' &&
                       theme.previewTheme &&
                       selectedTheme !== theme.value ? (
-                        <span className="border-border/60 flex shrink-0 overflow-hidden rounded-sm border">
+                        <span className="border-border/60 flex shrink-0 overflow-hidden border">
                           {[
                             theme.previewTheme.black,
                             theme.previewTheme.red,
@@ -448,7 +454,7 @@ export function ThemePicker({
                           )}
                         </span>
                       ) : null}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )
@@ -483,11 +489,13 @@ export function ColorField({
       description={description}
       control={
         <div className="flex items-center gap-2">
-          <input
+          <Input
             type="color"
             value={normalized}
             onChange={(e) => onChange(e.target.value)}
-            className="border-input focus-visible:border-ring h-8 w-10 rounded-md border bg-transparent p-1 outline-none"
+            variant="color"
+            size="sm"
+            className="w-10"
           />
           <Input
             value={value}
@@ -784,7 +792,9 @@ export function FontAutocomplete({
               />
               <div className="absolute inset-y-0 right-2 flex items-center gap-1">
                 {query ? (
-                  <button
+                  <Button
+                    variant="quiet"
+                    size="xs"
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
@@ -794,7 +804,7 @@ export function FontAutocomplete({
                       setOpen(true)
                       focusInput()
                     }}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground rounded-sm p-1 transition-colors outline-none"
+                    className="hover:bg-muted focus-visible:bg-muted h-auto border-0 p-1"
                     aria-label={translate(
                       'auto.components.settings.SettingsFormControls.a4ff6143f8',
                       'Clear font selection'
@@ -805,9 +815,11 @@ export function FontAutocomplete({
                     )}
                   >
                     <CircleX className="size-3.5" />
-                  </button>
+                  </Button>
                 ) : null}
-                <button
+                <Button
+                  variant="quiet"
+                  size="xs"
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
@@ -821,7 +833,7 @@ export function FontAutocomplete({
                       focusInput()
                     }
                   }}
-                  className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground rounded-sm p-1 transition-colors outline-none"
+                  className="hover:bg-muted focus-visible:bg-muted h-auto border-0 p-1"
                   aria-label={translate(
                     'auto.components.settings.SettingsFormControls.c766f8ac75',
                     'Toggle font suggestions'
@@ -831,8 +843,8 @@ export function FontAutocomplete({
                     'Fonts'
                   )}
                 >
-                  <ChevronsUpDown className="size-3.5" />
-                </button>
+                  <ChevronsUpDown weight="regular" className="size-3.5" />
+                </Button>
               </div>
             </div>
           }
@@ -855,7 +867,9 @@ export function FontAutocomplete({
             <div id={listboxId} role="listbox" className="p-1">
               {visibleSuggestions.length > 0 ? (
                 renderedSuggestions.map(({ font, sourceIndex }) => (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="default"
                     key={font}
                     type="button"
                     id={`${listboxId}-option-${sourceIndex}`}
@@ -870,8 +884,8 @@ export function FontAutocomplete({
                     onMouseEnter={() => setHighlightedIndex(sourceIndex)}
                     onClick={() => commitValue(font)}
                     className={cn(
-                      'outline-none focus-visible:bg-muted/60',
-                      'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors',
+                      'border-0 gap-0 whitespace-normal font-normal text-sm focus-visible:bg-muted/60',
+                      'flex w-full justify-between px-3 text-left transition-colors',
                       sourceIndex === highlightedIndex
                         ? 'bg-accent text-accent-foreground'
                         : 'hover:bg-muted/60'
@@ -879,7 +893,7 @@ export function FontAutocomplete({
                   >
                     <span className="truncate">{font}</span>
                     {font === value ? <Check className="ml-3 size-4 shrink-0" /> : null}
-                  </button>
+                  </Button>
                 ))
               ) : (
                 <div className="text-muted-foreground px-3 py-3 text-sm">

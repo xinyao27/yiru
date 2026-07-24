@@ -53,9 +53,9 @@ import type { OpenFile } from '../../store/slices/editor'
 import { MobileEmulatorTabIntroCallout } from '../emulator-pane/mobile-emulator-tab-intro-callout'
 import { shouldShowMobileEmulatorTabIntro } from '../emulator-pane/mobile-emulator-tab-intro-visibility'
 import { canToggleNativeChat } from '../native-chat/native-chat-availability'
-import { buildStatusMap } from '../right-sidebar/status-display'
 import { resolveTabIndicatorEdges } from '../tab-group/tab-insertion'
 import type { HoveredTabInsertion, TabDragItemData } from '../tab-group/use-tab-drag-split'
+import { buildStatusMap } from '../workspace-panel/status-display'
 import BrowserTab, { getBrowserTabLabel } from './browser-tab'
 import type { DropIndicator } from './drop-indicator'
 import EditorFileTab from './editor-file-tab'
@@ -715,7 +715,7 @@ function TabBarInner({
                 )
               )
             }}
-            className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+            className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
           >
             <ShellIcon shell={entry.shell} size={14} />
             <span className="flex-1">
@@ -738,7 +738,7 @@ function TabBarInner({
   const newBrowserMenuItem = !terminalOnly ? (
     <DropdownMenuItem
       onClick={onNewBrowserTab}
-      className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+      className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
     >
       <Globe className="text-muted-foreground size-4" />
       {translate('auto.components.tab.bar.TabBar.4833fb2cbe', 'New Browser Tab')}
@@ -753,7 +753,7 @@ function TabBarInner({
             render={
               <DropdownMenuItem
                 onClick={onNewSimulatorTab}
-                className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+                className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
               >
                 <Smartphone className="text-muted-foreground size-4" />
                 {translate('auto.components.tab.bar.TabBar.b426bb2615', 'Go to Mobile Emulator')}
@@ -771,7 +771,7 @@ function TabBarInner({
       ) : (
         <DropdownMenuItem
           onClick={onNewSimulatorTab}
-          className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+          className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
         >
           <Smartphone className="text-muted-foreground size-4" />
           {translate('auto.components.tab.bar.TabBar.fd2b42aaa3', 'New Mobile Emulator')}
@@ -783,7 +783,7 @@ function TabBarInner({
     !terminalOnly && onNewFileTab ? (
       <DropdownMenuItem
         onClick={onNewFileTab}
-        className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+        className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <FilePlus className="text-muted-foreground size-4" />
         {translate('auto.components.tab.bar.TabBar.3d5d6c960d', 'New Markdown')}
@@ -794,7 +794,7 @@ function TabBarInner({
     !terminalOnly && onOpenFileTab ? (
       <DropdownMenuItem
         onClick={onOpenFileTab}
-        className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+        className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <FileText className="text-muted-foreground size-4" />
         {translate('auto.components.tab.bar.TabBar.4f327c8b3d', 'Open Markdown...')}

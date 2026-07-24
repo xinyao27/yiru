@@ -19,6 +19,7 @@ export type PersistedTerminalSettingsDecodeResult = {
 }
 
 const LEGACY_TERMINAL_TUI_SCROLL_SENSITIVITY_DEFAULT = 3
+const LEGACY_TERMINAL_DIVIDER_THICKNESS_DEFAULT = 3
 
 function decodeScrollbackRows(settings: LegacyTerminalSettings): {
   rows: number
@@ -51,6 +52,22 @@ function decodeTuiScrollSensitivity(settings: LegacyTerminalSettings): {
   }
 }
 
+function decodeDividerThickness(
+  settings: LegacyTerminalSettings,
+  defaults: GlobalSettings
+): { value: number; needsSave: boolean } {
+  const migrated = settings.terminalDividerThicknessDefaultedToHairline === true
+  const current = settings.terminalDividerThicknessPx
+  return {
+    // Why: migrate the old 3px default while preserving non-default custom widths.
+    value:
+      !migrated && (current === undefined || current === LEGACY_TERMINAL_DIVIDER_THICKNESS_DEFAULT)
+        ? defaults.terminalDividerThicknessPx
+        : (current ?? defaults.terminalDividerThicknessPx),
+    needsSave: !migrated || current === undefined
+  }
+}
+
 export function decodePersistedTerminalSettings(
   value: Partial<GlobalSettings> | undefined,
   defaults: GlobalSettings,
@@ -62,6 +79,7 @@ export function decodePersistedTerminalSettings(
   const rightClickDefaulted = settings.terminalRightClickToPasteDefaultedForPlatform === true
   const scrollback = decodeScrollbackRows(settings)
   const tuiScrollSensitivity = decodeTuiScrollSensitivity(settings)
+  const dividerThickness = decodeDividerThickness(settings, defaults)
   const terminalLineHeight = normalizeTerminalLineHeight(settings.terminalLineHeight)
   const primarySelectionDefaultedForLinux =
     settings.primarySelectionMiddleClickPasteDefaultedForLinux === true
@@ -87,6 +105,8 @@ export function decodePersistedTerminalSettings(
       terminalRightClickToPasteDefaultedForPlatform: true,
       terminalTuiScrollSensitivity: tuiScrollSensitivity.value,
       terminalTuiScrollSensitivityDefaultedToOne: true,
+      terminalDividerThicknessPx: dividerThickness.value,
+      terminalDividerThicknessDefaultedToHairline: true,
       terminalMacOptionAsAlt: optionAsAltMigrated
         ? (settings.terminalMacOptionAsAlt ?? 'auto')
         : settings.terminalMacOptionAsAlt === undefined ||
@@ -123,6 +143,7 @@ export function decodePersistedTerminalSettings(
       !rightClickDefaulted ||
       scrollback.needsSave ||
       tuiScrollSensitivity.needsSave ||
+      dividerThickness.needsSave ||
       (settings.terminalLineHeight !== undefined &&
         settings.terminalLineHeight !== terminalLineHeight) ||
       migratePrimarySelection ||

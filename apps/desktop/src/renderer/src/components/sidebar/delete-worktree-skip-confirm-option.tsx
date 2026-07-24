@@ -1,6 +1,7 @@
 import { Check } from '@phosphor-icons/react'
 import type { JSX } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -18,16 +19,18 @@ export function DeleteWorktreeSkipConfirmOption({
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
       role="checkbox"
       aria-checked={dontAskAgain}
       onClick={onToggleDontAskAgain}
-      className="text-foreground/80 hover:text-foreground flex items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors focus-visible:outline-none"
+      className="text-foreground/80 hover:text-foreground flex h-auto gap-2 border-0 px-1 py-1 transition-colors"
     >
       <span
         className={cn(
-          'flex size-4 items-center justify-center rounded-sm border transition-colors',
+          'flex size-4 items-center justify-center border transition-colors',
           dontAskAgain
             ? 'border-foreground bg-foreground text-background'
             : 'border-muted-foreground bg-transparent'
@@ -39,6 +42,6 @@ export function DeleteWorktreeSkipConfirmOption({
         'auto.components.sidebar.DeleteWorktreeSkipConfirmOption.29aefb7e52',
         "Don't ask again"
       )}
-    </button>
+    </Button>
   )
 }

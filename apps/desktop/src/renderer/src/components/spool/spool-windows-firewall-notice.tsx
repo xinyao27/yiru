@@ -68,7 +68,7 @@ export function SpoolWindowsFirewallNotice(): React.JSX.Element {
   const ruleAvailable = status?.supported && status.ruleAllowed
   return (
     <div className="px-1 pb-2">
-      <div className="border-border bg-muted/40 rounded-lg border p-2.5">
+      <div className="border-border bg-muted/40 border p-2.5">
         <div className="flex items-start gap-2">
           <CircleAlert className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
           <div className="min-w-0 flex-1">

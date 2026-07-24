@@ -31,7 +31,7 @@ export function CodexUsageDailyChart({ daily }: CodexUsageDailyChartProps): Reac
   const maxDailyTotal = getMaxDailyTotal(daily)
 
   return (
-    <section className="border-border/60 bg-card/40 rounded-lg border p-4">
+    <section className="border-border/60 bg-card/40 border p-4">
       <div className="mb-3">
         <h4 className="text-foreground text-sm font-semibold">
           {translate('auto.components.stats.CodexUsageDailyChart.609aa96e8b', 'Daily usage')}
@@ -83,7 +83,7 @@ export function CodexUsageDailyChart({ daily }: CodexUsageDailyChartProps): Reac
                 {formatTokens(entry.totalTokens)}
               </span>
               <div className="flex min-h-0 flex-1 items-end justify-center">
-                <div className="bg-muted/60 flex h-full w-full max-w-12 overflow-hidden rounded-t-sm">
+                <div className="bg-muted/60 flex h-full w-full max-w-12 overflow-hidden">
                   <div className="flex h-full w-full flex-col justify-end">
                     {segments.map((segment) =>
                       segment.value > 0 ? (
@@ -125,19 +125,19 @@ export function CodexUsageDailyChart({ daily }: CodexUsageDailyChartProps): Reac
       </div>
       <div className="text-muted-foreground mt-3 flex flex-wrap gap-4 text-xs">
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-sky-500/80" />
+          <span className="size-2 bg-sky-500/80" />
           {translate('auto.components.stats.CodexUsageDailyChart.99a91d3143', 'Input')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-500/80" />
+          <span className="size-2 bg-emerald-500/80" />
           {translate('auto.components.stats.CodexUsageDailyChart.7b596a88b2', 'Output')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-amber-500/70" />
+          <span className="size-2 bg-amber-500/70" />
           {translate('auto.components.stats.CodexUsageDailyChart.c646e1783c', 'Cached input')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-fuchsia-500/70" />
+          <span className="size-2 bg-fuchsia-500/70" />
           {translate('auto.components.stats.CodexUsageDailyChart.1e6f62d7e3', 'Reasoning')}
         </span>
       </div>

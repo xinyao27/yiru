@@ -20,7 +20,6 @@ export function ScrollToCurrentWorkspaceToolbarButton(): React.JSX.Element {
               'Reveal active workspace'
             )}
             onClick={requestScrollToCurrentWorkspaceReveal}
-            className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
           >
             <Crosshair className="size-3.5" />
           </Button>

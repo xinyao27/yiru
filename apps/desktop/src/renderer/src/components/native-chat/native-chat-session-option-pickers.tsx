@@ -95,7 +95,7 @@ function PickerTrigger(props: {
                 className="text-muted-foreground max-w-48"
               >
                 <span className="truncate">{props.label}</span>
-                <ChevronDown className="size-3" />
+                <ChevronDown weight="regular" className="size-3" />
               </Button>
             }
           />

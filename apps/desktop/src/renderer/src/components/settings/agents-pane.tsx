@@ -305,13 +305,13 @@ function AgentCommandOverrideInput({
         {cmdOverride && (
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
             onClick={() => {
               onSaveOverride('')
               setCmdDraft(defaultCmd)
             }}
-            className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+            className="h-7 shrink-0 text-xs"
           >
             {translate('auto.components.settings.AgentsPane.5200dac9da', 'Reset')}
           </Button>
@@ -363,13 +363,13 @@ function AgentDefaultArgsInput({
         {argsOverride !== defaultArgs && (
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
             onClick={() => {
               onSaveArgs(defaultArgs)
               setArgsDraft(defaultArgs)
             }}
-            className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+            className="h-7 shrink-0 text-xs"
           >
             {translate('auto.components.settings.AgentsPane.5200dac9da', 'Reset')}
           </Button>
@@ -440,14 +440,14 @@ function AgentDefaultEnvInput({
         {draftSeed !== defaultEnvText && (
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
             onClick={() => {
               onSaveEnv(defaultEnv)
               setEnvDraft(defaultEnvText)
               setEnvDraftTooLarge(false)
             }}
-            className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+            className="h-7 shrink-0 text-xs"
           >
             {translate('auto.components.settings.AgentsPane.5200dac9da', 'Reset')}
           </Button>
@@ -494,7 +494,7 @@ function AgentRow({
   return (
     <div className={cn('py-3', !isDetected && 'opacity-70')}>
       <div className="flex flex-wrap items-start gap-3">
-        <div className="border-border/50 bg-background/50 flex size-7 shrink-0 items-center justify-center rounded-md border">
+        <div className="border-border/50 bg-background/50 flex size-7 shrink-0 items-center justify-center border">
           <AgentIcon agent={agentId} size={16} />
         </div>
 
@@ -559,16 +559,16 @@ function AgentRow({
                 ? translate('auto.components.settings.AgentsPane.fe4d630c94', 'Docs')
                 : translate('auto.components.settings.AgentsPane.f95b5c79b8', 'Install')
             }
-            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:bg-muted/50 focus-visible:text-foreground flex size-7 items-center justify-center rounded-md transition-colors outline-none"
+            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:bg-muted/50 focus-visible:text-foreground flex size-7 items-center justify-center transition-colors outline-none"
           >
-            <ExternalLink className="size-3.5" />
+            <ExternalLink weight="regular" className="size-3.5" />
           </a>
 
           <div className="flex size-7 items-center justify-center">
             {isDetected && (
               <Button
                 type="button"
-                variant="ghost"
+                variant="quiet"
                 size="icon-sm"
                 onClick={() => setCmdOpen((prev) => !prev)}
                 aria-label={
@@ -582,9 +582,10 @@ function AgentRow({
                         'Expand command override'
                       )
                 }
-                className="text-muted-foreground hover:text-foreground size-7"
+                className="size-7"
               >
                 <ChevronDown
+                  weight="regular"
                   className={cn('size-3.5 transition-transform', cmdOpen && 'rotate-180')}
                 />
               </Button>
@@ -650,19 +651,21 @@ type DefaultAgentPillProps = {
 
 function DefaultAgentPill({ active, onClick, children }: DefaultAgentPillProps): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="quiet"
+      size="sm"
       type="button"
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors focus-visible:border-ring',
+        'text-sm gap-2 py-1.5 ',
         active
-          ? 'border-muted-foreground/40 bg-accent font-medium text-accent-foreground'
-          : 'border-border bg-background/50 text-muted-foreground hover:border-muted-foreground/35 hover:text-foreground'
+          ? 'border-muted-foreground/40 bg-accent text-accent-foreground'
+          : 'bg-background/50 hover:border-muted-foreground/35 '
       )}
     >
       {children}
-    </button>
+    </Button>
   )
 }
 
@@ -849,7 +852,7 @@ export function AgentsPane({
             action={
               <Button
                 type="button"
-                variant="ghost"
+                variant="quiet"
                 size="xs"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
@@ -857,12 +860,12 @@ export function AgentsPane({
                   'auto.components.settings.AgentsPane.13647f9f80',
                   'Re-read your shell PATH and re-detect installed agents'
                 )}
-                className="text-muted-foreground hover:text-foreground h-7 gap-1.5 text-xs"
+                className="h-7 gap-1.5 text-xs"
               >
                 {isRefreshing ? (
                   <LoadingIndicator className="size-3" />
                 ) : (
-                  <RefreshCw className="size-3" />
+                  <RefreshCw weight="regular" className="size-3" />
                 )}
                 {isRefreshing
                   ? translate('auto.components.settings.AgentsPane.c9b33eb5c0', 'Refreshing…')
@@ -948,7 +951,7 @@ export function AgentsPane({
       )}
 
       {detectedIds === null && (
-        <div className="border-border/50 text-muted-foreground flex items-center justify-center rounded-md border border-dashed py-6 text-sm">
+        <div className="border-border/50 text-muted-foreground flex items-center justify-center border border-dashed py-6 text-sm">
           {translate(
             'auto.components.settings.AgentsPane.d83834f5e6',
             'Detecting installed agents…'

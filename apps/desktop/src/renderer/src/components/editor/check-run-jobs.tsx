@@ -7,7 +7,8 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CheckJobLogTail } from '@/components/right-sidebar/check-job-log-tail'
+import { Button } from '@/components/ui/button'
+import { CheckJobLogTail } from '@/components/workspace-panel/check-job-log-tail'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -98,7 +99,7 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
           {job.name}
         </span>
         {breakdown.failed.length > 0 && (
-          <span className="bg-destructive/15 text-destructive shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium">
+          <span className="bg-destructive/15 text-destructive shrink-0 px-2 py-0.5 text-[11px] font-medium">
             {breakdown.failed.length}
             {' / '}
             {breakdown.total}{' '}
@@ -117,13 +118,16 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
 
       {collapsible.length > 0 && (
         <div className="mt-1">
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
             onClick={() => setShowRest((value) => !value)}
-            className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 rounded py-1 text-xs focus-visible:outline-none"
+            className="flex h-auto w-full justify-start gap-1.5 border-0 py-1 font-normal whitespace-normal"
             aria-expanded={showRest}
           >
             <ChevronDown
+              weight="regular"
               className={cn(
                 'size-3.5 shrink-0 transition-transform',
                 showRest ? 'rotate-0' : '-rotate-90'
@@ -134,7 +138,7 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
                 translate('auto.components.editor.CheckRunJobs.5a8e1d4f23', ' · ')
               )}
             </span>
-          </button>
+          </Button>
           {showRest && (
             <div className="mt-0.5 grid gap-0.5 pl-5">
               {collapsible.map((step) => (
@@ -158,7 +162,7 @@ export function CheckRunJobs({
   hasFailedJobs: boolean
 }): React.JSX.Element {
   return (
-    <section className="border-border bg-background rounded-md border">
+    <section className="border-border bg-background border">
       <div className="border-border border-b px-3 py-2 text-sm font-medium">
         {hasFailedJobs
           ? translate('auto.components.editor.CheckRunDetailsPanel.066fedd446', 'Failed jobs')

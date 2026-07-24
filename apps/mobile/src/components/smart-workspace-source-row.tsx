@@ -1,7 +1,7 @@
 import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
-import { TextAa as CaseSensitive, GitBranch, Sparkle as Sparkles } from '@/components/uniwind-icons'
+import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { SourceProviderLogo } from './source-provider-logo'
@@ -28,7 +28,7 @@ function resolveRowContent(row: SourceRow): RowContent {
       }
     case 'create-branch':
       return {
-        icon: <GitBranch size={16} colorClassName="accent-primary" />,
+        icon: <GitMerge size={16} colorClassName="accent-primary" />,
         title: `Create branch "${row.name}"`,
         subtitle: 'New branch'
       }
@@ -60,7 +60,7 @@ function resolveRowContent(row: SourceRow): RowContent {
       }
     case 'branch':
       return {
-        icon: <GitBranch size={16} colorClassName="accent-muted-foreground" />,
+        icon: <GitMerge size={16} colorClassName="accent-muted-foreground" />,
         title: row.localBranchName || row.refName,
         subtitle: row.refName
       }

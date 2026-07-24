@@ -5,6 +5,7 @@ import {
 } from '@phosphor-icons/react'
 import type { MouseEvent, ReactElement, ReactNode } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 export function DiffSectionHeader({
@@ -76,17 +77,19 @@ export function DiffSectionHeader({
       </span>
       <div className="ml-2 flex shrink-0 items-center gap-1">
         {trailingContent}
-        <button
-          className="text-muted-foreground hover:text-foreground can-hover:opacity-0 focus-visible:text-foreground focus-visible:bg-accent rounded p-0.5 transition-opacity outline-none group-hover:opacity-100"
+        <Button
+          variant="quiet"
+          size="xs"
+          className="can-hover:opacity-0 h-auto w-auto p-0.5 transition-opacity group-hover:opacity-100"
           onClick={onOpenSection}
           title={openSectionTitle}
         >
-          <ExternalLink className="size-3.5" />
-        </button>
+          <ExternalLink weight="regular" className="size-3.5" />
+        </Button>
         {collapsed ? (
-          <ChevronRight className="text-muted-foreground size-3.5 shrink-0" />
+          <ChevronRight weight="regular" className="text-muted-foreground size-3.5 shrink-0" />
         ) : (
-          <ChevronDown className="text-muted-foreground size-3.5 shrink-0" />
+          <ChevronDown weight="regular" className="text-muted-foreground size-3.5 shrink-0" />
         )}
       </div>
     </div>

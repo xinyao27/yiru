@@ -215,7 +215,7 @@ export default function RepoCombobox({
                     badgeClassName="size-1.5"
                   />
                   {selectedRepo.connectionId && (
-                    <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 rounded px-1 py-0.5 text-[9px] leading-none font-medium">
+                    <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
                       <Server className="size-2.5" />
                       {translate('auto.components.repo.RepoCombobox.3639fd9da2', 'SSH')}
                     </span>
@@ -224,7 +224,7 @@ export default function RepoCombobox({
               ) : (
                 <span className="text-muted-foreground">{placeholder}</span>
               )}
-              <ChevronsUpDown className="size-3.5 opacity-50" />
+              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
             </Button>
           }
         />
@@ -278,7 +278,7 @@ export default function RepoCombobox({
                         className="max-w-full"
                       />
                       {repo.connectionId && (
-                        <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 rounded px-1 py-0.5 text-[9px] leading-none font-medium">
+                        <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
                           <Server className="size-2.5" />
                           {translate('auto.components.repo.RepoCombobox.3639fd9da2', 'SSH')}
                         </span>
@@ -300,7 +300,7 @@ export default function RepoCombobox({
                 onClick={() => void handleAddFolder()}
                 onMouseDown={(event) => event.preventDefault()}
                 onMouseEnter={() => setCommandValue('')}
-                className="h-9 w-full justify-start rounded-none px-3 text-xs font-normal"
+                className="h-9 w-full justify-start px-3 text-xs font-normal"
               >
                 <FolderPlus className="text-muted-foreground size-3.5" />
                 <span>

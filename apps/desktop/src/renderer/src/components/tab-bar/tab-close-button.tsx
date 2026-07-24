@@ -48,7 +48,7 @@ export function TabCloseButton({
               onClose()
             }}
           >
-            <X className={cn('size-4', iconClassName)} />
+            <X weight="regular" className={cn('size-4', iconClassName)} />
           </Button>
         }
       />

@@ -143,8 +143,8 @@ function SupportSection({
 function SupportRowSkeleton(): React.JSX.Element {
   return (
     <div className="flex items-center justify-between gap-4 py-2" aria-hidden="true">
-      <div className="bg-muted/50 h-4 w-36 animate-pulse rounded" />
-      <div className="bg-muted/50 h-8 w-24 animate-pulse rounded-md" />
+      <div className="bg-muted/50 h-4 w-36 animate-pulse" />
+      <div className="bg-muted/50 h-8 w-24 animate-pulse" />
     </div>
   )
 }
@@ -191,7 +191,7 @@ function SupportRow({
           {state === 'starring' || state === 'opening-github' ? (
             <LoadingIndicator className="size-3.5" />
           ) : state === 'web-fallback' ? (
-            <ExternalLink className="size-3.5" />
+            <ExternalLink weight="regular" className="size-3.5" />
           ) : (
             <Star className="size-3.5 fill-amber-400 text-amber-400" />
           )}

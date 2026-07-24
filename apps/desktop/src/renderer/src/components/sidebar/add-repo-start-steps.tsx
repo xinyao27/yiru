@@ -25,7 +25,7 @@ function AddRepoNestedScanProgressNotice({
   onStopNestedScan
 }: AddRepoNestedScanProgressNoticeProps): React.JSX.Element {
   return (
-    <div className="border-border bg-muted text-muted-foreground flex items-center gap-2 rounded-md border px-3 py-2 text-xs">
+    <div className="border-border bg-muted text-muted-foreground flex items-center gap-2 border px-3 py-2 text-xs">
       <LoadingIndicator className="size-3.5 shrink-0" />
       <span className="min-w-0 flex-1">{busyLabel}</span>
       {nestedScanInProgress && nestedScanId ? (
@@ -197,7 +197,7 @@ export function AddRepoLocalStartStep({
           </p>
           {/* Outline uses the `input` token (white-ish in dark mode) to match Browse's visible outline variant;
               primary-foreground is near-black in dark mode and rendered the border invisible. */}
-          <div className="border-input bg-background overflow-hidden rounded-md border">
+          <div className="border-input bg-background overflow-hidden border">
             {secondaryActions.map((action, index) => (
               <AddRepoSecondaryStartAction
                 key={action.kind}
@@ -209,8 +209,8 @@ export function AddRepoLocalStartStep({
                 onClick={action.onClick}
                 onFocus={() => setSelectedKind(action.kind)}
                 className={cn(
-                  index === 0 ? 'rounded-t-md' : 'border-t border-border/70',
-                  index === secondaryActions.length - 1 && 'rounded-b-md'
+                  index === 0 ? '' : 'border-t border-border/70',
+                  index === secondaryActions.length - 1 && ''
                 )}
               />
             ))}
@@ -281,7 +281,7 @@ const AddRepoPrimaryStartAction = ({
   >
     <span
       className={cn(
-        'grid size-7 shrink-0 place-items-center rounded-md',
+        'grid size-7 shrink-0 place-items-center',
         selected ? 'bg-background/70 text-accent-foreground' : 'text-foreground'
       )}
     >
@@ -308,24 +308,26 @@ function AddRepoSecondaryStartAction({
   className
 }: AddRepoStartActionProps & { className?: string }): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="default"
       type="button"
       data-add-repo-action
       disabled={disabled}
       onClick={onClick}
       onFocus={onFocus}
       className={cn(
-        'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:bg-accent disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
+        'flex h-auto min-h-[3.25rem] w-full justify-start gap-3 whitespace-normal px-3 py-2.5 text-left transition-colors focus-visible:bg-accent disabled:cursor-default disabled:opacity-40',
         className,
         // Selected mirrors the primary card's neutral wash so the highlight moves between rows.
         selected
-          ? 'border-ring bg-foreground/10 text-foreground   dark:bg-accent dark:text-accent-foreground'
-          : 'hover:bg-accent      '
+          ? 'border-ring bg-foreground/10 text-foreground dark:bg-accent dark:text-accent-foreground'
+          : ''
       )}
     >
       <span
         className={cn(
-          'grid size-7 shrink-0 place-items-center rounded-md',
+          'grid size-7 shrink-0 place-items-center ',
           selected ? 'bg-background/70 text-accent-foreground' : 'text-muted-foreground'
         )}
       >
@@ -343,6 +345,6 @@ function AddRepoSecondaryStartAction({
         <span className="text-muted-foreground block text-xs leading-4">{description}</span>
       </span>
       {selected ? <AddRepoEnterChip /> : null}
-    </button>
+    </Button>
   )
 }

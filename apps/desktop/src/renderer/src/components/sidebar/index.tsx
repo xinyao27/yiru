@@ -24,10 +24,10 @@ const ForgetSshWorkspaceDialog = lazyWithRetry(() => import('./forget-ssh-worksp
 
 const MIN_WIDTH = 220
 const MAX_WIDTH = 500
-// Why: straddle the sidebar/terminal seam so the divider sits on the border-l
-// instead of leaving a blank strip between the hover target and the edge.
+// Why: straddle the content seam and extend through the sibling titlebar so the
+// visible sidebar has one uninterrupted drag target; the header is a drag region.
 export const WORKTREE_SIDEBAR_RESIZE_HANDLE_CLASS_NAME =
-  'group absolute -right-1.5 top-0 z-10 flex h-full w-3 cursor-col-resize items-stretch justify-center'
+  'group absolute -top-[var(--titlebar-height)] -right-1.5 bottom-0 z-10 flex w-3 cursor-col-resize items-stretch justify-center [-webkit-app-region:no-drag]'
 export const WORKTREE_SIDEBAR_RESIZE_HANDLE_LINE_CLASS_NAME =
   'h-full w-px bg-transparent transition-colors group-hover:bg-ring/50 group-active:bg-ring'
 
@@ -110,44 +110,51 @@ function Sidebar({
       <div
         ref={containerRef}
         data-native-file-drop-target={sidebarOpen ? nativeDropTarget : undefined}
-        className="worktree-sidebar-theme bg-sidebar scrollbar-sleek-parent relative flex min-h-0 flex-shrink-0 flex-col overflow-hidden"
+        // Why: the outer seam matches the standard hairlines used by adjacent app panels.
+        className={cn(
+          'worktree-sidebar-theme bg-sidebar scrollbar-sleek-parent relative flex min-h-0 flex-shrink-0 flex-col',
+          sidebarOpen && 'border-border border-r'
+        )}
         style={appearanceStyle}
         {...dropHandlers}
       >
-        {sidebarOpen && (
-          <>
-            {/* Fixed controls */}
-            <SidebarNav />
-            <SidebarHeader />
+        {/* Why: clip sidebar content without clipping the handle's titlebar extension. */}
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          {sidebarOpen && (
+            <>
+              {/* Fixed controls */}
+              <SidebarNav />
+              <SidebarHeader />
 
-            <WorktreeList
-              scrollOffsetRef={worktreeScrollOffsetRef}
-              scrollAnchorRef={worktreeScrollAnchorRef}
-            />
+              <WorktreeList
+                scrollOffsetRef={worktreeScrollOffsetRef}
+                scrollAnchorRef={worktreeScrollAnchorRef}
+              />
 
-            <SetupScriptPromptCard />
+              <SetupScriptPromptCard />
 
-            {/* Fixed bottom toolbar */}
-            <SidebarToolbar />
-          </>
-        )}
+              {/* Fixed bottom toolbar */}
+              <SidebarToolbar />
+            </>
+          )}
 
-        {sidebarOpen && affordance.visible ? (
-          <div
-            className={cn(
-              'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 rounded-md border bg-sidebar-accent px-4 text-center text-sidebar-accent-foreground',
-              affordance.tone === 'blocked' ? 'border-destructive/70' : 'border-sidebar-ring/70'
-            )}
-          >
-            {affordance.tone === 'busy' ? (
-              <LoadingIndicator className="text-muted-foreground size-5" />
-            ) : (
-              <FolderPlus className="text-muted-foreground size-5" />
-            )}
-            <div className="text-sm font-medium">{affordance.label}</div>
-            <div className="text-muted-foreground text-xs">{affordance.description}</div>
-          </div>
-        ) : null}
+          {sidebarOpen && affordance.visible ? (
+            <div
+              className={cn(
+                'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 border bg-sidebar-accent px-4 text-center text-sidebar-accent-foreground',
+                affordance.tone === 'blocked' ? 'border-destructive/70' : 'border-sidebar-ring/70'
+              )}
+            >
+              {affordance.tone === 'busy' ? (
+                <LoadingIndicator className="text-muted-foreground size-5" />
+              ) : (
+                <FolderPlus className="text-muted-foreground size-5" />
+              )}
+              <div className="text-sm font-medium">{affordance.label}</div>
+              <div className="text-muted-foreground text-xs">{affordance.description}</div>
+            </div>
+          ) : null}
+        </div>
 
         {/* Resize handle */}
         {sidebarOpen && (

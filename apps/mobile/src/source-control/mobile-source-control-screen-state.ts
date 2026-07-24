@@ -4,7 +4,7 @@ import {
   ArrowUp,
   Check,
   CloudArrowUp as CloudUpload,
-  GitBranch,
+  GitMerge,
   GitPullRequest as GitPullRequestArrow,
   ClockCounterClockwise as History,
   ArrowClockwise as RefreshCw,
@@ -110,9 +110,9 @@ export const SOURCE_CONTROL_ACTION_ICONS: Record<MobileSourceControlActionIcon, 
   sync: ArrowDownUp,
   fetch: RefreshCw,
   publish: CloudUpload,
-  rebase: GitBranch,
+  rebase: GitMerge,
   pr: GitPullRequestArrow,
-  branch: GitBranch,
+  branch: GitMerge,
   history: History
 }
 

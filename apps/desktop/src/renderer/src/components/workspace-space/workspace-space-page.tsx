@@ -59,11 +59,11 @@ export default function WorkspaceSpacePage(): React.JSX.Element {
     <div className="bg-background flex h-full min-h-0 flex-col">
       <div className="border-border flex shrink-0 items-center gap-3 border-b px-5 py-3">
         <Button variant="outline" size="sm" onClick={closeSpacePage} className="shrink-0 gap-1.5">
-          <ArrowLeft className="size-3.5" />
+          <ArrowLeft weight="regular" className="size-3.5" />
           {translate('auto.components.workspace.space.WorkspaceSpacePage.ecf72fdc3b', 'Back')}
         </Button>
         <div className="flex min-w-0 items-center gap-3">
-          <div className="border-border bg-muted/30 flex size-8 shrink-0 items-center justify-center rounded-md border">
+          <div className="border-border bg-muted/30 flex size-8 shrink-0 items-center justify-center border">
             <HardDrive className="text-muted-foreground size-4" />
           </div>
           <div className="min-w-0">

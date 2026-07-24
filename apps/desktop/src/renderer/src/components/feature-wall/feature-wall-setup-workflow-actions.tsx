@@ -82,7 +82,7 @@ export function WorkspacesAction(props: { done: boolean }): React.JSX.Element | 
         })
       }}
     >
-      <ArrowUpRight className="size-3.5" />
+      <ArrowUpRight weight="regular" className="size-3.5" />
       {translate(
         'auto.components.feature.wall.FeatureWallSetupWorkflowActions.f0bbf7da77',
         'Try it out'
@@ -194,9 +194,9 @@ export function SetupScriptAction(): React.JSX.Element {
       </div>
       <Button
         type="button"
-        variant="ghost"
+        variant="quiet"
         size="sm"
-        className="text-muted-foreground hover:text-foreground w-fit gap-2 px-0 hover:bg-transparent"
+        className="w-fit gap-2 px-0 hover:bg-transparent"
         disabled={!canConfigure}
         onClick={openLocalCommandSettings}
       >

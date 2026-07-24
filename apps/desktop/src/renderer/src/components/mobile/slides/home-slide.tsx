@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import { cn } from '../../../lib/class-names'
@@ -15,13 +16,18 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
             {translate('auto.components.mobile.slides.HomeSlide.5d94e8ddcc', 'Yiru')}
           </span>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className={cn('outline-none focus-visible:bg-accent', mobileHomePreviewStyles.iconButton)}
+          className={cn(
+            'p-0 h-auto border-0 focus-visible:bg-accent',
+            mobileHomePreviewStyles.iconButton
+          )}
           aria-label={translate('auto.components.mobile.slides.HomeSlide.af761a0c0d', 'Settings')}
         >
           <SettingsIcon />
-        </button>
+        </Button>
       </div>
 
       <div className={mobileHomePreviewStyles.scrollRegion}>

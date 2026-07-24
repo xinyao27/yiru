@@ -287,10 +287,10 @@ export function ProviderPanel({
     return (
       <div className="space-y-1">
         <div className={cn('font-medium', textClass)}>{label}</div>
-        <div className={cn('h-[6px] w-full overflow-hidden rounded-full', emptyBarClass)}>
+        <div className={cn('h-[6px] w-full overflow-hidden', emptyBarClass)}>
           {/* Why: fill follows the selected percentage; color still signals consumption urgency. */}
           <div
-            className={cn('h-full rounded-full', barColor(usedPct), 'transition-all duration-300')}
+            className={cn('h-full', barColor(usedPct), 'transition-all duration-300')}
             style={{ width: `${displayedPct}%` }}
           />
         </div>

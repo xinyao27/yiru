@@ -64,11 +64,8 @@ const CONPTY_DA1_RESPONSE = '\x1b[?61;4c'
 export class HeadlessEmulator {
   private terminal: Terminal
   private serializer: SerializeAddon
-  // Why: our restructure owns cwd/title via TerminalOscCwdTitleScanner and the
-  // DECSET mouse modes via TerminalMouseModeMirror (functionally identical to
-  // main's inline cwd/lastTitle/oscScanTail + TerminalPrivateModeTracker, which
-  // only tracks the same mouse modes). restoredOscLinks/disposed/partialEscapeTail
-  // are declared below.
+  // Why: keep cwd/title scanning separate from DECSET mouse-mode tracking so
+  // terminal state can be restored without coupling unrelated OSC and CSI parsing.
   private oscText: TerminalOscCwdTitleScanner
   private mouseModes = new TerminalMouseModeMirror()
   private readonly pathFlavor?: 'posix' | 'win32'

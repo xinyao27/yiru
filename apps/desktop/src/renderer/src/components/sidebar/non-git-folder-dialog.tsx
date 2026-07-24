@@ -135,7 +135,7 @@ const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
         </DialogHeader>
 
         {folderPath && (
-          <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+          <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
             <div className="text-muted-foreground break-all">{folderPath}</div>
           </div>
         )}

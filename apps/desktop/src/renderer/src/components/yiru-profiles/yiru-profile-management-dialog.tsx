@@ -84,7 +84,7 @@ function ProjectTransferMenu({
           disabled={Boolean(pending) || profile.id === sourceProfileId}
           onClick={() => onTransfer(repo, profile, mode)}
         >
-          {mode === 'move' ? <MoveRight /> : <Copy />}
+          {mode === 'move' ? <MoveRight weight="regular" /> : <Copy />}
           <YiruProfileAvatar profile={profile} />
           <span className="min-w-0 truncate">{profile.name}</span>
           {targetPending ? <LoadingIndicator className="ml-auto size-3.5" /> : null}
@@ -97,7 +97,11 @@ function ProjectTransferMenu({
       <DropdownMenuTrigger
         render={
           <Button variant="outline" size="xs" disabled={disabled}>
-            {repoPending ? <LoadingIndicator className="size-3.5" /> : <ArrowRightLeft />}
+            {repoPending ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <ArrowRightLeft weight="regular" />
+            )}
             {translate('auto.components.yiru.profiles.management.04e7bd2a23', 'Transfer')}
           </Button>
         }
@@ -208,7 +212,7 @@ export function YiruProfileManagementDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="border-border rounded-md border">
+        <div className="border-border border">
           <div className="border-border flex items-center gap-2 border-b px-3 py-2">
             <YiruProfileAvatar profile={activeProfile} />
             <div className="min-w-0">

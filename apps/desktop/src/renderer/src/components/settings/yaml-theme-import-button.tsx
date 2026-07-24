@@ -19,7 +19,7 @@ export function YamlThemeImportButton({
       className="gap-1.5"
       onClick={() => void warpThemes.handleImportYamlClick()}
     >
-      <FileUp className="size-4" />
+      <FileUp weight="regular" className="size-4" />
       {translate('auto.components.settings.YamlThemeImportButton.label', 'Import from YAML')}
     </Button>
   )

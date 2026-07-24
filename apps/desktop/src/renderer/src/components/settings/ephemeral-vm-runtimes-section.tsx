@@ -205,11 +205,11 @@ export function EphemeralVmRuntimesSection(): React.JSX.Element {
           onClick={() => void refresh()}
           disabled={isLoading || cleaningId !== null}
         >
-          {isLoading ? <LoadingIndicator /> : <RefreshCw />}
+          {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
         </Button>
       </div>
 
-      <div className="border-border/50 bg-card/30 rounded-lg border">
+      <div className="border-border/50 bg-card/30 border">
         {!hasRuntimes ? (
           <div className="text-muted-foreground px-3 py-4 text-sm">
             {isLoading
@@ -259,10 +259,7 @@ function EphemeralVmRuntimeRow({
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <div
-        className={cn(
-          'size-2 shrink-0 rounded-full',
-          hasError ? 'bg-destructive' : 'bg-muted-foreground/40'
-        )}
+        className={cn('size-2 shrink-0', hasError ? 'bg-destructive' : 'bg-muted-foreground/40')}
       />
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
@@ -283,9 +280,9 @@ function EphemeralVmRuntimeRow({
         {runtime.cleanupStatus === 'failed' ? (
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
-            className="text-muted-foreground hover:text-foreground gap-1.5"
+            className="gap-1.5"
             onClick={onCopyCleanupCommand}
             disabled={disabled}
           >
@@ -298,9 +295,9 @@ function EphemeralVmRuntimeRow({
         ) : null}
         <Button
           type="button"
-          variant="ghost"
+          variant="quiet"
           size="xs"
-          className="text-muted-foreground hover:text-foreground gap-1.5"
+          className="gap-1.5"
           onClick={onCleanup}
           disabled={disabled}
         >

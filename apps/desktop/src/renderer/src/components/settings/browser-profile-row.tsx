@@ -123,7 +123,7 @@ export function BrowserProfileRow({
         }
       }}
       className={cn(
-        'flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors cursor-pointer outline-none focus-visible:border-ring',
+        'flex w-full items-center gap-3 border px-3 py-2.5 text-left transition-colors cursor-pointer outline-none focus-visible:border-ring',
         isActive
           ? 'border-foreground/20 bg-accent/15'
           : 'border-border/70 hover:border-border hover:bg-accent/8'
@@ -133,7 +133,7 @@ export function BrowserProfileRow({
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-medium">{profile.label}</span>
           {isActive ? (
-            <span className="border-border/50 text-foreground/80 shrink-0 rounded border px-1.5 text-[10px] leading-4 font-medium">
+            <span className="border-border/50 text-foreground/80 shrink-0 border px-1.5 text-[10px] leading-4 font-medium">
               {translate('auto.components.settings.BrowserProfileRow.c29648fe5b', 'Active')}
             </span>
           ) : null}

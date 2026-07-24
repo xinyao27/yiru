@@ -10,6 +10,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { getScreenSubmitShortcutLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
@@ -239,7 +240,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
             <label className="text-muted-foreground text-[11px] font-medium">
               {translate('auto.components.sidebar.WorktreeMetaDialog.9c1d1e9b71', 'Comment')}
             </label>
-            <textarea
+            <Textarea
               ref={setCommentTextareaRef}
               value={commentInput}
               onChange={handleCommentChange}
@@ -249,7 +250,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
                 'Notes about this worktree...'
               )}
               rows={3}
-              className="border-input placeholder:text-muted-foreground focus-visible:border-ring scrollbar-sleek max-h-60 w-full min-w-0 resize-none overflow-y-auto rounded-md border bg-transparent px-3 py-2 text-xs transition-[color] outline-none"
+              className="border-input placeholder:text-muted-foreground focus-visible:border-ring scrollbar-sleek max-h-60 w-full min-w-0 resize-none overflow-y-auto border bg-transparent px-3 py-2 text-xs transition-[color] outline-none"
             />
             <p className="text-muted-foreground text-[10px]">
               {translate(

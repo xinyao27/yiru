@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -225,6 +226,7 @@ export function HostRemoveDialog({
             >
               {translate('auto.components.sidebar.HostRemoveDialog.advanced', 'Advanced')}
               <ChevronDown
+                weight="regular"
                 className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
               />
             </Button>
@@ -237,28 +239,7 @@ export function HostRemoveDialog({
             >
               <div className="min-h-0">
                 <div className="flex items-start gap-3 px-1 pt-1">
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={deleteWorkspaces}
-                    onClick={() => setDeleteWorkspaces((v) => !v)}
-                    className="group mt-0.5 flex shrink-0 cursor-pointer items-center rounded-md outline-none"
-                  >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
-                        deleteWorkspaces ? 'bg-foreground' : 'bg-muted-foreground/30'
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                          deleteWorkspaces ? 'translate-x-4' : 'translate-x-0.5'
-                        )}
-                      />
-                    </span>
-                  </button>
+                  <Switch checked={deleteWorkspaces} onCheckedChange={setDeleteWorkspaces} />
                   <span className="min-w-0 flex-1 text-xs leading-snug">
                     <span className="text-foreground font-medium">{deleteOptionLabel}</span>
                     <span className="text-muted-foreground mt-0.5 block">

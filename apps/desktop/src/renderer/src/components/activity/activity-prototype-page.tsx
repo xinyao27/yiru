@@ -864,14 +864,16 @@ function EventTime({ timestamp }: { timestamp: number }): React.JSX.Element {
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
-            className="text-muted-foreground hover:text-foreground rounded px-1 py-0.5 text-xs focus-visible:outline-none"
+            className="h-auto border-0 px-1 py-0.5"
             aria-label={absolute}
             onClick={(event) => event.stopPropagation()}
           >
             {formatRelativeTime(timestamp)}
-          </button>
+          </Button>
         }
       />
       <TooltipContent side="right" sideOffset={6}>
@@ -963,7 +965,7 @@ function EventRepoBadge({ repo }: { repo: Repo | null }): React.JSX.Element | nu
     return null
   }
   return (
-    <div className="border-border bg-accent dark:border-border/60 dark:bg-accent/50 flex min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] border px-1.5 py-0.5">
+    <div className="border-border bg-accent dark:border-border/60 dark:bg-accent/50 flex min-w-0 shrink-0 items-center gap-1.5 border px-1.5 py-0.5">
       <RepoBadgeMark color={repo.badgeColor} />
       <span className="text-foreground max-w-[6rem] truncate text-[10px] leading-none font-semibold lowercase">
         {repo.displayName}
@@ -1207,7 +1209,7 @@ function ActivityStatusGroupHeader({ group }: { group: ActivityThreadGroup }): R
       <span className="text-muted-foreground min-w-0 flex-1 truncate text-[11px] font-semibold tracking-[0.05em] uppercase">
         {group.label}
       </span>
-      <span className="border-border bg-accent text-muted-foreground rounded-full border px-1.5 py-0.5 text-[10px] leading-none font-semibold">
+      <span className="border-border bg-accent text-muted-foreground border px-1.5 py-0.5 text-[10px] leading-none font-semibold">
         {group.threads.length}
       </span>
     </div>
@@ -1291,13 +1293,11 @@ function ThreadRow({
         // below the secondary badge row. Symmetric py made the top read
         // heavier; the smaller top pad visually evens the row.
         'group relative flex w-full cursor-pointer flex-col gap-1 border-b border-border px-3 pt-2.5 pb-3 text-left transition-colors outline-none',
-        selected
-          ? 'bg-black/[0.08] dark:bg-white/[0.10]'
-          : 'hover:bg-accent/40 focus-visible:bg-accent/40'
+        selected ? 'bg-accent' : 'hover:bg-accent/40 focus-visible:bg-accent/40'
       )}
     >
       {thread.unread ? (
-        <span className="bg-primary absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-r-full" />
+        <span className="bg-primary absolute top-1.5 bottom-1.5 left-0 w-0.5" />
       ) : null}
       <div className="flex min-w-0 items-start gap-2">
         <span className="inline-flex shrink-0 items-start gap-1">
@@ -1368,7 +1368,7 @@ function ThreadRow({
                             }}
                             onMouseDown={(event) => event.stopPropagation()}
                           >
-                            <ExternalLink className="size-3" />
+                            <ExternalLink weight="regular" className="size-3" />
                           </Button>
                         }
                       />
@@ -1397,7 +1397,9 @@ function ThreadRow({
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
                           type="button"
                           onClick={(event) => {
                             event.stopPropagation()
@@ -1405,7 +1407,7 @@ function ThreadRow({
                           }}
                           onMouseDown={(event) => event.stopPropagation()}
                           className={cn(
-                            'group/unread flex size-4 shrink-0 cursor-pointer items-center justify-center rounded transition-all',
+                            'group/unread flex size-4',
                             'hover:bg-accent/80 active:scale-95',
                             'focus-visible:outline-none'
                           )}
@@ -1415,7 +1417,7 @@ function ThreadRow({
                           )}
                         >
                           <Bell className="text-muted-foreground/40 can-hover:opacity-0 size-3 transition-opacity group-hover:opacity-100 group-hover/unread:opacity-100" />
-                        </button>
+                        </Button>
                       }
                     />
                     <TooltipContent side="left">
@@ -2072,8 +2074,8 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                         aria-hidden="true"
                       >
                         {visiblePortalUnavailable ? (
-                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-xs">
-                            <span className="bg-muted-foreground/70 h-3 w-1.5 rounded-sm" />
+                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 border px-2 py-1 text-xs">
+                            <span className="bg-muted-foreground/70 h-3 w-1.5" />
                             <span>
                               {translate(
                                 'auto.components.activity.ActivityPrototypePage.8de7c5beaa',
@@ -2082,8 +2084,8 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                             </span>
                           </div>
                         ) : showTerminalLoadingLabel ? (
-                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-xs">
-                            <span className="bg-muted-foreground/70 h-3 w-1.5 animate-pulse rounded-sm" />
+                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 border px-2 py-1 text-xs">
+                            <span className="bg-muted-foreground/70 h-3 w-1.5 animate-pulse" />
                             <span>
                               {translate(
                                 'auto.components.activity.ActivityPrototypePage.1b633f5c1e',

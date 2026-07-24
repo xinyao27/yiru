@@ -60,9 +60,11 @@ function MarkdownTocRow({
     <>
       <div className="markdown-toc-row" style={{ paddingLeft: rowPaddingLeft }}>
         {hasChildren ? (
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className="markdown-toc-disclosure focus-visible:bg-accent outline-none"
+            className="markdown-toc-disclosure focus-visible:bg-accent h-auto border-0 p-0"
             aria-label={
               expanded
                 ? translate(
@@ -80,20 +82,23 @@ function MarkdownTocRow({
             onClick={() => onToggleCollapsed(item.id)}
           >
             <ChevronRight
+              weight="regular"
               className={cn(
                 'size-3 shrink-0 text-muted-foreground transition-transform',
                 expanded && 'rotate-90'
               )}
             />
-          </button>
+          </Button>
         ) : null}
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className="markdown-toc-title-button focus-visible:bg-accent outline-none"
+          className="markdown-toc-title-button focus-visible:bg-accent h-auto border-0 p-0"
           onClick={() => onNavigate(item.id)}
         >
           <span className="markdown-toc-title">{item.title}</span>
-        </button>
+        </Button>
       </div>
       {hasChildren && expanded
         ? item.children.map((child) => (
@@ -240,7 +245,7 @@ export function MarkdownTableOfContentsPanel({
             )}
             onClick={onClose}
           >
-            <X className="size-3.5" />
+            <X weight="regular" className="size-3.5" />
           </Button>
         </div>
       </div>

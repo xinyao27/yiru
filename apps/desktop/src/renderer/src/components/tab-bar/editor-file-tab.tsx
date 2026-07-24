@@ -25,8 +25,8 @@ import { useRepoById, useWorktreeById } from '@/store/selectors'
 
 import type { GitFileStatus } from '../../../../shared/types'
 import type { OpenFile } from '../../store/slices/editor'
-import { STATUS_COLORS, STATUS_LABELS } from '../right-sidebar/status-display'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
+import { STATUS_COLORS, STATUS_LABELS } from '../workspace-panel/status-display'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { EditorFileTabContextMenu } from './editor-file-tab-context-menu'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
@@ -284,6 +284,8 @@ export default function EditorFileTab({
           <Input
             ref={setRenameInputElement}
             data-tab-rename-input="true"
+            size="inline-edit"
+            variant="subtle"
             aria-label={translate(
               'auto.components.tab.bar.EditorFileTab.3da7445c84',
               'Rename file {{value0}}',
@@ -292,7 +294,7 @@ export default function EditorFileTab({
             defaultValue={basename(file.filePath)}
             // Why: keep the inline field compact enough for the titlebar while
             // giving filenames a little more room than the static tab label.
-            className="bg-input/40 text-foreground mr-1 h-5 w-[12ch] max-w-[132px] min-w-[72px] rounded-sm px-1 py-0 text-xs md:text-xs"
+            className="mr-1 w-[12ch] max-w-[132px] min-w-[72px]"
             spellCheck={false}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -362,7 +364,7 @@ export default function EditorFileTab({
           status dot's slot, which the hover close affordance replaces in place. */}
       {file.isDirty ? (
         <div className="relative flex h-4 w-4 shrink-0 items-center justify-center">
-          <span className="bg-foreground/60 absolute size-1.5 rounded-full group-focus-within:hidden group-hover:hidden" />
+          <span className="bg-foreground/60 absolute size-1.5 group-focus-within:hidden group-hover:hidden" />
           {!isPinned && (
             <TabCloseButton
               className="right-0"

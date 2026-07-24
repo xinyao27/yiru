@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -27,9 +28,6 @@ type FloatingTerminalWindowControlsProps = {
   onToggleMaximized: () => void
   onMinimize: () => void
 }
-
-const controlButtonClassName =
-  'border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
 
 // Why: matches the repo convention (e.g. ReviewPRViewAnimatedVisual) of
 // surfacing the live keybinding in a tooltip as "Label (shortcut)", while
@@ -132,16 +130,18 @@ export function FloatingTerminalWindowControls({
   }, [activateTab, createTab, defaultAgent, defaultAgentLabel, setActiveTabForWorktree])
 
   return (
-    <div className="flex items-center gap-1 px-2" data-floating-terminal-no-drag>
+    // Why: floating-window actions follow the shared titlebar dimensions and
+    // collapse adjacent borders into the same continuous chrome as tab actions.
+    <ButtonGroup className="h-full" data-floating-terminal-no-drag>
       {defaultAgent ? (
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 type="button"
-                variant="outline"
-                size="icon-xs"
-                className={controlButtonClassName}
+                variant="outline-transparent"
+                size="icon-titlebar-wide"
+                className="text-muted-foreground"
                 aria-label={translate(
                   'auto.components.floating.terminal.FloatingTerminalWindowControls.648352c51f',
                   'Open {{value0}} in floating workspace',
@@ -167,9 +167,9 @@ export function FloatingTerminalWindowControls({
           render={
             <Button
               type="button"
-              variant="outline"
-              size="icon-xs"
-              className={controlButtonClassName}
+              variant="outline-transparent"
+              size="icon-titlebar-wide"
+              className="text-muted-foreground"
               aria-label={
                 maximized
                   ? translate(
@@ -184,7 +184,11 @@ export function FloatingTerminalWindowControls({
               aria-pressed={maximized}
               onClick={onToggleMaximized}
             >
-              {maximized ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+              {maximized ? (
+                <Minimize2 weight="regular" className="size-3.5" />
+              ) : (
+                <Maximize2 weight="regular" className="size-3.5" />
+              )}
             </Button>
           }
         />
@@ -211,16 +215,16 @@ export function FloatingTerminalWindowControls({
           render={
             <Button
               type="button"
-              variant="outline"
-              size="icon-xs"
-              className={controlButtonClassName}
+              variant="outline-transparent"
+              size="icon-titlebar-wide"
+              className="text-muted-foreground border-r-0"
               aria-label={translate(
                 'auto.components.floating.terminal.FloatingTerminalWindowControls.1bbaa0302f',
                 'Minimize floating workspace'
               )}
               onClick={onMinimize}
             >
-              <Minus className="size-3.5" />
+              <Minus weight="regular" className="size-3.5" />
             </Button>
           }
         />
@@ -234,6 +238,6 @@ export function FloatingTerminalWindowControls({
           )}
         </TooltipContent>
       </Tooltip>
-    </div>
+    </ButtonGroup>
   )
 }

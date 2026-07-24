@@ -31,8 +31,12 @@ import type RepoCombobox from '@/components/repo/repo-combobox'
 import { SettingsSwitch } from '@/components/settings/settings-form-controls'
 import SparseCheckoutPresetSelect from '@/components/sparse/sparse-checkout-preset-select'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
+import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
@@ -308,7 +312,7 @@ function WorkspaceRunTargetCombobox({
                 )}
               </span>
             )}
-            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+            <ChevronsUpDown weight="regular" className="size-3.5 shrink-0 opacity-50" />
           </Button>
         }
       />
@@ -375,7 +379,10 @@ function WorkspaceRunTargetCombobox({
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="text-muted-foreground size-3.5 shrink-0" />
+                      <ChevronRight
+                        weight="regular"
+                        className="text-muted-foreground size-3.5 shrink-0"
+                      />
                     </CommandItem>
                   }
                 />
@@ -430,7 +437,7 @@ function SetupCommandPreview({
 }): React.JSX.Element {
   if (setupConfig.source === 'yaml') {
     return (
-      <div className="border-border/60 bg-muted/40 rounded-2xl border">
+      <div className="border-border/60 bg-muted/40 border">
         <div className="border-border/60 flex items-center justify-between gap-3 border-b px-4 py-2.5">
           <div className="text-muted-foreground font-mono text-[11px]">
             {translate('auto.components.NewWorkspaceComposerCard.23bb365554', 'yiru.yaml')}
@@ -446,7 +453,7 @@ function SetupCommandPreview({
   }
 
   return (
-    <div className="border-border/60 bg-muted/35 rounded-2xl border px-4 py-3">
+    <div className="border-border/60 bg-muted/35 border px-4 py-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
           {setupConfig.source === 'both'
@@ -799,7 +806,7 @@ export default function NewWorkspaceComposerCard({
       onDragEnter={dragHandlers.onDragEnter}
       onDragLeave={dragHandlers.onDragLeave}
       className={cn(
-        'grid min-w-0 gap-1 rounded-md border border-transparent transition',
+        'grid min-w-0 gap-1 border border-transparent transition',
         isFileDragOver && 'border-ring',
         containerClassName
       )}
@@ -817,10 +824,10 @@ export default function NewWorkspaceComposerCard({
                   render={
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="quiet"
                       size="icon-xs"
                       onClick={handleAddRepo}
-                      className="text-muted-foreground hover:text-foreground size-5 shrink-0 rounded-sm"
+                      className="size-5 shrink-0"
                       aria-label={translate(
                         'auto.components.NewWorkspaceComposerCard.d6b0a96f32',
                         'Add project'
@@ -894,7 +901,7 @@ export default function NewWorkspaceComposerCard({
             <div
               role="status"
               aria-live="polite"
-              className="border-border/70 bg-muted/35 flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+              className="border-border/70 bg-muted/35 flex items-center justify-between gap-3 border px-3 py-2"
             >
               <div className="min-w-0">
                 <div className="text-foreground truncate text-xs font-medium">
@@ -997,32 +1004,15 @@ export default function NewWorkspaceComposerCard({
           >
             <div className="min-h-0">
               <div className="space-y-1 pt-1">
-                <label className="group text-foreground flex w-fit items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
+                <label className="text-foreground flex w-fit items-center gap-2 text-xs">
+                  <Checkbox
                     checked={reuseSelectedBranch}
-                    onChange={(event) => onReuseSelectedBranchChange(event.target.checked)}
+                    onCheckedChange={(checked) => onReuseSelectedBranchChange(checked === true)}
                     // Why: while collapsed the row is aria-hidden, so disable the
                     // input too — keeps a hidden control out of the tab order and
                     // fully inert (no focusable control inside an aria-hidden tree).
                     disabled={!canReuseSelectedBranch}
-                    className="peer sr-only outline-none"
                   />
-                  <span
-                    className={cn(
-                      'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
-                      reuseSelectedBranch
-                        ? 'border-emerald-500/60 bg-emerald-500 text-white'
-                        : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
-                    )}
-                  >
-                    <Check
-                      className={cn(
-                        'size-3 transition-opacity',
-                        reuseSelectedBranch ? 'opacity-100' : 'opacity-0'
-                      )}
-                    />
-                  </span>
                   <span>
                     {translate(
                       'auto.components.NewWorkspaceComposerCard.reuseExistingBranch',
@@ -1051,14 +1041,14 @@ export default function NewWorkspaceComposerCard({
                 render={
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="quiet"
                     size="icon-xs"
                     onClick={onOpenAgentSettings}
                     // Why: keep Tab flow Name → Agent combobox. This settings
                     // shortcut is a detour; making it tabbable forces a keystroke
                     // on every workspace creation.
                     tabIndex={-1}
-                    className="text-muted-foreground hover:text-foreground size-5 shrink-0 rounded-sm"
+                    className="size-5 shrink-0"
                     aria-label={translate(
                       'auto.components.NewWorkspaceComposerCard.ab63f25397',
                       'Open agent settings'
@@ -1101,6 +1091,7 @@ export default function NewWorkspaceComposerCard({
           >
             {translate('auto.components.NewWorkspaceComposerCard.f0470c7383', 'Advanced')}
             <ChevronDown
+              weight="regular"
               className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
             />
           </Button>
@@ -1134,15 +1125,15 @@ export default function NewWorkspaceComposerCard({
                   <label className="text-muted-foreground text-xs font-medium">
                     {translate('auto.components.NewWorkspaceComposerCard.2688050e4b', 'Name')}
                   </label>
-                  <input
+                  <Input
                     type="text"
+                    size="default"
                     value={name}
                     onChange={(event) => onNameValueChange(event.target.value)}
                     placeholder={translate(
                       'auto.components.NewWorkspaceComposerCard.0ee17638fe',
                       'Workspace name'
                     )}
-                    className="border-input placeholder:text-muted-foreground focus-visible:border-ring w-full min-w-0 rounded-md border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
                   />
                 </div>
               ) : null}
@@ -1165,16 +1156,16 @@ export default function NewWorkspaceComposerCard({
                       'Branch name'
                     )}
                   </label>
-                  <input
+                  <Input
                     id={branchNameInputId}
                     type="text"
+                    size="default"
                     value={branchNameOverride ?? ''}
                     onChange={(event) => onBranchNameOverrideChange(event.target.value)}
                     placeholder={translate(
                       'auto.components.NewWorkspaceComposerCard.branchNamePlaceholder',
                       'feature/my-branch'
                     )}
-                    className="border-input placeholder:text-muted-foreground focus-visible:border-ring w-full min-w-0 rounded-md border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
                   />
                 </div>
               ) : null}
@@ -1183,7 +1174,7 @@ export default function NewWorkspaceComposerCard({
                 <label className="text-muted-foreground text-xs font-medium">
                   {translate('auto.components.NewWorkspaceComposerCard.f8728aa4f9', 'Note')}
                 </label>
-                <textarea
+                <Textarea
                   value={note}
                   onChange={(event) => onNoteChange(event.target.value)}
                   onPaste={handleNotePaste}
@@ -1200,7 +1191,7 @@ export default function NewWorkspaceComposerCard({
                     'Write a note'
                   )}
                   rows={1}
-                  className="border-input placeholder:text-muted-foreground focus-visible:border-ring max-h-40 w-full min-w-0 resize-none overflow-hidden rounded-md border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
+                  className="border-input placeholder:text-muted-foreground focus-visible:border-ring max-h-40 w-full min-w-0 resize-none overflow-hidden border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
                 />
               </div>
 
@@ -1210,7 +1201,7 @@ export default function NewWorkspaceComposerCard({
                     <label className="text-muted-foreground text-xs font-medium">
                       {setupConfigLabel}
                     </label>
-                    <span className="border-border/70 bg-muted/45 text-foreground/70 rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase">
+                    <span className="border-border/70 bg-muted/45 text-foreground/70 border px-2 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase">
                       {setupConfig.source === 'yaml'
                         ? translate(
                             'auto.components.NewWorkspaceComposerCard.23bb365554',
@@ -1235,30 +1226,13 @@ export default function NewWorkspaceComposerCard({
                     setupConfig={setupConfig}
                     headerAction={
                       requiresExplicitSetupChoice ? null : (
-                        <label className="group text-foreground flex items-center gap-2 text-xs">
-                          <input
-                            type="checkbox"
+                        <label className="text-foreground flex items-center gap-2 text-xs">
+                          <Checkbox
                             checked={resolvedSetupDecision === 'run'}
-                            onChange={(event) =>
-                              onSetupDecisionChange(event.target.checked ? 'run' : 'skip')
+                            onCheckedChange={(checked) =>
+                              onSetupDecisionChange(checked ? 'run' : 'skip')
                             }
-                            className="peer sr-only outline-none"
                           />
-                          <span
-                            className={cn(
-                              'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
-                              resolvedSetupDecision === 'run'
-                                ? 'border-emerald-500/60 bg-emerald-500 text-white'
-                                : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
-                            )}
-                          >
-                            <Check
-                              className={cn(
-                                'size-3 transition-opacity',
-                                resolvedSetupDecision === 'run' ? 'opacity-100' : 'opacity-0'
-                              )}
-                            />
-                          </span>
                           <span>{setupRunLabel}</span>
                         </label>
                       )
@@ -1305,7 +1279,7 @@ export default function NewWorkspaceComposerCard({
                   ) : null}
 
                   {showSetupAgentStartupPolicy ? (
-                    <div className="border-border/60 bg-muted/25 flex items-start justify-between gap-3 rounded-md border p-3">
+                    <div className="border-border/60 bg-muted/25 flex items-start justify-between gap-3 border p-3">
                       <span className="min-w-0 space-y-1">
                         <span className="text-foreground block text-xs font-medium">
                           {translate(
@@ -1372,7 +1346,7 @@ export default function NewWorkspaceComposerCard({
       {createError ? (
         <div
           role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-xs"
+          className="border-destructive/30 bg-destructive/10 text-destructive border px-3 py-2 text-xs"
         >
           {createError.help ? (
             <div className="space-y-1">
@@ -1393,31 +1367,19 @@ export default function NewWorkspaceComposerCard({
         )}
       >
         {showCreateMultiple ? (
-          <button
-            type="button"
-            role="switch"
-            aria-checked={createMultiple}
-            onClick={() => onCreateMultipleChange?.(!createMultiple)}
-            className="group flex w-fit cursor-pointer items-center gap-2 rounded-md text-xs outline-none"
-          >
-            <span
-              aria-hidden
-              className={cn(
-                'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
-                createMultiple ? 'bg-foreground' : 'bg-muted-foreground/30'
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={createMultiple}
+              onCheckedChange={(checked) => onCreateMultipleChange?.(checked)}
+              aria-label={translate(
+                'auto.components.NewWorkspaceComposerCard.createMultiple',
+                'Create more'
               )}
-            >
-              <span
-                className={cn(
-                  'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                  createMultiple ? 'translate-x-4' : 'translate-x-0.5'
-                )}
-              />
-            </span>
-            <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+            />
+            <span className="text-muted-foreground">
               {translate('auto.components.NewWorkspaceComposerCard.createMultiple', 'Create more')}
             </span>
-          </button>
+          </div>
         ) : null}
         <Button
           onClick={() => void onCreate()}
@@ -1427,9 +1389,9 @@ export default function NewWorkspaceComposerCard({
         >
           {creating ? <LoadingIndicator className="size-4" /> : null}
           {primaryActionLabel}
-          <span className="ml-1 inline-flex items-center gap-0.5 rounded border border-white/20 px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
+          <span className="ml-1 inline-flex items-center gap-0.5 border border-current/20 px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
             <span>{submitShortcutModifierLabel}</span>
-            <CornerDownLeft className="size-3" />
+            <CornerDownLeft weight="regular" className="size-3" />
           </span>
         </Button>
       </div>

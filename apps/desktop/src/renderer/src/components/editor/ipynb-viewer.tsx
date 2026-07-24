@@ -42,6 +42,14 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -184,21 +192,29 @@ function NotebookCellHeader({
     <div className="border-border/50 bg-muted/20 text-muted-foreground flex items-center gap-2 border-b px-3 py-1.5 text-xs">
       <Icon className="size-3.5" />
       <span className="font-mono">{executionLabel}</span>
-      <select
+      <Select
         value={cell.kind}
-        onChange={(event) => onKindChange(event.target.value as IpynbCellKind)}
-        className="border-input bg-background text-foreground focus-visible:border-ring h-7 rounded-md border px-2 text-xs outline-none"
+        onValueChange={(value) => {
+          if (value) {
+            onKindChange(value as IpynbCellKind)
+          }
+        }}
       >
-        <option value="code">
-          {translate('auto.components.editor.IpynbViewer.7005960d73', 'Code')}
-        </option>
-        <option value="markdown">
-          {translate('auto.components.editor.IpynbViewer.1833dbbc43', 'Markdown')}
-        </option>
-        <option value="raw">
-          {translate('auto.components.editor.IpynbViewer.3e4cbf15ea', 'Raw')}
-        </option>
-      </select>
+        <SelectTrigger size="xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="code">
+            {translate('auto.components.editor.IpynbViewer.7005960d73', 'Code')}
+          </SelectItem>
+          <SelectItem value="markdown">
+            {translate('auto.components.editor.IpynbViewer.1833dbbc43', 'Markdown')}
+          </SelectItem>
+          <SelectItem value="raw">
+            {translate('auto.components.editor.IpynbViewer.3e4cbf15ea', 'Raw')}
+          </SelectItem>
+        </SelectContent>
+      </Select>
       {cell.kind === 'code' ? (
         <NotebookHeaderButton
           label={translate('auto.components.editor.IpynbViewer.859bf9fc21', 'Run cell')}
@@ -213,26 +229,26 @@ function NotebookCellHeader({
         disabled={!canMoveUp}
         onClick={onMoveUp}
       >
-        <MoveUp className="size-3.5" />
+        <MoveUp weight="regular" className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate('auto.components.editor.IpynbViewer.27e064e2db', 'Move cell down')}
         disabled={!canMoveDown}
         onClick={onMoveDown}
       >
-        <MoveDown className="size-3.5" />
+        <MoveDown weight="regular" className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate('auto.components.editor.IpynbViewer.53b839b8a0', 'Insert code cell above')}
         onClick={() => onInsertAbove('code')}
       >
-        <ArrowUpToLine className="size-3.5" />
+        <ArrowUpToLine weight="regular" className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate('auto.components.editor.IpynbViewer.b4208cad7e', 'Insert code cell below')}
         onClick={() => onInsertBelow('code')}
       >
-        <ArrowDownToLine className="size-3.5" />
+        <ArrowDownToLine weight="regular" className="size-3.5" />
       </NotebookHeaderButton>
       <NotebookHeaderButton
         label={translate(
@@ -243,7 +259,7 @@ function NotebookCellHeader({
       >
         <span className="relative size-4">
           <FileCode2 className="absolute top-0.5 left-0.5 size-3" />
-          <MoveUp className="absolute -top-0.5 -right-0.5 size-2.5" />
+          <MoveUp weight="regular" className="absolute -top-0.5 -right-0.5 size-2.5" />
         </span>
       </NotebookHeaderButton>
       <NotebookHeaderButton
@@ -255,7 +271,7 @@ function NotebookCellHeader({
       >
         <span className="relative size-4">
           <FileCode2 className="absolute top-0.5 left-0.5 size-3" />
-          <MoveDown className="absolute -right-0.5 -bottom-0.5 size-2.5" />
+          <MoveDown weight="regular" className="absolute -right-0.5 -bottom-0.5 size-2.5" />
         </span>
       </NotebookHeaderButton>
       <NotebookHeaderButton
@@ -387,7 +403,7 @@ function CodeCell({
       <div
         role="button"
         tabIndex={0}
-        className="focus-visible:bg-accent block w-full cursor-text bg-[var(--editor-surface)] text-left outline-none"
+        className="bg-background focus-visible:bg-accent block w-full cursor-text text-left outline-none"
         onClick={onActivate}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
@@ -407,7 +423,7 @@ function CodeCell({
   }
 
   return (
-    <div className="bg-[var(--editor-surface)]">
+    <div className="bg-background">
       <Editor
         height={editorHeight}
         defaultLanguage={cell.language}
@@ -451,7 +467,7 @@ function EditableTextCell({
   onChange: (source: string) => void
 }): React.JSX.Element {
   return (
-    <textarea
+    <Textarea
       value={source}
       onChange={(event) => onChange(event.target.value)}
       className="bg-background text-foreground block min-h-24 w-full resize-y border-0 px-4 py-3 text-sm outline-none"
@@ -773,8 +789,8 @@ export default function IpynbViewer({
 
   if (parsed.error || !parsed.notebook) {
     return (
-      <div className="text-muted-foreground flex h-full items-center justify-center bg-[var(--editor-surface)] p-6 text-sm">
-        <div className="border-border bg-background flex max-w-md items-start gap-3 rounded-md border p-4">
+      <div className="bg-background text-muted-foreground flex h-full items-center justify-center p-6 text-sm">
+        <div className="border-border bg-background flex max-w-md items-start gap-3 border p-4">
           <AlertCircle className="text-destructive mt-0.5 size-4" />
           <div>
             <div className="text-foreground font-medium">
@@ -882,7 +898,7 @@ export default function IpynbViewer({
   return (
     <div
       ref={setRootRef}
-      className="scrollbar-editor h-full min-h-0 overflow-auto bg-[var(--editor-surface)]"
+      className="scrollbar-editor bg-background h-full min-h-0 overflow-auto"
       style={{ fontSize, fontFamily: resolveEditorFontFamilyOrInherit(settings) }}
       onKeyDownCapture={handleNotebookKeyDownCapture}
       onPointerDownCapture={handleNotebookPointerDownCapture}
@@ -904,7 +920,7 @@ export default function IpynbViewer({
           >
             <Save className="size-3.5" />
           </NotebookHeaderButton>
-          <span className="border-border bg-muted text-muted-foreground rounded-sm border px-1.5 py-0.5 font-medium">
+          <span className="border-border bg-muted text-muted-foreground border px-1.5 py-0.5 font-medium">
             {translate('auto.components.editor.IpynbViewer.329764e9fc', 'BETA')}
           </span>
           <span className="font-mono">
@@ -915,7 +931,7 @@ export default function IpynbViewer({
       </div>
       <div className="mx-auto flex max-w-[980px] flex-col gap-3 px-5 py-5">
         {notebook.cells.length === 0 ? (
-          <div className="border-border bg-background text-muted-foreground flex items-center justify-center rounded-md border p-8 text-sm">
+          <div className="border-border bg-background text-muted-foreground flex items-center justify-center border p-8 text-sm">
             {translate('auto.components.editor.IpynbViewer.d6f37a640b', 'Empty notebook')}
           </div>
         ) : (
@@ -925,10 +941,7 @@ export default function IpynbViewer({
               ? (sourceDrafts[cellKey] ?? '')
               : cell.source
             return (
-              <section
-                key={cellKey}
-                className="border-border bg-background overflow-hidden rounded-md border"
-              >
+              <section key={cellKey} className="border-border bg-background overflow-hidden border">
                 <NotebookCellHeader
                   cell={cell}
                   index={index}

@@ -7,8 +7,8 @@ import {
   getFileExplorerOperationOwnerFromState,
   getFileExplorerOwnerUnresolvedMessage,
   getFileExplorerOperationRoute
-} from '@/components/right-sidebar/file-explorer-operation-owner'
-import type { FileExplorerOperationOwner } from '@/components/right-sidebar/file-explorer-types'
+} from '@/components/workspace-panel/file-explorer-operation-owner'
+import type { FileExplorerOperationOwner } from '@/components/workspace-panel/file-explorer-types'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { cancelRuntimeFileList, listRuntimeFiles } from '@/runtime/runtime-file-client'
 import { useAppStore } from '@/store'

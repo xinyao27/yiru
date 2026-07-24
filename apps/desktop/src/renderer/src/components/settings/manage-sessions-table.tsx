@@ -44,7 +44,7 @@ export function ManageSessionsTable({
   onRequestKill
 }: ManageSessionsTableProps): React.JSX.Element {
   return (
-    <div className="border-border/60 flex flex-col overflow-hidden rounded-lg border">
+    <div className="border-border/60 flex flex-col overflow-hidden border">
       <div className="border-border/60 flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-xs font-medium">
@@ -62,7 +62,7 @@ export function ManageSessionsTable({
             )}
             className="text-muted-foreground"
           >
-            {isRefreshing ? <LoadingIndicator /> : <RefreshCw />}
+            {isRefreshing ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
           </Button>
         </div>
         <div className="flex items-center gap-1">
@@ -105,7 +105,11 @@ export function ManageSessionsTable({
                   )}
                   className="text-muted-foreground"
                 >
-                  {daemonBusyKind === 'restart' ? <LoadingIndicator /> : <RotateCw />}
+                  {daemonBusyKind === 'restart' ? (
+                    <LoadingIndicator />
+                  ) : (
+                    <RotateCw weight="regular" />
+                  )}
                 </Button>
               }
             />
@@ -155,7 +159,7 @@ export function ManageSessionsTable({
                   >
                     <td className="px-3 py-1.5">
                       <span
-                        className={cn('block size-1.5 rounded-full', dotClass)}
+                        className={cn('block size-1.5', dotClass)}
                         aria-label={formatState(session)}
                         title={formatState(session)}
                       />
@@ -187,7 +191,7 @@ export function ManageSessionsTable({
                         )}
                         className="text-muted-foreground hover:text-destructive"
                       >
-                        <X />
+                        <X weight="regular" />
                       </Button>
                     </td>
                   </tr>

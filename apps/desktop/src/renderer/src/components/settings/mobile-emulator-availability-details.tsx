@@ -61,7 +61,7 @@ function ToolchainStatusRow({
   )
 }
 
-const sdkPathActionClassName = 'h-6 px-2 text-muted-foreground hover:text-foreground'
+const sdkPathActionClassName = 'h-6 px-2'
 
 export function MobileEmulatorAvailabilityDetails({
   availability,
@@ -112,7 +112,7 @@ export function MobileEmulatorAvailabilityDetails({
 
   return (
     <div className="mt-3">
-      <div className="divide-border/40 border-border/50 divide-y rounded-md border px-3">
+      <div className="divide-border/40 border-border/50 divide-y border px-3">
         <ToolchainStatusRow
           ok={android.sdkFound}
           title={translate(
@@ -131,7 +131,7 @@ export function MobileEmulatorAvailabilityDetails({
                       'auto.components.settings.MobileEmulatorSdkStatus.7fe4bd5907',
                       'Detected at'
                     )}{' '}
-                <code className="bg-muted rounded px-1 py-0.5">{android.sdkPath}</code>
+                <code className="bg-muted px-1 py-0.5">{android.sdkPath}</code>
               </>
             ) : (
               android.message ||
@@ -159,7 +159,7 @@ export function MobileEmulatorAvailabilityDetails({
               <Button
                 type="button"
                 size="xs"
-                variant="ghost"
+                variant="quiet"
                 onClick={() => void handleLocate()}
                 className={sdkPathActionClassName}
               >
@@ -173,11 +173,11 @@ export function MobileEmulatorAvailabilityDetails({
                 <Button
                   type="button"
                   size="xs"
-                  variant="ghost"
+                  variant="quiet"
                   onClick={() => void handleClear()}
                   className={sdkPathActionClassName}
                 >
-                  <X className="size-3" />
+                  <X weight="regular" className="size-3" />
                   {translate(
                     'auto.components.settings.MobileEmulatorSdkStatus.8c52684db8',
                     'Clear'

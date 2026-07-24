@@ -90,7 +90,6 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                   variant="ghost"
                   size="icon-xs"
                   type="button"
-                  className="text-muted-foreground relative"
                   aria-label={
                     hasAnyFilter
                       ? translate(
@@ -110,7 +109,7 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                     // needs the same at-a-glance signal that the old filter button had.
                     <span
                       aria-hidden
-                      className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-0.5 text-[9px] leading-none font-medium"
+                      className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center px-0.5 text-[9px] leading-none font-medium"
                     >
                       {activeFilterCount > 9 ? '9+' : activeFilterCount}
                     </span>

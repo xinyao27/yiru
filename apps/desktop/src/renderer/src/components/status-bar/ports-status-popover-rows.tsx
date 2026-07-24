@@ -51,9 +51,9 @@ function PortAction({
   const button = (
     <Button
       type="button"
-      variant="ghost"
+      variant="quiet"
       size="icon-xs"
-      className="text-muted-foreground hover:text-foreground disabled:text-muted-foreground/35 size-5 disabled:pointer-events-none"
+      className="disabled:text-muted-foreground/35 size-5 disabled:pointer-events-none"
       aria-label={label}
       onClick={handleClick}
       disabled={disabled}
@@ -226,7 +226,7 @@ export function PortRow({
   )
 
   return (
-    <div className="group/port hover:bg-accent/50 grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-2 rounded-md px-2 py-1.5">
+    <div className="group/port hover:bg-accent/50 grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-2 px-2 py-1.5">
       <span className="text-foreground font-mono text-[12px] font-semibold tabular-nums select-text">
         {port.port}
       </span>
@@ -246,13 +246,13 @@ export function PortRow({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
+          <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
             <PortAction
               label={openBrowserLabel}
               tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}
               onClick={handleOpen}
             >
-              <ExternalLink className="size-3" />
+              <ExternalLink weight="regular" className="size-3" />
             </PortAction>
             <PortAction
               label={translate(

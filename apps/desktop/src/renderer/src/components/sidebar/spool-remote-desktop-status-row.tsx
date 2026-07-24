@@ -28,7 +28,7 @@ export function SpoolRemoteDesktopStatusRow({
   return (
     <div
       role="status"
-      className="border-border/60 bg-card text-muted-foreground mx-1 flex h-8 min-w-0 items-center gap-1.5 rounded-lg border px-2"
+      className="border-border/60 bg-card text-muted-foreground mx-1 flex h-8 min-w-0 items-center gap-1.5 border px-2"
     >
       <Monitor aria-hidden="true" className="size-3.5 shrink-0" />
       <TruncatedSidebarLabel

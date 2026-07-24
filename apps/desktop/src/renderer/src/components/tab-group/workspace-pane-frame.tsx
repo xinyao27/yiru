@@ -3,6 +3,8 @@ import type React from 'react'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
+import { TAB_CONTENT_SURFACE_CLASSES } from '../tab-bar/tab-chrome-classes'
+
 type WorkspacePaneFrameProps = {
   worktreeId: string
   stripId: string
@@ -46,14 +48,21 @@ export function WorkspacePaneFrame({
       )}
     >
       {/* Why: every workspace strip reveals the same native material as the left
-          sidebar when available, while unsupported platforms keep the card fallback. */}
+          sidebar when available, while unsupported platforms keep the app canvas. */}
       <div
-        className="border-border bg-card h-[var(--titlebar-height)] shrink-0 border-b [[data-native-sidebar-material=true]_&]:bg-transparent"
+        className="bg-background relative h-[var(--titlebar-height)] shrink-0 [[data-native-sidebar-material=true]_&]:bg-transparent"
         data-tab-group-strip-id={stripId}
         data-terminal-focus-release-surface="true"
         data-worktree-id={worktreeId}
       >
-        <div className="flex h-full items-stretch pr-1.5">
+        {/* Why: inactive tabs reveal this seam while the opaque active tab covers it,
+            visually connecting the selected tab to the workbench below. */}
+        <div
+          aria-hidden="true"
+          className="bg-border pointer-events-none absolute inset-x-0 bottom-0 h-px"
+        />
+        {/* Why: the trailing titlebar action owns the pane edge without an inset gutter. */}
+        <div className="relative flex h-full items-stretch">
           {reserveCollapsedSidebarHeaderSpace && !sidebarOpen ? (
             <div
               className="shrink-0"
@@ -77,13 +86,10 @@ export function WorkspacePaneFrame({
           {reserveWindowControlsSpace ? (
             <div
               className="shrink-0"
-              // Why: native controls overlay the renderer on Windows/Linux;
-              // a collapsed left sidebar also moves the profile control here.
+              // Why: native controls overlay the renderer on Windows/Linux.
               style={
                 {
-                  width: sidebarOpen
-                    ? 'var(--window-controls-width, 0px)'
-                    : 'calc(40px + var(--window-controls-width, 0px))',
+                  width: 'var(--window-controls-width, 0px)',
                   WebkitAppRegion: 'no-drag'
                 } as React.CSSProperties
               }
@@ -95,7 +101,13 @@ export function WorkspacePaneFrame({
       <div
         {...bodyProps}
         ref={bodyRef}
-        className={cn('relative min-h-0 flex-1 overflow-hidden', bodyClassName)}
+        // Why: tab content and the selected tab share the app canvas so the two
+        // read as one continuous plane across every workspace content type.
+        className={cn(
+          'relative min-h-0 flex-1 overflow-hidden',
+          TAB_CONTENT_SURFACE_CLASSES,
+          bodyClassName
+        )}
       >
         {children}
       </div>

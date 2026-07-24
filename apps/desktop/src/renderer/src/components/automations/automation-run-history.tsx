@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -48,7 +49,7 @@ export function AutomationRunHistory({
   const selectedRun = runs.find((run) => run.id === selectedRunId) ?? runs[0] ?? null
 
   return (
-    <div className="border-border/50 bg-muted/20 rounded-md border">
+    <div className="border-border/50 bg-muted/20 border">
       <div className="border-border/50 flex items-center justify-between border-b px-3 py-2">
         <div className="text-sm font-medium">
           {translate('auto.components.automations.AutomationRunHistory.53fc5f07ab', 'Run history')}
@@ -82,12 +83,14 @@ export function AutomationRunHistory({
             })
             const usageLabel = getAutomationUsageStatusLabel(run.usage)
             return (
-              <button
+              <Button
+                variant="ghost"
+                size="default"
                 key={run.id}
                 type="button"
                 data-current={selectedRun?.id === run.id}
                 className={cn(
-                  'grid w-full grid-cols-[minmax(9rem,1fr)_minmax(10rem,1.1fr)_minmax(5rem,.55fr)_minmax(5rem,.55fr)_minmax(6rem,auto)] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none',
+                  'border-0 justify-normal whitespace-normal font-normal text-sm grid w-full grid-cols-[minmax(9rem,1fr)_minmax(10rem,1.1fr)_minmax(5rem,.55fr)_minmax(5rem,.55fr)_minmax(6rem,auto)] gap-3 px-3 text-left transition-colors ',
                   selectedRun?.id === run.id && 'bg-accent text-accent-foreground'
                 )}
                 onClick={() => {
@@ -141,7 +144,7 @@ export function AutomationRunHistory({
                     {getAutomationRunStatusLabel(run.status)}
                   </Badge>
                 </div>
-              </button>
+              </Button>
             )
           })}
           {runs.length === 0 ? (

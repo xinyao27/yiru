@@ -1,6 +1,7 @@
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -47,12 +48,14 @@ export function DashboardAgentChildDisclosure({
   // Why: the chevron owns child disclosure; leaf spacers keep the leading
   // state-dot column aligned across the card.
   return (
-    <button
+    <Button
+      variant="outline"
+      size="icon-xs"
       type="button"
       onClick={handleToggleChildren}
       onMouseDown={stopMouseDown}
       onKeyDown={stopKeyDown}
-      className="border-sidebar-border/80 bg-sidebar text-foreground/80 hover:bg-sidebar-accent hover:text-foreground focus-visible:bg-sidebar-accent focus-visible:text-foreground -ml-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-sm border outline-none"
+      className="border-border/80 hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground -ml-0.5 size-4"
       aria-label={translate(
         'auto.components.dashboard.DashboardAgentChildDisclosure.1b57ce9fa4',
         '{{value0}} {{value1}} child {{value2}}',
@@ -65,11 +68,12 @@ export function DashboardAgentChildDisclosure({
       aria-expanded={childAgentsExpanded}
     >
       <ChevronRight
+        weight="regular"
         className={cn(
           'size-3 transition-transform duration-150',
           childAgentsExpanded && 'rotate-90'
         )}
       />
-    </button>
+    </Button>
   )
 }

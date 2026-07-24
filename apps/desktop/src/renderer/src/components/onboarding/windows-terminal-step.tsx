@@ -3,6 +3,7 @@ import type { BuiltInWindowsTerminalShell } from '@yiru/workbench-model/platform
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import { useCallback, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -162,7 +163,7 @@ export function WindowsTerminalStep({
 
   if (!settings) {
     return (
-      <div className="border-border bg-muted/20 text-muted-foreground rounded-xl border px-5 py-4 text-sm">
+      <div className="border-border bg-muted/20 text-muted-foreground border px-5 py-4 text-sm">
         {translate(
           'auto.components.onboarding.WindowsTerminalStep.loading',
           'Loading terminal settings...'
@@ -209,7 +210,7 @@ export function WindowsTerminalStep({
         </div>
 
         {windowsShell === 'wsl.exe' ? (
-          <div className="border-border bg-muted/20 rounded-xl border px-4 py-3">
+          <div className="border-border bg-muted/20 border px-4 py-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
                 <div className="text-foreground text-sm font-medium">
@@ -333,25 +334,25 @@ function PreferenceCard({
   onClick: () => void
 }): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="outline"
+      size="xs"
       type="button"
       aria-pressed={selected}
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'group relative min-h-28 rounded-xl border p-4 text-left outline-none transition-all disabled:cursor-not-allowed disabled:opacity-60',
-        selected
-          ? 'border-foreground/55 bg-foreground/[0.06]'
-          : 'border-border bg-muted/25 hover:bg-muted/45'
+        'h-auto justify-start gap-0 whitespace-normal font-normal group relative min-h-28 p-4 text-left disabled:cursor-not-allowed disabled:opacity-60',
+        selected ? 'border-foreground/55 bg-foreground/[0.06]' : 'bg-muted/25 hover:bg-muted/45'
       )}
     >
       {selected ? (
-        <span className="bg-primary text-primary-foreground absolute top-3 right-3 grid size-5 place-items-center rounded-full">
+        <span className="bg-primary text-primary-foreground absolute top-3 right-3 grid size-5 place-items-center">
           <Check className="size-3" strokeWidth={3} />
         </span>
       ) : null}
       <span className="flex min-w-0 items-start gap-3 pr-7">
-        <span className="border-border bg-background text-foreground grid size-9 shrink-0 place-items-center rounded-lg border">
+        <span className="border-border bg-background text-foreground grid size-9 shrink-0 place-items-center border">
           {icon}
         </span>
         <span className="min-w-0 space-y-1">
@@ -361,6 +362,6 @@ function PreferenceCard({
           </span>
         </span>
       </span>
-    </button>
+    </Button>
   )
 }

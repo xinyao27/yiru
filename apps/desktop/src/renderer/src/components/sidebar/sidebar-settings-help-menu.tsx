@@ -58,7 +58,7 @@ function ExternalMenuItem({
     <DropdownMenuItem onClick={() => openExternalUrl(url)}>
       {icon}
       {label}
-      <ExternalLink className="text-muted-foreground ml-auto size-3" />
+      <ExternalLink weight="regular" className="text-muted-foreground ml-auto size-3" />
     </DropdownMenuItem>
   )
 }
@@ -296,7 +296,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               {updateStatus.state === 'checking' ? (
                 <LoadingIndicator className="size-3.5" />
               ) : (
-                <RefreshCw className="size-3.5" />
+                <RefreshCw weight="regular" className="size-3.5" />
               )}
               {translate(
                 'auto.components.sidebar.SidebarSettingsHelpMenu.29c56f30ee',
@@ -307,7 +307,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleRestartYiru} disabled={isRestartingYiru}>
-                  <RotateCw className="size-3.5" />
+                  <RotateCw weight="regular" className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.SidebarSettingsHelpMenu.ad3d3ed7f1',
                     'Restart Yiru'

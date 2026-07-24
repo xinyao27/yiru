@@ -4,7 +4,7 @@ import {
   Clock as Clock3,
   EyeSlash as EyeOff,
   FileText as FileWarning,
-  GitBranch,
+  GitMerge,
   GitPullRequest,
   MagnifyingGlass as Search,
   TerminalWindow as SquareTerminal,
@@ -75,7 +75,7 @@ function MetadataIconChip({
         render={
           <span
             className={cn(
-              'inline-flex h-5 shrink-0 items-center gap-1 rounded-full border px-1.5 text-[11px] font-medium',
+              'inline-flex h-5 shrink-0 items-center gap-1 border px-1.5 text-[11px] font-medium',
               'border-border bg-background text-muted-foreground',
               tone === 'ready' &&
                 'border-[color:color-mix(in_srgb,var(--git-decoration-added)_45%,transparent)] bg-[color:color-mix(in_srgb,var(--git-decoration-added)_10%,transparent)] text-[var(--git-decoration-added)]',
@@ -142,7 +142,9 @@ export const CandidateRow = React.memo(function CandidateRow({
     >
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-2.5 gap-y-1">
         {selectable ? (
-          <button
+          <Button
+            variant="outline"
+            size="icon-xs"
             type="button"
             role="checkbox"
             aria-checked={selected}
@@ -152,10 +154,10 @@ export const CandidateRow = React.memo(function CandidateRow({
               { value0: candidate.displayName }
             )}
             onClick={() => onToggleSelected(candidate.worktreeId)}
-            className="border-border bg-background text-primary hover:bg-accent mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border focus-visible:outline-none"
+            className="text-primary mt-0.5 flex size-4"
           >
             {selected ? <Check className="size-3" strokeWidth={3} /> : null}
-          </button>
+          </Button>
         ) : (
           <div className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         )}
@@ -176,7 +178,7 @@ export const CandidateRow = React.memo(function CandidateRow({
               <MetadataIconChip icon={FileWarning} label={dirtyLabel} tone="destructive" />
             ) : showGitMetadataChip ? (
               <MetadataIconChip
-                icon={GitBranch}
+                icon={GitMerge}
                 label={formatGitStatus(candidate)}
                 tone={getWorkspaceCleanupGitLabel(candidate) === 'Clean' ? 'ready' : 'review'}
               />
@@ -239,6 +241,7 @@ export const CandidateRow = React.memo(function CandidateRow({
                     onClick={() => onToggleExpanded(candidate.worktreeId)}
                   >
                     <ChevronDown
+                      weight="regular"
                       className={cn('size-3.5 transition-transform', expanded && 'rotate-180')}
                     />
                   </Button>

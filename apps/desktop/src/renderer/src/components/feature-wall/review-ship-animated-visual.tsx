@@ -1,4 +1,4 @@
-import { GitBranch, Sparkle as Sparkles } from '@phosphor-icons/react'
+import { GitMerge, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import type { JSX } from 'react'
 
@@ -360,7 +360,7 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
                 )}
               </div>
               <span className="ravs-pr-base">
-                <GitBranch className="size-3" />{' '}
+                <GitMerge className="size-3" />{' '}
                 {translate(
                   'auto.components.feature.wall.ReviewShipAnimatedVisual.3b9b96d6a6',
                   'main'

@@ -1,6 +1,7 @@
 import { EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -81,7 +82,9 @@ export function SetupGuideSidebarEntry(): React.JSX.Element | null {
     <ContextMenu>
       <ContextMenuTrigger
         render={
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
             data-contextual-tour-target="setup-guide-entry"
             onClick={() =>
@@ -92,11 +95,9 @@ export function SetupGuideSidebarEntry(): React.JSX.Element | null {
             }
             aria-current={setupActive ? 'page' : undefined}
             className={cn(
-              'outline-none focus-visible:bg-sidebar-foreground/8',
-              'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
-              setupActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/60 hover:bg-sidebar-foreground/8'
+              'border-0 justify-start whitespace-normal gap-2 focus-visible:bg-accent',
+              'flex w-full px-2 py-1.5 text-left text-[13px] tracking-tight transition-colors',
+              setupActive ? 'bg-accent text-accent-foreground' : 'text-sidebar-foreground/60'
             )}
           >
             <SetupGuideProgressRing
@@ -112,7 +113,7 @@ export function SetupGuideSidebarEntry(): React.JSX.Element | null {
                 )}
               </span>
             </span>
-          </button>
+          </Button>
         }
       />
       <ContextMenuContent>

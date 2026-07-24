@@ -19,6 +19,7 @@ import {
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -161,6 +162,9 @@ export default function TerminalContextMenu({
 
   return (
     <DropdownMenu
+      // Why: Base UI retains the previous floating reference across controlled
+      // reopens; remounting at each pointer point prevents one-click position lag.
+      key={`${menuPoint.x}:${menuPoint.y}`}
       open={open}
       onOpenChange={(nextOpen, eventDetails: Menu.Root.ChangeEventDetails) => {
         if (!nextOpen) {
@@ -192,10 +196,12 @@ export default function TerminalContextMenu({
     >
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             aria-hidden
             tabIndex={-1}
-            className="pointer-events-none absolute size-px opacity-0"
+            className="pointer-events-none absolute size-px border-0 opacity-0"
             style={{ left: menuPoint.x, top: menuPoint.y }}
           />
         }
@@ -339,7 +345,7 @@ export default function TerminalContextMenu({
         )}
         {canExpandPane && (
           <DropdownMenuItem onClick={onToggleExpand}>
-            {menuPaneIsExpanded ? <Minimize2 /> : <Maximize2 />}
+            {menuPaneIsExpanded ? <Minimize2 weight="regular" /> : <Maximize2 weight="regular" />}
             {menuPaneIsExpanded
               ? translate(
                   'auto.components.terminal.pane.TerminalContextMenu.df766809e0',
@@ -369,7 +375,7 @@ export default function TerminalContextMenu({
         </DropdownMenuItem>
         {canClearPaneTitle ? (
           <DropdownMenuItem onClick={onClearPaneTitle}>
-            <X />
+            <X weight="regular" />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.clearPaneTitle',
               'Clear Pane Title'
@@ -384,7 +390,7 @@ export default function TerminalContextMenu({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={onClosePane}>
-              <X />
+              <X weight="regular" />
               {translate(
                 'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
                 'Close Pane'

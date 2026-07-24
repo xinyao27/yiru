@@ -35,6 +35,7 @@ function CommandDialog({
   onCloseAutoFocus,
   contentClassName,
   overlayClassName,
+  density = 'default',
   commandProps,
   ...props
 }: Omit<DialogPrimitive.Root.Props, 'children'> & {
@@ -48,6 +49,7 @@ function CommandDialog({
   onCloseAutoFocus?: (e: Event) => void
   contentClassName?: string
   overlayClassName?: string
+  density?: 'default' | 'compact'
   commandProps?: React.ComponentProps<typeof CommandPrimitive>
 }) {
   const { className: commandClassName, ...commandRootProps } = commandProps ?? {}
@@ -102,7 +104,8 @@ function CommandDialog({
           <Command
             shouldFilter={shouldFilter}
             className={cn(
-              '[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3',
+              '[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-item]]:px-2',
+              density === 'default' ? '[&_[cmdk-item]]:py-3' : '[&_[cmdk-item]]:py-2',
               commandClassName
             )}
             {...commandRootProps}
@@ -119,24 +122,39 @@ function CommandInput({
   className,
   wrapperClassName,
   iconClassName,
+  size = 'default',
+  variant = 'default',
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.Input>, 'size'> & {
   wrapperClassName?: string
   iconClassName?: string
+  size?: 'default' | 'sm'
+  variant?: 'default' | 'inset'
 }) {
   return (
     <div
       className={cn(
-        'flex items-center border-b border-border bg-muted/30 px-3 py-1',
+        'flex items-center',
+        variant === 'default'
+          ? 'border-b border-border bg-muted/30'
+          : 'border border-input bg-transparent focus-within:border-ring dark:bg-input/30',
+        size === 'default' ? 'px-3 py-1' : 'px-2.5',
         wrapperClassName
       )}
       data-cmdk-input-wrapper=""
     >
-      <SearchIcon className={cn('mr-2 h-4 w-4 shrink-0 opacity-50', iconClassName)} />
+      <SearchIcon
+        className={cn(
+          'mr-2 shrink-0 text-muted-foreground opacity-50',
+          size === 'default' ? 'size-4' : 'size-3.5',
+          iconClassName
+        )}
+      />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          'flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+          'w-full bg-transparent py-0 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+          size === 'default' ? 'h-10' : 'h-8',
           className
         )}
         {...props}

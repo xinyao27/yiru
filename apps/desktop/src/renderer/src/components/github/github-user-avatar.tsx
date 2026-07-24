@@ -83,10 +83,7 @@ export function GitHubUserAvatar({
         decoding="async"
         title={title}
         onError={() => setFailedSrc(src)}
-        className={cn(
-          'shrink-0 rounded-full border border-border/50 bg-muted object-cover',
-          className
-        )}
+        className={cn('shrink-0 border border-border/50 bg-muted object-cover', className)}
       />
     )
   }
@@ -95,7 +92,7 @@ export function GitHubUserAvatar({
       title={title}
       aria-hidden
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-full border border-border/50 bg-muted text-[10px] font-semibold text-muted-foreground',
+        'inline-flex shrink-0 items-center justify-center border border-border/50 bg-muted text-[10px] font-semibold text-muted-foreground',
         className
       )}
     >

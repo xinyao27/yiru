@@ -234,7 +234,7 @@ export default function AutomationProjectCombobox({
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
-            <ChevronsUpDown className="size-3.5 opacity-50" />
+            <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
           </Button>
         }
       />
@@ -285,21 +285,20 @@ export default function AutomationProjectCombobox({
                       setHostMenuHover(group.projectKey, 'row', true)
                     }
                   }}
-                  onMouseLeave={() => {
-                    if (hasHostMenu) {
-                      setHostMenuHover(group.projectKey, 'row', false)
-                    }
-                  }}
+                  onMouseLeave={() =>
+                    hasHostMenu && setHostMenuHover(group.projectKey, 'row', false)
+                  }
                   className={cn(
                     'group/automation-project-row flex items-stretch transition-colors hover:bg-accent hover:text-accent-foreground',
                     commandValue === group.repo.id && 'bg-accent text-accent-foreground'
                   )}
                 >
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleSelect(selectedSource.id)}
                     onMouseDown={(event) => event.preventDefault()}
-                    className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-2 px-3 py-1.5 text-left text-xs outline-none"
+                    className="focus-visible:bg-accent flex min-w-0 flex-1 justify-start gap-2 border-0 py-1.5 text-left text-xs font-normal whitespace-normal"
                   >
                     <Check
                       className={cn(
@@ -315,7 +314,7 @@ export default function AutomationProjectCombobox({
                       />
                       <p className="text-muted-foreground mt-0.5 truncate text-[10px]">{detail}</p>
                     </div>
-                  </button>
+                  </Button>
                   {hasHostMenu ? (
                     <Popover
                       open={hostMenuProjectKey === group.projectKey}
@@ -325,8 +324,9 @@ export default function AutomationProjectCombobox({
                     >
                       <PopoverTrigger
                         render={
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="xs"
                             title={translate(
                               'auto.components.automations.AutomationProjectCombobox.chooseHost',
                               'Choose automation host'
@@ -336,10 +336,10 @@ export default function AutomationProjectCombobox({
                               event.stopPropagation()
                             }}
                             onMouseDown={(event) => event.preventDefault()}
-                            className="text-muted-foreground focus-visible:bg-accent flex w-7 shrink-0 items-center justify-center outline-none"
+                            className="text-muted-foreground focus-visible:bg-accent flex h-auto w-7 border-0 p-0"
                           >
-                            <ChevronRight className="size-3.5" />
-                          </button>
+                            <ChevronRight weight="regular" className="size-3.5" />
+                          </Button>
                         }
                       />
                       <PopoverContent
@@ -357,12 +357,14 @@ export default function AutomationProjectCombobox({
                               : null
                             const sourceSelected = source.id === selectedSource.id
                             return (
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 key={source.id}
                                 type="button"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => handleSelect(source.id)}
-                                className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors outline-none"
+                                className="focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full justify-start gap-2 border-0 px-2 py-1.5 text-left text-xs font-normal whitespace-normal transition-colors"
                               >
                                 <Check
                                   className={cn(
@@ -378,7 +380,7 @@ export default function AutomationProjectCombobox({
                                     {source.path}
                                   </p>
                                 </div>
-                              </button>
+                              </Button>
                             )
                           })}
                         </div>
@@ -397,7 +399,7 @@ export default function AutomationProjectCombobox({
               onClick={() => void handleAddFolder()}
               onMouseDown={(event) => event.preventDefault()}
               onMouseEnter={() => setCommandValue('')}
-              className="h-8 w-full justify-start rounded-none px-3 text-xs font-normal"
+              className="h-8 w-full justify-start px-3 text-xs font-normal"
             >
               <FolderPlus className="text-muted-foreground size-3.5" />
               <span>

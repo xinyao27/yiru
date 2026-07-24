@@ -92,10 +92,7 @@ export function BrowserUseCookieImportStep({
         'Import cookies from Chrome, Edge, or other browsers so agents can reuse your logins.'
       )}
       keywords={getBrowserUsePaneSearchEntries()[2].keywords}
-      className={cn(
-        'rounded-xl border border-border/60 bg-card/50 p-4',
-        step3Blocked && 'opacity-60'
-      )}
+      className={cn('border border-border/60 bg-card/50 p-4', step3Blocked && 'opacity-60')}
     >
       <div className="flex items-start gap-3">
         <StepBadge
@@ -125,16 +122,18 @@ export function BrowserUseCookieImportStep({
             </p>
           ) : null}
           {onConfigureMoreBrowsers ? (
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               onClick={onConfigureMoreBrowsers}
-              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-[11px] underline underline-offset-2 outline-none"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 text-[11px] underline underline-offset-2"
             >
               {translate(
                 'auto.components.settings.BrowserUsePane.67d9a53f47',
                 'Manage profiles for separate logins'
               )}
-            </button>
+            </Button>
           ) : null}
         </div>
         <DropdownMenu

@@ -61,7 +61,9 @@ sips --cropToHeightWidth 255 400 "$TMP_DIR/yiru-splash-square.png" \
 render_svg "$APP_ICON_SOURCE" 48 "$MOBILE_ASSETS_DIR/favicon.png"
 render_svg "$WARM_ICON_SOURCE" 1024 "$APP_ICONS_DIR/yiru-warm.png"
 render_svg "$GRAPHITE_ICON_SOURCE" 1024 "$APP_ICONS_DIR/yiru-graphite.png"
-render_svg "$DEV_ICON_SOURCE" 256 "$PROJECT_DIR/resources/icon-dev.png"
+# Why: Quick Look flattens transparent margins, which makes the dev Dock icon
+# render as an oversized square instead of matching the production icon bounds.
+render_transparent_svg "$DEV_ICON_SOURCE" 256 256 "$PROJECT_DIR/resources/icon-dev.png"
 # Why: Quick Look flattens SVG transparency against white, but macOS template
 # images need alpha-only backgrounds so the system can tint them correctly.
 render_transparent_svg \

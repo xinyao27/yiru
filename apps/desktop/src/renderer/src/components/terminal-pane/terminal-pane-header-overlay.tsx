@@ -8,6 +8,7 @@ import {
 import type { CSSProperties, RefObject } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
@@ -185,8 +186,9 @@ export default function TerminalPaneHeaderOverlay({
             }}
           >
             {isEditing ? (
-              <input
+              <Input
                 ref={renameInputRef}
+                variant="chrome-free"
                 className="pane-title-input focus-visible:border-ring outline-none"
                 aria-label={translate(
                   'auto.components.terminal.pane.TerminalPane.7dbbfcbecc',
@@ -232,9 +234,11 @@ export default function TerminalPaneHeaderOverlay({
                   />
                 )}
                 {title ? (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     type="button"
-                    className="pane-title-text focus-visible:bg-accent outline-none"
+                    className="pane-title-text focus-visible:bg-accent h-auto w-auto p-0"
                     onClick={() => onStartRename(pane.id)}
                     aria-label={translate(
                       'auto.components.terminal.pane.TerminalPane.cc5a2dc706',
@@ -243,7 +247,7 @@ export default function TerminalPaneHeaderOverlay({
                     )}
                   >
                     {title}
-                  </button>
+                  </Button>
                 ) : null}
                 <div className="pane-title-actions ml-auto flex shrink-0 items-center gap-0">
                   {canContinueAgentSessionInNewSession && isActivePane ? (
@@ -365,7 +369,7 @@ export default function TerminalPaneHeaderOverlay({
                               { value0: title }
                             )}
                           >
-                            <X className="size-3" />
+                            <X weight="regular" className="size-3" />
                           </Button>
                         }
                       />
@@ -394,7 +398,7 @@ export default function TerminalPaneHeaderOverlay({
                               'Close Pane'
                             )}
                           >
-                            <X className="size-3" />
+                            <X className="size-3" weight="regular" />
                           </Button>
                         }
                       />

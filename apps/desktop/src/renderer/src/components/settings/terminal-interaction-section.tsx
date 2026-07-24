@@ -57,13 +57,13 @@ function ScrollSpeedSlider({
   onChange
 }: ScrollSpeedSliderProps): React.JSX.Element {
   return (
-    <div className="border-border/60 bg-background/50 rounded-md border p-3">
+    <div className="border-border/60 bg-background/50 border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-0.5">
           <Label className="text-xs font-medium">{label}</Label>
           <p className="text-muted-foreground text-[11px] leading-4">{description}</p>
         </div>
-        <span className="border-border/50 bg-muted/40 text-foreground shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[11px] tabular-nums">
+        <span className="border-border/50 bg-muted/40 text-foreground shrink-0 border px-1.5 py-0.5 font-mono text-[11px] tabular-nums">
           {formatScrollSpeedValue(value)}
           {suffix}
         </span>
@@ -180,7 +180,7 @@ export function TerminalInteractionSection({
                   })
                 }
               >
-                <RotateCcw className="size-3.5" />
+                <RotateCcw weight="regular" className="size-3.5" />
                 {translate('auto.components.settings.TerminalPane.scrollSpeed.reset', 'Reset')}
               </Button>
             </div>

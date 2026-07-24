@@ -76,7 +76,9 @@ function SettingsSetupGuideNavRow({
   onSelect
 }: SettingsSetupGuideRowProps): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="default"
       type="button"
       aria-current={setupActive ? 'page' : undefined}
       aria-label={translate(
@@ -93,10 +95,10 @@ function SettingsSetupGuideNavRow({
         })
       }
       className={cn(
-        'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left outline-none transition-colors',
+        'border-0 justify-start whitespace-normal flex w-full px-2.5 text-left transition-colors',
         setupActive
-          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-          : 'text-sidebar-foreground/60 hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground'
+          ? 'bg-accent text-accent-foreground'
+          : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
       )}
     >
       <SetupGuideProgressRing
@@ -110,7 +112,7 @@ function SettingsSetupGuideNavRow({
           {translate('auto.components.settings.SettingsSidebar.6503182299', 'Onboarding checklist')}
         </span>
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -135,10 +137,10 @@ export function SettingsSidebar({
   const searchShortcutCombos = useShortcutKeyComboDetails('settings.search')
   const navItemClassName = (isActive: boolean): string =>
     cn(
-      'flex w-full items-center justify-start gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
+      'flex w-full items-center justify-start gap-2 px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
       isActive
-        ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-        : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
+        ? 'bg-accent text-accent-foreground font-medium'
+        : 'text-sidebar-foreground/60 hover:bg-accent hover:text-sidebar-foreground'
     )
   const installStatusLabel = (status: SettingsNavInstallStatus): string => {
     switch (status) {
@@ -162,7 +164,7 @@ export function SettingsSidebar({
   }
   const installStatusClassName = (status: SettingsNavInstallStatus): string =>
     cn(
-      'ml-auto shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium leading-none',
+      'ml-auto shrink-0 border px-1.5 py-0.5 text-[10px] font-medium leading-none',
       status === 'installed' || status === 'up-to-date'
         ? 'border-green-700/25 bg-green-700/10 text-green-700 dark:border-green-300/25 dark:bg-green-300/10 dark:text-green-300'
         : status === 'update-available'
@@ -186,7 +188,7 @@ export function SettingsSidebar({
           onClick={onBack}
           className="text-muted-foreground w-full justify-start gap-2 text-[13px]"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft weight="regular" className="size-4" />
           {translate('auto.components.settings.SettingsSidebar.60f8a673a7', 'Back to app')}
         </Button>
       </div>
@@ -245,7 +247,9 @@ export function SettingsSidebar({
                     const isActive = activeSectionId === section.id
 
                     return (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         key={section.id}
                         aria-current={isActive ? 'page' : undefined}
                         data-current={isActive ? 'true' : undefined}
@@ -258,7 +262,7 @@ export function SettingsSidebar({
                           })
                         }
                         className={cn(
-                          'outline-none focus-visible:bg-accent',
+                          'p-0 h-auto border-0 focus-visible:bg-accent',
                           navItemClassName(isActive)
                         )}
                       >
@@ -269,11 +273,11 @@ export function SettingsSidebar({
                             {installStatusLabel(section.installStatus)}
                           </span>
                         ) : section.badge ? (
-                          <span className="bg-muted text-muted-foreground ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-medium tracking-wider uppercase">
+                          <span className="bg-muted text-muted-foreground ml-auto px-1.5 py-0.5 text-[9px] font-medium tracking-wider uppercase">
                             {section.badge}
                           </span>
                         ) : null}
-                      </button>
+                      </Button>
                     )
                   })}
               </div>
@@ -291,7 +295,9 @@ export function SettingsSidebar({
                   const isActive = activeSectionId === section.id
 
                   return (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="xs"
                       key={section.id}
                       aria-current={isActive ? 'page' : undefined}
                       data-current={isActive ? 'true' : undefined}
@@ -304,7 +310,7 @@ export function SettingsSidebar({
                         })
                       }
                       className={cn(
-                        'outline-none focus-visible:bg-accent',
+                        'p-0 h-auto border-0 focus-visible:bg-accent',
                         navItemClassName(isActive)
                       )}
                     >
@@ -322,7 +328,7 @@ export function SettingsSidebar({
                           {translate('auto.components.settings.SettingsSidebar.e0900f83e7', 'SSH')}
                         </span>
                       )}
-                    </button>
+                    </Button>
                   )
                 })}
               </div>

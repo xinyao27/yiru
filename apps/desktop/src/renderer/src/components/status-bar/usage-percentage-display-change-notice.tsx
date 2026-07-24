@@ -144,7 +144,7 @@ export function UsagePercentageDisplayChangeNotice({
           <div
             role="status"
             // Why: the opaque callout sits under menus, and its caret points back to the usage meter.
-            className="border-border bg-popover text-popover-foreground after:border-border after:bg-popover fixed z-[50] w-[320px] max-w-[calc(100vw-16px)] rounded-lg border p-3.5 after:absolute after:bottom-[-6px] after:left-5 after:size-3 after:rotate-45 after:border-r after:border-b after:content-['']"
+            className="border-border bg-popover text-popover-foreground after:border-border after:bg-popover fixed z-[50] w-[320px] max-w-[calc(100vw-16px)] border p-3.5 after:absolute after:bottom-[-6px] after:left-5 after:size-3 after:rotate-45 after:border-r after:border-b after:content-['']"
             style={{
               bottom: anchorPosition.bottom,
               left: anchorPosition.left
@@ -154,7 +154,7 @@ export function UsagePercentageDisplayChangeNotice({
               <div className="min-w-0 space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span
-                    className="border-border bg-secondary text-foreground flex size-6 shrink-0 items-center justify-center rounded-full border"
+                    className="border-border bg-secondary text-foreground flex size-6 shrink-0 items-center justify-center border"
                     aria-hidden="true"
                   >
                     <BarChart3 className="size-3.5" />
@@ -183,7 +183,7 @@ export function UsagePercentageDisplayChangeNotice({
                   'Dismiss'
                 )}
               >
-                <X className="size-3.5" />
+                <X weight="regular" className="size-3.5" />
               </Button>
             </div>
             <div className="mt-3 flex gap-2">

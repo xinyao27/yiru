@@ -277,7 +277,7 @@ export function OnboardingInlineCommandTerminal({
       <section
         ref={terminalSectionRef}
         aria-label={ariaLabel}
-        className="border-border bg-card min-h-0 overflow-hidden rounded-xl border"
+        className="border-border bg-card min-h-0 overflow-hidden border"
       >
         {description ? (
           <div className={cn('border-b border-border', descriptionPaddingClassName)}>

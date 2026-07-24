@@ -389,7 +389,7 @@ function NativeChatResolvedView({
       onMouseUpCapture={contextMenu.onSelectionCapture}
       onKeyUpCapture={contextMenu.onSelectionCapture}
       onContextMenuCapture={contextMenu.onContextMenuCapture}
-      className="bg-background relative flex h-full min-h-0 w-full flex-col focus:outline-none"
+      className="bg-background text-foreground relative flex h-full min-h-0 w-full flex-col focus:outline-none"
     >
       <div className="flex min-h-0 flex-1 flex-col">
         {viewState.kind === 'loading' ? (

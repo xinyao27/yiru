@@ -46,7 +46,7 @@ export function SpoolSessionContinuationNotice({
           : AlertCircle
   const message = getContinuationMessage(phase, canControl)
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-[var(--editor-surface)]/90 p-6">
+    <div className="bg-background/90 absolute inset-0 flex items-center justify-center p-6">
       <div className="flex max-w-sm flex-col items-center gap-2 text-center">
         <Icon
           aria-hidden="true"
@@ -62,7 +62,7 @@ export function SpoolSessionContinuationNotice({
           phase === 'attach-error' ||
           phase === 'reconnect-error' ? (
           <Button type="button" size="xs" variant="outline" onClick={onRetry}>
-            <RotateCcw aria-hidden="true" />
+            <RotateCcw weight="regular" aria-hidden="true" />
             {phase === 'continue-error'
               ? translate('auto.components.spool.SpoolSessionPane.retryContinue', 'Try again')
               : translate(

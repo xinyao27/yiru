@@ -4,7 +4,7 @@ import {
   Check,
   Circle,
   FileText as FileWarning,
-  GitBranch,
+  GitMerge,
   GitPullRequest,
   HardDrive,
   Minus,
@@ -42,7 +42,6 @@ import type { WorktreeForceDeleteReason } from '../../../../shared/worktree-remo
 import { useAppStore } from '../../store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '../../store/selectors'
 import { getHostedReviewCacheKey } from '../../store/slices/hosted-review'
-import { refreshGitStatusForWorktree } from '../right-sidebar/git-status-refresh'
 import { prepareActiveWorktreeFocusAfterDelete } from '../sidebar/active-worktree-focus-after-delete'
 import { runWorktreeBatchDelete } from '../sidebar/delete-worktree-flow'
 import { branchDisplayName } from '../sidebar/worktree-card-helpers'
@@ -57,6 +56,7 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { refreshGitStatusForWorktree } from '../workspace-panel/git-status-refresh'
 import {
   formatBytes,
   formatCompactCount,
@@ -318,7 +318,9 @@ function CheckButton({
   const isChecked = checked === true
   const isMixed = checked === 'mixed'
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon-xs"
       type="button"
       role="checkbox"
       aria-checked={checked}
@@ -330,14 +332,11 @@ function CheckButton({
         event.stopPropagation()
         onClick()
       }}
-      className={cn(
-        'flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none',
-        disabled && 'cursor-default opacity-35'
-      )}
+      className={cn('flex transition-colors ', disabled && 'cursor-default opacity-35')}
     >
       <span
         className={cn(
-          'flex size-4 items-center justify-center rounded-sm border transition-colors',
+          'flex size-4 items-center justify-center border transition-colors',
           isChecked || isMixed
             ? 'border-foreground bg-foreground text-background'
             : 'border-muted-foreground/50 bg-background/40 text-transparent'
@@ -346,7 +345,7 @@ function CheckButton({
         {isChecked ? <Check className="size-3" strokeWidth={3} /> : null}
         {isMixed ? <Minus className="size-3" strokeWidth={3} /> : null}
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -362,7 +361,11 @@ function SortIndicator({
   if (sortKey !== activeKey) {
     return <Circle className="size-3 opacity-0" />
   }
-  return direction === 'asc' ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />
+  return direction === 'asc' ? (
+    <ArrowUp weight="regular" className="size-3" />
+  ) : (
+    <ArrowDown weight="regular" className="size-3" />
+  )
 }
 
 function StatusBadge({
@@ -495,7 +498,7 @@ function DecisionLine({
     <div className="flex min-w-0 items-start gap-2">
       <span
         className={cn(
-          'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border border-border/60 bg-muted/30 text-muted-foreground [&>svg]:size-3',
+          'mt-0.5 flex size-5 shrink-0 items-center justify-center border border-border/60 bg-muted/30 text-muted-foreground [&>svg]:size-3',
           tone === 'warning' && 'border-destructive/25 bg-destructive/8 text-destructive'
         )}
       >
@@ -662,7 +665,7 @@ function WorkspaceDecisionHoverCard({
           tone={details.dirtyEditorBufferCount > 0 ? 'warning' : 'default'}
         />
         <DecisionLine
-          icon={<GitBranch />}
+          icon={<GitMerge />}
           label={translate(
             'auto.components.status.bar.WorkspaceSpaceManagerPanel.b9b4a3a25d',
             'Branch'
@@ -701,7 +704,7 @@ function WorkspaceDecisionHoverCard({
           disabled={!details.canOpenWorkspace}
           className="shrink-0 gap-1.5"
         >
-          <ExternalLink className="size-3.5" />
+          <ExternalLink weight="regular" className="size-3.5" />
           {translate(
             'auto.components.status.bar.WorkspaceSpaceManagerPanel.c28643d3da',
             'Go to workspace'
@@ -757,7 +760,7 @@ function WorkspaceTreemap({
 
   if (rects.length === 0) {
     return (
-      <div className="border-border/70 bg-muted/20 text-muted-foreground relative flex h-72 items-center justify-center rounded-lg border border-dashed text-sm">
+      <div className="border-border/70 bg-muted/20 text-muted-foreground relative flex h-72 items-center justify-center border border-dashed text-sm">
         {zoomedWorktree ? (
           <Button
             variant="outline"
@@ -791,11 +794,11 @@ function WorkspaceTreemap({
   }
 
   return (
-    <div className="border-border/70 bg-muted/20 relative h-72 overflow-hidden rounded-lg border">
+    <div className="border-border/70 bg-muted/20 relative h-72 overflow-hidden border">
       <div className="absolute top-2 right-2 z-10 flex max-w-[calc(100%-1rem)] items-center gap-2">
         {zoomedWorktree ? (
           <>
-            <div className="border-border/70 bg-background max-w-56 truncate rounded-md border px-2 py-1 text-[11px] font-medium">
+            <div className="border-border/70 bg-background max-w-56 truncate border px-2 py-1 text-[11px] font-medium">
               {zoomedWorktree.displayName}
             </div>
             <Button
@@ -856,20 +859,22 @@ function WorkspaceTreemap({
         }
 
         return (
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             key={rect.id}
             type="button"
             aria-label={`${rect.label}, ${formatBytes(rect.sizeBytes)}`}
             title={`${rect.label} • ${formatBytes(rect.sizeBytes)}`}
             onClick={() => onSelect(rect.id)}
             className={cn(
-              'absolute overflow-hidden border border-background/80 p-2 text-left transition-[filter,border-color] hover:brightness-105 focus-visible:outline-none',
+              'h-auto w-auto absolute overflow-hidden border-background/80 p-2 text-left transition-[filter,border-color] hover:brightness-105 ',
               selected && 'border-ring'
             )}
             style={rectStyle}
           >
             {rectContent}
-          </button>
+          </Button>
         )
       })}
     </div>
@@ -879,8 +884,8 @@ function WorkspaceTreemap({
 function SizeBar({ value, max }: { value: number; max: number }): React.JSX.Element {
   const pct = max > 0 ? Math.max(2, Math.min(100, (value / max) * 100)) : 0
   return (
-    <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-      <div className="bg-foreground/65 h-full rounded-full" style={{ width: `${pct}%` }} />
+    <div className="bg-muted h-1.5 overflow-hidden">
+      <div className="bg-foreground/65 h-full" style={{ width: `${pct}%` }} />
     </div>
   )
 }
@@ -894,7 +899,7 @@ function BreakdownList({
 }): React.JSX.Element {
   if (!worktree) {
     return (
-      <div className="border-border/70 bg-muted/15 text-muted-foreground flex h-full min-h-72 items-center justify-center rounded-lg border border-dashed text-sm">
+      <div className="border-border/70 bg-muted/15 text-muted-foreground flex h-full min-h-72 items-center justify-center border border-dashed text-sm">
         <span className="flex items-center gap-2">
           {isScanning ? <LoadingIndicator className="size-4" /> : null}
           {isScanning
@@ -914,7 +919,7 @@ function BreakdownList({
   const maxChildSize = getLargestWorkspaceSpaceItemSize(worktree.topLevelItems)
   const topLevelItemCount = worktree.topLevelItems.length + worktree.omittedTopLevelItemCount
   return (
-    <div className="border-border/70 bg-background/35 min-h-72 rounded-lg border">
+    <div className="border-border/70 bg-background/35 min-h-72 border">
       <div className="border-border/60 border-b px-4 py-3">
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="min-w-0">
@@ -977,7 +982,7 @@ function BreakdownRow({
   maxSize: number
 }): React.JSX.Element {
   return (
-    <div className="hover:bg-accent/50 space-y-1.5 rounded-md px-2 py-1.5">
+    <div className="hover:bg-accent/50 space-y-1.5 px-2 py-1.5">
       <div className="flex min-w-0 items-center justify-between gap-3 text-xs">
         <span className="min-w-0 truncate font-medium">{item.name}</span>
         <span className="text-muted-foreground shrink-0 tabular-nums">
@@ -1071,14 +1076,14 @@ function WorkspaceRow({
           ) : null}
         </div>
         <div className="text-muted-foreground mt-1 flex min-w-0 items-center gap-1.5 text-xs">
-          <GitBranch className="size-3 shrink-0" />
+          <GitMerge className="size-3 shrink-0" />
           <span className="truncate">{getWorkspaceSpaceBranchLabel(worktree)}</span>
         </div>
         <div className="text-muted-foreground mt-0.5 truncate font-mono text-[11px]">
           {worktree.path}
         </div>
         {deleteError ? (
-          <div className="border-destructive/35 bg-destructive/8 text-destructive mt-2 flex min-w-0 items-start gap-2 rounded-md border px-2 py-1.5 text-[11px]">
+          <div className="border-destructive/35 bg-destructive/8 text-destructive mt-2 flex min-w-0 items-start gap-2 border px-2 py-1.5 text-[11px]">
             <AlertTriangle className="mt-0.5 size-3 shrink-0" />
             <span className="min-w-0 flex-1 break-words" title={deleteError}>
               {deleteError}
@@ -1584,7 +1589,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
 
   return (
     <div className="space-y-5">
-      <div className="border-border/65 bg-background/35 md:divide-border/60 grid overflow-hidden rounded-lg border md:grid-cols-4 md:divide-x">
+      <div className="border-border/65 bg-background/35 md:divide-border/60 grid overflow-hidden border md:grid-cols-4 md:divide-x">
         <Metric
           label={translate(
             'auto.components.status.bar.WorkspaceSpaceManagerPanel.09960d86bd',
@@ -1658,10 +1663,10 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
             progress?.state === 'cancelling' ? (
               <LoadingIndicator className="size-3.5" />
             ) : (
-              <X className="size-3.5" />
+              <X weight="regular" className="size-3.5" />
             )
           ) : (
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
           )}
           {isScanning
             ? progress?.state === 'cancelling'
@@ -1686,7 +1691,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       </div>
 
       {scanError ? (
-        <div className="border-destructive/35 bg-destructive/8 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-xs">
+        <div className="border-destructive/35 bg-destructive/8 text-destructive flex items-start gap-2 border px-3 py-2 text-xs">
           <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
           <span className="min-w-0 break-words">
             {scanError}
@@ -1701,7 +1706,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       ) : null}
 
       {repoErrors.length > 0 ? (
-        <div className="border-border/70 bg-muted/20 text-muted-foreground space-y-1.5 rounded-md border px-3 py-2 text-xs">
+        <div className="border-border/70 bg-muted/20 text-muted-foreground space-y-1.5 border px-3 py-2 text-xs">
           {repoErrors.map((repo) => (
             <div key={repo.repoId} className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
@@ -1728,7 +1733,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       ) : null}
 
       {hasRows ? (
-        <div className="border-border/70 bg-background sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2">
+        <div className="border-border/70 bg-background sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 border px-3 py-2">
           <div className="text-muted-foreground min-w-0 text-xs">
             <span className="text-foreground font-medium">
               {selectedDeletableIds.length}{' '}
@@ -1880,7 +1885,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       ) : null}
 
       {hasRows || isInitialScan ? (
-        <div className="border-border/70 bg-background/30 overflow-x-auto rounded-lg border">
+        <div className="border-border/70 bg-background/30 overflow-x-auto border">
           <div className="min-w-[46rem]">
             <div className="border-border/60 text-muted-foreground grid grid-cols-[1.75rem_minmax(0,1.25fr)_minmax(9rem,0.55fr)_8rem_9.5rem] gap-3 border-b px-3 py-2 text-[11px] font-medium tracking-[0.14em] uppercase">
               <div className="flex items-center">
@@ -1901,39 +1906,45 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
                   onClick={toggleVisibleSelection}
                 />
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 onClick={() => toggleSort('name')}
-                className="focus-visible:bg-accent flex items-center gap-1 text-left outline-none"
+                className="focus-visible:bg-accent flex h-auto justify-start border-0 p-0 text-left font-normal whitespace-normal"
               >
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.e4aebea158',
                   'Workspace'
                 )}
                 <SortIndicator sortKey="name" activeKey={sortKey} direction={sortDirection} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 onClick={() => toggleSort('repo')}
-                className="focus-visible:bg-accent flex items-center gap-1 text-left outline-none"
+                className="focus-visible:bg-accent flex h-auto justify-start border-0 p-0 text-left font-normal whitespace-normal"
               >
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.81f14d9924',
                   'Repository'
                 )}
                 <SortIndicator sortKey="repo" activeKey={sortKey} direction={sortDirection} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 onClick={() => toggleSort('size')}
-                className="focus-visible:bg-accent flex items-center justify-end gap-1 text-right outline-none"
+                className="focus-visible:bg-accent flex h-auto justify-end border-0 p-0 text-right font-normal"
               >
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.33aef3e9cc',
                   'Size'
                 )}
                 <SortIndicator sortKey="size" activeKey={sortKey} direction={sortDirection} />
-              </button>
+              </Button>
               <div className="text-right">
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.be37293b10',
@@ -2002,7 +2013,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="border-border/70 bg-background/30 text-muted-foreground rounded-lg border px-4 py-10 text-center text-sm">
+        <div className="border-border/70 bg-background/30 text-muted-foreground border px-4 py-10 text-center text-sm">
           {scanError
             ? translate(
                 'auto.components.status.bar.WorkspaceSpaceManagerPanel.8194a4fb29',

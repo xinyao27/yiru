@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -36,30 +38,16 @@ export function VoiceDictationSettingsSection({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={voiceSettings.enabled}
+        <Switch
+          checked={voiceSettings.enabled}
           aria-label={translate(
             'auto.components.settings.VoicePane.0121960365',
             'Enable Voice Dictation'
           )}
           aria-busy={permissionPending}
           disabled={permissionPending}
-          onClick={() => void onToggleVoiceDictation()}
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            voiceSettings.enabled ? 'bg-foreground' : 'bg-muted-foreground/30',
-            permissionPending ? 'cursor-wait opacity-70' : ''
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              voiceSettings.enabled ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+          onCheckedChange={() => void onToggleVoiceDictation()}
+        />
       </div>
 
       <Separator />
@@ -79,25 +67,25 @@ export function VoiceDictationSettingsSection({
             {shortcutLabel} {translate('auto.components.settings.VoicePane.7cf715f891', 'is held.')}
           </p>
         </div>
-        <div className="border-border/60 bg-background/50 flex shrink-0 items-center rounded-md border p-0.5">
+        <div className="border-border/60 bg-background/50 flex shrink-0 items-center border p-0.5">
           {(['toggle', 'hold'] as const).map((mode) => (
-            <button
+            <Button
+              variant="quiet"
+              size="sm"
               key={mode}
               onClick={() => onUpdateVoiceSettings({ dictationMode: mode })}
               disabled={!voiceSettings.enabled}
               className={cn(
-                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                'rounded-sm px-3 py-1 text-sm transition-colors',
-                voiceSettings.dictationMode === mode
-                  ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground',
+                'text-sm ',
+                'py-1 ',
+                voiceSettings.dictationMode === mode ? 'bg-accent text-accent-foreground' : ' ',
                 !voiceSettings.enabled ? 'opacity-50 cursor-not-allowed' : ''
               )}
             >
               {mode === 'toggle'
                 ? translate('auto.components.settings.VoicePane.118b3c2dee', 'Toggle')
                 : translate('auto.components.settings.VoicePane.174da92062', 'Hold')}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

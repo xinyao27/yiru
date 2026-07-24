@@ -253,10 +253,12 @@ function AppSection({
   return (
     <div className="border-border/50 border-t">
       <div className="flex items-center">
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           onClick={onToggle}
-          className="hover:bg-muted/50 focus-visible:bg-muted/50 py-2 pr-0.5 pl-2 transition-colors outline-none"
+          className="hover:bg-muted/50 focus-visible:bg-muted/50 h-auto gap-0 border-0 py-2 pr-0.5 pl-2 font-normal transition-colors"
           aria-label={
             isCollapsed
               ? translate(
@@ -271,11 +273,11 @@ function AppSection({
           aria-expanded={!isCollapsed}
         >
           {isCollapsed ? (
-            <ChevronRight className="text-muted-foreground h-3 w-3" />
+            <ChevronRight weight="regular" className="text-muted-foreground h-3 w-3" />
           ) : (
-            <ChevronDown className="text-muted-foreground h-3 w-3" />
+            <ChevronDown weight="regular" className="text-muted-foreground h-3 w-3" />
           )}
-        </button>
+        </Button>
         <div className="flex min-w-0 flex-1 items-center justify-between py-2 pr-3">
           <span className="text-muted-foreground truncate text-[11px] font-semibold tracking-wide uppercase">
             {translate('auto.components.status.bar.ResourceUsageStatusSegment.288a4dd177', 'Yiru')}
@@ -402,7 +404,7 @@ function SessionRow({
     >
       <span
         className={cn(
-          'size-1.5 shrink-0 rounded-full',
+          'size-1.5 shrink-0',
           session.bound ? 'bg-emerald-500' : 'bg-muted-foreground/40'
         )}
       />
@@ -416,15 +418,17 @@ function SessionRow({
           list); orphan sessions show it always so the "this is reclaimable"
           affordance survives. Mirrors Settings > Manage Sessions. */}
       <span className={ROW_TRAILING_GUTTER_CLS}>
-        <button
+        <Button
+          variant="destructive"
+          size="xs"
           type="button"
           onClick={(e) => {
             e.stopPropagation()
             onKill(session)
           }}
           className={cn(
-            'outline-none focus-visible:bg-destructive/10 focus-visible:text-destructive',
-            'rounded p-0.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive',
+            'h-auto border-0 gap-0 font-normal focus-visible:bg-destructive/10 focus-visible:text-destructive',
+            'p-0.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive',
             session.bound &&
               'can-hover:opacity-0 group-hover/sessrow:opacity-100 group-focus-within/sessrow:opacity-100 focus-visible:opacity-100'
           )}
@@ -434,8 +438,8 @@ function SessionRow({
             { value0: session.sessionId }
           )}
         >
-          <X className="size-3" />
-        </button>
+          <X weight="regular" className="size-3" />
+        </Button>
       </span>
     </div>
   )
@@ -497,10 +501,12 @@ export function WorktreeRow({
     <div className="border-border/20 border-b last:border-b-0">
       <div className="group/wtrow hover:bg-muted/60 ml-2 flex items-center transition-colors">
         {hasResources ? (
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             onClick={onToggle}
-            className="focus-visible:bg-accent shrink-0 py-2 pr-0.5 pl-2 outline-none"
+            className="focus-visible:bg-accent h-auto gap-0 border-0 py-2 pr-0.5 pl-2 font-normal"
             aria-label={
               isCollapsed
                 ? translate(
@@ -514,18 +520,20 @@ export function WorktreeRow({
             }
           >
             {isCollapsed ? (
-              <ChevronRight className="text-muted-foreground h-3 w-3" />
+              <ChevronRight weight="regular" className="text-muted-foreground h-3 w-3" />
             ) : (
-              <ChevronDown className="text-muted-foreground h-3 w-3" />
+              <ChevronDown weight="regular" className="text-muted-foreground h-3 w-3" />
             )}
-          </button>
+          </Button>
         ) : (
           <span
             className="w-[calc(0.5rem+0.75rem+0.125rem)] shrink-0 py-2 pr-0.5 pl-2"
             aria-hidden
           />
         )}
-        <button
+        <Button
+          variant="ghost"
+          size="default"
           type="button"
           onClick={onNavigate}
           aria-label={translate(
@@ -533,7 +541,7 @@ export function WorktreeRow({
             'Resume workspace {{value0}}',
             { value0: rowLabel }
           )}
-          className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1.5 py-2 pr-2 pl-1 text-left outline-none"
+          className="focus-visible:bg-accent flex min-w-0 flex-1 justify-start gap-1.5 border-0 pr-2 pl-1 text-left font-normal whitespace-normal"
           disabled={!isNavigable}
         >
           <span className="truncate text-xs font-medium">{rowLabel}</span>
@@ -549,7 +557,7 @@ export function WorktreeRow({
               )}
             </span>
           )}
-        </button>
+        </Button>
         <div className="flex shrink-0 items-center gap-2 pr-3">
           <div className="relative">
             {/* Why: no-hover devices show the action overlay by default, so
@@ -569,7 +577,9 @@ export function WorktreeRow({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <button
+                      <Button
+                        variant="destructive"
+                        size="xs"
                         type="button"
                         onClick={onDelete}
                         disabled={isMainWorktree}
@@ -579,15 +589,15 @@ export function WorktreeRow({
                           { value0: rowLabel }
                         )}
                         className={cn(
-                          'outline-none focus-visible:bg-destructive/10 focus-visible:text-destructive',
-                          'p-0.5 rounded text-muted-foreground transition-colors',
+                          'h-auto border-0 gap-0 font-normal focus-visible:bg-destructive/10 focus-visible:text-destructive',
+                          'p-0.5 text-muted-foreground transition-colors',
                           isMainWorktree
                             ? 'opacity-40 cursor-not-allowed'
                             : 'hover:bg-destructive/10 hover:text-destructive'
                         )}
                       >
                         <Trash2 className="size-3" />
-                      </button>
+                      </Button>
                     }
                   />
                   <TooltipContent
@@ -696,10 +706,12 @@ function ResourceTree({
         return (
           <div key={group.repoId} className="border-border/50 border-b last:border-b-0">
             <div className="flex items-center">
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 onClick={() => toggleRepo(group.repoId)}
-                className="hover:bg-muted/50 focus-visible:bg-muted/50 py-2 pr-0.5 pl-2 transition-colors outline-none"
+                className="hover:bg-muted/50 focus-visible:bg-muted/50 h-auto gap-0 border-0 py-2 pr-0.5 pl-2 font-normal transition-colors"
                 aria-label={
                   repoCollapsed
                     ? translate(
@@ -713,11 +725,11 @@ function ResourceTree({
                 }
               >
                 {repoCollapsed ? (
-                  <ChevronRight className="text-muted-foreground h-3 w-3" />
+                  <ChevronRight weight="regular" className="text-muted-foreground h-3 w-3" />
                 ) : (
-                  <ChevronDown className="text-muted-foreground h-3 w-3" />
+                  <ChevronDown weight="regular" className="text-muted-foreground h-3 w-3" />
                 )}
-              </button>
+              </Button>
               <div className="flex min-w-0 flex-1 items-center justify-between gap-2 py-2 pr-3">
                 <span className="flex min-w-0 items-center gap-1.5">
                   <span className="text-muted-foreground truncate text-[11px] font-semibold tracking-wide uppercase">
@@ -1224,7 +1236,7 @@ export function ResourceUsageStatusSegment({
                 >
                   {spaceScanReady ? (
                     <span
-                      className="bg-primary absolute -top-0.5 -right-0.5 size-1.5 rounded-full"
+                      className="bg-primary absolute -top-0.5 -right-0.5 size-1.5"
                       aria-hidden="true"
                     />
                   ) : null}
@@ -1293,7 +1305,9 @@ export function ResourceUsageStatusSegment({
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button
+                    variant="quiet"
+                    size="icon-xs"
                     type="button"
                     onClick={() => daemonActions.setPending('restart')}
                     disabled={daemonActions.isBusy}
@@ -1301,10 +1315,10 @@ export function ResourceUsageStatusSegment({
                       'auto.components.status.bar.ResourceUsageStatusSegment.c9382662bb',
                       'Restart daemon'
                     )}
-                    className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors outline-none disabled:opacity-40"
+                    className="disabled:opacity-40"
                   >
-                    <RotateCw className="size-3" />
-                  </button>
+                    <RotateCw weight="regular" className="size-3" />
+                  </Button>
                 }
               />
               <TooltipContent side="top" sideOffset={6}>
@@ -1317,7 +1331,9 @@ export function ResourceUsageStatusSegment({
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button
+                    variant="destructive"
+                    size="icon-xs"
                     type="button"
                     onClick={() => daemonActions.setPending('killAll')}
                     disabled={daemonActions.isBusy}
@@ -1325,10 +1341,10 @@ export function ResourceUsageStatusSegment({
                       'auto.components.status.bar.ResourceUsageStatusSegment.bd19fd7a59',
                       'Kill all sessions'
                     )}
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive inline-flex size-6 items-center justify-center rounded transition-colors outline-none disabled:opacity-40"
+                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive transition-colors disabled:opacity-40"
                   >
                     <Trash2 className="size-3" />
-                  </button>
+                  </Button>
                 }
               />
               <TooltipContent side="top" sideOffset={6}>
@@ -1365,7 +1381,7 @@ export function ResourceUsageStatusSegment({
               onClick={() => daemonActions.setPending('restart')}
               disabled={daemonActions.isBusy}
             >
-              <RotateCw className="mr-1 size-3" />
+              <RotateCw weight="regular" className="mr-1 size-3" />
               {translate(
                 'auto.components.status.bar.ResourceUsageStatusSegment.93b0de3c21',
                 'Restart'
@@ -1397,7 +1413,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-foreground font-medium focus-visible:rounded focus-visible:outline-none"
+                      className="text-foreground focus-visible: font-medium focus-visible:outline-none"
                     >
                       {formatCpu(totalCpu)}
                     </span>
@@ -1416,7 +1432,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-foreground font-medium focus-visible:rounded focus-visible:outline-none"
+                      className="text-foreground focus-visible: font-medium focus-visible:outline-none"
                     >
                       {formatMemory(totalMemory)}
                     </span>
@@ -1433,10 +1449,7 @@ export function ResourceUsageStatusSegment({
               <Tooltip>
                 <TooltipTrigger
                   render={
-                    <span
-                      tabIndex={0}
-                      className="text-muted-foreground focus-visible:rounded focus-visible:outline-none"
-                    >
+                    <span tabIndex={0} className="text-muted-foreground focus-visible:outline-none">
                       {formatPercent(hostShare)}{' '}
                       {translate(
                         'auto.components.status.bar.ResourceUsageStatusSegment.e7ccce7e87',
@@ -1482,15 +1495,15 @@ export function ResourceUsageStatusSegment({
         >
           {(unifiedRepos.length > 0 || resourceSnapshot) && (
             <div className="bg-muted/30 border-border/50 flex shrink-0 items-center justify-between border-b px-3 py-1 text-[10px] tracking-wide uppercase">
-              <button
+              <Button
+                variant="quiet"
+                size="xs"
                 type="button"
                 onClick={() => setSortOption('name')}
                 className={cn(
-                  'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                  'hover:text-foreground transition-colors',
-                  sortOption === 'name'
-                    ? 'font-semibold text-foreground'
-                    : 'text-muted-foreground/80'
+                  'p-0 h-auto border-0 gap-0 ',
+                  ' ',
+                  sortOption === 'name' ? 'font-semibold text-foreground' : '/80'
                 )}
                 aria-pressed={sortOption === 'name'}
               >
@@ -1498,19 +1511,19 @@ export function ResourceUsageStatusSegment({
                   'auto.components.status.bar.ResourceUsageStatusSegment.2aa2de6cb9',
                   'Name'
                 )}
-              </button>
+              </Button>
               <div className="flex shrink-0 items-center gap-2">
                 <div className={cn(METRIC_COLUMNS_CLS, 'text-[10px]')}>
-                  <button
+                  <Button
+                    variant="quiet"
+                    size="xs"
                     type="button"
                     onClick={() => setSortOption('cpu')}
                     className={cn(
-                      'outline-none focus-visible:text-foreground focus-visible:bg-accent',
+                      'p-0 h-auto border-0 gap-0 ',
                       CPU_COLUMN_CLS,
-                      'hover:text-foreground transition-colors',
-                      sortOption === 'cpu'
-                        ? 'font-semibold text-foreground'
-                        : 'text-muted-foreground/80'
+                      ' ',
+                      sortOption === 'cpu' ? 'font-semibold text-foreground' : '/80'
                     )}
                     aria-pressed={sortOption === 'cpu'}
                   >
@@ -1518,17 +1531,17 @@ export function ResourceUsageStatusSegment({
                       'auto.components.status.bar.ResourceUsageStatusSegment.298f4be7f2',
                       'CPU'
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="quiet"
+                    size="xs"
                     type="button"
                     onClick={() => setSortOption('memory')}
                     className={cn(
-                      'outline-none focus-visible:text-foreground focus-visible:bg-accent',
+                      'p-0 h-auto border-0 gap-0 ',
                       MEM_COLUMN_CLS,
-                      'hover:text-foreground transition-colors',
-                      sortOption === 'memory'
-                        ? 'font-semibold text-foreground'
-                        : 'text-muted-foreground/80'
+                      ' ',
+                      sortOption === 'memory' ? 'font-semibold text-foreground' : '/80'
                     )}
                     aria-pressed={sortOption === 'memory'}
                   >
@@ -1536,7 +1549,7 @@ export function ResourceUsageStatusSegment({
                       'auto.components.status.bar.ResourceUsageStatusSegment.1b24a32d3a',
                       'Memory'
                     )}
-                  </button>
+                  </Button>
                 </div>
                 {/* Why: empty trailing gutter so the CPU/Memory header
                     cells line up with the row cells; rows reserve the same
@@ -1592,10 +1605,12 @@ export function ResourceUsageStatusSegment({
         </div>
 
         <div className="border-border/50 shrink-0 border-t px-3 py-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             type="button"
             onClick={handleOpenWorkspaceCleanup}
-            className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 relative inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
+            className="border-border/70 hover:bg-accent/60 focus-visible:bg-accent/60 relative w-full gap-0 px-2.5 py-1.5 text-xs whitespace-normal transition-colors"
           >
             <span className="min-w-0 truncate px-4 text-center">
               {translate(
@@ -1605,15 +1620,18 @@ export function ResourceUsageStatusSegment({
               )}
             </span>
             <ChevronRight
+              weight="regular"
               className="text-muted-foreground absolute right-2.5 size-3.5"
               aria-hidden
             />
-          </button>
+          </Button>
           {orphanCount > 0 ? (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               type="button"
               onClick={() => void handleKillOrphans()}
-              className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
+              className="border-border/70 hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 w-full gap-0 px-2.5 py-1.5 text-xs whitespace-normal transition-colors"
             >
               {orphanCount === 1
                 ? translate(
@@ -1626,7 +1644,7 @@ export function ResourceUsageStatusSegment({
                     'Kill {{value0}} orphan terminals',
                     { value0: orphanCount }
                   )}
-            </button>
+            </Button>
           ) : null}
         </div>
 

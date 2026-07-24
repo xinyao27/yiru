@@ -1,5 +1,6 @@
 import { Terminal } from '@phosphor-icons/react'
 
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 
@@ -77,7 +78,7 @@ export function SourceControlActionRecipeRow({
   const agentSupportText = getSourceControlActionAgentSupportText(actionId)
 
   return (
-    <div className="border-border rounded-md border px-3 py-3">
+    <div className="border-border border px-3 py-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-0.5">
           <p className="text-foreground text-xs font-medium">
@@ -158,12 +159,12 @@ export function SourceControlActionRecipeRow({
               'Command template'
             )}
           </Label>
-          <textarea
+          <Textarea
             value={draftValue.commandInputTemplate}
             rows={3}
             spellCheck={false}
             onChange={(event) => onTemplateChange(actionId, event.target.value)}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 w-full resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none"
+            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 w-full resize-y border px-2.5 py-2 font-mono text-xs outline-none"
           />
           <SourceControlActionVariableChips
             actionId={actionId}

@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -178,17 +180,17 @@ export function GitPane({
             )}
           </p>
         </div>
-        <div className="border-border/50 flex w-fit gap-1 rounded-md border p-1">
+        <div className="border-border/50 flex w-fit gap-1 border p-1">
           {(['git-username', 'custom', 'none'] as const).map((option) => (
-            <button
+            <Button
+              variant="quiet"
+              size="sm"
               key={option}
               onClick={() => updateSettings({ branchPrefix: option })}
               className={cn(
-                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                'rounded-sm px-3 py-1 text-sm transition-colors',
-                settings.branchPrefix === option
-                  ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                'text-sm ',
+                'py-1 ',
+                settings.branchPrefix === option ? 'bg-accent text-accent-foreground' : ' '
               )}
             >
               {option === 'git-username'
@@ -196,7 +198,7 @@ export function GitPane({
                 : option === 'custom'
                   ? translate('auto.components.settings.GitPane.1f32ba27a6', 'Custom')
                   : translate('auto.components.settings.GitPane.3d172725cc', 'None')}
-            </button>
+            </Button>
           ))}
         </div>
         {(settings.branchPrefix === 'custom' || settings.branchPrefix === 'git-username') && (
@@ -254,29 +256,12 @@ export function GitPane({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={settings.refreshLocalBaseRefOnWorktreeCreate}
-          onClick={() =>
-            updateSettings({
-              refreshLocalBaseRefOnWorktreeCreate: !settings.refreshLocalBaseRefOnWorktreeCreate
-            })
+        <Switch
+          checked={settings.refreshLocalBaseRefOnWorktreeCreate}
+          onCheckedChange={(checked) =>
+            updateSettings({ refreshLocalBaseRefOnWorktreeCreate: checked })
           }
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            settings.refreshLocalBaseRefOnWorktreeCreate
-              ? 'bg-foreground'
-              : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              settings.refreshLocalBaseRefOnWorktreeCreate ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        />
       </SearchableSetting>
     ) : null,
     matchesSettingsSearch(searchQuery, {
@@ -352,27 +337,10 @@ export function GitPane({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={settings.enableGitHubAttribution}
-          onClick={() =>
-            updateSettings({
-              enableGitHubAttribution: !settings.enableGitHubAttribution
-            })
-          }
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            settings.enableGitHubAttribution ? 'bg-foreground' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              settings.enableGitHubAttribution ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        <Switch
+          checked={settings.enableGitHubAttribution}
+          onCheckedChange={(checked) => updateSettings({ enableGitHubAttribution: checked })}
+        />
       </SearchableSetting>
     ) : null
   ].filter(Boolean)

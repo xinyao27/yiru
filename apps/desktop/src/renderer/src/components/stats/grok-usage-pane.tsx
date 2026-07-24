@@ -44,10 +44,7 @@ export function GrokUsagePane(): React.JSX.Element {
 
   if (!grokAuthConfigured) {
     return (
-      <div
-        className="border-border/60 bg-card/40 rounded-lg border p-4"
-        data-testid="grok-usage-pane"
-      >
+      <div className="border-border/60 bg-card/40 border p-4" data-testid="grok-usage-pane">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <h3 className="text-foreground text-sm font-semibold">{paneTitle}</h3>
@@ -81,10 +78,7 @@ export function GrokUsagePane(): React.JSX.Element {
   const isFetching = isRefreshing || grok?.status === 'fetching'
 
   return (
-    <div
-      className="border-border/60 bg-card/30 space-y-4 rounded-lg border p-4"
-      data-testid="grok-usage-pane"
-    >
+    <div className="border-border/60 bg-card/30 space-y-4 border p-4" data-testid="grok-usage-pane">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h3 className="text-foreground text-sm font-semibold">{paneTitle}</h3>
@@ -115,7 +109,7 @@ export function GrokUsagePane(): React.JSX.Element {
                     {isFetching ? (
                       <LoadingIndicator className="size-3.5" />
                     ) : (
-                      <RefreshCw className="size-3.5" />
+                      <RefreshCw weight="regular" className="size-3.5" />
                     )}
                   </Button>
                 }
@@ -156,7 +150,7 @@ export function GrokUsagePane(): React.JSX.Element {
           onClick={openGrokAccounts}
         >
           {translate('auto.components.stats.GrokUsagePane.a7b8c9d0e1', 'Grok account settings')}
-          <ExternalLink className="size-3" />
+          <ExternalLink weight="regular" className="size-3" />
         </Button>
       </div>
     </div>

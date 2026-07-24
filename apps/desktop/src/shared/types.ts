@@ -1712,6 +1712,8 @@ export type GlobalSettings = {
   terminalActivePaneOpacity: number
   terminalPaneOpacityTransitionMs: number
   terminalDividerThicknessPx: number
+  /** One-shot migration guard for moving the inherited divider default from 3px to 1px. */
+  terminalDividerThicknessDefaultedToHairline?: boolean
   terminalBackgroundOpacity?: number
   terminalColorOverrides?: TerminalColorOverrides
   terminalPaddingX?: number

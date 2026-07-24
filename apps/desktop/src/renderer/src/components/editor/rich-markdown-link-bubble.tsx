@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 
@@ -134,7 +135,7 @@ function LinkEditInput({
   }, [])
 
   return (
-    <input
+    <Input
       ref={setInputElement}
       value={value}
       onChange={(e) => setValue(e.target.value)}
@@ -160,7 +161,8 @@ function LinkEditInput({
         'auto.components.editor.RichMarkdownLinkBubble.7b0b945fdc',
         'Paste or type a link…'
       )}
-      className="rich-markdown-link-input focus-visible:border-ring outline-none"
+      variant="chrome-free"
+      className="rich-markdown-link-input"
     />
   )
 }
@@ -337,7 +339,7 @@ export function RichMarkdownLinkBubble({
             disabled={!linkBubble.openEnabled}
             onClick={onOpen}
           >
-            <ExternalLink size={14} />
+            <ExternalLink weight="regular" size={14} />
           </LinkBubbleAction>
           <LinkBubbleAction
             label={translate('auto.components.editor.RichMarkdownLinkBubble.copyLink', 'Copy link')}

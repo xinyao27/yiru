@@ -1,3 +1,4 @@
+import type { IconProps } from '@phosphor-icons/react'
 import { TextSelection } from '@tiptap/pm/state'
 import type { Editor } from '@tiptap/react'
 import type React from 'react'
@@ -38,7 +39,7 @@ export type SlashCommandId =
   | 'emoji'
 
 export type SlashCommandIcon =
-  | { kind: 'component'; component: React.ComponentType<{ className?: string }> }
+  | { kind: 'component'; component: React.ComponentType<IconProps>; weight?: IconProps['weight'] }
   | { kind: 'text'; value: string }
 
 export type SlashCommandGroup =
@@ -59,8 +60,11 @@ export type SlashCommand = {
   run: (editor: Editor) => void
 }
 
-export function icon(component: React.ComponentType<{ className?: string }>): SlashCommandIcon {
-  return { kind: 'component', component }
+export function icon(
+  component: React.ComponentType<IconProps>,
+  weight?: IconProps['weight']
+): SlashCommandIcon {
+  return { kind: 'component', component, weight }
 }
 
 export function textIcon(value: string): SlashCommandIcon {

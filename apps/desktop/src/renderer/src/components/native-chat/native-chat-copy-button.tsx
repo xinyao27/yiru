@@ -1,6 +1,7 @@
 import { Check, Copy } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -50,18 +51,20 @@ export function NativeChatCopyButton({
     : translate('components.native-chat.copyMessage.copy', 'Copy message')
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon-xs"
       type="button"
       onClick={handleCopy}
       aria-label={label}
       title={label}
       className={cn(
-        'flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring',
+        'flex border text-muted-foreground transition-colors',
         copied && 'text-green-700 dark:text-green-300',
         className
       )}
     >
       {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-    </button>
+    </Button>
   )
 }

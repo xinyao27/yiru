@@ -271,23 +271,15 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
         // ancestor groups from workspace cards must not reveal every row's X.
         'group/agent-row relative flex flex-col -ml-2 py-1',
         isLineageChild ? 'pl-5 pr-2' : 'px-2',
-        // Why: inline agent rows sit inside a hoverable workspace card, so
-        // their hover wash must stay softer than the parent card highlight.
-        'cursor-pointer rounded-sm',
+        'cursor-pointer ',
         isFocusedPane
-          ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
+          ? 'bg-accent text-accent-foreground'
           : isLineageChild
             ? 'bg-[color-mix(in_srgb,var(--sidebar)_74%,var(--background))] dark:bg-[color-mix(in_srgb,var(--accent)_10%,var(--sidebar))]'
             : hasChildDisclosure
               ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_3%,var(--sidebar))] dark:bg-[color-mix(in_srgb,var(--accent)_22%,var(--sidebar))]'
               : undefined,
-        isLineageChild
-          ? 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_4%,var(--sidebar))] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,var(--sidebar))]'
-          : hasChildDisclosure
-            ? 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_6%,var(--sidebar))] dark:hover:bg-[color-mix(in_srgb,var(--accent)_30%,var(--sidebar))]'
-            : isFocusedPane
-              ? 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:hover:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
-              : 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_1.25%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]',
+        'hover:bg-accent',
         isLineageChild &&
           "relative before:absolute before:top-1/2 before:left-[0.15rem] before:w-[0.35rem] before:border-t before:border-t-[color:color-mix(in_srgb,var(--sidebar-foreground)_20%,transparent)] before:content-[''] dark:before:border-t-[color:color-mix(in_srgb,var(--accent)_42%,transparent)]",
         sendTargetStatus === 'sending' && 'cursor-progress opacity-75',

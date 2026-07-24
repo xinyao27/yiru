@@ -218,7 +218,7 @@
 
 .yiru-loader-escalade path {
   fill: none;
-  stroke: var(--muted-foreground);
+  stroke: currentColor;
   stroke-width: 20;
   stroke-linecap: round;
   stroke-dasharray: 0 1;

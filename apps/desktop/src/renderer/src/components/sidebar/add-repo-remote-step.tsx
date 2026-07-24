@@ -146,7 +146,7 @@ export function RemoteStep({
             )}
           </div>
         ) : selectedTarget && !selectedTargetConnected ? (
-          <div className="border-border bg-muted/30 flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+          <div className="border-border bg-muted/30 flex items-center justify-between gap-3 border px-3 py-2">
             <p className="text-muted-foreground min-w-0 text-xs">
               {translate(
                 'auto.components.sidebar.AddRepoRemoteStep.lockedDisconnected',

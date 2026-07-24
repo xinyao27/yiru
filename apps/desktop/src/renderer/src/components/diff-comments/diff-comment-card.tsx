@@ -2,6 +2,7 @@ import { Pencil, Trash, ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-i
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
@@ -157,9 +158,11 @@ export function DiffCommentCard({
               )}
               {url && (
                 <>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     type="button"
-                    className="yiru-diff-comment-pill-btn focus-visible:bg-accent outline-none"
+                    className="yiru-diff-comment-pill-btn focus-visible:bg-accent h-auto border-0 p-0"
                     title={translate(
                       'auto.components.diff.comments.DiffCommentCard.508ee678a5',
                       'Open in browser'
@@ -175,7 +178,7 @@ export function DiffCommentCard({
                     }}
                   >
                     {translate('auto.components.diff.comments.DiffCommentCard.6978871a3d', 'Open')}
-                  </button>
+                  </Button>
                   {(onSubmitEdit || onDelete) && (
                     <span className="yiru-diff-comment-pill-divider" />
                   )}
@@ -183,9 +186,11 @@ export function DiffCommentCard({
               )}
               {onSubmitEdit && (
                 <>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     type="button"
-                    className="yiru-diff-comment-pill-btn focus-visible:bg-accent outline-none"
+                    className="yiru-diff-comment-pill-btn focus-visible:bg-accent h-auto border-0 p-0"
                     title={translate(
                       'auto.components.diff.comments.DiffCommentCard.cad3384faa',
                       'Edit note'
@@ -201,14 +206,16 @@ export function DiffCommentCard({
                     }}
                   >
                     <Pencil className="size-3" />
-                  </button>
+                  </Button>
                   {onDelete && <span className="yiru-diff-comment-pill-divider" />}
                 </>
               )}
               {onDelete && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="xs"
                   type="button"
-                  className="yiru-diff-comment-pill-btn yiru-diff-comment-pill-btn-danger focus-visible:bg-accent outline-none"
+                  className="yiru-diff-comment-pill-btn yiru-diff-comment-pill-btn-danger focus-visible:bg-accent h-auto border-0 p-0"
                   title={translate(
                     'auto.components.diff.comments.DiffCommentCard.cce596969e',
                     'Delete note'
@@ -224,7 +231,7 @@ export function DiffCommentCard({
                   }}
                 >
                   <Trash className="size-3" />
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -240,7 +247,7 @@ export function DiffCommentCard({
         {/* Body or Edit Mode */}
         {editing ? (
           <div className="mt-1 flex flex-col gap-2">
-            <textarea
+            <Textarea
               ref={textareaRef}
               className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
               value={draft}
@@ -285,7 +292,7 @@ export function DiffCommentCard({
                 }
               >
                 {translate('auto.components.diff.comments.DiffCommentCard.109a791e7b', 'Save')}
-                <CornerDownLeft className="ml-1 size-3 opacity-70" />
+                <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />
               </Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -154,7 +155,7 @@ const YiruYamlTrustDialog = React.memo(function YiruYamlTrustDialog() {
         </DialogHeader>
 
         {scriptContent && (
-          <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2">
+          <div className="border-border/70 bg-muted/35 border px-3 py-2">
             <div className="text-muted-foreground mb-1 text-[11px] font-medium tracking-wide uppercase">
               {previouslyApproved
                 ? translate(
@@ -176,17 +177,15 @@ const YiruYamlTrustDialog = React.memo(function YiruYamlTrustDialog() {
 
         <label
           className={cn(
-            'flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 transition-colors',
+            'flex cursor-pointer items-center gap-2.5 border px-3 py-2 transition-colors',
             alwaysTrust
               ? 'border-primary/60 bg-primary/5'
               : 'border-border/70 bg-muted/25 hover:border-border hover:bg-muted/40'
           )}
         >
-          <input
-            type="checkbox"
-            className="accent-primary focus-visible:border-ring h-4 w-4 outline-none"
+          <Checkbox
             checked={alwaysTrust}
-            onChange={(event) => setAlwaysTrust(event.target.checked)}
+            onCheckedChange={(checked) => setAlwaysTrust(checked === true)}
           />
           <span className="text-foreground text-xs font-medium">
             {translate('auto.components.sidebar.YiruYamlTrustDialog.531689199b', 'Always trust')}

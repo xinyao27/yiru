@@ -102,7 +102,7 @@ function SpoolAvailabilityStatusSegmentContent({
               disabled={retrying}
               onClick={() => void retryAvailability()}
             >
-              {retrying ? <LoadingIndicator /> : <RefreshCw />}
+              {retrying ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
               {retrying
                 ? translate(
                     'auto.components.spool.SpoolAvailabilityStatusSegment.checking',

@@ -168,7 +168,7 @@ export default function ProjectCombobox({
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
-            <ChevronsUpDown className="size-3.5 opacity-50" />
+            <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
           </Button>
         }
       />

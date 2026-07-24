@@ -133,8 +133,8 @@ export function AddRepoServerPathStartStep({
             />
           </div>
 
-          <div className="border-border bg-muted text-muted-foreground flex items-center gap-3 rounded-md border px-3 py-2.5 text-xs">
-            <span className="bg-background text-foreground grid size-7 shrink-0 place-items-center rounded-md">
+          <div className="border-border bg-muted text-muted-foreground flex items-center gap-3 border px-3 py-2.5 text-xs">
+            <span className="bg-background text-foreground grid size-7 shrink-0 place-items-center">
               <Lightbulb className="size-3.5" />
             </span>
             <span className="min-w-0">
@@ -145,17 +145,19 @@ export function AddRepoServerPathStartStep({
             </span>
           </div>
 
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
             onClick={() => setPathEntryOpen(true)}
             disabled={disabled}
-            className="text-muted-foreground hover:text-foreground mx-auto block rounded px-2 py-1 text-xs transition-colors focus-visible:outline-none disabled:cursor-default disabled:opacity-40"
+            className="mx-auto block h-auto border-0 py-1 disabled:cursor-default disabled:opacity-40"
           >
             {translate(
               'auto.components.sidebar.AddRepoServerStartStep.438493f214',
               'Or enter a host path manually'
             )}
-          </button>
+          </Button>
         </div>
       </>
     )
@@ -253,22 +255,24 @@ export function AddRepoServerPathStartStep({
           </Button>
         </div>
         {isAddingServerPath && addProjectBusyLabel ? (
-          <div className="border-border bg-muted text-muted-foreground flex items-center gap-2 rounded-md border px-3 py-2 text-xs">
+          <div className="border-border bg-muted text-muted-foreground flex items-center gap-2 border px-3 py-2 text-xs">
             <LoadingIndicator className="size-3.5 shrink-0" />
             <span>{addProjectBusyLabel}</span>
           </div>
         ) : null}
-        <button
+        <Button
+          variant="quiet"
+          size="xs"
           type="button"
           onClick={() => setPathEntryOpen(false)}
           disabled={isAddingServerPath}
-          className="text-muted-foreground hover:text-foreground mx-auto block rounded px-2 py-1 text-xs transition-colors focus-visible:outline-none disabled:cursor-default disabled:opacity-40"
+          className="mx-auto block h-auto border-0 py-1 disabled:cursor-default disabled:opacity-40"
         >
           {translate(
             'auto.components.sidebar.AddRepoServerStartStep.ae990c86a0',
             'Back to add options'
           )}
-        </button>
+        </Button>
       </div>
     </>
   )
@@ -297,7 +301,7 @@ function AddRepoServerStartAction({
       onClick={onClick}
       className="border-border/80 bg-background h-32 min-w-0 flex-col gap-3 px-3 py-4 text-center whitespace-normal"
     >
-      <span className="text-muted-foreground grid size-9 shrink-0 place-items-center rounded-md">
+      <span className="text-muted-foreground grid size-9 shrink-0 place-items-center">
         <Icon className="size-5" />
       </span>
       <span className="min-w-0">

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -7,13 +8,18 @@ export function TerminalSlide(): React.JSX.Element {
     <div className={mobileTerminalPreviewStyles.deviceScreen}>
       <div className={mobileTerminalPreviewStyles.chrome}>
         <div className={mobileTerminalPreviewStyles.topbar}>
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className={cn('outline-none focus-visible:bg-accent', mobileTerminalPreviewStyles.back)}
+            className={cn(
+              'p-0 h-auto border-0 focus-visible:bg-accent',
+              mobileTerminalPreviewStyles.back
+            )}
             aria-label={translate('auto.components.mobile.slides.TerminalSlide.8fd998acd3', 'Back')}
           >
             <ChevronLeftIcon />
-          </button>
+          </Button>
           <div className={mobileTerminalPreviewStyles.titleBlock}>
             <div className={mobileTerminalPreviewStyles.sessionTitle}>
               {translate(
@@ -31,10 +37,12 @@ export function TerminalSlide(): React.JSX.Element {
               </span>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent',
+              'p-0 h-auto border-0 focus-visible:bg-accent',
               mobileTerminalPreviewStyles.iconButton
             )}
             aria-label={translate(
@@ -43,11 +51,13 @@ export function TerminalSlide(): React.JSX.Element {
             )}
           >
             <BranchIcon />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent',
+              'p-0 h-auto border-0 focus-visible:bg-accent',
               mobileTerminalPreviewStyles.iconButton
             )}
             aria-label={translate(
@@ -56,7 +66,7 @@ export function TerminalSlide(): React.JSX.Element {
             )}
           >
             <FolderIcon />
-          </button>
+          </Button>
         </div>
 
         <div className={mobileTerminalPreviewStyles.tabbar}>

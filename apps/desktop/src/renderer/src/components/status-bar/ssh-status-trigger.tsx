@@ -62,10 +62,7 @@ export function SshStatusTrigger({
                   'Remote host connection status'
                 )}
               >
-                <span className={cn('inline-flex items-center', iconOnly ? 'gap-1' : 'gap-1.5')}>
-                  {iconOnly ? (
-                    <span className={cn('inline-block size-2 rounded-full', statusDotClass)} />
-                  ) : null}
+                <span className="inline-flex items-center gap-1.5">
                   {statusIcon}
                   {!iconOnly && !compact ? (
                     <span
@@ -78,7 +75,7 @@ export function SshStatusTrigger({
                     </span>
                   ) : null}
                   {!iconOnly ? (
-                    <span className={cn('inline-block size-1.5 rounded-full', statusDotClass)} />
+                    <span className={cn('inline-block size-1.5', statusDotClass)} />
                   ) : null}
                 </span>
               </Button>

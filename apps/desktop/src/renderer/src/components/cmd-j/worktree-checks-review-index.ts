@@ -8,7 +8,7 @@ import { getRepoHostIdentityForParts } from '@/store/slices/repo-host-identity'
 import type { AppState } from '@/store/types'
 
 import type { Repo, Worktree } from '../../../../shared/types'
-import { selectChecksPanelReview } from '../right-sidebar/checks-panel-review'
+import { selectChecksPanelReview } from '../workspace-panel/checks-panel-review'
 
 type WorktreeChecksReviewIndexArgs = {
   worktrees: readonly Worktree[]

@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -65,7 +66,7 @@ export function CmdJPaletteTipDialog({
               {/* Why: uppercase eyebrow reads as a category label, not a feature launch. */}
               <Badge
                 variant="outline"
-                className="text-muted-foreground mb-3 rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase"
+                className="text-muted-foreground mb-3 px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase"
               >
                 {tip.eyebrow.toUpperCase()}
               </Badge>
@@ -78,7 +79,7 @@ export function CmdJPaletteTipDialog({
                 {displayShortcutLabel ? (
                   <>
                     {' '}
-                    <kbd className="border-border bg-card text-foreground ml-0.5 inline-flex items-center rounded-md border px-2 py-0.5 align-middle font-mono text-base font-medium whitespace-nowrap">
+                    <kbd className="border-border bg-card text-foreground ml-0.5 inline-flex items-center border px-2 py-0.5 align-middle font-mono text-base font-medium whitespace-nowrap">
                       {displayShortcutLabel}
                     </kbd>
                   </>
@@ -92,16 +93,18 @@ export function CmdJPaletteTipDialog({
                     'auto.components.feature.tips.CmdJPaletteTipDialog.8241897205',
                     'Rebind the shortcut anytime in'
                   )}{' '}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     type="button"
                     onClick={onRebindClick}
-                    className="text-foreground decoration-foreground/30 hover:decoration-foreground focus-visible:decoration-foreground inline appearance-none border-0 bg-transparent p-0 font-medium underline underline-offset-2 transition-colors focus-visible:outline-none"
+                    className="text-foreground decoration-foreground/30 hover:decoration-foreground focus-visible:decoration-foreground inline h-auto appearance-none border-0 bg-transparent p-0 underline underline-offset-2 transition-colors"
                   >
                     {translate(
                       'auto.components.feature.tips.CmdJPaletteTipDialog.c0bb9f869b',
                       'Settings → Shortcuts'
                     )}
-                  </button>
+                  </Button>
                   .
                 </span>
               </DialogDescription>

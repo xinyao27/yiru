@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { openSourceControlAiSettingsTarget } from '@/components/right-sidebar/source-control-ai-settings-navigation'
+import { openSourceControlAiSettingsTarget } from '@/components/workspace-panel/source-control-ai-settings-navigation'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import { startFixChecksAgent } from '@/lib/fix-checks-agent-launch'

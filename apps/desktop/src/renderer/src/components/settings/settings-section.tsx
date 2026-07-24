@@ -71,7 +71,7 @@ export function SettingsSection({
           <h2 className="text-foreground flex flex-wrap items-center gap-2 text-2xl leading-tight font-semibold">
             {title}
             {badge ? (
-              <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-[10px] font-medium tracking-[0.05em] uppercase">
+              <span className="bg-muted text-muted-foreground px-2 py-0.5 text-[10px] font-medium tracking-[0.05em] uppercase">
                 {badge}
               </span>
             ) : null}
@@ -82,11 +82,9 @@ export function SettingsSection({
         {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
       </div>
       {/* Why: body content sits in a visually distinct band — a soft card with
-          rounded corners and tight inner padding — so each row group reads as
+           corners and tight inner padding — so each row group reads as
           contained inside the section, not as a continuation of the sidebar. */}
-      <div
-        className={cn('rounded-xl border border-border/50 bg-card/50 px-7 py-6  ', bodyClassName)}
-      >
+      <div className={cn('border border-border/50 bg-card/50 px-7 py-6', bodyClassName)}>
         {children}
       </div>
     </section>

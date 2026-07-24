@@ -1,4 +1,5 @@
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import { cn } from '../../../lib/class-names'
@@ -23,16 +24,21 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
     <div className={mobileWorktreePreviewStyles.deviceScreen}>
       <div className={mobileWorktreePreviewStyles.chrome}>
         <div className={mobileWorktreePreviewStyles.statusRow}>
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className={cn('outline-none focus-visible:bg-accent', mobileWorktreePreviewStyles.back)}
+            className={cn(
+              'p-0 h-auto border-0 focus-visible:bg-accent',
+              mobileWorktreePreviewStyles.back
+            )}
             aria-label={translate(
               'auto.components.mobile.slides.WorktreeListSlide.cefd048225',
               'Back'
             )}
           >
             <ChevronLeftIcon />
-          </button>
+          </Button>
           <div className={mobileWorktreePreviewStyles.host}>
             <span className={mobileWorktreePreviewStyles.statusDot} />
             <span className={mobileWorktreePreviewStyles.hostName}>
@@ -44,33 +50,42 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
           </div>
         </div>
         <div className={mobileWorktreePreviewStyles.toolbar}>
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className={cn('outline-none focus-visible:bg-accent', mobileWorktreePreviewStyles.chip)}
+            className={cn(
+              'p-0 h-auto border-0 focus-visible:bg-accent',
+              mobileWorktreePreviewStyles.chip
+            )}
           >
             <FilterIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.0e3e809a4b', 'Filter')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent',
+              'p-0 h-auto border-0 focus-visible:bg-accent',
               mobileWorktreePreviewStyles.button
             )}
           >
             <SortIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.17f9e0d226', 'Recent')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             className={cn(
-              'outline-none focus-visible:bg-accent',
+              'p-0 h-auto border-0 focus-visible:bg-accent',
               mobileWorktreePreviewStyles.button
             )}
           >
             <GroupIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.22971156df', 'Repo')}
-          </button>
+          </Button>
           <span className={mobileWorktreePreviewStyles.spacer} />
           <span className={mobileWorktreePreviewStyles.icon}>
             <UserCircleIcon />

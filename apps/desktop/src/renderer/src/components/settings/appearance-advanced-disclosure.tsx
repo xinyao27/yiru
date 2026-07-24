@@ -2,6 +2,7 @@ import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -34,16 +35,19 @@ export function AppearanceAdvancedDisclosure({
 
   return (
     <div className={cn('mt-3 pt-2', showTopBorder && 'border-t border-border/50', className)}>
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         type="button"
         aria-expanded={expanded}
         onClick={() => setOpen((prev) => !prev)}
         // Why: while searching the disclosure is forced open, so disable the
         // toggle's collapse affordance rather than letting it fight the search.
         disabled={isSearching}
-        className="text-foreground flex w-full items-center gap-2 py-1 text-sm font-semibold focus-visible:outline-none disabled:cursor-default"
+        className="text-foreground flex h-auto w-full justify-start gap-2 border-0 py-1 text-sm font-semibold whitespace-normal focus-visible:outline-none disabled:cursor-default"
       >
         <ChevronRight
+          weight="regular"
           className={cn(
             'size-3.5 text-muted-foreground transition-transform',
             expanded && 'rotate-90'
@@ -51,7 +55,7 @@ export function AppearanceAdvancedDisclosure({
         />
         {label ??
           translate('auto.components.settings.AppearanceAdvancedDisclosure.advanced', 'Advanced')}
-      </button>
+      </Button>
       {expanded ? <div className={cn('pt-1', contentClassName)}>{children}</div> : null}
     </div>
   )

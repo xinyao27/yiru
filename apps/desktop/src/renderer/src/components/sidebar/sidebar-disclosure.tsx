@@ -1,6 +1,7 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -15,7 +16,7 @@ type SidebarDisclosureProps = {
 }
 
 const DISCLOSURE_CLASS_NAME =
-  'flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground focus-visible:outline-none'
+  'flex size-5 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none'
 
 export function SidebarDisclosure({
   expanded,
@@ -29,6 +30,7 @@ export function SidebarDisclosure({
   const icon = (
     <ChevronDown
       aria-hidden="true"
+      weight="regular"
       className={cn(
         'size-3.5 transition-transform motion-reduce:transition-none',
         !expanded && '-rotate-90'
@@ -45,9 +47,15 @@ export function SidebarDisclosure({
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
-      className={cn('outline-none focus-visible:bg-accent', DISCLOSURE_CLASS_NAME, className)}
+      className={cn(
+        'p-0 h-auto border-0 focus-visible:bg-accent',
+        DISCLOSURE_CLASS_NAME,
+        className
+      )}
       aria-label={
         label ??
         (itemLabel
@@ -70,6 +78,6 @@ export function SidebarDisclosure({
       onPointerDown={onPointerDown}
     >
       {icon}
-    </button>
+    </Button>
   )
 }

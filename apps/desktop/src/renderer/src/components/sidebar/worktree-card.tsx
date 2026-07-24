@@ -166,7 +166,7 @@ function RepoIdentityChip({
       <TooltipTrigger
         render={
           <span
-            className="border-sidebar-border bg-sidebar-accent/55 inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border"
+            className="border-sidebar-border bg-sidebar-accent/55 inline-flex size-4 shrink-0 items-center justify-center border"
             aria-label={translate(
               'auto.components.sidebar.WorktreeCard.35ccfe2475',
               'Project {{value0}}',
@@ -1103,7 +1103,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                       onPointerDown={stopQuickActionPointerPropagation}
                       onClick={handleOpenRenameErrorDialog}
                       onDoubleClick={handleOpenRenameErrorDialog}
-                      className="text-destructive border-destructive/40 bg-destructive/10 hover:bg-destructive/15 hover:text-destructive h-4 shrink-0 gap-0.5 rounded border !px-0.5 text-[10px] leading-none font-medium has-[>svg]:!px-0.5"
+                      className="text-destructive border-destructive/40 bg-destructive/10 hover:bg-destructive/15 hover:text-destructive h-4 gap-0.5 border !px-0.5 text-[10px] leading-none has-[>svg]:!px-0.5"
                       aria-label={translate(
                         'auto.components.sidebar.WorktreeCard.02e19349f4',
                         'Auto-rename failed: view error'
@@ -1131,7 +1131,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                   render={
                     <Badge
                       variant="outline"
-                      className="text-foreground/70 border-foreground/20 bg-foreground/[0.06] h-[16px] shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                      className="text-foreground/70 border-foreground/20 bg-foreground/[0.06] h-[16px] shrink-0 px-1.5 text-[10px] leading-none font-medium"
                     >
                       {translate('auto.components.sidebar.WorktreeCard.7d517f82e2', 'primary')}
                     </Badge>
@@ -1152,7 +1152,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                   render={
                     <Badge
                       variant="outline"
-                      className="h-[16px] shrink-0 rounded border-amber-500/30 bg-amber-500/5 px-1.5 text-[10px] leading-none font-medium text-amber-700 dark:text-amber-300"
+                      className="h-[16px] shrink-0 border-amber-500/30 bg-amber-500/5 px-1.5 text-[10px] leading-none font-medium text-amber-700 dark:text-amber-300"
                     >
                       {translate('auto.components.sidebar.WorktreeCard.4f964d5e8c', 'sparse')}
                     </Badge>
@@ -1185,13 +1185,14 @@ const WorktreeCard = React.memo(function WorktreeCard({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <button
+                      <Button
+                        variant="destructive"
+                        size="icon-xs"
                         type="button"
                         onPointerDown={stopQuickActionPointerPropagation}
                         onClick={handleWorkspaceQuickAction}
                         className={cn(
-                          'outline-none',
-                          'inline-flex size-4 items-center justify-center rounded bg-transparent opacity-0 transition-colors transition-opacity',
+                          'size-4 bg-transparent opacity-0 transition-colors transition-opacity',
                           'group-hover/worktree-card:opacity-100 group-focus-within/worktree-card:opacity-100 focus-visible:opacity-100',
                           'text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive'
                         )}
@@ -1201,7 +1202,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                         )}
                       >
                         <Trash2 className="size-3.5" />
-                      </button>
+                      </Button>
                     }
                   />
                   <TooltipContent side="right" sideOffset={8}>
@@ -1222,7 +1223,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
               {showHostContextBadge && (
                 <Badge
                   variant="secondary"
-                  className="border-border bg-accent text-muted-foreground dark:bg-accent/80 dark:border-border/50 h-[16px] max-w-[7rem] shrink-0 rounded border px-1.5 text-[10px] leading-none font-medium"
+                  className="border-border bg-accent text-muted-foreground dark:bg-accent/80 dark:border-border/50 h-[16px] max-w-[7rem] shrink-0 border px-1.5 text-[10px] leading-none font-medium"
                 >
                   <span className="truncate">{hostContextLabel}</span>
                 </Badge>
@@ -1246,7 +1247,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
               {showConflictOperationBadge && (
                 <Badge
                   variant="outline"
-                  className="h-[16px] shrink-0 gap-1 rounded border-amber-500/30 bg-amber-500/5 px-1.5 text-[10px] leading-none font-medium text-amber-600 dark:border-amber-400/30 dark:bg-amber-400/5 dark:text-amber-400"
+                  className="h-[16px] shrink-0 gap-1 border-amber-500/30 bg-amber-500/5 px-1.5 text-[10px] leading-none font-medium text-amber-600 dark:border-amber-400/30 dark:bg-amber-400/5 dark:text-amber-400"
                 >
                   <GitMerge className="size-2.5" />
                   {CONFLICT_OPERATION_LABELS[conflictOperation]}
@@ -1261,7 +1262,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         )}
 
         {remoteBranchConflict && (
-          <div className="mt-0.5 flex items-start gap-1.5 rounded border border-amber-500/25 bg-amber-500/5 px-1.5 py-1 text-[10.5px] leading-snug text-amber-700 dark:text-amber-300">
+          <div className="mt-0.5 flex items-start gap-1.5 border border-amber-500/25 bg-amber-500/5 px-1.5 py-1 text-[10.5px] leading-snug text-amber-700 dark:text-amber-300">
             <AlertTriangle className="mt-[1px] size-3 shrink-0" />
             <span className="min-w-0 flex-1">
               {translate(
@@ -1315,14 +1316,15 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     type="button"
                     variant="ghost"
                     size="xs"
-                    className="border-sidebar-border bg-sidebar text-muted-foreground hover:bg-sidebar-accent hover:text-foreground relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border px-1.5 text-[10px] leading-none font-medium"
+                    className="border-border hover:text-foreground relative z-10 h-[18px] max-w-[8rem] border px-1.5 text-[10px] leading-none"
                     aria-label={lineageChildAriaLabel}
                     aria-expanded={!lineageCollapsed}
                     onClick={onLineageToggle}
                   >
-                    <Workflow className="size-2.5" />
+                    <Workflow weight="regular" className="size-2.5" />
                     <span className="truncate">{childWorkspaceShortLabel}</span>
                     <ChevronDown
+                      weight="regular"
                       className={cn(
                         'size-2.5 transition-transform',
                         lineageCollapsed && '-rotate-90'
@@ -1411,8 +1413,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
       style={cardStyle}
     >
       {isDeleting && (
-        <div className="bg-background/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-[1px]">
-          <div className="bg-background text-foreground border-border/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium">
+        <div className="bg-background/50 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[1px]">
+          <div className="bg-background text-foreground border-border/50 inline-flex items-center gap-1.5 border px-3 py-1 text-[11px] font-medium">
             {!isQueuedForDeletion ? (
               <LoadingIndicator className="text-muted-foreground size-3.5" />
             ) : null}

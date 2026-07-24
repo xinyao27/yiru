@@ -1,4 +1,4 @@
-import { GitBranch } from '@phosphor-icons/react'
+import { GitMerge } from '@phosphor-icons/react'
 import React from 'react'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -37,7 +37,7 @@ const branchStatusIconClassName = cn(reviewAndBranchStatusIconClassName, 'text-m
 // Why: a left-edge badge overlays unread on the status glyph without widening
 // the lane or indenting the title.
 const unreadAlertClassName =
-  'pointer-events-none absolute left-0 top-1/2 size-[6px] -translate-y-1/2 rounded-full bg-amber-500'
+  'pointer-events-none absolute left-0 top-1/2 size-[6px] -translate-y-1/2 bg-amber-500'
 
 function overlayUnreadStatus(
   status: React.JSX.Element,
@@ -112,7 +112,7 @@ export function WorktreeCardStatusSlot({
   // Why: working and permission own the status lane, but unread state remains
   // available in assistive copy and reappears visually afterward.
   const showUnreadAlert = isUnread && showStatus && status !== 'working' && status !== 'permission'
-  const branchStatusIcon = <GitBranch className={branchStatusIconClassName} aria-hidden="true" />
+  const branchStatusIcon = <GitMerge className={branchStatusIconClassName} aria-hidden="true" />
   const passiveStatus =
     canShowReviewStatus && prDisplay ? (
       <Tooltip>

@@ -1,6 +1,7 @@
 import { Copy, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,10 +37,12 @@ export function MonacoGutterContextMenu({
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             aria-hidden
             tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
+            className="pointer-events-none fixed size-px border-0 opacity-0"
             style={{ left: point.x, top: point.y }}
           />
         }
@@ -91,7 +94,7 @@ export function MonacoGutterContextMenu({
             }
           }}
         >
-          <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+          <ExternalLink weight="regular" className="mr-1.5 h-3.5 w-3.5" />
           {translate(
             'auto.components.editor.MonacoGutterContextMenu.7b57b1b468',
             'Copy Remote URL'

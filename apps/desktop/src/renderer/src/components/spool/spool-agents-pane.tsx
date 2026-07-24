@@ -2,10 +2,11 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import type React from 'react'
 import { useMemo, useRef } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   AiVaultPanelNotice,
   AiVaultPanelSurface
-} from '@/components/right-sidebar/ai-vault-panel-surface'
+} from '@/components/workspace-panel/ai-vault-panel-surface'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
@@ -76,7 +77,9 @@ export function SpoolAgentsPane({
               }
               const active = route.sessionRef === session.sessionRef
               return (
-                <button
+                <Button
+                  variant="outline"
+                  size="xs"
                   key={virtualRow.key}
                   ref={virtualizer.measureElement}
                   data-index={virtualRow.index}
@@ -84,9 +87,9 @@ export function SpoolAgentsPane({
                   data-current={active ? 'true' : undefined}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'absolute left-0 top-0 flex w-full min-w-0 items-center gap-2 border-b border-sidebar-border px-3 py-2 text-left transition-colors',
-                    'hover:bg-sidebar-accent focus-visible:outline-none',
-                    active && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    'h-auto w-auto gap-2 py-2 absolute left-0 top-0 flex w-full min-w-0 border-b border-sidebar-border px-3 text-left transition-colors',
+                    'focus-visible:outline-none',
+                    active && 'bg-accent text-accent-foreground'
                   )}
                   style={{ transform: `translateY(${virtualRow.start}px)` }}
                   onClick={() => setActiveRoute({ ...route, sessionRef: session.sessionRef })}
@@ -102,7 +105,7 @@ export function SpoolAgentsPane({
                       {agentProviderLabel(session)}
                     </span>
                   </span>
-                </button>
+                </Button>
               )
             })}
           </div>

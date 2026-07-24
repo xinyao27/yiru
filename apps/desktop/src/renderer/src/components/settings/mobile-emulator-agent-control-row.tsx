@@ -37,7 +37,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
   }
 
   return (
-    <div className="border-border/60 bg-card/30 rounded-2xl border p-4">
+    <div className="border-border/60 bg-card/30 border p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="space-y-0.5">
           <p className="text-sm font-semibold">
@@ -55,7 +55,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
         </div>
         <span
           className={cn(
-            'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
+            'shrink-0 px-2 py-0.5 text-[10px] font-medium',
             setup.completedCount === 2
               ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
               : 'bg-muted text-muted-foreground'
@@ -90,9 +90,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
                   'auto.components.settings.MobileEmulatorAgentControlRow.aaf62a3dd2',
                   'Installed at'
                 )}{' '}
-                <code className="bg-muted rounded px-1 py-0.5">
-                  {setup.cliInstallStatus.commandPath}
-                </code>
+                <code className="bg-muted px-1 py-0.5">{setup.cliInstallStatus.commandPath}</code>
               </p>
             ) : null}
             {!setup.cliEnabled && setup.cliInstallStatus?.detail ? (
@@ -105,9 +103,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
                   'Registering the Yiru CLI'
                 )}{' '}
                 {setup.cliInstallStatus?.commandPath ? (
-                  <code className="bg-muted rounded px-1 py-0.5">
-                    {setup.cliInstallStatus.commandPath}
-                  </code>
+                  <code className="bg-muted px-1 py-0.5">{setup.cliInstallStatus.commandPath}</code>
                 ) : null}{' '}
                 {translate(
                   'auto.components.settings.MobileEmulatorAgentControlRow.3be27641c9',
@@ -200,7 +196,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
             {EMULATOR_CLI_COMMANDS.map((command) => (
               <code
                 key={command}
-                className="border-border/60 bg-background/60 text-foreground block rounded-md border px-2 py-1 font-mono text-[11px] leading-snug break-all"
+                className="border-border/60 bg-background/60 text-foreground block border px-2 py-1 font-mono text-[11px] leading-snug break-all"
               >
                 {command}
               </code>

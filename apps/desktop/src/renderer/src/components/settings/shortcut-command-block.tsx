@@ -127,7 +127,7 @@ export function ShortcutCommandBlock({
       forceVisible
       className="group/shortcut flex max-w-none flex-col"
     >
-      <div className="hover:bg-accent/40 focus-within:bg-accent/40 flex min-h-9 items-center gap-3 rounded-md px-2 py-1 transition-colors">
+      <div className="hover:bg-accent/40 focus-within:bg-accent/40 flex min-h-9 items-center gap-3 px-2 py-1 transition-colors">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span
             className={cn(
@@ -178,9 +178,8 @@ export function ShortcutCommandBlock({
                   render={
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="quiet"
                       size="icon-xs"
-                      className="text-muted-foreground hover:text-foreground"
                       aria-label={translate(
                         'auto.components.settings.ShortcutCommandBlock.a0e2ef0e61',
                         'Add another shortcut for {{value0}}',
@@ -206,9 +205,8 @@ export function ShortcutCommandBlock({
                   render={
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="quiet"
                       size="icon-xs"
-                      className="text-muted-foreground hover:text-foreground"
                       aria-label={translate(
                         'auto.components.settings.ShortcutCommandBlock.07939d084e',
                         'Reset {{value0}} to default',
@@ -216,7 +214,7 @@ export function ShortcutCommandBlock({
                       )}
                       onClick={() => onResetAction(item.id)}
                     >
-                      <RotateCcw className="size-3" />
+                      <RotateCcw weight="regular" className="size-3" />
                     </Button>
                   }
                 />
@@ -275,9 +273,8 @@ export function ShortcutCommandBlock({
             canEnable ? (
               <Button
                 type="button"
-                variant="ghost"
+                variant="quiet"
                 size="xs"
-                className="text-muted-foreground hover:text-foreground"
                 aria-label={translate(
                   'auto.components.settings.ShortcutCommandBlock.482a60225d',
                   'Enable {{value0}}',
@@ -293,9 +290,8 @@ export function ShortcutCommandBlock({
                   render={
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="quiet"
                       size="icon-xs"
-                      className="text-muted-foreground hover:text-foreground"
                       aria-label={translate(
                         'auto.components.settings.ShortcutCommandBlock.01481b964c',
                         'Add shortcut for {{value0}}',

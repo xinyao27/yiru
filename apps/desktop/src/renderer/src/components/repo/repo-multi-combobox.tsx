@@ -140,7 +140,7 @@ export default function RepoMultiCombobox({
             className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
           >
             {renderTriggerLabel(repos, selected)}
-            <ChevronsUpDown className="size-3.5 opacity-50" />
+            <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
           </Button>
         }
       />
@@ -168,14 +168,16 @@ export default function RepoMultiCombobox({
               it emits `onSelectAll` (not a snapshot via onChange) so the
               caller can persist sticky-all semantics. */}
           <div className="border-border border-b">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               type="button"
               onClick={handleSelectAll}
               onMouseDown={(event) => event.preventDefault()}
               onMouseEnter={() => setCommandValue('')}
               className={cn(
-                'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
-                'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+                'border-0 justify-start whitespace-normal font-normal gap-2 focus-visible:bg-accent focus-visible:text-accent-foreground',
+                'flex w-full py-1.5 text-left text-xs text-foreground transition-colors',
                 allSelected && 'opacity-80'
               )}
             >
@@ -188,7 +190,7 @@ export default function RepoMultiCombobox({
               <span>
                 {translate('auto.components.ui.repo.multi.combobox.bfd8ce21c6', 'All projects')}
               </span>
-            </button>
+            </Button>
           </div>
           <CommandList>
             <CommandEmpty>

@@ -26,16 +26,18 @@ export function PolicyOptionGrid<P extends string>({
       {options.map(({ policy, label, description }) => {
         const active = selected === policy
         return (
-          <button
+          <Button
+            variant="outline"
+            size="default"
             type="button"
             key={policy}
             onClick={() => onSelect(policy)}
             className={cn(
-              'outline-none focus-visible:border-border focus-visible:bg-muted/40',
-              'rounded-xl border px-3 py-2.5 text-center transition-colors',
+              'focus-visible:border-border focus-visible:bg-muted/40',
+              'px-3 py-2.5 text-center transition-colors',
               active
                 ? 'border-foreground/15 bg-accent text-accent-foreground'
-                : 'border-border/60 bg-background text-foreground hover:border-border hover:bg-muted/40'
+                : 'border-border/60 hover:border-border hover:bg-muted/40'
             )}
           >
             <span className={cn('block text-sm', active ? 'font-semibold' : 'font-medium')}>
@@ -49,7 +51,7 @@ export function PolicyOptionGrid<P extends string>({
             >
               {description}
             </p>
-          </button>
+          </Button>
         )
       })}
     </div>
@@ -66,25 +68,25 @@ export function SegmentedPolicyToggle<P extends string>({
   onSelect: (p: P) => void
 }): React.JSX.Element {
   return (
-    <div className="border-border/60 bg-muted/50 inline-flex gap-0.5 rounded-lg border p-0.5">
+    <div className="border-border/60 bg-muted/50 inline-flex gap-0.5 border p-0.5">
       {options.map(({ policy, label, description }) => {
         const active = selected === policy
         return (
-          <button
+          <Button
+            variant={active ? 'default' : 'ghost'}
+            size="xs"
             type="button"
             key={policy}
             onClick={() => onSelect(policy)}
             title={description}
             className={cn(
-              'outline-none focus-visible:bg-background/60 focus-visible:text-foreground',
-              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-              active
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+              'focus-visible:bg-background/60 ',
+              'h-auto border-0 px-2.5 py-1 text-xs ',
+              active ? '' : ' hover:bg-background/60 '
             )}
           >
             {label}
-          </button>
+          </Button>
         )
       })}
     </div>
@@ -102,19 +104,19 @@ export function ExampleTemplateCard({
     <div className="space-y-2">
       <p className="text-muted-foreground text-[10px] tracking-[0.18em]">
         {translate('auto.components.settings.RepositoryHooksSection.175daba180', 'Example')}
-        <code className="bg-muted rounded px-1 py-0.5">
+        <code className="bg-muted px-1 py-0.5">
           {translate('auto.components.settings.RepositoryHooksSection.39da2ae12f', 'yiru.yaml')}
         </code>{' '}
         {translate('auto.components.settings.RepositoryHooksSection.95a0411b3e', 'template')}
       </p>
-      <div className="border-border/50 bg-background/70 relative rounded-lg border">
+      <div className="border-border/50 bg-background/70 relative border">
         <Button
           type="button"
           variant={copiedTemplate ? 'secondary' : 'ghost'}
           size="sm"
           className={cn(
             'absolute right-2 top-2 z-10 h-6 px-2 text-[11px]',
-            copiedTemplate ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+            copiedTemplate ? 'text-foreground' : ' '
           )}
           onClick={onCopyTemplate}
         >
@@ -132,7 +134,7 @@ export function ExampleTemplateCard({
 
 export function YamlScriptBlock({ content }: { content: string }): React.JSX.Element {
   return (
-    <pre className="border-border/50 bg-muted/30 text-foreground overflow-x-auto rounded-lg border p-3 font-mono text-[11.5px] leading-5 break-words whitespace-pre-wrap">
+    <pre className="border-border/50 bg-muted/30 text-foreground overflow-x-auto border p-3 font-mono text-[11.5px] leading-5 break-words whitespace-pre-wrap">
       {content}
     </pre>
   )
@@ -147,7 +149,7 @@ export function LocalCommandSourceNotice({
 }): React.JSX.Element {
   const isChecking = notice.kind === 'checking'
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+    <div className="flex flex-wrap items-start justify-between gap-3 border border-amber-500/20 bg-amber-500/5 p-3">
       <div className="flex min-w-0 flex-1 items-start gap-3">
         <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-300" />
         <div className="space-y-1">
@@ -181,7 +183,7 @@ export function LocalCommandSourceNotice({
           {notice.label}
         </Button>
       ) : (
-        <span className="border-border/60 bg-muted/30 text-muted-foreground shrink-0 rounded-full border px-2 py-1 text-[11px]">
+        <span className="border-border/60 bg-muted/30 text-muted-foreground shrink-0 border px-2 py-1 text-[11px]">
           {translate('auto.components.settings.RepositoryHooksSection.673a7fd10e', 'Checking...')}
         </span>
       )}

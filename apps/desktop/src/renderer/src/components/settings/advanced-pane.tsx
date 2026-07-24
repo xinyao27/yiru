@@ -74,16 +74,17 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <button
+                        <Button
+                          variant="quiet"
+                          size="icon-xs"
                           type="button"
                           aria-label={translate(
                             'auto.components.settings.AdvancedPane.6627e75c92',
                             'Explain HTTP/1.1 compatibility'
                           )}
-                          className="text-muted-foreground hover:text-foreground inline-flex size-6 items-center justify-center rounded-md transition-colors outline-none"
                         >
                           <Info className="size-3.5" />
-                        </button>
+                        </Button>
                       }
                     />
                     <TooltipContent
@@ -108,7 +109,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
           </div>
 
           {http1CompatibilityRestartRequired ? (
-            <div className="border-border/50 bg-muted/30 flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+            <div className="border-border/50 bg-muted/30 flex items-center justify-between gap-3 border px-3 py-2">
               <div className="min-w-0">
                 <p className="text-xs font-medium">
                   {translate(
@@ -133,7 +134,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                 {http1CompatibilityRelaunching ? (
                   <LoadingIndicator className="size-3.5" />
                 ) : (
-                  <RotateCw className="size-3.5" />
+                  <RotateCw weight="regular" className="size-3.5" />
                 )}
                 {translate('auto.components.settings.AdvancedPane.40b29e0bf3', 'Restart')}
               </Button>

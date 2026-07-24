@@ -4,7 +4,7 @@ import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { useAppStore } from '@/store'
 
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
-import { RightSidebarPanelContent } from '../right-sidebar/right-sidebar-panel-content'
+import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel-content'
 
 const EditorPanel = lazy(() => import('../editor/editor-panel'))
 
@@ -30,7 +30,7 @@ export function WorkspacePanelTabContent({
     >
       {embedsEditor ? (
         <>
-          <div className="flex min-h-0 min-w-0 flex-1 bg-[var(--editor-surface)]">
+          <div className="bg-background flex min-h-0 min-w-0 flex-1">
             {activeFileId ? (
               <Suspense fallback={null}>
                 <EditorPanel

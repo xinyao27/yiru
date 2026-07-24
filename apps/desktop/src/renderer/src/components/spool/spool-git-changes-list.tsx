@@ -1,9 +1,9 @@
 import type React from 'react'
 import { useState } from 'react'
 
-import { SourceControlSectionHeader } from '@/components/right-sidebar/source-control-section-header'
-import { SourceControlVirtualFileList } from '@/components/right-sidebar/source-control-virtual-file-list'
 import { Button } from '@/components/ui/button'
+import { SourceControlSectionHeader } from '@/components/workspace-panel/source-control-section-header'
+import { SourceControlVirtualFileList } from '@/components/workspace-panel/source-control-virtual-file-list'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -188,12 +188,14 @@ function SpoolChangeRow({
       data-current={selected ? 'true' : undefined}
       className={cn(
         'group flex items-center text-[13px]',
-        selected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent'
+        selected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
       )}
     >
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-2 px-3 py-1 text-left focus-visible:outline-none"
+        className="flex h-auto min-w-0 flex-1 justify-start gap-2 border-0 py-1 text-left font-normal whitespace-normal"
         onClick={onSelect}
       >
         <span
@@ -202,7 +204,7 @@ function SpoolChangeRow({
           {getGitStatusLabel(entry)}
         </span>
         <SpoolTruncatedPathLabel path={entry.relativePath} className="flex-1" />
-      </button>
+      </Button>
       <Button
         type="button"
         size="xs"

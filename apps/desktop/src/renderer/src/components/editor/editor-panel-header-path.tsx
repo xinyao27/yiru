@@ -1,6 +1,7 @@
 import { Copy, Eye, Pencil, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,7 +93,7 @@ export function EditorPanelHeaderPath({
             defaultValue={currentFileName}
             // Why: the header is narrow in floating mode; this keeps the
             // edit field aligned with the path label without growing chrome.
-            className="bg-input/40 text-foreground h-6 w-[16ch] max-w-full min-w-[104px] rounded-sm px-1.5 py-0 font-mono text-xs md:text-xs"
+            className="bg-input/40 text-foreground h-6 w-[16ch] max-w-full min-w-[104px] px-1.5 py-0 font-mono text-xs md:text-xs"
             spellCheck={false}
             onPointerDown={(event) => event.stopPropagation()}
             onMouseDown={(event) => event.stopPropagation()}
@@ -112,17 +113,19 @@ export function EditorPanelHeaderPath({
             onBlur={commitRename}
           />
         ) : (
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
             className={cn(
-              'block min-w-0 max-w-full flex-[0_1_auto] cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left font-mono text-xs leading-[1.2] text-ellipsis whitespace-nowrap text-muted-foreground outline-none hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground disabled:cursor-default disabled:text-muted-foreground disabled:hover:text-muted-foreground'
+              'h-auto justify-start gap-0 font-normal block min-w-0 max-w-full flex-[0_1_auto] overflow-hidden border-0 bg-transparent p-0 text-left font-mono leading-[1.2] text-ellipsis disabled:cursor-default disabled:text-muted-foreground disabled:hover:text-muted-foreground'
             )}
             onClick={canCopyHeaderPath ? onCopyPath : undefined}
             disabled={!canCopyHeaderPath}
             title={headerCopyState.pathTitle}
           >
             {headerCopyState.pathLabel}
-          </button>
+          </Button>
         )}
         <span
           className={cn(
@@ -137,10 +140,12 @@ export function EditorPanelHeaderPath({
       <DropdownMenu open={pathMenuOpen} onOpenChange={setPathMenuOpen} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none fixed size-px opacity-0"
+              className="pointer-events-none fixed size-px border-0 opacity-0"
               style={{ left: pathMenuPoint.x, top: pathMenuPoint.y }}
             />
           }
@@ -206,7 +211,7 @@ export function EditorPanelHeaderPath({
           {canShowMarkdownPreview && <DropdownMenuSeparator />}
           {!isVirtualEditorTab && (
             <DropdownMenuItem onClick={onOpenContainingFolder}>
-              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+              <ExternalLink weight="regular" className="mr-1.5 h-3.5 w-3.5" />
               {revealLabel}
             </DropdownMenuItem>
           )}

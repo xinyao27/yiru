@@ -23,13 +23,13 @@ const PANE_COLUMN_DIRECTIONS: TabSplitDirection[] = ['right', 'left', 'down', 'u
 function paneColumnDirectionIcon(direction: TabSplitDirection): React.JSX.Element {
   switch (direction) {
     case 'right':
-      return <ArrowRight className="size-3.5 shrink-0" />
+      return <ArrowRight weight="regular" className="size-3.5 shrink-0" />
     case 'left':
-      return <ArrowLeft className="size-3.5 shrink-0" />
+      return <ArrowLeft weight="regular" className="size-3.5 shrink-0" />
     case 'down':
-      return <ArrowDown className="size-3.5 shrink-0" />
+      return <ArrowDown weight="regular" className="size-3.5 shrink-0" />
     case 'up':
-      return <ArrowUp className="size-3.5 shrink-0" />
+      return <ArrowUp weight="regular" className="size-3.5 shrink-0" />
   }
 }
 

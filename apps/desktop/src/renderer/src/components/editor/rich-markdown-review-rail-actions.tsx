@@ -1,5 +1,6 @@
 import { Check, Copy, Chat as MessageSquare } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import type { MarkdownReviewNote } from '@/lib/markdown-review-notes'
 
@@ -30,9 +31,11 @@ export function RichMarkdownReviewRailActions({
 }: RichMarkdownReviewRailActionsProps): React.JSX.Element {
   return (
     <div className="rich-markdown-review-rail-actions">
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         type="button"
-        className="rich-markdown-review-rail-toggle focus-visible:bg-accent outline-none"
+        className="rich-markdown-review-rail-toggle focus-visible:bg-accent h-auto border-0 p-0"
         aria-label={
           railOpen
             ? translate(
@@ -60,10 +63,12 @@ export function RichMarkdownReviewRailActions({
       >
         <MessageSquare className="size-3.5" />
         <span>{noteCount}</span>
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="xs"
         type="button"
-        className="rich-markdown-review-rail-action focus-visible:bg-accent outline-none"
+        className="rich-markdown-review-rail-action focus-visible:bg-accent h-auto border-0 p-0"
         title={
           notesCopied
             ? translate(
@@ -89,7 +94,7 @@ export function RichMarkdownReviewRailActions({
         onClick={onCopyNotes}
       >
         {notesCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-      </button>
+      </Button>
       <NotesSendMenu
         worktreeId={worktreeId}
         groupId={worktreeId}

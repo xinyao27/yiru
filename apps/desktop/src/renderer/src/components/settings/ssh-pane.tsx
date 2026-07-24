@@ -378,7 +378,7 @@ export function SshPane(): React.JSX.Element {
           <>
             {/* Target list */}
             {targets.length === 0 && !showForm ? (
-              <div className="border-border/60 bg-card/30 text-muted-foreground flex items-center justify-center rounded-lg border border-dashed px-4 py-5 text-sm">
+              <div className="border-border/60 bg-card/30 text-muted-foreground flex items-center justify-center border border-dashed px-4 py-5 text-sm">
                 {translate(
                   'auto.components.settings.SshPane.c0f1c80166',
                   'No SSH targets configured.'

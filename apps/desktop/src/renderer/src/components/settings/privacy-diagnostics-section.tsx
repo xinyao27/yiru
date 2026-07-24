@@ -280,7 +280,7 @@ function DiagnosticsDisabledStateNote({
               )
 
   return (
-    <div className="border-border/60 bg-card/30 text-muted-foreground rounded border border-dashed px-3 py-2 text-xs">
+    <div className="border-border/60 bg-card/30 text-muted-foreground border border-dashed px-3 py-2 text-xs">
       {message}
     </div>
   )

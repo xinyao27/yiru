@@ -45,8 +45,6 @@ export default function MobilePage(): React.JSX.Element {
   const stageRef = useRef<FlowStage | null>(null)
   const deviceCountAtPairStartRef = useRef<number | null>(null)
   const closeMobilePage = useAppStore((s) => s.closeMobilePage)
-  const showMobileButton = useAppStore((s) => s.settings?.showMobileButton !== false)
-  const updateSettings = useAppStore((s) => s.updateSettings)
   const installQrUrl = useMobileInstallQr(stage, platform)
   const { copyInstallUrl, openInstallUrl } = useMobileInstallActions(platform)
 
@@ -367,19 +365,6 @@ export default function MobilePage(): React.JSX.Element {
     }
   }
 
-  const toggleMobileSidebarButton = useCallback(() => {
-    const nextShowMobileButton = !showMobileButton
-    void updateSettings({ showMobileButton: nextShowMobileButton })
-    if (!nextShowMobileButton) {
-      toast.message(
-        translate(
-          'auto.components.mobile.MobilePageToolbar.e1c7b4a92d',
-          'Configure in Settings > Mobile.'
-        )
-      )
-    }
-  }, [showMobileButton, updateSettings])
-
   useMobilePageEscape(closeMobilePage)
 
   return (
@@ -407,11 +392,9 @@ export default function MobilePage(): React.JSX.Element {
       revokingDeviceIds={revokingDeviceIds}
       selectedAddress={selectedAddress}
       onPlatformChange={setPlatform}
-      showMobileButton={showMobileButton}
       showPairedDevices={showPairedDevices}
       stage={stage}
       stepIdx={stepIdx}
-      toggleMobileSidebarButton={toggleMobileSidebarButton}
     />
   )
 }

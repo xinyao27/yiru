@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { getProviderRateLimitScope } from '@/components/settings/provider-account-scope'
 import { ProviderHostScopeControl } from '@/components/settings/provider-host-scope-control'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
@@ -178,7 +179,7 @@ export function GitHubRateLimitPanel({ className }: { className?: string }): Rea
   const budgetScope = getProviderRateLimitScope(settings, 'GitHub')
 
   return (
-    <div className={cn('space-y-3 rounded-md border border-border/60 p-3', className)}>
+    <div className={cn('space-y-3 border border-border/60 p-3', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-0.5">
           <div className="text-foreground flex items-center gap-1.5 text-sm font-medium">
@@ -203,11 +204,13 @@ export function GitHubRateLimitPanel({ className }: { className?: string }): Rea
             className="text-xs"
           />
         </div>
-        <button
+        <Button
+          variant="secondary"
+          size="icon-xs"
           type="button"
           onClick={() => void refresh(true)}
           disabled={isFetching}
-          className="border-border bg-secondary text-secondary-foreground hover:bg-accent focus-visible:bg-accent inline-flex size-7 items-center justify-center rounded-md border transition outline-none disabled:opacity-50"
+          className="border-border hover:bg-accent focus-visible:bg-accent size-7 border transition"
           aria-label={translate(
             'auto.components.github.github.rate.limit.display.d12d3d6f33',
             'Refresh GitHub API budget'
@@ -216,9 +219,9 @@ export function GitHubRateLimitPanel({ className }: { className?: string }): Rea
           {isFetching ? (
             <LoadingIndicator className="size-3.5" />
           ) : (
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
           )}
-        </button>
+        </Button>
       </div>
       {hasError ? (
         <div className="text-muted-foreground text-xs">

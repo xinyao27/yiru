@@ -1,6 +1,7 @@
 import { Check, Info, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -114,7 +115,7 @@ export function AgentStep({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5">
       {!hasDetected && !isDetecting && (
-        <div className="shrink-0 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-700 dark:text-amber-200/90">
+        <div className="shrink-0 border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-700 dark:text-amber-200/90">
           {translate(
             'auto.components.onboarding.AgentStep.1eee1c7bd8',
             'No agents detected on your PATH. Pick one to install later, or continue with a blank terminal.'
@@ -122,7 +123,7 @@ export function AgentStep({
         </div>
       )}
       {selectedEntry && (
-        <div className="flex shrink-0 items-center justify-between gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-200/90">
+        <div className="flex shrink-0 items-center justify-between gap-3 border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-200/90">
           <span>
             <span className="font-medium">{selectedEntry.label}</span>{' '}
             {translate(
@@ -130,14 +131,16 @@ export function AgentStep({
               "isn't on your PATH yet. Yiru will set it as your default and you can install it any time."
             )}
           </span>
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             type="button"
-            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-medium text-amber-800 outline-none hover:bg-amber-400/20 focus-visible:bg-amber-400/20 dark:text-amber-100"
+            className="h-auto border-amber-400/40 bg-amber-400/10 py-1 text-amber-800 hover:bg-amber-400/20 focus-visible:bg-amber-400/20 dark:text-amber-100"
             onClick={() => void window.api.shell.openUrl(selectedEntry.homepageUrl)}
           >
             {translate('auto.components.onboarding.AgentStep.9c163bb0e0', 'Install instructions')}
-            <ExternalLink className="size-3" />
-          </button>
+            <ExternalLink weight="regular" className="size-3" />
+          </Button>
         </div>
       )}
       <section className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
@@ -208,7 +211,7 @@ function YoloPermissionsControl({
   onYoloPermissionsChange?: (enabled: boolean) => void
 }): React.JSX.Element {
   return (
-    <label className="border-border bg-muted/25 hover:bg-muted/40 mt-auto flex shrink-0 cursor-pointer items-center justify-between gap-4 rounded-lg border px-4 py-3 transition-colors">
+    <label className="border-border bg-muted/25 hover:bg-muted/40 mt-auto flex shrink-0 cursor-pointer items-center justify-between gap-4 border px-4 py-3 transition-colors">
       <span className="flex min-w-0 items-center gap-3">
         <Checkbox
           checked={yoloPermissions}
@@ -229,17 +232,19 @@ function YoloPermissionsControl({
       <Tooltip>
         <TooltipTrigger
           render={
-            <button
+            <Button
+              variant="quiet"
+              size="icon-xs"
               type="button"
               aria-label={translate(
                 'auto.components.onboarding.AgentStep.yoloPermissionsInfo',
                 'Agent permission info'
               )}
               onPointerDown={(event) => event.preventDefault()}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-6 shrink-0 place-items-center rounded-md transition-colors outline-none"
+              className="hover:bg-muted grid place-items-center"
             >
               <Info className="size-3.5" />
-            </button>
+            </Button>
           }
         />
         <TooltipContent side="top" sideOffset={6} style={{ zIndex: 120 }}>
@@ -265,7 +270,7 @@ function SectionHeader({
   return (
     <div className="text-muted-foreground flex shrink-0 items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase">
       {showDetectedIndicator && (
-        <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
+        <span className="size-1.5 shrink-0 bg-emerald-500" aria-hidden="true" />
       )}
       <span>{label}</span>
       <span className="text-muted-foreground/60">·</span>
@@ -284,26 +289,26 @@ function AgentButton({
   onClick: () => void
 }) {
   return (
-    <button
+    <Button
+      variant="outline"
+      size="xs"
       type="button"
       data-agent-card
       aria-pressed={selected}
       className={cn(
-        'outline-none focus-visible:bg-muted/60',
-        'group relative overflow-hidden rounded-xl border p-3.5 text-left transition-all',
-        selected
-          ? 'border-violet-500/60 bg-violet-500/10'
-          : 'border-border bg-muted/30 hover:bg-muted/60'
+        'h-auto justify-start gap-0 whitespace-normal font-normal focus-visible:bg-muted/60',
+        'group relative overflow-hidden p-3.5 text-left',
+        selected ? 'border-violet-500/60 bg-violet-500/10' : 'bg-muted/30 hover:bg-muted/60'
       )}
       onClick={onClick}
     >
       {selected ? (
-        <div className="absolute top-2 right-2 grid size-5 place-items-center rounded-full bg-violet-500 text-white">
+        <div className="absolute top-2 right-2 grid size-5 place-items-center bg-violet-500 text-white">
           <Check className="size-3" strokeWidth={3} />
         </div>
       ) : null}
       <div className="flex min-w-0 items-start gap-2.5 pr-6">
-        <span className="bg-muted text-foreground grid size-7 shrink-0 place-items-center rounded-md">
+        <span className="bg-muted text-foreground grid size-7 shrink-0 place-items-center">
           <AgentIcon agent={agent.id} size={16} />
         </span>
         <div className="min-w-0">
@@ -313,6 +318,6 @@ function AgentButton({
           </div>
         </div>
       </div>
-    </button>
+    </Button>
   )
 }

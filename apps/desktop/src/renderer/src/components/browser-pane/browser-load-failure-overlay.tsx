@@ -236,7 +236,7 @@ export function BrowserLoadFailureOverlay({
       disabled={actionsDisabled}
       onClick={onRetry}
     >
-      <RefreshCw className="size-4" />
+      <RefreshCw weight="regular" className="size-4" />
       {translate('browser.loadFailure.retry', 'Retry')}
     </Button>
   )
@@ -261,7 +261,7 @@ export function BrowserLoadFailureOverlay({
         disabled={actionsDisabled}
         onClick={() => onOpenExternal(externalUrl)}
       >
-        <ExternalLink className="size-4" />
+        <ExternalLink weight="regular" className="size-4" />
         {translate('browser.loadFailure.openExternally', 'Open Externally')}
       </Button>
     ) : null
@@ -269,7 +269,7 @@ export function BrowserLoadFailureOverlay({
   return (
     <div className="bg-background absolute inset-0 z-20 flex items-center justify-center px-6">
       <div aria-live="polite" className="flex max-w-lg flex-col items-center px-8 py-8 text-center">
-        <div className="border-border bg-muted text-muted-foreground mb-4 rounded-full border p-3">
+        <div className="border-border bg-muted text-muted-foreground mb-4 border p-3">
           {certificateError ? <ShieldAlert className="size-5" /> : <Globe className="size-5" />}
         </div>
         <h2 className="text-foreground text-base font-semibold">

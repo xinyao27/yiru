@@ -10,7 +10,7 @@ export function BrowserUseComputerUseNotice({
   onOpenComputerUse: () => void
 }): React.JSX.Element {
   return (
-    <div className="border-border/60 bg-card/50 rounded-xl border p-4">
+    <div className="border-border/60 bg-card/50 border p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-sm font-medium">

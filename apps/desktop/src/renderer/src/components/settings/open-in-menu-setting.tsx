@@ -101,7 +101,7 @@ function OpenInMenuRow({
   return (
     <div className="py-3">
       <div className="flex flex-wrap items-start gap-3">
-        <div className="border-border/50 bg-background/50 flex size-7 shrink-0 items-center justify-center rounded-md border">
+        <div className="border-border/50 bg-background/50 flex size-7 shrink-0 items-center justify-center border">
           <OpenInApplicationIcon application={application} size={16} />
         </div>
 
@@ -121,7 +121,7 @@ function OpenInMenuRow({
         <div className="ml-auto flex shrink-0 items-center gap-1">
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-sm"
             onClick={onEditToggle}
             title={
@@ -141,10 +141,7 @@ function OpenInMenuRow({
                 : translate('auto.components.settings.OpenInMenuSetting.af7d1c3656', 'Edit app')
             }
             aria-expanded={editing}
-            className={cn(
-              'size-7 text-muted-foreground hover:text-foreground',
-              editing && 'text-foreground'
-            )}
+            className={cn('size-7 ', editing && 'text-foreground')}
           >
             <Pencil className="size-3.5" />
           </Button>
@@ -314,7 +311,7 @@ export function OpenInMenuSetting({
                 className="h-8 shrink-0 gap-1.5"
               >
                 {translate('auto.components.settings.OpenInMenuSetting.e4064916aa', 'Add app')}
-                <ChevronDown className="size-3.5" />
+                <ChevronDown weight="regular" className="size-3.5" />
               </Button>
             }
           />

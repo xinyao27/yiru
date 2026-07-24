@@ -310,7 +310,7 @@ export default function AgentCombobox({
                   </span>
                 </span>
               )}
-              <ChevronsUpDown className="size-3.5 opacity-50" />
+              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
             </Button>
           }
         />
@@ -382,10 +382,10 @@ export default function AgentCombobox({
                   onClick={onOpenManageAgents}
                   onMouseDown={(event) => event.preventDefault()}
                   onMouseEnter={() => setCommandValue('')}
-                  className="text-muted-foreground h-9 w-full justify-start rounded-none px-3 text-xs font-normal"
+                  className="text-muted-foreground h-9 w-full justify-start px-3 text-xs font-normal"
                 >
                   {translate('auto.components.agent.AgentCombobox.19522e25ee', 'Manage agents')}
-                  <ArrowRight className="ml-auto size-3" />
+                  <ArrowRight weight="regular" className="ml-auto size-3" />
                 </Button>
               </div>
             ) : null}

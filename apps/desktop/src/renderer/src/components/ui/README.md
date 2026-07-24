@@ -2,6 +2,8 @@
 
 This catalog defines what belongs in Yiru's reusable UI layer and where higher-level UI should live. Visual rules and token policy remain canonical in [`style-guide.md`](../../../../../docs/style-guide.md).
 
+**First principle (from the style guide):** screens must reuse these primitives before writing native controls or hand-rolled class recipes. If a primitive is close but missing a size or variant, extend the primitive here — do not copy its styles into call sites.
+
 ## Layers
 
 | Layer | Location | Owns | Must not own |
@@ -9,9 +11,11 @@ This catalog defines what belongs in Yiru's reusable UI layer and where higher-l
 | Theme | `src/renderer/src/assets/main.css` | shadcn roles, light/dark values, exceptional product-domain CSS variables | Per-feature colors or component-specific tokens |
 | Primitives | `src/renderer/src/components/ui/` | Generic appearance and headless interaction | Repositories, providers, worktrees, teams, or store workflows |
 | Domain UI | The nearest feature folder or domain-named module under `components/` | Product terminology, domain data, composed workflows | New visual foundations that belong in a primitive |
-| Screens | `src/renderer/src/components/` and feature folders | Layout, data loading, copy, orchestration | Reimplementations of primitive interaction behavior |
+| Screens | `src/renderer/src/components/` and feature folders | Layout, data loading, copy, orchestration | Reimplementations of primitive interaction behavior; restyling primitives via color/size className overrides |
 
 A primitive should remain useful if Yiru's domain types are deleted. A searchable repository picker therefore belongs under `components/repo/`, even though it composes `Popover` and `Command` from the primitive layer.
+
+Decision order for new UI: reuse a primitive → extend that primitive's CVA → domain composite → colocated host CSS. Never invent a generic `helpers` / `shared-styles` dump.
 
 ## Token policy
 
@@ -22,7 +26,7 @@ The supported general-purpose vocabulary is the default shadcn set. Use those ro
 - `text-green-700 dark:text-green-300`, not a success token.
 - `border-border` plus an opaque surface, not an elevation variable.
 
-Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. `config/scripts/check-design-token-budget.mjs` keeps the Tailwind theme on the default shadcn vocabulary in CI; promoting an exception requires a deliberate contract change, not an incidental task edit.
+Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. `config/scripts/check-design-token-budget.mjs` keeps the Tailwind theme on the default shadcn vocabulary in CI; promoting an exception requires a deliberate contract change, not an incidental task edit. `config/scripts/check-ui-style-drift.mjs` fails on feature-TSX drift that reintroduces native form/action tags, dead `rounded-*`, black/white alpha washes, or private style-module imports, and warns on Button classNames that look like the old quiet/`sidebar-accent` stacks — see `docs/style-guide.md`.
 
 ## Primitive catalog
 
@@ -32,7 +36,7 @@ Import primitives directly from their module (`@/components/ui/button`), not thr
 
 | Module | Public interface | Notes |
 | --- | --- | --- |
-| `button.tsx` | `Button`, `buttonVariants` | Canonical action hierarchy and sizes |
+| `button.tsx` | `Button`, `buttonVariants` | Canonical action hierarchy and sizes (`quiet` for muted toolbar icons; `outline-transparent` for bordered titlebar chrome; `list-row` for multi-line actions) |
 | `button-group.tsx` | `ButtonGroup`, `ButtonGroupText`, `ButtonGroupSeparator` | Visually joins related controls |
 | `toggle.tsx` | `Toggle`, `toggleVariants` | One pressed/unpressed action |
 | `toggle-group.tsx` | `ToggleGroup`, `ToggleGroupItem` | Related toggle choices |
@@ -41,8 +45,8 @@ Import primitives directly from their module (`@/components/ui/button`), not thr
 
 | Module | Public interface | Notes |
 | --- | --- | --- |
-| `input.tsx` | `Input` | Single-line text and native input types |
-| `textarea.tsx` | `Textarea` | Multi-line input with the standard field states |
+| `input.tsx` | `Input` | `default` / `lg` / `sm` / `xs` / `inline-edit` sizes; `chrome-free` for host-owned editor chrome; `color` for native color swatches; `subtle` for tinted fields |
+| `textarea.tsx` | `Textarea` | `default` / `sm` sizes; `chrome-free` for host-owned form chrome; `editor` for editor-surface text |
 | `label.tsx` | `Label` | Accessible field label |
 | `checkbox.tsx` | `Checkbox` | Independent boolean choice |
 | `switch.tsx` | `Switch` | Immediate on/off setting |
@@ -64,8 +68,8 @@ Import primitives directly from their module (`@/components/ui/button`), not thr
 
 | Module | Public interface | Notes |
 | --- | --- | --- |
-| `badge.tsx` | `Badge`, `badgeVariants` | Compact persistent metadata |
-| `progress.tsx` | `Progress` | Determinate progress |
+| `badge.tsx` | `Badge`, `badgeVariants` | Compact persistent metadata (`size="xs"`, `success` / `warning` tones) |
+| `progress.tsx` | `Progress` | Determinate progress; `xs` size and muted/urgency tones support dense meters |
 | `sonner.tsx` | `Toaster` | App-level transient notifications |
 
 ### Floating interaction
@@ -93,10 +97,12 @@ These are examples to copy when the same domain needs another composed picker; t
 
 ## Adding or changing UI
 
-1. Start with the nearest existing primitive and sibling domain UI.
-2. Compose default shadcn roles; do not add a theme token for the task.
-3. Put domain imports and copy outside `components/ui/`.
-4. Preserve `data-slot` on primitive parts and merge caller `className` last with `cn()`.
-5. Use Base UI for headless behavior, Phosphor for icons, and existing scrollbar classes.
-6. Check light/dark, keyboard focus, reduced motion, Windows/Linux labels, and remote latency.
-7. Update this catalog only when the reusable interface or ownership changes.
+1. Start with the nearest existing primitive; prefer `variant` / `size` over call-site color or height overrides.
+2. If the same call-site exception would repeat, add a CVA axis here instead of copying classes.
+3. Compose default shadcn roles; do not add a theme token for the task.
+4. Put domain imports and copy outside `components/ui/`.
+5. Preserve `data-slot` on primitive parts and merge caller `className` last with `cn()` (layout only at call sites).
+6. Use Base UI for headless behavior, Phosphor for icons, and existing scrollbar classes.
+7. Screens import rendered modules only — never `floating-surface-styles.ts` or `menu-item-styles.ts`.
+8. Check light/dark, keyboard focus, reduced motion, Windows/Linux labels, and remote latency.
+9. Update this catalog only when the reusable interface or ownership changes.

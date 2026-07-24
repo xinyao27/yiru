@@ -219,7 +219,7 @@ function SpoolWorkspaceSurfaceContent({
           trailingActions={accessControls}
           reserveCollapsedSidebarHeaderSpace
           reserveWindowControlsSpace
-          bodyClassName="flex bg-[var(--editor-surface)]"
+          bodyClassName="flex bg-background"
         >
           {activePanel ? (
             <SpoolWorkspacePanelPane

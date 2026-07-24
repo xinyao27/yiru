@@ -1,5 +1,6 @@
 import { DeviceMobile as Smartphone, Trash as Trash2 } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -58,10 +59,12 @@ export function HeroPaired({
                   {new Date(device.pairedAt).toLocaleDateString()}
                 </div>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 className={cn(
-                  'outline-none focus-visible:bg-accent',
+                  'p-0 h-auto border-0 focus-visible:bg-accent',
                   mobilePageStyles.pairedRevoke
                 )}
                 onClick={() => onRevoke(device.deviceId)}
@@ -74,20 +77,25 @@ export function HeroPaired({
                 title={translate('auto.components.mobile.MobileHero.f9cbf4bb53', 'Revoke device')}
               >
                 <Trash2 className="size-3.5" />
-              </button>
+              </Button>
             </li>
           )
         })}
       </ul>
       <div className={mobilePageStyles.flowActions}>
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.secondaryAction)}
+          className={cn(
+            'p-0 h-auto border-0 focus-visible:bg-accent',
+            mobilePageStyles.secondaryAction
+          )}
           onClick={onPairAnother}
         >
           <Smartphone className="size-3.5" />
           {translate('auto.components.mobile.MobileHero.ff48d9d520', 'Pair another device')}
-        </button>
+        </Button>
         <span />
       </div>
     </div>

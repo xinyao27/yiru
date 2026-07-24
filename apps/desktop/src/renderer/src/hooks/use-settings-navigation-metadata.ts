@@ -9,7 +9,7 @@ import {
   Bug,
   PlugsConnected as Cable,
   Flask as FlaskConical,
-  GitBranch,
+  GitMerge,
   Globe,
   Keyboard,
   Lock,
@@ -285,7 +285,7 @@ export function buildSettingsNavigationMetadata({
         'auto.hooks.useSettingsNavigationMetadata.ab4b21b58e',
         'Branch naming, base refs, attribution, and Git AI Author.'
       ),
-      icon: GitBranch,
+      icon: GitMerge,
       // Why: Git AI Author is rendered inside Git, so shared
       // metadata must search both surfaces wherever Git appears.
       searchEntries: [

@@ -64,9 +64,7 @@ export function MobileEmulatorAgentSetupGuideSteps({
                 'auto.components.settings.MobileEmulatorAgentControlRow.aaf62a3dd2',
                 'Installed at'
               )}{' '}
-              <code className="bg-muted rounded px-1 py-0.5">
-                {setup.cliInstallStatus.commandPath}
-              </code>
+              <code className="bg-muted px-1 py-0.5">{setup.cliInstallStatus.commandPath}</code>
             </p>
           ) : null}
           {setup.cliPathNeedsAttention && setup.cliInstallStatus?.detail ? (
@@ -81,9 +79,7 @@ export function MobileEmulatorAgentSetupGuideSteps({
                 'Registering the Yiru CLI'
               )}{' '}
               {setup.cliInstallStatus?.commandPath ? (
-                <code className="bg-muted rounded px-1 py-0.5">
-                  {setup.cliInstallStatus.commandPath}
-                </code>
+                <code className="bg-muted px-1 py-0.5">{setup.cliInstallStatus.commandPath}</code>
               ) : null}{' '}
               {translate(
                 'auto.components.emulator.pane.MobileEmulatorAgentSetupGuideSteps.3be27641c9',

@@ -1734,7 +1734,7 @@ export default function CombinedDiffViewer({
 
   const skippedConflictNotice =
     (file.skippedConflicts?.length ?? 0) > 0 ? (
-      <div className="border-border/60 bg-muted/20 mx-4 mt-3 rounded-md border px-3 py-2 text-xs">
+      <div className="border-border/60 bg-muted/20 mx-4 mt-3 border px-3 py-2 text-xs">
         <div className="text-foreground font-medium">
           {translate(
             'auto.components.editor.CombinedDiffViewer.820ec01f24',
@@ -1825,13 +1825,15 @@ export default function CombinedDiffViewer({
                 : ''}
             </span>
             {diffCommentCount > 0 && (
-              <div className="border-border/70 bg-muted/40 ml-1 flex shrink-0 items-center overflow-hidden rounded-full border">
+              <div className="border-border/70 bg-muted/40 ml-1 flex shrink-0 items-center overflow-hidden border">
                 <Popover>
                   <PopoverTrigger
                     render={
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         type="button"
-                        className="text-foreground/80 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex h-6 items-center gap-1 pr-1.5 pl-2 text-[11px] leading-none font-medium transition-colors outline-none"
+                        className="text-foreground/80 hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground border-0 pr-1.5 pl-2 text-[11px] leading-none transition-colors"
                         aria-label={translate(
                           'auto.components.editor.CombinedDiffViewer.8f68ad9ca9',
                           'Show {{value0}} AI {{value1}}',
@@ -1848,10 +1850,10 @@ export default function CombinedDiffViewer({
                             'AI notes'
                           )}
                         </span>
-                        <span className="bg-background/80 text-muted-foreground rounded-full px-1 text-[10px] tabular-nums">
+                        <span className="bg-background/80 text-muted-foreground px-1 text-[10px] tabular-nums">
                           {diffCommentCount}
                         </span>
-                      </button>
+                      </Button>
                     }
                   />
                   <PopoverContent align="start" side="bottom" sideOffset={6} className="w-80 p-0">
@@ -1869,7 +1871,7 @@ export default function CombinedDiffViewer({
                   groupId={activeGroupId ?? file.worktreeId}
                   comments={diffCommentsForWorktree}
                   actionLabel="Send"
-                  triggerClassName="h-6 gap-1 rounded-none border-l border-border/70 px-2 text-[11px] font-medium leading-none text-foreground/80 hover:bg-accent hover:text-foreground"
+                  triggerClassName="h-6 gap-1 border-l border-border/70 px-2 text-[11px] font-medium leading-none text-foreground/80 hover:bg-accent hover:text-foreground"
                   iconClassName="size-3"
                 />
               </div>
@@ -1877,8 +1879,10 @@ export default function CombinedDiffViewer({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {file.combinedAlternate && (
-              <button
-                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-xs transition-colors outline-none"
+              <Button
+                variant="quiet"
+                size="xs"
+                className="h-auto border-0 p-0"
                 onClick={openAlternateDiff}
               >
                 {file.combinedAlternate.source === 'combined-branch'
@@ -1890,32 +1894,32 @@ export default function CombinedDiffViewer({
                       'auto.components.editor.CombinedDiffViewer.982d14bfa5',
                       'Open All Changes'
                     )}
-              </button>
+              </Button>
             )}
-            <button
-              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent w-20 text-left text-xs transition-colors outline-none"
+            <Button
+              variant="quiet"
+              size="xs"
+              className="h-auto w-20 justify-start gap-0 border-0 p-0 text-left font-normal whitespace-normal"
               onClick={() => setAllSectionsCollapsed(!allSectionsCollapsed)}
             >
               {allSectionsCollapsed
                 ? translate('auto.components.editor.CombinedDiffViewer.19c45cfdc0', 'Expand All')
                 : translate('auto.components.editor.CombinedDiffViewer.ea08dae15b', 'Collapse All')}
-            </button>
-            <button
-              className="border-border text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent w-24 rounded border px-2 py-0.5 text-center text-xs transition-colors outline-none"
+            </Button>
+            <Button
+              variant="quiet"
+              size="xs"
+              className="h-auto w-24 py-0.5 text-center"
               onClick={toggleSideBySide}
             >
               {sideBySide
                 ? translate('auto.components.editor.CombinedDiffViewer.f786fd54e1', 'Inline')
                 : translate('auto.components.editor.CombinedDiffViewer.ec5053c7f5', 'Side by Side')}
-            </button>
-            <button
-              className={cn(
-                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                'inline-flex h-6 items-center gap-1 rounded border border-border px-2 text-xs transition-colors hover:text-foreground',
-                settings?.diffWordWrap === true
-                  ? 'bg-accent text-foreground'
-                  : 'text-muted-foreground'
-              )}
+            </Button>
+            <Button
+              variant="quiet"
+              size="xs"
+              className={cn(' ', ' ', settings?.diffWordWrap === true ? 'bg-accent' : '')}
               onClick={toggleDiffWordWrap}
               aria-pressed={settings?.diffWordWrap === true}
             >
@@ -1923,7 +1927,7 @@ export default function CombinedDiffViewer({
               {settings?.diffWordWrap === true
                 ? translate('auto.components.editor.CombinedDiffViewer.a4420ca1f7', 'Wrap On')
                 : translate('auto.components.editor.CombinedDiffViewer.dde325ddfe', 'Wrap Off')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -2012,12 +2016,12 @@ export default function CombinedDiffViewer({
             {scrollThumb.visible && (
               <div
                 aria-hidden="true"
-                className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default rounded pl-1"
+                className="bg-muted/15 absolute inset-y-1 right-1 z-20 w-4 cursor-default pl-1"
                 onPointerDown={handleCombinedDiffScrollbarPointerDown}
               >
                 <div
                   data-combined-diff-scrollbar-thumb
-                  className="bg-muted-foreground/30 absolute right-0 left-1 rounded"
+                  className="bg-muted-foreground/30 absolute right-0 left-1"
                   style={{ top: scrollThumb.top, height: scrollThumb.height }}
                 />
               </div>
@@ -2107,9 +2111,9 @@ function DiffNotesPreviewPopover({
         <div className="flex shrink-0 items-center gap-1">
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
-            className="text-muted-foreground hover:text-foreground h-6"
+            className="h-6"
             onClick={onCopy}
             disabled={totalCount === 0}
           >
@@ -2131,11 +2135,11 @@ function DiffNotesPreviewPopover({
       </div>
       <div className="scrollbar-sleek max-h-72 overflow-y-auto p-2">
         {comments.map((comment) => (
-          <div key={comment.id} className="hover:bg-accent/50 rounded-md px-2 py-1.5">
+          <div key={comment.id} className="hover:bg-accent/50 px-2 py-1.5">
             <div className="text-muted-foreground flex items-center gap-1.5 text-[11px] leading-none">
               <span className="min-w-0 flex-1 truncate font-mono">{comment.filePath}</span>
               {comment.sentAt ? (
-                <span className="bg-muted shrink-0 rounded px-1 py-0.5 text-[10px] leading-none">
+                <span className="bg-muted shrink-0 px-1 py-0.5 text-[10px] leading-none">
                   {translate('auto.components.editor.CombinedDiffViewer.1da745c551', 'Sent')}
                 </span>
               ) : null}

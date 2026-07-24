@@ -1,6 +1,5 @@
 import type React from 'react'
 
-import type { ActivityBarItem } from '@/components/right-sidebar/activity-bar-buttons'
 import { preventMiddleButtonDefault } from '@/components/tab-bar/middle-button-default-guard'
 import {
   getTitlebarTabStateClasses,
@@ -13,6 +12,7 @@ import {
   TAB_LABEL_WIDTH_CLASSES
 } from '@/components/tab-bar/tab-width-rules'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import type { ActivityBarItem } from '@/components/workspace-panel/activity-bar-buttons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

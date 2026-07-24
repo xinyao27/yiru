@@ -82,11 +82,11 @@ function isMacAppPasteInput(input: Electron.Input): boolean {
   )
 }
 
-// Why: mirrors renderer --titlebar-height (36px); native window buttons cannot
+// Why: mirrors renderer --titlebar-height (38px); native window buttons cannot
 // consume renderer CSS, so derive their visual center from the named height.
-// At zoom factor z that becomes 18·z window px.  Traffic lights are
+// At zoom factor z that becomes 19·z window px. Traffic lights are
 // ~12px tall, so we position their top edge at (center − 6).
-const TITLEBAR_CSS_HEIGHT = 36
+const TITLEBAR_CSS_HEIGHT = 38
 const TITLEBAR_CSS_CENTER = TITLEBAR_CSS_HEIGHT / 2
 const TRAFFIC_LIGHT_RADIUS = 6
 const TRAFFIC_LIGHT_X = 16
@@ -265,7 +265,7 @@ export function createMainWindow(
           ? '#0a0a0a'
           : '#ffffff',
     // Why: on macOS 'hiddenInset' keeps the native traffic lights positioned
-    // inside our custom 36px titlebar. On Windows 'hidden' removes the default
+    // inside our custom 38px titlebar. On Windows 'hidden' removes the default
     // OS title bar (which would otherwise stack on top of our renderer titlebar
     // and waste vertical space) while still allowing our renderer to draw its
     // own drag region and window controls.

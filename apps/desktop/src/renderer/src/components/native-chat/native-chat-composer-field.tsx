@@ -1,6 +1,7 @@
 import { Image as ImageIcon, ImageBroken as ImageOff, X } from '@phosphor-icons/react'
 import type { ClipboardEventHandler, KeyboardEventHandler, RefObject } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { basename } from '@/lib/path'
@@ -131,7 +132,7 @@ export function NativeChatComposerField({
                 {imageAttachments.map((attachment) => (
                   <div
                     key={attachment.id}
-                    className="border-border bg-background text-muted-foreground flex max-w-full items-center gap-1.5 rounded-md border px-2 py-1 text-xs"
+                    className="border-border bg-background text-muted-foreground flex max-w-full items-center gap-1.5 border px-2 py-1 text-xs"
                     title={attachment.path}
                   >
                     <ImageIcon className="size-3.5 shrink-0" />
@@ -143,21 +144,25 @@ export function NativeChatComposerField({
                           )
                         : basename(attachment.path)}
                     </span>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
                       type="button"
                       onClick={() => onRemoveImageAttachment(attachment.id)}
                       aria-label={translate(
                         'components.native-chat.composer.removeAttachment',
                         'Remove attachment'
                       )}
-                      className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-4 shrink-0 items-center justify-center rounded-sm transition-colors focus-visible:outline-none"
+                      className="text-muted-foreground flex size-4 transition-colors"
                     >
-                      <X className="size-3" />
-                    </button>
+                      <X weight="regular" className="size-3" />
+                    </Button>
                   </div>
                 ))}
               </div>
             ) : null}
+            {/* Why: keep native so field-sizing, IME composition, and selection
+                callbacks share one HTMLTextAreaElement without Input chrome. */}
             <textarea
               ref={textareaRef}
               value={draft}

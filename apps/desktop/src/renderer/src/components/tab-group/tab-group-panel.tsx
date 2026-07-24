@@ -188,9 +188,13 @@ export default function TabGroupPanel({
   )
 
   // Why: focused-only — workspace actions and Close split pane stay with the
-  // active pane so unfocused strips stay compact.
+  // active pane so unfocused strips stay compact; adjacent actions touch as
+  // continuous titlebar chrome instead of leaving background slivers. When
+  // More follows a button group, the group's right edge owns their shared seam.
+  // Base UI inserts focus guards beside an open menu trigger, so the general
+  // sibling selector must keep the seam collapsed across those guards.
   const focusedActionChromeClassName = cn(
-    'flex shrink-0 items-center gap-0.5 overflow-hidden transition-[opacity] duration-150',
+    'flex h-full shrink-0 items-center gap-0 overflow-hidden transition-[opacity] duration-150 [&>[data-slot=button-group]~button]:border-l-0',
     isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
   )
   // Why: the split wrapper already paints edge-touching seams; duplicating them

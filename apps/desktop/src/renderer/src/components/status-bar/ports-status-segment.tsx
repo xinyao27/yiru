@@ -197,9 +197,11 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
               )}
 
               <section className="border-border/60 border-t">
-                <button
+                <Button
+                  variant="quiet"
+                  size="default"
                   type="button"
-                  className="border-border/40 bg-popover text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:bg-accent/50 focus-visible:text-foreground sticky top-0 z-10 flex w-full items-center gap-1.5 border-b px-3 py-2 text-left text-[11px] font-medium tracking-[0.05em] uppercase outline-none"
+                  className="border-border/40 bg-popover /50 /50 sticky top-0 z-10 flex w-full justify-start gap-1.5 border-b px-3 text-left text-[11px] tracking-[0.05em] whitespace-normal uppercase"
                   aria-expanded={externalOpen}
                   onClick={() => {
                     recordFeatureInteraction('ports')
@@ -207,9 +209,9 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                   }}
                 >
                   {externalOpen ? (
-                    <ChevronDown className="size-3" />
+                    <ChevronDown weight="regular" className="size-3" />
                   ) : (
-                    <ChevronRight className="size-3" />
+                    <ChevronRight weight="regular" className="size-3" />
                   )}
                   <span>
                     {translate(
@@ -218,7 +220,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                     )}
                   </span>
                   <span className="ml-auto font-mono text-[10px]">{externalPorts.length}</span>
-                </button>
+                </Button>
                 {externalOpen && (
                   <div className="px-1 pb-1">
                     {externalPorts.length > 0 ? (

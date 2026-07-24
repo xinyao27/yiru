@@ -161,7 +161,7 @@ export function RepositoryHostSetupActions({
 
   if (!isOpen) {
     return (
-      <div className="border-border bg-muted/20 flex items-center justify-between gap-3 rounded-md border p-3">
+      <div className="border-border bg-muted/20 flex items-center justify-between gap-3 border p-3">
         <div className="min-w-0 space-y-1">
           <Label className="text-sm font-semibold">
             {translate(
@@ -188,7 +188,7 @@ export function RepositoryHostSetupActions({
   }
 
   return (
-    <div className="border-border bg-background space-y-3 rounded-md border p-3">
+    <div className="border-border bg-background space-y-3 border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <Label className="text-sm font-semibold">
@@ -211,7 +211,7 @@ export function RepositoryHostSetupActions({
           aria-label={translate('auto.components.settings.RepositoryPane.closeHostSetup', 'Close')}
           onClick={resetFlow}
         >
-          <X className="size-4" />
+          <X weight="regular" className="size-4" />
         </Button>
       </div>
 

@@ -104,7 +104,7 @@ function SheetContent({
               'absolute top-3 right-3 text-muted-foreground hover:text-foreground'
             )}
           >
-            <XIcon />
+            <XIcon weight="regular" />
             <span className="sr-only">
               {translate('auto.components.ui.sheet.1189e9fe0a', 'Close')}
             </span>

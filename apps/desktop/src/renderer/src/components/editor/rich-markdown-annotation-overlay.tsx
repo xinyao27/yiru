@@ -1,5 +1,6 @@
 import { Plus } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import { DiffCommentPopover } from '../diff-comments/diff-comment-popover'
@@ -25,9 +26,11 @@ export function RichMarkdownAnnotationOverlay({
   return (
     <>
       {target ? (
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className="yiru-diff-comment-add-btn rich-markdown-comment-add-btn focus-visible:bg-accent outline-none"
+          className="yiru-diff-comment-add-btn rich-markdown-comment-add-btn focus-visible:bg-accent h-auto border-0 p-0"
           style={{
             top: target.buttonTop ?? 56,
             left: target.buttonLeft ?? 16
@@ -51,7 +54,7 @@ export function RichMarkdownAnnotationOverlay({
           }}
         >
           <Plus className="size-3.5" strokeWidth={2.5} />
-        </button>
+        </Button>
       ) : null}
       {popover ? (
         <DiffCommentPopover

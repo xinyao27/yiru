@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import type { AppState } from '@/store/types'
 
@@ -27,20 +28,22 @@ export function showMobileEmulatorHiddenToast(deps: MobileEmulatorHiddenToastDep
             'auto.components.emulator.pane.mobile.emulator.hidden.toast.c46c979c1d',
             'Re-enable Mobile Emulator anytime in'
           )}{' '}
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             onClick={() => {
               deps.openSettingsTarget({ pane: 'mobile-emulator', repoId: null })
               deps.openSettingsPage()
               toast.dismiss(MOBILE_EMULATOR_HIDDEN_TOAST_ID)
             }}
-            className="text-popover-foreground hover:text-primary focus-visible:text-primary focus-visible:bg-accent cursor-pointer font-medium underline underline-offset-2 outline-none"
+            className="text-popover-foreground hover:text-primary focus-visible:text-primary focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
           >
             {translate(
               'auto.components.emulator.pane.mobile.emulator.hidden.toast.600f9a745a',
               'Settings › Mobile Emulator'
             )}
-          </button>
+          </Button>
           .
         </p>
       ),

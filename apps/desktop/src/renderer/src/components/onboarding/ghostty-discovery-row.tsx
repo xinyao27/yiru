@@ -1,5 +1,6 @@
 import { Check } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import ghosttyIcon from '../../../../../resources/ghostty.svg'
@@ -26,8 +27,8 @@ export function GhosttyDiscoveryRow({
 
   if (discovery.status === 'detecting') {
     return (
-      <div className="border-border text-muted-foreground flex items-center gap-2.5 rounded-lg border border-dashed bg-transparent px-3.5 py-2.5 text-[12px]">
-        <span className="bg-muted-foreground/60 size-1.5 animate-pulse rounded-full" />
+      <div className="border-border text-muted-foreground flex items-center gap-2.5 border border-dashed bg-transparent px-3.5 py-2.5 text-[12px]">
+        <span className="bg-muted-foreground/60 size-1.5 animate-pulse" />
         {translate(
           'auto.components.onboarding.ThemeStep.2c3aa538f8',
           'Looking for a Ghostty config...'
@@ -38,7 +39,7 @@ export function GhosttyDiscoveryRow({
 
   if (discovery.status === 'imported') {
     return (
-      <div className="text-foreground flex items-center gap-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.07] px-3.5 py-2.5 text-[12px]">
+      <div className="text-foreground flex items-center gap-2.5 border border-emerald-500/30 bg-emerald-500/[0.07] px-3.5 py-2.5 text-[12px]">
         <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" strokeWidth={3} />
         <span className="flex-1">
           <span className="font-medium">
@@ -54,7 +55,7 @@ export function GhosttyDiscoveryRow({
 
   const { preview, fields } = discovery
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-violet-500/30 bg-violet-500/[0.06] px-3.5 py-2.5">
+    <div className="flex items-center gap-3 border border-violet-500/30 bg-violet-500/[0.06] px-3.5 py-2.5">
       <img src={ghosttyIcon} alt="" className="size-4 shrink-0" />
       <div className="min-w-0 flex-1">
         <div className="text-foreground text-[12px]">
@@ -81,15 +82,17 @@ export function GhosttyDiscoveryRow({
           </div>
         )}
       </div>
-      <button
-        className="bg-foreground text-background hover:bg-foreground/90 focus-visible:bg-foreground/90 shrink-0 rounded-md px-3 py-1.5 text-[11.5px] font-semibold outline-none disabled:opacity-50"
+      <Button
+        variant="ghost"
+        size="sm"
+        className="bg-foreground text-background hover:bg-foreground/90 focus-visible:bg-foreground/90 py-1.5 text-[11.5px] font-semibold"
         disabled={importing || disabled}
         onClick={() => onImport(preview)}
       >
         {importing
           ? translate('auto.components.onboarding.ThemeStep.ad19e5c916', 'Importing...')
           : translate('auto.components.onboarding.ThemeStep.248c812283', 'Import')}
-      </button>
+      </Button>
     </div>
   )
 }

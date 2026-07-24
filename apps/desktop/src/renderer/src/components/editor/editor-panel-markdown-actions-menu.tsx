@@ -1,6 +1,7 @@
 import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -46,9 +47,11 @@ export function EditorPanelMarkdownActionsMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
-            className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground flex-shrink-0 rounded p-1 transition-colors outline-none"
+            className="h-auto flex-shrink-0 border-0 p-1"
             aria-label={translate(
               'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
               'More actions'
@@ -59,7 +62,7 @@ export function EditorPanelMarkdownActionsMenu({
             )}
           >
             <MoreHorizontal size={14} />
-          </button>
+          </Button>
         }
       />
       <DropdownMenuContent align="end" sideOffset={4}>

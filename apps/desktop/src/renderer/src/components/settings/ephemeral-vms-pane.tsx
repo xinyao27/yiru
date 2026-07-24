@@ -177,7 +177,7 @@ export function EphemeralVmsPane(): React.JSX.Element {
         }
       />
 
-      <div className="border-border/60 bg-card/30 space-y-3 rounded-lg border p-4">
+      <div className="border-border/60 bg-card/30 space-y-3 border p-4">
         <div className="text-sm font-medium">
           {translate(
             'auto.components.settings.EphemeralVmsPane.whatTitle',
@@ -211,7 +211,7 @@ export function EphemeralVmsPane(): React.JSX.Element {
               'In any workspace, ask your agent:'
             )}
           </div>
-          <div className="border-border/60 bg-background/50 flex items-center gap-2 rounded-md border px-3 py-2">
+          <div className="border-border/60 bg-background/50 flex items-center gap-2 border px-3 py-2">
             <code className="text-muted-foreground min-w-0 flex-1 truncate font-mono text-xs">
               {AGENT_PROMPT}
             </code>
@@ -260,11 +260,11 @@ export function EphemeralVmsPane(): React.JSX.Element {
             onClick={() => void refresh()}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingIndicator /> : <RefreshCw />}
+            {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
           </Button>
         </div>
 
-        <div className="border-border/50 bg-card/30 rounded-lg border">
+        <div className="border-border/50 bg-card/30 border">
           {recipes.length === 0 ? (
             <div className="text-muted-foreground px-3 py-4 text-sm">
               {isLoading
@@ -298,7 +298,7 @@ export function EphemeralVmsPane(): React.JSX.Element {
 function WhatItem({ text }: { text: string }): React.JSX.Element {
   return (
     <li className="text-muted-foreground flex items-start gap-2.5 text-sm">
-      <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+      <ArrowRight weight="regular" className="text-muted-foreground mt-0.5 size-4 shrink-0" />
       <span>{text}</span>
     </li>
   )

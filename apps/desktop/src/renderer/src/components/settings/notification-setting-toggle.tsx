@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { cn } from '@/lib/class-names'
+import { Switch } from '@/components/ui/switch'
 
 import { Label } from '../ui/label'
 
@@ -30,26 +30,7 @@ export function NotificationSettingToggle({
         </div>
         <p className="text-muted-foreground text-xs">{description}</p>
       </div>
-      <button
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
-        disabled={disabled}
-        onClick={onToggle}
-        className={cn(
-          'outline-none focus-visible:border-ring',
-          'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
-          checked ? 'bg-foreground' : 'bg-muted-foreground/30',
-          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-        )}
-      >
-        <span
-          className={cn(
-            'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-            checked ? 'translate-x-4' : 'translate-x-0.5'
-          )}
-        />
-      </button>
+      <Switch checked={checked} aria-label={label} disabled={disabled} onCheckedChange={onToggle} />
     </div>
   )
 }

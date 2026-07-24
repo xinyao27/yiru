@@ -18,12 +18,12 @@ import {
   ensureYiruCliAvailableForAgentSkillTerminal,
   isYiruCliAvailableOnPath
 } from '@/lib/agent-skill-cli-prerequisite'
-import { cn } from '@/lib/class-names'
 
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
+import { Switch } from '../ui/switch'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { AgentSkillSetupPanel } from './agent-skill-setup-panel'
 import { CliRegistrationDialog } from './cli-registration-dialog'
@@ -152,9 +152,7 @@ export function CliSection({
     }
   }, [handleStatusChange, mountedRef])
 
-  useEffect(() => {
-    void refreshStatus()
-  }, [refreshStatus])
+  useEffect(() => void refreshStatus(), [refreshStatus])
 
   const isEnabled = status?.state === 'installed'
   const isSupported = status?.supported ?? false
@@ -246,7 +244,7 @@ export function CliSection({
         </p>
       </div>
 
-      <div className="border-border/60 bg-card/50 space-y-3 rounded-xl border p-4">
+      <div className="border-border/60 bg-card/50 space-y-3 border p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
             <Label>
@@ -276,7 +274,7 @@ export function CliSection({
                         'Refresh CLI status'
                       )}
                     >
-                      <RefreshCw className="size-3.5" />
+                      <RefreshCw weight="regular" className="size-3.5" />
                     </Button>
                   }
                 />
@@ -286,27 +284,11 @@ export function CliSection({
               </Tooltip>
             </TooltipProvider>
             {!isBrowserManaged ? (
-              <button
-                role="switch"
-                aria-checked={isEnabled}
+              <Switch
+                checked={isEnabled}
                 disabled={loading || !isSupported || busyAction !== null}
-                onClick={() => setDialogOpen(true)}
-                className={cn(
-                  'outline-none focus-visible:border-ring',
-                  'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
-                  isEnabled ? 'bg-foreground' : 'bg-muted-foreground/30',
-                  loading || !isSupported || busyAction !== null
-                    ? 'cursor-not-allowed opacity-60'
-                    : 'cursor-pointer'
-                )}
-              >
-                <span
-                  className={cn(
-                    'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                    isEnabled ? 'translate-x-4' : 'translate-x-0.5'
-                  )}
-                />
-              </button>
+                onCheckedChange={() => setDialogOpen(true)}
+              />
             ) : null}
           </div>
         </div>
@@ -314,7 +296,7 @@ export function CliSection({
         {status?.commandPath ? (
           <p className="text-muted-foreground text-xs">
             {translate('auto.components.settings.CliSection.15eaad0d31', 'Command path:')}{' '}
-            <code className="bg-muted rounded px-1 py-0.5 text-[11px]">{status.commandPath}</code>
+            <code className="bg-muted px-1 py-0.5 text-[11px]">{status.commandPath}</code>
           </p>
         ) : null}
 

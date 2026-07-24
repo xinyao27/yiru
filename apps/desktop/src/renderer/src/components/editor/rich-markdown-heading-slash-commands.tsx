@@ -133,7 +133,7 @@ export const headingSlashCommands: SlashCommand[] = [
       )
     },
     aliases: ['toggle-h1', 'toggle heading', 'details heading', 'collapse heading'],
-    icon: icon(ChevronRight),
+    icon: icon(ChevronRight, 'regular'),
     group: 'Toggle headings',
     get description() {
       return translate(
@@ -154,7 +154,7 @@ export const headingSlashCommands: SlashCommand[] = [
       )
     },
     aliases: ['toggle-h2'],
-    icon: icon(ChevronRight),
+    icon: icon(ChevronRight, 'regular'),
     group: 'Toggle headings',
     get description() {
       return translate(
@@ -175,7 +175,7 @@ export const headingSlashCommands: SlashCommand[] = [
       )
     },
     aliases: ['toggle-h3'],
-    icon: icon(ChevronRight),
+    icon: icon(ChevronRight, 'regular'),
     group: 'Toggle headings',
     get description() {
       return translate(
@@ -196,7 +196,7 @@ export const headingSlashCommands: SlashCommand[] = [
       )
     },
     aliases: ['toggle-h4'],
-    icon: icon(ChevronRight),
+    icon: icon(ChevronRight, 'regular'),
     group: 'Toggle headings',
     get description() {
       return translate(

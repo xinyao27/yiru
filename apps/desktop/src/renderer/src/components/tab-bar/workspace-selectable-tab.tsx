@@ -1,5 +1,6 @@
 import type React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'
 
@@ -31,14 +32,20 @@ export function WorkspaceSelectableTab({
   // close, rename, pin, or persistence behavior.
   return (
     <div className={TAB_CONTAINER_WIDTH_CLASSES}>
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         type="button"
         role="tab"
         aria-selected={active}
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={cn(TAB_ROOT_CLASSES, 'w-full text-left', getTitlebarTabStateClasses(active))}
+        className={cn(
+          TAB_ROOT_CLASSES,
+          'p-0 h-auto border-0 justify-start gap-0 whitespace-normal font-normal w-full text-left',
+          getTitlebarTabStateClasses(active)
+        )}
         onClick={() => onSelect(id)}
       >
         <span
@@ -59,7 +66,7 @@ export function WorkspaceSelectableTab({
             {title}
           </TooltipContent>
         </Tooltip>
-      </button>
+      </Button>
     </div>
   )
 }

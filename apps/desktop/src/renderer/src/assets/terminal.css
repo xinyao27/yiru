@@ -62,12 +62,22 @@
   caret-color: transparent;
 }
 
-/* Divider: the element is a wide transparent hit area; the visible line is
-   drawn by ::after so that setting `background` on the element never hides it. */
+/* Divider: only the hairline consumes flex space. ::before expands the drag
+   target over adjacent panes, while ::after paints the visible line. */
 .pane-divider.is-vertical,
 .pane-divider.is-horizontal {
-  --divider-thickness: 4px;
+  --divider-thickness: 1px;
+  --divider-hit-size: 9px;
+  /* Why: override stale HMR inline values from the former layout-width hit area. */
+  --divider-extension: calc(var(--divider-thickness) / 2) !important;
+  z-index: 15;
   background: transparent !important;
+}
+
+.pane-divider::before {
+  content: '';
+  position: absolute;
+  background: transparent;
 }
 
 .pane-divider::after {
@@ -78,6 +88,18 @@
   transition: background 100ms ease;
 }
 
+.pane-divider.is-vertical::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--divider-hit-size);
+  transform: translateX(-50%);
+}
+
+.pane-divider.is-vertical {
+  width: var(--divider-thickness) !important;
+}
+
 .pane-divider.is-vertical::after {
   /* Negative insets on the cross axis extend the line into perpendicular
      divider hit zones so that intersecting splits visually connect (├ not |-). */
@@ -86,6 +108,18 @@
   left: 50%;
   width: var(--divider-thickness);
   transform: translateX(-50%);
+}
+
+.pane-divider.is-horizontal {
+  height: var(--divider-thickness) !important;
+}
+
+.pane-divider.is-horizontal::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: var(--divider-hit-size);
+  transform: translateY(-50%);
 }
 
 .pane-divider.is-horizontal::after {

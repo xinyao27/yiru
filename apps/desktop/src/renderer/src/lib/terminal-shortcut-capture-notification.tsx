@@ -82,7 +82,7 @@ export function showTerminalShortcutCaptureNotification({
         content: 'min-w-0 flex-1 !gap-0.5',
         title: 'truncate !leading-5',
         description: 'truncate !leading-4',
-        actionButton: '!h-7 !shrink-0 !rounded-md !px-2.5'
+        actionButton: '!h-7 !shrink-0 !px-2.5'
       },
       icon: <Keyboard className="text-muted-foreground size-4" />,
       action: {

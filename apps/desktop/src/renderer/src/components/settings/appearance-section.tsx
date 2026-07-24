@@ -1,6 +1,7 @@
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 
 type AppearanceSectionProps = {
@@ -31,18 +32,20 @@ export function AppearanceSection({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-xl border border-border/50 bg-card transition-colors',
+        'overflow-hidden border border-border/50 bg-card transition-colors',
         open && 'border-ring/40'
       )}
     >
-      <button
+      <Button
+        variant="ghost"
+        size="default"
         type="button"
         aria-expanded={open}
         aria-controls={contentId}
         onClick={onToggle}
-        className="hover:bg-accent/15 flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors focus-visible:outline-none"
+        className="hover:bg-accent/15 flex h-auto w-full justify-start gap-3.5 border-0 py-3.5 text-left font-normal whitespace-normal transition-colors"
       >
-        <span className="bg-secondary text-foreground grid size-8 shrink-0 place-items-center rounded-md [&_svg]:size-4">
+        <span className="bg-secondary text-foreground grid size-8 shrink-0 place-items-center [&_svg]:size-4">
           {icon}
         </span>
         <span className="min-w-0 flex-1">
@@ -52,12 +55,13 @@ export function AppearanceSection({
           ) : null}
         </span>
         <ChevronRight
+          weight="regular"
           className={cn(
             'size-[18px] shrink-0 text-muted-foreground transition-transform',
             open && 'rotate-90 text-foreground'
           )}
         />
-      </button>
+      </Button>
       <div
         className={cn(
           'grid overflow-hidden transition-[grid-template-rows,opacity,border-color] duration-200 ease-out motion-reduce:transition-none',

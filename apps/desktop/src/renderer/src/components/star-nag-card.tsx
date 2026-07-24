@@ -176,7 +176,7 @@ export function StarNagCard(): React.JSX.Element | null {
               disabled={busy}
               aria-label={translate('auto.components.StarNagCard.b5e685e4d9', 'Dismiss')}
             >
-              <X className="size-3.5" />
+              <X weight="regular" className="size-3.5" />
             </Button>
           </div>
 
@@ -196,7 +196,7 @@ export function StarNagCard(): React.JSX.Element | null {
               className={primaryActionClass}
             >
               {mode === 'web' ? (
-                <ExternalLink className="size-3.5" />
+                <ExternalLink weight="regular" className="size-3.5" />
               ) : (
                 <Star className="size-3.5" />
               )}

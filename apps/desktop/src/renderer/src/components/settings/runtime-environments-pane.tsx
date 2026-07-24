@@ -765,7 +765,7 @@ export function RuntimeEnvironmentsPane({
             <p className="text-muted-foreground text-xs">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.connectToRemoteServersHelp',
-                'Pair another Yiru runtime, then connect or disconnect it here. Use Advanced > Active Server only when you want to change the default host.'
+                'Pair another Yiru runtime, then connect or disconnect it here.'
               )}
             </p>
           </div>
@@ -820,7 +820,7 @@ export function RuntimeEnvironmentsPane({
 
         {addServerFormOpen ? (
           <form
-            className="border-border/50 bg-muted/20 space-y-3 rounded-lg border p-3"
+            className="border-border/50 bg-muted/20 space-y-3 border p-3"
             onSubmit={(event) => {
               event.preventDefault()
               void addEnvironment()
@@ -904,7 +904,7 @@ export function RuntimeEnvironmentsPane({
           </form>
         ) : null}
 
-        <div className="border-border/50 bg-card/30 rounded-lg border">
+        <div className="border-border/50 bg-card/30 border">
           {environments.length === 0 ? (
             <div className="text-muted-foreground px-3 py-4 text-sm">
               {translate(
@@ -941,7 +941,7 @@ export function RuntimeEnvironmentsPane({
                             <div className="truncate text-sm font-medium">{environment.name}</div>
                             <span
                               className={cn(
-                                'size-2 shrink-0 rounded-full',
+                                'size-2 shrink-0',
                                 getRuntimeServerDotClass(connectionState)
                               )}
                             />
@@ -1100,6 +1100,7 @@ export function RuntimeEnvironmentsPane({
         >
           {translate('auto.components.settings.RuntimeEnvironmentsPane.advanced', 'Advanced')}
           <ChevronDown
+            weight="regular"
             className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
           />
         </Button>
@@ -1187,7 +1188,7 @@ export function RuntimeEnvironmentsPane({
                   onClick={() => void loadEnvironments()}
                   disabled={isLoading || isBusy}
                 >
-                  {isLoading ? <LoadingIndicator /> : <RefreshCw />}
+                  {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
                 </Button>
               </div>
               {environments.length > 0 ? (
@@ -1198,13 +1199,13 @@ export function RuntimeEnvironmentsPane({
                       'Server details'
                     )}
                   </div>
-                  <div className="border-border/50 bg-card/30 space-y-1 rounded-lg border p-2">
+                  <div className="border-border/50 bg-card/30 space-y-1 border p-2">
                     {environments.map((environment) => {
                       const details = detailsByEnvironmentId[environment.id]
                       return (
                         <div
                           key={environment.id}
-                          className="text-muted-foreground grid gap-1 rounded-md px-2 py-1.5 text-[11px] sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
+                          className="text-muted-foreground grid gap-1 px-2 py-1.5 text-[11px] sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
                         >
                           <div className="text-foreground truncate font-medium">
                             {environment.name}
@@ -1269,7 +1270,7 @@ export function RuntimeEnvironmentsPane({
               )}
             </p>
           </div>
-          <div className="border-border/50 bg-card/30 overflow-hidden rounded-lg border">
+          <div className="border-border/50 bg-card/30 overflow-hidden border">
             <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
               <div className="min-w-0 space-y-0.5">
                 <div className="text-sm font-medium">
@@ -1340,7 +1341,7 @@ export function RuntimeEnvironmentsPane({
             </DialogDescription>
           </DialogHeader>
           {pendingSwitchValue ? (
-            <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
               <div className="text-muted-foreground">
                 {translate(
                   'auto.components.settings.RuntimeEnvironmentsPane.05e0fc3ebf',
@@ -1420,7 +1421,7 @@ export function RuntimeEnvironmentsPane({
             </DialogDescription>
           </DialogHeader>
           {pendingRemove ? (
-            <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
               <div className="truncate font-medium">{pendingRemove.name}</div>
               <div className="text-muted-foreground mt-0.5 truncate font-mono">
                 {pendingRemove.endpoints[0]?.endpoint ??
