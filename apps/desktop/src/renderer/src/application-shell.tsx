@@ -219,7 +219,7 @@ const TITLEBAR_CLASS_NAME =
   'flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 // Why: the reference tabs occupy the full 36px titlebar without vertical inset.
 const TITLEBAR_LEFT_CLASS_NAME =
-  'worktree-sidebar-theme flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] shrink-0 flex-row items-center overflow-hidden bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+  'worktree-sidebar-theme border-sidebar-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] shrink-0 flex-row items-center overflow-hidden border-b bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 const WINDOW_CONTROL_BUTTON_CLASS_NAME =
   'h-[var(--titlebar-height)] w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 
