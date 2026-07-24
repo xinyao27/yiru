@@ -135,7 +135,7 @@ export function SettingsSidebar({
   const searchShortcutCombos = useShortcutKeyComboDetails('settings.search')
   const navItemClassName = (isActive: boolean): string =>
     cn(
-      'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
+      'flex w-full items-center justify-start gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
       isActive
         ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
         : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
