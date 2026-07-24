@@ -1,0 +1,311 @@
+import { HardDrives as Server, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { useCallback, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { translate } from '@/i18n/i18n'
+import {
+  killWorkspacePortForTarget,
+  openWorkspacePortInBrowser,
+  refreshWorkspacePortScanAfterStop,
+  resolvePortOpenInYiruBrowser,
+  scanWorkspacePortsForTarget,
+  workspacePortRuntimeTargetKey
+} from '@/lib/workspace-port-actions'
+import { resolveLocalhostLabelRouteForPort } from '@/lib/workspace-port-localhost-label-selector'
+import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { useAppStore } from '@/store'
+import { useActiveWorktree, useRepoById } from '@/store/selectors'
+
+import type { WorkspacePort } from '../../../../shared/workspace-ports'
+import { LocalWorkspacePortDetailsDialog } from './local-workspace-port-details-dialog'
+import { LocalWorkspacePortSection } from './local-workspace-port-list'
+import { getLocalWorkspacePortSections } from './local-workspace-port-sections'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
+
+export function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }): React.JSX.Element {
+  const activeWorktree = useActiveWorktree()
+  const activeRepo = useRepoById(activeWorktree?.repoId ?? null)
+  const settings = useAppStore((state) => state.settings)
+  const createBrowserTab = useAppStore((state) => state.createBrowserTab)
+  const setRemoteBrowserPageHandle = useAppStore((state) => state.setRemoteBrowserPageHandle)
+  const scansByKey = useAppStore((state) => state.workspacePortScansByKey)
+  const refreshing = useAppStore((state) => state.workspacePortScanRefreshing)
+  const setWorkspacePortScan = useAppStore((state) => state.setWorkspacePortScan)
+  const setWorkspacePortScanForKey = useAppStore((state) => state.setWorkspacePortScanForKey)
+  const setWorkspacePortScanRefreshing = useAppStore(
+    (state) => state.setWorkspacePortScanRefreshing
+  )
+  const [detailsPort, setDetailsPort] = useState<WorkspacePort | null>(null)
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
+    other: true,
+    external: true
+  })
+
+  const runtimeTarget = useMemo(() => {
+    const activeRuntimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(
+      useAppStore.getState(),
+      activeWorktree?.id
+    )
+    // Why: Ports actions must follow the active workspace owner, not sidebar focus.
+    return getActiveRuntimeTarget({ ...settings, activeRuntimeEnvironmentId })
+  }, [activeWorktree?.id, settings])
+  const scanKey = `${workspacePortRuntimeTargetKey(runtimeTarget)}:all`
+
+  const refresh = useCallback(() => {
+    if (!activeRepo) {
+      return Promise.resolve()
+    }
+    setWorkspacePortScanRefreshing(true)
+    return scanWorkspacePortsForTarget(runtimeTarget)
+      .then((nextScan) => {
+        setWorkspacePortScanForKey(scanKey, nextScan)
+        setWorkspacePortScan({ key: scanKey, result: nextScan })
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        toast.error(
+          translate(
+            'auto.components.right.sidebar.PortsPanel.a00f3a2840',
+            'Failed to refresh ports'
+          ),
+          {
+            description:
+              message ||
+              translate(
+                'auto.components.right.sidebar.PortsPanel.740aca88ab',
+                'Workspace port scan failed.'
+              )
+          }
+        )
+      })
+      .finally(() => setWorkspacePortScanRefreshing(false))
+  }, [
+    activeRepo,
+    runtimeTarget,
+    scanKey,
+    setWorkspacePortScan,
+    setWorkspacePortScanForKey,
+    setWorkspacePortScanRefreshing
+  ])
+
+  // Why: the scanner owns polling; visibility only scopes its shared result.
+  const displayScan = isVisible ? (scansByKey[scanKey] ?? null) : null
+  const toggleSection = useCallback((sectionId: string) => {
+    setCollapsedSections((current) => ({ ...current, [sectionId]: !current[sectionId] }))
+  }, [])
+  const handleStopPort = useCallback(
+    async (port: WorkspacePort) => {
+      if (!activeRepo || !port.pid) {
+        return
+      }
+      const result = await killWorkspacePortForTarget(runtimeTarget, {
+        repoId: activeRepo.id,
+        pid: port.pid,
+        port: port.port
+      })
+      if (!result.ok) {
+        toast.error(result.reason)
+        return
+      }
+      toast.success(
+        translate(
+          'auto.components.right.sidebar.PortsPanel.97b562d21d',
+          'Stopped process on :{{value0}}',
+          { value0: port.port }
+        )
+      )
+      const refreshResult = await refreshWorkspacePortScanAfterStop({
+        runtimeTarget,
+        setWorkspacePortScan,
+        setWorkspacePortScanForKey,
+        getWorkspacePortScansByKey: () => useAppStore.getState().workspacePortScansByKey,
+        setWorkspacePortScanRefreshing
+      })
+      if (!refreshResult.ok) {
+        toast.error(
+          translate(
+            'auto.components.right.sidebar.PortsPanel.a00f3a2840',
+            'Failed to refresh ports'
+          ),
+          { description: refreshResult.reason }
+        )
+      }
+    },
+    [
+      activeRepo,
+      runtimeTarget,
+      setWorkspacePortScan,
+      setWorkspacePortScanForKey,
+      setWorkspacePortScanRefreshing
+    ]
+  )
+  const handleOpenPortInBrowser = useCallback(
+    async (port: WorkspacePort, event?: React.MouseEvent<HTMLButtonElement>) => {
+      const result = await openWorkspacePortInBrowser({
+        port,
+        activeWorktreeId: activeWorktree?.id,
+        runtimeTarget,
+        createBrowserTab,
+        setRemoteBrowserPageHandle,
+        openInYiruBrowser: resolvePortOpenInYiruBrowser({
+          settings,
+          event,
+          isMac: navigator.userAgent.includes('Mac')
+        }),
+        localhostLabelRoute: resolveLocalhostLabelRouteForPort(useAppStore.getState(), port)
+      })
+      if (!result.ok) {
+        toast.error(
+          translate(
+            'auto.components.right.sidebar.PortsPanel.98e9a414f8',
+            'Failed to open browser'
+          ),
+          { description: result.reason }
+        )
+      }
+    },
+    [activeWorktree?.id, createBrowserTab, runtimeTarget, setRemoteBrowserPageHandle, settings]
+  )
+  const sections = useMemo(
+    () => getLocalWorkspacePortSections(displayScan, activeRepo?.id, activeWorktree?.id),
+    [activeRepo?.id, activeWorktree?.id, displayScan]
+  )
+
+  if (!activeRepo) {
+    return <NoWorkspaceSelected />
+  }
+  const sectionProps = {
+    onStopPort: (port: WorkspacePort) => void handleStopPort(port),
+    onShowDetails: setDetailsPort,
+    onOpenInBrowser: handleOpenPortInBrowser
+  }
+  const noPorts =
+    sections.activePorts.length === 0 &&
+    sections.otherWorkspacePorts.length === 0 &&
+    sections.externalPorts.length === 0
+
+  return (
+    <div className="scrollbar-sleek flex h-full flex-col overflow-y-auto">
+      <PortsHeader refreshing={refreshing} onRefresh={() => void refresh()} />
+      {displayScan?.unavailableReason ? (
+        <div className="text-muted-foreground border-border border-b px-3 py-2 text-xs">
+          {translate(
+            'auto.components.right.sidebar.PortsPanel.f59c783b7a',
+            'Port scan unavailable on {{value0}}: {{value1}}',
+            { value0: displayScan.platform, value1: displayScan.unavailableReason }
+          )}
+        </div>
+      ) : (
+        <>
+          <LocalWorkspacePortSection
+            id="active"
+            title={translate(
+              'auto.components.right.sidebar.PortsPanel.935dda7718',
+              'Active Workspace'
+            )}
+            ports={sections.activePorts}
+            emptyText={
+              refreshing && !displayScan
+                ? translate('auto.components.right.sidebar.PortsPanel.0d63d94db3', 'Scanning...')
+                : translate(
+                    'auto.components.right.sidebar.PortsPanel.38b16cfbef',
+                    'No ports detected'
+                  )
+            }
+            collapsed={collapsedSections.active ?? false}
+            onToggle={() => toggleSection('active')}
+            {...sectionProps}
+          />
+          <LocalWorkspacePortSection
+            id="other"
+            title={translate(
+              'auto.components.right.sidebar.PortsPanel.4db4b5e435',
+              'Other Workspaces'
+            )}
+            ports={sections.otherWorkspacePorts}
+            collapsed={collapsedSections.other ?? false}
+            onToggle={() => toggleSection('other')}
+            {...sectionProps}
+          />
+          <LocalWorkspacePortSection
+            id="external"
+            title={translate('auto.components.right.sidebar.PortsPanel.d32820d3e2', 'External')}
+            ports={sections.externalPorts}
+            collapsed={collapsedSections.external ?? false}
+            onToggle={() => toggleSection('external')}
+            {...sectionProps}
+          />
+          {displayScan && noPorts && <NoLocalPorts />}
+        </>
+      )}
+      <LocalWorkspacePortDetailsDialog port={detailsPort} onClose={() => setDetailsPort(null)} />
+    </div>
+  )
+}
+
+function PortsHeader({ refreshing, onRefresh }: { refreshing: boolean; onRefresh: () => void }) {
+  const refreshLabel = translate(
+    'auto.components.right.sidebar.PortsPanel.7822e3edc6',
+    'Refresh Ports'
+  )
+  return (
+    <div className="border-border flex items-center justify-between border-b px-3 py-2">
+      <span className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+        {translate('auto.components.right.sidebar.PortsPanel.6bc058dbe1', 'Ports')}
+      </span>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
+              onClick={onRefresh}
+              disabled={refreshing}
+              aria-label={refreshLabel}
+            >
+              {refreshing ? (
+                <LoadingIndicator size={14} />
+              ) : (
+                <RefreshCw weight="regular" size={14} />
+              )}
+            </Button>
+          }
+        />
+        <TooltipContent side="top" sideOffset={4}>
+          {refreshLabel}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+function NoWorkspaceSelected(): React.JSX.Element {
+  return (
+    <div className="text-muted-foreground flex h-full flex-col items-center justify-center px-4 text-center">
+      <Server size={32} className="mb-3 opacity-50" />
+      <p className="text-sm">
+        {translate('auto.components.right.sidebar.PortsPanel.c1b115c375', 'No workspace selected')}
+      </p>
+    </div>
+  )
+}
+
+function NoLocalPorts(): React.JSX.Element {
+  return (
+    <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center px-4 text-center">
+      <Server size={32} className="mb-3 opacity-50" />
+      <p className="text-sm">
+        {translate(
+          'auto.components.right.sidebar.PortsPanel.a2a9fc6899',
+          'No local ports detected'
+        )}
+      </p>
+    </div>
+  )
+}
