@@ -33,7 +33,6 @@
     "check": "pnpm run lint && pnpm run fmt && pnpm run typecheck",
     "test": "vp test",
     "up": "taze major -Ir",
-    "prepare": "vp config",
     "format:check": "pnpm --workspace-root exec vp fmt apps/mobile --check",
     "start:emulator": "node scripts/start-emulator.mjs"
   },
