@@ -1,7 +1,7 @@
-// Why: tabs fill the 36px titlebar; its shared bottom hairline closes every
-// segment without stacking a second border beneath the tab.
+// Why: the strip owns its outer edges; the canonical border keeps tab
+// dividers consistent while inactive tabs avoid duplicate left borders.
 export const TAB_ROOT_CLASSES =
-  'group relative flex h-full items-center border-x border-t border-border px-3 text-xs cursor-pointer select-none outline-none transition-[background,color] duration-100 motion-reduce:transition-none focus:outline-none focus-visible:bg-accent'
+  'group relative flex h-full items-center border-r border-border px-3 text-xs cursor-pointer select-none outline-none transition-[background,color] duration-100 motion-reduce:transition-none focus:outline-none focus-visible:bg-accent'
 
 // Why: the reference chrome uses compact 14px identity glyphs with an 8px
 // title gap; sharing the rule keeps every tab content type aligned.
