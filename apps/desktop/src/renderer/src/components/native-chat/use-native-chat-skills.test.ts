@@ -1,10 +1,31 @@
-import { describe, expect, it } from 'vite-plus/test'
+// @vitest-environment happy-dom
+
+import { act, createElement } from 'react'
+import { createRoot, type Root } from 'react-dom/client'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import type { DiscoveredSkill, SkillDiscoveryResult } from '../../../../shared/skills'
+
+const mocks = vi.hoisted(() => ({
+  callRuntimeRpc: vi.fn(),
+  emitNativeChatSkillDiscovery: vi.fn()
+}))
+
+vi.mock('@/runtime/runtime-rpc-client', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  callRuntimeRpc: mocks.callRuntimeRpc
+}))
+vi.mock('@/lib/native-chat-telemetry', () => ({
+  emitNativeChatSkillDiscovery: mocks.emitNativeChatSkillDiscovery
+}))
+
+import { useAppStore } from '../../store'
 import {
   isNativeChatSkillForAgent,
+  resetNativeChatSkillDiscoveryCacheForTests,
   resolveNativeChatSkillDiscoveryContext,
-  resolveNativeChatSkillDiscoveryCwd
+  resolveNativeChatSkillDiscoveryCwd,
+  useNativeChatSkills
 } from './use-native-chat-skills'
 
 const SOURCE_LABEL = 'Source'
@@ -201,6 +222,87 @@ describe('resolveNativeChatSkillDiscoveryContext', () => {
         worktreeId: 'repo-1::/remote/repo',
         executionHostId: 'ssh:target-1'
       }
+    })
+  })
+})
+
+describe('useNativeChatSkills SSH discovery', () => {
+  let container: HTMLDivElement
+  let root: Root
+
+  beforeEach(() => {
+    useAppStore.setState(useAppStore.getInitialState(), true)
+    resetNativeChatSkillDiscoveryCacheForTests()
+    mocks.callRuntimeRpc.mockReset()
+    mocks.emitNativeChatSkillDiscovery.mockReset()
+    container = document.createElement('div')
+    document.body.appendChild(container)
+    root = createRoot(container)
+  })
+
+  afterEach(() => {
+    act(() => root.unmount())
+    container.remove()
+    useAppStore.setState(useAppStore.getInitialState(), true)
+    resetNativeChatSkillDiscoveryCacheForTests()
+  })
+
+  it('dispatches direct SSH discovery through the local runtime relay bridge', async () => {
+    const result: SkillDiscoveryResult = {
+      skills: [skill({ providers: ['codex'] })],
+      sources: [
+        {
+          id: 'codex-home',
+          label: CODEX_HOME_LABEL,
+          path: '/Users/test/.agents/skills',
+          sourceKind: 'home',
+          providers: ['codex'],
+          owner: 'codex',
+          exists: true
+        }
+      ],
+      scannedAt: 1
+    }
+    mocks.callRuntimeRpc.mockResolvedValue(result)
+    const initialSettings = useAppStore.getState().settings
+    useAppStore.setState({
+      activeRepoId: 'repo-1',
+      activeWorktreeId: 'repo-1::/remote/repo',
+      repos: [{ id: 'repo-1', path: '/remote/repo', executionHostId: 'ssh:target-1' }] as never,
+      tabsByWorktree: {
+        'repo-1::/remote/repo': [{ id: 'tab-1', startupCwd: '/remote/repo/packages/app' }]
+      } as never,
+      worktreesByRepo: {
+        'repo-1': [{ id: 'repo-1::/remote/repo', repoId: 'repo-1', path: '/remote/repo' }]
+      } as never,
+      settings: { ...initialSettings, activeRuntimeEnvironmentId: null } as never
+    })
+
+    function Probe(): React.ReactNode {
+      const discoveryState = useNativeChatSkills('codex', 'tab-1', true)
+      return createElement('div', { 'data-status': discoveryState.status })
+    }
+
+    await act(async () => {
+      root.render(createElement(Probe))
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(mocks.callRuntimeRpc).toHaveBeenCalledWith(
+      { kind: 'local' },
+      'skills.discover',
+      expect.objectContaining({
+        cwd: '/remote/repo/packages/app',
+        executionHostId: 'ssh:target-1'
+      }),
+      { timeoutMs: 10_000 }
+    )
+    expect(container.firstElementChild?.getAttribute('data-status')).toBe('ready')
+    expect(mocks.emitNativeChatSkillDiscovery).toHaveBeenCalledWith({
+      agent: 'codex',
+      outcome: 'ready',
+      executionHostKind: 'ssh'
     })
   })
 })

@@ -40,4 +40,21 @@ describe('resolveCodexProjectTrustRoot', () => {
       rmSync(fixtureRoot, { recursive: true, force: true })
     }
   })
+
+  it('does not broaden trust for a worktree attached to a bare repository', () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), 'yiru-codex-bare-worktree-'))
+    const workspace = join(fixtureRoot, 'worktrees', 'feature')
+    const bareRepository = join(fixtureRoot, 'repository.git')
+    const worktreeGitDir = join(bareRepository, 'worktrees', 'feature')
+    try {
+      mkdirSync(worktreeGitDir, { recursive: true })
+      mkdirSync(workspace, { recursive: true })
+      writeFileSync(join(workspace, '.git'), `gitdir: ${worktreeGitDir}\n`, 'utf-8')
+      writeFileSync(join(worktreeGitDir, 'gitdir'), join(workspace, '.git'), 'utf-8')
+
+      expect(resolveCodexProjectTrustRoot(workspace)).toBe(realpathSync.native(workspace))
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true })
+    }
+  })
 })

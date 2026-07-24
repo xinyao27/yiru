@@ -55,4 +55,30 @@ describe('resolveRemoteCodexProjectTrustRoot', () => {
 
     await expect(resolveRemoteCodexProjectTrustRoot(fsProvider, workspace)).resolves.toBe(workspace)
   })
+
+  it.each([
+    {
+      label: 'POSIX SSH',
+      workspace: '/srv/worktrees/feature',
+      gitDir: '/srv/repository.git/worktrees/feature',
+      workspaceGitFile: '/srv/worktrees/feature/.git',
+      gitDirBacklink: '/srv/repository.git/worktrees/feature/gitdir'
+    },
+    {
+      label: 'Windows SSH',
+      workspace: String.raw`C:\worktrees\feature`,
+      gitDir: String.raw`C:\repository.git\worktrees\feature`,
+      workspaceGitFile: String.raw`C:\worktrees\feature\.git`,
+      gitDirBacklink: String.raw`C:\repository.git\worktrees\feature\gitdir`
+    }
+  ])('keeps bare-repository trust scoped to the workspace on $label', async (fixture) => {
+    const fsProvider = remoteFilesystem({
+      [fixture.workspaceGitFile]: `gitdir: ${fixture.gitDir}\n`,
+      [fixture.gitDirBacklink]: fixture.workspaceGitFile
+    })
+
+    await expect(resolveRemoteCodexProjectTrustRoot(fsProvider, fixture.workspace)).resolves.toBe(
+      fixture.workspace
+    )
+  })
 })

@@ -93,22 +93,6 @@ export function useNativeChatSkills(
       setState(IDLE_STATE)
       return
     }
-    if (context.executionHostKind === 'ssh') {
-      emitNativeChatSkillDiscovery({
-        agent,
-        outcome: 'unavailable',
-        executionHostKind: 'ssh'
-      })
-      setState({
-        status: 'error',
-        skills: [],
-        error: new Error('Skill discovery is unavailable for SSH hosts.'),
-        errorKind: 'unavailable',
-        contextKey: context.key
-      })
-      return
-    }
-
     const paneCacheKey = context.key
     const cached = paneDiscoveryCache.current.get(paneCacheKey)
     if (cached) {

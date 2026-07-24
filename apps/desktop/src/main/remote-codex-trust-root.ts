@@ -57,6 +57,13 @@ export async function resolveRemoteCodexProjectTrustRoot(
     if ((pathApi === win32 ? worktreesName.toLowerCase() : worktreesName) !== 'worktrees') {
       return absPath
     }
+    const commonGitDir = pathApi.dirname(worktreesDir)
+    const commonGitDirName = pathApi.basename(commonGitDir)
+    if ((pathApi === win32 ? commonGitDirName.toLowerCase() : commonGitDirName) !== '.git') {
+      // Why: a bare <repo>/worktrees/<name> path must not be mistaken for the
+      // linked-worktree layout and expand remote trust to the repo's parent.
+      return absPath
+    }
     const gitDirBacklink = (
       await readRemoteTextFile(fsProvider, pathApi.join(gitDir, 'gitdir'))
     ).trim()
@@ -73,7 +80,7 @@ export async function resolveRemoteCodexProjectTrustRoot(
     }
     // Why: only a reciprocal `.git/worktrees/<name>` link may broaden remote
     // Codex trust from the checkout to its repository root.
-    return canonicalizeRemotePath(fsProvider, pathApi.dirname(pathApi.dirname(worktreesDir)))
+    return canonicalizeRemotePath(fsProvider, pathApi.dirname(commonGitDir))
   } catch {
     return absPath
   }

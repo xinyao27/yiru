@@ -134,6 +134,12 @@ export function resolveCodexProjectTrustRoot(workspacePath: string): string {
     if (basename(worktreesDir) !== 'worktrees') {
       return absPath
     }
+    const commonGitDir = dirname(worktreesDir)
+    if (basename(commonGitDir) !== '.git') {
+      // Why: bare repositories also use <repo>/worktrees/<name>; treating that
+      // as .git/worktrees would broaden trust to the repository's parent.
+      return absPath
+    }
     // Why: workspace-controlled metadata may broaden trust only when Git's
     // worktree metadata links back to this exact checkout.
     const gitDirBacklink = readFileSync(join(gitDir, 'gitdir'), 'utf-8').trim()
@@ -150,7 +156,7 @@ export function resolveCodexProjectTrustRoot(workspacePath: string): string {
     }
     // Why: Codex evaluates linked worktree trust at the repository root; the
     // validated `.git/worktrees/<name>` structure identifies it safely.
-    return canonicalize(dirname(dirname(worktreesDir)))
+    return canonicalize(dirname(commonGitDir))
   } catch {
     return absPath
   }
