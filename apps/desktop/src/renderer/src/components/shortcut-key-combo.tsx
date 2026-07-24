@@ -6,6 +6,7 @@ import { cn } from '@/lib/class-names'
 function KeyCap({ label, className }: { label: string; className?: string }): React.JSX.Element {
   return (
     <span
+      data-slot="shortcut-key-cap"
       className={cn(
         'inline-flex min-w-6 items-center justify-center rounded border border-border/80 bg-secondary/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground',
         className
@@ -39,6 +40,7 @@ export function ShortcutKeyCombo({
 
   return (
     <span
+      data-slot="shortcut-key-combo"
       className={cn('inline-flex items-center gap-1', className)}
       title={
         doubleTap && keys.length > 0
@@ -55,7 +57,12 @@ export function ShortcutKeyCombo({
               shortcuts read more naturally with explicit "+" separators. A
               double-tap reads as the same key twice, so it gets a space, not "+". */}
           {!isMac && !doubleTap && index < keys.length - 1 ? (
-            <span className={separatorClassName ?? 'text-muted-foreground mx-0.5 text-xs'}>+</span>
+            <span
+              data-slot="shortcut-key-separator"
+              className={separatorClassName ?? 'text-muted-foreground mx-0.5 text-xs'}
+            >
+              +
+            </span>
           ) : null}
         </React.Fragment>
       ))}
