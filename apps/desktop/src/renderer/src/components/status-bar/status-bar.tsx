@@ -1921,7 +1921,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     // chrome layer as the workspace titlebar, with an opaque fallback elsewhere.
     <div
       ref={containerRefCallback}
-      className="border-border relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t bg-[var(--bg-titlebar,var(--card))] px-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
+      className="border-border relative flex h-6 min-h-[24px] shrink-0 items-center gap-4 border-t bg-[var(--bg-titlebar,var(--card))] pr-3 text-xs select-none [[data-native-sidebar-material=true]_&]:bg-transparent"
       onContextMenuCapture={(event) => {
         if (!shouldOpenStatusBarContextMenu(event.target)) {
           return
@@ -1941,7 +1941,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     >
       <div className="flex min-w-0 items-center gap-3">
         {showUsageGroup ? (
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center">
             {showEmptyUsageCta ? (
               <StatusBarUsageEmptyCta />
             ) : (
