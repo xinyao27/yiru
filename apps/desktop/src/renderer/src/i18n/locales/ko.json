@@ -275,16 +275,6 @@
         "yiru": {
           "profiles": {
             "612f7f6861": "프로필을 생성하지 못했습니다",
-            "319d7cf39b": "클라우드 프로필이 생성되었습니다",
-            "d6e764e7db": "이 프로필을 다시 연결하세요",
-            "f0c9e11a6d": "클라우드 프로필을 생성하지 못했습니다",
-            "8b8fa73174": "Yiru Cloud 로그인이 구성되어 있지 않습니다",
-            "33290e88ed": "프로필을 연결하지 못했습니다",
-            "9fcb07a796": "프로필이 연결되었습니다",
-            "2f6c78a039": "프로필 인증을 새로 고치지 못했습니다",
-            "a37b5e6d37": "프로필에서 로그아웃했습니다",
-            "83600521e7": "로그아웃하지 못했습니다",
-            "76deec8f58": "조직을 전환하지 못했습니다",
             "7d4bc516ee": "프로필을 전환하지 못했습니다",
             "f518e89aa5": "프로젝트가 해당 프로필에 이미 있습니다",
             "f03ae7f27b": "프로젝트를 전송하지 못했습니다"
@@ -5055,9 +5045,9 @@
           "2801d4ce22": "참조 ID 복사",
           "d8be621237": "먼저 검토 파일을 여세요.",
           "61676df223": "진단 정보를 보냈습니다. 이 참조 ID를 지원팀에 공유하세요: {{value0}}.",
-          "fd7b3891af": "검토 파일({{value0}})을 열었습니다. 이 파일을 지원팀에 보내거나 버릴 수 있습니다.",
-          "62340d4439": "검토 파일({{value0}})이 준비되었습니다. 열어서 보낼 내용을 확인한 다음 지원팀에 보낼지 선택하세요.",
-          "19ec5e29b3": "최근 앱 활동과 오류를 보내기 전에 검토할 수 있는 수정된 파일로 모읍니다. 보내기를 선택하기 전에는 아무것도 업로드되지 않습니다."
+          "fd7b3891af": "로컬 검토 파일({{value0}})을 열었습니다. 전송하면 제한된 수정 발췌문과 메타데이터가 지원팀과 공유되며 전체 파일은 이 기기에 남습니다.",
+          "62340d4439": "로컬 검토 파일({{value0}})이 준비되었습니다. 열어서 원본 데이터를 검토할 수 있습니다. 전송되는 것은 제한된 수정 발췌문과 메타데이터뿐이며 전체 파일은 이 기기에 남습니다.",
+          "19ec5e29b3": "최근 앱 활동과 오류를 로컬의 수정된 파일로 모읍니다. 전송 시 제한된 수정 발췌문과 메타데이터만 PostHog에 업로드되며 전체 파일은 이 기기에 남습니다."
         },
         "PrivacyDiagnosticsSection": {
           "af2fc82cde": "앱 진단 정보를 지원팀에 보내기",
@@ -7943,14 +7933,7 @@
           "behindBaseRefToastDescription": "인라인 설정 링크와 바닥글 작업이 있는 영구 프롬프트입니다.",
           "notificationPlayground": "Notification playground",
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
-          "devOnly": "Dev only",
-          "yiruCloud": "Yiru Cloud",
-          "yiruCloudDescription": "1方클라우드 로그인의 개발자 전용 미리보기. 프로덕션에서는 숨겨집니다. 개발 환경에서는 YIRU_CLOUD_API_URL과 YIRU_CLOUD_CLIENT_ID가 설정되면 사이드바 계정 전환기에도 표시됩니다.",
-          "yiruCloudStatus": "상태",
-          "yiruCloudSignOut": "로그아웃",
-          "yiruCloudConnect": "프로필 연결",
-          "yiruCloudRefresh": "상태 새로고침",
-          "yiruCloudNotConfigured": "YIRU_CLOUD_API_URL과 YIRU_CLOUD_CLIENT_ID를 설정하여 이 개발 빌드에서 Yiru Cloud 로그인을 미리보세요."
+          "devOnly": "Dev only"
         },
         "EphemeralVmRecipeRow": {
           "useInWorkspace": "워크스페이스에서 사용"
@@ -11797,20 +11780,6 @@
       "yiru": {
         "profiles": {
           "switcher": {
-            "cloud": {
-              "unavailable": "Yiru 로그인 사용 불가"
-            },
-            "reconnect": "프로필 다시 연결",
-            "connect": "프로필 연결",
-            "organization": "조직",
-            "create": {
-              "profile": {
-                "for": {
-                  "org": "조직용 프로필 생성"
-                }
-              }
-            },
-            "signout": "로그아웃",
             "16e3681072": "새 로컬 프로필",
             "e3b91a3d90": "프로젝트와 워크트리를 분리할 빈 프로필을 만듭니다.",
             "f322e1f4d6": "프로필 이름",
@@ -11818,18 +11787,7 @@
             "b4f9d1125d": "로컬",
             "4815f7d163": "프로필 전환",
             "d00d853e2a": "프로필 관리",
-            "c106c674fe": "새 로컬 프로필",
-            "account": "계정",
-            "org": {
-              "members": "조직 구성원"
-            },
-            "signInWaiting": "로그인 대기 중…",
-            "signInAgain": "다시 로그인",
-            "signIn": "Yiru에 로그인",
-            "accountTitle": "Yiru 계정",
-            "accountSignedIn": "로그인됨",
-            "accountSignInRequired": "로그인 필요",
-            "accountSignedOut": "로그아웃됨"
+            "c106c674fe": "새 로컬 프로필"
           },
           "management": {
             "04e7bd2a23": "전송",
@@ -11870,14 +11828,6 @@
               }
             }
           },
-          "signout": {
-            "confirm": {
-              "title": "Yiru에서 로그아웃할까요?",
-              "description": "이 기기의 Yiru에서 로그아웃됩니다. 로컬 프로젝트와 워크트리에는 영향을 주지 않습니다.",
-              "cancel": "취소",
-              "action": "로그아웃"
-            }
-          },
           "switch": {
             "confirm": {
               "target": "선택된 프로필",
@@ -11894,61 +11844,6 @@
               "agentPlural": "활성 에이전트 {{count}}개",
               "browserSingular": "브라우저 작업 공간 {{count}}개",
               "browserPlural": "브라우저 작업 공간 {{count}}개"
-            }
-          },
-          "org": {
-            "members": {
-              "role": {
-                "label": "역할",
-                "owner": "소유자",
-                "admin": "관리자",
-                "member": "구성원"
-              },
-              "not": {
-                "signed": {
-                  "in": "아직 Yiru에 로그인하지 않았습니다."
-                }
-              },
-              "remove": {
-                "confirm": "제거",
-                "cancel": "취소",
-                "label": "팀원 제거"
-              },
-              "title": "조직 구성원",
-              "load": {
-                "error": "조직 구성원을 로드할 수 없습니다."
-              },
-              "retry": "다시 시도",
-              "pending": {
-                "title": "대기 중인 초대",
-                "revoke": "취소"
-              },
-              "invite": {
-                "title": "초대",
-                "placeholder": "teammate@example.com",
-                "role": "초대 역할",
-                "submit": "보내기"
-              },
-              "error": {
-                "forbidden": "이 작업을 수행할 권한이 없습니다.",
-                "conflict": "이미 구성원이거나 초대되었습니다.",
-                "remove": {
-                  "self": "자신을 제거할 수 없습니다."
-                },
-                "own": {
-                  "role": "자신의 역할을 변경할 수 없습니다."
-                },
-                "not": {
-                  "found": "해당 팀원은 이 조직에 없습니다."
-                },
-                "reconnect": "구성원을 관리하려면 프로필을 다시 연결하세요.",
-                "unconfigured": "이 빌드에서 조직 관리를 사용할 수 없습니다.",
-                "failed": "문제가 발생했습니다. 다시 시도해 주세요."
-              },
-              "subtitle": {
-                "named": "{{orgName}}에서 Yiru에 협업할 수 있는 사람들.",
-                "default": "조직에서 Yiru에 협업할 수 있는 사람들."
-              }
             }
           }
         }

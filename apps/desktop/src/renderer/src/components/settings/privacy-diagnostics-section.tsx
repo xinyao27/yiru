@@ -25,7 +25,6 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
   const [uploading, setUploading] = useState(false)
   const [discarding, setDiscarding] = useState(false)
   const [copyingTicket, setCopyingTicket] = useState(false)
-  const [deletingTicket, setDeletingTicket] = useState(false)
   const mountedRef = useRef(true)
   const activeBundleSubmissionIdRef = useRef<string | null>(null)
 
@@ -209,34 +208,6 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
     }
   }, [ticketId])
 
-  const handleDeleteUploadedBundle = useCallback(async (): Promise<void> => {
-    if (!ticketId) {
-      return
-    }
-    setDeletingTicket(true)
-    try {
-      await window.api.diagnostics.deleteBundle(ticketId)
-      if (!mountedRef.current) {
-        return
-      }
-      setTicketId(null)
-      toast.success(
-        translate(
-          'auto.components.settings.PrivacyDiagnosticsSection.c18cbe45df',
-          'Sent diagnostics deleted'
-        )
-      )
-    } catch (error) {
-      if (mountedRef.current) {
-        toast.error(getDiagnosticsErrorMessage(error, 'Could not delete sent diagnostics'))
-      }
-    } finally {
-      if (mountedRef.current) {
-        setDeletingTicket(false)
-      }
-    }
-  }, [ticketId])
-
   return (
     <>
       {status?.disabledReason ? (
@@ -261,13 +232,11 @@ export function PrivacyDiagnosticsSection(): React.JSX.Element {
           uploading={uploading}
           discarding={discarding}
           copyingTicket={copyingTicket}
-          deletingTicket={deletingTicket}
           onCollect={handleCollectBundle}
           onOpenPreview={handleOpenPreview}
           onUpload={handleUploadBundle}
           onDiscard={handleDiscardBundle}
           onCopyTicket={handleCopyTicket}
-          onDeleteUploadedBundle={handleDeleteUploadedBundle}
           onDismissTicket={() => setTicketId(null)}
         />
       </PrivacyDiagnosticsRow>

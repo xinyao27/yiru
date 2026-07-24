@@ -3,28 +3,20 @@ import type { StateCreator } from 'zustand'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
 import type {
-  YiruProfileAuthStatus,
   YiruProfileSummary,
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
 } from '../../../../shared/yiru-profiles'
 import type { AppState } from '../types'
-import {
-  createYiruProfilesAuthActions,
-  type YiruProfilesAuthActions
-} from './yiru-profiles-auth-actions'
 
-export type YiruProfilesSlice = YiruProfilesAuthActions & {
+export type YiruProfilesSlice = {
   yiruProfiles: YiruProfileSummary[]
   activeYiruProfileId: string | null
-  yiruProfileAuthStatus: YiruProfileAuthStatus | null
   yiruProfilesMultiProfileUi: boolean
   yiruProfilesLoading: boolean
   yiruProfileSwitching: boolean
-  yiruProfileConnecting: boolean
   fetchYiruProfiles: () => Promise<void>
-  fetchYiruProfileAuthStatus: () => Promise<YiruProfileAuthStatus | null>
   createLocalYiruProfile: (name?: string) => Promise<YiruProfileSummary | null>
   switchYiruProfile: (profileId: string) => Promise<SwitchYiruProfileResult | null>
   transferYiruProfileProject: (
@@ -34,45 +26,27 @@ export type YiruProfilesSlice = YiruProfilesAuthActions & {
 
 export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfilesSlice> = (
   set,
-  get,
-  api
+  get
 ) => ({
   yiruProfiles: [],
   activeYiruProfileId: null,
-  yiruProfileAuthStatus: null,
   yiruProfilesMultiProfileUi: false,
   yiruProfilesLoading: false,
   yiruProfileSwitching: false,
-  yiruProfileConnecting: false,
 
   fetchYiruProfiles: async () => {
     set({ yiruProfilesLoading: true })
     try {
-      const [state, authStatus] = await Promise.all([
-        window.api.yiruProfiles.list(),
-        window.api.yiruProfiles.authStatus()
-      ])
+      const state = await window.api.yiruProfiles.list()
       set({
         activeYiruProfileId: state.activeProfileId,
         yiruProfiles: state.profiles,
         yiruProfilesMultiProfileUi: state.multiProfileUi,
-        yiruProfileAuthStatus: authStatus,
         yiruProfilesLoading: false
       })
     } catch (err) {
       console.error('Failed to fetch Yiru profiles:', err)
       set({ yiruProfilesLoading: false })
-    }
-  },
-
-  fetchYiruProfileAuthStatus: async () => {
-    try {
-      const authStatus = await window.api.yiruProfiles.authStatus()
-      set({ yiruProfileAuthStatus: authStatus })
-      return authStatus
-    } catch (err) {
-      console.error('Failed to fetch Yiru profile auth status:', err)
-      return null
     }
   },
 
@@ -83,7 +57,6 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
         activeYiruProfileId: state.activeProfileId,
         yiruProfiles: state.profiles
       })
-      void get().fetchYiruProfileAuthStatus()
       return state.profile
     } catch (err) {
       console.error('Failed to create Yiru profile:', err)
@@ -96,8 +69,6 @@ export const createYiruProfilesSlice: StateCreator<AppState, [], [], YiruProfile
       return null
     }
   },
-
-  ...createYiruProfilesAuthActions(set, get, api),
 
   switchYiruProfile: async (profileId) => {
     if (!profileId || profileId === get().activeYiruProfileId) {

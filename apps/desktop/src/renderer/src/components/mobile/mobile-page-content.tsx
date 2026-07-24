@@ -1,6 +1,5 @@
 import { translate } from '@/i18n/i18n'
 
-import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice } from './mobile-hero'
 import type { StepIndex } from './mobile-hero'
@@ -26,8 +25,6 @@ type MobilePageContentProps = {
   openInstallUrl: () => void
   pairAnotherDevice: () => void
   pairLoading: boolean
-  connectionMode: MobilePairingConnectionMode
-  handleConnectionModeChange: (mode: MobilePairingConnectionMode) => void
   pairQrDataUrl: string | null
   pairingUrl: string | null
   platform: MobilePlatform
@@ -59,8 +56,6 @@ export function MobilePageContent({
   openInstallUrl,
   pairAnotherDevice,
   pairLoading,
-  connectionMode,
-  handleConnectionModeChange,
   pairQrDataUrl,
   pairingUrl,
   platform,
@@ -105,8 +100,6 @@ export function MobilePageContent({
               pairQrDataUrl={pairQrDataUrl}
               pairingUrl={pairingUrl}
               pairLoading={pairLoading}
-              connectionMode={connectionMode}
-              onConnectionModeChange={handleConnectionModeChange}
               onRegeneratePairing={() => generatePairing(true)}
               onCopyPairingCode={copyPairingCode}
               networkInterfaces={networkInterfaces}

@@ -83,8 +83,6 @@ let registered = false
 
 type CoreHandlerLifecycleOptions = {
   onBeforeRelaunch?: () => void | Promise<void>
-  onYiruProfileAuthMutation?: () => void
-  onBeforeYiruProfileSignOut?: () => void
   getAdditionalAiVaultCodexHomePaths?: () => readonly string[]
   resolveAiVaultClaudeProjectsDirs?: (
     target: AiVaultSessionRuntimeTarget
@@ -165,11 +163,7 @@ export function registerCoreHandlers(
     registerKeybindingHandlers(keybindings)
   }
   registerTelemetryHandlers(store)
-  registerYiruProfileHandlers(store, {
-    onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch,
-    onAuthMutation: lifecycleOptions.onYiruProfileAuthMutation,
-    onBeforeSignOut: lifecycleOptions.onBeforeYiruProfileSignOut
-  })
+  registerYiruProfileHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
   registerBrowserHandlers()
   registerShellHandlers()
   registerPetHandlers()

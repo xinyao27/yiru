@@ -124,8 +124,6 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
-import { DesktopRelayService } from './runtime/relay/desktop-relay-service'
-import type { RelayBrokerStatus } from './runtime/relay/relay-session-broker'
 import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
 import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
@@ -213,9 +211,7 @@ import { createMainWindow, loadMainWindow } from './window/create-main-window'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { notifyMainWindowBecameVisible } from './window/main-window-visibility'
 import { getDefaultWslDistro } from './wsl'
-import { getYiruCloudAuthConfig } from './yiru-profiles/profile-cloud-auth-config'
 import { ensureActiveYiruProfile, initYiruProfilePaths } from './yiru-profiles/profile-index-store'
-import { getProfileUserDataPath } from './yiru-profiles/profile-storage-paths'
 
 let mainWindow: BrowserWindow | null = null
 /** Whether a manual app.quit() (Cmd+Q, etc.) is in progress. Shared with the
@@ -235,8 +231,6 @@ let runtime: YiruRuntimeService | null = null
 let globalAssistant: GlobalAssistantService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
-let desktopRelayService: DesktopRelayService | null = null
-let desktopRelayStatus: RelayBrokerStatus = 'offline'
 let spoolDesktop: SpoolDesktopComposition | null = null
 let unregisterSpoolSharingHandlers: (() => void) | null = null
 // Why: set during early startup; gates whether headless serve installs the
@@ -1062,11 +1056,8 @@ function openMainWindow(): BrowserWindow {
         claudeRuntimeAuth!.resolveSessionProjectRoots(target),
       onBeforeRelaunch: async () => {
         isQuitting = true
-        desktopRelayService?.fenceAndCloseNow()
         await preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
-      },
-      onYiruProfileAuthMutation: () => desktopRelayService?.authMutated(),
-      onBeforeYiruProfileSignOut: () => desktopRelayService?.fenceAndCloseNow()
+      }
     }
   )
   automations.setWebContents(window.webContents)
@@ -2216,7 +2207,7 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc, { getRelayStatus: () => desktopRelayStatus })
+  registerMobileHandlers(runtimeRpc)
 
   startTerminalRuntimeStartupServices()
   app.on('activate', requestDesktopActivation)
@@ -2324,36 +2315,6 @@ app.whenReady().then(async () => {
     spoolDesktop?.start()
   ])
 
-  const cloudAuth = getYiruCloudAuthConfig()
-  if (cloudAuth.configured) {
-    try {
-      const relayService = new DesktopRelayService({
-        authConfig: cloudAuth.config,
-        userDataPath: getProfileUserDataPath(),
-        appVersion: app.getVersion(),
-        runtimeRpc,
-        onStatus: (status) => {
-          desktopRelayStatus = status
-          mainWindow?.webContents.send('mobile:relayStatusChanged', status)
-        }
-      })
-      desktopRelayService = relayService
-      runtimeRpc.setMobileRelayPairingProvider({
-        createPairingRelay: (relayDeviceId) => relayService.createPairingRelay(relayDeviceId),
-        onDeviceRevokeQueued: (item) => relayService.onDeviceRevokeQueued(item),
-        onDemandStateChanged: () => relayService.demandStateChanged(),
-        getEndpoints: (context, params) => relayService.getEndpoints(context, params),
-        provisionRelay: (context, params) => relayService.provisionRelay(context, params)
-      })
-      relayService.start()
-    } catch (error) {
-      console.warn(
-        '[relay] Desktop relay startup unavailable:',
-        error instanceof Error ? error.message : String(error)
-      )
-    }
-  }
-
   // Why: the macOS notification permission dialog must fire after the window
   // is visible and focused. If it fires before the window exists, the system
   // dialog either doesn't appear or gets immediately covered by the maximized
@@ -2378,8 +2339,6 @@ app.on('before-quit', () => {
     })
   }
   isQuitting = true
-  desktopRelayService?.fenceAndCloseNow()
-  runtimeRpc?.setMobileRelayPairingProvider(null)
   unsubscribeSystemResumeBroadcast?.()
   unsubscribeSystemResumeBroadcast = null
   unsubscribeAgentAwakeStatusChanges?.()

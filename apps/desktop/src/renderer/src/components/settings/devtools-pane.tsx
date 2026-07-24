@@ -8,7 +8,6 @@ import {
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 
 import { showDeleteWorktreeFailureToast } from '../sidebar/delete-worktree-failure-toast'
@@ -134,85 +133,6 @@ function showDeleteFailureToast(): void {
   })
 }
 
-// Dev-only preview of the first-party Yiru Cloud sign-in. The sidebar/titlebar
-// account switcher is hidden in packaged builds while the feature is in
-// progress; this surfaces it (and its status) in dev when the env vars are set.
-function YiruCloudDevSubsection(): React.JSX.Element {
-  const authStatus = useAppStore((s) => s.yiruProfileAuthStatus)
-  const connecting = useAppStore((s) => s.yiruProfileConnecting)
-  const connect = useAppStore((s) => s.connectCurrentYiruProfile)
-  const signOut = useAppStore((s) => s.signOutCurrentYiruProfile)
-  const refresh = useAppStore((s) => s.fetchYiruProfileAuthStatus)
-  const configured = authStatus?.configured === true
-  const connected = authStatus?.state === 'connected'
-
-  return (
-    <section className="space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <SettingsSubsectionHeader
-          title={translate('auto.components.settings.DevToolsPane.yiruCloud', 'Yiru Cloud')}
-          description={translate(
-            'auto.components.settings.DevToolsPane.yiruCloudDescription',
-            'Dev-only preview of first-party cloud sign-in. Hidden in production; in dev it also appears in the sidebar account switcher once YIRU_CLOUD_API_URL and YIRU_CLOUD_CLIENT_ID are set.'
-          )}
-        />
-        <Badge variant="outline" className="mt-0.5">
-          {translate('auto.components.settings.DevToolsPane.devOnly', 'Dev only')}
-        </Badge>
-      </div>
-
-      {configured ? (
-        <div className="space-y-2">
-          <p className="text-muted-foreground text-xs">
-            {translate('auto.components.settings.DevToolsPane.yiruCloudStatus', 'Status')}:{' '}
-            <span className="text-foreground font-medium">{authStatus?.state}</span>
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {connected ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={connecting}
-                onClick={() => void signOut()}
-              >
-                {translate('auto.components.settings.DevToolsPane.yiruCloudSignOut', 'Sign out')}
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={connecting}
-                onClick={() => void connect()}
-              >
-                {translate(
-                  'auto.components.settings.DevToolsPane.yiruCloudConnect',
-                  'Connect profile'
-                )}
-              </Button>
-            )}
-            <Button type="button" variant="ghost" size="sm" onClick={() => void refresh()}>
-              {translate(
-                'auto.components.settings.DevToolsPane.yiruCloudRefresh',
-                'Refresh status'
-              )}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <p className="text-muted-foreground text-xs">
-          {authStatus?.setupMessage ??
-            translate(
-              'auto.components.settings.DevToolsPane.yiruCloudNotConfigured',
-              'Set YIRU_CLOUD_API_URL and YIRU_CLOUD_CLIENT_ID to preview Yiru Cloud sign-in in this dev build.'
-            )}
-        </p>
-      )}
-    </section>
-  )
-}
-
 export function DevToolsPane(): React.JSX.Element {
   const actions: DevToastAction[] = [
     {
@@ -334,8 +254,6 @@ export function DevToolsPane(): React.JSX.Element {
           ))}
         </div>
       </section>
-
-      <YiruCloudDevSubsection />
     </div>
   )
 }

@@ -39,12 +39,6 @@ const YIRU_POSTHOG_WRITE_KEY_LITERAL =
   typeof yiruPostHogWriteKey === 'string' && yiruPostHogWriteKey.length > 0
     ? JSON.stringify(yiruPostHogWriteKey)
     : 'null'
-const yiruDiagnosticsTokenUrl = process.env.YIRU_DIAGNOSTICS_TOKEN_URL
-const YIRU_DIAGNOSTICS_TOKEN_URL_LITERAL =
-  typeof yiruDiagnosticsTokenUrl === 'string' && yiruDiagnosticsTokenUrl.length > 0
-    ? JSON.stringify(yiruDiagnosticsTokenUrl)
-    : 'null'
-
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
 ;(() => {
@@ -217,8 +211,7 @@ export default defineConfig({
     // above for the full rationale.
     define: {
       YIRU_BUILD_IDENTITY: YIRU_BUILD_IDENTITY_LITERAL,
-      YIRU_POSTHOG_WRITE_KEY: YIRU_POSTHOG_WRITE_KEY_LITERAL,
-      YIRU_DIAGNOSTICS_TOKEN_URL: YIRU_DIAGNOSTICS_TOKEN_URL_LITERAL
+      YIRU_POSTHOG_WRITE_KEY: YIRU_POSTHOG_WRITE_KEY_LITERAL
     },
     // Why: @xterm/headless declares "exports": null in package.json, which
     // prevents Vite's default resolver from finding the CJS entry. Point

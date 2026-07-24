@@ -18,16 +18,8 @@ export type RendererCommandResult =
   | { type: 'runtime-environment-switch-failed'; error: string }
   | {
       type: 'yiru-profile'
-      operation:
-        | 'create-local'
-        | 'switch'
-        | 'transfer'
-        | 'create-cloud'
-        | 'connect'
-        | 'refresh-auth'
-        | 'sign-out'
-        | 'select-org'
-      outcome: 'succeeded' | 'failed' | 'reconnect-required' | 'unconfigured' | 'duplicate-target'
+      operation: 'create-local' | 'switch' | 'transfer'
+      outcome: 'succeeded' | 'failed' | 'duplicate-target'
       error?: string
     }
   | { type: 'worktree-local-base-ref-refresh'; result: LocalBaseRefRefreshResult }

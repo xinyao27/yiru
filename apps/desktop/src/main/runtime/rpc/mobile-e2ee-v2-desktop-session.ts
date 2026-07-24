@@ -1,7 +1,6 @@
 import {
   encodeMobileE2EEV2Transcript,
   validateMobileE2EEV2Handshake,
-  type MobileE2EETransport,
   type MobileE2EEV2Hello,
   type MobileE2EEV2Ready
 } from '@yiru/mobile-relay-protocol/e2ee-contract'
@@ -15,8 +14,7 @@ import { deriveSharedKey } from './e2ee-crypto'
 import { deriveMobileE2EEV2KeySchedule } from './mobile-e2ee-v2-key-schedule'
 
 export type DesktopMobileE2EEV2Context = {
-  transport: MobileE2EETransport
-  relayHostId?: string
+  transport: 'direct'
 }
 
 export class DesktopMobileE2EEV2Session {
@@ -134,9 +132,7 @@ function hasExpectedContext(
     return false
   }
   const candidate = context as { transport?: unknown; relayHostId?: unknown }
-  return (
-    candidate.transport === expected.transport && candidate.relayHostId === expected.relayHostId
-  )
+  return candidate.transport === expected.transport && candidate.relayHostId === undefined
 }
 
 function decodeCanonicalBase64(value: string): Uint8Array | null {

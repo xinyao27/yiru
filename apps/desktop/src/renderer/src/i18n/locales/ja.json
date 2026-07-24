@@ -275,16 +275,6 @@
         "yiru": {
           "profiles": {
             "612f7f6861": "プロファイルの作成に失敗しました",
-            "319d7cf39b": "クラウド プロファイルが作成されました",
-            "d6e764e7db": "このプロファイルを再接続してください",
-            "f0c9e11a6d": "クラウド プロファイルの作成に失敗しました",
-            "8b8fa73174": "Yiru Cloud のサインインが構成されていません",
-            "33290e88ed": "プロファイルの接続に失敗しました",
-            "9fcb07a796": "プロファイルが接続されました",
-            "2f6c78a039": "プロファイル認証の更新に失敗しました",
-            "a37b5e6d37": "プロファイルからサインアウトしました",
-            "83600521e7": "サインアウトに失敗しました",
-            "76deec8f58": "組織の切り替えに失敗しました",
             "7d4bc516ee": "プロファイルの切り替えに失敗しました",
             "f518e89aa5": "プロジェクトはそのプロファイルに既に存在します",
             "f03ae7f27b": "プロジェクトの転送に失敗しました"
@@ -5092,9 +5082,9 @@
           "2801d4ce22": "参照 ID をコピー",
           "d8be621237": "先に確認用ファイルを開いてください。",
           "61676df223": "診断情報を送信しました。サポートにこの参照 ID を共有してください: {{value0}}。",
-          "fd7b3891af": "確認用ファイル（{{value0}}）を開きました。このファイルをサポートに送信するか、破棄できます。",
-          "62340d4439": "確認用ファイル（{{value0}}）の準備ができました。開いて送信内容を確認してから、サポートに送信するか選択してください。",
-          "19ec5e29b3": "最近のアプリ操作とエラーを、送信前に確認できる編集済みファイルにまとめます。送信を選ぶまで何もアップロードされません。"
+          "fd7b3891af": "ローカルの確認用ファイル（{{value0}}）を開きました。送信すると、制限付きの編集済み抜粋とメタデータがサポートに共有されます。完全なファイルはこのデバイスに残ります。",
+          "62340d4439": "ローカルの確認用ファイル（{{value0}}）の準備ができました。開いて元データを確認できます。送信されるのは制限付きの編集済み抜粋とメタデータだけで、完全なファイルはこのデバイスに残ります。",
+          "19ec5e29b3": "最近のアプリ操作とエラーをローカルの編集済みファイルにまとめます。送信時に PostHog へアップロードされるのは、制限付きの編集済み抜粋とメタデータだけです。完全なファイルはこのデバイスに残ります。"
         },
         "PrivacyDiagnosticsSection": {
           "af2fc82cde": "アプリ診断情報をサポートに送信",
@@ -7943,14 +7933,7 @@
           "behindBaseRefToastDescription": "インラインの設定リンクとフッターアクション付きの永続プロンプト。",
           "notificationPlayground": "Notification playground",
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
-          "devOnly": "Dev only",
-          "yiruCloud": "Yiru Cloud",
-          "yiruCloudDescription": "第一方クラウドサインインの開発者限定プレビュー。本番環境では非表示。開発環境では、YIRU_CLOUD_API_URLとYIRU_CLOUD_CLIENT_IDを設定するとサイドバーのアカウント切替にも表示されます。",
-          "yiruCloudStatus": "ステータス",
-          "yiruCloudSignOut": "サインアウト",
-          "yiruCloudConnect": "プロファイルを接続",
-          "yiruCloudRefresh": "ステータスを更新",
-          "yiruCloudNotConfigured": "YIRU_CLOUD_API_URLとYIRU_CLOUD_CLIENT_IDを設定して、この開発ビルドでYiru Cloudのサインインをプレビューします。"
+          "devOnly": "Dev only"
         },
         "EphemeralVmRecipeRow": {
           "useInWorkspace": "ワークスペースでの使用"
@@ -11797,20 +11780,6 @@
       "yiru": {
         "profiles": {
           "switcher": {
-            "cloud": {
-              "unavailable": "Yiruへのサインインは利用できません"
-            },
-            "reconnect": "プロファイルを再接続",
-            "connect": "プロファイルを接続",
-            "organization": "組織",
-            "create": {
-              "profile": {
-                "for": {
-                  "org": "組織用のプロフィールを作成"
-                }
-              }
-            },
-            "signout": "サインアウト",
             "16e3681072": "新しいローカル プロファイル",
             "e3b91a3d90": "プロジェクトとワークツリーを分けるための空のプロファイルを作成します。",
             "f322e1f4d6": "プロファイル名",
@@ -11818,18 +11787,7 @@
             "b4f9d1125d": "ローカル",
             "4815f7d163": "プロファイルを切り替え",
             "d00d853e2a": "プロファイルを管理",
-            "c106c674fe": "新しいローカル プロファイル",
-            "account": "アカウント",
-            "org": {
-              "members": "組織メンバー"
-            },
-            "signInWaiting": "サインインを待機中…",
-            "signInAgain": "もう一度サインイン",
-            "signIn": "Yiruにサインイン",
-            "accountTitle": "Yiruアカウント",
-            "accountSignedIn": "サインイン済み",
-            "accountSignInRequired": "サインインが必要です",
-            "accountSignedOut": "サインアウト済み"
+            "c106c674fe": "新しいローカル プロファイル"
           },
           "management": {
             "04e7bd2a23": "転送",
@@ -11870,14 +11828,6 @@
               }
             }
           },
-          "signout": {
-            "confirm": {
-              "title": "Yiruからログアウトしますか？",
-              "description": "このデバイスでYiruからログアウトします。ローカルのプロジェクトとワークツリーには影響しません。",
-              "cancel": "キャンセル",
-              "action": "ログアウト"
-            }
-          },
           "switch": {
             "confirm": {
               "target": "選択されたプロフィール",
@@ -11894,61 +11844,6 @@
               "agentPlural": "{{count}}個のアクティブなエージェント",
               "browserSingular": "{{count}}個のブラウザワークスペース",
               "browserPlural": "{{count}}個のブラウザワークスペース"
-            }
-          },
-          "org": {
-            "members": {
-              "role": {
-                "label": "役割",
-                "owner": "オーナー",
-                "admin": "管理者",
-                "member": "メンバー"
-              },
-              "not": {
-                "signed": {
-                  "in": "まだYiruにサインインしていません。"
-                }
-              },
-              "remove": {
-                "confirm": "削除",
-                "cancel": "キャンセル",
-                "label": "チームメンバーを削除"
-              },
-              "title": "組織メンバー",
-              "load": {
-                "error": "組織メンバーを読み込めませんでした。"
-              },
-              "retry": "再試行",
-              "pending": {
-                "title": "保留中の招待",
-                "revoke": "取り消し"
-              },
-              "invite": {
-                "title": "招待",
-                "placeholder": "teammate@example.com",
-                "role": "招待役割",
-                "submit": "送信"
-              },
-              "error": {
-                "forbidden": "この役割では実行できません。",
-                "conflict": "既にメンバーまたは招待済みです。",
-                "remove": {
-                  "self": "自分自身を削除することはできません。"
-                },
-                "own": {
-                  "role": "自分の役割を変更することはできません。"
-                },
-                "not": {
-                  "found": "そのチームメンバーはこの組織にいません。"
-                },
-                "reconnect": "メンバーを管理するには、プロフィールを再接続してください。",
-                "unconfigured": "このビルドでは組織管理が利用できません。",
-                "failed": "問題が発生しました。もう一度お試しください。"
-              },
-              "subtitle": {
-                "named": "{{orgName}}でYiruに協力できる人々。",
-                "default": "組織でYiruに協力できる人々。"
-              }
             }
           }
         }

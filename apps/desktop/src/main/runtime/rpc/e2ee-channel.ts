@@ -273,9 +273,7 @@ export class E2EEChannel {
       this.handshakeTimer = null
     }
 
-    // Why: transport-bound identity checks must complete before the peer sees
-    // authentication success; relay sockets additionally bind this context to
-    // their immutable relayDeviceId in the resolver.
+    // Why: identity checks must complete before the peer sees authentication success.
     try {
       this.authentication.notifyReady(this, authentication)
     } catch {

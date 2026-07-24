@@ -3,14 +3,12 @@
 // compromising one device doesn't expose others. The registry is a simple
 // JSON file with hardened permissions matching the runtime metadata pattern.
 import { randomBytes, randomUUID } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { MobilePairingConnectionMode } from '../../shared/mobile-pairing-connection-mode'
 import type { DeviceScope } from '../../shared/runtime-types'
 import { hardenExistingSecureFile, writeSecureJsonFile } from '../../shared/secure-file'
 import { DEVICE_REGISTRY_FILENAME } from './mobile-pairing-files'
-import type { RelayDeviceBinding } from './relay/relay-revoke-outbox'
 
 export type { DeviceScope }
 
@@ -21,28 +19,14 @@ export type DeviceEntry = {
   scope: DeviceScope
   pairedAt: number
   lastSeenAt: number
-  relayBinding?: RelayDeviceBinding
-  mobilePairingConnectionMode?: MobilePairingConnectionMode
 }
 
-function validRelayBinding(value: unknown, deviceId: string): RelayDeviceBinding | undefined {
-  if (!value || typeof value !== 'object') {
-    return undefined
-  }
-  const binding = value as Partial<RelayDeviceBinding>
-  return binding.relayDeviceId === deviceId &&
-    typeof binding.relayHostId === 'string' &&
-    typeof binding.ownerIdentityKey === 'string'
-    ? {
-        relayHostId: binding.relayHostId,
-        relayDeviceId: binding.relayDeviceId,
-        ownerIdentityKey: binding.ownerIdentityKey,
-        ...(typeof binding.inviteExpiresAt === 'number' && Number.isFinite(binding.inviteExpiresAt)
-          ? { inviteExpiresAt: binding.inviteExpiresAt }
-          : {})
-      }
-    : undefined
+type LegacyRelayDeviceEntry = DeviceEntry & {
+  relayBinding?: unknown
+  mobilePairingConnectionMode?: unknown
 }
+
+const LEGACY_RELAY_REVOKE_OUTBOX_FILENAME = 'mobile-relay-revoke-outbox.json'
 
 export class DeviceRegistry {
   private readonly registryPath: string
@@ -51,6 +35,13 @@ export class DeviceRegistry {
   constructor(userDataPath: string) {
     this.registryPath = join(userDataPath, DEVICE_REGISTRY_FILENAME)
     this.load()
+    try {
+      // Why: Cloud Relay was removed and the outbox contains identifiers that
+      // can no longer be delivered or cleared through the deleted service.
+      rmSync(join(userDataPath, LEGACY_RELAY_REVOKE_OUTBOX_FILENAME), { force: true })
+    } catch {
+      // Retry on the next runtime startup without breaking direct pairing.
+    }
   }
 
   addDevice(name: string, scope: DeviceScope = 'mobile'): DeviceEntry {
@@ -110,36 +101,6 @@ export class DeviceRegistry {
     return this.devices.find((device) => device.lastSeenAt === 0 && device.scope === scope) ?? null
   }
 
-  setRelayBinding(deviceId: string, binding: RelayDeviceBinding): boolean {
-    const device = this.devices.find((candidate) => candidate.deviceId === deviceId)
-    if (!device || binding.relayDeviceId !== deviceId) {
-      return false
-    }
-    device.relayBinding = binding
-    this.save()
-    return true
-  }
-
-  setMobilePairingConnectionMode(deviceId: string, mode: MobilePairingConnectionMode): boolean {
-    const device = this.devices.find((candidate) => candidate.deviceId === deviceId)
-    if (!device || device.scope !== 'mobile') {
-      return false
-    }
-    device.mobilePairingConnectionMode = mode
-    this.save()
-    return true
-  }
-
-  getMobilePairingConnectionMode(deviceId: string): MobilePairingConnectionMode | null {
-    const device = this.devices.find((candidate) => candidate.deviceId === deviceId)
-    if (!device || device.scope !== 'mobile') {
-      return null
-    }
-    // Why: pairings created before this preference existed used automatic
-    // direct-first Relay fallback, so missing state must preserve that behavior.
-    return device.mobilePairingConnectionMode === 'local-only' ? 'local-only' : 'automatic'
-  }
-
   listDevices(): readonly DeviceEntry[] {
     return this.devices
   }
@@ -163,16 +124,32 @@ export class DeviceRegistry {
     }
     try {
       hardenExistingSecureFile(this.registryPath)
-      const parsed = JSON.parse(readFileSync(this.registryPath, 'utf-8')) as DeviceEntry[]
+      const parsed = JSON.parse(
+        readFileSync(this.registryPath, 'utf-8')
+      ) as LegacyRelayDeviceEntry[]
+      const removedLegacyRelayFields = parsed.some(
+        (device) =>
+          Object.hasOwn(device, 'relayBinding') ||
+          Object.hasOwn(device, 'mobilePairingConnectionMode')
+      )
       this.devices = parsed.map((device) => ({
-        ...device,
+        deviceId: device.deviceId,
+        name: device.name,
+        token: device.token,
+        pairedAt: device.pairedAt,
+        lastSeenAt: device.lastSeenAt,
         // Why: older registries only existed for phone pairing. Treat missing
         // scope as mobile so legacy device tokens do not gain new CLI powers.
-        scope: device.scope === 'runtime' ? 'runtime' : 'mobile',
-        relayBinding: validRelayBinding(device.relayBinding, device.deviceId),
-        mobilePairingConnectionMode:
-          device.mobilePairingConnectionMode === 'local-only' ? 'local-only' : 'automatic'
+        scope: device.scope === 'runtime' ? 'runtime' : 'mobile'
       }))
+      if (removedLegacyRelayFields) {
+        try {
+          this.save()
+        } catch {
+          // Keep direct pairing usable in memory; the legacy fields trigger
+          // another best-effort rewrite on the next startup.
+        }
+      }
     } catch {
       this.devices = []
     }

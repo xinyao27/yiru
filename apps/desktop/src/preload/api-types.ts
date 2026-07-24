@@ -91,8 +91,6 @@ import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
 } from '../shared/localhost-worktree-labels'
-import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
-import type { MobileRelayStatus } from '../shared/mobile-relay-status'
 import type { NativeFileDropPayload } from '../shared/native-file-drop'
 import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
 import type { PtyMainDeliveryDiagnostics } from '../shared/pty-delivery-diagnostics'
@@ -273,28 +271,13 @@ import type {
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
-  CreateCloudLinkedYiruProfileArgs,
-  CreateCloudLinkedYiruProfileResult,
-  ConnectCurrentYiruProfileResult,
   FindYiruProfileProjectsByPathArgs,
   FindYiruProfileProjectsByPathResult,
   YiruProfileListResult,
-  YiruProfileAuthStatus,
-  RefreshCurrentYiruProfileAuthResult,
-  SelectYiruProfileOrgArgs,
-  SelectYiruProfileOrgResult,
-  SignOutCurrentYiruProfileResult,
   SwitchYiruProfileArgs,
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
-  TransferYiruProfileProjectResult,
-  YiruProfileOrgInviteRevokeArgs,
-  YiruProfileOrgMemberChangeRoleArgs,
-  YiruProfileOrgMemberInviteArgs,
-  YiruProfileOrgMemberMutationResult,
-  YiruProfileOrgMemberRemoveArgs,
-  YiruProfileOrgMembersListArgs,
-  YiruProfileOrgMembersListResult
+  TransferYiruProfileProjectResult
 } from '../shared/yiru-profiles'
 
 export type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
@@ -893,11 +876,7 @@ export type PreloadApi = {
   app: AppApi
   yiruProfiles: {
     list: () => Promise<YiruProfileListResult>
-    authStatus: () => Promise<YiruProfileAuthStatus>
     createLocal: (args?: CreateLocalYiruProfileArgs) => Promise<CreateLocalYiruProfileResult>
-    createCloudLinked: (
-      args?: CreateCloudLinkedYiruProfileArgs
-    ) => Promise<CreateCloudLinkedYiruProfileResult>
     switchProfile: (args: SwitchYiruProfileArgs) => Promise<SwitchYiruProfileResult>
     transferProject: (
       args: TransferYiruProfileProjectArgs
@@ -905,25 +884,6 @@ export type PreloadApi = {
     findProjectProfiles: (
       args: FindYiruProfileProjectsByPathArgs
     ) => Promise<FindYiruProfileProjectsByPathResult>
-    connectCurrent: () => Promise<ConnectCurrentYiruProfileResult>
-    refreshAuth: () => Promise<RefreshCurrentYiruProfileAuthResult>
-    signOutCurrent: () => Promise<SignOutCurrentYiruProfileResult>
-    selectOrg: (args: SelectYiruProfileOrgArgs) => Promise<SelectYiruProfileOrgResult>
-    orgMembersList: (
-      args: YiruProfileOrgMembersListArgs
-    ) => Promise<YiruProfileOrgMembersListResult>
-    orgMemberInvite: (
-      args: YiruProfileOrgMemberInviteArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
-    orgInviteRevoke: (
-      args: YiruProfileOrgInviteRevokeArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
-    orgMemberChangeRole: (
-      args: YiruProfileOrgMemberChangeRoleArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
-    orgMemberRemove: (
-      args: YiruProfileOrgMemberRemoveArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
   }
   platform: {
     get: () => {
@@ -1788,7 +1748,6 @@ export type PreloadApi = {
     openBundlePreview: (bundleSubmissionId: string) => Promise<void>
     discardBundlePreview: (bundleSubmissionId: string) => Promise<void>
     uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadPayload>
-    deleteBundle: (ticketId: string) => Promise<void>
   }
   /** Read-only view of effective consent state, including the reason if
    *  disabled (env var / user opt-out / CI / pending banner). Used by the
@@ -2897,11 +2856,7 @@ export type PreloadApi = {
     listNetworkInterfaces: () => Promise<{
       interfaces: { name: string; address: string }[]
     }>
-    getPairingQR: (args?: {
-      address?: string
-      connectionMode?: MobilePairingConnectionMode
-      rotate?: boolean
-    }) => Promise<
+    getPairingQR: (args?: { address?: string; rotate?: boolean }) => Promise<
       | { available: false }
       | {
           available: true
@@ -2944,8 +2899,6 @@ export type PreloadApi = {
     listRuntimeAccessGrants: () => Promise<{ grants: RuntimeAccessGrant[] }>
     revokeRuntimeAccess: (args: { deviceId: string }) => Promise<{ revoked: boolean }>
     isWebSocketReady: () => Promise<{ ready: boolean; endpoint: string | null }>
-    getRelayStatus: () => Promise<{ status: MobileRelayStatus }>
-    onRelayStatusChanged: (callback: (status: MobileRelayStatus) => void) => () => void
   }
   speech: {
     getCatalog: () => Promise<SpeechModelManifest[]>

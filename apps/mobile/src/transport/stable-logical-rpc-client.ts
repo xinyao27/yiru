@@ -1,7 +1,7 @@
 import type { RpcClient } from './rpc-client'
 import type { ConnectionState, RpcResponse } from './types'
 
-export type MobileConnectionPath = 'lan' | 'tailscale' | 'relay'
+export type MobileConnectionPath = 'lan' | 'tailscale'
 
 export class LogicalClientCutoverError extends Error {
   constructor() {

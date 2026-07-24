@@ -275,16 +275,6 @@
         "yiru": {
           "profiles": {
             "612f7f6861": "Error al crear perfil",
-            "319d7cf39b": "Perfil en la nube creado",
-            "d6e764e7db": "Reconectar este perfil",
-            "f0c9e11a6d": "Error al crear perfil en la nube",
-            "8b8fa73174": "El inicio de sesión de Yiru Cloud no está configurado",
-            "33290e88ed": "Error al conectar perfil",
-            "9fcb07a796": "Perfil conectado",
-            "2f6c78a039": "Error al actualizar autenticación del perfil",
-            "a37b5e6d37": "Sesión cerrada del perfil",
-            "83600521e7": "Error al cerrar sesión",
-            "76deec8f58": "Error al cambiar organización",
             "7d4bc516ee": "Error al cambiar perfil",
             "f518e89aa5": "El proyecto ya existe en ese perfil",
             "f03ae7f27b": "Error al transferir proyecto"
@@ -5070,9 +5060,9 @@
           "2801d4ce22": "Copiar ID de referencia",
           "d8be621237": "Abre primero el archivo de revisión.",
           "61676df223": "Diagnósticos enviados. Comparte este ID de referencia con soporte: {{value0}}.",
-          "fd7b3891af": "Abriste el archivo de revisión ({{value0}}). Envía ese archivo a soporte o descártalo.",
-          "62340d4439": "Tu archivo de revisión está listo ({{value0}}). Ábrelo para ver qué se enviaría y luego elige si quieres enviarlo a soporte.",
-          "19ec5e29b3": "Recopila actividad reciente y errores de la app en un archivo depurado que puedes revisar antes de enviarlo. Nada se sube hasta que elijas enviarlo."
+          "fd7b3891af": "Abriste el archivo de revisión local ({{value0}}). Al enviar, se comparte con soporte un fragmento depurado y limitado junto con metadatos; el archivo completo permanece en este dispositivo.",
+          "62340d4439": "Tu archivo de revisión local está listo ({{value0}}). Ábrelo para revisar los datos de origen. Al enviar, solo se comparten un fragmento depurado y limitado y metadatos; el archivo completo permanece en este dispositivo.",
+          "19ec5e29b3": "Recopila la actividad reciente y los errores en un archivo local depurado. Al enviar, solo se suben a PostHog un fragmento limitado y metadatos; el archivo completo permanece en este dispositivo."
         },
         "PrivacyDiagnosticsSection": {
           "af2fc82cde": "Enviar diagnósticos de la app a soporte",
@@ -7943,14 +7933,7 @@
           "behindBaseRefToastDescription": "Aviso persistente con un enlace a Ajustes y una acción en el pie.",
           "notificationPlayground": "Panel de prueba de notificaciones",
           "notificationPlaygroundDescription": "Disparadores solo para desarrollo para comprobar el diseño de toasts, acciones de recuperación y ajuste de texto largo.",
-          "devOnly": "Solo para desarrollo",
-          "yiruCloud": "Yiru Cloud",
-          "yiruCloudDescription": "Vista previa solo para desarrolladores del inicio de sesión de la nube propia. Oculto en producción; en desarrollo también aparece en el selector de cuentas de la barra lateral cuando se configuran YIRU_CLOUD_API_URL y YIRU_CLOUD_CLIENT_ID.",
-          "yiruCloudStatus": "Estado",
-          "yiruCloudSignOut": "Cerrar sesión",
-          "yiruCloudConnect": "Conectar perfil",
-          "yiruCloudRefresh": "Actualizar estado",
-          "yiruCloudNotConfigured": "Configura YIRU_CLOUD_API_URL y YIRU_CLOUD_CLIENT_ID para previsualizar el inicio de sesión de Yiru Cloud en esta versión de desarrollo."
+          "devOnly": "Solo para desarrollo"
         },
         "EphemeralVmRecipeRow": {
           "useInWorkspace": "Usar en el espacio de trabajo"
@@ -11797,21 +11780,6 @@
       "yiru": {
         "profiles": {
           "switcher": {
-            "cloud": {
-              "unavailable": "Inicio de sesión en Yiru no disponible"
-            },
-            "account": "Cuenta",
-            "reconnect": "Reconectar perfil",
-            "connect": "Conectar perfil",
-            "organization": "Organización",
-            "create": {
-              "profile": {
-                "for": {
-                  "org": "Crear perfil para organización"
-                }
-              }
-            },
-            "signout": "Cerrar sesión",
             "16e3681072": "Nuevo perfil local",
             "e3b91a3d90": "Crear un perfil vacío para proyectos y worktrees separados.",
             "f322e1f4d6": "Nombre del perfil",
@@ -11819,17 +11787,7 @@
             "b4f9d1125d": "Local",
             "4815f7d163": "Cambiar perfil",
             "d00d853e2a": "Gestionar perfiles",
-            "c106c674fe": "Nuevo perfil local",
-            "org": {
-              "members": "Miembros de la organización"
-            },
-            "signInWaiting": "Esperando el inicio de sesión…",
-            "signInAgain": "Volver a iniciar sesión",
-            "signIn": "Iniciar sesión en Yiru",
-            "accountTitle": "Cuenta de Yiru",
-            "accountSignedIn": "Sesión iniciada",
-            "accountSignInRequired": "Inicio de sesión requerido",
-            "accountSignedOut": "Sesión cerrada"
+            "c106c674fe": "Nuevo perfil local"
           },
           "management": {
             "04e7bd2a23": "Transferir",
@@ -11870,14 +11828,6 @@
               }
             }
           },
-          "signout": {
-            "confirm": {
-              "title": "¿Cerrar sesión en Yiru?",
-              "description": "Se cerrará tu sesión de Yiru en este dispositivo. Tus proyectos y worktrees locales no se verán afectados.",
-              "cancel": "Cancelar",
-              "action": "Cerrar sesión"
-            }
-          },
           "switch": {
             "confirm": {
               "target": "el perfil seleccionado",
@@ -11894,61 +11844,6 @@
               "agentPlural": "{{count}} agentes activos",
               "browserSingular": "{{count}} espacio de trabajo del navegador",
               "browserPlural": "{{count}} espacios de trabajo del navegador"
-            }
-          },
-          "org": {
-            "members": {
-              "role": {
-                "label": "Rol",
-                "owner": "Propietario",
-                "admin": "Administrador",
-                "member": "Miembro"
-              },
-              "not": {
-                "signed": {
-                  "in": "Aún no han iniciado sesión en Yiru."
-                }
-              },
-              "remove": {
-                "confirm": "Eliminar",
-                "cancel": "Cancelar",
-                "label": "Eliminar compañero"
-              },
-              "title": "Miembros de la organización",
-              "load": {
-                "error": "No se pudieron cargar los miembros de la organización."
-              },
-              "retry": "Intentar de nuevo",
-              "pending": {
-                "title": "Invitaciones pendientes",
-                "revoke": "Revocar"
-              },
-              "invite": {
-                "title": "Invitar",
-                "placeholder": "teammate@example.com",
-                "role": "Rol de invitación",
-                "submit": "Enviar"
-              },
-              "error": {
-                "forbidden": "Tu rol no puede hacer eso.",
-                "conflict": "Ya es miembro o fue invitado.",
-                "remove": {
-                  "self": "No puedes eliminarte a ti mismo."
-                },
-                "own": {
-                  "role": "No puedes cambiar tu propio rol."
-                },
-                "not": {
-                  "found": "Ese compañero ya no está en esta organización."
-                },
-                "reconnect": "Reconecta tu perfil para gestionar miembros.",
-                "unconfigured": "La gestión de organización no está disponible en esta compilación.",
-                "failed": "Algo salió mal. Por favor, intenta de nuevo."
-              },
-              "subtitle": {
-                "named": "Personas en {{orgName}} que pueden colaborar en Yiru.",
-                "default": "Personas en tu organización que pueden colaborar en Yiru."
-              }
             }
           }
         }

@@ -402,15 +402,6 @@ export function installWebPreloadApi(): void {
 }
 
 function createWebPreloadApi(): Partial<PreloadApi> {
-  const webYiruProfileAuthStatus = () =>
-    Promise.resolve({
-      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-      configured: false,
-      state: 'unconfigured' as const,
-      persistence: 'none' as const,
-      setupMessage: 'Yiru Cloud sign-in is not available in the browser fallback.'
-    })
-
   return {
     app: {
       getIdentity: () =>
@@ -464,17 +455,12 @@ function createWebPreloadApi(): Partial<PreloadApi> {
           profiles: [createDefaultLocalYiruProfile(0)],
           multiProfileUi: false
         }),
-      authStatus: webYiruProfileAuthStatus,
       createLocal: () =>
         Promise.resolve({
           activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
           profiles: [createDefaultLocalYiruProfile(0)],
           profile: createDefaultLocalYiruProfile(0)
         }),
-      createCloudLinked: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
       switchProfile: () => Promise.resolve({ status: 'already-active' }),
       transferProject: (args) =>
         Promise.resolve({
@@ -484,30 +470,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
           sourceRepoId: args.repoId,
           duplicateRepoId: args.repoId
         }),
-      findProjectProfiles: async () => ({ projects: [] }),
-      connectCurrent: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
-      refreshAuth: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
-      signOutCurrent: async () => ({
-        status: 'signed-out',
-        auth: await webYiruProfileAuthStatus(),
-        activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-        profiles: [createDefaultLocalYiruProfile(0)]
-      }),
-      selectOrg: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
-      orgMembersList: async () => ({ status: 'unconfigured' }),
-      orgMemberInvite: async () => ({ status: 'unconfigured' }),
-      orgInviteRevoke: async () => ({ status: 'unconfigured' }),
-      orgMemberChangeRole: async () => ({ status: 'unconfigured' }),
-      orgMemberRemove: async () => ({ status: 'unconfigured' })
+      findProjectProfiles: async () => ({ projects: [] })
     },
     settings: {
       get: async () => getRuntimeBackedStoredSettings(),
@@ -563,8 +526,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       collectBundle: () => Promise.reject(new Error('Review files are unavailable on web.')),
       openBundlePreview: () => Promise.reject(new Error('Review files are unavailable on web.')),
       discardBundlePreview: () => Promise.resolve(),
-      uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.')),
-      deleteBundle: () => Promise.reject(new Error('Sent diagnostics are unavailable on web.'))
+      uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
     },
     session: {
       // hostId mirrors the desktop bridge: omitted/'local' targets the existing
@@ -698,10 +660,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       revokeDevice: () => Promise.resolve({ revoked: false }),
       listRuntimeAccessGrants: () => Promise.resolve({ grants: [] }),
       revokeRuntimeAccess: () => Promise.resolve({ revoked: false }),
-      isWebSocketReady: () =>
-        Promise.resolve({ ready: Boolean(activeEnvironment), endpoint: null }),
-      getRelayStatus: () => Promise.resolve({ status: 'offline' as const }),
-      onRelayStatusChanged: () => noopUnsubscribe
+      isWebSocketReady: () => Promise.resolve({ ready: Boolean(activeEnvironment), endpoint: null })
     },
     telemetryTrack: () => Promise.resolve(),
     telemetrySetOptIn: () => Promise.resolve(),

@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import { useAppStore } from '../../store'
 import { WindowsFirewallNotice } from '../mobile/windows-firewall-notice'
 import { MobileAutoRestoreFitSection } from './mobile-auto-restore-fit-section'
@@ -13,7 +12,6 @@ import {
   type MobileNetworkInterface
 } from './mobile-network-interface-selection'
 import { MobilePairedDevicesSection, type PairedDevice } from './mobile-paired-devices-section'
-import { MobilePairingConnectionOptions } from './mobile-pairing-connection-options'
 import { useMobilePairingDevicePolling } from './mobile-pairing-device-polling'
 import { MobilePairingQrSection } from './mobile-pairing-qr-section'
 import { MobilePairingSetupSection } from './mobile-pairing-setup-section'
@@ -33,12 +31,8 @@ export function MobilePane(): React.JSX.Element {
   const [refreshingNetworkInterfaces, setRefreshingNetworkInterfaces] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
   const [deviceCountAtQr, setDeviceCountAtQr] = useState<number | null>(null)
-  const signedIn = useAppStore((state) => state.yiruProfileAuthStatus?.state === 'connected')
-  // Why: Relay remains opt-in while compatible mobile builds are still beta distributions.
-  const [connectionMode, setConnectionMode] = useState<MobilePairingConnectionMode>('local-only')
   const [rotateNextQr, setRotateNextQr] = useState(false)
   const devicesRef = useRef<PairedDevice[]>([])
-  const wasSignedInRef = useRef(signedIn)
   const codeCopiedResetTimerRef = useRef<number | null>(null)
   const mountedRef = useMountedRef()
 
@@ -96,7 +90,6 @@ export function MobilePane(): React.JSX.Element {
       try {
         const result = await window.api.mobile.getPairingQR({
           ...(selectedAddress ? { address: selectedAddress } : {}),
-          connectionMode,
           ...(opts.rotate || rotateNextQr ? { rotate: true } : {})
         })
         if (result.available) {
@@ -136,46 +129,13 @@ export function MobilePane(): React.JSX.Element {
         }
       }
     },
-    [
-      clearCodeCopiedResetTimer,
-      connectionMode,
-      loadDevices,
-      mountedRef,
-      rotateNextQr,
-      selectedAddress
-    ]
-  )
-
-  const changeConnectionMode = useCallback(
-    (nextMode: MobilePairingConnectionMode) => {
-      if (nextMode === connectionMode) {
-        return
-      }
-      setConnectionMode(nextMode)
-      if (qrDataUrl) {
-        // Why: a displayed code encodes the old connection policy. Hide it and
-        // rotate its pending credential before showing a code for the new mode.
-        setQrDataUrl(null)
-        setPairingUrl(null)
-        setEndpoint(null)
-        setRotateNextQr(true)
-      }
-    },
-    [connectionMode, qrDataUrl]
+    [clearCodeCopiedResetTimer, loadDevices, mountedRef, rotateNextQr, selectedAddress]
   )
 
   useEffect(() => {
     void loadDevices()
     void loadNetworkInterfaces()
   }, [loadDevices, loadNetworkInterfaces])
-
-  useEffect(() => {
-    const wasSignedIn = wasSignedInRef.current
-    wasSignedInRef.current = signedIn
-    if (wasSignedIn && !signedIn) {
-      changeConnectionMode('local-only')
-    }
-  }, [changeConnectionMode, signedIn])
 
   useMobilePairingDevicePolling({
     deviceCountAtQr,
@@ -206,10 +166,6 @@ export function MobilePane(): React.JSX.Element {
   return (
     <div className="space-y-6">
       <MobilePairingSetupSection
-        connectionMode={connectionMode}
-        relayConnectionControl={
-          <MobilePairingConnectionOptions value={connectionMode} onChange={changeConnectionMode} />
-        }
         networkInterfaces={networkInterfaces}
         selectedAddress={selectedAddress}
         onSelectedAddressChange={setSelectedAddress}

@@ -1,9 +1,3 @@
-import type {
-  DeviceCredentialInstalled,
-  PairingGetEndpointsParams,
-  PairingGetEndpointsResult,
-  PairingProvisionRelayParams
-} from '@yiru/mobile-relay-protocol/credential-contract'
 // Why: this is the single boundary between raw RPC frames and the YiruRuntimeService.
 // Keeping the schema, handler, and result type attached to one object makes the
 // CLI-facing contract greppable and lets the dispatcher verify every payload
@@ -23,11 +17,6 @@ import type { RuntimeBrowserCommands } from '../yiru-runtime-browser'
 import type { RuntimeEmulatorCommands } from '../yiru-runtime-emulator'
 import type { RuntimeFileCommands } from '../yiru-runtime-files'
 import type { RuntimeGitCommands } from '../yiru-runtime-git'
-
-export type PairingRpcContext = {
-  getEndpoints(params: PairingGetEndpointsParams): Promise<PairingGetEndpointsResult>
-  provisionRelay(params: PairingProvisionRelayParams): Promise<DeviceCredentialInstalled>
-}
 
 export type RpcEnvelopeMeta = {
   runtimeId: string
@@ -94,7 +83,6 @@ export type RpcContext = {
   // clients. Carries the paired device's scope so handlers can gate the diet to
   // phones only. Undefined for in-process callers → treat as full-class (no clip).
   clientKind?: 'mobile' | 'runtime'
-  pairing?: PairingRpcContext
   // Why: mobile terminal traffic is byte-oriented and bypasses JSON streaming
   // responses after the binary terminal cutover. Undefined on Unix/socket
   // transports and non-E2EE WebSocket paths.

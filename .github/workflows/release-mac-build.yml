@@ -115,7 +115,6 @@ jobs:
           # the macOS release runner, leaving v1.4.2-rc.8 as an incomplete draft.
           NODE_OPTIONS: --max-old-space-size=4096
           YIRU_BUILD_IDENTITY: ${{ steps.tag-classify.outputs.identity }}
-          YIRU_DIAGNOSTICS_TOKEN_URL: https://yiru.ai/diagnostics/token
           YIRU_POSTHOG_WRITE_KEY: ${{ secrets.YIRU_POSTHOG_WRITE_KEY }}
 
       - name: Publish release artifacts (macOS)

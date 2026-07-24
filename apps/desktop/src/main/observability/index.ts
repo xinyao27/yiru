@@ -35,13 +35,6 @@ import {
   type CollectedBundle
 } from './bundle'
 import {
-  deleteBundle as _deleteBundle,
-  uploadBundle as _uploadBundle,
-  type DeleteBundleOptions,
-  type UploadBundleOptions,
-  type UploadBundleResult
-} from './diagnostic-bundle-upload'
-import {
   createLocalFileSink,
   DEFAULT_MAX_FILES,
   getRotatedFamilySize,
@@ -222,16 +215,4 @@ export function collectDiagnosticBundle(
     daemonLogMaxFiles: DAEMON_LOG_MAX_FILES,
     ...meta
   })
-}
-
-/** Upload a collected bundle payload. Returns the ticket ID on success;
- *  throws on any of the failure modes documented in `bundle.ts`. */
-export async function uploadDiagnosticBundle(
-  opts: UploadBundleOptions
-): Promise<UploadBundleResult> {
-  return _uploadBundle(opts)
-}
-
-export async function deleteDiagnosticBundle(opts: DeleteBundleOptions): Promise<void> {
-  return _deleteBundle(opts)
 }

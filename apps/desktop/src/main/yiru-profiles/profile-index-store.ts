@@ -21,6 +21,8 @@ import {
   type YiruProfileListState,
   type YiruProfileSummary
 } from '../../shared/yiru-profiles'
+import { purgeLegacyCloudProfileFiles } from './legacy-cloud-profile-cleanup'
+import { normalizeProfileIndex, type ProfileIndexReadResult } from './profile-index-normalization'
 import {
   getYiruProfileBrowserSessionMetaFile,
   getYiruProfileDataFile,
@@ -50,61 +52,12 @@ export type ActiveYiruProfileState = {
   profileDirectory: string
 }
 
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function isProfileSummary(value: unknown): value is YiruProfileSummary {
-  if (!isObject(value)) {
-    return false
-  }
-  const avatar = value.avatar
-  const cloud = value.cloud
-  return (
-    typeof value.id === 'string' &&
-    // Why: IDs from the on-disk index become filesystem path segments; a
-    // tampered index must not be able to escape the profiles directory.
-    /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(value.id) &&
-    typeof value.name === 'string' &&
-    value.name.length > 0 &&
-    (value.kind === 'local' || value.kind === 'cloud-linked') &&
-    typeof value.createdAt === 'number' &&
-    typeof value.updatedAt === 'number' &&
-    typeof value.lastOpenedAt === 'number' &&
-    isObject(avatar) &&
-    avatar.kind === 'initials' &&
-    typeof avatar.initials === 'string' &&
-    avatar.color === 'neutral' &&
-    (cloud === undefined || isObject(cloud))
-  )
-}
-
-function normalizeProfileIndex(raw: unknown): YiruProfileIndex | null {
-  if (!isObject(raw) || !Array.isArray(raw.profiles)) {
-    return null
-  }
-  const profiles = raw.profiles.filter(isProfileSummary)
-  const activeProfileId =
-    typeof raw.activeProfileId === 'string' &&
-    profiles.some((profile) => profile.id === raw.activeProfileId)
-      ? raw.activeProfileId
-      : profiles[0]?.id
-  if (!activeProfileId) {
-    return null
-  }
-  return {
-    schemaVersion: YIRU_PROFILE_INDEX_SCHEMA_VERSION,
-    activeProfileId,
-    profiles
-  }
-}
-
 function sanitizeProfileName(value: unknown): string {
   const trimmed = typeof value === 'string' ? value.trim() : ''
   return trimmed.length > 0 ? trimmed.slice(0, 80) : 'New Profile'
 }
 
-function readProfileIndexFile(indexPath: string): YiruProfileIndex | null {
+function readProfileIndexFile(indexPath: string): ProfileIndexReadResult | null {
   try {
     return normalizeProfileIndex(JSON.parse(readFileSync(indexPath, 'utf-8')))
   } catch {
@@ -112,10 +65,24 @@ function readProfileIndexFile(indexPath: string): YiruProfileIndex | null {
   }
 }
 
-export function readProfileIndex(indexPath: string): YiruProfileIndex | null {
+function readProfileIndexResult(indexPath: string): ProfileIndexReadResult | null {
   // Why: a torn/corrupt index must not silently reset the app to a single
   // default profile — that would orphan every other profile's data directory.
-  return readProfileIndexFile(indexPath) ?? readProfileIndexFile(`${indexPath}.bak`)
+  const primary = readProfileIndexFile(indexPath)
+  const backup = readProfileIndexFile(`${indexPath}.bak`)
+  if (primary) {
+    return {
+      index: primary.index,
+      // Why: a canonical primary can still have an older cloud-bearing backup.
+      // Refresh both so recovery cannot resurrect removed account metadata.
+      migratedCloudProfiles: primary.migratedCloudProfiles || backup?.migratedCloudProfiles === true
+    }
+  }
+  return backup
+}
+
+export function readProfileIndex(indexPath: string): YiruProfileIndex | null {
+  return readProfileIndexResult(indexPath)?.index ?? null
 }
 
 export function writeProfileIndex(indexPath: string, index: YiruProfileIndex): void {
@@ -132,6 +99,18 @@ export function writeProfileIndex(indexPath: string, index: YiruProfileIndex): v
   const tmpPath = `${indexPath}.tmp`
   writeFileSync(tmpPath, JSON.stringify(index, null, 2), 'utf-8')
   renameSync(tmpPath, indexPath)
+}
+
+function persistCloudProfileMigration(indexPath: string, index: YiruProfileIndex): void {
+  try {
+    writeProfileIndex(indexPath, index)
+    // Why: writeProfileIndex first preserves the old primary as a backup; replace
+    // that copy too so removed cloud account metadata cannot be restored later.
+    copyFileSync(indexPath, `${indexPath}.bak`)
+  } catch {
+    // Keep the normalized profile usable in memory. Remaining cloud metadata
+    // makes the migration retry on the next startup.
+  }
 }
 
 function copyIfPresent(source: string, target: string): void {
@@ -191,9 +170,13 @@ function createInitialProfileIndex(now = Date.now()): YiruProfileIndex {
 
 export function loadOrCreateProfileIndex(userDataPath: string): YiruProfileIndex {
   const indexPath = getYiruProfileIndexPath(userDataPath)
-  const index = existsSync(indexPath) ? readProfileIndex(indexPath) : null
-  if (index) {
-    return index
+  const result = readProfileIndexResult(indexPath)
+  if (result) {
+    purgeLegacyCloudProfileFiles(result.index, userDataPath)
+    if (result.migratedCloudProfiles) {
+      persistCloudProfileMigration(indexPath, result.index)
+    }
+    return result.index
   }
   const nextIndex = createInitialProfileIndex()
   writeProfileIndex(indexPath, nextIndex)
@@ -212,8 +195,9 @@ export function ensureActiveYiruProfile(
   userDataPath = getProfileUserDataPath()
 ): ActiveYiruProfileState {
   const indexPath = getYiruProfileIndexPath(userDataPath)
-  let index = existsSync(indexPath) ? readProfileIndex(indexPath) : null
-  let shouldWriteIndex = false
+  const readResult = readProfileIndexResult(indexPath)
+  let index = readResult?.index ?? null
+  let shouldWriteIndex = readResult?.migratedCloudProfiles ?? false
 
   if (!index) {
     index = createInitialProfileIndex()
@@ -232,8 +216,14 @@ export function ensureActiveYiruProfile(
     copyLegacyStateToProfile(userDataPath, activeProfile.id)
   }
 
+  purgeLegacyCloudProfileFiles(index, userDataPath)
+
   if (shouldWriteIndex) {
-    writeProfileIndex(indexPath, index)
+    if (readResult?.migratedCloudProfiles) {
+      persistCloudProfileMigration(indexPath, index)
+    } else {
+      writeProfileIndex(indexPath, index)
+    }
   }
 
   return {

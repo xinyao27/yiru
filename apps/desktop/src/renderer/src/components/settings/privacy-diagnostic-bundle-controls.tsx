@@ -3,7 +3,6 @@ import {
   Clipboard,
   Eye,
   FileText,
-  Trash as Trash2,
   CloudArrowUp as UploadCloud,
   X
 } from '@phosphor-icons/react'
@@ -27,13 +26,11 @@ export function PrivacyDiagnosticBundleControls({
   uploading,
   discarding,
   copyingTicket,
-  deletingTicket,
   onCollect,
   onOpenPreview,
   onUpload,
   onDiscard,
   onCopyTicket,
-  onDeleteUploadedBundle,
   onDismissTicket
 }: {
   readonly status: DiagnosticsStatusPayload | null
@@ -45,13 +42,11 @@ export function PrivacyDiagnosticBundleControls({
   readonly uploading: boolean
   readonly discarding: boolean
   readonly copyingTicket: boolean
-  readonly deletingTicket: boolean
   readonly onCollect: () => Promise<void>
   readonly onOpenPreview: () => Promise<void>
   readonly onUpload: () => Promise<void>
   readonly onDiscard: () => Promise<void>
   readonly onCopyTicket: () => Promise<void>
-  readonly onDeleteUploadedBundle: () => Promise<void>
   readonly onDismissTicket: () => void
 }): React.JSX.Element {
   if (ticketId) {
@@ -69,19 +64,7 @@ export function PrivacyDiagnosticBundleControls({
             'Copy reference ID'
           )}
         </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          disabled={deletingTicket}
-          onClick={() => void onDeleteUploadedBundle()}
-        >
-          <ActionIcon busy={deletingTicket} icon={<Trash2 className="size-3.5" />} />
-          {translate(
-            'auto.components.settings.PrivacyDiagnosticBundleControls.7f14a1733c',
-            'Delete sent file'
-          )}
-        </Button>
-        <Button variant="ghost" size="sm" disabled={deletingTicket} onClick={onDismissTicket}>
+        <Button variant="ghost" size="sm" onClick={onDismissTicket}>
           <Check className="size-3.5" />
           {translate('auto.components.settings.PrivacyDiagnosticBundleControls.2ae9a6b63e', 'Done')}
         </Button>
@@ -171,19 +154,19 @@ export function getDiagnosticBundleDescription({
     if (previewOpened) {
       return translate(
         'auto.components.settings.PrivacyDiagnosticBundleControls.fd7b3891af',
-        'You opened the review file ({{value0}}). Send that file to support, or discard it.',
+        'You opened the local review file ({{value0}}). Sending shares a bounded redacted excerpt and metadata with support; the full file stays on this device.',
         { value0: size }
       )
     }
     return translate(
       'auto.components.settings.PrivacyDiagnosticBundleControls.62340d4439',
-      'Your review file is ready ({{value0}}). Open it to see what would be sent, then choose whether to send it to support.',
+      'Your local review file is ready ({{value0}}). Open it to review the source data. Sending shares only a bounded redacted excerpt and metadata; the full file stays on this device.',
       { value0: size }
     )
   }
   return translate(
     'auto.components.settings.PrivacyDiagnosticBundleControls.19ec5e29b3',
-    'Collects recent app activity and errors into a redacted file you can review before sending. Nothing is uploaded until you choose to send it.'
+    'Collects recent app activity and errors into a local redacted file. Sending uploads only a bounded excerpt and metadata to PostHog; the full file stays on this device.'
   )
 }
 

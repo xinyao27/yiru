@@ -6,6 +6,7 @@ import {
 import { net } from 'electron'
 import { parse } from 'yaml'
 
+import { cacheGitHubReleaseFeed } from './updater-changelog'
 import { compareVersions, isPrereleaseVersion, isValidVersion } from './updater-fallback'
 
 const ATOM_FEED_URL = `${YIRU_GITHUB_RELEASES_URL}.atom`
@@ -72,6 +73,7 @@ async function fetchReleaseFeedTags(): Promise<ReleaseFeedTag[] | null> {
       return null
     }
     const body = await res.text()
+    cacheGitHubReleaseFeed(body)
     const tags: ReleaseFeedTag[] = []
 
     for (const match of body.matchAll(TAG_HREF_RE)) {

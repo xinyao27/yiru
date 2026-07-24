@@ -8,7 +8,7 @@ import {
 } from '../../shared/crash-reporting'
 import type { FeedbackDiagnosticBundleAttachment, FeedbackSubmitResult } from '../ipc/feedback'
 import { collectDiagnosticBundle, getDiagnosticsStatus } from '../observability'
-import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-upload-endpoint'
+import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
 
 const CRASH_REPORT_LOG_LOOKBACK_MINUTES = 3 * 24 * 60
 
@@ -81,22 +81,6 @@ export function prepareCrashDiagnosticBundle(
     : skippedCrashDiagnosticBundle()
 }
 
-export function diagnosticBundleForReportOnlyRetry(
-  attachment: CrashDiagnosticBundleAttachment
-): CrashReportDiagnosticBundle | undefined {
-  const bundle = attachment.feedbackDiagnosticBundle
-  if (!bundle) {
-    return undefined
-  }
-  return {
-    status: 'not_uploaded',
-    reason: 'diagnostic log attachment could not be sent; report retried without logs',
-    bundleSubmissionId: bundle.bundleSubmissionId,
-    bytes: bundle.bytes,
-    spanCount: bundle.spanCount
-  }
-}
-
 export function resolveSubmittedDiagnosticBundle(
   attachment: CrashDiagnosticBundleAttachment,
   result: FeedbackSubmitResult
@@ -105,15 +89,12 @@ export function resolveSubmittedDiagnosticBundle(
   if (!bundle) {
     return attachment.diagnosticBundle
   }
-  const failure =
-    result.diagnosticBundleFailure ??
-    (!result.ok ? { status: result.status, error: result.error } : undefined)
-  if (!failure) {
+  if (result.ok) {
     return attachment.diagnosticBundle
   }
   return {
     status: 'not_uploaded',
-    reason: `diagnostic log attachment failed: ${formatUnknownError(failure.error)}`,
+    reason: `diagnostic log excerpt could not be sent: ${formatUnknownError(result.error)}`,
     bundleSubmissionId: bundle.bundleSubmissionId,
     bytes: bundle.bytes,
     spanCount: bundle.spanCount

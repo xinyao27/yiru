@@ -298,16 +298,6 @@
         "yiru": {
           "profiles": {
             "612f7f6861": "Failed to create profile",
-            "319d7cf39b": "Cloud profile created",
-            "d6e764e7db": "Reconnect this profile",
-            "f0c9e11a6d": "Failed to create cloud profile",
-            "8b8fa73174": "Yiru Cloud sign-in is not configured",
-            "33290e88ed": "Failed to connect profile",
-            "9fcb07a796": "Profile connected",
-            "2f6c78a039": "Failed to refresh profile auth",
-            "a37b5e6d37": "Signed out of profile",
-            "83600521e7": "Failed to sign out",
-            "76deec8f58": "Failed to switch organization",
             "7d4bc516ee": "Failed to switch profile",
             "f518e89aa5": "Project already exists in that profile",
             "f03ae7f27b": "Failed to transfer project"
@@ -5130,9 +5120,9 @@
           "2801d4ce22": "Copy reference ID",
           "d8be621237": "Open the review file first.",
           "61676df223": "Diagnostics sent. Share this reference ID with support: {{value0}}.",
-          "fd7b3891af": "You opened the review file ({{value0}}). Send that file to support, or discard it.",
-          "62340d4439": "Your review file is ready ({{value0}}). Open it to see what would be sent, then choose whether to send it to support.",
-          "19ec5e29b3": "Collects recent app activity and errors into a redacted file you can review before sending. Nothing is uploaded until you choose to send it."
+          "fd7b3891af": "You opened the local review file ({{value0}}). Sending shares a bounded redacted excerpt and metadata with support; the full file stays on this device.",
+          "62340d4439": "Your local review file is ready ({{value0}}). Open it to review the source data. Sending shares only a bounded redacted excerpt and metadata; the full file stays on this device.",
+          "19ec5e29b3": "Collects recent app activity and errors into a local redacted file. Sending uploads only a bounded excerpt and metadata to PostHog; the full file stays on this device."
         },
         "PrivacyDiagnosticsSection": {
           "af2fc82cde": "Send app diagnostics to support",
@@ -7966,14 +7956,7 @@
           "behindBaseRefToastDescription": "Persistent prompt with an inline Settings link and footer action.",
           "notificationPlayground": "Notification playground",
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
-          "devOnly": "Dev only",
-          "yiruCloud": "Yiru Cloud",
-          "yiruCloudDescription": "Dev-only preview of first-party cloud sign-in. Hidden in production; in dev it also appears in the sidebar account switcher once YIRU_CLOUD_API_URL and YIRU_CLOUD_CLIENT_ID are set.",
-          "yiruCloudStatus": "Status",
-          "yiruCloudSignOut": "Sign out",
-          "yiruCloudConnect": "Connect profile",
-          "yiruCloudRefresh": "Refresh status",
-          "yiruCloudNotConfigured": "Set YIRU_CLOUD_API_URL and YIRU_CLOUD_CLIENT_ID to preview Yiru Cloud sign-in in this dev build."
+          "devOnly": "Dev only"
         },
         "EphemeralVmRecipeRow": {
           "useInWorkspace": "Use in workspace"
@@ -11820,21 +11803,6 @@
       "yiru": {
         "profiles": {
           "switcher": {
-            "cloud": {
-              "unavailable": "Yiru sign-in unavailable"
-            },
-            "account": "Account",
-            "reconnect": "Reconnect profile",
-            "connect": "Connect profile",
-            "organization": "Organization",
-            "create": {
-              "profile": {
-                "for": {
-                  "org": "Create profile for org"
-                }
-              }
-            },
-            "signout": "Sign out",
             "16e3681072": "New local profile",
             "e3b91a3d90": "Create an empty profile for separate projects and worktrees.",
             "f322e1f4d6": "Profile name",
@@ -11842,17 +11810,7 @@
             "b4f9d1125d": "Local",
             "4815f7d163": "Switch profile",
             "d00d853e2a": "Manage profiles",
-            "c106c674fe": "New local profile",
-            "org": {
-              "members": "Organization members"
-            },
-            "signInWaiting": "Waiting for sign-in…",
-            "signInAgain": "Sign in again",
-            "signIn": "Sign in to Yiru",
-            "accountTitle": "Yiru account",
-            "accountSignedIn": "Signed in",
-            "accountSignInRequired": "Sign-in required",
-            "accountSignedOut": "Signed out"
+            "c106c674fe": "New local profile"
           },
           "management": {
             "04e7bd2a23": "Transfer",
@@ -11893,14 +11851,6 @@
               }
             }
           },
-          "signout": {
-            "confirm": {
-              "title": "Sign out of Yiru?",
-              "description": "You'll be signed out of Yiru on this device. Your local projects and worktrees won't be affected.",
-              "cancel": "Cancel",
-              "action": "Sign out"
-            }
-          },
           "switch": {
             "confirm": {
               "target": "the selected profile",
@@ -11917,61 +11867,6 @@
               "agentPlural": "{{count}} active agents",
               "browserSingular": "{{count}} browser workspace",
               "browserPlural": "{{count}} browser workspaces"
-            }
-          },
-          "org": {
-            "members": {
-              "role": {
-                "label": "Role",
-                "owner": "Owner",
-                "admin": "Admin",
-                "member": "Member"
-              },
-              "not": {
-                "signed": {
-                  "in": "They haven't signed in to Yiru yet."
-                }
-              },
-              "remove": {
-                "confirm": "Remove",
-                "cancel": "Cancel",
-                "label": "Remove teammate"
-              },
-              "title": "Organization members",
-              "load": {
-                "error": "Couldn't load organization members."
-              },
-              "retry": "Try again",
-              "pending": {
-                "title": "Pending invites",
-                "revoke": "Revoke"
-              },
-              "invite": {
-                "title": "Invite",
-                "placeholder": "teammate@example.com",
-                "role": "Invite role",
-                "submit": "Send"
-              },
-              "error": {
-                "forbidden": "Your role can't do that.",
-                "conflict": "Already a member or invited.",
-                "remove": {
-                  "self": "You can't remove yourself."
-                },
-                "own": {
-                  "role": "You can't change your own role."
-                },
-                "not": {
-                  "found": "That teammate is no longer in this organization."
-                },
-                "reconnect": "Reconnect your profile to manage members.",
-                "unconfigured": "Organization management is unavailable in this build.",
-                "failed": "Something went wrong. Please try again."
-              },
-              "subtitle": {
-                "named": "People in {{orgName}} who can collaborate on Yiru.",
-                "default": "People in your organization who can collaborate on Yiru."
-              }
             }
           }
         }

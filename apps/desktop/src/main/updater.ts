@@ -29,7 +29,6 @@ import {
   markMacQuitAndInstallInFlight,
   resetMacInstallState
 } from './updater-mac-install'
-import { fetchNudge, shouldApplyNudge } from './updater-nudge'
 import {
   fetchNewerReleaseTagsWithReadiness,
   getReleaseDownloadUrl
@@ -49,8 +48,6 @@ const AUTO_UPDATE_RETRY_INTERVAL_MS = 60 * 60 * 1000
 // delay per consecutive failure up to this cap; any completed check resets.
 // Release-publishing windows resolve within the first (still 1h) retry.
 const MAX_AUTO_UPDATE_RETRY_INTERVAL_MS = 6 * 60 * 60 * 1000
-const NUDGE_POLL_INTERVAL_MS = 30 * 60 * 1000
-const NUDGE_ACTIVATION_COOLDOWN_MS = 5 * 60 * 1000
 const QUIT_AND_INSTALL_DELAY_MS = 100
 const PRE_QUIT_CLEANUP_TIMEOUT_MS = 2_500
 const UPDATE_CHECK_SILENT_SETTLE_DELAY_MS = 1_000
@@ -70,7 +67,6 @@ let availableReleaseUrl: string | null = null
 let pendingCheckFailureKey: string | null = null
 let pendingCheckFailurePromise: Promise<void> | null = null
 let autoUpdateCheckTimer: ReturnType<typeof setTimeout> | null = null
-let nudgeCheckTimer: ReturnType<typeof setTimeout> | null = null
 let pendingQuitAndInstallTimer: ReturnType<typeof setTimeout> | null = null
 let quitAndInstallInProgress = false
 // Why: once quitAndInstall has committed (Win/Linux install, or macOS with
@@ -97,8 +93,6 @@ let updateAvailableEventPendingAttemptId: number | null = null
 let pendingUserInitiatedCheckAfterInFlight: UpdateCheckVariant | null = null
 let activeUpdateNudgeId: string | null = null
 let awaitingNudgeCheckOutcome = false
-let nudgeCheckInFlight = false
-let lastNudgeCheckAt = 0
 let publishingWindowLastGoodCheck: { lastGoodTag: string } | null = null
 let pendingPrereleaseFallback: {
   primaryTag: string
@@ -116,7 +110,6 @@ let pendingPrereleaseFallback: {
 } | null = null
 
 let _getPendingUpdateNudgeId: (() => string | null) | null = null
-let _getDismissedUpdateNudgeId: (() => string | null) | null = null
 let _setPendingUpdateNudgeId: ((id: string | null) => void) | null = null
 let _setDismissedUpdateNudgeId: ((id: string | null) => void) | null = null
 // Why: guards against duplicate download() calls when both the card and
@@ -1288,63 +1281,6 @@ export function quitAndInstall(): void {
   }, QUIT_AND_INSTALL_DELAY_MS)
 }
 
-async function checkForUpdateNudge(): Promise<void> {
-  if (!app.isPackaged || is.dev) {
-    return
-  }
-  if (nudgeCheckInFlight) {
-    return
-  }
-
-  const now = Date.now()
-  if (now - lastNudgeCheckAt < NUDGE_ACTIVATION_COOLDOWN_MS) {
-    return
-  }
-  lastNudgeCheckAt = now
-
-  nudgeCheckInFlight = true
-  try {
-    const nudge = await fetchNudge()
-    if (!nudge) {
-      return
-    }
-
-    if (currentStatus.state === 'checking' || currentStatus.state === 'downloading') {
-      return
-    }
-
-    const appVersion = app.getVersion()
-    const pendingUpdateNudgeId = _getPendingUpdateNudgeId?.() ?? null
-    const dismissedUpdateNudgeId = _getDismissedUpdateNudgeId?.() ?? null
-
-    if (
-      shouldApplyNudge({
-        nudge,
-        appVersion,
-        pendingUpdateNudgeId,
-        dismissedUpdateNudgeId
-      })
-    ) {
-      awaitingNudgeCheckOutcome = true
-      _setPendingUpdateNudgeId?.(nudge.id)
-      mainWindowRef?.webContents.send('updater:clearDismissal')
-      runBackgroundUpdateCheck(nudge.id)
-    }
-  } finally {
-    nudgeCheckInFlight = false
-  }
-}
-
-function scheduleUpdateNudgeCheck(): void {
-  if (nudgeCheckTimer) {
-    clearTimeout(nudgeCheckTimer)
-  }
-  nudgeCheckTimer = setTimeout(() => {
-    void checkForUpdateNudge()
-    scheduleUpdateNudgeCheck()
-  }, NUDGE_POLL_INTERVAL_MS)
-}
-
 export function dismissNudge(): void {
   const pendingId = activeUpdateNudgeId ?? _getPendingUpdateNudgeId?.() ?? null
   if (pendingId) {
@@ -1360,7 +1296,6 @@ export function setupAutoUpdater(
     onBeforeQuit?: () => void | Promise<void>
     setLastUpdateCheckAt?: (timestamp: number) => void
     getPendingUpdateNudgeId?: () => string | null
-    getDismissedUpdateNudgeId?: () => string | null
     setPendingUpdateNudgeId?: (id: string | null) => void
     setDismissedUpdateNudgeId?: (id: string | null) => void
   }
@@ -1370,7 +1305,6 @@ export function setupAutoUpdater(
   persistLastUpdateCheckAt = opts?.setLastUpdateCheckAt ?? null
   _getLastUpdateCheckAt = opts?.getLastUpdateCheckAt ?? null
   _getPendingUpdateNudgeId = opts?.getPendingUpdateNudgeId ?? null
-  _getDismissedUpdateNudgeId = opts?.getDismissedUpdateNudgeId ?? null
   _setPendingUpdateNudgeId = opts?.setPendingUpdateNudgeId ?? null
   _setDismissedUpdateNudgeId = opts?.setDismissedUpdateNudgeId ?? null
 
@@ -1463,11 +1397,7 @@ export function setupAutoUpdater(
     }
   })
 
-  void checkForUpdateNudge()
-  scheduleUpdateNudgeCheck()
-
   const checkDailyOnWake = () => {
-    void checkForUpdateNudge()
     if (
       backgroundCheckLaunchPending ||
       currentStatus.state === 'checking' ||

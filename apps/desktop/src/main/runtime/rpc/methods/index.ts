@@ -21,7 +21,6 @@ import { LANGUAGE_SERVER_METHODS } from './language-servers'
 import { NATIVE_CHAT_METHODS } from './native-chat'
 import { NOTIFICATION_METHODS } from './notifications'
 import { ORCHESTRATION_METHODS } from './orchestration'
-import { PAIRING_METHODS } from './pairing'
 import { PREFLIGHT_METHODS } from './preflight'
 import { REPO_METHODS } from './repo'
 import { SESSION_TAB_METHODS } from './session-tabs'
@@ -73,7 +72,6 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...CLIENT_EVENT_METHODS,
   ...CLIENT_UI_METHODS,
   ...EMULATOR_METHODS,
-  ...PAIRING_METHODS,
   ...SPOOL_HOST_METHODS,
   ...LANGUAGE_SERVER_METHODS
 ]

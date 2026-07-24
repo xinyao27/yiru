@@ -11,7 +11,7 @@ import {
   ArrowClockwise as RefreshCw,
   ArrowClockwise as RotateCw
 } from '@phosphor-icons/react'
-import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
+import { YIRU_GITHUB_RELEASES_URL, YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -39,7 +39,6 @@ import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'
 import { SidebarFeedbackDialog } from './sidebar-feedback-dialog'
 
 const DOCS_URL = 'https://yiru.ai/docs'
-const CHANGELOG_URL = 'https://yiru.ai/changelog'
 const NO_UPDATE_CHECK_MODIFIERS = { ctrlKey: false, metaKey: false, shiftKey: false }
 
 function openExternalUrl(url: string): void {
@@ -275,7 +274,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                 'auto.components.sidebar.SidebarSettingsHelpMenu.5f83d86d92',
                 'Changelog'
               )}
-              url={CHANGELOG_URL}
+              url={YIRU_GITHUB_RELEASES_URL}
               icon={<ScrollText className="size-3.5" />}
             />
             <DropdownMenuSeparator />

@@ -76,8 +76,6 @@ import type {
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
 } from '../shared/mobile-markdown-document'
-import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
-import type { MobileRelayStatus } from '../shared/mobile-relay-status'
 import {
   YIRU_INTERNAL_FILE_DRAG_TYPE,
   createNativeFileDropPayload,
@@ -518,21 +516,10 @@ const api = {
 
   yiruProfiles: {
     list: () => ipcRenderer.invoke('yiruProfiles:list'),
-    authStatus: () => ipcRenderer.invoke('yiruProfiles:authStatus'),
     createLocal: (args) => ipcRenderer.invoke('yiruProfiles:createLocal', args),
-    createCloudLinked: (args) => ipcRenderer.invoke('yiruProfiles:createCloudLinked', args),
     switchProfile: (args) => ipcRenderer.invoke('yiruProfiles:switch', args),
     transferProject: (args) => ipcRenderer.invoke('yiruProfiles:transferProject', args),
-    findProjectProfiles: (args) => ipcRenderer.invoke('yiruProfiles:findProjectProfiles', args),
-    connectCurrent: () => ipcRenderer.invoke('yiruProfiles:connectCurrent'),
-    refreshAuth: () => ipcRenderer.invoke('yiruProfiles:refreshAuth'),
-    signOutCurrent: () => ipcRenderer.invoke('yiruProfiles:signOutCurrent'),
-    selectOrg: (args) => ipcRenderer.invoke('yiruProfiles:selectOrg', args),
-    orgMembersList: (args) => ipcRenderer.invoke('yiruProfiles:orgMembersList', args),
-    orgMemberInvite: (args) => ipcRenderer.invoke('yiruProfiles:orgMemberInvite', args),
-    orgInviteRevoke: (args) => ipcRenderer.invoke('yiruProfiles:orgInviteRevoke', args),
-    orgMemberChangeRole: (args) => ipcRenderer.invoke('yiruProfiles:orgMemberChangeRole', args),
-    orgMemberRemove: (args) => ipcRenderer.invoke('yiruProfiles:orgMemberRemove', args)
+    findProjectProfiles: (args) => ipcRenderer.invoke('yiruProfiles:findProjectProfiles', args)
   } satisfies PreloadApi['yiruProfiles'],
 
   platform: {
@@ -1550,9 +1537,7 @@ const api = {
     discardBundlePreview: (bundleSubmissionId: string): Promise<void> =>
       ipcRenderer.invoke('diagnostics:discardBundlePreview', bundleSubmissionId),
     uploadBundle: (bundleSubmissionId: string): Promise<unknown> =>
-      ipcRenderer.invoke('diagnostics:uploadBundle', bundleSubmissionId),
-    deleteBundle: (ticketId: string): Promise<void> =>
-      ipcRenderer.invoke('diagnostics:deleteBundle', ticketId)
+      ipcRenderer.invoke('diagnostics:uploadBundle', bundleSubmissionId)
   },
 
   settings: {
@@ -4019,7 +4004,6 @@ const api = {
 
     getPairingQR: (args?: {
       address?: string
-      connectionMode?: MobilePairingConnectionMode
       rotate?: boolean
     }): Promise<
       | { available: false }
@@ -4066,17 +4050,7 @@ const api = {
       ipcRenderer.invoke('mobile:revokeRuntimeAccess', args),
 
     isWebSocketReady: (): Promise<{ ready: boolean; endpoint: string | null }> =>
-      ipcRenderer.invoke('mobile:isWebSocketReady'),
-
-    getRelayStatus: (): Promise<{ status: MobileRelayStatus }> =>
-      ipcRenderer.invoke('mobile:getRelayStatus'),
-
-    onRelayStatusChanged: (callback: (status: MobileRelayStatus) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, status: MobileRelayStatus) =>
-        callback(status)
-      ipcRenderer.on('mobile:relayStatusChanged', listener)
-      return () => ipcRenderer.removeListener('mobile:relayStatusChanged', listener)
-    }
+      ipcRenderer.invoke('mobile:isWebSocketReady')
   },
 
   agentStatus: {

@@ -168,7 +168,6 @@ export function attachMainWindowServices(
         store.updateUI({ lastUpdateCheckAt: timestamp })
       },
       getPendingUpdateNudgeId: () => store.getUI().pendingUpdateNudgeId ?? null,
-      getDismissedUpdateNudgeId: () => store.getUI().dismissedUpdateNudgeId ?? null,
       setPendingUpdateNudgeId: (id) => {
         // Why: the nudge lifecycle is owned by the main process. When applying a
         // new campaign, persist the pending id AND clear the version dismissal

@@ -53,9 +53,9 @@ export function MobileHostCard(props: {
             {worktreeSummary}
           </Text>
         ) : null}
-        {props.verdict.kind === 'unreachable' && !props.host.relay ? (
+        {props.verdict.kind === 'unreachable' ? (
           <Text className={styles.discoveryHint} numberOfLines={2}>
-            Update desktop Yiru and sign in to connect from anywhere
+            Check that this phone can reach the selected LAN or private-network address
           </Text>
         ) : null}
       </View>

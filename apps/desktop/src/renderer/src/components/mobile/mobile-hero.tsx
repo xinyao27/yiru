@@ -3,10 +3,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 
-import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import { cn } from '../../lib/class-names'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
-import { MobilePairingConnectionOptions } from '../settings/mobile-pairing-connection-options'
 import { AndroidLogo, IosBrandIcon } from './mobile-brand-icons'
 import type { MobilePlatform, MobileReleaseLink } from './mobile-release-link'
 import { NetworkInterfacePicker } from './network-interface-picker'
@@ -42,8 +40,6 @@ type HeroFlowProps = {
   pairQrDataUrl: string | null
   pairingUrl: string | null
   pairLoading: boolean
-  connectionMode: MobilePairingConnectionMode
-  onConnectionModeChange: (mode: MobilePairingConnectionMode) => void
   onRegeneratePairing: () => void
   onCopyPairingCode: () => void
   networkInterfaces: readonly MobileNetworkInterface[]
@@ -67,8 +63,6 @@ export function HeroFlow({
   pairQrDataUrl,
   pairingUrl,
   pairLoading,
-  connectionMode,
-  onConnectionModeChange,
   onRegeneratePairing,
   onCopyPairingCode,
   networkInterfaces,
@@ -239,13 +233,6 @@ export function HeroFlow({
                 </strong>
                 {translate('auto.components.mobile.MobileHero.2f077ef4eb', ', and scan the code.')}
               </p>
-            </div>
-            <div className={mobilePageStyles.pairingRelay}>
-              <MobilePairingConnectionOptions
-                value={connectionMode}
-                onChange={onConnectionModeChange}
-                compact
-              />
             </div>
             <div className={cn(mobilePageStyles.qrStack, mobilePageStyles.pairingQr)}>
               <div

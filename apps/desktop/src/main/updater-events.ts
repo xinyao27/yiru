@@ -2,7 +2,7 @@ import { app, autoUpdater as nativeUpdater } from 'electron'
 
 import type { UpdateStatus } from '../shared/types'
 import type { ElectronAutoUpdater } from './electron-updater-loader'
-import { fetchChangelog } from './updater-changelog'
+import { changelogFromUpdateInfo } from './updater-changelog'
 import { compareVersions } from './updater-fallback'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import {
@@ -179,50 +179,36 @@ export function registerAutoUpdaterHandlers({
       return
     }
 
-    // Why: fetching changelog in the main process avoids CORS issues that
-    // would block a renderer-side fetch to yiru.ai, and ensures the
-    // card can render immediately without an async loading gap.
+    // Why: update preflight already cached GitHub's Release feed; formatting
+    // it here avoids a second network dependency and API quota.
     markUpdateAvailableEventPending(attemptId)
-    void (async () => {
-      try {
-        const changelog = await fetchChangelog(info.version, app.getVersion()).catch(() => null)
-
-        // Why: the handler is now async, so up to 5 seconds may pass during the
-        // fetch. If another autoUpdater event (e.g., 'error') fired and updated
-        // the attempt during that window, broadcasting 'available' here would
-        // overwrite a more recent check. Guard on the attempt before state.
-        if (!isActiveUpdateCheckAttempt(attemptId)) {
-          return
-        }
-        if (getCurrentStatus().state !== 'checking' && getCurrentStatus().state !== 'idle') {
-          return
-        }
-
-        // --- post-await side effects (only run if the guard passed) ---
-        // Why: these must live AFTER the guard, not before the await. If the
-        // fetch times out and a concurrent 'error' event advanced the status,
-        // bailing out above avoids orphaned side effects — e.g., availableVersion
-        // set without a matching 'available' broadcast, or a completed-check
-        // timestamp persisted for a check that never showed a result.
-        setAvailableVersion(info.version)
-        setAvailableReleaseUrl(null)
-        if (missingManifestFallback || publishingWindowLastGoodCheck) {
-          // Why: offering a previous/last-good release is only a temporary
-          // fallback; keep probing soon so users can move to the newest tag once
-          // its platform manifest finishes publishing.
-          scheduleAutomaticUpdateCheck(AUTO_UPDATE_RETRY_INTERVAL_MS)
-        } else {
-          recordCompletedUpdateCheck()
-          if (!wasUserInitiated) {
-            scheduleAutomaticUpdateCheck(AUTO_UPDATE_CHECK_INTERVAL_MS)
-          }
-        }
-
-        sendStatus({ state: 'available', version: info.version, changelog })
-      } finally {
-        clearUpdateAvailableEventPending(attemptId)
+    try {
+      const changelog = changelogFromUpdateInfo(info)
+      if (!isActiveUpdateCheckAttempt(attemptId)) {
+        return
       }
-    })()
+      if (getCurrentStatus().state !== 'checking' && getCurrentStatus().state !== 'idle') {
+        return
+      }
+
+      setAvailableVersion(info.version)
+      setAvailableReleaseUrl(null)
+      if (missingManifestFallback || publishingWindowLastGoodCheck) {
+        // Why: offering a previous/last-good release is only a temporary
+        // fallback; keep probing soon so users can move to the newest tag once
+        // its platform manifest finishes publishing.
+        scheduleAutomaticUpdateCheck(AUTO_UPDATE_RETRY_INTERVAL_MS)
+      } else {
+        recordCompletedUpdateCheck()
+        if (!wasUserInitiated) {
+          scheduleAutomaticUpdateCheck(AUTO_UPDATE_CHECK_INTERVAL_MS)
+        }
+      }
+
+      sendStatus({ state: 'available', version: info.version, changelog })
+    } finally {
+      clearUpdateAvailableEventPending(attemptId)
+    }
   })
 
   autoUpdater.on('update-not-available', () => {

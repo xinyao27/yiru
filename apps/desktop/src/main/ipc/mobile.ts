@@ -3,11 +3,9 @@ import { networkInterfaces } from 'node:os'
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import QRCode from 'qrcode'
 
-import type { MobilePairingConnectionMode } from '../../shared/mobile-pairing-connection-mode'
 import type { RuntimeAccessGrant } from '../../shared/runtime-access-grants'
 import { isTailnetIPv4Address } from '../../shared/tailnet-address'
 import type { DeviceEntry } from '../runtime/device-registry'
-import type { RelayBrokerStatus } from '../runtime/relay/relay-session-broker'
 import type { YiruRuntimeRpcServer } from '../runtime/runtime-rpc'
 import {
   getWebSocketPort,
@@ -64,7 +62,6 @@ function toRuntimeAccessGrant(device: DeviceEntry): RuntimeAccessGrant {
 export type MobileHandlerDependencies = {
   firewallEnvironment?: WindowsMobileFirewallEnvironment
   openWindowsNetworkSettings?: () => Promise<void>
-  getRelayStatus?: () => RelayBrokerStatus
 }
 
 export function registerMobileHandlers(
@@ -87,7 +84,6 @@ export function registerMobileHandlers(
       _event,
       args?: {
         address?: string
-        connectionMode?: MobilePairingConnectionMode
         rotate?: boolean
       }
     ) => {
@@ -108,7 +104,6 @@ export function registerMobileHandlers(
       // one so the new QR carries a different credential.
       const offer = await rpcServer.createMobilePairingOffer({
         address: ip,
-        connectionMode: args?.connectionMode,
         rotate: args?.rotate,
         name: `Mobile ${new Date().toLocaleDateString()}`
       })
@@ -246,10 +241,6 @@ export function registerMobileHandlers(
     await openSettings()
     return true
   })
-
-  ipcMain.handle('mobile:getRelayStatus', () => ({
-    status: dependencies.getRelayStatus?.() ?? 'offline'
-  }))
 }
 
 function isWindowRenderer(event: IpcMainInvokeEvent): boolean {
