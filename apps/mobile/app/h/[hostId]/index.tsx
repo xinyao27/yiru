@@ -839,8 +839,11 @@ export function HostScreen({
   }
 
   return (
-    <SafeAreaView className={styles.container} edges={['top']}>
-      <View className={styles.topChrome}>
+    <View className={styles.container}>
+      {/* Why: the safe-area inset wraps only the top chrome so the status-bar
+          strip and the header share one bg-card color — previously the strip
+          showed the screen's bg-background against the bg-card header. */}
+      <SafeAreaView className={styles.topChrome} edges={['top']}>
         <View className={styles.statusBar}>
           <Pressable
             className={styles.backButton}
@@ -1110,7 +1113,7 @@ export function HostScreen({
             </Pressable>
           </View>
         )}
-      </View>
+      </SafeAreaView>
 
       {/* Auth failed banner */}
       {connState === 'auth-failed' && (
@@ -1452,7 +1455,7 @@ export function HostScreen({
         }}
         onRouteVisibleChange={setShowNewWorktreeVisible}
       />
-    </SafeAreaView>
+    </View>
   )
 }
 
