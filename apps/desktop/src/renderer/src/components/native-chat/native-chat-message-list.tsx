@@ -218,10 +218,13 @@ function MessageRow({
       )}
     >
       {showControls ? (
+        // Why: anchor to this message's own top-right corner (not -top-8 above it):
+        // rows sit only gap-3 (12px) apart, so a control lifted above would hang
+        // into the previous bubble. The bg backing keeps it legible over prose.
         <AgentControls
           markdown={markdown}
           onScrollToTop={scrollToTop}
-          className="absolute -top-8 right-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+          className="bg-background absolute top-0 right-0 z-10 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
         />
       ) : null}
       <ImageAttachmentRefs blocks={prose} />
