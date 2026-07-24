@@ -67,25 +67,29 @@ export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
   const resolvedColor = color ?? colors.textSecondary
   if (repoIcon?.type === 'image') {
     return (
-      <Image
-        source={{ uri: repoIcon.src }}
-        className="rounded-none"
-        style={{ width: size, height: size }}
-        accessibilityLabel={repoIcon.label}
-      />
+      <View className={styles.iconBox} style={{ width: size, height: size }}>
+        <Image
+          source={{ uri: repoIcon.src }}
+          className="rounded-none"
+          style={{ width: size, height: size }}
+          accessibilityLabel={repoIcon.label}
+        />
+      </View>
     )
   }
   if (repoIcon?.type === 'emoji') {
     return (
-      <Text className={styles.emoji} style={[{ fontSize: size }]}>
-        {repoIcon.emoji}
-      </Text>
+      <View className={styles.iconBox} style={{ width: size, height: size }}>
+        <Text className={styles.emoji} style={{ fontSize: size, lineHeight: size }}>
+          {repoIcon.emoji}
+        </Text>
+      </View>
     )
   }
   // Why: `lucide` is a persisted cross-client discriminator, not a runtime dependency.
   const Icon = (repoIcon?.type === 'lucide' && REPO_PHOSPHOR_ICONS[repoIcon.name]) || Folder
   return (
-    <View className={styles.glyph}>
+    <View className={styles.iconBox} style={{ width: size, height: size }}>
       <Icon size={size} color={resolvedColor} />
     </View>
   )
@@ -93,5 +97,7 @@ export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
 
 const styles = {
   emoji: cn('text-center'),
-  glyph: cn('items-center justify-center')
+  // Why: image, emoji, and vector glyphs have different native line boxes;
+  // one fixed box gives every section title the same visual center.
+  iconBox: cn('items-center justify-center')
 } as const

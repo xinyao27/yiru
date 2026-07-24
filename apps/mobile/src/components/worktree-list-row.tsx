@@ -206,7 +206,9 @@ const styles = {
   // Neutral grey accent, matching the desktop's active-tab indicator rather
   // than a blue line.
   worktreeRowActive: cn('bg-card border-l-muted-foreground'),
-  indicatorCol: cn('w-5 items-center pt-1.5 mr-2 gap-1'),
+  // Why: the 12px status shell sits within the title's ~17px line box; 2px
+  // centers it on the first line instead of letting it drift toward metadata.
+  indicatorCol: cn('w-5 items-center pt-[2px] mr-2 gap-1'),
   unreadBell: cn('mt-[2px]'),
   worktreeMain: cn('flex-1 mr-2'),
   worktreeNameRow: cn('flex-row items-center gap-2'),

@@ -1,8 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
+import {
+  DEFAULT_MOBILE_LOADER_STYLE,
+  normalizeMobileLoaderStyle,
+  type MobileLoaderStyle
+} from '../loading/mobile-loader-style'
+
 const PINS_PREFIX = 'yiru:pins:'
 const NOTIF_KEY = 'yiru:pushNotificationsEnabled'
 const NATIVE_CHAT_TABS_PREFIX = 'yiru:nativeChatTabs:'
+
+const LOADER_STYLE_KEY = 'yiru:loaderStyle'
+
+export async function loadMobileLoaderStyle(): Promise<MobileLoaderStyle> {
+  try {
+    return normalizeMobileLoaderStyle(await AsyncStorage.getItem(LOADER_STYLE_KEY))
+  } catch {
+    return DEFAULT_MOBILE_LOADER_STYLE
+  }
+}
+
+export async function saveMobileLoaderStyle(style: MobileLoaderStyle): Promise<void> {
+  await AsyncStorage.setItem(LOADER_STYLE_KEY, normalizeMobileLoaderStyle(style))
+}
 
 function nativeChatTabIdsKey(hostId: string, worktreeId: string): string {
   return `${NATIVE_CHAT_TABS_PREFIX}${encodeURIComponent(hostId)}:${encodeURIComponent(worktreeId)}`

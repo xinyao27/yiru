@@ -13,6 +13,7 @@ import {
   Lifebuoy as LifeBuoy,
   Microphone as Mic,
   Globe,
+  Palette,
   Terminal as TerminalIcon,
   Key as KeyRound
 } from '@/components/uniwind-icons'
@@ -96,6 +97,15 @@ export default function SettingsScreen() {
 
       <ScrollView contentContainerClassName="pb-safe-offset-4" showsVerticalScrollIndicator={false}>
         <View className={styles.section}>
+          <Pressable
+            className={cn(styles.row, styles.rowPressedActive)}
+            onPress={() => router.push('/appearance-settings')}
+          >
+            <Palette size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Appearance</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </Pressable>
+          <View className={styles.separator} />
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/terminal-settings')}
