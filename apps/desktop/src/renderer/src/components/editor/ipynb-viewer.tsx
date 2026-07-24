@@ -48,6 +48,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getConnectionId } from '@/lib/connection-context'
 import { resolveDocumentTheme } from '@/lib/document-theme'
+import { resolveEditorFontFamily, resolveEditorFontFamilyOrInherit } from '@/lib/editor-font-family'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
@@ -417,7 +418,7 @@ function CodeCell({
         onChange={(value) => onChange(value ?? '')}
         options={{
           automaticLayout: true,
-          fontFamily: settings?.terminalFontFamily || 'monospace',
+          fontFamily: resolveEditorFontFamily(settings),
           fontSize,
           glyphMargin: false,
           lineNumbersMinChars: 3,
@@ -882,7 +883,7 @@ export default function IpynbViewer({
     <div
       ref={setRootRef}
       className="scrollbar-editor h-full min-h-0 overflow-auto bg-[var(--editor-surface)]"
-      style={{ fontSize, fontFamily: settings?.terminalFontFamily || undefined }}
+      style={{ fontSize, fontFamily: resolveEditorFontFamilyOrInherit(settings) }}
       onKeyDownCapture={handleNotebookKeyDownCapture}
       onPointerDownCapture={handleNotebookPointerDownCapture}
     >

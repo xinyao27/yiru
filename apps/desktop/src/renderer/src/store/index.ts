@@ -1,6 +1,10 @@
 import { create } from 'zustand'
 
 import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
+import {
+  registerRendererMemoryProfileContributor,
+  summarizeStateCollectionSizes
+} from '@/lib/renderer-memory-profile'
 
 import './slice-contracts'
 import { createAgentStatusSlice } from './slices/agent-status'
@@ -23,6 +27,7 @@ import { createPreflightSlice } from './slices/preflight'
 import { createPullRequestGenerationSlice } from './slices/pull-request-generation'
 import { createRateLimitSlice } from './slices/rate-limits'
 import { createRecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
+import { createRemoteServerUpdatesSlice } from './slices/remote-server-updates'
 import { createRepoSlice } from './slices/repos'
 import { createRuntimeEnvironmentSshSlice } from './slices/runtime-environment-ssh'
 import { createRuntimeStatusSlice } from './slices/runtime-status'
@@ -62,6 +67,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createOpenCodeUsageSlice(...a),
   ...createBrowserSlice(...a),
   ...createRateLimitSlice(...a),
+  ...createRemoteServerUpdatesSlice(...a),
   ...createSshSlice(...a),
   ...createRuntimeEnvironmentSshSlice(...a),
   ...createAgentStatusSlice(...a),
@@ -81,6 +87,12 @@ export const useAppStore = create<AppState>()((...a) => ({
 }))
 
 registerHttpLinkStoreAccessor(() => useAppStore.getState())
+
+// Why: high-water breadcrumbs need to identify the store collections that grew
+// without retaining raw state in a crash report.
+registerRendererMemoryProfileContributor('store', () =>
+  summarizeStateCollectionSizes(useAppStore.getState(), 20)
+)
 
 export type { AppState } from './types'
 

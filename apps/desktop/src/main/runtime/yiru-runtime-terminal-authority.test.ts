@@ -13,6 +13,7 @@ vi.mock('./terminal-view-attribute-store', () => ({
   registerTerminalViewAttributesApplier: () => undefined
 }))
 
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../shared/constants'
 import { toAppSshPtyId } from '../../shared/ssh-pty-id'
 import { YiruRuntimeService } from './yiru-runtime'
 
@@ -39,6 +40,64 @@ function createPtyController(initialSize: { cols: number; rows: number }) {
 }
 
 describe('YiruRuntimeService terminal authority', () => {
+  it('reports floating workspace availability from settings', () => {
+    expect(new YiruRuntimeService().getStatus().floatingWorkspaceEnabled).toBe(true)
+
+    const disabledRuntime = new YiruRuntimeService({
+      getSettings: () => ({ floatingTerminalEnabled: false })
+    } as never)
+    expect(disabledRuntime.getStatus().floatingWorkspaceEnabled).toBe(false)
+  })
+
+  it('restores floating tabs with exact PTY liveness and no provider inventory', async () => {
+    const runtime = new YiruRuntimeService()
+    const floatingPtyId = `${FLOATING_TERMINAL_WORKTREE_ID}@@pty-1`
+    const hasPty = vi.fn((ptyId: string) => ptyId === floatingPtyId)
+    const listProcesses = vi.fn().mockResolvedValue([])
+    const { controller } = createPtyController({ cols: 100, rows: 30 })
+    runtime.setPtyController({ ...controller, hasPty, listProcesses })
+    runtime.attachWindow(7)
+    runtime.syncWindowGraph(7, {
+      tabs: [],
+      leaves: [],
+      mobileSessionTabs: [
+        {
+          worktree: FLOATING_TERMINAL_WORKTREE_ID,
+          publicationEpoch: 'renderer:1',
+          snapshotVersion: 1,
+          activeGroupId: null,
+          activeTabId: 'floating-tab::leaf-1',
+          activeTabType: 'terminal',
+          tabs: [
+            {
+              type: 'terminal',
+              id: 'floating-tab::leaf-1',
+              title: 'Floating Terminal',
+              parentTabId: 'floating-tab',
+              leafId: 'leaf-1',
+              ptyId: floatingPtyId,
+              isActive: true
+            }
+          ]
+        }
+      ]
+    })
+
+    const tabs = await runtime.listMobileSessionTabs(`id:${FLOATING_TERMINAL_WORKTREE_ID}`)
+
+    expect(tabs.tabs).toEqual([
+      expect.objectContaining({
+        type: 'terminal',
+        parentTabId: 'floating-tab',
+        status: 'ready',
+        terminal: expect.any(String)
+      })
+    ])
+    expect(hasPty).toHaveBeenCalledOnce()
+    expect(hasPty).toHaveBeenCalledWith(floatingPtyId)
+    expect(listProcesses).not.toHaveBeenCalled()
+  })
+
   it('keeps pre-allocated terminal handles stable and PTY-scoped', () => {
     const runtime = new YiruRuntimeService()
 

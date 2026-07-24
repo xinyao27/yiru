@@ -87,7 +87,8 @@
     "minimizeNotice": {
       "body": "Yiru sigue ejecutándose en la bandeja del sistema"
     },
-    "activityWaiting": "Yiru: actividad en espera"
+    "activityWaiting": "Yiru: actividad en espera",
+    "activityWaitingSuffix": "actividad en espera"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -187,6 +188,20 @@
             "07f788de83": "WebSocket"
           }
         }
+      }
+    },
+    "runtime": {
+      "remoteServerUpdateErrors": {
+        "manualRequired": "Este servidor debe actualizarse manualmente mediante su gestor de servicios.",
+        "notAvailable": "El servidor ya no informa de una actualización disponible. Compruébalo de nuevo.",
+        "notDownloaded": "La actualización del servidor aún no terminó de descargarse.",
+        "legacyServer": "Actualiza este servidor manualmente una vez para habilitar las actualizaciones remotas.",
+        "updaterTimeout": "Se agotó el tiempo de espera del actualizador del servidor.",
+        "requestedVersionUnavailable": "El actualizador del servidor no ofreció la versión solicitada de Yiru.",
+        "updateUnavailable": "El servidor no informó de una actualización disponible.",
+        "downloadIncomplete": "La actualización del servidor no terminó de descargarse.",
+        "reconnectTimeout": "El servidor no volvió a conectarse con la versión actualizada.",
+        "runtimeChanged": "El servidor emparejado cambió durante la actualización. Compruébalo antes de reintentar."
       }
     },
     "store": {
@@ -2000,6 +2015,16 @@
             "fd1d3b3a1d": "Descargando actualización, {{value0}} por ciento. Haz clic para expandir.",
             "9d13213a56": "Yiru v{{value0}} lista para instalar"
           },
+          "RemoteServerUpdateStatusSegment": {
+            "updating": "Actualizando {{value0}}/{{value1}}",
+            "updatingTooltip": "Las actualizaciones de servidores Yiru remotos están en curso",
+            "failed": "Fallaron {{value0}} actualizaciones de servidor",
+            "failedTooltip": "Abrir las actualizaciones de servidores Yiru remotos para revisar y reintentar",
+            "updated": "{{value0}} servidores actualizados",
+            "updatedTooltip": "Actualizaciones de servidores Yiru remotos completadas",
+            "failedOne": "Falló 1 actualización de servidor",
+            "updatedOne": "1 servidor actualizado"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "Actualizado",
             "9be86c46a0": "Liberable",
@@ -2157,6 +2182,19 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "UsageRosterPanel": {
+            "title": "Usage",
+            "openDetails": "Open usage details",
+            "notSignedIn": "not signed in",
+            "allAgents": "visible agents",
+            "usageDetails": "Usage details & history",
+            "loadingUsage": "Loading usage…",
+            "usageUnavailable": "Usage unavailable",
+            "noUsageData": "No usage data",
+            "detailed": "Detailed",
+            "compact": "Compact",
+            "footerDetailAria": "Usage footer detail"
           },
           "LanguageServerStatusSegment": {
             "aria": "Language server: {{value0}}",
@@ -3195,7 +3233,17 @@
           "0bed8727db": "Puede que se haya movido o eliminado. Actualiza los espacios de trabajo o quítalo de Yiru.",
           "3921d3d9a5": "No se encontró la carpeta del espacio de trabajo.",
           "f387af445b": "La ruta del espacio de trabajo no es una ruta local válida.",
-          "3ec372b664": "gestor de archivos"
+          "3ec372b664": "gestor de archivos",
+          "localOnly": "Local only",
+          "checkingHost": "Checking host…",
+          "hostUnsupported": "Host unsupported",
+          "remoteSsh": "Remote SSH",
+          "remoteRuntimeUnsupported": "Opening this path in a local app is not available on this host.",
+          "sshTargetUnavailable": "SSH host configuration is no longer available.",
+          "sshAliasRequired": "VS Code needs an SSH config alias for this host.",
+          "sshAliasRequiredDetail": "Add a Host alias for {{host}}:{{port}}, reconnect the workspace, then try again.",
+          "remoteEditorUnsupported": "This app cannot open SSH workspaces. Choose VS Code instead.",
+          "remoteLaunchFailed": "Could not open the path in VS Code."
         },
         "WorktreeTitleInlineRename": {
           "2f42ae024f": "No leído:",
@@ -4029,7 +4077,8 @@
           "remoteScopeAccounts": "Mostrando las cuentas administradas por {{value0}}. Agrega o vuelve a autenticar cuentas en ese servidor.",
           "remoteScopeAuthContext": "Cada cuenta mantiene su propio contexto de inicio de sesión en {{value0}}.",
           "remoteEmptyClaudeAccounts": "No hay cuentas de Claude administradas en {{value0}}. Usa su inicio de sesión de Claude predeterminado del sistema; agrega cuentas en ese servidor.",
-          "remoteEmptyCodexAccounts": "No hay cuentas de Codex administradas en {{value0}}. Usa su inicio de sesión de Codex predeterminado del sistema; agrega cuentas en ese servidor."
+          "remoteEmptyCodexAccounts": "No hay cuentas de Codex administradas en {{value0}}. Usa su inicio de sesión de Codex predeterminado del sistema; agrega cuentas en ese servidor.",
+          "codexSystemDefaultCustomProvider": "Proveedor personalizado — no se registra el uso."
         },
         "AdvancedPane": {
           "40b29e0bf3": "Reiniciar",
@@ -4562,6 +4611,53 @@
           "5195f0b9ef": "Muestra subrayados y sugerencias ortográficas del navegador al editar Rich Markdown.",
           "7ddd66fede": "Ajuste de línea en el editor",
           "9b18de6eea": "Ajusta las líneas largas en editores de archivos en lugar de requerir desplazamiento horizontal."
+        },
+        "EditorFontFamilySetting": {
+          "title": "Familia tipográfica del editor",
+          "description": "Fuente usada por los editores de archivos y las vistas de diferencias. Déjalo vacío para usar la fuente del terminal.",
+          "placeholder": "Igual que la fuente del terminal"
+        },
+        "GeneralRemoteServerUpdates": {
+          "serverCount": "{{value0}} servidores emparejados",
+          "availableCount": "{{value0}} listos para actualizar",
+          "currentCount": "{{value0}} actualizados",
+          "manualCount": "{{value0}} manuales",
+          "offlineCount": "{{value0}} sin conexión",
+          "title": "Servidores Yiru remotos",
+          "description": "Comprueba y actualiza servidores Yiru emparejados desde este cliente.",
+          "updating": "Actualizando servidores…",
+          "reviewServers": "Buscar actualizaciones de servidores",
+          "serverCountOne": "1 servidor emparejado"
+        },
+        "RemoteServerUpdateDialog": {
+          "versionUnavailable": "Versión no disponible",
+          "restartingHelp": "Esperando a que el servidor de reemplazo vuelva a conectarse con la nueva versión.",
+          "retry": "Reintentar",
+          "update": "Actualizar este servidor",
+          "title": "Actualizar servidores Yiru remotos",
+          "description": "Revisa los servidores emparejados y actualiza las instalaciones compatibles desde este cliente Yiru.",
+          "restartWarning": "La actualización reinicia estos servidores. {{value0}} pestañas activas y {{value1}} paneles de terminal pueden desconectarse brevemente.",
+          "checking": "Comprobando servidores emparejados…",
+          "empty": "No hay servidores Yiru remotos emparejados.",
+          "updateAll": "Actualizar los {{value0}} servidores",
+          "noUpdates": "Todos los servidores están actualizados.",
+          "downloadProgress": "Progreso de descarga de {{value0}}"
+        },
+        "RemoteServerUpdateStatus": {
+          "checking": "Comprobando…",
+          "available": "Actualización disponible",
+          "current": "Actualizado",
+          "manual": "Actualización manual",
+          "offline": "Sin conexión",
+          "queued": "En cola",
+          "checkingUpdate": "Buscando actualización…",
+          "downloading": "Descargando…",
+          "restarting": "Reiniciando…",
+          "updated": "Actualizado",
+          "failed": "Error de actualización",
+          "serviceManagerHelp": "Actualiza Yiru mediante el gestor de servicios que inicia este servidor.",
+          "unpackedHelp": "Las compilaciones de desarrollo deben actualizarse desde su repositorio de origen.",
+          "legacyHelp": "Actualiza este servidor manualmente una vez para habilitar las actualizaciones remotas."
         },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "localhost, 127.0.0.1, *.internal",
@@ -5416,7 +5512,12 @@
           "advertiseThisApp": "Anunciar esta app como servidor",
           "advertiseThisAppHelp": "Crea enlaces de acceso para que navegadores, clientes móviles u otro cliente de Yiru se conecten a esta app en ejecución.",
           "runtimeReachable": "{{value0}} está accesible.",
-          "hostModelCapabilityProjectSourceContext": "project source context"
+          "hostModelCapabilityProjectSourceContext": "project source context",
+          "reviewServerUpdates": "Buscar actualizaciones de servidores",
+          "updatingServers": "Actualizando servidores…",
+          "yiruVersion": "Yiru v{{value0}}",
+          "versionUnavailable": "Versión de Yiru no disponible",
+          "updateServer": "Actualizar"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "Copiar {{value0}}"
@@ -6342,7 +6443,11 @@
             "d6c0a9e2f4": "grok",
             "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "Porcentajes de uso",
-            "usagePercentageDisplayDescription": "Elige si los límites del proveedor muestran el porcentaje usado o restante."
+            "usagePercentageDisplayDescription": "Elige si los límites del proveedor muestran el porcentaje usado o restante.",
+            "showPinnedWorktreesInGroups": {
+              "title": "Mostrar también los worktrees fijados en sus listas originales",
+              "description": "Los worktrees fijados permanecen en Fijados y también aparecen en Todos, Proyecto, Estado y Revisión."
+            }
           }
         },
         "auto": {
@@ -6786,6 +6891,8 @@
             "4497e2e2bb": "Muestra subrayados y sugerencias ortográficas del navegador al editar Rich Markdown.",
             "e61157e926": "Ajuste de línea en el editor",
             "005be5c699": "Ajusta las líneas largas en editores de archivos en lugar de requerir desplazamiento horizontal.",
+            "editorFontFamily": "Familia tipográfica del editor",
+            "editorFontFamilyDesc": "Fuente usada por los editores de archivos y las vistas de diferencias. Déjalo vacío para usar la fuente del terminal.",
             "languageServer": "Language Server (Experimental)",
             "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
@@ -8546,6 +8653,7 @@
             "createPrIntentPublishing": "Publicando rama…",
             "createPrIntentForcePushing": "Haciendo force push con lease…",
             "createPrIntentPushing": "Haciendo push de commits…",
+            "createPrIntentFastForwarding": "Actualizando rama…",
             "createPrIntentRemoteFailed": "No se pudo actualizar la rama remota. Vuelve a intentar Crear PR.",
             "createPrIntentGeneratingDetails": "Generando detalles de revisión…",
             "createPrIntentBranchChangedDuringDetails": "La rama cambió mientras se generaban los detalles de la revisión. Vuelve a intentar Crear PR.",
@@ -9515,7 +9623,8 @@
           },
           "ProjectCombobox": {
             "search": "Buscar proyectos...",
-            "empty": "Ningún proyecto coincide con tu búsqueda."
+            "empty": "Ningún proyecto coincide con tu búsqueda.",
+            "addProject": "Agregar un proyecto nuevo"
           }
         }
       },
@@ -11934,6 +12043,21 @@
         "startDictation": "Iniciar dictado",
         "stopDictation": "Detener dictado",
         "noSkills": "Sin habilidades coincidentes",
+        "noCommandsOrSkills": "No hay comandos o habilidades coincidentes",
+        "noCommands": "No hay comandos coincidentes",
+        "commands": "Comandos",
+        "skills": "Habilidades",
+        "loadingSkills": "Cargando habilidades…",
+        "skillsLoaded": "Habilidades cargadas",
+        "skillsUnavailableHost": "Las habilidades no están disponibles para este host",
+        "skillsLoadFailed": "No se pudieron cargar las habilidades de este host",
+        "retrySkills": "Reintentar",
+        "skillCommandCollision": "También es un nombre de habilidad - el agente decide",
+        "skillMultipleSources": "{{sourceCount}} fuentes - el agente resuelve",
+        "skillScopeProject": "Proyecto",
+        "skillScopePersonal": "Personal",
+        "skillScopeBuiltIn": "Integrado",
+        "skillScopePlugin": "Plugin",
         "localAttachmentUnsupported": "Los archivos adjuntos locales no están disponibles para sesiones remotas.",
         "removeAttachment": "Quitar archivo adjunto",
         "pastedImageLabel": "Imagen pegada",

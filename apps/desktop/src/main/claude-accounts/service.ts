@@ -18,6 +18,7 @@ import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'
 import { toWindowsWslPath } from '../wsl'
 import { buildEncodedWslBashCommand } from '../wsl-bash-command'
+import { findDuplicateClaudeAccount } from './claude-duplicate-account'
 import {
   deleteActiveClaudeKeychainCredentialsStrict,
   deleteManagedClaudeKeychainCredentials,
@@ -141,11 +142,25 @@ export class ClaudeAccountService {
     const managedAuth = this.createManagedAuthDir(accountId, target)
     const { managedAuthPath } = managedAuth
     const previousSettings = this.store.getSettings()
+    let duplicateIdentityFound = false
 
     try {
       const captured = await this.runClaudeLoginAndCapture(managedAuth)
       if (!captured.identity.email) {
         throw new Error('Claude login completed, but Yiru could not resolve the account email.')
+      }
+      if (
+        findDuplicateClaudeAccount(previousSettings.claudeManagedAccounts, {
+          email: captured.identity.email,
+          organizationUuid: captured.identity.organizationUuid,
+          managedAuthRuntime: managedAuth.managedAuthRuntime,
+          wslDistro: managedAuth.wslDistro
+        })
+      ) {
+        // Why: duplicate rows corrupt account selection and usage attribution;
+        // re-authentication is the supported way to refresh an existing account.
+        duplicateIdentityFound = true
+        throw new Error('This Claude account is already added.')
       }
       await this.writeManagedAuth(accountId, managedAuthPath, captured)
 
@@ -175,8 +190,12 @@ export class ClaudeAccountService {
       this.rateLimits.evictInactiveClaudeCache(accountId)
       return this.getSnapshot()
     } catch (error) {
-      this.restoreClaudeSettings(previousSettings)
-      await this.runtimeAuth.forceMaterializeCurrentSelectionForRollback()
+      // Duplicate detection precedes all durable writes, so avoid needless
+      // credential rematerialization while still deleting the throwaway login.
+      if (!duplicateIdentityFound) {
+        this.restoreClaudeSettings(previousSettings)
+        await this.runtimeAuth.forceMaterializeCurrentSelectionForRollback()
+      }
       await this.safeRemoveManagedAuth(accountId, managedAuthPath)
       throw error
     }

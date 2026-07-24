@@ -2,6 +2,7 @@ import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
 import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
+import { useAgentRowConversationName } from '@/components/dashboard/use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
@@ -46,8 +47,11 @@ function lastEnteredDoneAt(agent: DashboardAgentRowData): number | null {
   return null
 }
 
-function getCompactAgentPrimary(agent: DashboardAgentRowData): string {
-  const prompt = getAgentRowPrimaryText(agent.entry)
+function getCompactAgentPrimary(
+  agent: DashboardAgentRowData,
+  conversationName: string | null
+): string {
+  const prompt = conversationName ?? getAgentRowPrimaryText(agent.entry)
   return prompt || agentStateLabel(getAgentDotState(agent))
 }
 
@@ -65,7 +69,15 @@ function getCompactAgentSecondary(agent: DashboardAgentRowData): string {
       return toolName
     }
   }
-  return agent.entry.lastAssistantMessage?.trim() || formatAgentTypeLabel(agent.agentType)
+  const lastAssistantMessage = agent.entry.lastAssistantMessage?.trim()
+  if (lastAssistantMessage) {
+    return lastAssistantMessage
+  }
+  // Why: child rows without descriptions use their role as primary text; repeating it adds no information.
+  if (agent.rowSource === 'subagent' && agent.entry.prompt?.trim() === agent.agentType.trim()) {
+    return ''
+  }
+  return formatAgentTypeLabel(agent.agentType)
 }
 
 function getCompactAgentTime(agent: DashboardAgentRowData, now: number): string | null {
@@ -127,8 +139,10 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   // "?" glyph. Nesting under the parent already conveys identity.
   const hideIcon = hideIdentityIcon || agent.rowSource === 'subagent'
   const dotState = getAgentDotState(agent)
-  const primary = getCompactAgentPrimary(agent)
+  const conversationName = useAgentRowConversationName(agent)
+  const primary = getCompactAgentPrimary(agent, conversationName)
   const secondary = getCompactAgentSecondary(agent)
+  const model = agent.entry.model?.trim() ?? ''
   const shortTime = getCompactAgentTime(agent, now)
   const cacheTimer = usePromptCacheCountdownForPane(agent.paneKey, cacheTimerActive)
 
@@ -219,6 +233,17 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
           </span>
         )}
       </span>
+      {model && (
+        <span
+          className={cn(
+            'max-w-24 shrink-0 truncate font-mono text-[10px]',
+            isFocusedPane ? 'text-foreground/70' : 'text-muted-foreground/70'
+          )}
+          title={model}
+        >
+          {model}
+        </span>
+      )}
       {hasChildDisclosure && !childAgentsExpanded && (
         <span
           className={cn(

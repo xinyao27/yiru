@@ -42,6 +42,8 @@ export type NotesSendMenuProps<TNote> = {
   disabledTooltip?: string
   iconClassName?: string
   align?: 'start' | 'center' | 'end'
+  openRequestNonce?: number | null
+  onOpenRequestHandled?: () => void
   onDelivered: (notes: readonly TNote[]) => void
 }
 
@@ -66,6 +68,8 @@ export function NotesSendMenu<TNote>({
   disabledTooltip = 'All notes sent',
   iconClassName = 'size-3.5',
   align = 'end',
+  openRequestNonce = null,
+  onOpenRequestHandled,
   onDelivered
 }: NotesSendMenuProps<TNote>): React.JSX.Element {
   const openAgentSendPopoverTargetMode = useAppStore((s) => s.openAgentSendPopoverTargetMode)
@@ -149,6 +153,18 @@ export function NotesSendMenu<TNote>({
     },
     [closeAgentSendPopoverTargetMode, targetModeId]
   )
+
+  useEffect(() => {
+    if (openRequestNonce === null) {
+      return
+    }
+    // Why: consume even an undeliverable request so remounts cannot replay it.
+    if (hasDeliverableNotes && defaultScope) {
+      setSendMenuOpen(true)
+      openTargetMode(defaultScope)
+    }
+    onOpenRequestHandled?.()
+  }, [defaultScope, hasDeliverableNotes, onOpenRequestHandled, openRequestNonce, openTargetMode])
 
   return (
     <DropdownMenu modal={false} open={effectiveSendMenuOpen} onOpenChange={handleOpenChange}>

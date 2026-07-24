@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { win32 as pathWin32 } from 'node:path'
+import { posix as pathPosix, win32 as pathWin32 } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
@@ -14,6 +14,11 @@ export type CodexWslRuntimeHookInstallPlan = {
   scriptPath: string
   commandScriptPath: string
   trustConfigPath: string
+  /** Distro that executes Codex for this runtime home (RPC trust grants run
+   *  codex inside it). */
+  wslDistro: string
+  /** Canonical Linux-side runtime home — CODEX_HOME for in-distro codex runs. */
+  linuxRuntimeHome: string
 }
 
 export type WslCanonicalPathSettlement =
@@ -184,7 +189,9 @@ export function createCodexWslRuntimeHookInstallPlan(
     configPath: pathWin32.join(runtimeHomePath, 'hooks.json'),
     tomlPath: pathWin32.join(runtimeHomePath, 'config.toml'),
     scriptPath: pathWin32.join(runtimeHomePath, '.yiru', 'agent-hooks', 'codex-hook.sh'),
-    commandScriptPath: `${linuxRuntimeHome}/.yiru/agent-hooks/codex-hook.sh`,
-    trustConfigPath: `${linuxRuntimeHome}/hooks.json`
+    commandScriptPath: pathPosix.join(linuxRuntimeHome, '.yiru', 'agent-hooks', 'codex-hook.sh'),
+    trustConfigPath: pathPosix.join(linuxRuntimeHome, 'hooks.json'),
+    wslDistro: distro,
+    linuxRuntimeHome
   }
 }

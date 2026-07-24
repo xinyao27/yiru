@@ -33,6 +33,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
@@ -59,6 +62,7 @@ import type {
   ProviderRateLimits,
   RateLimitRuntimeTarget
 } from '../../../../shared/rate-limit-types'
+import { normalizeStatusBarUsageMode } from '../../../../shared/status-bar-usage-mode'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
@@ -72,16 +76,22 @@ import { useAppStore } from '../../store'
 import { selectFloatingWorkspaceHasUnread } from '../../store/selectors'
 import { summarizeCodexRestartStatus } from './codex-restart-status-summary'
 import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
-import { ProviderUsageSegment } from './provider-usage-segment'
+import { ProviderLetterBadge, ProviderUsageSegment } from './provider-usage-segment'
+import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-segment'
 import { SpoolAvailabilityStatusSegment } from './spool-availability-status-segment'
 import { isStatusBarItemAvailable } from './status-bar-agent-gating'
-import { shouldOpenStatusBarContextMenu } from './status-bar-context-menu-policy'
+import {
+  STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS,
+  shouldOpenStatusBarContextMenu
+} from './status-bar-context-menu-policy'
 import { getVisibleUsageProvider, isUsageEmptyState } from './status-bar-provider-visibility'
 import { StatusBarUsageEmptyCta } from './status-bar-usage-empty-cta'
 import { ProviderPanel, barColor, clampUsedPercent, formatResetCreditExpiry } from './tooltip'
 import { UpdateStatusSegment } from './update-status-segment'
 import { UsagePercentageDisplayChangeNotice } from './usage-percentage-display-change-notice'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
+import { getUsageProviderAccountsSectionId } from './usage-provider-settings-target'
+import { UsageRosterPanel } from './usage-roster-panel'
 import { WorkspacePanelStatusActions } from './workspace-panel-status-actions'
 
 type StatusBarProps = {
@@ -115,6 +125,15 @@ export type CodexStatusRuntimeTarget = {
 
 type CodexStatusAccount = CodexRateLimitAccountsState['accounts'][number]
 type ClaudeStatusAccount = ClaudeRateLimitAccountsState['accounts'][number]
+const EMPTY_CLAUDE_ACCOUNTS: ClaudeRateLimitAccountsState = {
+  accounts: [],
+  activeAccountId: null,
+  activeAccountIdsByRuntime: { host: null, wsl: {} }
+}
+const EMPTY_CODEX_ACCOUNTS: CodexRateLimitAccountsState = {
+  accounts: [],
+  activeAccountId: null
+}
 
 export type CodexStatusSwitchTarget = {
   id: string | null
@@ -664,24 +683,25 @@ function AccountRuntimeToggle<TGroup extends { key: string; label: string }>({
   )
 }
 
-function ClaudeSwitcherMenu({
+export function ClaudeSwitcherMenu({
   claude,
   compact,
-  iconOnly
+  iconOnly,
+  asSubmenu = false,
+  triggerContent
 }: {
   claude: ProviderRateLimits
   compact: boolean
   iconOnly: boolean
+  asSubmenu?: boolean
+  triggerContent?: React.ReactNode
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [accountsExpanded, setAccountsExpanded] = useState(false)
-  const [accounts, setAccounts] = useState<ClaudeRateLimitAccountsState>({
-    accounts: [],
-    activeAccountId: null,
-    activeAccountIdsByRuntime: { host: null, wsl: {} }
-  })
+  const [accounts, setAccounts] = useState<ClaudeRateLimitAccountsState>(EMPTY_CLAUDE_ACCOUNTS)
   const [isSwitching, setIsSwitching] = useState(false)
   const mountedRef = useRef(true)
+  const accountsOwnerRef = useRef<string | null>(null)
   const openSettingsPage = useAppStore((s) => s.openSettingsPage)
   const openSettingsTarget = useAppStore((s) => s.openSettingsTarget)
   const fetchSettings = useAppStore((s) => s.fetchSettings)
@@ -713,7 +733,10 @@ function ClaudeSwitcherMenu({
     }
     return `${settings.activeRuntimeEnvironmentId?.trim() || 'local'}:${settings.activeClaudeManagedAccountId ?? 'system'}:${JSON.stringify(settings.activeClaudeManagedAccountIdsByRuntime ?? null)}:${settings.claudeManagedAccounts.map((account) => `${account.id}:${account.updatedAt}`).join('|')}`
   })
-  const accountState = resolveClaudeStatusAccountState(settings, accounts)
+  const activeRuntimeEnvironmentId = settings?.activeRuntimeEnvironmentId?.trim() || null
+  const visibleAccounts =
+    accountsOwnerRef.current === activeRuntimeEnvironmentId ? accounts : EMPTY_CLAUDE_ACCOUNTS
+  const accountState = resolveClaudeStatusAccountState(settings, visibleAccounts)
 
   useEffect(() => {
     mountedRef.current = true
@@ -722,26 +745,35 @@ function ClaudeSwitcherMenu({
     }
   }, [])
 
-  const activeRuntimeEnvironmentId = settings?.activeRuntimeEnvironmentId?.trim() || null
   // Why: keyed on the owner id, not the settings object identity, so routine
   // settings mutations don't re-run the remote snapshot round trip.
-  const loadAccounts = useCallback(async () => {
+  const loadAccounts = useCallback(async (): Promise<ClaudeRateLimitAccountsState | null> => {
     const snapshot = await fetchProviderAccountsSnapshot({ activeRuntimeEnvironmentId })
     // Why: a failed Claude half is a substituted empty roster; keep prior state.
     if (snapshot.failedProviders?.includes('claude')) {
       console.error('Claude account list failed; keeping previous status bar state.')
-      return
+      return null
     }
-    if (mountedRef.current) {
-      setAccounts(snapshot.claude)
-    }
+    return snapshot.claude
   }, [activeRuntimeEnvironmentId])
 
   useEffect(() => {
-    void loadAccounts().catch((error) => {
-      console.error('Failed to load Claude accounts for status bar:', error)
-    })
-  }, [loadAccounts, open, claudeAccountSyncKey])
+    let superseded = false
+    void loadAccounts()
+      .then((nextAccounts) => {
+        // Why: an SSH owner can change before its snapshot resolves; never show that old roster.
+        if (!superseded && mountedRef.current && nextAccounts) {
+          accountsOwnerRef.current = activeRuntimeEnvironmentId
+          setAccounts(nextAccounts)
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load Claude accounts for status bar:', error)
+      })
+    return () => {
+      superseded = true
+    }
+  }, [activeRuntimeEnvironmentId, loadAccounts, claudeAccountSyncKey])
 
   const handleOpenChange = useCallback((nextOpen: boolean): void => {
     setOpen(nextOpen)
@@ -836,6 +868,8 @@ function ClaudeSwitcherMenu({
       provider={claude}
       compact={compact}
       iconOnly={iconOnly}
+      asSubmenu={asSubmenu}
+      triggerContent={triggerContent}
       ariaLabel={translate(
         'auto.components.status.bar.StatusBar.3dd7ddfae1',
         'Open Claude details and account switcher'
@@ -1072,27 +1106,29 @@ function InlineUsageSkeleton(): React.JSX.Element {
   )
 }
 
-function CodexSwitcherMenu({
+export function CodexSwitcherMenu({
   codex,
   compact,
-  iconOnly
+  iconOnly,
+  asSubmenu = false,
+  triggerContent
 }: {
   codex: ProviderRateLimits
   compact: boolean
   iconOnly: boolean
+  asSubmenu?: boolean
+  triggerContent?: React.ReactNode
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [accountsExpanded, setAccountsExpanded] = useState(false)
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
   const [skipFutureResetConfirm, setSkipFutureResetConfirm] = useState(false)
-  const [accounts, setAccounts] = useState<CodexRateLimitAccountsState>({
-    accounts: [],
-    activeAccountId: null
-  })
+  const [accounts, setAccounts] = useState<CodexRateLimitAccountsState>(EMPTY_CODEX_ACCOUNTS)
   const [isSwitching, setIsSwitching] = useState(false)
   const [isRedeemingReset, setIsRedeemingReset] = useState(false)
   const [reauthenticatingAccountId, setReauthenticatingAccountId] = useState<string | null>(null)
   const mountedRef = useRef(true)
+  const accountsOwnerRef = useRef<string | null>(null)
   const accountsExpandedRef = useRef(accountsExpanded)
   // Why: Radix item selection is separate from the nested button click, so
   // propagation stops alone do not prevent the row switch action.
@@ -1136,21 +1172,21 @@ function CodexSwitcherMenu({
     }
     return `${settings.activeRuntimeEnvironmentId?.trim() || 'local'}:${settings.activeCodexManagedAccountId ?? 'system'}:${JSON.stringify(settings.activeCodexManagedAccountIdsByRuntime ?? null)}:${settings.codexManagedAccounts.map((account) => `${account.id}:${account.updatedAt}`).join('|')}`
   })
-  const accountState = resolveCodexStatusAccountState(settings, accounts)
-
   const activeRuntimeEnvironmentId = settings?.activeRuntimeEnvironmentId?.trim() || null
+  const visibleAccounts =
+    accountsOwnerRef.current === activeRuntimeEnvironmentId ? accounts : EMPTY_CODEX_ACCOUNTS
+  const accountState = resolveCodexStatusAccountState(settings, visibleAccounts)
+
   // Why: keyed on the owner id, not the settings object identity, so routine
   // settings mutations don't re-run the remote snapshot round trip.
-  const loadAccounts = useCallback(async () => {
+  const loadAccounts = useCallback(async (): Promise<CodexRateLimitAccountsState | null> => {
     const snapshot = await fetchProviderAccountsSnapshot({ activeRuntimeEnvironmentId })
     // Why: a failed Codex half is a substituted empty roster; keep prior state.
     if (snapshot.failedProviders?.includes('codex')) {
       console.error('Codex account list failed; keeping previous status bar state.')
-      return
+      return null
     }
-    if (mountedRef.current) {
-      setAccounts(snapshot.codex)
-    }
+    return snapshot.codex
   }, [activeRuntimeEnvironmentId])
 
   useEffect(() => {
@@ -1168,11 +1204,23 @@ function CodexSwitcherMenu({
     // Why: the status bar keeps its own lightweight account snapshot for the
     // dropdown. Settings account actions mutate the main-process store outside
     // this component, so we refresh when the persisted account roster changes
-    // or when the menu opens instead of leaving a stale account list mounted.
-    void loadAccounts().catch((error) => {
-      console.error('Failed to load Codex accounts for status bar:', error)
-    })
-  }, [loadAccounts, open, codexAccountSyncKey])
+    // instead of leaving a stale account list mounted.
+    let superseded = false
+    void loadAccounts()
+      .then((nextAccounts) => {
+        // Why: an SSH owner can change before its snapshot resolves; never show that old roster.
+        if (!superseded && mountedRef.current && nextAccounts) {
+          accountsOwnerRef.current = activeRuntimeEnvironmentId
+          setAccounts(nextAccounts)
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load Codex accounts for status bar:', error)
+      })
+    return () => {
+      superseded = true
+    }
+  }, [activeRuntimeEnvironmentId, loadAccounts, codexAccountSyncKey])
 
   const handleSelectAccount = async (
     accountId: string | null,
@@ -1355,6 +1403,8 @@ function CodexSwitcherMenu({
       provider={codex}
       compact={compact}
       iconOnly={iconOnly}
+      asSubmenu={asSubmenu}
+      triggerContent={triggerContent}
       // Why: Codex reset credits render beside the reset action below; showing
       // them in the generic provider summary duplicates the same metadata.
       hidePanelResetCredits
@@ -1377,7 +1427,7 @@ function CodexSwitcherMenu({
       onOpenChange={handleOpenChange}
     >
       <Dialog open={resetConfirmOpen} onOpenChange={setResetConfirmOpen}>
-        <DialogContent className="sm:max-w-[420px]">
+        <DialogContent className="sm:max-w-[420px]" {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}>
           <DialogHeader>
             <DialogTitle>
               {translate('auto.components.status.bar.StatusBar.972a1ff497', 'Reset Codex limits?')}
@@ -1588,7 +1638,9 @@ export function ProviderDetailsMenu({
   hidePanelResetCredits = false,
   open,
   onOpenChange,
-  children
+  children,
+  asSubmenu = false,
+  triggerContent
 }: {
   provider: ProviderRateLimits
   compact: boolean
@@ -1599,26 +1651,58 @@ export function ProviderDetailsMenu({
   open?: boolean
   onOpenChange?: (open: boolean) => void
   children?: React.ReactNode
+  asSubmenu?: boolean
+  triggerContent?: React.ReactNode
 }): React.JSX.Element {
   const recordFeatureInteraction = useAppStore((s) => s.recordFeatureInteraction)
   const usagePercentageDisplay = normalizeUsagePercentageDisplay(
     useAppStore((s) => s.usagePercentageDisplay)
   )
-  const skipCloseAutoFocusRef = useRef(false)
+  const menuFocusHandoff = useStatusBarMenuFocusHandoff()
 
   const handleOpenChange = (
     nextOpen: boolean,
     eventDetails: DropdownMenuPrimitive.Root.ChangeEventDetails
   ): void => {
     if (nextOpen) {
-      skipCloseAutoFocusRef.current = false
       recordFeatureInteraction('usage-tracking')
-    } else if (eventDetails.reason === 'outside-press') {
-      // Why: click-away should focus the clicked surface (esp. xterm); flag the
-      // close so finalFocus skips the default trigger restore below.
-      skipCloseAutoFocusRef.current = true
     }
+    menuFocusHandoff.noteOpenChange(nextOpen, eventDetails)
     onOpenChange?.(nextOpen)
+  }
+
+  const panelBody = (
+    <>
+      {topContent}
+      <div className="p-2">
+        {/* Why: provider-specific action sections may render richer reset-credit UI. */}
+        <ProviderPanel
+          p={provider}
+          showResetCredits={!hidePanelResetCredits}
+          usagePercentageDisplay={usagePercentageDisplay}
+        />
+      </div>
+      {children ? (
+        <>
+          <DropdownMenuSeparator />
+          {children}
+        </>
+      ) : null}
+    </>
+  )
+
+  if (asSubmenu) {
+    return (
+      <DropdownMenuSub open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuSubTrigger className="w-full gap-3">{triggerContent}</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent
+          {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
+          className="scrollbar-sleek max-h-(--available-height) w-[300px] overflow-y-auto p-0"
+        >
+          {panelBody}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    )
   }
 
   return (
@@ -1633,33 +1717,7 @@ export function ProviderDetailsMenu({
             aria-label={ariaLabel}
           >
             {iconOnly ? (
-              <span className="inline-flex items-center gap-1">
-                <span
-                  className={cn(
-                    'inline-block h-2 w-2 rounded-full',
-                    provider.session || provider.weekly || provider.fableWeekly || provider.monthly
-                      ? 'bg-muted-foreground/60'
-                      : 'bg-muted-foreground/30'
-                  )}
-                />
-                <span className="text-muted-foreground">
-                  {provider.provider === 'claude'
-                    ? 'C'
-                    : provider.provider === 'gemini'
-                      ? 'G'
-                      : provider.provider === 'opencode-go'
-                        ? 'O'
-                        : provider.provider === 'kimi'
-                          ? 'K'
-                          : provider.provider === 'antigravity'
-                            ? 'A'
-                            : provider.provider === 'minimax'
-                              ? 'M'
-                              : provider.provider === 'grok'
-                                ? 'R'
-                                : 'X'}
-                </span>
-              </span>
+              <ProviderLetterBadge limits={provider} />
             ) : (
               <ProviderUsageSegment
                 limits={provider}
@@ -1671,38 +1729,44 @@ export function ProviderDetailsMenu({
         }
       />
       <DropdownMenuContent
+        {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
         side="top"
         align="start"
         sideOffset={8}
         className="w-[260px]"
-        finalFocus={() => {
-          if (!skipCloseAutoFocusRef.current) {
-            return
-          }
-          skipCloseAutoFocusRef.current = false
-          // Why: click-away should focus the clicked surface, especially xterm;
-          // the default trigger restore steals that first click.
-          return false
-        }}
+        finalFocus={menuFocusHandoff.finalFocus}
       >
-        {topContent}
-        <div className="p-2">
-          {/* Why: provider-specific action sections may render richer reset-credit UI. */}
-          <ProviderPanel
-            p={provider}
-            showResetCredits={!hidePanelResetCredits}
-            usagePercentageDisplay={usagePercentageDisplay}
-          />
-        </div>
-        {children ? (
-          <>
-            <DropdownMenuSeparator />
-            {children}
-          </>
-        ) : null}
+        {panelBody}
       </DropdownMenuContent>
     </DropdownMenu>
   )
+}
+
+function useStatusBarMenuFocusHandoff(): {
+  noteOpenChange: (
+    nextOpen: boolean,
+    details: Pick<DropdownMenuPrimitive.Root.ChangeEventDetails, 'reason'>
+  ) => void
+  finalFocus: () => false | undefined
+} {
+  const skipCloseAutoFocusRef = useRef(false)
+  return {
+    noteOpenChange: (nextOpen, details) => {
+      if (nextOpen) {
+        skipCloseAutoFocusRef.current = false
+      } else if (details.reason === 'outside-press') {
+        skipCloseAutoFocusRef.current = true
+      }
+    },
+    finalFocus: () => {
+      if (!skipCloseAutoFocusRef.current) {
+        return
+      }
+      skipCloseAutoFocusRef.current = false
+      // Why: restoring the trigger steals the first click from surfaces such as xterm.
+      return false
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1716,6 +1780,15 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const rateLimits = useAppStore((s) => s.rateLimits)
   const settings = useAppStore((s) => s.settings)
   const refreshRateLimits = useAppStore((s) => s.refreshRateLimits)
+  const openSettingsTarget = useAppStore((s) => s.openSettingsTarget)
+  const openSettingsPage = useAppStore((s) => s.openSettingsPage)
+  const usagePercentageDisplay = normalizeUsagePercentageDisplay(
+    useAppStore((s) => s.usagePercentageDisplay)
+  )
+  const statusBarUsageMode = normalizeStatusBarUsageMode(useAppStore((s) => s.statusBarUsageMode))
+  const setStatusBarUsageMode = useAppStore((s) => s.setStatusBarUsageMode)
+  const [usageMenuOpen, setUsageMenuOpen] = useState(false)
+  const usageMenuFocusHandoff = useStatusBarMenuFocusHandoff()
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const statusBarItems = useAppStore((s) => s.statusBarItems)
   const recordFeatureInteraction = useAppStore((s) => s.recordFeatureInteraction)
@@ -1804,6 +1877,42 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
       }
     }
   }, [isRefreshing, refreshRateLimits, refreshDetectedAgents])
+
+  const handleManageAccounts = useCallback((): void => {
+    setUsageMenuOpen(false)
+    openSettingsTarget({ pane: 'accounts', repoId: null })
+    openSettingsPage()
+  }, [openSettingsPage, openSettingsTarget])
+
+  const handleUsageDetails = useCallback((): void => {
+    setUsageMenuOpen(false)
+    openSettingsTarget({ pane: 'stats', repoId: null })
+    openSettingsPage()
+  }, [openSettingsPage, openSettingsTarget])
+
+  const handleOpenProviderAccounts = useCallback(
+    (provider: ProviderRateLimits['provider']): void => {
+      const sectionId = getUsageProviderAccountsSectionId(provider)
+      if (!sectionId) {
+        return
+      }
+      setUsageMenuOpen(false)
+      openSettingsTarget({ pane: 'accounts', repoId: null, sectionId })
+      openSettingsPage()
+    },
+    [openSettingsPage, openSettingsTarget]
+  )
+
+  const handleUsageMenuOpenChange = (
+    nextOpen: boolean,
+    details: DropdownMenuPrimitive.Root.ChangeEventDetails
+  ): void => {
+    if (nextOpen) {
+      recordFeatureInteraction('usage-tracking')
+    }
+    usageMenuFocusHandoff.noteOpenChange(nextOpen, details)
+    setUsageMenuOpen(nextOpen)
+  }
 
   if (!statusBarVisible) {
     return null
@@ -1911,6 +2020,18 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
 
   const compact = containerWidth < 900
   const iconOnly = containerWidth < 500
+  // Why: the roster mirrors the user's visible provider selection instead of
+  // bypassing status-item and agent-detection gates in its expanded view.
+  const rosterProviders = [
+    showClaude ? visibleClaude : null,
+    showCodex ? visibleCodex : null,
+    showGemini ? visibleGemini : null,
+    showAntigravity ? visibleAntigravity : null,
+    showOpencodeGo ? visibleOpencodeGo : null,
+    showKimi ? visibleKimi : null,
+    showMiniMax ? visibleMiniMax : null,
+    showGrok ? visibleGrok : null
+  ].filter((provider): provider is ProviderRateLimits => provider !== null)
   const floatingTerminalActionLabel = floatingTerminalOpen
     ? 'Minimize Floating Workspace'
     : 'Show Floating Workspace'
@@ -1950,120 +2071,108 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
               // Why: one-time usage-display change callout anchors to this cluster so
               // it sits next to the meters the user is confused by, not a global toast.
               <UsagePercentageDisplayChangeNotice hasVisibleUsageMeters={hasVisibleUsageMeters}>
-                {showClaude && (
-                  <ClaudeSwitcherMenu
-                    claude={visibleClaude}
-                    compact={compact}
-                    iconOnly={iconOnly}
+                <DropdownMenu
+                  open={usageMenuOpen}
+                  onOpenChange={handleUsageMenuOpenChange}
+                  modal={false}
+                >
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="status-bar"
+                        size="status-bar"
+                        className="gap-3"
+                        aria-label={translate(
+                          'auto.components.status.bar.UsageRosterPanel.title',
+                          'Usage'
+                        )}
+                      >
+                        {rosterProviders.map((provider) =>
+                          iconOnly ? (
+                            <ProviderLetterBadge key={provider.provider} limits={provider} />
+                          ) : (
+                            <ProviderUsageSegment
+                              key={provider.provider}
+                              limits={provider}
+                              compact={compact}
+                              display={usagePercentageDisplay}
+                              mode={statusBarUsageMode}
+                            />
+                          )
+                        )}
+                      </Button>
+                    }
                   />
-                )}
-                {showCodex && (
-                  <CodexSwitcherMenu codex={visibleCodex} compact={compact} iconOnly={iconOnly} />
-                )}
-                {showGemini && (
-                  <ProviderDetailsMenu
-                    provider={visibleGemini}
-                    compact={compact}
-                    iconOnly={iconOnly}
-                    ariaLabel={translate(
-                      'auto.components.status.bar.StatusBar.d2375976eb',
-                      'Open Gemini usage details'
-                    )}
-                  />
-                )}
-                {showAntigravity && (
-                  <ProviderDetailsMenu
-                    provider={visibleAntigravity}
-                    compact={compact}
-                    iconOnly={iconOnly}
-                    ariaLabel={translate(
-                      'auto.components.status.bar.StatusBar.antigravityUsageDetails',
-                      'Open Antigravity usage details'
-                    )}
-                  />
-                )}
-                {showOpencodeGo && (
-                  <ProviderDetailsMenu
-                    provider={visibleOpencodeGo}
-                    compact={compact}
-                    iconOnly={iconOnly}
-                    ariaLabel={translate(
-                      'auto.components.status.bar.StatusBar.629251f4b6',
-                      'Open OpenCode Go usage details'
-                    )}
-                  />
-                )}
-                {showKimi && (
-                  <ProviderDetailsMenu
-                    provider={visibleKimi}
-                    compact={compact}
-                    iconOnly={iconOnly}
-                    ariaLabel={translate(
-                      'auto.components.status.bar.StatusBar.fda8146810',
-                      'Open Kimi usage details'
-                    )}
-                  />
-                )}
-                {showMiniMax && (
-                  <ProviderDetailsMenu
-                    provider={visibleMiniMax}
-                    compact={compact}
-                    iconOnly={iconOnly}
-                    ariaLabel={translate(
-                      'auto.components.status.bar.StatusBar.06741a2f3d',
-                      'Open MiniMax usage details'
-                    )}
-                  />
-                )}
-                {showGrok && (
-                  <ProviderDetailsMenu
-                    provider={visibleGrok}
-                    compact={compact}
-                    iconOnly={iconOnly}
-                    ariaLabel={translate(
-                      'auto.components.status.bar.StatusBar.grokUsageAria',
-                      'Open Grok usage details'
-                    )}
-                  />
-                )}
+                  <DropdownMenuContent
+                    {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
+                    side="top"
+                    align="start"
+                    sideOffset={8}
+                    className="w-[360px] p-0"
+                    finalFocus={usageMenuFocusHandoff.finalFocus}
+                  >
+                    <UsageRosterPanel
+                      providers={rosterProviders}
+                      display={usagePercentageDisplay}
+                      statusBarUsageMode={statusBarUsageMode}
+                      onStatusBarUsageModeChange={setStatusBarUsageMode}
+                      isRefreshing={isRefreshing || anyFetching}
+                      onRefresh={handleRefresh}
+                      onOpenProvider={handleOpenProviderAccounts}
+                      onSignIn={handleOpenProviderAccounts}
+                      canSignIn={(provider) => getUsageProviderAccountsSectionId(provider) !== null}
+                      onManageAccounts={handleManageAccounts}
+                      onUsageDetails={handleUsageDetails}
+                      renderRow={(provider, row) => {
+                        if (provider.provider === 'claude') {
+                          return (
+                            <ClaudeSwitcherMenu
+                              claude={provider}
+                              compact={compact}
+                              iconOnly={false}
+                              asSubmenu
+                              triggerContent={row}
+                            />
+                          )
+                        }
+                        if (provider.provider === 'codex') {
+                          return (
+                            <CodexSwitcherMenu
+                              codex={provider}
+                              compact={compact}
+                              iconOnly={false}
+                              asSubmenu
+                              triggerContent={row}
+                            />
+                          )
+                        }
+                        return (
+                          <ProviderDetailsMenu
+                            provider={provider}
+                            compact={compact}
+                            iconOnly={false}
+                            asSubmenu
+                            triggerContent={row}
+                            ariaLabel={translate(
+                              'auto.components.status.bar.UsageRosterPanel.openDetails',
+                              'Open usage details'
+                            )}
+                          />
+                        )
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </UsagePercentageDisplayChangeNotice>
             )}
-            {hasVisibleUsageMeters ? (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="status-bar-icon"
-                      size="icon-status-bar"
-                      onClick={handleRefresh}
-                      disabled={isRefreshing}
-                      aria-label={translate(
-                        'auto.components.status.bar.StatusBar.3325d996cb',
-                        'Refresh rate limits'
-                      )}
-                    >
-                      {isRefreshing || anyFetching ? (
-                        <LoadingIndicator size={11} />
-                      ) : (
-                        <RefreshCw weight="regular" size={11} />
-                      )}
-                    </Button>
-                  }
-                />
-                <TooltipContent side="top" sideOffset={6}>
-                  {translate(
-                    'auto.components.status.bar.StatusBar.c8857b40f7',
-                    'Refresh usage data'
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            ) : null}
           </div>
         ) : null}
         {showUsageGroup ? <Separator orientation="vertical" size="sm" /> : null}
         {/* Why: system status stays icon-only beside usage, reserving the right
         edge for workspace panel navigation. */}
         <div className="flex h-full shrink-0 items-center gap-0.5">
+          <RemoteServerUpdateStatusSegment iconOnly />
           <UpdateStatusSegment compact={compact} iconOnly />
           <React.Suspense fallback={null}>
             {petEnabled ? <PetStatusSegment /> : null}

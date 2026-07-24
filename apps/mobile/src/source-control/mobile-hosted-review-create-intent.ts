@@ -20,6 +20,7 @@ export type MobileHostedReviewCreateIntentProgress =
   | 'publishing'
   | 'pushing'
   | 'force_pushing'
+  | 'fast_forwarding'
   | 'creating_review'
 
 export type MobileHostedReviewCreateIntentFailure = {
@@ -64,6 +65,8 @@ export function mobileHostedReviewCreateIntentProgressMessage(
       return 'Pushing commits...'
     case 'force_pushing':
       return 'Force pushing with lease...'
+    case 'fast_forwarding':
+      return 'Updating branch...'
     case 'creating_review':
       return 'Creating review...'
   }

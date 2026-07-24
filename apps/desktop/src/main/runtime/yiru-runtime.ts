@@ -6,6 +6,7 @@ import { isAbsolute, join, resolve } from 'node:path'
 import {
   BROWSER_HEADLESS_RUNTIME_CAPABILITY,
   BROWSER_CERTIFICATE_TRUST_RUNTIME_CAPABILITY,
+  EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY,
   MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION,
   RUNTIME_CAPABILITIES,
   RUNTIME_PROTOCOL_VERSION,
@@ -43,6 +44,12 @@ import type {
   HostedReviewCreationEligibilityArgs,
   HostedReviewInfo
 } from '@yiru/workbench-model/review'
+import {
+  applyTerminalQuickCommandMutation,
+  MAX_QUICK_COMMANDS,
+  type TerminalQuickCommand,
+  type TerminalQuickCommandMutation
+} from '@yiru/workbench-model/ui'
 import {
   getRepoExecutionHostId,
   parseExecutionHostId,
@@ -711,10 +718,12 @@ type RuntimeStore = {
     agentDefaultArgs?: GlobalSettings['agentDefaultArgs']
     agentDefaultEnv?: GlobalSettings['agentDefaultEnv']
     terminalWindowsShell?: GlobalSettings['terminalWindowsShell']
+    floatingTerminalEnabled?: GlobalSettings['floatingTerminalEnabled']
     agentStatusHooksEnabled?: GlobalSettings['agentStatusHooksEnabled']
     minimaxGroupId?: GlobalSettings['minimaxGroupId']
     minimaxUsageModels?: GlobalSettings['minimaxUsageModels']
     prBotAuthorOverrides?: GlobalSettings['prBotAuthorOverrides']
+    terminalQuickCommands?: GlobalSettings['terminalQuickCommands']
     mobileAutoRestoreFitMs?: number | null
     mobileEmulatorEnabled?: boolean
     mobileEmulatorDefaultDeviceUdid?: string | null
@@ -871,6 +880,7 @@ type TerminalCreateOptions = {
   claudeAgentTeamsSourceCommand?: string
   cwd?: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: WorktreeStartupLaunch['launchConfig']
   launchToken?: string
   launchAgent?: TuiAgent
@@ -911,6 +921,13 @@ function copySleepingAgentLaunchConfig(
     agentArgs: config.agentArgs,
     agentEnv: { ...config.agentEnv }
   }
+}
+
+function mergeTerminalEnvDeletions(
+  ...lists: readonly (readonly string[] | undefined)[]
+): string[] | undefined {
+  const merged = [...new Set(lists.flatMap((list) => list ?? []))]
+  return merged.length > 0 ? merged : undefined
 }
 
 function normalizeAgentLaunchCommandForMatch(command: string): string {
@@ -1066,6 +1083,8 @@ type RuntimePtyController = {
   hasChildProcesses?(ptyId: string): Promise<boolean>
   clearBuffer?(ptyId: string): Promise<void>
   resize?(ptyId: string, cols: number, rows: number): boolean
+  // Why: exact-id Mobile polls should not enumerate every local and SSH PTY.
+  hasPty?(ptyId: string): boolean | null
   listProcesses?(): Promise<PtyProcessInfo[]>
   serializeBuffer?(
     ptyId: string,
@@ -2289,6 +2308,34 @@ export class YiruRuntimeService {
     return this.getClientSettings()
   }
 
+  getClientTerminalQuickCommands(): TerminalQuickCommand[] {
+    if (!this.store?.getSettings) {
+      throw new Error('runtime_unavailable')
+    }
+    return this.store.getSettings().terminalQuickCommands ?? []
+  }
+
+  updateClientTerminalQuickCommands(
+    mutation: TerminalQuickCommandMutation
+  ): TerminalQuickCommand[] {
+    if (!this.store?.getSettings || !this.store.updateSettings) {
+      throw new Error('runtime_unavailable')
+    }
+    const current = this.getClientTerminalQuickCommands()
+    if (
+      mutation.type === 'upsert' &&
+      !current.some((command) => command.id === mutation.command.id) &&
+      current.length >= MAX_QUICK_COMMANDS
+    ) {
+      throw new Error('Quick command limit reached')
+    }
+    this.store.updateSettings(
+      { terminalQuickCommands: applyTerminalQuickCommandMutation(current, mutation) },
+      { notifyListeners: true }
+    )
+    return this.getClientTerminalQuickCommands()
+  }
+
   updateClientPRBotAuthorOverride(args: { author: string; isBot: boolean }) {
     if (!this.store?.getSettings || !this.store.updateSettings) {
       throw new Error('runtime_unavailable')
@@ -2534,6 +2581,10 @@ export class YiruRuntimeService {
     if (hasOffscreen) {
       capabilities.push(BROWSER_HEADLESS_RUNTIME_CAPABILITY)
     }
+    if (hasRenderer) {
+      // Why: opening VS Code is a desktop-host side effect unavailable to headless serve.
+      capabilities.push(EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY)
+    }
     // Why: certificate proceed is owned by the browser-hosting process for both
     // desktop webviews and offscreen pages. Advertise whenever either backend
     // can host a page so remote clients can surface Proceed Anyway (Unsafe).
@@ -2556,6 +2607,7 @@ export class YiruRuntimeService {
       capabilities,
       hostPlatform: process.platform,
       terminalWindowsShell: this.store?.getSettings?.().terminalWindowsShell ?? null,
+      floatingWorkspaceEnabled: this.store?.getSettings?.().floatingTerminalEnabled !== false,
       protocolVersion: RUNTIME_PROTOCOL_VERSION,
       minCompatibleMobileVersion: MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION
     }
@@ -2799,12 +2851,12 @@ export class YiruRuntimeService {
     const explicitWorktreeId = this.getValidatedExplicitWorktreeIdSelector(worktreeSelector)
     if (explicitWorktreeId) {
       this.hydrateHeadlessMobileSessionTabsFromWorkspaceSession(explicitWorktreeId)
-      await this.refreshMobileSessionPtyRecords()
+      await this.refreshMobileSessionPtyRecords(explicitWorktreeId)
       return this.getMobileSessionTabsForWorktree(explicitWorktreeId)
     }
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
     this.hydrateHeadlessMobileSessionTabsFromWorkspaceSession(worktree.id)
-    await this.refreshMobileSessionPtyRecords()
+    await this.refreshMobileSessionPtyRecords(worktree.id)
     return this.getMobileSessionTabsForWorktree(worktree.id)
   }
 
@@ -3840,12 +3892,19 @@ export class YiruRuntimeService {
     }
   }
 
-  private async refreshMobileSessionPtyRecords(): Promise<void> {
-    if (!this.ptyController?.listProcesses) {
+  private async refreshMobileSessionPtyRecords(
+    targetWorktreeId: string | null = null
+  ): Promise<void> {
+    if (!this.ptyController?.listProcesses && !this.ptyController?.hasPty) {
       return
     }
-    const resolvedWorktrees = await this.listResolvedWorktrees()
-    await this.refreshPtyWorktreeRecordsFromController(resolvedWorktrees)
+    // Why: the floating workspace has explicit PTY identity and no Git/SSH worktree to resolve.
+    const isFloatingWorkspace = targetWorktreeId === FLOATING_TERMINAL_WORKTREE_ID
+    const resolvedWorktrees = isFloatingWorkspace ? [] : await this.listResolvedWorktrees()
+    await this.refreshPtyWorktreeRecordsFromController(
+      resolvedWorktrees,
+      isFloatingWorkspace ? targetWorktreeId : null
+    )
   }
 
   async activateMobileSessionTab(
@@ -3858,7 +3917,7 @@ export class YiruRuntimeService {
     const worktreeId =
       explicitWorktreeId ?? (await this.resolveWorktreeSelector(worktreeSelector)).id
     this.hydrateHeadlessMobileSessionTabsFromWorkspaceSession(worktreeId)
-    await this.refreshMobileSessionPtyRecords()
+    await this.refreshMobileSessionPtyRecords(worktreeId)
     const snapshot = this.mobileSessionTabsByWorktree.get(worktreeId)
     const directTab = snapshot?.tabs.find((candidate) => candidate.id === tabId)
     const tab = leafId
@@ -7080,6 +7139,16 @@ export class YiruRuntimeService {
     const ptyId = this.resolveLeafForHandle(handle)?.ptyId
     const pty = ptyId ? this.terminalSessions.getPtyRecord(ptyId) : null
     return pty ? { worktreeId: pty.worktreeId, connectionId: pty.connectionId } : null
+  }
+
+  // Why: remote clients cannot resolve this runtime's WSL project preference,
+  // so host-affecting RPCs resolve it from the owning store.
+  resolveProjectRuntimeForWorktree(
+    worktreeId: string | null | undefined
+  ): ProjectExecutionRuntimeResolution | undefined {
+    return this.store && worktreeId
+      ? resolveLocalProjectRuntimeForWorktreeId(this.requireStore(), worktreeId)
+      : undefined
   }
 
   getTerminalOrchestrationCliCommand(handle: string): 'yiru' {
@@ -16711,7 +16780,7 @@ export class YiruRuntimeService {
         commandDelivery: 'provider',
         startupCommandDelivery: launchOpts.startupCommandDelivery,
         env,
-        envToDelete: agentTeamsPlan?.envToDelete,
+        envToDelete: mergeTerminalEnvDeletions(launchOpts.envToDelete, agentTeamsPlan?.envToDelete),
         telemetry: launchOpts.telemetry,
         connectionId: workspace.connectionId,
         worktreeId: workspace.id,
@@ -16853,6 +16922,7 @@ export class YiruRuntimeService {
         command: launchOpts.command,
         cwd,
         ...(launchOpts.env ? { env: launchOpts.env } : {}),
+        ...(launchOpts.envToDelete ? { envToDelete: launchOpts.envToDelete } : {}),
         ...(launchOpts.launchConfig ? { launchConfig: launchOpts.launchConfig } : {}),
         ...(launchOpts.launchToken ? { launchToken: launchOpts.launchToken } : {}),
         ...(launchOpts.launchAgent ? { launchAgent: launchOpts.launchAgent } : {}),
@@ -16952,8 +17022,10 @@ export class YiruRuntimeService {
       command?: string
       cwd?: string
       env?: Record<string, string>
+      envToDelete?: string[]
       startupCommandDelivery?: WorktreeStartupLaunch['startupCommandDelivery']
       agent?: TuiAgent
+      agentPrompt?: string
       launchConfig?: SleepingAgentLaunchConfig
       launchAgent?: TuiAgent
       viewMode?: 'terminal' | 'chat'
@@ -16997,8 +17069,10 @@ export class YiruRuntimeService {
       command?: string
       cwd?: string
       env?: Record<string, string>
+      envToDelete?: string[]
       startupCommandDelivery?: WorktreeStartupLaunch['startupCommandDelivery']
       agent?: TuiAgent
+      agentPrompt?: string
       launchConfig?: SleepingAgentLaunchConfig
       launchAgent?: TuiAgent
       viewMode?: 'terminal' | 'chat'
@@ -17033,6 +17107,7 @@ export class YiruRuntimeService {
           command: startupCommand.command,
           cwd,
           env: startupCommand.env,
+          envToDelete: startupCommand.envToDelete,
           startupCommandDelivery: startupCommand.startupCommandDelivery,
           launchAgent: startupCommand.launchAgent,
           viewMode: opts.viewMode,
@@ -17082,6 +17157,7 @@ export class YiruRuntimeService {
         command: startupCommand.command,
         cwd,
         ...(startupCommand.env ? { env: startupCommand.env } : {}),
+        ...(startupCommand.envToDelete ? { envToDelete: startupCommand.envToDelete } : {}),
         ...(startupCommand.launchConfig ? { launchConfig: startupCommand.launchConfig } : {}),
         ...(startupCommand.launchAgent ? { launchAgent: startupCommand.launchAgent } : {}),
         ...(opts.viewMode ? { viewMode: opts.viewMode } : {}),
@@ -17146,6 +17222,7 @@ export class YiruRuntimeService {
           command: startupCommand.command,
           cwd,
           env: startupCommand.env,
+          envToDelete: startupCommand.envToDelete,
           startupCommandDelivery: startupCommand.startupCommandDelivery,
           identity: { tabId: pendingSurface.tab.parentTabId, leafId: pendingSurface.tab.leafId },
           launchAgent: startupCommand.launchAgent,
@@ -17191,14 +17268,17 @@ export class YiruRuntimeService {
     opts: {
       command?: string
       env?: Record<string, string>
+      envToDelete?: string[]
       startupCommandDelivery?: WorktreeStartupLaunch['startupCommandDelivery']
       agent?: TuiAgent
+      agentPrompt?: string
       launchConfig?: SleepingAgentLaunchConfig
       launchAgent?: TuiAgent
     }
   ): Promise<{
     command?: string
     env?: Record<string, string>
+    envToDelete?: string[]
     startupCommandDelivery?: WorktreeStartupLaunch['startupCommandDelivery']
     launchConfig?: SleepingAgentLaunchConfig
     launchAgent?: TuiAgent
@@ -17207,6 +17287,7 @@ export class YiruRuntimeService {
       return {
         command: opts.command,
         env: opts.env,
+        envToDelete: opts.envToDelete,
         launchConfig: opts.launchConfig,
         launchAgent: opts.launchAgent,
         startupCommandDelivery: opts.startupCommandDelivery
@@ -17231,7 +17312,7 @@ export class YiruRuntimeService {
     })
     const startupPlan = buildAgentStartupPlan({
       agent: opts.agent,
-      prompt: '',
+      prompt: opts.agentPrompt ?? '',
       cmdOverrides: settings.agentCmdOverrides ?? {},
       agentArgs: resolveTuiAgentLaunchArgs(opts.agent, settings.agentDefaultArgs),
       agentEnv: resolveTuiAgentLaunchEnv(opts.agent, settings.agentDefaultEnv),
@@ -17242,6 +17323,9 @@ export class YiruRuntimeService {
     })
     if (!startupPlan) {
       throw new Error(`Could not build launch command for ${opts.agent}.`)
+    }
+    if (opts.agentPrompt && startupPlan.followupPrompt) {
+      throw new Error(`Agent ${opts.agent} does not support startup prompt quick commands.`)
     }
     if (workspace.connectionId) {
       await this.markRemoteWorkspaceTrustedForAgent(
@@ -17255,6 +17339,7 @@ export class YiruRuntimeService {
     return {
       command: startupPlan.launchCommand,
       env: startupPlan.env,
+      envToDelete: opts.envToDelete,
       launchConfig: startupPlan.launchConfig,
       launchAgent: opts.agent,
       startupCommandDelivery: startupPlan.startupCommandDelivery
@@ -17269,6 +17354,7 @@ export class YiruRuntimeService {
       command?: string
       cwd?: string
       env?: Record<string, string>
+      envToDelete?: string[]
       startupCommandDelivery?: WorktreeStartupLaunch['startupCommandDelivery']
       identity?: { tabId: string; leafId: string; sessionId?: string }
       launchAgent?: TuiAgent
@@ -17288,6 +17374,7 @@ export class YiruRuntimeService {
       command: opts.command,
       cwd,
       env: opts.env,
+      envToDelete: opts.envToDelete,
       ...(opts.launchConfig ? { launchConfig: opts.launchConfig } : {}),
       ...(opts.launchAgent ? { launchAgent: opts.launchAgent } : {}),
       ...(opts.viewMode ? { viewMode: opts.viewMode } : {}),
@@ -19451,6 +19538,12 @@ export class YiruRuntimeService {
     resolvedWorktrees: ResolvedWorktree[],
     targetWorktreeId: string | null = null
   ): Promise<Set<string> | null> {
+    if (targetWorktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
+      const targetedLiveness = this.refreshFloatingWorkspacePtyLiveness()
+      if (targetedLiveness !== null) {
+        return targetedLiveness
+      }
+    }
     if (!this.ptyController?.listProcesses) {
       return null
     }
@@ -19491,6 +19584,90 @@ export class YiruRuntimeService {
     this.terminalSessions.markDisconnectedPtysUnless(livePtyIds, (ptyId) =>
       this.leafExistsForPty(ptyId)
     )
+    this.pruneDisconnectedPtyRecords()
+    return livePtyIds
+  }
+
+  private refreshFloatingWorkspacePtyLiveness(): Set<string> | null {
+    const controller = this.ptyController
+    if (!controller?.hasPty) {
+      return null
+    }
+    const knownPtyIds = new Set<string>()
+    const persistedBindingByPtyId = new Map<string, { tabId: string; paneKey: string }>()
+    for (const pty of this.terminalSessions.listPtyRecords()) {
+      if (pty.worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
+        knownPtyIds.add(pty.ptyId)
+      }
+    }
+    for (const leaf of this.terminalSessions.listGraphLeaves()) {
+      if (leaf.worktreeId === FLOATING_TERMINAL_WORKTREE_ID && leaf.ptyId) {
+        knownPtyIds.add(leaf.ptyId)
+      }
+    }
+    const snapshot = this.mobileSessionTabsByWorktree.get(FLOATING_TERMINAL_WORKTREE_ID)
+    for (const tab of snapshot?.tabs ?? []) {
+      if (tab.type !== 'terminal') {
+        continue
+      }
+      if (tab.ptyId) {
+        knownPtyIds.add(tab.ptyId)
+        persistedBindingByPtyId.set(tab.ptyId, {
+          tabId: tab.parentTabId,
+          paneKey: this.getMobileTerminalPaneKey(tab)
+        })
+      }
+      for (const [leafId, ptyId] of Object.entries(tab.parentLayout?.ptyIdsByLeafId ?? {})) {
+        knownPtyIds.add(ptyId)
+        persistedBindingByPtyId.set(ptyId, {
+          tabId: tab.parentTabId,
+          paneKey: isTerminalLeafId(leafId)
+            ? makePaneKey(tab.parentTabId, leafId)
+            : `${tab.parentTabId}:${/^pane:(\d+)$/.exec(leafId)?.[1] ?? leafId}`
+        })
+      }
+    }
+
+    const liveness = new Map<string, boolean>()
+    try {
+      for (const ptyId of knownPtyIds) {
+        const live = controller.hasPty(ptyId)
+        if (live === null) {
+          return null
+        }
+        liveness.set(ptyId, live)
+      }
+    } catch {
+      return null
+    }
+
+    const livePtyIds = new Set<string>()
+    for (const [ptyId, live] of liveness) {
+      let pty = this.terminalSessions.getPtyRecord(ptyId)
+      if (live) {
+        livePtyIds.add(ptyId)
+        const binding = persistedBindingByPtyId.get(ptyId)
+        if (!pty && binding) {
+          // Why: a live restored daemon PTY needs pane identity before Mobile can issue a safe handle.
+          pty = this.recordPtyWorktree(ptyId, FLOATING_TERMINAL_WORKTREE_ID, {
+            connected: true,
+            tabId: binding.tabId,
+            paneKey: binding.paneKey
+          })
+        } else if (pty) {
+          pty = this.recordPtyWorktree(ptyId, FLOATING_TERMINAL_WORKTREE_ID, {
+            connected: true
+          })
+        }
+        if (pty) {
+          this.refreshPtyForegroundAgent(ptyId)
+        }
+      } else if (pty && !this.leafExistsForPty(ptyId)) {
+        pty.connected = false
+        pty.disconnectedAt ??= Date.now()
+        this.terminalSessions.commitPtyState(ptyId, { pty })
+      }
+    }
     this.pruneDisconnectedPtyRecords()
     return livePtyIds
   }

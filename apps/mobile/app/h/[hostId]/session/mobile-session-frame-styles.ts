@@ -34,6 +34,7 @@ export const mobileSessionFrameStyles = {
   newTerminalButton: cn('w-10 h-9 items-center justify-center border-b-2 border-b-transparent'),
   newTerminalButtonPressed: cn('bg-secondary'),
   newTerminalButtonDisabled: cn('opacity-[0.45]'),
+  tabActionDivider: cn('h-[18px] w-hairline bg-border'),
   terminalFrame: cn('flex-1 min-h-0 relative overflow-hidden'),
   terminalPane: cn('absolute inset-0'),
   terminalPaneHidden: cn('opacity-[0]'),

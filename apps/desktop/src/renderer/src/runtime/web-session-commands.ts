@@ -25,6 +25,7 @@ export async function createWebSessionTerminalCommand(args: {
   command?: string
   cwd?: string
   env?: Record<string, string>
+  envToDelete?: string[]
   startupCommandDelivery?: StartupCommandDelivery
   launchConfig?: SleepingAgentLaunchConfig
   agent?: TuiAgent
@@ -43,6 +44,7 @@ export async function createWebSessionTerminalCommand(args: {
         command: args.command,
         cwd: args.cwd,
         ...(args.env ? { env: args.env } : {}),
+        ...(args.envToDelete ? { envToDelete: args.envToDelete } : {}),
         startupCommandDelivery: args.startupCommandDelivery,
         ...(args.launchConfig ? { launchConfig: args.launchConfig } : {}),
         agent: args.agent,

@@ -1,8 +1,10 @@
+import { isBehindOnlyUpstream } from '@yiru/workbench-model/review'
+
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
 } from '../../../../shared/hosted-review-refs'
-import type { GitStatusEntry } from '../../../../shared/types'
+import type { GitStatusEntry, GitUpstreamStatus } from '../../../../shared/types'
 import { summarizeCommitFailure } from './commit-failure-summary'
 import { getStageAllPaths } from './discard-all-sequence'
 
@@ -21,6 +23,45 @@ export type CreatePrIntentCurrentTarget = {
   worktreePath?: string | null
   branch?: string | null
   baseRef?: string | null
+}
+
+export type CreatePrIntentPreparationOutcome = 'ready' | 'stopped' | 'remote_failed' | 'superseded'
+
+type CreatePrIntentPreparationRemoteResult = {
+  status: 'ok' | 'failed' | 'superseded' | 'skipped'
+}
+
+export async function prepareCreatePrIntentBeforeCommit({
+  refresh,
+  readUpstreamStatus,
+  fastForward,
+  stage
+}: {
+  refresh: () => Promise<boolean>
+  readUpstreamStatus: () => GitUpstreamStatus | undefined
+  fastForward: () => Promise<CreatePrIntentPreparationRemoteResult>
+  stage: () => Promise<boolean>
+}): Promise<CreatePrIntentPreparationOutcome> {
+  if (!(await refresh())) {
+    return 'stopped'
+  }
+
+  // Why: update before commit to avoid divergence; cross-host `git pull --ff-only`
+  // also refuses concurrent divergence or overwritten local edits.
+  if (isBehindOnlyUpstream(readUpstreamStatus())) {
+    const result = await fastForward()
+    if (result.status === 'superseded') {
+      return 'superseded'
+    }
+    if (result.status !== 'ok') {
+      return 'remote_failed'
+    }
+    if (!(await refresh())) {
+      return 'stopped'
+    }
+  }
+
+  return (await stage()) ? 'ready' : 'stopped'
 }
 
 export function createCreatePrIntentRunToken(input: Omit<CreatePrIntentRunToken, 'startedAt'>) {

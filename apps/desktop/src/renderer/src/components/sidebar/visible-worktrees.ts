@@ -1,7 +1,7 @@
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
-  getRepoExecutionHostId,
   getSettingsFocusedExecutionHostId,
+  getWorktreeExecutionHostId,
   type ExecutionHostId,
   type ExecutionHostScope
 } from '@yiru/workbench-model/workspace'
@@ -155,10 +155,7 @@ export function computeVisibleWorktreeIds(
       if (!repo) {
         return false
       }
-      const hostId =
-        repo.connectionId || repo.executionHostId
-          ? getRepoExecutionHostId(repo)
-          : opts.defaultHostId
+      const hostId = getWorktreeExecutionHostId(w, repo, opts.defaultHostId)
       return visibleHostIdSet.has(hostId)
     })
   }

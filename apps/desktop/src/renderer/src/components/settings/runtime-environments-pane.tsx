@@ -28,6 +28,7 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 import { unwrapRuntimeRpcResult } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 
@@ -50,6 +51,10 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { EphemeralVmRuntimesSection } from './ephemeral-vm-runtimes-section'
+import {
+  getRemoteServerManualUpdateHelp,
+  RemoteServerUpdateStatus
+} from './remote-server-update-status'
 import {
   getRuntimeEnvironmentsSearchEntry,
   getWebRuntimeEnvironmentsSearchEntry
@@ -268,7 +273,15 @@ export function RuntimeEnvironmentsPane({
   const [removeError, setRemoveError] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [pairingCode, setPairingCode] = useState('')
+  const remoteServerUpdates = useAppStore((state) => state.remoteServerUpdates)
+  const remoteServerUpdatesChecking = useAppStore((state) => state.remoteServerUpdatesChecking)
+  const remoteServerUpdatesRunning = useAppStore((state) => state.remoteServerUpdatesRunning)
+  const refreshRemoteServerUpdates = useAppStore((state) => state.refreshRemoteServerUpdates)
+  const setRemoteServerUpdateDialogOpen = useAppStore(
+    (state) => state.setRemoteServerUpdateDialogOpen
+  )
   const mountedRef = useMountedRef()
+  const updateCheckHint = getUpdateCheckHint()
   const activeValue =
     settings.activeRuntimeEnvironmentId ??
     (allowLocalRuntime ? LOCAL_RUNTIME_VALUE : NO_RUNTIME_VALUE)
@@ -377,6 +390,11 @@ export function RuntimeEnvironmentsPane({
   useEffect(() => {
     void loadEnvironments()
   }, [loadEnvironments])
+
+  const environmentIdsKey = environments.map((environment) => environment.id).join('\n')
+  useEffect(() => {
+    void refreshRemoteServerUpdates()
+  }, [environmentIdsKey, refreshRemoteServerUpdates])
 
   const closeAddServerForm = (): void => {
     if (isSaving) {
@@ -733,7 +751,10 @@ export function RuntimeEnvironmentsPane({
       className="space-y-4 py-2"
     >
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div
+          data-settings-section="remote-server-updates"
+          className="flex items-center justify-between gap-3"
+        >
           <div className="min-w-0 space-y-0.5">
             <div className="text-sm font-medium">
               {translate(
@@ -748,22 +769,53 @@ export function RuntimeEnvironmentsPane({
               )}
             </p>
           </div>
-          {addServerFormOpen ? null : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setAddServerFormOpen(true)}
-              disabled={isBusy}
-            >
-              <Plus />
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
-                'Add Server'
-              )}
-            </Button>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {environments.length > 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                title={updateCheckHint}
+                onClick={(event) => {
+                  setRemoteServerUpdateDialogOpen(true)
+                  void refreshRemoteServerUpdates(getUpdateCheckClickOptions(event))
+                }}
+                disabled={remoteServerUpdatesChecking && remoteServerUpdates.size === 0}
+              >
+                {remoteServerUpdatesChecking || remoteServerUpdatesRunning ? (
+                  <LoadingIndicator />
+                ) : (
+                  <RefreshCw weight="regular" />
+                )}
+                {remoteServerUpdatesRunning
+                  ? translate(
+                      'auto.components.settings.RuntimeEnvironmentsPane.updatingServers',
+                      'Updating servers…'
+                    )
+                  : translate(
+                      'auto.components.settings.RuntimeEnvironmentsPane.reviewServerUpdates',
+                      'Check for Server Updates'
+                    )}
+              </Button>
+            ) : null}
+            {addServerFormOpen ? null : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setAddServerFormOpen(true)}
+                disabled={isBusy}
+              >
+                <Plus />
+                {translate(
+                  'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
+                  'Add Server'
+                )}
+              </Button>
+            )}
+          </div>
         </div>
 
         {addServerFormOpen ? (
@@ -873,6 +925,7 @@ export function RuntimeEnvironmentsPane({
                     const detailsDescription = getHostDetailsDescription(details)
                     const isActive = settings.activeRuntimeEnvironmentId === environment.id
                     const connectionState = getRuntimeServerConnectionState(details)
+                    const remoteUpdate = remoteServerUpdates.get(environment.id)
                     // A connected host exposes Disconnect; otherwise Connect.
                     const isReachable = connectionState === 'connected'
                     const actionBusy =
@@ -921,8 +974,48 @@ export function RuntimeEnvironmentsPane({
                               {detailsDescription}
                             </p>
                           ) : null}
+                          {remoteUpdate ? (
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <span className="text-muted-foreground text-[11px]">
+                                {remoteUpdate.currentVersion
+                                  ? translate(
+                                      'auto.components.settings.RuntimeEnvironmentsPane.yiruVersion',
+                                      'Yiru v{{value0}}',
+                                      { value0: remoteUpdate.currentVersion }
+                                    )
+                                  : translate(
+                                      'auto.components.settings.RuntimeEnvironmentsPane.versionUnavailable',
+                                      'Yiru version unavailable'
+                                    )}
+                              </span>
+                              <RemoteServerUpdateStatus entry={remoteUpdate} compact />
+                            </div>
+                          ) : null}
+                          {remoteUpdate?.phase === 'manual' ? (
+                            <p className="text-muted-foreground mt-1 text-xs">
+                              {getRemoteServerManualUpdateHelp(remoteUpdate)}
+                            </p>
+                          ) : null}
+                          {remoteUpdate?.phase === 'failed' && remoteUpdate.error ? (
+                            <p className="text-destructive mt-1 text-xs">{remoteUpdate.error}</p>
+                          ) : null}
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
+                          {remoteUpdate?.phase === 'available' ||
+                          remoteUpdate?.phase === 'failed' ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              onClick={() => setRemoteServerUpdateDialogOpen(true)}
+                              disabled={remoteServerUpdatesRunning}
+                            >
+                              {translate(
+                                'auto.components.settings.RuntimeEnvironmentsPane.updateServer',
+                                'Update'
+                              )}
+                            </Button>
+                          ) : null}
                           {isReachable ? (
                             <Button
                               type="button"

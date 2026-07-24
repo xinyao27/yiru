@@ -48,7 +48,10 @@ export async function discoverFiles(args: {
         path,
         mtimeMs: fileStat.mtimeMs,
         modifiedAt: fileStat.mtime.toISOString(),
-        sizeBytes: fileStat.size
+        sizeBytes: fileStat.size,
+        dev: fileStat.dev,
+        ino: fileStat.ino,
+        nlink: fileStat.nlink
       })
     } catch (err) {
       if (args.readErrorPolicy === 'throw-except-missing' && !isMissingPathError(err)) {

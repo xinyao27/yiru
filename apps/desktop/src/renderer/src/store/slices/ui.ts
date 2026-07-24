@@ -48,6 +48,11 @@ import {
   DEFAULT_STATUS_BAR_ITEMS,
   normalizeStatusBarItems
 } from '../../../../shared/status-bar-defaults'
+import {
+  DEFAULT_STATUS_BAR_USAGE_MODE,
+  normalizeStatusBarUsageMode,
+  type StatusBarUsageMode
+} from '../../../../shared/status-bar-usage-mode'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type {
   ChangelogData,
@@ -465,6 +470,10 @@ export type UISlice = {
   openAgentSendPopoverTargetMode: (args: OpenAgentSendPopoverTargetModeArgs) => void
   closeAgentSendPopoverTargetMode: (id?: string, instanceId?: string) => void
   sendPromptToSidebarAgentTarget: (paneKey: string) => Promise<boolean>
+  diffNotesSendMenuOpenRequest: { worktreeId: string; nonce: number; issuedAt: number } | null
+  /** Requests the active workspace's notes menu; false means there is nothing to send. */
+  openDiffNotesSendMenuForActiveWorktree: () => boolean
+  consumeDiffNotesSendMenuOpenRequest: (worktreeId: string) => void
   /** Per-agent "I've looked at this" timestamps, keyed by paneKey. Set when
    *  the user clicks an agent row or its parent workspace card from the
    *  dashboard. A row is considered unvisited when no ack exists OR the
@@ -722,6 +731,8 @@ export type UISlice = {
   setStatusBarVisible: (v: boolean) => void
   usagePercentageDisplay: UsagePercentageDisplay
   setUsagePercentageDisplay: (display: UsagePercentageDisplay) => void
+  statusBarUsageMode: StatusBarUsageMode
+  setStatusBarUsageMode: (mode: StatusBarUsageMode) => void
   workspacePortScan: { key: string; result: WorkspacePortScanResult } | null
   workspacePortScansByKey: Record<string, WorkspacePortScanResult>
   workspacePortScanRefreshing: boolean
@@ -854,6 +865,27 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       get().revealWorktreeInSidebar(args.worktreeId, { behavior: 'auto', highlight: true })
     }
   },
+  diffNotesSendMenuOpenRequest: null,
+  openDiffNotesSendMenuForActiveWorktree: () => {
+    const worktreeId = get().activeWorktreeId
+    if (
+      !worktreeId ||
+      !get()
+        .getDiffComments(worktreeId)
+        .some((comment) => !comment.sentAt)
+    ) {
+      return false
+    }
+    const nonce = (get().diffNotesSendMenuOpenRequest?.nonce ?? 0) + 1
+    set({ diffNotesSendMenuOpenRequest: { worktreeId, nonce, issuedAt: Date.now() } })
+    return true
+  },
+  consumeDiffNotesSendMenuOpenRequest: (worktreeId) =>
+    set((state) =>
+      state.diffNotesSendMenuOpenRequest?.worktreeId === worktreeId
+        ? { diffNotesSendMenuOpenRequest: null }
+        : state
+    ),
   closeAgentSendPopoverTargetMode: (id, instanceId) =>
     set((s) => {
       if (!s.agentSendPopoverTargetMode) {
@@ -1762,6 +1794,12 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       usagePercentageDisplayChangeNoticeDismissed: true
     })
   },
+  statusBarUsageMode: DEFAULT_STATUS_BAR_USAGE_MODE,
+  setStatusBarUsageMode: (mode) => {
+    const normalized = normalizeStatusBarUsageMode(mode)
+    window.api.ui.set({ statusBarUsageMode: normalized }).catch(console.error)
+    set({ statusBarUsageMode: normalized })
+  },
   workspacePortScan: null,
   workspacePortScansByKey: {},
   workspacePortScanRefreshing: false,
@@ -2045,6 +2083,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         statusBarItems: statusBarItemsWithPorts,
         statusBarVisible: ui.statusBarVisible ?? true,
         usagePercentageDisplay: normalizeUsagePercentageDisplay(ui.usagePercentageDisplay),
+        statusBarUsageMode: normalizeStatusBarUsageMode(ui.statusBarUsageMode),
         // Why: absent → true so existing users see the pet the first time
         // they enable the experimental flag. Only an explicit Hide pet
         // dismissal persists a `false` value.

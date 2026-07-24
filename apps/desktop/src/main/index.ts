@@ -64,7 +64,14 @@ import {
 } from './codex-accounts/runtime-selection'
 import { CodexAccountService } from './codex-accounts/service'
 import { CodexUsageStore, initCodexUsagePath } from './codex-usage/store'
-import { codexHookService } from './codex/hook-service'
+import {
+  ensureRealHomeCodexHookState,
+  isRealHomeCodexHookLaneUsable
+} from './codex/codex-real-home-hook-install'
+import { startCodexSessionBackfillInBackground } from './codex/codex-session-backfill'
+import { startCodexSessionIndexHealInBackground } from './codex/codex-session-index-heal'
+import { resolveHostCodexSessionSourceHome } from './codex/codex-session-source-home'
+import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
 import {
   recordCoalescedCrashBreadcrumb,
   recordCrashBreadcrumb
@@ -124,6 +131,7 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
 import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
 import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
@@ -201,7 +209,15 @@ import {
   setTrayAttention,
   type SystemTrayOptions
 } from './tray/system-tray'
-import { checkForUpdatesFromMenu, isQuittingForUpdate } from './updater'
+import {
+  checkForRemoteServerUpdate,
+  checkForUpdatesFromMenu,
+  configureRemoteServerUpdateInstallMode,
+  downloadRemoteServerUpdate,
+  getRemoteServerUpdaterSnapshot,
+  installRemoteServerUpdate,
+  isQuittingForUpdate
+} from './updater'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import {
   attachMainWindowServices,
@@ -451,6 +467,13 @@ installUncaughtPipeErrorGuard()
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
 // electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
 process.env.YIRU_APP_VERSION = app.getVersion()
+configureRemoteServerUpdateInstallMode(isServeMode ? 'unsupported-headless-serve' : 'interactive')
+configureRemoteServerUpdater({
+  getSnapshot: getRemoteServerUpdaterSnapshot,
+  check: checkForRemoteServerUpdate,
+  download: downloadRemoteServerUpdate,
+  install: installRemoteServerUpdate
+})
 patchPackagedProcessPath()
 // Why: patchPackagedProcessPath seeds a minimal list of well-known system
 // dirs synchronously so early IPC (e.g. preflight before the shell spawn
@@ -752,8 +775,34 @@ function startTerminalRuntimeStartupServices(): Promise<void> {
   return firstWindowStartupServicesReady
 }
 
-function prepareCodexRuntimeHomeForLaunch(target?: CodexAccountSelectionTarget): string | null {
-  const runtimeHomePath = codexRuntimeHome!.prepareForCodexLaunch(target)
+function prepareCodexRuntimeHomeForLaunch(
+  target?: CodexAccountSelectionTarget,
+  launchEnv?: NodeJS.ProcessEnv
+): string | null {
+  const ensureRealHomeHooksIfSelected = (): boolean => {
+    if (
+      target?.runtime === 'wsl' ||
+      !codexRuntimeHome!.isHostSystemDefaultRealHomeSelected(launchEnv)
+    ) {
+      return false
+    }
+    ensureRealHomeCodexHookState({
+      hooksEnabled: isAgentStatusHooksEnabled(store?.getSettings()),
+      userDataPath: app.getPath('userData')
+    })
+    return true
+  }
+  let realHomeHooksPrepared = ensureRealHomeHooksIfSelected()
+  let runtimeHomePath = codexRuntimeHome!.prepareForCodexLaunch(target, launchEnv)
+  if (runtimeHomePath === null && !realHomeHooksPrepared) {
+    realHomeHooksPrepared = ensureRealHomeHooksIfSelected()
+    if (realHomeHooksPrepared) {
+      runtimeHomePath = codexRuntimeHome!.prepareForCodexLaunch(target, launchEnv)
+    }
+  }
+  if (runtimeHomePath === null && target?.runtime !== 'wsl') {
+    return null
+  }
   const hookTarget =
     target?.runtime === 'wsl'
       ? {
@@ -767,9 +816,9 @@ function prepareCodexRuntimeHomeForLaunch(target?: CodexAccountSelectionTarget):
     // the persisted off switch so those launches cannot reinstall removed hooks.
     const status = hooksEnabled
       ? (codexHookService.installForRuntimeHome(runtimeHomePath, hookTarget) ??
-        codexHookService.install())
+        codexHookService.install(runtimeHomePath ?? undefined))
       : (codexHookService.refreshRuntimeUserHooksForRuntimeHome(runtimeHomePath, hookTarget) ??
-        codexHookService.refreshRuntimeUserHooks())
+        codexHookService.refreshRuntimeUserHooks(runtimeHomePath ?? undefined))
     if (status.state === 'error') {
       console.warn(
         `[codex-hook-service] failed to ${
@@ -851,6 +900,8 @@ function getSystemTrayOptions(): SystemTrayOptions | null {
   }
   return {
     appIcon: store.getSettings().appIcon,
+    isDevInstance: devInstanceIdentity.isDev,
+    devInstanceLabel: devInstanceIdentity.devLabel,
     onOpen: showMainWindowFromTray,
     onOpenSettings: openSettingsFromSystemMenu,
     onCheckForUpdates: () => {
@@ -1051,7 +1102,7 @@ function openMainWindow(): BrowserWindow {
     keybindings,
     {
       getAdditionalAiVaultCodexHomePaths: () =>
-        codexRuntimeHome ? [codexRuntimeHome.getHostRuntimeHomePath()] : [],
+        codexRuntimeHome ? codexRuntimeHome.getHostCodexHomePathsForSessionDiscovery() : [],
       resolveAiVaultClaudeProjectsDirs: (target) =>
         claudeRuntimeAuth!.resolveSessionProjectRoots(target),
       onBeforeRelaunch: async () => {
@@ -1134,10 +1185,28 @@ function openMainWindow(): BrowserWindow {
       stateStartedAt,
       launchToken,
       providerSession,
+      providerSessionOnly,
       promptInteractionKey,
       isReplay
     }) => {
       if (mainWindow?.isDestroyed()) {
+        return
+      }
+      if (providerSessionOnly) {
+        // Why: Pi session_start refreshes resume identity while the TUI is
+        // idle, so it must not drive titles, telemetry, or visible status.
+        mainWindow?.webContents.send('agentStatus:set', {
+          ...payload,
+          paneKey,
+          ...(launchToken ? { launchToken } : {}),
+          tabId,
+          worktreeId,
+          connectionId,
+          receivedAt,
+          stateStartedAt,
+          ...(providerSession ? { providerSession } : {}),
+          providerSessionOnly: true
+        })
         return
       }
       maybeAutoRenameBranchOnFirstWorkFromHook({ paneKey, tabId, worktreeId, payload, isReplay })
@@ -1842,7 +1911,34 @@ app.whenReady().then(async () => {
   openCodeUsage = new OpenCodeUsageStore(store)
   rateLimits = new RateLimitService()
   codexRuntimeHome = new CodexRuntimeHomeService(store)
+  codexRuntimeHome.setRealHomeLaneGate(() => isRealHomeCodexHookLaneUsable())
+  setSystemCodexHomeHookSweepSuppressed(
+    () =>
+      codexRuntimeHome !== null &&
+      codexRuntimeHome.isHostSystemDefaultRealHome() &&
+      isAgentStatusHooksEnabled(store?.getSettings())
+  )
   codexAccounts = new CodexAccountService(store, rateLimits, codexRuntimeHome)
+  setTimeout(() => {
+    if (!codexRuntimeHome?.isHostSystemDefaultRealHome()) {
+      return
+    }
+    const systemCodexHomePathOverride = resolveHostCodexSessionSourceHome(store!.getSettings())
+    const shouldStopSessionMigration = (): boolean =>
+      isQuitting || codexRuntimeHome?.isHostSystemDefaultRealHome() !== true
+    void startCodexSessionBackfillInBackground(
+      { shouldStop: shouldStopSessionMigration },
+      systemCodexHomePathOverride
+    ).then(() => {
+      if (!codexRuntimeHome?.isHostSystemDefaultRealHome()) {
+        return
+      }
+      return startCodexSessionIndexHealInBackground(
+        { shouldStop: shouldStopSessionMigration },
+        systemCodexHomePathOverride
+      )
+    })
+  }, 15_000)
   claudeRuntimeAuth = new ClaudeRuntimeAuthService(store)
   claudeAccounts = new ClaudeAccountService(store, rateLimits, claudeRuntimeAuth)
   rateLimits.setCodexHomePathResolver((target) =>
@@ -1929,10 +2025,11 @@ app.whenReady().then(async () => {
     getDesktopWindowStatus: getDesktopWindowStatus,
     // Why: hook-reported agent status is the same source the desktop sidebar
     // reads. worktree.ps pulls it at query time so mobile shows the same agents.
-    getAgentStatusSnapshot: () => agentHookServer.getStatusSnapshot(),
+    getAgentStatusSnapshot: () =>
+      agentHookServer.getStatusSnapshot().filter((entry) => entry.providerSessionOnly !== true),
     // Why: Claude and Codex history roots must be wired before either desktop or serve mode starts.
     getAdditionalAiVaultCodexHomePaths: () =>
-      codexRuntimeHome ? [codexRuntimeHome.getHostRuntimeHomePath()] : [],
+      codexRuntimeHome ? codexRuntimeHome.getHostCodexHomePathsForSessionDiscovery() : [],
     resolveAiVaultClaudeProjectsDirs: (target) =>
       claudeRuntimeAuth!.resolveSessionProjectRoots(target),
     buildAgentHookPtyEnv: () =>
@@ -2060,6 +2157,12 @@ app.whenReady().then(async () => {
   const emulatorBridge = new EmulatorBridge()
   runtimeService.setEmulatorBridge(emulatorBridge)
   nativeTheme.themeSource = store.getSettings().theme ?? 'system'
+  if (codexRuntimeHome.isHostSystemDefaultRealHomeSelected()) {
+    ensureRealHomeCodexHookState({
+      hooksEnabled: isAgentStatusHooksEnabled(store.getSettings()),
+      userDataPath: app.getPath('userData')
+    })
+  }
   if (shouldInstallManagedHooks(is.dev)) {
     // Why: the persisted off switch must run before any auto-install path so
     // users who removed Yiru-managed hooks do not see them silently reappear on launch.

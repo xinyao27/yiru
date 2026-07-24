@@ -1,12 +1,12 @@
-import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
+import { CheckCircle as CircleCheck, Question } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 
 // Why: shared state-indicator primitive so the dashboard and the sidebar's
-// agent hover share a single state vocabulary. Most states render as a dot;
-// 'working' renders a spinner. 'done' intentionally diverges from the
+// agent hover share a single state vocabulary. Most states render as a dot,
+// while working and needs-you states use explicit glyphs. 'done' intentionally diverges from the
 // sidebar's StatusIndicator: the dashboard uses a check icon so completion
 // is visually distinct from 'idle' (grey dot) and the sidebar's 'active'
 // (emerald dot), while the sidebar collapses 'done'/'active' to the same
@@ -28,8 +28,8 @@ export type AgentDotState =
   // Why: the sidebar's title-based status flow (StatusIndicator/WorktreeCard)
   // collapses blocked + waiting into a single "needs attention" state. Keep
   // this as a distinct member so that flow can render without inventing a new
-  // vocabulary, while rendering it with the same amber attention color as the
-  // worktree-level permission dot.
+  // vocabulary, while rendering it with the same amber question glyph as the
+  // worktree-level permission marker.
   | 'permission'
 
 /** Return the accessible label shared by every visual agent-state marker. */
@@ -97,6 +97,17 @@ export const AgentStateDot = React.memo(function AgentStateDot({
         aria-label={agentStateLabel(state)}
       >
         <CircleCheck className={cn('text-emerald-500', icon)} aria-hidden="true" />
+      </span>
+    )
+  }
+
+  if (state === 'permission' || state === 'waiting') {
+    return (
+      <span
+        className={cn('inline-flex shrink-0 items-center justify-center', box, className)}
+        aria-label={agentStateLabel(state)}
+      >
+        <Question className={cn('text-amber-500', icon)} aria-hidden="true" />
       </span>
     )
   }

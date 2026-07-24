@@ -26,6 +26,15 @@ function cloneProcessEnv(): Record<string, string> {
   return env
 }
 
+function cloneProcessEnvWithoutYiruCodexHomeOverride(): Record<string, string> {
+  const env = cloneProcessEnv()
+  if (env.YIRU_CODEX_HOME && env.CODEX_HOME === env.YIRU_CODEX_HOME) {
+    delete env.CODEX_HOME
+  }
+  delete env.YIRU_CODEX_HOME
+  return env
+}
+
 function readInheritedOrShellEnvVar(name: string, sourceName?: string): string | undefined {
   return (
     (sourceName ? process.env[sourceName] : undefined) ??
@@ -90,8 +99,8 @@ export async function prepareLocalCommitMessageAgentEnv(
         return {
           ok: true,
           env: codexHomeForTarget
-            ? { ...cloneProcessEnv(), CODEX_HOME: codexHomeForTarget }
-            : undefined
+            ? { ...cloneProcessEnvWithoutYiruCodexHomeOverride(), CODEX_HOME: codexHomeForTarget }
+            : cloneProcessEnvWithoutYiruCodexHomeOverride()
         }
       }
       if (codexHomePath && wslCodexHome) {
@@ -101,7 +110,9 @@ export async function prepareLocalCommitMessageAgentEnv(
       }
       return {
         ok: true,
-        env: codexHomePath ? { ...cloneProcessEnv(), CODEX_HOME: codexHomePath } : undefined
+        env: codexHomePath
+          ? { ...cloneProcessEnv(), CODEX_HOME: codexHomePath }
+          : cloneProcessEnvWithoutYiruCodexHomeOverride()
       }
     }
 

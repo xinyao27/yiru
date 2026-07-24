@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 import { isMarkdownComment } from '@/lib/diff-comment-compat'
+import { resolveEditorFontFamily } from '@/lib/editor-font-family'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { registerFileSearchSelectedTextProvider } from '@/lib/file-search-selection'
 import { formatMarkdownReviewNotes, type MarkdownReviewNote } from '@/lib/markdown-review-notes'
@@ -46,6 +47,7 @@ import {
   syncContentUpdate,
   type MonacoContentSyncMode
 } from './monaco-content-sync'
+import { monacoFindOptions } from './monaco-find-options'
 import { MonacoGutterContextMenu } from './monaco-gutter-context-menu'
 import { createMonacoImportNavigationController } from './monaco-import-navigation'
 import { handleMonacoLargeTextPaste } from './monaco-large-text-paste'
@@ -182,7 +184,7 @@ export default function MonacoEditor({
     settings?.terminalFontSize ?? 13,
     editorFontZoomLevel
   )
-  const editorFontFamily = settings?.terminalFontFamily || 'monospace'
+  const editorFontFamily = resolveEditorFontFamily(settings)
   const editorWordWrap = settings?.editorWordWrap
   useMonacoLanguageServer({
     editorInstance: mountedEditor,
@@ -938,11 +940,7 @@ export default function MonacoEditor({
           smoothScrolling: true,
           cursorSmoothCaretAnimation: 'off',
           padding: { top: 0 },
-          find: {
-            addExtraSpaceOnTop: false,
-            autoFindInSelection: 'never',
-            seedSearchStringFromSelection: 'never'
-          },
+          find: monacoFindOptions,
           // Why: Monaco has its own Linux primary-selection integration; keep
           // it aligned with Yiru's app-level opt-out instead of relying on the
           // global DOM hook, which does not own Monaco's rendered line surface.

@@ -12,6 +12,7 @@ import { DashboardAgentChildDisclosure } from './dashboard-agent-child-disclosur
 import { DashboardAgentRowMessage } from './dashboard-agent-row-message'
 import { DashboardAgentRowToolStep } from './dashboard-agent-row-tool-step'
 import { DashboardAgentRowTrailingControls } from './dashboard-agent-row-trailing-controls'
+import { useAgentRowConversationName } from './use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from './use-dashboard-data'
 
 // Why: the dashboard tracks its own rollup states (incl. 'idle'); narrow to the
@@ -199,7 +200,8 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
   )
   const startedAt = agent.startedAt > 0 ? agent.startedAt : null
   const doneAt = lastEnteredDoneAt(agent)
-  const prompt = getAgentRowPrimaryText(agent.entry)
+  const conversationName = useAgentRowConversationName(agent)
+  const prompt = conversationName ?? getAgentRowPrimaryText(agent.entry)
   // Why: `agent.entry.prompt` is normalized to '' when the prompt is unknown
   // (fresh agent, missing telemetry). Rendering the row with an empty primary
   // slot would collapse the text column and leave the row with no human-
@@ -207,6 +209,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
   // ("Working", "Done", "Waiting", …) so every row is identifiable at a
   // glance.
   const displayLabel = prompt || agentStateLabel(asDotState(agent.state))
+  const model = agent.entry.model?.trim() ?? ''
   // Why: the tool row describes what the agent is *currently* doing; once it
   // leaves working, that line goes stale and misleads (a done row showing
   // "Bash: pnpm test" reads as if the command is still running). Gate tool
@@ -226,7 +229,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
       ? `${formatAgentTypeLabel(agent.agentType)} - dispatched ${lineageChildCount} ${
           lineageChildCount === 1 ? 'agent' : 'agents'
         }`
-      : formatAgentTypeLabel(agent.agentType)
+      : [formatAgentTypeLabel(agent.agentType), model].filter(Boolean).join(' · ')
   // Why: interrupted is a terminal outcome the user needs to scan in the
   // leading state column; the secondary-line text below provides the
   // explanation without competing with the prompt or timestamp.
@@ -396,6 +399,14 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
         >
           {displayLabel}
         </span>
+        {model && (
+          <span
+            className="text-muted-foreground/70 max-w-24 shrink-0 truncate font-mono text-[10px]"
+            title={model}
+          >
+            {model}
+          </span>
+        )}
         {/* Why: "+N" badge mirrors the leading chevron — without it the
             parent row reads identical to a leaf row when collapsed, and the
             child count is invisible. Hidden when expanded because the

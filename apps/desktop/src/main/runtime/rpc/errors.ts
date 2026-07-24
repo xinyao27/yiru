@@ -48,7 +48,10 @@ const RUNTIME_PASSTHROUGH_CODES: ReadonlySet<string> = new Set([
   'no_active_terminal',
   'repo_not_found',
   'timeout',
-  'invalid_limit'
+  'invalid_limit',
+  'remote_update_manual_required',
+  'remote_update_not_available',
+  'remote_update_not_downloaded'
 ])
 
 const COMPUTER_PASSTHROUGH_CODES: ReadonlySet<string> = new Set(Object.values(COMPUTER_ERROR_CODES))

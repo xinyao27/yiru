@@ -107,6 +107,7 @@ export function decodePersistedSettings(
       experimentalActivityDefaultedOffForAllUsers: true,
       minimizeToTrayOnClose: raw.minimizeToTrayOnClose === true,
       showMenuBarIcon: raw.showMenuBarIcon !== false,
+      showPinnedWorktreesInGroups: raw.showPinnedWorktreesInGroups === true,
       uiLanguage: normalizeUiLanguage(raw.uiLanguage),
       appIcon: normalizeAppIconId(raw.appIcon),
       loaderStyle: normalizeLoaderStyle(raw.loaderStyle),

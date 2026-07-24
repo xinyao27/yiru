@@ -10,6 +10,9 @@ export type AiVaultScanOptions = {
   claudeProjectsDir?: string
   codexSessionsDir?: string
   additionalCodexSessionsDirs?: readonly string[]
+  // Why: tests can inject a disposable real home while preserving canonical
+  // Codex resume attribution for the system-default lane.
+  defaultCodexHomeDir?: string
   wslHomeDirs?: readonly string[]
   geminiSessionsDir?: string
   antigravityBrainDir?: string
@@ -44,6 +47,9 @@ export type FileWithMtime = {
   // unchanged/truncated files without a second stat. Synthetic candidates
   // (OpenCode SQLite rows, remote files) omit it.
   sizeBytes?: number
+  dev?: number
+  ino?: number
+  nlink?: number
 }
 
 export type SessionFileCandidate = {

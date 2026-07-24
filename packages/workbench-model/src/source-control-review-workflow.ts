@@ -6,13 +6,17 @@ import type {
   HostedReviewCreationEligibility
 } from './hosted-review'
 import { supportsHostedReviewCreation } from './hosted-review-creation-providers'
-import { shouldForcePushWithLeaseForUpstream } from './source-control-operation-workflow'
+import {
+  isBehindOnlyUpstream,
+  shouldForcePushWithLeaseForUpstream
+} from './source-control-operation-workflow'
 
 export type CreateReviewIntentKind =
   | 'dirty'
   | 'message_required'
   | 'no_upstream'
   | 'needs_push'
+  | 'needs_sync'
   | 'force_push'
 
 export type CreateReviewIntentEligibility = {
@@ -20,7 +24,13 @@ export type CreateReviewIntentEligibility = {
   kind: CreateReviewIntentKind | null
 }
 
-export type SourceControlReviewRemoteStep = 'publish' | 'push' | 'force_push' | 'blocked' | 'none'
+export type SourceControlReviewRemoteStep =
+  | 'publish'
+  | 'push'
+  | 'force_push'
+  | 'fast_forward'
+  | 'blocked'
+  | 'none'
 
 export type SourceControlHostedReviewCreateOutcome =
   | { kind: 'created'; number: number; url: string }
@@ -82,6 +92,12 @@ export function resolveCreateReviewIntentEligibility({
     return { eligible: true, kind: 'force_push' }
   }
 
+  // Why: a behind-only branch can be prepared with `git pull --ff-only`.
+  // Diverged branches remain ineligible because they need an explicit choice.
+  if (hostedReviewCreation.blockedReason === 'needs_sync' && isBehindOnlyUpstream(upstreamStatus)) {
+    return { eligible: true, kind: 'needs_sync' }
+  }
+
   return { eligible: false, kind: null }
 }
 
@@ -117,7 +133,12 @@ export function resolveSourceControlReviewRemoteStep({
     return 'push'
   }
   if (hostedReviewCreation.blockedReason === 'needs_sync') {
-    return shouldForcePushWithLeaseForUpstream(upstreamStatus) ? 'force_push' : 'blocked'
+    if (shouldForcePushWithLeaseForUpstream(upstreamStatus)) {
+      return 'force_push'
+    }
+    // Why: enforce the no-merge invariant at execution time, including when
+    // upstream changes between status refresh and review preparation.
+    return isBehindOnlyUpstream(upstreamStatus) ? 'fast_forward' : 'blocked'
   }
   return 'none'
 }

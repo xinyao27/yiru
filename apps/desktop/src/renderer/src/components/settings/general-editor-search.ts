@@ -5,6 +5,29 @@ import { translateSearchKeyword } from './settings-search-keywords'
 
 export const getGeneralEditorSearchEntries = createLocalizedCatalog(() => [
   {
+    title: translate(
+      'auto.components.settings.general.search.editorFontFamily',
+      'Editor Font Family'
+    ),
+    description: translate(
+      'auto.components.settings.general.search.editorFontFamilyDesc',
+      'Font used by file editors and diff views. Leave empty to follow the terminal font.'
+    ),
+    keywords: [
+      ...translateSearchKeyword('auto.components.settings.general.search.e1ee631696', 'editor'),
+      ...translateSearchKeyword('auto.components.settings.general.search.3ca5ab78a5', 'code'),
+      ...translateSearchKeyword('auto.components.settings.appearance.search.24094af355', 'font'),
+      ...translateSearchKeyword(
+        'auto.components.settings.appearance.search.a0e09aed9c',
+        'typeface'
+      ),
+      ...translateSearchKeyword(
+        'auto.components.settings.appearance.search.8b36fb3f64',
+        'typography'
+      )
+    ]
+  },
+  {
     title: translate('auto.components.settings.general.search.ae21e806ce', 'Auto Save Files'),
     description: translate(
       'auto.components.settings.general.search.e9d948d3c3',

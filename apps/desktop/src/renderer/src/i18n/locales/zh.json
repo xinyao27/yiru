@@ -87,7 +87,8 @@
     "minimizeNotice": {
       "body": "Yiru 仍在系统托盘中运行"
     },
-    "activityWaiting": "Yiru - 活动等待中"
+    "activityWaiting": "Yiru - 活动等待中",
+    "activityWaitingSuffix": "活动等待中"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -187,6 +188,20 @@
             "07f788de83": "WebSocket"
           }
         }
+      }
+    },
+    "runtime": {
+      "remoteServerUpdateErrors": {
+        "manualRequired": "必须通过服务管理器手动更新此服务器。",
+        "notAvailable": "服务器不再报告可用更新，请重新检查。",
+        "notDownloaded": "服务器更新尚未下载完成。",
+        "legacyServer": "请先手动更新此服务器一次，以启用远程更新。",
+        "updaterTimeout": "等待服务器更新程序超时。",
+        "requestedVersionUnavailable": "服务器更新程序未提供请求的 Yiru 版本。",
+        "updateUnavailable": "服务器未报告可用更新。",
+        "downloadIncomplete": "服务器更新未下载完成。",
+        "reconnectTimeout": "服务器未以更新后的版本重新连接。",
+        "runtimeChanged": "更新过程中配对服务器发生变化，请重新检查后再重试。"
       }
     },
     "store": {
@@ -2000,6 +2015,16 @@
             "fd1d3b3a1d": "更新下载，{{value0}}%。单击以展开。",
             "9d13213a56": "Yiru v{{value0}} 已准备好安装"
           },
+          "RemoteServerUpdateStatusSegment": {
+            "updating": "正在更新 {{value0}}/{{value1}}",
+            "updatingTooltip": "远程 Yiru 服务器正在更新",
+            "failed": "{{value0}} 个服务器更新失败",
+            "failedTooltip": "打开远程 Yiru 服务器更新以查看并重试",
+            "updated": "已更新 {{value0}} 个服务器",
+            "updatedTooltip": "远程 Yiru 服务器更新已完成",
+            "failedOne": "1 个服务器更新失败",
+            "updatedOne": "已更新 1 个服务器"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "已更新",
             "9be86c46a0": "可自由",
@@ -2157,6 +2182,19 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "UsageRosterPanel": {
+            "title": "Usage",
+            "openDetails": "Open usage details",
+            "notSignedIn": "not signed in",
+            "allAgents": "visible agents",
+            "usageDetails": "Usage details & history",
+            "loadingUsage": "Loading usage…",
+            "usageUnavailable": "Usage unavailable",
+            "noUsageData": "No usage data",
+            "detailed": "Detailed",
+            "compact": "Compact",
+            "footerDetailAria": "Usage footer detail"
           },
           "LanguageServerStatusSegment": {
             "aria": "Language server: {{value0}}",
@@ -3176,7 +3214,17 @@
           "0bed8727db": "它可能已被手机或删除。刷新工作区或将其从 Yiru 中删除。",
           "3921d3d9a5": "找不到工作区文件夹。",
           "f387af445b": "工作区路径不是有效的本地路径。",
-          "3ec372b664": "文件管理器"
+          "3ec372b664": "文件管理器",
+          "localOnly": "Local only",
+          "checkingHost": "Checking host…",
+          "hostUnsupported": "Host unsupported",
+          "remoteSsh": "Remote SSH",
+          "remoteRuntimeUnsupported": "Opening this path in a local app is not available on this host.",
+          "sshTargetUnavailable": "SSH host configuration is no longer available.",
+          "sshAliasRequired": "VS Code needs an SSH config alias for this host.",
+          "sshAliasRequiredDetail": "Add a Host alias for {{host}}:{{port}}, reconnect the workspace, then try again.",
+          "remoteEditorUnsupported": "This app cannot open SSH workspaces. Choose VS Code instead.",
+          "remoteLaunchFailed": "Could not open the path in VS Code."
         },
         "WorktreeTitleInlineRename": {
           "2f42ae024f": "未读：",
@@ -4014,7 +4062,8 @@
           "remoteScopeAccounts": "正在显示由 {{value0}} 管理的账户。请在该服务器上添加或重新验证账户。",
           "remoteScopeAuthContext": "每个账户在 {{value0}} 上保留自己的登录上下文。",
           "remoteEmptyClaudeAccounts": "{{value0}} 上没有受管理的 Claude 账户。它使用其系统默认的 Claude 登录；请在该服务器上添加账户。",
-          "remoteEmptyCodexAccounts": "{{value0}} 上没有受管理的 Codex 账户。它使用其系统默认的 Codex 登录；请在该服务器上添加账户。"
+          "remoteEmptyCodexAccounts": "{{value0}} 上没有受管理的 Codex 账户。它使用其系统默认的 Codex 登录；请在该服务器上添加账户。",
+          "codexSystemDefaultCustomProvider": "自定义提供商 — 不跟踪使用情况。"
         },
         "AdvancedPane": {
           "40b29e0bf3": "重新启动",
@@ -4547,6 +4596,53 @@
           "5195f0b9ef": "在编辑富 Markdown 时显示浏览器拼写下划线和建议。",
           "7ddd66fede": "编辑器自动换行",
           "9b18de6eea": "在文件编辑器中自动换行长行，而无需水平滚动。"
+        },
+        "EditorFontFamilySetting": {
+          "title": "编辑器字体",
+          "description": "文件编辑器和差异视图使用的字体。留空则使用终端字体。",
+          "placeholder": "与终端字体相同"
+        },
+        "GeneralRemoteServerUpdates": {
+          "serverCount": "{{value0}} 个已配对服务器",
+          "availableCount": "{{value0}} 个可更新",
+          "currentCount": "{{value0}} 个已是最新",
+          "manualCount": "{{value0}} 个需手动更新",
+          "offlineCount": "{{value0}} 个离线",
+          "title": "远程 Yiru 服务器",
+          "description": "从此客户端检查并更新已配对的 Yiru 服务器。",
+          "updating": "正在更新服务器…",
+          "reviewServers": "检查服务器更新",
+          "serverCountOne": "1 个已配对服务器"
+        },
+        "RemoteServerUpdateDialog": {
+          "versionUnavailable": "版本不可用",
+          "restartingHelp": "正在等待替代服务器以新版本重新连接。",
+          "retry": "重试",
+          "update": "更新此服务器",
+          "title": "更新远程 Yiru 服务器",
+          "description": "查看已配对服务器，并从此 Yiru 客户端更新受支持的安装。",
+          "restartWarning": "更新将重启这些服务器。{{value0}} 个活动标签页和 {{value1}} 个终端窗格可能会短暂断开连接。",
+          "checking": "正在检查已配对服务器…",
+          "empty": "没有已配对的远程 Yiru 服务器。",
+          "updateAll": "更新全部 {{value0}} 个服务器",
+          "noUpdates": "所有服务器均已是最新。",
+          "downloadProgress": "{{value0}} 下载进度"
+        },
+        "RemoteServerUpdateStatus": {
+          "checking": "正在检查…",
+          "available": "有可用更新",
+          "current": "已是最新",
+          "manual": "手动更新",
+          "offline": "离线",
+          "queued": "已排队",
+          "checkingUpdate": "正在检查更新…",
+          "downloading": "正在下载…",
+          "restarting": "正在重启…",
+          "updated": "已更新",
+          "failed": "更新失败",
+          "serviceManagerHelp": "请通过启动此服务器的服务管理器更新 Yiru。",
+          "unpackedHelp": "开发构建必须从源代码检出中更新。",
+          "legacyHelp": "请先手动更新此服务器一次，以启用远程更新。"
         },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "本地主机，127.0.0.1，*.internal",
@@ -5401,7 +5497,12 @@
           "advertiseThisApp": "将此应用作为服务器公布",
           "advertiseThisAppHelp": "创建访问链接，让浏览器、移动客户端或另一个 Yiru 客户端连接回这个正在运行的应用。",
           "runtimeReachable": "可连接到 {{value0}}。",
-          "hostModelCapabilityProjectSourceContext": "project source context"
+          "hostModelCapabilityProjectSourceContext": "project source context",
+          "reviewServerUpdates": "检查服务器更新",
+          "updatingServers": "正在更新服务器…",
+          "yiruVersion": "Yiru v{{value0}}",
+          "versionUnavailable": "Yiru 版本不可用",
+          "updateServer": "更新"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "复制 {{value0}}"
@@ -6327,7 +6428,11 @@
             "d6c0a9e2f4": "grok",
             "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "用量百分比",
-            "usagePercentageDisplayDescription": "选择以已用或剩余百分比显示提供商限额。"
+            "usagePercentageDisplayDescription": "选择以已用或剩余百分比显示提供商限额。",
+            "showPinnedWorktreesInGroups": {
+              "title": "也在原来的列表中显示已固定的工作树",
+              "description": "已固定的工作树会保留在 Pinned 中，同时也显示在全部、项目、状态和评审中。"
+            }
           }
         },
         "auto": {
@@ -6771,6 +6876,8 @@
             "4497e2e2bb": "在编辑富 Markdown 时显示浏览器拼写下划线和建议。",
             "e61157e926": "编辑器自动换行",
             "005be5c699": "在文件编辑器中自动换行长行，而无需水平滚动。",
+            "editorFontFamily": "编辑器字体",
+            "editorFontFamilyDesc": "文件编辑器和差异视图使用的字体。留空则使用终端字体。",
             "languageServer": "Language Server (Experimental)",
             "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
@@ -8546,6 +8653,7 @@
             "createPrIntentPublishing": "正在发布分支…",
             "createPrIntentForcePushing": "正在使用 lease 强制推送…",
             "createPrIntentPushing": "正在推送提交…",
+            "createPrIntentFastForwarding": "正在更新分支…",
             "createPrIntentRemoteFailed": "无法更新远程分支。请重试创建 PR。",
             "createPrIntentGeneratingDetails": "正在生成审查详情…",
             "createPrIntentBranchChangedDuringDetails": "生成审查详情时分支已更改。请重试创建 PR。",
@@ -9515,7 +9623,8 @@
           },
           "ProjectCombobox": {
             "search": "搜索项目...",
-            "empty": "没有匹配搜索的项目。"
+            "empty": "没有匹配搜索的项目。",
+            "addProject": "添加新项目"
           }
         }
       },
@@ -11934,6 +12043,21 @@
         "startDictation": "开始听写",
         "stopDictation": "停止听写",
         "noSkills": "没有匹配的技能",
+        "noCommandsOrSkills": "没有匹配的命令或技能",
+        "noCommands": "没有匹配的命令",
+        "commands": "命令",
+        "skills": "技能",
+        "loadingSkills": "正在加载技能…",
+        "skillsLoaded": "技能已加载",
+        "skillsUnavailableHost": "此主机不可用技能",
+        "skillsLoadFailed": "无法从此主机加载技能",
+        "retrySkills": "重试",
+        "skillCommandCollision": "也是技能名称 - 由代理决定",
+        "skillMultipleSources": "{{sourceCount}} 个来源 - 由代理解析",
+        "skillScopeProject": "项目",
+        "skillScopePersonal": "个人",
+        "skillScopeBuiltIn": "内置",
+        "skillScopePlugin": "插件",
         "localAttachmentUnsupported": "远程会话不支持本地附件。",
         "removeAttachment": "移除附件",
         "pastedImageLabel": "粘贴的图片",

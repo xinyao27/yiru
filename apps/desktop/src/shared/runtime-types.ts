@@ -10,6 +10,7 @@ import type {
   RuntimeMarkdownSaveTabResult
 } from './mobile-markdown-document'
 import type { RemoteRuntimeSharedConnectionDiagnostics } from './remote-runtime-shared-control-types'
+import type { RemoteServerUpdateSupport } from './remote-server-update'
 import type {
   BaseRefSearchResult,
   BrowserCookieImportResult,
@@ -67,12 +68,17 @@ export type RuntimeStatus = {
   runtimeProtocolVersion?: number
   minCompatibleRuntimeClientVersion?: number
   capabilities?: RuntimeCapability[]
+  // Why: optional inventory fields keep new clients compatible with older paired servers.
+  appVersion?: string
+  remoteUpdateSupport?: RemoteServerUpdateSupport
   remoteControl?: RemoteRuntimeSharedConnectionDiagnostics | null
   hostPlatform?: NodeJS.Platform
   terminalWindowsShell?: string | null
   // Why: legacy or saved WebSocket pairings may not carry scope metadata, so
   // the server stamps the authenticated token scope here for status.get only.
   deviceScope?: DeviceScope
+  // Why: Mobile hides the synthetic workspace on older or user-disabled hosts.
+  floatingWorkspaceEnabled?: boolean
   // COMPAT(runtimeStatusMobileAliases): added 2026-05-15 for mobile builds
   // that still read these names; new desktop/CLI code uses the fields above.
   protocolVersion?: number
@@ -96,6 +102,9 @@ export type CliStatusResult = {
     state: CliRuntimeState
     reachable: boolean
     runtimeId: string | null
+    appVersion?: string
+    remoteUpdateSupport?: RemoteServerUpdateSupport
+    capabilities?: RuntimeCapability[]
   }
   graph: {
     state: RuntimeGraphStatus | 'not_running' | 'starting'
@@ -467,6 +476,7 @@ type RuntimeTerminalCreateBaseRequestPayload = {
   command?: string
   cwd?: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
   launchToken?: string
   launchAgent?: TuiAgent

@@ -1785,6 +1785,7 @@ export function useIpcEvents(): void {
             store.queueTabStartupCommand(tab.id, {
               command: data.command,
               ...(data.env ? { env: data.env } : {}),
+              ...(data.envToDelete ? { envToDelete: data.envToDelete } : {}),
               ...(data.launchConfig ? { launchConfig: data.launchConfig } : {}),
               ...(data.launchToken ? { launchToken: data.launchToken } : {}),
               ...(data.launchAgent ? { launchAgent: data.launchAgent } : {}),
@@ -3036,6 +3037,7 @@ export function useIpcEvents(): void {
         state: data.state,
         prompt: data.prompt,
         agentType: data.agentType,
+        model: data.model,
         toolName: data.toolName,
         toolInput: data.toolInput,
         // Why: the live AskUserQuestion prompt rides this IPC field; omitting it
@@ -3140,6 +3142,32 @@ export function useIpcEvents(): void {
       ) {
         return 'dropped'
       }
+      const existingStatus = store.agentStatusByPaneKey[paneKey]
+      if (existingStatus && data.receivedAt < existingStatus.updatedAt) {
+        // Why: metadata-only identity and visible statuses must share the same
+        // accepted-event boundary so stale startup events cannot win.
+        return 'dropped'
+      }
+      if (data.providerSessionOnly) {
+        if (!data.providerSession || data.agentType !== 'pi') {
+          return 'dropped'
+        }
+        store.recordAgentProviderSession(
+          paneKey,
+          'pi',
+          data.providerSession,
+          { updatedAt: data.receivedAt },
+          {
+            tabId: ownerTabId,
+            worktreeId: data.worktreeId ?? owningWorktreeId,
+            // Why: persist WSL-normalized ownership, not relay provenance,
+            // so a later resume stays on the local worktree connection.
+            ...(ownershipConnectionId !== undefined ? { connectionId: ownershipConnectionId } : {})
+          },
+          data.launchToken ? { launchToken: data.launchToken } : undefined
+        )
+        return 'applied'
+      }
       const resolvedPayload = resolveHookPayloadAgentType(payload, identityTitle ?? title)
       const statusPayload = data.orchestration
         ? { ...resolvedPayload, orchestration: data.orchestration }
@@ -3147,12 +3175,6 @@ export function useIpcEvents(): void {
       const statusPayloadWithTurnBoundary = data.promptInteractionKey
         ? { ...statusPayload, promptInteractionKey: data.promptInteractionKey }
         : statusPayload
-      const existingStatus = store.agentStatusByPaneKey[paneKey]
-      if (existingStatus && data.receivedAt < existingStatus.updatedAt) {
-        // Why: the store rejects out-of-order status rows; keep notification and
-        // terminal lifecycle effects on the same accepted event boundary.
-        return 'dropped'
-      }
       const identity = resolveAgentStatusIdentity({
         existing: existingStatus
           ? {

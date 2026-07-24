@@ -93,6 +93,10 @@ export function getRegisteredSshState(targetId: string): SshConnectionState | un
   return registeredGetSshState?.(targetId)
 }
 
+export function getRegisteredSshTarget(targetId: string): SshTarget | undefined {
+  return sshStore?.getTarget(targetId)
+}
+
 /** Public targets for runtime RPC clients — same list the desktop renderer gets. */
 export function listRegisteredSshTargets(): SshTarget[] {
   return sshStore?.listTargets() ?? []
@@ -265,7 +269,15 @@ function broadcastSshState(
 
 function withSshRemotePlatform(targetId: string, state: SshConnectionState): SshConnectionState {
   const remotePlatform = activeSessions.get(targetId)?.getHostPlatform()?.os
-  return remotePlatform ? { ...state, remotePlatform } : state
+  const connection = connectionManager?.getConnection(targetId)
+  const supportsFolderDownload =
+    state.status === 'connected' &&
+    (connection ? !connection.usesSystemSshTransport() : state.supportsFolderDownload === true)
+  return {
+    ...state,
+    supportsFolderDownload,
+    ...(remotePlatform ? { remotePlatform } : {})
+  }
 }
 
 function publishRelayOverride(

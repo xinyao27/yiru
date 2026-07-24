@@ -40,11 +40,15 @@ import {
   syncSystemConfigIntoManagedCodexHome
 } from '../codex/codex-config-mirror'
 import {
+  getCodexSessionBackfillStateDirPath,
   getYiruManagedCodexHomePath,
   getSystemCodexHomePath,
   syncCodexGlobalInstructionsIntoManagedHome,
   syncSystemCodexResourcesIntoManagedHome
 } from '../codex/codex-home-paths'
+import { isCodexSystemDefaultRealHomeEnabled } from '../codex/codex-real-home-flag'
+import { hasCustomCodexHomeOverride } from '../codex/codex-real-home-path'
+import { invalidateCodexSessionBackfillMarker } from '../codex/codex-session-backfill-marker'
 import { startSystemCodexSessionBridgeInBackground } from '../codex/codex-session-bridge'
 import {
   resolveHostCodexSessionSourceHome,
@@ -53,8 +57,17 @@ import {
 import { startWslCodexSessionBridgeInBackground } from '../codex/wsl-codex-session-bridge'
 import type { Store } from '../persistence'
 import { WSL_CODEX_RUNTIME_HOME_SEGMENTS } from '../pty/codex-home-wsl-env'
+import { readShellStartupEnvVar } from '../pty/shell-startup-env'
 import { getDefaultWslDistro, getWslHome } from '../wsl'
 import { writeFileAtomically } from './fs-utils'
+import { assertOwnedHostCodexManagedHomePath } from './host-codex-managed-home-ownership'
+import { migrateLegacySharedAuthToPerAccountHome } from './legacy-shared-auth-migration'
+
+type CodexAuthIdentity = {
+  email: string | null
+  providerAccountId: string | null
+  workspaceAccountId: string | null
+}
 import {
   getWslSelectionKey,
   getSelectedCodexAccountIdForTarget,
@@ -62,12 +75,6 @@ import {
   setSelectedCodexAccountIdForTarget,
   type CodexAccountSelectionTarget
 } from './runtime-selection'
-
-type CodexAuthIdentity = {
-  email: string | null
-  providerAccountId: string | null
-  workspaceAccountId: string | null
-}
 
 type CodexSystemDefaultSnapshot = {
   authJson: string | null
@@ -93,6 +100,20 @@ type CodexReadBackMatch =
     }
   | { kind: 'none' | 'ambiguous' }
 
+function readLaunchEnvValue(
+  launchEnv: NodeJS.ProcessEnv,
+  key: 'CODEX_HOME' | 'YIRU_CODEX_HOME' | 'HOME' | 'SHELL'
+): string | undefined {
+  return Object.prototype.hasOwnProperty.call(launchEnv, key) ? launchEnv[key] : process.env[key]
+}
+
+function getEffectiveCodexHomeEnv(launchEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return {
+    CODEX_HOME: readLaunchEnvValue(launchEnv, 'CODEX_HOME'),
+    YIRU_CODEX_HOME: readLaunchEnvValue(launchEnv, 'YIRU_CODEX_HOME')
+  }
+}
+
 export class CodexRuntimeHomeService {
   // Why: tracks whether the runtime auth.json currently mirrors a managed
   // account. When null, runtime auth follows the user's system-default
@@ -112,8 +133,14 @@ export class CodexRuntimeHomeService {
   private readonly lastSyncedWslAccountIdByDistro = new Map<string, string | null>()
   private readonly wslRuntimeHomePathByDistro = new Map<string, string>()
   private skipNextReadBackForAccountId: string | null = null
+  // Why: auth refreshed in a per-account home must never be replaced with
+  // stale bytes left behind in the legacy shared runtime mirror.
+  private lastHostAccountUsedSelfContainedHome = false
+
+  private realHomeLaneGate: () => boolean = () => true
 
   constructor(private readonly store: Store) {
+    this.safeMigrateLegacySharedAuth()
     this.safeMigrateLegacyManagedState()
     this.safeMigrateLegacyActiveHomePointer()
     this.initializeLastSyncedState()
@@ -140,7 +167,10 @@ export class CodexRuntimeHomeService {
    * Historical session bridging is requested in the background so launch setup
    * returns as soon as the active runtime home is ready.
    */
-  prepareForCodexLaunch(target?: CodexAccountSelectionTarget): string | null {
+  prepareForCodexLaunch(
+    target?: CodexAccountSelectionTarget,
+    launchEnv?: NodeJS.ProcessEnv
+  ): string | null {
     if (target?.runtime === 'wsl') {
       const wslTarget = this.resolveWslDefaultTarget(target)
       const syncedRuntimeHomePath = this.syncWslRuntimeForCurrentSelection(wslTarget)
@@ -149,6 +179,17 @@ export class CodexRuntimeHomeService {
       this.startWslSessionBridgeForLaunch(wslTarget, runtimeHomePath)
       return runtimeHomePath
     }
+    const selfContainedAccount = this.getSelfContainedManagedHostAccount()
+    if (selfContainedAccount) {
+      const perAccountHome = this.prepareSelfContainedManagedHomeForLaunch(selfContainedAccount)
+      if (perAccountHome) {
+        return perAccountHome
+      }
+    }
+    if (this.isHostSystemDefaultRealHome(launchEnv)) {
+      return null
+    }
+    this.invalidateBackfillAfterManagedSystemDefaultLaunch(launchEnv)
     this.syncForCurrentSelection()
     syncSystemCodexResourcesIntoManagedHome()
     syncSystemConfigIntoManagedCodexHome()
@@ -158,6 +199,109 @@ export class CodexRuntimeHomeService {
       resolveHostCodexSessionSourceHome(this.store.getSettings())
     )
     return this.getRuntimeHomePath()
+  }
+
+  private getSelfContainedManagedHostAccount(): CodexManagedAccount | null {
+    if (!isCodexSystemDefaultRealHomeEnabled()) {
+      return null
+    }
+    const settings = this.store.getSettings()
+    const account = this.getActiveAccount(
+      settings.codexManagedAccounts,
+      normalizeCodexRuntimeSelection(settings).host
+    )
+    return account && !this.getWslManagedHomePath(account) ? account : null
+  }
+
+  private getManagedHostAccountHomesForSessionDiscovery(): string[] {
+    const flagEnabled = isCodexSystemDefaultRealHomeEnabled()
+    const homes: string[] = []
+    for (const account of this.store.getSettings().codexManagedAccounts) {
+      if (this.getWslManagedHomePath(account)) {
+        continue
+      }
+      const trustedHome = this.getTrustedSelfContainedManagedHomePath(account)
+      if (trustedHome && (flagEnabled || existsSync(join(trustedHome, 'sessions')))) {
+        homes.push(trustedHome)
+      }
+    }
+    return homes
+  }
+
+  private prepareSelfContainedManagedHomeForLaunch(account: CodexManagedAccount): string | null {
+    const perAccountHome = this.getTrustedSelfContainedManagedHomePath(account)
+    if (!perAccountHome || !existsSync(join(perAccountHome, 'auth.json'))) {
+      this.clearSelfContainedManagedSelection(account)
+      return null
+    }
+    this.lastSyncedAccountId = account.id
+    this.lastHostAccountUsedSelfContainedHome = true
+    syncSystemCodexResourcesIntoManagedHome(perAccountHome)
+    syncSystemConfigIntoManagedCodexHome({
+      runtimeHomePath: perAccountHome,
+      systemHomePath: getSystemCodexHomePath()
+    })
+    return perAccountHome
+  }
+
+  private syncSelfContainedManagedSelection(account: CodexManagedAccount): void {
+    const perAccountHome = this.getTrustedSelfContainedManagedHomePath(account)
+    if (perAccountHome && existsSync(join(perAccountHome, 'auth.json'))) {
+      this.lastSyncedAccountId = account.id
+      this.lastHostAccountUsedSelfContainedHome = true
+      return
+    }
+    this.clearSelfContainedManagedSelection(account)
+  }
+
+  private getTrustedSelfContainedManagedHomePath(account: CodexManagedAccount): string | null {
+    try {
+      assertOwnedHostCodexManagedHomePath({
+        candidatePath: account.managedHomePath,
+        managedAccountsRoot: this.getManagedAccountsRoot(),
+        systemCodexHomePath: getSystemCodexHomePath(),
+        expectedAccountId: account.id
+      })
+      // Preserve persisted path spelling so the injected value remains stable
+      // across macOS /var and /private/var aliases.
+      return account.managedHomePath
+    } catch (error) {
+      console.warn('[codex-runtime-home] Refusing untrusted managed account home:', error)
+      return null
+    }
+  }
+
+  private clearSelfContainedManagedSelection(account: CodexManagedAccount): void {
+    const settings = this.store.getSettings()
+    if (normalizeCodexRuntimeSelection(settings).host !== account.id) {
+      return
+    }
+    console.warn(
+      '[codex-runtime-home] Active managed account home is invalid or missing auth.json, clearing selection'
+    )
+    this.store.updateSettings({
+      activeCodexManagedAccountId: null,
+      activeCodexManagedAccountIdsByRuntime: {
+        ...normalizeCodexRuntimeSelection(settings),
+        host: null
+      }
+    })
+    this.lastSyncedAccountId = null
+    this.lastHostAccountUsedSelfContainedHome = false
+  }
+
+  private invalidateBackfillAfterManagedSystemDefaultLaunch(launchEnv?: NodeJS.ProcessEnv): void {
+    if (normalizeCodexRuntimeSelection(this.store.getSettings()).host !== null) {
+      return
+    }
+    if (
+      this.isHostSystemDefaultRealHomeSelected(launchEnv) ||
+      !isCodexSystemDefaultRealHomeEnabled()
+    ) {
+      invalidateCodexSessionBackfillMarker(
+        join(getCodexSessionBackfillStateDirPath(), 'backfill-complete.json')
+      )
+    }
   }
 
   private startWslSessionBridgeForLaunch(
@@ -189,8 +333,41 @@ export class CodexRuntimeHomeService {
     })
   }
 
-  getHostRuntimeHomePath(): string {
-    return this.getRuntimeHomePath()
+  getHostCodexHomePathsForSessionDiscovery(): string[] {
+    const homes = [this.getRuntimeHomePath()]
+    if (this.isHostSystemDefaultRealHome() || this.getSelfContainedManagedHostAccount()) {
+      homes.push(getSystemCodexHomePath())
+    }
+    homes.push(...this.getManagedHostAccountHomesForSessionDiscovery())
+    return homes.filter((home, index) => homes.indexOf(home) === index)
+  }
+
+  setRealHomeLaneGate(gate: () => boolean): void {
+    this.realHomeLaneGate = gate
+  }
+
+  isHostSystemDefaultRealHomeSelected(launchEnv?: NodeJS.ProcessEnv): boolean {
+    const settings = this.store.getSettings()
+    if (
+      !isCodexSystemDefaultRealHomeEnabled() ||
+      normalizeCodexRuntimeSelection(settings).host !== null
+    ) {
+      return false
+    }
+    const effectiveEnv = launchEnv ? getEffectiveCodexHomeEnv(launchEnv) : process.env
+    if (hasCustomCodexHomeOverride(effectiveEnv)) {
+      return false
+    }
+    const shellCodexHome = readShellStartupEnvVar(
+      'CODEX_HOME',
+      launchEnv ? readLaunchEnvValue(launchEnv, 'HOME') : process.env.HOME,
+      launchEnv ? readLaunchEnvValue(launchEnv, 'SHELL') : process.env.SHELL
+    )
+    return !hasCustomCodexHomeOverride({ CODEX_HOME: shellCodexHome })
+  }
+
+  isHostSystemDefaultRealHome(launchEnv?: NodeJS.ProcessEnv): boolean {
+    return this.isHostSystemDefaultRealHomeSelected(launchEnv) && this.realHomeLaneGate()
   }
 
   syncActiveWslSelectionsBeforeRestart(): void {
@@ -256,6 +433,23 @@ export class CodexRuntimeHomeService {
       const syncedRuntimeHomePath = this.getPreparedWslRateLimitHomePath(wslTarget)
       return syncedRuntimeHomePath ?? this.getWslSystemCodexHomePath(wslTarget)
     }
+    const selfContainedAccount = this.getSelfContainedManagedHostAccount()
+    const selfContainedHome = selfContainedAccount
+      ? this.getTrustedSelfContainedManagedHomePath(selfContainedAccount)
+      : null
+    if (
+      selfContainedAccount &&
+      selfContainedHome &&
+      existsSync(join(selfContainedHome, 'auth.json'))
+    ) {
+      return selfContainedHome
+    }
+    if (selfContainedAccount) {
+      this.clearSelfContainedManagedSelection(selfContainedAccount)
+    }
+    if (this.isHostSystemDefaultRealHome()) {
+      return getSystemCodexHomePath()
+    }
     this.syncForCurrentSelection()
     syncSystemCodexResourcesIntoManagedHome()
     syncSystemConfigIntoManagedCodexHome()
@@ -268,7 +462,21 @@ export class CodexRuntimeHomeService {
       return
     }
 
+    const selfContainedAccount = this.getSelfContainedManagedHostAccount()
+    if (selfContainedAccount) {
+      this.syncSelfContainedManagedSelection(selfContainedAccount)
+      return
+    }
+
     const settings = this.store.getSettings()
+    if (this.lastHostAccountUsedSelfContainedHome) {
+      this.lastHostAccountUsedSelfContainedHome = false
+      this.lastSyncedAccountId = null
+      this.lastWrittenAuthJson = null
+      if (this.isHostSystemDefaultRealHome()) {
+        return
+      }
+    }
     const runtimeAuthExistedBeforeSync = existsSync(this.getRuntimeAuthPath())
     if (this.lastSyncedAccountId === null) {
       this.captureSystemDefaultSnapshot({ force: false })
@@ -359,6 +567,10 @@ export class CodexRuntimeHomeService {
       console.warn(
         '[codex-runtime-home] Active managed account is missing auth.json, restoring system default'
       )
+      const outgoingReadBackResult =
+        this.lastSyncedAccountId === activeAccount.id
+          ? this.recoverRefreshForMissingActiveAccount(activeAccount)
+          : 'unchanged'
       this.store.updateSettings({
         activeCodexManagedAccountId: null,
         activeCodexManagedAccountIdsByRuntime: {
@@ -367,7 +579,9 @@ export class CodexRuntimeHomeService {
         }
       })
       if (this.lastSyncedAccountId !== null) {
-        this.restoreSystemDefaultSnapshot({ detectExternalLogin: true })
+        this.restoreSystemDefaultSnapshot({
+          detectExternalLogin: outgoingReadBackResult !== 'rejected'
+        })
         this.lastSyncedAccountId = null
       }
       return
@@ -396,6 +610,32 @@ export class CodexRuntimeHomeService {
     }
     this.lastSyncedAccountId = activeAccount.id
     this.writeRuntimeAuth(readFileSync(activeAuthPath, 'utf-8'))
+  }
+
+  private recoverRefreshForMissingActiveAccount(account: CodexManagedAccount): CodexReadBackResult {
+    try {
+      const runtimeAuthPath = this.getRuntimeAuthPath()
+      if (!existsSync(runtimeAuthPath) || this.lastWrittenAuthJson === null) {
+        return 'rejected'
+      }
+      const runtimeContents = readFileSync(runtimeAuthPath, 'utf-8')
+      if (runtimeContents === this.lastWrittenAuthJson) {
+        return 'unchanged'
+      }
+      // Why: when canonical auth vanished, the exact bytes Yiru last mirrored
+      // are the only safe identity baseline for recovering a token refresh.
+      if (!this.runtimeAuthMatchesAccount(runtimeContents, account, this.lastWrittenAuthJson)) {
+        return 'rejected'
+      }
+      writeFileAtomically(join(account.managedHomePath, 'auth.json'), runtimeContents, {
+        mode: 0o600
+      })
+      this.lastWrittenAuthJson = runtimeContents
+      return 'persisted'
+    } catch (error) {
+      console.warn('[codex-runtime-home] Failed to recover missing managed auth:', error)
+      return 'rejected'
+    }
   }
 
   // Why: called by CodexAccountService before syncForCurrentSelection() after
@@ -1063,6 +1303,29 @@ export class CodexRuntimeHomeService {
     }
     const trimmed = value.trim()
     return trimmed === '' ? null : trimmed
+  }
+
+  private safeMigrateLegacySharedAuth(): void {
+    const settings = this.store.getSettings()
+    if (!isCodexSystemDefaultRealHomeEnabled()) {
+      return
+    }
+    try {
+      migrateLegacySharedAuthToPerAccountHome({
+        activeHostAccountId: normalizeCodexRuntimeSelection(settings).host,
+        hostAccounts: settings.codexManagedAccounts.filter(
+          (account) => !this.getWslManagedHomePath(account)
+        ),
+        managedAccountsRoot: this.getManagedAccountsRoot(),
+        metadataDir: this.getRuntimeMetadataDir(),
+        sharedRuntimeHome: this.getRuntimeHomePath(),
+        systemCodexHome: getSystemCodexHomePath()
+      })
+    } catch (error) {
+      // Why: leave the marker absent after an inconclusive result so a later
+      // startup can retry without risking cross-account credential movement.
+      console.warn('[codex-runtime-home] Failed to migrate legacy shared Codex auth:', error)
+    }
   }
 
   private safeMigrateLegacyManagedState(): void {

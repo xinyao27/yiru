@@ -1,6 +1,7 @@
 import {
   buildAiVaultResumeCommand,
   buildAiVaultResumeShellCommand,
+  realHomeCodexResumeEnvDeletion,
   type AiVaultSession
 } from '@yiru/workbench-model/agent'
 import { isResumableTuiAgent, type SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
@@ -32,6 +33,7 @@ type AiVaultResumeCommandSession = Pick<
 export type AiVaultResumeStartup = {
   command: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
 }
 
@@ -69,7 +71,10 @@ function buildAiVaultResumeForWorktree(args: AiVaultResumeWorktreeArgs): AiVault
     args.session.resumeCommand &&
     !args.commandOverride?.trim()
   ) {
-    return { command: args.session.resumeCommand }
+    return {
+      command: args.session.resumeCommand,
+      ...realHomeCodexResumeEnvDeletion(args.session)
+    }
   }
   const platform =
     args.session.executionHostId &&
@@ -114,6 +119,7 @@ function buildAiVaultResumeForWorktree(args: AiVaultResumeWorktreeArgs): AiVault
           shell: liveShell
         }),
         ...(startupPlan.env ? { env: startupPlan.env } : {}),
+        ...realHomeCodexResumeEnvDeletion(args.session),
         launchConfig: startupPlan.launchConfig
       }
     }
@@ -134,7 +140,8 @@ function buildAiVaultResumeForWorktree(args: AiVaultResumeWorktreeArgs): AiVault
       // Why: non-resumable agents queue through this fallback too, so it must
       // quote for the live Windows shell like the startup-plan branch above.
       shell: liveShell
-    })
+    }),
+    ...realHomeCodexResumeEnvDeletion(args.session)
   }
 }
 

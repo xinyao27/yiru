@@ -16,6 +16,10 @@ type RepoExecutionHost = {
   executionHostId?: ExecutionHostId | null
 }
 
+type WorktreeExecutionHost = {
+  hostId?: ExecutionHostId | null
+}
+
 type FocusedExecutionHostSettings = {
   activeRuntimeEnvironmentId?: string | null
 }
@@ -153,6 +157,19 @@ export function getRepoExecutionHostId(repo: RepoExecutionHost): ExecutionHostId
   }
   const connectionId = normalizeHostPart(repo.connectionId)
   return connectionId ? toSshExecutionHostId(connectionId) : LOCAL_EXECUTION_HOST_ID
+}
+
+export function getWorktreeExecutionHostId(
+  worktree: WorktreeExecutionHost,
+  repo: RepoExecutionHost | undefined,
+  defaultHostId: ExecutionHostId = LOCAL_EXECUTION_HOST_ID
+): ExecutionHostId {
+  // Why: runtime and SSH snapshots can identify a more precise workspace owner
+  // than the repo fallback; every host-scoped sidebar path uses this precedence.
+  return (
+    worktree.hostId ??
+    (repo?.connectionId || repo?.executionHostId ? getRepoExecutionHostId(repo) : defaultHostId)
+  )
 }
 
 export function getSettingsFocusedExecutionHostId(

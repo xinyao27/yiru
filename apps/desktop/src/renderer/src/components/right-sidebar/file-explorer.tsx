@@ -104,6 +104,12 @@ function FileExplorerFiles({
   const activeRuntimeEnvironmentId = useAppStore((s) =>
     getRuntimeEnvironmentIdForWorktree(s, activeWorktreeId)
   )
+  const supportsFolderDownload = useAppStore((s) => {
+    if (activeRuntimeEnvironmentId || !activeRepo?.connectionId) {
+      return false
+    }
+    return s.sshConnectionStates.get(activeRepo.connectionId)?.supportsFolderDownload === true
+  })
   const sshConnectedGeneration = useAppStore((s) => s.sshConnectedGeneration)
   const expandedDirs = useAppStore((s) => s.expandedDirs)
   const collapseAllDirs = useAppStore((s) => s.collapseAllDirs)
@@ -660,6 +666,7 @@ function FileExplorerFiles({
           repoName={repoName}
           worktreePath={worktreePath}
           connectionId={activeRepo?.connectionId ?? null}
+          runtimeEnvironmentId={activeRuntimeEnvironmentId}
           refresh={manualRefresh}
           canRefresh={isFilesViewActive}
           canCollapseAll={canCollapseAll}
@@ -798,6 +805,7 @@ function FileExplorerFiles({
                       deleteShortcutLabel={deleteShortcutLabel}
                       connectionId={activeRepo?.connectionId ?? null}
                       runtimeDownloadContext={runtimeDownloadContext}
+                      supportsFolderDownload={supportsFolderDownload}
                       canCollapseFolderSubtree={!hasNameFilter}
                       targetDir={node.isDirectory ? node.path : rowParentDir}
                       targetDepth={node.isDirectory ? node.depth + 1 : node.depth}

@@ -6,7 +6,13 @@ import {
   consumeSessionInventoryJsonLines,
   isMethodNotFoundError
 } from '../ssh/ssh-filesystem-stream-reader'
+import { isWindowsRemoteHost, type RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
+import {
+  downloadFileViaSftp,
+  downloadFolderViaSftp,
+  type FolderDownloader
+} from './ssh-filesystem-download'
 import { readSshFilesystemFile } from './ssh-filesystem-file-reader'
 import {
   openSshFileUploadSession,
@@ -18,7 +24,6 @@ import {
   readSshFileLstat,
   readSshFileStat
 } from './ssh-filesystem-metadata-reader'
-import { fastGetViaSftp } from './ssh-filesystem-provider-sftp'
 import {
   closeSshFilesystemWatch,
   registerSshFilesystemWatch,
@@ -38,6 +43,7 @@ const WORKSPACE_SPACE_SCAN_TIMEOUT_MS = 130_000
 
 export class SshFilesystemProvider implements IFilesystemProvider {
   readonly spoolVerifiedFiles: SpoolVerifiedRemoteFilesystem
+  readonly downloadFolder?: FolderDownloader
   private connectionId: string
   private mux: SshChannelMultiplexer
   private watchListeners = new Map<string, WatchRegistration>()
@@ -49,11 +55,23 @@ export class SshFilesystemProvider implements IFilesystemProvider {
     connectionId: string,
     mux: SshChannelMultiplexer,
     private readonly createSftp?: SftpFactory,
-    private readonly rawTransfer?: SshRawTransferOptions
+    private readonly rawTransfer?: SshRawTransferOptions,
+    hostPlatform?: RemoteHostPlatform
   ) {
     this.connectionId = connectionId
     this.mux = mux
     this.spoolVerifiedFiles = createSshSpoolVerifiedFilesystem(mux)
+
+    if (createSftp) {
+      // Why: system SSH has single-file transfer but no ssh2 SFTP channel;
+      // omitting the method keeps folder capability truthful at the provider boundary.
+      const windowsRemotePaths = hostPlatform ? isWindowsRemoteHost(hostPlatform) : undefined
+      this.downloadFolder = (sourcePath, destinationPath, options) =>
+        downloadFolderViaSftp(createSftp, sourcePath, destinationPath, {
+          ...options,
+          windowsRemotePaths
+        })
+    }
 
     this.unsubscribeNotifications = mux.onNotification((method, params) =>
       routeSshFilesystemWatchNotification(this.watchListeners, method, params)
@@ -125,19 +143,12 @@ export class SshFilesystemProvider implements IFilesystemProvider {
   }
 
   async downloadFile(sourcePath: string, destinationPath: string): Promise<void> {
+    // Why: system SSH targets cannot open an ssh2-owned SFTP channel.
     if (this.rawTransfer?.downloadFile) {
       await this.rawTransfer.downloadFile(sourcePath, destinationPath)
       return
     }
-    if (!this.createSftp) {
-      throw new Error('Remote file download is unavailable. Reconnect the SSH target and retry.')
-    }
-    const sftp = await this.createSftp()
-    try {
-      await fastGetViaSftp(sftp, sourcePath, destinationPath)
-    } finally {
-      sftp.end()
-    }
+    await downloadFileViaSftp(this.createSftp, sourcePath, destinationPath)
   }
 
   async openFileUploadSession(): Promise<FileUploadSession> {

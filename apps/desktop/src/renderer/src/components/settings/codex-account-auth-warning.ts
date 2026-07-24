@@ -3,6 +3,7 @@ import type {
   ProviderRateLimits,
   RateLimitRuntimeTarget
 } from '../../../../shared/rate-limit-types'
+import type { CodexSystemDefaultIdentity } from '../../../../shared/types'
 
 type AccountRuntime = {
   runtime: 'host' | 'wsl'
@@ -28,7 +29,11 @@ export function getCodexAccountAuthWarning(args: {
   runtime: AccountRuntime
   activeAccountId: string | null
   accountId: string | null
+  authKind?: CodexSystemDefaultIdentity['authKind']
 }): string | null {
+  if (args.accountId === null && args.authKind === 'api-key') {
+    return null
+  }
   if (args.accountId !== args.activeAccountId) {
     return null
   }

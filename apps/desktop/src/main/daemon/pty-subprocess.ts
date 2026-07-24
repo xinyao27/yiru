@@ -125,6 +125,24 @@ export type PtySubprocessOptions = {
   terminalWindowsPowerShellImplementation?: 'auto' | 'powershell.exe' | 'pwsh.exe'
 }
 
+function deleteRequestedDaemonEnvKeys(
+  env: Record<string, string>,
+  keys: readonly string[] | undefined
+): void {
+  // Why: a persistent daemon has its own inherited environment. Compare the
+  // marker here so real-home routing preserves user-owned custom CODEX_HOME.
+  const deleteYiruOwnedCodexHome =
+    keys?.includes('YIRU_CODEX_HOME') === true &&
+    env.YIRU_CODEX_HOME !== undefined &&
+    env.CODEX_HOME === env.YIRU_CODEX_HOME
+  for (const key of keys ?? []) {
+    delete env[key]
+  }
+  if (deleteYiruOwnedCodexHome) {
+    delete env.CODEX_HOME
+  }
+}
+
 /**
  * Returns a stable default working directory for daemon-spawned PTYs.
  */
@@ -587,9 +605,7 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
     FORCE_HYPERLINK: '1'
   } as Record<string, string>
   composeGuardedDaemonGitConfigEnv(env, opts.env, opts.launchAgent)
-  for (const key of opts.envToDelete ?? []) {
-    delete env[key]
-  }
+  deleteRequestedDaemonEnvKeys(env, opts.envToDelete)
   if (opts.env?.TERM) {
     env.TERM = opts.env.TERM
   }
@@ -763,9 +779,7 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
   } else {
     // Why: relay-side launch modes can ask for host defaults to stay scrubbed
     // even after environment normalization above.
-    for (const key of opts.envToDelete ?? []) {
-      delete env[key]
-    }
+    deleteRequestedDaemonEnvKeys(env, opts.envToDelete)
     if (opts.env?.TERM) {
       env.TERM = opts.env.TERM
     }

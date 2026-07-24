@@ -676,26 +676,35 @@ export class SshRelaySession {
     const ptyProvider = new SshPtyProvider(this.targetId, mux, this.remoteCliBridgeEnv ?? undefined)
     registerSshPtyProvider(this.targetId, ptyProvider)
 
+    const connection = this.requireReadyConnection()
+    const createSftp =
+      connection.usesSystemSshTransport() === true
+        ? undefined
+        : (options?: { signal?: AbortSignal }) => this.requireReadyConnection().sftp(options)
+    // Why: getHostPlatform falls back to the relay platform when the richer
+    // bridge environment is incomplete, so path rules still match the SSH host.
+    const hostPlatform = this.getHostPlatform() ?? undefined
     const fsProvider = new SshFilesystemProvider(
       this.targetId,
       mux,
-      () => this.requireReadyConnection().sftp(),
+      createSftp,
       {
         downloadFile: (sourcePath, destinationPath) =>
           this.requireReadyConnection().downloadFile(sourcePath, destinationPath, {
-            hostPlatform: this.remoteCliBridgeEnv?.hostPlatform
+            hostPlatform
           }),
         openFileUploadSession: () =>
           this.requireReadyConnection().openFileUploadSession({
-            hostPlatform: this.remoteCliBridgeEnv?.hostPlatform
+            hostPlatform
           }),
         writeBuffer: (remotePath, contents, options) =>
           this.requireReadyConnection().writeBuffer(remotePath, contents, {
-            hostPlatform: this.remoteCliBridgeEnv?.hostPlatform,
+            hostPlatform,
             append: options.append,
             exclusive: options.exclusive
           })
-      }
+      },
+      hostPlatform
     )
     registerSshFilesystemProvider(this.targetId, fsProvider)
 
@@ -933,6 +942,7 @@ export class SshRelaySession {
         toolAgentType?: unknown
         isReplay?: unknown
         providerSession?: unknown
+        providerSessionOnly?: unknown
         payload?: unknown
       }
       if (typeof envelope.paneKey !== 'string') {
@@ -964,6 +974,7 @@ export class SshRelaySession {
             typeof envelope.toolAgentType === 'string' ? envelope.toolAgentType : undefined,
           isReplay: envelope.isReplay === true ? true : undefined,
           providerSession: envelope.providerSession,
+          providerSessionOnly: envelope.providerSessionOnly === true ? true : undefined,
           payload: envelope.payload
         },
         this.targetId

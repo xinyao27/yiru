@@ -17,6 +17,7 @@ import {
   getProviderUsageStatusLabel
 } from './usage-error-copy'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
+import { getUsageUrgency } from './usage-roster-formatting'
 
 // Re-exported from its shared home so status-bar callers keep a single import.
 export { clampUsedPercent }
@@ -185,17 +186,17 @@ export function getWindowSections(
 // `text-background` for primary text and `text-background/50` for secondary
 // to stay readable inside the inverted tooltip container.
 
-// Why: color always tracks % used so urgency reads correctly even when the meter
-// fills with % remaining (#8560) — low remaining still turns red, not green.
-// Green = comfortable (<60% used), yellow = caution (60-80%), red = critical (≥80%).
+// Why: urgency color tracks % used even when fill represents % remaining;
+// low usage stays neutral so persistent status-bar chrome stays quiet.
 export function barColor(usedPct: number): string {
-  if (usedPct < 60) {
-    return 'bg-green-500'
+  switch (getUsageUrgency(usedPct)) {
+    case 'critical':
+      return 'bg-red-500'
+    case 'warning':
+      return 'bg-yellow-500'
+    case 'neutral':
+      return 'bg-muted-foreground/40'
   }
-  if (usedPct < 80) {
-    return 'bg-yellow-500'
-  }
-  return 'bg-red-500'
 }
 
 export function ProviderPanel({

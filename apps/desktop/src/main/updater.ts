@@ -3,11 +3,18 @@ import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '@yiru/workbench-model/p
 /* eslint-disable max-lines */
 import { app, BrowserWindow, powerMonitor } from 'electron'
 
+import type {
+  RemoteServerUpdateInstallMode,
+  RemoteServerUpdateInstallResult,
+  RemoteServerUpdaterSnapshot,
+  RemoteServerUpdateSupport
+} from '../shared/remote-server-update'
 import type { UpdateCheckOptions, UpdateStatus } from '../shared/types'
 import { writeMainThreadDiagnosticMarker } from './diagnostics/main-thread-churn-probe'
 import { loadElectronAutoUpdater, type ElectronAutoUpdater } from './electron-updater-loader'
 import { killAllPty } from './ipc/pty'
 import { withUpdaterSpan } from './observability/instrumentation'
+import { resolveRemoteServerUpdateSupport } from './remote-server-update-support'
 import {
   armUpdateInstallExitWatchdog,
   disarmUpdateInstallExitWatchdog
@@ -58,6 +65,7 @@ let currentStatus: UpdateStatus = { state: 'idle' }
 let userInitiatedCheck = false
 let onBeforeQuitCleanup: (() => void | Promise<void>) | null = null
 let autoUpdaterInitialized = false
+let remoteServerUpdateInstallMode: RemoteServerUpdateInstallMode = 'interactive'
 // Why: modifier-clicking "Check for Updates" can target prerelease manifests.
 // The generic feed still gets pinned to a concrete tag on every check so
 // cancelled prereleases without manifests are skipped.
@@ -820,6 +828,69 @@ async function sendCheckFailureStatus(
 
 export function getUpdateStatus(): UpdateStatus {
   return currentStatus
+}
+
+export function configureRemoteServerUpdateInstallMode(
+  installMode: RemoteServerUpdateInstallMode
+): void {
+  remoteServerUpdateInstallMode = installMode
+}
+
+export function getRemoteServerUpdateSupport(): RemoteServerUpdateSupport {
+  return resolveRemoteServerUpdateSupport({
+    installMode: remoteServerUpdateInstallMode,
+    isPackaged: app.isPackaged,
+    isDev: is.dev,
+    updaterInitialized: autoUpdaterInitialized
+  })
+}
+
+export function getRemoteServerUpdaterSnapshot(runtimeId: string): RemoteServerUpdaterSnapshot {
+  return {
+    appVersion: app.getVersion(),
+    runtimeId,
+    support: getRemoteServerUpdateSupport(),
+    status: getUpdateStatus()
+  }
+}
+
+function assertRemoteServerUpdateAvailable(): void {
+  if (!getRemoteServerUpdateSupport().automatic) {
+    throw new Error('remote_update_manual_required')
+  }
+}
+
+export function checkForRemoteServerUpdate(
+  runtimeId: string,
+  options?: UpdateCheckOptions
+): RemoteServerUpdaterSnapshot {
+  assertRemoteServerUpdateAvailable()
+  checkForUpdatesFromMenu(options)
+  return getRemoteServerUpdaterSnapshot(runtimeId)
+}
+
+export function downloadRemoteServerUpdate(runtimeId: string): RemoteServerUpdaterSnapshot {
+  assertRemoteServerUpdateAvailable()
+  if (currentStatus.state !== 'available') {
+    throw new Error('remote_update_not_available')
+  }
+  downloadUpdate()
+  return getRemoteServerUpdaterSnapshot(runtimeId)
+}
+
+export function installRemoteServerUpdate(runtimeId: string): RemoteServerUpdateInstallResult {
+  assertRemoteServerUpdateAvailable()
+  if (currentStatus.state !== 'downloaded') {
+    throw new Error('remote_update_not_downloaded')
+  }
+  const result: RemoteServerUpdateInstallResult = {
+    accepted: true,
+    fromVersion: app.getVersion(),
+    targetVersion: currentStatus.version,
+    runtimeId
+  }
+  quitAndInstall()
+  return result
 }
 
 let consecutiveAutomaticRetrySchedules = 0

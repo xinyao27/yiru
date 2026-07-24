@@ -102,7 +102,8 @@ export class SshConnection {
       targetId: target.id,
       status: 'disconnected',
       error: null,
-      reconnectAttempt: 0
+      reconnectAttempt: 0,
+      supportsFolderDownload: false
     }
   }
 
@@ -174,7 +175,11 @@ export class SshConnection {
     )
   }
 
-  async sftp(signal?: AbortSignal): Promise<SFTPWrapper> {
+  async sftp(options?: AbortSignal | { signal?: AbortSignal }): Promise<SFTPWrapper> {
+    const signal = options && 'aborted' in options ? options : options?.signal
+    if (signal?.aborted) {
+      throw createSshOperationAbortError()
+    }
     if (this.useSystemSshTransport) {
       throw new Error('SFTP is not available when using system SSH transport')
     }
@@ -1368,7 +1373,12 @@ export class SshConnection {
   }
 
   private setState(status: SshConnectionStatus, error?: string): void {
-    this.state = { ...this.state, status, error: error ?? null }
+    this.state = {
+      ...this.state,
+      status,
+      error: error ?? null,
+      supportsFolderDownload: status === 'connected' && !this.useSystemSshTransport
+    }
     this.callbacks.onStateChange(this.target.id, { ...this.state })
   }
 }

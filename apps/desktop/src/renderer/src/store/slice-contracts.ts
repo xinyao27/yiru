@@ -18,6 +18,7 @@ import type { PreflightSlice } from './slices/preflight'
 import type { PullRequestGenerationSlice } from './slices/pull-request-generation'
 import type { RateLimitSlice } from './slices/rate-limits'
 import type { RecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
+import type { RemoteServerUpdatesSlice } from './slices/remote-server-updates'
 import type { RepoSlice } from './slices/repos'
 import type { RuntimeEnvironmentSshSlice } from './slices/runtime-environment-ssh'
 import type { RuntimeStatusSlice } from './slices/runtime-status'
@@ -59,6 +60,7 @@ declare module './types' {
       OpenCodeUsageSlice,
       BrowserSlice,
       RateLimitSlice,
+      RemoteServerUpdatesSlice,
       SshSlice,
       RuntimeEnvironmentSshSlice,
       AgentStatusSlice,

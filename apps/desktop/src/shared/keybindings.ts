@@ -92,6 +92,7 @@ export type KeybindingActionId =
   | 'editor.previousChange'
   | 'editor.nextChange'
   | 'editor.addReviewNote'
+  | 'sourceControl.sendReviewNotes'
   | 'fileExplorer.undo'
   | 'fileExplorer.redo'
   | 'fileExplorer.copyPath'
@@ -849,6 +850,27 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     scope: 'editor',
     searchKeywords: ['shortcut', 'editor', 'markdown', 'note', 'comment', 'annotation', 'review'],
     defaultBindings: platformBindings(['Mod+Alt+N'])
+  },
+  {
+    id: 'sourceControl.sendReviewNotes',
+    title: 'Send Review Notes to Agent',
+    group: 'Global',
+    scope: 'global',
+    // Why: this global command also fires over editors, so collisions with
+    // editor review-note chords must be reported in Settings.
+    conflictGroup: 'editor',
+    searchKeywords: [
+      'shortcut',
+      'source control',
+      'diff',
+      'notes',
+      'send',
+      'agent',
+      'review',
+      'annotate'
+    ],
+    // Why: users opt into a chord, avoiding a new cross-platform default conflict.
+    defaultBindings: platformBindings([])
   },
   {
     id: 'fileExplorer.undo',

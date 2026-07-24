@@ -25,6 +25,7 @@ type FileExplorerToolbarProps = {
   repoName: string
   worktreePath?: string
   connectionId?: string | null
+  runtimeEnvironmentId?: string | null
   mutationActions?: React.ReactNode
   refresh: {
     isRefreshing: boolean
@@ -45,6 +46,7 @@ export function FileExplorerToolbar({
   repoName,
   worktreePath,
   connectionId,
+  runtimeEnvironmentId,
   mutationActions,
   refresh,
   canRefresh,
@@ -197,6 +199,7 @@ export function FileExplorerToolbar({
                 <WorktreeOpenInMenuItems
                   worktreePath={worktreePath}
                   connectionId={connectionId}
+                  runtimeEnvironmentId={runtimeEnvironmentId}
                   labelPrefix="Open in "
                 />
               </>

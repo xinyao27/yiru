@@ -5,10 +5,15 @@ import menuBarIconRetinaPath from '../../../resources/tray/yiru-menu-barTemplate
 import { createAppIconImage } from '../app-icon'
 import { translateMain } from '../i18n/main-i18n'
 import { composeTrayAttentionIcon, tintTrayTemplateForAttention } from './tray-attention-icon'
+import { stampTrayDevBadge } from './tray-dev-badge'
 
 export type SystemTrayOptions = {
   /** App icon id from settings; the tray reuses the app icon image. */
   appIcon: unknown
+  /** True for development instances, which need to remain distinct from production. */
+  isDevInstance: boolean
+  /** Worktree or branch label identifying this development instance. */
+  devInstanceLabel: string | null
   /** Restore + show + focus the main window (recreating it if needed). */
   onOpen: () => void
   /** Restore the main window and open its Settings surface. */
@@ -32,11 +37,20 @@ let baseTrayImage: NativeImage | null = null
 // freshly created tray reflects it immediately.
 let attentionActive = false
 
+let devIndicator: { label: string | null } | null = null
+
 let nativeThemeUpdatedListener: (() => void) | null = null
 
 // Why: on Windows the notification area expects a 16px icon; the app icon PNG
 // is larger, so downscale to avoid a cropped/blurry tray glyph.
 const TRAY_ICON_SIZE = 16
+
+function baseTooltip(): string {
+  if (!devIndicator) {
+    return 'Yiru'
+  }
+  return devIndicator.label ? `Yiru DEV (${devIndicator.label})` : 'Yiru DEV'
+}
 
 // Why: centralize which image the tray shows so both creation and attention
 // toggling stay in sync. No-ops safely when the tray or base image is missing.
@@ -67,7 +81,11 @@ function applyTrayImage(): void {
         }
         attentionImage.setTemplateImage(false)
         tray.setImage(attentionImage)
-        tray.setToolTip(translateMain('tray.activityWaiting', 'Yiru - activity waiting'))
+        tray.setToolTip(
+          devIndicator
+            ? `${baseTooltip()} - ${translateMain('tray.activityWaitingSuffix', 'activity waiting')}`
+            : translateMain('tray.activityWaiting', 'Yiru - activity waiting')
+        )
         return
       } catch (error) {
         // Why: this path runs inside unguarded callbacks (nativeTheme 'updated',
@@ -79,7 +97,7 @@ function applyTrayImage(): void {
 
     baseTrayImage.setTemplateImage(true)
     tray.setImage(baseTrayImage)
-    tray.setToolTip('Yiru')
+    tray.setToolTip(baseTooltip())
     return
   }
 
@@ -116,6 +134,22 @@ function createMacMenuBarImage(): NativeImage | null {
   }
   image.setTemplateImage(true)
   return image
+}
+
+function stampMacDevBadge(base: NativeImage): NativeImage {
+  try {
+    const stamped = stampTrayDevBadge(base)
+    if (base.getScaleFactors().includes(2)) {
+      const retinaStamped = stampTrayDevBadge(base, 2)
+      stamped.addRepresentation({ scaleFactor: 2, dataURL: retinaStamped.toDataURL() })
+    }
+    stamped.setTemplateImage(true)
+    return stamped
+  } catch (error) {
+    // Why: diagnostic chrome must degrade to the plain icon, never block tray creation.
+    console.warn('[system-tray] dev badge could not be stamped; showing plain icon', error)
+    return base
+  }
 }
 
 function watchMacAppearance(): void {
@@ -163,10 +197,15 @@ export function createSystemTray(opts: SystemTrayOptions): Tray | null {
     return tray
   }
 
+  devIndicator = opts.isDevInstance ? { label: opts.devInstanceLabel } : null
+
   if (process.platform === 'darwin') {
     baseTrayImage = createMacMenuBarImage()
     if (!baseTrayImage) {
       return null
+    }
+    if (devIndicator) {
+      baseTrayImage = stampMacDevBadge(baseTrayImage)
     }
   } else {
     baseTrayImage = createAppIconImage(opts.appIcon).resize({
@@ -180,6 +219,13 @@ export function createSystemTray(opts: SystemTrayOptions): Tray | null {
   applyTrayImage()
 
   const menu = Menu.buildFromTemplate([
+    ...(devIndicator
+      ? ([
+          // Why: simultaneous worktree dev instances need an identity even on Windows.
+          { label: baseTooltip(), enabled: false },
+          { type: 'separator' }
+        ] as Electron.MenuItemConstructorOptions[])
+      : []),
     {
       label: translateMain('tray.openYiru', 'Open Yiru'),
       click: safeMenuAction(() => opts.onOpen())
@@ -203,7 +249,7 @@ export function createSystemTray(opts: SystemTrayOptions): Tray | null {
   ])
   tray.setContextMenu(menu)
   if (process.platform === 'win32') {
-    tray.setToolTip('Yiru')
+    tray.setToolTip(baseTooltip())
     // Why: a left-click on the tray icon is the conventional Windows gesture to
     // restore a minimized-to-tray app; macOS opens the attached menu instead.
     tray.on(
@@ -250,6 +296,7 @@ export function destroySystemTray(): void {
   }
   tray = null
   baseTrayImage = null
+  devIndicator = null
   // Why: attention is owned by the notification/visibility flow, and must
   // survive the macOS hide/show toggle so a re-shown icon keeps its dot.
 }

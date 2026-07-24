@@ -1,6 +1,5 @@
 import { FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
-import { toast } from 'sonner'
 
 import {
   DropdownMenuItem,
@@ -11,18 +10,20 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 import { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
 import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
 import { useAppStore } from '@/store'
 
-import type { ShellOpenLocalPathFailureReason } from '../../../../shared/shell-open-types'
 import type { OpenInApplication, OpenInTargetKey } from '../../../../shared/types'
+import { useRuntimeRemoteSshSupport } from './use-runtime-remote-ssh-support'
+import { getOpenInEntryAvailability, openWorktreePath } from './worktree-path-opening'
 
 export { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
+export { openWorktreePath } from './worktree-path-opening'
 
 type WorktreeOpenInMenuItemsProps = {
   worktreePath: string
   connectionId?: string | null
+  runtimeEnvironmentId?: string | null
   disabled?: boolean
   labelPrefix?: string
   onEntryOpen?: (entry: OpenInMenuEntry) => void
@@ -64,45 +65,6 @@ export function getPreferredWorktreeOpenInEntry(
   return entries.find((entry) => entry.preferenceKey === preferredKey) ?? entries[0] ?? null
 }
 
-function showOpenFailureToast(reason: ShellOpenLocalPathFailureReason): void {
-  if (reason === 'not-absolute') {
-    toast.error(
-      translate(
-        'auto.components.sidebar.WorktreeOpenInMenu.f387af445b',
-        'Workspace path is not a valid local path.'
-      )
-    )
-    return
-  }
-  if (reason === 'not-found') {
-    toast.error(
-      translate(
-        'auto.components.sidebar.WorktreeOpenInMenu.3921d3d9a5',
-        'Workspace folder was not found.'
-      ),
-      {
-        description: translate(
-          'auto.components.sidebar.WorktreeOpenInMenu.0bed8727db',
-          'It may have been moved or deleted. Refresh workspaces or remove it from Yiru.'
-        )
-      }
-    )
-    return
-  }
-  toast.error(
-    translate(
-      'auto.components.sidebar.WorktreeOpenInMenu.9a5381eb09',
-      'Could not open workspace folder.'
-    ),
-    {
-      description: translate(
-        'auto.components.sidebar.WorktreeOpenInMenu.bd0e8159f8',
-        'Check the editor command or file manager configuration on this machine.'
-      )
-    }
-  )
-}
-
 function stopMenuPropagation(event: React.SyntheticEvent): void {
   event.stopPropagation()
 }
@@ -117,80 +79,83 @@ export function openOpenInAppsSettings(): void {
   store.openSettingsPage()
 }
 
-export async function openWorktreePath(args: {
-  target: 'file-manager' | 'external-editor'
-  worktreePath: string
-  connectionId?: string | null
-  command?: string
-}): Promise<void> {
-  if (
-    isLocalPathOpenBlocked(useAppStore.getState().settings, {
-      connectionId: args.connectionId ?? null
-    })
-  ) {
-    showLocalPathOpenBlockedToast()
-    return
-  }
-
-  const result =
-    args.target === 'file-manager'
-      ? await window.api.shell.openInFileManager(args.worktreePath)
-      : await window.api.shell.openInExternalEditor(args.worktreePath, args.command)
-  if (!result.ok) {
-    showOpenFailureToast(result.reason)
-  }
-}
-
 function useOpenInWorktreePath({
   worktreePath,
-  connectionId
+  connectionId,
+  runtimeEnvironmentId
 }: WorktreeOpenInMenuItemsProps): (
   target: 'file-manager' | 'external-editor',
   command?: string
 ) => Promise<void> {
   return useCallback(
     async (target, command) => {
-      await openWorktreePath({ target, worktreePath, connectionId, command })
+      await openWorktreePath({
+        target,
+        worktreePath,
+        connectionId,
+        runtimeEnvironmentId,
+        command
+      })
     },
-    [connectionId, worktreePath]
+    [connectionId, runtimeEnvironmentId, worktreePath]
   )
 }
 
 export function WorktreeOpenInMenuItems({
   worktreePath,
   connectionId,
+  runtimeEnvironmentId,
   disabled,
   labelPrefix = '',
   onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
-  const openInWorktreePath = useOpenInWorktreePath({ worktreePath, connectionId })
+  const openInWorktreePath = useOpenInWorktreePath({
+    worktreePath,
+    connectionId,
+    runtimeEnvironmentId
+  })
   const openInApplications = useAppStore((s) => s.settings?.openInApplications ?? [])
   const fileManagerLabel = getLocalFileManagerLabel()
   const entries = getWorktreeOpenInEntries(openInApplications, fileManagerLabel)
+  const runtimeRemoteSshSupport = useRuntimeRemoteSshSupport(runtimeEnvironmentId, connectionId)
 
   return (
     <>
-      {entries.map((entry) => (
-        <DropdownMenuItem
-          key={entry.preferenceKey}
-          onClick={(event) => {
-            stopMenuPropagation(event)
-            onEntryOpen?.(entry)
-            void openInWorktreePath(entry.target, entry.command)
-          }}
-          disabled={disabled}
-        >
-          {entry.target === 'file-manager' ? (
-            <FolderOpen className="size-3.5" />
-          ) : entry.command ? (
-            <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
-          ) : (
-            <ExternalLink className="size-3.5" />
-          )}
-          {labelPrefix}
-          {entry.label}
-        </DropdownMenuItem>
-      ))}
+      {entries.map((entry) => {
+        const availability = getOpenInEntryAvailability(entry, {
+          connectionId,
+          runtimeEnvironmentId,
+          runtimeRemoteSshSupport
+        })
+        return (
+          <DropdownMenuItem
+            key={entry.preferenceKey}
+            onClick={(event) => {
+              stopMenuPropagation(event)
+              onEntryOpen?.(entry)
+              void openInWorktreePath(entry.target, entry.command)
+            }}
+            disabled={disabled || availability.disabled}
+          >
+            {entry.target === 'file-manager' ? (
+              <FolderOpen className="size-3.5" />
+            ) : entry.command ? (
+              <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
+            ) : (
+              <ExternalLink weight="regular" className="size-3.5" />
+            )}
+            <span className="min-w-0 truncate">
+              {labelPrefix}
+              {entry.label}
+            </span>
+            {availability.metadata ? (
+              <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                {availability.metadata}
+              </span>
+            ) : null}
+          </DropdownMenuItem>
+        )
+      })}
     </>
   )
 }
@@ -198,6 +163,7 @@ export function WorktreeOpenInMenuItems({
 export function WorktreeOpenInMenuContent({
   worktreePath,
   connectionId,
+  runtimeEnvironmentId,
   disabled,
   onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
@@ -206,6 +172,7 @@ export function WorktreeOpenInMenuContent({
       <WorktreeOpenInMenuItems
         worktreePath={worktreePath}
         connectionId={connectionId}
+        runtimeEnvironmentId={runtimeEnvironmentId}
         disabled={disabled}
         onEntryOpen={onEntryOpen}
       />
@@ -226,6 +193,7 @@ export function WorktreeOpenInMenuContent({
 export function WorktreeOpenInSubMenu({
   worktreePath,
   connectionId,
+  runtimeEnvironmentId,
   disabled,
   onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
@@ -243,6 +211,7 @@ export function WorktreeOpenInSubMenu({
         <WorktreeOpenInMenuContent
           worktreePath={worktreePath}
           connectionId={connectionId}
+          runtimeEnvironmentId={runtimeEnvironmentId}
           disabled={disabled}
           onEntryOpen={onEntryOpen}
         />

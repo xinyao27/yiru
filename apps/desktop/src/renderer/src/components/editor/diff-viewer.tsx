@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 
 import { isDiffComment } from '@/lib/diff-comment-compat'
 import { resolveDocumentTheme } from '@/lib/document-theme'
+import { resolveEditorFontFamily } from '@/lib/editor-font-family'
 import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
 import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { diffViewStateCache, setWithLRU } from '@/lib/scroll-cache'
@@ -26,6 +27,7 @@ import type { DiffViewerProps } from './diff-viewer-props'
 import { installEditorSaveShortcut, installMonacoEditorFindShortcut } from './editor-shortcuts'
 import { LargeDiffFallback } from './large-diff-fallback'
 import { getLargeDiffRenderLimit } from './large-diff-render-limit'
+import { monacoFindOptions } from './monaco-find-options'
 import { PierreReadonlyDiffViewer } from './pierre-readonly-diff-viewer'
 import { useContextualCopySetup } from './use-contextual-copy-setup'
 import { useDiffViewerLargeDiffLifecycle } from './use-diff-viewer-large-diff-lifecycle'
@@ -465,18 +467,14 @@ function MonacoDiffViewer({
               minimap: { enabled: false },
               scrollBeyondLastLine: false,
               fontSize: diffEditorFontSize,
-              fontFamily: settings?.terminalFontFamily || 'monospace',
+              fontFamily: resolveEditorFontFamily(settings),
               lineNumbers: 'on',
               ...buildDiffEditorWordWrapOptions(settings?.diffWordWrap),
               automaticLayout: true,
               renderOverviewRuler: true,
               scrollbar: diffEditorScrollbarOptions,
               padding: { top: 0 },
-              find: {
-                addExtraSpaceOnTop: false,
-                autoFindInSelection: 'never',
-                seedSearchStringFromSelection: 'never'
-              }
+              find: monacoFindOptions
             }}
           />
         )}

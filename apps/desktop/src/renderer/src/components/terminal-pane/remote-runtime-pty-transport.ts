@@ -66,6 +66,7 @@ export function createRemoteRuntimePtyTransport(
     command,
     startupCommandDelivery,
     env,
+    envToDelete,
     launchConfig,
     launchToken,
     launchAgent,
@@ -637,6 +638,7 @@ export function createRemoteRuntimePtyTransport(
         const startupCommandDeliveryToSend =
           options.startupCommandDelivery ?? startupCommandDelivery
         const envToSend = options.env ?? env
+        const envToDeleteToSend = options.envToDelete ?? envToDelete
         const launchConfigToSend = options.launchConfig ?? launchConfig
         const launchTokenToSend = options.launchToken ?? launchToken
         const launchAgentToSend = options.launchAgent ?? launchAgent
@@ -647,6 +649,7 @@ export function createRemoteRuntimePtyTransport(
             ? { startupCommandDelivery: startupCommandDeliveryToSend }
             : {}),
           ...(envToSend !== undefined ? { env: envToSend } : {}),
+          ...(envToDeleteToSend !== undefined ? { envToDelete: envToDeleteToSend } : {}),
           ...(launchConfigToSend !== undefined ? { launchConfig: launchConfigToSend } : {}),
           ...(launchTokenToSend !== undefined ? { launchToken: launchTokenToSend } : {}),
           ...(launchAgentToSend !== undefined ? { launchAgent: launchAgentToSend } : {}),

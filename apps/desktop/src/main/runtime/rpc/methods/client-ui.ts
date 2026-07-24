@@ -6,6 +6,7 @@ import {
   SettingsUpdate,
   UiUpdate
 } from './client-ui-schemas'
+import { TerminalQuickCommandsUpdate } from './terminal-quick-command-rpc-schema'
 
 export const CLIENT_UI_METHODS: RpcMethod[] = [
   defineMethod({
@@ -19,6 +20,24 @@ export const CLIENT_UI_METHODS: RpcMethod[] = [
     mobile: true,
     params: SettingsUpdate,
     handler: (params, { runtime }) => ({ settings: runtime.updateClientSettings(params) })
+  }),
+  defineMethod({
+    name: 'settings.getTerminalQuickCommands',
+    mobile: true,
+    params: null,
+    // Why: command bodies can total about 240 KB, so unrelated settings reads
+    // should not carry them over every paired or relay connection.
+    handler: (_params, { runtime }) => ({
+      terminalQuickCommands: runtime.getClientTerminalQuickCommands()
+    })
+  }),
+  defineMethod({
+    name: 'settings.updateTerminalQuickCommands',
+    mobile: true,
+    params: TerminalQuickCommandsUpdate,
+    handler: (params, { runtime }) => ({
+      terminalQuickCommands: runtime.updateClientTerminalQuickCommands(params.mutation)
+    })
   }),
   defineMethod({
     name: 'settings.updatePRBotAuthorOverride',

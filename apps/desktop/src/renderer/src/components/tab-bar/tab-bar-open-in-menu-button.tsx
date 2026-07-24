@@ -18,6 +18,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
+import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 import { useRepoById } from '@/store/selectors'
 
@@ -30,6 +31,9 @@ export function TabBarOpenInMenuButton({
 }): React.JSX.Element | null {
   const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
   const repo = useRepoById(worktree?.repoId ?? null)
+  const runtimeEnvironmentId = useAppStore((state) =>
+    getRuntimeEnvironmentIdForWorktree(state, worktreeId)
+  )
   const openInApplications = useAppStore((state) => state.settings?.openInApplications ?? [])
   const lastOpenInTargetKey = useAppStore((state) => state.settings?.lastOpenInTargetKey)
   const updateSettings = useAppStore((state) => state.updateSettings)
@@ -55,6 +59,7 @@ export function TabBarOpenInMenuButton({
       target: entry.target,
       worktreePath: worktree.path,
       connectionId: repo?.connectionId ?? null,
+      runtimeEnvironmentId,
       command: entry.command
     })
   }
@@ -102,12 +107,13 @@ export function TabBarOpenInMenuButton({
                 render={
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground h-7 w-6"
+                    variant="outline-transparent"
+                    size="icon-titlebar-compact"
+                    className="text-muted-foreground"
                     aria-label={chooseLabel}
                   >
-                    <CaretDown className="size-3" />
+                    {/* Why: the compact chooser affordance is intentionally quieter than menu icons. */}
+                    <CaretDown className="size-3" weight="regular" />
                   </Button>
                 }
               />

@@ -17,8 +17,9 @@ export type AiVaultSessionDragPayload = {
   // WSL) to reject SSH panes that cannot reach it.
   sessionFilePath?: string
   sessionExecutionHostId?: ExecutionHostId
-  // Why: drag/drop resume must preserve planned env/default args, not just the shell command.
+  // Why: drag/drop resume must preserve planned env mutations/default args, not just the command.
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
 }
 
@@ -42,6 +43,14 @@ function isStringRecord(value: unknown): value is Record<string, string> {
     return false
   }
   return Object.values(value).every((entry) => typeof entry === 'string')
+}
+
+function isEnvDeletionList(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length <= 32 &&
+    value.every((entry) => typeof entry === 'string' && entry.length > 0 && entry.length <= 256)
+  )
 }
 
 function isLaunchConfig(value: unknown): value is SleepingAgentLaunchConfig {
@@ -72,6 +81,7 @@ function isSerializedPayload(value: unknown): value is SerializedAiVaultSessionD
     (payload.sessionExecutionHostId === undefined ||
       Boolean(normalizeExecutionHostId(payload.sessionExecutionHostId))) &&
     (payload.env === undefined || isStringRecord(payload.env)) &&
+    (payload.envToDelete === undefined || isEnvDeletionList(payload.envToDelete)) &&
     (payload.launchConfig === undefined || isLaunchConfig(payload.launchConfig))
   )
 }
@@ -126,6 +136,7 @@ export function readAiVaultSessionDragData(
       sessionFilePath,
       sessionExecutionHostId,
       env,
+      envToDelete,
       launchConfig
     } = parsed
     return {
@@ -136,6 +147,7 @@ export function readAiVaultSessionDragData(
       ...(sessionFilePath ? { sessionFilePath } : {}),
       ...(sessionExecutionHostId ? { sessionExecutionHostId } : {}),
       ...(env ? { env } : {}),
+      ...(envToDelete ? { envToDelete } : {}),
       ...(launchConfig ? { launchConfig } : {})
     }
   } catch {

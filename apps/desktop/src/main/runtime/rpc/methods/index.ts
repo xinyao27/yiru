@@ -11,6 +11,7 @@ import { CLIPBOARD_METHODS } from './clipboard'
 import { COMPUTER_METHODS } from './computer'
 import { DIAGNOSTICS_METHODS } from './diagnostics'
 import { EMULATOR_METHODS } from './emulator'
+import { EXTERNAL_EDITOR_METHODS } from './external-editor'
 import { FILE_METHODS } from './files'
 import { GIT_METHODS } from './git'
 import { GITHUB_METHODS } from './github'
@@ -31,6 +32,7 @@ import { SSH_METHODS } from './ssh'
 import { STATS_METHODS } from './stats'
 import { STATUS_METHODS } from './status'
 import { TERMINAL_METHODS } from './terminal'
+import { UPDATER_METHODS } from './updater'
 import { WORKSPACE_METHODS } from './workspace'
 import { WORKSPACE_PORT_METHODS } from './workspace-ports'
 import { WORKTREE_METHODS } from './worktree'
@@ -40,6 +42,7 @@ import { WORKTREE_METHODS } from './worktree'
 // auditing the security boundary or wiring new CLI commands.
 export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...STATUS_METHODS,
+  ...UPDATER_METHODS,
   ...AI_VAULT_METHODS,
   ...AUTOMATION_METHODS,
   ...REPO_METHODS,
@@ -72,6 +75,7 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...CLIENT_EVENT_METHODS,
   ...CLIENT_UI_METHODS,
   ...EMULATOR_METHODS,
+  ...EXTERNAL_EDITOR_METHODS,
   ...SPOOL_HOST_METHODS,
   ...LANGUAGE_SERVER_METHODS
 ]

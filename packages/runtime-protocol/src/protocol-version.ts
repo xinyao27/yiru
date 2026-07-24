@@ -1,3 +1,5 @@
+import { REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY } from './runtime-capability-contract'
+
 // Why: declares the Yiru runtime RPC compatibility contract. Desktop,
 // headless server, CLI, and mobile builds may drift in app version, but
 // they must agree on this protocol range before runtime RPCs are allowed.
@@ -42,6 +44,9 @@ export const BROWSER_CERTIFICATE_TRUST_RUNTIME_CAPABILITY = 'browser.certificate
 // floor-taking input. Mobile must not forward replies unless advertised.
 export const TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY =
   'terminal.query-reply-input.v1' as const
+// Why: older hosts lack the targeted settings RPCs and strip agentPrompt from
+// terminal creation, so mobile must hide Quick Commands unless both are present.
+export const TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY = 'terminal.quick-commands.v1' as const
 export const LANGUAGE_SERVER_RUNTIME_CAPABILITY = 'language-server.v1' as const
 
 export const RUNTIME_CAPABILITIES = [
@@ -58,6 +63,8 @@ export const RUNTIME_CAPABILITIES = [
   FOLDER_WORKSPACE_PATH_STATUS_RUNTIME_CAPABILITY,
   AI_VAULT_RUNTIME_CAPABILITY,
   TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY,
+  TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY,
+  REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY,
   LANGUAGE_SERVER_RUNTIME_CAPABILITY
 ] as const
 

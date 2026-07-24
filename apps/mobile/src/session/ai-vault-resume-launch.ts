@@ -1,7 +1,8 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import {
   buildAiVaultResumeCommand,
-  buildAiVaultResumeShellCommand
+  buildAiVaultResumeShellCommand,
+  realHomeCodexResumeEnvDeletion
 } from '@yiru/workbench-model/agent'
 import { resolveTuiAgentLaunchArgs, resolveTuiAgentLaunchEnv } from '@yiru/workbench-model/agent'
 import { isResumableTuiAgent } from '@yiru/workbench-model/agent'
@@ -69,6 +70,7 @@ export type MobileAiVaultResumeSettings = {
 export type MobileAiVaultResumeLaunch = {
   command: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
   launchAgent?: TuiAgent
 }
@@ -109,6 +111,9 @@ export function buildMobileAiVaultResumeLaunch(args: {
           shell
         }),
         ...(startupPlan.env ? { env: startupPlan.env } : {}),
+        // Why: the command is typed after pane creation, so the pane itself
+        // must start without an inherited managed Codex home.
+        ...realHomeCodexResumeEnvDeletion(args.session),
         launchConfig: startupPlan.launchConfig,
         launchAgent: startupPlan.agent
       }
@@ -120,7 +125,8 @@ export function buildMobileAiVaultResumeLaunch(args: {
       hostPlatform: args.hostPlatform,
       hostTerminalWindowsShell: args.hostTerminalWindowsShell,
       commandOverride
-    })
+    }),
+    ...realHomeCodexResumeEnvDeletion(args.session)
   }
 }
 
@@ -153,6 +159,7 @@ export async function resumeAiVaultSessionInTerminal(
     {
       worktree: `id:${worktreeId}`,
       ...(launch.env ? { env: launch.env } : {}),
+      ...(launch.envToDelete ? { envToDelete: launch.envToDelete } : {}),
       ...(launch.launchConfig ? { launchConfig: launch.launchConfig } : {}),
       ...(launch.launchAgent ? { launchAgent: launch.launchAgent } : {}),
       ...(launch.clientMutationId ? { clientMutationId: launch.clientMutationId } : {})

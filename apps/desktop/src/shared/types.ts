@@ -46,6 +46,7 @@ import type {
   SourceControlAiSettings
 } from './source-control-ai-types'
 import type { VoiceSettings } from './speech-types'
+import type { StatusBarUsageMode } from './status-bar-usage-mode'
 import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
 import type { TerminalCustomTheme } from './terminal-custom-themes'
 import type { UiLanguage } from './ui-language'
@@ -1485,10 +1486,19 @@ export type CodexManagedAccountSummary = {
   lastAuthenticatedAt: number
 }
 
+export type CodexSystemDefaultIdentity = {
+  hasAuth: boolean
+  authKind: 'oauth' | 'api-key' | 'none'
+  email: string | null
+  providerAccountId: string | null
+  workspaceLabel: string | null
+}
+
 export type CodexRateLimitAccountsState = {
   accounts: CodexManagedAccountSummary[]
   activeAccountId: string | null
   activeAccountIdsByRuntime?: CodexManagedAccountRuntimeSelection
+  systemDefault?: CodexSystemDefaultIdentity
 }
 
 export type CodexManagedAccountRuntimeSelection = {
@@ -1645,6 +1655,8 @@ export type GlobalSettings = {
   editorAutoSave: boolean
   editorAutoSaveDelayMs: number
   editorMinimapEnabled: boolean
+  /** Opt-in code-editor font; empty (the default) keeps following `terminalFontFamily`. */
+  editorFontFamily?: string
   /** Explicit local-only command configuration for Stage 1 editor language intelligence. */
   languageServer?: LanguageServerSettings
   /** Defaults on for profiles saved before file-editor wrapping became configurable. */
@@ -1716,6 +1728,8 @@ export type GlobalSettings = {
   /** Why: macOS keeps Yiru running after its last window closes, so this
    *  controls the additive menu-bar entry without changing Dock behavior. */
   showMenuBarIcon?: boolean
+  /** Pinned workspaces default to one sidebar location; this opt-in also shows natural groups. */
+  showPinnedWorktreesInGroups?: boolean
   /** Why: Windows terminals conventionally use right-click as a paste gesture,
    *  while macOS/Linux default to their existing context menu behavior. */
   terminalRightClickToPaste: boolean
@@ -2396,6 +2410,8 @@ export type PersistedUIState = {
   statusBarVisible: boolean
   /** Why: this is client-side presentation, not a provider/account or execution-host setting. */
   usagePercentageDisplay?: UsagePercentageDisplay
+  /** Why: usage roster density follows the user across native, web, and SSH runtimes. */
+  statusBarUsageMode?: StatusBarUsageMode
   dismissedUpdateVersion: string | null
   lastUpdateCheckAt: number | null
   pendingUpdateNudgeId?: string | null

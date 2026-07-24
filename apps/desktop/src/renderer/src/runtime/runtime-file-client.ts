@@ -273,6 +273,35 @@ export async function downloadRuntimeFile(
   }
 }
 
+export async function streamRuntimeFileDownloadChunks(
+  context: RuntimeFileOperationArgs,
+  filePath: string,
+  consume: (chunk: { contentBase64: string; first: boolean; last: boolean }) => Promise<void>
+): Promise<void> {
+  const remoteArgs = getRemoteFileArgs(context, filePath)
+  if (!remoteArgs) {
+    throw new Error('Remote file is outside the owning runtime worktree')
+  }
+  let offset = 0
+  let first = true
+  for (;;) {
+    const chunk = await readRemoteDownloadChunk(remoteArgs, offset)
+    if (chunk.bytesRead <= 0 && !chunk.eof) {
+      throw new Error('Remote download stalled before reaching EOF')
+    }
+    await consume({
+      contentBase64: chunk.contentBase64,
+      first,
+      last: chunk.eof
+    })
+    first = false
+    offset += chunk.bytesRead
+    if (chunk.eof) {
+      return
+    }
+  }
+}
+
 async function remoteChunkedDownloadAvailable(
   remoteArgs: RemoteFileDownloadArgs
 ): Promise<boolean> {

@@ -26,7 +26,8 @@ const RESUMABLE_AGENT_RUNTIME: Record<ResumableTuiAgent, ResumableAgentRuntime> 
   'mimo-code': { launchCommand: 'mimo', expectedProcess: 'mimo' },
   droid: { launchCommand: 'droid', expectedProcess: 'droid' },
   grok: { launchCommand: 'grok', expectedProcess: 'grok' },
-  devin: { launchCommand: 'devin', expectedProcess: 'devin' }
+  devin: { launchCommand: 'devin', expectedProcess: 'devin' },
+  pi: { launchCommand: 'pi', expectedProcess: 'pi' }
 }
 
 export type AgentResumeStartupPlan = {

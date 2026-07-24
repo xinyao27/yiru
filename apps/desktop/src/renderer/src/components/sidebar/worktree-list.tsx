@@ -225,6 +225,7 @@ import {
   ALL_GROUP_KEY,
   PINNED_GROUP_KEY,
   buildRows,
+  getPinnedWorktreeDisplayPolicy,
   getProjectGroupHeaderKey,
   getGroupKeysForWorktree,
   getLineageGroupKey
@@ -294,6 +295,10 @@ import {
   revealElementInScrollContainer,
   WORKTREE_SIDEBAR_REVEAL_TOP_INSET
 } from './worktree-sidebar-reveal'
+import {
+  getPreferredWorktreeRows,
+  getRenderedWorktreesInSidebarOrder
+} from './worktree-sidebar-row-preference'
 
 export {
   getScrollTopToRevealBounds,
@@ -453,9 +458,9 @@ function markSidebarWorktreeActiveImmediately(worktreeId: string, primaryRowKey?
         ? option.dataset.worktreeRowKey === primaryRowKey
           ? 'primary'
           : 'secondary'
-        : option.dataset.worktreeSectionKey === PINNED_GROUP_KEY
-          ? 'secondary'
-          : 'primary'
+        : option === nextOption
+          ? 'primary'
+          : 'secondary'
     const surface = option.matches('[data-worktree-card-surface]')
       ? option
       : option.querySelector<HTMLElement>('[data-worktree-card-surface]')
@@ -1081,6 +1086,27 @@ function renderRowContainsNaturalWorktree(row: RenderRow, worktreeId: string): b
   )
 }
 
+function findPreferredRenderRowIndexForWorktree(
+  renderRows: readonly RenderRow[],
+  worktreeId: string,
+  preferNaturalRow: boolean
+): number {
+  let fallbackIndex = -1
+  for (let index = 0; index < renderRows.length; index += 1) {
+    const row = renderRows[index]
+    if (!renderRowContainsWorktree(row, worktreeId)) {
+      continue
+    }
+    if (fallbackIndex === -1) {
+      fallbackIndex = index
+    }
+    if (preferNaturalRow && renderRowContainsNaturalWorktree(row, worktreeId)) {
+      return index
+    }
+  }
+  return fallbackIndex
+}
+
 function getActiveDescendantOptionId(args: {
   activeWorktreeId: string | null
   primaryActiveRowKey?: string
@@ -1183,6 +1209,11 @@ export function getRenderRowKey(row: RenderRow): string {
 
 export function getWorktreeDragGroups(rows: HostSectionRow[]): WorktreeDragGroup[] {
   const groups: WorktreeDragGroup[] = []
+  const naturalWorktreeIds = new Set(
+    rows.flatMap((row) =>
+      row.type === 'item' && row.sectionKey !== PINNED_GROUP_KEY ? [row.worktree.id] : []
+    )
+  )
   let current: { key: string; ids: string[] } | null = null
 
   for (const row of rows) {
@@ -1200,7 +1231,7 @@ export function getWorktreeDragGroups(rows: HostSectionRow[]): WorktreeDragGroup
     ) {
       continue
     }
-    if (row.sectionKey === PINNED_GROUP_KEY) {
+    if (row.sectionKey === PINNED_GROUP_KEY && naturalWorktreeIds.has(row.worktree.id)) {
       continue
     }
     if (!current) {
@@ -1227,12 +1258,20 @@ function getWorktreeDragIndexes(rows: readonly HostSectionRow[]): {
   const groupKeyByRowKey = new Map<string, string>()
   const groupIndexByRowKey = new Map<string, number>()
   const groupIndexes = new Map<string, number>()
+  const naturalWorktreeIds = new Set(
+    rows.flatMap((row) =>
+      row.type === 'item' && row.sectionKey !== PINNED_GROUP_KEY ? [row.worktree.id] : []
+    )
+  )
   for (const row of rows) {
     if (row.type === 'header') {
       groupIndexes.set(row.key, 0)
       continue
     }
-    if (row.type !== 'item' || row.sectionKey === PINNED_GROUP_KEY) {
+    if (row.type !== 'item') {
+      continue
+    }
+    if (row.sectionKey === PINNED_GROUP_KEY && naturalWorktreeIds.has(row.worktree.id)) {
       continue
     }
     const index = groupIndexes.get(row.sectionKey) ?? 0
@@ -1488,6 +1527,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   const sshConnectedGeneration = useAppStore((s) => s.sshConnectedGeneration)
   const prVisibleRefreshGeneration = useAppStore((s) => s.prVisibleRefreshGeneration)
   const settings = useAppStore((s) => s.settings)
+  const pinnedDisplayPolicy = getPinnedWorktreeDisplayPolicy(settings)
   const reorderRepos = useAppStore((s) => s.reorderRepos)
   const folderBackedProjectGroupIds = useMemo(
     () =>
@@ -1551,13 +1591,25 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   useEffect(() => () => onHostDragActiveChange(false), [onHostDragActiveChange])
   const worktreeDragGroups = useMemo(() => getWorktreeDragGroups(rows), [rows])
   const worktreeDragUnitGroups = useMemo(() => getWorktreeDragUnitGroups(rows), [rows])
+  const naturalDragWorktreeIds = useMemo(
+    () =>
+      new Set(
+        rows.flatMap((row) =>
+          row.type === 'item' && row.sectionKey !== PINNED_GROUP_KEY ? [row.worktree.id] : []
+        )
+      ),
+    [rows]
+  )
   const worktreeLineageDragRows = useMemo(
     () =>
       rows
         .filter((row): row is WorktreeItemRow => row.type === 'item')
-        .filter((row) => row.sectionKey !== PINNED_GROUP_KEY)
+        .filter(
+          (row) =>
+            row.sectionKey !== PINNED_GROUP_KEY || !naturalDragWorktreeIds.has(row.worktree.id)
+        )
         .map((row) => ({ worktreeId: row.worktree.id, depth: row.depth })),
-    [rows]
+    [naturalDragWorktreeIds, rows]
   )
   const getReorderDraggedIds = useCallback(
     (draggedIds: readonly string[]) =>
@@ -2162,7 +2214,10 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         }
       } else {
         const targetWorktree = worktrees.find((w) => w.id === pendingRevealWorktree.worktreeId)
-        if (targetWorktree && !targetWorktree.isPinned) {
+        if (
+          targetWorktree &&
+          (!targetWorktree.isPinned || pinnedDisplayPolicy === 'duplicate-in-groups')
+        ) {
           const seen = new Set<string>()
           let current: Worktree | undefined = targetWorktree
           while (current && !seen.has(current.id)) {
@@ -2185,7 +2240,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
           }
         }
 
-        if (targetWorktree?.isPinned) {
+        if (targetWorktree?.isPinned && pinnedDisplayPolicy === 'single-location') {
           // Why: pinned worktrees live in the dedicated "Pinned" section regardless
           // of their PR-status / project group. Only uncollapse the Pinned header
           // itself — expanding the underlying status group would be surprising since
@@ -2222,8 +2277,10 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         worktrees,
         folderWorkspaces
       )
-      const targetIndex = renderRows.findIndex((row) =>
-        renderRowContainsWorktree(row, pendingRevealWorktree.worktreeId)
+      const targetIndex = findPreferredRenderRowIndexForWorktree(
+        renderRows,
+        pendingRevealWorktree.worktreeId,
+        pinnedDisplayPolicy === 'duplicate-in-groups'
       )
       const outcome = resolvePendingSidebarReveal({ targetIndex, targetWorktreeStillExists })
       if (outcome === 'scroll-and-clear') {
@@ -2330,6 +2387,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     collapsedGroups,
     workspaceStatuses,
     settings,
+    pinnedDisplayPolicy,
     projectGroups,
     pendingRevealRetryTick,
     flashRevealedRow,
@@ -2560,34 +2618,23 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       // hidden in a collapsed group — in particular it couldn't cross the
       // Pinned/All boundary when either section is collapsed. Reveal will
       // uncollapse the target section (see pendingRevealWorktree effect).
-      const allWorktreeRows = buildRows(
+      const allWorktreeRows = buildRows({
         groupBy,
         worktrees,
         repoMap,
         prCache,
-        new Set<string>(),
+        collapsedGroups: new Set<string>(),
         repoOrder,
         workspaceStatuses,
         projectOrderBy,
-        worktreeLineageById,
+        lineageById: worktreeLineageById,
         worktreeMap,
-        true,
+        nestLineage: true,
         settings,
         projectGroups,
-        new Set(),
-        new Map(),
-        new Map(),
-        [],
         projectGrouping
-      ).filter((r): r is Extract<Row, { type: 'item' }> => r.type === 'item')
-      const seenWorktreeIds = new Set<string>()
-      const worktreeRows = allWorktreeRows.filter((row) => {
-        if (seenWorktreeIds.has(row.worktree.id)) {
-          return false
-        }
-        seenWorktreeIds.add(row.worktree.id)
-        return true
-      })
+      }).filter((r): r is Extract<Row, { type: 'item' }> => r.type === 'item')
+      const worktreeRows = getPreferredWorktreeRows(allWorktreeRows, pinnedDisplayPolicy)
       if (worktreeRows.length === 0) {
         return
       }
@@ -2614,7 +2661,11 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       // it must flow through the same activation helper that records history.
       activateAndRevealWorktree(nextWorktreeId)
 
-      const rowIndex = renderRows.findIndex((row) => renderRowContainsWorktree(row, nextWorktreeId))
+      const rowIndex = findPreferredRenderRowIndexForWorktree(
+        renderRows,
+        nextWorktreeId,
+        pinnedDisplayPolicy === 'duplicate-in-groups'
+      )
       if (rowIndex !== -1) {
         virtualizer.scrollToIndex(workspaceIndexForLocalRowIndex(workspaceSidebarRows, rowIndex), {
           align: 'auto'
@@ -2636,6 +2687,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       worktreeLineageById,
       worktreeMap,
       settings,
+      pinnedDisplayPolicy,
       projectGroups,
       projectGrouping
     ]
@@ -5371,6 +5423,7 @@ const WorktreeList = React.memo(function WorktreeList({
     useShallow((s) => selectWorktreeListReviewCacheInputs(s, groupBy, cardProps))
   )
   const settings = useAppStore((s) => s.settings)
+  const pinnedDisplayPolicy = getPinnedWorktreeDisplayPolicy(settings)
   const sshTargetLabels = useAppStore((s) => s.sshTargetLabels)
   const sshConnectionStates = useAppStore((s) => s.sshConnectionStates)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
@@ -5693,7 +5746,7 @@ const WorktreeList = React.memo(function WorktreeList({
       return collapsedGroups
     }
     const next = new Set(collapsedGroups)
-    if (targetWorktree.isPinned) {
+    if (targetWorktree.isPinned && pinnedDisplayPolicy === 'single-location') {
       next.delete(PINNED_GROUP_KEY)
     } else {
       for (const groupKey of getGroupKeysForWorktree(
@@ -5733,6 +5786,7 @@ const WorktreeList = React.memo(function WorktreeList({
     collapsedGroups,
     groupBy,
     prCache,
+    pinnedDisplayPolicy,
     projectGroups,
     projectGrouping,
     repoMap,
@@ -5876,34 +5930,37 @@ const WorktreeList = React.memo(function WorktreeList({
   // Build flat row list for rendering
   const rows: Row[] = useMemo(
     () =>
-      buildRows(
+      buildRows({
         groupBy,
         worktrees,
         repoMap,
         prCache,
-        effectiveCollapsedGroups,
+        collapsedGroups: effectiveCollapsedGroups,
         repoOrder,
         workspaceStatuses,
         projectOrderBy,
-        worktreeLineageById,
+        lineageById: worktreeLineageById,
         worktreeMap,
-        true,
+        nestLineage: true,
         settings,
-        visibleProjectGroupsForRows,
+        projectGroups: visibleProjectGroupsForRows,
         placeholderRepoIds,
         importedWorktreesByRepo,
         newExternalWorktreesInboxByRepo,
         pendingCreations,
         projectGrouping,
-        visibleFolderWorkspacesForRows,
-        hostLabelById
-      ),
+        folderWorkspaces: visibleFolderWorkspacesForRows,
+        hostLabelById,
+        defaultHostId,
+        pinnedDisplayPolicy
+      }),
     [
       groupBy,
       worktrees,
       repoMap,
       prCache,
       effectiveCollapsedGroups,
+      defaultHostId,
       repoOrder,
       workspaceStatuses,
       projectOrderBy,
@@ -5917,7 +5974,8 @@ const WorktreeList = React.memo(function WorktreeList({
       importedWorktreesByRepo,
       newExternalWorktreesInboxByRepo,
       pendingCreations,
-      hostLabelById
+      hostLabelById,
+      pinnedDisplayPolicy
     ]
   )
   const orderedHostOptions = useMemo(
@@ -6000,17 +6058,8 @@ const WorktreeList = React.memo(function WorktreeList({
   // order would cause Cmd+1–9 shortcuts to not match the visual card
   // positions when grouping is active.
   const renderedWorktrees = useMemo(
-    () =>
-      sectionRows.flatMap((row) => {
-        if (row.type === 'item') {
-          return [row.worktree]
-        }
-        if (row.type === 'folder-workspace') {
-          return [folderWorkspaceToWorktree(row.folderWorkspace)]
-        }
-        return []
-      }),
-    [sectionRows]
+    () => getRenderedWorktreesInSidebarOrder(sectionRows, pinnedDisplayPolicy),
+    [pinnedDisplayPolicy, sectionRows]
   )
   const renderedWorktreeIds = useMemo(
     () => uniqueWorktreeIds(renderedWorktrees.map((worktree) => worktree.id)),

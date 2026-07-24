@@ -122,7 +122,11 @@ import type {
   RuntimeTerminalDriverState,
   RuntimeTerminalPresentation
 } from '../shared/runtime-types'
-import type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
+import type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type {
@@ -1848,8 +1852,14 @@ const api = {
     openInFileManager: (path: string): Promise<ShellOpenLocalPathResult> =>
       ipcRenderer.invoke('shell:openInFileManager', path),
 
-    openInExternalEditor: (path: string, command?: string): Promise<ShellOpenLocalPathResult> =>
-      ipcRenderer.invoke('shell:openInExternalEditor', path, command),
+    openInExternalEditor: (
+      request: ShellOpenExternalEditorRequest | string,
+      command?: string
+    ): Promise<ShellOpenExternalEditorResult> =>
+      ipcRenderer.invoke(
+        'shell:openInExternalEditor',
+        typeof request === 'string' ? { path: request, command } : request
+      ),
 
     openUrl: (url: string): Promise<void> => ipcRenderer.invoke('shell:openUrl', url),
 
@@ -2466,6 +2476,11 @@ const api = {
       connectionId: string
     }): Promise<{ canceled: true } | { canceled: false; destinationPath: string }> =>
       ipcRenderer.invoke('fs:downloadFile', args),
+    downloadFolder: (args: {
+      dirPath: string
+      connectionId: string
+    }): Promise<{ canceled: true } | { canceled: false; destinationPath: string }> =>
+      ipcRenderer.invoke('fs:downloadFolder', args),
     saveDownloadedFile: (args: {
       suggestedName: string
       content: string
@@ -2487,6 +2502,28 @@ const api = {
       ipcRenderer.invoke('fs:finishDownloadedFile', args),
     cancelDownloadedFile: (args: { transferId: string }): Promise<{ ok: true }> =>
       ipcRenderer.invoke('fs:cancelDownloadedFile', args),
+    startDownloadedFolder: (args: {
+      suggestedName: string
+    }): Promise<
+      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
+    > => ipcRenderer.invoke('fs:startDownloadedFolder', args),
+    createDownloadedFolderDirectory: (args: {
+      transferId: string
+      pathSegments: string[]
+    }): Promise<{ ok: true }> => ipcRenderer.invoke('fs:createDownloadedFolderDirectory', args),
+    appendDownloadedFolderFileChunk: (args: {
+      transferId: string
+      pathSegments: string[]
+      contentBase64: string
+      first: boolean
+      last: boolean
+    }): Promise<{ ok: true }> => ipcRenderer.invoke('fs:appendDownloadedFolderFileChunk', args),
+    finishDownloadedFolder: (args: {
+      transferId: string
+    }): Promise<{ canceled: false; destinationPath: string }> =>
+      ipcRenderer.invoke('fs:finishDownloadedFolder', args),
+    cancelDownloadedFolder: (args: { transferId: string }): Promise<{ ok: true }> =>
+      ipcRenderer.invoke('fs:cancelDownloadedFolder', args),
     listMarkdownDocuments: (args: {
       rootPath: string
       connectionId?: string

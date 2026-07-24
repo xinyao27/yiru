@@ -8,6 +8,11 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { IFilesystemProvider } from '../providers/types'
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
+import {
+  codexRolloutHardlinkIdentity,
+  dedupeCodexRolloutFileAliases,
+  dedupeCodexSessionsBySessionId
+} from './codex-session-root-dedup'
 import { discoverRemoteSourceCandidates } from './remote-session-scanner-discovery'
 import { remoteSessionSources } from './remote-session-scanner-sources'
 import type { RemoteScannerContext, RemoteSessionCandidate } from './remote-session-scanner-types'
@@ -43,21 +48,30 @@ export async function scanRemoteAiVaultSessions(args: {
       }
     })
   }
-  const candidates = (
-    await mapRemoteScanConcurrently(
-      remoteSessionSources(args.remoteHome, args.hostPlatform),
-      (source) => discoverRemoteSourceCandidates({ source, context, issues })
+  const candidates = dedupeCodexRolloutFileAliases(
+    (
+      await mapRemoteScanConcurrently(
+        remoteSessionSources(args.remoteHome, args.hostPlatform),
+        (source) => discoverRemoteSourceCandidates({ source, context, issues })
+      )
     )
+      .flat()
+      .sort((left, right) => right.file.mtimeMs - left.file.mtimeMs),
+    {
+      isCodex: (candidate) => candidate.source.agent === 'codex',
+      getFilePath: (candidate) => candidate.file.path,
+      getCodexHome: (candidate) => candidate.source.codexHome ?? null,
+      getHardlinkIdentity: (candidate) => codexRolloutHardlinkIdentity(candidate.file)
+    }
   )
-    .flat()
-    .sort((left, right) => right.file.mtimeMs - left.file.mtimeMs)
 
   const parsed = await parseRemoteSessionCandidates({ candidates, context, issues, limit })
-  const cappedSessions = parsed.sessions
+  const parsedSessions = dedupeCodexSessionsBySessionId(parsed.sessions)
+  const cappedSessions = parsedSessions
     .sort((left, right) => sessionSortTime(right) - sessionSortTime(left))
     .slice(0, limit)
   const scopePaths = normalizeRemoteScopePaths(args.scopePaths ?? [])
-  const parsedScopeSessions = parsed.sessions.filter((session) =>
+  const parsedScopeSessions = parsedSessions.filter((session) =>
     isRemoteSessionInScope(session, scopePaths)
   )
   const extraScopeSessions = await scanRemoteInScopeSessions({
@@ -68,8 +82,13 @@ export async function scanRemoteAiVaultSessions(args: {
     alreadyParsedFilePaths: parsed.parsedFilePaths
   })
 
+  const scopeSessions = dedupeCodexSessionsBySessionId([
+    ...parsedScopeSessions,
+    ...extraScopeSessions
+  ])
+
   return {
-    sessions: mergeRemoteSessions(cappedSessions, [...parsedScopeSessions, ...extraScopeSessions]),
+    sessions: mergeRemoteSessions(cappedSessions, scopeSessions),
     issues,
     scannedAt: new Date().toISOString()
   }
@@ -98,6 +117,7 @@ async function parseRemoteSessionCandidates(args: {
       batch.map((candidate) => parseRemoteSessionCandidate(candidate, args.context, args.issues))
     )
     sessions.push(...results.filter(isAiVaultSession))
+    sessions.splice(0, sessions.length, ...dedupeCodexSessionsBySessionId(sessions))
     index += batch.length
   }
 

@@ -87,7 +87,8 @@
     "minimizeNotice": {
       "body": "Yiruはシステムトレイで実行中です"
     },
-    "activityWaiting": "Yiru - アクティビティ待機中"
+    "activityWaiting": "Yiru - アクティビティ待機中",
+    "activityWaitingSuffix": "アクティビティ待機中"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -187,6 +188,20 @@
             "07f788de83": "ウェブソケット"
           }
         }
+      }
+    },
+    "runtime": {
+      "remoteServerUpdateErrors": {
+        "manualRequired": "このサーバーはサービスマネージャーから手動で更新する必要があります。",
+        "notAvailable": "サーバーで更新を利用できなくなりました。もう一度確認してください。",
+        "notDownloaded": "サーバー更新のダウンロードが完了していません。",
+        "legacyServer": "リモート更新を有効にするには、このサーバーを一度手動で更新してください。",
+        "updaterTimeout": "サーバー更新プログラムの待機がタイムアウトしました。",
+        "requestedVersionUnavailable": "要求した Yiru バージョンがサーバー更新プログラムから提供されませんでした。",
+        "updateUnavailable": "サーバーから利用可能な更新が報告されませんでした。",
+        "downloadIncomplete": "サーバー更新のダウンロードが完了しませんでした。",
+        "reconnectTimeout": "更新後のサーバーが再接続しませんでした。",
+        "runtimeChanged": "更新中にペアリング済みサーバーが変更されました。再試行前にもう一度確認してください。"
       }
     },
     "store": {
@@ -2000,6 +2015,16 @@
             "fd1d3b3a1d": "アップデートのダウンロード、{{value0}} パーセント。クリックして展開します。",
             "9d13213a56": "Yiru v{{value0}} をインストールする準備ができました"
           },
+          "RemoteServerUpdateStatusSegment": {
+            "updating": "更新中 {{value0}}/{{value1}}",
+            "updatingTooltip": "リモート Yiru サーバーを更新しています",
+            "failed": "{{value0}} 件のサーバー更新に失敗しました",
+            "failedTooltip": "リモート Yiru サーバー更新を開いて確認・再試行",
+            "updated": "{{value0}} 台のサーバーを更新しました",
+            "updatedTooltip": "リモート Yiru サーバーの更新が完了しました",
+            "failedOne": "1 件のサーバー更新に失敗しました",
+            "updatedOne": "1 台のサーバーを更新しました"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "更新されました",
             "9be86c46a0": "無料可能",
@@ -2157,6 +2182,19 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "UsageRosterPanel": {
+            "title": "Usage",
+            "openDetails": "Open usage details",
+            "notSignedIn": "not signed in",
+            "allAgents": "visible agents",
+            "usageDetails": "Usage details & history",
+            "loadingUsage": "Loading usage…",
+            "usageUnavailable": "Usage unavailable",
+            "noUsageData": "No usage data",
+            "detailed": "Detailed",
+            "compact": "Compact",
+            "footerDetailAria": "Usage footer detail"
           },
           "LanguageServerStatusSegment": {
             "aria": "Language server: {{value0}}",
@@ -3176,7 +3214,17 @@
           "0bed8727db": "移動または削除された可能性があります。ワークスペースを更新するか、Yiru からワークスペースを削除します。",
           "3921d3d9a5": "ワークスペースフォルダーが見つかりませんでした。",
           "f387af445b": "ワークスペース パスは有効なローカル パスではありません。",
-          "3ec372b664": "ファイルマネージャー"
+          "3ec372b664": "ファイルマネージャー",
+          "localOnly": "Local only",
+          "checkingHost": "Checking host…",
+          "hostUnsupported": "Host unsupported",
+          "remoteSsh": "Remote SSH",
+          "remoteRuntimeUnsupported": "Opening this path in a local app is not available on this host.",
+          "sshTargetUnavailable": "SSH host configuration is no longer available.",
+          "sshAliasRequired": "VS Code needs an SSH config alias for this host.",
+          "sshAliasRequiredDetail": "Add a Host alias for {{host}}:{{port}}, reconnect the workspace, then try again.",
+          "remoteEditorUnsupported": "This app cannot open SSH workspaces. Choose VS Code instead.",
+          "remoteLaunchFailed": "Could not open the path in VS Code."
         },
         "WorktreeTitleInlineRename": {
           "2f42ae024f": "未読:",
@@ -4014,7 +4062,8 @@
           "remoteScopeAccounts": "{{value0}} が管理するアカウントを表示しています。アカウントの追加や再認証はそのサーバー上で行ってください。",
           "remoteScopeAuthContext": "各アカウントは {{value0}} 上に独自のサインインコンテキストを保持します。",
           "remoteEmptyClaudeAccounts": "{{value0}} に管理対象の Claude アカウントはありません。システム既定の Claude ログインを使用します。アカウントの追加はそのサーバー上で行ってください。",
-          "remoteEmptyCodexAccounts": "{{value0}} に管理対象の Codex アカウントはありません。システム既定の Codex ログインを使用します。アカウントの追加はそのサーバー上で行ってください。"
+          "remoteEmptyCodexAccounts": "{{value0}} に管理対象の Codex アカウントはありません。システム既定の Codex ログインを使用します。アカウントの追加はそのサーバー上で行ってください。",
+          "codexSystemDefaultCustomProvider": "カスタムプロバイダー — 使用量は追跡されません。"
         },
         "AdvancedPane": {
           "40b29e0bf3": "再起動",
@@ -4547,6 +4596,53 @@
           "5195f0b9ef": "Show browser spelling underlines and suggestions while editing rich Markdown.",
           "7ddd66fede": "エディターのワードラップ",
           "9b18de6eea": "水平スクロールを使わずに、ファイルエディターで長い行を折り返します。"
+        },
+        "EditorFontFamilySetting": {
+          "title": "エディタのフォントファミリー",
+          "description": "ファイルエディタと差分ビューで使用するフォントです。空欄にするとターミナルのフォントを使用します。",
+          "placeholder": "ターミナルと同じフォント"
+        },
+        "GeneralRemoteServerUpdates": {
+          "serverCount": "{{value0}} 台のペアリング済みサーバー",
+          "availableCount": "{{value0}} 台を更新可能",
+          "currentCount": "{{value0}} 台は最新",
+          "manualCount": "{{value0}} 台は手動更新",
+          "offlineCount": "{{value0}} 台はオフライン",
+          "title": "リモート Yiru サーバー",
+          "description": "このクライアントからペアリング済み Yiru サーバーを確認・更新します。",
+          "updating": "サーバーを更新中…",
+          "reviewServers": "サーバー更新を確認",
+          "serverCountOne": "1 台のペアリング済みサーバー"
+        },
+        "RemoteServerUpdateDialog": {
+          "versionUnavailable": "バージョンを取得できません",
+          "restartingHelp": "新しいバージョンの代替サーバーが再接続するのを待っています。",
+          "retry": "再試行",
+          "update": "このサーバーを更新",
+          "title": "リモート Yiru サーバーを更新",
+          "description": "ペアリング済みサーバーを確認し、この Yiru クライアントから対応インストールを更新します。",
+          "restartWarning": "更新するとサーバーが再起動します。{{value0}} 個のライブタブと {{value1}} 個のターミナルペインが一時的に切断される場合があります。",
+          "checking": "ペアリング済みサーバーを確認中…",
+          "empty": "ペアリング済みのリモート Yiru サーバーはありません。",
+          "updateAll": "{{value0}} 台すべてを更新",
+          "noUpdates": "すべてのサーバーは最新です。",
+          "downloadProgress": "{{value0}} のダウンロード進行状況"
+        },
+        "RemoteServerUpdateStatus": {
+          "checking": "確認中…",
+          "available": "更新あり",
+          "current": "最新",
+          "manual": "手動更新",
+          "offline": "オフライン",
+          "queued": "待機中",
+          "checkingUpdate": "更新を確認中…",
+          "downloading": "ダウンロード中…",
+          "restarting": "再起動中…",
+          "updated": "更新済み",
+          "failed": "更新失敗",
+          "serviceManagerHelp": "このサーバーを起動するサービスマネージャーから Yiru を更新してください。",
+          "unpackedHelp": "開発ビルドはソースチェックアウトから更新する必要があります。",
+          "legacyHelp": "リモート更新を有効にするには、このサーバーを一度手動で更新してください。"
         },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "ローカルホスト、127.0.0.1、*.internal",
@@ -5438,7 +5534,12 @@
           "advertiseThisApp": "このアプリをサーバーとして公開",
           "advertiseThisAppHelp": "ブラウザー、モバイルクライアント、または別の Yiru クライアントがこの実行中のアプリへ接続できるように、アクセスリンクを作成します。",
           "runtimeReachable": "{{value0}} に到達できます。",
-          "hostModelCapabilityProjectSourceContext": "project source context"
+          "hostModelCapabilityProjectSourceContext": "project source context",
+          "reviewServerUpdates": "サーバー更新を確認",
+          "updatingServers": "サーバーを更新中…",
+          "yiruVersion": "Yiru v{{value0}}",
+          "versionUnavailable": "Yiru バージョンを取得できません",
+          "updateServer": "更新"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "{{value0}}をコピー"
@@ -6364,7 +6465,11 @@
             "d6c0a9e2f4": "grok",
             "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "使用率",
-            "usagePercentageDisplayDescription": "プロバイダーの制限を使用済みまたは残りの割合で表示するかを選択します。"
+            "usagePercentageDisplayDescription": "プロバイダーの制限を使用済みまたは残りの割合で表示するかを選択します。",
+            "showPinnedWorktreesInGroups": {
+              "title": "ピン留めしたワークツリーを元のリストにも表示",
+              "description": "ピン留めしたワークツリーを Pinned に残したまま、すべて、プロジェクト、ステータス、レビューにも表示します。"
+            }
           }
         },
         "auto": {
@@ -6808,6 +6913,8 @@
             "4497e2e2bb": "Show browser spelling underlines and suggestions while editing rich Markdown.",
             "e61157e926": "エディターのワードラップ",
             "005be5c699": "水平スクロールを使わずに、ファイルエディターで長い行を折り返します。",
+            "editorFontFamily": "エディタのフォントファミリー",
+            "editorFontFamilyDesc": "ファイルエディタと差分ビューで使用するフォントです。空欄にするとターミナルのフォントを使用します。",
             "languageServer": "Language Server (Experimental)",
             "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
@@ -8546,6 +8653,7 @@
             "createPrIntentPublishing": "ブランチを公開中…",
             "createPrIntentForcePushing": "lease 付きで強制プッシュ中…",
             "createPrIntentPushing": "commits をプッシュ中…",
+            "createPrIntentFastForwarding": "ブランチを更新中…",
             "createPrIntentRemoteFailed": "リモートブランチを更新できませんでした。Create PR を再試行してください。",
             "createPrIntentGeneratingDetails": "レビューの詳細を生成中…",
             "createPrIntentBranchChangedDuringDetails": "レビューの詳細を生成中にブランチが変更されました。Create PR を再試行してください。",
@@ -9515,7 +9623,8 @@
           },
           "ProjectCombobox": {
             "search": "Search projects...",
-            "empty": "No projects match your search."
+            "empty": "No projects match your search.",
+            "addProject": "新しいプロジェクトを追加"
           }
         }
       },
@@ -11934,6 +12043,21 @@
         "startDictation": "ディクテーションを開始する",
         "stopDictation": "ディクテーションを停止する",
         "noSkills": "一致するスキルがありません",
+        "noCommandsOrSkills": "一致するコマンドやスキルがありません",
+        "noCommands": "一致するコマンドがありません",
+        "commands": "コマンド",
+        "skills": "スキル",
+        "loadingSkills": "スキルを読み込み中…",
+        "skillsLoaded": "スキルを読み込みました",
+        "skillsUnavailableHost": "このホストではスキルが利用できません",
+        "skillsLoadFailed": "このホストからスキルを読み込めませんでした",
+        "retrySkills": "再試行",
+        "skillCommandCollision": "スキル名でもあります - エージェントが判断します",
+        "skillMultipleSources": "{{sourceCount}} 個のソース - エージェントが解決します",
+        "skillScopeProject": "プロジェクト",
+        "skillScopePersonal": "個人",
+        "skillScopeBuiltIn": "組み込み",
+        "skillScopePlugin": "プラグイン",
         "localAttachmentUnsupported": "ローカル添付ファイルはリモート セッションでは使用できません。",
         "removeAttachment": "添付ファイルを削除する",
         "pastedImageLabel": "貼り付けた画像",

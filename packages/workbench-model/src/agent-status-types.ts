@@ -80,16 +80,17 @@ export type AgentStatusOrchestrationContext = {
   orchestrationRunId?: string
 }
 
-export type AgentSubagentState = 'working' | 'idle'
+export type AgentSubagentState = 'working' | 'blocked' | 'waiting' | 'idle'
 
-/** A live in-process subagent/teammate spawned by the pane's agent session
- *  (reported by Claude's SubagentStart/SubagentStop hooks and the
- *  `background_tasks` field on Stop). Rendered as an indented child row under
- *  the owning pane's sidebar row — these children have no PTY of their own. */
+/** A live in-process child spawned by the pane's provider session. Rendered as
+ *  an indented child row under the owning pane's sidebar row — these children
+ *  have no PTY of their own. */
 export type AgentSubagentSnapshot = {
-  /** Provider-assigned id (Claude hook `agent_id`). */
+  /** Provider-assigned lifecycle id. */
   id: string
   agentType?: string
+  /** Provider model used by this child, when exposed by its lifecycle event. */
+  model?: string
   description?: string
   state: AgentSubagentState
   /** Timestamp (ms) when this subagent was first observed. */
@@ -111,6 +112,8 @@ export type AgentStatusEntry = {
    *  (tool/prompt pings reset updatedAt but not stateStartedAt). */
   stateStartedAt: number
   agentType?: AgentType
+  /** Provider model currently used by this session. */
+  model?: string
   /** Composite key: `${tabId}:${leafId}` where leafId is a stable UUID layout leaf. */
   paneKey: string
   /** Runtime terminal handle for matching retained parent rows when the parent
@@ -181,6 +184,7 @@ export type AgentStatusPayload = {
   state: AgentStatusState
   prompt?: string
   agentType?: AgentType
+  model?: string
   toolName?: string
   toolInput?: string
   /** JSON string of the AskUserQuestion tool input, captured live. See the
@@ -188,7 +192,7 @@ export type AgentStatusPayload = {
   interactivePrompt?: string
   lastAssistantMessage?: string
   interrupted?: boolean
-  /** Live subagents/teammates of the reporting session. See AgentStatusEntry. */
+  /** Live in-process children of the reporting session. See AgentStatusEntry. */
   subagents?: AgentSubagentSnapshot[]
 }
 
@@ -224,6 +228,8 @@ export type AgentStatusIpcPayload = ParsedAgentStatusPayload & {
   stateStartedAt: number
   orchestration?: AgentStatusOrchestrationContext
   providerSession?: AgentProviderSessionMetadata
+  /** Resume identity update only; status-shaped fields are transport placeholders. */
+  providerSessionOnly?: boolean
   /** Live-only Command Code turn boundary key; not persisted to last-status.json. */
   promptInteractionKey?: string
 }
@@ -269,6 +275,8 @@ export function isFreshNonDoneAgentStatus(
 const VALID_STATES: ReadonlySet<string> = new Set<string>(AGENT_STATUS_STATES)
 /** Maximum character length for the agentType label. Truncated on parse. */
 export const AGENT_TYPE_MAX_LENGTH = 40
+/** Maximum character length for a provider model identifier. */
+export const AGENT_MODEL_MAX_LENGTH = 120
 
 /** Maximum subagent child rows carried per status entry. Bounds per-pane cache
  *  and IPC fanout against a runaway spawner. */
@@ -287,7 +295,12 @@ function normalizeSubagentSnapshot(value: unknown): AgentSubagentSnapshot | null
   if (id.length === 0 || id.length > AGENT_SUBAGENT_ID_MAX_LENGTH) {
     return null
   }
-  if (obj.state !== 'working' && obj.state !== 'idle') {
+  if (
+    obj.state !== 'working' &&
+    obj.state !== 'blocked' &&
+    obj.state !== 'waiting' &&
+    obj.state !== 'idle'
+  ) {
     return null
   }
   return {
@@ -296,6 +309,7 @@ function normalizeSubagentSnapshot(value: unknown): AgentSubagentSnapshot | null
     startedAt:
       typeof obj.startedAt === 'number' && Number.isFinite(obj.startedAt) ? obj.startedAt : 0,
     agentType: normalizeOptionalField(obj.agentType, AGENT_TYPE_MAX_LENGTH),
+    model: normalizeOptionalField(obj.model, AGENT_MODEL_MAX_LENGTH),
     description: normalizeOptionalField(obj.description, AGENT_STATUS_TOOL_INPUT_MAX_LENGTH)
   }
 }
@@ -337,6 +351,7 @@ export function agentSubagentsEqual(
       x.state !== y.state ||
       x.startedAt !== y.startedAt ||
       x.agentType !== y.agentType ||
+      x.model !== y.model ||
       x.description !== y.description
     ) {
       return false
@@ -376,6 +391,7 @@ function normalizeAgentStatusObject(parsed: unknown): ParsedAgentStatusPayload |
     // rendering and equality checks when a payload contained e.g.
     // `agentType: "claude\nrogue"`.
     agentType: normalizeOptionalField(obj.agentType, AGENT_TYPE_MAX_LENGTH),
+    model: normalizeOptionalField(obj.model, AGENT_MODEL_MAX_LENGTH),
     toolName: normalizeOptionalField(obj.toolName, AGENT_STATUS_TOOL_NAME_MAX_LENGTH),
     toolInput: normalizeOptionalField(obj.toolInput, AGENT_STATUS_TOOL_INPUT_MAX_LENGTH),
     interactivePrompt: normalizeInteractivePromptField(

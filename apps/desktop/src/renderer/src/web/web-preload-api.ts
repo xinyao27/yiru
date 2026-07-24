@@ -98,6 +98,7 @@ import { RuntimeRpcCallQueuePool } from '../../../shared/runtime-rpc-call-queue'
 import type { RuntimeStatus, RuntimeSyncWindowGraph } from '../../../shared/runtime-types'
 import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
 import type { SkillDiscoveryResult } from '../../../shared/skills'
+import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
 import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal-cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '../../../shared/terminal-custom-themes'
 import {
@@ -1482,6 +1483,9 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
     downloadFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
     },
+    downloadFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
     saveDownloadedFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
     },
@@ -1496,6 +1500,21 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
     },
     cancelDownloadedFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
+    },
+    startDownloadedFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    createDownloadedFolderDirectory: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    appendDownloadedFolderFileChunk: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    finishDownloadedFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    cancelDownloadedFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
     },
     listMarkdownDocuments: async ({ rootPath }) => {
       const file = await resolveRuntimeFilePath(rootPath)
@@ -2529,11 +2548,7 @@ function createComputerUsePermissionsApi(): NonNullable<
 function createSkillsApi(): NonNullable<Partial<PreloadApi>['skills']> {
   return {
     discover: (target) =>
-      callRuntimeResult<SkillDiscoveryResult>('skills.discover', target, 15_000).catch(() => ({
-        skills: [],
-        sources: [],
-        scannedAt: Date.now()
-      })),
+      callRuntimeResult<SkillDiscoveryResult>('skills.discover', target, 15_000),
     // Why: browser clients have no local skill homes, and remote-host
     // freshness stays disabled until its update rail has equivalent coverage.
     freshnessInventory: (): Promise<SkillFreshnessInventory> =>
@@ -3304,6 +3319,9 @@ function mergeWebUIState(
     ),
     usagePercentageDisplay: normalizeUsagePercentageDisplay(
       safeUpdates.usagePercentageDisplay ?? base.usagePercentageDisplay
+    ),
+    statusBarUsageMode: normalizeStatusBarUsageMode(
+      safeUpdates.statusBarUsageMode ?? base.statusBarUsageMode
     )
   }
 }

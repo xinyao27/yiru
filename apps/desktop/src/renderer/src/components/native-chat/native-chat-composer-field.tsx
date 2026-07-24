@@ -10,14 +10,9 @@ import type {
   SessionOptionsSurface
 } from '../../../../shared/native-chat-session-options'
 import { NATIVE_FILE_DROP_TARGET } from '../../../../shared/native-file-drop'
-import type { DiscoveredSkill } from '../../../../shared/skills'
-import {
-  NativeChatMentionHint,
-  NativeChatSkillMenu,
-  NativeChatSlashMenu
-} from './native-chat-autocomplete-menus'
+import { NativeChatMentionHint, NativeChatPickerMenu } from './native-chat-autocomplete-menus'
 import { NativeChatComposerActions } from './native-chat-composer-actions'
-import type { ComposerAutocomplete, SlashCommandSuggestion } from './native-chat-composer-state'
+import type { ComposerAutocomplete, NativeChatPickerItem } from './native-chat-composer-state'
 import { nativeChatComposerPlaceholder } from './native-chat-composer-target'
 import { isNativeChatPastedImagePath } from './native-chat-image-paste'
 import { NATIVE_CHAT_CONTENT_WIDTH_CLASS } from './native-chat-layout'
@@ -42,9 +37,10 @@ export type NativeChatComposerFieldProps = {
   onTextareaSelect: (element: HTMLTextAreaElement) => void
   onKeyDown: KeyboardEventHandler<HTMLTextAreaElement>
   onPaste: ClipboardEventHandler<HTMLTextAreaElement>
-  onChooseSlash: (command: SlashCommandSuggestion) => void
+  pickerListboxId: string
+  onChoosePickerItem: (item: NativeChatPickerItem) => void
+  onRetrySkills: () => void
   onAcceptMention: () => void
-  onChooseSkill: (skill: DiscoveredSkill) => void
   onRemoveImageAttachment: (id: string) => void
   onAttach: () => void
   onDictationToggle: () => void
@@ -81,9 +77,10 @@ export function NativeChatComposerField({
   onTextareaSelect,
   onKeyDown,
   onPaste,
-  onChooseSlash,
+  pickerListboxId,
+  onChoosePickerItem,
+  onRetrySkills,
   onAcceptMention,
-  onChooseSkill,
   onRemoveImageAttachment,
   onAttach,
   onDictationToggle,
@@ -104,22 +101,17 @@ export function NativeChatComposerField({
             NATIVE_CHAT_CONTENT_WIDTH_CLASS
           )}
         >
-          {autocomplete.mode === 'slash' && autocomplete.suggestions.length > 0 ? (
-            <NativeChatSlashMenu
-              suggestions={autocomplete.suggestions}
+          {autocomplete.mode === 'slash' || autocomplete.mode === 'skill' ? (
+            <NativeChatPickerMenu
+              autocomplete={autocomplete}
               activeIndex={activeSuggestion}
-              onChoose={onChooseSlash}
+              listboxId={pickerListboxId}
+              onChoose={onChoosePickerItem}
+              onRetry={onRetrySkills}
             />
           ) : null}
           {autocomplete.mode === 'mention' ? (
             <NativeChatMentionHint query={autocomplete.query} onAccept={onAcceptMention} />
-          ) : null}
-          {autocomplete.mode === 'skill' ? (
-            <NativeChatSkillMenu
-              suggestions={autocomplete.suggestions}
-              activeIndex={activeSuggestion}
-              onChoose={onChooseSkill}
-            />
           ) : null}
           {notice ? (
             <div className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-xs">
@@ -175,10 +167,22 @@ export function NativeChatComposerField({
               onKeyDown={onKeyDown}
               onPaste={onPaste}
               onSelect={(e) => onTextareaSelect(e.currentTarget)}
+              aria-expanded={autocomplete.mode === 'slash' || autocomplete.mode === 'skill'}
+              aria-controls={
+                autocomplete.mode === 'slash' || autocomplete.mode === 'skill'
+                  ? pickerListboxId
+                  : undefined
+              }
+              aria-activedescendant={
+                (autocomplete.mode === 'slash' || autocomplete.mode === 'skill') &&
+                autocomplete.items.length > 0
+                  ? `${pickerListboxId}-option-${Math.min(activeSuggestion, autocomplete.items.length - 1)}`
+                  : undefined
+              }
               placeholder={nativeChatComposerPlaceholder(hasPty, canSend)}
-              // Why: field-sizing lets Chromium grow the editor without a JS
-              // reflow loop; max-height then hands long drafts to the scrollbar.
-              // Coarse pointers retain the app's larger touch target.
+              // Why: field-sizing grows without a JS reflow loop; max-height
+              // then hands long drafts to the scrollbar. Coarse pointers keep
+              // the larger touch target.
               className={cn(
                 'scrollbar-sleek min-h-9 max-h-[200px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-5 outline-none [field-sizing:content] pointer-coarse:min-h-14',
                 'placeholder:text-muted-foreground/60 disabled:cursor-not-allowed disabled:opacity-50'

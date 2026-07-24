@@ -22,6 +22,7 @@ export type RemoteParserOptions = {
 export type RemoteSessionSource = {
   agent: AiVaultAgent
   rootDir: string
+  codexHome?: string
   extensions: readonly string[]
   filePredicate?: (path: string) => boolean
   // Depth 0 denotes a direct child of rootDir.

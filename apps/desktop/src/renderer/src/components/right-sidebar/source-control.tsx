@@ -195,6 +195,7 @@ import {
   createPrIntentRunTokenMatches,
   getCreatePrIntentCommitFailureNoticeMessage,
   getCreatePrIntentStagePaths,
+  prepareCreatePrIntentBeforeCommit,
   resolveCreatePrIntentReviewBase,
   type CreatePrIntentRunToken
 } from './source-control-create-pr-intent-flow'
@@ -837,6 +838,7 @@ function SourceControlInner({
   const commitInFlightRef = useRef<Record<string, boolean>>({})
   const activeWorktree = useActiveWorktree()
   const activeWorktreeId = useAppStore((s) => s.activeWorktreeId)
+  const activeTabId = useAppStore((s) => s.activeTabId)
   const activeWorktreeInstanceId = activeWorktree?.instanceId
   const activeGroupId = useAppStore((s) =>
     activeWorktreeId ? s.activeGroupIdByWorktree[activeWorktreeId] : undefined
@@ -2485,6 +2487,14 @@ function SourceControlInner({
   // chevron dropdown can trigger. Keeps the error-swallow pattern in one
   // place — store slices already surface actionable toasts, so additional
   // try/catch here would duplicate the notification.
+  // Why: Create Review must distinguish an actual remote failure from a stale
+  // action losing ownership; only the former should replace the newer notice.
+  type RunRemoteActionResult =
+    | { status: 'ok' }
+    | { status: 'failed'; error: SourceControlActionError }
+    | { status: 'superseded' }
+    | { status: 'skipped' }
+
   const runRemoteAction = useCallback(
     async (
       kind:
@@ -2500,7 +2510,7 @@ function SourceControlInner({
         target?: SourceControlOperationTarget
         baseRef?: string | null
       }
-    ): Promise<boolean> => {
+    ): Promise<RunRemoteActionResult> => {
       const target =
         options?.target ??
         (activeWorktreeId && worktreePath
@@ -2513,7 +2523,7 @@ function SourceControlInner({
             }
           : null)
       if (!target) {
-        return false
+        return { status: 'skipped' }
       }
       const sequence = (remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] ?? 0) + 1
       remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] = sequence
@@ -2539,7 +2549,7 @@ function SourceControlInner({
             target.pushTarget,
             { runtimeTargetSettings: target.settings }
           )
-          return true
+          return { status: 'ok' }
         }
         if (kind === 'push') {
           // Why: kind 'push' must stay a regular push. Force-with-lease is only
@@ -2554,7 +2564,7 @@ function SourceControlInner({
             target.pushTarget,
             { runtimeTargetSettings: target.settings }
           )
-          return true
+          return { status: 'ok' }
         }
         if (kind === 'force_push') {
           await pushBranch(
@@ -2565,7 +2575,7 @@ function SourceControlInner({
             target.pushTarget,
             { forceWithLease: true, runtimeTargetSettings: target.settings }
           )
-          return true
+          return { status: 'ok' }
         }
         if (kind === 'pull') {
           await pullBranch(
@@ -2577,7 +2587,7 @@ function SourceControlInner({
               runtimeTargetSettings: target.settings
             }
           )
-          return true
+          return { status: 'ok' }
         }
         if (kind === 'fast_forward') {
           await fastForwardBranch(
@@ -2587,7 +2597,7 @@ function SourceControlInner({
             target.pushTarget,
             { runtimeTargetSettings: target.settings }
           )
-          return true
+          return { status: 'ok' }
         }
         if (kind === 'fetch') {
           await fetchBranch(
@@ -2599,12 +2609,12 @@ function SourceControlInner({
               runtimeTargetSettings: target.settings
             }
           )
-          return true
+          return { status: 'ok' }
         }
         if (kind === 'rebase') {
           const baseRef = options?.baseRef ?? effectiveBaseRef
           if (!baseRef) {
-            return false
+            return { status: 'skipped' }
           }
           await rebaseFromBase(
             target.worktreeId,
@@ -2614,7 +2624,7 @@ function SourceControlInner({
             target.pushTarget,
             { runtimeTargetSettings: target.settings }
           )
-          return true
+          return { status: 'ok' }
         }
         await syncBranch(
           target.worktreeId,
@@ -2628,30 +2638,28 @@ function SourceControlInner({
         if (remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] === sequence) {
           setRemoteActionErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
         }
-        return true
+        return { status: 'ok' }
       } catch (error) {
         // Why: remote action failures are surfaced by editor-slice actions to keep
         // one consistent toast path and avoid duplicate notifications in the UI.
         // Keep the latest failure inline too: dropdown-only actions like Fetch can
         // otherwise look like nothing happened once the menu closes.
         if (remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] !== sequence) {
-          return false
+          return { status: 'superseded' }
         }
-        setRemoteActionErrors((prev) => ({
-          ...prev,
-          [target.worktreeId]: {
-            kind,
-            message: resolveRemoteActionError(kind, error),
-            rawError: error instanceof Error ? error.message : String(error),
-            syncPushStage: kind === 'sync' ? isSyncPushStageError(error) : false,
-            branchName: failureBranchName,
-            worktreePath: target.worktreePath,
-            entriesSnapshot: recoveryEntrySnapshot.entries,
-            entriesSnapshotTotalCount: recoveryEntrySnapshot.totalCount,
-            sequence
-          }
-        }))
-        return false
+        const actionError: SourceControlActionError = {
+          kind,
+          message: resolveRemoteActionError(kind, error),
+          rawError: error instanceof Error ? error.message : String(error),
+          syncPushStage: kind === 'sync' ? isSyncPushStageError(error) : false,
+          branchName: failureBranchName,
+          worktreePath: target.worktreePath,
+          entriesSnapshot: recoveryEntrySnapshot.entries,
+          entriesSnapshotTotalCount: recoveryEntrySnapshot.totalCount,
+          sequence
+        }
+        setRemoteActionErrors((prev) => ({ ...prev, [target.worktreeId]: actionError }))
+        return { status: 'failed', error: actionError }
       } finally {
         if (!options?.target) {
           refreshSourceControlAfterRemoteAction({
@@ -3891,11 +3899,32 @@ function SourceControlInner({
         return refreshIntentSnapshot()
       }
 
-      if (!(await refreshIntentSnapshot())) {
-        return
+      const preparationOutcome = await prepareCreatePrIntentBeforeCommit({
+        refresh: refreshIntentSnapshot,
+        readUpstreamStatus: () => latestUpstreamStatus,
+        fastForward: async () => {
+          setCreatePrIntentNoticeForWorktree(token.worktreeId, {
+            tone: 'muted',
+            message: translate(
+              'auto.components.right.sidebar.SourceControl.createPrIntentFastForwarding',
+              'Updating branch…'
+            )
+          })
+          const result = await runRemoteAction('fast_forward', { target: operationTarget })
+          return abortIfStale() ? { status: 'superseded' } : result
+        },
+        stage: stageLatestIntentPaths
+      })
+      if (preparationOutcome === 'remote_failed') {
+        setCreatePrIntentNoticeForWorktree(token.worktreeId, {
+          tone: 'destructive',
+          message: translate(
+            'auto.components.right.sidebar.SourceControl.createPrIntentRemoteFailed',
+            'Could not update the remote branch. Retry Create PR.'
+          )
+        })
       }
-
-      if (!(await stageLatestIntentPaths())) {
+      if (preparationOutcome !== 'ready') {
         return
       }
 
@@ -4047,22 +4076,29 @@ function SourceControlInner({
             ? 'auto.components.right.sidebar.SourceControl.createPrIntentPublishing'
             : remoteStep === 'force_push'
               ? 'auto.components.right.sidebar.SourceControl.createPrIntentForcePushing'
-              : 'auto.components.right.sidebar.SourceControl.createPrIntentPushing',
+              : remoteStep === 'fast_forward'
+                ? 'auto.components.right.sidebar.SourceControl.createPrIntentFastForwarding'
+                : 'auto.components.right.sidebar.SourceControl.createPrIntentPushing',
           remoteStep === 'publish'
             ? 'Publishing branch…'
             : remoteStep === 'force_push'
               ? 'Force pushing with lease…'
-              : 'Pushing commits…'
+              : remoteStep === 'fast_forward'
+                ? 'Updating branch…'
+                : 'Pushing commits…'
         )
       })
-      const remoteOk = await runRemoteAction(remoteStep, {
+      const remoteResult = await runRemoteAction(remoteStep, {
         target: operationTarget,
         baseRef: token.baseRef
       })
       if (abortIfStale()) {
         return
       }
-      if (!remoteOk) {
+      if (remoteResult.status === 'superseded') {
+        return
+      }
+      if (remoteResult.status !== 'ok') {
         setCreatePrIntentNoticeForWorktree(token.worktreeId, {
           tone: 'destructive',
           message: translate(
@@ -5678,6 +5714,11 @@ function SourceControlInner({
                   groupId={activeGroupId ?? activeWorktreeId}
                   comments={diffCommentsForActive}
                   triggerClassName="size-6"
+                  // Why: split groups can mount more than one Source Control tab;
+                  // only the focused tab may consume the global shortcut request.
+                  respondToOpenRequest={
+                    isVisible && (!workspacePanelTabId || workspacePanelTabId === activeTabId)
+                  }
                 />
                 {diffCommentCount > 0 && (
                   <TooltipProvider delay={400}>

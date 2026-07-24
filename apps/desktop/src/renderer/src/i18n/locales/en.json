@@ -110,7 +110,8 @@
     "minimizeNotice": {
       "body": "Yiru is still running in the system tray"
     },
-    "activityWaiting": "Yiru - activity waiting"
+    "activityWaiting": "Yiru - activity waiting",
+    "activityWaitingSuffix": "activity waiting"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -210,6 +211,20 @@
             "07f788de83": "WebSocket"
           }
         }
+      }
+    },
+    "runtime": {
+      "remoteServerUpdateErrors": {
+        "manualRequired": "This server must be updated manually through its service manager.",
+        "notAvailable": "The server no longer reports an available update. Check again.",
+        "notDownloaded": "The server update has not finished downloading.",
+        "legacyServer": "Update this server manually once to enable remote updates.",
+        "updaterTimeout": "Timed out waiting for the server updater.",
+        "requestedVersionUnavailable": "The server updater did not offer the requested Yiru version.",
+        "updateUnavailable": "The server did not report an available update.",
+        "downloadIncomplete": "The server update did not finish downloading.",
+        "reconnectTimeout": "The server did not reconnect on the updated version.",
+        "runtimeChanged": "The paired server changed while updating. Check again before retrying."
       }
     },
     "store": {
@@ -2023,6 +2038,16 @@
             "fd1d3b3a1d": "Update downloading, {{value0}} percent. Click to expand.",
             "9d13213a56": "Yiru v{{value0}} ready to install"
           },
+          "RemoteServerUpdateStatusSegment": {
+            "updating": "Updating {{value0}}/{{value1}}",
+            "updatingTooltip": "Remote Yiru Server updates are in progress",
+            "failed": "{{value0}} server updates failed",
+            "failedTooltip": "Open Remote Yiru Server updates to review and retry",
+            "updated": "{{value0}} servers updated",
+            "updatedTooltip": "Remote Yiru Server updates completed",
+            "failedOne": "1 server update failed",
+            "updatedOne": "1 server updated"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "Updated",
             "9be86c46a0": "Freeable",
@@ -2180,6 +2205,19 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "UsageRosterPanel": {
+            "title": "Usage",
+            "openDetails": "Open usage details",
+            "notSignedIn": "not signed in",
+            "allAgents": "visible agents",
+            "usageDetails": "Usage details & history",
+            "loadingUsage": "Loading usage…",
+            "usageUnavailable": "Usage unavailable",
+            "noUsageData": "No usage data",
+            "detailed": "Detailed",
+            "compact": "Compact",
+            "footerDetailAria": "Usage footer detail"
           },
           "LanguageServerStatusSegment": {
             "aria": "Language server: {{value0}}",
@@ -3241,7 +3279,17 @@
           "0bed8727db": "It may have been moved or deleted. Refresh workspaces or remove it from Yiru.",
           "3921d3d9a5": "Workspace folder was not found.",
           "f387af445b": "Workspace path is not a valid local path.",
-          "3ec372b664": "file-manager"
+          "3ec372b664": "file-manager",
+          "localOnly": "Local only",
+          "checkingHost": "Checking host…",
+          "hostUnsupported": "Host unsupported",
+          "remoteSsh": "Remote SSH",
+          "remoteRuntimeUnsupported": "Opening this path in a local app is not available on this host.",
+          "sshTargetUnavailable": "SSH host configuration is no longer available.",
+          "sshAliasRequired": "VS Code needs an SSH config alias for this host.",
+          "sshAliasRequiredDetail": "Add a Host alias for {{host}}:{{port}}, reconnect the workspace, then try again.",
+          "remoteEditorUnsupported": "This app cannot open SSH workspaces. Choose VS Code instead.",
+          "remoteLaunchFailed": "Could not open the path in VS Code."
         },
         "WorktreeTitleInlineRename": {
           "2f42ae024f": "Unread:",
@@ -4052,7 +4100,8 @@
           "remoteScopeAccounts": "Showing accounts managed by {{value0}}. Add or re-authenticate accounts on that server.",
           "remoteScopeAuthContext": "Each account keeps its own sign-in context on {{value0}}.",
           "remoteEmptyClaudeAccounts": "No managed Claude accounts on {{value0}}. It uses its system default Claude login; add accounts on that server.",
-          "remoteEmptyCodexAccounts": "No managed Codex accounts on {{value0}}. It uses its system default Codex login; add accounts on that server."
+          "remoteEmptyCodexAccounts": "No managed Codex accounts on {{value0}}. It uses its system default Codex login; add accounts on that server.",
+          "codexSystemDefaultCustomProvider": "Custom provider — no usage tracked."
         },
         "AdvancedPane": {
           "40b29e0bf3": "Restart",
@@ -4585,6 +4634,53 @@
           "5195f0b9ef": "Show browser spelling underlines and suggestions while editing rich Markdown.",
           "7ddd66fede": "Editor Word Wrap",
           "9b18de6eea": "Wrap long lines in file editors instead of requiring horizontal scrolling."
+        },
+        "EditorFontFamilySetting": {
+          "title": "Editor Font Family",
+          "description": "Font used by file editors and diff views. Leave empty to follow the terminal font.",
+          "placeholder": "Same as terminal font"
+        },
+        "GeneralRemoteServerUpdates": {
+          "serverCount": "{{value0}} paired servers",
+          "availableCount": "{{value0}} ready to update",
+          "currentCount": "{{value0}} up to date",
+          "manualCount": "{{value0}} manual",
+          "offlineCount": "{{value0}} offline",
+          "title": "Remote Yiru Servers",
+          "description": "Check and update paired Yiru servers from this client.",
+          "updating": "Updating servers…",
+          "reviewServers": "Check for Server Updates",
+          "serverCountOne": "1 paired server"
+        },
+        "RemoteServerUpdateDialog": {
+          "versionUnavailable": "Version unavailable",
+          "restartingHelp": "Waiting for the replacement server to reconnect on the new version.",
+          "retry": "Retry",
+          "update": "Update this server",
+          "title": "Update Remote Yiru Servers",
+          "description": "Review paired servers and update supported installs from this Yiru client.",
+          "restartWarning": "Updating restarts these servers. {{value0}} live tabs and {{value1}} terminal panes may briefly disconnect.",
+          "checking": "Checking paired servers…",
+          "empty": "No paired Remote Yiru Servers.",
+          "updateAll": "Update all {{value0}} servers",
+          "noUpdates": "All servers are up to date.",
+          "downloadProgress": "{{value0}} download progress"
+        },
+        "RemoteServerUpdateStatus": {
+          "checking": "Checking…",
+          "available": "Update available",
+          "current": "Up to date",
+          "manual": "Manual update",
+          "offline": "Offline",
+          "queued": "Queued",
+          "checkingUpdate": "Checking update…",
+          "downloading": "Downloading…",
+          "restarting": "Restarting…",
+          "updated": "Updated",
+          "failed": "Update failed",
+          "serviceManagerHelp": "Update Yiru through the service manager that starts this server.",
+          "unpackedHelp": "Development builds must be updated from their source checkout.",
+          "legacyHelp": "Update this server manually once to enable remote updates."
         },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "localhost, 127.0.0.1, *.internal",
@@ -5476,7 +5572,12 @@
           "advertiseThisApp": "Advertise this app as a server",
           "advertiseThisAppHelp": "Create access links for browsers, mobile clients, or another Yiru client to connect back to this running app.",
           "runtimeReachable": "{{value0}} is reachable.",
-          "hostModelCapabilityProjectSourceContext": "project source context"
+          "hostModelCapabilityProjectSourceContext": "project source context",
+          "reviewServerUpdates": "Check for Server Updates",
+          "updatingServers": "Updating servers…",
+          "yiruVersion": "Yiru v{{value0}}",
+          "versionUnavailable": "Yiru version unavailable",
+          "updateServer": "Update"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "Copy {{value0}}"
@@ -6402,7 +6503,11 @@
             "d6c0a9e2f4": "grok",
             "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "Usage percentages",
-            "usagePercentageDisplayDescription": "Choose whether provider limits show the percentage used or remaining."
+            "usagePercentageDisplayDescription": "Choose whether provider limits show the percentage used or remaining.",
+            "showPinnedWorktreesInGroups": {
+              "title": "Also show pinned worktrees in their original lists",
+              "description": "Pinned worktrees stay in Pinned and also appear in All, Project, Status, and Review."
+            }
           }
         },
         "auto": {
@@ -6846,6 +6951,8 @@
             "4497e2e2bb": "Show browser spelling underlines and suggestions while editing rich Markdown.",
             "e61157e926": "Editor Word Wrap",
             "005be5c699": "Wrap long lines in file editors instead of requiring horizontal scrolling.",
+            "editorFontFamily": "Editor Font Family",
+            "editorFontFamilyDesc": "Font used by file editors and diff views. Leave empty to follow the terminal font.",
             "languageServer": "Language Server (Experimental)",
             "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
@@ -8569,6 +8676,7 @@
             "createPrIntentPublishing": "Publishing branch…",
             "createPrIntentForcePushing": "Force pushing with lease…",
             "createPrIntentPushing": "Pushing commits…",
+            "createPrIntentFastForwarding": "Updating branch…",
             "createPrIntentRemoteFailed": "Could not update the remote branch. Retry Create PR.",
             "createPrIntentGeneratingDetails": "Generating review details…",
             "createPrIntentBranchChangedDuringDetails": "Branch changed while generating review details. Retry Create PR.",
@@ -9538,7 +9646,8 @@
           },
           "ProjectCombobox": {
             "search": "Search projects...",
-            "empty": "No projects match your search."
+            "empty": "No projects match your search.",
+            "addProject": "Add a new project"
           }
         }
       },
@@ -11957,6 +12066,21 @@
         "startDictation": "Start dictation",
         "stopDictation": "Stop dictation",
         "noSkills": "No matching skills",
+        "noCommandsOrSkills": "No matching commands or skills",
+        "noCommands": "No matching commands",
+        "commands": "Commands",
+        "skills": "Skills",
+        "loadingSkills": "Loading skills...",
+        "skillsLoaded": "Skills loaded",
+        "skillsUnavailableHost": "Skills are unavailable for this host",
+        "skillsLoadFailed": "Could not load skills from this host",
+        "retrySkills": "Retry",
+        "skillCommandCollision": "Also a skill name - agent decides",
+        "skillMultipleSources": "{{sourceCount}} sources - agent resolves",
+        "skillScopeProject": "Project",
+        "skillScopePersonal": "Personal",
+        "skillScopeBuiltIn": "Built-in",
+        "skillScopePlugin": "Plugin",
         "localAttachmentUnsupported": "Local attachments are not available for remote sessions.",
         "removeAttachment": "Remove attachment",
         "pastedImageLabel": "Pasted image",

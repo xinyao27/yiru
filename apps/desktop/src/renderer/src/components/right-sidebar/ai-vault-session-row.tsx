@@ -104,6 +104,7 @@ export function VaultSessionRow({
         sessionFilePath: session.filePath,
         sessionExecutionHostId: session.executionHostId,
         ...(resumeStartup.env ? { env: resumeStartup.env } : {}),
+        ...(resumeStartup.envToDelete ? { envToDelete: resumeStartup.envToDelete } : {}),
         ...(resumeStartup.launchConfig ? { launchConfig: resumeStartup.launchConfig } : {})
       })
       window.dispatchEvent(new Event(AI_VAULT_SESSION_DRAG_START_EVENT))

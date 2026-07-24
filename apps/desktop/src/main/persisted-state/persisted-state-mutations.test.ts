@@ -54,4 +54,14 @@ describe('persisted-state domain mutations', () => {
       'automation-run': { firstInteractedAt: 100, interactionCount: 5 }
     })
   })
+
+  it('normalizes and persists status-bar usage density', () => {
+    const current = getDefaultUIState()
+    const invalid = applyPersistedUiUpdate(current, { statusBarUsageMode: 'dense' as never })
+    expect(invalid.ui.statusBarUsageMode).toBe('verbose')
+
+    const compact = applyPersistedUiUpdate(current, { statusBarUsageMode: 'compact' })
+    expect(compact.ui.statusBarUsageMode).toBe('compact')
+    expect(compact.changed).toBe(true)
+  })
 })

@@ -546,6 +546,8 @@ async function fetchViaBackend(
     provider: 'codex',
     session: mapBackendUsageWindow(payload.rate_limit?.primary_window, 300),
     weekly: mapBackendUsageWindow(payload.rate_limit?.secondary_window, 10080),
+    // Why: the consolidated roster uses the backend tier to distinguish active Codex accounts.
+    planType: payload.plan_type,
     ...(payload.rate_limit_reset_credits !== undefined
       ? {
           rateLimitResetCredits:

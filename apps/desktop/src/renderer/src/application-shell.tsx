@@ -385,6 +385,9 @@ const SshPassphraseDialog = lazy(() =>
 const UpdateCard = lazy(() =>
   import('./components/update-card').then((module) => ({ default: module.UpdateCard }))
 )
+const RemoteServerUpdateDialog = lazy(
+  () => import('./components/settings/remote-server-update-dialog')
+)
 const ContextualTourOverlay = lazy(() =>
   import('./components/contextual-tours/contextual-tour-overlay').then((module) => ({
     default: module.ContextualTourOverlay
@@ -498,6 +501,7 @@ function App(): React.JSX.Element {
       setContextualToursAutoEligible: s.setContextualToursAutoEligible,
       setContextualToursOnboardingVisible: s.setContextualToursOnboardingVisible,
       cancelContextualTour: s.cancelContextualTour,
+      openDiffNotesSendMenuForActiveWorktree: s.openDiffNotesSendMenuForActiveWorktree,
       setActiveView: s.setActiveView,
       updateSettings: s.updateSettings,
       pruneLastVisitedTimestamps: s.pruneLastVisitedTimestamps,
@@ -1439,7 +1443,7 @@ function App(): React.JSX.Element {
       // which is in-memory. Capture them into the persisted sleeping-session
       // map so a daemon/session death while the app is closed can still
       // cold-restore via the agent's resume command (#5232).
-      useAppStore.getState().captureAllSleepingAgentSessions()
+      useAppStore.getState().captureAllSleepingAgentSessions('quit')
       // Why: re-read state after capture() calls populated scrollback buffers
       // into the store via Zustand setters. The earlier read is only for the
       // gating flags and would miss those updates.
@@ -1466,7 +1470,7 @@ function App(): React.JSX.Element {
       if (!shouldPersistWorkspaceSession(useAppStore.getState())) {
         return
       }
-      useAppStore.getState().captureAllSleepingAgentSessions()
+      useAppStore.getState().captureAllSleepingAgentSessions('periodic')
     }, SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS)
     return () => window.clearInterval(timer)
   }, [])
@@ -1736,6 +1740,17 @@ function App(): React.JSX.Element {
           panel: 'explorer',
           explorerDestination: { view: 'search', ...(query ? { query } : {}) }
         })
+      }
+
+      // Why: this command is intentionally assignable over editor/terminal
+      // focus; consume its chord only while unsent notes make the action valid.
+      if (matchShortcut('sourceControl.sendReviewNotes') && canOpenWorkspacePanel) {
+        if (actions.openDiffNotesSendMenuForActiveWorktree()) {
+          input.preventDefault()
+          notifyTerminalCapture('sourceControl.sendReviewNotes')
+          openWorkspacePanelTab({ panel: 'source-control' })
+          return
+        }
       }
 
       if (matchShortcut('sidebar.search.toggle') && canOpenWorkspacePanel) {
@@ -2917,6 +2932,15 @@ function App(): React.JSX.Element {
             >
               <SkillFreshnessUpdateDialog />
             </RecoverableRenderErrorBoundary>
+            <Suspense fallback={null}>
+              <RecoverableRenderErrorBoundary
+                boundaryId="overlay.remote-server-update-dialog"
+                surface="overlay"
+                compact
+              >
+                <RemoteServerUpdateDialog />
+              </RecoverableRenderErrorBoundary>
+            </Suspense>
           </LinkRoutingPreferenceDialogProvider>
         </ConfirmationDialogProvider>
       </TooltipProvider>

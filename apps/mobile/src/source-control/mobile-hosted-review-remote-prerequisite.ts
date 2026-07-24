@@ -60,6 +60,16 @@ export async function applyMobileHostedReviewRemotePrerequisite(
       )
       return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'force_push' }
     }
+    case 'fast_forward': {
+      input.onProgress?.('fast_forwarding')
+      const result = await sendMobileHostedReviewGitMutation(
+        client,
+        'git.fastForward',
+        { worktree: `id:${worktreeId}` },
+        'Failed to update branch'
+      )
+      return result.ok ? { ok: true, ran: true } : { ...result, remoteOperation: 'fast_forward' }
+    }
     case 'blocked':
     case 'none':
       return { ok: true, ran: false }

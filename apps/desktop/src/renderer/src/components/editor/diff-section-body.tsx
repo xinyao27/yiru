@@ -13,6 +13,7 @@ import { combinedDiffSectionScrollbarOptions } from './diff-editor-scrollbar-opt
 import { buildDiffEditorWordWrapOptions } from './diff-editor-word-wrap-options'
 import type { DiffSection } from './diff-section-types'
 import { LargeDiffFallback } from './large-diff-fallback'
+import { monacoFindOptions } from './monaco-find-options'
 import { PierreDiffViewer } from './pierre-diff-viewer'
 import type { PierreDiffSectionCommentProps } from './use-diff-section-comment-actions'
 
@@ -41,7 +42,7 @@ type DiffSectionBodyProps = {
   isEditable: boolean
   diffEditorFontSize: number
   diffWordWrap?: boolean
-  terminalFontFamily?: string
+  editorFontFamily?: string
   onCancelComment: () => void
   onSubmitComment: (body: string) => Promise<void>
   onRetrySection: (index: number) => void
@@ -67,7 +68,7 @@ export function DiffSectionBody({
   isEditable,
   diffEditorFontSize,
   diffWordWrap,
-  terminalFontFamily,
+  editorFontFamily,
   onCancelComment,
   onSubmitComment,
   onRetrySection,
@@ -188,7 +189,7 @@ export function DiffSectionBody({
           sideBySide={sideBySide}
           isDark={isDark}
           fontSize={diffEditorFontSize}
-          fontFamily={terminalFontFamily}
+          fontFamily={editorFontFamily}
           wordWrap={diffWordWrap}
           worktreeId={pierreCommentProps.worktreeId}
           comments={pierreCommentProps.comments}
@@ -223,18 +224,14 @@ export function DiffSectionBody({
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             fontSize: diffEditorFontSize,
-            fontFamily: terminalFontFamily || 'monospace',
+            fontFamily: editorFontFamily || 'monospace',
             lineNumbers: 'on',
             ...buildDiffEditorWordWrapOptions(diffWordWrap),
             automaticLayout: true,
             renderOverviewRuler: false,
             scrollbar: combinedDiffSectionScrollbarOptions,
             hideUnchangedRegions: { enabled: true },
-            find: {
-              addExtraSpaceOnTop: false,
-              autoFindInSelection: 'never',
-              seedSearchStringFromSelection: 'never'
-            }
+            find: monacoFindOptions
           }}
         />
       )}

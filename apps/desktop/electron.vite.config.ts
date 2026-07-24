@@ -198,6 +198,11 @@ export default defineConfig({
           // Why: forked with ELECTRON_RUN_AS_NODE so @parcel/watcher faults
           // can't take down the main process (issue #7547).
           'parcel-watcher-process-entry': resolve('src/main/ipc/parcel-watcher-process-entry.ts'),
+          // Why: the synchronous launch gate needs a short-lived plain-Node
+          // child so the app-server JSONL session can keep a live event loop.
+          'codex/codex-app-server-grant-entry': resolve(
+            'src/main/codex/codex-app-server-grant-entry.ts'
+          ),
           // Why: electron-vite cleans out/main in dev. The dev CLI imports
           // this path for `yiru agent hooks ...`, so it must survive rebuilds.
           'agent-hooks/managed-agent-hook-controls': resolve(

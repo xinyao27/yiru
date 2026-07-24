@@ -114,6 +114,8 @@ export type SshConnectionState = {
   error: string | null
   /** Number of reconnection attempts since last disconnect. */
   reconnectAttempt: number
+  /** Recursive downloads require ssh2 SFTP on a direct SSH host. */
+  supportsFolderDownload?: boolean
   /** Remote OS detected by the SSH relay once available. */
   remotePlatform?: SshRemotePlatform
 }

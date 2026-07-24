@@ -15,6 +15,7 @@ import { normalizeFeatureTipIds } from '../../shared/feature-tips'
 import { normalizeManualRepoOrder } from '../../shared/manual-repo-order'
 import { clampMarkdownTocPanelWidth } from '../../shared/markdown-toc-panel-width'
 import { persistedUIValuesEqual } from '../../shared/persisted-ui-equality'
+import { normalizeStatusBarUsageMode } from '../../shared/status-bar-usage-mode'
 import type { PersistedState } from '../../shared/types'
 import { normalizeUsagePercentageDisplay } from '../../shared/usage-percentage-display'
 import { normalizeWorkspaceStatuses } from '../../shared/workspace-statuses'
@@ -53,6 +54,7 @@ export function readPersistedUi(value: PersistedUi): PersistedUi {
     agentActivityDisplayMode: normalizeAgentActivityDisplayMode(value?.agentActivityDisplayMode),
     workspaceStatuses: normalizeWorkspaceStatuses(value?.workspaceStatuses),
     usagePercentageDisplay: normalizeUsagePercentageDisplay(value?.usagePercentageDisplay),
+    statusBarUsageMode: normalizeStatusBarUsageMode(value?.statusBarUsageMode),
     trayMinimizeNoticeShown: value?.trayMinimizeNoticeShown === true,
     markdownTocPanelWidth: clampMarkdownTocPanelWidth(value?.markdownTocPanelWidth),
     visibleWorkspaceHostIds: normalizeVisibleExecutionHostIds(value?.visibleWorkspaceHostIds),
@@ -117,6 +119,9 @@ export function applyPersistedUiUpdate(
         : normalizeWorkspaceStatuses(current?.workspaceStatuses),
     usagePercentageDisplay: normalizeUsagePercentageDisplay(
       normalizedUpdates.usagePercentageDisplay ?? current?.usagePercentageDisplay
+    ),
+    statusBarUsageMode: normalizeStatusBarUsageMode(
+      normalizedUpdates.statusBarUsageMode ?? current?.statusBarUsageMode
     ),
     markdownTocPanelWidth: clampMarkdownTocPanelWidth(
       normalizedUpdates.markdownTocPanelWidth ?? current?.markdownTocPanelWidth

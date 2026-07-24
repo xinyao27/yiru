@@ -393,9 +393,7 @@ export function useRpcClientContext(): RpcClientContextValue {
   return ctx
 }
 
-// Why: the primary hook for screens. Acquires the shared client for a
-// hostId on mount and releases on unmount. Re-renders when the host's
-// connection state changes.
+// Why: the primary screen hook owns one host acquire/release and follows its connection state.
 export function useHostClient(hostId: string | undefined): {
   client: RpcClient | null
   state: ConnectionState
@@ -405,7 +403,7 @@ export function useHostClient(hostId: string | undefined): {
   const [state, setState] = useState<ConnectionState>(() =>
     hostId ? ctx.getState(hostId) : 'disconnected'
   )
-  const clientRef = useRef<RpcClient | null>(null)
+  const clientRef = useRef<{ hostId: string; client: RpcClient } | null>(null)
 
   useEffect(() => {
     if (!hostId) {
@@ -420,25 +418,23 @@ export function useHostClient(hostId: string | undefined): {
         return
       }
       setState(next)
-      // Why: the client materialises after an async open, and forceReconnect
-      // swaps in a fresh client object. Re-read on every state change so a
-      // mounted screen never keeps driving a stale (closed) client.
+      // Why: async opens and forceReconnect can swap clients; never retain a closed instance.
       const found = ctx.getAllClients().find((entry) => entry.hostId === hostId)
-      if (found && found.client !== clientRef.current) {
-        clientRef.current = found.client
+      if (found && found.client !== clientRef.current?.client) {
+        clientRef.current = { hostId, client: found.client }
         force((n) => n + 1)
       } else if (!found && clientRef.current) {
-        // Why: closeHost deletes the entry without a replacement; holding the
-        // closed client would let screens keep issuing requests that can never
-        // resolve (STA-1511). Null it so they render disconnected states.
+        // Why: closeHost deletes without replacement; null the stale client (STA-1511).
         clientRef.current = null
         force((n) => n + 1)
       }
     })
     const initial = ctx.acquire(hostId)
+    clientRef.current = initial ? { hostId, client: initial } : null
+    setState(ctx.getState(hostId))
     if (initial) {
-      clientRef.current = initial
-      setState(ctx.getState(hostId))
+      // Why: two cached hosts may share the same state value while their clients differ.
+      force((n) => n + 1)
     }
     return () => {
       cancelled = true
@@ -448,7 +444,10 @@ export function useHostClient(hostId: string | undefined): {
     }
   }, [ctx, hostId])
 
-  return { client: clientRef.current, state }
+  // Why: Expo can reuse the screen before effects bind its next host; never leak the prior host.
+  const current = clientRef.current
+  const client = current && current.hostId === hostId ? current.client : null
+  return { client, state: client ? state : hostId ? ctx.getState(hostId) : 'disconnected' }
 }
 
 // Why: home screen renders all paired hosts at once. Acquires each on

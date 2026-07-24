@@ -61,6 +61,7 @@ type CreateWebRuntimeSessionTerminalArgs = {
   command?: string
   cwd?: string
   env?: Record<string, string>
+  envToDelete?: string[]
   startupCommandDelivery?: StartupCommandDelivery
   launchConfig?: SleepingAgentLaunchConfig
   agent?: TuiAgent

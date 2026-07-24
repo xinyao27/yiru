@@ -841,6 +841,7 @@ export default function NewWorkspaceComposerCard({
             value={selectedProjectId}
             onValueChange={onProjectChange}
             onValueSelected={focusNameInput}
+            onAddProject={handleAddRepo}
             placeholder={
               projectPlaceholder ??
               translate('auto.components.NewWorkspaceComposerCard.dccd26d4e4', 'Choose project')

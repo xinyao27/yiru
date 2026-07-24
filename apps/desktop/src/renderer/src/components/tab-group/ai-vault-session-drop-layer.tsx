@@ -207,6 +207,7 @@ export default function AiVaultSessionDropLayer({
         worktreeId,
         command: payload.command,
         ...(payload.env ? { env: payload.env } : {}),
+        ...(payload.envToDelete ? { envToDelete: payload.envToDelete } : {}),
         ...(payload.launchConfig ? { launchConfig: payload.launchConfig } : {}),
         targetGroupId: dropTarget.groupId,
         splitDirection: dropTarget.zone === 'center' ? undefined : dropTarget.zone

@@ -41,6 +41,12 @@ export function shouldForcePushWithLeaseForUpstream(
   )
 }
 
+// Why: behind-only is the sole review-preparation case that can reconcile
+// upstream without merging or rewriting local commits.
+export function isBehindOnlyUpstream(status: GitUpstreamStatus | undefined): boolean {
+  return status?.hasUpstream === true && status.ahead === 0 && status.behind > 0
+}
+
 export function resolveSourceControlSyncStart(status: GitUpstreamStatus): SourceControlSyncStep {
   return shouldForcePushWithLeaseForUpstream(status) ? 'force_push' : 'pull'
 }

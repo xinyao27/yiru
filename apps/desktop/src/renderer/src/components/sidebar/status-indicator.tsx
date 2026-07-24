@@ -1,3 +1,4 @@
+import { Question } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -20,7 +21,7 @@ const StatusIndicator = React.memo(function StatusIndicator({
   title,
   ...rest
 }: StatusIndicatorProps) {
-  // Why: surface the status label as a native tooltip so hovering the dot
+  // Why: surface the status label as a native tooltip so hovering the marker
   // reveals the state — matters especially for 'active' vs 'done', which
   // share the same emerald dot. Callers pass aria-hidden="true" alongside
   // an sr-only label, so the `title` attribute is ignored by AT and only
@@ -37,6 +38,18 @@ const StatusIndicator = React.memo(function StatusIndicator({
       >
         {/* Why: worktree activity follows the selected indicator, and its 14px size matches adjacent row actions. */}
         <LoadingIndicator className="size-3.5 text-yellow-500" />
+      </span>
+    )
+  }
+
+  if (status === 'permission') {
+    return (
+      <span
+        className={cn('inline-flex h-3 w-3 shrink-0 items-center justify-center', className)}
+        title={resolvedTitle}
+        {...rest}
+      >
+        <Question className="size-3 text-amber-500" aria-hidden="true" />
       </span>
     )
   }

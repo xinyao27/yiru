@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 
 import { isDiffComment } from '@/lib/diff-comment-compat'
 import { resolveDocumentTheme } from '@/lib/document-theme'
+import { resolveEditorFontFamily } from '@/lib/editor-font-family'
 import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
@@ -93,7 +94,7 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
         sideBySide={props.sideBySide}
         isDark={isDark}
         fontSize={fontSize}
-        fontFamily={settings?.terminalFontFamily}
+        fontFamily={resolveEditorFontFamily(settings)}
         wordWrap={settings?.diffWordWrap}
         worktreeId={worktreeId}
         comments={comments}

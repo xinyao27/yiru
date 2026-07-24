@@ -36,6 +36,7 @@ import {
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
+  CodexSystemDefaultIdentity,
   GlobalSettings
 } from '../../../../shared/types'
 import { useAppStore } from '../../store'
@@ -175,6 +176,26 @@ function getCodexAccountLabel(
     return 'System default'
   }
   return state.accounts.find((account) => account.id === accountId)?.email ?? 'Codex account'
+}
+
+function getCodexSystemDefaultSubtitle(
+  identity: CodexSystemDefaultIdentity | undefined,
+  runtimeSentenceLabel: string
+): string {
+  if (identity?.authKind === 'oauth' && identity.email) {
+    return identity.email
+  }
+  if (identity?.authKind === 'api-key') {
+    return translate(
+      'auto.components.settings.AccountsPane.codexSystemDefaultCustomProvider',
+      'Custom provider — no usage tracked.'
+    )
+  }
+  return translate(
+    'auto.components.settings.AccountsPane.fcc4093fc1',
+    'Use your current {{value0}} Codex login.',
+    { value0: runtimeSentenceLabel }
+  )
 }
 
 function getClaudeAccountLabel(
@@ -387,6 +408,8 @@ export function AccountsPane({
   ).some((account) =>
     providerAccountIsActiveInView(account, claudeAccounts, accountRuntime, accountVisibilityOptions)
   )
+  const systemCodexIdentity =
+    accountRuntime.runtime === 'host' ? codexAccounts.systemDefault : undefined
   // Why: the auth warning is derived from the desktop's own rate-limit poll;
   // with a remote owner it would misattribute local auth state to the server.
   const activeCodexAuthWarning =
@@ -396,7 +419,8 @@ export function AccountsPane({
           target: codexRateLimitTarget,
           runtime: accountRuntime,
           activeAccountId: activeCodexAccountId,
-          accountId: activeCodexAccountId
+          accountId: activeCodexAccountId,
+          authKind: activeCodexAccountId === null ? systemCodexIdentity?.authKind : undefined
         })
       : null
   const systemCodexNeedsReauthentication =
@@ -1182,10 +1206,9 @@ export function AccountsPane({
                         'Codex reported this {{value0}} login is out of date.',
                         { value0: accountRuntimeSentenceLabel }
                       )
-                    : translate(
-                        'auto.components.settings.AccountsPane.fcc4093fc1',
-                        'Use your current {{value0}} Codex login.',
-                        { value0: accountRuntimeSentenceLabel }
+                    : getCodexSystemDefaultSubtitle(
+                        systemCodexIdentity,
+                        accountRuntimeSentenceLabel
                       )}
                 </span>
               </div>

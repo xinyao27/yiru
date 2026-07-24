@@ -104,6 +104,9 @@ function normalizeSettingsUpdate(
   if ('showMenuBarIcon' in updates) {
     normalized.showMenuBarIcon = updates.showMenuBarIcon === true
   }
+  if ('showPinnedWorktreesInGroups' in updates) {
+    normalized.showPinnedWorktreesInGroups = updates.showPinnedWorktreesInGroups === true
+  }
   if ('disabledTuiAgents' in updates) {
     normalized.disabledTuiAgents = normalizeDisabledTuiAgents(updates.disabledTuiAgents)
   }

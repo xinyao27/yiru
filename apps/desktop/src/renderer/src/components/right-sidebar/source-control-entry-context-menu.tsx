@@ -1,11 +1,13 @@
 import { Copy, Eye, FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
+import { useRuntimeRemoteSshSupport } from '@/components/sidebar/use-runtime-remote-ssh-support'
 import {
   getWorktreeOpenInEntries,
   openOpenInAppsSettings,
   openWorktreePath
 } from '@/components/sidebar/worktree-open-in-menu'
+import { getOpenInEntryAvailability } from '@/components/sidebar/worktree-path-opening'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,6 +21,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
 import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
+import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 
 type SourceControlEntryContextMenuProps = {
@@ -42,7 +45,11 @@ export function SourceControlEntryContextMenu({
   children
 }: SourceControlEntryContextMenuProps): React.JSX.Element {
   const openInApplications = useAppStore((s) => s.settings?.openInApplications ?? [])
+  const runtimeEnvironmentId = useAppStore((s) =>
+    getRuntimeEnvironmentIdForWorktree(s, currentWorktreeId)
+  )
   const fileManagerLabel = getLocalFileManagerLabel()
+  const runtimeRemoteSshSupport = useRuntimeRemoteSshSupport(runtimeEnvironmentId, connectionId)
   const openInEntries = React.useMemo(
     () => getWorktreeOpenInEntries(openInApplications, fileManagerLabel),
     [fileManagerLabel, openInApplications]
@@ -71,10 +78,11 @@ export function SourceControlEntryContextMenu({
         target,
         worktreePath: absolutePath,
         connectionId,
+        runtimeEnvironmentId,
         command
       })
     },
-    [absolutePath, connectionId]
+    [absolutePath, connectionId, runtimeEnvironmentId]
   )
 
   return (
@@ -100,22 +108,34 @@ export function SourceControlEntryContextMenu({
             {translate('auto.components.sidebar.WorktreeOpenInMenu.8009ab69a6', 'Open in')}
           </ContextMenuSubTrigger>
           <ContextMenuSubContent className="w-52">
-            {openInEntries.map((entry) => (
-              <ContextMenuItem
-                key={entry.id}
-                onClick={() => handleOpenInExternal(entry.target, entry.command)}
-                disabled={!absolutePath}
-              >
-                {entry.target === 'file-manager' ? (
-                  <FolderOpen className="size-3.5" />
-                ) : entry.command ? (
-                  <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
-                ) : (
-                  <ExternalLink className="size-3.5" />
-                )}
-                {entry.label}
-              </ContextMenuItem>
-            ))}
+            {openInEntries.map((entry) => {
+              const availability = getOpenInEntryAvailability(entry, {
+                connectionId,
+                runtimeEnvironmentId,
+                runtimeRemoteSshSupport
+              })
+              return (
+                <ContextMenuItem
+                  key={entry.id}
+                  onClick={() => handleOpenInExternal(entry.target, entry.command)}
+                  disabled={!absolutePath || availability.disabled}
+                >
+                  {entry.target === 'file-manager' ? (
+                    <FolderOpen className="size-3.5" />
+                  ) : entry.command ? (
+                    <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
+                  ) : (
+                    <ExternalLink className="size-3.5" />
+                  )}
+                  <span className="min-w-0 truncate">{entry.label}</span>
+                  {availability.metadata ? (
+                    <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                      {availability.metadata}
+                    </span>
+                  ) : null}
+                </ContextMenuItem>
+              )
+            })}
             <ContextMenuSeparator />
             <ContextMenuItem onClick={openOpenInAppsSettings}>
               {translate(

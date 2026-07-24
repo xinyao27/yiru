@@ -41,6 +41,7 @@ import {
   WORKSPACE_FILE_PATHS_MIME
 } from '@/lib/workspace-file-drag'
 import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import { downloadRuntimeFolder } from '@/runtime/runtime-folder-download'
 import { useAppStore } from '@/store'
 
 import type { GitFileStatus } from '../../../../shared/types'
@@ -268,6 +269,7 @@ type FileExplorerRowProps = {
   deleteShortcutLabel: string
   connectionId?: string | null
   runtimeDownloadContext?: RuntimeFileOperationArgs | null
+  supportsFolderDownload?: boolean
   canCollapseFolderSubtree: boolean
   targetDir: string
   targetDepth: number
@@ -316,12 +318,13 @@ export function shouldShowViewFileAction(node: TreeNode): boolean {
 export function shouldShowRemoteDownloadAction(
   node: TreeNode,
   connectionId?: string | null,
-  runtimeDownloadContext?: RuntimeFileOperationArgs | null
+  runtimeDownloadContext?: RuntimeFileOperationArgs | null,
+  supportsFolderDownload = false
 ): boolean {
   // Why: Desktop-only because download depends on Electron's native save dialog.
   return (
-    !node.isDirectory &&
     Boolean(connectionId || runtimeDownloadContext) &&
+    (!node.isDirectory || Boolean(runtimeDownloadContext) || supportsFolderDownload) &&
     (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
   )
 }
@@ -340,18 +343,25 @@ export function shouldShowCopyFileAction(
   )
 }
 
-export async function downloadRemoteFile(
+export async function downloadRemoteEntry(
   node: TreeNode,
   connectionIdOrRuntimeContext: string | RuntimeFileOperationArgs
 ): Promise<void> {
   try {
     const result =
       typeof connectionIdOrRuntimeContext === 'string'
-        ? await window.api.fs.downloadFile({
-            filePath: node.path,
-            connectionId: connectionIdOrRuntimeContext
-          })
-        : await downloadRuntimeFile(connectionIdOrRuntimeContext, node.path, node.name)
+        ? node.isDirectory
+          ? await window.api.fs.downloadFolder({
+              dirPath: node.path,
+              connectionId: connectionIdOrRuntimeContext
+            })
+          : await window.api.fs.downloadFile({
+              filePath: node.path,
+              connectionId: connectionIdOrRuntimeContext
+            })
+        : node.isDirectory
+          ? await downloadRuntimeFolder(connectionIdOrRuntimeContext, node.path, node.name)
+          : await downloadRuntimeFile(connectionIdOrRuntimeContext, node.path, node.name)
     // Why: Suppress toasts when the user cancels the native save dialog per design.
     if (result.canceled) {
       return
@@ -418,6 +428,7 @@ export function FileExplorerRow({
   deleteShortcutLabel,
   connectionId,
   runtimeDownloadContext,
+  supportsFolderDownload = false,
   canCollapseFolderSubtree,
   targetDir,
   targetDepth,
@@ -455,7 +466,8 @@ export function FileExplorerRow({
   const showRemoteDownloadAction = shouldShowRemoteDownloadAction(
     node,
     connectionId,
-    runtimeDownloadContext
+    runtimeDownloadContext,
+    supportsFolderDownload
   )
   const showCopyFileAction = shouldShowCopyFileAction(node, connectionId, selectionSize)
   const { setRowDragNode, handleDragOver, handleDragEnter, handleDragLeave, handleDrop } =
@@ -480,11 +492,12 @@ export function FileExplorerRow({
     }
   }, [activeWorktreeId, node.path])
   const handleDownload = useCallback(() => {
-    const downloadTarget = connectionId || runtimeDownloadContext
+    // Why: a paired runtime owns the SSH connection and must service its paths.
+    const downloadTarget = runtimeDownloadContext || connectionId
     if (!downloadTarget) {
       return
     }
-    void downloadRemoteFile(node, downloadTarget)
+    void downloadRemoteEntry(node, downloadTarget)
   }, [connectionId, node, runtimeDownloadContext])
   const handleCopyFile = useCallback(() => {
     void copyFileToOsClipboard(node, connectionId)

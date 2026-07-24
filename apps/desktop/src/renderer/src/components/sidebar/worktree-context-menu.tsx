@@ -40,6 +40,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoById, useRepoMap, useWorktreeMap } from '@/store/selectors'
@@ -288,6 +289,9 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
   const deleteFolderWorkspace = useAppStore((s) => s.deleteFolderWorkspace)
   const setActiveWorktree = useAppStore((s) => s.setActiveWorktree)
   const repo = useRepoById(worktree.repoId)
+  const runtimeEnvironmentId = useAppStore((state) =>
+    getRuntimeEnvironmentIdForWorktree(state, worktree.id)
+  )
   const deleteState = useAppStore((s) => s.deleteStateByWorktreeId[worktree.id])
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
@@ -763,6 +767,7 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
               <WorktreeOpenInSubMenu
                 worktreePath={worktree.path}
                 connectionId={repo?.connectionId ?? null}
+                runtimeEnvironmentId={runtimeEnvironmentId}
                 disabled={isDeleting}
               />
               <DropdownMenuItem onClick={handleCopyPath} disabled={isDeleting}>

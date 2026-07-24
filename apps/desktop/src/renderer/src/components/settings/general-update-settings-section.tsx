@@ -10,6 +10,7 @@ import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-che
 
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
+import { GeneralRemoteServerUpdates } from './general-remote-server-updates'
 import { SearchableSetting } from './searchable-setting'
 import { SettingsSubsectionHeader } from './settings-form-controls'
 
@@ -244,6 +245,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 ))}
         </p>
       </SearchableSetting>
+      <GeneralRemoteServerUpdates />
     </section>
   )
 }

@@ -1,6 +1,9 @@
 import {
   interpretSourceControlHostedReviewCreateResult,
+  isBehindOnlyUpstream,
+  resolveCreateReviewIntentEligibility,
   resolveSourceControlCommitAreaPrimaryActionDecision,
+  resolveSourceControlPrimaryActionDecision,
   resolveSourceControlOperationFollowUp,
   resolveSourceControlRemoteOperationFailureOutcome,
   resolveSourceControlReviewRemoteStep,
@@ -112,6 +115,51 @@ describe('source-control workflow', () => {
         allowPublishWhenCommitCountUnknown: true
       })
     ).toBe('publish')
+
+    const behindOnly = { hasUpstream: true, ahead: 0, behind: 2 }
+    expect(isBehindOnlyUpstream(behindOnly)).toBe(true)
+    expect(
+      resolveCreateReviewIntentEligibility({
+        stagedCount: 0,
+        hasStageableChanges: false,
+        hasMessage: false,
+        hasUnresolvedConflicts: false,
+        upstreamStatus: behindOnly,
+        hostedReviewCreation: {
+          provider: 'gitlab',
+          review: null,
+          canCreate: false,
+          blockedReason: 'needs_sync',
+          nextAction: 'sync'
+        }
+      })
+    ).toEqual({ eligible: true, kind: 'needs_sync' })
+    expect(
+      resolveSourceControlPrimaryActionDecision(
+        primaryActionInputs({
+          upstreamStatus: behindOnly,
+          hostedReviewCreation: {
+            provider: 'gitlab',
+            review: null,
+            canCreate: false,
+            blockedReason: 'needs_sync',
+            nextAction: 'sync'
+          }
+        })
+      )
+    ).toMatchObject({ kind: 'create_review_intent', disabled: false })
+    expect(
+      resolveSourceControlReviewRemoteStep({
+        upstreamStatus: behindOnly,
+        hostedReviewCreation: { canCreate: false, blockedReason: 'needs_sync' }
+      })
+    ).toBe('fast_forward')
+    expect(
+      resolveSourceControlReviewRemoteStep({
+        upstreamStatus: { hasUpstream: true, ahead: 1, behind: 2 },
+        hostedReviewCreation: { canCreate: false, blockedReason: 'needs_sync' }
+      })
+    ).toBe('blocked')
 
     expect(
       resolveSourceControlOperationFollowUp({ operation: 'push', outcome: 'rejected_push' })

@@ -113,7 +113,11 @@ import type {
   RuntimeTerminalPresentation
 } from '../shared/runtime-types'
 import type { SetupScriptImportCandidate } from '../shared/setup-script-imports'
-import type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
+import type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control-ai'
@@ -280,7 +284,11 @@ import type {
   TransferYiruProfileProjectResult
 } from '../shared/yiru-profiles'
 
-export type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
+export type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../shared/shell-open-types'
 
 type RuntimeEnvironmentSubscriptionHandle = {
   unsubscribe: () => void
@@ -1182,6 +1190,7 @@ export type PreloadApi = {
       cwd?: string
       cwdFallback?: 'worktree'
       env?: Record<string, string>
+      envToDelete?: string[]
       command?: string
       launchConfig?: SleepingAgentLaunchConfig
       launchToken?: string
@@ -1898,7 +1907,10 @@ export type PreloadApi = {
   shell: {
     openPath: (path: string) => Promise<void>
     openInFileManager: (path: string) => Promise<ShellOpenLocalPathResult>
-    openInExternalEditor: (path: string, command?: string) => Promise<ShellOpenLocalPathResult>
+    openInExternalEditor: {
+      (request: ShellOpenExternalEditorRequest): Promise<ShellOpenExternalEditorResult>
+      (path: string, command?: string): Promise<ShellOpenLocalPathResult>
+    }
     openUrl: (url: string) => Promise<void>
     openFilePath: (path: string) => Promise<boolean>
     openFileUri: (uri: string) => Promise<void>
@@ -2078,6 +2090,10 @@ export type PreloadApi = {
       filePath: string
       connectionId: string
     }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
+    downloadFolder: (args: {
+      dirPath: string
+      connectionId: string
+    }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
     saveDownloadedFile: (args: {
       suggestedName: string
       content: string
@@ -2096,6 +2112,26 @@ export type PreloadApi = {
       transferId: string
     }) => Promise<{ canceled: false; destinationPath: string }>
     cancelDownloadedFile: (args: { transferId: string }) => Promise<{ ok: true }>
+    startDownloadedFolder: (args: {
+      suggestedName: string
+    }) => Promise<
+      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
+    >
+    createDownloadedFolderDirectory: (args: {
+      transferId: string
+      pathSegments: string[]
+    }) => Promise<{ ok: true }>
+    appendDownloadedFolderFileChunk: (args: {
+      transferId: string
+      pathSegments: string[]
+      contentBase64: string
+      first: boolean
+      last: boolean
+    }) => Promise<{ ok: true }>
+    finishDownloadedFolder: (args: {
+      transferId: string
+    }) => Promise<{ canceled: false; destinationPath: string }>
+    cancelDownloadedFolder: (args: { transferId: string }) => Promise<{ ok: true }>
     listMarkdownDocuments: (args: {
       rootPath: string
       connectionId?: string
