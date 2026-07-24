@@ -179,7 +179,7 @@ export function SettingsSidebar({
       className="worktree-sidebar-theme border-sidebar-border bg-sidebar flex w-[var(--settings-sidebar-width)] shrink-0 flex-col border-r pt-9"
       style={appearanceStyle}
     >
-      <div className="border-sidebar-border border-b px-3 py-3">
+      <div className="border-sidebar-border border-b px-3 pt-2 pb-3">
         <Button
           variant="ghost"
           size="sm"
