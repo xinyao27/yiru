@@ -257,6 +257,7 @@ export function EditorPanelHeader({
               {previousChangeShortcut.keys.length > 0 && (
                 <ShortcutKeyCombo
                   keys={previousChangeShortcut.keys}
+                  variant="inverted"
                   doubleTap={previousChangeShortcut.doubleTap}
                   className="ml-1.5"
                 />
@@ -287,6 +288,7 @@ export function EditorPanelHeader({
               {nextChangeShortcut.keys.length > 0 && (
                 <ShortcutKeyCombo
                   keys={nextChangeShortcut.keys}
+                  variant="inverted"
                   doubleTap={nextChangeShortcut.doubleTap}
                   className="ml-1.5"
                 />

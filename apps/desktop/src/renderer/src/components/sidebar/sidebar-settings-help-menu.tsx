@@ -180,10 +180,11 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             {settingsShortcut.keys.length > 0 ? (
               <ShortcutKeyCombo
                 keys={settingsShortcut.keys}
+                variant="inverted"
                 doubleTap={settingsShortcut.doubleTap}
                 className="gap-0.5"
-                keyCapClassName="min-w-0 border-background/20 bg-background/10 px-1 py-0 text-[10px] text-background "
-                separatorClassName="text-[10px] text-background/70"
+                keyCapClassName="min-w-0 px-1 py-0 text-[10px]"
+                separatorClassName="text-[10px]"
               />
             ) : null}
           </TooltipContent>

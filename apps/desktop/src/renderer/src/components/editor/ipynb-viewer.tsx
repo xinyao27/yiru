@@ -302,7 +302,11 @@ function NotebookHeaderButton({
         <span className="flex items-center gap-2">
           <span>{label}</span>
           {shortcut && shortcut.keys.length > 0 ? (
-            <ShortcutKeyCombo keys={shortcut.keys} doubleTap={shortcut.doubleTap} />
+            <ShortcutKeyCombo
+              keys={shortcut.keys}
+              variant="inverted"
+              doubleTap={shortcut.doubleTap}
+            />
           ) : null}
         </span>
       </TooltipContent>

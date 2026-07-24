@@ -317,8 +317,9 @@ export function RightPanelCommentComposer({
                 <span>{submitLabel}</span>
                 <ShortcutKeyCombo
                   keys={[isMac ? '⌘' : 'Ctrl', 'Enter']}
+                  variant="inverted"
                   className="shrink text-[10px] [&_span]:min-w-0 [&_span]:px-1"
-                  separatorClassName="mx-0 text-[10px] text-muted-foreground"
+                  separatorClassName="mx-0 text-[10px]"
                 />
               </span>
             )}

@@ -71,7 +71,11 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
             <TooltipContent side="top" sideOffset={6} className="flex items-center gap-2">
               <span>{item.title}</span>
               {shortcut && shortcut.keys.length > 0 ? (
-                <ShortcutKeyCombo keys={shortcut.keys} doubleTap={shortcut.doubleTap} />
+                <ShortcutKeyCombo
+                  keys={shortcut.keys}
+                  variant="inverted"
+                  doubleTap={shortcut.doubleTap}
+                />
               ) : null}
             </TooltipContent>
           </Tooltip>

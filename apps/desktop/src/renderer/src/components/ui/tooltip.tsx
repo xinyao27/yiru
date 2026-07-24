@@ -2,11 +2,6 @@ import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
 
 import { cn } from '@/lib/class-names'
 
-// Why: shortcut caps use default-surface colors, while tooltips invert the app
-// surface. Adapt nested caps here so every tooltip keeps its shortcut visible.
-const TOOLTIP_SHORTCUT_CLASSES =
-  '[&_[data-slot=shortcut-key-cap]]:border-background/20 [&_[data-slot=shortcut-key-cap]]:bg-background/10 [&_[data-slot=shortcut-key-cap]]:text-background [&_[data-slot=shortcut-key-separator]]:text-background/70'
-
 function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
   return <TooltipPrimitive.Provider delay={delay} {...props} />
 }
@@ -54,7 +49,6 @@ function TooltipContent({
           data-slot="tooltip-content"
           className={cn(
             'pointer-events-none z-[90] w-fit origin-(--transform-origin) rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background transition-[opacity,transform,scale] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 data-[side=bottom]:data-starting-style:-translate-y-2 data-[side=left]:data-starting-style:translate-x-2 data-[side=right]:data-starting-style:-translate-x-2 data-[side=top]:data-starting-style:translate-y-2',
-            TOOLTIP_SHORTCUT_CLASSES,
             className
           )}
           {...props}
