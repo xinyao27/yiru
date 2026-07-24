@@ -640,10 +640,12 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
   let windowsFallbackAttempts: WindowsShellSpawnAttempt[] = []
   const startupAgentRecognition = recognizeAgentProcessFromCommandLine(opts.command)
   const isCodexStartupCommand = startupAgentRecognition?.agent === 'codex'
-  if (opts.command && startupAgentRecognition) {
-    assertSafeAgentStartupCwd(opts.cwd, opts.command)
-  }
+  // Why: validate the effective cwd after fallback; raw undefined is not the
+  // root-like path that the agent startup guard is intended to reject.
   const requestedCwd = opts.cwd || getDefaultCwd()
+  if (opts.command && startupAgentRecognition) {
+    assertSafeAgentStartupCwd(requestedCwd, opts.command)
+  }
   let spawnCwd = requestedCwd
   let validationCwd = spawnCwd
 

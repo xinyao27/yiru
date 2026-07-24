@@ -91,6 +91,7 @@ import {
   getRepoIdFromWorktreeId,
   type WorktreeSlice
 } from './worktree-helpers'
+import { reconcileHydratedWorktreeReferences } from './worktree-hydration-reconciliation'
 import { routeListingBranchSwitchesThroughGitIdentity } from './worktree-listing-branch-switch'
 export type { WorktreeSlice, WorktreeDeleteState } from './worktree-helpers'
 
@@ -4325,46 +4326,12 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
 
   pruneLastVisitedTimestamps: () => {
     set((s) => {
-      // Why: scope pruning per-repo. SSH-backed repos cannot enumerate
-      // worktrees until their connection is established, so at hydration
-      // time worktreesByRepo[sshRepoId] is empty/undefined. If we pruned
-      // globally based on the union of all repos' worktrees, we would wipe
-      // every persisted focus-recency entry for SSH worktrees — precisely
-      // the set this feature exists to preserve. Instead, only drop entries
-      // whose repo has a populated worktree list: a missing repoId means
-      // "not yet hydrated" (defer), a repoId with an empty list after a
-      // successful listing means the worktree really is gone (drop).
-      // The ssh:state-changed 'connected' handler re-fetches worktrees and
-      // a follow-up prune runs from the same site if needed.
-      const validIdsByRepo = new Map<string, Set<string>>()
-      for (const [repoId, list] of Object.entries(s.worktreesByRepo)) {
-        if (s.detectedWorktreesByRepo[repoId]) {
-          continue
-        }
-        validIdsByRepo.set(repoId, new Set(list.map((worktree) => worktree.id)))
-      }
-      for (const [repoId, result] of Object.entries(s.detectedWorktreesByRepo)) {
-        if (result.authoritative) {
-          validIdsByRepo.set(repoId, new Set(result.worktrees.map((worktree) => worktree.id)))
-        }
-      }
-      let changed = false
-      const next: Record<string, number> = {}
-      for (const [id, ts] of Object.entries(s.lastVisitedAtByWorktreeId)) {
-        const repoId = getRepoIdFromWorktreeId(id)
-        const repoIds = validIdsByRepo.get(repoId)
-        if (!repoIds) {
-          // Repo not yet hydrated (e.g. SSH not connected). Keep the entry.
-          next[id] = ts
-          continue
-        }
-        if (repoIds.has(id)) {
-          next[id] = ts
-        } else {
-          changed = true
-        }
-      }
-      return changed ? { lastVisitedAtByWorktreeId: next } : {}
+      return reconcileHydratedWorktreeReferences({
+        worktreesByRepo: s.worktreesByRepo,
+        detectedWorktreesByRepo: s.detectedWorktreesByRepo,
+        lastVisitedAtByWorktreeId: s.lastVisitedAtByWorktreeId,
+        activeWorktreeId: s.activeWorktreeId
+      })
     })
   },
 

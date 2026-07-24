@@ -80,6 +80,23 @@ function hasRestorableStablePanePty(
   )
 }
 
+function stablePaneHasLivePty(
+  tabId: string,
+  leafId: string,
+  ptyIdsByTabId: Record<string, string[] | undefined>,
+  layout: TerminalLayoutSnapshot | undefined
+): boolean {
+  const livePtyIds = ptyIdsByTabId[tabId] ?? []
+  if (livePtyIds.length === 0) {
+    return false
+  }
+  const leafPtyId = layout?.ptyIdsByLeafId?.[leafId]
+  if (leafPtyId) {
+    return livePtyIds.includes(leafPtyId)
+  }
+  return layout?.root?.type === 'leaf' && layout.root.leafId === leafId
+}
+
 function paneWillConnectOnActivation(
   worktreeId: string,
   tabId: string,
@@ -119,6 +136,18 @@ export function recordPaneIsOwnedByPreservedPane(
       return false
     }
     if (isPassiveCompletedHibernationEvidence(record)) {
+      return true
+    }
+    // Why: a live PTY already owns its provider session even when its
+    // background pane will not reconnect through the activation path.
+    if (
+      stablePaneHasLivePty(
+        tabId,
+        stable.leafId,
+        state.ptyIdsByTabId,
+        state.terminalLayoutsByTabId[tabId]
+      )
+    ) {
       return true
     }
     // Why: active sessions rely on pane-level cold restore. A preserved leaf

@@ -1,8 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
+import { getBranchPrefixIssue } from '../../../../shared/branch-prefix'
 import type { SourceControlAiSettingsPatch } from '../../../../shared/source-control-ai-types'
 import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from '../../../../shared/source-control-group-order'
 import type { GlobalSettings, SourceControlGroupOrder } from '../../../../shared/types'
@@ -11,6 +14,7 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { AutoRenameBranchFromWorkSetting } from './auto-rename-branch-from-work-setting'
 import { getAutoRenameBranchSearchEntries } from './auto-rename-branch-search'
+import { BranchPrefixFeedback } from './branch-prefix-feedback'
 import {
   CompareAgainstUpstreamSetting,
   compareAgainstUpstreamMatchesSearch
@@ -147,6 +151,18 @@ export function GitPane({
   const storeSearchQuery = useAppStore((s) => s.settingsSearchQuery)
   const searchQuery = settingsSearchQuery ?? storeSearchQuery
   const keepLocalMainUpToDateTitle = getKeepLocalMainUpToDateTitle()
+  // Why: settings persistence can round-trip over SSH; a local draft prevents
+  // delayed store echoes from moving the caret or overwriting fast input.
+  const [customPrefixDraft, setCustomPrefixDraft] = useState(settings.branchPrefixCustom)
+  const lastCommittedPrefixRef = useRef(settings.branchPrefixCustom)
+  useEffect(() => {
+    if (settings.branchPrefixCustom !== lastCommittedPrefixRef.current) {
+      lastCommittedPrefixRef.current = settings.branchPrefixCustom
+      setCustomPrefixDraft(settings.branchPrefixCustom)
+    }
+  }, [settings.branchPrefixCustom])
+  const branchPrefixInputValue =
+    settings.branchPrefix === 'git-username' ? displayedGitUsername : customPrefixDraft
 
   const visibleSections = [
     matchesSettingsSearch(searchQuery, {
@@ -203,12 +219,13 @@ export function GitPane({
         </div>
         {(settings.branchPrefix === 'custom' || settings.branchPrefix === 'git-username') && (
           <Input
-            value={
-              settings.branchPrefix === 'git-username'
-                ? displayedGitUsername
-                : settings.branchPrefixCustom
-            }
-            onChange={(e) => updateSettings({ branchPrefixCustom: e.target.value })}
+            value={branchPrefixInputValue}
+            onChange={(e) => {
+              const nextPrefix = e.target.value
+              lastCommittedPrefixRef.current = nextPrefix
+              setCustomPrefixDraft(nextPrefix)
+              updateSettings({ branchPrefixCustom: nextPrefix })
+            }}
             placeholder={
               settings.branchPrefix === 'git-username'
                 ? translate(
@@ -219,7 +236,11 @@ export function GitPane({
             }
             className="max-w-xs"
             readOnly={settings.branchPrefix === 'git-username'}
+            aria-invalid={getBranchPrefixIssue(branchPrefixInputValue) !== null}
           />
+        )}
+        {(settings.branchPrefix === 'custom' || settings.branchPrefix === 'git-username') && (
+          <BranchPrefixFeedback rawPrefix={branchPrefixInputValue} />
         )}
       </SearchableSetting>
     ) : null,

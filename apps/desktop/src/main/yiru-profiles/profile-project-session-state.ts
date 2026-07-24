@@ -2,12 +2,11 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import { getDefaultWorkspaceSession } from '../../shared/constants'
 import type { WorkspaceSessionState } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace-scope'
-import {
-  isRepoWorktreeId,
-  ownerKeyBelongsToRepo,
-  removeRepoWorktreeRecord
-} from './profile-project-worktree-identity'
+
+export {
+  removeRepoFromHostWorkspaceSessions,
+  removeRepoFromWorkspaceSession
+} from '../persisted-state/workspace-session-owner-removal'
 
 export function mergeHostWorkspaceSessions(
   existing: Partial<Record<ExecutionHostId, WorkspaceSessionState>> | undefined,
@@ -83,74 +82,4 @@ export function mergeWorkspaceSessions(
     activeWorkspaceKey: base.activeWorkspaceKey ?? incoming.activeWorkspaceKey,
     activeTabId: base.activeTabId ?? incoming.activeTabId
   }
-}
-
-export function removeRepoFromHostWorkspaceSessions(
-  sessions: Partial<Record<ExecutionHostId, WorkspaceSessionState>> | undefined,
-  repoId: string
-): Partial<Record<ExecutionHostId, WorkspaceSessionState>> {
-  const next: Partial<Record<ExecutionHostId, WorkspaceSessionState>> = {}
-  for (const [hostId, session] of Object.entries(sessions ?? {})) {
-    next[hostId as ExecutionHostId] = removeRepoFromWorkspaceSession(session, repoId)
-  }
-  return next
-}
-
-export function removeRepoFromWorkspaceSession(
-  session: WorkspaceSessionState | undefined,
-  repoId: string
-): WorkspaceSessionState {
-  const next = structuredClone(session ?? getDefaultWorkspaceSession())
-  const removedTerminalTabIds = new Set<string>()
-  for (const [ownerKey, tabs] of Object.entries(next.tabsByWorktree)) {
-    if (!ownerKeyBelongsToRepo(ownerKey, repoId)) {
-      continue
-    }
-    tabs.forEach((tab) => removedTerminalTabIds.add(tab.id))
-    delete next.tabsByWorktree[ownerKey]
-  }
-  for (const tabId of removedTerminalTabIds) {
-    delete next.terminalLayoutsByTabId[tabId]
-  }
-  next.openFilesByWorktree = removeRepoWorktreeRecord(next.openFilesByWorktree, repoId)
-  next.activeFileIdByWorktree = removeRepoWorktreeRecord(next.activeFileIdByWorktree, repoId)
-  const removedBrowserWorkspaceIds = new Set<string>()
-  for (const [ownerKey, workspaces] of Object.entries(next.browserTabsByWorktree ?? {})) {
-    if (!ownerKeyBelongsToRepo(ownerKey, repoId)) {
-      continue
-    }
-    workspaces.forEach((workspace) => removedBrowserWorkspaceIds.add(workspace.id))
-    delete next.browserTabsByWorktree![ownerKey]
-  }
-  if (next.browserPagesByWorkspace) {
-    for (const workspaceId of removedBrowserWorkspaceIds) {
-      delete next.browserPagesByWorkspace[workspaceId]
-    }
-  }
-  next.activeBrowserTabIdByWorktree = removeRepoWorktreeRecord(
-    next.activeBrowserTabIdByWorktree,
-    repoId
-  )
-  next.activeTabTypeByWorktree = removeRepoWorktreeRecord(next.activeTabTypeByWorktree, repoId)
-  next.activeTabIdByWorktree = removeRepoWorktreeRecord(next.activeTabIdByWorktree, repoId)
-  next.unifiedTabs = removeRepoWorktreeRecord(next.unifiedTabs, repoId)
-  next.tabGroups = removeRepoWorktreeRecord(next.tabGroups, repoId)
-  next.tabGroupLayouts = removeRepoWorktreeRecord(next.tabGroupLayouts, repoId)
-  next.activeGroupIdByWorktree = removeRepoWorktreeRecord(next.activeGroupIdByWorktree, repoId)
-  next.lastVisitedAtByWorktreeId = removeRepoWorktreeRecord(next.lastVisitedAtByWorktreeId, repoId)
-  next.defaultTerminalTabsAppliedByWorktreeId = removeRepoWorktreeRecord(
-    next.defaultTerminalTabsAppliedByWorktreeId,
-    repoId
-  )
-  if (next.activeWorktreeId && isRepoWorktreeId(repoId, next.activeWorktreeId)) {
-    next.activeWorktreeId = null
-  }
-  const activeScope = next.activeWorkspaceKey ? parseWorkspaceKey(next.activeWorkspaceKey) : null
-  if (activeScope?.type === 'worktree' && isRepoWorktreeId(repoId, activeScope.worktreeId)) {
-    next.activeWorkspaceKey = null
-  }
-  next.activeWorktreeIdsOnShutdown = next.activeWorktreeIdsOnShutdown?.filter(
-    (worktreeId) => !isRepoWorktreeId(repoId, worktreeId)
-  )
-  return next
 }

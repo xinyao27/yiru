@@ -86,6 +86,7 @@ import {
 import { isFloatingWorkspaceWorktreeId } from '../../../../src/session/floating-workspace'
 import { resolveMarkdownFloatingActionsBottom } from '../../../../src/session/markdown-floating-actions-layout'
 import { MobileBrowserTabActionSheet } from '../../../../src/session/mobile-browser-tab-action-sheet'
+import { sendMobileBufferedTerminalInput } from '../../../../src/session/mobile-buffered-terminal-send'
 import {
   addMobileDiffComment,
   formatDiffComments,
@@ -3179,19 +3180,16 @@ export default function SessionScreen() {
     setInput('')
 
     try {
-      await client.sendRequest('terminal.send', {
+      const outcome = await sendMobileBufferedTerminalInput({
+        client,
         terminal: activeHandle,
         text,
-        enter: true,
-        // Why: presence-lock take-floor signal. Identifies this phone as
-        // the active mobile actor so the runtime can resolve multi-mobile
-        // contention (most-recent-actor's viewport wins).
-        ...(deviceTokenRef.current
-          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-          : {})
+        deviceToken: deviceTokenRef.current
       })
-    } catch {
-      setInput(text)
+      // Why: restoring an unknown, possibly delivered command invites duplicate retries.
+      if (outcome === 'rejected' && activeHandleRef.current === activeHandle) {
+        setInput(text)
+      }
     } finally {
       sendingRef.current = false
     }

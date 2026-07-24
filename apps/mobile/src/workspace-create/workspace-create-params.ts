@@ -1,3 +1,4 @@
+import { WORKSPACE_CREATE_STARTUP_AGENT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { getWorkspaceSourceName } from '@yiru/workbench-model/workspace'
 import type {
@@ -29,6 +30,30 @@ export type WorkspaceCreateReviewItem =
     }
 
 export type WorkspaceCreateParams = Record<string, unknown>
+
+export function buildMobileWorkspaceAgentLaunchFields(args: {
+  agentId: TuiAgent | undefined
+  startupCommand: string | undefined
+  hostCapabilities: readonly string[] | undefined
+}): {
+  startupAgent?: TuiAgent
+  startupCommand?: string
+  createdWithAgent?: TuiAgent
+} {
+  if (!args.agentId) {
+    return {}
+  }
+  if (args.hostCapabilities?.includes(WORKSPACE_CREATE_STARTUP_AGENT_RUNTIME_CAPABILITY)) {
+    return { startupAgent: args.agentId, createdWithAgent: args.agentId }
+  }
+  // Why: while capability support is unknown, send both forms. New hosts prefer
+  // startupAgent; old hosts strip that unknown field and retain startupCommand.
+  return {
+    ...(args.hostCapabilities === undefined ? { startupAgent: args.agentId } : {}),
+    ...(args.startupCommand ? { startupCommand: args.startupCommand } : {}),
+    createdWithAgent: args.agentId
+  }
+}
 
 export function buildReviewWorkspaceCreateParams(args: {
   item: WorkspaceCreateReviewItem

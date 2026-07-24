@@ -4754,6 +4754,11 @@
           "273e7e81fe": "Configuraciones",
           "1f744a72f4": "configuración"
         },
+        "BranchPrefixFeedback": {
+          "6c40c0908f": "El prefijo no puede contener espacios ni caracteres reservados de Git como ~ ^ : ? * [ o \\",
+          "64d70b156a": "Las ramas se llamarán {{example}}",
+          "808f9a726e": "No se aplicará ningún prefijo"
+        },
         "GitPane": {
           "e02ea23a32": "Atribución de Yiru",
           "e71ce09c42": "yiru",
@@ -5346,6 +5351,7 @@
           "removeSetup": "Eliminar",
           "hostSetupBlockedVersion": "La versión del servidor Yiru no es compatible",
           "hostSetupMissingCapability": "Actualiza Yiru en este host para configurar proyectos",
+          "hostSetupConnectionRequired": "Conecta este host antes de importar o clonar el proyecto",
           "setupProjectOnHost": "Configurar en otro host",
           "setupProjectOnHostHelp": "Elige un host y luego importa un checkout existente, clona el repositorio allí o registra una configuración que se aprovisionará más tarde.",
           "setupExistingFolder": "Importar carpeta existente",

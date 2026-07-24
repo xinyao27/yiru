@@ -11,6 +11,7 @@ type Props = {
   routeVisible: boolean
   client: RpcClient | null
   hostId?: string
+  hostCapabilities?: readonly string[]
   existingWorktreePaths?: readonly string[]
   existingWorktrees?: readonly { repoId: string; branch: string }[]
   onVisibleChange?: (visible: boolean) => void
@@ -24,6 +25,7 @@ export const NewWorktreeModalController = forwardRef<NewWorktreeModalControllerH
       routeVisible,
       client,
       hostId,
+      hostCapabilities,
       existingWorktreePaths,
       existingWorktrees,
       onVisibleChange,
@@ -59,6 +61,7 @@ export const NewWorktreeModalController = forwardRef<NewWorktreeModalControllerH
         visible={visible}
         client={client}
         hostId={hostId}
+        hostCapabilities={hostCapabilities}
         existingWorktreePaths={existingWorktreePaths}
         existingWorktrees={existingWorktrees}
         onCreated={onCreated}

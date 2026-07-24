@@ -52,6 +52,7 @@ import {
 } from '@yiru/workbench-model/ui'
 import {
   getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
@@ -105,6 +106,7 @@ import type {
   AutomationUpdateInput,
   AutomationWorkspaceMode
 } from '../../shared/automations-types'
+import type { BranchPrefixSettings } from '../../shared/branch-prefix'
 import {
   addClaudeTeammateModeAuto,
   addClaudeTeammateModeInProcess,
@@ -469,7 +471,7 @@ import { detectInstalledAgentsWithShellPathHydration, detectRemoteAgents } from 
 import { normalizeSparseDirectories } from '../ipc/sparse-checkout-directories'
 import { acquireWatcherRemovalGate } from '../ipc/watcher-removal-gate'
 import {
-  computeBranchName,
+  computeValidatedBranchName,
   computeWorktreePath,
   computeWorkspaceRoot,
   ensurePathWithinWorkspace,
@@ -584,6 +586,7 @@ import {
   UNREGISTERED_MISSING_WORKTREE_MESSAGE
 } from '../worktree-removal-safety'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'
+import { persistExistingWorktreeSortOrder } from '../worktree-sort-order-persistence'
 import { ClaudeAgentTeamsService } from './claude-agent-teams-service'
 import type {
   AgentTeamsTmuxCompatRequest,
@@ -594,6 +597,10 @@ import {
   ensureClaudeAgentTeamsShimDir,
   resolveClaudeAgentTeamsShimBin
 } from './claude-agent-teams-shim-env'
+import {
+  collectLiveRepoIdsForHost,
+  shouldHydratePersistedWorktreeSession
+} from './headless-session-repo-hydration'
 import {
   buildHeadlessTabGroupMove,
   buildHeadlessTabGroupSplit
@@ -710,7 +717,7 @@ type RuntimeStore = {
     nestWorkspaces: boolean
     refreshLocalBaseRefOnWorktreeCreate: boolean
     localBaseRefSuggestionDismissed?: boolean
-    branchPrefix: string
+    branchPrefix: GlobalSettings['branchPrefix']
     branchPrefixCustom: string
     defaultTuiAgent?: GlobalSettings['defaultTuiAgent']
     disabledTuiAgents?: GlobalSettings['disabledTuiAgents']
@@ -1521,12 +1528,12 @@ async function resolveCreateBranchName(
   repoPath: string,
   branchNameOverride: string | undefined,
   sanitizedName: string,
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   username: string | null,
   gitOptions: { wslDistro?: string } = {}
 ): Promise<string> {
   if (!branchNameOverride) {
-    return computeBranchName(sanitizedName, settings, username)
+    return computeValidatedBranchName(sanitizedName, settings, username)
   }
   if (branchNameOverride.startsWith('-')) {
     throw new Error('Branch name must not start with "-"')
@@ -2891,7 +2898,14 @@ export class YiruRuntimeService {
       worktreeId !== undefined
         ? ([[worktreeId, session.tabsByWorktree[worktreeId] ?? []]] as const)
         : Object.entries(session.tabsByWorktree ?? {})
+    const liveRepoIds = collectLiveRepoIdsForHost(
+      this.store?.getRepos() ?? [],
+      LOCAL_EXECUTION_HOST_ID
+    )
     for (const [entryWorktreeId, persistedTabs] of entries) {
+      if (!shouldHydratePersistedWorktreeSession(entryWorktreeId, liveRepoIds)) {
+        continue
+      }
       const existing = this.mobileSessionTabsByWorktree.get(entryWorktreeId)
       if (
         existing &&
@@ -15546,12 +15560,7 @@ export class YiruRuntimeService {
     if (!this.store) {
       throw new Error('runtime_unavailable')
     }
-    const now = Date.now()
-    let updated = 0
-    for (let i = 0; i < orderedIds.length; i++) {
-      this.store.setWorktreeMeta(orderedIds[i], { sortOrder: now - i * 1000 })
-      updated++
-    }
+    const updated = persistExistingWorktreeSortOrder(this.store, orderedIds)
     this.invalidateResolvedWorktreeCache()
     this.notifyReposChanged()
     return { updated }

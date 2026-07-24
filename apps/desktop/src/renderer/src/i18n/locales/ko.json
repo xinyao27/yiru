@@ -4739,6 +4739,11 @@
           "273e7e81fe": "구성",
           "1f744a72f4": "구성"
         },
+        "BranchPrefixFeedback": {
+          "6c40c0908f": "접두사에는 공백이나 ~ ^ : ? * [ \\ 같은 Git 예약 문자를 사용할 수 없습니다",
+          "64d70b156a": "브랜치 이름은 {{example}}(으)로 지정됩니다",
+          "808f9a726e": "접두사가 적용되지 않습니다"
+        },
         "GitPane": {
           "e02ea23a32": "Yiru 표기",
           "e71ce09c42": "yiru",
@@ -5331,6 +5336,7 @@
           "removeSetup": "제거",
           "hostSetupBlockedVersion": "Yiru 서버 버전이 호환되지 않습니다.",
           "hostSetupMissingCapability": "프로젝트를 설정하려면 이 호스트의 Yiru를 업데이트하세요.",
+          "hostSetupConnectionRequired": "프로젝트를 가져오거나 클론하기 전에 이 호스트에 연결하세요.",
           "setupProjectOnHost": "다른 호스트에 설정",
           "setupProjectOnHostHelp": "호스트를 선택한 뒤 기존 체크아웃을 가져오거나, repos를 클론하거나, 나중에 준비될 설정을 추적합니다.",
           "setupExistingFolder": "기존 폴더 가져오기",

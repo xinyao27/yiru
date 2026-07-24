@@ -26,6 +26,10 @@ export const MIN_COMPATIBLE_RUNTIME_SERVER_VERSION = 2
 export const PROJECT_HOST_SETUP_RUNTIME_CAPABILITY = 'project-host-setup.v1' as const
 export const PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY = 'project-source-context.v1' as const
 export const WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY = 'workspace-run-context.v1' as const
+// Why: Mobile must only delegate agent launch quoting/permission policy to
+// hosts that understand worktree.create.startupAgent; older hosts need a command.
+export const WORKSPACE_CREATE_STARTUP_AGENT_RUNTIME_CAPABILITY =
+  'workspace-create.startup-agent.v1' as const
 export const REMOTE_RUNTIME_SHARED_CONTROL_CAPABILITY = 'remote-runtime.shared-control.v1' as const
 export const FOLDER_WORKSPACE_PATH_STATUS_RUNTIME_CAPABILITY =
   'folder-workspace.path-status.v1' as const
@@ -60,6 +64,7 @@ export const RUNTIME_CAPABILITIES = [
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
   PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY,
+  WORKSPACE_CREATE_STARTUP_AGENT_RUNTIME_CAPABILITY,
   FOLDER_WORKSPACE_PATH_STATUS_RUNTIME_CAPABILITY,
   AI_VAULT_RUNTIME_CAPABILITY,
   TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY,

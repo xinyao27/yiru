@@ -20,10 +20,7 @@ import {
   resolveGitBashPath,
   resolveWindowsGitBashShellPath
 } from '../git-bash'
-import {
-  captureDescendantSnapshot,
-  terminateDescendantSnapshot
-} from '../pty-descendant-termination'
+import { killWithDescendantSweep } from '../pty-descendant-termination'
 import { removeAppImageRuntimeEnv } from '../pty/appimage-terminal-env'
 import { isHostCodexHomeForWsl, isWslCodexHomeForHost } from '../pty/codex-home-wsl-env'
 import { forceKillPosixPtyProcessGroups } from '../pty/posix-pty-process-groups'
@@ -1069,22 +1066,25 @@ export class LocalPtyProvider implements IPtyProvider {
     operation: PtyShutdownOperation
   ): Promise<void> {
     const physicalExit = ptyPhysicalExits.get(id)
-    // Why: the snapshot must precede any signal — once the shell dies,
-    // surviving descendants reparent to pid 1 and a ppid walk can't find them.
-    const descendants = ptyAgentSessionIds.has(id)
-      ? await captureDescendantSnapshot(proc.pid)
-      : null
-    // Why: a natural exit can race the snapshot. Never signal descendants or
-    // a root PID after this exact PTY has lost ownership.
-    if (ptyProcesses.get(id) === proc) {
-      if (descendants) {
-        terminateDescendantSnapshot(descendants)
+    const signalRoot = (): void => {
+      // Why: a natural exit can race the sweep; never signal after ownership is lost.
+      if (ptyProcesses.get(id) !== proc) {
+        return
       }
       // Cancel startup delivery now, but preserve the exit listener and all
       // ownership maps until node-pty reports the physical process exit.
       runPtyCleanup(id)
       operation.rootSignalled = true
       this.requestTrackedPtyShutdown(id, proc, operation.immediate)
+    }
+    if (ptyAgentSessionIds.has(id)) {
+      // Why: POSIX needs a pre-kill snapshot; Windows needs taskkill /T so
+      // agent and MCP descendants cannot retain worktree directory handles.
+      await killWithDescendantSweep(proc.pid, signalRoot, {
+        ownsRoot: () => ptyProcesses.get(id) === proc
+      })
+    } else {
+      signalRoot()
     }
     await waitForPtyPhysicalExit(id, physicalExit)
   }

@@ -9,7 +9,9 @@ import type { RpcClient } from './rpc-client'
 import type { ConnectionState, RpcSuccess } from './types'
 
 export type HostStatusGates = {
-  hostCapabilities: string[]
+  // Undefined means status.get has not produced an authoritative answer yet;
+  // an empty array means the connected host explicitly advertised no capabilities.
+  hostCapabilities: string[] | undefined
   floatingWorkspaceEnabled: boolean
   compatVerdict: MobileRuntimeCompatVerdict
 }
@@ -18,8 +20,6 @@ type LoadedHostStatusGates = HostStatusGates & {
   hostId: string | undefined
   client: RpcClient
 }
-
-const EMPTY_HOST_CAPABILITIES: string[] = []
 
 export function deriveHostStatusGates(
   status: DesktopStatus & { capabilities?: string[] }
@@ -94,7 +94,7 @@ export function useHostStatusGates(args: {
     loaded.client !== client
   ) {
     return {
-      hostCapabilities: EMPTY_HOST_CAPABILITIES,
+      hostCapabilities: undefined,
       floatingWorkspaceEnabled: false,
       compatVerdict: { kind: 'ok' }
     }

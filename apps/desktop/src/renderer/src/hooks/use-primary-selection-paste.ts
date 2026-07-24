@@ -4,7 +4,8 @@ import { isLinuxUserAgent, isMacUserAgent } from '@/components/terminal-pane/pan
 import {
   readPrimarySelectionText,
   setPrimarySelectionEnabled,
-  setPrimarySelectionText
+  setPrimarySelectionText,
+  shouldSuppressPrimarySelectionNativePaste
 } from '@/lib/primary-selection'
 import { readCurrentPrimarySelectionText } from '@/lib/primary-selection-capture'
 import {
@@ -39,6 +40,15 @@ function suppressEvent(event: Event): void {
   event.preventDefault()
   event.stopPropagation()
   event.stopImmediatePropagation()
+}
+
+// Why: terminal-owned suppression is only for xterm's hidden input surface;
+// unrelated keyboard and context-menu pastes elsewhere must remain native.
+function isTerminalNativePasteTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    (target.classList.contains('xterm-helper-textarea') || target.closest('.xterm') !== null)
+  )
 }
 
 function isPrimarySelectionPasteTargetCurrent(
@@ -85,11 +95,20 @@ export function usePrimarySelectionPaste(enabled: boolean): void {
         typeof InputEvent !== 'function' ||
         !(event instanceof InputEvent) ||
         event.inputType === 'insertFromPaste'
+      if (!isPasteInputEvent) {
+        return
+      }
       if (
         pendingMiddleTarget &&
         Date.now() <= pendingMiddleUntil &&
-        targetMatchesPending(event.target) &&
-        isPasteInputEvent
+        targetMatchesPending(event.target)
+      ) {
+        suppressEvent(event)
+        return
+      }
+      if (
+        isTerminalNativePasteTarget(event.target) &&
+        shouldSuppressPrimarySelectionNativePaste()
       ) {
         suppressEvent(event)
       }

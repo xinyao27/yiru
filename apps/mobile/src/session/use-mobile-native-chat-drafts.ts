@@ -1,6 +1,12 @@
 import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
+import {
+  createMobileNativeChatUnconfirmedMatch,
+  findLandedMobileNativeChatUnconfirmedMatches,
+  type MobileNativeChatUnconfirmedMatch
+} from './mobile-native-chat-unconfirmed-reconcile'
+
 export type MobileNativeChatPendingMessage = {
   id: string
   text: string
@@ -14,6 +20,13 @@ export type MobileNativeChatSendOrigin = {
 }
 
 const NO_PENDING_MESSAGES: MobileNativeChatPendingMessage[] = []
+const UNCONFIRMED_SEND_DEADLINE_MS = 20_000
+
+type MobileNativeChatUnconfirmedSend = {
+  match: MobileNativeChatUnconfirmedMatch
+  text: string
+  deadline: ReturnType<typeof setTimeout>
+}
 
 function normalizedUserText(message: NativeChatMessage): string | null {
   if (message.role !== 'user') {
@@ -49,6 +62,11 @@ export function useMobileNativeChatDrafts(args: {
   pending: MobileNativeChatPendingMessage[]
   captureSendOrigin: (text: string) => MobileNativeChatSendOrigin | null
   acceptSend: (origin: MobileNativeChatSendOrigin, text: string) => void
+  holdUnconfirmedSend: (
+    origin: MobileNativeChatSendOrigin,
+    text: string,
+    onUnconfirmed: () => void
+  ) => void
 } {
   const { hostId, worktreeId, tabId, sessionId, messages } = args
   const draftKey = tabId ? `${hostId}\0${worktreeId}\0${tabId}` : null
@@ -60,6 +78,12 @@ export function useMobileNativeChatDrafts(args: {
   const pendingCounterRef = useRef(0)
   const messagesRef = useRef(messages)
   messagesRef.current = messages
+  const unconfirmedRef = useRef<MobileNativeChatUnconfirmedSend[]>([])
+  const activeDraftKeyRef = useRef(draftKey)
+  activeDraftKeyRef.current = draftKey
+  const activePendingKeyRef = useRef(pendingKey)
+  activePendingKeyRef.current = pendingKey
+  const mountedRef = useRef(false)
 
   const setComposerText: Dispatch<SetStateAction<string>> = useCallback(
     (value) => {
@@ -122,6 +146,92 @@ export function useMobileNativeChatDrafts(args: {
     })
   }, [])
 
+  const holdUnconfirmedSend = useCallback(
+    (origin: MobileNativeChatSendOrigin, text: string, onUnconfirmed: () => void): void => {
+      if (!mountedRef.current) {
+        return
+      }
+      const match = createMobileNativeChatUnconfirmedMatch(
+        origin,
+        unconfirmedRef.current.map((entry) => entry.match)
+      )
+      const landedImmediately = findLandedMobileNativeChatUnconfirmedMatches({
+        held: [match],
+        activeDraftKey: activeDraftKeyRef.current,
+        activePendingKey: activePendingKeyRef.current,
+        occurrenceCounts: new Map([
+          [
+            origin.normalizedText,
+            countUserTextOccurrences(messagesRef.current, origin.normalizedText)
+          ]
+        ])
+      })
+      if (landedImmediately.length > 0) {
+        setDrafts((previous) =>
+          (previous[origin.draftKey] ?? '').trim() === text.trim()
+            ? { ...previous, [origin.draftKey]: '' }
+            : previous
+        )
+        return
+      }
+      let entry: MobileNativeChatUnconfirmedSend
+      const deadline = setTimeout(() => {
+        unconfirmedRef.current = unconfirmedRef.current.filter((held) => held !== entry)
+        if (mountedRef.current) {
+          onUnconfirmed()
+        }
+      }, UNCONFIRMED_SEND_DEADLINE_MS)
+      entry = {
+        match,
+        text,
+        deadline
+      }
+      unconfirmedRef.current = [...unconfirmedRef.current, entry]
+    },
+    []
+  )
+
+  useEffect(() => {
+    const occurrenceCounts = new Map<string, number>()
+    for (const message of messages) {
+      const text = normalizedUserText(message)
+      if (text) {
+        occurrenceCounts.set(text, (occurrenceCounts.get(text) ?? 0) + 1)
+      }
+    }
+    const landedMatches = findLandedMobileNativeChatUnconfirmedMatches({
+      held: unconfirmedRef.current.map((entry) => entry.match),
+      activeDraftKey: draftKey,
+      activePendingKey: pendingKey,
+      occurrenceCounts
+    })
+    if (landedMatches.length === 0) {
+      return
+    }
+    const landedSet = new Set(landedMatches)
+    const landed = unconfirmedRef.current.filter((entry) => landedSet.has(entry.match))
+    unconfirmedRef.current = unconfirmedRef.current.filter((entry) => !landedSet.has(entry.match))
+    for (const entry of landed) {
+      clearTimeout(entry.deadline)
+      setDrafts((previous) =>
+        (previous[entry.match.draftKey] ?? '').trim() === entry.text.trim()
+          ? { ...previous, [entry.match.draftKey]: '' }
+          : previous
+      )
+    }
+  }, [draftKey, messages, pendingKey])
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      for (const entry of unconfirmedRef.current) {
+        clearTimeout(entry.deadline)
+      }
+      unconfirmedRef.current = []
+    }
+  }, [])
+
   const pending = pendingKey
     ? (pendingBySession[pendingKey] ?? NO_PENDING_MESSAGES)
     : NO_PENDING_MESSAGES
@@ -160,6 +270,7 @@ export function useMobileNativeChatDrafts(args: {
     setComposerText,
     pending,
     captureSendOrigin,
-    acceptSend
+    acceptSend,
+    holdUnconfirmedSend
   }
 }

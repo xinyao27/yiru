@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const launchAgentInNewTab = vi.hoisted(() => vi.fn())
 const toast = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn() }))
+const continuationOwner = vi.hoisted(() => ({
+  connectionId: null as string | null,
+  runtimeEnvironmentId: null as string | null
+}))
 const store = vi.hoisted(() => ({
   settings: { disabledTuiAgents: [] as string[] },
   ensureDetectedAgents: vi.fn(async () => ['claude', 'codex']),
@@ -14,9 +18,11 @@ vi.mock('@/lib/launch-agent-in-new-tab', () => ({ launchAgentInNewTab }))
 vi.mock('@/lib/agent-catalog', () => ({
   getAgentLabel: (agent: string) => (agent === 'codex' ? 'Codex' : 'Claude')
 }))
-vi.mock('@/lib/connection-context', () => ({ getConnectionIdFromState: () => null }))
+vi.mock('@/lib/connection-context', () => ({
+  getConnectionIdFromState: () => continuationOwner.connectionId
+}))
 vi.mock('@/lib/worktree-runtime-owner', () => ({
-  getRuntimeEnvironmentIdForWorktree: () => null
+  getRuntimeEnvironmentIdForWorktree: () => continuationOwner.runtimeEnvironmentId
 }))
 vi.mock('sonner', () => ({ toast }))
 vi.mock('@/i18n/i18n', () => ({
@@ -30,6 +36,8 @@ vi.mock('@/i18n/i18n', () => ({
 describe('agent session continuation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    continuationOwner.connectionId = null
+    continuationOwner.runtimeEnvironmentId = null
     launchAgentInNewTab.mockReturnValue({
       tabId: 'tab-codex',
       promptDeliveryResult: Promise.resolve({ delivered: true, failureNotified: false })
@@ -71,5 +79,30 @@ describe('agent session continuation', () => {
         worktreeId: 'wt-1'
       })
     )
+  })
+
+  it('detects the target agent on the SSH host that owns the workspace', async () => {
+    continuationOwner.connectionId = 'ssh-1'
+    continuationOwner.runtimeEnvironmentId = 'runtime-shadow'
+    const { detectAgentSessionContinuationAgents } =
+      await import('./launch-agent-session-continuation')
+
+    await expect(detectAgentSessionContinuationAgents('wt-1')).resolves.toEqual(['claude', 'codex'])
+
+    expect(store.ensureRemoteDetectedAgents).toHaveBeenCalledWith('ssh-1')
+    expect(store.ensureRuntimeDetectedAgents).not.toHaveBeenCalled()
+    expect(store.ensureDetectedAgents).not.toHaveBeenCalled()
+  })
+
+  it('detects the target agent through the paired runtime owner', async () => {
+    continuationOwner.runtimeEnvironmentId = 'runtime-1'
+    const { detectAgentSessionContinuationAgents } =
+      await import('./launch-agent-session-continuation')
+
+    await expect(detectAgentSessionContinuationAgents('wt-1')).resolves.toEqual(['claude', 'codex'])
+
+    expect(store.ensureRuntimeDetectedAgents).toHaveBeenCalledWith('runtime-1')
+    expect(store.ensureRemoteDetectedAgents).not.toHaveBeenCalled()
+    expect(store.ensureDetectedAgents).not.toHaveBeenCalled()
   })
 })

@@ -4739,6 +4739,11 @@
           "273e7e81fe": "配置",
           "1f744a72f4": "配置"
         },
+        "BranchPrefixFeedback": {
+          "6c40c0908f": "前缀不能包含空格或 ~ ^ : ? * [ \\ 等 Git 保留字符",
+          "64d70b156a": "分支将命名为 {{example}}",
+          "808f9a726e": "不会应用前缀"
+        },
         "GitPane": {
           "e02ea23a32": "Yiru 署名",
           "e71ce09c42": "yiru",
@@ -5331,6 +5336,7 @@
           "removeSetup": "移除",
           "hostSetupBlockedVersion": "Yiru 服务器版本不兼容",
           "hostSetupMissingCapability": "在此主机上更新 Yiru 以设置项目",
+          "hostSetupConnectionRequired": "请先连接此主机，再导入或克隆项目",
           "setupProjectOnHost": "在其他主机上设置",
           "setupProjectOnHostHelp": "选择一台主机，然后导入已有检出、在那里克隆仓库，或跟踪稍后才配置的设置。",
           "setupExistingFolder": "导入现有文件夹",

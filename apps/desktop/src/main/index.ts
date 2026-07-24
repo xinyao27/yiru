@@ -92,6 +92,7 @@ import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemo
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/emulator-bridge'
+import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { GlobalAssistantService } from './global-assistant/global-assistant-service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
@@ -1843,7 +1844,13 @@ app.whenReady().then(async () => {
   const activeYiruProfile = ensureActiveYiruProfile()
   store = new Store({ dataFile: activeYiruProfile.dataFile })
   logStartupMilestone('store-loaded')
+  // Why: global provider discovery has no repository cwd from which to infer a WSL distro.
+  setDefaultWslDistroOverride(store.getSettings().terminalWindowsWslDistro ?? null)
   store.onSettingsChanged((updates, settings) => {
+    if ('terminalWindowsWslDistro' in updates) {
+      // Why: the pinned fallback must follow settings changes without an app restart.
+      setDefaultWslDistroOverride(settings.terminalWindowsWslDistro ?? null)
+    }
     if ('showMenuBarIcon' in updates) {
       // Why: Store is the mutation authority for renderer, RPC, and future
       // settings writes, so every macOS toggle updates the native item live.

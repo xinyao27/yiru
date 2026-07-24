@@ -75,6 +75,7 @@ import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
+import { persistExistingWorktreeSortOrder } from '../worktree-sort-order-persistence'
 import { shouldEmitBoundedWarning } from './bounded-warning-dedupe'
 import {
   invalidateAuthorizedRootsCache,
@@ -2110,13 +2111,7 @@ export function registerWorktreeHandlers(
     if (!Array.isArray(args?.orderedIds) || args.orderedIds.length === 0) {
       return
     }
-    const now = Date.now()
-    for (let i = 0; i < args.orderedIds.length; i++) {
-      // Descending timestamps so that the first item has the highest
-      // sortOrder value (most recent), making b.sortOrder - a.sortOrder
-      // a natural "first wins" comparator on cold start.
-      store.setWorktreeMeta(args.orderedIds[i], { sortOrder: now - i * 1000 })
-    }
+    persistExistingWorktreeSortOrder(store, args.orderedIds)
   })
 
   // Why: the full generation-failure output is main-memory only (never in

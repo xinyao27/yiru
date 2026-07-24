@@ -7,18 +7,19 @@ import type {
 import { resolveMobileWorkspaceCreateName } from './mobile-workspace-name'
 import type { WorkspaceAgentChoice } from './workspace-agent-selection'
 import {
+  buildMobileWorkspaceAgentLaunchFields,
   buildReviewWorkspaceCreateParams,
   type WorkspaceCreateSetupDecision,
   type WorkspaceCreateReviewItem
 } from './workspace-create-params'
 import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'
 
-// The agent bundle the modal already resolved: the choice drives
-// buildReviewWorkspaceCreateParams for work-item sources; the explicit launch
-// command is used for branch sources (which have no work-item URL to seed the draft).
+// Why: work-item sources seed their URL through startupDraft; branch sources
+// carry agent intent plus the legacy command needed for mixed-version hosts.
 export type WorkspaceCreateAgentBundle = {
   choice: WorkspaceAgentChoice
   startupCommand: string | undefined
+  hostCapabilities: readonly string[] | undefined
 }
 
 export type CreateWorkspaceFromComposerArgs = {
@@ -126,9 +127,14 @@ async function createBranchWorkspace(args: {
   const createdWithAgentId = agent.choice === 'blank' ? undefined : agent.choice
   const comment = note?.trim()
   const applyCommon = (params: Record<string, unknown>): Record<string, unknown> => {
-    if (createdWithAgentId) {
-      params.createdWithAgent = createdWithAgentId
-    }
+    Object.assign(
+      params,
+      buildMobileWorkspaceAgentLaunchFields({
+        agentId: createdWithAgentId,
+        startupCommand: agent.startupCommand,
+        hostCapabilities: agent.hostCapabilities
+      })
+    )
     if (comment) {
       params.comment = comment
     }
@@ -153,8 +159,7 @@ async function createBranchWorkspace(args: {
           name,
           setupDecision,
           baseBranch: selection.refName,
-          branchNameOverride: selection.localBranchName,
-          startupCommand: agent.startupCommand
+          branchNameOverride: selection.localBranchName
         })
     })
   }
@@ -173,8 +178,7 @@ async function createBranchWorkspace(args: {
         repo: `id:${targetRepoId}`,
         name: candidate,
         setupDecision,
-        baseBranch: selection.baseBranch,
-        startupCommand: agent.startupCommand
+        baseBranch: selection.baseBranch
       }
       if (selection.branchNameOverride) {
         params.branchNameOverride = candidate
@@ -209,10 +213,11 @@ async function createNewBranchWorkspace(args: {
         name: candidate,
         setupDecision,
         branchNameOverride: candidate,
-        startupCommand: agent.startupCommand
-      }
-      if (createdWithAgentId) {
-        params.createdWithAgent = createdWithAgentId
+        ...buildMobileWorkspaceAgentLaunchFields({
+          agentId: createdWithAgentId,
+          startupCommand: agent.startupCommand,
+          hostCapabilities: agent.hostCapabilities
+        })
       }
       if (comment) {
         params.comment = comment

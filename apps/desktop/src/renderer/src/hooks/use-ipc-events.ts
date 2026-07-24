@@ -127,6 +127,11 @@ import {
   handleSwitchTabAcrossAllTypes,
   handleSwitchTerminalTab
 } from './ipc-tab-switch'
+import {
+  hasRuntimeBackedAgentStatusAttribution,
+  retryPendingAgentStatusEvents,
+  type PendingAgentStatusEvent
+} from './pending-agent-status-retry'
 import { resolveZoomTarget } from './resolve-zoom-target'
 import { createRuntimeClientEventsSync } from './runtime-client-events-sync'
 import { createRuntimeProjectRefreshScheduler } from './runtime-project-refresh-scheduler'
@@ -824,12 +829,8 @@ export function useIpcEvents(): void {
     const unsubs: (() => void)[] = []
     const backgroundSleepingAgentWakeDispatcher = createBackgroundSleepingAgentWakeDispatcher()
     unsubs.push(backgroundSleepingAgentWakeDispatcher.dispose)
-    type PendingAgentStatusEvent = {
-      data: AgentStatusIpcPayload
-      firstSeenAt: number
-    }
     type AgentStatusApplyResult = 'applied' | 'pending' | 'dropped'
-    const pendingAgentStatusEvents: PendingAgentStatusEvent[] = []
+    const pendingAgentStatusEvents: PendingAgentStatusEvent<AgentStatusIpcPayload>[] = []
     let pendingAgentStatusRetryTimer: ReturnType<typeof setTimeout> | null = null
     // Why: applyAgentStatus -> store.setAgentStatus notifies the store
     // subscriber synchronously, which re-enters flushPendingAgentStatuses while
@@ -2964,8 +2965,8 @@ export function useIpcEvents(): void {
     // Re-parse it here so the renderer enforces the same normalization rules
     // (state enum, field truncation) regardless of whether the source was a
     // hook callback or an OSC fallback path. Startup pushes are ignored until
-    // workspace session hydration finishes; the snapshot pull below replays the
-    // main-process cache after tab identity is available.
+    // workspace hydration; the snapshot pull and bounded queue bridge any
+    // remaining tab/layout hydration race.
     function schedulePendingAgentStatusFlush(): void {
       if (pendingAgentStatusRetryTimer !== null || pendingAgentStatusEvents.length === 0) {
         return
@@ -2976,8 +2977,15 @@ export function useIpcEvents(): void {
       }, PENDING_AGENT_STATUS_RETRY_MS)
     }
 
-    function enqueuePendingAgentStatus(data: AgentStatusIpcPayload): void {
-      pendingAgentStatusEvents.push({ data, firstSeenAt: Date.now() })
+    function enqueuePendingAgentStatus(
+      data: AgentStatusIpcPayload,
+      options?: { replay?: boolean }
+    ): void {
+      pendingAgentStatusEvents.push({
+        data,
+        firstSeenAt: Date.now(),
+        replay: options?.replay === true
+      })
       while (pendingAgentStatusEvents.length > MAX_PENDING_AGENT_STATUS_EVENTS) {
         pendingAgentStatusEvents.shift()
       }
@@ -2997,17 +3005,11 @@ export function useIpcEvents(): void {
       }
       isFlushingAgentStatuses = true
       try {
-        const now = Date.now()
-        const remaining: PendingAgentStatusEvent[] = []
-        for (const event of pendingAgentStatusEvents) {
-          if (now - event.firstSeenAt > PENDING_AGENT_STATUS_TTL_MS) {
-            continue
-          }
-          const result = applyAgentStatus(event.data, { retry: true })
-          if (result === 'pending') {
-            remaining.push(event)
-          }
-        }
+        const remaining = retryPendingAgentStatusEvents(pendingAgentStatusEvents, {
+          now: Date.now(),
+          ttlMs: PENDING_AGENT_STATUS_TTL_MS,
+          apply: applyAgentStatus
+        })
         pendingAgentStatusEvents.length = 0
         pendingAgentStatusEvents.push(...remaining)
         if (pendingAgentStatusEvents.length === 0 && pendingAgentStatusRetryTimer !== null) {
@@ -3068,7 +3070,7 @@ export function useIpcEvents(): void {
         repoConnectionId = null
         repoConnectionResolved = true
       }
-      if (!exists && data.worktreeId && hasRuntimeBackedWorktreeAttribution(data)) {
+      if (!exists && hasRuntimeBackedAgentStatusAttribution(data)) {
         // Why: orchestration worker hooks can carry main-side worktree
         // attribution before this renderer has a terminal tab for the pane.
         // Require runtime identity too; durable snapshots with only worktreeId
@@ -3082,23 +3084,24 @@ export function useIpcEvents(): void {
         }
       }
       if (!exists) {
-        // Why: empty paneKeys are dropped in main before IPC fanout. Reaching
-        // this branch means a non-empty paneKey escaped without a matching
-        // renderer tab, so track the adoption/routing failure separately.
-        // Skipped during snapshot replay because main's durable cache may
-        // include entries whose tabs were closed before this session — that
-        // reconciliation miss is not a regression signal.
-        if (options?.replay !== true) {
-          if (options?.retry !== true) {
-            track('agent_hook_unattributed', { reason: 'unknown_tab_id' })
-            // Why: live hook IPC can beat the renderer's tab/layout hydration.
-            // Main already cached the event; retry locally so a transient
-            // pane-key miss does not drop Droid/Codex completion state.
-            enqueuePendingAgentStatus(data)
+        // Why: runtime-backed startup snapshots can arrive before tab/layout
+        // hydration; keep their replay semantics while the pane catches up.
+        if (options?.replay === true) {
+          if (hasRuntimeBackedAgentStatusAttribution(data)) {
+            if (options?.retry !== true) {
+              enqueuePendingAgentStatus(data, { replay: true })
+            }
+            return 'pending'
           }
-          return 'pending'
+          return 'dropped'
         }
-        return 'dropped'
+        if (options?.retry !== true) {
+          // Why: a live hook with no matching renderer pane is either a brief
+          // hydration race or a routing failure worth tracking once.
+          track('agent_hook_unattributed', { reason: 'unknown_tab_id' })
+          enqueuePendingAgentStatus(data)
+        }
+        return 'pending'
       }
       if (options?.replay !== true && options?.retry !== true) {
         for (let index = pendingAgentStatusEvents.length - 1; index >= 0; index -= 1) {
@@ -3352,10 +3355,8 @@ export function useIpcEvents(): void {
       unsubs.push(unsubscribeMigrationUnsupportedClear)
     }
 
-    // Why: the main hook server is the durable source of truth. Pull a
-    // snapshot only after workspace tabs are ready, so early startup pushes
-    // can be safely ignored instead of buffered against partially hydrated
-    // renderer state.
+    // Why: the main hook server is durable truth. Pull once workspace hydration
+    // is ready; the bounded pane retry queue handles layouts that still lag.
     requestAgentStatusSnapshotIfReady()
     unsubs.push(
       useAppStore.subscribe((state, previousState) => {
@@ -3497,13 +3498,6 @@ export function useIpcEvents(): void {
       resetAgentHookCompletionNotificationCoordinators()
     }
   }, [])
-}
-
-function hasRuntimeBackedWorktreeAttribution(data: AgentStatusIpcPayload): boolean {
-  return (
-    (typeof data.terminalHandle === 'string' && data.terminalHandle.length > 0) ||
-    data.orchestration !== undefined
-  )
 }
 
 function tryMakePaneKey(tabId: string, leafId: string): string | null {

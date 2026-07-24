@@ -1,5 +1,6 @@
 import { win32 as pathWin32 } from 'node:path'
 
+import { quoteStartupArg } from '../../shared/tui-agent-startup-shell'
 import {
   buildWslInteractiveLoginShellCommand,
   escapeWslShCommandForWindows,
@@ -81,11 +82,22 @@ function getCmdShellArgStartupCommand(command?: string): string | null {
  * Short startup commands are appended to the bootstrap and marked as delivered;
  * large payloads return the bootstrap alone so stdin delivery remains available.
  */
-function getPowerShellEncodedCommand(startupCommand?: string): {
+function getPowerShellRestoreCwdCommand(cwd: string): string {
+  return [
+    '',
+    '# Profiles can change location; restore the PTY cwd after profile loading.',
+    `try { Set-Location -LiteralPath ${quoteStartupArg(cwd, 'powershell')} -ErrorAction Stop } catch { Write-Warning "Failed to restore working directory: $_" }`
+  ].join('\n')
+}
+
+function getPowerShellEncodedCommand(
+  cwd: string,
+  startupCommand?: string
+): {
   encodedCommand: string
   startupCommandDeliveredInShellArgs?: boolean
 } {
-  const bootstrap = getPowerShellOsc133Bootstrap()
+  const bootstrap = `${getPowerShellOsc133Bootstrap()}${getPowerShellRestoreCwdCommand(cwd)}`
   if (!startupCommand || startupCommand.length > STARTUP_COMMAND_TEXT_MAX_CHARS) {
     return { encodedCommand: encodePowerShellCommand(bootstrap) }
   }
@@ -169,7 +181,7 @@ export function resolveWindowsShellLaunchArgs(
   }
 
   if (shellBasename === 'powershell.exe' || shellBasename === 'pwsh.exe') {
-    const powerShellCommand = getPowerShellEncodedCommand(startupCommand)
+    const powerShellCommand = getPowerShellEncodedCommand(nativeCwd, startupCommand)
     // Why: foreground-process status on Windows depends on OSC 133 C/D, and
     // PowerShell needs a prompt/readline bootstrap after profiles finish.
     return {

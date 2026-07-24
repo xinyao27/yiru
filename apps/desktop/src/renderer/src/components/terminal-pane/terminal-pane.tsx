@@ -1,4 +1,8 @@
 import type { IDisposable } from '@xterm/xterm'
+import {
+  assertClipboardTextWithinLimitWithYield,
+  type ReadClipboardTextOptions
+} from '@yiru/workbench-model/ui'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: terminal pane component co-locates title state, layout serialization, and portal rendering to keep pane lifecycle consistent. */
@@ -17,6 +21,7 @@ import {
 import TerminalSearch from '@/components/terminal-search'
 import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
+import { CODEX_ACCOUNT_RESTART_STARTUP } from '@/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
 import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
 import { requestGlobalAssistant } from '@/lib/global-assistant'
@@ -43,7 +48,11 @@ import type {
 import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/pane-manager-registry'
 import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
 import { clearTerminalScrollbackAndFollowOutput } from '@/lib/pane-manager/terminal-scrollback-clear'
-import { isPrimarySelectionEnabled, readPrimarySelectionText } from '@/lib/primary-selection'
+import {
+  armPrimarySelectionNativePasteSuppression,
+  isPrimarySelectionEnabled,
+  readPrimarySelectionText
+} from '@/lib/primary-selection'
 import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
@@ -131,6 +140,11 @@ import { SessionRestoredBannerPortals } from './session-restored-banner-portals'
 import { canContinueAgentSessionInNewSession } from './terminal-agent-session-continuation'
 import type { PreparedAgentSessionFork } from './terminal-agent-session-fork'
 import { TerminalAgentSessionForkDialog } from './terminal-agent-session-fork-dialog'
+import {
+  firesNativePasteEvent,
+  getClipboardEventText,
+  isClipboardEventPasteRequired
+} from './terminal-clipboard-event-paste'
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import TerminalContextMenu from './terminal-context-menu'
 import { handleInternalTerminalFileDrop } from './terminal-drop-handler'
@@ -1760,7 +1774,7 @@ export default function TerminalPane({
         tabId,
         worktreeId,
         cwd,
-        startup: { command: 'codex' },
+        startup: CODEX_ACCOUNT_RESTART_STARTUP,
         paneTransportsRef,
         paneMode2031Ref,
         paneKittyKeyboardModesRef,
@@ -2167,7 +2181,9 @@ export default function TerminalPane({
 
     const pasteFromClipboard = (
       pane: ManagedPane,
-      source: Extract<TerminalPasteSource, 'keyboard' | 'paste-event'>
+      source: Extract<TerminalPasteSource, 'keyboard' | 'paste-event'>,
+      readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string> = window.api.ui
+        .readClipboardText
     ): void => {
       const connectionId = getConnectionId(worktreeId) ?? null
       const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(
@@ -2176,7 +2192,7 @@ export default function TerminalPane({
       )
       const activeElementAtDispatch = document.activeElement
       void pasteTerminalClipboard({
-        readClipboardText: window.api.ui.readClipboardText,
+        readClipboardText,
         saveClipboardImageAsTempFile: window.api.ui.saveClipboardImageAsTempFile,
         connectionId,
         runtimeEnvironmentId,
@@ -2232,6 +2248,11 @@ export default function TerminalPane({
         }
         return
       }
+      if (isClipboardEventPasteRequired() && firesNativePasteEvent(e, isMac)) {
+        // Why: insecure web clients can only read clipboard text from the
+        // native paste event dispatched after this chord.
+        return
+      }
       e.preventDefault()
       e.stopPropagation()
       const manager = managerRef.current
@@ -2281,6 +2302,13 @@ export default function TerminalPane({
       }
       const pane = manager.getActivePane() ?? manager.getPanes()[0]
       if (!pane) {
+        return
+      }
+      if (isClipboardEventPasteRequired()) {
+        const eventText = getClipboardEventText(e)
+        pasteFromClipboard(pane, 'paste-event', (options) =>
+          assertClipboardTextWithinLimitWithYield(eventText, options)
+        )
         return
       }
       pasteFromClipboard(pane, 'paste-event')
@@ -2835,6 +2863,9 @@ export default function TerminalPane({
       }
       event.preventDefault()
       event.stopPropagation()
+      // Why: preventDefault on mousedown does not stop Chromium's native X11
+      // paste follow-up, which would otherwise reach xterm a second time.
+      armPrimarySelectionNativePasteSuppression()
       clickedPane.terminal.focus()
       void readPrimarySelectionText().then(async (text) => {
         if (!text) {
@@ -2908,6 +2939,9 @@ export default function TerminalPane({
       ) {
         event.preventDefault()
         event.stopPropagation()
+        // Why: re-arm at release so slow middle clicks still cover Chromium's
+        // imminent native paste event.
+        armPrimarySelectionNativePasteSuppression()
       }
     },
     [getPrimarySelectionMiddleClickPane]

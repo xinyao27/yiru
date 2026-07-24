@@ -33,6 +33,7 @@ import { UnixSocketTransport } from './rpc/unix-socket-transport'
 import { readWsFallbackPort, writeWsFallbackPort } from './rpc/ws-fallback-port-store'
 import { WebSocketTransport } from './rpc/ws-transport'
 import { writeRuntimeMetadata } from './runtime-metadata'
+import { isLongPollRequest } from './runtime-rpc-long-poll-classification'
 import type { YiruRuntimeService } from './yiru-runtime'
 
 const DEFAULT_WS_PORT = 6768
@@ -113,21 +114,6 @@ function webClientPathForEndpoint(pathname: string): string {
     return '/web-index.html'
   }
   return `${pathname.replace(/\/$/, '')}/web-index.html`
-}
-
-// Why: a long-poll request is one whose handler blocks waiting for an external
-// event. This function is the single place that classifies it — the long-poll
-// counter, abort wiring, keepalives, and runtime_busy admission check all
-// share this decision. See §3.1.
-function isLongPollRequest(request: RpcRequest): boolean {
-  if (request.method === 'terminal.wait') {
-    return true
-  }
-  if (request.method === 'orchestration.check') {
-    const params = request.params as { wait?: unknown } | undefined
-    return params?.wait === true
-  }
-  return false
 }
 
 // Why: stamp the authenticated connection's scope onto the status.get success

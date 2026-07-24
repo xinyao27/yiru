@@ -77,6 +77,7 @@ type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
 }
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
+import type { BranchPrefixSettings } from '../../shared/branch-prefix'
 import { createSequencedSetupAgentCommands } from '../../shared/setup-agent-sequencing'
 import { shouldWaitForSetupBeforeAgentStartup } from '../../shared/setup-agent-startup-policy'
 import {
@@ -106,7 +107,7 @@ import { normalizeSparseDirectories } from './sparse-checkout-directories'
 import {
   sanitizeWorktreeName,
   sanitizeWorktreeDisplayName,
-  computeBranchName,
+  computeValidatedBranchName,
   computeWorktreePath,
   computeRemoteWorktreePath,
   computeWorkspaceRoot,
@@ -525,12 +526,12 @@ async function resolveCreateBranchName(
   repoPath: string,
   branchNameOverride: string | undefined,
   sanitizedName: string,
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   username: string | null,
   gitOptions: { wslDistro?: string } = {}
 ): Promise<string> {
   if (!branchNameOverride) {
-    return computeBranchName(sanitizedName, settings, username)
+    return computeValidatedBranchName(sanitizedName, settings, username)
   }
   if (branchNameOverride.startsWith('-')) {
     throw new Error('Branch name must not start with "-"')
@@ -547,11 +548,11 @@ async function resolveCreateBranchNameSsh(
   repoPath: string,
   branchNameOverride: string | undefined,
   sanitizedName: string,
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   username: string | null
 ): Promise<string> {
   if (!branchNameOverride) {
-    return computeBranchName(sanitizedName, settings, username)
+    return computeValidatedBranchName(sanitizedName, settings, username)
   }
   if (branchNameOverride.startsWith('-')) {
     throw new Error('Branch name must not start with "-"')

@@ -171,12 +171,13 @@ export function openDetectedFilePath(
       activateAndRevealWorktree(worktreeId)
     }
 
+    const language = detectLanguage(filePath)
     store.openFile(
       {
         filePath,
         relativePath,
         worktreeId: worktreeId || '',
-        language: detectLanguage(filePath),
+        language,
         mode: 'edit',
         runtimeEnvironmentId
       },
@@ -184,6 +185,14 @@ export function openDetectedFilePath(
     )
 
     if (line !== null) {
+      const openedStore = useAppStore.getState()
+      // Why: the active editor id carries local/WSL/SSH ownership while the
+      // path alone can identify multiple open tabs on different hosts.
+      const fileId = openedStore.activeFileIdByWorktree[worktreeId] ?? filePath
+      if (language === 'markdown') {
+        // Why: rendered Markdown has no line-reveal consumer; source mode mounts Monaco.
+        openedStore.setMarkdownViewMode(fileId, 'source')
+      }
       const targetColumn = column ?? 1
       store.setPendingEditorReveal(null)
       schedulePendingEditorReveal(() => {
@@ -192,6 +201,7 @@ export function openDetectedFilePath(
         }
         store.setPendingEditorReveal({
           filePath,
+          fileId,
           line,
           column: targetColumn,
           matchLength: 0

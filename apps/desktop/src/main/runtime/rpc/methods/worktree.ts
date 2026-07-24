@@ -108,16 +108,21 @@ export const WORKTREE_METHODS: RpcMethod[] = [
           setupDecision: params.setupDecision,
           createdWithAgent: params.createdWithAgent ?? params.startupAgent,
           automationProvenance,
-          startup: params.startupCommand
-            ? {
-                command: params.startupCommand,
-                ...(params.startupEnv ? { env: params.startupEnv } : {}),
-                ...(params.startupLaunchConfig ? { launchConfig: params.startupLaunchConfig } : {}),
-                ...(params.startupCommandDelivery
-                  ? { startupCommandDelivery: params.startupCommandDelivery }
-                  : {})
-              }
-            : undefined,
+          // Why: an unknown-capability Mobile client sends both launch forms.
+          // This host owns launch policy, so structured agent intent wins.
+          startup:
+            !params.startupAgent && params.startupCommand
+              ? {
+                  command: params.startupCommand,
+                  ...(params.startupEnv ? { env: params.startupEnv } : {}),
+                  ...(params.startupLaunchConfig
+                    ? { launchConfig: params.startupLaunchConfig }
+                    : {}),
+                  ...(params.startupCommandDelivery
+                    ? { startupCommandDelivery: params.startupCommandDelivery }
+                    : {})
+                }
+              : undefined,
           ...(params.startupAgent ? { startupAgent: params.startupAgent } : {}),
           ...(params.startupPrompt !== undefined ? { startupPrompt: params.startupPrompt } : {}),
           startupDraft: params.startupDraft,

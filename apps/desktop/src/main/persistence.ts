@@ -139,6 +139,10 @@ import {
   normalizePersistedMigrationUnsupportedPtyEntries as normalizeMigrationUnsupportedPtyEntries
 } from './persisted-state/persisted-terminal-session-codec'
 import { applyPersistedUiUpdate, readPersistedUi } from './persisted-state/persisted-ui-mutations'
+import {
+  removeRepoFromWorkspaceSessionsForHost,
+  removeWorkspaceSessionOwner
+} from './persisted-state/workspace-session-owner-removal'
 import { createNestedProjectGroupResolver } from './project-groups/nested-repo-import'
 import { toRelaySshPtyId } from './providers/ssh-pty-id'
 import { MOBILE_PAIRING_USERDATA_FILES } from './runtime/mobile-pairing-files'
@@ -1434,90 +1438,6 @@ function createMinimalPersistedTerminalTab(args: {
   }
 }
 
-function cloneWorkspaceSessionState(session: WorkspaceSessionState): WorkspaceSessionState {
-  return structuredClone(session)
-}
-
-function removeWorkspaceSessionOwner(
-  session: WorkspaceSessionState | undefined,
-  ownerKey: string
-): WorkspaceSessionState | undefined {
-  if (!session) {
-    return session
-  }
-  const next = cloneWorkspaceSessionState(session)
-  const removedTerminalTabs = next.tabsByWorktree?.[ownerKey] ?? []
-  if (next.tabsByWorktree) {
-    delete next.tabsByWorktree[ownerKey]
-  }
-  for (const tab of removedTerminalTabs) {
-    delete next.terminalLayoutsByTabId[tab.id]
-    if (next.activeTabId === tab.id) {
-      next.activeTabId = null
-    }
-  }
-
-  if (next.openFilesByWorktree) {
-    delete next.openFilesByWorktree[ownerKey]
-  }
-  if (next.activeFileIdByWorktree) {
-    delete next.activeFileIdByWorktree[ownerKey]
-  }
-  const browserWorkspaces = next.browserTabsByWorktree?.[ownerKey] ?? []
-  if (next.browserTabsByWorktree) {
-    delete next.browserTabsByWorktree[ownerKey]
-  }
-  if (next.browserPagesByWorkspace) {
-    for (const workspace of browserWorkspaces) {
-      delete next.browserPagesByWorkspace[workspace.id]
-    }
-  }
-  if (next.activeBrowserTabIdByWorktree) {
-    delete next.activeBrowserTabIdByWorktree[ownerKey]
-  }
-  if (next.activeTabTypeByWorktree) {
-    delete next.activeTabTypeByWorktree[ownerKey]
-  }
-  if (next.activeTabIdByWorktree) {
-    delete next.activeTabIdByWorktree[ownerKey]
-  }
-  if (next.unifiedTabs) {
-    delete next.unifiedTabs[ownerKey]
-  }
-  if (next.tabGroups) {
-    delete next.tabGroups[ownerKey]
-  }
-  if (next.tabGroupLayouts) {
-    delete next.tabGroupLayouts[ownerKey]
-  }
-  if (next.activeGroupIdByWorktree) {
-    delete next.activeGroupIdByWorktree[ownerKey]
-  }
-  if (next.lastVisitedAtByWorktreeId) {
-    delete next.lastVisitedAtByWorktreeId[ownerKey]
-  }
-  if (next.defaultTerminalTabsAppliedByWorktreeId) {
-    delete next.defaultTerminalTabsAppliedByWorktreeId[ownerKey]
-  }
-  if (next.sleepingAgentSessionsByPaneKey) {
-    for (const [paneKey, record] of Object.entries(next.sleepingAgentSessionsByPaneKey)) {
-      if (record.worktreeId === ownerKey) {
-        delete next.sleepingAgentSessionsByPaneKey[paneKey]
-      }
-    }
-  }
-  if (next.activeWorkspaceKey === ownerKey) {
-    next.activeWorkspaceKey = null
-  }
-  if (next.activeWorktreeId === ownerKey) {
-    next.activeWorktreeId = null
-  }
-  next.activeWorktreeIdsOnShutdown = next.activeWorktreeIdsOnShutdown?.filter(
-    (worktreeId) => worktreeId !== ownerKey
-  )
-  return next
-}
-
 function inferFolderScopeConnectionIdForMigration(args: {
   folderPath: string
   projectGroupId: string
@@ -2385,6 +2305,16 @@ export class Store {
   // missing hostId is treated as local).
   private pruneWorktreeStateForRepo(id: string, hostId: ExecutionHostId | null): void {
     const prefix = `${id}::`
+    // Why: owner ids do not encode their execution host, so only the selected
+    // host partition may be pruned while another host still owns the repo id.
+    const sessions = removeRepoFromWorkspaceSessionsForHost({
+      workspaceSession: this.state.workspaceSession,
+      workspaceSessionsByHostId: this.state.workspaceSessionsByHostId,
+      repoId: id,
+      hostId
+    })
+    this.state.workspaceSession = sessions.workspaceSession
+    this.state.workspaceSessionsByHostId = sessions.workspaceSessionsByHostId
     // Why: snapshot host membership up front. Lineage pruning below checks the
     // meta.hostId of worktree keys that may already have been deleted from
     // worktreeMeta in the first loop, so reading hostId live would misclassify
@@ -3863,7 +3793,7 @@ export class Store {
     if (!session) {
       return
     }
-    const sessionBeforeBinding = cloneWorkspaceSessionState(session)
+    const sessionBeforeBinding = structuredClone(session)
     const tabs = session.tabsByWorktree?.[args.worktreeId]
     const tab = tabs?.find((t) => t.id === args.tabId)
     if (tab) {

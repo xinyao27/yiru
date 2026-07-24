@@ -1,7 +1,10 @@
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { WorkspaceCreateSetupDecision } from './workspace-create-params'
+import {
+  buildMobileWorkspaceAgentLaunchFields,
+  type WorkspaceCreateSetupDecision
+} from './workspace-create-params'
 import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'
 
 // The blank/named create path, extracted from NewWorktreeModal so the modal keeps
@@ -13,6 +16,7 @@ export async function createBlankWorkspace(args: {
   baseName: string
   startupCommand: string | undefined
   createdWithAgentId: TuiAgent | undefined
+  hostCapabilities: readonly string[] | undefined
   comment: string | undefined
   setupDecision: WorkspaceCreateSetupDecision
 }): Promise<WorktreeCreateResult> {
@@ -22,12 +26,13 @@ export async function createBlankWorkspace(args: {
     buildParams: (name) => {
       const params: Record<string, unknown> = {
         repo: `id:${args.repoId}`,
-        startupCommand: args.startupCommand,
         setupDecision: args.setupDecision,
-        name
-      }
-      if (args.createdWithAgentId) {
-        params.createdWithAgent = args.createdWithAgentId
+        name,
+        ...buildMobileWorkspaceAgentLaunchFields({
+          agentId: args.createdWithAgentId,
+          startupCommand: args.startupCommand,
+          hostCapabilities: args.hostCapabilities
+        })
       }
       if (args.comment) {
         params.comment = args.comment

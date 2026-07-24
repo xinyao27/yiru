@@ -13,6 +13,7 @@ export function RepoSettingsDraftInput({
   repoId,
   storeValue,
   onTextChange,
+  onBlur,
   onCompositionStart,
   onCompositionEnd,
   ...inputProps
@@ -33,9 +34,12 @@ export function RepoSettingsDraftInput({
   // repeats the already-persisted confirmed value; consume that one change so
   // the value is not persisted twice.
   const skipNextChangeRef = useRef<string | null>(null)
+  // Why: blur/unmount must only flush genuinely unpersisted composition text.
+  const lastPersistedRef = useRef(storeValue)
 
   const persist = (text: string): void => {
     pendingStoreEchoesRef.current.push(text)
+    lastPersistedRef.current = text
     onTextChange(text)
   }
 
@@ -45,11 +49,13 @@ export function RepoSettingsDraftInput({
         pendingStoreEchoesRef.current = []
         composingRef.current = false
         skipNextChangeRef.current = null
+        lastPersistedRef.current = storeValue
         return { repoId, text: storeValue }
       }
       if (storeValue === current.text) {
         pendingStoreEchoesRef.current = []
         skipNextChangeRef.current = null
+        lastPersistedRef.current = storeValue
         return current
       }
       const pendingEchoIndex = pendingStoreEchoesRef.current.indexOf(storeValue)
@@ -61,11 +67,27 @@ export function RepoSettingsDraftInput({
       }
       pendingStoreEchoesRef.current = []
       skipNextChangeRef.current = null
+      lastPersistedRef.current = storeValue
       return { repoId, text: storeValue }
     })
   }, [repoId, storeValue])
 
   const text = draft.repoId === repoId ? draft.text : storeValue
+  const flushRef = useRef<() => void>(() => {})
+  // Why: publish only committed draft/callback state; a discarded concurrent
+  // render must never become the authority used by blur or unmount cleanup.
+  useEffect(() => {
+    flushRef.current = (): void => {
+      if (draft.repoId !== repoId || draft.text === lastPersistedRef.current) {
+        return
+      }
+      composingRef.current = false
+      skipNextChangeRef.current = draft.text
+      persist(draft.text)
+    }
+  })
+  useEffect(() => () => flushRef.current(), [])
+
   return (
     <Input
       {...inputProps}
@@ -89,6 +111,10 @@ export function RepoSettingsDraftInput({
         composingRef.current = true
         skipNextChangeRef.current = null
         onCompositionStart?.(e)
+      }}
+      onBlur={(e) => {
+        flushRef.current()
+        onBlur?.(e)
       }}
       onCompositionEnd={(e) => {
         composingRef.current = false

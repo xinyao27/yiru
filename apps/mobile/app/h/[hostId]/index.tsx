@@ -1383,7 +1383,7 @@ export function HostScreen({
                       hostId,
                       worktreeId: actionTarget.worktreeId,
                       worktreeName: actionTarget.displayName || actionTarget.repo,
-                      hostCapabilities,
+                      hostCapabilities: hostCapabilities ?? [],
                       navigate: navigateFromHostList,
                       onDone: () => setActionTarget(null)
                     }),
@@ -1437,6 +1437,7 @@ export function HostScreen({
         routeVisible={showNewWorktree}
         client={client}
         hostId={hostId}
+        hostCapabilities={hostCapabilities}
         existingWorktreePaths={existingWorktreePaths}
         existingWorktrees={worktrees}
         onVisibleChange={(visible) => {

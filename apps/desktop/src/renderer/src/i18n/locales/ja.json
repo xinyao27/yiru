@@ -4776,6 +4776,11 @@
         "YamlThemeImportButton": {
           "label": "YAML からインポート"
         },
+        "BranchPrefixFeedback": {
+          "6c40c0908f": "プレフィックスにスペースや ~ ^ : ? * [ \\ など Git で予約された文字は使用できません",
+          "64d70b156a": "ブランチ名は {{example}} になります",
+          "808f9a726e": "プレフィックスは適用されません"
+        },
         "GitPane": {
           "e02ea23a32": "Yiru の帰属",
           "e71ce09c42": "yiru",
@@ -5368,6 +5373,7 @@
           "removeSetup": "削除",
           "hostSetupBlockedVersion": "Yiru server version is incompatible",
           "hostSetupMissingCapability": "Update Yiru on this host to set up projects",
+          "hostSetupConnectionRequired": "プロジェクトをインポートまたはクローンする前に、このホストに接続してください",
           "setupProjectOnHost": "別のホストで設定",
           "setupProjectOnHostHelp": "Choose a host, then import an existing checkout, clone the repository there, or track a setup that will be provisioned later.",
           "setupExistingFolder": "既存フォルダをインポート",

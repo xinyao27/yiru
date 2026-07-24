@@ -2,9 +2,11 @@ import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 
 export const PRIMARY_SELECTION_MAX_LENGTH = 65_536
 const PRIMARY_SELECTION_MAX_BYTES = PRIMARY_SELECTION_MAX_LENGTH * 4
+const PRIMARY_SELECTION_NATIVE_PASTE_SUPPRESSION_MS = 750
 
 let enabled = false
 let primarySelectionText = ''
+let nativePasteSuppressionUntil = 0
 
 type SelectionClipboardApi = {
   readSelectionClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
@@ -45,7 +47,21 @@ export function setPrimarySelectionEnabled(nextEnabled: boolean): void {
   enabled = nextEnabled
   if (!enabled) {
     primarySelectionText = ''
+    nativePasteSuppressionUntil = 0
   }
+}
+
+// Why: Chromium follows a handled X11 middle click with a native paste event;
+// the terminal owns the first insertion, so the follow-up must be swallowed.
+export function armPrimarySelectionNativePasteSuppression(now: number = Date.now()): void {
+  if (!enabled || !isLinuxUserAgent(getUserAgent())) {
+    return
+  }
+  nativePasteSuppressionUntil = now + PRIMARY_SELECTION_NATIVE_PASTE_SUPPRESSION_MS
+}
+
+export function shouldSuppressPrimarySelectionNativePaste(now: number = Date.now()): boolean {
+  return enabled && now <= nativePasteSuppressionUntil
 }
 
 export function isPrimarySelectionEnabled(): boolean {
