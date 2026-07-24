@@ -175,10 +175,11 @@ Variants in priority order:
 | `secondary`   | Lower-emphasis sibling next to a `default`.                        |
 | `outline`     | Toolbar / standalone actions where a filled button feels heavy.    |
 | `ghost`       | Icon buttons, list-row triggers, anywhere chrome should disappear. |
+| `status-bar`  | Contiguous usage meters with a background focus state and no seam. |
 | `link`        | Inline text actions inside paragraphs.                             |
 | `destructive` | Delete, discard, irreversible. Never for Cancel.                   |
 
-Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), plus `icon`, `icon-xs`, `icon-sm`, `icon-lg`. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar.
+Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), content-driven `status-bar`, plus `icon`, `icon-xs`, `icon-sm`, `icon-lg`. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar. Use `status-bar` for contiguous inline meters.
 
 ### Other primitives in this repo
 

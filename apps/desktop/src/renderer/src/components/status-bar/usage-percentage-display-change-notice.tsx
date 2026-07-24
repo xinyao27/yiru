@@ -207,7 +207,7 @@ export function UsagePercentageDisplayChangeNotice({
 
   return (
     <>
-      <div ref={anchorRef} className="flex items-center gap-3">
+      <div ref={anchorRef} className="flex items-center">
         {children}
       </div>
       {card}

@@ -1625,11 +1625,7 @@ export function ProviderDetailsMenu({
     <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger
         render={
-          <button
-            type="button"
-            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center rounded px-1 py-0.5 outline-none"
-            aria-label={ariaLabel}
-          >
+          <Button variant="status-bar" size="status-bar" type="button" aria-label={ariaLabel}>
             {iconOnly ? (
               <span className="inline-flex items-center gap-1">
                 <span
@@ -1665,7 +1661,7 @@ export function ProviderDetailsMenu({
                 display={usagePercentageDisplay}
               />
             )}
-          </button>
+          </Button>
         }
       />
       <DropdownMenuContent

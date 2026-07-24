@@ -20,11 +20,15 @@ const buttonVariants = cva(
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
+        // Why: contiguous usage meters cannot reserve a border seam, so focus uses background contrast.
+        'status-bar': 'border-0 font-normal hover:bg-accent/70 focus-visible:bg-accent/70',
         link: 'text-primary underline-offset-4 hover:underline'
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        // Why: adjacent status-bar meters need contiguous hit areas without horizontal inset.
+        'status-bar': "h-auto gap-0 px-0 py-0.5 text-xs [&_svg:not([class*='size-'])]:size-3",
         sm: 'h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
         lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
         icon: 'size-9',
