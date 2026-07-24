@@ -1,6 +1,5 @@
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
-import { cn } from '@/lib/class-names'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import { useAppStore } from '@/store'
@@ -31,7 +30,7 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
   }
 
   return (
-    <div className="flex shrink-0 items-center gap-0.5">
+    <div className="flex h-full shrink-0 items-center gap-0.5">
       {items.map((item) => {
         const Icon = item.icon
         const active = activeTabContentType === item.id
@@ -53,11 +52,10 @@ export function WorkspacePanelStatusActions(): React.JSX.Element | null {
               render={
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon-xs"
+                  variant="status-bar-icon"
+                  size="icon-status-bar"
                   // Why: compact status actions mark selection through icon
-                  // contrast only; ghost hover/focus remains transient.
-                  className={cn('size-5', active ? 'text-foreground' : 'text-muted-foreground')}
+                  // contrast only; the footer variant keeps hover/focus transient.
                   aria-label={label}
                   aria-current={active ? 'page' : undefined}
                   onClick={() =>

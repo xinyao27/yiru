@@ -38,14 +38,15 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
         delay={150}
         closeDelay={80}
         render={
-          <button
+          <Button
+            variant="status-bar-quiet"
+            size="status-bar"
             type="button"
             onClick={handleOpenSettings}
             aria-label={translate(
               'auto.components.status.bar.StatusBarUsageEmptyCta.d663430cf9',
               'Configure usage tracking'
             )}
-            className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground inline-flex h-5 cursor-pointer items-center gap-1.5 rounded px-1.5 text-xs font-normal transition-colors outline-none"
           >
             <BarChart3 className="size-3.5" />
             <span>
@@ -54,7 +55,7 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
                 'Configure usage tracking'
               )}
             </span>
-          </button>
+          </Button>
         }
       />
       <HoverCardContent side="top" align="start" sideOffset={8} className="w-[260px] p-2.5">

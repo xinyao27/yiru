@@ -66,10 +66,11 @@ export function LanguageServerStatusSegment({
           render={
             <PopoverTrigger
               render={
-                <button
+                <Button
+                  variant="status-bar"
+                  size="status-bar"
                   type="button"
                   {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                  className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 px-1 py-0.5 outline-none"
                   aria-label={translate(
                     'auto.components.status.bar.LanguageServerStatusSegment.aria',
                     'Language server: {{value0}}',
@@ -92,7 +93,7 @@ export function LanguageServerStatusSegment({
                       )}
                     </span>
                   ) : null}
-                </button>
+                </Button>
               }
             />
           }

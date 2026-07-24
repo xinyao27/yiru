@@ -175,11 +175,13 @@ Variants in priority order:
 | `secondary`   | Lower-emphasis sibling next to a `default`.                        |
 | `outline`     | Toolbar / standalone actions where a filled button feels heavy.    |
 | `ghost`       | Icon buttons, list-row triggers, anywhere chrome should disappear. |
-| `status-bar`  | Contiguous usage meters with a background focus state and no seam. |
+| `status-bar`  | Full-height footer actions with background focus and no border seam. |
+| `status-bar-icon` | Muted footer icons with selected state from `aria-current`.         |
+| `status-bar-quiet` | Muted footer labels with quiet hover and focus states.              |
 | `link`        | Inline text actions inside paragraphs.                             |
 | `destructive` | Delete, discard, irreversible. Never for Cancel.                   |
 
-Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), content-driven `status-bar`, plus `icon`, `icon-xs`, `icon-sm`, `icon-lg`. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar. Use `status-bar` for contiguous inline meters.
+Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), full-height `status-bar`, plus `icon`, `icon-xs`, `icon-status-bar`, `icon-sm`, `icon-lg`. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar. Use `status-bar` / `icon-status-bar` for footer actions.
 
 ### Other primitives in this repo
 

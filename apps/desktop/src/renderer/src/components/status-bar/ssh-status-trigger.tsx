@@ -6,6 +6,7 @@ import {
 } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -52,9 +53,10 @@ export function SshStatusTrigger({
         render={
           <DropdownMenuTrigger
             render={
-              <button
+              <Button
+                variant="status-bar"
+                size="status-bar"
                 type="button"
-                className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
                 aria-label={translate(
                   'auto.components.status.bar.SshStatusSegment.fdc57e9970',
                   'Remote host connection status'
@@ -79,7 +81,7 @@ export function SshStatusTrigger({
                     <span className={cn('inline-block size-1.5 rounded-full', statusDotClass)} />
                   ) : null}
                 </span>
-              </button>
+              </Button>
             }
           />
         }

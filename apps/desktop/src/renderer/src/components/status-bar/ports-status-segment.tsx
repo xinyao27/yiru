@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { SelectedTextCopyMenu } from '@/components/selected-text-copy-menu'
+import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -82,10 +83,11 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
             render={
               <PopoverTrigger
                 render={
-                  <button
+                  <Button
+                    variant="status-bar"
+                    size="status-bar"
                     type="button"
                     {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                    className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
                     aria-label={translate(
                       'auto.components.status.bar.PortsStatusSegment.b8bc3e420a',
                       'Ports, {{value0}} workspace {{value1}}',
@@ -105,7 +107,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                         {workspacePortCount}
                       </span>
                     )}
-                  </button>
+                  </Button>
                 }
               />
             }

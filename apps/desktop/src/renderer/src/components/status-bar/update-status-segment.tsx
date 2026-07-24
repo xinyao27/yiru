@@ -5,6 +5,7 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 
@@ -88,16 +89,17 @@ export function UpdateStatusSegment({
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button
+            variant="status-bar"
+            size="status-bar"
             type="button"
             onClick={handleClick}
-            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
             aria-label={segment.ariaLabel}
             aria-expanded={!collapsed}
           >
             {segment.icon}
             {!iconOnly && <span className="text-[11px] tabular-nums">{segment.label}</span>}
-          </button>
+          </Button>
         }
       />
       <TooltipContent side="top" sideOffset={6}>

@@ -2,6 +2,7 @@ import { Check, Package as PackageOpen, Trash as Trash2, Upload } from '@phospho
 import React from 'react'
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,9 +119,12 @@ function PetStatusSegmentInner(): React.JSX.Element {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="status-bar-quiet"
+            size="status-bar"
             type="button"
-            className="group focus-visible:bg-accent inline-flex cursor-pointer items-center py-0.5 pr-[6.5rem] pl-1 outline-none"
+            // Why: preserve the status-bar span reserved for the overlaid pet sprite.
+            className="gap-0 pr-[6.5rem]"
             aria-label={translate(
               'auto.components.status.bar.PetStatusSegment.aec479308a',
               'Pet menu'
@@ -128,13 +132,13 @@ function PetStatusSegmentInner(): React.JSX.Element {
           >
             <span
               className={cn(
-                'rounded px-1 py-0.5 text-[11px] font-medium text-muted-foreground group-hover:bg-accent/70 group-hover:text-foreground',
+                'rounded px-1 py-0.5 text-[11px] font-medium',
                 petVisible ? '' : 'opacity-50'
               )}
             >
               {label}
             </span>
-          </button>
+          </Button>
         }
       />
       <DropdownMenuContent side="top" align="end" sideOffset={8} className="min-w-[220px]">

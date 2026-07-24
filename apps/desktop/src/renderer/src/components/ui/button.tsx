@@ -20,19 +20,24 @@ const buttonVariants = cva(
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
-        // Why: contiguous usage meters cannot reserve a border seam, so focus uses background contrast.
+        // Why: status actions cannot reserve a border seam, so focus uses background contrast.
         'status-bar': 'border-0 font-normal hover:bg-accent/70 focus-visible:bg-accent/70',
+        'status-bar-icon':
+          'border-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground aria-[current=page]:text-foreground',
+        'status-bar-quiet':
+          'border-0 font-normal text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground',
         link: 'text-primary underline-offset-4 hover:underline'
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        // Why: adjacent status-bar meters need a small inset while preserving their compact grouping.
-        'status-bar': "h-auto gap-0 px-1.5 py-0.5 text-xs [&_svg:not([class*='size-'])]:size-3",
+        // Why: status actions fill the footer while their content retains compact spacing.
+        'status-bar': "h-full gap-1.5 px-1 py-0.5 text-xs [&_svg:not([class*='size-'])]:size-3",
         sm: 'h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
         lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
         icon: 'size-9',
         'icon-xs': "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        'icon-status-bar': "h-full w-5 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
         'icon-lg': 'size-10'
       }

@@ -1625,7 +1625,13 @@ export function ProviderDetailsMenu({
     <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger
         render={
-          <Button variant="status-bar" size="status-bar" type="button" aria-label={ariaLabel}>
+          <Button
+            variant="status-bar"
+            size="status-bar"
+            type="button"
+            className="gap-0 px-1.5"
+            aria-label={ariaLabel}
+          >
             {iconOnly ? (
               <span className="inline-flex items-center gap-1">
                 <span
@@ -1935,9 +1941,9 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
         setMenuOpen(true)
       }}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex h-full min-w-0 items-center gap-2">
         {showUsageGroup ? (
-          <div className="flex min-w-0 items-center">
+          <div className="flex h-full min-w-0 items-center">
             {showEmptyUsageCta ? (
               <StatusBarUsageEmptyCta />
             ) : (
@@ -2027,11 +2033,10 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                 <TooltipTrigger
                   render={
                     <Button
-                      variant="quiet"
-                      size="xs"
+                      variant="status-bar-icon"
+                      size="icon-status-bar"
                       onClick={handleRefresh}
                       disabled={isRefreshing}
-                      className="h-auto gap-0 border-0 p-0.5 font-normal disabled:opacity-40"
                       aria-label={translate(
                         'auto.components.status.bar.StatusBar.3325d996cb',
                         'Refresh rate limits'
@@ -2058,7 +2063,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
         {showUsageGroup ? <Separator orientation="vertical" size="sm" /> : null}
         {/* Why: system status stays icon-only beside usage, reserving the right
         edge for workspace panel navigation. */}
-        <div className="flex shrink-0 items-center gap-0.5">
+        <div className="flex h-full shrink-0 items-center gap-0.5">
           <UpdateStatusSegment compact={compact} iconOnly />
           <React.Suspense fallback={null}>
             {petEnabled ? <PetStatusSegment /> : null}
@@ -2071,14 +2076,19 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
           </React.Suspense>
           <SpoolAvailabilityStatusSegment />
           {showFloatingTerminalToggle && (
-            <FloatingTerminalIconContextMenu currentLocation="status-bar" className="relative">
+            <FloatingTerminalIconContextMenu
+              currentLocation="status-bar"
+              className="relative h-full"
+            >
               <Tooltip>
                 <TooltipTrigger
                   render={
                     // Why: this compact status-bar control sits flush with app chrome, so it stays flat.
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="icon-status-bar"
                       type="button"
-                      className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border transition-colors outline-none"
+                      className="border-border hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground relative border"
                       aria-label={
                         showFloatingWorkspaceAttentionDot
                           ? `${floatingTerminalActionLabel}, new activity`
@@ -2097,7 +2107,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                           className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 rounded-full bg-amber-500"
                         />
                       ) : null}
-                    </button>
+                    </Button>
                   }
                 />
                 <TooltipContent side="top" sideOffset={6}>

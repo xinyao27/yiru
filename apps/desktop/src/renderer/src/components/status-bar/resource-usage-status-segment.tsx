@@ -1206,10 +1206,12 @@ export function ResourceUsageStatusSegment({
           render={
             <PopoverTrigger
               render={
-                <button
+                <Button
+                  variant="status-bar"
+                  size="status-bar"
                   type="button"
                   {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                  className="hover:bg-accent/70 focus-visible:bg-accent/70 relative inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
+                  className="relative"
                   aria-label={
                     daemonUnreachable
                       ? translate(
@@ -1251,7 +1253,7 @@ export function ResourceUsageStatusSegment({
                       )}
                     />
                   )}
-                </button>
+                </Button>
               }
             />
           }

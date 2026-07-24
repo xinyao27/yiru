@@ -67,10 +67,10 @@ function SpoolAvailabilityStatusSegmentContent({
         render={
           <Button
             type="button"
-            variant="ghost"
-            size="xs"
+            variant="status-bar-quiet"
+            size="status-bar"
             {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-            className="text-muted-foreground hover:text-foreground h-auto gap-1.5 px-1 py-0.5 text-[11px] font-medium"
+            className="text-[11px] font-medium"
             aria-label={title}
             aria-expanded={open}
           >
