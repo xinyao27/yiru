@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import {
   View,
   Pressable,
@@ -65,6 +65,18 @@ export function BottomDrawer({
   const [mounted, setMounted] = useState(visible)
   const resolvedMounted = resolveBottomDrawerMounted(visible, mounted)
 
+  const onAfterCloseRef = useRef(onAfterClose)
+  onAfterCloseRef.current = onAfterClose
+  // Why: must stay referentially stable — MountedBottomDrawer's show/hide effect
+  // re-runs whenever this callback changes identity. A fresh closure per render
+  // restarts the show animation on any parent re-render and cancels an in-flight
+  // backdrop-tap dismiss (whose onClose only fires when the timing finishes),
+  // making the drawer reopen in a loop.
+  const onHidden = useCallback(() => {
+    setMounted(false)
+    onAfterCloseRef.current?.()
+  }, [])
+
   // Why: opening drawers should mount before commit; waiting for a passive
   // Effect adds a null render before every drawer can animate in.
   if (resolvedMounted !== mounted) {
@@ -81,10 +93,7 @@ export function BottomDrawer({
     <MountedBottomDrawer
       visible={visible}
       onClose={onClose}
-      onHidden={() => {
-        setMounted(false)
-        onAfterClose?.()
-      }}
+      onHidden={onHidden}
       dragContentToDismiss={dragContentToDismiss}
       contentScrollable={contentScrollable}
       zIndex={zIndex}
