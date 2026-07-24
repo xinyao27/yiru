@@ -35,7 +35,6 @@
     "check": "pnpm run lint && pnpm run fmt && pnpm run typecheck",
     "test": "pnpm --workspace-root exec vp test packages/expo-two-way-audio",
     "up": "taze major -Ir",
-    "prepare": "vp config",
     "typecheck": "tsc --noEmit",
     "expo-module": "expo-module"
   },
