@@ -12,6 +12,7 @@ import { IconContext } from '@/components/uniwind-icons'
 import { SafeAreaListener, SafeAreaProvider } from '@/components/uniwind-native-components'
 
 import { YiruLogo } from '../src/components/yiru-logo'
+import { MobileLoaderStyleProvider } from '../src/loading/mobile-loader-style-context'
 import { getNotificationNavigationPath } from '../src/notifications/notification-routing'
 import { RpcClientProvider } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
@@ -169,49 +170,52 @@ export default function RootLayout() {
         }}
       >
         <IconContext.Provider value={iconContextValue}>
-          <RpcClientProvider>
-            <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
-              <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-              <Stack
-                screenOptions={{
-                  headerStyle,
-                  headerTintColor: foreground,
-                  headerTitleStyle,
-                  contentStyle,
-                  headerShadowVisible: false
-                  // Why: deliberately no `orientation` screenOption. react-native-screens
-                  // has no value that respects the device rotation lock — even 'default'
-                  // calls setRequestedOrientation(UNSPECIFIED) at runtime, overriding the
-                  // manifest. Leaving it unset lets the manifest's "fullUser" (set by the
-                  // android-respect-rotation-lock config plugin) honor the auto-rotate lock.
-                }}
-              >
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    headerShown: false,
-                    headerTitle: () => <YiruLogo size={22} />
+          <MobileLoaderStyleProvider>
+            <RpcClientProvider>
+              <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
+                <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+                <Stack
+                  screenOptions={{
+                    headerStyle,
+                    headerTintColor: foreground,
+                    headerTitleStyle,
+                    contentStyle,
+                    headerShadowVisible: false
+                    // Why: deliberately no `orientation` screenOption. react-native-screens
+                    // has no value that respects the device rotation lock — even 'default'
+                    // calls setRequestedOrientation(UNSPECIFIED) at runtime, overriding the
+                    // manifest. Leaving it unset lets the manifest's "fullUser" (set by the
+                    // android-respect-rotation-lock config plugin) honor the auto-rotate lock.
                   }}
-                />
-                <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
-                <Stack.Screen name="pair" options={{ headerShown: false }} />
-                <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="notification-opt-in"
-                  options={{ headerShown: false, presentation: 'modal', gestureEnabled: false }}
-                />
-                <Stack.Screen name="settings" options={{ headerShown: false }} />
-                <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
-                <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
-                <Stack.Screen name="voice-settings" options={{ headerShown: false }} />
-                <Stack.Screen name="notifications" options={{ headerShown: false }} />
-                <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
-                <Stack.Screen name="connection-log" options={{ headerShown: false }} />
-                <Stack.Screen name="about" options={{ headerShown: false }} />
-                <Stack.Screen name="h" options={{ headerShown: false }} />
-              </Stack>
-            </View>
-          </RpcClientProvider>
+                >
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      headerShown: false,
+                      headerTitle: () => <YiruLogo size={22} />
+                    }}
+                  />
+                  <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
+                  <Stack.Screen name="pair" options={{ headerShown: false }} />
+                  <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="notification-opt-in"
+                    options={{ headerShown: false, presentation: 'modal', gestureEnabled: false }}
+                  />
+                  <Stack.Screen name="settings" options={{ headerShown: false }} />
+                  <Stack.Screen name="appearance-settings" options={{ headerShown: false }} />
+                  <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
+                  <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
+                  <Stack.Screen name="voice-settings" options={{ headerShown: false }} />
+                  <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                  <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
+                  <Stack.Screen name="connection-log" options={{ headerShown: false }} />
+                  <Stack.Screen name="about" options={{ headerShown: false }} />
+                  <Stack.Screen name="h" options={{ headerShown: false }} />
+                </Stack>
+              </View>
+            </RpcClientProvider>
+          </MobileLoaderStyleProvider>
         </IconContext.Provider>
       </SafeAreaListener>
     </SafeAreaProvider>
