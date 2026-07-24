@@ -2408,14 +2408,12 @@ function App(): React.JSX.Element {
                         >
                           <div
                             data-testid="titlebar-left"
-                            // Why: when the sidebar is collapsed, titlebar-left floats
-                            // above the now-open tab edge. Its border keeps the control
-                            // cluster distinct, while w-max preserves the full hit area
-                            // inside the zero-width sidebar wrapper.
+                            // Why: collapsed controls float over the tab edge; a transparent host keeps
+                            // the titlebar continuous while its borders and w-max preserve separation and hit area.
                             className={cn(
                               TITLEBAR_LEFT_CLASS_NAME,
                               leftTitlebarChromeLayout.isFloating &&
-                                'absolute left-0 top-0 z-10 w-max border-r border-border bg-[var(--bg-titlebar,var(--card))]'
+                                'absolute left-0 top-0 z-10 w-max border-r border-border bg-transparent'
                             )}
                             style={{
                               // Why: custom sidebar appearances are scoped to the sidebar
