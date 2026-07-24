@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -1884,7 +1885,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     showAntigravity ||
     showMiniMax ||
     showGrok
-  const anyVisible = hasVisibleUsageMeters || showResourceUsage
   // Why: a brand-new user with no provider configured would otherwise see an
   // empty left side of the status bar and wonder what's missing. Settings are
   // included because managed accounts are durable even when live usage
@@ -1896,6 +1896,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   // Why: the teaching CTA is a one-time nudge — once the user hides it, keep it
   // hidden even after providers are disconnected again.
   const showEmptyUsageCta = isEmptyUsageState && !usageEmptyStateDismissed
+  const showUsageGroup = hasVisibleUsageMeters || showEmptyUsageCta
   const anyFetching =
     claude?.status === 'fetching' ||
     codex?.status === 'fetching' ||
@@ -1939,114 +1940,126 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
       }}
     >
       <div className="flex min-w-0 items-center gap-3">
-        {isEmptyUsageState ? (
-          showEmptyUsageCta ? (
-            <StatusBarUsageEmptyCta />
-          ) : null
-        ) : (
-          // Why: one-time usage-display change callout anchors to this cluster so
-          // it sits next to the meters the user is confused by, not a global toast.
-          <UsagePercentageDisplayChangeNotice hasVisibleUsageMeters={hasVisibleUsageMeters}>
-            {showClaude && (
-              <ClaudeSwitcherMenu claude={visibleClaude} compact={compact} iconOnly={iconOnly} />
-            )}
-            {showCodex && (
-              <CodexSwitcherMenu codex={visibleCodex} compact={compact} iconOnly={iconOnly} />
-            )}
-            {showGemini && (
-              <ProviderDetailsMenu
-                provider={visibleGemini}
-                compact={compact}
-                iconOnly={iconOnly}
-                ariaLabel={translate(
-                  'auto.components.status.bar.StatusBar.d2375976eb',
-                  'Open Gemini usage details'
+        {showUsageGroup ? (
+          <div className="flex min-w-0 items-center gap-3">
+            {showEmptyUsageCta ? (
+              <StatusBarUsageEmptyCta />
+            ) : (
+              // Why: one-time usage-display change callout anchors to this cluster so
+              // it sits next to the meters the user is confused by, not a global toast.
+              <UsagePercentageDisplayChangeNotice hasVisibleUsageMeters={hasVisibleUsageMeters}>
+                {showClaude && (
+                  <ClaudeSwitcherMenu
+                    claude={visibleClaude}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                  />
                 )}
-              />
-            )}
-            {showAntigravity && (
-              <ProviderDetailsMenu
-                provider={visibleAntigravity}
-                compact={compact}
-                iconOnly={iconOnly}
-                ariaLabel={translate(
-                  'auto.components.status.bar.StatusBar.antigravityUsageDetails',
-                  'Open Antigravity usage details'
+                {showCodex && (
+                  <CodexSwitcherMenu codex={visibleCodex} compact={compact} iconOnly={iconOnly} />
                 )}
-              />
-            )}
-            {showOpencodeGo && (
-              <ProviderDetailsMenu
-                provider={visibleOpencodeGo}
-                compact={compact}
-                iconOnly={iconOnly}
-                ariaLabel={translate(
-                  'auto.components.status.bar.StatusBar.629251f4b6',
-                  'Open OpenCode Go usage details'
+                {showGemini && (
+                  <ProviderDetailsMenu
+                    provider={visibleGemini}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                    ariaLabel={translate(
+                      'auto.components.status.bar.StatusBar.d2375976eb',
+                      'Open Gemini usage details'
+                    )}
+                  />
                 )}
-              />
-            )}
-            {showKimi && (
-              <ProviderDetailsMenu
-                provider={visibleKimi}
-                compact={compact}
-                iconOnly={iconOnly}
-                ariaLabel={translate(
-                  'auto.components.status.bar.StatusBar.fda8146810',
-                  'Open Kimi usage details'
+                {showAntigravity && (
+                  <ProviderDetailsMenu
+                    provider={visibleAntigravity}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                    ariaLabel={translate(
+                      'auto.components.status.bar.StatusBar.antigravityUsageDetails',
+                      'Open Antigravity usage details'
+                    )}
+                  />
                 )}
-              />
-            )}
-            {showMiniMax && (
-              <ProviderDetailsMenu
-                provider={visibleMiniMax}
-                compact={compact}
-                iconOnly={iconOnly}
-                ariaLabel={translate(
-                  'auto.components.status.bar.StatusBar.06741a2f3d',
-                  'Open MiniMax usage details'
+                {showOpencodeGo && (
+                  <ProviderDetailsMenu
+                    provider={visibleOpencodeGo}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                    ariaLabel={translate(
+                      'auto.components.status.bar.StatusBar.629251f4b6',
+                      'Open OpenCode Go usage details'
+                    )}
+                  />
                 )}
-              />
-            )}
-            {showGrok && (
-              <ProviderDetailsMenu
-                provider={visibleGrok}
-                compact={compact}
-                iconOnly={iconOnly}
-                ariaLabel={translate(
-                  'auto.components.status.bar.StatusBar.grokUsageAria',
-                  'Open Grok usage details'
+                {showKimi && (
+                  <ProviderDetailsMenu
+                    provider={visibleKimi}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                    ariaLabel={translate(
+                      'auto.components.status.bar.StatusBar.fda8146810',
+                      'Open Kimi usage details'
+                    )}
+                  />
                 )}
-              />
+                {showMiniMax && (
+                  <ProviderDetailsMenu
+                    provider={visibleMiniMax}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                    ariaLabel={translate(
+                      'auto.components.status.bar.StatusBar.06741a2f3d',
+                      'Open MiniMax usage details'
+                    )}
+                  />
+                )}
+                {showGrok && (
+                  <ProviderDetailsMenu
+                    provider={visibleGrok}
+                    compact={compact}
+                    iconOnly={iconOnly}
+                    ariaLabel={translate(
+                      'auto.components.status.bar.StatusBar.grokUsageAria',
+                      'Open Grok usage details'
+                    )}
+                  />
+                )}
+              </UsagePercentageDisplayChangeNotice>
             )}
-          </UsagePercentageDisplayChangeNotice>
-        )}
-        {anyVisible && !isEmptyUsageState && (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-0.5 transition-colors outline-none disabled:opacity-40"
-                  aria-label={translate(
-                    'auto.components.status.bar.StatusBar.3325d996cb',
-                    'Refresh rate limits'
+            {hasVisibleUsageMeters ? (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="quiet"
+                      size="xs"
+                      onClick={handleRefresh}
+                      disabled={isRefreshing}
+                      className="h-auto gap-0 border-0 p-0.5 font-normal disabled:opacity-40"
+                      aria-label={translate(
+                        'auto.components.status.bar.StatusBar.3325d996cb',
+                        'Refresh rate limits'
+                      )}
+                    >
+                      {isRefreshing || anyFetching ? (
+                        <LoadingIndicator size={11} />
+                      ) : (
+                        <RefreshCw weight="regular" size={11} />
+                      )}
+                    </Button>
+                  }
+                />
+                <TooltipContent side="top" sideOffset={6}>
+                  {translate(
+                    'auto.components.status.bar.StatusBar.c8857b40f7',
+                    'Refresh usage data'
                   )}
-                >
-                  {isRefreshing || anyFetching ? (
-                    <LoadingIndicator size={11} />
-                  ) : (
-                    <RefreshCw size={11} />
-                  )}
-                </button>
-              }
-            />
-            <TooltipContent side="top" sideOffset={6}>
-              {translate('auto.components.status.bar.StatusBar.c8857b40f7', 'Refresh usage data')}
-            </TooltipContent>
-          </Tooltip>
-        )}
+                </TooltipContent>
+              </Tooltip>
+            ) : null}
+          </div>
+        ) : null}
+        {showUsageGroup ? <Separator orientation="vertical" size="sm" /> : null}
         {/* Why: system status stays icon-only beside usage, reserving the right
         edge for workspace panel navigation. */}
         <div className="flex shrink-0 items-center gap-0.5">

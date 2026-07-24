@@ -6,33 +6,13 @@ import { translate } from '@/i18n/i18n'
 import { formatRateLimitWindowChipLabel } from '@/lib/window-label-formatter'
 
 import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
-import {
-  getDisplayedUsagePercentage,
-  type UsagePercentageDisplay
-} from '../../../../shared/usage-percentage-display'
+import type { UsagePercentageDisplay } from '../../../../shared/usage-percentage-display'
 import { getProviderUsageStatusLabel, ProviderIcon } from './tooltip'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 
 // Why: only the primary Gemini buckets earn space in compact usage surfaces;
 // the remaining model buckets stay available in the detailed usage panel.
 const STATUS_BAR_BUCKET_NAMES = new Set(['Flash', 'Pro', '1.5 Pro'])
-
-function UsageBar({
-  usedPercent,
-  display
-}: {
-  usedPercent: number
-  display: UsagePercentageDisplay
-}): React.JSX.Element {
-  return (
-    <span className="bg-muted h-[6px] w-12 shrink-0 overflow-hidden rounded-full">
-      <span
-        className="bg-muted-foreground/40 block h-full rounded-full transition-all duration-300"
-        style={{ width: `${getDisplayedUsagePercentage(usedPercent, display)}%` }}
-      />
-    </span>
-  )
-}
 
 function WindowLabel({
   window,
@@ -176,9 +156,6 @@ export function ProviderUsageSegment({
   return (
     <span className="inline-flex items-center gap-1.5">
       <ProviderIcon provider={provider} />
-      {limits.session && !compact ? (
-        <UsageBar usedPercent={limits.session.usedPercent} display={display} />
-      ) : null}
       {visibleWindows.map((window, index) => (
         <Fragment key={window.key}>
           {index > 0 ? <span className="text-muted-foreground">·</span> : null}

@@ -54,7 +54,7 @@ Import primitives directly from their module (`@/components/ui/button`), not thr
 | Module | Public interface | Notes |
 | --- | --- | --- |
 | `card.tsx` | `Card` family | Repeated or framed content only |
-| `separator.tsx` | `Separator` | Semantic visual divider |
+| `separator.tsx` | `Separator` | Semantic visual divider; `size="sm"` shortens vertical toolbar splits |
 | `tabs.tsx` | `Tabs` family | Peer views sharing one region |
 | `accordion.tsx` | `Accordion` family | Multiple disclosure sections |
 | `collapsible.tsx` | `Collapsible` family | One disclosure section |

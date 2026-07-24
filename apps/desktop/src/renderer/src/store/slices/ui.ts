@@ -20,7 +20,6 @@ import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
   DEFAULT_SHOW_SLEEPING_WORKSPACES,
-  DEFAULT_STATUS_BAR_ITEMS,
   DEFAULT_WORKTREE_CARD_PROPERTIES,
   normalizeAgentActivityDisplayMode,
   normalizeWorktreeCardProperties
@@ -45,6 +44,10 @@ import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-pane
 import { persistedUIValuesEqual } from '../../../../shared/persisted-ui-equality'
 import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
+import {
+  DEFAULT_STATUS_BAR_ITEMS,
+  normalizeStatusBarItems
+} from '../../../../shared/status-bar-defaults'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type {
   ChangelogData,
@@ -216,27 +219,7 @@ function clampPetSize(size: number): number {
   return Math.max(PET_SIZE_MIN, Math.min(PET_SIZE_MAX, Math.round(size)))
 }
 
-// Why: persisted UI state pre-dated the consolidation of `memory` + `sessions`
-// into a single `resource-usage` entry. Rewrite legacy ids in place and
-// de-duplicate. We leave unknown ids alone so a downgrade→upgrade cycle
-// doesn't strip a newer build's ids out of the user's settings.
-function migrateStatusBarItems(items: readonly string[] | undefined): StatusBarItem[] {
-  const source = items ?? DEFAULT_STATUS_BAR_ITEMS
-  const out: string[] = []
-  for (const id of source) {
-    const mapped = id === 'memory' || id === 'sessions' ? 'resource-usage' : id
-    if (!out.includes(mapped)) {
-      out.push(mapped)
-    }
-  }
-  return out as StatusBarItem[]
-}
-
 const DEFAULT_ON_PORTS_STATUS_BAR_ITEM: StatusBarItem = 'ports'
-const DEFAULT_ON_KIMI_STATUS_BAR_ITEM: StatusBarItem = 'kimi'
-const DEFAULT_ON_MINIMAX_STATUS_BAR_ITEM: StatusBarItem = 'minimax'
-const DEFAULT_ON_ANTIGRAVITY_STATUS_BAR_ITEM: StatusBarItem = 'antigravity'
-const DEFAULT_ON_GROK_STATUS_BAR_ITEM: StatusBarItem = 'grok'
 
 function normalizeHydratedVisibleWorkspaceHostIds(ui: PersistedUIState): VisibleWorkspaceHostIds {
   const visibleHostIds = normalizeVisibleExecutionHostIds(ui.visibleWorkspaceHostIds)
@@ -1966,38 +1949,30 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       //     flag — not here — so that users who intentionally select the new
       //     'recent' sort keep it across restarts.
       const sortBy = ui.sortBy
-      const migratedStatusBarItems = migrateStatusBarItems(ui.statusBarItems)
+      const migratedStatusBarItems = normalizeStatusBarItems(ui.statusBarItems)
       const statusBarItemsWithPorts =
         ui._portsStatusBarDefaultAdded || migratedStatusBarItems.includes('ports')
           ? migratedStatusBarItems
           : [...migratedStatusBarItems, DEFAULT_ON_PORTS_STATUS_BAR_ITEM]
-      const statusBarItems =
-        ui._kimiStatusBarDefaultAdded || statusBarItemsWithPorts.includes('kimi')
-          ? statusBarItemsWithPorts
-          : [...statusBarItemsWithPorts, DEFAULT_ON_KIMI_STATUS_BAR_ITEM]
-      const statusBarItemsWithMiniMax =
-        ui._minimaxStatusBarDefaultAdded || statusBarItems.includes('minimax')
-          ? statusBarItems
-          : [...statusBarItems, DEFAULT_ON_MINIMAX_STATUS_BAR_ITEM]
-      const statusBarItemsWithAntigravity =
-        ui._antigravityStatusBarDefaultAdded || statusBarItemsWithMiniMax.includes('antigravity')
-          ? statusBarItemsWithMiniMax
-          : [...statusBarItemsWithMiniMax, DEFAULT_ON_ANTIGRAVITY_STATUS_BAR_ITEM]
-      const statusBarItemsWithGrok =
-        ui._grokStatusBarDefaultAdded || statusBarItemsWithAntigravity.includes('grok')
-          ? statusBarItemsWithAntigravity
-          : [...statusBarItemsWithAntigravity, DEFAULT_ON_GROK_STATUS_BAR_ITEM]
+      const persistedStatusBarItems = ui.statusBarItems ?? []
+      const statusBarItemsChanged =
+        persistedStatusBarItems.length !== statusBarItemsWithPorts.length ||
+        persistedStatusBarItems.some((item, index) => item !== statusBarItemsWithPorts[index])
+      const historicalStatusBarDefaultsHandled =
+        ui._portsStatusBarDefaultAdded &&
+        ui._kimiStatusBarDefaultAdded &&
+        ui._minimaxStatusBarDefaultAdded &&
+        ui._antigravityStatusBarDefaultAdded &&
+        ui._grokStatusBarDefaultAdded
       if (
-        (!ui._portsStatusBarDefaultAdded ||
-          !ui._kimiStatusBarDefaultAdded ||
-          !ui._minimaxStatusBarDefaultAdded ||
-          !ui._antigravityStatusBarDefaultAdded ||
-          !ui._grokStatusBarDefaultAdded) &&
+        (statusBarItemsChanged || !historicalStatusBarDefaultsHandled) &&
         typeof window !== 'undefined'
       ) {
         window.api.ui
           .set({
-            statusBarItems: statusBarItemsWithGrok,
+            statusBarItems: statusBarItemsWithPorts,
+            // Why: retire the former provider-default migrations without
+            // re-enabling their meters when this quieter default is hydrated.
             _portsStatusBarDefaultAdded: true,
             _kimiStatusBarDefaultAdded: true,
             _minimaxStatusBarDefaultAdded: true,
@@ -2067,7 +2042,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         worktreeCardProperties: normalizeWorktreeCardProperties(ui.worktreeCardProperties),
         agentActivityDisplayMode: normalizeAgentActivityDisplayMode(ui.agentActivityDisplayMode),
         workspaceStatuses: normalizeWorkspaceStatuses(ui.workspaceStatuses),
-        statusBarItems: statusBarItemsWithGrok,
+        statusBarItems: statusBarItemsWithPorts,
         statusBarVisible: ui.statusBarVisible ?? true,
         usagePercentageDisplay: normalizeUsagePercentageDisplay(ui.usagePercentageDisplay),
         // Why: absent → true so existing users see the pet the first time
