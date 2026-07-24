@@ -42,7 +42,7 @@ export function getCodexSessionBackfillStateDirPath(): string {
   return join(getYiruUserDataPath(), 'codex-session-backfill')
 }
 
-function getYiruUserDataPath(): string {
+export function getYiruUserDataPath(): string {
   if (process.env.YIRU_USER_DATA_PATH) {
     return process.env.YIRU_USER_DATA_PATH
   }

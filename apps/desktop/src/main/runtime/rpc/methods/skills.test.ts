@@ -2,6 +2,14 @@ import { describe, expect, it, vi } from 'vite-plus/test'
 
 import type { RpcContext } from '../core'
 
+const { getActiveMultiplexerMock } = vi.hoisted(() => ({
+  getActiveMultiplexerMock: vi.fn()
+}))
+
+vi.mock('../../../ipc/ssh', () => ({
+  getActiveMultiplexer: getActiveMultiplexerMock
+}))
+
 vi.mock('../../../skills/skill-discovery-target', () => ({
   resolveSkillDiscoveryTarget: vi.fn((target) => ({ kind: 'native-host', cwd: target?.cwd })),
   discoverSkillsOnTarget: vi.fn(async () => ({ skills: [], sources: [], scannedAt: 1 }))
@@ -43,6 +51,50 @@ function discoverMethod() {
 }
 
 describe('skills.discover RPC', () => {
+  it('delegates direct SSH discovery only after the relay advertises support', async () => {
+    const request = vi.fn(async (method: string) => {
+      if (method === 'session.capabilities') {
+        return { capabilities: ['skills.discover.v1'] }
+      }
+      return { skills: [], sources: [], scannedAt: 4 }
+    })
+    getActiveMultiplexerMock.mockReturnValue({ isDisposed: () => false, request })
+
+    await expect(
+      discoverMethod().handler(
+        {
+          cwd: '/remote/repo',
+          worktreeId: 'worktree-1',
+          executionHostId: 'ssh:target-1'
+        },
+        makeContext({})
+      )
+    ).resolves.toEqual({ skills: [], sources: [], scannedAt: 4 })
+    expect(getActiveMultiplexerMock).toHaveBeenCalledWith('target-1')
+    expect(request.mock.calls).toEqual([
+      ['session.capabilities'],
+      ['skills.discover', { cwd: '/remote/repo' }]
+    ])
+  })
+
+  it('does not call an additive discovery method on an older SSH relay', async () => {
+    const unsupported = Object.assign(new Error('Method not found: session.capabilities'), {
+      code: -32601
+    })
+    const request = vi.fn(async () => {
+      throw unsupported
+    })
+    getActiveMultiplexerMock.mockReturnValue({ isDisposed: () => false, request })
+
+    await expect(
+      discoverMethod().handler(
+        { cwd: '/remote/repo', executionHostId: 'ssh:target-1' },
+        makeContext({})
+      )
+    ).rejects.toThrow('does not support skill discovery')
+    expect(request).toHaveBeenCalledTimes(1)
+  })
+
   it('resolves the project runtime from the owning runtime store when the caller omits it', async () => {
     const resolveProjectRuntimeForWorktree = vi.fn(() => WSL_RUNTIME)
     await discoverMethod().handler(

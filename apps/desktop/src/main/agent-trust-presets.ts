@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 
 import { writeFileAtomically } from './codex-accounts/fs-utils'
 import { getYiruManagedCodexHomePath } from './codex/codex-home-paths'
@@ -110,12 +110,50 @@ export function markCopilotFolderTrusted(workspacePath: string): void {
  * codex-rs/core/src/config/config_tests.rs in the Codex CLI source.
  */
 export function markCodexProjectTrusted(workspacePath: string): void {
-  const absPath = canonicalize(workspacePath)
+  const absPath = resolveCodexProjectTrustRoot(workspacePath)
   const configPath = join(homedir(), '.codex', 'config.toml')
   upsertProjectTrustLevel(configPath, absPath, 'trusted')
   // Why: Yiru-launched Codex runs with a Yiru-owned CODEX_HOME, so the trust
   // preset must also update the runtime config Codex will actually read.
   upsertProjectTrustLevel(join(getYiruManagedCodexHomePath(), 'config.toml'), absPath, 'trusted')
+}
+
+export function resolveCodexProjectTrustRoot(workspacePath: string): string {
+  const absPath = canonicalize(workspacePath)
+  try {
+    const gitDirReference = readFileSync(join(absPath, '.git'), 'utf-8').trim()
+    if (!gitDirReference.startsWith('gitdir:')) {
+      return absPath
+    }
+    const gitDirPath = gitDirReference.slice('gitdir:'.length).trim()
+    if (!gitDirPath) {
+      return absPath
+    }
+    const gitDir = resolve(absPath, gitDirPath)
+    const worktreesDir = dirname(gitDir)
+    if (basename(worktreesDir) !== 'worktrees') {
+      return absPath
+    }
+    // Why: workspace-controlled metadata may broaden trust only when Git's
+    // worktree metadata links back to this exact checkout.
+    const gitDirBacklink = readFileSync(join(gitDir, 'gitdir'), 'utf-8').trim()
+    if (!gitDirBacklink) {
+      return absPath
+    }
+    const workspaceGitFile = join(absPath, '.git')
+    const resolvedBacklink = resolve(gitDir, gitDirBacklink)
+    if (
+      resolvedBacklink !== workspaceGitFile &&
+      canonicalize(resolvedBacklink) !== canonicalize(workspaceGitFile)
+    ) {
+      return absPath
+    }
+    // Why: Codex evaluates linked worktree trust at the repository root; the
+    // validated `.git/worktrees/<name>` structure identifies it safely.
+    return canonicalize(dirname(dirname(worktreesDir)))
+  } catch {
+    return absPath
+  }
 }
 
 function canonicalize(p: string): string {

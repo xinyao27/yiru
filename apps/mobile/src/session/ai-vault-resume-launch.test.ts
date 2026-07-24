@@ -6,6 +6,36 @@ import {
 } from './ai-vault-resume-launch'
 
 describe('mobile AI Vault Codex resume routing', () => {
+  it('preserves the exact OMP transcript locator for later cold resume', () => {
+    const launch = buildMobileAiVaultResumeLaunch({
+      session: {
+        agent: 'omp',
+        sessionId: 'omp-custom-1',
+        cwd: '/repo',
+        codexHome: null,
+        filePath: '/custom/omp-sessions/session.jsonl'
+      },
+      hostPlatform: 'linux',
+      settings: {
+        agentDefaultArgs: { omp: '--model custom' },
+        agentDefaultEnv: { omp: { OMP_PROFILE: 'custom' } }
+      }
+    })
+
+    expect(launch).toMatchObject({
+      command:
+        "cd '/repo' && omp '--model' 'custom' '--resume' '/custom/omp-sessions/session.jsonl'",
+      env: { OMP_PROFILE: 'custom' },
+      launchConfig: {
+        agentCommand: "omp '--model' 'custom'",
+        agentArgs: '--model custom',
+        agentEnv: { OMP_PROFILE: 'custom' },
+        ompResumeFilePath: '/custom/omp-sessions/session.jsonl'
+      },
+      launchAgent: 'omp'
+    })
+  })
+
   it('deletes inherited homes for real-home Codex but not managed or non-Codex sessions', () => {
     expect(
       buildMobileAiVaultResumeLaunch({

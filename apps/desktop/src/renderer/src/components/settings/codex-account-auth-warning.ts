@@ -31,11 +31,16 @@ export function getCodexAccountAuthWarning(args: {
   accountId: string | null
   authKind?: CodexSystemDefaultIdentity['authKind']
 }): string | null {
+  if (args.accountId !== args.activeAccountId) {
+    return null
+  }
+  // Why: app-server cannot report quota for API-key auth, while `none` is an
+  // authoritative signed-out system-default state that needs user attention.
   if (args.accountId === null && args.authKind === 'api-key') {
     return null
   }
-  if (args.accountId !== args.activeAccountId) {
-    return null
+  if (args.accountId === null && args.authKind === 'none') {
+    return 'No Codex sign-in was found.'
   }
   if (!codexRateLimitTargetMatchesAccountRuntime(args.target, args.runtime)) {
     return null

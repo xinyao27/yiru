@@ -3224,7 +3224,10 @@ export function useIpcEvents(): void {
         {
           tabId: ownerTabId,
           worktreeId: statusWorktreeId,
-          terminalHandle: data.terminalHandle
+          terminalHandle: data.terminalHandle,
+          // Why: provider resume metadata is host-owned; carry normalized
+          // ownership into the durable cold-restore record.
+          ...(ownershipConnectionId !== undefined ? { connectionId: ownershipConnectionId } : {})
         },
         data.providerSession || data.launchToken
           ? {

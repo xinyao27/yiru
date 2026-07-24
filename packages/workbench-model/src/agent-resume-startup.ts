@@ -27,7 +27,8 @@ const RESUMABLE_AGENT_RUNTIME: Record<ResumableTuiAgent, ResumableAgentRuntime> 
   droid: { launchCommand: 'droid', expectedProcess: 'droid' },
   grok: { launchCommand: 'grok', expectedProcess: 'grok' },
   devin: { launchCommand: 'devin', expectedProcess: 'devin' },
-  pi: { launchCommand: 'pi', expectedProcess: 'pi' }
+  pi: { launchCommand: 'pi', expectedProcess: 'pi' },
+  omp: { launchCommand: 'omp', expectedProcess: 'omp' }
 }
 
 export type AgentResumeStartupPlan = {
@@ -48,8 +49,9 @@ export function buildAgentResumeStartupPlan(args: {
   agentArgs?: string | null
   agentEnv?: Record<string, string> | null
   agentCommand?: string | null
+  ompResumeFilePath?: string | null
 }): AgentResumeStartupPlan | null {
-  const resumeArgv = getAgentResumeArgv(args.agent, args.providerSession)
+  const resumeArgv = getAgentResumeArgv(args.agent, args.providerSession, args.ompResumeFilePath)
   if (!resumeArgv) {
     return null
   }
@@ -79,7 +81,8 @@ export function buildAgentResumeStartupPlan(args: {
   const launchConfig: SleepingAgentLaunchConfig = {
     ...(baseCommand.trim() ? { agentCommand: baseCommand } : {}),
     agentArgs: args.agentArgs ?? '',
-    agentEnv: args.agentEnv ? { ...args.agentEnv } : {}
+    agentEnv: args.agentEnv ? { ...args.agentEnv } : {},
+    ...(args.ompResumeFilePath?.trim() ? { ompResumeFilePath: args.ompResumeFilePath.trim() } : {})
   }
 
   return {

@@ -60,3 +60,41 @@ describe('workspace-session Pi sleeping agents', () => {
     }
   })
 })
+
+describe('workspace-session OMP sleeping agents', () => {
+  it('preserves the provider id and exact resume path through hydration', () => {
+    const result = parseWorkspaceSession({
+      activeRepoId: null,
+      activeWorktreeId: null,
+      activeTabId: null,
+      tabsByWorktree: {},
+      terminalLayoutsByTabId: {},
+      sleepingAgentSessionsByPaneKey: {
+        'tab1:pane-1': {
+          paneKey: 'tab1:pane-1',
+          tabId: 'tab1',
+          worktreeId: 'wt',
+          agent: 'omp',
+          providerSession: { key: 'session_id', id: 'omp-session' },
+          prompt: '',
+          state: 'working',
+          capturedAt: 10,
+          updatedAt: 10,
+          launchConfig: {
+            agentArgs: '',
+            agentEnv: {},
+            ompResumeFilePath: '/custom/omp/session.jsonl'
+          },
+          origin: 'live'
+        }
+      }
+    })
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(
+        result.value.sleepingAgentSessionsByPaneKey?.['tab1:pane-1']?.launchConfig
+      ).toMatchObject({ ompResumeFilePath: '/custom/omp/session.jsonl' })
+    }
+  })
+})

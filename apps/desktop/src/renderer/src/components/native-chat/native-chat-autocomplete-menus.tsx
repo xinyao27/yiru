@@ -4,7 +4,6 @@ import { memo, useEffect, useRef } from 'react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 import type { SkillSourceKind } from '../../../../shared/skills'
 import type { ComposerAutocomplete, NativeChatPickerItem } from './native-chat-composer-state'
@@ -198,8 +197,8 @@ function PickerOption({
   const selected = index === activeIndex
   return (
     <Button
-      variant="ghost"
-      size="list-row"
+      variant="picker-row"
+      size="picker-row"
       id={`${listboxId}-option-${index}`}
       ref={selected ? activeItemRef : null}
       role="option"
@@ -211,10 +210,7 @@ function PickerOption({
         event.preventDefault()
         onChoose(item)
       }}
-      className={cn(
-        'w-full items-start justify-start gap-2 border-transparent px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
-        selected && 'border-border bg-accent text-accent-foreground'
-      )}
+      className="w-full items-start justify-start"
     >
       {item.kind === 'skill' ? (
         <Package className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
@@ -275,14 +271,14 @@ export function NativeChatMentionHint({
 }): React.JSX.Element {
   return (
     <Button
-      variant="outline"
-      size="xs"
+      variant="popover-outline"
+      size="popover-hint"
       type="button"
       onPointerDown={(event) => {
         event.preventDefault()
         onAccept()
       }}
-      className="bg-popover text-muted-foreground absolute right-3 bottom-full left-3 mb-1 flex h-auto w-auto items-center gap-2 px-3 py-1.5 text-left sm:right-4 sm:left-4"
+      className="absolute right-3 bottom-full left-3 mb-1 flex w-auto items-center sm:right-4 sm:left-4"
     >
       {translate('components.native-chat.composer.mentionHint', 'Referencing file:')}{' '}
       <span className="text-foreground font-medium">@{query || '…'}</span>

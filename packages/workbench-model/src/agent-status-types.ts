@@ -126,6 +126,9 @@ export type AgentStatusEntry = {
   worktreeId?: string
   /** Tab attribution from the hook IPC payload, when available. */
   tabId?: string
+  /** Execution host owning this status. Null is local; a string identifies an
+   *  SSH/remote connection and keeps persisted resume routing host-correct. */
+  connectionId?: string | null
   terminalTitle?: string
   /** Rolling log of previous states. Each entry records a state the agent was in
    *  before transitioning to the current one. Capped at AGENT_STATE_HISTORY_MAX. */

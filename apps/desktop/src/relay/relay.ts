@@ -64,6 +64,7 @@ import { pickRemoteCliEnv } from './remote-cli-env'
 import { shouldReadRemoteCliStdin } from './remote-cli-stdin'
 import { remoteCliRequestTimeoutMs } from './remote-cli-timeout'
 import { installRelayLogRotation } from './rotating-log-writer'
+import { registerSkillDiscoveryHandlers } from './skill-discovery-handler'
 import { WorkspaceSessionHandler } from './workspace-session-handler'
 
 const DEFAULT_GRACE_MS = DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS * 1000
@@ -466,6 +467,8 @@ async function main(): Promise<void> {
     }
     return { resolvedPath: inputPath }
   })
+
+  registerSkillDiscoveryHandlers(dispatcher)
 
   const ptyHandler = new PtyHandler(dispatcher, graceTimeMs)
   const fsHandler = new FsHandler(dispatcher, context)

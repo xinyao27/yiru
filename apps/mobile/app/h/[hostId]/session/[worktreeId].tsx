@@ -186,6 +186,7 @@ import {
 import { sendMobileTerminalQueryReply } from '../../../../src/terminal/mobile-terminal-query-reply'
 import {
   buildMobileQuickCommandLaunch,
+  shouldShowMobileQuickCommandsAction,
   supportsMobileQuickCommands,
   type MobileQuickCommandLaunch
 } from '../../../../src/terminal/quick-commands'
@@ -4654,13 +4655,15 @@ export default function SessionScreen() {
                 </Text>
               </Pressable>
             </View>
-            <MobileSessionHeaderIconButton
-              active={activePanel === 'files'}
-              accessibilityLabel="Open file explorer"
-              icon={Folder}
-              onPress={() => handlePanelTap('files')}
-            />
-            {!isFolderWorkspaceRoute && (
+            {!isFloatingWorkspaceRoute ? (
+              <MobileSessionHeaderIconButton
+                active={activePanel === 'files'}
+                accessibilityLabel="Open file explorer"
+                icon={Folder}
+                onPress={() => handlePanelTap('files')}
+              />
+            ) : null}
+            {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
               <MobileSessionHeaderIconButton
                 active={activePanel === 'sourceControl'}
                 accessibilityLabel="Open source control"
@@ -4770,12 +4773,18 @@ export default function SessionScreen() {
               >
                 <Plus size={16} colorClassName="accent-muted-foreground" />
               </Pressable>
-              {quickCommandsSupported === true ? (
+              {shouldShowMobileQuickCommandsAction(quickCommandsSupported) ? (
                 <QuickCommandsTabButton
                   disabled={
                     creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
                   }
-                  onPress={() => setShowQuickCommands(true)}
+                  onPress={() => {
+                    if (quickCommandsSupported === true) {
+                      setShowQuickCommands(true)
+                      return
+                    }
+                    showToast('Checking desktop capabilities - try again in a moment', 1600)
+                  }}
                 />
               ) : null}
             </View>

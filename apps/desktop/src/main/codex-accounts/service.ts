@@ -188,6 +188,17 @@ export class CodexAccountService {
     return this.serializeMutation(() => this.doSelectAccount(accountId, target))
   }
 
+  private startQuotaRefreshInBackground(
+    outgoingAccountId: string | null | undefined,
+    target: CodexAccountSelectionTarget | undefined
+  ): void {
+    // Why: cold account homes can take tens of seconds to probe. The durable
+    // account mutation must resolve independently of this best-effort refresh.
+    void this.rateLimits.refreshForCodexAccountChange(outgoingAccountId, target).catch((error) => {
+      console.error('[codex-accounts] Quota refresh after account change failed:', error)
+    })
+  }
+
   private async doAddAccount(target?: CodexAccountAddTarget): Promise<CodexRateLimitAccountsState> {
     const accountId = randomUUID()
     const managedHome = this.createManagedHome(accountId, target)
@@ -239,7 +250,7 @@ export class CodexAccountService {
       // Why: the new account becomes active, so the previous active account is
       // now inactive and its last-known usage should be cached for the switcher.
       const outgoingAccountId = getSelectedCodexAccountIdForTarget(settings, targetSelection)
-      await this.rateLimits.refreshForCodexAccountChange(outgoingAccountId, targetSelection)
+      this.startQuotaRefreshInBackground(outgoingAccountId, targetSelection)
       return this.getSnapshot()
     } catch (error) {
       this.safeRemoveManagedHome(managedHomePath, accountId)
@@ -250,12 +261,34 @@ export class CodexAccountService {
   private async doReauthenticateAccount(accountId: string): Promise<CodexRateLimitAccountsState> {
     const account = this.requireAccount(accountId)
     const managedHomePath = this.ensureManagedHomeForReauthentication(account)
+    const accountTarget = getCodexSelectionTargetForAccount(account)
+    const selectedAccountId = getSelectedCodexAccountIdForTarget(
+      this.store.getSettings(),
+      accountTarget
+    )
 
     this.safeSyncCanonicalConfigIntoManagedHome(managedHomePath, account.id)
-    await this.runCodexLogin(managedHomePath)
-    const identity = this.readIdentityFromHome(managedHomePath)
-    if (!identity.email) {
-      throw new Error('Codex login completed, but Yiru could not resolve the account email.')
+    let identity: ResolvedCodexIdentity
+    try {
+      await this.runCodexLogin(managedHomePath)
+      identity = this.readIdentityFromHome(managedHomePath)
+      if (!identity.email) {
+        throw new Error('Codex login completed, but Yiru could not resolve the account email.')
+      }
+    } catch (error) {
+      const currentSettings = this.store.getSettings()
+      const restoredSelection = setSelectedCodexAccountIdForTarget(
+        normalizeCodexRuntimeSelection(currentSettings),
+        selectedAccountId,
+        accountTarget
+      )
+      // Why: the login subprocess can transiently clear this runtime's active
+      // account; a failed re-auth must leave the prior selection intact.
+      this.store.updateSettings({
+        activeCodexManagedAccountId: restoredSelection.host,
+        activeCodexManagedAccountIdsByRuntime: restoredSelection
+      })
+      throw error
     }
 
     const settings = this.store.getSettings()
@@ -274,20 +307,24 @@ export class CodexAccountService {
         : entry
     )
 
+    const activeSelection = setSelectedCodexAccountIdForTarget(
+      normalizeCodexRuntimeSelection(settings),
+      selectedAccountId,
+      accountTarget
+    )
     this.store.updateSettings({
-      codexManagedAccounts: updatedAccounts
+      codexManagedAccounts: updatedAccounts,
+      activeCodexManagedAccountId: activeSelection.host,
+      activeCodexManagedAccountIdsByRuntime: activeSelection
     })
     this.safeSyncCanonicalConfigToManagedHomes()
     this.runtimeHome.clearLastWrittenAuthJson(accountId)
-    this.runtimeHome.syncForCurrentSelection(getCodexSelectionTargetForAccount(account))
+    this.runtimeHome.syncForCurrentSelection(accountTarget)
 
     // Why: re-auth can change which actual Codex identity the managed home
     // points at. Force a fresh read immediately so the status bar cannot keep
     // showing the previous account's quota under the updated label.
-    await this.rateLimits.refreshForCodexAccountChange(
-      undefined,
-      getCodexSelectionTargetForAccount(account)
-    )
+    this.startQuotaRefreshInBackground(undefined, accountTarget)
     return this.getSnapshot()
   }
 
@@ -313,7 +350,7 @@ export class CodexAccountService {
     // Why: a removed account can no longer appear in the switcher dropdown,
     // so purge its cached usage to avoid stale entries.
     this.rateLimits.evictInactiveCodexCache(accountId)
-    await this.rateLimits.refreshForCodexAccountChange(
+    this.startQuotaRefreshInBackground(
       getSelectedCodexAccountIdForTarget(settings, getCodexSelectionTargetForAccount(account)) ===
         accountId
         ? accountId
@@ -356,7 +393,7 @@ export class CodexAccountService {
     this.safeSyncCanonicalConfigToManagedHomes()
     this.runtimeHome.syncForCurrentSelection(effectiveTarget)
 
-    await this.rateLimits.refreshForCodexAccountChange(outgoingAccountId, effectiveTarget)
+    this.startQuotaRefreshInBackground(outgoingAccountId, effectiveTarget)
     return this.getSnapshot()
   }
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test'
 import type { DiscoveredSkill, SkillDiscoveryResult } from '../../../../shared/skills'
 import {
   isNativeChatSkillForAgent,
+  resolveNativeChatSkillDiscoveryContext,
   resolveNativeChatSkillDiscoveryCwd
 } from './use-native-chat-skills'
 
@@ -161,5 +162,45 @@ describe('resolveNativeChatSkillDiscoveryCwd', () => {
         'tab-1'
       )
     ).toBe('/repo/worktree/packages/app')
+  })
+})
+
+describe('resolveNativeChatSkillDiscoveryContext', () => {
+  it('carries the direct SSH owner into local-runtime discovery dispatch', () => {
+    const context = resolveNativeChatSkillDiscoveryContext(
+      {
+        activeRepoId: 'repo-1',
+        activeWorktreeId: 'repo-1::/remote/repo',
+        folderWorkspaces: [],
+        projectGroups: [],
+        projects: [],
+        repos: [
+          {
+            id: 'repo-1',
+            path: '/remote/repo',
+            executionHostId: 'ssh:target-1'
+          }
+        ],
+        restoredRuntimeHostIdByWorkspaceSessionKey: {},
+        settings: { activeRuntimeEnvironmentId: null },
+        tabsByWorktree: {
+          'repo-1::/remote/repo': [{ id: 'tab-1', startupCwd: '/remote/repo/packages/app' }]
+        },
+        worktreesByRepo: {
+          'repo-1': [{ id: 'repo-1::/remote/repo', repoId: 'repo-1', path: '/remote/repo' }]
+        }
+      } as never,
+      'tab-1'
+    )
+
+    expect(context).toMatchObject({
+      executionHostKind: 'ssh',
+      runtimeTarget: { kind: 'local' },
+      discoveryTarget: {
+        cwd: '/remote/repo/packages/app',
+        worktreeId: 'repo-1::/remote/repo',
+        executionHostId: 'ssh:target-1'
+      }
+    })
   })
 })

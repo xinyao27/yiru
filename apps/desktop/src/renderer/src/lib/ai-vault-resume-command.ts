@@ -103,6 +103,7 @@ function buildAiVaultResumeForWorktree(args: AiVaultResumeWorktreeArgs): AiVault
       },
       platform,
       shell: liveShell,
+      ompResumeFilePath: args.session.filePath,
       agentArgs: resolveTuiAgentLaunchArgs(
         args.session.agent,
         args.state.settings?.agentDefaultArgs

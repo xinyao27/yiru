@@ -106,7 +106,9 @@ export function resolveNativeChatSkillDiscoveryContext(
       cwd,
       executionHostKind: 'ssh',
       runtimeTarget: { kind: 'local' },
-      discoveryTarget: { cwd, worktreeId }
+      // Why: the desktop runtime needs the concrete SSH owner to delegate the
+      // scan to that relay; cwd alone is ambiguous with a local path.
+      discoveryTarget: { cwd, worktreeId, executionHostId: hostId }
     }
   }
 
@@ -140,7 +142,12 @@ export function resolveNativeChatSkillDiscoveryContext(
     // Why: worktreeId lets the owning runtime resolve its own WSL project
     // preference when this client cannot supply projectRuntime (environment-
     // owned panes resolve host semantics on the runtime, never here).
-    discoveryTarget: { cwd, worktreeId, ...(projectRuntime ? { projectRuntime } : {}) }
+    discoveryTarget: {
+      cwd,
+      worktreeId,
+      executionHostId: hostId,
+      ...(projectRuntime ? { projectRuntime } : {})
+    }
   }
 }
 

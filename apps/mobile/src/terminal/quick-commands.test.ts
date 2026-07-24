@@ -5,6 +5,7 @@ import {
   buildMobileQuickCommandLaunch,
   getQuickCommandDisplayPreview,
   getQuickCommandPreview,
+  shouldShowMobileQuickCommandsAction,
   supportsMobileQuickCommands
 } from './quick-commands'
 
@@ -21,6 +22,12 @@ function command(overrides: Partial<TerminalQuickCommand> = {}): TerminalQuickCo
 }
 
 describe('mobile quick-command launch', () => {
+  it('keeps the action stable while capability support is loading', () => {
+    expect(shouldShowMobileQuickCommandsAction(null)).toBe(true)
+    expect(shouldShowMobileQuickCommandsAction(true)).toBe(true)
+    expect(shouldShowMobileQuickCommandsAction(false)).toBe(false)
+  })
+
   it('requires the complete host capability', () => {
     expect(supportsMobileQuickCommands(undefined)).toBe(false)
     expect(supportsMobileQuickCommands(['terminal.binary-stream.v1'])).toBe(false)

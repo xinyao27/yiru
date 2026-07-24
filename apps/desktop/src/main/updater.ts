@@ -16,6 +16,11 @@ import { killAllPty } from './ipc/pty'
 import { withUpdaterSpan } from './observability/instrumentation'
 import { resolveRemoteServerUpdateSupport } from './remote-server-update-support'
 import {
+  failServeUpdateHandoff,
+  hasServeUpdateSupervisor,
+  requestServeUpdateHandoff
+} from './serve-update-handoff'
+import {
   armUpdateInstallExitWatchdog,
   disarmUpdateInstallExitWatchdog
 } from './update-install-exit-watchdog'
@@ -60,7 +65,9 @@ const PRE_QUIT_CLEANUP_TIMEOUT_MS = 2_500
 const UPDATE_CHECK_SILENT_SETTLE_DELAY_MS = 1_000
 const UPDATE_CHECK_STALL_TIMEOUT_MS = 45_000
 
-let mainWindowRef: BrowserWindow | null = null
+type UpdaterStatusTarget = { webContents: { send: (channel: string, ...args: unknown[]) => void } }
+
+let mainWindowRef: UpdaterStatusTarget | null = null
 let currentStatus: UpdateStatus = { state: 'idle' }
 let userInitiatedCheck = false
 let onBeforeQuitCleanup: (() => void | Promise<void>) | null = null
@@ -551,6 +558,13 @@ function getCheckFailureKey(message: string, userInitiated?: boolean): string {
   return `${userInitiated ? 'user' : 'auto'}:${message}`
 }
 
+export function resolveUpdateInstallMode(isServeMode: boolean): RemoteServerUpdateInstallMode {
+  if (!isServeMode) {
+    return 'interactive'
+  }
+  return hasServeUpdateSupervisor() ? 'supervised-headless-serve' : 'unsupported-headless-serve'
+}
+
 function clearPrereleaseFallbackContextIfSettled(): void {
   if (
     pendingPrereleaseFallback?.fallbackResultHandled &&
@@ -602,6 +616,18 @@ async function performQuitAndInstall(): Promise<void> {
       await runBeforeUpdateQuitCleanup()
       span.addEvent('pre_quit_cleanup_done')
 
+      if (
+        remoteServerUpdateInstallMode === 'supervised-headless-serve' &&
+        !requestServeUpdateHandoff(pendingVersion)
+      ) {
+        sendErrorStatus(
+          'Could not prepare the supervised server restart. Yiru remains running.',
+          true
+        )
+        resetQuitForUpdateState()
+        return
+      }
+
       recordUpdaterLifecycle('quit_and_install_invoking_native', {
         version: pendingVersion || null
       })
@@ -616,7 +642,8 @@ async function performQuitAndInstall(): Promise<void> {
       // Why: invoke quitAndInstall before killAllPty/remove close listeners so a
       // sync 'error' (common "no filepath" path) recovers while windows and
       // local PTYs are still intact.
-      getAutoUpdater().quitAndInstall(false, true)
+      const supervisorOwnsRelaunch = remoteServerUpdateInstallMode === 'supervised-headless-serve'
+      getAutoUpdater().quitAndInstall(supervisorOwnsRelaunch, !supervisorOwnsRelaunch)
       span.addEvent('native_quit_and_install_invoked')
 
       // Why: handleQuitAndInstallFailure may clear quitAndInstallInProgress
@@ -649,6 +676,7 @@ async function performQuitAndInstall(): Promise<void> {
       }
     })
   } catch (error) {
+    failServeUpdateHandoff('Could not invoke the native updater.')
     resetQuitForUpdateState()
     recordUpdaterLifecycle(
       'quit_and_install_failed',
@@ -683,6 +711,7 @@ function handleQuitAndInstallFailure(): boolean {
   if (!quitAndInstallInProgress || !quitAndInstallNativeInvoked || updateInstallCommitted) {
     return false
   }
+  failServeUpdateHandoff('The native updater rejected the install request.')
   resetQuitForUpdateState()
   recordUpdaterLifecycle('quit_and_install_failed_via_event', undefined, {
     level: 'warn',
@@ -1361,7 +1390,7 @@ export function dismissNudge(): void {
 }
 
 export function setupAutoUpdater(
-  mainWindow: BrowserWindow,
+  mainWindow: UpdaterStatusTarget,
   opts?: {
     getLastUpdateCheckAt?: () => number | null
     onBeforeQuit?: () => void | Promise<void>

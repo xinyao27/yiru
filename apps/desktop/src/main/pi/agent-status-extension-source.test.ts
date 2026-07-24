@@ -17,7 +17,11 @@ type HookContext = {
 
 type HookHandler = (event?: unknown, context?: HookContext) => void
 
-function createHarness(sessionFileExists: () => boolean) {
+function createHarness(
+  sessionFileExists: () => boolean,
+  kind: 'pi' | 'omp' = 'pi',
+  processCommand: 'pi' | 'omp' = kind
+) {
   const fetchMock = vi.fn(async (_url: string, _init?: { body?: string }) => ({ ok: true }))
   const fsMock = {
     existsSync: vi.fn(() => sessionFileExists()),
@@ -35,7 +39,7 @@ function createHarness(sessionFileExists: () => boolean) {
     },
     pid: 4242,
     title: 'node',
-    argv: ['node', 'pi']
+    argv: ['node', processCommand]
   }
   const context = {
     module,
@@ -61,7 +65,7 @@ function createHarness(sessionFileExists: () => boolean) {
   } as Record<string, unknown>
   context.globalThis = context
 
-  const output = ts.transpileModule(getPiAgentStatusExtensionSource('pi'), {
+  const output = ts.transpileModule(getPiAgentStatusExtensionSource(kind), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
   }).outputText
   runInNewContext(output, context)
@@ -72,13 +76,42 @@ function createHarness(sessionFileExists: () => boolean) {
 }
 
 describe('getPiAgentStatusExtensionSource', () => {
-  it('keeps the Pi session manager contract out of the OMP extension', () => {
+  it('keeps Pi-only session-start handling out of the OMP extension', () => {
     const source = getPiAgentStatusExtensionSource('omp')
 
-    expect(source).toContain("const configuredPath = '/hook/omp'")
+    expect(source).toContain("const CONFIGURED_HOOK_PATH = '/hook/omp'")
     expect(source).not.toContain("pi.on('session_start'")
-    expect(source).not.toContain('getSessionFile')
+    expect(source).toContain('getSessionFile')
   })
+
+  it.each([
+    ['omp', 'omp'],
+    ['pi', 'omp']
+  ] as const)(
+    'posts resumable OMP identity from a %s extension running under %s',
+    async (kind, processCommand) => {
+      const sessionFile = join(tmpdir(), `yiru-omp-${kind}.jsonl`)
+      const harness = createHarness(() => true, kind, processCommand)
+
+      harness.handlers.before_agent_start?.(
+        { prompt: 'continue' },
+        {
+          sessionManager: {
+            getSessionId: () => `omp-${kind}-session`,
+            getSessionFile: () => sessionFile
+          }
+        }
+      )
+
+      await vi.waitFor(() => expect(harness.fetchMock).toHaveBeenCalledTimes(1))
+      expect(String(harness.fetchMock.mock.calls[0]?.[0])).toContain('/hook/omp')
+      expect(JSON.parse(String(harness.fetchMock.mock.calls[0]?.[1]?.body)).payload).toEqual({
+        hook_event_name: 'before_agent_start',
+        session_id: `omp-${kind}-session`,
+        prompt: 'continue'
+      })
+    }
+  )
 
   it('posts persisted Pi resume identity on session_start and later turn hooks', async () => {
     const sessionFile = join(tmpdir(), 'yiru-pi-session-1.jsonl')

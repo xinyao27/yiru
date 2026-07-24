@@ -3,7 +3,7 @@ import {
   UPDATER_DOWNLOAD_CONTRACT,
   UPDATER_GET_STATUS_CONTRACT,
   UPDATER_INSTALL_CONTRACT
-} from '../../../../shared/runtime-method-contracts/runtime-control-contracts'
+} from '../../../../shared/runtime-method-contracts/runtime-updater-contracts'
 import {
   checkRemoteServerUpdater,
   downloadRemoteServerUpdater,

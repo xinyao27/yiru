@@ -59,7 +59,7 @@ host, provider, file type, protocol, workflow, or user action; a commit titled
 | `d67ede159` | `equivalent` | Confirm-only create-review composer with classified blockers | Current hosted-review eligibility and `source-control-create-review-blocked-action.ts` classify and present blocking states. |
 | `245d79cc8` | `equivalent` | Preserve surviving workspace state when a runtime host is removed | Host cleanup removes owner-scoped rows while retaining workspaces owned by surviving runtimes. |
 | `daf22f072` | `migrated` | Create review automatically fast-forwards behind-only branches | Shared review policy admits only behind-only branches, runs an owner-routed `ff-only` step before staging, and preserves supersession/provider behavior in focused tests. |
-| `1def694e8` | `migrated` | Host-aware Chat UI skill discovery and picker | Discovery now covers local, WSL, SSH, web, Claude/Codex sources, typed insertion/dispatch, freshness bounds, and focused tests. |
+| `1def694e8` | `migrated` | Host-aware Chat UI skill discovery and picker | Discovery covers local, WSL, runtime, web, and direct SSH: SSH clients capability-gate `skills.discover.v1`, then delegate through the active relay to scan the remote cwd. |
 | `e3721e8cf` | `equivalent` | Pi `ask_user_question` maps to blocked/Needs You | Pi hook status parsing and agent-state projection recognize the tool state. |
 | `5fcf77761` | `migrated` | Mobile Quick Commands for terminal commands and agent prompts | Mobile list/editor/sheet/launch, runtime RPC delivery, persistence, and focused model tests are present. |
 | `4d49b9342` | `equivalent` | Forward project/worktree setup variables into WSL | WSL launch command construction carries Yiru root/worktree context across `wsl.exe`. |
@@ -67,11 +67,11 @@ host, provider, file type, protocol, workflow, or user action; a commit titled
 | `aca7d50ba` | `equivalent` | Do not attach stale closed reviews to default branches | Hosted-review cache reconciliation validates live review state before associating it with a branch. |
 | `f8b430f72` | `equivalent` | Ship the product CLI as a hybrid skill stub | Yiru ships the equivalent `yiru-cli` hybrid skill rather than an Orca-branded stub. |
 | `e58de71f5` | `migrated` | Codex real-home routing and self-contained multi-account homes | Current codex-account runtime-home service covers native, WSL, and remote routing with per-account homes. |
-| `d19cb8bc4` | `migrated` | Require an explicit Codex account-switch action | The migrated account notice no longer offers a deferring Not now action. |
+| `d19cb8bc4` | `migrated` | Require an explicit Codex account-switch action | An unresolved Codex restart notice exposes Restart only; collapse and dismiss paths are absent. |
 | `f655ae392` | `migrated` | Resolve OMP identity from the outer wrapper | Pi/OMP hook handling projects the outer terminal identity and preserves it through resume. |
-| `c45dc62ea` | `migrated` | Flag signed-out system-default Codex account | Codex account state distinguishes unavailable system auth from managed account state. |
-| `fec996a54` | `migrated` | Preserve active Codex account during reauthentication | Account mutations retain the selected runtime account while refreshing credentials. |
-| `bf7fbdd57` | `migrated` | Trust linked worktrees before Codex launch | Codex trust promotion covers linked worktree config before process launch. |
+| `c45dc62ea` | `migrated` | Flag signed-out system-default Codex account | The system-default row warns for `authKind: none`, while API-key/custom-provider setups remain explicitly exempt. |
+| `fec996a54` | `migrated` | Preserve active Codex account during reauthentication | Reauthentication captures and restores the selected host or WSL account lane on both success and failure. |
+| `bf7fbdd57` | `migrated` | Trust linked worktrees before Codex launch | Local and SSH trust presets validate reciprocal linked-worktree metadata, resolve the main-repository root on POSIX/Windows, and reject malicious mismatches. |
 | `0ed1d04b3` | `migrated` | Migrate legacy shared-home Codex sessions before resume | Codex account migration promotes legacy session data into the selected account home. |
 | `3468b434d` | `intentional-divergence` | Agent-dashboard popout | The popout belongs to the intentionally removed Workspace Board/dashboard surface. |
 | `580f8eb49` | `migrated` | Consolidated agent usage roster | `status-bar/usage-roster-panel.tsx` replaces separate provider presentation and has focused tests. |
@@ -94,7 +94,7 @@ host, provider, file type, protocol, workflow, or user action; a commit titled
 | `42a4f017b` | `intentional-divergence` | MCP-compatible Linear issue listing | Linear integration was intentionally removed. |
 | `87af1c867` | `intentional-divergence` | Linear issue relations | Linear integration was intentionally removed. |
 | `a10a2ba53` | `intentional-divergence` | MCP-style Linear issue save | Linear integration was intentionally removed. |
-| `7ca3e670c` | `migrated` | Include per-account Codex homes in usage/removal scope | Codex account service and rate-limit store enumerate account homes by runtime. |
+| `7ca3e670c` | `migrated` | Include per-account Codex homes in usage/removal scope | Usage scanning enumerates every ownership-marked host account home and de-duplicates canonical roots before reading transcripts. |
 | `d8378e8ec` | `equivalent` | Correctly label a WSL default shell | Shell labels are derived from the remote/WSL shell family rather than the Windows host shell. |
 | `e986a7ba1` | `migrated` | Surface nested Codex subagents | Codex hook identity, roster reconciliation, shared types, sidebar/dashboard rows, and focused tests are present. |
 | `1fef1e1dd` | `equivalent` | Safely relaunch macOS headless serve after updates | Yiru's headless server/update lifecycle separates install, disconnect, and relaunch ownership. |
@@ -110,16 +110,16 @@ host, provider, file type, protocol, workflow, or user action; a commit titled
 | `d6c9fcd53` | `migrated` | Surface pairing-auth failures on desktop and Mobile | Pairing state and Mobile host gates present actionable authentication failures. |
 | `034aeb15e` | `migrated` | Seed Monaco Find from selected text | `editor/monaco-find-options.ts` configures selection seeding with a focused test. |
 | `b63d4cde2` | `migrated` | Amber question glyph for Needs You everywhere | Shared agent-state dots and sidebar status indicators use the question glyph for permission/question waits. |
-| `11310eef6` | `migrated` | Keep the Mobile Quick Commands button stable during capability load | The migrated action model separates loading from unsupported capability state. |
+| `11310eef6` | `migrated` | Keep the Mobile Quick Commands button stable during capability load | The action remains visible for unknown/loading capability state and hides only after the paired host is known unsupported. |
 | `43ae014a6` | `equivalent` | iOS emulator accessibility-tree command | Yiru's emulator bridge and bundled skill expose `emulator ax`. |
 | `adc020393` | `migrated` | Open SSH workspaces through VS Code Remote-SSH | SSH authority resolution, launcher contract, runtime capability, preload, and focused tests are present. |
 | `908020581` | `equivalent` | Authenticate OpenCode Go usage through a cookie jar | Current provider usage fetchers preserve the authenticated session transport. |
 | `c8381f3ea` | `migrated` | Preserve Codex TUI settings across managed-home remirrors | The first Orca attempt was reverted and re-landed in `ef985ed80`; Yiru uses anchored config mirroring. |
-| `0326594d5` | `migrated` | Update paired headless servers from the active desktop client | Authenticated host-scoped updater RPC, mixed-version gates, bounded replacement verification, coordinator, CLI/status propagation, and Settings/status-bar surfaces are present. |
+| `0326594d5` | `migrated` | Update paired headless servers from the active desktop client | Authenticated updater RPC and a canonical macOS packaged-CLI supervision handoff persist the install intent, relaunch, and verify replacement identity/version; unsupervised, SSH, Linux, and Windows serve modes remain safely manual. |
 | `6d55c7fa1` | `equivalent` | Rename Native Chat to Chat UI | Supported user-facing Yiru copy uses Chat UI while internal module names remain stable. |
 | `9500ca7a6` | `equivalent` | Show attached images in Mobile rich chat | Mobile attachment input and chat rendering retain image metadata across sends. |
 | `059a80b29` | `migrated` | Assignable Send Review Notes to Agent shortcut | The global unbound action is registered in `shared/keybindings.ts` and dispatches through application/store state to both review-notes menus, with focused tests. |
-| `fc05769ed` | `migrated` | Permit blank SSH user in VS Code authority | The migrated authority resolver treats user as optional and has focused coverage. |
+| `fc05769ed` | `migrated` | Permit blank SSH user in VS Code authority | Manual usernames are optional, non-empty values are validated, and an empty value emits the bare host authority without `@`. |
 | `ee6319ebe` | `equivalent` | Scope Settings agent list and quick launch to the selected host | Runtime-backed agent discovery and picker options carry execution-host ownership. |
 | `4a9affd6e` | `equivalent` | iOS accessibility tree through plain-JSON serve-sim helper | Yiru materializes and controls the helper process through the emulator bridge. |
 | `1d8ce38a5` | `intentional-divergence` | Size dashboard-popout terminal PTYs to the dialog grid | The terminal dialog belongs to the intentionally removed dashboard popout surface. |
@@ -129,14 +129,14 @@ host, provider, file type, protocol, workflow, or user action; a commit titled
 | `5dc6799c4` | `equivalent` | Use LAN terminology consistently | Current Yiru Mobile and pairing copy uses LAN/private network terminology. |
 | `84968dfd9` | `equivalent` | De-duplicate paired hosts in run-target pickers | Host option construction keys paired runtimes by stable execution-host identity. |
 | `94d3db4a2` | `equivalent` | Show current branch without evicting Create Review | Source Control renders branch context and preserves the create-review primary action. |
-| `babf1ff9e` | `migrated` | Keep Codex account mutations responsive during quota refresh | Account mutations and rate-limit refreshes use separate asynchronous ownership. |
-| `4a09ede8b` | `migrated` | Classify Codex rate-limit windows by duration | Current Codex usage state distinguishes window kinds for account display. |
+| `babf1ff9e` | `migrated` | Keep Codex account mutations responsive during quota refresh | Add, select, reauthenticate, and remove start an independently caught best-effort quota refresh instead of awaiting it in the account mutation. |
+| `4a09ede8b` | `migrated` | Classify Codex rate-limit windows by duration | RPC windows are classified and de-duplicated by `windowDurationMins`, with reordered, weekly-only, duplicate, and legacy-fallback coverage. |
 | `ef985ed80` | `migrated` | Anchored Codex TUI settings promotion | `codex-config-mirror.ts` and path-aware config rewriting preserve managed settings. |
 | `a34eb872c` | `equivalent` | Preserve PDF zoom across file reload | PDF viewer state retains zoom while refreshing document content. |
-| `b97e8c4e2` | `migrated` | Resume finished agents after macOS logout | Sleeping-agent capture and resume launch use provider-session metadata instead of opening a bare shell. |
+| `b97e8c4e2` | `migrated` | Resume finished agents after macOS logout | Completed Claude, Codex, Pi, and OMP turns retain host-aware provider-session anchors; quit/cold restore launches the provider resume path instead of a bare shell. |
 | `34e0233cf` | `migrated` | Conversation names as primary agent-row labels | Shared extraction plus sidebar/dashboard row hooks and tests are present. |
 | `52cef48fd` | `equivalent` | Render tab-close shortcut as text | Current shortcut labels use platform-aware text rather than key-cap UI. |
-| `e3adb2091` | `migrated` | Include OMP terminals in cold session restore | Hibernation planning and sleeping-agent persistence include Pi/OMP session metadata. |
+| `e3adb2091` | `migrated` | Include OMP terminals in cold session restore | Direct and Pi-wrapped OMP hooks report a session id; persistence plus desktop/Mobile resume support both that id and an exact transcript path. |
 | `fde063618` | `equivalent` | Create paired agent sessions without stealing host focus | Runtime session creation is owner-scoped and does not require desktop host focus. |
 | `eab721e1f` | `equivalent` | Route folder workspaces through worktree operations | Shared folder-workspace identity, runtime RPC, and Source Control adapters are present. |
 | `9373f5d37` | `equivalent` | Expand Windows `~\\` in relay home resolution | Runtime home resolution is platform-aware and normalizes Windows paths. |

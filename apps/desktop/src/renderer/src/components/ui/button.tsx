@@ -20,6 +20,14 @@ const buttonVariants = cva(
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
+        // Why: command/listbox rows share selected-state chrome, including a
+        // border that remains legible while the user types.
+        'picker-row':
+          'text-foreground hover:bg-accent hover:text-accent-foreground aria-selected:border-border aria-selected:bg-accent aria-selected:text-accent-foreground',
+        // Why: inline actions floating above an editor need opaque popover
+        // paint while retaining the standard outline interaction states.
+        'popover-outline':
+          'border border-border bg-popover text-muted-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground',
         // Why: status actions cannot reserve a border seam, so focus uses background contrast.
         'status-bar': 'border-0 font-normal hover:bg-accent/70 focus-visible:bg-accent/70',
         'status-bar-icon':
@@ -30,6 +38,8 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+        'picker-row': 'h-auto gap-2 px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
+        'popover-hint': 'h-auto gap-2 px-3 py-1.5 text-left',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         // Why: status actions fill the footer while their content retains compact spacing.
         'status-bar': "h-full gap-1.5 px-1 py-0.5 text-xs [&_svg:not([class*='size-'])]:size-3",

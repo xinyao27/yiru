@@ -220,6 +220,7 @@ export class GlobalAssistantService {
     return buildAgentResumeStartupPlan({
       agent,
       providerSession: { key: 'session_id', id: previous.sessionId },
+      ompResumeFilePath: previous.filePath,
       cmdOverrides: this.store.getSettings().agentCmdOverrides ?? {},
       agentArgs,
       agentEnv,

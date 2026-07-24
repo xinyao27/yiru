@@ -21,6 +21,18 @@ describe('remote server update support', () => {
   it('advertises control only for packaged, initialized, restart-owned installs', () => {
     expect(
       resolveRemoteServerUpdateSupport({
+        installMode: 'supervised-headless-serve',
+        isPackaged: true,
+        isDev: false,
+        updaterInitialized: true
+      })
+    ).toEqual({
+      installMode: 'supervised-headless-serve',
+      automatic: true,
+      reason: 'available'
+    })
+    expect(
+      resolveRemoteServerUpdateSupport({
         installMode: 'interactive',
         isPackaged: true,
         isDev: false,

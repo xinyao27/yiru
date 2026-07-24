@@ -141,20 +141,25 @@ export function useNativeChatSkills(
         }
         const error = reason instanceof Error ? reason : new Error(String(reason))
         const timedOut = /timed?\s*out|timeout/i.test(error.message)
+        const unavailable =
+          context.executionHostKind === 'ssh' &&
+          /requires a connected relay|does not support skill discovery/i.test(error.message)
         emitNativeChatSkillDiscovery({
           agent,
-          outcome: timedOut ? 'timeout' : 'error',
+          outcome: unavailable ? 'unavailable' : timedOut ? 'timeout' : 'error',
           executionHostKind: context.executionHostKind
         })
         setState({
           status: 'error',
           skills: [],
           error,
-          errorKind: timedOut
-            ? 'timeout'
-            : context.executionHostKind === 'runtime'
-              ? 'host'
-              : 'unknown',
+          errorKind: unavailable
+            ? 'unavailable'
+            : timedOut
+              ? 'timeout'
+              : context.executionHostKind === 'local'
+                ? 'unknown'
+                : 'host',
           contextKey: paneCacheKey
         })
       }

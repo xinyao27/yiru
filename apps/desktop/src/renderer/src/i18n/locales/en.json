@@ -755,7 +755,7 @@
         "c72a5fb234": "Restart",
         "9263e75f49": "Codex is using the previous account",
         "d3e8a1f4b2": "Account switched",
-        "e9b2c7d1a5": "Restart this session to use {{value0}}. Collapse to keep working with the current account.",
+        "e9b2c7d1a5": "Restart this session to use {{value0}}.",
         "f1a6c8e3b4": "Collapse"
       },
       "FirstLaunchBanner": {

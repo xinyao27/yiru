@@ -61,3 +61,46 @@ describe('Pi session resume metadata', () => {
     expect(agentProviderSessionsEqual('claude', first, second)).toBe(true)
   })
 })
+
+describe('OMP session resume metadata', () => {
+  it('captures the provider id and builds an id-based cold resume', () => {
+    const providerSession = extractAgentProviderSession('omp', {
+      session_id: 'omp-session-1'
+    })
+
+    expect(isResumableTuiAgent('omp')).toBe(true)
+    expect(providerSession).toEqual({ key: 'session_id', id: 'omp-session-1' })
+    expect(getAgentResumeArgv('omp', providerSession!)).toEqual([
+      'omp',
+      '--resume',
+      'omp-session-1'
+    ])
+    expect(
+      buildAgentResumeStartupPlan({
+        agent: 'omp',
+        providerSession: providerSession!,
+        cmdOverrides: {},
+        platform: 'linux'
+      })
+    ).toMatchObject({
+      launchCommand: "omp '--resume' 'omp-session-1'",
+      expectedProcess: 'omp'
+    })
+  })
+
+  it('preserves an explicit transcript locator across cold resume', () => {
+    expect(
+      buildAgentResumeStartupPlan({
+        agent: 'omp',
+        providerSession: { key: 'session_id', id: 'omp-session-1' },
+        cmdOverrides: {},
+        platform: 'win32',
+        shell: 'powershell',
+        ompResumeFilePath: String.raw`C:\omp\sessions\session.jsonl`
+      })
+    ).toMatchObject({
+      launchCommand: "omp '--resume' 'C:\\omp\\sessions\\session.jsonl'",
+      launchConfig: { ompResumeFilePath: String.raw`C:\omp\sessions\session.jsonl` }
+    })
+  })
+})

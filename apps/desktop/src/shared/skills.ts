@@ -1,4 +1,5 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
+import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
 import type { ProjectExecutionRuntimeResolution } from './project-execution-runtime'
@@ -51,8 +52,13 @@ export type SkillDiscoveryTarget = {
   /** Lets the owning runtime resolve the project runtime from its own store
    *  when the caller (e.g. a remote client) cannot supply `projectRuntime`. */
   worktreeId?: string | null
+  /** Explicit pane owner used by the local runtime to delegate direct SSH
+   *  discovery to the connected relay instead of scanning local paths. */
+  executionHostId?: ExecutionHostId | null
   projectRuntime?: ProjectExecutionRuntimeResolution
 }
+
+export const SSH_SKILL_DISCOVERY_RELAY_CAPABILITY = 'skills.discover.v1' as const
 
 const ResolvedProjectRuntimeSchema = z.object({
   status: z.literal('resolved'),
@@ -93,12 +99,18 @@ const RepairProjectRuntimeSchema = z.object({
   })
 })
 
+const ExecutionHostIdSchema = z
+  .string()
+  .refine((value) => parseExecutionHostId(value) !== null)
+  .transform((value) => value as ExecutionHostId)
+
 /** Both desktop IPC and runtime RPC parse the complete discovery target here. */
 export const SkillDiscoveryTargetSchema: z.ZodType<SkillDiscoveryTarget> = z.object({
   runtime: z.enum(['host', 'wsl']).optional(),
   wslDistro: z.string().nullable().optional(),
   cwd: z.string().nullable().optional(),
   worktreeId: z.string().nullable().optional(),
+  executionHostId: ExecutionHostIdSchema.nullable().optional(),
   projectRuntime: z
     .discriminatedUnion('status', [ResolvedProjectRuntimeSchema, RepairProjectRuntimeSchema])
     .optional()

@@ -31,6 +31,13 @@ describe('resolveVsCodeSshAuthority', () => {
     })
   })
 
+  it('lets Remote-SSH resolve the configured user when a manual target omits it', () => {
+    expect(resolveVsCodeSshAuthority(target({ username: '   ' }))).toEqual({
+      ok: true,
+      authority: 'example.com'
+    })
+  })
+
   it('requires a config alias for a manual non-default port', () => {
     expect(resolveVsCodeSshAuthority(target({ port: 2202 }))).toEqual({
       ok: false,

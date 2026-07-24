@@ -60,6 +60,7 @@ function isLaunchConfig(value: unknown): value is SleepingAgentLaunchConfig {
   const config = value as Partial<SleepingAgentLaunchConfig>
   return (
     (config.agentCommand === undefined || typeof config.agentCommand === 'string') &&
+    (config.ompResumeFilePath === undefined || isNonEmptyString(config.ompResumeFilePath)) &&
     typeof config.agentArgs === 'string' &&
     isStringRecord(config.agentEnv)
   )

@@ -65,7 +65,13 @@ const sleepingAgentLaunchEnvSchema = z.preprocess(
 const sleepingAgentLaunchConfigBaseSchema = z.object({
   agentCommand: z.string().optional(),
   agentArgs: z.string(),
-  agentEnv: sleepingAgentLaunchEnvSchema
+  agentEnv: sleepingAgentLaunchEnvSchema,
+  ompResumeFilePath: z
+    .string()
+    .min(1)
+    .max(32 * 1024)
+    .refine((value) => !hasUnsafeLaunchEnvChars(value))
+    .optional()
 })
 
 export const sleepingAgentLaunchConfigSchema = z.preprocess((raw) => {
@@ -91,12 +97,20 @@ const sleepingAgentSessionRecordSchema = z
     launchConfig: sleepingAgentLaunchConfigSchema.optional(),
     origin: z.enum(['worktree-sleep', 'quit', 'live']).optional()
   })
-  .refine((record) => getAgentResumeArgv(record.agent, record.providerSession) !== null, {
-    // Why: hydration must not retain records that cannot be launched safely;
-    // Pi additionally needs its session file and every agent needs the right key.
-    message: 'provider session is not resumable for this agent',
-    path: ['providerSession']
-  })
+  .refine(
+    (record) =>
+      getAgentResumeArgv(
+        record.agent,
+        record.providerSession,
+        record.launchConfig?.ompResumeFilePath
+      ) !== null,
+    {
+      // Why: hydration must not retain records that cannot be launched safely;
+      // Pi additionally needs its session file and every agent needs the right key.
+      message: 'provider session is not resumable for this agent',
+      path: ['providerSession']
+    }
+  )
 
 export const sleepingAgentSessionsByPaneKeySchema = z.preprocess((raw) => {
   if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {

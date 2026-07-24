@@ -36,6 +36,12 @@ export function supportsMobileQuickCommands(capabilities: readonly string[] | un
   return capabilities?.includes(TERMINAL_QUICK_COMMANDS_RUNTIME_CAPABILITY) === true
 }
 
+export function shouldShowMobileQuickCommandsAction(supported: boolean | null): boolean {
+  // Why: an unresolved probe must not shift tab chrome; only a completed
+  // legacy-host verdict removes the action.
+  return supported !== false
+}
+
 export type MobileQuickCommandLaunch = {
   agent?: TuiAgent
   options: {

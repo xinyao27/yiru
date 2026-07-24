@@ -1,5 +1,5 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Button } from '@/components/ui/button'
@@ -7,11 +7,7 @@ import { translate } from '@/i18n/i18n'
 
 import { useAppStore } from '../store'
 import { selectCodexRestartInputs } from './codex-restart-chip-inputs'
-import {
-  buildCodexRestartNoticeKey,
-  createCodexRestartOverlayCollapseState,
-  getCodexRestartOverlayCollapseState
-} from './codex-restart-overlay-collapse'
+import { buildCodexRestartNoticeKey } from './codex-restart-notice-key'
 import { shouldFocusMobileDriverAction } from './terminal-pane/mobile-driver-overlay-focus'
 
 const EMPTY_TABS: { id: string }[] = []
@@ -46,18 +42,6 @@ export function collectStaleWorktreePtyIds({
     ptyIdsByTabId,
     codexRestartNoticeByPtyId
   })
-}
-
-export function dismissStaleWorktreePtyIds(
-  staleWorktreePtyIds: string[],
-  clearCodexRestartNotice: (ptyId: string) => void
-): void {
-  // Why: restart notices are stored per PTY, but the workspace host presents
-  // one shared prompt. Clearing all matching PTY notices keeps every pane in
-  // that worktree consistent with the dismissal.
-  for (const ptyId of staleWorktreePtyIds) {
-    clearCodexRestartNotice(ptyId)
-  }
 }
 
 function isInsideHiddenTree(element: HTMLElement): boolean {
@@ -98,19 +82,8 @@ export default function CodexRestartChip({
     ? codexRestartNoticeByPtyId[staleWorktreePtyIds[0]]
     : undefined
   const queueCodexPaneRestarts = useAppStore((s) => s.queueCodexPaneRestarts)
-  const clearCodexRestartNotice = useAppStore((s) => s.clearCodexRestartNotice)
 
   const noticeKey = restartNotice ? buildCodexRestartNoticeKey(restartNotice) : null
-  const [collapseState, setCollapseState] = useState(() =>
-    createCodexRestartOverlayCollapseState(noticeKey)
-  )
-
-  const currentCollapseState = getCodexRestartOverlayCollapseState(collapseState, noticeKey)
-  useEffect(() => {
-    // Why: a new account switch must reopen loud mode without updating state
-    // during render, which can trip React's external-store snapshot guard.
-    setCollapseState((state) => getCodexRestartOverlayCollapseState(state, noticeKey))
-  }, [noticeKey])
 
   if (staleWorktreePtyIds.length === 0 || !restartNotice) {
     return null
@@ -120,27 +93,11 @@ export default function CodexRestartChip({
     queueCodexPaneRestarts(staleWorktreePtyIds)
   }
 
-  const handleDismiss = (): void => {
-    dismissStaleWorktreePtyIds(staleWorktreePtyIds, clearCodexRestartNotice)
-  }
-
-  if (currentCollapseState.collapsed) {
-    return (
-      <CollapsedRestartChip
-        restartNotice={restartNotice}
-        onExpand={() => setCollapseState(createCodexRestartOverlayCollapseState(noticeKey))}
-        onRestart={handleRestart}
-      />
-    )
-  }
-
   return (
     <LoudRestartOverlay
       isVisible={isVisible}
       noticeKey={noticeKey}
       restartNotice={restartNotice}
-      onCollapse={() => setCollapseState({ noticeKey, collapsed: true })}
-      onDismiss={handleDismiss}
       onRestart={handleRestart}
     />
   )
@@ -150,15 +107,11 @@ function LoudRestartOverlay({
   isVisible,
   noticeKey,
   restartNotice,
-  onCollapse,
-  onDismiss,
   onRestart
 }: {
   isVisible: boolean
   noticeKey: string | null
   restartNotice: RestartNotice
-  onCollapse: () => void
-  onDismiss: () => void
   onRestart: () => void
 }): React.JSX.Element {
   const titleId = useId()
@@ -212,61 +165,17 @@ function LoudRestartOverlay({
         <div id={bodyId} className="text-muted-foreground text-sm leading-relaxed">
           {translate(
             'auto.components.CodexRestartChip.e9b2c7d1a5',
-            'Restart this session to use {{value0}}. Collapse to keep working with the current account.',
+            'Restart this session to use {{value0}}.',
             { value0: restartNotice.nextAccountLabel }
           )}
         </div>
         <div className="mt-1 flex flex-wrap justify-end gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={onDismiss}>
-            {translate('auto.components.CodexRestartChip.9132779820', 'Dismiss')}
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={onCollapse}>
-            {translate('auto.components.CodexRestartChip.f1a6c8e3b4', 'Collapse')}
-          </Button>
           <Button ref={restartRef} type="button" variant="default" size="sm" onClick={onRestart}>
             <RefreshCw />
             {translate('auto.components.CodexRestartChip.c72a5fb234', 'Restart')}
           </Button>
         </div>
       </div>
-    </div>
-  )
-}
-
-function CollapsedRestartChip({
-  restartNotice,
-  onExpand,
-  onRestart
-}: {
-  restartNotice: RestartNotice
-  onExpand: () => void
-  onRestart: () => void
-}): React.JSX.Element {
-  return (
-    <div
-      className="border-border bg-card text-card-foreground absolute top-2 right-2 z-50 flex max-w-[min(100%-1rem,24rem)] items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium"
-      role="status"
-      aria-live="polite"
-    >
-      <RefreshCw className="text-foreground size-3 shrink-0" aria-hidden="true" />
-      <Button
-        type="button"
-        variant="ghost"
-        size="xs"
-        className="max-w-[10rem] min-w-0 px-1 font-medium"
-        onClick={onExpand}
-      >
-        <span className="truncate">
-          {translate(
-            'auto.components.CodexRestartChip.a4c8e1b2f7',
-            'Codex is still signed in as {{value0}}',
-            { value0: restartNotice.previousAccountLabel }
-          )}
-        </span>
-      </Button>
-      <Button type="button" variant="default" size="xs" onClick={onRestart}>
-        {translate('auto.components.CodexRestartChip.c72a5fb234', 'Restart')}
-      </Button>
     </div>
   )
 }

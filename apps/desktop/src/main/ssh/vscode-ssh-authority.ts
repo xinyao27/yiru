@@ -29,7 +29,7 @@ export function resolveVsCodeSshAuthority(target: SshTarget): VsCodeSshAuthority
   const username = target.username.trim()
   if (
     !isValidAuthorityPart(host) ||
-    !isValidAuthorityPart(username) ||
+    (username.length > 0 && !isValidAuthorityPart(username)) ||
     !Number.isInteger(target.port) ||
     target.port < 1 ||
     target.port > 65_535
@@ -39,5 +39,5 @@ export function resolveVsCodeSshAuthority(target: SshTarget): VsCodeSshAuthority
   if (target.port !== 22) {
     return { ok: false, reason: 'ssh-alias-required', host, port: target.port }
   }
-  return { ok: true, authority: `${username}@${host}` }
+  return { ok: true, authority: username ? `${username}@${host}` : host }
 }

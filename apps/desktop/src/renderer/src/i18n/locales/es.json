@@ -732,7 +732,7 @@
         "9263e75f49": "Codex está usando la cuenta anterior.",
         "a4c8e1b2f7": "Codex sigue conectado como {{value0}}",
         "d3e8a1f4b2": "Cuenta cambiada",
-        "e9b2c7d1a5": "Reinicia esta sesión para usar {{value0}}. Contrae para seguir trabajando con la cuenta actual.",
+        "e9b2c7d1a5": "Reinicia esta sesión para usar {{value0}}.",
         "f1a6c8e3b4": "Contraer"
       },
       "FirstLaunchBanner": {

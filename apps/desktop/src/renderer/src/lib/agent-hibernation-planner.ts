@@ -1,5 +1,4 @@
 import {
-  agentProviderSessionsEqual,
   getAgentResumeArgv,
   isResumableTuiAgent,
   type SleepingAgentSessionRecord
@@ -11,6 +10,7 @@ import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { GlobalSettings, TerminalLayoutSnapshot, TerminalTab } from '../../../shared/types'
 import { lastInputBlocksHibernation } from './agent-hibernation-input-guard'
+import { isCompletedAgentWithLiveRecoveryRecord } from './completed-agent-live-recovery-record'
 
 export const DEFAULT_AGENT_HIBERNATION_IDLE_MS = 30 * 60 * 1000
 export const MIN_AGENT_HIBERNATION_IDLE_MS = 60 * 1000
@@ -135,20 +135,17 @@ function getEligiblePane(args: {
     mobileLockedPtyIds
   } = args
   const sleepingRecord = sleepingAgentSessionsByPaneKey[entry.paneKey]
-  // Why: Pi's done hook ends a turn, not the TUI. A live recovery checkpoint
-  // must not make the still-running pane look already hibernated.
-  const hasOnlyLivePiRecoveryIdentity = Boolean(
-    entry.agentType === 'pi' &&
-    entry.providerSession &&
-    sleepingRecord?.agent === 'pi' &&
-    sleepingRecord.origin === 'live' &&
-    sleepingRecord.worktreeId === tab.worktreeId &&
-    agentProviderSessionsEqual('pi', entry.providerSession, sleepingRecord.providerSession)
+  // Why: a done hook ends a turn, not a resumable TUI. Its live recovery
+  // checkpoint must not make the still-running pane look already hibernated.
+  const hasOnlyLiveRecoveryIdentity = isCompletedAgentWithLiveRecoveryRecord(
+    entry,
+    sleepingRecord,
+    tab.worktreeId
   )
   if (
     entry.state !== 'done' ||
     entry.interrupted === true ||
-    (sleepingRecord && !hasOnlyLivePiRecoveryIdentity)
+    (sleepingRecord && !hasOnlyLiveRecoveryIdentity)
   ) {
     return null
   }

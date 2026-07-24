@@ -732,7 +732,7 @@
         "9263e75f49": "Codex 正在使用之前的账户",
         "a4c8e1b2f7": "Codex 仍以 {{value0}} 身份登录",
         "d3e8a1f4b2": "账户已切换",
-        "e9b2c7d1a5": "重启此会话以使用 {{value0}}。折叠以继续使用当前账户。",
+        "e9b2c7d1a5": "重启此会话以使用 {{value0}}。",
         "f1a6c8e3b4": "折叠"
       },
       "FirstLaunchBanner": {

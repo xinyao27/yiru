@@ -137,6 +137,10 @@ import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
 import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/yiru-runtime-files'
 import {
+  installServeSupervisorDisconnectQuit,
+  notifyServeSupervisorReady
+} from './serve-update-handoff'
+import {
   createSpoolDesktopComposition,
   type SpoolDesktopComposition
 } from './spool/spool-desktop-composition'
@@ -216,7 +220,9 @@ import {
   downloadRemoteServerUpdate,
   getRemoteServerUpdaterSnapshot,
   installRemoteServerUpdate,
-  isQuittingForUpdate
+  isQuittingForUpdate,
+  resolveUpdateInstallMode,
+  setupAutoUpdater
 } from './updater'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import {
@@ -467,7 +473,6 @@ installUncaughtPipeErrorGuard()
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
 // electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
 process.env.YIRU_APP_VERSION = app.getVersion()
-configureRemoteServerUpdateInstallMode(isServeMode ? 'unsupported-headless-serve' : 'interactive')
 configureRemoteServerUpdater({
   getSnapshot: getRemoteServerUpdaterSnapshot,
   check: checkForRemoteServerUpdate,
@@ -492,6 +497,8 @@ if (app.isPackaged && process.platform !== 'win32') {
 }
 configureDevUserDataPath(is.dev)
 configureYiruUserDataPathEnv()
+configureRemoteServerUpdateInstallMode(resolveUpdateInstallMode(isServeMode))
+installServeSupervisorDisconnectQuit(isServeMode)
 
 // Why: just past createMainWindow's 10s ready-to-show reveal fallback,
 // so a window revealed on that path still gets its tray icon.
@@ -2316,6 +2323,16 @@ app.whenReady().then(async () => {
   app.on('activate', requestDesktopActivation)
 
   if (serveOptions) {
+    // Why: headless servers have no BrowserWindow to initialize updater
+    // listeners, so use a silent status sink before advertising control.
+    setupAutoUpdater(
+      { webContents: { send: () => undefined } },
+      {
+        getLastUpdateCheckAt: () => store!.getUI().lastUpdateCheckAt,
+        onBeforeQuit: () => store!.flush(),
+        setLastUpdateCheckAt: (timestamp) => store!.updateUI({ lastUpdateCheckAt: timestamp })
+      }
+    )
     // Why: give managed WSL launchers a brief chance to migrate before headless
     // PTYs become reachable without letting slow repairs withhold all RPC readiness.
     logStartupMilestone('wsl-cli-barrier-start')
@@ -2381,6 +2398,7 @@ app.whenReady().then(async () => {
     // Why: headless serve never opens a renderer, so arm scheduled automation dispatch here.
     automations.start()
     await printServeReady(serveOptions)
+    notifyServeSupervisorReady(runtime.getRuntimeId())
     return
   }
 
