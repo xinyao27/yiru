@@ -1,6 +1,7 @@
 import {
   FileCode as FileJson,
   FolderSimple as FolderGit2,
+  ChatCentered as MessageSquarePlus,
   Chat as MessageSquare,
   Play
 } from '@phosphor-icons/react'
@@ -35,6 +36,7 @@ export function SessionInlineDetails({
   resumeActions,
   onResumeInWorktree,
   onResumeInNewTab,
+  onContinueInNewSession,
   onOpenLog
 }: {
   id: string
@@ -47,6 +49,7 @@ export function SessionInlineDetails({
   }
   onResumeInWorktree: () => void
   onResumeInNewTab: () => void
+  onContinueInNewSession?: () => void
   onOpenLog?: () => void
 }): React.JSX.Element {
   // A zero-turn transcript would resume into an empty conversation, so the plain
@@ -122,8 +125,27 @@ export function SessionInlineDetails({
         ) : null}
       </div>
 
-      {showResumeInWorktree || showResumeInNewTab || onOpenLog ? (
+      {showResumeInWorktree || showResumeInNewTab || onContinueInNewSession || onOpenLog ? (
         <div className="border-sidebar-border/80 bg-sidebar-accent/15 flex flex-wrap items-center gap-1.5 border-t px-3 py-2">
+          {onContinueInNewSession ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="xs"
+              draggable={false}
+              onClick={(event) => {
+                event.stopPropagation()
+                onContinueInNewSession()
+              }}
+              className="shrink-0"
+            >
+              <MessageSquarePlus className="size-3.5" />
+              {translate(
+                'components.agentSessionContinuation.continueInNewSession',
+                'Continue in New Session…'
+              )}
+            </Button>
+          ) : null}
           {showResumeInWorktree ? (
             <Button
               type="button"

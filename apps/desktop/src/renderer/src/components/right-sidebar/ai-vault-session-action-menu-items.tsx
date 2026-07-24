@@ -2,6 +2,7 @@ import {
   Copy,
   FileCode as FileJson,
   FolderOpen,
+  ChatCentered as MessageSquarePlus,
   Crosshair as LocateFixed,
   Layout as PanelTopOpen,
   Play
@@ -16,6 +17,7 @@ export function SessionActionMenuItems({
   resumeDisabled,
   resumeLabel,
   onResume,
+  onContinueInNewSession,
   onJumpToOriginalPane,
   showJumpToWorktree,
   onJumpToWorktree,
@@ -30,6 +32,7 @@ export function SessionActionMenuItems({
   resumeDisabled: boolean
   resumeLabel: string
   onResume: () => void
+  onContinueInNewSession?: () => void
   onJumpToOriginalPane?: () => void
   showJumpToWorktree: boolean
   onJumpToWorktree?: () => void
@@ -70,6 +73,15 @@ export function SessionActionMenuItems({
         <Play className="size-3.5" />
         {resumeLabel}
       </Item>
+      {onContinueInNewSession ? (
+        <Item onClick={onContinueInNewSession}>
+          <MessageSquarePlus className="size-3.5" />
+          {translate(
+            'components.agentSessionContinuation.continueInNewSession',
+            'Continue in New Session…'
+          )}
+        </Item>
+      ) : null}
       {onCopyResume ? (
         <Item onClick={onCopyResume}>
           <Copy className="size-3.5" />

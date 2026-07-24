@@ -10,6 +10,7 @@ import { cn } from '@/lib/class-names'
 import { getActiveStickyHeaderIndexForScroll } from '../sidebar/worktree-list-virtual-rows'
 import type { AiVaultOriginalPaneTarget } from './ai-vault-original-pane'
 import { EmptyState, SessionLoadingState, VaultGroupHeader } from './ai-vault-panel-controls'
+import { canContinueAiVaultSessionInNewSession } from './ai-vault-session-continuation'
 import type { AiVaultSessionGroup } from './ai-vault-session-filters'
 import {
   canOpenAiVaultSessionLogInYiru,
@@ -59,6 +60,7 @@ export function AiVaultSessionVirtualList({
   onJumpToOriginalPane,
   onJumpToWorktree,
   onResume,
+  onContinueInNewSession,
   onCopyResume,
   onCopyId,
   onCopyPath,
@@ -83,6 +85,7 @@ export function AiVaultSessionVirtualList({
   onJumpToOriginalPane: (session: AiVaultSession) => void
   onJumpToWorktree: (worktreeId: string) => void
   onResume: (session: AiVaultSession, worktreeId: string) => void
+  onContinueInNewSession: (session: AiVaultSession, worktreeId: string) => void
   onCopyResume: (session: AiVaultSession, worktreeId?: string | null) => void
   onCopyId: (session: AiVaultSession) => void
   onCopyPath: (session: AiVaultSession) => void
@@ -211,6 +214,7 @@ export function AiVaultSessionVirtualList({
               onJumpToOriginalPane={onJumpToOriginalPane}
               onJumpToWorktree={onJumpToWorktree}
               onResume={onResume}
+              onContinueInNewSession={onContinueInNewSession}
               onCopyResume={onCopyResume}
               onCopyId={onCopyId}
               onCopyPath={onCopyPath}
@@ -245,6 +249,7 @@ function AiVaultVirtualRow({
   onJumpToOriginalPane,
   onJumpToWorktree,
   onResume,
+  onContinueInNewSession,
   onCopyResume,
   onCopyId,
   onCopyPath,
@@ -271,6 +276,7 @@ function AiVaultVirtualRow({
   onJumpToOriginalPane: (session: AiVaultSession) => void
   onJumpToWorktree: (worktreeId: string) => void
   onResume: (session: AiVaultSession, worktreeId: string) => void
+  onContinueInNewSession: (session: AiVaultSession, worktreeId: string) => void
   onCopyResume: (session: AiVaultSession, worktreeId?: string | null) => void
   onCopyId: (session: AiVaultSession) => void
   onCopyPath: (session: AiVaultSession) => void
@@ -294,6 +300,11 @@ function AiVaultVirtualRow({
       : null
   const resumeState = row.type === 'session' ? getSessionResumeState(row.session) : null
   const resumeActions = row.type === 'session' ? getSessionResumeActions(row.session) : null
+  const continuationWorktreeId =
+    row.type === 'session' &&
+    canContinueAiVaultSessionInNewSession(row.session, resumeState?.worktreeId)
+      ? resumeState?.worktreeId
+      : null
   // Gate resume on real content: a zero-turn transcript would resume into an
   // empty conversation, so it is never offered as normally resumable.
   const resumeGating =
@@ -351,6 +362,11 @@ function AiVaultVirtualRow({
               onResume(row.session, resumeState.worktreeId)
             }
           }}
+          onContinueInNewSession={
+            continuationWorktreeId
+              ? () => onContinueInNewSession(row.session, continuationWorktreeId)
+              : undefined
+          }
           onResumeInWorktree={() => {
             if (resumeActions?.worktree.worktreeId) {
               onResume(row.session, resumeActions.worktree.worktreeId)

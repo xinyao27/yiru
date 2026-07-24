@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/agent-session-continuation-dialog'
 import { SpoolAgentsPane } from '@/components/spool/spool-agents-pane'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
@@ -161,7 +162,7 @@ function LocalAiVaultPanel(): React.JSX.Element {
     worktrees: allWorktrees,
     activeWorktreeId: activeWorktreeId ?? activeWorktree?.id ?? null
   })
-  const { buildResumeStartup, copyResumeCommand, handleResume } = useAiVaultSessionLaunchActions({
+  const launchActions = useAiVaultSessionLaunchActions({
     activeWorktree: activeWorktree ?? null,
     activeWorktreeId: activeWorktreeId ?? activeWorktree?.id ?? null,
     targetState: resumeTargetState,
@@ -353,7 +354,7 @@ function LocalAiVaultPanel(): React.JSX.Element {
         filteredSessionsCount={filteredSessions.length}
         error={error}
         vaultScope={scope}
-        buildResumeStartup={buildResumeStartup}
+        buildResumeStartup={launchActions.buildResumeStartup}
         getSessionResumeState={getSessionResumeState}
         getSessionResumeActions={getSessionResumeActions}
         getOriginalPaneTarget={getOriginalPaneTarget}
@@ -362,8 +363,11 @@ function LocalAiVaultPanel(): React.JSX.Element {
         onToggleGroup={toggleGroup}
         onJumpToOriginalPane={jumpToOriginalPane}
         onJumpToWorktree={jumpToWorktree}
-        onResume={handleResume}
-        onCopyResume={(session, worktreeId) => void copyResumeCommand(session, worktreeId)}
+        onResume={launchActions.handleResume}
+        onContinueInNewSession={launchActions.handleContinueInNewSession}
+        onCopyResume={(session, worktreeId) =>
+          void launchActions.copyResumeCommand(session, worktreeId)
+        }
         onCopyId={(session) =>
           void copyText(
             session.sessionId,
@@ -384,6 +388,13 @@ function LocalAiVaultPanel(): React.JSX.Element {
           }
         }}
       />
+      {launchActions.continuationRequest ? (
+        <AgentSessionContinuationDialog
+          open
+          request={launchActions.continuationRequest}
+          onOpenChange={launchActions.handleContinuationDialogOpenChange}
+        />
+      ) : null}
     </AiVaultPanelSurface>
   )
 }

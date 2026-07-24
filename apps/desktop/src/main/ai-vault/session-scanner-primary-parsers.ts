@@ -1,8 +1,11 @@
 import { createReadStream } from 'node:fs'
 import { createInterface } from 'node:readline'
 
-import type { AiVaultSession } from '@yiru/workbench-model/agent'
-import { isKnownHarnessInjectedUserTurnText } from '@yiru/workbench-model/agent'
+import {
+  isKnownHarnessInjectedUserTurnText,
+  normalizePromptField,
+  type AiVaultSession
+} from '@yiru/workbench-model/agent'
 import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import {
@@ -113,6 +116,14 @@ export function consumeClaudeSessionLine(state: ClaudeSessionParseState, line: s
       accumulator.queuedMessageCount++
     } else if (record.operation === 'remove' || record.operation === 'dequeue') {
       accumulator.queuedMessageCount = Math.max(0, accumulator.queuedMessageCount - 1)
+    }
+    return
+  }
+
+  if (record.type === 'last-prompt') {
+    const prompt = normalizePromptField(record.lastPrompt)
+    if (prompt) {
+      accumulator.lastUserPrompt = prompt
     }
     return
   }

@@ -130,11 +130,12 @@ export function getLocalPreflightContext(
 export function getLocalAgentPreflightContext(
   state: AppState,
   appPlatform: NodeJS.Platform = getRendererAppPlatform(),
-  wslContext: LocalProjectRuntimeWslContext = getCachedLocalProjectRuntimeWslContext()
+  wslContext: LocalProjectRuntimeWslContext = getCachedLocalProjectRuntimeWslContext(),
+  worktreeId?: string | null
 ): LocalPreflightContext {
   const projectRuntime = getLocalProjectExecutionRuntimeContext(
     state,
-    undefined,
+    worktreeId,
     appPlatform,
     wslContext
   )
@@ -144,6 +145,7 @@ export function getLocalAgentPreflightContext(
 
   if (
     appPlatform === 'win32' &&
+    !worktreeId &&
     !state.activeRepoId &&
     !state.activeWorktreeId &&
     state.settings?.localWindowsRuntimeDefault
@@ -153,7 +155,7 @@ export function getLocalAgentPreflightContext(
     return getProjectRuntimePreflightContext(
       resolveProjectExecutionRuntime({
         appPlatform: 'win32',
-        projectId: getLocalPreflightProjectId(state),
+        projectId: getLocalPreflightProjectId(state, worktreeId),
         projectRuntimePreference: { kind: 'inherit-global' },
         globalWindowsRuntimeDefault: state.settings.localWindowsRuntimeDefault,
         ...wslContext
@@ -166,7 +168,7 @@ export function getLocalAgentPreflightContext(
     return getProjectRuntimePreflightContext(
       resolveProjectExecutionRuntime({
         appPlatform: 'win32',
-        projectId: getLocalPreflightProjectId(state),
+        projectId: getLocalPreflightProjectId(state, worktreeId),
         projectRuntimePreference: { kind: 'windows-host' },
         globalWindowsRuntimeDefault: deriveGlobalWindowsRuntimeDefaultFromLegacySettings(
           state.settings
@@ -180,7 +182,7 @@ export function getLocalAgentPreflightContext(
       return getProjectRuntimePreflightContext(
         resolveProjectExecutionRuntime({
           appPlatform: 'win32',
-          projectId: getLocalPreflightProjectId(state),
+          projectId: getLocalPreflightProjectId(state, worktreeId),
           projectRuntimePreference: { kind: 'wsl', distro: explicitDistro },
           globalWindowsRuntimeDefault: deriveGlobalWindowsRuntimeDefaultFromLegacySettings(
             state.settings
@@ -191,7 +193,7 @@ export function getLocalAgentPreflightContext(
     return getProjectRuntimePreflightContext(
       resolveProjectExecutionRuntime({
         appPlatform: 'win32',
-        projectId: getLocalPreflightProjectId(state),
+        projectId: getLocalPreflightProjectId(state, worktreeId),
         projectRuntimePreference: { kind: 'inherit-global' },
         globalWindowsRuntimeDefault: deriveGlobalWindowsRuntimeDefaultFromLegacySettings(
           state.settings
@@ -200,7 +202,7 @@ export function getLocalAgentPreflightContext(
     )
   }
 
-  const wslDistro = getLocalPreflightWslDistro(state)
+  const wslDistro = getLocalPreflightWslDistro(state, worktreeId)
   if (wslDistro) {
     return getWslPreflightContext(wslDistro)
   }
@@ -220,8 +222,8 @@ function getCachedLocalProjectRuntimeWslContext(): LocalProjectRuntimeWslContext
   }
 }
 
-function getLocalPreflightWslDistro(state: AppState): string | null {
-  const activeWorktree = getLocalWorktree(state)
+function getLocalPreflightWslDistro(state: AppState, worktreeId?: string | null): string | null {
+  const activeWorktree = getLocalWorktree(state, worktreeId)
   const repo = getLocalRuntimeRepoForWorktree(state, activeWorktree)
   if (!isLocalRuntimeRepo(repo) || !isLocalRuntimeWorktree(activeWorktree)) {
     return null

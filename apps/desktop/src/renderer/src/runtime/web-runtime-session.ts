@@ -5,12 +5,14 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
 import type { TerminalPaneSplitSource } from '../../../shared/feature-education-telemetry'
 import type {
+  RuntimeMobileSessionCreateTerminalResult,
   RuntimeMobileSessionTabMove,
   RuntimeMobileSessionTabMoveResult,
   RuntimeTerminalClose,
   RuntimeTerminalSplit
 } from '../../../shared/runtime-types'
 import type { TerminalPaneLayoutNode, TuiAgent } from '../../../shared/types'
+import { deliverLaunchPromptToAgentTab } from '../lib/agent-launch-prompt-delivery'
 import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owner'
 import { useAppStore } from '../store'
 import type { AppState } from '../store/types'
@@ -25,7 +27,11 @@ import {
 } from './web-session-commands'
 import { recordWebSessionReorderIntent } from './web-session-reorder-intent'
 import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
-import { isWebTerminalSurfaceTabId, toHostSessionTabId } from './web-terminal-surface-id'
+import {
+  isWebTerminalSurfaceTabId,
+  toHostSessionTabId,
+  toWebTerminalSurfaceTabId
+} from './web-terminal-surface-id'
 
 export {
   HOST_TERMINAL_SURFACE_SEPARATOR,
@@ -47,7 +53,7 @@ const pendingWebRuntimeSplitMirrorTelemetry = new Map<string, Set<string>>()
 const WEB_RUNTIME_SPLIT_MIRROR_SUPPRESSION_TTL_MS = 30_000
 let pendingWebRuntimeSplitMirrorTelemetryId = 0
 
-export async function createWebRuntimeSessionTerminal(args: {
+type CreateWebRuntimeSessionTerminalArgs = {
   worktreeId: string
   environmentId?: string | null
   afterTabId?: string
@@ -62,13 +68,50 @@ export async function createWebRuntimeSessionTerminal(args: {
   viewMode?: 'terminal' | 'chat'
   activate?: boolean
   selectWorktree?: boolean
-}): Promise<boolean> {
+}
+
+type CreatedWebRuntimeSessionTerminal = {
+  terminal: RuntimeMobileSessionCreateTerminalResult['tab']
+}
+
+export async function createWebRuntimeSessionTerminal(
+  args: CreateWebRuntimeSessionTerminalArgs
+): Promise<boolean> {
+  return Boolean(await createWebRuntimeSessionTerminalResult(args))
+}
+
+export async function createWebRuntimeAgentSessionTerminal(
+  args: CreateWebRuntimeSessionTerminalArgs & {
+    agent: TuiAgent
+    promptAfterReady: string
+    submitPrompt: boolean
+    forcePromptPaste: boolean
+  }
+): Promise<{ created: boolean; promptDelivered: boolean }> {
+  const created = await createWebRuntimeSessionTerminalResult(args)
+  if (!created) {
+    return { created: false, promptDelivered: false }
+  }
+
+  const promptDelivered = await deliverLaunchPromptToAgentTab({
+    tabId: toWebTerminalSurfaceTabId(created.terminal.parentTabId),
+    content: args.promptAfterReady,
+    agent: args.agent,
+    submit: args.submitPrompt,
+    forcePaste: args.forcePromptPaste
+  })
+  return { created: true, promptDelivered }
+}
+
+async function createWebRuntimeSessionTerminalResult(
+  args: CreateWebRuntimeSessionTerminalArgs
+): Promise<CreatedWebRuntimeSessionTerminal | null> {
   const environmentId =
     args.environmentId?.trim() ??
     useAppStore.getState().settings?.activeRuntimeEnvironmentId?.trim() ??
     null
   if (!environmentId || !isWebRuntimeSessionActive(environmentId)) {
-    return false
+    return null
   }
 
   if (args.selectWorktree !== false) {
@@ -83,10 +126,10 @@ export async function createWebRuntimeSessionTerminal(args: {
       '[web-runtime-session] failed to create terminal:',
       result.error instanceof Error ? result.error.message : String(result.error)
     )
-    return false
+    return null
   }
   await requestWebSessionTabsRefresh({ environmentId, worktreeId: args.worktreeId })
-  return true
+  return { terminal: result.value.tab }
 }
 
 export async function createWebRuntimeSessionBrowserTab(args: {

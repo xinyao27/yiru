@@ -1,4 +1,5 @@
 import {
+  ChatCentered as MessageSquarePlus,
   Crosshair as LocateFixed,
   DotsThree as MoreHorizontal,
   Layout as PanelTopOpen,
@@ -57,6 +58,7 @@ export function SessionRowTrailingActions({
   showJumpToWorktree,
   onJumpToWorktree,
   onResume,
+  onContinueInNewSession,
   onCopyResume,
   onCopyId,
   onCopyPath,
@@ -76,6 +78,7 @@ export function SessionRowTrailingActions({
   showJumpToWorktree: boolean
   onJumpToWorktree?: () => void
   onResume: () => void
+  onContinueInNewSession?: () => void
   onCopyResume?: () => void
   onCopyId: () => void
   onCopyPath: () => void
@@ -165,6 +168,38 @@ export function SessionRowTrailingActions({
             {resumeLabel}
           </TooltipContent>
         </Tooltip>
+        {onContinueInNewSession ? (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={translate(
+                    'components.agentSessionContinuation.continueInNewSession',
+                    'Continue in New Session…'
+                  )}
+                  draggable={false}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onContinueInNewSession()
+                  }}
+                  data-testid="ai-vault-session-continue-in-new-session"
+                  className="can-hover:pointer-events-none group-focus-within/session-row:pointer-events-auto group-hover/session-row:pointer-events-auto focus-visible:pointer-events-auto"
+                >
+                  <MessageSquarePlus className="size-3.5" />
+                </Button>
+              }
+            />
+            <TooltipContent side="top" sideOffset={4}>
+              {translate(
+                'components.agentSessionContinuation.continueInNewSession',
+                'Continue in New Session…'
+              )}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
       </div>
       <Tooltip>
         <TooltipTrigger
@@ -233,6 +268,7 @@ export function SessionRowTrailingActions({
             resumeDisabled={resumeDisabled}
             resumeLabel={resumeLabel}
             onResume={onResume}
+            onContinueInNewSession={onContinueInNewSession}
             onJumpToOriginalPane={onJumpToOriginalPane}
             showJumpToWorktree={showJumpToWorktree}
             onJumpToWorktree={onJumpToWorktree}

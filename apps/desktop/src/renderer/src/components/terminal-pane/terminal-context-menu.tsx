@@ -39,7 +39,9 @@ import type { KeybindingOverrides } from '../../../../shared/keybindings'
 import { isTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import { isMacPlatform, nativeChatToggleShortcutLabel } from '../native-chat/native-chat-shortcut'
+import { AgentSessionContinuationMenuItem } from './agent-session-continuation-menu-item'
 import { shouldIgnoreTerminalMenuPointerDownOutside } from './terminal-context-menu-dismiss'
+import { TerminalIdMenuItems } from './terminal-id-menu-items'
 
 type TerminalContextMenuProps = {
   open: boolean
@@ -58,6 +60,8 @@ type TerminalContextMenuProps = {
   onEqualizePaneSizes: () => void
   onClosePane: () => void
   onClearScreen: () => void
+  canContinueAgentSessionInNewSession: boolean
+  onContinueAgentSessionInNewSession: () => void
   onForkAgentSession: () => void
   canToggleNativeChat: boolean
   isNativeChatView: boolean
@@ -93,6 +97,8 @@ export default function TerminalContextMenu({
   onEqualizePaneSizes,
   onClosePane,
   onClearScreen,
+  canContinueAgentSessionInNewSession,
+  onContinueAgentSessionInNewSession,
   onForkAgentSession,
   canToggleNativeChat,
   isNativeChatView,
@@ -270,6 +276,9 @@ export default function TerminalContextMenu({
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+        {canContinueAgentSessionInNewSession ? (
+          <AgentSessionContinuationMenuItem onSelect={onContinueAgentSessionInNewSession} />
+        ) : null}
         <DropdownMenuItem onClick={onForkAgentSession}>
           <GitFork />
           {translate(
@@ -370,20 +379,7 @@ export default function TerminalContextMenu({
             ) : null}
           </DropdownMenuItem>
         ) : null}
-        <DropdownMenuItem onClick={onCopyTerminalId}>
-          <Copy />
-          {translate(
-            'auto.components.terminal.pane.TerminalContextMenu.copyTerminalId',
-            'Copy Terminal ID'
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onCopyPaneId}>
-          <Copy />
-          {translate(
-            'auto.components.terminal.pane.TerminalContextMenu.2cf85a6a55',
-            'Copy Pane ID'
-          )}
-        </DropdownMenuItem>
+        <TerminalIdMenuItems onCopyTerminalId={onCopyTerminalId} onCopyPaneId={onCopyPaneId} />
         {canClosePane && (
           <>
             <DropdownMenuSeparator />
