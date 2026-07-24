@@ -108,7 +108,9 @@ export default function EditorViewToggle({
     <TooltipProvider delay={300}>
       <ToggleGroup
         size="sm"
-        className="h-[23px] [&_[data-slot=toggle-group-item]]:h-[23px] [&_[data-slot=toggle-group-item]]:min-w-[24px] [&_[data-slot=toggle-group-item]]:px-2"
+        // shrink-0: on a narrow editor panel this segmented control must keep its
+        // intrinsic width instead of absorbing flex-shrink and overlapping segments.
+        className="h-[23px] shrink-0 [&_[data-slot=toggle-group-item]]:h-[23px] [&_[data-slot=toggle-group-item]]:min-w-[24px] [&_[data-slot=toggle-group-item]]:px-2"
         variant="outline"
         value={[value]}
         onValueChange={(v) => {
