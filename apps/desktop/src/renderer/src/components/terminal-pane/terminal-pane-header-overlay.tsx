@@ -286,10 +286,10 @@ export default function TerminalPaneHeaderOverlay({
                         render={
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="icon-xs"
-                            // Same class as split so it shares the hover/active reveal
-                            // and sits as a peer in the [chat][split][×] cluster.
+                            // Same variant/class as split so the cluster reads as one
+                            // ghost trio; active state comes from aria-pressed.
                             className="pane-title-split-trigger"
                             aria-label={
                               isChatViewMode
