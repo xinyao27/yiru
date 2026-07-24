@@ -1028,6 +1028,7 @@ export function HostScreen({
               >
                 <Plus
                   size={16}
+                  weight="regular"
                   colorClassName={
                     connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
                   }

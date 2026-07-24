@@ -66,6 +66,7 @@ import { MobileDictationSetupSheet } from '../../../../src/components/mobile-dic
 import { MobileHtmlPreview } from '../../../../src/components/mobile-html-preview'
 import { MobileRichMarkdownEditor } from '../../../../src/components/mobile-rich-markdown-editor'
 import { MobileSyntaxSegments } from '../../../../src/components/mobile-syntax-segments'
+import { PhosphorIconContextProvider } from '../../../../src/components/phosphor-icon-context-provider'
 import { StatusDot } from '../../../../src/components/status-dot'
 import { TextInputModal } from '../../../../src/components/text-input-modal'
 import {
@@ -4725,31 +4726,34 @@ export default function SessionScreen() {
                     }}
                     delayLongPress={400}
                   >
-                    <View className={styles.tabLabelRow}>
-                      {t.type === 'browser' && (
-                        <Globe size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'markdown' && (
-                        <FileText size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'file' && (
-                        <File size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'terminal' &&
-                        (() => {
-                          const agentId = resolveMobileTerminalTabAgentId(t)
-                          return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
-                        })()}
-                      <Text
-                        className={cn(
-                          styles.tabText,
-                          t.id === activeSessionTabId && styles.tabTextActive
+                    <PhosphorIconContextProvider weight="regular">
+                      <View className={styles.tabLabelRow}>
+                        {/* Why: tab identity glyphs match desktop's compact regular-weight chrome. */}
+                        {t.type === 'browser' && (
+                          <Globe size={13} colorClassName="accent-muted-foreground" />
                         )}
-                        numberOfLines={1}
-                      >
-                        {getMobileSessionTabTitle(t)}
-                      </Text>
-                    </View>
+                        {t.type === 'markdown' && (
+                          <FileText size={13} colorClassName="accent-muted-foreground" />
+                        )}
+                        {t.type === 'file' && (
+                          <File size={13} colorClassName="accent-muted-foreground" />
+                        )}
+                        {t.type === 'terminal' &&
+                          (() => {
+                            const agentId = resolveMobileTerminalTabAgentId(t)
+                            return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
+                          })()}
+                        <Text
+                          className={cn(
+                            styles.tabText,
+                            t.id === activeSessionTabId && styles.tabTextActive
+                          )}
+                          numberOfLines={1}
+                        >
+                          {getMobileSessionTabTitle(t)}
+                        </Text>
+                      </View>
+                    </PhosphorIconContextProvider>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -4771,7 +4775,7 @@ export default function SessionScreen() {
                 }}
                 accessibilityLabel="New tab"
               >
-                <Plus size={16} colorClassName="accent-muted-foreground" />
+                <Plus size={16} weight="regular" colorClassName="accent-muted-foreground" />
               </Pressable>
               {shouldShowMobileQuickCommandsAction(quickCommandsSupported) ? (
                 <QuickCommandsTabButton

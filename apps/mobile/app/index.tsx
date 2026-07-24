@@ -784,7 +784,7 @@ export default function HomeScreen() {
                   }}
                 >
                   <View className={styles.quickActionIcon}>
-                    <Plus size={16} colorClassName="accent-muted-foreground" />
+                    <Plus size={16} weight="regular" colorClassName="accent-muted-foreground" />
                   </View>
                   <Text className={styles.quickActionLabel}>New Workspace</Text>
                 </Pressable>

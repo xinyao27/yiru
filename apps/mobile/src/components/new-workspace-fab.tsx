@@ -25,7 +25,7 @@ export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): Re
       accessibilityLabel="New workspace"
       hitSlop={8}
     >
-      <Plus size={24} colorClassName="accent-primary-foreground" />
+      <Plus size={24} weight="regular" colorClassName="accent-primary-foreground" />
     </Pressable>
   )
 }
