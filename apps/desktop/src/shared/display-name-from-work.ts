@@ -1,5 +1,6 @@
+import { extractWorkIdentifier, formatIdentifierFirst } from '@yiru/workbench-model/review'
+
 import { humanizeBranchSlug } from './branch-name-from-work'
-import { extractWorkIdentifier, formatIdentifierFirst } from './work-item-reference'
 
 // Why: the git branch must stay lowercase kebab-case, but the sidebar display
 // name is free-form. When the first prompt references a review target, that

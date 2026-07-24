@@ -1,4 +1,4 @@
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
 /** Pick the live agent-status entry for this tab. A tab's panes are keyed
  *  `${tabId}:${leafId}`; the single active agent pane is the one whose paneKey

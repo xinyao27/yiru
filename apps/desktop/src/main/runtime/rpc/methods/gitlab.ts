@@ -1,7 +1,11 @@
 import { z } from 'zod'
 
+import {
+  OptionalFiniteNumber,
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalFiniteNumber, OptionalString, requiredString } from '../schemas'
 
 const RepoSelector = z.object({
   repo: requiredString('Missing repo selector')
@@ -112,6 +116,7 @@ const WorkItemByPath = RepoSelector.extend({
 export const GITLAB_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'gitlab.listMRs',
+    mobile: true,
     params: WorkItemsList,
     handler: async (params, { runtime }) =>
       runtime.listGitLabRepoMRs(
@@ -139,6 +144,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'gitlab.addMRComment',
+    mobile: true,
     params: AddMRComment,
     handler: async (params, { runtime }) =>
       runtime.addGitLabRepoMRComment(params.repo, params.iid, params.body, params.projectRef)
@@ -151,6 +157,7 @@ export const GITLAB_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'gitlab.resolveMRDiscussion',
+    mobile: true,
     params: ResolveMRDiscussion,
     handler: async (params, { runtime }) =>
       runtime.resolveGitLabRepoMRDiscussion(
@@ -175,18 +182,21 @@ export const GITLAB_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'gitlab.mergeMR',
+    mobile: true,
     params: MergeMr,
     handler: async (params, { runtime }) =>
       runtime.mergeGitLabRepoMR(params.repo, params.iid, params.method, params.projectRef)
   }),
   defineMethod({
     name: 'gitlab.updateMRState',
+    mobile: true,
     params: UpdateMrState,
     handler: async (params, { runtime }) =>
       runtime.updateGitLabRepoMRState(params.repo, params.iid, params.state, params.projectRef)
   }),
   defineMethod({
     name: 'gitlab.updateMR',
+    mobile: true,
     params: UpdateMr,
     handler: async (params, { runtime }) =>
       runtime.updateGitLabRepoMR(params.repo, params.iid, params.updates, params.projectRef)
@@ -204,12 +214,14 @@ export const GITLAB_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'gitlab.workItemDetails',
+    mobile: true,
     params: WorkItemDetails,
     handler: async (params, { runtime }) =>
       runtime.getGitLabRepoWorkItemDetails(params.repo, params.iid, params.type, params.projectRef)
   }),
   defineMethod({
     name: 'gitlab.workItemByPath',
+    mobile: true,
     params: WorkItemByPath,
     handler: async (params, { runtime }) =>
       runtime.getGitLabRepoWorkItemByPath(

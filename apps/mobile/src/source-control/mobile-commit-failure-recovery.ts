@@ -5,7 +5,7 @@ export {
   buildFixCommitFailurePrompt,
   hasExpandedCommitFailureDetails,
   summarizeCommitFailure
-} from '../../../desktop/src/shared/source-control-commit-failure'
+} from '@yiru/workbench-model/review'
 
 export type MobileCommitFailureRecovery = {
   error: string

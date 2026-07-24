@@ -6,14 +6,14 @@ import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
+import {
+  absolutePathToFileUri as toFileUrlForOsEscape,
+  resolveMarkdownLinkTarget
+} from '@/lib/markdown-internal-links'
 import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 
 import type { DiffComment } from '../../../../shared/types'
 import { scrollToAnchorInEditor } from './markdown-anchor-scroll'
-import {
-  absolutePathToFileUri as toFileUrlForOsEscape,
-  resolveMarkdownLinkTarget
-} from './markdown-internal-links'
 import {
   classifyHtmlSuperscriptLinkAction,
   type RichMarkdownHtmlSuperscriptLinkContext

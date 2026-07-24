@@ -1,3 +1,6 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { isRuntimeSubscriptionReplayResponse } from '@yiru/runtime-protocol/subscription-replay'
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: web session-tab sync reconciles terminal,
  * unified-tab, group, and PTY maps atomically so host-published surfaces don't
  * leave the web client in a split-brain tab state. */
@@ -10,17 +13,11 @@ import {
 } from '@/lib/worktree-runtime-owner'
 
 import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../shared/agent-status-types'
-import {
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
 } from '../../../shared/agent-title-owner'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import { resolvePaneAgentOwner } from '../../../shared/pane-agent-owner'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
-import { isRuntimeSubscriptionReplayResponse } from '../../../shared/runtime-subscription-replay'
 import type {
   RuntimeMobileSessionTabsResult,
   RuntimeMobileSessionBrowserTab,
@@ -49,13 +46,6 @@ import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
 import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './runtime-terminal-stream'
 import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
 import {
-  createWebRuntimeSessionTerminal,
-  HOST_TERMINAL_SURFACE_SEPARATOR,
-  isWebTerminalSurfaceTabId,
-  toWebTerminalSurfaceTabId,
-  WEB_TERMINAL_SURFACE_TAB_PREFIX
-} from './web-runtime-session'
-import {
   beginWebRuntimeWakeTerminalRespawn,
   clearAllWebRuntimeWakeTerminalRespawn,
   clearWebRuntimeWakeTerminalRespawnForWorktree,
@@ -66,11 +56,23 @@ import {
   isWebSessionCloseIntentPending,
   reconcileWebSessionCloseIntents
 } from './web-session-close-intent'
+import { createWebSessionTerminalCommand } from './web-session-commands'
 import { clearWebSessionFocusIntent, peekWebSessionFocusIntent } from './web-session-focus-intent'
 import {
   clearWebSessionReorderIntentsForWorktree,
   resolveWebSessionReorderedOrder
 } from './web-session-reorder-intent'
+import {
+  registerWebSessionTabsRefreshHandler,
+  requestWebSessionTabsRefresh,
+  type WebSessionTabsRefreshRequest
+} from './web-session-tabs-refresh-requests'
+import {
+  HOST_TERMINAL_SURFACE_SEPARATOR,
+  isWebTerminalSurfaceTabId,
+  toWebTerminalSurfaceTabId,
+  WEB_TERMINAL_SURFACE_TAB_PREFIX
+} from './web-terminal-surface-id'
 
 const WEB_SESSION_GROUP_PREFIX = 'web-session-tabs:'
 
@@ -2508,6 +2510,53 @@ export function applyWebSessionTabsStorePatch(
   }
 }
 
+async function refreshRequestedWebSessionTabs(
+  request: WebSessionTabsRefreshRequest
+): Promise<void> {
+  try {
+    const response = await window.api.runtimeEnvironments.call({
+      selector: request.environmentId,
+      method: 'session.tabs.list',
+      params: { worktree: toRuntimeWorktreeSelector(request.worktreeId) },
+      timeoutMs: 15_000
+    })
+    if (response.ok === false) {
+      throw new Error(response.error.message)
+    }
+    const snapshot = response.result as RuntimeMobileSessionTabsResult
+    applyWebSessionTabsStorePatch((state) =>
+      applyFreshWebSessionTabsSnapshot(state, snapshot, request.environmentId)
+    )
+  } catch (error) {
+    // Why: the host command already succeeded; the live subscription remains
+    // authoritative if this eager parity refresh cannot complete.
+    console.warn(
+      '[web-session-tabs-sync] failed to refresh session tabs:',
+      error instanceof Error ? error.message : String(error)
+    )
+  }
+}
+
+// Why: command refreshes must work before React effects and across remounts;
+// this runtime module is imported once by the renderer bootstrap.
+registerWebSessionTabsRefreshHandler(refreshRequestedWebSessionTabs)
+
+async function createAndRefreshWebSessionTerminal(args: {
+  environmentId: string
+  worktreeId: string
+}): Promise<boolean> {
+  const result = await createWebSessionTerminalCommand({ ...args, activate: true })
+  if (result.status === 'failed') {
+    console.warn(
+      '[web-session-tabs-sync] failed to create terminal:',
+      result.error instanceof Error ? result.error.message : String(result.error)
+    )
+    return false
+  }
+  await requestWebSessionTabsRefresh(args)
+  return true
+}
+
 export function useWebSessionTabsSync(): void {
   const activeWorktreeId = useAppStore((state) => state.activeWorktreeId)
   const runtimeSessionMirrorEnvironmentKey = useAppStore((state) =>
@@ -2728,10 +2777,9 @@ export function useWebSessionTabsSync(): void {
             }
             if (!disposed && shouldBootstrapInitialTerminal) {
               requestedInitialTerminal = true
-              void createWebRuntimeSessionTerminal({
+              void createAndRefreshWebSessionTerminal({
                 worktreeId: activeWorktreeId,
-                environmentId,
-                activate: true
+                environmentId
               })
             } else if (
               !disposed &&
@@ -2741,11 +2789,9 @@ export function useWebSessionTabsSync(): void {
               requestedRespawnAfterWake = true
               // Why: wake recovery must recreate the terminal without changing
               // selected worktree to avoid re-triggering activation churn.
-              void createWebRuntimeSessionTerminal({
+              void createAndRefreshWebSessionTerminal({
                 worktreeId: activeWorktreeId,
-                environmentId,
-                activate: true,
-                selectWorktree: false
+                environmentId
               }).finally(() => {
                 endWebRuntimeWakeTerminalRespawn(activeWorktreeId)
               })

@@ -1,3 +1,4 @@
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: the editor external-watch hook co-locates
    target diffing, fs:changed dispatch, tombstone coalescing, and rename
    correlation so the end-to-end event-to-store mutation contract stays
@@ -18,7 +19,7 @@ import {
   getRecentSelfWrite,
   type RecentSelfWrite
 } from '@/components/editor/editor-self-write-registry'
-import { getExternalFileChangeRelativePath } from '@/components/right-sidebar/use-file-explorer-watch'
+import { getExternalFileChangeRelativePath } from '@/components/workspace-panel/use-file-explorer-watch'
 import { basename, joinPath } from '@/lib/path'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '@/runtime/runtime-file-client'
@@ -26,7 +27,6 @@ import { useAppStore, type AppState } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { FsChangedPayload } from '../../../shared/types'
 import {

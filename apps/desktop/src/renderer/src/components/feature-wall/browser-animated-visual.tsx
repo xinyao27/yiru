@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, type JSX, type ReactNode } from 'react'
 
 import { ClaudeIcon } from '@/components/status-bar/icons'
-import { floatingSurfaceClass } from '@/components/ui/floating-surface-styles'
+import { Card } from '@/components/ui/card'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -16,10 +16,6 @@ import { FeatureWallClickRing } from './feature-wall-click-ring'
 // modal stays in lockstep with the design source.
 
 const PROMPT_TEXT = 'Make Starter card stand out'
-
-// Why: hand-rolled tour popovers must obey the same opaque surface contract as
-// live dropdowns even though they stay inside the storyboard DOM.
-const TOUR_FLOATING_SURFACE_CLASS = floatingSurfaceClass
 
 const PRE_INTRO_MS = 600
 const NEWTAB_APPROACH_MS = 700
@@ -507,7 +503,7 @@ export function BrowserAnimatedVisual(props: {
           }}
         >
           {/* Browser app-window — column 1 */}
-          <div className="border-border bg-card text-card-foreground relative flex min-w-0 flex-col overflow-hidden rounded-xl border">
+          <div className="border-border bg-card text-card-foreground relative flex min-w-0 flex-col overflow-hidden border">
             <div
               ref={titlebarRef}
               className="border-border bg-muted/40 relative flex min-h-[32px] items-end gap-1.5 border-b px-2.5 pt-2"
@@ -534,7 +530,7 @@ export function BrowserAnimatedVisual(props: {
                 <span
                   ref={newtabBtnRef}
                   className={cn(
-                    'mb-1 inline-flex size-[22px] items-center justify-center rounded-md text-muted-foreground transition-colors duration-150',
+                    'mb-1 inline-flex size-[22px] items-center justify-center text-muted-foreground transition-colors duration-150',
                     newtabActive ? 'bg-foreground/10 text-foreground' : null
                   )}
                 >
@@ -542,11 +538,12 @@ export function BrowserAnimatedVisual(props: {
                 </span>
               </div>
               {/* New-tab dropdown menu */}
-              <div
+              {/* Why: this is inert storyboard chrome, so Card supplies a rendered
+                  surface without mounting a live dropdown into the animation. */}
+              <Card
                 aria-hidden={!dropdownVisible}
                 className={cn(
-                  'absolute z-40 origin-top-left rounded-[10px] p-1 text-[11.5px] transition-[opacity,transform] duration-150',
-                  TOUR_FLOATING_SURFACE_CLASS,
+                  'bg-popover text-popover-foreground border-border absolute z-40 gap-0 origin-top-left p-1 py-1 text-[11.5px] transition-[opacity,transform] duration-150',
                   dropdownVisible
                     ? 'translate-y-0 scale-100 opacity-100'
                     : '-translate-y-[3px] scale-[0.985] opacity-0'
@@ -561,8 +558,8 @@ export function BrowserAnimatedVisual(props: {
                 <div
                   ref={newtabRowRef}
                   className={cn(
-                    'grid items-center gap-2 rounded-md px-2 py-[5px]',
-                    newtabRowActive ? 'bg-black/8 dark:bg-white/14' : null
+                    'grid items-center gap-2 px-2 py-[5px]',
+                    newtabRowActive ? 'bg-accent' : null
                   )}
                   style={{ gridTemplateColumns: '18px 1fr' }}
                 >
@@ -580,7 +577,7 @@ export function BrowserAnimatedVisual(props: {
                   </span>
                 </div>
                 <DropdownSkeletonRow widthPct={52} />
-              </div>
+              </Card>
             </div>
 
             {/* URL toolbar — hidden until tab reveals so the panel reads as
@@ -594,7 +591,7 @@ export function BrowserAnimatedVisual(props: {
                 <NavGlyph>›</NavGlyph>
                 <NavGlyph>↻</NavGlyph>
               </span>
-              <div className="border-border bg-card flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-md border px-2 py-[3px] font-mono text-[11px]">
+              <div className="border-border bg-card flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden border px-2 py-[3px] font-mono text-[11px]">
                 {isSplit ? (
                   <span className="text-muted-foreground truncate transition-colors duration-200">
                     {`...${showSignup ? '/signup' : '/pricing'}`}
@@ -650,11 +647,10 @@ export function BrowserAnimatedVisual(props: {
                   />
                 )}
 
-                <div
+                <Card
                   aria-hidden={!annotateOpen}
                   className={cn(
-                    'pointer-events-none absolute z-30 flex origin-top-left flex-col gap-1.5 rounded-md px-[9px] pb-[7px] pt-2 text-[10px] transition-[opacity,transform] duration-200',
-                    TOUR_FLOATING_SURFACE_CLASS,
+                    'bg-popover text-popover-foreground border-border pointer-events-none absolute z-30 flex origin-top-left flex-col gap-1.5 px-[9px] pb-[7px] pt-2 text-[10px] transition-[opacity,transform] duration-200',
                     annotateOpen ? 'scale-100 opacity-100' : 'scale-[0.96] opacity-0'
                   )}
                   style={{ left: annotateAnchor.left, top: annotateAnchor.top, width: 188 }}
@@ -689,14 +685,14 @@ export function BrowserAnimatedVisual(props: {
                         'Send to Claude'
                       )}
                       className={cn(
-                        'inline-flex size-5 shrink-0 items-center justify-center rounded border border-border bg-muted text-foreground transition-[background-color,transform] duration-150',
+                        'inline-flex size-5 shrink-0 items-center justify-center border border-border bg-muted text-foreground transition-[background-color,transform] duration-150',
                         sendPressed ? 'scale-[0.92] bg-foreground/[0.12]' : null
                       )}
                     >
                       <ClaudeIcon size={12} />
                     </span>
                   </div>
-                </div>
+                </Card>
 
                 <span
                   key={flashKey}
@@ -725,7 +721,7 @@ export function BrowserAnimatedVisual(props: {
 
           <div
             className={cn(
-              'flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card font-mono text-[10px] text-card-foreground transition-[opacity,transform] duration-500',
+              'flex min-w-0 flex-col overflow-hidden border border-border bg-card font-mono text-[10px] text-card-foreground transition-[opacity,transform] duration-500',
               isSplit ? 'translate-x-0 opacity-100' : 'translate-x-2 opacity-0'
             )}
           >
@@ -768,7 +764,7 @@ function BrowserTab(props: {
   return (
     <span
       className={cn(
-        'relative inline-flex shrink-0 items-center gap-1.5 rounded-t-md border border-b-0 border-border bg-card px-2.5 pb-1.5 pt-1 text-[11px] text-foreground',
+        'relative inline-flex shrink-0 items-center gap-1.5  border border-b-0 border-border bg-card px-2.5 pb-1.5 pt-1 text-[11px] text-foreground',
         minimized ? 'gap-0 px-2' : null,
         incoming ? 'animate-[browserTabIn_320ms_cubic-bezier(.2,.8,.2,1)_both]' : null
       )}
@@ -787,14 +783,11 @@ function BrowserTab(props: {
 function DropdownSkeletonRow(props: { widthPct: number }): JSX.Element {
   return (
     <div
-      className="grid items-center gap-2 rounded-md px-2 py-[5px]"
+      className="grid items-center gap-2 px-2 py-[5px]"
       style={{ gridTemplateColumns: '18px 1fr' }}
     >
-      <span className="bg-popover-foreground/10 size-[13px] rounded-[3px]" />
-      <span
-        className="bg-popover-foreground/10 h-[7px] rounded-[3px]"
-        style={{ width: `${props.widthPct}%` }}
-      />
+      <span className="bg-popover-foreground/10 size-[13px]" />
+      <span className="bg-popover-foreground/10 h-[7px]" style={{ width: `${props.widthPct}%` }} />
     </div>
   )
 }
@@ -814,7 +807,7 @@ function TermEntryView(props: { entry: TermEntry }): JSX.Element {
   if (entry.kind === 'working') {
     return (
       <span className="text-muted-foreground inline-flex items-center gap-1.5">
-        <span className="size-1.5 animate-pulse rounded-full bg-emerald-500 dark:bg-emerald-400" />
+        <span className="size-1.5 animate-pulse bg-emerald-500 dark:bg-emerald-400" />
         {translate('auto.components.feature.wall.BrowserAnimatedVisual.0ce7c24b4d', 'Working…')}
       </span>
     )
@@ -860,7 +853,7 @@ function PricingView(props: {
       <div className="text-[15px] leading-tight font-bold">
         {translate('auto.components.feature.wall.BrowserAnimatedVisual.9e0f530390', 'Pricing')}
       </div>
-      <div className="bg-foreground/10 h-2 w-4/5 rounded" />
+      <div className="bg-foreground/10 h-2 w-4/5" />
       <div className="mt-1 grid grid-cols-2 gap-2.5">
         <PricingCard
           cardRef={props.cardRef}
@@ -894,8 +887,8 @@ function SignupView(): JSX.Element {
           'Start your free trial'
         )}
       </div>
-      <div className="bg-foreground/10 h-2 w-[70%] rounded" />
-      <div className="bg-foreground/10 -mt-1 h-2 w-[55%] rounded" />
+      <div className="bg-foreground/10 h-2 w-[70%]" />
+      <div className="bg-foreground/10 -mt-1 h-2 w-[55%]" />
     </div>
   )
 }
@@ -926,24 +919,24 @@ function PricingCard(props: {
   return (
     <div
       ref={cardRef}
-      className="border-border bg-card relative flex flex-col gap-1.5 rounded-md border p-2.5"
+      className="border-border bg-card relative flex flex-col gap-1.5 border p-2.5"
     >
       {target ? (
         <span
           aria-hidden
           className={cn(
-            'pointer-events-none absolute -inset-[3px] rounded-[10px] border-2 border-blue-500 bg-blue-500/10 transition-opacity duration-300',
+            'pointer-events-none absolute -inset-[3px] border-2 border-blue-500 bg-blue-500/10 transition-opacity duration-300',
             ringActive ? 'opacity-100' : 'opacity-0'
           )}
         />
       ) : null}
       <span className="text-[11.5px] font-semibold">{label}</span>
-      <div className="bg-foreground/10 h-1.5 w-3/5 rounded" />
-      <div className="bg-foreground/10 h-1.5 w-4/5 rounded" />
+      <div className="bg-foreground/10 h-1.5 w-3/5" />
+      <div className="bg-foreground/10 h-1.5 w-4/5" />
       <span
         ref={ctaRef}
         className={cn(
-          'mt-1 inline-flex w-fit items-center rounded-md px-2 py-1 text-[11px] font-semibold transition-[background-color,color,transform] duration-300',
+          'mt-1 inline-flex w-fit items-center px-2 py-1 text-[11px] font-semibold transition-[background-color,color,transform] duration-300',
           highlighted
             ? 'bg-foreground text-background'
             : ctaIsBranded
@@ -960,7 +953,7 @@ function PricingCard(props: {
 
 function NavGlyph(props: { children: ReactNode }): JSX.Element {
   return (
-    <span className="text-muted-foreground inline-flex size-[18px] items-center justify-center rounded">
+    <span className="text-muted-foreground inline-flex size-[18px] items-center justify-center">
       {props.children}
     </span>
   )

@@ -5,6 +5,11 @@ import {
   ArrowRight,
   ArrowsIn as Minimize2
 } from '@phosphor-icons/react'
+import {
+  isRuntimeOwnedSshTargetId,
+  toRuntimeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import {
   Suspense,
@@ -22,6 +27,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import { Toaster } from '@/components/ui/sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { SYNC_FIT_PANES_EVENT, TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
@@ -60,11 +66,6 @@ import {
 import logo from '../../../resources/logo.svg'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../shared/constants'
 import {
-  isRuntimeOwnedSshTargetId,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../shared/execution-host'
-import {
   keybindingMatchesAction,
   type KeybindingActionId,
   type KeybindingContext,
@@ -99,13 +100,11 @@ import NewWorkspaceComposerModal from './components/new-workspace-composer-modal
 import { shouldShowOnboarding } from './components/onboarding/should-show-onboarding'
 import { onOnboardingReopened } from './components/onboarding/show-onboarding-event'
 import { shouldRenderPetOverlay } from './components/pet/pet-overlay-visibility'
+import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
 import { WorkspacePortScanner } from './components/ports/workspace-port-scanner'
-import {
-  folderRelativePathToIncludeGlob,
-  selectedExplorerFolderRelativePath
-} from './components/right-sidebar/file-search-include-pattern'
-import { useGitStatusPolling } from './components/right-sidebar/use-git-status-polling'
+import { installRendererCommandToasts } from './components/renderer-command-toasts'
 import Sidebar from './components/sidebar/index'
+import { SidebarWorkspaceSearchButton } from './components/sidebar/sidebar-workspace-search-button'
 import { SkillFreshnessNudge } from './components/skills/skill-freshness-nudge'
 import { SkillFreshnessUpdateDialog } from './components/skills/skill-freshness-update-dialog'
 import { SpoolControlRequestDialog } from './components/spool/spool-control-request-dialog'
@@ -115,7 +114,6 @@ import { StarNagToastHost } from './components/star-nag/star-nag-toast-host'
 import RecentTabSwitcher from './components/tab-bar/recent-tab-switcher'
 import { TelemetryFirstLaunchSurface } from './components/telemetry-first-launch-surface'
 import PinnedTabCloseDialog from './components/terminal-pane/pinned-tab-close-dialog'
-import { shutdownBufferCaptures } from './components/terminal-pane/shutdown-buffer-captures'
 import { publishTerminalViewAttributesAtAppStart } from './components/terminal-pane/terminal-appearance'
 import {
   getSystemPrefersDarkSnapshot,
@@ -126,6 +124,11 @@ import {
   subscribeBackgroundTerminalWorktreeMountRequests
 } from './components/terminal/background-terminal-worktree-mount'
 import { dispatchWindowCloseRequest } from './components/window-close-request-coordinator'
+import {
+  folderRelativePathToIncludeGlob,
+  selectedExplorerFolderRelativePath
+} from './components/workspace-panel/file-search-include-pattern'
+import { useGitStatusPolling } from './components/workspace-panel/use-git-status-polling'
 import { YiruProfileSwitcher } from './components/yiru-profiles/yiru-profile-switcher'
 import { ZoomOverlay } from './components/zoom-overlay'
 import { useAppMenuPaste } from './hooks/use-app-menu-paste'
@@ -175,6 +178,7 @@ import {
   setRuntimeGraphStoreStateGetter,
   setRuntimeGraphSyncEnabled
 } from './runtime/sync-runtime-graph'
+import { shutdownBufferCaptures } from './runtime/terminal-shutdown-buffer-captures'
 import { useWebSessionTabsSync } from './runtime/web-session-tabs-sync'
 import { reconnectSshTargetForRendererStartup } from './startup/ssh-startup-reconnect'
 import {
@@ -185,6 +189,10 @@ import {
 import { useAppStore } from './store'
 import { selectActiveTerminalChromeState } from './store/active-terminal-chrome-selector'
 import { selectFloatingVisibleTabCount } from './store/selectors'
+
+// Why: presentation must exist before any bootstrap action can publish a result,
+// and it must not disappear during React remounts.
+installRendererCommandToasts()
 
 // Why: agents alive during a hard kill (crash, forced update install) need a
 // reasonably fresh resume record on disk; one minute bounds the lost window
@@ -210,13 +218,15 @@ const hasCustomTitleBar = shouldRenderDesktopWindowChrome({
 })
 // Why: Electron drag regions swallow clicks even when a control is visibly above them.
 const TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME = '[-webkit-app-region:no-drag]'
+// Why: full-page titlebars continue the app canvas instead of introducing a
+// separate card-colored band above landing and other background surfaces.
 const TITLEBAR_CLASS_NAME =
-  'flex h-9 min-h-9 flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
-// Why: the inset seam preserves the full 36px content box, keeping controls aligned with traffic lights.
+  'flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] flex-row items-center bg-background select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+// Why: the full-height header continues the standard app hairline through its search surface.
 const TITLEBAR_LEFT_CLASS_NAME =
-  'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+  'worktree-sidebar-theme border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] shrink-0 flex-row items-center overflow-hidden border-r border-b bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 const WINDOW_CONTROL_BUTTON_CLASS_NAME =
-  'h-9 w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
+  'h-[var(--titlebar-height)] w-[46px] bg-background text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 
 async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
   try {
@@ -253,8 +263,8 @@ type ShortcutDispatchInput = {
 
 // Why: Windows ('hidden' titleBarStyle) and Linux (frame: false) both remove
 // the native OS title bar, so we render our own minimize/maximize/close
-// buttons. These SVG icons match the Fluent/Win11 style: thin 10×10 paths on a
-// 40×30 hit area.
+// buttons. These SVG icons match the Fluent/Win11 style: thin 10×10 paths in a
+// 46×36 hit area.
 function WindowControls(): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
   useEffect(() => {
@@ -276,7 +286,7 @@ function WindowControls(): React.JSX.Element {
   return (
     <div
       data-testid="window-controls"
-      className="fixed top-0 right-0 z-[9999] flex h-9 flex-row [-webkit-app-region:no-drag]"
+      className="fixed top-0 right-0 z-[9999] flex h-[var(--titlebar-height)] flex-row [-webkit-app-region:no-drag]"
     >
       <Button
         type="button"
@@ -379,6 +389,9 @@ const SshPassphraseDialog = lazy(() =>
 )
 const UpdateCard = lazy(() =>
   import('./components/update-card').then((module) => ({ default: module.UpdateCard }))
+)
+const RemoteServerUpdateDialog = lazy(
+  () => import('./components/settings/remote-server-update-dialog')
 )
 const ContextualTourOverlay = lazy(() =>
   import('./components/contextual-tours/contextual-tour-overlay').then((module) => ({
@@ -493,6 +506,7 @@ function App(): React.JSX.Element {
       setContextualToursAutoEligible: s.setContextualToursAutoEligible,
       setContextualToursOnboardingVisible: s.setContextualToursOnboardingVisible,
       cancelContextualTour: s.cancelContextualTour,
+      openDiffNotesSendMenuForActiveWorktree: s.openDiffNotesSendMenuForActiveWorktree,
       setActiveView: s.setActiveView,
       updateSettings: s.updateSettings,
       pruneLastVisitedTimestamps: s.pruneLastVisitedTimestamps,
@@ -1434,7 +1448,7 @@ function App(): React.JSX.Element {
       // which is in-memory. Capture them into the persisted sleeping-session
       // map so a daemon/session death while the app is closed can still
       // cold-restore via the agent's resume command (#5232).
-      useAppStore.getState().captureAllSleepingAgentSessions()
+      useAppStore.getState().captureAllSleepingAgentSessions('quit')
       // Why: re-read state after capture() calls populated scrollback buffers
       // into the store via Zustand setters. The earlier read is only for the
       // gating flags and would miss those updates.
@@ -1461,7 +1475,7 @@ function App(): React.JSX.Element {
       if (!shouldPersistWorkspaceSession(useAppStore.getState())) {
         return
       }
-      useAppStore.getState().captureAllSleepingAgentSessions()
+      useAppStore.getState().captureAllSleepingAgentSessions('periodic')
     }, SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS)
     return () => window.clearInterval(timer)
   }, [])
@@ -1609,6 +1623,9 @@ function App(): React.JSX.Element {
   // above nav. Creation layout suppresses the full-width titlebar.
   const stackedSidebarOpen =
     !workspaceChromeActive && !creationLayoutActive && showSidebar && sidebarOpen
+  // Why: these pages already provide draggable top-row controls, so the shared
+  // stacked titlebar would only add an empty strip above their content.
+  const stackedPageOwnsTitlebar = activeView === 'automations' || activeView === 'mobile'
   // Why: visible creation keeps only the top-left window chrome; workspace tabs
   // chrome remains gated by workspaceChromeActive.
   const leftTitlebarChromeLayout = resolveLeftTitlebarChromeLayout({
@@ -1731,6 +1748,17 @@ function App(): React.JSX.Element {
           panel: 'explorer',
           explorerDestination: { view: 'search', ...(query ? { query } : {}) }
         })
+      }
+
+      // Why: this command is intentionally assignable over editor/terminal
+      // focus; consume its chord only while unsent notes make the action valid.
+      if (matchShortcut('sourceControl.sendReviewNotes') && canOpenWorkspacePanel) {
+        if (actions.openDiffNotesSendMenuForActiveWorktree()) {
+          input.preventDefault()
+          notifyTerminalCapture('sourceControl.sendReviewNotes')
+          openWorkspacePanelTab({ panel: 'source-control' })
+          return
+        }
       }
 
       if (matchShortcut('sidebar.search.toggle') && canOpenWorkspacePanel) {
@@ -2099,6 +2127,36 @@ function App(): React.JSX.Element {
     setMountedLazyModalIds(new Set(resolvedMountedLazyModalIds))
   }
 
+  const showWorktreeHistoryControls = shouldShowWorktreeHistoryControls(activeView)
+  // Why: the empty full-width titlebar has no adjacent panel seams to continue;
+  // keep its controls borderless while sidebar/tab chrome retains separators.
+  const titlebarControlVariant = leftTitlebarChromeLayout.shouldMount
+    ? 'outline-transparent'
+    : 'ghost'
+  const sidebarToggleControl = showSidebar ? (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant={titlebarControlVariant}
+            size="icon-titlebar-extra-wide"
+            className={TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}
+            onClick={actions.toggleSidebar}
+            aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
+          >
+            <PanelLeft />
+          </Button>
+        }
+      />
+      <TooltipContent side="bottom" sideOffset={6}>
+        {translate('auto.App.ce37cf5279', 'Toggle sidebar ({{value0}})', {
+          value0: leftSidebarShortcutLabel
+        })}
+      </TooltipContent>
+    </Tooltip>
+  ) : null
+
   // Why: extracted so both the full-width titlebar (settings/landing) and
   // the sidebar-width left header (workspace view) can share the same
   // controls without duplicating the agent badge popover.
@@ -2118,133 +2176,116 @@ function App(): React.JSX.Element {
         leftTitlebarChromeLayout.isFloating ? 'w-max' : 'w-full'
       )}
     >
-      <div className="flex h-full items-center">
-        {isMac && !isFullScreen ? (
-          <div className="w-[calc(80px/var(--ui-zoom-factor,1))] shrink-0" />
-        ) : hasCustomTitleBar ? (
-          /* Why: on Windows/Linux the native title bar is removed, so we render
-             the Yiru logo as a non-interactive identity anchor and a ··· button
-             that pops up the application menu (the same menu revealed by Alt
-             on the default autoHideMenuBar). */
-          <>
-            <img
-              src={logo}
-              alt=""
-              aria-hidden
-              className="mr-1 ml-2.5 h-4 shrink-0 opacity-75 invert dark:invert-0"
-            />
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className={cn(
-                      'mr-2 bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-                      TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
-                    )}
-                    aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
-                    onClick={() => window.api.ui.popupMenu()}
-                  >
-                    <MoreHorizontal className="size-3.5" />
-                  </Button>
-                }
+      {/* Why: macOS fullscreen has no traffic lights; keep this leading group only
+          when it still owns the standalone sidebar toggle. */}
+      {(!isMac || !isFullScreen || (showSidebar && !showWorktreeHistoryControls)) && (
+        <div className="flex h-full items-center">
+          {isMac && !isFullScreen ? (
+            // Why: the 92px gutter leaves the native control cluster with matching 16px outer insets.
+            <div className="w-[calc(92px/var(--ui-zoom-factor,1))] shrink-0" />
+          ) : hasCustomTitleBar ? (
+            /* Why: on Windows/Linux the native title bar is removed, so we render
+               the Yiru logo as a non-interactive identity anchor and a ··· button
+               that pops up the application menu (the same menu revealed by Alt
+               on the default autoHideMenuBar). */
+            <>
+              <img
+                src={logo}
+                alt=""
+                aria-hidden
+                className="mr-1 ml-2.5 h-4 shrink-0 opacity-75 invert dark:invert-0"
               />
-              <TooltipContent side="bottom" sideOffset={6}>
-                {translate('auto.App.8b0b8eb54f', 'Application menu')}
-              </TooltipContent>
-            </Tooltip>
-          </>
-        ) : (
-          <div className="pl-2" />
-        )}
-        {showSidebar && (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className={cn(
-                    'bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-                    TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
-                  )}
-                  onClick={actions.toggleSidebar}
-                  aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
-                >
-                  <PanelLeft />
-                </Button>
-              }
-            />
-            <TooltipContent side="bottom" sideOffset={6}>
-              {translate('auto.App.ce37cf5279', 'Toggle sidebar ({{value0}})', {
-                value0: leftSidebarShortcutLabel
-              })}
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className={cn('mr-2', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+                      aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
+                      onClick={() => window.api.ui.popupMenu()}
+                    >
+                      <MoreHorizontal className="size-3.5" />
+                    </Button>
+                  }
+                />
+                <TooltipContent side="bottom" sideOffset={6}>
+                  {translate('auto.App.8b0b8eb54f', 'Application menu')}
+                </TooltipContent>
+              </Tooltip>
+            </>
+          ) : !isMac ? (
+            <div className="pl-2" />
+          ) : null}
+          {!showWorktreeHistoryControls ? sidebarToggleControl : null}
+        </div>
+      )}
       {/* Why: Back/Forward traverse mixed worktree + page history, so the
           cluster is shown wherever the history shortcut is live. Hidden in
           Settings and non-stack page views. */}
-      {shouldShowWorktreeHistoryControls(activeView) && (
-        // Why: when the workspace sidebar is collapsed, this header shrink-wraps
-        // and ml-auto has no spare width; keep a fixed gutter before Back.
-        <div className="mr-3 ml-auto flex items-center pl-2">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className={cn(
-                    'bg-sidebar text-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-                    TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
-                  )}
-                  onClick={() => useAppStore.getState().goBackWorktree()}
-                  disabled={!canGoBackWorktree}
-                  aria-label={translate('auto.App.064bd07810', 'Go back')}
-                >
-                  <ArrowLeft />
-                </Button>
-              }
-            />
-            <TooltipContent side="bottom" sideOffset={6}>
-              {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
-                value0: historyBackShortcutLabel
-              })}
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className={cn(
-                    'bg-sidebar text-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-                    TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
-                  )}
-                  onClick={() => useAppStore.getState().goForwardWorktree()}
-                  disabled={!canGoForwardWorktree}
-                  aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
-                >
-                  <ArrowRight />
-                </Button>
-              }
-            />
-            <TooltipContent side="bottom" sideOffset={6}>
-              {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
-                value0: historyForwardShortcutLabel
-              })}
-            </TooltipContent>
-          </Tooltip>
+      {showWorktreeHistoryControls && (
+        // Why: workspace navigation begins immediately after the traffic-light gutter.
+        <div className="flex h-full items-center">
+          {/* Why: grouped full-height controls share seams and finish flush against the sidebar edge. */}
+          <ButtonGroup className="h-full">
+            {sidebarToggleControl}
+            {/* Why: compact history arrows use the quieter regular-weight chrome treatment. */}
+            <PhosphorIconContextProvider weight="regular">
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant={titlebarControlVariant}
+                      size="icon-titlebar"
+                      className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
+                      onClick={() => useAppStore.getState().goBackWorktree()}
+                      disabled={!canGoBackWorktree}
+                      aria-label={translate('auto.App.064bd07810', 'Go back')}
+                    >
+                      <ArrowLeft weight="regular" />
+                    </Button>
+                  }
+                />
+                <TooltipContent side="bottom" sideOffset={6}>
+                  {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
+                    value0: historyBackShortcutLabel
+                  })}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant={titlebarControlVariant}
+                      size="icon-titlebar"
+                      className={TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}
+                      onClick={() => useAppStore.getState().goForwardWorktree()}
+                      disabled={!canGoForwardWorktree}
+                      aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
+                    >
+                      <ArrowRight weight="regular" />
+                    </Button>
+                  }
+                />
+                <TooltipContent side="bottom" sideOffset={6}>
+                  {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
+                    value0: historyForwardShortcutLabel
+                  })}
+                </TooltipContent>
+              </Tooltip>
+            </PhosphorIconContextProvider>
+          </ButtonGroup>
         </div>
       )}
+      {showWorktreeHistoryControls && sidebarOpen ? (
+        // Why: the remaining header surface is one search target, with its icon centered in the region.
+        <div className="flex h-full min-w-0 flex-1 items-stretch">
+          <SidebarWorkspaceSearchButton />
+        </div>
+      ) : null}
     </div>
   )
 
@@ -2270,14 +2311,14 @@ function App(): React.JSX.Element {
                 variant="ghost"
                 size="icon-xs"
                 className={cn(
-                  'mr-2 bg-[var(--bg-titlebar,var(--card))] text-muted-foreground dark:bg-[var(--bg-titlebar,var(--card))] dark:hover:bg-accent',
+                  'bg-background text-muted-foreground mr-2',
                   TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
                 )}
                 onClick={handleToggleExpand}
                 aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
                 disabled={!activeTabCanExpand}
               >
-                <Minimize2 className="size-3.5" />
+                <Minimize2 weight="regular" className="size-3.5" />
               </Button>
             }
           />
@@ -2302,7 +2343,7 @@ function App(): React.JSX.Element {
     !stackedSidebarOpen ? (
       <div
         // Why: keep the profile control clear of desktop window controls.
-        className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]"
+        className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-[var(--titlebar-height)] items-center [-webkit-app-region:no-drag]"
       >
         <YiruProfileSwitcher />
       </div>
@@ -2327,7 +2368,7 @@ function App(): React.JSX.Element {
           '--window-controls-width': hasCustomTitleBar ? '138px' : '0px',
           // Why: consumed by the side-position activity bar to push icons below
           // the fixed-position window-controls overlay on Windows/Linux.
-          '--window-controls-height': hasCustomTitleBar ? '36px' : '0px'
+          '--window-controls-height': hasCustomTitleBar ? 'var(--titlebar-height)' : '0px'
         } as React.CSSProperties
       }
     >
@@ -2372,7 +2413,9 @@ function App(): React.JSX.Element {
                     >
                       <div
                         className={cn(
-                          'mr-2 flex shrink-0 items-center',
+                          // Why: titlebar button sizes use h-full, so this wrapper must preserve
+                          // the row's explicit height instead of collapsing to the icon height.
+                          'mr-2 flex h-full shrink-0 items-center',
                           settingsChromeOverlayActive && 'mr-0 w-[var(--settings-sidebar-width)]'
                         )}
                         // Why: controls over the Settings rail inherit its custom
@@ -2391,7 +2434,7 @@ function App(): React.JSX.Element {
                      header above it. The header holds the same controls
                      (traffic lights, sidebar toggle, agent badge)
                      that the full-width titlebar held while the center and right
-                     columns keep their own top strips at the same 36px height.
+                     columns keep their own top strips at the same 38px height.
                      When the sidebar is collapsed, take this header out of flex
                      layout so the terminal/editor reclaim the left edge instead of
                      leaving behind a content-width blank strip. */
@@ -2403,18 +2446,12 @@ function App(): React.JSX.Element {
                         >
                           <div
                             data-testid="titlebar-left"
-                            // Why: when the sidebar is collapsed, titlebar-left floats
-                            // absolutely on top of the center column's own `border-l`
-                            // (see TabGroupSplitLayout), occluding that seam. Add a
-                            // `border-r` in the floating state so the vertical line
-                            // between the traffic-light/nav cluster and the tab strip
-                            // stays visible in both states. w-max keeps the floating
-                            // header sized to its own controls instead of the w-0
-                            // sidebar wrapper.
+                            // Why: collapsed controls float over the tab strip, whose continuous bottom seam
+                            // remains visible; suppress this overlay's seam so translucent borders do not stack.
                             className={cn(
                               TITLEBAR_LEFT_CLASS_NAME,
                               leftTitlebarChromeLayout.isFloating &&
-                                'absolute left-0 top-0 z-10 w-max border-r border-border bg-[var(--bg-titlebar,var(--card))]'
+                                'absolute left-0 top-0 z-10 w-max border-r border-b-0 border-border bg-transparent'
                             )}
                             style={{
                               // Why: custom sidebar appearances are scoped to the sidebar
@@ -2432,7 +2469,7 @@ function App(): React.JSX.Element {
                             {titlebarLeftControls}
                           </div>
                           <div className="flex min-h-0 flex-1">
-                            {/* Why: the workspace-view wrapper adds a fixed 36px header
+                            {/* Why: the workspace-view wrapper adds a fixed 38px header
                           above the sidebar. Without a flex-1/min-h-0 slot here,
                           the sidebar falls back to its content height, so the
                           worktree list loses its scroll viewport and the fixed
@@ -2480,17 +2517,20 @@ function App(): React.JSX.Element {
                         </RecoverableRenderErrorBoundary>
                       )
                     ) : null}
-                    {/* Why: window blur may expose native material through translucent
-                    terminals, while Settings reserves it only for the left rail. */}
+                    {/* Why: native sidebar material may continue through the top 36px
+                    without making the workspace body translucent; full-window blur
+                    still leaves the complete surface transparent. */}
                     <div
                       className={cn(
                         'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
                         windowBackgroundBlurEnabled || settingsNativeSidebarMaterialActive
                           ? 'bg-transparent'
-                          : 'bg-background'
+                          : workspaceChromeActive || creationLayoutActive
+                            ? 'workspace-native-material-frame'
+                            : 'bg-background'
                       )}
                     >
-                      {stackedSidebarOpen ? (
+                      {stackedSidebarOpen && !stackedPageOwnsTitlebar ? (
                         <div className={TITLEBAR_CLASS_NAME}>{titlebarMainStrip}</div>
                       ) : null}
                       <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
@@ -2601,7 +2641,9 @@ function App(): React.JSX.Element {
             {statusBarVisible && !hasActiveSpoolWorkspace ? (
               <Suspense
                 fallback={
-                  <div className="border-border h-6 min-h-[24px] shrink-0 border-t bg-[var(--bg-titlebar,var(--card))]" />
+                  // Why: Suspense must not flash an opaque footer while the real
+                  // status bar reveals supported native window material.
+                  <div className="border-border bg-background h-6 min-h-[24px] shrink-0 border-t [[data-native-sidebar-material=true]_&]:bg-transparent" />
                 }
               >
                 <RecoverableRenderErrorBoundary
@@ -2913,6 +2955,15 @@ function App(): React.JSX.Element {
             >
               <SkillFreshnessUpdateDialog />
             </RecoverableRenderErrorBoundary>
+            <Suspense fallback={null}>
+              <RecoverableRenderErrorBoundary
+                boundaryId="overlay.remote-server-update-dialog"
+                surface="overlay"
+                compact
+              >
+                <RemoteServerUpdateDialog />
+              </RecoverableRenderErrorBoundary>
+            </Suspense>
           </LinkRoutingPreferenceDialogProvider>
         </ConfirmationDialogProvider>
       </TooltipProvider>

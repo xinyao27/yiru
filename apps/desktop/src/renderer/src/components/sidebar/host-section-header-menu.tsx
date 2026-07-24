@@ -8,6 +8,8 @@ import {
   Trash as Trash2,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -30,8 +32,6 @@ import {
 } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 
-import { parseExecutionHostId } from '../../../../shared/execution-host'
-import { describeRuntimeCompatBlock } from '../../../../shared/protocol-compat'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { buildHostHeaderMenuModel } from './host-header-menu-items'
 import { HostRemoveDialog } from './host-remove-dialog'
@@ -191,7 +191,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
                   variant="ghost"
                   size="icon-xs"
                   type="button"
-                  className="bg-sidebar text-muted-foreground can-hover:opacity-0 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent size-5 shrink-0 transition-opacity group-hover/host-header:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
+                  className="can-hover:opacity-0 size-5 transition-opacity group-hover/host-header:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
                   aria-label={translate(
                     'auto.components.sidebar.HostSectionHeaderMenu.4f2c8a9b10',
                     'Host actions for {{value0}}',
@@ -261,7 +261,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
         )}
         {model.actions.includes('runtime-check-connection') && (
           <DropdownMenuItem onClick={() => void handleCheckConnection()}>
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
             {translate(
               'auto.components.sidebar.HostSectionHeaderMenu.2d3e4f5a6b',
               'Check connection'

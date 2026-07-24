@@ -34,7 +34,7 @@ export function BrowserUseCliStep({
         'Register the Yiru CLI so agents can drive the browser.'
       )}
       keywords={getBrowserUsePaneSearchEntries()[0].keywords}
-      className="border-border/60 bg-card/50 rounded-xl border p-4"
+      className="border-border/60 bg-card/50 border p-4"
     >
       <div className="flex items-start gap-3">
         <StepBadge index={1} state={cliEnabled ? 'done' : cliBusy ? 'in-progress' : 'pending'} />
@@ -51,7 +51,7 @@ export function BrowserUseCliStep({
           {cliStatus?.commandPath && cliEnabled ? (
             <p className="text-muted-foreground text-[11px]">
               {translate('auto.components.settings.BrowserUsePane.e9f3f3b488', 'Installed at')}{' '}
-              <code className="bg-muted rounded px-1 py-0.5">{cliStatus.commandPath}</code>
+              <code className="bg-muted px-1 py-0.5">{cliStatus.commandPath}</code>
             </p>
           ) : null}
           {cliPathNeedsAttention && cliStatus?.detail ? (

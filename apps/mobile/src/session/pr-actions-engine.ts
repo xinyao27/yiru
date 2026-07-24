@@ -1,4 +1,5 @@
-import type { GitHubPRMergeMethod, PRState } from '../../../desktop/src/shared/types'
+import type { GitHubPRMergeMethod, PRState } from '@yiru/workbench-model/review'
+
 import type { GitHubPrMutationOutcome } from './github-pr-mutations'
 import type { GitHubPrRepoSlug } from './github-pr-rpc'
 import { classifyPrSidebarFailure } from './mobile-pr-sidebar-state'

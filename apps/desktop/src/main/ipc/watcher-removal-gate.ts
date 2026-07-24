@@ -1,7 +1,7 @@
 import {
   isPathInsideOrEqual,
   normalizeRuntimePathForComparison
-} from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
 
 type WatcherRemovalGateState = {
   connectionId: string | null

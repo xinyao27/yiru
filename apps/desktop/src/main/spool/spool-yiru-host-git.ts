@@ -1,9 +1,10 @@
-import { parseExecutionHostId } from '../../shared/execution-host'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { gitExecFileAsync } from '../git/runner'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
-import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import type { RuntimeGitCommands } from '../runtime/yiru-runtime-git'
 import { SpoolExecutionError } from './spool-execution-error'
 import type { SpoolGitMutationHost, SpoolPreparedGitMutation } from './spool-git-operation-executor'
 import type {
@@ -13,8 +14,8 @@ import type {
 } from './spool-git-read-profile'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 
-type SpoolGitRuntime = Pick<
-  YiruRuntimeService,
+type SpoolGitCommands = Pick<
+  RuntimeGitCommands,
   'bulkStageRuntimeGitPaths' | 'bulkUnstageRuntimeGitPaths' | 'commitRuntimeGit'
 >
 
@@ -22,7 +23,7 @@ type SpoolGitRuntime = Pick<
 export class YiruSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutationHost {
   constructor(
     private readonly store: Store,
-    private readonly runtime: SpoolGitRuntime
+    private readonly gitCommands: SpoolGitCommands
   ) {}
 
   async runReadCommand(
@@ -79,10 +80,14 @@ export class YiruSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutati
       start: async (signal, beforeSideEffect) => {
         signal.throwIfAborted()
         requireSupportedRoute(target)
-        await this.runtime.bulkStageRuntimeGitPaths(`id:${target.worktreeId}`, [...relativePaths], {
-          signal,
-          beforeSideEffect
-        })
+        await this.gitCommands.bulkStageRuntimeGitPaths(
+          `id:${target.worktreeId}`,
+          [...relativePaths],
+          {
+            signal,
+            beforeSideEffect
+          }
+        )
       }
     })
   }
@@ -96,7 +101,7 @@ export class YiruSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutati
       start: async (signal, beforeSideEffect) => {
         signal.throwIfAborted()
         requireSupportedRoute(target)
-        await this.runtime.bulkUnstageRuntimeGitPaths(
+        await this.gitCommands.bulkUnstageRuntimeGitPaths(
           `id:${target.worktreeId}`,
           [...relativePaths],
           { signal, beforeSideEffect }
@@ -114,7 +119,7 @@ export class YiruSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutati
       start: async (signal, beforeSideEffect) => {
         signal.throwIfAborted()
         requireSupportedRoute(target)
-        const result = await this.runtime.commitRuntimeGit(`id:${target.worktreeId}`, message, {
+        const result = await this.gitCommands.commitRuntimeGit(`id:${target.worktreeId}`, message, {
           signal,
           beforeSideEffect
         })

@@ -1,22 +1,17 @@
+import type {
+  AgentProviderSessionMetadata,
+  SleepingAgentLaunchConfig
+} from '@yiru/workbench-model/agent'
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoIdFromWorktreeId,
+  splitWorktreeIdForFilesystem
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
-import {
-  restorePtyDataHandlersAfterFailedShutdown,
-  unregisterPtyDataHandlers
-} from '@/components/terminal-pane/pty-transport'
-import { shutdownBufferCaptures } from '@/components/terminal-pane/shutdown-buffer-captures'
-import {
-  normalizeTerminalLayoutSnapshot,
-  resolvePtyBoundActiveLeafId
-} from '@/components/terminal-pane/terminal-layout-leaf-ids'
-// Why: import the store-free registry, not terminal-parked-tab-watchers —
-// that module imports @/store, and a slice importing it would re-enter store
-// creation before this slice finishes evaluating.
-import {
-  disposeParkedTerminalWatchersForPtyIds,
-  retireParkedTerminalTab
-} from '@/components/terminal-pane/terminal-parked-watcher-registry'
 import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
 import { isClaudeAgent } from '@/lib/agent-status'
@@ -27,6 +22,10 @@ import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import type { NativeChatLaunchPrompt } from '@/lib/native-chat-launch-prompt'
 import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
+import {
+  normalizeTerminalLayoutSnapshot,
+  resolvePtyBoundActiveLeafId
+} from '@/lib/terminal-layout-leaf-ids'
 import { sanitizeTerminalLayoutPaneTitles } from '@/lib/terminal-pane-title-sanitization'
 import {
   addAdditionalValidWorkspaceKeys,
@@ -34,23 +33,35 @@ import {
 } from '@/lib/workspace-session-hydration-keys'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { hasWorktreeSleepIntent } from '@/lib/worktree-sleep-intent'
+import {
+  restorePtyDataHandlersAfterFailedShutdown,
+  unregisterPtyDataHandlers
+} from '@/runtime/pty-handler-registry'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
 import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
 import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
+// Why: import the store-free registry, not terminal-parked-tab-watchers —
+// that module imports @/store, and a slice importing it would re-enter store
+// creation before this slice finishes evaluating.
+import {
+  disposeParkedTerminalWatchersForPtyIds,
+  retireParkedTerminalTab
+} from '@/runtime/terminal-parked-watcher-registry'
+import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
+import {
+  createWebSessionTerminalCommand,
+  setWebSessionTabPropsCommand
+} from '@/runtime/web-session-commands'
+import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
 
 import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent-decorative-title-signature'
-import type {
-  AgentProviderSessionMetadata,
-  SleepingAgentLaunchConfig
-} from '../../../../shared/agent-session-resume'
 import { deriveGeneratedTabTitle } from '../../../../shared/agent-tab-title'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import {
   DEFAULT_REPO_BADGE_COLOR,
   FLOATING_TERMINAL_WORKTREE_ID
 } from '../../../../shared/constants'
-import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { resolveLocalWindowsTerminalShellOverrideForTab } from '../../../../shared/local-windows-terminal-runtime'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import {
@@ -70,18 +81,12 @@ import type {
   WorkspaceKey,
   WorkspaceSessionState
 } from '../../../../shared/types'
-import { WINDOWS_GIT_BASH_SHELL } from '../../../../shared/windows-terminal-shell'
 import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace-scope'
-import {
-  getRepoIdFromWorktreeId,
-  splitWorktreeIdForFilesystem
-} from '../../../../shared/worktree-id'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
-import type { AgentStartedTelemetry } from '../../lib/worktree-activation'
+import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
 import type { AppState } from '../types'
 import {
   collectHibernatedCompletionEvidenceForWorktree,
@@ -507,6 +512,7 @@ export type TerminalSlice = {
       delivery?: 'terminal-paste'
       startupCommandDelivery?: StartupCommandDelivery
       env?: Record<string, string>
+      envToDelete?: string[]
       launchConfig?: SleepingAgentLaunchConfig
       resumeProviderSession?: AgentProviderSessionMetadata
       launchToken?: string
@@ -692,6 +698,7 @@ export type TerminalSlice = {
       delivery?: 'terminal-paste'
       startupCommandDelivery?: StartupCommandDelivery
       env?: Record<string, string>
+      envToDelete?: string[]
       launchConfig?: SleepingAgentLaunchConfig
       resumeProviderSession?: AgentProviderSessionMetadata
       launchToken?: string
@@ -709,6 +716,7 @@ export type TerminalSlice = {
     delivery?: 'terminal-paste'
     startupCommandDelivery?: StartupCommandDelivery
     env?: Record<string, string>
+    envToDelete?: string[]
     launchConfig?: SleepingAgentLaunchConfig
     resumeProviderSession?: AgentProviderSessionMetadata
     launchToken?: string
@@ -1174,13 +1182,23 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     }
     const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(state, worktreeId)
     if (runtimeEnvironmentId) {
-      const { createWebRuntimeSessionTerminal } = await import('@/runtime/web-runtime-session')
-      await createWebRuntimeSessionTerminal({
+      const result = await createWebSessionTerminalCommand({
         worktreeId,
         environmentId: runtimeEnvironmentId,
         targetGroupId: groupId,
         activate: true
       })
+      if (result.status === 'failed') {
+        console.warn(
+          '[terminal] remote terminal creation failed:',
+          result.error instanceof Error ? result.error.message : String(result.error)
+        )
+      } else {
+        await requestWebSessionTabsRefresh({
+          environmentId: runtimeEnvironmentId,
+          worktreeId
+        })
+      }
       return
     }
     const terminal = get().createTab(worktreeId, groupId)
@@ -1981,10 +1999,16 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       const owningWorktreeId = Object.keys(state.unifiedTabsByWorktree).find((wId) =>
         (state.unifiedTabsByWorktree[wId] ?? []).some((entry) => entry.id === item.id)
       )
-      if (owningWorktreeId && getRuntimeEnvironmentIdForWorktree(state, owningWorktreeId)) {
-        void import('@/runtime/web-runtime-session').then(({ setWebRuntimeTabProps }) =>
-          setWebRuntimeTabProps({ worktreeId: owningWorktreeId, tabId: item.id, color })
-        )
+      const environmentId = owningWorktreeId
+        ? getRuntimeEnvironmentIdForWorktree(state, owningWorktreeId)
+        : null
+      if (owningWorktreeId && environmentId) {
+        setWebSessionTabPropsCommand({
+          environmentId,
+          worktreeId: owningWorktreeId,
+          tabId: item.id,
+          color
+        })
       }
     }
   },

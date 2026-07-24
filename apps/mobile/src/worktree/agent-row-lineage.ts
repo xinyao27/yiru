@@ -1,4 +1,4 @@
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 
 export type AgentRowNode = {
   row: RuntimeWorktreeAgentRow

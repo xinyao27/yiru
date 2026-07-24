@@ -1,6 +1,7 @@
 import { open, stat } from 'node:fs/promises'
 
-import type { NativeChatMessage } from '../../shared/native-chat-types'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { transcriptFallbackId } from './transcript-fallback-id'
 import {
   MAX_NATIVE_CHAT_TRANSCRIPT_RECORD_BYTES,

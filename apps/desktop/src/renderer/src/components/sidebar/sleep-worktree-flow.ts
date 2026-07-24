@@ -1,11 +1,9 @@
 import { toast } from 'sonner'
 
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/hooks/use-virtualized-scroll-anchor'
 import { translate } from '@/i18n/i18n'
 import { clearWorktreeSleepIntent, markWorktreeSleepIntent } from '@/lib/worktree-sleep-intent'
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
-
-import { PINNED_GROUP_KEY } from './worktree-list-groups'
 
 /**
  * Shared "sleep worktree" flow (close all panels to free memory / CPU)
@@ -30,13 +28,19 @@ function getSidebarWorktreeOptions(worktreeId: string): HTMLElement[] {
   )
 }
 
+function isPinnedSidebarWorktreeOption(element: HTMLElement): boolean {
+  // Why: duplicated pinned rows share a worktree id, so row-key scope is the
+  // stable signal that distinguishes the pinned copy from natural rows.
+  return element.dataset.worktreeRowKey?.startsWith('pinned:') === true
+}
+
 function findPrimarySidebarWorktreeOption(worktreeId: string): HTMLElement | null {
   const options = getSidebarWorktreeOptions(worktreeId)
   return (
     options.find((element) =>
       element.querySelector<HTMLElement>('[data-worktree-card-active="primary"]')
     ) ??
-    options.find((element) => element.dataset.worktreeSectionKey !== PINNED_GROUP_KEY) ??
+    options.find((element) => !isPinnedSidebarWorktreeOption(element)) ??
     options[0] ??
     null
   )

@@ -1,8 +1,9 @@
 import { createReadStream } from 'node:fs'
 import { createInterface } from 'node:readline'
 
-import type { AiVaultSession } from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+import { normalizePromptField, type AiVaultSession } from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import {
   addPreviewContent,
   cloneSessionAccumulator,
@@ -180,6 +181,10 @@ export function consumeCodexSessionLine(state: CodexSessionParseState, line: str
 
   if (payload.type === 'user_message') {
     accumulator.messageCount++
+    const prompt = normalizePromptField(payload.message)
+    if (prompt) {
+      accumulator.lastUserPrompt = prompt
+    }
     if (!accumulator.title) {
       accumulator.title = extractContentText(payload.message)
       state.titleSource = accumulator.title ? 'user' : state.titleSource

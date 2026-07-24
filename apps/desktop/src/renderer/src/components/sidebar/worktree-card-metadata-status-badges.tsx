@@ -27,7 +27,7 @@ function MetadataStatusBadge({
     <Badge
       variant="outline"
       className={cn(
-        'h-4 gap-1 rounded px-1.5 text-[9px] font-medium leading-none [&>svg]:size-2.5',
+        'h-4 gap-1 px-1.5 text-[9px] font-medium leading-none [&>svg]:size-2.5',
         className
       )}
     >

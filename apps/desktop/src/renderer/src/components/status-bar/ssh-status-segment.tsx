@@ -1,3 +1,8 @@
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+import {
+  isRuntimeOwnedSshTargetId,
+  toRuntimeExecutionHostId
+} from '@yiru/workbench-model/workspace'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -9,14 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 
-import {
-  isRuntimeOwnedSshTargetId,
-  toRuntimeExecutionHostId
-} from '../../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { RemoteRuntimeSharedConnectionDiagnostics } from '../../../../shared/remote-runtime-shared-control-types'
 import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { useAppStore } from '../../store'
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './runtime-host-status-row'
 import { SshStatusTrigger } from './ssh-status-trigger'

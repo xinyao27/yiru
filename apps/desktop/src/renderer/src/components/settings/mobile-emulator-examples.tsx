@@ -39,11 +39,7 @@ export function MobileEmulatorExamples({
   variant = 'card'
 }: MobileEmulatorExamplesProps): React.JSX.Element {
   return (
-    <div
-      className={cn(
-        variant === 'card' ? 'rounded-xl border border-border/60 bg-card/50 p-4' : 'py-3'
-      )}
-    >
+    <div className={cn(variant === 'card' ? 'border border-border/60 bg-card/50 p-4' : 'py-3')}>
       <div className="flex items-center gap-2">
         <Sparkles className="text-muted-foreground size-3.5" />
         <p className="text-sm font-medium">
@@ -63,7 +59,7 @@ export function MobileEmulatorExamples({
         {EMULATOR_EXAMPLE_PROMPTS.map((prompt) => (
           <li
             key={prompt}
-            className="border-border bg-background flex items-start gap-2 rounded-lg border px-3 py-2"
+            className="border-border bg-background flex items-start gap-2 border px-3 py-2"
           >
             <p className="text-foreground/90 flex-1 text-[11px] leading-relaxed">
               {translate('auto.components.settings.MobileEmulatorExamples.b525ff2b12', '"')}

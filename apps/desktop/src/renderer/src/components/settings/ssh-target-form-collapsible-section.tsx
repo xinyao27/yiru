@@ -41,6 +41,7 @@ export function SshTargetFormCollapsibleSection({
               </span>
             </span>
             <ChevronDown
+              weight="regular"
               className={cn('size-4 shrink-0 transition-transform', open && 'rotate-180')}
             />
           </Button>

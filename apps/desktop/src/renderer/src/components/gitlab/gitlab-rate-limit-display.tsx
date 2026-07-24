@@ -155,7 +155,7 @@ export function GitLabRateLimitPanel({ className }: { className?: string }): Rea
   const budgetScope = getProviderRateLimitScope(settings, 'GitLab')
 
   return (
-    <div className={cn('space-y-3 rounded-md border border-border/60 p-3', className)}>
+    <div className={cn('space-y-3 border border-border/60 p-3', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-0.5">
           <div className="text-foreground flex items-center gap-1.5 text-sm font-medium">
@@ -194,7 +194,7 @@ export function GitLabRateLimitPanel({ className }: { className?: string }): Rea
           {isFetching ? (
             <LoadingIndicator className="size-3.5" />
           ) : (
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
           )}
         </Button>
       </div>

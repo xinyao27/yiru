@@ -1,7 +1,7 @@
 import {
   StopCircle as CircleStop,
   FolderOpen,
-  GitBranch,
+  GitMerge,
   Lightbulb,
   HardDrives as Server,
   ArrowRight
@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 
@@ -84,14 +85,14 @@ export function RepoStep({
     <div className="space-y-3">
       {runtimeActive ? (
         <form
-          className="border-border bg-muted/30 rounded-lg border p-5"
+          className="border-border bg-muted/30 border p-5"
           onSubmit={(event) => {
             event.preventDefault()
             onOpenServerFolder('git')
           }}
         >
           <div className="flex items-center gap-4">
-            <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center rounded-lg">
+            <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center">
               <FolderOpen className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -110,8 +111,9 @@ export function RepoStep({
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <input
-              className="border-border bg-background text-foreground focus:border-foreground/50 min-w-0 flex-1 rounded-lg border px-4 py-3 font-mono text-sm transition outline-none"
+            <Input
+              size="lg"
+              className="flex-1 font-mono"
               placeholder={translate(
                 'auto.components.onboarding.RepoStep.2ebbc26343',
                 '/home/user/project'
@@ -121,33 +123,38 @@ export function RepoStep({
               spellCheck={false}
               onChange={(event) => onServerPathChange(event.target.value)}
             />
-            <button
+            <Button
+              variant="default"
+              size="lg"
               type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 shrink-0 rounded-lg px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
               disabled={!serverPath.trim() || disabled}
             >
               {translate('auto.components.onboarding.RepoStep.3863747c56', 'Add Git Project')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="default"
               type="button"
-              className="border-border bg-background text-foreground hover:bg-muted/60 focus-visible:bg-muted/60 shrink-0 rounded-lg border px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
+              className="hover:bg-muted/60 focus-visible:bg-muted/60 py-3 text-sm disabled:opacity-40"
               disabled={!serverPath.trim() || disabled}
               onClick={() => onOpenServerFolder('folder')}
             >
               {translate('auto.components.onboarding.RepoStep.e8214aa632', 'Open as Folder')}
-            </button>
+            </Button>
           </div>
         </form>
       ) : (
-        <button
+        <Button
+          variant="outline"
+          size="xs"
           type="button"
-          className="group border-border bg-muted/30 hover:border-foreground/40 hover:bg-muted/60 focus:border-foreground/70 focus:bg-muted/40 w-full rounded-xl border p-5 text-left transition focus:outline-none disabled:opacity-60"
+          className="group bg-muted/30 hover:border-foreground/40 hover:bg-muted/60 focus:border-foreground/70 focus:bg-muted/40 h-auto w-full justify-start gap-0 p-5 text-left font-normal whitespace-normal transition focus:outline-none disabled:opacity-60"
           disabled={disabled}
           autoFocus={!disabled}
           onClick={onOpenFolder}
         >
           <div className="flex min-w-0 items-center gap-4">
-            <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center rounded-lg">
+            <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center">
               <FolderOpen className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -158,7 +165,10 @@ export function RepoStep({
                     'Browse for a folder'
                   )}
                 </div>
-                <ArrowRight className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition group-hover:translate-x-0.5" />
+                <ArrowRight
+                  weight="regular"
+                  className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition group-hover:translate-x-0.5"
+                />
               </div>
               <div className="text-muted-foreground mt-0.5 text-[13px]">
                 {translate(
@@ -168,8 +178,8 @@ export function RepoStep({
               </div>
             </div>
           </div>
-          <div className="border-border bg-muted text-muted-foreground mt-3 ml-[3.75rem] flex w-fit max-w-[calc(100%-3.75rem)] items-center gap-2 rounded-lg border px-3 py-2 text-[12px]">
-            <span className="border-border bg-background text-foreground grid size-6 shrink-0 place-items-center rounded-md border">
+          <div className="border-border bg-muted text-muted-foreground mt-3 ml-[3.75rem] flex w-fit max-w-[calc(100%-3.75rem)] items-center gap-2 border px-3 py-2 text-[12px]">
+            <span className="border-border bg-background text-foreground grid size-6 shrink-0 place-items-center border">
               <Lightbulb className="size-3.5" />
             </span>
             <span>
@@ -179,19 +189,19 @@ export function RepoStep({
               )}
             </span>
           </div>
-        </button>
+        </Button>
       )}
 
       <form
-        className="border-border bg-muted/30 rounded-lg border p-5"
+        className="border-border bg-muted/30 border p-5"
         onSubmit={(e) => {
           e.preventDefault()
           onClone()
         }}
       >
         <div className="flex items-center gap-4">
-          <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center rounded-lg">
-            <GitBranch className="size-5" />
+          <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center">
+            <GitMerge className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-foreground text-base font-semibold">
@@ -206,8 +216,9 @@ export function RepoStep({
           </div>
         </div>
         <div className="mt-4 flex gap-2">
-          <input
-            className="border-border bg-background text-foreground focus:border-foreground/50 min-w-0 flex-1 rounded-lg border px-4 py-3 font-mono text-sm transition outline-none"
+          <Input
+            size="lg"
+            className="flex-1 font-mono"
             placeholder={translate(
               'auto.components.onboarding.RepoStep.955134915e',
               'git@github.com:org/repo.git'
@@ -216,21 +227,23 @@ export function RepoStep({
             disabled={disabled}
             onChange={(event) => onCloneUrlChange(event.target.value)}
           />
-          <button
+          <Button
+            variant="default"
+            size="lg"
             type="submit"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 shrink-0 rounded-lg px-5 py-3 text-sm font-medium outline-none disabled:opacity-40"
             disabled={!cloneUrl.trim() || (runtimeActive && !cloneDestination.trim()) || disabled}
           >
             {translate('auto.components.onboarding.RepoStep.7932e95f68', 'Clone')}
-          </button>
+          </Button>
         </div>
         {runtimeActive && (
           <div className="mt-2 space-y-1">
             <label className="text-muted-foreground text-[11px] font-medium">
               {translate('auto.components.onboarding.RepoStep.24c7c8696c', 'Clone into host path')}
             </label>
-            <input
-              className="border-border bg-background text-foreground focus:border-foreground/50 w-full rounded-lg border px-4 py-3 font-mono text-sm transition outline-none"
+            <Input
+              size="lg"
+              className="font-mono"
               placeholder={translate(
                 'auto.components.onboarding.RepoStep.7ec3f48820',
                 '/home/user'
@@ -261,9 +274,11 @@ export function RepoStep({
             </span>
           </div>
         ) : (
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 transition focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            className="hover:bg-muted h-auto min-w-0 gap-1.5 border-0 px-1.5 py-1 transition"
             disabled={disabled}
             onClick={onOpenSshSettings}
           >
@@ -274,13 +289,13 @@ export function RepoStep({
                 'SSH? Set hosts up in Settings'
               )}
             </span>
-            <ArrowRight className="size-3.5 shrink-0" />
-          </button>
+            <ArrowRight weight="regular" className="size-3.5 shrink-0" />
+          </Button>
         )}
       </div>
 
       {busyLabel && (
-        <div className="flex items-center gap-2 rounded-lg border border-blue-400/30 bg-blue-400/10 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-200">
+        <div className="flex items-center gap-2 border border-blue-400/30 bg-blue-400/10 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-200">
           <span className="min-w-0 flex-1">{busyLabel}</span>
           {nestedScanInProgress ? (
             <Tooltip>
@@ -317,7 +332,7 @@ export function RepoStep({
         </div>
       )}
       {error && (
-        <div className="rounded-lg border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-700 dark:text-red-200">
+        <div className="border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-700 dark:text-red-200">
           {error}
         </div>
       )}

@@ -17,6 +17,7 @@ import {
 import type { Editor } from '@tiptap/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,14 +53,16 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
             render={
               <DropdownMenuTrigger
                 render={
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     type="button"
-                    className="rich-markdown-toolbar-button focus-visible:bg-accent outline-none"
+                    className="rich-markdown-toolbar-button focus-visible:bg-accent h-auto w-auto p-0"
                     aria-label={label}
                     onMouseDown={(event) => event.preventDefault()}
                   >
                     <MoreHorizontal className="size-3.5" />
-                  </button>
+                  </Button>
                 }
               />
             }
@@ -83,7 +86,7 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => (editor ? insertToggle(editor) : undefined)}>
-          <ChevronRight className="size-3.5" />
+          <ChevronRight weight="regular" className="size-3.5" />
           {translate(
             'auto.components.editor.RichMarkdownToolbar.d1bbf9a835',
             'Collapsible section'

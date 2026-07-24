@@ -1,4 +1,5 @@
 import { Download, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -7,9 +8,9 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 
-import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
+import { GeneralRemoteServerUpdates } from './general-remote-server-updates'
 import { SearchableSetting } from './searchable-setting'
 import { SettingsSubsectionHeader } from './settings-form-controls'
 
@@ -103,7 +104,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
             {updateStatus.state === 'checking' ? (
               <LoadingIndicator className="size-3.5" />
             ) : (
-              <RefreshCw className="size-3.5" />
+              <RefreshCw weight="regular" className="size-3.5" />
             )}
             {translate(
               'auto.components.settings.GeneralUpdateSettingsSection.e1a647adc5',
@@ -244,6 +245,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 ))}
         </p>
       </SearchableSetting>
+      <GeneralRemoteServerUpdates />
     </section>
   )
 }

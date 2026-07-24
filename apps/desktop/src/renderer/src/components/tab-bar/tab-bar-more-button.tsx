@@ -1,4 +1,5 @@
 import { DotsThree as MoreHorizontal, X } from '@phosphor-icons/react'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,6 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { TabBarQuickCommandsButton } from './tab-bar-quick-commands-button'
 
 export function TabBarMoreButton({
@@ -40,19 +40,21 @@ export function TabBarMoreButton({
   return (
     <Tooltip>
       <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+        {/* Why: trailing titlebar actions span the header so their seams align with full-height tabs. */}
         <TooltipTrigger
           render={
             <DropdownMenuTrigger
               render={
                 <Button
                   type="button"
-                  variant="outline"
-                  size="icon-xs"
+                  variant="outline-transparent"
+                  size="icon-titlebar-wide"
                   aria-label={label}
-                  className="text-muted-foreground hover:text-foreground my-auto size-7 shrink-0"
+                  className="text-muted-foreground"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <MoreHorizontal className="size-4" />
+                  {/* Why: this compact tab-strip control shares the regular-weight chrome treatment. */}
+                  <MoreHorizontal className="size-4" weight="regular" />
                 </Button>
               }
             />
@@ -70,7 +72,7 @@ export function TabBarMoreButton({
           ) : null}
           {onClosePane ? (
             <DropdownMenuItem onClick={onClosePane}>
-              <X className="size-4" />
+              <X weight="regular" className="size-4" />
               {translate(
                 'auto.components.tab.group.TabGroupPanel.closePaneColumn',
                 'Close split pane'

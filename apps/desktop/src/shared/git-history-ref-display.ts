@@ -1,5 +1,6 @@
+import type { GitHistoryItemRef } from '@yiru/workbench-model/review'
+
 import { splitRemoteBranchName } from './git-effective-upstream'
-import type { GitHistoryItemRef } from './git-history-types'
 
 type DedupeRemoteTrackingRefsOptions = {
   preserveRefIds?: ReadonlySet<string> | readonly string[]

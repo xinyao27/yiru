@@ -1,6 +1,5 @@
-// Why: presence-based driver state for the mobile-presence lock. Mirrors
-// the runtime's `currentDriver` map. Keyed by ptyId. Updated by an IPC
-// listener (onTerminalDriverChanged) wired from main.
+// Why: this renderer cache is a projection of main's TerminalSessionAuthority.
+// It drives immediate UI locks but never decides who owns the input floor.
 //
 // While `getDriverForPty(ptyId).kind === 'mobile'` the renderer:
 //   - drops xterm.onData (input lock)

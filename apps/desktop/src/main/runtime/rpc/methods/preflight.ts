@@ -22,16 +22,19 @@ const PreflightDetectRemoteWindowsTerminalCapabilities = z.object({
 export const PREFLIGHT_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'preflight.check',
+    mobile: true,
     params: PreflightCheck,
     handler: async (params) => runPreflightCheck(params.force)
   }),
   defineMethod({
     name: 'preflight.detectAgents',
+    mobile: true,
     params: null,
     handler: async () => detectInstalledAgentsWithShellPathHydration()
   }),
   defineMethod({
     name: 'preflight.detectRemoteAgents',
+    mobile: true,
     params: PreflightDetectRemoteAgents,
     handler: async (params) => detectRemoteAgents(params)
   }),

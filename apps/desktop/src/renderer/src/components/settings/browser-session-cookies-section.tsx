@@ -1,8 +1,8 @@
 import { Plus } from '@phosphor-icons/react'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import { translate } from '@/i18n/i18n'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import type { BrowserSessionProfile } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
@@ -86,7 +86,7 @@ export function BrowserSessionCookiesSection({
       </div>
 
       {hostOptions.length > 1 ? (
-        <div className="border-border/70 flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+        <div className="border-border/70 flex items-center justify-between gap-3 border px-3 py-2">
           <div className="min-w-0 space-y-0.5">
             <Label className="text-xs">
               {translate('auto.components.settings.BrowserPane.5e19a692f7', 'Host')}

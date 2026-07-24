@@ -1,10 +1,16 @@
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+import {
+  getRepoIdFromWorktreeId,
+  splitWorktreeIdForFilesystem
+} from '@yiru/workbench-model/workspace'
+
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
 } from '../../../shared/commit-message-agent-spec'
 import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../shared/commit-message-host-key'
 import type { GitHistoryOptions, GitHistoryResult } from '../../../shared/git-history'
-import type { HostedReviewProvider } from '../../../shared/hosted-review'
+import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control-ai'
 /* eslint-disable max-lines -- Why: this module mirrors the git preload API with
 runtime-aware routing so source-control callers have one typed boundary instead
@@ -22,7 +28,6 @@ import type {
   GitUpstreamStatus,
   GlobalSettings
 } from '../../../shared/types'
-import { getRepoIdFromWorktreeId, splitWorktreeIdForFilesystem } from '../../../shared/worktree-id'
 import { callRuntimeRpc, getActiveRuntimeTarget } from './runtime-rpc-client'
 import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
 
@@ -158,9 +163,9 @@ export async function getRuntimeGitStatus(
       options?.signal
     )
   }
-  return callRuntimeRpc<GitStatusResult>(
+  return callRuntimeRpc(
     target,
-    'git.status',
+    GIT_STATUS_CONTRACT,
     {
       worktree: toRuntimeWorktreeSelector(context.worktreeId),
       ...includeIgnoredArgs,

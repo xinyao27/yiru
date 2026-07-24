@@ -1,5 +1,6 @@
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { Automation, AutomationRun } from './automations-types'
-import { getRepoExecutionHostId } from './execution-host'
 import type { AutomationWorkspaceProvenance, Repo } from './types'
 
 type AutomationProvenanceRun = Pick<AutomationRun, 'id' | 'title' | 'runContext'>

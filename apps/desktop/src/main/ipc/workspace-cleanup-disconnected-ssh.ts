@@ -1,12 +1,13 @@
 import { basename } from 'node:path'
 
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { Repo, WorktreeMeta } from '../../shared/types'
 import {
   applyWorkspaceCleanupPolicy,
   createWorkspaceCleanupFingerprint,
   type WorkspaceCleanupCandidate
 } from '../../shared/workspace-cleanup'
-import { splitWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import {
   getNewestWorkspaceCleanupDiffCommentAt,

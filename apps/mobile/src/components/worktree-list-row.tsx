@@ -1,16 +1,16 @@
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
 
 import {
   Bell,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  GitBranch,
+  GitMerge,
   GitPullRequest
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { RepoIcon } from '../../../desktop/src/shared/repo-icon'
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
 import { triggerMediumImpact } from '../platform/haptics'
 import { spacing } from '../theme/uniwind-theme-values'
 import { AgentSpinner } from './agent-spinner'
@@ -145,7 +145,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
         <View className={styles.worktreeMetaRow}>
           {lineageDepth > 0 && (
             <View className={styles.childBadge}>
-              <GitBranch size={10} colorClassName="accent-muted-foreground" />
+              <GitMerge size={10} colorClassName="accent-muted-foreground" />
               <Text className={styles.childBadgeText}>Child</Text>
             </View>
           )}
@@ -182,7 +182,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             ) : (
               <ChevronDown size={12} colorClassName="accent-muted-foreground" />
             )}
-            <GitBranch size={12} colorClassName="accent-muted-foreground" />
+            <GitMerge size={12} colorClassName="accent-muted-foreground" />
             <Text className={styles.lineageToggleText}>
               {lineageChildCount} {lineageChildCount === 1 ? 'child' : 'children'}
             </Text>

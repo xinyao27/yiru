@@ -71,6 +71,8 @@ export function MarkupOverlay({
       />
 
       {pendingText ? (
+        // Why: canvas text editing needs a chrome-free native input with exact
+        // glyph geometry (IME + field-sizing); Input chrome would misalign commit.
         <input
           ref={editor.textInputRef}
           // Why: key by position so each placement re-mounts a fresh input.
@@ -135,7 +137,7 @@ export function MarkupOverlay({
             onClear={editor.clear}
           />
         </div>
-        <div className="border-border bg-card pointer-events-auto flex items-center gap-2 rounded-md border p-1.5">
+        <div className="border-border bg-card pointer-events-auto flex items-center gap-2 border p-1.5">
           <span className="text-muted-foreground px-1 text-xs">
             {translate(
               'auto.components.browser-pane.markup.hint',
@@ -143,7 +145,7 @@ export function MarkupOverlay({
             )}
           </span>
           <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={busy}>
-            <X className="size-4" />
+            <X weight="regular" className="size-4" />
             {translate('auto.components.browser-pane.markup.cancel', 'Cancel')}
           </Button>
           <Button type="button" size="sm" onClick={handleDone} disabled={busy || !baseLoaded}>

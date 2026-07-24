@@ -60,7 +60,7 @@ function SpoolVisibilityConfirmation({
           <DialogTitle>{copy.title}</DialogTitle>
           <DialogDescription>{copy.description}</DialogDescription>
         </DialogHeader>
-        <div className="border-border bg-muted/50 flex gap-3 rounded-lg border p-3 text-sm">
+        <div className="border-border bg-muted/50 flex gap-3 border p-3 text-sm">
           <AlertTriangle
             aria-hidden="true"
             className="text-muted-foreground mt-0.5 size-4 shrink-0"

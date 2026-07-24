@@ -1,9 +1,10 @@
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { FLOATING_TERMINAL_WORKTREE_ID } from './constants'
-import { parseExecutionHostId } from './execution-host'
 import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from './terminal-scrollback-limits'
 import type { Repo, WorkspaceSessionState } from './types'
 import { clampUtf8TextTail, measureUtf8ByteLength } from './utf8-byte-limits'
-import { getRepoIdFromWorktreeId } from './worktree-id'
 
 export type RepoConnection = Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>
 

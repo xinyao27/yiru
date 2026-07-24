@@ -33,6 +33,8 @@ export function OnboardingSkipConfirmationDialog(props: {
 }): React.JSX.Element {
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      {/* Why: this nested confirmation needs a lighter translucent backdrop
+          so the onboarding context remains visible behind the modal. */}
       <DialogContent
         showCloseButton={false}
         overlayClassName="z-[120] bg-black/35"

@@ -1,6 +1,7 @@
 import type { GlobalSettings } from '../../../../shared/types'
 
 export const SETTING_LABELS: Partial<Record<keyof GlobalSettings, string>> = {
+  editorFontFamily: 'Editor Font Family',
   terminalFontSize: 'Font Size',
   terminalFontFamily: 'Font Family',
   terminalFontWeight: 'Font Weight',

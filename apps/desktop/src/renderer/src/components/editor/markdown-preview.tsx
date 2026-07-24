@@ -8,6 +8,7 @@ import {
   Plus,
   X
 } from '@phosphor-icons/react'
+import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: MarkdownPreview owns rendering, link interception,
 search, and viewport state for the preview surface in one place so markdown
 behavior stays coherent across split panes and preview tabs. */
@@ -36,6 +37,7 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -46,6 +48,7 @@ import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { detectLanguage } from '@/lib/language-detect'
 import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
+import { absolutePathToFileUri, resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
 import { copyMarkdownReviewNotesForAgent } from '@/lib/markdown-review-note-copy'
 import {
   formatMarkdownReviewCardQuote,
@@ -62,7 +65,6 @@ import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { relativePathInsideRoot } from '../../../../shared/cross-platform-path'
 import type { DiffComment, MarkdownDocument, Worktree } from '../../../../shared/types'
 import { DiffCommentCard } from '../diff-comments/diff-comment-card'
 import CodeBlockCopyButton from './code-block-copy-button'
@@ -74,7 +76,6 @@ import {
   resolveMarkdownDocLink
 } from './markdown-doc-links'
 import { extractFrontMatter } from './markdown-frontmatter'
-import { absolutePathToFileUri, resolveMarkdownLinkTarget } from './markdown-internal-links'
 import {
   getMarkdownAnnotationBlockKeyForSelection,
   isMarkdownPreviewAddReviewNoteShortcut
@@ -1123,9 +1124,11 @@ export default function MarkdownPreview({
 
       return (
         <div className="markdown-annotation-controls">
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className="markdown-annotation-add focus-visible:bg-accent outline-none"
+            className="markdown-annotation-add focus-visible:bg-accent h-auto border-0 p-0"
             aria-label={translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
             title={translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
             onClick={(event) => {
@@ -1135,7 +1138,7 @@ export default function MarkdownPreview({
             }}
           >
             <Plus className="size-3" />
-          </button>
+          </Button>
           {activeAnnotationBlockKey === blockKey ? (
             <MarkdownAnnotationComposer
               lineNumber={range.endLine}
@@ -1170,9 +1173,11 @@ export default function MarkdownPreview({
                   onSubmitEdit={(body) => updateDiffComment(sourceWorktree.id, comment.id, body)}
                   headerActions={
                     <>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         type="button"
-                        className="yiru-diff-comment-pill-btn focus-visible:bg-accent outline-none"
+                        className="yiru-diff-comment-pill-btn focus-visible:bg-accent h-auto border-0 p-0"
                         title={
                           copiedReviewNoteId === comment.id
                             ? translate(
@@ -1206,7 +1211,7 @@ export default function MarkdownPreview({
                         ) : (
                           <Copy className="size-3" />
                         )}
-                      </button>
+                      </Button>
                       <MarkdownSingleNoteSendMenu
                         worktreeId={sourceWorktree.id}
                         filePath={filePath}
@@ -1874,7 +1879,7 @@ export default function MarkdownPreview({
               )}
               className="markdown-preview-search-button"
             >
-              <ChevronUp size={14} />
+              <ChevronUp weight="regular" size={14} />
             </Button>
             <Button
               type="button"
@@ -1889,7 +1894,7 @@ export default function MarkdownPreview({
               )}
               className="markdown-preview-search-button"
             >
-              <ChevronDown size={14} />
+              <ChevronDown weight="regular" size={14} />
             </Button>
             <div className="markdown-preview-search-divider" />
             <Button
@@ -1904,15 +1909,17 @@ export default function MarkdownPreview({
               )}
               className="markdown-preview-search-button"
             >
-              <X size={14} />
+              <X weight="regular" size={14} />
             </Button>
           </div>
         ) : null}
         {canShowReviewTools ? (
           <div className="markdown-review-toolbar">
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="markdown-review-toolbar-button focus-visible:bg-accent outline-none"
+              className="markdown-review-toolbar-button focus-visible:bg-accent h-auto border-0 p-0"
               onClick={() => {
                 const firstNote = markdownReviewNotes[0]
                 if (firstNote) {
@@ -1934,10 +1941,12 @@ export default function MarkdownPreview({
                 {translate('auto.components.editor.MarkdownPreview.322afab6ff', 'Review notes')}
               </span>
               <span className="markdown-review-count">{markdownReviewNotes.length}</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="markdown-review-icon-button focus-visible:bg-accent outline-none"
+              className="markdown-review-icon-button focus-visible:bg-accent h-auto border-0 p-0"
               onClick={() => void handleCopyMarkdownReviewNotes()}
               disabled={markdownReviewNotes.length === 0}
               title={translate(
@@ -1950,7 +1959,7 @@ export default function MarkdownPreview({
               )}
             >
               {reviewNotesCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            </button>
+            </Button>
             {sourceWorktree ? (
               <NotesSendMenu
                 worktreeId={sourceWorktree.id}
@@ -1971,7 +1980,7 @@ export default function MarkdownPreview({
         output. When the user opts in from the preview actions menu, render the
         raw metadata as a compact read-only block above the document body. */}
           {frontMatter && frontmatterVisible ? (
-            <div className="border-border/60 bg-muted/40 mb-4 rounded border px-3 py-2">
+            <div className="border-border/60 bg-muted/40 mb-4 border px-3 py-2">
               <div className="text-muted-foreground mb-1 text-[10px] font-medium tracking-wider uppercase">
                 {translate('auto.components.editor.MarkdownPreview.2b2b31382c', 'Front Matter')}
               </div>
@@ -2094,7 +2103,7 @@ function MarkdownAnnotationComposer({
       <div className="yiru-diff-comment-popover-label">
         {translate('auto.components.editor.MarkdownPreview.b1bfc04034', 'Selected text')}
       </div>
-      <textarea
+      <Textarea
         ref={focusTextareaRef}
         className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
         placeholder={translate(
@@ -2129,7 +2138,7 @@ function MarkdownAnnotationComposer({
           {submitting
             ? translate('auto.components.editor.MarkdownPreview.d652c87c91', 'Saving…')
             : translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
-          {!submitting && <CornerDownLeft className="ml-1 size-3 opacity-70" />}
+          {!submitting && <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />}
         </Button>
       </div>
     </div>

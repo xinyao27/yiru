@@ -1,3 +1,11 @@
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  getRepoExecutionHostId,
+  getSettingsFocusedExecutionHostId,
+  normalizeExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the GitHub slice co-locates pull-request cache,
 checks, comments, and refresh orchestration so invalidation stays consistent. */
 import type { StateCreator } from 'zustand'
@@ -6,14 +14,6 @@ import { translate } from '@/i18n/i18n'
 import { isMacAppDataPath } from '@/lib/passive-macos-app-data-access'
 import { rightSidebarShowsPullRequestData } from '@/lib/right-sidebar-visibility'
 
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  getRepoExecutionHostId,
-  getSettingsFocusedExecutionHostId,
-  normalizeExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
 import {
   getProjectSourceCacheScope,
@@ -51,13 +51,14 @@ import { getHostedReviewCacheKey, linkedReviewHintKey } from './hosted-review-ca
 function getRuntimeRepoTarget(
   state: AppState,
   repoPath: string,
-  settings: AppState['settings'] = state.settings
+  settings: AppState['settings'] = state.settings,
+  resolvedRepo?: Repo
 ): { target: { kind: 'environment'; environmentId: string }; repo: Repo } | null {
   const target = getActiveRuntimeTarget(settings)
   if (target.kind !== 'environment') {
     return null
   }
-  const repo = state.repos.find((candidate) => candidate.path === repoPath)
+  const repo = resolvedRepo ?? state.repos.find((candidate) => candidate.path === repoPath)
   return repo ? { target, repo } : null
 }
 
@@ -81,6 +82,15 @@ function getPRRefreshRuntimeRepoTarget(
   if (!ownerRuntimeEnvironmentId) {
     return null
   }
+  const repoMatches = state.repos.filter(
+    (repo) =>
+      repo.id === candidate.repoId &&
+      repo.path === candidate.repoPath &&
+      getRepoExecutionHostId(repo) === candidate.executionHostId
+  )
+  if (repoMatches.length !== 1) {
+    return null
+  }
   // Why: PR refreshes must follow the repo owner host, not the Active Server
   // dropdown. A runtime-owned worktree can be visible while Local desktop is focused.
   return getRuntimeRepoTarget(
@@ -88,7 +98,8 @@ function getPRRefreshRuntimeRepoTarget(
     candidate.repoPath,
     state.settings
       ? { ...state.settings, activeRuntimeEnvironmentId: ownerRuntimeEnvironmentId }
-      : ({ activeRuntimeEnvironmentId: ownerRuntimeEnvironmentId } as AppState['settings'])
+      : ({ activeRuntimeEnvironmentId: ownerRuntimeEnvironmentId } as AppState['settings']),
+    repoMatches[0]
   )
 }
 
@@ -339,6 +350,7 @@ type FetchOptions = {
 
 type RepoScopedFetchOptions = FetchOptions & {
   repoId?: string
+  executionHostId?: string
 }
 
 export type PRRefreshState = {
@@ -644,6 +656,7 @@ function findWorktreeById(state: AppState, worktreeId: string): Worktree | null 
 type WorktreeLookupEntry = {
   first: Worktree
   unique: Worktree | null
+  all: Worktree[]
 }
 
 type WorktreeLookupIndex = {
@@ -659,8 +672,9 @@ function buildWorktreeLookupIndex(state: AppState): WorktreeLookupIndex {
       const existing = byId.get(worktreeId)
       if (existing) {
         existing.unique = null
+        existing.all.push(worktree)
       } else {
-        byId.set(worktreeId, { first: worktree, unique: worktree })
+        byId.set(worktreeId, { first: worktree, unique: worktree, all: [worktree] })
       }
     }
   }
@@ -683,17 +697,23 @@ function findUniqueWorktreeById(
   executionHostId?: string,
   lookupIndex = buildWorktreeLookupIndex(state)
 ): Worktree | null {
-  const match = lookupIndex.byId.get(worktreeId)?.unique ?? null
-  // Why: metadata persistence is keyed only by worktree id. If two hosts own
-  // that id, the index marks it non-unique and destructive clears fail closed.
-  if (!match || executionHostId === undefined) {
-    return match
+  const entry = lookupIndex.byId.get(worktreeId)
+  if (!entry || executionHostId === undefined) {
+    // Why: metadata persistence is keyed only by worktree id. Without a host
+    // scope, colliding ids must remain fail-closed.
+    return entry?.unique ?? null
   }
   const expectedHostId = normalizeExecutionHostId(executionHostId) ?? LOCAL_EXECUTION_HOST_ID
-  const explicitWorktreeHostId = normalizeExecutionHostId(match.hostId)
-  if (explicitWorktreeHostId) {
-    return explicitWorktreeHostId === expectedHostId ? match : null
+  const explicitMatches = entry.all.filter(
+    (worktree) => normalizeExecutionHostId(worktree.hostId) === expectedHostId
+  )
+  if (explicitMatches.length > 0) {
+    return explicitMatches.length === 1 ? explicitMatches[0] : null
   }
+  if (entry.all.length !== 1) {
+    return null
+  }
+  const match = entry.all[0]
   const repoHostIds = lookupIndex.repoHostIdsByRepoId.get(match.repoId)
   // Pre-host persisted rows are safe only when their repo has one unambiguous owner.
   if (!repoHostIds || repoHostIds.size !== 1 || !repoHostIds.has(expectedHostId)) {
@@ -706,14 +726,17 @@ function isStaleExactLinkedPRLookup(
   state: AppState,
   worktreeId: string | undefined,
   linkedPRNumber: number | null | undefined,
+  executionHostId?: string,
   lookupIndex?: WorktreeLookupIndex
 ): boolean {
   if (!worktreeId || linkedPRNumber == null) {
     return false
   }
-  const worktree = lookupIndex
-    ? (lookupIndex.byId.get(worktreeId)?.first ?? null)
-    : findWorktreeById(state, worktreeId)
+  const worktree = executionHostId
+    ? findUniqueWorktreeById(state, worktreeId, executionHostId, lookupIndex)
+    : lookupIndex
+      ? (lookupIndex.byId.get(worktreeId)?.first ?? null)
+      : findWorktreeById(state, worktreeId)
   return worktree?.linkedPR !== linkedPRNumber
 }
 
@@ -810,9 +833,16 @@ function shouldApplyBranchMismatchedLinkedPRClear(args: {
 function buildPRRefreshCandidate(
   state: AppState,
   worktree: Worktree,
-  repoPath?: string
+  repoPath?: string,
+  repoOwner?: Repo
 ): GitHubPRRefreshCandidate | null {
-  const repo = state.repos.find((r) => r.id === worktree.repoId)
+  const worktreeHostId = normalizeExecutionHostId(worktree.hostId)
+  const matchingRepos = state.repos.filter(
+    (repo) =>
+      repo.id === worktree.repoId &&
+      (!worktreeHostId || getRepoExecutionHostId(repo) === worktreeHostId)
+  )
+  const repo = repoOwner ?? (matchingRepos.length === 1 ? matchingRepos[0] : undefined)
   if (!repo) {
     return null
   }
@@ -1078,6 +1108,7 @@ function shouldPreserveExistingPRForFallbackMiss(args: {
   linkedPRNumber?: number | null
   fallbackPRNumber?: number | null
   fallbackPRSource?: GitHubPRFallbackSource | null
+  executionHostId?: string
 }): boolean {
   if (
     args.nextPR !== null ||
@@ -1090,7 +1121,11 @@ function shouldPreserveExistingPRForFallbackMiss(args: {
   }
   // Why: the common found/non-merged paths do not depend on worktree state.
   // Gate the global lookup so batched refresh aliases do not multiply full scans.
-  const worktree = args.worktreeId ? findWorktreeById(args.state, args.worktreeId) : null
+  const worktree = args.worktreeId
+    ? args.executionHostId
+      ? findUniqueWorktreeById(args.state, args.worktreeId, args.executionHostId)
+      : findWorktreeById(args.state, args.worktreeId)
+    : null
   const worktreeHead = worktree?.head
   // Why: merged branch PRs are only safe to keep when cached PR metadata still
   // matches the commit this stored worktree is actually on — exactly, or via a
@@ -1590,7 +1625,7 @@ export type GitHubSlice = {
   ) => Promise<boolean>
   initGitHubCache: () => Promise<void>
   refreshAllGitHub: () => void
-  refreshGitHubForWorktree: (worktreeId: string) => void
+  refreshGitHubForWorktree: (worktreeId: string, executionHostId?: string) => void
   refreshGitHubForWorktreeIfStale: (worktreeId: string) => void
   enqueueGitHubPRRefresh: (
     worktreeId: string,
@@ -1893,9 +1928,26 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
   },
 
   fetchPRForBranch: async (repoPath, branch, options): Promise<PRInfo | null> => {
-    const repo = get().repos?.find((candidate) =>
+    const repoCandidates = (get().repos ?? []).filter((candidate) =>
       options?.repoId ? candidate.id === options.repoId : candidate.path === repoPath
     )
+    const expectedHostId = options?.executionHostId
+      ? (normalizeExecutionHostId(options.executionHostId) ?? LOCAL_EXECUTION_HOST_ID)
+      : undefined
+    const scopedRepoCandidates = expectedHostId
+      ? repoCandidates.filter(
+          (candidate) =>
+            candidate.path === repoPath && getRepoExecutionHostId(candidate) === expectedHostId
+        )
+      : repoCandidates
+    const repo = expectedHostId
+      ? scopedRepoCandidates.length === 1
+        ? scopedRepoCandidates[0]
+        : undefined
+      : repoCandidates[0]
+    if (expectedHostId && !repo) {
+      return null
+    }
     const repoId = options?.repoId ?? repo?.id
     const requestSettings = settingsForGitHubRepoOwner(get().settings, repo)
     const cacheKey = prCacheKey(
@@ -1952,7 +2004,8 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
         linkedPRNumber != null &&
         cached?.data?.headDivergedFromMergedPRAtOid != null
       ) {
-        const currentHeadOid = findWorktreeById(get(), options.worktreeId)?.head ?? null
+        const currentHeadOid =
+          findUniqueWorktreeById(get(), options.worktreeId, options.executionHostId)?.head ?? null
         if (
           shouldClearDivergedLinkedMergedPR({
             pr: cached.data,
@@ -2001,9 +2054,9 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
 
     const request = (async () => {
       try {
-        const runtimeRepo = getRuntimeRepoTarget(get(), repoPath, requestSettings)
+        const runtimeRepo = getRuntimeRepoTarget(get(), repoPath, requestSettings, repo)
         const candidateWorktree = options?.worktreeId
-          ? findWorktreeById(get(), options.worktreeId)
+          ? findUniqueWorktreeById(get(), options.worktreeId, options.executionHostId)
           : null
         const requestHeadOid = candidateWorktree?.head ?? null
         const outcome = runtimeRepo
@@ -2076,7 +2129,14 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
           set((s) => {
             // Why: unlinking a PR while an exact linked-PR lookup is in flight
             // must prevent that older result from restoring the manual link UI.
-            if (isStaleExactLinkedPRLookup(s, options?.worktreeId, linkedPRNumber)) {
+            if (
+              isStaleExactLinkedPRLookup(
+                s,
+                options?.worktreeId,
+                linkedPRNumber,
+                options?.executionHostId
+              )
+            ) {
               skippedStaleLinkedPRLookup = true
               return {}
             }
@@ -2180,7 +2240,8 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
             void get().fetchPRForBranch(repoPath, branch, {
               force: true,
               repoId,
-              worktreeId: options.worktreeId
+              worktreeId: options.worktreeId,
+              executionHostId: options.executionHostId
             })
           }
         }
@@ -2192,7 +2253,8 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
             worktreeId: options?.worktreeId,
             linkedPRNumber,
             fallbackPRNumber,
-            fallbackPRSource
+            fallbackPRSource,
+            executionHostId: options?.executionHostId
           })
         ) {
           return get().prCache[cacheKey]?.data ?? null
@@ -2958,7 +3020,13 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
           // Why: queued local refreshes may finish after the user unlinks an
           // exact PR; those older results must not restore the manual-link UI.
           if (
-            isStaleExactLinkedPRLookup(s, alias.worktreeId, linkedPRNumber, worktreeLookupIndex)
+            isStaleExactLinkedPRLookup(
+              s,
+              alias.worktreeId,
+              linkedPRNumber,
+              aliasExecutionHostId,
+              worktreeLookupIndex
+            )
           ) {
             continue
           }
@@ -3178,11 +3246,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     for (const { candidate } of stalePRCandidates
       .sort((a, b) => b.score - a.score)
       .slice(0, isPRStatusGrouping ? stalePRCandidates.length : 5)) {
-      const candidateSettings = settingsForGitHubRepoOwner(
-        state.settings,
-        candidate as Pick<Repo, 'connectionId' | 'executionHostId'>
-      )
-      if (getRuntimeRepoTarget(state, candidate.repoPath, candidateSettings)) {
+      if (getPRRefreshRuntimeRepoTarget(state, candidate)) {
         void get().fetchPRForBranch(candidate.repoPath, candidate.branch, {
           repoId: candidate.repoId,
           worktreeId: candidate.worktreeId,
@@ -3196,19 +3260,26 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     }
   },
 
-  refreshGitHubForWorktree: (worktreeId) => {
+  refreshGitHubForWorktree: (worktreeId, executionHostId) => {
     const state = get()
-    const worktree = Object.values(state.worktreesByRepo)
-      .flat()
-      .find((candidate) => candidate.id === worktreeId)
+    const worktree = findUniqueWorktreeById(state, worktreeId, executionHostId)
     if (!worktree) {
       return
     }
 
-    const repo = state.repos.find((candidate) => candidate.id === worktree.repoId)
-    if (!repo) {
+    const expectedHostId =
+      executionHostId === undefined
+        ? normalizeExecutionHostId(worktree.hostId)
+        : (normalizeExecutionHostId(executionHostId) ?? LOCAL_EXECUTION_HOST_ID)
+    const matchingRepos = state.repos.filter(
+      (repo) =>
+        repo.id === worktree.repoId &&
+        (!expectedHostId || getRepoExecutionHostId(repo) === expectedHostId)
+    )
+    if (matchingRepos.length !== 1) {
       return
     }
+    const repo = matchingRepos[0]
 
     const branch = worktree.branch.replace(/^refs\/heads\//, '')
     const ownerSettings = settingsForGitHubRepoOwner(state.settings, repo)
@@ -3234,7 +3305,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     if (worktree.isBare || !branch) {
       return
     }
-    const candidate = buildPRRefreshCandidate(get(), worktree)
+    const candidate = buildPRRefreshCandidate(get(), worktree, undefined, repo)
     if (!candidate) {
       return
     }
@@ -3243,6 +3314,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
       void get().fetchPRForBranch(candidate.repoPath, candidate.branch, {
         force: true,
         repoId: candidate.repoId,
+        executionHostId: getRepoExecutionHostId(repo),
         worktreeId: candidate.worktreeId,
         linkedPRNumber: candidate.linkedPRNumber ?? null,
         fallbackPRNumber: candidate.fallbackPRNumber ?? null,

@@ -1,7 +1,8 @@
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import { WINDOWS_GIT_BASH_SHELL } from '../../../../shared/windows-terminal-shell'
 import { ShellIcon } from '../tab-bar/shell-icons'
 import { SearchableSetting } from './searchable-setting'
 import {

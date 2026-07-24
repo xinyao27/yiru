@@ -1,5 +1,7 @@
-import { legacyBaseRefSearchResult } from '../../../shared/base-ref-search-result'
-import type { ExecutionHostId } from '../../../shared/execution-host'
+import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
+import { REPO_SEARCH_REFS_CONTRACT } from '../../../shared/runtime-method-contracts/workspace-contracts'
 import type { BaseRefSearchResult, GlobalSettings } from '../../../shared/types'
 import { isRuntimeRepoRefSearchQueryWithinLimit } from './runtime-repo-search-bounds'
 import { callRuntimeRpc, getActiveRuntimeTarget } from './runtime-rpc-client'
@@ -40,9 +42,9 @@ export async function searchRuntimeRepoBaseRefs(
   if (target.kind !== 'environment') {
     return window.api.repos.searchBaseRefs({ repoId, query, limit, ...(hostId ? { hostId } : {}) })
   }
-  const result = await callRuntimeRpc<{ refs: string[]; truncated: boolean }>(
+  const result = await callRuntimeRpc(
     target,
-    'repo.searchRefs',
+    REPO_SEARCH_REFS_CONTRACT,
     { repo: repoId, query, limit },
     { timeoutMs: 15_000 }
   )
@@ -68,10 +70,11 @@ export async function searchRuntimeRepoBaseRefDetails(
       ...(hostId ? { hostId } : {})
     })
   }
-  const result = await callRuntimeRpc<{
-    refs: string[]
-    refDetails?: BaseRefSearchResult[]
-    truncated: boolean
-  }>(target, 'repo.searchRefs', { repo: repoId, query, limit }, { timeoutMs: 15_000 })
+  const result = await callRuntimeRpc(
+    target,
+    REPO_SEARCH_REFS_CONTRACT,
+    { repo: repoId, query, limit },
+    { timeoutMs: 15_000 }
+  )
   return result.refDetails ?? result.refs.map(legacyBaseRefSearchResult)
 }

@@ -1,5 +1,6 @@
+import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
+
 import type { PtyTransport } from './pty-transport'
-import { pasteTerminalText } from './terminal-bracketed-paste'
 import {
   executeTerminalPastePlan,
   planTerminalPasteWithYield,

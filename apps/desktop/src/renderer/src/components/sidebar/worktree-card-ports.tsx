@@ -42,9 +42,11 @@ export function WorktreeCardPortsTrigger({
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
-      className="text-muted-foreground/70 inline-flex size-3.5 shrink-0 items-center justify-center rounded focus-visible:outline-none"
+      className="text-muted-foreground/70 size-3.5 border-0 p-0"
       aria-label={translate(
         'auto.components.sidebar.WorktreeCardPorts.fed49903c9',
         '{{value0}} live {{value1}}',
@@ -56,7 +58,7 @@ export function WorktreeCardPortsTrigger({
       }}
     >
       <Plug className="size-3.5" />
-    </button>
+    </Button>
   )
 }
 
@@ -86,10 +88,10 @@ function PortAction({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-xs"
             disabled={disabled}
-            className="text-muted-foreground hover:text-foreground disabled:text-muted-foreground/35 size-5 disabled:pointer-events-none"
+            className="disabled:text-muted-foreground/35 size-5 disabled:pointer-events-none"
             aria-label={label}
             onClick={handleClick}
           >
@@ -240,7 +242,7 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
   )
 
   return (
-    <div className="group/port hover:bg-accent/50 grid min-w-0 grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-1.5 rounded-md px-1.5 py-1">
+    <div className="group/port hover:bg-accent/50 grid min-w-0 grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-1.5 px-1.5 py-1">
       <span className="text-foreground font-mono text-[12px] font-semibold tabular-nums select-text">
         {port.port}
       </span>
@@ -265,13 +267,13 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
             </span>
           </TooltipContent>
         </Tooltip>
-        <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
+        <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
           <PortAction
             label={openBrowserLabel}
             tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}
             onClick={handleOpen}
           >
-            <ExternalLink className="size-3" />
+            <ExternalLink weight="regular" className="size-3" />
           </PortAction>
           <PortAction
             label={translate(

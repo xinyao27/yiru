@@ -1,7 +1,7 @@
-import type { RetainedAgentEntry } from '@/store/slices/agent-status'
+import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
-import type { SleepingAgentSessionRecord } from '../../../shared/agent-session-resume'
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
+import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 
 export type AgentMetadata = {
   paneKey: string

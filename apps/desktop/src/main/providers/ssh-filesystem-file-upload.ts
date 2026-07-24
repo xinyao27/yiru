@@ -3,7 +3,7 @@ import type { SFTPWrapper } from 'ssh2'
 import { uploadFile as uploadFileViaSftp } from '../ssh/sftp-upload'
 import type { FileUploadSession } from './types'
 
-export type SftpFactory = () => Promise<SFTPWrapper>
+export type SftpFactory = (options?: { signal?: AbortSignal }) => Promise<SFTPWrapper>
 
 export type SshRawTransferOptions = {
   downloadFile?: (sourcePath: string, destinationPath: string) => Promise<void>

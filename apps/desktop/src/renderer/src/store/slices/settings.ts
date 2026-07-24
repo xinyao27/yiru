@@ -1,8 +1,7 @@
-import { toast } from 'sonner'
 import type { StateCreator } from 'zustand'
 
-import { translate } from '@/i18n/i18n'
 import { bumpProviderRuntimeSessionGeneration } from '@/lib/provider-runtime-context'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 import { assertRuntimeStatusCompatible } from '@/runtime/runtime-protocol-compat'
 import {
   clearRuntimeCompatibilityCache,
@@ -162,8 +161,9 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
       return true
     } catch (err) {
       console.error('Failed to switch runtime environment:', err)
-      toast.error(translate('auto.store.slices.settings.e12dab333b', 'Failed to switch servers'), {
-        description: err instanceof Error ? err.message : String(err)
+      publishRendererCommandResult({
+        type: 'runtime-environment-switch-failed',
+        error: err instanceof Error ? err.message : String(err)
       })
       return false
     }

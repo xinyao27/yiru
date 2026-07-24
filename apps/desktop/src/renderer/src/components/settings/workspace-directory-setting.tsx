@@ -1,10 +1,10 @@
 import { FolderOpen, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useId, useRef, useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 
-import { LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
 import {
   getEffectiveHostSetting,
   getHostSettingOverride,
@@ -256,7 +256,7 @@ export function WorkspaceDirectorySetting({
               className="h-7 gap-1.5 text-xs"
               onClick={resetOverride}
             >
-              <RotateCcw className="size-3.5" />
+              <RotateCcw weight="regular" className="size-3.5" />
               {translate('auto.components.settings.WorkspaceDirectorySetting.5e6f7a8b9c', 'Reset')}
             </Button>
           )}

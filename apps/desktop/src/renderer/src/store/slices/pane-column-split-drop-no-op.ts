@@ -1,5 +1,5 @@
 import type { TabGroupLayoutNode } from '../../../../shared/types'
-import type { TabSplitDirection } from './tabs'
+import type { TabSplitDirection } from '../../lib/tab-split-direction'
 
 function getDirectLayoutSiblingOnSplitSide(
   split: Extract<TabGroupLayoutNode, { type: 'split' }>,

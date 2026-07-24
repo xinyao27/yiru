@@ -69,11 +69,13 @@ export function MobilePairingQrSection({
 
   return (
     <>
-      <div className="border-border/60 flex flex-col items-center gap-3 rounded-lg border py-6">
-        <button
+      <div className="border-border/60 flex flex-col items-center gap-3 border py-6">
+        <Button
+          variant="outline"
+          size="xs"
           type="button"
           onClick={() => onQrEnlargedChange(true)}
-          className="group border-border/60 focus-visible:bg-accent relative cursor-pointer rounded-lg border bg-white p-3 outline-none"
+          className="group border-border/60 focus-visible:bg-accent relative h-auto bg-white p-3"
         >
           <img
             src={qrDataUrl}
@@ -83,8 +85,13 @@ export function MobilePairingQrSection({
             )}
             className="size-48"
           />
-          <Maximize2 className="can-hover:opacity-0 absolute top-1.5 right-1.5 size-3 text-black/30 transition-opacity group-hover:opacity-100" />
-        </button>
+          {/* Why: the icon sits on the QR image's fixed white export surface,
+              so its contrast must not follow the surrounding app theme. */}
+          <Maximize2
+            weight="regular"
+            className="can-hover:opacity-0 absolute top-1.5 right-1.5 size-3 text-black/30 transition-opacity group-hover:opacity-100"
+          />
+        </Button>
         {endpoint && <span className="text-muted-foreground font-mono text-xs">{endpoint}</span>}
         <p className="text-muted-foreground max-w-xs text-center text-xs">
           {translate(
@@ -126,7 +133,7 @@ export function MobilePairingQrSection({
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-3">
-            <div className="rounded-lg bg-white p-4">
+            <div className="bg-white p-4">
               <img
                 src={qrDataUrl}
                 alt={translate(

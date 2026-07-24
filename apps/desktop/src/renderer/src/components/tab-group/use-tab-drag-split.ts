@@ -15,10 +15,11 @@ import {
  * transitions stay readable in one place. */
 import { useCallback, useRef, useState, type RefObject } from 'react'
 
+import type { TabSplitDirection } from '@/lib/tab-split-direction'
+import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
+
 import type { TabGroup, TuiAgent } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import type { TabSplitDirection } from '../../store/slices/tabs'
-import { acquireWebviewsDragPassthrough } from '../browser-pane/webview-registry'
 import { mirrorWebRuntimeTabMove } from '../tab-bar/web-runtime-tab-move-mirror'
 import { getDragPointer } from './tab-drag-pointer'
 import { TabDragPointerSensor } from './tab-drag-pointer-sensor'

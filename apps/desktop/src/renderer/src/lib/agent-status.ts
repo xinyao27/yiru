@@ -1,5 +1,6 @@
+import type { AgentStatusState, AgentType } from '@yiru/workbench-model/agent'
+
 import { tuiAgentToAgentKind } from '../../../shared/agent-kind'
-import type { AgentStatusState, AgentType } from '../../../shared/agent-status-types'
 import type { AgentKind } from '../../../shared/telemetry-events'
 import type { TerminalTab, TuiAgent, Worktree } from '../../../shared/types'
 import { tabHasLivePty } from './tab-has-live-pty'
@@ -107,7 +108,7 @@ export function getWorkingAgentsPerWorktree({
 
 // Re-exported from shared so mobile shows the same agent labels (one source of
 // truth). Kept re-exported here so existing `@/lib/agent-status` importers work.
-export { formatAgentTypeLabel } from '../../../shared/agent-type-label'
+export { formatAgentTypeLabel } from '@yiru/workbench-model/agent'
 
 // Why: AgentIcon expects a TuiAgent, but AgentType is a broader union
 // (WellKnownAgentType | (string & {})) that includes 'unknown' and arbitrary

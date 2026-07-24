@@ -5,6 +5,7 @@ import {
 } from '@phosphor-icons/react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -97,10 +98,12 @@ export function FloatingTerminalIconContextMenu({
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none fixed size-px opacity-0"
+              className="pointer-events-none fixed size-px border-0 opacity-0"
               style={{ left: menuPoint.x, top: menuPoint.y }}
             />
           }

@@ -32,10 +32,11 @@ const NotificationGetMissedSinceParams = z.object({
 export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
   defineStreamingMethod({
     name: 'notifications.subscribe',
+    mobile: true,
     params: null,
-    handler: async (_params, { runtime, connectionId }, emit) => {
+    handler: async (_params, { runtime, mobileNotifications, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
-        const unsubscribe = runtime.onNotificationDispatched((event) => {
+        const unsubscribe = mobileNotifications.subscribe((event) => {
           emit(event)
         })
 
@@ -59,6 +60,7 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'notifications.unsubscribe',
+    mobile: true,
     params: NotificationUnsubscribeParams,
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)
@@ -67,12 +69,13 @@ export const NOTIFICATION_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'notifications.getMissedSince',
+    mobile: true,
     params: NotificationGetMissedSinceParams,
     // Why: returns only notifications with seq > lastSeenSeq. The runtime owns
     // the monotonic seq, so this is the single source of truth for what the
     // client missed while its socket was reaped.
-    handler: async (params, { runtime }) => {
-      const missed = runtime.getMissedNotificationsSince(params.lastSeenSeq)
+    handler: async (params, { mobileNotifications }) => {
+      const missed = mobileNotifications.getMissedSince(params.lastSeenSeq)
       return { notifications: missed }
     }
   })

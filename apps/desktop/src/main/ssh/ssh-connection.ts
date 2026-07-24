@@ -2,10 +2,14 @@ import type { ChildProcess } from 'node:child_process'
 /* eslint-disable max-lines -- Why: SSH connection lifecycle, credential retries, reconnect policy, and transport fallback are intentionally co-located so state transitions stay auditable in one file. */
 import * as net from 'node:net'
 
+import type {
+  SshTarget,
+  SshConnectionState,
+  SshConnectionStatus
+} from '@yiru/runtime-protocol/ssh-connection'
 import { Client as SshClient } from 'ssh2'
 import type { ClientChannel, ConnectConfig, SFTPWrapper } from 'ssh2'
 
-import type { SshTarget, SshConnectionState, SshConnectionStatus } from '../../shared/ssh-types'
 import type { FileUploadSession } from '../providers/types'
 import { resolveWithSshG, type SshResolvedConfig } from './ssh-config-parser'
 import {
@@ -98,7 +102,8 @@ export class SshConnection {
       targetId: target.id,
       status: 'disconnected',
       error: null,
-      reconnectAttempt: 0
+      reconnectAttempt: 0,
+      supportsFolderDownload: false
     }
   }
 
@@ -170,7 +175,11 @@ export class SshConnection {
     )
   }
 
-  async sftp(signal?: AbortSignal): Promise<SFTPWrapper> {
+  async sftp(options?: AbortSignal | { signal?: AbortSignal }): Promise<SFTPWrapper> {
+    const signal = options && 'aborted' in options ? options : options?.signal
+    if (signal?.aborted) {
+      throw createSshOperationAbortError()
+    }
     if (this.useSystemSshTransport) {
       throw new Error('SFTP is not available when using system SSH transport')
     }
@@ -1364,7 +1373,12 @@ export class SshConnection {
   }
 
   private setState(status: SshConnectionStatus, error?: string): void {
-    this.state = { ...this.state, status, error: error ?? null }
+    this.state = {
+      ...this.state,
+      status,
+      error: error ?? null,
+      supportsFolderDownload: status === 'connected' && !this.useSystemSshTransport
+    }
     this.callbacks.onStateChange(this.target.id, { ...this.state })
   }
 }

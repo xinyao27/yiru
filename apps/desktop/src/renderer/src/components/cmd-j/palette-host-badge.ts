@@ -2,7 +2,8 @@ import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
   type ExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { Repo } from '../../../../shared/types'
 import type { SidebarHostOption } from '../sidebar/sidebar-host-options'
 

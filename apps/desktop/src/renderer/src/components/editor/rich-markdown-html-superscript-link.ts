@@ -1,8 +1,8 @@
 import { Node } from '@tiptap/core'
 
 import { translate } from '@/i18n/i18n'
+import { projectMarkdownHrefForClipboard } from '@/lib/markdown-internal-links'
 
-import { projectMarkdownHrefForClipboard } from './markdown-internal-links'
 import {
   classifyHtmlSuperscriptLinkAction,
   type RichMarkdownHtmlSuperscriptLinkContext

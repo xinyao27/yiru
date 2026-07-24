@@ -95,7 +95,10 @@ module.exports = {
     // Why: feature-wall media is copied via extraResources so runtime can read
     // it from process.resourcesPath; exclude the source copy from app.asar.
     '!resources/onboarding/feature-wall/**',
-    '!resources/skills/**'
+    '!resources/skills/**',
+    // Why: the working Windows shim ships beside yiru.exe via extraResources;
+    // an unpacked source copy has no adjacent launcher and cannot run.
+    '!resources/win32{,/**/*}'
   ],
   // Why: the CLI entry-point lives in out/cli/ but imports shared modules
   // from out/shared/ and local hook mutators from out/main/. These paths must be

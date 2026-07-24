@@ -1,6 +1,5 @@
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
-import { useAppStore } from '@/store'
 
 import type { RuntimeTerminalSend, RuntimeTerminalWait } from '../../../shared/runtime-types'
 import type { ActiveAgentNotesSendResult } from './active-agent-note-send-result'
@@ -16,19 +15,18 @@ import {
   isRuntimeTerminalUnavailable,
   isRuntimeTimeout
 } from './active-agent-terminal-send-readiness'
+import { POST_PASTE_SUBMIT_DELAY_MS } from './agent-paste-submit-delay'
 import {
-  BRACKETED_PASTE_BEGIN,
   BRACKETED_PASTE_END,
-  POST_PASTE_SUBMIT_DELAY_MS,
-  sanitizeBracketedPasteContent
-} from './agent-paste-draft'
+  BRACKETED_PASTE_START,
+  sanitizeTerminalPasteText
+} from './terminal-bracketed-paste'
 
 export {
   getActiveAgentNoteTarget,
   getActiveAgentRuntimeProbeDescriptor,
   getActiveTerminalNoteTarget,
   probeActiveAgentNoteTarget,
-  useCanSendNotesToActiveTerminal,
   type ActiveTerminalNoteTarget
 } from './active-agent-note-target'
 export {
@@ -41,11 +39,13 @@ const ACTIVE_AGENT_SEND_TIMEOUT_MS = 8000
 const YIRU_DESKTOP_TERMINAL_CLIENT = { id: 'yiru-desktop', type: 'desktop' as const }
 
 export async function sendNotesToActiveAgentSession({
+  state,
   worktreeId,
   prompt,
   noteTarget: explicitNoteTarget,
   timeoutMs
 }: {
+  state: Parameters<typeof getActiveTerminalNoteTarget>[0]
   worktreeId: string
   prompt: string
   noteTarget?: ActiveTerminalNoteTarget
@@ -56,7 +56,6 @@ export async function sendNotesToActiveAgentSession({
     return { status: 'empty' }
   }
 
-  const state = useAppStore.getState()
   // Why: an explicit target lets the notes dropdown address ANY running agent of
   // the worktree, not just the focused pane; omitted, fall back to the focused
   // active terminal so existing callers keep their behavior. Routing below still
@@ -179,7 +178,7 @@ async function sendPromptWithGuardedPasteAndEnter(
     return { status: initialAgentStatus.status }
   }
 
-  const pastePayload = `${BRACKETED_PASTE_BEGIN}${sanitizeBracketedPasteContent(prompt)}${BRACKETED_PASTE_END}`
+  const pastePayload = `${BRACKETED_PASTE_START}${sanitizeTerminalPasteText(prompt)}${BRACKETED_PASTE_END}`
   try {
     const { send } = await callRuntimeRpc<{ send: RuntimeTerminalSend }>(
       runtimeTarget,

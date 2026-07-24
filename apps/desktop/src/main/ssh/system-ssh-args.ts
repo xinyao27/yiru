@@ -1,4 +1,5 @@
-import type { SshTarget } from '../../shared/ssh-types'
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import { getControlSocketPath, type SystemSshResolvedConfig } from './ssh-control-socket'
 
 export type SystemSshBuildArgsOptions = {
@@ -166,7 +167,7 @@ function shouldUseOpenSshConfigHost(target: SshTarget): boolean {
   return isOpenSshConfigBackedTarget(target)
 }
 
-function isOpenSshConfigBackedTarget(target: SshTarget): boolean {
+export function isOpenSshConfigBackedTarget(target: SshTarget): boolean {
   if (target.source === 'ssh-config') {
     return true
   }

@@ -4,6 +4,7 @@ import type { NodeViewProps } from '@tiptap/react'
 import React, { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
@@ -230,6 +231,8 @@ export function RichMarkdownCodeBlock({
 
   return (
     <NodeViewWrapper className="rich-markdown-code-block-wrapper">
+      {/* Why: TipTap NodeView keeps an in-flow native select (contentEditable=false)
+          so language changes do not open a portaled Select that steals ProseMirror focus. */}
       <select
         className="rich-markdown-code-block-lang focus-visible:border-ring outline-none"
         contentEditable={false}
@@ -246,10 +249,12 @@ export function RichMarkdownCodeBlock({
           <option value={language}>{language}</option>
         ) : null}
       </select>
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         ref={setCopyButtonRef}
         type="button"
-        className="code-block-copy-btn focus-visible:bg-accent outline-none"
+        className="code-block-copy-btn focus-visible:bg-accent h-auto border-0 p-0"
         contentEditable={false}
         onClick={handleCopy}
         aria-label={translate(
@@ -268,7 +273,7 @@ export function RichMarkdownCodeBlock({
         ) : (
           <Copy size={14} />
         )}
-      </button>
+      </Button>
       <NodeViewContent<'pre'> as="pre" />
       {/* Why: mermaid diagrams render as a live SVG preview below the editable
           source so users can see the result while editing. The code block stays

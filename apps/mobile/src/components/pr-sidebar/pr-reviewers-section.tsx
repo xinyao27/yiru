@@ -1,10 +1,10 @@
+import type { GitHubWorkItemDetails } from '@yiru/workbench-model/review'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import { UserPlus, X } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { GitHubWorkItemDetails } from '../../../../desktop/src/shared/types'
 import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
 import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
 import type { RpcClient } from '../../transport/rpc-client'

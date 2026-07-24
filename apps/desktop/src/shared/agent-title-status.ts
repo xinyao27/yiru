@@ -1,3 +1,4 @@
+import { isGrokRotatingWorkingTitle } from '@yiru/workbench-model/agent'
 import {
   AGY_AGENT_NAME_RE,
   BRAILLE_SPINNER_RE,
@@ -20,10 +21,9 @@ import {
   isGeminiTerminalTitle,
   isPiAgentTitle,
   isPiTerminalTitle
-} from './agent-title-core'
-import type { AgentStatus } from './agent-title-core'
-import { getPiCompatibleSyntheticAgentStatus } from './pi-compatible-synthetic-title'
-import { isGrokRotatingWorkingTitle } from './terminal-title-agent-type'
+} from '@yiru/workbench-model/agent'
+import type { AgentStatus } from '@yiru/workbench-model/agent'
+import { getPiCompatibleSyntheticAgentStatus } from '@yiru/workbench-model/agent'
 
 /**
  * Strip working-status indicators so stale exit titles stop reporting working.

@@ -1,18 +1,22 @@
 import { z } from 'zod'
 
+import {
+  OptionalFiniteNumber,
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+import {
+  REPO_ADD_CONTRACT,
+  REPO_LIST_CONTRACT,
+  REPO_SEARCH_REFS_CONTRACT
+} from '../../../../shared/runtime-method-contracts/workspace-contracts'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalFiniteNumber, OptionalString, requiredString } from '../schemas'
 import { FOLDER_WORKSPACE_METHODS } from './folder-workspace'
 import { PROJECT_RUNTIME_METHODS } from './project-runtime-rpc-methods'
 import { createRepoUpdateSchema } from './repo-update-schema'
 
 const RepoSelector = z.object({
   repo: requiredString('Missing repo selector')
-})
-
-const RepoPath = z.object({
-  path: requiredString('Missing repo path'),
-  kind: z.enum(['git', 'folder']).optional()
 })
 
 const RepoCreate = z.object({
@@ -32,15 +36,6 @@ const RepoSetBaseRef = z.object({
 })
 
 const RepoUpdate = createRepoUpdateSchema(RepoSelector.shape)
-
-const RepoSearchRefs = z.object({
-  repo: requiredString('Missing repo selector'),
-  query: z
-    .unknown()
-    .transform((v) => (typeof v === 'string' ? v : undefined))
-    .pipe(z.string({ message: 'Missing query' })),
-  limit: OptionalFiniteNumber
-})
 
 const RepoReorder = z.object({
   orderedIds: z.array(z.string())
@@ -103,8 +98,7 @@ const RepoSparsePresetSave = RepoSelector.extend({
 
 export const REPO_METHODS: RpcMethod[] = [
   defineMethod({
-    name: 'repo.list',
-    params: null,
+    contract: REPO_LIST_CONTRACT,
     handler: (_params, { runtime }) => {
       runtime.enrichMissingRepoGitRemoteIdentities?.()
       return { repos: runtime.listRepos() }
@@ -113,6 +107,7 @@ export const REPO_METHODS: RpcMethod[] = [
   ...PROJECT_RUNTIME_METHODS,
   defineMethod({
     name: 'projectGroup.list',
+    mobile: true,
     params: null,
     handler: (_params, { runtime }) => ({ groups: runtime.listProjectGroups() })
   }),
@@ -155,6 +150,7 @@ export const REPO_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'repo.sparsePresets',
+    mobile: true,
     params: RepoSelector,
     handler: async (params, { runtime }) => ({
       presets: await runtime.listSparsePresets(params.repo)
@@ -162,6 +158,7 @@ export const REPO_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'repo.saveSparsePreset',
+    mobile: true,
     params: RepoSparsePresetSave,
     handler: async (params, { runtime }) => ({
       preset: await runtime.saveSparsePreset(params.repo, {
@@ -172,8 +169,7 @@ export const REPO_METHODS: RpcMethod[] = [
     })
   }),
   defineMethod({
-    name: 'repo.add',
-    params: RepoPath,
+    contract: REPO_ADD_CONTRACT,
     handler: async (params, { runtime }) => ({
       repo: await runtime.addRepo(params.path, params.kind)
     })
@@ -186,6 +182,7 @@ export const REPO_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'repo.gitAvailable',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime }) => ({ available: await runtime.isGitAvailable() })
   }),
@@ -203,6 +200,7 @@ export const REPO_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'repo.update',
+    mobile: true,
     params: RepoUpdate,
     handler: async (params, { runtime }) => ({
       repo: await runtime.updateRepo(
@@ -230,17 +228,18 @@ export const REPO_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'repo.baseRefDefault',
+    mobile: true,
     params: RepoSelector,
     handler: async (params, { runtime }) => runtime.getRepoBaseRefDefault(params.repo)
   }),
   defineMethod({
-    name: 'repo.searchRefs',
-    params: RepoSearchRefs,
+    contract: REPO_SEARCH_REFS_CONTRACT,
     handler: async (params, { runtime }) =>
       runtime.searchRepoRefs(params.repo, params.query, params.limit)
   }),
   defineMethod({
     name: 'repo.hooks',
+    mobile: true,
     params: RepoSelector,
     handler: async (params, { runtime }) => runtime.getRepoHooks(params.repo)
   }),

@@ -138,15 +138,6 @@ inline apps/desktop/src/renderer/src/components/floating-terminal/floating-termi
 inline apps/desktop/src/renderer/src/components/new-workspace-composer-card.tsx
 inline apps/desktop/src/renderer/src/components/new-workspace/smart-workspace-name-field.tsx
 inline apps/desktop/src/renderer/src/components/onboarding/use-onboarding-flow.ts
-inline apps/desktop/src/renderer/src/components/right-sidebar/checks-panel-content.tsx
-inline apps/desktop/src/renderer/src/components/right-sidebar/checks-panel.tsx
-inline apps/desktop/src/renderer/src/components/right-sidebar/file-explorer-row.tsx
-inline apps/desktop/src/renderer/src/components/right-sidebar/file-explorer.tsx
-inline apps/desktop/src/renderer/src/components/right-sidebar/ports-panel.tsx
-inline apps/desktop/src/renderer/src/components/right-sidebar/source-control-dropdown-items.ts
-inline apps/desktop/src/renderer/src/components/right-sidebar/source-control.tsx
-inline apps/desktop/src/renderer/src/components/right-sidebar/use-create-pull-request-dialog-fields.ts
-inline apps/desktop/src/renderer/src/components/right-sidebar/use-file-explorer-drag-drop.ts
 inline apps/desktop/src/renderer/src/components/settings/accounts-pane.tsx
 inline apps/desktop/src/renderer/src/components/settings/agents-pane.tsx
 inline apps/desktop/src/renderer/src/components/settings/runtime-environments-pane.tsx

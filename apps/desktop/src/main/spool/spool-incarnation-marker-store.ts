@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import type { IFilesystemProvider } from '../providers/types'
 import { classifySpoolIncarnationMarkerIoError } from './spool-incarnation-marker-error'
 import { readOrCreateSpoolLocalIncarnationMarker } from './spool-local-incarnation-marker'

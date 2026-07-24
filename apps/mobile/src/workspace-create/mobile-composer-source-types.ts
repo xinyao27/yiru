@@ -1,8 +1,9 @@
-import type { SmartNameMode } from '../../../desktop/src/shared/new-workspace/smart-workspace-source-results'
+import type { SmartNameMode } from '@yiru/workbench-model/workspace'
 import type {
   WorkspaceSourceLinkedItem,
   WorkspaceSourceSelection
-} from '../../../desktop/src/shared/new-workspace/workspace-source'
+} from '@yiru/workbench-model/workspace'
+
 import type { WorkspaceCreateGitPushTarget } from './workspace-create-params'
 
 export type { SmartNameMode }

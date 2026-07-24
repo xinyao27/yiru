@@ -189,7 +189,7 @@ export function SparsePresetSettingsSection({
       {visibleError ? (
         <div
           role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-xs"
+          className="border-destructive/30 bg-destructive/10 text-destructive border px-3 py-2 text-xs"
         >
           {visibleError}
         </div>
@@ -208,7 +208,7 @@ export function SparsePresetSettingsSection({
       ) : null}
 
       {presets === undefined ? (
-        <div className="border-border/60 bg-background/60 text-muted-foreground rounded-xl border border-dashed px-4 py-6 text-sm">
+        <div className="border-border/60 bg-background/60 text-muted-foreground border border-dashed px-4 py-6 text-sm">
           {loadError
             ? translate(
                 'auto.components.settings.SparsePresetSettingsSection.92c08ccae3',
@@ -220,7 +220,7 @@ export function SparsePresetSettingsSection({
               )}
         </div>
       ) : sortedPresets.length === 0 && !draft ? (
-        <div className="border-border/60 bg-background/60 text-muted-foreground rounded-xl border border-dashed px-4 py-6 text-sm">
+        <div className="border-border/60 bg-background/60 text-muted-foreground border border-dashed px-4 py-6 text-sm">
           {translate(
             'auto.components.settings.SparsePresetSettingsSection.88bfbf1a9c',
             'No sparse presets saved for this repository.'

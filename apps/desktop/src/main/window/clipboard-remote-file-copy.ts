@@ -3,9 +3,9 @@ import type { Dirent } from 'node:fs'
 import { mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
+import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
 
-import { getRuntimePathBasename } from '../../shared/cross-platform-path'
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import {
   writeFileToClipboard,

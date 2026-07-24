@@ -1,4 +1,5 @@
-import { normalizeExecutionHostId } from '../../shared/execution-host'
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { SpoolOwnerHistoricalSessionRecord } from './spool-session-source'
 
 const MAX_OWNER_RECORDS = 10_000

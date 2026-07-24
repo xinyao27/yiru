@@ -6,6 +6,8 @@ files without a cleaner ownership seam. */
 import { basename, delimiter } from 'node:path'
 import { win32 as pathWin32 } from 'node:path'
 
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import * as pty from 'node-pty'
 
 import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
@@ -13,17 +15,12 @@ import { shouldUseShellReadyStartupDelivery } from '../../shared/codex-startup-d
 import { mergeGitConfigEnvProtocol } from '../../shared/git-credential-prompt-env'
 import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
 import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
-import { WINDOWS_GIT_BASH_SHELL } from '../../shared/windows-terminal-shell'
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
 import {
   isWindowsGitBashShellPath,
   resolveGitBashPath,
   resolveWindowsGitBashShellPath
 } from '../git-bash'
-import {
-  captureDescendantSnapshot,
-  terminateDescendantSnapshot
-} from '../pty-descendant-termination'
+import { killWithDescendantSweep } from '../pty-descendant-termination'
 import { removeAppImageRuntimeEnv } from '../pty/appimage-terminal-env'
 import { isHostCodexHomeForWsl, isWslCodexHomeForHost } from '../pty/codex-home-wsl-env'
 import { forceKillPosixPtyProcessGroups } from '../pty/posix-pty-process-groups'
@@ -443,7 +440,6 @@ export type LocalPtyProviderOptions = {
   pwshAvailable?: () => boolean
   onSpawned?: (id: string) => void
   onExit?: (id: string, code: number) => void
-  onData?: (id: string, data: string, timestamp: number) => void
 }
 
 export class LocalPtyProvider implements IPtyProvider {
@@ -876,7 +872,6 @@ export class LocalPtyProvider implements IPtyProvider {
       if (heldBytes.length === 0) {
         return
       }
-      this.opts.onData?.(id, heldBytes, Date.now())
       for (const cb of dataListeners) {
         cb({ id, data: heldBytes })
       }
@@ -918,7 +913,6 @@ export class LocalPtyProvider implements IPtyProvider {
       if (data.length === 0) {
         return
       }
-      this.opts.onData?.(id, data, Date.now())
       for (const cb of dataListeners) {
         cb({ id, data })
       }
@@ -1072,22 +1066,25 @@ export class LocalPtyProvider implements IPtyProvider {
     operation: PtyShutdownOperation
   ): Promise<void> {
     const physicalExit = ptyPhysicalExits.get(id)
-    // Why: the snapshot must precede any signal — once the shell dies,
-    // surviving descendants reparent to pid 1 and a ppid walk can't find them.
-    const descendants = ptyAgentSessionIds.has(id)
-      ? await captureDescendantSnapshot(proc.pid)
-      : null
-    // Why: a natural exit can race the snapshot. Never signal descendants or
-    // a root PID after this exact PTY has lost ownership.
-    if (ptyProcesses.get(id) === proc) {
-      if (descendants) {
-        terminateDescendantSnapshot(descendants)
+    const signalRoot = (): void => {
+      // Why: a natural exit can race the sweep; never signal after ownership is lost.
+      if (ptyProcesses.get(id) !== proc) {
+        return
       }
       // Cancel startup delivery now, but preserve the exit listener and all
       // ownership maps until node-pty reports the physical process exit.
       runPtyCleanup(id)
       operation.rootSignalled = true
       this.requestTrackedPtyShutdown(id, proc, operation.immediate)
+    }
+    if (ptyAgentSessionIds.has(id)) {
+      // Why: POSIX needs a pre-kill snapshot; Windows needs taskkill /T so
+      // agent and MCP descendants cannot retain worktree directory handles.
+      await killWithDescendantSweep(proc.pid, signalRoot, {
+        ownsRoot: () => ptyProcesses.get(id) === proc
+      })
+    } else {
+      signalRoot()
     }
     await waitForPtyPhysicalExit(id, physicalExit)
   }

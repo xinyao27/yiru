@@ -228,7 +228,7 @@ const CommentMarkdown = React.memo(
           // Reset inline-code pill styles when <code> is inside a <pre> block.
           // The descendant selector (pre code) has higher specificity than the
           // direct utility classes on <code>, so these overrides win reliably.
-          '[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none',
+          '[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:',
           'min-w-0 max-w-full [overflow-wrap:anywhere]',
           className
         )}

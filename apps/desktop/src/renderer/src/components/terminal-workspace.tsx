@@ -98,6 +98,7 @@ import {
 import EditorAutosaveController from './editor/editor-autosave-controller-host'
 import EmulatorPaneOverlayLayer from './emulator-pane/emulator-pane-overlay-layer'
 import TabBar from './tab-bar/tab-bar'
+import { TAB_CONTENT_SURFACE_CLASSES } from './tab-bar/tab-chrome-classes'
 import { openTabBarEntry, type TabCreateEntryArgs } from './tab-bar/tab-create-entry-action'
 import AiVaultSessionDropLayer from './tab-group/ai-vault-session-drop-layer'
 import TabGroupSplitLayout from './tab-group/tab-group-split-layout'
@@ -2187,6 +2188,7 @@ function Terminal(): React.JSX.Element | null {
     <div
       className={cn(
         'flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden',
+        TAB_CONTENT_SURFACE_CLASSES,
         renderedActiveWorktreeId ? '' : 'hidden'
       )}
       data-rendered-active-worktree-id={renderedActiveWorktreeId ?? undefined}

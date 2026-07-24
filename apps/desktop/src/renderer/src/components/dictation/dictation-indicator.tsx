@@ -23,7 +23,7 @@ export function DictationIndicator() {
         : partialTranscript || 'Listening...'
 
   return (
-    <div className="bg-foreground/90 text-background fixed bottom-12 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg px-3 py-1.5 text-sm">
+    <div className="bg-foreground/90 text-background fixed bottom-12 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 px-3 py-1.5 text-sm">
       <Mic className={cn('h-4 w-4', dictationState === 'listening' ? 'animate-pulse' : '')} />
       <span>{label}</span>
     </div>

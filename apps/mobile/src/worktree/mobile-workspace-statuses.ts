@@ -1,4 +1,4 @@
-import type { WorkspaceStatusDefinition } from '../../../desktop/src/shared/types'
+import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 
 export const DEFAULT_MOBILE_WORKSPACE_STATUS_ID = 'in-progress'
 

@@ -1,5 +1,6 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import type { RateLimitState } from '../../../shared/rate-limit-types'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
@@ -33,6 +34,15 @@ const REMOTE_ACCOUNTS_FIRST_SNAPSHOT_TIMEOUT_MS = 15_000
 // refreshes, and those refreshes can crawl behind broken auth. Give the call
 // room to finish instead of reporting failure for an applied switch.
 const REMOTE_ACCOUNT_MUTATION_TIMEOUT_MS = 30_000
+const pendingProviderAccountsSnapshots = new Map<string, Promise<ProviderAccountsSnapshot>>()
+
+function getProviderAccountsOwnerKey(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
+): string {
+  const target = getActiveRuntimeTarget(settings)
+  // Why: environment ids are user-controlled; prefix the kind so remote "local" cannot collide.
+  return target.kind === 'local' ? 'local' : `environment:${target.environmentId}`
+}
 
 export function hasRemoteProviderAccountOwner(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
@@ -194,10 +204,15 @@ export function watchProviderAccounts(
 
 // One-shot convenience over watchProviderAccounts for surfaces that only need
 // the current snapshot (status-bar switcher menus).
-export async function fetchProviderAccountsSnapshot(
+export function fetchProviderAccountsSnapshot(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
 ): Promise<ProviderAccountsSnapshot> {
-  return await new Promise((resolve, reject) => {
+  const ownerKey = getProviderAccountsOwnerKey(settings)
+  const pending = pendingProviderAccountsSnapshots.get(ownerKey)
+  if (pending) {
+    return pending
+  }
+  const request = new Promise<ProviderAccountsSnapshot>((resolve, reject) => {
     const watcher = watchProviderAccounts(settings, {
       onSnapshot: (snapshot) => {
         watcher.close()
@@ -209,6 +224,15 @@ export async function fetchProviderAccountsSnapshot(
       }
     })
   })
+  pendingProviderAccountsSnapshots.set(ownerKey, request)
+  const clearPending = (): void => {
+    if (pendingProviderAccountsSnapshots.get(ownerKey) === request) {
+      pendingProviderAccountsSnapshots.delete(ownerKey)
+    }
+  }
+  // Why: the roster mounts Claude and Codex switchers together; share only their in-flight read.
+  void request.then(clearPending, clearPending)
+  return request
 }
 
 export async function selectClaudeProviderAccount(

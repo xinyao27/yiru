@@ -1,63 +1,107 @@
 import { Warning as AlertTriangle } from '@phosphor-icons/react'
-import { Fragment } from 'react'
 import type React from 'react'
 
+import { Progress } from '@/components/ui/progress'
 import { translate } from '@/i18n/i18n'
-import { formatRateLimitWindowChipLabel } from '@/lib/window-label-formatter'
 
-import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
+import type { ProviderRateLimits } from '../../../../shared/rate-limit-types'
+import type { StatusBarUsageMode } from '../../../../shared/status-bar-usage-mode'
 import {
+  clampUsedPercent,
   getDisplayedUsagePercentage,
   type UsagePercentageDisplay
 } from '../../../../shared/usage-percentage-display'
 import { getProviderUsageStatusLabel, ProviderIcon } from './tooltip'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
+import { getUsageUrgency, usageTextColorClass } from './usage-roster-formatting'
+import {
+  getTightestUsageSection,
+  getUsageSectionShortLabel,
+  getUsedUsageSections,
+  type UsageSection
+} from './usage-roster-windows'
 
 // Why: only the primary Gemini buckets earn space in compact usage surfaces;
 // the remaining model buckets stay available in the detailed usage panel.
 const STATUS_BAR_BUCKET_NAMES = new Set(['Flash', 'Pro', '1.5 Pro'])
+const PROVIDER_LETTERS: Record<ProviderRateLimits['provider'], string> = {
+  claude: 'C',
+  codex: 'X',
+  gemini: 'G',
+  'opencode-go': 'O',
+  kimi: 'K',
+  minimax: 'M',
+  grok: 'R',
+  antigravity: 'A'
+}
 
-function UsageBar({
+export function UsageWindowMeter({
+  label,
   usedPercent,
   display
 }: {
+  label: string
   usedPercent: number
   display: UsagePercentageDisplay
 }): React.JSX.Element {
+  const used = clampUsedPercent(usedPercent)
+  const shown = getDisplayedUsagePercentage(usedPercent, display)
+
   return (
-    <span className="bg-muted h-[6px] w-12 shrink-0 overflow-hidden rounded-full">
-      <span
-        className="bg-muted-foreground/40 block h-full rounded-full transition-all duration-300"
-        style={{ width: `${getDisplayedUsagePercentage(usedPercent, display)}%` }}
+    <span className="flex items-center gap-1.5">
+      <span aria-hidden className="text-muted-foreground text-[11px]">
+        {label}
+      </span>
+      <Progress
+        value={shown}
+        variant="muted"
+        size="xs"
+        tone={getUsageUrgency(used)}
+        aria-label={label}
+        aria-valuetext={formatUsagePercentageLabel(usedPercent, display)}
       />
+      <span aria-hidden className={`text-[11px] tabular-nums ${usageTextColorClass(used)}`}>
+        {shown}%
+      </span>
     </span>
   )
 }
 
-function WindowLabel({
-  window,
-  label,
-  display
-}: {
-  window: RateLimitWindow
-  label: string
-  display: UsagePercentageDisplay
-}): React.JSX.Element {
-  return (
-    <span className="tabular-nums">
-      {formatUsagePercentageLabel(window.usedPercent, display)} {label}
-    </span>
+function getStatusBarUsageSections(limits: ProviderRateLimits): UsageSection[] {
+  if (limits.buckets && limits.buckets.length > 0) {
+    const visibleBuckets = limits.buckets.filter((bucket) =>
+      STATUS_BAR_BUCKET_NAMES.has(bucket.name)
+    )
+    if (visibleBuckets.length > 0) {
+      return visibleBuckets.map((bucket) => ({ label: bucket.name, window: bucket }))
+    }
+    return limits.session
+      ? [
+          {
+            label: translate('auto.components.status.bar.tooltip.94038ad2fa', 'Session'),
+            window: limits.session
+          }
+        ]
+      : []
+  }
+
+  // Why: unified-billing providers expose only a monthly window; providers
+  // with shorter windows keep monthly details in the provider panel.
+  return getUsedUsageSections(limits).filter(
+    (section) => section.window !== limits.monthly || (!limits.session && !limits.weekly)
   )
 }
 
 export function ProviderUsageSegment({
   limits,
   compact,
-  display
+  display,
+  mode = 'verbose'
 }: {
   limits: ProviderRateLimits | null
   compact: boolean
   display: UsagePercentageDisplay
+  mode?: StatusBarUsageMode
 }): React.JSX.Element {
   const provider = limits?.provider ?? 'claude'
   const statusLabel = limits ? getProviderUsageStatusLabel(limits) : ''
@@ -71,13 +115,9 @@ export function ProviderUsageSegment({
     )
   }
 
-  if (
-    limits.status === 'fetching' &&
-    !limits.session &&
-    !limits.weekly &&
-    !limits.monthly &&
-    !limits.fableWeekly
-  ) {
+  const tightest = getTightestUsageSection(limits)
+
+  if (limits.status === 'fetching' && !tightest) {
     return (
       <span className="text-muted-foreground inline-flex items-center gap-1">
         <ProviderIcon provider={provider} />
@@ -94,13 +134,7 @@ export function ProviderUsageSegment({
     )
   }
 
-  if (
-    limits.status === 'error' &&
-    !limits.session &&
-    !limits.weekly &&
-    !limits.monthly &&
-    !limits.fableWeekly
-  ) {
+  if (limits.status === 'error' && !tightest) {
     return (
       <span className="text-muted-foreground inline-flex items-center gap-1">
         <ProviderIcon provider={provider} />
@@ -111,25 +145,14 @@ export function ProviderUsageSegment({
   }
 
   const isStale = limits.status === 'error'
-  if (limits.buckets && limits.buckets.length > 0) {
-    const visibleBuckets = limits.buckets.filter((bucket) =>
-      STATUS_BAR_BUCKET_NAMES.has(bucket.name)
-    )
+  if (mode === 'compact') {
     return (
       <span className="inline-flex items-center gap-1.5">
         <ProviderIcon provider={provider} />
-        {visibleBuckets.map((bucket, index) => (
-          <Fragment key={bucket.name}>
-            {index > 0 ? <span className="text-muted-foreground">·</span> : null}
-            <span className="tabular-nums">
-              {bucket.name} {formatUsagePercentageLabel(bucket.usedPercent, display)}
-            </span>
-          </Fragment>
-        ))}
-        {visibleBuckets.length === 0 && limits.session ? (
-          <WindowLabel
-            window={limits.session}
-            label={formatRateLimitWindowChipLabel(limits.session)}
+        {tightest ? (
+          <UsageWindowMeter
+            label={getUsageSectionShortLabel(limits, tightest)}
+            usedPercent={tightest.window.usedPercent}
             display={display}
           />
         ) : null}
@@ -138,54 +161,34 @@ export function ProviderUsageSegment({
     )
   }
 
-  const visibleWindows = [
-    limits.session
-      ? {
-          key: 'session',
-          window: limits.session,
-          label: formatRateLimitWindowChipLabel(limits.session)
-        }
-      : null,
-    limits.weekly
-      ? {
-          key: 'weekly',
-          window: limits.weekly,
-          label: formatRateLimitWindowChipLabel(limits.weekly)
-        }
-      : null,
-    limits.fableWeekly
-      ? {
-          key: 'fableWeekly',
-          window: limits.fableWeekly,
-          label: translate('auto.components.status.bar.StatusBar.a79c64f87e', 'Fable')
-        }
-      : null,
-    // Why: unified-billing providers expose only a monthly window; providers
-    // with shorter windows keep monthly details in the hover surface.
-    limits.monthly && !limits.session && !limits.weekly
-      ? {
-          key: 'monthly',
-          window: limits.monthly,
-          label: formatRateLimitWindowChipLabel(limits.monthly)
-        }
-      : null
-  ].filter(
-    (window): window is { key: string; window: RateLimitWindow; label: string } => window !== null
-  )
+  const visibleSections = getStatusBarUsageSections(limits)
 
   return (
     <span className="inline-flex items-center gap-1.5">
       <ProviderIcon provider={provider} />
-      {limits.session && !compact ? (
-        <UsageBar usedPercent={limits.session.usedPercent} display={display} />
-      ) : null}
-      {visibleWindows.map((window, index) => (
-        <Fragment key={window.key}>
-          {index > 0 ? <span className="text-muted-foreground">·</span> : null}
-          <WindowLabel window={window.window} label={window.label} display={display} />
-        </Fragment>
-      ))}
+      <span className="inline-flex items-center gap-2.5">
+        {visibleSections.map((section, index) => (
+          <UsageWindowMeter
+            key={`${section.label}-${index}`}
+            label={getUsageSectionShortLabel(limits, section)}
+            usedPercent={section.window.usedPercent}
+            display={display}
+          />
+        ))}
+      </span>
       {isStale ? <AlertTriangle size={11} className="text-muted-foreground/80" /> : null}
+    </span>
+  )
+}
+
+export function ProviderLetterBadge({ limits }: { limits: ProviderRateLimits }): React.JSX.Element {
+  const hasData = getTightestUsageSection(limits) !== null
+  return (
+    <span className="text-muted-foreground inline-flex items-center gap-1">
+      <span
+        className={hasData ? 'bg-muted-foreground/60 size-2' : 'bg-muted-foreground/30 size-2'}
+      />
+      {PROVIDER_LETTERS[limits.provider]}
     </span>
   )
 }

@@ -1,4 +1,5 @@
 import { LoadingIndicatorPreview } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -92,7 +93,9 @@ export function LoaderStyleSetting({
           const active = loaderStyle === selected
           const label = getLoaderStyleLabel(loaderStyle)
           return (
-            <button
+            <Button
+              variant="outline"
+              size="default"
               key={loaderStyle}
               type="button"
               role="radio"
@@ -102,15 +105,13 @@ export function LoaderStyleSetting({
               onClick={() => onChange(loaderStyle)}
               onKeyDown={(event) => handleLoaderStyleKeyDown(event, index, onChange)}
               className={cn(
-                'focus-visible:border-foreground focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:border-2 flex min-h-16 flex-col items-center justify-center gap-1.5 border px-2 py-2 text-center outline-none transition-colors',
-                active
-                  ? 'border-ring bg-accent text-accent-foreground'
-                  : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                'focus-visible:border-foreground focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:border-2 flex min-h-16 flex-col gap-1.5 px-2 text-center transition-colors',
+                active ? 'border-ring bg-accent text-accent-foreground' : 'text-muted-foreground'
               )}
             >
               <LoadingIndicatorPreview loaderStyle={loaderStyle} className="size-7" />
               <span className="text-[11px] font-medium">{label}</span>
-            </button>
+            </Button>
           )
         })}
       </div>

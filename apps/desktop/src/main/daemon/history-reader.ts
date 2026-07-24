@@ -1,7 +1,8 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
+
 import { HeadlessEmulator } from './headless-emulator'
 import type { SessionMeta } from './history-manager'
 import { getHistorySessionDirName } from './history-paths'

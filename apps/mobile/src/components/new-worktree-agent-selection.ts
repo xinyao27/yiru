@@ -1,4 +1,5 @@
-import type { TuiAgent } from '../../../desktop/src/shared/types'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+
 import { MOBILE_AGENT_CATALOG } from '../workspace-create/mobile-agent-catalog'
 import { isMobileTuiAgentEnabled } from '../workspace-create/mobile-tui-agents'
 import { pickWorkspaceAgent } from '../workspace-create/workspace-agent-selection'

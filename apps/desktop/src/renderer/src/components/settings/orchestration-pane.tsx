@@ -1,11 +1,14 @@
 import {
-  GitBranch,
+  GitMerge,
   ListChecks,
   ArrowsLeftRight as ArrowRightLeft,
-  FlowArrow as Workflow
+  FlowArrow as Workflow,
+  type Icon as PhosphorIcon,
+  type IconProps
 } from '@phosphor-icons/react'
 import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
@@ -41,9 +44,14 @@ const EXAMPLE_ICONS = {
   handoff: ArrowRightLeft,
   'worktree-handoff': ArrowRightLeft,
   'child-sequence': ListChecks,
-  'child-parallel': GitBranch,
+  'child-parallel': GitMerge,
   'child-worktrees': Workflow
 } as const
+
+function getExampleIconWeight(Icon: PhosphorIcon): IconProps['weight'] {
+  // Why: both directional example glyphs follow the renderer-wide arrow rule.
+  return Icon === ArrowRightLeft || Icon === Workflow ? 'regular' : undefined
+}
 
 export function OrchestrationPane(): React.JSX.Element {
   const searchQuery = useAppStore((s) => s.settingsSearchQuery)
@@ -111,7 +119,7 @@ export function OrchestrationPane(): React.JSX.Element {
         loading={orchestrationSkillLoading}
         error={activeSkillRuntime.installDisabledReason ?? orchestrationSkillError}
         installDisabled={Boolean(activeSkillRuntime.installDisabledReason)}
-        icon={<Workflow className="size-5" />}
+        icon={<Workflow weight="regular" className="size-5" />}
         preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
         getPrerequisiteStatus={() =>
           activeSkillRuntime.agentRuntime?.runtime === 'wsl'
@@ -134,9 +142,11 @@ export function OrchestrationPane(): React.JSX.Element {
                 'auto.components.settings.OrchestrationPane.832f1f3ee6',
                 'Prefer your own terminal?'
               )}{' '}
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
-                className="text-foreground focus-visible:bg-accent font-medium underline-offset-2 outline-none hover:underline"
+                className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline-offset-2 hover:underline"
                 onClick={() => {
                   setSkillPromptOpen(true)
                 }}
@@ -145,7 +155,7 @@ export function OrchestrationPane(): React.JSX.Element {
                   'auto.components.settings.OrchestrationPane.7bc082f4de',
                   'Copy install command'
                 )}
-              </button>
+              </Button>
             </p>
           )
         }
@@ -181,16 +191,19 @@ export function OrchestrationPane(): React.JSX.Element {
         <div className="grid gap-2 sm:grid-cols-2">
           {getOrchestrationUsageExamples().map((example) => {
             const Icon = EXAMPLE_ICONS[example.id as keyof typeof EXAMPLE_ICONS] ?? Workflow
+            const iconWeight = getExampleIconWeight(Icon)
             return (
-              <button
+              <Button
+                variant="outline"
+                size="default"
                 key={example.id}
                 type="button"
-                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring focus-visible:bg-muted/35 rounded-md border px-4 py-3 text-left transition-colors outline-none"
+                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:bg-muted/35 h-auto justify-start gap-0 py-3 text-left font-normal whitespace-normal transition-colors"
                 onClick={() => setSelectedExampleId(example.id)}
               >
                 <div className="flex items-start gap-3">
-                  <div className="border-border bg-background text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border">
-                    <Icon className="size-4" />
+                  <div className="border-border bg-background text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center border">
+                    <Icon className="size-4" weight={iconWeight} />
                   </div>
                   <div className="min-w-0 space-y-1">
                     <p className="text-foreground text-sm font-medium">{example.title}</p>
@@ -199,7 +212,7 @@ export function OrchestrationPane(): React.JSX.Element {
                     </p>
                   </div>
                 </div>
-              </button>
+              </Button>
             )
           })}
         </div>
@@ -207,11 +220,13 @@ export function OrchestrationPane(): React.JSX.Element {
 
       {getOrchestrationUsageExamples().map((example) => {
         const Icon = EXAMPLE_ICONS[example.id as keyof typeof EXAMPLE_ICONS] ?? Workflow
+        const iconWeight = getExampleIconWeight(Icon)
         return (
           <OrchestrationExampleDialog
             key={`${example.id}-dialog`}
             example={example}
             icon={Icon}
+            iconWeight={iconWeight}
             open={selectedExampleId === example.id}
             onOpenChange={(open) => setSelectedExampleId(open ? example.id : null)}
           />

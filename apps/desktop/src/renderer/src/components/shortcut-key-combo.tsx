@@ -1,19 +1,47 @@
+import { cva, type VariantProps } from 'class-variance-authority'
 import React from 'react'
 
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-function KeyCap({ label, className }: { label: string; className?: string }): React.JSX.Element {
-  return (
-    <span
-      className={cn(
-        'inline-flex min-w-6 items-center justify-center rounded border border-border/80 bg-secondary/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground',
-        className
-      )}
-    >
-      {label}
-    </span>
-  )
+// Why: tooltips invert the app surface, so the shortcut component owns the
+// matching palette instead of making each tooltip style its internal parts.
+const shortcutKeyCapVariants = cva(
+  'inline-flex min-w-6 items-center justify-center border px-1.5 py-0.5 text-xs font-medium',
+  {
+    variants: {
+      variant: {
+        default: 'border-border/80 bg-secondary/70 text-muted-foreground',
+        inverted: 'border-background/20 bg-background/10 text-background'
+      }
+    },
+    defaultVariants: {
+      variant: 'default'
+    }
+  }
+)
+
+const shortcutKeySeparatorVariants = cva('mx-0.5 text-xs', {
+  variants: {
+    variant: {
+      default: 'text-muted-foreground',
+      inverted: 'text-background/70'
+    }
+  },
+  defaultVariants: {
+    variant: 'default'
+  }
+})
+
+function KeyCap({
+  label,
+  className,
+  variant
+}: {
+  label: string
+  className?: string
+} & VariantProps<typeof shortcutKeyCapVariants>): React.JSX.Element {
+  return <span className={cn(shortcutKeyCapVariants({ variant }), className)}>{label}</span>
 }
 
 type ShortcutKeyComboProps = {
@@ -26,13 +54,14 @@ type ShortcutKeyComboProps = {
   // "Shift Shift"), with a title clarifying the gesture. Note: the title uses
   // the displayed label, so on Mac it reads as the glyph (e.g. 'Double-tap ⇧').
   doubleTap?: boolean
-}
+} & VariantProps<typeof shortcutKeyCapVariants>
 
 export function ShortcutKeyCombo({
   keys,
   className,
   separatorClassName,
   keyCapClassName,
+  variant = 'default',
   doubleTap = false
 }: ShortcutKeyComboProps): React.JSX.Element {
   const isMac = navigator.userAgent.includes('Mac')
@@ -50,12 +79,14 @@ export function ShortcutKeyCombo({
     >
       {keys.map((key, index) => (
         <React.Fragment key={`${key}-${index}`}>
-          <KeyCap label={key} className={keyCapClassName} />
+          <KeyCap label={key} className={keyCapClassName} variant={variant} />
           {/* Why: Yiru renders Mac shortcuts as adjacent glyphs, but Windows/Linux
               shortcuts read more naturally with explicit "+" separators. A
               double-tap reads as the same key twice, so it gets a space, not "+". */}
           {!isMac && !doubleTap && index < keys.length - 1 ? (
-            <span className={separatorClassName ?? 'text-muted-foreground mx-0.5 text-xs'}>+</span>
+            <span className={cn(shortcutKeySeparatorVariants({ variant }), separatorClassName)}>
+              +
+            </span>
           ) : null}
         </React.Fragment>
       ))}

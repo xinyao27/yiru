@@ -1,10 +1,10 @@
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 import type { RefObject } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
 
 import { ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { DiffComment } from '../../../desktop/src/shared/types'
 import type { MobileDiffReviewQueueItem } from '../session/mobile-diff-review-queue'
 import type {
   ReviewDiffLine,

@@ -1,6 +1,7 @@
 import { Check } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
@@ -50,32 +51,24 @@ function SetupStepRow(props: {
   const { step, done, active, ordinal, onSelect, layout } = props
   const isEmbedded = layout === 'embedded'
   return (
-    <button
+    <Button
+      variant="outline"
+      size="default"
       type="button"
       onClick={onSelect}
       aria-current={active ? 'step' : undefined}
       className={cn(
-        'relative flex w-full items-center gap-3 text-left transition-colors',
+        'justify-start whitespace-normal font-normal relative flex w-full gap-3 text-left transition-colors',
         'focus-visible:outline-none',
         isEmbedded
-          ? cn(
-              'rounded-lg px-3 py-2',
-              active ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
-            )
-          : cn(
-              'rounded-md border px-3 py-2.5',
-              active
-                ? 'border-border bg-accent text-accent-foreground'
-                : 'border-border bg-background hover:bg-accent'
-            )
+          ? cn('px-3', active ? 'bg-accent text-accent-foreground' : '')
+          : cn('px-3 py-2.5', active ? 'bg-accent text-accent-foreground' : '')
       )}
     >
-      {active ? (
-        <span className="bg-foreground absolute top-2 bottom-2 left-0 w-0.5 rounded-full" />
-      ) : null}
+      {active ? <span className="bg-foreground absolute top-2 bottom-2 left-0 w-0.5" /> : null}
       <span
         className={cn(
-          'flex size-5 shrink-0 items-center justify-center rounded-full border',
+          'flex size-5 shrink-0 items-center justify-center border',
           done
             ? 'border-green-500/45 bg-green-500/10 text-green-600 dark:text-green-300'
             : 'border-border text-muted-foreground'
@@ -88,7 +81,7 @@ function SetupStepRow(props: {
           {step.name}
         </span>
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -302,7 +295,7 @@ export function FeatureWallSetupChecklist(
               </div>
               <span
                 className={cn(
-                  'shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium',
+                  'shrink-0 border px-2.5 py-1 text-xs font-medium',
                   activeDone
                     ? 'border-green-500/45 bg-green-500/10 text-green-600 dark:text-green-300'
                     : 'border-border bg-muted/30 text-muted-foreground'

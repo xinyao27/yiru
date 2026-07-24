@@ -114,16 +114,18 @@ export function AgentSessionSourceHomeInput({
         <Tooltip>
           <TooltipTrigger
             render={
-              <button
+              <Button
+                variant="quiet"
+                size="icon-xs"
                 type="button"
                 aria-label={translate(
                   'auto.components.settings.AgentsPane.codexSessionSourceInfo',
                   'About importing Codex history'
                 )}
-                className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-4 place-items-center rounded transition-colors outline-none"
+                className="hover:bg-muted grid size-4 place-items-center"
               >
                 <Info className="size-3" />
-              </button>
+              </Button>
             }
           />
           <TooltipContent side="top" sideOffset={6} className="max-w-xs">
@@ -156,13 +158,13 @@ export function AgentSessionSourceHomeInput({
         {value.trim() && (
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
             onClick={() => {
               onSave('')
               setDraft('')
             }}
-            className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+            className="h-7 shrink-0 text-xs"
           >
             {translate('auto.components.settings.AgentsPane.5200dac9da', 'Reset')}
           </Button>

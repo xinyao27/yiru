@@ -1,3 +1,9 @@
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import {
+  normalizeAgentStatusPayload,
+  type AgentStatusIpcPayload,
+  type ParsedAgentStatusPayload
+} from '@yiru/workbench-model/agent'
 /* oxlint-disable max-lines -- Why: this App-level IPC bridge intentionally keeps the renderer's main-process event contract in one place so shortcut, runtime, updater, and agent-status wiring do not drift across files. */
 import { useEffect } from 'react'
 import { toast } from 'sonner'
@@ -6,7 +12,6 @@ import {
   acquireBrowserAutomationVisibility,
   releaseBrowserAutomationVisibility
 } from '@/components/browser-pane/browser-automation-visibility'
-import { destroyPersistentWebview } from '@/components/browser-pane/webview-registry'
 import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/settings-constants'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
@@ -62,6 +67,7 @@ import { persistWorkspaceSessionByHost } from '@/lib/workspace-session-host-pers
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
+import { destroyPersistentWebview } from '@/runtime/browser-webview-registry'
 import { attachMobileMarkdownBridge } from '@/runtime/mobile-markdown-bridge'
 import { closeMobileSessionTabInStore } from '@/runtime/mobile-session-tab-close'
 import { subscribeRuntimeClientEvents } from '@/runtime/runtime-client-events'
@@ -86,11 +92,6 @@ import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../../shared/agent-status-identity'
-import {
-  normalizeAgentStatusPayload,
-  type AgentStatusIpcPayload,
-  type ParsedAgentStatusPayload
-} from '../../../shared/agent-status-types'
 import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../../shared/constants'
 import type { RateLimitState } from '../../../shared/rate-limit-types'
 import { importRemoteWorkspaceSession } from '../../../shared/remote-workspace-session-projection'
@@ -104,7 +105,6 @@ import type {
   RuntimeTerminalPresentation,
   RuntimeTerminalDriverState
 } from '../../../shared/runtime-types'
-import type { SshConnectionState } from '../../../shared/ssh-types'
 import { makePaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,
@@ -127,6 +127,11 @@ import {
   handleSwitchTabAcrossAllTypes,
   handleSwitchTerminalTab
 } from './ipc-tab-switch'
+import {
+  hasRuntimeBackedAgentStatusAttribution,
+  retryPendingAgentStatusEvents,
+  type PendingAgentStatusEvent
+} from './pending-agent-status-retry'
 import { resolveZoomTarget } from './resolve-zoom-target'
 import { createRuntimeClientEventsSync } from './runtime-client-events-sync'
 import { createRuntimeProjectRefreshScheduler } from './runtime-project-refresh-scheduler'
@@ -824,12 +829,8 @@ export function useIpcEvents(): void {
     const unsubs: (() => void)[] = []
     const backgroundSleepingAgentWakeDispatcher = createBackgroundSleepingAgentWakeDispatcher()
     unsubs.push(backgroundSleepingAgentWakeDispatcher.dispose)
-    type PendingAgentStatusEvent = {
-      data: AgentStatusIpcPayload
-      firstSeenAt: number
-    }
     type AgentStatusApplyResult = 'applied' | 'pending' | 'dropped'
-    const pendingAgentStatusEvents: PendingAgentStatusEvent[] = []
+    const pendingAgentStatusEvents: PendingAgentStatusEvent<AgentStatusIpcPayload>[] = []
     let pendingAgentStatusRetryTimer: ReturnType<typeof setTimeout> | null = null
     // Why: applyAgentStatus -> store.setAgentStatus notifies the store
     // subscriber synchronously, which re-enters flushPendingAgentStatuses while
@@ -1785,6 +1786,7 @@ export function useIpcEvents(): void {
             store.queueTabStartupCommand(tab.id, {
               command: data.command,
               ...(data.env ? { env: data.env } : {}),
+              ...(data.envToDelete ? { envToDelete: data.envToDelete } : {}),
               ...(data.launchConfig ? { launchConfig: data.launchConfig } : {}),
               ...(data.launchToken ? { launchToken: data.launchToken } : {}),
               ...(data.launchAgent ? { launchAgent: data.launchAgent } : {}),
@@ -2963,8 +2965,8 @@ export function useIpcEvents(): void {
     // Re-parse it here so the renderer enforces the same normalization rules
     // (state enum, field truncation) regardless of whether the source was a
     // hook callback or an OSC fallback path. Startup pushes are ignored until
-    // workspace session hydration finishes; the snapshot pull below replays the
-    // main-process cache after tab identity is available.
+    // workspace hydration; the snapshot pull and bounded queue bridge any
+    // remaining tab/layout hydration race.
     function schedulePendingAgentStatusFlush(): void {
       if (pendingAgentStatusRetryTimer !== null || pendingAgentStatusEvents.length === 0) {
         return
@@ -2975,8 +2977,15 @@ export function useIpcEvents(): void {
       }, PENDING_AGENT_STATUS_RETRY_MS)
     }
 
-    function enqueuePendingAgentStatus(data: AgentStatusIpcPayload): void {
-      pendingAgentStatusEvents.push({ data, firstSeenAt: Date.now() })
+    function enqueuePendingAgentStatus(
+      data: AgentStatusIpcPayload,
+      options?: { replay?: boolean }
+    ): void {
+      pendingAgentStatusEvents.push({
+        data,
+        firstSeenAt: Date.now(),
+        replay: options?.replay === true
+      })
       while (pendingAgentStatusEvents.length > MAX_PENDING_AGENT_STATUS_EVENTS) {
         pendingAgentStatusEvents.shift()
       }
@@ -2996,17 +3005,11 @@ export function useIpcEvents(): void {
       }
       isFlushingAgentStatuses = true
       try {
-        const now = Date.now()
-        const remaining: PendingAgentStatusEvent[] = []
-        for (const event of pendingAgentStatusEvents) {
-          if (now - event.firstSeenAt > PENDING_AGENT_STATUS_TTL_MS) {
-            continue
-          }
-          const result = applyAgentStatus(event.data, { retry: true })
-          if (result === 'pending') {
-            remaining.push(event)
-          }
-        }
+        const remaining = retryPendingAgentStatusEvents(pendingAgentStatusEvents, {
+          now: Date.now(),
+          ttlMs: PENDING_AGENT_STATUS_TTL_MS,
+          apply: applyAgentStatus
+        })
         pendingAgentStatusEvents.length = 0
         pendingAgentStatusEvents.push(...remaining)
         if (pendingAgentStatusEvents.length === 0 && pendingAgentStatusRetryTimer !== null) {
@@ -3036,6 +3039,7 @@ export function useIpcEvents(): void {
         state: data.state,
         prompt: data.prompt,
         agentType: data.agentType,
+        model: data.model,
         toolName: data.toolName,
         toolInput: data.toolInput,
         // Why: the live AskUserQuestion prompt rides this IPC field; omitting it
@@ -3066,7 +3070,7 @@ export function useIpcEvents(): void {
         repoConnectionId = null
         repoConnectionResolved = true
       }
-      if (!exists && data.worktreeId && hasRuntimeBackedWorktreeAttribution(data)) {
+      if (!exists && hasRuntimeBackedAgentStatusAttribution(data)) {
         // Why: orchestration worker hooks can carry main-side worktree
         // attribution before this renderer has a terminal tab for the pane.
         // Require runtime identity too; durable snapshots with only worktreeId
@@ -3080,23 +3084,24 @@ export function useIpcEvents(): void {
         }
       }
       if (!exists) {
-        // Why: empty paneKeys are dropped in main before IPC fanout. Reaching
-        // this branch means a non-empty paneKey escaped without a matching
-        // renderer tab, so track the adoption/routing failure separately.
-        // Skipped during snapshot replay because main's durable cache may
-        // include entries whose tabs were closed before this session — that
-        // reconciliation miss is not a regression signal.
-        if (options?.replay !== true) {
-          if (options?.retry !== true) {
-            track('agent_hook_unattributed', { reason: 'unknown_tab_id' })
-            // Why: live hook IPC can beat the renderer's tab/layout hydration.
-            // Main already cached the event; retry locally so a transient
-            // pane-key miss does not drop Droid/Codex completion state.
-            enqueuePendingAgentStatus(data)
+        // Why: runtime-backed startup snapshots can arrive before tab/layout
+        // hydration; keep their replay semantics while the pane catches up.
+        if (options?.replay === true) {
+          if (hasRuntimeBackedAgentStatusAttribution(data)) {
+            if (options?.retry !== true) {
+              enqueuePendingAgentStatus(data, { replay: true })
+            }
+            return 'pending'
           }
-          return 'pending'
+          return 'dropped'
         }
-        return 'dropped'
+        if (options?.retry !== true) {
+          // Why: a live hook with no matching renderer pane is either a brief
+          // hydration race or a routing failure worth tracking once.
+          track('agent_hook_unattributed', { reason: 'unknown_tab_id' })
+          enqueuePendingAgentStatus(data)
+        }
+        return 'pending'
       }
       if (options?.replay !== true && options?.retry !== true) {
         for (let index = pendingAgentStatusEvents.length - 1; index >= 0; index -= 1) {
@@ -3140,6 +3145,32 @@ export function useIpcEvents(): void {
       ) {
         return 'dropped'
       }
+      const existingStatus = store.agentStatusByPaneKey[paneKey]
+      if (existingStatus && data.receivedAt < existingStatus.updatedAt) {
+        // Why: metadata-only identity and visible statuses must share the same
+        // accepted-event boundary so stale startup events cannot win.
+        return 'dropped'
+      }
+      if (data.providerSessionOnly) {
+        if (!data.providerSession || data.agentType !== 'pi') {
+          return 'dropped'
+        }
+        store.recordAgentProviderSession(
+          paneKey,
+          'pi',
+          data.providerSession,
+          { updatedAt: data.receivedAt },
+          {
+            tabId: ownerTabId,
+            worktreeId: data.worktreeId ?? owningWorktreeId,
+            // Why: persist WSL-normalized ownership, not relay provenance,
+            // so a later resume stays on the local worktree connection.
+            ...(ownershipConnectionId !== undefined ? { connectionId: ownershipConnectionId } : {})
+          },
+          data.launchToken ? { launchToken: data.launchToken } : undefined
+        )
+        return 'applied'
+      }
       const resolvedPayload = resolveHookPayloadAgentType(payload, identityTitle ?? title)
       const statusPayload = data.orchestration
         ? { ...resolvedPayload, orchestration: data.orchestration }
@@ -3147,12 +3178,6 @@ export function useIpcEvents(): void {
       const statusPayloadWithTurnBoundary = data.promptInteractionKey
         ? { ...statusPayload, promptInteractionKey: data.promptInteractionKey }
         : statusPayload
-      const existingStatus = store.agentStatusByPaneKey[paneKey]
-      if (existingStatus && data.receivedAt < existingStatus.updatedAt) {
-        // Why: the store rejects out-of-order status rows; keep notification and
-        // terminal lifecycle effects on the same accepted event boundary.
-        return 'dropped'
-      }
       const identity = resolveAgentStatusIdentity({
         existing: existingStatus
           ? {
@@ -3202,7 +3227,10 @@ export function useIpcEvents(): void {
         {
           tabId: ownerTabId,
           worktreeId: statusWorktreeId,
-          terminalHandle: data.terminalHandle
+          terminalHandle: data.terminalHandle,
+          // Why: provider resume metadata is host-owned; carry normalized
+          // ownership into the durable cold-restore record.
+          ...(ownershipConnectionId !== undefined ? { connectionId: ownershipConnectionId } : {})
         },
         data.providerSession || data.launchToken
           ? {
@@ -3327,10 +3355,8 @@ export function useIpcEvents(): void {
       unsubs.push(unsubscribeMigrationUnsupportedClear)
     }
 
-    // Why: the main hook server is the durable source of truth. Pull a
-    // snapshot only after workspace tabs are ready, so early startup pushes
-    // can be safely ignored instead of buffered against partially hydrated
-    // renderer state.
+    // Why: the main hook server is durable truth. Pull once workspace hydration
+    // is ready; the bounded pane retry queue handles layouts that still lag.
     requestAgentStatusSnapshotIfReady()
     unsubs.push(
       useAppStore.subscribe((state, previousState) => {
@@ -3472,13 +3498,6 @@ export function useIpcEvents(): void {
       resetAgentHookCompletionNotificationCoordinators()
     }
   }, [])
-}
-
-function hasRuntimeBackedWorktreeAttribution(data: AgentStatusIpcPayload): boolean {
-  return (
-    (typeof data.terminalHandle === 'string' && data.terminalHandle.length > 0) ||
-    data.orchestration !== undefined
-  )
 }
 
 function tryMakePaneKey(tabId: string, leafId: string): string | null {

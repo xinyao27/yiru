@@ -9,9 +9,9 @@ import {
   isGeminiTerminalTitle,
   isPiAgentTitle,
   titleHasAgentName
-} from './agent-title-core'
-import { isOpenCodeNativeTitle } from './opencode-terminal-title'
-import { getPiCompatibleSyntheticAgentLabel } from './pi-compatible-synthetic-title'
+} from '@yiru/workbench-model/agent'
+import { isOpenCodeNativeTitle } from '@yiru/workbench-model/agent'
+import { getPiCompatibleSyntheticAgentLabel } from '@yiru/workbench-model/agent'
 
 /**
  * Returns true when the terminal title matches Claude Code's title conventions.

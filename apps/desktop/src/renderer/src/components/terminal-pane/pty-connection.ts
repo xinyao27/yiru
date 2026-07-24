@@ -1,4 +1,19 @@
 import type { IBuffer, IDisposable } from '@xterm/xterm'
+import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
+import {
+  agentProviderSessionsEqual,
+  isResumableTuiAgent,
+  normalizeAgentProviderSession,
+  type ResumableTuiAgent,
+  type SleepingAgentSessionRecord
+} from '@yiru/workbench-model/agent'
+import {
+  isFreshNonDoneAgentStatus,
+  type AgentStatusEntry,
+  type AgentType
+} from '@yiru/workbench-model/agent'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 import { dispatchTerminalCommandFinishedEvent } from '@/hooks/terminal-command-finished-event'
 import { sendAgentDraftPasteContent } from '@/lib/agent-draft-paste-content'
@@ -70,6 +85,10 @@ import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence
 } from '@/lib/sleeping-agent-pane-ownership'
+import {
+  markTerminalBracketedPasteInterrupted,
+  observeTerminalBracketedPasteModeOutput
+} from '@/lib/terminal-bracketed-paste'
 import { getSystemPrefersDark } from '@/lib/terminal-theme'
 import { buildAgentResumeStartupPlan } from '@/lib/tui-agent-startup'
 import {
@@ -81,6 +100,7 @@ import {
   getSettingsForWorktreeRuntimeOwner,
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
+import type { PtyDataMeta } from '@/runtime/pty-data-meta'
 import { inspectRuntimeTerminalProcess } from '@/runtime/runtime-terminal-inspection'
 import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
@@ -97,24 +117,12 @@ import {
   recognizeAgentProcessFromCommandLine
 } from '../../../../shared/agent-process-recognition'
 import {
-  isResumableTuiAgent,
-  normalizeAgentProviderSession,
-  type ResumableTuiAgent,
-  type SleepingAgentSessionRecord
-} from '../../../../shared/agent-session-resume'
-import {
-  isFreshNonDoneAgentStatus,
-  type AgentStatusEntry,
-  type AgentType
-} from '../../../../shared/agent-status-types'
-import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
 } from '../../../../shared/agent-title-owner'
 import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
 import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { resolvePaneAgentOwner } from '../../../../shared/pane-agent-owner'
 import { redactPtyIdForDiagnostics } from '../../../../shared/pty-delivery-diagnostics'
 import { resolveSetupAgentSequenceLaunchCommand } from '../../../../shared/setup-agent-sequencing'
@@ -128,7 +136,6 @@ import {
 import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal-github-pr-link-detector'
 import { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
 import { parseTerminalOscColorQuery } from '../../../../shared/terminal-osc-color-reply'
-import { isTerminalQueryReply } from '../../../../shared/terminal-query-reply'
 import {
   HIDDEN_STARTUP_RENDERER_QUERY_PENDING_CHARS,
   containsCsiRendererQuery,
@@ -147,7 +154,6 @@ import {
 } from '../../../../shared/tui-agent-launch-defaults'
 import type { SetupSplitDirection, TuiAgent } from '../../../../shared/types'
 import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
 import { createAgentCompletionCoordinator } from './agent-completion-coordinator'
 import type {
   AgentCompletionDispatchMeta,
@@ -195,7 +201,6 @@ import {
   registerPtyTitleSource
 } from './pty-buffer-serializer'
 import type { PtyConnectionDeps } from './pty-connection-types'
-import type { PtyDataMeta } from './pty-dispatcher'
 import { getEagerPtyBufferHandle } from './pty-dispatcher'
 import { registerPtyModelRestoreNeededHandler } from './pty-model-restore-channel'
 import {
@@ -222,10 +227,6 @@ import {
   isDocumentVisibilityProvenStale,
   registerStaleDocumentVisibilityRecovery
 } from './stale-document-visibility'
-import {
-  markTerminalBracketedPasteInterrupted,
-  observeTerminalBracketedPasteModeOutput
-} from './terminal-bracketed-paste'
 import {
   CONPTY_DA1_RESPONSE,
   DEFAULT_DA1_RESPONSE,
@@ -426,6 +427,7 @@ function hasCursorAgentReattachPayloadScreenSignal(data: string): boolean {
 type PendingStartupCommand = {
   command: string
   env?: Record<string, string>
+  envToDelete?: string[]
 }
 
 type FreshSpawnOptions = {
@@ -929,14 +931,7 @@ export function connectPanePty(
       return legacy?.numericPaneId === String(pane.id)
     })
     const providerSessionKeys = new Set(
-      legacyMatches.map(([, record]) =>
-        [
-          record.worktreeId,
-          record.agent,
-          record.providerSession.key,
-          record.providerSession.id
-        ].join('\0')
-      )
+      legacyMatches.map(([, record]) => getProviderSessionClaimKey(record))
     )
     const oldestLegacyMatch = legacyMatches
       .slice()
@@ -966,8 +961,11 @@ export function connectPanePty(
         paneKey !== consumed.paneKey &&
         record.worktreeId === consumed.record.worktreeId &&
         record.agent === consumed.record.agent &&
-        record.providerSession.key === consumed.record.providerSession.key &&
-        record.providerSession.id === consumed.record.providerSession.id
+        agentProviderSessionsEqual(
+          record.agent,
+          record.providerSession,
+          consumed.record.providerSession
+        )
       ) {
         // Why: legacy pane aliases can leave multiple sleeping rows for one
         // provider session; once this pane resumes it, every alias is stale.
@@ -4199,8 +4197,7 @@ export function connectPanePty(
         sleepingRecord?.launchConfig &&
         (!useLiveEntry ||
           (sleepingRecord.agent === agent &&
-            sleepingRecord.providerSession.key === providerSession.key &&
-            sleepingRecord.providerSession.id === providerSession.id))
+            agentProviderSessionsEqual(agent, sleepingRecord.providerSession, providerSession)))
           ? sleepingRecord.launchConfig
           : undefined
       const launchConfig =
@@ -4220,6 +4217,9 @@ export function connectPanePty(
             ? launchConfig.agentEnv
             : resolveTuiAgentLaunchEnv(agent, state.settings?.agentDefaultEnv),
         ...(launchConfig?.agentCommand ? { agentCommand: launchConfig.agentCommand } : {}),
+        ...(launchConfig?.ompResumeFilePath
+          ? { ompResumeFilePath: launchConfig.ompResumeFilePath }
+          : {}),
         platform: resumePlatform
       })
       if (!startupPlan) {
@@ -4448,6 +4448,7 @@ export function connectPanePty(
         ...(startupOverride?.env
           ? { env: mergeStartupEnvWithPaneIdentity(startupOverride.env) }
           : {}),
+        ...(startupOverride?.envToDelete ? { envToDelete: startupOverride.envToDelete } : {}),
         ...(coldRestoreOverride ? { launchConfig: coldRestoreOverride.launchConfig } : {}),
         ...(coldRestoreOverride ? { launchToken: coldRestoreOverride.launchToken } : {}),
         ...(coldRestoreOverride ? { launchAgent: coldRestoreOverride.agent } : {}),

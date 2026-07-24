@@ -48,7 +48,7 @@ export function TabCloseButton({
               onClose()
             }}
           >
-            <X className={cn('size-4', iconClassName)} />
+            <X weight="regular" className={cn('size-4', iconClassName)} />
           </Button>
         }
       />
@@ -57,7 +57,11 @@ export function TabCloseButton({
           {translate('auto.components.tab.bar.EditorFileTabCloseButton.a768f428f1', 'Close tab')}
         </span>
         {closeShortcut.keys.length > 0 && (
-          <ShortcutKeyCombo keys={closeShortcut.keys} doubleTap={closeShortcut.doubleTap} />
+          <ShortcutKeyCombo
+            keys={closeShortcut.keys}
+            variant="inverted"
+            doubleTap={closeShortcut.doubleTap}
+          />
         )}
       </TooltipContent>
     </Tooltip>

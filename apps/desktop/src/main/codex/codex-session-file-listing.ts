@@ -2,6 +2,11 @@ import { readdirSync } from 'node:fs'
 import { opendir } from 'node:fs/promises'
 import { join } from 'node:path'
 
+export type CodexSessionBridgeIncrementalOptions = {
+  batchSize?: number
+  yieldMs?: number
+}
+
 const INCREMENTAL_BRIDGE_BATCH_SIZE = 64
 const INCREMENTAL_BRIDGE_YIELD_MS = 10
 
@@ -48,10 +53,12 @@ function appendSessionFilePaths(target: string[], source: readonly string[]): vo
  * not monopolize startup work.
  */
 export async function* listCodexSessionJsonlFilesIncrementally(
-  rootPath: string
+  rootPath: string,
+  options: CodexSessionBridgeIncrementalOptions = {},
+  onDirectoryError?: (directoryPath: string, error: unknown) => void | Promise<void>
 ): AsyncGenerator<string> {
-  const batchSize = INCREMENTAL_BRIDGE_BATCH_SIZE
-  const yieldMs = INCREMENTAL_BRIDGE_YIELD_MS
+  const batchSize = Math.max(1, options.batchSize ?? INCREMENTAL_BRIDGE_BATCH_SIZE)
+  const yieldMs = Math.max(0, options.yieldMs ?? INCREMENTAL_BRIDGE_YIELD_MS)
   const pendingDirectories = [rootPath]
   let entriesSinceYield = 0
 
@@ -76,6 +83,7 @@ export async function* listCodexSessionJsonlFilesIncrementally(
         }
       }
     } catch (error) {
+      await onDirectoryError?.(currentDirectory, error)
       console.warn('[codex-session-bridge] Failed to list system Codex sessions:', error)
     }
   }

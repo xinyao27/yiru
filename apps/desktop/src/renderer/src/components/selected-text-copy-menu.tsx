@@ -2,6 +2,7 @@ import { Copy } from '@phosphor-icons/react'
 import React from 'react'
 import { createPortal } from 'react-dom'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 type SelectedTextCopyMenuProps = {
@@ -106,18 +107,20 @@ export function SelectedTextCopyMenu({
       {menu &&
         createPortal(
           <div
-            className="bg-popover text-popover-foreground fixed z-[100] min-w-36 rounded-[11px] border border-black/14 p-1 dark:border-white/14"
+            className="bg-popover text-popover-foreground border-border fixed z-[100] min-w-36 border p-1"
             style={{ left: menu.x, top: menu.y }}
             onPointerDown={(event) => event.stopPropagation()}
           >
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="hover:bg-accent focus:bg-accent flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-1 text-left text-[12px] leading-5 font-[450] outline-none"
+              className="focus:bg-accent flex h-auto w-full cursor-default justify-start gap-2 border-0 py-1 text-left text-[12px] leading-5 font-[450] font-normal whitespace-normal"
               onClick={handleCopy}
             >
               <Copy className="text-muted-foreground size-3.5" />
               {translate('auto.components.SelectedTextCopyMenu.9b40d7b018', 'Copy')}
-            </button>
+            </Button>
           </div>,
           document.body
         )}

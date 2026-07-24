@@ -114,7 +114,7 @@ export function UsageOverviewPane(): React.JSX.Element {
 
   return (
     <div className="space-y-4" data-testid="usage-overview-pane">
-      <section className="border-border/60 bg-card/30 rounded-lg border p-4">
+      <section className="border-border/60 bg-card/30 border p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h3 className="text-foreground text-sm font-semibold">
@@ -146,7 +146,7 @@ export function UsageOverviewPane(): React.JSX.Element {
                   {isScanning ? (
                     <LoadingIndicator className="size-3.5" />
                   ) : (
-                    <RefreshCw className="size-3.5" />
+                    <RefreshCw weight="regular" className="size-3.5" />
                   )}
                 </Button>
               }
@@ -158,7 +158,7 @@ export function UsageOverviewPane(): React.JSX.Element {
         </div>
 
         {!overview.hasAnyEnabledProvider ? (
-          <div className="border-border/60 bg-card/30 mt-4 rounded-lg border border-dashed px-4 py-5">
+          <div className="border-border/60 bg-card/30 mt-4 border border-dashed px-4 py-5">
             <div className="max-w-xl space-y-3">
               <div>
                 <h4 className="text-foreground text-sm font-semibold">
@@ -245,7 +245,7 @@ export function UsageOverviewPane(): React.JSX.Element {
             </div>
 
             {!overview.hasAnyData ? (
-              <div className="border-border/60 bg-card/30 text-muted-foreground mt-4 rounded-lg border border-dashed px-4 py-5 text-sm">
+              <div className="border-border/60 bg-card/30 text-muted-foreground mt-4 border border-dashed px-4 py-5 text-sm">
                 {translate(
                   'auto.components.stats.UsageOverviewPane.60002bb22f',
                   'No local Claude, Codex, or OpenCode usage found yet. The overview will populate after the next agent session writes token logs.'

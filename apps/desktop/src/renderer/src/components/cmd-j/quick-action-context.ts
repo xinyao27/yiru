@@ -1,7 +1,8 @@
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
+
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 import type { AppState } from '@/store/types'
 
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import type { Worktree } from '../../../../shared/types'
 
 export type CmdJUnavailableReason =

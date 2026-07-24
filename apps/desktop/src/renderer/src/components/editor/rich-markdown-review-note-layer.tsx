@@ -1,5 +1,6 @@
 import { Check, Copy } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import {
@@ -89,9 +90,11 @@ export function RichMarkdownReviewNoteLayer({
             onContentResize={onContentResize}
             headerActions={
               <>
-                <button
+                <Button
+                  variant="ghost"
+                  size="xs"
                   type="button"
-                  className="rich-markdown-review-note-action focus-visible:bg-accent outline-none"
+                  className="rich-markdown-review-note-action focus-visible:bg-accent h-auto border-0 p-0"
                   title={
                     copiedCommentId === comment.id
                       ? translate(
@@ -126,7 +129,7 @@ export function RichMarkdownReviewNoteLayer({
                   ) : (
                     <Copy className="size-3.5" />
                   )}
-                </button>
+                </Button>
                 <NotesSendMenu
                   worktreeId={worktreeId}
                   groupId={worktreeId}

@@ -1,8 +1,9 @@
 import { basename } from 'node:path'
 
+import { splitWorktreeId, splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { isFolderRepo } from '../shared/repo-kind'
 import type { Repo } from '../shared/types'
-import { splitWorktreeId, splitWorktreeIdForFilesystem } from '../shared/worktree-id'
 import type { Store } from './persistence'
 
 export type UsageWorktreeRef = {

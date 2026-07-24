@@ -46,7 +46,12 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
     try {
       const nextScanState = (await window.api.codexUsage.setEnabled({
         enabled
-      })) as CodexUsageScanState
+      })) as CodexUsageScanState | undefined
+      // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
+      // undefined; keep the unavailable state stable instead of fabricating one.
+      if (!nextScanState) {
+        return
+      }
       set({
         codexUsageScanState: enabled
           ? {
@@ -82,7 +87,12 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
 
   fetchCodexUsage: async (opts) => {
     try {
-      const scanState = (await window.api.codexUsage.getScanState()) as CodexUsageScanState
+      const scanState = (await window.api.codexUsage.getScanState()) as
+        | CodexUsageScanState
+        | undefined
+      if (!scanState) {
+        return
+      }
       const currentScanState = get().codexUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&

@@ -1,19 +1,20 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { BrowserWindow, ipcMain } from 'electron'
 
-import type { RuntimeRpcResponse } from '../../shared/runtime-rpc-envelope'
 import type {
   RuntimeBrowserDriverState,
-  RuntimeStatus,
   RuntimeSyncWindowGraphResult,
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
 } from '../../shared/runtime-types'
 import { RpcDispatcher } from '../runtime/rpc/dispatcher'
+import { ALL_RPC_METHODS } from '../runtime/rpc/methods'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 
 export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
+  const dispatcher = new RpcDispatcher({ runtime, methods: ALL_RPC_METHODS })
+
   ipcMain.removeHandler('runtime:syncWindowGraph')
-  ipcMain.removeHandler('runtime:getStatus')
   ipcMain.removeHandler('runtime:call')
 
   ipcMain.handle(
@@ -27,17 +28,13 @@ export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
     }
   )
 
-  ipcMain.handle('runtime:getStatus', (): RuntimeStatus => {
-    return runtime.getStatus()
-  })
-
   ipcMain.handle(
     'runtime:call',
     async (
       _event,
       args: { method: string; params?: unknown }
     ): Promise<RuntimeRpcResponse<unknown>> => {
-      return (await new RpcDispatcher({ runtime }).dispatch({
+      return (await dispatcher.dispatch({
         id: 'desktop-ipc',
         authToken: 'desktop-ipc',
         method: args.method,
@@ -76,7 +73,7 @@ export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
   ipcMain.handle(
     'runtime:getBrowserDrivers',
     (): { browserPageId: string; driver: RuntimeBrowserDriverState }[] => {
-      const drivers = runtime.getAllBrowserDrivers()
+      const drivers = runtime.browserCommands.getDrivers()
       return Array.from(drivers.entries()).map(([browserPageId, driver]) => ({
         browserPageId,
         driver
@@ -115,7 +112,7 @@ export function registerRuntimeHandlers(runtime: YiruRuntimeService): void {
     'runtime:reclaimBrowserForDesktop',
     (_event, args: { browserPageId: string }): { reclaimed: boolean } => {
       try {
-        return { reclaimed: runtime.reclaimBrowserForDesktop(args.browserPageId) }
+        return { reclaimed: runtime.browserCommands.reclaimForDesktop(args.browserPageId) }
       } catch {
         return { reclaimed: false }
       }

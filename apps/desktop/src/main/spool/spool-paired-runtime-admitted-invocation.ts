@@ -1,4 +1,5 @@
-import type { RuntimeRpcResponse } from '../../shared/runtime-rpc-envelope'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import {
   isSpoolMutationOperation,
   type SpoolExecutionOperation

@@ -1,8 +1,8 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+
 import type { AgentDotState } from '@/components/agent-state-dot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { formatAgentTypeLabel } from '@/lib/agent-status'
-
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 
 export type SummaryAgentGroup = {
   state: AgentDotState

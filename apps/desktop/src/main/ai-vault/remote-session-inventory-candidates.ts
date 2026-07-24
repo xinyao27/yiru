@@ -1,4 +1,5 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+
 import type { FileReadResult, FileStat, IFilesystemProvider } from '../providers/types'
 import type { RemoteScannerContext, RemoteSessionCandidate } from './remote-session-scanner-types'
 import type { FileWithMtime } from './session-scanner-types'

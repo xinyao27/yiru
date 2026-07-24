@@ -33,7 +33,7 @@ guard let context = NSGraphicsContext(bitmapImageRep: bitmap) else {
     fatalError("Could not create bitmap graphics context")
 }
 NSGraphicsContext.current = context
-// Why: menu-bar template images must retain transparency so macOS can tint the glyph.
+// Why: native icon sizing and tinting depend on preserving the SVG's transparent regions.
 context.cgContext.clear(CGRect(x: 0, y: 0, width: width, height: height))
 image.draw(
     in: NSRect(x: 0, y: 0, width: width, height: height),

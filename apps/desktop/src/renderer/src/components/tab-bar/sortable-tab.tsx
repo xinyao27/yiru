@@ -1,7 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { PushPin as Pin, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
+import { stripLeadingAgentTitleDecoration } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { PhosphorIconContextProvider } from '@/components/phosphor-icon-context-provider'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -9,20 +12,14 @@ import { cn } from '@/lib/class-names'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 import { useTabAgent } from '@/lib/use-tab-agent'
 
-import { stripLeadingAgentTitleDecoration } from '../../../../shared/agent-title-decoration'
 import type { TerminalTab } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
-import {
-  getDropIndicatorClasses,
-  getTabDividerClasses,
-  getTabRootStateClasses,
-  type DropIndicator
-} from './drop-indicator'
+import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { SortableTabContextMenu } from './sortable-tab-context-menu'
+import { getTitlebarTabStateClasses, TAB_ROOT_CLASSES } from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 import {
@@ -241,193 +238,197 @@ export default function SortableTab({
     disabled: isEditing
   })
   const tabTitle = tab.customTitle ?? tab.title
+  // Why: terminal-tab identity and action glyphs share the compact regular-weight treatment.
   const tabRoot = (
-    <div
-      ref={setNodeRef}
-      data-tab-id={tab.id}
-      data-tab-title={tabTitle}
-      data-pinned={isPinned ? 'true' : 'false'}
-      data-agent-activity-status={activityStatus}
-      {...attributes}
-      {...dragListeners}
-      // Why: on unread activity, tint the whole tab with a subtle amber
-      // wash so the signal is visible at a glance even when the small
-      // bell icon is easy to miss in a long tab bar. Active tabs keep
-      // their existing highlight — the amber wash layers on top so the
-      // tab still reads as "selected + has activity". The wash is
-      // rendered as an absolutely-positioned child below so the ::after
-      // pseudo-element stays free for the drop indicator.
-      className={cn(
-        TAB_ROOT_CLASSES,
-        getTabDividerClasses(hasTabsToRight),
-        getDropIndicatorClasses(dropIndicator ?? null),
-        getTabRootStateClasses(isActive)
-      )}
-      onDoubleClick={(e) => {
-        if (isEditing) {
-          return
-        }
-        e.stopPropagation()
-        handleRenameOpen()
-      }}
-      onPointerDown={(e) => {
-        onTabPointerDown(
-          e,
-          dragListeners?.onPointerDown as ((event: React.PointerEvent<Element>) => void) | undefined
-        )
-      }}
-      onMouseDown={(e) => {
-        // Why: prevent default browser middle-click behavior (auto-scroll)
-        // but do NOT close here — closing removes the element before mouseup,
-        // causing the mouseup to fall through to the terminal and trigger
-        // an X11 primary selection paste on Linux.
-        if (e.button === 1) {
-          e.preventDefault()
-        }
-      }}
-      onMouseUp={preventMiddleButtonDefault}
-      onAuxClick={(e) => {
-        if (isEditing) {
-          return
-        }
-        if (e.button === 1) {
-          e.preventDefault()
-          e.stopPropagation()
-          if (isPinned) {
+    <PhosphorIconContextProvider weight="regular">
+      <div
+        ref={setNodeRef}
+        data-tab-id={tab.id}
+        data-tab-title={tabTitle}
+        data-pinned={isPinned ? 'true' : 'false'}
+        data-agent-activity-status={activityStatus}
+        {...attributes}
+        {...dragListeners}
+        // Why: on unread activity, tint the whole tab with a subtle amber
+        // wash so the signal is visible at a glance even when the small
+        // bell icon is easy to miss in a long tab bar. Active tabs keep
+        // their existing highlight — the amber wash layers on top so the
+        // tab still reads as "selected + has activity". The wash is
+        // rendered as an absolutely-positioned child below so the ::after
+        // pseudo-element stays free for the drop indicator.
+        className={cn(
+          TAB_ROOT_CLASSES,
+          getDropIndicatorClasses(dropIndicator ?? null),
+          getTitlebarTabStateClasses(isActive)
+        )}
+        onDoubleClick={(e) => {
+          if (isEditing) {
             return
           }
-          onClose(tab.id)
-        }
-      }}
-    >
-      {showUnreadActivity && (
-        // Why: a real DOM child leaves both drop-indicator pseudo-elements
-        // available and keeps pointer events reaching the tab beneath it.
-        <span aria-hidden className="pointer-events-none absolute inset-0 bg-amber-500/10" />
-      )}
-      <TerminalTabLeadingIcon
-        agent={tabAgent}
-        activityStatus={activityStatus}
-        shell={shellForIcon}
-        showUnreadActivity={showUnreadActivity}
-        isActive={isActive}
-      />
-      {isPinned && !isEditing && (
-        <Pin className="text-muted-foreground mr-1 size-4 shrink-0" aria-hidden />
-      )}
-      {isEditing ? (
-        <Input
-          ref={setRenameInputElement}
-          data-tab-rename-input="true"
-          value={renameValue}
-          aria-label={translate(
-            'auto.components.tab.bar.SortableTab.ab19f603eb',
-            'Rename tab {{value0}}',
-            { value0: tabTitle }
-          )}
-          onChange={(event) => setRenameValue(event.target.value)}
-          onBlur={commitRename}
-          onKeyDown={(event) => {
-            // Why: an Enter that only confirms a CJK IME candidate must not
-            // commit the rename; wait for a non-composition Enter.
-            if (isImeCompositionKeyDown(event)) {
+          e.stopPropagation()
+          handleRenameOpen()
+        }}
+        onPointerDown={(e) => {
+          onTabPointerDown(
+            e,
+            dragListeners?.onPointerDown as
+              | ((event: React.PointerEvent<Element>) => void)
+              | undefined
+          )
+        }}
+        onMouseDown={(e) => {
+          // Why: prevent default browser middle-click behavior (auto-scroll)
+          // but do NOT close here — closing removes the element before mouseup,
+          // causing the mouseup to fall through to the terminal and trigger
+          // an X11 primary selection paste on Linux.
+          if (e.button === 1) {
+            e.preventDefault()
+          }
+        }}
+        onMouseUp={preventMiddleButtonDefault}
+        onAuxClick={(e) => {
+          if (isEditing) {
+            return
+          }
+          if (e.button === 1) {
+            e.preventDefault()
+            e.stopPropagation()
+            if (isPinned) {
               return
             }
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              commitRename()
-            } else if (event.key === 'Escape') {
-              event.preventDefault()
-              cancelRename()
-            }
-          }}
-          // Why: stop pointer/mouse events from bubbling to the outer div, which
-          // would otherwise trigger tab activation or start a dnd-kit drag while
-          // the user is trying to click inside the input.
-          onPointerDown={(event) => event.stopPropagation()}
-          onMouseDown={(event) => {
-            // Why: stop propagation so the outer tab's activation/drag handlers
-            // don't fire on clicks inside the input. Also preventDefault on middle
-            // click (button 1) to block Linux X11 primary-selection paste into the
-            // rename field, matching the outer tab's behavior.
-            event.stopPropagation()
-            if (event.button === 1) {
-              event.preventDefault()
-            }
-          }}
-          onClick={(event) => event.stopPropagation()}
-          onDoubleClick={(event) => event.stopPropagation()}
-          onAuxClick={(event) => event.stopPropagation()}
-          // Why: the base Input applies w-full min-w-0, which lets flex
-          // shrink it to ~0 when many tabs compete for horizontal space.
-          // Force a minimum width that matches the normal title box so the
-          // rename input stays usable even when the tab bar is saturated.
-          className="mr-1 h-5 min-w-[72px] flex-1 px-1 py-0 text-xs"
-          spellCheck={false}
-        />
-      ) : isEditing || menuOpen ? (
-        <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>
-      ) : (
-        <Tooltip>
-          <TooltipTrigger
-            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>}
-          />
-          <TooltipContent
-            side="bottom"
-            sideOffset={6}
-            className="max-w-80 text-left break-words whitespace-normal"
-          >
-            {displayTitle}
-          </TooltipContent>
-        </Tooltip>
-      )}
-      {tab.color && !isEditing && (
-        <span
-          className="mr-1.5 size-2 shrink-0 rounded-full"
-          style={{ backgroundColor: tab.color }}
-        />
-      )}
-      {isExpanded &&
-        !isEditing && (
-          // Why: hover-close occupies this same trailing overlay position; hide
-          // collapse only when that close control exists so hit targets never stack.
-          <button
-            className={cn(
-              'outline-none focus-visible:bg-muted focus-visible:text-foreground',
-              'mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0',
-              !isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : '',
-              isActive
-                ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted'
-            )}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleExpand(tab.id)
-            }}
-            title={translate('auto.components.tab.bar.SortableTab.fdb2691425', 'Collapse pane')}
-            aria-label={translate(
-              'auto.components.tab.bar.SortableTab.fdb2691425',
-              'Collapse pane'
-            )}
-          >
-            <Minimize2 className="size-4" />
-          </button>
+            onClose(tab.id)
+          }
+        }}
+      >
+        {showUnreadActivity && (
+          // Why: a real DOM child leaves both drop-indicator pseudo-elements
+          // available and keeps pointer events reaching the tab beneath it.
+          <span aria-hidden className="pointer-events-none absolute inset-0 bg-amber-500/10" />
         )}
-      {/* Why: terminal tabs keep trailing close chrome compact beside activity controls. */}
-      {!isEditing && !isPinned && (
-        <TabCloseButton
-          className="right-1 size-5"
-          iconClassName="size-3.5"
-          ariaLabel={translate(
-            'auto.components.tab.bar.SortableTab.6df69d9388',
-            'Close tab {{value0}}',
-            { value0: tabTitle }
-          )}
-          onClose={() => onClose(tab.id)}
+        <TerminalTabLeadingIcon
+          agent={tabAgent}
+          activityStatus={activityStatus}
+          shell={shellForIcon}
+          showUnreadActivity={showUnreadActivity}
+          isActive={isActive}
         />
-      )}
-    </div>
+        {isPinned && !isEditing && (
+          <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />
+        )}
+        {isEditing ? (
+          <Input
+            ref={setRenameInputElement}
+            data-tab-rename-input="true"
+            size="inline-edit"
+            value={renameValue}
+            aria-label={translate(
+              'auto.components.tab.bar.SortableTab.ab19f603eb',
+              'Rename tab {{value0}}',
+              { value0: tabTitle }
+            )}
+            onChange={(event) => setRenameValue(event.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(event) => {
+              // Why: an Enter that only confirms a CJK IME candidate must not
+              // commit the rename; wait for a non-composition Enter.
+              if (isImeCompositionKeyDown(event)) {
+                return
+              }
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                commitRename()
+              } else if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelRename()
+              }
+            }}
+            // Why: stop pointer/mouse events from bubbling to the outer div, which
+            // would otherwise trigger tab activation or start a dnd-kit drag while
+            // the user is trying to click inside the input.
+            onPointerDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) => {
+              // Why: stop propagation so the outer tab's activation/drag handlers
+              // don't fire on clicks inside the input. Also preventDefault on middle
+              // click (button 1) to block Linux X11 primary-selection paste into the
+              // rename field, matching the outer tab's behavior.
+              event.stopPropagation()
+              if (event.button === 1) {
+                event.preventDefault()
+              }
+            }}
+            onClick={(event) => event.stopPropagation()}
+            onDoubleClick={(event) => event.stopPropagation()}
+            onAuxClick={(event) => event.stopPropagation()}
+            // Why: the base Input applies w-full min-w-0, which lets flex
+            // shrink it to ~0 when many tabs compete for horizontal space.
+            // Force a minimum width that matches the normal title box so the
+            // rename input stays usable even when the tab bar is saturated.
+            className="mr-1 min-w-[72px] flex-1"
+            spellCheck={false}
+          />
+        ) : isEditing || menuOpen ? (
+          <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger
+              render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>}
+            />
+            <TooltipContent
+              side="bottom"
+              sideOffset={6}
+              className="max-w-80 text-left break-words whitespace-normal"
+            >
+              {displayTitle}
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {tab.color && !isEditing && (
+          <span className="mr-1.5 size-2 shrink-0" style={{ backgroundColor: tab.color }} />
+        )}
+        {isExpanded &&
+          !isEditing && (
+            // Why: hover-close occupies this same trailing overlay position; hide
+            // collapse only when that close control exists so hit targets never stack.
+            <Button
+              variant="quiet"
+              size="icon-xs"
+              className={cn(
+                'focus-visible:bg-muted ',
+                'mr-1 flex size-4 border-0',
+                !isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : '',
+                isActive
+                  ? ' hover:bg-muted'
+                  : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted'
+              )}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleExpand(tab.id)
+              }}
+              title={translate('auto.components.tab.bar.SortableTab.fdb2691425', 'Collapse pane')}
+              aria-label={translate(
+                'auto.components.tab.bar.SortableTab.fdb2691425',
+                'Collapse pane'
+              )}
+            >
+              <Minimize2 weight="regular" className="size-3.5" />
+            </Button>
+          )}
+        {/* Why: terminal tabs keep trailing close chrome compact beside activity controls. */}
+        {!isEditing && !isPinned && (
+          <TabCloseButton
+            className="right-1 size-5"
+            iconClassName="size-3.5"
+            ariaLabel={translate(
+              'auto.components.tab.bar.SortableTab.6df69d9388',
+              'Close tab {{value0}}',
+              { value0: tabTitle }
+            )}
+            onClose={() => onClose(tab.id)}
+          />
+        )}
+      </div>
+    </PhosphorIconContextProvider>
   )
 
   return (

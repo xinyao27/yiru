@@ -1,4 +1,4 @@
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 
 export type SshTargetBusyAction = 'terminate' | 'reset' | 'remove'
 

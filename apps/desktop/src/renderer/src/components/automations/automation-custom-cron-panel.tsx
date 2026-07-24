@@ -92,7 +92,7 @@ export function AutomationCustomCronPanel({
           {AUTOMATION_CRON_FIELD_LABELS.map((label, index) => (
             <div
               key={label}
-              className="border-border/70 bg-muted/25 min-w-0 rounded-md border px-1.5 py-1 text-center"
+              className="border-border/70 bg-muted/25 min-w-0 border px-1.5 py-1 text-center"
             >
               <div className="text-muted-foreground truncate text-[10px] font-medium">{label}</div>
               <div className="text-foreground mt-0.5 truncate font-mono text-[11px]">
@@ -104,7 +104,7 @@ export function AutomationCustomCronPanel({
         <div
           id="automation-cron-status"
           className={cn(
-            'mt-2 flex min-h-8 items-center gap-2 rounded-md border px-2 py-1.5 text-xs',
+            'mt-2 flex min-h-8 items-center gap-2 border px-2 py-1.5 text-xs',
             customScheduleStatus.kind === 'invalid'
               ? 'border-destructive/40 bg-destructive/10 text-destructive'
               : 'border-border/70 bg-muted/30 text-muted-foreground'

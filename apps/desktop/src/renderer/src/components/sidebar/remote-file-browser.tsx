@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -630,44 +631,55 @@ export function RemoteFileBrowser({
     <div ref={setBrowserRootRef} className="flex w-full min-w-0 flex-col gap-2">
       {/* Breadcrumb bar */}
       <div className="flex min-h-[28px] scrollbar-none items-center gap-0.5 overflow-x-auto">
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           onClick={navigateUp}
           disabled={resolvedPath === '/' || loading}
-          className="hover:bg-accent focus-visible:bg-accent shrink-0 cursor-pointer rounded p-1 transition-colors outline-none disabled:cursor-default disabled:opacity-30"
+          className="focus-visible:bg-accent h-auto border-0 p-1 transition-colors disabled:cursor-default disabled:opacity-30"
         >
-          <ArrowUp className="size-3.5" />
-        </button>
-        <button
+          <ArrowUp weight="regular" className="size-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           onClick={() => navigate('~')}
           disabled={loading}
-          className="hover:bg-accent focus-visible:bg-accent shrink-0 cursor-pointer rounded p-1 transition-colors outline-none"
+          className="focus-visible:bg-accent h-auto border-0 p-1 transition-colors"
         >
           <Home className="size-3.5" />
-        </button>
+        </Button>
         <div className="text-muted-foreground ml-1 flex min-w-0 items-center gap-0 text-[11px]">
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             onClick={() => navigate('/')}
-            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 cursor-pointer px-0.5 transition-colors outline-none"
+            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 px-0.5 transition-colors"
           >
             /
-          </button>
+          </Button>
           {pathSegments.map((segment, i) => (
             <React.Fragment key={i}>
-              <ChevronRight className="text-muted-foreground/50 size-2.5 shrink-0" />
-              <button
+              <ChevronRight
+                weight="regular"
+                className="text-muted-foreground/50 size-2.5 shrink-0"
+              />
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 onClick={() => navigate(`/${pathSegments.slice(0, i + 1).join('/')}`)}
                 className={cn(
-                  'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                  'truncate max-w-[120px] hover:text-foreground transition-colors cursor-pointer px-0.5',
-                  i === pathSegments.length - 1 && 'text-foreground font-medium'
+                  'h-auto border-0 focus-visible:text-foreground focus-visible:bg-accent',
+                  'truncate max-w-[120px] hover:text-foreground transition-colors px-0.5',
+                  i === pathSegments.length - 1 && 'text-foreground'
                 )}
               >
                 {segment}
-              </button>
+              </Button>
             </React.Fragment>
           ))}
         </div>
@@ -676,7 +688,7 @@ export function RemoteFileBrowser({
       {/* Filter input */}
       <div className="relative">
         <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2" />
-        <input
+        <Input
           ref={inputRef}
           type="text"
           autoFocus
@@ -691,7 +703,7 @@ export function RemoteFileBrowser({
           aria-invalid={!!preview?.error}
           aria-describedby={preview?.error ? 'remote-file-browser-path-error' : undefined}
           className={cn(
-            'w-full h-7 pl-7 pr-7 text-xs rounded-md bg-background',
+            'w-full h-7 pl-7 pr-7 text-xs bg-background',
             'border border-border outline-none focus:border-ring',
             preview?.error && 'border-destructive/60'
           )}
@@ -712,7 +724,7 @@ export function RemoteFileBrowser({
       )}
 
       {/* File listing */}
-      <div className="border-border bg-background overflow-hidden rounded-md border">
+      <div className="border-border bg-background overflow-hidden border">
         <div className="scrollbar-sleek h-[240px] overflow-y-auto">
           {loading ? (
             <div className="flex h-full items-center justify-center">
@@ -749,7 +761,9 @@ export function RemoteFileBrowser({
             displayEntries.map((entry) => {
               const FileIcon = getFileTypeIcon(entry.name)
               return (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   key={entry.name}
                   type="button"
                   onClick={() => handleRowClick(entry)}
@@ -759,8 +773,8 @@ export function RemoteFileBrowser({
                     inputRef.current?.focus()
                   }}
                   className={cn(
-                    'outline-none focus-visible:bg-accent/60',
-                    'w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left transition-colors cursor-pointer',
+                    'border-0 justify-start whitespace-normal font-normal gap-2 focus-visible:bg-accent/60',
+                    'w-full flex py-1.5 text-xs text-left transition-colors',
                     'hover:bg-accent/60'
                   )}
                 >
@@ -771,9 +785,12 @@ export function RemoteFileBrowser({
                   )}
                   <span className="min-w-0 flex-1 truncate">{entry.name}</span>
                   {entry.isDirectory && (
-                    <ChevronRight className="text-muted-foreground/60 size-3.5 shrink-0" />
+                    <ChevronRight
+                      weight="regular"
+                      className="text-muted-foreground/60 size-3.5 shrink-0"
+                    />
                   )}
-                </button>
+                </Button>
               )
             })
           )}

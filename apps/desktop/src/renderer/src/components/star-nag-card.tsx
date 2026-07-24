@@ -1,11 +1,11 @@
 import { Star, ArrowSquareOut as ExternalLink, X } from '@phosphor-icons/react'
+import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { YIRU_GITHUB_REPOSITORY_URL } from '../../../shared/yiru-github-repository'
 import { useAppStore } from '../store'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
@@ -176,7 +176,7 @@ export function StarNagCard(): React.JSX.Element | null {
               disabled={busy}
               aria-label={translate('auto.components.StarNagCard.b5e685e4d9', 'Dismiss')}
             >
-              <X className="size-3.5" />
+              <X weight="regular" className="size-3.5" />
             </Button>
           </div>
 
@@ -196,7 +196,7 @@ export function StarNagCard(): React.JSX.Element | null {
               className={primaryActionClass}
             >
               {mode === 'web' ? (
-                <ExternalLink className="size-3.5" />
+                <ExternalLink weight="regular" className="size-3.5" />
               ) : (
                 <Star className="size-3.5" />
               )}

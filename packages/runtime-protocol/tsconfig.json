@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "strict": true,
+    "lib": ["es2023"],
+    "target": "es2023",
+    "types": ["node"]
+  },
+  "include": ["src"]
+}

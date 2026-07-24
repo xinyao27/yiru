@@ -1,18 +1,16 @@
-import type { SleepingAgentLaunchConfig } from './agent-session-resume'
+import type { RuntimeCapability } from '@yiru/runtime-protocol/capabilities'
+import type * as RuntimeMobileTypes from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: shared type definitions for all runtime RPC methods live in one file for discoverability and import simplicity. */
-import type {
-  AgentStatusEntry,
-  AgentStatusOrchestrationContext,
-  AgentStatusState,
-  AgentType
-} from './agent-status-types'
+import type { AgentStatusEntry, AgentStatusOrchestrationContext } from '@yiru/workbench-model/agent'
+
 import type { StartupCommandDelivery } from './codex-startup-delivery'
 import type {
   RuntimeMarkdownReadTabResult,
   RuntimeMarkdownSaveTabResult
 } from './mobile-markdown-document'
-import type { RuntimeCapability } from './protocol-version'
 import type { RemoteRuntimeSharedConnectionDiagnostics } from './remote-runtime-shared-control-types'
+import type { RemoteServerUpdateSupport } from './remote-server-update'
 import type {
   BaseRefSearchResult,
   BrowserCookieImportResult,
@@ -25,7 +23,6 @@ import type {
   RemoveWorktreeResult,
   Repo,
   TabGroupLayoutNode,
-  TerminalColorOverrides,
   TerminalLayoutSnapshot,
   TuiAgent,
   Worktree,
@@ -71,12 +68,17 @@ export type RuntimeStatus = {
   runtimeProtocolVersion?: number
   minCompatibleRuntimeClientVersion?: number
   capabilities?: RuntimeCapability[]
+  // Why: optional inventory fields keep new clients compatible with older paired servers.
+  appVersion?: string
+  remoteUpdateSupport?: RemoteServerUpdateSupport
   remoteControl?: RemoteRuntimeSharedConnectionDiagnostics | null
   hostPlatform?: NodeJS.Platform
   terminalWindowsShell?: string | null
   // Why: legacy or saved WebSocket pairings may not carry scope metadata, so
   // the server stamps the authenticated token scope here for status.get only.
   deviceScope?: DeviceScope
+  // Why: Mobile hides the synthetic workspace on older or user-disabled hosts.
+  floatingWorkspaceEnabled?: boolean
   // COMPAT(runtimeStatusMobileAliases): added 2026-05-15 for mobile builds
   // that still read these names; new desktop/CLI code uses the fields above.
   protocolVersion?: number
@@ -100,6 +102,9 @@ export type CliStatusResult = {
     state: CliRuntimeState
     reachable: boolean
     runtimeId: string | null
+    appVersion?: string
+    remoteUpdateSupport?: RemoteServerUpdateSupport
+    capabilities?: RuntimeCapability[]
   }
   graph: {
     state: RuntimeGraphStatus | 'not_running' | 'starting'
@@ -158,10 +163,7 @@ export type RuntimeMobileSessionTerminalTab = {
   isActive: boolean
 }
 
-export type RuntimeMobileTerminalTheme = {
-  mode: 'dark' | 'light'
-  theme: TerminalColorOverrides
-}
+export type RuntimeMobileTerminalTheme = RuntimeMobileTypes.RuntimeMobileTerminalTheme
 
 export type RuntimeMobileSessionMarkdownTab = {
   type: 'markdown'
@@ -336,37 +338,8 @@ export type RuntimeFileReadResult = {
   byteLength: number
 }
 
-export type RuntimeTerminalPathOpenTarget =
-  | {
-      kind: 'worktree-file'
-      provider: 'local' | 'ssh'
-      relativePath: string
-      absolutePath: string
-    }
-  | {
-      kind: 'absolute-file'
-      provider: 'local' | 'ssh'
-      absolutePath: string
-      grantId: string
-    }
-  | {
-      kind: 'unsupported'
-      reason: string
-    }
-
-/** Result of resolving a file path tapped in the mobile terminal against the
- *  worktree root (+ optional cwd). relativePath is null when the path resolves
- *  outside the worktree (not openable via the worktree-scoped file RPCs). */
-export type RuntimeTerminalPathResolution = {
-  worktree: string
-  relativePath: string | null
-  /** Absolute on-disk path (or remote path), present when relativePath is.
-   *  Used to build a file:// URL for opening HTML in a browser tab. */
-  absolutePath: string | null
-  exists: boolean
-  isDirectory: boolean
-  openTarget?: RuntimeTerminalPathOpenTarget
-}
+export type RuntimeTerminalPathOpenTarget = RuntimeMobileTypes.RuntimeTerminalPathOpenTarget
+export type RuntimeTerminalPathResolution = RuntimeMobileTypes.RuntimeTerminalPathResolution
 
 export type RuntimeFilePreviewResult = {
   content: string
@@ -503,6 +476,7 @@ type RuntimeTerminalCreateBaseRequestPayload = {
   command?: string
   cwd?: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
   launchToken?: string
   launchAgent?: TuiAgent
@@ -581,26 +555,7 @@ export type RuntimeTerminalWait = {
 /** One agent's live status as carried to mobile in a worktree.ps summary.
  *  Flat shape (parentPaneKey points to another row in the same worktree's list)
  *  so the client can rebuild the spawn-lineage tree desktop renders inline. */
-export type RuntimeWorktreeAgentRow = {
-  paneKey: string
-  /** paneKey of the orchestration parent, or null for a root agent. */
-  parentPaneKey: string | null
-  state: AgentStatusState
-  agentType: AgentType | null
-  /** Raw hook-reported prompt. Display surfaces can prefer displayName. */
-  prompt: string
-  /** Explicit orchestration task title, or null outside dispatch. */
-  taskTitle: string | null
-  /** Explicit UI label for orchestration task rows, or null outside dispatch. */
-  displayName: string | null
-  lastAssistantMessage: string | null
-  toolName: string | null
-  toolInput: string | null
-  interrupted: boolean
-  /** When the current `state` was first reported (ms). Drives "Xm ago". */
-  stateStartedAt: number
-  updatedAt: number
-}
+export type RuntimeWorktreeAgentRow = RuntimeMobileTypes.RuntimeWorktreeAgentRow
 
 export type RuntimeWorktreePsSummary = {
   workspaceKind?: 'git' | 'folder-workspace'
@@ -644,30 +599,9 @@ export type RuntimeWorktreePsSummary = {
   agents: RuntimeWorktreeAgentRow[]
 }
 
-export type RuntimeGitLocalBranches = {
-  current: string | null
-  branches: string[]
-}
-
-/** One speech model as presented to the mobile dictation-setup sheet: catalog
- *  metadata joined with live download/ready state. */
-export type RuntimeSpeechModelSummary = {
-  id: string
-  label: string
-  provider: 'local' | 'openai'
-  sizeBytes: number | null
-  recommended: boolean
-  status: 'ready' | 'not-downloaded' | 'downloading' | 'extracting' | 'error'
-  progress: number | null
-}
-
-export type RuntimeSpeechSetupState = {
-  enabled: boolean
-  selectedModelId: string
-  /** 'toggle' = press once to start/stop; 'hold' = dictate while held. */
-  dictationMode: 'toggle' | 'hold'
-  models: RuntimeSpeechModelSummary[]
-}
+export type RuntimeGitLocalBranches = RuntimeMobileTypes.RuntimeGitLocalBranches
+export type RuntimeSpeechModelSummary = RuntimeMobileTypes.RuntimeSpeechModelSummary
+export type RuntimeSpeechSetupState = RuntimeMobileTypes.RuntimeSpeechSetupState
 
 export type RuntimeGitCheckoutResult = {
   ok: true

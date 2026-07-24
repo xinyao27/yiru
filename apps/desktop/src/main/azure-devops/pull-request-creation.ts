@@ -1,6 +1,10 @@
 import { Buffer } from 'node:buffer'
 
-import type { CreateHostedReviewInput, CreateHostedReviewResult } from '../../shared/hosted-review'
+import type {
+  CreateHostedReviewInput,
+  CreateHostedReviewResult
+} from '@yiru/workbench-model/review'
+
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef

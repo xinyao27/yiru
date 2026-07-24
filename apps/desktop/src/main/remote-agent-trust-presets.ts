@@ -1,12 +1,16 @@
+import { posix, win32 } from 'node:path'
+
 import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathSeparators
-} from '../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
 import type { AgentTrustPreset } from './agent-trust-presets'
 import { upsertProjectTrustLevelInContent } from './codex/config-toml-trust'
 import { getActiveMultiplexer } from './ipc/ssh'
 import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
 import type { IFilesystemProvider } from './providers/types'
+import { resolveRemoteCodexProjectTrustRoot } from './remote-codex-trust-root'
 
 export async function markRemoteAgentWorkspaceTrusted(args: {
   preset: AgentTrustPreset
@@ -21,7 +25,8 @@ export async function markRemoteAgentWorkspaceTrusted(args: {
 
   const workspacePath = await canonicalizeRemoteWorkspacePath(fsProvider, args.workspacePath)
   if (args.preset === 'codex') {
-    await markRemoteCodexProjectTrusted(fsProvider, home, workspacePath)
+    const trustRoot = await resolveRemoteCodexProjectTrustRoot(fsProvider, workspacePath)
+    await markRemoteCodexProjectTrusted(fsProvider, home, trustRoot)
   } else if (args.preset === 'cursor') {
     await markRemoteCursorWorkspaceTrusted(fsProvider, home, workspacePath)
   } else if (args.preset === 'copilot') {
@@ -80,8 +85,9 @@ async function markRemoteCodexProjectTrusted(
   remoteHome: string,
   workspacePath: string
 ): Promise<void> {
-  const codexDir = `${remoteHome}/.codex`
-  const configPath = `${codexDir}/config.toml`
+  const pathApi = isWindowsAbsolutePathLike(remoteHome) ? win32 : posix
+  const codexDir = pathApi.join(remoteHome, '.codex')
+  const configPath = pathApi.join(codexDir, 'config.toml')
   const existing = await readRemoteTextFile(fsProvider, configPath)
   const updated = upsertProjectTrustLevelInContent(existing, workspacePath, 'trusted', {
     // Why: workspacePath was resolved by the remote filesystem provider; local

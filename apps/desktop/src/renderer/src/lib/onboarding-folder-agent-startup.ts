@@ -1,8 +1,9 @@
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
+import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-import type { AgentStartedTelemetry } from '@/lib/worktree-activation'
 
-import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
 import type { SessionOptionValue } from '../../../shared/native-chat-session-options'

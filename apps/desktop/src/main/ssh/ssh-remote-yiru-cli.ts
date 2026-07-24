@@ -1,6 +1,13 @@
-import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
+import type { CliStatusResult } from '../../shared/runtime-types'
 import type { RpcResponse } from '../runtime/rpc/core'
 import { RpcDispatcher } from '../runtime/rpc/dispatcher'
+import { ALL_RPC_METHODS } from '../runtime/rpc/methods'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { RemoteCliArgumentError, type ParsedRemoteCli } from './ssh-remote-cli-argument-error'
 import { formatRemoteCli } from './ssh-remote-cli-format'
@@ -90,7 +97,7 @@ async function runLegacyRemoteYiruCli(
   json: boolean,
   passthroughFailure: HostCliUnavailableError
 ): Promise<RemoteYiruCliResult> {
-  const dispatcher = new RpcDispatcher({ runtime })
+  const dispatcher = new RpcDispatcher({ runtime, methods: ALL_RPC_METHODS })
   try {
     const response = await dispatchRemoteCli(
       dispatcher,
@@ -138,11 +145,11 @@ async function dispatchRemoteCli(
   const command = parsed.commandPath.join(' ')
   switch (command) {
     case 'status': {
-      const response = await call(dispatcher, 'status.get')
+      const response = await call(dispatcher, STATUS_GET_CONTRACT, undefined)
       if (!response.ok) {
         return response
       }
-      const status = response.result as RuntimeStatus
+      const status = response.result
       const cliStatus: CliStatusResult = {
         app: {
           running: true,
@@ -210,17 +217,22 @@ async function dispatchRemoteCli(
   }
 }
 
-async function call(
+type RpcCallResult<TContract extends string | RuntimeMethodContract> =
+  TContract extends RuntimeMethodContract ? RuntimeMethodResult<TContract> : unknown
+
+async function call<TContract extends string | RuntimeMethodContract>(
   dispatcher: RpcDispatcher,
-  method: string,
-  params?: Record<string, unknown>
-): Promise<RpcResponse> {
-  return await dispatcher.dispatch({
+  contract: TContract,
+  params?: TContract extends RuntimeMethodContract
+    ? RuntimeMethodParams<TContract>
+    : Record<string, unknown>
+): Promise<RpcResponse<RpcCallResult<TContract>>> {
+  return (await dispatcher.dispatch({
     id: `remote-cli-${Date.now()}`,
     authToken: 'remote-cli',
-    method,
-    params
-  })
+    method: typeof contract === 'string' ? contract : contract.name,
+    params: params as Record<string, unknown> | undefined
+  })) as RpcResponse<RpcCallResult<TContract>>
 }
 
 function parseRemoteCliArgs(argv: string[]): ParsedRemoteCli {

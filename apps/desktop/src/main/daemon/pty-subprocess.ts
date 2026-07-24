@@ -1,6 +1,7 @@
 import { statSync } from 'node:fs'
 import { delimiter, win32 as pathWin32 } from 'node:path'
 
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: daemon PTY spawning centralizes platform launch setup,
    preflight validation, and lifecycle guards that must stay in one execution path. */
 import * as pty from 'node-pty'
@@ -22,7 +23,6 @@ import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query
 import { isShellProcess } from '../../shared/shell-process-detection'
 import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../../shared/terminal-git-credential-guard'
 import type { TuiAgent } from '../../shared/types'
-import { WINDOWS_GIT_BASH_SHELL } from '../../shared/windows-terminal-shell'
 import { isWindowsGitBashShellPath, resolveWindowsGitBashShellPath } from '../git-bash'
 import { getAgentForegroundContextPaths } from '../providers/agent-foreground-context-paths'
 import { resolveAgentForegroundProcessWithAvailability } from '../providers/agent-foreground-process'
@@ -123,6 +123,24 @@ export type PtySubprocessOptions = {
   shellOverride?: string
   terminalWindowsWslDistro?: string | null
   terminalWindowsPowerShellImplementation?: 'auto' | 'powershell.exe' | 'pwsh.exe'
+}
+
+function deleteRequestedDaemonEnvKeys(
+  env: Record<string, string>,
+  keys: readonly string[] | undefined
+): void {
+  // Why: a persistent daemon has its own inherited environment. Compare the
+  // marker here so real-home routing preserves user-owned custom CODEX_HOME.
+  const deleteYiruOwnedCodexHome =
+    keys?.includes('YIRU_CODEX_HOME') === true &&
+    env.YIRU_CODEX_HOME !== undefined &&
+    env.CODEX_HOME === env.YIRU_CODEX_HOME
+  for (const key of keys ?? []) {
+    delete env[key]
+  }
+  if (deleteYiruOwnedCodexHome) {
+    delete env.CODEX_HOME
+  }
 }
 
 /**
@@ -587,9 +605,7 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
     FORCE_HYPERLINK: '1'
   } as Record<string, string>
   composeGuardedDaemonGitConfigEnv(env, opts.env, opts.launchAgent)
-  for (const key of opts.envToDelete ?? []) {
-    delete env[key]
-  }
+  deleteRequestedDaemonEnvKeys(env, opts.envToDelete)
   if (opts.env?.TERM) {
     env.TERM = opts.env.TERM
   }
@@ -624,10 +640,12 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
   let windowsFallbackAttempts: WindowsShellSpawnAttempt[] = []
   const startupAgentRecognition = recognizeAgentProcessFromCommandLine(opts.command)
   const isCodexStartupCommand = startupAgentRecognition?.agent === 'codex'
-  if (opts.command && startupAgentRecognition) {
-    assertSafeAgentStartupCwd(opts.cwd, opts.command)
-  }
+  // Why: validate the effective cwd after fallback; raw undefined is not the
+  // root-like path that the agent startup guard is intended to reject.
   const requestedCwd = opts.cwd || getDefaultCwd()
+  if (opts.command && startupAgentRecognition) {
+    assertSafeAgentStartupCwd(requestedCwd, opts.command)
+  }
   let spawnCwd = requestedCwd
   let validationCwd = spawnCwd
 
@@ -763,9 +781,7 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
   } else {
     // Why: relay-side launch modes can ask for host defaults to stay scrubbed
     // even after environment normalization above.
-    for (const key of opts.envToDelete ?? []) {
-      delete env[key]
-    }
+    deleteRequestedDaemonEnvKeys(env, opts.envToDelete)
     if (opts.env?.TERM) {
       env.TERM = opts.env.TERM
     }

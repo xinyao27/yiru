@@ -3,13 +3,6 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import type React from 'react'
 import { useRef } from 'react'
 
-import { isDotfileRelativePath } from '@/components/right-sidebar/file-explorer-entries'
-import { FileExplorerToolbar } from '@/components/right-sidebar/file-explorer-toolbar'
-import { FileExplorerTreeRowButton } from '@/components/right-sidebar/file-explorer-tree-row-button'
-import { FileExplorerTreeStatus } from '@/components/right-sidebar/file-explorer-tree-status'
-import type { TreeNode } from '@/components/right-sidebar/file-explorer-types'
-import { FileExplorerVirtualList } from '@/components/right-sidebar/file-explorer-virtual-list'
-import { useFileExplorerManualRefresh } from '@/components/right-sidebar/use-file-explorer-manual-refresh'
 import { Button } from '@/components/ui/button'
 import {
   ContextMenu,
@@ -19,6 +12,13 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { isDotfileRelativePath } from '@/components/workspace-panel/file-explorer-entries'
+import { FileExplorerToolbar } from '@/components/workspace-panel/file-explorer-toolbar'
+import { FileExplorerTreeRowButton } from '@/components/workspace-panel/file-explorer-tree-row-button'
+import { FileExplorerTreeStatus } from '@/components/workspace-panel/file-explorer-tree-status'
+import type { TreeNode } from '@/components/workspace-panel/file-explorer-types'
+import { FileExplorerVirtualList } from '@/components/workspace-panel/file-explorer-virtual-list'
+import { useFileExplorerManualRefresh } from '@/components/workspace-panel/use-file-explorer-manual-refresh'
 import { translate } from '@/i18n/i18n'
 
 import type {

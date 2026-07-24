@@ -2,7 +2,8 @@ import {
   ALL_EXECUTION_HOSTS_SCOPE,
   type ExecutionHostId,
   type ExecutionHostScope
-} from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import { projectHostSetupProjectionFromRepos } from '../../../shared/project-host-setup-projection'
 import type { Project, ProjectHostSetup, Repo } from '../../../shared/types'
 import { resolveComposerRepoId } from './new-workspace-composer-repo'

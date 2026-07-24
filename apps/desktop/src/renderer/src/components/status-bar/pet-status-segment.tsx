@@ -2,6 +2,7 @@ import { Check, Package as PackageOpen, Trash as Trash2, Upload } from '@phospho
 import React from 'react'
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { Slider } from '@/components/ui/slider'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -118,23 +120,23 @@ function PetStatusSegmentInner(): React.JSX.Element {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="status-bar-quiet"
+            size="status-bar"
             type="button"
-            className="group focus-visible:bg-accent inline-flex cursor-pointer items-center py-0.5 pr-[6.5rem] pl-1 outline-none"
+            // Why: preserve the status-bar span reserved for the overlaid pet sprite.
+            className="gap-0 pr-[6.5rem]"
             aria-label={translate(
               'auto.components.status.bar.PetStatusSegment.aec479308a',
               'Pet menu'
             )}
           >
             <span
-              className={cn(
-                'rounded px-1 py-0.5 text-[11px] font-medium text-muted-foreground group-hover:bg-accent/70 group-hover:text-foreground',
-                petVisible ? '' : 'opacity-50'
-              )}
+              className={cn('px-1 py-0.5 text-[11px] font-medium', petVisible ? '' : 'opacity-50')}
             >
               {label}
             </span>
-          </button>
+          </Button>
         }
       />
       <DropdownMenuContent side="top" align="end" sideOffset={8} className="min-w-[220px]">
@@ -171,14 +173,18 @@ function PetStatusSegmentInner(): React.JSX.Element {
               {translate('auto.components.status.bar.PetStatusSegment.c6aa805b1b', 'px')}
             </span>
           </div>
-          <input
-            type="range"
+          <Slider
             min={PET_SIZE_MIN}
             max={PET_SIZE_MAX}
             step={10}
-            value={petSize}
-            onChange={(e) => setPetSize(Number(e.target.value))}
-            className="focus-visible:border-ring w-full outline-none"
+            value={[petSize]}
+            onValueChange={(value) => {
+              const nextSize = Array.isArray(value) ? value[0] : value
+              if (nextSize !== undefined) {
+                setPetSize(nextSize)
+              }
+            }}
+            className="w-full"
             aria-label={translate(
               'auto.components.status.bar.PetStatusSegment.b75484a01a',
               'Pet size'
@@ -232,9 +238,11 @@ function PetStatusSegmentInner(): React.JSX.Element {
                       {selected ? <Check className="size-3.5" aria-hidden /> : null}
                     </span>
                     <span className="flex-1 truncate">{model.label}</span>
-                    <button
+                    <Button
+                      variant="destructive"
+                      size="icon-xs"
                       type="button"
-                      className="text-muted-foreground hover:bg-destructive/15 hover:text-destructive focus-visible:bg-destructive/15 focus-visible:text-destructive ml-2 flex size-5 items-center justify-center rounded outline-none"
+                      className="text-muted-foreground hover:bg-destructive/15 hover:text-destructive focus-visible:bg-destructive/15 focus-visible:text-destructive ml-2 flex size-5"
                       aria-label={translate(
                         'auto.components.status.bar.PetStatusSegment.3668339495',
                         'Remove {{value0}}',
@@ -247,7 +255,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
                       }}
                     >
                       <Trash2 className="size-3" aria-hidden />
-                    </button>
+                    </Button>
                   </DropdownMenuItem>
                 )
               })}

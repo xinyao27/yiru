@@ -1,12 +1,13 @@
 import {
   Warning as AlertTriangle,
-  GitBranch,
+  GitMerge,
   ArrowCounterClockwise as RotateCcw,
   X
 } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { getCreationProgressLabel } from '@/lib/pending-worktree-creation'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
@@ -56,11 +57,11 @@ export default function WorktreeCreationPanel({
   const elapsedLabel = formatElapsedTime(now - entry.startedAt)
 
   return (
-    <div className="bg-background absolute inset-0 flex flex-col">
+    <div className="workspace-native-material-frame absolute inset-0 flex flex-col">
       {/* Faux tab strip: mirrors the real tab row (height, border, bg) so the
           create reads as a workspace tab. Carries only the worktree name + a
           cancel control — the live status lives in the body below. */}
-      <div className="border-border bg-card flex h-[36px] shrink-0 items-stretch border-b">
+      <div className="border-border bg-background flex h-[var(--titlebar-height)] shrink-0 items-stretch border-b [[data-native-sidebar-material=true]_&]:bg-transparent">
         {reserveCollapsedSidebarHeaderSpace ? (
           // Why: collapsed sidebar chrome floats above this strip, so reserve
           // the same measured width real tabs use to keep title/cancel clear.
@@ -74,16 +75,18 @@ export default function WorktreeCreationPanel({
             }
           />
         ) : null}
-        <div className="border-border flex h-full max-w-[240px] items-center gap-1.5 border-r px-2.5 text-xs">
+        <div className="border-border flex h-full max-w-[240px] min-w-32 items-center gap-2 border-x border-t px-3 text-xs">
           {isError ? (
             <AlertTriangle className="text-destructive size-3.5 shrink-0" />
           ) : (
             // Why: a static worktree glyph (not a spinner) keeps the tab reading
             // as a normal tab; the single loading spinner lives in the body.
-            <GitBranch className="text-muted-foreground size-3.5 shrink-0" />
+            <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
           )}
           <span className="text-foreground truncate font-medium">{title}</span>
-          <button
+          <Button
+            variant="quiet"
+            size="icon-xs"
             type="button"
             title={translate(
               'auto.components.worktree.creation.WorktreeCreationPanel.532aea14ce',
@@ -94,10 +97,10 @@ export default function WorktreeCreationPanel({
               'Cancel worktree creation'
             )}
             onClick={dismiss}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground flex size-4 shrink-0 items-center justify-center rounded-sm outline-none"
+            className="hover:bg-muted focus-visible:bg-muted flex size-4"
           >
-            <X className="size-3" />
-          </button>
+            <X weight="regular" className="size-3" />
+          </Button>
         </div>
       </div>
 
@@ -139,27 +142,31 @@ export default function WorktreeCreationPanel({
                   'Something went wrong while creating the worktree.'
                 )}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               onClick={() => retryBackgroundWorktreeCreation(creationId)}
-              className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 outline-none hover:underline"
+              className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
             >
-              <RotateCcw className="size-3" />
+              <RotateCcw weight="regular" className="size-3" />
               {translate(
                 'auto.components.worktree.creation.WorktreeCreationPanel.34dd5ee38b',
                 'Retry'
               )}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               onClick={dismiss}
-              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent outline-none hover:underline"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
             >
               {translate(
                 'auto.components.worktree.creation.WorktreeCreationPanel.dabd226118',
                 'Dismiss'
               )}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="text-muted-foreground flex min-h-0 max-w-3xl flex-col gap-2 text-xs">
@@ -210,27 +217,31 @@ function VmProvisioningStatus({
                 <span className="text-muted-foreground font-normal">{error}</span>
               </div>
               <div className="flex items-center gap-3 text-xs">
-                <button
+                <Button
+                  variant="ghost"
+                  size="xs"
                   type="button"
                   onClick={onRetry}
-                  className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 outline-none hover:underline"
+                  className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
                 >
-                  <RotateCcw className="size-3" />
+                  <RotateCcw weight="regular" className="size-3" />
                   {translate(
                     'auto.components.worktree.creation.WorktreeCreationPanel.34dd5ee38b',
                     'Retry'
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   type="button"
                   onClick={onDismiss}
-                  className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent outline-none hover:underline"
+                  className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
                 >
                   {translate(
                     'auto.components.worktree.creation.WorktreeCreationPanel.dabd226118',
                     'Dismiss'
                   )}
-                </button>
+                </Button>
               </div>
             </>
           ) : (
@@ -245,16 +256,18 @@ function VmProvisioningStatus({
                 </span>
                 <span className="text-muted-foreground text-xs font-normal">{elapsedLabel}</span>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 type="button"
                 onClick={onCancel}
-                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-xs outline-none hover:underline"
+                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 hover:underline"
               >
                 {translate(
                   'auto.components.worktree.creation.WorktreeCreationPanel.cancelProvisioning',
                   'Cancel'
                 )}
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -301,7 +314,7 @@ function RecipeOutputLog({
     <pre
       ref={ref}
       onScroll={handleScroll}
-      className="scrollbar-sleek bg-muted/40 text-muted-foreground h-72 overflow-auto rounded-md p-3 font-mono text-[11px] leading-4 whitespace-pre-wrap"
+      className="scrollbar-sleek bg-muted/40 text-muted-foreground h-72 overflow-auto p-3 font-mono text-[11px] leading-4 whitespace-pre-wrap"
     >
       {log || <span className="text-muted-foreground/60">{emptyLabel}</span>}
     </pre>

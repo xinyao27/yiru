@@ -3,8 +3,9 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { homedir } from 'node:os'
 import { dirname } from 'node:path'
 
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { getDefaultPersistedState, getDefaultWorkspaceSession } from '../../shared/constants'
-import type { ExecutionHostId } from '../../shared/execution-host'
 import { projectHostSetupProjectionFromRepos } from '../../shared/project-host-setup-projection'
 import type {
   PersistedState,

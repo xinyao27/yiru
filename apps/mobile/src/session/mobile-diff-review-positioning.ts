@@ -1,4 +1,5 @@
-import type { DiffReviewScope } from '../../../desktop/src/shared/types'
+import type { DiffReviewScope } from '@yiru/workbench-model/workspace'
+
 import type { MobileGitStagingArea } from '../source-control/mobile-git-status'
 import {
   createMobileDiffReviewFileKey,

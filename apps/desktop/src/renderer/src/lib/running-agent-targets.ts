@@ -1,17 +1,19 @@
-import { resolvePaneAgentActivity } from '@/lib/pane-agent-evidence'
-import type { AppState } from '@/store/types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
+import { resolvePaneAgentActivity } from '@/lib/pane-agent-evidence'
+
 import { parsePaneKey } from '../../../shared/stable-pane-id'
-import type { TerminalTab } from '../../../shared/types'
+import type { TerminalLayoutSnapshot, TerminalTab } from '../../../shared/types'
 import { detectAgentSendTitleStatus } from './agent-send-title-status'
 import { resolveRuntimePaneTitleLeafResolution } from './runtime-pane-title-leaf-id'
 
-export type RunningAgentTargetState = Pick<
-  AppState,
-  'agentStatusByPaneKey' | 'tabsByWorktree' | 'terminalLayoutsByTabId' | 'ptyIdsByTabId'
-> &
-  Partial<Pick<AppState, 'runtimePaneTitlesByTabId'>>
+export type RunningAgentTargetState = {
+  agentStatusByPaneKey: Record<string, AgentStatusEntry>
+  tabsByWorktree: Record<string, TerminalTab[]>
+  terminalLayoutsByTabId: Record<string, TerminalLayoutSnapshot>
+  ptyIdsByTabId: Record<string, string[]>
+  runtimePaneTitlesByTabId?: Record<string, Record<number, string>>
+}
 
 export type RunningAgentSendTarget = {
   paneKey: string

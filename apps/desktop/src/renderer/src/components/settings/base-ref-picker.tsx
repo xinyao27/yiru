@@ -1,3 +1,4 @@
+import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: base-ref defaults and search results come from runtime repo IPC and must clear stale repo results before new requests resolve. */
 import { useEffect, useRef, useState } from 'react'
 
@@ -11,7 +12,6 @@ import {
 import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/runtime-repo-search-bounds'
 import { useAppStore } from '@/store'
 
-import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 
@@ -243,11 +243,13 @@ export function BaseRefPicker({
         baseRefResults.length > 0 ? (
           <div
             ref={baseRefResultsListRef}
-            className="border-border/50 scrollbar-sleek max-h-[min(12rem,40vh)] overflow-x-hidden overflow-y-auto rounded-md border"
+            className="border-border/50 scrollbar-sleek max-h-[min(12rem,40vh)] overflow-x-hidden overflow-y-auto border"
           >
             <div className="p-1">
               {baseRefResults.map((ref) => (
-                <button
+                <Button
+                  variant="ghost"
+                  size="default"
                   key={ref}
                   onClick={() => {
                     // Why: clear the query so the picker returns to its
@@ -260,8 +262,8 @@ export function BaseRefPicker({
                     onSelect(ref)
                   }}
                   className={cn(
-                    'outline-none focus-visible:bg-muted/60',
-                    'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-muted/60',
+                    'border-0 gap-0 whitespace-normal font-normal text-sm focus-visible:bg-muted/60',
+                    'flex w-full justify-between px-3 text-left transition-colors hover:bg-muted/60',
                     effectiveBaseRef === ref
                       ? 'bg-accent text-accent-foreground'
                       : 'text-foreground'
@@ -273,7 +275,7 @@ export function BaseRefPicker({
                       {translate('auto.components.settings.BaseRefPicker.d166ff883d', 'Current')}
                     </span>
                   ) : null}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

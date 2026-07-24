@@ -1,5 +1,6 @@
-import type { AiVaultAgent, AiVaultSession } from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { IFilesystemProvider } from '../providers/types'
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import type { AntigravityWorkspaceResolver } from './session-scanner-antigravity-history'
@@ -21,6 +22,7 @@ export type RemoteParserOptions = {
 export type RemoteSessionSource = {
   agent: AiVaultAgent
   rootDir: string
+  codexHome?: string
   extensions: readonly string[]
   filePredicate?: (path: string) => boolean
   // Depth 0 denotes a direct child of rootDir.

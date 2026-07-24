@@ -1,4 +1,5 @@
 import { CaretRight as ChevronRight, X } from '@phosphor-icons/react'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -6,7 +7,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { normalizeRuntimePathForComparison } from '../../../../shared/cross-platform-path'
 import { getExternalWorktreeParentPath } from '../../../../shared/external-worktree-visibility'
 
 export type ImportedWorktreesVisibilityPlacement = 'repo-group' | 'pinned-fallback'
@@ -121,8 +121,8 @@ export default function ImportedWorktreesVisibilityLine({
     >
       <div
         className={cn(
-          'flex min-h-7 min-w-0 items-center gap-1.5 rounded-md px-1.5 text-[11px] leading-none text-muted-foreground transition-colors',
-          'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+          'flex min-h-7 min-w-0 items-center gap-1.5 px-1.5 text-[11px] leading-none text-muted-foreground transition-colors',
+          'hover:bg-accent hover:text-accent-foreground'
         )}
       >
         <Button
@@ -137,9 +137,10 @@ export default function ImportedWorktreesVisibilityLine({
             { value0: isExpanded ? 'Collapse' : 'Expand', value1: repoDisplayName }
           )}
           onClick={() => setIsExpanded((value) => !value)}
-          className="text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shrink-0 rounded-[4px]"
+          className="text-muted-foreground"
         >
           <ChevronRight
+            weight="regular"
             className={cn('size-3 transition-transform', isExpanded && 'rotate-90')}
             aria-hidden="true"
           />
@@ -156,9 +157,9 @@ export default function ImportedWorktreesVisibilityLine({
                   disabled={pending}
                   aria-label={keepHiddenAriaLabel}
                   onClick={onKeepHidden}
-                  className="text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shrink-0 rounded-md"
+                  className="text-muted-foreground"
                 >
-                  <X className="size-3" aria-hidden="true" />
+                  <X weight="regular" className="size-3" aria-hidden="true" />
                 </Button>
               }
             />
@@ -178,7 +179,7 @@ export default function ImportedWorktreesVisibilityLine({
           )}
         >
           {visibleWorktreeGroups.map((group) => (
-            <div key={group.path} className="grid min-w-0 gap-0.5 rounded-md px-1.5 py-1">
+            <div key={group.path} className="grid min-w-0 gap-0.5 px-1.5 py-1">
               <div className="flex min-h-7 min-w-0 items-center gap-1.5">
                 <Tooltip>
                   <TooltipTrigger
@@ -195,7 +196,7 @@ export default function ImportedWorktreesVisibilityLine({
                     {group.path}
                   </TooltipContent>
                 </Tooltip>
-                <span className="border-sidebar-border text-muted-foreground shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] leading-none">
+                <span className="border-sidebar-border text-muted-foreground shrink-0 border px-1.5 py-0.5 text-[10px] leading-none">
                   {group.worktrees.length}
                 </span>
               </div>
@@ -232,7 +233,7 @@ export default function ImportedWorktreesVisibilityLine({
                       size="xs"
                       disabled={pending}
                       onClick={() => toggleGroupExpanded(group.path)}
-                      className="text-muted-foreground hover:text-sidebar-accent-foreground h-6 justify-start px-0 text-[11px] font-normal"
+                      className="text-muted-foreground justify-start px-0 text-[11px] font-normal"
                     >
                       {expandedGroupPathKeys.has(normalizeRuntimePathForComparison(group.path))
                         ? translate(
@@ -260,7 +261,7 @@ export default function ImportedWorktreesVisibilityLine({
             </div>
           ) : null}
           <div className="grid gap-1 px-1.5 pt-1 pb-1">
-            <p className="bg-sidebar-accent text-sidebar-accent-foreground rounded-md px-2 py-1 text-[10px] leading-4 font-medium">
+            <p className="bg-sidebar-accent text-sidebar-accent-foreground px-2 py-1 text-[10px] leading-4 font-medium">
               {translate(
                 'auto.components.sidebar.ImportedWorktreesVisibilityLine.9f4f14e821',
                 'Change this later from the project menu.'
@@ -274,7 +275,7 @@ export default function ImportedWorktreesVisibilityLine({
                   size="xs"
                   disabled={pending}
                   onClick={onKeepHidden}
-                  className="h-6 px-2 text-[11px] font-medium"
+                  className="text-[11px]"
                 >
                   {translate(
                     'auto.components.sidebar.ImportedWorktreesVisibilityLine.ad99f4eea9',
@@ -289,7 +290,7 @@ export default function ImportedWorktreesVisibilityLine({
                   size="xs"
                   disabled={pending}
                   onClick={onShow}
-                  className="h-6 px-2 text-[11px] font-medium"
+                  className="text-[11px]"
                 >
                   {translate(
                     'auto.components.sidebar.ImportedWorktreesVisibilityLine.b7a87dc32f',

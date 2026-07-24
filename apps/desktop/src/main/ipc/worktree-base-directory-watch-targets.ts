@@ -8,11 +8,12 @@ import {
   getRuntimePathBasename,
   normalizeRuntimePathForComparison,
   resolveRuntimePath
-} from '../../shared/cross-platform-path'
-import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../shared/execution-host'
+} from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+
 import { isFolderRepo } from '../../shared/repo-kind'
 import type { GlobalSettings, Repo } from '../../shared/types'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import type { Store } from '../persistence'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { FileStat, IFilesystemProvider } from '../providers/types'

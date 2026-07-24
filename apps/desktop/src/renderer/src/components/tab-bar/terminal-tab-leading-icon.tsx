@@ -6,6 +6,7 @@ import { cn } from '@/lib/class-names'
 import type { TerminalTab, TuiAgent } from '../../../../shared/types'
 import { FilledBellIcon } from '../sidebar/worktree-card-helpers'
 import { ShellIcon } from './shell-icons'
+import { TAB_LEADING_ICON_CLASSES } from './tab-chrome-classes'
 import type { TerminalTabActivityStatus } from './terminal-tab-activity-status'
 
 type TerminalTabLeadingIconProps = {
@@ -51,7 +52,7 @@ function TerminalTabAgentIdentityIcon({
 }: TerminalTabAgentIdentityIconProps): React.JSX.Element {
   return (
     <span
-      className={cn('inline-flex size-4 [&>*]:size-full', !isActive && 'opacity-70', className)}
+      className={cn('inline-flex size-3.5 [&>*]:size-full', !isActive && 'opacity-70', className)}
       data-agent-icon={agent}
       aria-hidden
     >
@@ -76,9 +77,9 @@ export function TerminalTabLeadingIcon({
           'auto.components.tab.bar.TerminalTabLeadingIcon.7ab2964bea',
           'Unread agent completion'
         )}
-        className="mr-1 inline-flex shrink-0 items-center gap-1"
+        className="mr-2 inline-flex shrink-0 items-center gap-1"
       >
-        <FilledBellIcon className="size-4 text-amber-500" />
+        <FilledBellIcon className="size-3.5 text-amber-500" />
         {agent ? <TerminalTabAgentIdentityIcon agent={agent} isActive={isActive} /> : null}
       </span>
     )
@@ -90,7 +91,7 @@ export function TerminalTabLeadingIcon({
       <span
         data-testid="tab-agent-activity-indicator"
         data-agent-activity-status={activityStatus}
-        className="mr-1 inline-flex shrink-0 items-center gap-1"
+        className="mr-2 inline-flex shrink-0 items-center gap-1"
       >
         <AgentStateDot state={dotState} size="md" />
         {/* Why: status and identity answer different questions. Keep the agent
@@ -102,7 +103,7 @@ export function TerminalTabLeadingIcon({
 
   if (agent) {
     return (
-      <TerminalTabAgentIdentityIcon agent={agent} isActive={isActive} className="mr-1 shrink-0" />
+      <TerminalTabAgentIdentityIcon agent={agent} isActive={isActive} className="mr-2 shrink-0" />
     )
   }
 
@@ -111,7 +112,8 @@ export function TerminalTabLeadingIcon({
   return (
     <span
       className={cn(
-        'mr-1 inline-flex size-4 shrink-0 [&>*]:size-full',
+        TAB_LEADING_ICON_CLASSES,
+        'inline-flex [&>*]:size-full',
         isActive ? '' : 'opacity-70'
       )}
       data-shell-icon={shell ?? 'generic'}

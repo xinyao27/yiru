@@ -54,8 +54,8 @@ export default function NewExternalWorktreesInboxLine({
     >
       <div
         className={cn(
-          'group flex min-h-7 min-w-0 items-center gap-1.5 rounded-md px-1.5 text-[11px] leading-none text-muted-foreground transition-colors',
-          'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+          'group flex min-h-7 min-w-0 items-center gap-1.5 px-1.5 text-[11px] leading-none text-muted-foreground transition-colors',
+          'hover:bg-accent hover:text-accent-foreground'
         )}
       >
         <Button
@@ -78,9 +78,10 @@ export default function NewExternalWorktreesInboxLine({
                 )
           }
           onClick={() => setIsExpanded((value) => !value)}
-          className="text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shrink-0 rounded-[4px]"
+          className="text-muted-foreground"
         >
           <ChevronRight
+            weight="regular"
             className={cn('size-3 transition-transform', isExpanded && 'rotate-90')}
             aria-hidden="true"
           />
@@ -94,7 +95,7 @@ export default function NewExternalWorktreesInboxLine({
         <span className="relative inline-grid size-6 shrink-0 place-items-center">
           <span
             className={cn(
-              'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full border border-border px-1.5 text-[10px] font-medium leading-none text-muted-foreground transition-opacity',
+              'inline-flex h-[18px] min-w-[18px] items-center justify-center border border-border px-1.5 text-[10px] font-medium leading-none text-muted-foreground transition-opacity',
               onSuppress &&
                 'can-hover:group-hover:opacity-0 can-hover:group-focus-within:opacity-0 [@media(hover:none)]:opacity-0'
             )}
@@ -112,9 +113,9 @@ export default function NewExternalWorktreesInboxLine({
                     disabled={pending}
                     aria-label={suppressAriaLabel}
                     onClick={onSuppress}
-                    className="text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground can-hover:pointer-events-none can-hover:opacity-0 can-hover:group-hover:pointer-events-auto can-hover:group-hover:opacity-100 can-hover:group-focus-within:pointer-events-auto can-hover:group-focus-within:opacity-100 absolute inset-0"
+                    className="text-muted-foreground can-hover:pointer-events-none can-hover:opacity-0 can-hover:group-hover:pointer-events-auto can-hover:group-hover:opacity-100 can-hover:group-focus-within:pointer-events-auto can-hover:group-focus-within:opacity-100 absolute inset-0"
                   >
-                    <X className="size-3" aria-hidden="true" />
+                    <X weight="regular" className="size-3" aria-hidden="true" />
                   </Button>
                 }
               />
@@ -138,7 +139,7 @@ export default function NewExternalWorktreesInboxLine({
             {inboxWorktrees.map((worktree) => (
               <li
                 key={worktree.id ?? worktree.path ?? worktree.displayName}
-                className="hover:bg-sidebar-accent flex min-h-7 min-w-0 items-center gap-2 rounded-md px-1.5 py-1 text-xs"
+                className="hover:bg-accent flex min-h-7 min-w-0 items-center gap-2 px-1.5 py-1 text-xs"
               >
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{worktree.displayName}</div>

@@ -4,7 +4,8 @@
 // agents get a native attachment chip; unsupported/custom agents get a clear
 // message instead of silently injecting a path that the model reads as text.
 
-import type { AgentType } from '../../../../shared/agent-status-types'
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import { isImageDropPath } from '../terminal-pane/terminal-drop-image-path'
 
 /** How a given agent consumes a pasted image. `attachment` = bracket-paste the

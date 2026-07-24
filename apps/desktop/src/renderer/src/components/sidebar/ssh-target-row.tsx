@@ -1,3 +1,4 @@
+import type { SshTarget, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 /**
  * Row used in the "Open project on SSH host" step to pick an SSH target.
  *
@@ -7,10 +8,9 @@
 import React, { useCallback, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-
-import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 
 type Props = {
   target: SshTarget & { state?: SshConnectionState }
@@ -73,7 +73,7 @@ export function SshTargetRow({
       role={isConnected ? 'button' : undefined}
       tabIndex={isConnected ? 0 : undefined}
       className={cn(
-        'w-full flex items-center gap-2 px-3 py-2 rounded-md border text-xs transition-colors outline-none focus-visible:border-ring',
+        'w-full flex items-center gap-2 px-3 py-2  border text-xs transition-colors outline-none focus-visible:border-ring',
         isSelected ? 'border-foreground/30 bg-accent' : 'border-border hover:bg-accent/50',
         isConnected ? 'cursor-pointer' : ''
       )}
@@ -85,16 +85,18 @@ export function SshTargetRow({
         }
       }}
     >
-      <span className={cn('size-2 rounded-full shrink-0', dotColor)} />
+      <span className={cn('size-2  shrink-0', dotColor)} />
       <span className={cn('font-medium truncate', !isConnected ? 'text-muted-foreground' : '')}>
         {target.label || `${target.username}@${target.host}`}
       </span>
       {!isConnected && (
         // Why: inline Connect avoids forcing the user out to Settings just to
         // bring up a configured target.
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className="text-foreground hover:bg-accent/70 focus-visible:bg-accent/70 ml-auto flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium outline-none disabled:cursor-default disabled:opacity-50"
+          className="text-foreground hover:bg-accent/70 focus-visible:bg-accent/70 ml-auto flex h-auto border-0 px-1.5 py-0.5 text-[11px] disabled:cursor-default"
           onClick={handleConnectClick}
           disabled={isBusy}
         >
@@ -106,7 +108,7 @@ export function SshTargetRow({
           ) : (
             translate('auto.components.sidebar.SshTargetRow.75ad429b5d', 'Connect')
           )}
-        </button>
+        </Button>
       )}
     </div>
   )

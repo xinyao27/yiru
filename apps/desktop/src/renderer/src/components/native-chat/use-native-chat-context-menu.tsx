@@ -3,6 +3,7 @@ import {
   Clipboard,
   Copy,
   GitFork,
+  ChatCentered as MessageSquarePlus,
   Layout as PanelBottomClose,
   Layout as PanelsTopLeft,
   Sidebar as PanelRightClose,
@@ -22,6 +23,7 @@ import {
   type RefObject
 } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +58,8 @@ export type NativeChatContextMenuActions = {
   canExpandPane: boolean
   isPaneExpanded: boolean
   onToggleExpand: () => void
+  canContinueAgentSessionInNewSession: boolean
+  onContinueAgentSessionInNewSession: () => void
   onForkAgentSession: () => void
   onSetTitle: () => void
   onCopyTerminalId: () => void
@@ -73,6 +77,8 @@ export const emptyNativeChatContextMenuActions: Omit<NativeChatContextMenuAction
   canExpandPane: false,
   isPaneExpanded: false,
   onToggleExpand: () => {},
+  canContinueAgentSessionInNewSession: false,
+  onContinueAgentSessionInNewSession: () => {},
   onForkAgentSession: () => {},
   onSetTitle: () => {},
   onCopyTerminalId: () => {},
@@ -141,10 +147,12 @@ export function useNativeChatContextMenu({
       <DropdownMenu open={state.open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none fixed size-px opacity-0"
+              className="pointer-events-none fixed size-px border-0 opacity-0"
               style={{ left: state.point.x, top: state.point.y }}
             />
           }
@@ -164,7 +172,7 @@ export function useNativeChatContextMenu({
           </DropdownMenuItem>
           {onNewConversation ? (
             <DropdownMenuItem onClick={onNewConversation}>
-              <ArrowClockwise />
+              <ArrowClockwise weight="regular" />
               {translate('components.global-assistant.newConversation', 'New conversation')}
             </DropdownMenuItem>
           ) : null}
@@ -176,6 +184,15 @@ export function useNativeChatContextMenu({
                 'Switch to terminal view'
               )}
               <DropdownMenuShortcut>{shortcutLabel}</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          ) : null}
+          {actions.canContinueAgentSessionInNewSession ? (
+            <DropdownMenuItem onClick={actions.onContinueAgentSessionInNewSession}>
+              <MessageSquarePlus />
+              {translate(
+                'components.agentSessionContinuation.continueInNewSession',
+                'Continue in New Session…'
+              )}
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem onClick={actions.onForkAgentSession}>
@@ -211,7 +228,11 @@ export function useNativeChatContextMenu({
           ) : null}
           {actions.canExpandPane ? (
             <DropdownMenuItem onClick={actions.onToggleExpand}>
-              {actions.isPaneExpanded ? <Minimize2 /> : <Maximize2 />}
+              {actions.isPaneExpanded ? (
+                <Minimize2 weight="regular" />
+              ) : (
+                <Maximize2 weight="regular" />
+              )}
               {actions.isPaneExpanded
                 ? translate(
                     'auto.components.terminal.pane.TerminalContextMenu.df766809e0',
@@ -249,7 +270,7 @@ export function useNativeChatContextMenu({
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={actions.onClosePane}>
-                <X />
+                <X weight="regular" />
                 {translate(
                   'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
                   'Close Pane'

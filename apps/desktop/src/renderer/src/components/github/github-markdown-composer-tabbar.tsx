@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -17,32 +18,36 @@ export function GitHubMarkdownComposerTabbar({
   return (
     <div className="github-markdown-composer-tabbar">
       <div className="github-markdown-composer-tabs" role="tablist">
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           role="tab"
           aria-selected={activeTab === 'write'}
           className={cn(
-            'outline-none focus-visible:bg-accent',
+            'p-0 h-auto border-0 gap-0 whitespace-normal font-normal focus-visible:bg-accent',
             'github-markdown-composer-tab',
             activeTab === 'write' && 'is-active'
           )}
           onClick={() => onTabChange('write')}
         >
           {translate('auto.components.github.GitHubMarkdownComposer.c91f0a2b14', 'Write')}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           role="tab"
           aria-selected={activeTab === 'preview'}
           className={cn(
-            'outline-none focus-visible:bg-accent',
+            'p-0 h-auto border-0 gap-0 whitespace-normal font-normal focus-visible:bg-accent',
             'github-markdown-composer-tab',
             activeTab === 'preview' && 'is-active'
           )}
           onClick={() => onTabChange('preview')}
         >
           {translate('auto.components.github.GitHubMarkdownComposer.d82b1e3f05', 'Preview')}
-        </button>
+        </Button>
       </div>
       {activeTab === 'write' ? (
         <div className="github-markdown-composer-tabbar-toolbar">{children}</div>

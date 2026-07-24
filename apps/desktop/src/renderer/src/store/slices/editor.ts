@@ -1,34 +1,37 @@
-import { toast } from 'sonner'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+import {
+  resolveSourceControlRemoteOperationFailureOutcome,
+  resolveSourceControlSyncAfterPull,
+  resolveSourceControlSyncStart,
+  type SourceControlRemoteOperationOutcome,
+  type SourceControlRemoteOpKind
+} from '@yiru/workbench-model/review'
 /* eslint-disable max-lines */
 import type { StateCreator, StoreApi } from 'zustand'
 
+import { translate } from '@/i18n/i18n'
 import {
   buildCheckRunDetailsTabId,
   getCheckRunDetailsTabLabel,
   type OpenCheckRunDetailsState
-} from '@/components/editor/check-run-details-tab'
-import { resolveMarkdownLinkTarget } from '@/components/editor/markdown-internal-links'
-import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/components/right-sidebar/push-target-upstream-refresh-cache'
-import type { RemoteOpKind } from '@/components/right-sidebar/source-control-primary-action'
-import { translate } from '@/i18n/i18n'
+} from '@/lib/check-run-details-tab'
 import { getConnectionIdForFileFromState } from '@/lib/connection-owner-resolution'
 import { createUntitledMarkdownFileWithTemplateSelection } from '@/lib/create-untitled-markdown'
 import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { detectLanguage } from '@/lib/language-detect'
 import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
+import { resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
 import { joinPath } from '@/lib/path'
-import {
-  isNonFastForwardRemoteError,
-  markSyncPushStageError,
-  resolveRemoteOperationErrorMessage
-} from '@/lib/source-control-remote-error'
+import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/lib/push-target-upstream-refresh-cache'
+import { markSyncPushStageError } from '@/lib/source-control-remote-error'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
 } from '@/lib/workspace-session-hydration-keys'
 import { getExplicitRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { notifyHostOfMirroredEditorClose } from '@/runtime/close-mirrored-editor-tab'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 import {
   deleteRuntimePath,
   deleteRuntimeRelativePath,
@@ -45,8 +48,6 @@ import {
 import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { isPathInsideOrEqual } from '../../../../shared/cross-platform-path'
-import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
 import type {
   GitBranchChangeEntry,
@@ -73,7 +74,10 @@ import type {
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 import type { AppState } from '../types'
 import { pushRecentlyClosedTabKind } from './recently-closed-tabs'
+import { applyRemoteOperationFollowUp } from './source-control-operation-follow-up'
 import { findWorktreeById, getRepoIdFromWorktreeId } from './worktree-helpers'
+
+type RemoteOpKind = SourceControlRemoteOpKind
 
 export type {
   ActiveRightSidebarTab,
@@ -1943,7 +1947,10 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       get().openFile(fileInfo, { preview: false, targetGroupId: groupId })
       get().recordFeatureInteraction('markdown-file-created')
     } catch (err) {
-      toast.error(extractIpcErrorMessage(err, 'Failed to create untitled markdown file.'))
+      publishRendererCommandResult({
+        type: 'editor-markdown-create-failed',
+        error: extractIpcErrorMessage(err, 'Failed to create untitled markdown file.')
+      })
     }
   },
 
@@ -3874,7 +3881,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     get().beginRemoteOperation(
       publish ? 'publish' : options.forceWithLease === true ? 'force_push' : 'push'
     )
-    let shouldRefreshAfterRejectedPush = false
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     const runtimeSettings = options.runtimeTargetSettings ?? get().settings
     try {
       await pushRuntimeGit(
@@ -3882,81 +3889,87 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         { publish, pushTarget, forceWithLease: options.forceWithLease }
       )
     } catch (error) {
-      shouldRefreshAfterRejectedPush = isNonFastForwardRemoteError(error)
-      toast.error(
-        resolveRemoteOperationErrorMessage(error, {
+      outcome = resolveSourceControlRemoteOperationFailureOutcome({
+        operation: publish ? 'publish' : options.forceWithLease === true ? 'force_push' : 'push',
+        error
+      })
+      publishRendererCommandResult({
+        type: 'source-control-remote-operation-failed',
+        error,
+        context: {
           publish,
           isPush: !publish && options.forceWithLease !== true,
           isForcePush: !publish && options.forceWithLease === true
-        })
-      )
+        }
+      })
       throw error
     } finally {
       get().endRemoteOperation()
-      if (shouldRefreshAfterRejectedPush) {
-        const context = { settings: runtimeSettings, worktreeId, worktreePath, connectionId }
-        // Why: the rejected push proved the publish branch moved. Fetch first
-        // so legacy base-tracking worktrees can discover origin/<branch>, then
-        // refresh ahead/behind so Pull/Sync become actionable immediately.
-        void fetchRuntimeGit(context, pushTarget)
-          .catch(() => undefined)
-          .then(() =>
-            get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-              runtimeTargetSettings: runtimeSettings
-            })
-          )
-      }
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: publish ? 'publish' : options.forceWithLease === true ? 'force_push' : 'push',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   pullBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
     get().beginRemoteOperation('pull')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await pullRuntimeGit(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         pushTarget
       )
     } catch (error) {
-      toast.error(resolveRemoteOperationErrorMessage(error))
+      outcome = 'failed'
+      publishRendererCommandResult({ type: 'source-control-remote-operation-failed', error })
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: 'pull',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   fastForwardBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
     get().beginRemoteOperation('fast_forward')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await fastForwardRuntimeGit(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         pushTarget
       )
     } catch (error) {
-      toast.error(resolveRemoteOperationErrorMessage(error, { isFastForward: true }))
+      outcome = 'failed'
+      publishRendererCommandResult({
+        type: 'source-control-remote-operation-failed',
+        error,
+        context: { isFastForward: true }
+      })
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: 'fast_forward',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   syncBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
@@ -3964,29 +3977,29 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     // post-op upstream refresh after the busy flag clears so the primary
     // button label rotates immediately when the IPC resolves.
     get().beginRemoteOperation('sync')
-    // Why: the inner push stage toasts with { isSync: true } so its failure
+    // Why: the inner push stage publishes with { isSync: true } so its failure
     // surfaces a "Sync failed..." message instead of "Push failed..." — the
     // user invoked Sync; the underlying push is implementation detail. The
-    // outer catch must then skip toasting to avoid a double-toast.
-    let pushStageToastShown = false
+    // outer catch must skip publishing the same failure twice.
+    let pushStageFailurePublished = false
     let pushed = false
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
     try {
       const context = { settings: runtimeSettings, worktreeId, worktreePath, connectionId }
       await fetchRuntimeGit(context, pushTarget)
       const upstreamStatusBeforePull = await getRuntimeGitUpstreamStatus(context, pushTarget)
-      if (shouldForcePushWithLeaseForUpstream(upstreamStatusBeforePull)) {
+      if (resolveSourceControlSyncStart(upstreamStatusBeforePull) === 'force_push') {
         try {
           await pushRuntimeGit(context, { pushTarget, forceWithLease: true })
           pushed = true
         } catch (error) {
-          toast.error(
-            resolveRemoteOperationErrorMessage(error, {
-              isSync: true,
-              isSyncPushStage: true
-            })
-          )
-          pushStageToastShown = true
+          publishRendererCommandResult({
+            type: 'source-control-remote-operation-failed',
+            error,
+            context: { isSync: true, isSyncPushStage: true }
+          })
+          pushStageFailurePublished = true
           throw markSyncPushStageError(error)
         }
       } else {
@@ -3996,7 +4009,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         // the new merge commit) or 0 (pure fast-forward), and we avoid a
         // no-op push round-trip in the fast-forward case.
         const upstreamStatus = await getRuntimeGitUpstreamStatus(context, pushTarget)
-        if (upstreamStatus.ahead > 0) {
+        if (resolveSourceControlSyncAfterPull(upstreamStatus) === 'push') {
           try {
             await pushRuntimeGit(context, { pushTarget })
             pushed = true
@@ -4004,59 +4017,76 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
             // Why: format under the user-facing operation (sync) rather than
             // the inner step (push) — the user clicked Sync and shouldn't see
             // a "Push failed" toast for a step they didn't directly invoke.
-            toast.error(
-              resolveRemoteOperationErrorMessage(error, {
-                isSync: true,
-                isSyncPushStage: true
-              })
-            )
-            pushStageToastShown = true
+            publishRendererCommandResult({
+              type: 'source-control-remote-operation-failed',
+              error,
+              context: { isSync: true, isSyncPushStage: true }
+            })
+            pushStageFailurePublished = true
             throw markSyncPushStageError(error)
           }
         }
       }
     } catch (error) {
-      if (!pushStageToastShown) {
+      outcome = resolveSourceControlRemoteOperationFailureOutcome({
+        operation: 'sync',
+        error,
+        isPushStage: pushStageFailurePublished
+      })
+      if (!pushStageFailurePublished) {
         // Why: same isSync framing for fetch/pull/upstream-status failures so
         // every sync failure path consistently reads as "Sync failed..." (or
         // a more specific actionable message like "Pull blocked..." when the
         // shared classifiers match first).
-        toast.error(resolveRemoteOperationErrorMessage(error, { isSync: true }))
+        publishRendererCommandResult({
+          type: 'source-control-remote-operation-failed',
+          error,
+          context: { isSync: true }
+        })
       }
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    if (pushed) {
-      const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-      if (typeof refreshGitHubForWorktree === 'function') {
-        refreshGitHubForWorktree(worktreeId)
-      }
+      applyRemoteOperationFollowUp(get, {
+        operation: 'sync',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings,
+        syncPushed: pushed
+      })
     }
   },
   rebaseFromBase: async (worktreeId, worktreePath, baseRef, connectionId, pushTarget, options) => {
     get().beginRemoteOperation('rebase')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await rebaseRuntimeGitFromBase(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         baseRef
       )
     } catch (error) {
-      toast.error(resolveRemoteOperationErrorMessage(error, { isRebase: true }))
+      outcome = 'failed'
+      publishRendererCommandResult({
+        type: 'source-control-remote-operation-failed',
+        error,
+        context: { isRebase: true }
+      })
       throw error
     } finally {
       get().endRemoteOperation()
-    }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
-    const refreshGitHubForWorktree = get().refreshGitHubForWorktree
-    if (typeof refreshGitHubForWorktree === 'function') {
-      refreshGitHubForWorktree(worktreeId)
+      applyRemoteOperationFollowUp(get, {
+        operation: 'rebase',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
   },
   fetchBranch: async (worktreeId, worktreePath, connectionId, pushTarget, options) => {
@@ -4066,20 +4096,32 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     // ahead/behind counts on the upstream-status payload.
     get().beginRemoteOperation('fetch')
     const runtimeSettings = options?.runtimeTargetSettings ?? get().settings
+    let outcome: SourceControlRemoteOperationOutcome = 'succeeded'
     try {
       await fetchRuntimeGit(
         { settings: runtimeSettings, worktreeId, worktreePath, connectionId },
         pushTarget
       )
     } catch (error) {
-      toast.error(resolveRemoteOperationErrorMessage(error, { isFetch: true }))
+      outcome = 'failed'
+      publishRendererCommandResult({
+        type: 'source-control-remote-operation-failed',
+        error,
+        context: { isFetch: true }
+      })
       throw error
     } finally {
       get().endRemoteOperation()
+      applyRemoteOperationFollowUp(get, {
+        operation: 'fetch',
+        outcome,
+        worktreeId,
+        worktreePath,
+        connectionId,
+        pushTarget,
+        runtimeSettings
+      })
     }
-    void get().fetchUpstreamStatus(worktreeId, worktreePath, connectionId, pushTarget, {
-      runtimeTargetSettings: runtimeSettings
-    })
   },
   gitBranchChangesByWorktree: {},
   gitBranchCompareSummaryByWorktree: {},
@@ -4363,19 +4405,19 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         try {
           stats = await statRuntimePath(fileContext, target.absolutePath)
         } catch {
-          toast.error(
-            translate('auto.store.slices.editor.f2e00db373', 'File not found: {{value0}}', {
-              value0: target.relativePath
-            })
-          )
+          publishRendererCommandResult({
+            type: 'editor-link-open-failed',
+            reason: 'missing',
+            path: target.relativePath
+          })
           return
         }
         if (stats.isDirectory) {
-          toast.error(
-            translate('auto.store.slices.editor.51f15c37d3', 'Cannot open directory: {{value0}}', {
-              value0: target.relativePath
-            })
-          )
+          publishRendererCommandResult({
+            type: 'editor-link-open-failed',
+            reason: 'directory',
+            path: target.relativePath
+          })
           return
         }
       }
@@ -4408,19 +4450,19 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     try {
       stats = await statRuntimePath(fileContext, absolutePath)
     } catch {
-      toast.error(
-        translate('auto.store.slices.editor.f2e00db373', 'File not found: {{value0}}', {
-          value0: relativePath
-        })
-      )
+      publishRendererCommandResult({
+        type: 'editor-link-open-failed',
+        reason: 'missing',
+        path: relativePath
+      })
       return
     }
     if (stats.isDirectory) {
-      toast.error(
-        translate('auto.store.slices.editor.51f15c37d3', 'Cannot open directory: {{value0}}', {
-          value0: relativePath
-        })
-      )
+      publishRendererCommandResult({
+        type: 'editor-link-open-failed',
+        reason: 'directory',
+        path: relativePath
+      })
       return
     }
 

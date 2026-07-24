@@ -1,4 +1,4 @@
-import type { BuiltInWindowsTerminalShell } from '../../../../shared/windows-terminal-shell'
+import type { BuiltInWindowsTerminalShell } from '@yiru/workbench-model/platform'
 
 export function resolveWindowsShellLaunchTarget(
   shell: BuiltInWindowsTerminalShell,

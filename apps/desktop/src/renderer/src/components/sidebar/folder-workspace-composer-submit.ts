@@ -1,3 +1,7 @@
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { resolveQuickCreateLinkedWorkItemPrompt } from '@/lib/linked-work-item-context'
 import {
@@ -14,15 +18,12 @@ import {
 import { isWorkItemLookupText } from '@/lib/work-item-lookup-text'
 import { activateAndRevealFolderWorkspace } from '@/lib/worktree-activation'
 
-import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
 import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
 import type { AgentStartupShell } from '../../../../shared/tui-agent-startup-shell'
 import type { FolderWorkspace, ProjectGroup, TuiAgent } from '../../../../shared/types'
-import { resolveLocalWindowsAgentStartupShell } from '../../../../shared/windows-terminal-shell'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
 import {
   getLinkedItemDisplayName,
   toFolderWorkspaceLinkedReview

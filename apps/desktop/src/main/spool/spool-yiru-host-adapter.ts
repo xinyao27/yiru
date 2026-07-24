@@ -1,4 +1,5 @@
-import { parseExecutionHostId } from '../../shared/execution-host'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type { SpoolHostAdapter } from './spool-execution-gateway'
@@ -43,8 +44,12 @@ export function createYiruSpoolHostAdapter(
   options: YiruSpoolHostAdapterOptions
 ): YiruSpoolHostAdapterBundle {
   const files = new YiruSpoolHostFiles(options.store)
-  const git = new YiruSpoolHostGit(options.store, options.runtime)
-  const checks = new YiruSpoolHostChecks(options.store, options.runtime)
+  const git = new YiruSpoolHostGit(options.store, options.runtime.gitCommands)
+  const checks = new YiruSpoolHostChecks(
+    options.store,
+    options.runtime,
+    options.runtime.gitCommands
+  )
   const sessionRecords = new SpoolOwnerSessionRecords()
   const terminalSessionBindings = new SpoolTerminalSessionBindings()
   const terminal = new YiruSpoolHostTerminal(

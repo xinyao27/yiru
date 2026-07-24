@@ -1,4 +1,5 @@
 import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -12,7 +13,6 @@ import {
 } from '@/runtime/runtime-environment-ssh-state'
 import { useAppStore } from '@/store'
 
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { runWorktreeDelete } from '../sidebar/delete-worktree-flow'
 
 type TerminalSshReconnectOverlayProps = {
@@ -144,9 +144,9 @@ export function TerminalSshReconnectOverlay({
       className="bg-background/75 pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6 py-8 backdrop-blur-[1px]"
       data-terminal-ssh-reconnect-overlay="true"
     >
-      <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-sm flex-col gap-3 rounded-md border px-4 py-4">
+      <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-sm flex-col gap-3 border px-4 py-4">
         <div className="flex items-start gap-3">
-          <div className="border-border bg-muted text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border">
+          <div className="border-border bg-muted text-muted-foreground mt-0.5 flex size-8 shrink-0 items-center justify-center border">
             {isConnecting ? (
               <LoadingIndicator className="size-4" />
             ) : (
@@ -175,7 +175,7 @@ export function TerminalSshReconnectOverlay({
             </div>
           </div>
         </div>
-        <div className="border-border/60 bg-muted/40 flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+        <div className="border-border/60 bg-muted/40 flex items-center justify-between gap-3 border px-3 py-2">
           <div className="flex min-w-0 items-center gap-2">
             <Server className="text-muted-foreground size-3.5 shrink-0" />
             <span className="truncate text-xs font-medium">{targetLabel}</span>

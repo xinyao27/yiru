@@ -5,7 +5,7 @@
 // Pure state/selectors live here (no React Native imports) so they can be
 // unit-tested directly; account-usage.tsx re-exports them alongside the
 // UsageBar component.
-import { formatResetCountdown } from '../../../desktop/src/shared/rate-limit-reset-format'
+import { formatResetCountdown } from '@yiru/workbench-model/ui'
 
 export type RateLimitWindow = {
   usedPercent: number

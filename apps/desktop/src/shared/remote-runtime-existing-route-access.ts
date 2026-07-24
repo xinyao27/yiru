@@ -1,3 +1,5 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import { REMOTE_RUNTIME_CANCEL_REQUEST_METHOD } from './remote-runtime-request-cancellation'
 import { remoteRuntimeUnavailableError } from './remote-runtime-request-frames'
 import { requestSharedControl } from './remote-runtime-shared-control-requests'
@@ -14,7 +16,6 @@ import type {
   SharedControlPendingRequest,
   SharedControlSubscriptionCallbacks
 } from './remote-runtime-shared-control-types'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 
 type RemoteRuntimeExistingRouteAccessOptions = {
   deviceToken: string

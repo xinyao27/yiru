@@ -2,7 +2,6 @@ import { Linking, Pressable, Text, View } from 'react-native'
 
 import {
   ArrowSquareOut as ExternalLink,
-  GitBranch,
   GitMerge,
   GitPullRequest,
   X
@@ -27,7 +26,7 @@ function SelectionIcon({ kind }: { kind: SmartNameSelection['kind'] }) {
   if (kind === 'gitlab-mr') {
     return <GitMerge size={15} colorClassName="accent-muted-foreground" />
   }
-  return <GitBranch size={15} colorClassName="accent-muted-foreground" />
+  return <GitMerge size={15} colorClassName="accent-muted-foreground" />
 }
 
 export function SmartWorkspaceSourceField({

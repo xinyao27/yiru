@@ -1,11 +1,13 @@
-import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
-import type { ParsedAgentStatusPayload } from '../../../../shared/agent-status-types'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+
+import type { PtyDataMeta } from '@/runtime/pty-data-meta'
+
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import type { EventProps } from '../../../../shared/telemetry-events'
 import type { TerminalOscColorQueryReplyColors } from '../../../../shared/terminal-osc-color-reply'
 import type { TuiAgent } from '../../../../shared/types'
-import type { PtyDataMeta } from './pty-dispatcher'
 
 export type PtyBufferSnapshot = {
   data: string
@@ -84,6 +86,7 @@ export type PtyTransport = {
     initiallyHidden?: boolean
     command?: string
     env?: Record<string, string>
+    envToDelete?: string[]
     launchConfig?: SleepingAgentLaunchConfig
     launchToken?: string
     launchAgent?: TuiAgent
@@ -140,6 +143,7 @@ export type IpcPtyTransportOptions = {
   cwd?: string
   cwdFallback?: 'worktree'
   env?: Record<string, string>
+  envToDelete?: string[]
   command?: string
   launchConfig?: SleepingAgentLaunchConfig
   launchToken?: string

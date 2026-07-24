@@ -11,6 +11,13 @@ import {
   ArrowClockwise as RefreshCw,
   X
 } from '@phosphor-icons/react'
+import { PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import {
+  getLocalExecutionHostLabel,
+  getRepoExecutionHostId,
+  parseExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: this page owns the automations list/detail
  * orchestration while the form and detail presentation live in sibling files. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -72,18 +79,11 @@ import type {
   AutomationRun,
   AutomationUpdateInput
 } from '../../../../shared/automations-types'
-import {
-  getLocalExecutionHostLabel,
-  getRepoExecutionHostId,
-  parseExecutionHostId
-} from '../../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { ProjectSourceContext } from '../../../../shared/project-source-context'
-import { PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '../../../../shared/protocol-version'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { YiruHooks, Repo, Worktree } from '../../../../shared/types'
-import { getWorktreePathBasenameFromId } from '../../../../shared/worktree-id'
 import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import {
   getRepoBackedProviderAvailability,
@@ -2120,22 +2120,21 @@ export default function AutomationsPage(): React.JSX.Element {
 
   return (
     <main className="bg-background text-foreground relative flex h-full min-h-0 flex-col">
-      <header className="flex shrink-0 items-center justify-between px-5 pt-1.5 pb-3 md:px-8">
-        <div className="flex items-center gap-2">
+      <header className="flex shrink-0 items-center justify-between py-2.5 pr-[calc(1.25rem+var(--window-controls-width,0px))] pl-2 [-webkit-app-region:drag]">
+        <div className="flex items-center gap-2 [-webkit-app-region:no-drag]">
           <Tooltip>
             <TooltipTrigger
               render={
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="size-7 rounded-full"
+                  size="icon-sm"
                   onClick={closeAutomationsPage}
                   aria-label={translate(
                     'auto.components.automations.AutomationsPage.67c7ff795b',
                     'Close automations'
                   )}
                 >
-                  <X className="size-4" />
+                  <X weight="regular" className="size-4" />
                 </Button>
               }
             />
@@ -2152,17 +2151,16 @@ export default function AutomationsPage(): React.JSX.Element {
             <TooltipTrigger
               render={
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="icon-sm"
                   aria-label={translate(
                     'auto.components.automations.AutomationsPage.8d1afa8269',
                     'Add automation'
                   )}
                   onClick={() => openCreateDialog()}
-                  className="border-border/50 hover:bg-muted/50 border bg-transparent"
                   data-contextual-tour-target="automations-create"
                 >
-                  <Plus className="size-4" />
+                  <Plus weight="regular" className="size-4" />
                 </Button>
               }
             />
@@ -2174,12 +2172,12 @@ export default function AutomationsPage(): React.JSX.Element {
             </TooltipContent>
           </Tooltip>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 [-webkit-app-region:no-drag]">
           <Tooltip>
             <TooltipTrigger
               render={
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="icon-sm"
                   aria-label={translate(
                     'auto.components.automations.AutomationsPage.19a6e30eae',
@@ -2187,12 +2185,11 @@ export default function AutomationsPage(): React.JSX.Element {
                   )}
                   onClick={refresh}
                   disabled={isLoading}
-                  className="border-border/50 hover:bg-muted/50 border bg-transparent"
                 >
                   {isLoading ? (
                     <LoadingIndicator className="size-4" />
                   ) : (
-                    <RefreshCw className="size-4" />
+                    <RefreshCw weight="regular" className="size-4" />
                   )}
                 </Button>
               }
@@ -2260,7 +2257,7 @@ export default function AutomationsPage(): React.JSX.Element {
             </DialogDescription>
           </DialogHeader>
           {deleteTarget ? (
-            <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
               <div className="text-foreground font-medium break-all">{deleteTarget.name}</div>
               <div className="text-muted-foreground mt-1">
                 {deleteTarget.workspaceMode === 'new_per_run'
@@ -2275,16 +2272,18 @@ export default function AutomationsPage(): React.JSX.Element {
               </div>
             </div>
           ) : null}
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
             role="checkbox"
             aria-checked={dontAskDeleteAgain}
             onClick={() => setDontAskDeleteAgain((prev) => !prev)}
-            className="text-foreground/80 hover:text-foreground flex items-center gap-2 rounded-sm px-1 py-1 text-xs transition-colors focus-visible:outline-none"
+            className="text-foreground/80 hover:text-foreground flex h-auto gap-2 border-0 px-1 py-1 transition-colors"
           >
             <span
               className={cn(
-                'flex size-4 items-center justify-center rounded-sm border transition-colors',
+                'flex size-4 items-center justify-center border transition-colors',
                 dontAskDeleteAgain
                   ? 'border-foreground bg-foreground text-background'
                   : 'border-muted-foreground bg-transparent'
@@ -2293,7 +2292,7 @@ export default function AutomationsPage(): React.JSX.Element {
               {dontAskDeleteAgain ? <Check className="size-3" strokeWidth={3} /> : null}
             </span>
             {translate('auto.components.automations.AutomationsPage.1e2e41392f', "Don't ask again")}
-          </button>
+          </Button>
           <DialogFooter>
             <Button
               variant="outline"
@@ -2349,7 +2348,7 @@ export default function AutomationsPage(): React.JSX.Element {
             </DialogDescription>
           </DialogHeader>
           {externalDeleteTarget ? (
-            <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
               <div className="text-foreground font-medium break-all">
                 {externalDeleteTarget.job.name}
               </div>
@@ -2386,7 +2385,7 @@ export default function AutomationsPage(): React.JSX.Element {
         >
           <div className="scrollbar-sleek min-h-0 flex-1 overflow-auto p-2">
             {automations.length + externalAutomationEntries.length > 0 ? (
-              <div className="text-muted-foreground grid grid-cols-[1fr_auto] gap-2 px-2 pb-2 text-[11px] font-medium uppercase">
+              <div className="text-muted-foreground grid grid-cols-[1fr_auto] gap-2 px-3 pb-2 text-[11px] font-semibold tracking-[0.05em] uppercase">
                 <span>
                   {translate(
                     'auto.components.automations.AutomationsPage.761a35834d',
@@ -2436,25 +2435,30 @@ export default function AutomationsPage(): React.JSX.Element {
                 <ContextMenu key={automation.id}>
                   <ContextMenuTrigger
                     render={
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="list-row"
                         type="button"
                         onClick={() => {
                           selectExternalKey(null)
                           selectAutomationId(automation.id)
                         }}
                         className={cn(
-                          'outline-none focus-visible:bg-muted/50',
-                          'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                          selectedExternal === null && selected?.id === automation.id
-                            ? 'border-foreground/30 bg-muted/70 text-foreground  '
-                            : 'border-transparent hover:bg-muted/50'
+                          'justify-normal whitespace-normal font-normal text-sm',
+                          'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 text-left',
+                          'data-[current=true]:border-border data-[current=true]:bg-accent'
                         )}
+                        data-current={
+                          selectedExternal === null && selected?.id === automation.id
+                            ? 'true'
+                            : undefined
+                        }
                       >
                         <span className="min-w-0">
                           <span className="flex min-w-0 items-center gap-2">
                             <span
                               className={cn(
-                                'size-2 rounded-full',
+                                'size-2',
                                 automation.enabled ? 'bg-foreground' : 'bg-muted-foreground/40'
                               )}
                             />
@@ -2491,7 +2495,7 @@ export default function AutomationsPage(): React.JSX.Element {
                           <Clock className="size-3.5" />
                           <span className="line-clamp-2">{nextRunLabel}</span>
                         </span>
-                      </button>
+                      </Button>
                     }
                   />
                   <ContextMenuContent className="w-48">
@@ -2566,7 +2570,9 @@ export default function AutomationsPage(): React.JSX.Element {
                   sshStatus
                 })
                 return (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="list-row"
                     key={entry.key}
                     type="button"
                     onClick={() => {
@@ -2574,16 +2580,15 @@ export default function AutomationsPage(): React.JSX.Element {
                       setActivePaneTab('overview')
                     }}
                     className={cn(
-                      'outline-none focus-visible:bg-muted/50',
-                      'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                      selectedExternal?.key === entry.key
-                        ? 'border-foreground/30 bg-muted/70 text-foreground  '
-                        : 'border-transparent hover:bg-muted/50'
+                      'justify-normal whitespace-normal font-normal text-sm',
+                      'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 text-left',
+                      'data-[current=true]:border-border data-[current=true]:bg-accent'
                     )}
+                    data-current={selectedExternal?.key === entry.key ? 'true' : undefined}
                   >
                     <span className="min-w-0">
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className="bg-muted-foreground/40 size-2 rounded-full" />
+                        <span className="bg-muted-foreground/40 size-2" />
                         <span className="truncate font-medium">{entry.manager.targetLabel}</span>
                       </span>
                       <span className="text-muted-foreground mt-1 flex min-w-0 items-center gap-1.5 text-xs">
@@ -2605,7 +2610,7 @@ export default function AutomationsPage(): React.JSX.Element {
                       <Clock className="size-3.5" />
                       <span className="line-clamp-2">{sourceAvailability.statusLabel}</span>
                     </span>
-                  </button>
+                  </Button>
                 )
               }
               const nextRunLabel = entry.job.enabled
@@ -2628,25 +2633,26 @@ export default function AutomationsPage(): React.JSX.Element {
                 <ContextMenu key={entry.key}>
                   <ContextMenuTrigger
                     render={
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="list-row"
                         type="button"
                         onClick={() => {
                           selectExternalKey(entry.key)
                           setActivePaneTab('overview')
                         }}
                         className={cn(
-                          'outline-none focus-visible:bg-muted/50',
-                          'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                          selectedExternal?.key === entry.key
-                            ? 'border-foreground/30 bg-muted/70 text-foreground  '
-                            : 'border-transparent hover:bg-muted/50'
+                          'justify-normal whitespace-normal font-normal text-sm',
+                          'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 text-left',
+                          'data-[current=true]:border-border data-[current=true]:bg-accent'
                         )}
+                        data-current={selectedExternal?.key === entry.key ? 'true' : undefined}
                       >
                         <span className="min-w-0">
                           <span className="flex min-w-0 items-center gap-2">
                             <span
                               className={cn(
-                                'size-2 rounded-full',
+                                'size-2',
                                 entry.job.enabled ? 'bg-foreground' : 'bg-muted-foreground/40'
                               )}
                             />
@@ -2679,7 +2685,7 @@ export default function AutomationsPage(): React.JSX.Element {
                           <Clock className="size-3.5" />
                           <span className="line-clamp-2">{nextRunLabel}</span>
                         </span>
-                      </button>
+                      </Button>
                     }
                   />
                   <ContextMenuContent className="w-48">
@@ -2758,11 +2764,13 @@ export default function AutomationsPage(): React.JSX.Element {
                   )}
                 </div>
                 {getAutomationTemplates().map((template) => (
-                  <button
+                  <Button
+                    variant="outline"
+                    size="list-row"
                     key={template.id}
                     type="button"
                     onClick={() => openCreateDialog(template)}
-                    className="border-border/70 bg-background hover:bg-accent hover:text-accent-foreground rounded-md border px-3 py-2 text-left transition-colors focus-visible:outline-none"
+                    className="border-border/70 flex-col items-start gap-0 text-left font-normal whitespace-normal"
                   >
                     <div className="text-muted-foreground text-[11px] font-medium uppercase">
                       {template.category}
@@ -2771,7 +2779,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     <div className="text-muted-foreground mt-1 line-clamp-2 text-xs">
                       {template.description}
                     </div>
-                  </button>
+                  </Button>
                 ))}
                 <Button
                   type="button"
@@ -2823,8 +2831,8 @@ export default function AutomationsPage(): React.JSX.Element {
                   onEdit={openEditExternalDialog}
                 />
               ) : (
-                <div className="border-border/50 bg-muted/20 rounded-md border">
-                  <div className="border-border/50 flex items-center justify-between border-b px-3 py-2">
+                <div className="border-border/50 bg-muted/20 border">
+                  <div className="border-border/50 flex items-center justify-between gap-4 border-b px-4 py-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium">
                         {selectedExternal.manager.targetLabel}
@@ -2863,7 +2871,7 @@ export default function AutomationsPage(): React.JSX.Element {
                       </Button>
                     ) : null}
                   </div>
-                  <div className="text-muted-foreground px-3 py-6 text-sm">
+                  <div className="text-muted-foreground px-4 py-4 text-sm">
                     {selectedExternalSourceAvailability?.detail}
                   </div>
                 </div>
@@ -2948,7 +2956,7 @@ export default function AutomationsPage(): React.JSX.Element {
                             {isSelectedAutomationRunPageRerunPending ? (
                               <LoadingIndicator className="size-3.5" />
                             ) : (
-                              <RefreshCw className="size-3.5" />
+                              <RefreshCw weight="regular" className="size-3.5" />
                             )}
                             {translate(
                               'auto.components.automations.AutomationsPage.295698292f',

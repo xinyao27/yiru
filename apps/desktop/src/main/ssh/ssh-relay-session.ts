@@ -8,6 +8,14 @@
 // for relay session state, eliminating the class of bugs where one path
 // forgets a step that another path handles.
 
+import {
+  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type DetectedPort,
+  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  MIN_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
+} from '@yiru/runtime-protocol/ssh-connection'
+import { toSshExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { BrowserWindow } from 'electron'
 
 import {
@@ -16,15 +24,7 @@ import {
   AGENT_HOOK_REQUEST_REPLAY_METHOD,
   isRemoteAgentHooksEnabled
 } from '../../shared/agent-hook-relay'
-import { toSshExecutionHostId, type ExecutionHostId } from '../../shared/execution-host'
 import type { PtyModelRestoreNeededEvent } from '../../shared/pty-model-restore-marker'
-import {
-  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  type DetectedPort,
-  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  MIN_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
-} from '../../shared/ssh-types'
 import { isTerminalLeafId, makePaneKey } from '../../shared/stable-pane-id'
 import { isValidTerminalTabId } from '../../shared/terminal-tab-id'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
@@ -38,14 +38,14 @@ import {
   clearPtyOwnershipForConnection,
   clearProviderPtyState,
   deletePtyOwnership,
-  setPtyOwnership,
-  answerStartupTerminalColorQueriesForPty
+  setPtyOwnership
 } from '../ipc/pty'
 import {
   recordHiddenRendererPtyDataDrop,
   shouldDropHiddenRendererPtyData
 } from '../ipc/pty-hidden-delivery-gate'
 import { notifyRemoteWorkspaceHandlers } from '../ipc/remote-workspace-events'
+import { answerStartupTerminalColorQueries } from '../ipc/terminal-startup-color-query-replies'
 import { getOpenCodePluginSource } from '../opencode/hook-service'
 import type { Store } from '../persistence'
 import { getPiAgentStatusExtensionSource } from '../pi/agent-status-extension-source'
@@ -676,26 +676,35 @@ export class SshRelaySession {
     const ptyProvider = new SshPtyProvider(this.targetId, mux, this.remoteCliBridgeEnv ?? undefined)
     registerSshPtyProvider(this.targetId, ptyProvider)
 
+    const connection = this.requireReadyConnection()
+    const createSftp =
+      connection.usesSystemSshTransport() === true
+        ? undefined
+        : (options?: { signal?: AbortSignal }) => this.requireReadyConnection().sftp(options)
+    // Why: getHostPlatform falls back to the relay platform when the richer
+    // bridge environment is incomplete, so path rules still match the SSH host.
+    const hostPlatform = this.getHostPlatform() ?? undefined
     const fsProvider = new SshFilesystemProvider(
       this.targetId,
       mux,
-      () => this.requireReadyConnection().sftp(),
+      createSftp,
       {
         downloadFile: (sourcePath, destinationPath) =>
           this.requireReadyConnection().downloadFile(sourcePath, destinationPath, {
-            hostPlatform: this.remoteCliBridgeEnv?.hostPlatform
+            hostPlatform
           }),
         openFileUploadSession: () =>
           this.requireReadyConnection().openFileUploadSession({
-            hostPlatform: this.remoteCliBridgeEnv?.hostPlatform
+            hostPlatform
           }),
         writeBuffer: (remotePath, contents, options) =>
           this.requireReadyConnection().writeBuffer(remotePath, contents, {
-            hostPlatform: this.remoteCliBridgeEnv?.hostPlatform,
+            hostPlatform,
             append: options.append,
             exclusive: options.exclusive
           })
-      }
+      },
+      hostPlatform
     )
     registerSshFilesystemProvider(this.targetId, fsProvider)
 
@@ -933,6 +942,7 @@ export class SshRelaySession {
         toolAgentType?: unknown
         isReplay?: unknown
         providerSession?: unknown
+        providerSessionOnly?: unknown
         payload?: unknown
       }
       if (typeof envelope.paneKey !== 'string') {
@@ -964,6 +974,7 @@ export class SshRelaySession {
             typeof envelope.toolAgentType === 'string' ? envelope.toolAgentType : undefined,
           isReplay: envelope.isReplay === true ? true : undefined,
           providerSession: envelope.providerSession,
+          providerSessionOnly: envelope.providerSessionOnly === true ? true : undefined,
           payload: envelope.payload
         },
         this.targetId
@@ -1106,8 +1117,21 @@ export class SshRelaySession {
 
   private wireUpPtyEvents(ptyProvider: SshPtyProvider): void {
     ptyProvider.onData((payload) => {
-      const seq = this.runtime?.onPtyData(payload.id, payload.data, Date.now())
-      const rendererData = answerStartupTerminalColorQueriesForPty(payload.id, payload.data)
+      // Why: capture authority before synchronous ingestion so the model and
+      // startup shim cannot both answer if gate/subscriber state later changes.
+      const queryReplyOwner =
+        this.runtime?.getTerminalQueryReplyOwnerForLiveChunk(payload.id) ?? 'renderer'
+      const seq = this.runtime?.onPtyData(
+        payload.id,
+        payload.data,
+        Date.now(),
+        payload.data.length,
+        queryReplyOwner
+      )
+      const rendererData =
+        queryReplyOwner === 'renderer'
+          ? answerStartupTerminalColorQueries(payload.id, payload.data, () => ptyProvider)
+          : payload.data
       const win = this.getMainWindow()
       if (!win || win.isDestroyed()) {
         return

@@ -129,7 +129,7 @@ export default function GrabConfirmationSheet({
       {/* Header */}
       <div className="border-border/70 flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="rounded-md bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-400">
+          <div className="bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-400">
             {translate('auto.components.browser.pane.GrabConfirmationSheet.f3575229df', 'Grab')}
           </div>
           <span className="text-muted-foreground text-sm">
@@ -140,7 +140,7 @@ export default function GrabConfirmationSheet({
           </span>
         </div>
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onCancel}>
-          <X className="size-4" />
+          <X weight="regular" className="size-4" />
         </Button>
       </div>
 
@@ -151,14 +151,14 @@ export default function GrabConfirmationSheet({
               Why: the design doc requires screenshots be image/png only. Validating
               the prefix prevents a crafted payload from injecting non-image URIs. */}
           {payload.screenshot?.dataUrl?.startsWith('data:image/png;base64,') ? (
-            <div className="border-border/60 overflow-hidden rounded-lg border">
+            <div className="border-border/60 overflow-hidden border">
               <img
                 src={payload.screenshot.dataUrl}
                 alt={translate(
                   'auto.components.browser.pane.GrabConfirmationSheet.9c6ce0632a',
                   'Selected element screenshot'
                 )}
-                className="max-h-48 w-full bg-black/5 object-contain"
+                className="bg-muted max-h-48 w-full object-contain"
               />
             </div>
           ) : null}
@@ -171,7 +171,7 @@ export default function GrabConfirmationSheet({
                 'Selected Element'
               )}
             </h3>
-            <div className="border-border/60 bg-muted/20 rounded-lg border p-3 text-sm">
+            <div className="border-border/60 bg-muted/20 border p-3 text-sm">
               <div className="flex items-baseline gap-2">
                 <span className="text-foreground font-mono font-semibold">
                   <EscapedText text={`<${target.tagName}>`} />
@@ -207,7 +207,7 @@ export default function GrabConfirmationSheet({
             <h3 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               {translate('auto.components.browser.pane.GrabConfirmationSheet.9098b118ab', 'Page')}
             </h3>
-            <div className="border-border/60 bg-muted/20 rounded-lg border p-3 text-sm">
+            <div className="border-border/60 bg-muted/20 border p-3 text-sm">
               <div className="text-foreground font-medium">
                 <EscapedText
                   text={
@@ -231,7 +231,7 @@ export default function GrabConfirmationSheet({
               <h3 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {translate('auto.components.browser.pane.GrabConfirmationSheet.7d1480fbf1', 'HTML')}
               </h3>
-              <pre className="border-border/60 bg-muted/20 text-foreground/80 scrollbar-sleek max-h-32 overflow-auto rounded-lg border p-3 font-mono text-xs">
+              <pre className="border-border/60 bg-muted/20 text-foreground/80 scrollbar-sleek max-h-32 overflow-auto border p-3 font-mono text-xs">
                 <EscapedText text={target.htmlSnippet} />
               </pre>
             </div>
@@ -246,7 +246,7 @@ export default function GrabConfirmationSheet({
                   'Nearby Context'
                 )}
               </h3>
-              <div className="border-border/60 bg-muted/20 rounded-lg border p-3">
+              <div className="border-border/60 bg-muted/20 border p-3">
                 <ul className="text-muted-foreground list-inside list-disc space-y-0.5 text-sm">
                   {nearbyText.map((text, i) => (
                     <li key={i}>

@@ -62,7 +62,7 @@ export function TokenMixBar({ overview }: { overview: UsageOverviewModel }): Rea
   const mixTotal = segments.reduce((sum, segment) => sum + segment.value, 0)
 
   return (
-    <section className="border-border/60 bg-card/40 rounded-lg border p-4">
+    <section className="border-border/60 bg-card/40 border p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h4 className="text-foreground text-sm font-semibold">
@@ -85,7 +85,7 @@ export function TokenMixBar({ overview }: { overview: UsageOverviewModel }): Rea
 
       {mixTotal > 0 ? (
         <div
-          className="border-border/60 bg-muted flex h-3 overflow-hidden rounded-full border"
+          className="border-border/60 bg-muted flex h-3 overflow-hidden border"
           aria-label={translate(
             'auto.components.stats.usage.overview.sections.3a795542fa',
             'Combined token mix'
@@ -107,13 +107,13 @@ export function TokenMixBar({ overview }: { overview: UsageOverviewModel }): Rea
           )}
         </div>
       ) : (
-        <div className="border-border/60 bg-muted/40 h-3 rounded-full border border-dashed" />
+        <div className="border-border/60 bg-muted/40 h-3 border border-dashed" />
       )}
 
       <div className="text-muted-foreground mt-3 grid gap-2 text-xs sm:grid-cols-3">
         {segments.map((segment) => (
           <div key={segment.key} className="flex min-w-0 items-center gap-2">
-            <span className={cn('size-2 shrink-0 rounded-full', segment.className)} />
+            <span className={cn('size-2 shrink-0', segment.className)} />
             <span className="min-w-0 truncate">
               {segment.label}: {formatUsageTokens(segment.value)}
             </span>
@@ -132,7 +132,7 @@ export function DailyIntensityGrid({
   bestDay: UsageOverviewDailyPoint | null
 }): React.JSX.Element {
   return (
-    <section className="border-border/60 bg-card/40 rounded-lg border p-4">
+    <section className="border-border/60 bg-card/40 border p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h4 className="text-foreground text-sm font-semibold">
@@ -166,10 +166,7 @@ export function DailyIntensityGrid({
         {days.map((day) => (
           <div
             key={day.day}
-            className={cn(
-              'aspect-square min-h-3 rounded-[2px] border',
-              INTENSITY_CLASS[day.intensity]
-            )}
+            className={cn('aspect-square min-h-3 border', INTENSITY_CLASS[day.intensity])}
             aria-label={translate(
               'auto.components.stats.usage.overview.sections.32330a6e66',
               '{{value0}}: {{value1}} tokens',
@@ -187,7 +184,7 @@ export function DailyIntensityGrid({
             <span
               key={intensity}
               className={cn(
-                'size-2 rounded-[2px] border',
+                'size-2 border',
                 INTENSITY_CLASS[intensity as UsageOverviewDailyPoint['intensity']]
               )}
             />
@@ -214,7 +211,7 @@ export function ProviderUsageRow({
   const statusVariant = provider.enabled ? 'secondary' : 'outline'
 
   return (
-    <div className="border-border/60 bg-card/40 rounded-lg border p-3">
+    <div className="border-border/60 bg-card/40 border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2">
@@ -252,9 +249,9 @@ export function ProviderUsageRow({
         </span>
         <span>{formatUsageCost(provider.estimatedCostUsd)}</span>
       </div>
-      <div className="bg-muted mt-3 h-1.5 overflow-hidden rounded-full">
+      <div className="bg-muted mt-3 h-1.5 overflow-hidden">
         <div
-          className="bg-foreground/75 h-full rounded-full"
+          className="bg-foreground/75 h-full"
           style={{ width: `${Math.max(share * 100, provider.totalTokens > 0 ? 2 : 0)}%` }}
         />
       </div>

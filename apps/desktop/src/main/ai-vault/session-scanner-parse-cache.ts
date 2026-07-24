@@ -1,7 +1,8 @@
 import { createReadStream } from 'node:fs'
 import { open } from 'node:fs/promises'
 
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+
 import { parseAgentSessionFile } from './session-scanner-agent-parser'
 import { createAntigravitySessionResumeState } from './session-scanner-antigravity-parser'
 import { createCodexSessionResumeState } from './session-scanner-codex-parser'

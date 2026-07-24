@@ -1,5 +1,5 @@
-import type { ParsedAgentStatusPayload } from './agent-status-types'
-import { parseAgentStatusPayload } from './agent-status-types'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+import { parseAgentStatusPayload } from '@yiru/workbench-model/agent'
 
 const OSC_AGENT_STATUS_PREFIX = '\x1b]9999;'
 

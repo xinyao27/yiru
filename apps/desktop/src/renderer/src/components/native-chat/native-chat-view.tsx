@@ -1,7 +1,7 @@
+import type { NativeChatSession } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import type { NativeChatSession } from '../../../../shared/native-chat-types'
 import type { TuiAgent } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { pruneConfirmedNativeChatActivePrompt } from './native-chat-active-prompt'
@@ -389,7 +389,7 @@ function NativeChatResolvedView({
       onMouseUpCapture={contextMenu.onSelectionCapture}
       onKeyUpCapture={contextMenu.onSelectionCapture}
       onContextMenuCapture={contextMenu.onContextMenuCapture}
-      className="bg-background relative flex h-full min-h-0 w-full flex-col focus:outline-none"
+      className="bg-background text-foreground relative flex h-full min-h-0 w-full flex-col focus:outline-none"
     >
       <div className="flex min-h-0 flex-1 flex-col">
         {viewState.kind === 'loading' ? (
@@ -432,6 +432,7 @@ function NativeChatResolvedView({
           <NativeChatComposer
             ref={composerRef}
             terminalTabId={terminalTabId}
+            paneKey={paneKey}
             targetPtyId={targetPtyId}
             agent={agent}
             canSend={canSend}

@@ -1,10 +1,11 @@
+/* eslint-disable max-lines -- Why: remote PTY transport keeps lifecycle, JSON fallback, and binary stream wiring together so reconnect/destroy ordering stays testable as one behavior surface. */
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { setDriverForPty } from '@/lib/pane-manager/mobile-driver-state'
 import { setFitOverride } from '@/lib/pane-manager/mobile-fit-overrides'
 import { isWebTerminalSurfaceTabId, toHostSessionTabId } from '@/runtime/web-terminal-surface-id'
 
-/* eslint-disable max-lines -- Why: remote PTY transport keeps lifecycle, JSON fallback, and binary stream wiring together so reconnect/destroy ordering stays testable as one behavior surface. */
-import type { RuntimeRpcResponse } from '../../../../shared/runtime-rpc-envelope'
 import type {
   RuntimeMobileSessionTerminalClientTab,
   RuntimeMobileSessionTabsResult,
@@ -65,6 +66,7 @@ export function createRemoteRuntimePtyTransport(
     command,
     startupCommandDelivery,
     env,
+    envToDelete,
     launchConfig,
     launchToken,
     launchAgent,
@@ -636,6 +638,7 @@ export function createRemoteRuntimePtyTransport(
         const startupCommandDeliveryToSend =
           options.startupCommandDelivery ?? startupCommandDelivery
         const envToSend = options.env ?? env
+        const envToDeleteToSend = options.envToDelete ?? envToDelete
         const launchConfigToSend = options.launchConfig ?? launchConfig
         const launchTokenToSend = options.launchToken ?? launchToken
         const launchAgentToSend = options.launchAgent ?? launchAgent
@@ -646,6 +649,7 @@ export function createRemoteRuntimePtyTransport(
             ? { startupCommandDelivery: startupCommandDeliveryToSend }
             : {}),
           ...(envToSend !== undefined ? { env: envToSend } : {}),
+          ...(envToDeleteToSend !== undefined ? { envToDelete: envToDeleteToSend } : {}),
           ...(launchConfigToSend !== undefined ? { launchConfig: launchConfigToSend } : {}),
           ...(launchTokenToSend !== undefined ? { launchToken: launchTokenToSend } : {}),
           ...(launchAgentToSend !== undefined ? { launchAgent: launchAgentToSend } : {}),

@@ -1,9 +1,7 @@
-import {
-  filterAiVaultSessions,
-  groupAiVaultSessions
-} from '../../../desktop/src/shared/ai-vault-session-filters'
-import { AI_VAULT_AGENTS } from '../../../desktop/src/shared/ai-vault-types'
-import type { AiVaultScope, AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
+import { filterAiVaultSessions, groupAiVaultSessions } from '@yiru/workbench-model/agent'
+import { AI_VAULT_AGENTS } from '@yiru/workbench-model/agent'
+import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
+
 import {
   buildMobileAgentHistoryCard,
   type MobileAgentHistoryCard

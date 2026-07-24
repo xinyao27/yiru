@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
+import type { GitLabWorkItem } from '@yiru/workbench-model/review'
+import type { GitHubWorkItem } from '@yiru/workbench-model/review'
 import {
   buildSmartWorkspaceSourceRows,
   getSmartWorkspaceEmptyHint,
   type SmartNameMode,
   type SmartWorkspaceSourceRow
-} from '../../../desktop/src/shared/new-workspace/smart-workspace-source-results'
-import type { GitHubWorkItem, GitLabWorkItem } from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/workspace'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { MrStateFilter } from './mobile-composer-source-types'
 import { fanOutSmartSearch, type SmartFanOutResult } from './smart-source-fan-out'

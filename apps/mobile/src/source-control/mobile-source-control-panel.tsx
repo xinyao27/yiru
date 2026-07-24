@@ -55,6 +55,10 @@ export function MobileSourceControlPanel({
     () => new Set<SourceControlHubTab>([initialTab])
   )
   const [historyRefreshNonce, setHistoryRefreshNonce] = useState(0)
+  const hostedReviewRefreshRef = useRef<(() => void) | null>(null)
+  const requestHostedReviewRefresh = useCallback(() => {
+    hostedReviewRefreshRef.current?.()
+  }, [])
 
   // Deep-link / push with a different `tab` param should adopt the new segment
   // (expo-router can reuse the screen instance when only query params change).
@@ -93,7 +97,8 @@ export function MobileSourceControlPanel({
     onRequestClose,
     onFileOpenStart,
     onOpenedFileDiff,
-    onOpenHistory: openHistoryTab
+    onOpenHistory: openHistoryTab,
+    onHostedReviewRefresh: requestHostedReviewRefresh
   })
   const actionSheetActions = useMobileSourceControlActionSheet(state)
   const {
@@ -164,6 +169,16 @@ export function MobileSourceControlPanel({
   refetchPrRef.current = refetchPr
   const ensurePrDetailsRef = useRef(ensurePrDetails)
   ensurePrDetailsRef.current = ensurePrDetails
+  useEffect(() => {
+    // Why: source-control runners are created before the review controller;
+    // this bridge lets remote completions refresh the current controller only.
+    hostedReviewRefreshRef.current = () => {
+      void refetchPrRef.current({ includeDetails: activeTab === 'pr' })
+    }
+    return () => {
+      hostedReviewRefreshRef.current = null
+    }
+  }, [activeTab])
 
   // Chip bootstrap: phase-1 only (PR + checks). Full comment payload waits until
   // the Pull Request segment is open — opening SC to stage must not pull details.
@@ -363,6 +378,9 @@ export function MobileSourceControlPanel({
             // loading, not flash "unavailable for this provider" (old /pr parity).
             branchContextLoaded={ready && prController.prSidebarRepoProbeLoaded}
             controller={prController}
+            onSourceControlRefresh={async () => {
+              await loadStatus({ preserveReadyOnFailure: true, force: true })
+            }}
           />
         </View>
       ) : activeTab === 'pr' ? (

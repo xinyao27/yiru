@@ -1,4 +1,4 @@
-import { fileUriToFilesystemPath } from '../../../../shared/file-uri-path'
+import { fileUriToFilesystemPath } from '@yiru/workbench-model/platform'
 
 export type TerminalFileUrlTarget = {
   filePath: string

@@ -1,34 +1,36 @@
 import {
+  WORKTREE_CREATE_CONTRACT,
+  WORKTREE_LIST_CONTRACT,
+  WORKTREE_REMOVE_CONTRACT,
+  WORKTREE_SET_CONTRACT
+} from '../../../../shared/runtime-method-contracts/workspace-contracts'
+import {
+  WorktreeDetectedListParams,
+  WorktreeActivate,
+  WorktreeForceDeleteBranch,
+  WorktreePrefetchCreateBase,
+  WorktreePsParams,
+  WorktreeResolveMrBase,
+  WorktreeResolvePrBase,
+  WorktreeSelector,
+  WorktreeSortOrder
+} from '../../../../shared/runtime-method-contracts/worktree-method-params'
+import {
   finishAutomationWorkspaceProvenanceRequest,
   releaseAutomationWorkspaceProvenanceRequest,
   resolveAutomationWorkspaceProvenance
 } from '../../../automations/workspace-provenance'
 import { defineMethod, type RpcMethod } from '../core'
-import {
-  WorktreeCreate,
-  WorktreeDetectedListParams,
-  WorktreeActivate,
-  WorktreeForceDeleteBranch,
-  WorktreeListParams,
-  WorktreePrefetchCreateBase,
-  WorktreePsParams,
-  WorktreeRemove,
-  WorktreeResolveMrBase,
-  WorktreeResolvePrBase,
-  WorktreeSelector,
-  WorktreeSet,
-  WorktreeSortOrder
-} from './worktree-schemas'
 
 export const WORKTREE_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'worktree.ps',
+    mobile: true,
     params: WorktreePsParams,
     handler: async (params, { runtime }) => runtime.getWorktreePs(params.limit)
   }),
   defineMethod({
-    name: 'worktree.list',
-    params: WorktreeListParams,
+    contract: WORKTREE_LIST_CONTRACT,
     handler: async (params, { runtime }) => runtime.listManagedWorktrees(params.repo, params.limit)
   }),
   defineMethod({
@@ -46,6 +48,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'worktree.show',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { runtime }) => ({
       worktree: await runtime.showManagedWorktree(params.worktree)
@@ -53,11 +56,13 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'worktree.sleep',
+    mobile: true,
     params: WorktreeSelector,
     handler: async (params, { runtime }) => runtime.sleepManagedWorktree(params.worktree)
   }),
   defineMethod({
     name: 'worktree.activate',
+    mobile: true,
     params: WorktreeActivate,
     handler: async (params, { runtime, clientKind }) =>
       // Why: clientKind ('mobile'|'runtime') scopes the host-renderer slept-agent
@@ -68,8 +73,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
       })
   }),
   defineMethod({
-    name: 'worktree.create',
-    params: WorktreeCreate,
+    contract: WORKTREE_CREATE_CONTRACT,
     handler: async (params, { runtime }) => {
       const repo = await runtime.showRepo(params.repo)
       const automationProvenance = resolveAutomationWorkspaceProvenance({
@@ -104,16 +108,21 @@ export const WORKTREE_METHODS: RpcMethod[] = [
           setupDecision: params.setupDecision,
           createdWithAgent: params.createdWithAgent ?? params.startupAgent,
           automationProvenance,
-          startup: params.startupCommand
-            ? {
-                command: params.startupCommand,
-                ...(params.startupEnv ? { env: params.startupEnv } : {}),
-                ...(params.startupLaunchConfig ? { launchConfig: params.startupLaunchConfig } : {}),
-                ...(params.startupCommandDelivery
-                  ? { startupCommandDelivery: params.startupCommandDelivery }
-                  : {})
-              }
-            : undefined,
+          // Why: an unknown-capability Mobile client sends both launch forms.
+          // This host owns launch policy, so structured agent intent wins.
+          startup:
+            !params.startupAgent && params.startupCommand
+              ? {
+                  command: params.startupCommand,
+                  ...(params.startupEnv ? { env: params.startupEnv } : {}),
+                  ...(params.startupLaunchConfig
+                    ? { launchConfig: params.startupLaunchConfig }
+                    : {}),
+                  ...(params.startupCommandDelivery
+                    ? { startupCommandDelivery: params.startupCommandDelivery }
+                    : {})
+                }
+              : undefined,
           ...(params.startupAgent ? { startupAgent: params.startupAgent } : {}),
           ...(params.startupPrompt !== undefined ? { startupPrompt: params.startupPrompt } : {}),
           startupDraft: params.startupDraft,
@@ -141,6 +150,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'worktree.prefetchCreateBase',
+    mobile: true,
     params: WorktreePrefetchCreateBase,
     handler: async (params, { runtime }) => {
       await runtime.prefetchManagedWorktreeCreateBase({
@@ -151,8 +161,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
     }
   }),
   defineMethod({
-    name: 'worktree.set',
-    params: WorktreeSet,
+    contract: WORKTREE_SET_CONTRACT,
     handler: async (params, { runtime }) => ({
       worktree: await runtime.updateManagedWorktreeMeta(params.worktree, {
         displayName: params.displayName,
@@ -195,6 +204,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'worktree.resolvePrBase',
+    mobile: true,
     params: WorktreeResolvePrBase,
     handler: async (params, { runtime }) =>
       runtime.resolveManagedPrBase({
@@ -207,6 +217,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'worktree.resolveMrBase',
+    mobile: true,
     params: WorktreeResolveMrBase,
     handler: async (params, { runtime }) =>
       runtime.resolveManagedMrBase({
@@ -218,8 +229,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
       })
   }),
   defineMethod({
-    name: 'worktree.rm',
-    params: WorktreeRemove,
+    contract: WORKTREE_REMOVE_CONTRACT,
     handler: async (params, { runtime }) => {
       const result = await runtime.removeManagedWorktree(
         params.worktree,
@@ -231,6 +241,7 @@ export const WORKTREE_METHODS: RpcMethod[] = [
   }),
   defineMethod({
     name: 'worktree.forceDeleteBranch',
+    mobile: true,
     params: WorktreeForceDeleteBranch,
     handler: async (params, { runtime }) =>
       runtime.forceDeletePreservedBranch(params.worktree, params.branchName, params.expectedHead)

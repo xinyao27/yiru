@@ -1,9 +1,9 @@
 import { Plus, X } from '@phosphor-icons/react'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import type {
   ProjectHostSetup,
   ProjectHostSetupCreateResult,
@@ -70,11 +70,16 @@ export function RepositoryHostSetupActions({
   const [isCloning, setIsCloning] = useState(false)
   const [isCreatingPendingSetup, setIsCreatingPendingSetup] = useState(false)
   const defaultSetupHostOption =
-    setupHostOptions.find((option) => option.isAvailable) ?? setupHostOptions[0] ?? null
+    setupHostOptions.find((option) => option.isAvailable && option.canUsePathActions) ??
+    setupHostOptions.find((option) => option.isAvailable) ??
+    setupHostOptions[0] ??
+    null
   const setupTargetHostId = selectedSetupHostId ?? defaultSetupHostOption?.id ?? null
   const setupTargetHostOption =
     setupHostOptions.find((option) => option.id === setupTargetHostId) ?? null
   const canUseSetupTargetHost = setupTargetHostOption?.isAvailable ?? false
+  const canUsePathActions =
+    canUseSetupTargetHost && (setupTargetHostOption?.canUsePathActions ?? false)
 
   if (setupHostOptions.length === 0) {
     return null
@@ -90,7 +95,7 @@ export function RepositoryHostSetupActions({
   }
 
   const handleExistingFolder = async (): Promise<void> => {
-    if (!setupTargetHostId || !canUseSetupTargetHost || !setupPath.trim()) {
+    if (!setupTargetHostId || !canUsePathActions || !setupPath.trim()) {
       return
     }
     setIsSettingUp(true)
@@ -112,12 +117,7 @@ export function RepositoryHostSetupActions({
   }
 
   const handleClone = async (): Promise<void> => {
-    if (
-      !setupTargetHostId ||
-      !canUseSetupTargetHost ||
-      !cloneUrl.trim() ||
-      !cloneDestination.trim()
-    ) {
+    if (!setupTargetHostId || !canUsePathActions || !cloneUrl.trim() || !cloneDestination.trim()) {
       return
     }
     setIsCloning(true)
@@ -161,7 +161,7 @@ export function RepositoryHostSetupActions({
 
   if (!isOpen) {
     return (
-      <div className="border-border bg-muted/20 flex items-center justify-between gap-3 rounded-md border p-3">
+      <div className="border-border bg-muted/20 flex items-center justify-between gap-3 border p-3">
         <div className="min-w-0 space-y-1">
           <Label className="text-sm font-semibold">
             {translate(
@@ -188,7 +188,7 @@ export function RepositoryHostSetupActions({
   }
 
   return (
-    <div className="border-border bg-background space-y-3 rounded-md border p-3">
+    <div className="border-border bg-background space-y-3 border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <Label className="text-sm font-semibold">
@@ -211,7 +211,7 @@ export function RepositoryHostSetupActions({
           aria-label={translate('auto.components.settings.RepositoryPane.closeHostSetup', 'Close')}
           onClick={resetFlow}
         >
-          <X className="size-4" />
+          <X weight="regular" className="size-4" />
         </Button>
       </div>
 
@@ -231,7 +231,7 @@ export function RepositoryHostSetupActions({
               <SelectItem key={option.id} value={option.id} disabled={!option.isAvailable}>
                 <span className="min-w-0">
                   <span className="block truncate">{option.label}</span>
-                  {!option.isAvailable ? (
+                  {!option.isAvailable || !option.canUsePathActions ? (
                     <span className="text-muted-foreground block truncate text-[11px]">
                       {option.detail}
                     </span>
@@ -241,14 +241,15 @@ export function RepositoryHostSetupActions({
             ))}
           </SelectContent>
         </Select>
-        {!canUseSetupTargetHost && setupTargetHostOption ? (
+        {(!canUseSetupTargetHost || !canUsePathActions) && setupTargetHostOption ? (
           <p className="text-muted-foreground text-xs">{setupTargetHostOption.detail}</p>
         ) : null}
       </div>
 
       {step === 'choose' ? (
         <HostSetupStartActions
-          disabled={!canUseSetupTargetHost}
+          pathActionsDisabled={!canUsePathActions}
+          planDisabled={!canUseSetupTargetHost}
           onBrowse={() => setStep('existing')}
           onClone={() => setStep('clone')}
           onPlan={() => setStep('planned')}
@@ -258,7 +259,7 @@ export function RepositoryHostSetupActions({
         <HostSetupExistingFolderStep
           setupPath={setupPath}
           setupKind={setupKind}
-          disabled={!canUseSetupTargetHost}
+          disabled={!canUsePathActions}
           isSettingUp={isSettingUp}
           onBack={() => setStep('choose')}
           onPathChange={setSetupPath}
@@ -270,7 +271,7 @@ export function RepositoryHostSetupActions({
         <HostSetupCloneStep
           cloneUrl={cloneUrl}
           cloneDestination={cloneDestination}
-          disabled={!canUseSetupTargetHost}
+          disabled={!canUsePathActions}
           isCloning={isCloning}
           onBack={() => setStep('choose')}
           onCloneUrlChange={setCloneUrl}

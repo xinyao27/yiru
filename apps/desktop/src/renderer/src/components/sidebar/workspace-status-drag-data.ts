@@ -1,4 +1,4 @@
-import { measureClipboardTextByteLength } from '../../../../shared/clipboard-text'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
 
 export const WORKSPACE_STATUS_DRAG_TYPE = 'application/x-yiru-worktree-id'
 export const WORKSPACE_STATUS_DRAG_IDS_TYPE = 'application/x-yiru-worktree-ids'

@@ -14,6 +14,7 @@ import {
 import React, { useMemo, useState } from 'react'
 
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -104,19 +105,25 @@ function CollapsibleSection({
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-lg border border-border/50',
+        'overflow-hidden border border-border/50',
         tone === 'muted' ? 'bg-muted/15' : 'bg-background'
       )}
     >
-      <button
+      <Button
+        variant="ghost"
+        size="default"
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="text-foreground hover:bg-muted/40 focus-visible:bg-muted/40 flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold tracking-wide uppercase transition-colors outline-none"
+        className="text-foreground hover:bg-muted/40 focus-visible:bg-muted/40 flex w-full justify-start border-0 px-3 text-left text-xs font-semibold tracking-wide whitespace-normal uppercase transition-colors"
       >
-        {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+        {open ? (
+          <ChevronDown weight="regular" className="size-3.5" />
+        ) : (
+          <ChevronRight weight="regular" className="size-3.5" />
+        )}
         {Icon ? <Icon className={cn('size-3.5', iconClass ?? 'text-muted-foreground')} /> : null}
         {title}
-      </button>
+      </Button>
       {open ? <div className="border-border/50 border-t px-4 py-3">{children}</div> : null}
     </section>
   )
@@ -133,7 +140,7 @@ function SectionCard({ title, accent = 'default', children }: SectionCardProps):
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-lg border',
+        'relative overflow-hidden border',
         accent === 'error'
           ? 'border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-background to-background'
           : accent === 'response'
@@ -204,11 +211,11 @@ export function HermesCronOutputView({ content }: { content: string }): React.JS
             return (
               <div
                 key={entry.label}
-                className="border-border/50 bg-muted/15 flex items-start gap-3 rounded-lg border px-3 py-2.5"
+                className="border-border/50 bg-muted/15 flex items-start gap-3 border px-3 py-2.5"
               >
                 <span
                   className={cn(
-                    'mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md',
+                    'mt-0.5 flex size-7 shrink-0 items-center justify-center',
                     ringClass
                   )}
                 >

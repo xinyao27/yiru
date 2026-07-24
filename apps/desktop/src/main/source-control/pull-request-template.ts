@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import type { HostedReviewProvider } from '../../shared/hosted-review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { joinWorktreeRelativePath } from '../runtime/runtime-relative-paths'
 

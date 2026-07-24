@@ -1,3 +1,4 @@
+import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { Image, Text, View } from 'react-native'
 import type { ImageSourcePropType } from 'react-native'
 import Svg, { Defs, G, LinearGradient, Path, Stop } from 'react-native-svg'
@@ -6,7 +7,6 @@ import { useCSSVariable } from 'uniwind'
 import { Terminal } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { TuiAgent } from '../../../desktop/src/shared/types'
 import { MOBILE_AGENT_CATALOG } from '../workspace-create/mobile-agent-catalog'
 import { ClaudeIcon, OpenAIIcon } from './agent-icons'
 import { MOBILE_AGENT_ICON_ASSETS } from './mobile-agent-icon-assets'

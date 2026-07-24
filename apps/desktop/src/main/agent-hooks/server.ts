@@ -16,6 +16,20 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { join } from 'node:path'
 
 import {
+  getAgentResumeArgv,
+  normalizeAgentProviderSession,
+  type AgentProviderSessionMetadata
+} from '@yiru/workbench-model/agent'
+import {
+  AGENT_STATUS_STALE_AFTER_MS,
+  type AgentStatusIpcPayload,
+  type AgentType,
+  type AgentStatusState,
+  type ParsedAgentStatusPayload,
+  normalizeAgentStatusPayload
+} from '@yiru/workbench-model/agent'
+
+import {
   clearAllListenerCaches,
   clearPaneCacheState,
   createHookListenerState,
@@ -23,13 +37,16 @@ import {
   hasPendingAgentResultText,
   HOOK_REQUEST_SLOWLORIS_MS,
   markClaudeLeadTurnInterrupted,
+  markCodexLeadTurnInterrupted,
   MAX_PANE_KEY_LEN,
   movePaneCacheState,
   normalizeHookPayload,
+  reconcileRemoteCodexState,
   readRequestBody,
   resolveHookSource,
   preparePendingGrokResultDiscovery,
   seedClaudeSubagentRosterFromSnapshots,
+  seedCodexStateFromSnapshot,
   warnOnHookEnvOrVersionMismatch,
   writeEndpointFile,
   type AgentHookEventPayload,
@@ -41,19 +58,10 @@ import {
   isAgentInterruptInputIntent,
   type AgentInterruptInferenceRequest
 } from '../../shared/agent-interrupt-intent'
-import { normalizeAgentProviderSession } from '../../shared/agent-session-resume'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../shared/agent-status-identity'
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusIpcPayload,
-  type AgentType,
-  type AgentStatusState,
-  type ParsedAgentStatusPayload,
-  normalizeAgentStatusPayload
-} from '../../shared/agent-status-types'
 import { isCommandCodeNewTurnWhileWorking } from '../../shared/command-code-turn-boundary'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../shared/stable-pane-id'
 import { AGENT_KIND_VALUES, type AgentKind } from '../../shared/telemetry-events'
@@ -182,13 +190,22 @@ function dropHydratedIdleClaudeSubagents(
   ) {
     return payload
   }
-  const workingSubagents = payload.subagents.filter((subagent) => subagent.state === 'working')
+  const activeSubagents = payload.subagents.filter((subagent) => subagent.state !== 'idle')
   // Why: older builds persisted finished Claude children as idle rows. Prune
   // them from the replay payload itself so restart cannot resurrect the pile.
   return {
     ...payload,
-    subagents: workingSubagents.length > 0 ? workingSubagents : undefined
+    subagents: activeSubagents.length > 0 ? activeSubagents : undefined
   }
+}
+
+// Why: one shared gate keeps local hydration and SSH relay ingest from
+// disagreeing about which metadata-only Pi sessions are durable.
+function isValidPiProviderSessionOnly(
+  providerSession: AgentProviderSessionMetadata | undefined,
+  agentType: AgentType | undefined
+): boolean {
+  return Boolean(providerSession && agentType === 'pi' && getAgentResumeArgv('pi', providerSession))
 }
 
 function sanitizeHydratedEntry(
@@ -247,6 +264,11 @@ function sanitizeHydratedEntry(
   if (!payload) {
     return null
   }
+  const providerSession = normalizeAgentProviderSession(record.providerSession) ?? undefined
+  const providerSessionOnly = record.providerSessionOnly === true
+  if (providerSessionOnly && !isValidPiProviderSessionOnly(providerSession, payload.agentType)) {
+    return null
+  }
   return {
     paneKey,
     launchToken: typeof record.launchToken === 'string' ? record.launchToken : undefined,
@@ -258,7 +280,8 @@ function sanitizeHydratedEntry(
     toolUseId: typeof record.toolUseId === 'string' ? record.toolUseId : undefined,
     toolAgentId: typeof record.toolAgentId === 'string' ? record.toolAgentId : undefined,
     toolAgentType: typeof record.toolAgentType === 'string' ? record.toolAgentType : undefined,
-    providerSession: normalizeAgentProviderSession(record.providerSession) ?? undefined,
+    providerSession,
+    providerSessionOnly: providerSessionOnly ? true : undefined,
     payload,
     receivedAt,
     stateStartedAt
@@ -275,15 +298,14 @@ function toAgentStatusIpcPayload(entry: EnrichedAgentHookEventPayload): AgentSta
     receivedAt: entry.receivedAt,
     stateStartedAt: entry.stateStartedAt,
     ...(entry.providerSession ? { providerSession: entry.providerSession } : {}),
+    ...(entry.providerSessionOnly ? { providerSessionOnly: true } : {}),
     ...(entry.promptInteractionKey ? { promptInteractionKey: entry.promptInteractionKey } : {}),
     ...entry.payload
   }
 }
 
-// Why: OSC-only dedupe (ingestTerminalStatus). Deliberately omits `subagents`:
-// OSC payloads never carry them, and including the field would make every
-// hook-cached entry with child rows non-equivalent — the OSC ping would then
-// apply and wipe the roster. Do not reuse this for hook-path comparisons.
+// Why: OSC never carries model/children; omit both so an equivalent OSC ping
+// preserves the hook-cached identity graph. Do not reuse for hook comparisons.
 function equivalentParsedAgentStatusPayload(
   a: ParsedAgentStatusPayload,
   b: ParsedAgentStatusPayload
@@ -555,6 +577,9 @@ export class AgentHookServer {
     if (!existing) {
       return false
     }
+    if (existing.providerSessionOnly) {
+      return false
+    }
     const payload = existing.payload
     const agentType: AgentType | undefined = payload.agentType
     // Why: Droid's Ctrl+C does not interrupt the current turn; repeated Ctrl+C
@@ -589,7 +614,7 @@ export class AgentHookServer {
     // subagent running). Ctrl+C at the TUI does not stop background children,
     // so inferring a terminal done here would wrongly retire live child rows;
     // their own hook events keep the row truthful instead.
-    if (payload.subagents?.some((subagent) => subagent.state === 'working')) {
+    if (payload.subagents?.some((subagent) => subagent.state !== 'idle')) {
       return false
     }
 
@@ -598,6 +623,9 @@ export class AgentHookServer {
     // 'working' lead state and resurrect the cancelled pane.
     if (agentType === 'claude') {
       markClaudeLeadTurnInterrupted(this.state, existing.paneKey)
+    }
+    if (agentType === 'codex') {
+      markCodexLeadTurnInterrupted(this.state, existing.paneKey)
     }
     const inferred = this.applyNormalizedStatus({
       paneKey: existing.paneKey,
@@ -609,6 +637,7 @@ export class AgentHookServer {
         state: 'done',
         prompt: payload.prompt,
         agentType,
+        ...(payload.model ? { model: payload.model } : {}),
         interrupted: true,
         // Why: idle children are display state; dropping them on an inferred
         // interrupt would blank the child rows a later hook would restore.
@@ -624,13 +653,17 @@ export class AgentHookServer {
   }
 
   getStatusChangeSnapshot(): AgentHookStatusChangeEntry[] {
-    return Array.from(this.state.lastStatusByPaneKey.entries(), ([paneKey, entry]) => {
+    return Array.from(this.state.lastStatusByPaneKey.entries()).flatMap(([paneKey, entry]) => {
       const enriched = entry as EnrichedAgentHookEventPayload
-      return {
-        state: enriched.payload.state,
-        receivedAt: enriched.receivedAt,
-        observedInCurrentRuntime: this.runtimeObservedStatusPaneKeys.has(paneKey)
-      }
+      return enriched.providerSessionOnly
+        ? []
+        : [
+            {
+              state: enriched.payload.state,
+              receivedAt: enriched.receivedAt,
+              observedInCurrentRuntime: this.runtimeObservedStatusPaneKeys.has(paneKey)
+            }
+          ]
     })
   }
 
@@ -794,6 +827,64 @@ export class AgentHookServer {
       | EnrichedAgentHookEventPayload
       | undefined
     const now = Date.now()
+    if (payload.providerSessionOnly) {
+      // Why: session_start replaces stale turn state and survives replay, but
+      // must not emit prompt telemetry or a fabricated visible status.
+      const enriched = this.attachStatusTiming(payload, now)
+      this.clearAssistantMessageRetry(enriched.paneKey)
+      this.runtimeObservedStatusPaneKeys.delete(enriched.paneKey)
+      this.state.lastStatusByPaneKey.set(enriched.paneKey, enriched)
+      this.scheduleStatusPersist()
+      this.notifyStatusChangeListeners()
+      this.onAgentStatus?.(enriched)
+      return enriched
+    }
+    const sameTransportAuthority = previous?.connectionId === payload.connectionId
+    if (previous && !sameTransportAuthority && payload.payload.agentType === 'codex') {
+      // Why: a replacement SSH/WSL process may reuse the pane; do not merge it with the lost transport's children.
+      this.state.codexSubagentRosterByPaneKey.delete(payload.paneKey)
+      this.state.codexLeadStateByPaneKey.delete(payload.paneKey)
+    }
+    const stateReconciledPayload =
+      payload.connectionId !== null &&
+      payload.payload.agentType === 'codex' &&
+      payload.hookEventName
+        ? {
+            ...payload,
+            payload: reconcileRemoteCodexState(
+              this.state,
+              payload.paneKey,
+              payload.hookEventName,
+              payload.toolAgentId,
+              payload.payload,
+              sameTransportAuthority ? previous?.payload : undefined
+            )
+          }
+        : payload
+    const previousCodexRoot =
+      stateReconciledPayload.payload.agentType === 'codex' &&
+      stateReconciledPayload.toolAgentId &&
+      previous?.payload.agentType === 'codex' &&
+      sameTransportAuthority
+        ? previous
+        : undefined
+    const preservedProviderSession = !stateReconciledPayload.providerSession
+      ? previousCodexRoot?.providerSession
+      : undefined
+    const preservedRootModel = !stateReconciledPayload.payload.model
+      ? previousCodexRoot?.payload.model
+      : undefined
+    // Why: child hooks and relay restarts omit root-only fields; keep the pane's durable resume/model identity.
+    const rootContextPreservingPayload =
+      preservedProviderSession || preservedRootModel
+        ? {
+            ...stateReconciledPayload,
+            ...(preservedProviderSession ? { providerSession: preservedProviderSession } : {}),
+            payload: preservedRootModel
+              ? { ...stateReconciledPayload.payload, model: preservedRootModel }
+              : stateReconciledPayload.payload
+          }
+        : stateReconciledPayload
     const identity = resolveAgentStatusIdentity({
       existing: previous
         ? {
@@ -802,25 +893,25 @@ export class AgentHookServer {
             updatedAt: previous.receivedAt
           }
         : undefined,
-      incoming: payload.payload.agentType,
+      incoming: rootContextPreservingPayload.payload.agentType,
       now
     })
     if (
       previous &&
       shouldSuppressInheritedTerminalStatus({
         inheritedFromActivePane: identity.inheritedFromActivePane,
-        incomingState: payload.payload.state
+        incomingState: rootContextPreservingPayload.payload.state
       })
     ) {
       return previous
     }
     const identityResolvedPayload =
-      identity.agentType === payload.payload.agentType
-        ? payload
+      identity.agentType === rootContextPreservingPayload.payload.agentType
+        ? rootContextPreservingPayload
         : {
-            ...payload,
+            ...rootContextPreservingPayload,
             payload: {
-              ...payload.payload,
+              ...rootContextPreservingPayload.payload,
               agentType: identity.agentType
             }
           }
@@ -1298,6 +1389,7 @@ export class AgentHookServer {
       toolAgentId?: string
       toolAgentType?: string
       providerSession?: unknown
+      providerSessionOnly?: unknown
       isReplay?: boolean
       payload: unknown
     },
@@ -1392,6 +1484,12 @@ export class AgentHookServer {
     if (!normalizedPayload) {
       return
     }
+    if (
+      envelope.providerSessionOnly === true &&
+      !isValidPiProviderSessionOnly(providerSession, normalizedPayload.agentType)
+    ) {
+      return
+    }
     // Why: run the same warn-once diagnostics the HTTP path runs (cross-build
     // version mismatch, dev-vs-prod env mismatch). Use `this.env` as the
     // expected env so the messages match what the local server produces.
@@ -1413,6 +1511,7 @@ export class AgentHookServer {
       toolAgentId,
       toolAgentType,
       providerSession,
+      providerSessionOnly: envelope.providerSessionOnly === true ? true : undefined,
       isReplay: envelope.isReplay === true ? true : undefined,
       payload: normalizedPayload
     }
@@ -1794,9 +1893,10 @@ export class AgentHookServer {
           entry.payload = hydratedPayload
         }
         this.state.lastStatusByPaneKey.set(resolvedPaneKey, entry)
-        // Why: preserve only working children across restart. Live activity
-        // confirms them; a later complete inventory may reap stale seeds.
-        if (entry.payload.subagents) {
+        // Why: restore live child hierarchy immediately; provider-specific reconciliation reaps stale seeds.
+        if (entry.payload.agentType === 'codex') {
+          seedCodexStateFromSnapshot(this.state, resolvedPaneKey, entry.payload)
+        } else if (entry.payload.agentType === 'claude' && entry.payload.subagents) {
           seedClaudeSubagentRosterFromSnapshots(
             this.state,
             resolvedPaneKey,

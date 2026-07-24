@@ -2,7 +2,8 @@ import { lstat, readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { posix, win32 } from 'node:path'
 
-import { isWindowsAbsolutePathLike } from '../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+
 import type { GitWorktreeInfo, Repo, WorktreeMeta } from '../shared/types'
 import { areWorktreePathsEqual } from './ipc/worktree-logic'
 import {

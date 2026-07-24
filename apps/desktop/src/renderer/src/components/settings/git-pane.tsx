@@ -1,6 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
+import { getBranchPrefixIssue } from '../../../../shared/branch-prefix'
 import type { SourceControlAiSettingsPatch } from '../../../../shared/source-control-ai-types'
 import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from '../../../../shared/source-control-group-order'
 import type { GlobalSettings, SourceControlGroupOrder } from '../../../../shared/types'
@@ -9,6 +14,7 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { AutoRenameBranchFromWorkSetting } from './auto-rename-branch-from-work-setting'
 import { getAutoRenameBranchSearchEntries } from './auto-rename-branch-search'
+import { BranchPrefixFeedback } from './branch-prefix-feedback'
 import {
   CompareAgainstUpstreamSetting,
   compareAgainstUpstreamMatchesSearch
@@ -145,6 +151,18 @@ export function GitPane({
   const storeSearchQuery = useAppStore((s) => s.settingsSearchQuery)
   const searchQuery = settingsSearchQuery ?? storeSearchQuery
   const keepLocalMainUpToDateTitle = getKeepLocalMainUpToDateTitle()
+  // Why: settings persistence can round-trip over SSH; a local draft prevents
+  // delayed store echoes from moving the caret or overwriting fast input.
+  const [customPrefixDraft, setCustomPrefixDraft] = useState(settings.branchPrefixCustom)
+  const lastCommittedPrefixRef = useRef(settings.branchPrefixCustom)
+  useEffect(() => {
+    if (settings.branchPrefixCustom !== lastCommittedPrefixRef.current) {
+      lastCommittedPrefixRef.current = settings.branchPrefixCustom
+      setCustomPrefixDraft(settings.branchPrefixCustom)
+    }
+  }, [settings.branchPrefixCustom])
+  const branchPrefixInputValue =
+    settings.branchPrefix === 'git-username' ? displayedGitUsername : customPrefixDraft
 
   const visibleSections = [
     matchesSettingsSearch(searchQuery, {
@@ -178,17 +196,17 @@ export function GitPane({
             )}
           </p>
         </div>
-        <div className="border-border/50 flex w-fit gap-1 rounded-md border p-1">
+        <div className="border-border/50 flex w-fit gap-1 border p-1">
           {(['git-username', 'custom', 'none'] as const).map((option) => (
-            <button
+            <Button
+              variant="quiet"
+              size="sm"
               key={option}
               onClick={() => updateSettings({ branchPrefix: option })}
               className={cn(
-                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-                'rounded-sm px-3 py-1 text-sm transition-colors',
-                settings.branchPrefix === option
-                  ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                'text-sm ',
+                'py-1 ',
+                settings.branchPrefix === option ? 'bg-accent text-accent-foreground' : ' '
               )}
             >
               {option === 'git-username'
@@ -196,17 +214,18 @@ export function GitPane({
                 : option === 'custom'
                   ? translate('auto.components.settings.GitPane.1f32ba27a6', 'Custom')
                   : translate('auto.components.settings.GitPane.3d172725cc', 'None')}
-            </button>
+            </Button>
           ))}
         </div>
         {(settings.branchPrefix === 'custom' || settings.branchPrefix === 'git-username') && (
           <Input
-            value={
-              settings.branchPrefix === 'git-username'
-                ? displayedGitUsername
-                : settings.branchPrefixCustom
-            }
-            onChange={(e) => updateSettings({ branchPrefixCustom: e.target.value })}
+            value={branchPrefixInputValue}
+            onChange={(e) => {
+              const nextPrefix = e.target.value
+              lastCommittedPrefixRef.current = nextPrefix
+              setCustomPrefixDraft(nextPrefix)
+              updateSettings({ branchPrefixCustom: nextPrefix })
+            }}
             placeholder={
               settings.branchPrefix === 'git-username'
                 ? translate(
@@ -217,7 +236,11 @@ export function GitPane({
             }
             className="max-w-xs"
             readOnly={settings.branchPrefix === 'git-username'}
+            aria-invalid={getBranchPrefixIssue(branchPrefixInputValue) !== null}
           />
+        )}
+        {(settings.branchPrefix === 'custom' || settings.branchPrefix === 'git-username') && (
+          <BranchPrefixFeedback rawPrefix={branchPrefixInputValue} />
         )}
       </SearchableSetting>
     ) : null,
@@ -254,29 +277,12 @@ export function GitPane({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={settings.refreshLocalBaseRefOnWorktreeCreate}
-          onClick={() =>
-            updateSettings({
-              refreshLocalBaseRefOnWorktreeCreate: !settings.refreshLocalBaseRefOnWorktreeCreate
-            })
+        <Switch
+          checked={settings.refreshLocalBaseRefOnWorktreeCreate}
+          onCheckedChange={(checked) =>
+            updateSettings({ refreshLocalBaseRefOnWorktreeCreate: checked })
           }
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            settings.refreshLocalBaseRefOnWorktreeCreate
-              ? 'bg-foreground'
-              : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              settings.refreshLocalBaseRefOnWorktreeCreate ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        />
       </SearchableSetting>
     ) : null,
     matchesSettingsSearch(searchQuery, {
@@ -352,27 +358,10 @@ export function GitPane({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={settings.enableGitHubAttribution}
-          onClick={() =>
-            updateSettings({
-              enableGitHubAttribution: !settings.enableGitHubAttribution
-            })
-          }
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            settings.enableGitHubAttribution ? 'bg-foreground' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              settings.enableGitHubAttribution ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        <Switch
+          checked={settings.enableGitHubAttribution}
+          onCheckedChange={(checked) => updateSettings({ enableGitHubAttribution: checked })}
+        />
       </SearchableSetting>
     ) : null
   ].filter(Boolean)

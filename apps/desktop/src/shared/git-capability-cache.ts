@@ -79,12 +79,6 @@ export class GitCapabilityCache {
     }
   }
 
-  clear(): void {
-    this.retryAfterByCapability.clear()
-    this.probesByCapability.clear()
-    this.supportedCapabilities.clear()
-  }
-
   private async runPreferredOrFallback<T>(
     capability: GitCapability,
     runPreferred: () => Promise<T>,

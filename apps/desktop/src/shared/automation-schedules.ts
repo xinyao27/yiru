@@ -1,7 +1,8 @@
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 /* eslint-disable max-lines -- Why: automation scheduling needs RRULE presets and
  * custom cron parsing to share one execution path for main/renderer parity. */
 import type { AutomationSchedulePreset } from './automations-types'
-import { isClipboardTextByteLengthOverLimit } from './clipboard-text'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const HOUR_MS = 60 * 60 * 1000

@@ -1,5 +1,6 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
+
 import { findCatalogModel, getAgentSessionOptionCatalog } from './agent-session-option-catalog'
-import type { AgentType } from './agent-status-types'
 import type { SessionOptionValue } from './native-chat-session-options'
 
 export type ResolvedSessionOptionLaunch = {

@@ -1,3 +1,4 @@
+import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
 import { z } from 'zod'
 
 import {
@@ -5,7 +6,6 @@ import {
   type FeatureInteractionId
 } from '../../../../shared/feature-interactions'
 import { isFeatureTipId } from '../../../../shared/feature-tips'
-import { normalizePRBotAuthorOverrides } from '../../../../shared/pr-bot-author-overrides'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import {
   normalizeTuiAgentArgsRecord,
@@ -166,6 +166,7 @@ export const UiUpdate = z
     _grokStatusBarDefaultAdded: z.boolean().optional(),
     statusBarVisible: z.boolean().optional(),
     usagePercentageDisplay: z.enum(['used', 'remaining']).optional(),
+    statusBarUsageMode: z.enum(['verbose', 'compact']).optional(),
     dismissedUpdateVersion: NullableString.optional(),
     lastUpdateCheckAt: z.number().finite().nullable().optional(),
     pendingUpdateNudgeId: NullableString.optional(),

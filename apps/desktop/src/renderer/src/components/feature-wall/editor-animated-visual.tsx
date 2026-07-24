@@ -22,7 +22,7 @@ const NEW_LINE_HOLD_MS = 380
 const FINAL_HOLD_MS = 2200
 
 const KBD_CLASS_DOC =
-  'rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10.5px] text-muted-foreground'
+  ' border border-border bg-card px-1.5 py-0.5 font-mono text-[10.5px] text-muted-foreground'
 
 function CursorIcon(): JSX.Element {
   return (
@@ -230,7 +230,7 @@ const TB_ICON: Record<string, JSX.Element> = {
 
 function ToolbarBtn(props: { iconKey: keyof typeof TB_ICON }): JSX.Element {
   return (
-    <span className="text-muted-foreground inline-flex size-[22px] items-center justify-center rounded">
+    <span className="text-muted-foreground inline-flex size-[22px] items-center justify-center">
       <span className="size-[13px] [&>svg]:size-full">{TB_ICON[props.iconKey]}</span>
     </span>
   )
@@ -254,7 +254,7 @@ function SlashRow(props: {
       ref={props.refCb}
       data-slash-row
       className={cn(
-        'grid h-6 grid-cols-[18px_1fr_auto] items-center gap-2 rounded-[5px] px-2 py-1 pl-1.5',
+        'grid h-6 grid-cols-[18px_1fr_auto] items-center gap-2 px-2 py-1 pl-1.5',
         props.hidden ? 'hidden' : null
       )}
     >
@@ -590,13 +590,13 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
   }, [reducedMotion])
 
   return (
-    <div className="border-border bg-card text-foreground relative overflow-visible rounded-xl border">
+    <div className="border-border bg-card text-foreground relative overflow-visible border">
       {/* Faux titlebar with the editing path so the surface reads as a
           real document, not a generic notes widget. */}
       <div className="border-border bg-muted/40 flex h-7 items-center gap-1.5 border-b px-3">
-        <span className="size-2.5 rounded-full bg-rose-400/70" />
-        <span className="size-2.5 rounded-full bg-amber-400/70" />
-        <span className="size-2.5 rounded-full bg-emerald-400/70" />
+        <span className="size-2.5 bg-rose-400/70" />
+        <span className="size-2.5 bg-amber-400/70" />
+        <span className="size-2.5 bg-emerald-400/70" />
         <span className="text-muted-foreground ml-2 font-mono text-[11px]">
           {translate(
             'auto.components.feature.wall.EditorAnimatedVisual.cda56c5915',
@@ -621,7 +621,7 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
         <ToolbarBtn iconKey="check" />
         <ToolbarBtn iconKey="quote" />
         <span className="text-muted-foreground ml-auto inline-flex items-center gap-1.5 font-mono text-[10px]">
-          <span className="size-1.5 rounded-full bg-emerald-500" />
+          <span className="size-1.5 bg-emerald-500" />
           <span>
             {translate('auto.components.feature.wall.EditorAnimatedVisual.218503f9f3', 'autosaved')}
           </span>
@@ -669,7 +669,7 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
         <div
           ref={menuRef}
           data-slash-menu
-          className="border-border bg-card pointer-events-none absolute z-10 min-w-[220px] origin-top-left rounded-lg border p-1.5 text-[12px] transition-[opacity,transform] duration-[160ms] ease-out"
+          className="border-border bg-card pointer-events-none absolute z-10 min-w-[220px] origin-top-left border p-1.5 text-[12px] transition-[opacity,transform] duration-[160ms] ease-out"
           style={{
             opacity: 0,
             transform: 'translateY(-4px) scale(0.985)'
@@ -751,7 +751,7 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
             <CursorIcon />
             <span
               data-cursor-ripple
-              className="border-foreground/50 pointer-events-none absolute -top-1.5 -left-1.5 size-7 rounded-full border-2"
+              className="border-foreground/50 pointer-events-none absolute -top-1.5 -left-1.5 size-7 border-2"
               style={{ opacity: 0 }}
             />
           </div>
@@ -797,7 +797,7 @@ function DocBlock(props: { children: ReactNode; listItem?: boolean }): JSX.Eleme
   if (props.listItem) {
     return (
       <div className="relative mt-1.5 min-h-[18px] py-px pl-[18px] text-[13px] leading-[1.55]">
-        <span className="bg-foreground/55 absolute top-[9px] left-1.5 size-1 rounded-full" />
+        <span className="bg-foreground/55 absolute top-[9px] left-1.5 size-1" />
         {props.children}
       </div>
     )

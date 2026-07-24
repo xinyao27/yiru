@@ -188,7 +188,7 @@ export function ExternalAutomationRunTable({
   }
 
   return (
-    <div className="border-border/50 bg-background/50 mt-2 rounded-md border">
+    <div className="border-border/50 bg-background/50 mt-2 border">
       <div className="border-border/50 flex items-center justify-between border-b px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <div className="text-xs font-medium">
@@ -240,7 +240,9 @@ export function ExternalAutomationRunTable({
             </div>
             <div className="divide-border/50 divide-y">
               {visibleRuns.map((run) => (
-                <button
+                <Button
+                  variant="ghost"
+                  size="default"
                   key={run.id}
                   type="button"
                   data-current={selectedRun?.id === run.id}
@@ -252,7 +254,7 @@ export function ExternalAutomationRunTable({
                     onOpenRun?.(run)
                   }}
                   className={cn(
-                    'grid w-full grid-cols-[minmax(7.5rem,.45fr)_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none',
+                    'border-0 justify-normal whitespace-normal font-normal text-sm grid w-full grid-cols-[minmax(7.5rem,.45fr)_minmax(0,1fr)_auto] gap-3 px-3 text-left transition-colors ',
                     selectedRun?.id === run.id && 'bg-accent text-accent-foreground'
                   )}
                 >
@@ -270,7 +272,7 @@ export function ExternalAutomationRunTable({
                     {getRunSummary(run)}
                   </span>
                   <Badge variant={getRunStatusVariant(run)}>{getRunStatusLabel(run)}</Badge>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -310,7 +312,7 @@ export function ExternalAutomationRunTable({
             disabled={page === 0 || isLoading}
             onClick={() => handlePageChange(Math.max(0, page - 1))}
           >
-            <ChevronLeft className="size-3.5" />
+            <ChevronLeft weight="regular" className="size-3.5" />
           </Button>
           <div className="text-muted-foreground min-w-14 text-center text-xs">
             {page + 1} / {totalPages}
@@ -326,7 +328,7 @@ export function ExternalAutomationRunTable({
             disabled={page >= totalPages - 1 || isLoading}
             onClick={() => handlePageChange(Math.min(totalPages - 1, page + 1))}
           >
-            <ChevronRight className="size-3.5" />
+            <ChevronRight weight="regular" className="size-3.5" />
           </Button>
         </div>
       </div>

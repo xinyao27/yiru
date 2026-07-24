@@ -1,19 +1,20 @@
 import { Image as ImageIcon, ArrowDown, ArrowUp } from '@phosphor-icons/react'
+import {
+  isTextBlock,
+  type NativeChatBlock,
+  type NativeChatMessage
+} from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import CommentMarkdown, {
   type CommentMarkdownLinkClickHandler
 } from '@/components/sidebar/comment-markdown'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { basename } from '@/lib/path'
 
 import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat-streaming'
-import {
-  isTextBlock,
-  type NativeChatBlock,
-  type NativeChatMessage
-} from '../../../../shared/native-chat-types'
 import { isNearBottom, shouldShowJumpToLatest, type ScrollGeometry } from './native-chat-autoscroll'
 import { NativeChatCopyButton } from './native-chat-copy-button'
 import { isNativeChatPastedImagePath } from './native-chat-image-paste'
@@ -58,7 +59,7 @@ function ImageAttachmentRefs({ blocks }: { blocks: NativeChatBlock[] }): React.J
         return (
           <div
             key={`${label}-${index}`}
-            className="border-border bg-background text-muted-foreground flex max-w-full items-center gap-1.5 rounded-md border px-2 py-1 text-xs"
+            className="border-border bg-background text-muted-foreground flex max-w-full items-center gap-1.5 border px-2 py-1 text-xs"
             title={label}
           >
             <ImageIcon className="size-3.5 shrink-0" />
@@ -85,7 +86,9 @@ function AgentControls({
   return (
     <div className={cn('flex items-center gap-1', className)}>
       <NativeChatCopyButton text={markdown} />
-      <button
+      <Button
+        variant="ghost"
+        size="icon-xs"
         type="button"
         onClick={onScrollToTop}
         aria-label={translate(
@@ -93,10 +96,10 @@ function AgentControls({
           'Scroll this message to top'
         )}
         title={translate('components.native-chat.scrollMessageToTop', 'Scroll this message to top')}
-        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors outline-none"
+        className="text-muted-foreground flex border transition-colors"
       >
-        <ArrowUp className="size-3.5" />
-      </button>
+        <ArrowUp weight="regular" className="size-3.5" />
+      </Button>
     </div>
   )
 }
@@ -112,7 +115,7 @@ function TypingIndicatorRow(): React.JSX.Element {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full"
+            className="bg-muted-foreground/70 size-1.5 animate-bounce"
             // Stagger the three dots so they ripple rather than pulse in unison.
             style={{ animationDelay: `${i * 160}ms` }}
           />
@@ -392,16 +395,18 @@ export function NativeChatMessageList({
         >
           {hasMore ? (
             <div className="flex justify-center py-1">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={loadEarlier}
                 disabled={loadingEarlier}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring rounded-md border border-transparent px-3 py-1 text-xs font-medium outline-none disabled:pointer-events-none disabled:opacity-50"
+                className="text-muted-foreground border py-1 text-xs"
               >
                 {loadingEarlier
                   ? translate('components.native-chat.loadingEarlier', 'Loading…')
                   : translate('components.native-chat.loadEarlier', 'Load earlier messages')}
-              </button>
+              </Button>
             </div>
           ) : null}
           {messages.map((message) => (
@@ -419,16 +424,18 @@ export function NativeChatMessageList({
         </div>
       </div>
       {showJump ? (
-        <button
+        <Button
+          variant="outline"
+          size="xs"
           type="button"
           onClick={scrollToBottom}
           aria-label={translate('components.native-chat.jumpToLatest', 'Jump to latest')}
-          className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 border px-3 py-1.5 text-xs outline-none"
+          className="bg-card text-muted-foreground absolute left-1/2 flex h-auto w-auto -translate-x-1/2 gap-1.5 px-3 py-1.5"
           style={{ bottom: bottomInset + 12 }}
         >
-          <ArrowDown className="size-3.5" />
+          <ArrowDown weight="regular" className="size-3.5" />
           <span>{translate('components.native-chat.jumpToLatest', 'Jump to latest')}</span>
-        </button>
+        </Button>
       ) : null}
     </div>
   )

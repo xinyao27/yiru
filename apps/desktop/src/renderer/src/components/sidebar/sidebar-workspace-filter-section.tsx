@@ -1,8 +1,8 @@
-import { GitBranch, Moon, FlowArrow as Workflow } from '@phosphor-icons/react'
+import { GitMerge, Moon, FlowArrow as Workflow } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
 const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilterSection() {
@@ -32,7 +32,7 @@ const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilter
         onChange={(hideSleeping) => setShowSleepingWorkspaces(!hideSleeping)}
       />
       <FilterToggleRow
-        icon={<GitBranch className="size-3.5" />}
+        icon={<GitMerge className="size-3.5" />}
         label={translate(
           'auto.components.sidebar.SidebarWorkspaceFilterSection.c3fa13dc2e',
           'Hide default branch'
@@ -41,7 +41,7 @@ const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilter
         onChange={setHideDefaultBranchWorkspace}
       />
       <FilterToggleRow
-        icon={<Workflow className="size-3.5" />}
+        icon={<Workflow weight="regular" className="size-3.5" />}
         label={translate(
           'auto.components.sidebar.SidebarWorkspaceFilterSection.automationCreated',
           'Hide automation-created'
@@ -65,32 +65,13 @@ function FilterToggleRow({
   onChange: (next: boolean) => void
 }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="hover:bg-muted flex w-full items-center justify-between gap-2 rounded-[5px] px-2 py-1.5 text-[12px] font-medium focus-visible:outline-none"
-    >
+    <div className="flex w-full items-center justify-between gap-2 py-1.5 text-[12px]">
       <span className="text-foreground inline-flex items-center gap-2">
         <span className="text-muted-foreground">{icon}</span>
         {label}
       </span>
-      <span
-        aria-hidden
-        className={cn(
-          'relative h-3.5 w-6 shrink-0 rounded-full transition-colors',
-          checked ? 'bg-primary' : 'bg-muted-foreground/30'
-        )}
-      >
-        <span
-          className={cn(
-            'absolute top-0.5 left-0.5 size-2.5 rounded-full bg-background transition-transform',
-            checked && 'translate-x-2.5'
-          )}
-        />
-      </span>
-    </button>
+      <Switch checked={checked} aria-label={label} onCheckedChange={onChange} />
+    </div>
   )
 }
 

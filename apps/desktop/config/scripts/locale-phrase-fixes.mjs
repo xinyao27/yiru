@@ -106,7 +106,8 @@ export const LOCALE_PHRASE_FIXES = {
     { pattern: /公关/g, replacement: 'PR', whenEnIncludes: 'PR' },
     { pattern: /虎鲸:\/\//g, replacement: 'yiru://', whenEnIncludes: 'yiru://' },
     { pattern: /代理商/g, replacement: '代理', whenEnIncludes: 'agent' },
-    { pattern: /智能体/g, replacement: '代理', whenEnIncludes: 'agent' },
+    // Why: Agent is a product term in Chinese UI copy and must remain in English.
+    { pattern: /智能体/g, replacement: 'Agent', whenEnIncludes: 'agent' },
     { pattern: /分支机构/g, replacement: '分支', whenEnIncludes: 'ranch' },
     { pattern: /座席/g, replacement: '代理', whenEnIncludes: 'agent' },
     { pattern: /汽车/g, replacement: '自动', whenEnIncludes: 'Auto' },

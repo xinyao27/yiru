@@ -1,4 +1,5 @@
 import { findTransport } from '../../shared/runtime-bootstrap'
+import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
 import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
 import { tryReadMetadata } from './metadata'
 import { sendRequest } from './transport'
@@ -30,7 +31,7 @@ export async function getCliStatus(
   }
 
   try {
-    const response = await sendRequest<RuntimeStatus>(metadata, 'status.get', undefined, 1000)
+    const response = await sendRequest(metadata, STATUS_GET_CONTRACT, undefined, 1000)
     if (response.ok === false) {
       throw new RuntimeRpcFailureError(response)
     }
@@ -45,7 +46,12 @@ export async function getCliStatus(
       runtime: {
         state: graphState === 'ready' ? 'ready' : 'graph_not_ready',
         reachable: true,
-        runtimeId: response.result.runtimeId
+        runtimeId: response.result.runtimeId,
+        ...(response.result.appVersion ? { appVersion: response.result.appVersion } : {}),
+        ...(response.result.remoteUpdateSupport
+          ? { remoteUpdateSupport: response.result.remoteUpdateSupport }
+          : {}),
+        ...(response.result.capabilities ? { capabilities: response.result.capabilities } : {})
       },
       graph: {
         state: graphState

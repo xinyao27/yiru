@@ -11,6 +11,16 @@ import {
   Plus,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import {
+  describeRuntimeCompatBlock,
+  evaluateRuntimeCompat,
+  MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
+  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
+  RUNTIME_PROTOCOL_VERSION,
+  PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
+  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY,
+  type RuntimeCompatVerdict
+} from '@yiru/runtime-protocol/capabilities'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -18,21 +28,10 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 import { unwrapRuntimeRpcResult } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 
-import {
-  describeRuntimeCompatBlock,
-  evaluateRuntimeCompat,
-  type RuntimeCompatVerdict
-} from '../../../../shared/protocol-compat'
-import {
-  MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
-  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-  RUNTIME_PROTOCOL_VERSION,
-  PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
-  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-} from '../../../../shared/protocol-version'
 import {
   isUserManagedRuntimeEnvironment,
   type PublicKnownRuntimeEnvironment
@@ -52,6 +51,10 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { EphemeralVmRuntimesSection } from './ephemeral-vm-runtimes-section'
+import {
+  getRemoteServerManualUpdateHelp,
+  RemoteServerUpdateStatus
+} from './remote-server-update-status'
 import {
   getRuntimeEnvironmentsSearchEntry,
   getWebRuntimeEnvironmentsSearchEntry
@@ -270,7 +273,15 @@ export function RuntimeEnvironmentsPane({
   const [removeError, setRemoveError] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [pairingCode, setPairingCode] = useState('')
+  const remoteServerUpdates = useAppStore((state) => state.remoteServerUpdates)
+  const remoteServerUpdatesChecking = useAppStore((state) => state.remoteServerUpdatesChecking)
+  const remoteServerUpdatesRunning = useAppStore((state) => state.remoteServerUpdatesRunning)
+  const refreshRemoteServerUpdates = useAppStore((state) => state.refreshRemoteServerUpdates)
+  const setRemoteServerUpdateDialogOpen = useAppStore(
+    (state) => state.setRemoteServerUpdateDialogOpen
+  )
   const mountedRef = useMountedRef()
+  const updateCheckHint = getUpdateCheckHint()
   const activeValue =
     settings.activeRuntimeEnvironmentId ??
     (allowLocalRuntime ? LOCAL_RUNTIME_VALUE : NO_RUNTIME_VALUE)
@@ -379,6 +390,11 @@ export function RuntimeEnvironmentsPane({
   useEffect(() => {
     void loadEnvironments()
   }, [loadEnvironments])
+
+  const environmentIdsKey = environments.map((environment) => environment.id).join('\n')
+  useEffect(() => {
+    void refreshRemoteServerUpdates()
+  }, [environmentIdsKey, refreshRemoteServerUpdates])
 
   const closeAddServerForm = (): void => {
     if (isSaving) {
@@ -735,7 +751,10 @@ export function RuntimeEnvironmentsPane({
       className="space-y-4 py-2"
     >
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div
+          data-settings-section="remote-server-updates"
+          className="flex items-center justify-between gap-3"
+        >
           <div className="min-w-0 space-y-0.5">
             <div className="text-sm font-medium">
               {translate(
@@ -746,31 +765,62 @@ export function RuntimeEnvironmentsPane({
             <p className="text-muted-foreground text-xs">
               {translate(
                 'auto.components.settings.RuntimeEnvironmentsPane.connectToRemoteServersHelp',
-                'Pair another Yiru runtime, then connect or disconnect it here. Use Advanced > Active Server only when you want to change the default host.'
+                'Pair another Yiru runtime, then connect or disconnect it here.'
               )}
             </p>
           </div>
-          {addServerFormOpen ? null : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setAddServerFormOpen(true)}
-              disabled={isBusy}
-            >
-              <Plus />
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
-                'Add Server'
-              )}
-            </Button>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {environments.length > 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                title={updateCheckHint}
+                onClick={(event) => {
+                  setRemoteServerUpdateDialogOpen(true)
+                  void refreshRemoteServerUpdates(getUpdateCheckClickOptions(event))
+                }}
+                disabled={remoteServerUpdatesChecking && remoteServerUpdates.size === 0}
+              >
+                {remoteServerUpdatesChecking || remoteServerUpdatesRunning ? (
+                  <LoadingIndicator />
+                ) : (
+                  <RefreshCw weight="regular" />
+                )}
+                {remoteServerUpdatesRunning
+                  ? translate(
+                      'auto.components.settings.RuntimeEnvironmentsPane.updatingServers',
+                      'Updating servers…'
+                    )
+                  : translate(
+                      'auto.components.settings.RuntimeEnvironmentsPane.reviewServerUpdates',
+                      'Check for Server Updates'
+                    )}
+              </Button>
+            ) : null}
+            {addServerFormOpen ? null : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setAddServerFormOpen(true)}
+                disabled={isBusy}
+              >
+                <Plus />
+                {translate(
+                  'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
+                  'Add Server'
+                )}
+              </Button>
+            )}
+          </div>
         </div>
 
         {addServerFormOpen ? (
           <form
-            className="border-border/50 bg-muted/20 space-y-3 rounded-lg border p-3"
+            className="border-border/50 bg-muted/20 space-y-3 border p-3"
             onSubmit={(event) => {
               event.preventDefault()
               void addEnvironment()
@@ -854,7 +904,7 @@ export function RuntimeEnvironmentsPane({
           </form>
         ) : null}
 
-        <div className="border-border/50 bg-card/30 rounded-lg border">
+        <div className="border-border/50 bg-card/30 border">
           {environments.length === 0 ? (
             <div className="text-muted-foreground px-3 py-4 text-sm">
               {translate(
@@ -875,6 +925,7 @@ export function RuntimeEnvironmentsPane({
                     const detailsDescription = getHostDetailsDescription(details)
                     const isActive = settings.activeRuntimeEnvironmentId === environment.id
                     const connectionState = getRuntimeServerConnectionState(details)
+                    const remoteUpdate = remoteServerUpdates.get(environment.id)
                     // A connected host exposes Disconnect; otherwise Connect.
                     const isReachable = connectionState === 'connected'
                     const actionBusy =
@@ -890,7 +941,7 @@ export function RuntimeEnvironmentsPane({
                             <div className="truncate text-sm font-medium">{environment.name}</div>
                             <span
                               className={cn(
-                                'size-2 shrink-0 rounded-full',
+                                'size-2 shrink-0',
                                 getRuntimeServerDotClass(connectionState)
                               )}
                             />
@@ -923,8 +974,48 @@ export function RuntimeEnvironmentsPane({
                               {detailsDescription}
                             </p>
                           ) : null}
+                          {remoteUpdate ? (
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <span className="text-muted-foreground text-[11px]">
+                                {remoteUpdate.currentVersion
+                                  ? translate(
+                                      'auto.components.settings.RuntimeEnvironmentsPane.yiruVersion',
+                                      'Yiru v{{value0}}',
+                                      { value0: remoteUpdate.currentVersion }
+                                    )
+                                  : translate(
+                                      'auto.components.settings.RuntimeEnvironmentsPane.versionUnavailable',
+                                      'Yiru version unavailable'
+                                    )}
+                              </span>
+                              <RemoteServerUpdateStatus entry={remoteUpdate} compact />
+                            </div>
+                          ) : null}
+                          {remoteUpdate?.phase === 'manual' ? (
+                            <p className="text-muted-foreground mt-1 text-xs">
+                              {getRemoteServerManualUpdateHelp(remoteUpdate)}
+                            </p>
+                          ) : null}
+                          {remoteUpdate?.phase === 'failed' && remoteUpdate.error ? (
+                            <p className="text-destructive mt-1 text-xs">{remoteUpdate.error}</p>
+                          ) : null}
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
+                          {remoteUpdate?.phase === 'available' ||
+                          remoteUpdate?.phase === 'failed' ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              onClick={() => setRemoteServerUpdateDialogOpen(true)}
+                              disabled={remoteServerUpdatesRunning}
+                            >
+                              {translate(
+                                'auto.components.settings.RuntimeEnvironmentsPane.updateServer',
+                                'Update'
+                              )}
+                            </Button>
+                          ) : null}
                           {isReachable ? (
                             <Button
                               type="button"
@@ -1009,6 +1100,7 @@ export function RuntimeEnvironmentsPane({
         >
           {translate('auto.components.settings.RuntimeEnvironmentsPane.advanced', 'Advanced')}
           <ChevronDown
+            weight="regular"
             className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
           />
         </Button>
@@ -1096,7 +1188,7 @@ export function RuntimeEnvironmentsPane({
                   onClick={() => void loadEnvironments()}
                   disabled={isLoading || isBusy}
                 >
-                  {isLoading ? <LoadingIndicator /> : <RefreshCw />}
+                  {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
                 </Button>
               </div>
               {environments.length > 0 ? (
@@ -1107,13 +1199,13 @@ export function RuntimeEnvironmentsPane({
                       'Server details'
                     )}
                   </div>
-                  <div className="border-border/50 bg-card/30 space-y-1 rounded-lg border p-2">
+                  <div className="border-border/50 bg-card/30 space-y-1 border p-2">
                     {environments.map((environment) => {
                       const details = detailsByEnvironmentId[environment.id]
                       return (
                         <div
                           key={environment.id}
-                          className="text-muted-foreground grid gap-1 rounded-md px-2 py-1.5 text-[11px] sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
+                          className="text-muted-foreground grid gap-1 px-2 py-1.5 text-[11px] sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
                         >
                           <div className="text-foreground truncate font-medium">
                             {environment.name}
@@ -1178,7 +1270,7 @@ export function RuntimeEnvironmentsPane({
               )}
             </p>
           </div>
-          <div className="border-border/50 bg-card/30 overflow-hidden rounded-lg border">
+          <div className="border-border/50 bg-card/30 overflow-hidden border">
             <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
               <div className="min-w-0 space-y-0.5">
                 <div className="text-sm font-medium">
@@ -1249,7 +1341,7 @@ export function RuntimeEnvironmentsPane({
             </DialogDescription>
           </DialogHeader>
           {pendingSwitchValue ? (
-            <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
               <div className="text-muted-foreground">
                 {translate(
                   'auto.components.settings.RuntimeEnvironmentsPane.05e0fc3ebf',
@@ -1329,7 +1421,7 @@ export function RuntimeEnvironmentsPane({
             </DialogDescription>
           </DialogHeader>
           {pendingRemove ? (
-            <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
               <div className="truncate font-medium">{pendingRemove.name}</div>
               <div className="text-muted-foreground mt-0.5 truncate font-mono">
                 {pendingRemove.endpoints[0]?.endpoint ??

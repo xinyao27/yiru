@@ -77,7 +77,7 @@ export function RepoColorPicker({
           >
             <span
               aria-hidden="true"
-              className="border-border/70 size-4 rounded-[4px] border"
+              className="border-border/70 size-4 border"
               style={{ backgroundColor: currentColor }}
             />
             {triggerLabel ? <span className="text-xs">{triggerLabel}</span> : null}
@@ -97,7 +97,7 @@ export function RepoColorPicker({
               '{{value0}} picker',
               { value0: label }
             )}
-            className="[&_.react-colorful__pointer]:border-popover [&_.react-colorful__hue]:rounded-b-md"
+            className="[&_.react-colorful__pointer]:border-popover"
             style={{ width: '100%', height: 180 }}
           />
           <div className="flex items-center justify-between gap-3">

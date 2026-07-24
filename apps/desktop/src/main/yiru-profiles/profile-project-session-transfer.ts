@@ -1,5 +1,6 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { getDefaultWorkspaceSession } from '../../shared/constants'
-import type { ExecutionHostId } from '../../shared/execution-host'
 import type {
   BrowserPage,
   BrowserWorkspace,

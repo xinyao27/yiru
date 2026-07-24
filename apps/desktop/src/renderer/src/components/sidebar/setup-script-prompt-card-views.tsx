@@ -10,6 +10,7 @@ import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -35,7 +36,7 @@ function DismissButton({ onDismiss }: DismissButtonProps): React.JSX.Element {
             className="text-muted-foreground -mr-1"
             onClick={onDismiss}
           >
-            <X className="size-3.5" />
+            <X weight="regular" className="size-3.5" />
           </Button>
         }
       />
@@ -66,7 +67,7 @@ export function DetectedSetupPreview({
           'Detected setup'
         )}
       </div>
-      <textarea
+      <Textarea
         // Why: the mixed fill keeps this editable command distinct without overpowering the prompt.
         value={setup}
         aria-label={translate(
@@ -76,7 +77,7 @@ export function DetectedSetupPreview({
         onChange={(event) => onSetupChange(event.target.value)}
         spellCheck={false}
         rows={getDetectedSetupScriptTextareaRows(setup)}
-        className="scrollbar-sleek border-sidebar-border text-foreground max-h-28 w-full resize-y overflow-auto rounded-md border bg-[color-mix(in_srgb,var(--sidebar-foreground)_2%,var(--sidebar))] px-2 py-1.5 font-mono text-[11px] leading-5 outline-none dark:bg-[color-mix(in_srgb,var(--sidebar-foreground)_8%,var(--sidebar))]"
+        className="scrollbar-sleek border-sidebar-border text-foreground max-h-28 w-full resize-y overflow-auto border bg-[color-mix(in_srgb,var(--sidebar-foreground)_2%,var(--sidebar))] px-2 py-1.5 font-mono text-[11px] leading-5 outline-none dark:bg-[color-mix(in_srgb,var(--sidebar-foreground)_8%,var(--sidebar))]"
       />
       {provenance ? (
         <p className="text-muted-foreground mt-1.5 text-[11px]">
@@ -84,7 +85,7 @@ export function DetectedSetupPreview({
             'auto.components.sidebar.SetupScriptPromptCardViews.d02e6a42b1',
             'Detected from'
           )}
-          <code className="bg-muted rounded px-1 py-0.5">{provenance}</code>
+          <code className="bg-muted px-1 py-0.5">{provenance}</code>
         </p>
       ) : null}
     </div>
@@ -229,7 +230,7 @@ export function InspectionErrorActions({
         className="h-7 flex-1 text-xs"
         onClick={onRetry}
       >
-        <RefreshCw className="size-3.5" />
+        <RefreshCw weight="regular" className="size-3.5" />
         <span className="truncate">
           {translate('auto.components.sidebar.SetupScriptPromptCardViews.4a98f907ae', 'Retry')}
         </span>

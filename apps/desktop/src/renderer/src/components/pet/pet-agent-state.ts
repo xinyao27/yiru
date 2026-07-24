@@ -1,6 +1,6 @@
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
+import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 
 export type PetAnimationName =
   | 'idle'

@@ -27,7 +27,7 @@ import type {
   SpoolTerminalLaunchOptionsResult
 } from '../../../../shared/spool/spool-operation-contract'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
-import type { ActivityBarItem } from '../right-sidebar/activity-bar-buttons'
+import type { ActivityBarItem } from '../workspace-panel/activity-bar-buttons'
 import {
   parseSpoolTerminalCreateResult,
   parseSpoolTerminalLaunchOptionsResult
@@ -184,7 +184,7 @@ export function SpoolSessionCreateMenu({
       ) : (
         <DropdownMenuItem
           disabled
-          className="text-muted-foreground gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5"
+          className="text-muted-foreground gap-2 px-2 py-1.5 text-[12px] leading-5"
         >
           {launchOptions.status === 'loading' ? (
             <LoadingIndicator aria-hidden="true" className="size-3.5" />

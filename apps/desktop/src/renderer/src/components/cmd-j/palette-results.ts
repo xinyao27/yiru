@@ -1,6 +1,7 @@
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { SettingsNavIcon, SettingsNavSection } from '@/lib/settings-navigation-types'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import type { CmdJQuickAction } from './quick-actions'
 
 export type CmdJSettingsResult = {

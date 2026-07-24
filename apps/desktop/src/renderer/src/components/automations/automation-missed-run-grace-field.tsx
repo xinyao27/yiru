@@ -1,5 +1,6 @@
 import { Info } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -38,16 +39,18 @@ export function AutomationMissedRunGraceField({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
+                  variant="quiet"
+                  size="xs"
                   type="button"
                   aria-label={translate(
                     'auto.components.automations.AutomationMissedRunGraceField.3df53d554a',
                     'Missed-run grace help'
                   )}
-                  className="text-muted-foreground hover:text-foreground rounded-sm outline-none"
+                  className="h-auto border-0 p-0"
                 >
                   <Info className="size-3.5" />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="top" sideOffset={6} className="max-w-72">

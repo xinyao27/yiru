@@ -1,5 +1,7 @@
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import type { SparsePresetDirectoryParseResult } from '@/lib/sparse-preset-draft'
 
@@ -56,10 +58,12 @@ export function SparseCheckoutPresetDraftForm({
           >
             {translate('auto.components.sparse.SparseCheckoutPresetSelect.b3a500c623', 'Name')}
           </label>
-          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 rounded-md border px-2.5 transition">
-            <input
+          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 flex h-8 items-center border px-2.5 transition">
+            <Input
               id="sparse-preset-name"
               ref={setNameInputNode}
+              variant="chrome-free"
+              size="xs"
               value={draft.name}
               onChange={(event) => onDraftChange({ ...draft, name: event.target.value })}
               placeholder={translate(
@@ -69,7 +73,6 @@ export function SparseCheckoutPresetDraftForm({
               maxLength={80}
               autoComplete="off"
               spellCheck={false}
-              className="text-foreground selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground h-8 w-full bg-transparent text-xs outline-none"
             />
           </div>
         </div>
@@ -83,9 +86,11 @@ export function SparseCheckoutPresetDraftForm({
               'Directories'
             )}
           </label>
-          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 rounded-md border px-2.5 py-1.5 transition">
-            <textarea
+          <div className="border-border/70 bg-muted/20 focus-within:border-ring/70 border px-2.5 py-1.5 transition">
+            <Textarea
               id="sparse-preset-directories"
+              variant="chrome-free"
+              size="sm"
               value={draft.directoriesText}
               onChange={(event) => onDraftChange({ ...draft, directoriesText: event.target.value })}
               placeholder={translate(
@@ -94,7 +99,7 @@ export function SparseCheckoutPresetDraftForm({
               )}
               rows={3}
               spellCheck={false}
-              className="text-foreground selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground max-h-28 w-full min-w-0 resize-none bg-transparent font-mono text-xs leading-5 outline-none"
+              className="max-h-28 font-mono leading-5"
             />
           </div>
         </div>

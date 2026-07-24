@@ -1,4 +1,5 @@
-import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { applyAppend, replaceList, type NativeChatMerger } from './mobile-native-chat-merge'
 
 export type MobileNativeChatStreamFrame = {

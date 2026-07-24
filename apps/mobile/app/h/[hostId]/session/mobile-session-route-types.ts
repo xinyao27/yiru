@@ -1,5 +1,7 @@
-import type { AgentStatusEntry } from '../../../../../desktop/src/shared/agent-status-types'
-import type { DiffComment, TuiAgent } from '../../../../../desktop/src/shared/types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+import type { DiffComment } from '@yiru/workbench-model/workspace'
+
 import type { MobileBrowserTab } from '../../../../src/browser/mobile-browser-pane'
 import type { MobileDiffLine } from '../../../../src/session/mobile-diff-lines'
 import type {

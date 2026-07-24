@@ -1,9 +1,5 @@
 import { formatShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
-import { useAppStore } from '@/store'
-
-import type { ContextualTour, ContextualTourId } from '../../../../shared/contextual-tours'
-import type { ContextualTourOutcome } from '../../../../shared/feature-education-telemetry'
 import {
   getContextualTourOutcomeStepTotal,
   getContextualTourPanelHost,
@@ -11,7 +7,11 @@ import {
   getContextualTourStepProgress,
   getMeasurableContextualTourTarget,
   getVisibleContextualTourStepIndexes
-} from './contextual-tour-gate'
+} from '@/runtime/contextual-tour-gate'
+import { useAppStore } from '@/store'
+
+import type { ContextualTour, ContextualTourId } from '../../../../shared/contextual-tours'
+import type { ContextualTourOutcome } from '../../../../shared/feature-education-telemetry'
 import type { ActiveTourRenderState } from './contextual-tour-overlay-surface'
 
 export type ContextualTourMeasurementAction =

@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { SpoolWorktreeVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,11 +37,12 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/hooks/use-virtualized-scroll-anchor'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoById, useRepoMap, useWorktreeMap } from '@/store/selectors'
 import type { AppState } from '@/store/types'
@@ -288,6 +290,9 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
   const deleteFolderWorkspace = useAppStore((s) => s.deleteFolderWorkspace)
   const setActiveWorktree = useAppStore((s) => s.setActiveWorktree)
   const repo = useRepoById(worktree.repoId)
+  const runtimeEnvironmentId = useAppStore((state) =>
+    getRuntimeEnvironmentIdForWorktree(state, worktree.id)
+  )
   const deleteState = useAppStore((s) => s.deleteStateByWorktreeId[worktree.id])
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPoint, setMenuPoint] = useState({ x: 0, y: 0 })
@@ -695,10 +700,12 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpenState} modal={false}>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-hidden
               tabIndex={-1}
-              className="pointer-events-none absolute size-px opacity-0"
+              className="pointer-events-none absolute size-px border-0 opacity-0"
               style={{ left: menuPoint.x, top: menuPoint.y }}
             />
           }
@@ -763,6 +770,7 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
               <WorktreeOpenInSubMenu
                 worktreePath={worktree.path}
                 connectionId={repo?.connectionId ?? null}
+                runtimeEnvironmentId={runtimeEnvironmentId}
                 disabled={isDeleting}
               />
               <DropdownMenuItem onClick={handleCopyPath} disabled={isDeleting}>
@@ -865,7 +873,7 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
                 <>
                   {validParentWorktreeId && (
                     <DropdownMenuItem onClick={handleOpenParent} disabled={isDeleting}>
-                      <Workflow className="size-3.5" />
+                      <Workflow weight="regular" className="size-3.5" />
                       {translate(
                         'auto.components.sidebar.WorktreeContextMenu.8d9cd19d09',
                         'Open Parent Worktree'

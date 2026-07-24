@@ -1,10 +1,10 @@
+import type { GitHubWorkItemDetails, PRInfo } from '@yiru/workbench-model/review'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
 import { ArrowRight, ArrowSquareOut as ExternalLink, Pencil } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { GitHubWorkItemDetails, PRInfo } from '../../../../desktop/src/shared/types'
 import { canEditPRTitle } from '../../session/pr-title-edit'
 import type { MobilePrTitleAction } from '../../session/use-mobile-pr-title-action'
 import { openMobilePrUrl } from '../mobile-pr-compose-sheet'

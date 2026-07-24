@@ -1,8 +1,9 @@
+import type { AgentType } from '@yiru/workbench-model/agent'
+import { resolveTerminalTitleAgentType } from '@yiru/workbench-model/agent'
+
 import type { AppState } from '@/store/types'
 
-import type { AgentType } from '../../../shared/agent-status-types'
 import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
-import { resolveTerminalTitleAgentType } from '../../../shared/terminal-title-agent-type'
 import type { TerminalTab } from '../../../shared/types'
 import { detectAgentSendTitleStatus } from './agent-send-title-status'
 import {

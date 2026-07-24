@@ -1,15 +1,18 @@
 import type React from 'react'
 
-import type { ActivityBarItem } from '@/components/right-sidebar/activity-bar-buttons'
-import { getTabRootStateClasses } from '@/components/tab-bar/drop-indicator'
 import { preventMiddleButtonDefault } from '@/components/tab-bar/middle-button-default-guard'
+import {
+  getTitlebarTabStateClasses,
+  TAB_LEADING_ICON_CLASSES,
+  TAB_ROOT_CLASSES
+} from '@/components/tab-bar/tab-chrome-classes'
 import { TabCloseButton } from '@/components/tab-bar/tab-close-button'
-import { TAB_ROOT_CLASSES } from '@/components/tab-bar/tab-root-classes'
 import {
   TAB_CONTAINER_WIDTH_CLASSES,
   TAB_LABEL_WIDTH_CLASSES
 } from '@/components/tab-bar/tab-width-rules'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import type { ActivityBarItem } from '@/components/workspace-panel/activity-bar-buttons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -42,7 +45,7 @@ export function SpoolWorkspacePanelTab({
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={cn(TAB_ROOT_CLASSES, 'w-full', getTabRootStateClasses(active))}
+        className={cn(TAB_ROOT_CLASSES, 'w-full', getTitlebarTabStateClasses(active))}
         onClick={onSelect}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -64,7 +67,7 @@ export function SpoolWorkspacePanelTab({
           }
         }}
       >
-        <Icon className="mr-1 size-4 shrink-0" />
+        <Icon className={TAB_LEADING_ICON_CLASSES} />
         <Tooltip>
           <TooltipTrigger
             render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{item.title}</span>}

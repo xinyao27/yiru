@@ -1,10 +1,13 @@
-import { isTerminalSendRpcAccepted } from '../terminal/terminal-send-rpc-response'
 import type { RpcClient } from '../transport/rpc-client'
 import {
   buildMobileImagePastePayload,
   saveMobileClipboardImageAsTempFile
 } from './mobile-clipboard-image'
 import type { MobileImageSource, PickedMobileImage } from './mobile-image-source-picker'
+import {
+  sendMobileNativeChatMessageWithOutcome,
+  type MobileNativeChatSendOutcome
+} from './mobile-native-chat-send'
 
 export type AttachMobileImageDeps = {
   readonly client: Pick<RpcClient, 'sendRequest'>
@@ -20,10 +23,10 @@ export type AttachMobileImageDeps = {
   readonly beforeTerminalSend?: (terminal: string) => Promise<boolean>
 }
 
-// Uploads a picked image to the host and pastes the resulting file path into the
-// active terminal — the same bracketed-path payload desktop image paste sends, so
-// TUIs (Claude Code, etc.) attach it exactly as a desktop paste. Returns false
-// when the user cancelled the picker.
+export type MobileImageAttachmentOutcome = MobileNativeChatSendOutcome | 'cancelled' | 'blocked'
+
+// Why: use desktop's bracketed-path payload so TUIs attach Mobile uploads the
+// same way, while preserving ambiguous delivery for the input-healing caller.
 export async function attachMobileImageToTerminal(
   source: MobileImageSource,
   {
@@ -35,10 +38,10 @@ export async function attachMobileImageToTerminal(
     onUploadStart,
     beforeTerminalSend
   }: AttachMobileImageDeps
-): Promise<boolean> {
+): Promise<MobileImageAttachmentOutcome> {
   const picked = await pickImage(source)
   if (!picked) {
-    return false
+    return 'cancelled'
   }
   onUploadStart?.()
   const connectionId = await getConnectionId()
@@ -49,13 +52,13 @@ export async function attachMobileImageToTerminal(
   // bracketed (matching desktop paste) regardless of terminal mode.
   const payload = buildMobileImagePastePayload(imagePath)
   if (beforeTerminalSend && !(await beforeTerminalSend(terminal))) {
-    return false
+    return 'blocked'
   }
-  const response = await client.sendRequest('terminal.send', {
+  return sendMobileNativeChatMessageWithOutcome({
+    client,
     terminal,
     text: payload,
     enter: false,
-    ...(deviceToken ? { client: { id: deviceToken, type: 'mobile' as const } } : {})
+    ...(deviceToken ? { mobileClient: { id: deviceToken, type: 'mobile' as const } } : {})
   })
-  return isTerminalSendRpcAccepted(response)
 }

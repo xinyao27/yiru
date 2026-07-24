@@ -17,14 +17,17 @@ import {
   powerMonitor
 } from 'electron'
 export { getBashShellReadyRcfileContent } from '../providers/local-pty-shell-ready'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { isRemoteAgentHooksEnabled } from '../../shared/agent-hook-relay'
-import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import {
   getCommandTokenPathBasename,
   getFirstCommandToken
 } from '../../shared/command-token-scanner'
-import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
 import {
   isWslShellName,
   resolveLocalWindowsTerminalRuntimeOptions
@@ -73,8 +76,6 @@ import { validateTerminalViewAttributes } from '../../shared/terminal-view-attri
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import type { GlobalSettings, TuiAgent } from '../../shared/types'
 import { parseWorkspaceKey } from '../../shared/workspace-scope'
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   clearMigrationUnsupportedPty,
@@ -95,6 +96,7 @@ import {
 import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude-accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
+import { isCodexSystemDefaultRealHomeEnabled } from '../codex/codex-real-home-flag'
 import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
 import { recordDaemonStreamBacklogEvent } from '../daemon/daemon-stream-backlog-probe'
 import { addNodePtyRecoveryHint } from '../daemon/node-pty-error-hints'
@@ -543,10 +545,6 @@ function getProviderForStartupTerminalColorReply(ptyId: string): IPtyProvider | 
   return localProvider
 }
 
-export function answerStartupTerminalColorQueriesForPty(ptyId: string, data: string): string {
-  return answerStartupTerminalColorQueries(ptyId, data, getProviderForStartupTerminalColorReply)
-}
-
 function normalizeNodePtySpawnError(err: unknown): Error {
   const rawMessage = err instanceof Error ? err.message : String(err)
   const hintedMessage = addNodePtyRecoveryHint(rawMessage)
@@ -632,6 +630,8 @@ export type BuildPtyHostEnvOptions = {
   userDataPath: string
   selectedCodexHomePath: string | null
   skipCodexHomeEnv?: boolean
+  /** Real-home routing strips only a Yiru-owned inherited override. */
+  stripInheritedYiruCodexHome?: boolean
   githubAttributionEnabled: boolean
   /** The launch command the renderer chose for this PTY (e.g. 'pi', 'omp',
    *  'claude'). Used to resolve the per-agent managed extension target for
@@ -704,7 +704,34 @@ function shouldSkipCodexHomeEnvForWindowsShell(
 }
 
 const CODEX_HOME_ENV_KEYS = ['CODEX_HOME', 'YIRU_CODEX_HOME'] as const
-type GetSelectedCodexHomePath = (target?: CodexAccountSelectionTarget) => string | null
+
+function shouldStripInheritedYiruCodexHome(args: {
+  target: CodexAccountSelectionTarget
+  selectedCodexHomePath: string | null
+  skipCodexHomeEnv: boolean
+}): boolean {
+  return (
+    args.target.runtime === 'host' &&
+    args.selectedCodexHomePath === null &&
+    !args.skipCodexHomeEnv &&
+    isCodexSystemDefaultRealHomeEnabled()
+  )
+}
+
+function getLocalYiruCodexHomeEnvKeysToDelete(env: Record<string, string>): string[] {
+  const inheritedYiruOverride = env.YIRU_CODEX_HOME ?? process.env.YIRU_CODEX_HOME
+  const inheritedCodexHome = env.CODEX_HOME ?? process.env.CODEX_HOME
+  const keys = ['YIRU_CODEX_HOME']
+  if (inheritedYiruOverride && inheritedCodexHome === inheritedYiruOverride) {
+    keys.push('CODEX_HOME')
+  }
+  return keys
+}
+
+type GetSelectedCodexHomePath = (
+  target?: CodexAccountSelectionTarget,
+  launchEnv?: NodeJS.ProcessEnv
+) => string | null
 type PrepareClaudeAuth = (
   target?: ClaudeAccountSelectionTarget
 ) => Promise<ClaudeRuntimeAuthPreparation>
@@ -1076,6 +1103,12 @@ export function buildPtyHostEnv(
     // Why: user startup files may re-export CODEX_HOME; shell-ready wrappers
     // restore this runtime home before Codex can be launched from the prompt.
     baseEnv.YIRU_CODEX_HOME = opts.selectedCodexHomePath
+  } else if (opts.stripInheritedYiruCodexHome) {
+    // Why: nested Yiru panes inherit the private marker; a user-owned custom
+    // CODEX_HOME has no matching marker and must survive real-home routing.
+    for (const key of getLocalYiruCodexHomeEnvKeysToDelete(baseEnv)) {
+      delete baseEnv[key]
+    }
   }
 
   // Why: WSL shells need the managed userData root for shell-ready wrappers; dev-mode terminals need the same export so `yiru` targets the live dev instance.
@@ -1640,13 +1673,19 @@ export function registerPtyHandlers(
             : { runtime: 'host' }
         const selectedCodexHomePath = getCompatibleSelectedCodexHomePath(
           codexSelectionTarget,
-          getSelectedCodexHomePath?.(codexSelectionTarget) ?? null
+          getSelectedCodexHomePath?.(codexSelectionTarget, baseEnv) ?? null
         )
+        const skipCodexHomeEnv = ctx?.isWsl === true && !selectedCodexHomePath
         const env = buildPtyHostEnv(id, baseEnv, {
           isPackaged: app.isPackaged,
           userDataPath: app.getPath('userData'),
           selectedCodexHomePath,
-          skipCodexHomeEnv: ctx?.isWsl === true && !selectedCodexHomePath,
+          skipCodexHomeEnv,
+          stripInheritedYiruCodexHome: shouldStripInheritedYiruCodexHome({
+            target: codexSelectionTarget,
+            selectedCodexHomePath,
+            skipCodexHomeEnv
+          }),
           githubAttributionEnabled: getSettings?.()?.enableGitHubAttribution ?? false,
           launchCommand: ctx?.command,
           launchAgent: ctx?.launchAgent,
@@ -1680,8 +1719,7 @@ export function registerPtyHandlers(
         ptyOwnership.delete(id)
         markClaudePtyExited(id)
         runtime?.onPtyExit(id, code)
-      },
-      onData: (id, data, timestamp) => runtime?.onPtyData(id, data, timestamp)
+      }
     })
   }
 
@@ -2693,24 +2731,30 @@ export function registerPtyHandlers(
         runtime?.emitDaemonPtyTransientFact(payload.id, payload.fact)
       }) ?? null
 
-    // Why: LocalPtyProvider routes data to the runtime via configure().onData,
-    // but daemon-backed providers don't have configure(). Without this, daemon
-    // PTY data never reaches the runtime's tail buffer, so terminal.read returns
-    // empty and agent-detection from raw data never fires. Runtime tails also
-    // power mobile read/stream, so they must be notified regardless of window
-    // state.
+    // Why: LocalPtyProvider reports exit through its configured cleanup hook;
+    // daemon adapters report it only through the provider event below.
     const isLocalProvider = localProvider instanceof LocalPtyProvider
 
     localDataUnsub = localProvider.onData((payload) => {
-      const outputSeq = isLocalProvider
-        ? runtime?.getPtyOutputSequence(payload.id)
-        : runtime?.onPtyData(
-            payload.id,
-            payload.data,
-            Date.now(),
-            payload.sequenceChars ?? payload.data.length
-          )
-      const rendererData = answerStartupTerminalColorQueriesForPty(payload.id, payload.data)
+      // Why: capture authority before synchronous ingestion so the model and
+      // startup shim cannot both answer if gate/subscriber state later changes.
+      const queryReplyOwner =
+        runtime?.getTerminalQueryReplyOwnerForLiveChunk(payload.id) ?? 'renderer'
+      const outputSeq = runtime?.onPtyData(
+        payload.id,
+        payload.data,
+        Date.now(),
+        payload.sequenceChars ?? payload.data.length,
+        queryReplyOwner
+      )
+      const rendererData =
+        queryReplyOwner === 'renderer'
+          ? answerStartupTerminalColorQueries(
+              payload.id,
+              payload.data,
+              getProviderForStartupTerminalColorReply
+            )
+          : payload.data
       const preservesSeq =
         rendererData === payload.data &&
         (payload.sequenceChars === undefined || payload.sequenceChars === payload.data.length)
@@ -3117,13 +3161,20 @@ export function registerPtyHandlers(
       const selectedCodexHomePath = isDaemonHostSpawn
         ? getCompatibleSelectedCodexHomePath(
             codexSelectionTarget,
-            getSelectedCodexHomePath?.(codexSelectionTarget) ?? null
+            getSelectedCodexHomePath?.(codexSelectionTarget, env) ?? null
           )
         : null
       const skipCodexHomeEnv =
         isDaemonHostSpawn &&
         shouldSkipCodexHomeEnvForWindowsShell(daemonShellOverride, cwd) &&
         !selectedCodexHomePath
+      const stripInheritedYiruCodexHome =
+        isDaemonHostSpawn &&
+        shouldStripInheritedYiruCodexHome({
+          target: codexSelectionTarget,
+          selectedCodexHomePath,
+          skipCodexHomeEnv
+        })
       if (isDaemonHostSpawn && sessionId) {
         if (!isSafePtySessionId(sessionId, app.getPath('userData'))) {
           throw new Error('Invalid PTY session id')
@@ -3133,6 +3184,7 @@ export function registerPtyHandlers(
           userDataPath: app.getPath('userData'),
           selectedCodexHomePath,
           skipCodexHomeEnv,
+          stripInheritedYiruCodexHome,
           githubAttributionEnabled: getSettings?.()?.enableGitHubAttribution ?? false,
           launchCommand: args.command,
           launchAgent: isTuiAgent(args.launchAgent) ? args.launchAgent : undefined,
@@ -3165,6 +3217,12 @@ export function registerPtyHandlers(
           spawnOptions.envToDelete,
           CODEX_HOME_ENV_KEYS
         )
+      } else if (stripInheritedYiruCodexHome) {
+        // Why: the persistent daemon must compare against its own inherited
+        // marker; Electron cannot safely decide ownership for that process.
+        spawnOptions.envToDelete = mergePtyEnvDeletions(spawnOptions.envToDelete, [
+          'YIRU_CODEX_HOME'
+        ])
       }
       deleteRequestedEnvKeys(env, spawnOptions.envToDelete)
       promoteAgentTeamsShimPath(env, requestedAgentTeamsPath)
@@ -3601,6 +3659,19 @@ export function registerPtyHandlers(
         /* best effort: renderer clear still handles local PTYs */
       }
     },
+    hasPty: (ptyId) => {
+      const ownedConnectionId = ptyOwnership.get(ptyId)
+      const parsedSshId = ownedConnectionId === undefined ? parseAppSshPtyId(ptyId) : null
+      try {
+        const provider = parsedSshId
+          ? getProvider(parsedSshId.connectionId)
+          : getProviderForPty(ptyId)
+        return provider.hasPty?.(ptyId) ?? null
+      } catch {
+        // Why: only an authoritative false may retire a restored Mobile terminal.
+        return null
+      }
+    },
     listProcesses: async () => {
       const providerSessions = await Promise.all([
         localProvider.listProcesses(),
@@ -4013,13 +4084,20 @@ export function registerPtyHandlers(
       const selectedCodexHomePath = isDaemonHostSpawn
         ? getCompatibleSelectedCodexHomePath(
             codexSelectionTarget,
-            getSelectedCodexHomePath?.(codexSelectionTarget) ?? null
+            getSelectedCodexHomePath?.(codexSelectionTarget, baseEnv) ?? null
           )
         : null
       const skipCodexHomeEnv =
         isDaemonHostSpawn &&
         shouldSkipCodexHomeEnvForWindowsShell(effectiveShellOverride, cwd) &&
         !selectedCodexHomePath
+      const stripInheritedYiruCodexHome =
+        isDaemonHostSpawn &&
+        shouldStripInheritedYiruCodexHome({
+          target: codexSelectionTarget,
+          selectedCodexHomePath,
+          skipCodexHomeEnv
+        })
       if (isDaemonHostSpawn) {
         if (effectiveSessionId === undefined) {
           // Should be unreachable: the expression above returns a string when
@@ -4044,6 +4122,7 @@ export function registerPtyHandlers(
             userDataPath: app.getPath('userData'),
             selectedCodexHomePath,
             skipCodexHomeEnv,
+            stripInheritedYiruCodexHome,
             githubAttributionEnabled: getSettings?.()?.enableGitHubAttribution ?? false,
             launchCommand: args.command,
             launchAgent: isTuiAgent(args.launchAgent) ? args.launchAgent : undefined,
@@ -4089,7 +4168,11 @@ export function registerPtyHandlers(
         ),
         skipCodexHomeEnv ? CODEX_HOME_ENV_KEYS : []
       )
-      deleteRequestedEnvKeys(spawnEnv, combinedEnvToDelete)
+      const daemonEnvToDelete = mergePtyEnvDeletions(
+        combinedEnvToDelete,
+        stripInheritedYiruCodexHome ? ['YIRU_CODEX_HOME'] : []
+      )
+      deleteRequestedEnvKeys(spawnEnv, daemonEnvToDelete)
       promoteAgentTeamsShimPath(spawnEnv, requestedAgentTeamsPath)
       const spawnOptions: PtySpawnOptions = {
         cols: args.cols,
@@ -4098,8 +4181,8 @@ export function registerPtyHandlers(
         env: spawnEnv,
         ...(isMintedSessionId ? { isNewSession: true } : {})
       }
-      if (combinedEnvToDelete) {
-        spawnOptions.envToDelete = combinedEnvToDelete
+      if (daemonEnvToDelete) {
+        spawnOptions.envToDelete = daemonEnvToDelete
       }
       if (args.command !== undefined) {
         spawnOptions.command = args.command

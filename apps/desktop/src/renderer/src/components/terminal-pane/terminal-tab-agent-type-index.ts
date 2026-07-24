@@ -1,4 +1,4 @@
-import type { AgentStatusEntry, AgentType } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
 
 export type TerminalTabAgentTypeState = Record<string, AgentStatusEntry>
 export type TerminalTabAgentTypesByLeaf = Readonly<Record<string, AgentType>>

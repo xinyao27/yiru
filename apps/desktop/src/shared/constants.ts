@@ -11,6 +11,7 @@ import { getDefaultSourceControlAiSettings } from './source-control-ai'
 import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from './source-control-group-order'
 import type { VoiceSettings } from './speech-types'
 import { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
+import { DEFAULT_STATUS_BAR_USAGE_MODE } from './status-bar-usage-mode'
 import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal-fonts'
 import { getDefaultTerminalQuickCommands } from './terminal-quick-commands'
 import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from './terminal-scrollback-policy'
@@ -208,6 +209,8 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     editorAutoSave: false,
     editorAutoSaveDelayMs: DEFAULT_EDITOR_AUTO_SAVE_DELAY_MS,
     editorMinimapEnabled: false,
+    // Why empty: editors keep following the terminal font unless the user opts in.
+    editorFontFamily: '',
     editorWordWrap: true,
     richMarkdownSpellcheckEnabled: true,
     markdownReviewToolsEnabled: true,
@@ -244,7 +247,8 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     terminalInactivePaneOpacity: 0.8,
     terminalActivePaneOpacity: 1,
     terminalPaneOpacityTransitionMs: 140,
-    terminalDividerThicknessPx: 3,
+    terminalDividerThicknessPx: 1,
+    terminalDividerThicknessDefaultedToHairline: true,
     // Why: Windows follows its native terminal paste convention, while macOS
     // and Linux keep right-click available for the context menu by default.
     terminalRightClickToPaste: getDefaultTerminalRightClickToPaste(),
@@ -269,6 +273,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     // Why: default-on everywhere so the value round-trips across platforms;
     // only the darwin consumers act on it.
     showMenuBarIcon: true,
+    showPinnedWorktreesInGroups: false,
     terminalClipboardOnSelect: false,
     // Why: OSC 52 is a classic data-exfiltration vector (any process piping
     // untrusted output into the terminal can rewrite the clipboard). Keep the
@@ -486,6 +491,7 @@ export function getDefaultUIState(): PersistedUIState {
     statusBarItems: [...DEFAULT_STATUS_BAR_ITEMS],
     statusBarVisible: true,
     usagePercentageDisplay: DEFAULT_USAGE_PERCENTAGE_DISPLAY,
+    statusBarUsageMode: DEFAULT_STATUS_BAR_USAGE_MODE,
     dismissedUpdateVersion: null,
     lastUpdateCheckAt: null,
     trustedYiruHooks: {},

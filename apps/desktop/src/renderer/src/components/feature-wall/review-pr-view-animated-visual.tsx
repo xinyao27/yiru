@@ -1,6 +1,6 @@
 import {
   Files,
-  GitBranch,
+  GitMerge,
   ListChecks,
   Chat as MessageSquare,
   MagnifyingGlass as Search
@@ -9,6 +9,7 @@ import { useRef } from 'react'
 import type { ComponentType, JSX, ReactNode } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -46,7 +47,7 @@ const SIDEBAR_TABS: readonly {
   },
   {
     id: 'source-control',
-    icon: GitBranch,
+    icon: GitMerge,
     get label() {
       return translate(
         'auto.components.feature.wall.ReviewPRViewAnimatedVisual.d7f80060ca',
@@ -180,18 +181,20 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
                 'Add local diagnostics error tracking'
               )}
             </div>
-            <button
-              className="ravpr-merge focus-visible:bg-accent outline-none"
+            <Button
+              variant="ghost"
+              size="xs"
+              className="ravpr-merge focus-visible:bg-accent h-auto border-0 p-0"
               data-merge-btn
               type="button"
             >
-              <GitBranch className="size-3" />
+              <GitMerge className="size-3" />
               {translate(
                 'auto.components.feature.wall.ReviewPRViewAnimatedVisual.2f37142229',
                 'Squash and merge'
               )}
               <ChevDownIcon />
-            </button>
+            </Button>
 
             <div className="ravpr-reveal" data-checks-block>
               <div className="ravpr-section-row" data-check-summary>

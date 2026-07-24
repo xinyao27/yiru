@@ -1,17 +1,21 @@
-/* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
-and race protection are kept together so branch review lookup invariants stay testable. */
-import type { StateCreator } from 'zustand'
-
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
-
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import type {
   CreateHostedReviewInput,
   CreateHostedReviewResult,
   HostedReviewCreationEligibility,
   HostedReviewCreationEligibilityArgs,
   HostedReviewInfo
-} from '../../../../shared/hosted-review'
+} from '@yiru/workbench-model/review'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+/* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
+and race protection are kept together so branch review lookup invariants stay testable. */
+import type { StateCreator } from 'zustand'
+
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+
 import type { Repo } from '../../../../shared/types'
 import type { AppState } from '../types'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'
@@ -27,6 +31,7 @@ type CacheEntry<T> = { data: T | null; fetchedAt: number; linkedReviewHintKey?: 
 type FetchOptions = {
   force?: boolean
   repoId?: string
+  executionHostId?: ExecutionHostId
   staleWhileRevalidate?: boolean
   currentHeadOid?: string | null
 }
@@ -291,9 +296,15 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
     options
   ): Promise<HostedReviewInfo | null> => {
     const settings = get().settings
-    const repo = get().repos?.find((candidate) =>
-      options?.repoId ? candidate.id === options.repoId : candidate.path === repoPath
-    )
+    const repo = get().repos?.find((candidate) => {
+      const matchesRepo = options?.repoId
+        ? candidate.id === options.repoId
+        : candidate.path === repoPath
+      return (
+        matchesRepo &&
+        (!options?.executionHostId || getRepoExecutionHostId(candidate) === options.executionHostId)
+      )
+    })
     const ownerSettings = settingsForHostedReviewRepoOwner(settings, repo)
     const target = getActiveRuntimeTarget(ownerSettings)
     const repoId = options?.repoId ?? repo?.id

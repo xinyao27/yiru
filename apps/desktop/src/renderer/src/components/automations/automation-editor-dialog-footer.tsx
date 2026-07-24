@@ -110,16 +110,18 @@ export function AutomationEditorDialogFooter({
               <Tooltip>
                 <TooltipTrigger
                   render={
-                    <button
+                    <Button
+                      variant="quiet"
+                      size="xs"
                       type="button"
                       aria-label={translate(
                         'auto.components.automations.AutomationEditorDialog.2c3fd9bfa1',
                         'Workspace mode help'
                       )}
-                      className="text-muted-foreground hover:text-foreground rounded-sm outline-none"
+                      className="h-auto border-0 p-0"
                     >
                       <Info className="size-3.5" />
-                    </button>
+                    </Button>
                   }
                 />
                 <TooltipContent side="top" sideOffset={6} className="max-w-72">

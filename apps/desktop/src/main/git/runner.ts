@@ -159,8 +159,16 @@ function resolveHostGitHubCli(command: 'gh', args: string[]): ResolvedCommand {
   }
 }
 
+let defaultWslDistroOverride: string | null = null
+
+// Why: global provider commands have no repo cwd, so follow the user's pinned
+// terminal distro without coupling this low-level runner to persistence.
+export function setDefaultWslDistroOverride(distro: string | null): void {
+  defaultWslDistroOverride = distro
+}
+
 function resolveDefaultWslCli(command: 'gh' | 'glab', args: string[]): ResolvedCommand | null {
-  const distro = getDefaultWslDistro()
+  const distro = defaultWslDistroOverride ?? getDefaultWslDistro()
   return distro ? resolveCommand(command, args, undefined, distro) : null
 }
 

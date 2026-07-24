@@ -35,7 +35,7 @@ export function UsageBreakdownSection({
   const sessionsKey = 'auto.components.stats.UsageBreakdownSection.02a046792e'
 
   return (
-    <section className="border-border/60 bg-card/40 rounded-lg border p-4">
+    <section className="border-border/60 bg-card/40 border p-4">
       <div className="mb-3">
         <h4 className="text-foreground text-sm font-semibold">{title}</h4>
         <p className="text-muted-foreground text-xs">

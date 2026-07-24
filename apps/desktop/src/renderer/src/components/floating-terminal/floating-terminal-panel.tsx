@@ -17,6 +17,7 @@ import EmulatorPane from '@/components/emulator-pane/emulator-pane'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import TabBar from '@/components/tab-bar/tab-bar'
+import { TAB_CONTENT_SURFACE_CLASSES } from '@/components/tab-bar/tab-chrome-classes'
 import { resolveGroupTabFromVisibleId } from '@/components/tab-group/tab-group-visible-id'
 import TerminalPane from '@/components/terminal-pane/terminal-pane'
 import { appendUniqueOpenFileIds } from '@/components/terminal/unsaved-close-queue'
@@ -1417,16 +1418,15 @@ export function FloatingTerminalPanel({
   return (
     // Why: root notification cards use z-40; keep the floating workspace below
     // them so alerts are never hidden behind an open terminal panel.
-    // Keep the border on an inner shell rather than mixing frame chrome on
-    // one rounded node made corners look stubby. Floating tabs skip their top
-    // border so the titlebar curve stays clean.
+    // Keep the border on an inner shell so the resize frame and tab seams do
+    // not compete for the same outer edge.
     <div
       ref={setPanelNode}
       data-floating-terminal-panel
       aria-hidden={!open}
       tabIndex={-1}
       className={cn(
-        'fixed z-30 flex min-h-[280px] min-w-[420px] rounded-lg bg-transparent text-card-foreground outline-none',
+        'fixed z-30 flex min-h-[280px] min-w-[420px] bg-transparent text-card-foreground outline-none',
         open ? 'opacity-100' : 'invisible pointer-events-none opacity-0'
       )}
       style={{
@@ -1447,9 +1447,9 @@ export function FloatingTerminalPanel({
       onBlurCapture={(event) => setFloatingTerminalInputFocused(event.relatedTarget)}
       onKeyDownCapture={handleShortcutSurfaceKeyDown}
     >
-      <div className="bg-card relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border border-black/14 dark:border-white/14">
+      <div className="bg-card border-border relative flex h-full min-h-0 w-full flex-col overflow-hidden border">
         <div
-          className="border-border flex h-9 shrink-0 cursor-grab items-center border-b bg-[var(--bg-titlebar,var(--card))] active:cursor-grabbing"
+          className="bg-background relative h-[var(--titlebar-height)] shrink-0 cursor-grab active:cursor-grabbing"
           data-floating-terminal-shortcut-surface
           onPointerDown={handleDragStart}
           onPointerMove={handleDragMove}
@@ -1457,63 +1457,73 @@ export function FloatingTerminalPanel({
           onPointerCancel={handleDragEnd}
           onDoubleClick={handleTitlebarDoubleClick}
         >
-          <div className="flex h-full min-w-0 flex-1">
-            <TabBar
-              tabs={terminalItems}
-              activeTabId={activeTerminalId}
-              worktreeId={FLOATING_TERMINAL_WORKTREE_ID}
-              expandedPaneByTabId={expandedPaneByTabId}
-              onActivate={activateFloatingItem}
-              onClose={closeFloatingItem}
-              onCloseOthers={closeOthers}
-              onCloseToRight={closeToRight}
-              onNewTerminalTab={() => createFloatingTerminalTab()}
-              onNewTerminalWithShell={createFloatingTerminalTab}
-              onNewBrowserTab={createFloatingBrowserTab}
-              onNewFileTab={createFloatingMarkdownTab}
-              onOpenFileTab={openFloatingMarkdownTab}
-              newTabMenuOrder="markdown-first"
-              onSetCustomTitle={setTabCustomTitle}
-              onSetTabColor={setTabColor}
-              onTogglePaneExpand={(tabId) =>
-                setTabPaneExpanded(tabId, expandedPaneByTabId[tabId] !== true)
-              }
-              editorFiles={editorItems}
-              browserTabs={browserItems}
-              activeFileId={activeEditorUnifiedId}
-              activeBrowserTabId={activeBrowserId}
-              activeSimulatorTabId={activeTab?.contentType === 'simulator' ? activeTab.id : null}
-              activeTabType={activeTabType}
-              onActivateFile={activateFloatingItem}
-              onCloseFile={closeFloatingItem}
-              onActivateBrowserTab={activateFloatingItem}
-              onCloseBrowserTab={closeFloatingItem}
-              onDuplicateBrowserTab={(browserTabId) => {
-                const source = browserTabs.find((tab) => tab.id === browserTabId)
-                if (!source) {
-                  return
+          {/* Why: inactive tabs reveal the same bottom seam as workspace strips,
+              while the opaque active tab paints over it and connects to the body. */}
+          <div
+            aria-hidden="true"
+            className="bg-border pointer-events-none absolute inset-x-0 bottom-0 h-px"
+          />
+          <div className="relative flex h-full items-stretch">
+            <div className="h-full min-w-0 flex-1">
+              <TabBar
+                tabs={terminalItems}
+                activeTabId={activeTerminalId}
+                worktreeId={FLOATING_TERMINAL_WORKTREE_ID}
+                expandedPaneByTabId={expandedPaneByTabId}
+                onActivate={activateFloatingItem}
+                onClose={closeFloatingItem}
+                onCloseOthers={closeOthers}
+                onCloseToRight={closeToRight}
+                onNewTerminalTab={() => createFloatingTerminalTab()}
+                onNewTerminalWithShell={createFloatingTerminalTab}
+                onNewBrowserTab={createFloatingBrowserTab}
+                onNewFileTab={createFloatingMarkdownTab}
+                onOpenFileTab={openFloatingMarkdownTab}
+                newTabMenuOrder="markdown-first"
+                onSetCustomTitle={setTabCustomTitle}
+                onSetTabColor={setTabColor}
+                onTogglePaneExpand={(tabId) =>
+                  setTabPaneExpanded(tabId, expandedPaneByTabId[tabId] !== true)
                 }
-                createBrowserTab(FLOATING_TERMINAL_WORKTREE_ID, source.url, {
-                  ...buildDuplicatedBrowserTabOptions(source),
-                  targetGroupId: activeGroup?.id,
-                  browserRuntimeEnvironmentId: null
-                })
-              }}
-              onCloseAllFiles={closeAllFiles}
-              onMakePreviewFilePermanent={makePreviewFilePermanent}
-              onPinFile={pinFile}
-              tabBarOrder={tabBarOrder}
+                editorFiles={editorItems}
+                browserTabs={browserItems}
+                activeFileId={activeEditorUnifiedId}
+                activeBrowserTabId={activeBrowserId}
+                activeSimulatorTabId={activeTab?.contentType === 'simulator' ? activeTab.id : null}
+                activeTabType={activeTabType}
+                onActivateFile={activateFloatingItem}
+                onCloseFile={closeFloatingItem}
+                onActivateBrowserTab={activateFloatingItem}
+                onCloseBrowserTab={closeFloatingItem}
+                onDuplicateBrowserTab={(browserTabId) => {
+                  const source = browserTabs.find((tab) => tab.id === browserTabId)
+                  if (!source) {
+                    return
+                  }
+                  createBrowserTab(FLOATING_TERMINAL_WORKTREE_ID, source.url, {
+                    ...buildDuplicatedBrowserTabOptions(source),
+                    targetGroupId: activeGroup?.id,
+                    browserRuntimeEnvironmentId: null
+                  })
+                }}
+                onCloseAllFiles={closeAllFiles}
+                onMakePreviewFilePermanent={makePreviewFilePermanent}
+                onPinFile={pinFile}
+                tabBarOrder={tabBarOrder}
+              />
+            </div>
+            <FloatingTerminalWindowControls
+              maximized={maximized}
+              onToggleMaximized={toggleMaximized}
+              onMinimize={() => onOpenChange(false)}
             />
           </div>
-          <FloatingTerminalWindowControls
-            maximized={maximized}
-            onToggleMaximized={toggleMaximized}
-            onMinimize={() => onOpenChange(false)}
-          />
         </div>
 
         <div
-          className="bg-background relative min-h-0 flex-1 overflow-hidden"
+          // Why: floating-workspace content follows the same selected-tab surface
+          // contract as the main workspace, including browser and empty-state roots.
+          className={cn('relative min-h-0 flex-1 overflow-hidden', TAB_CONTENT_SURFACE_CLASSES)}
           data-contextual-tour-target={
             hasVisibleFloatingTabs ? 'floating-workspace-surface' : undefined
           }
@@ -1615,7 +1625,7 @@ export function FloatingTerminalPanel({
       </div>
       {showOrchestrationSetup && activeTabType === 'terminal' ? (
         <div
-          className="border-border/60 bg-card text-card-foreground absolute right-4 bottom-4 z-10 w-[280px] rounded-md border p-3"
+          className="border-border/60 bg-card text-card-foreground absolute right-4 bottom-4 z-10 w-[280px] border p-3"
           data-floating-terminal-no-drag
         >
           <div className="space-y-2">
@@ -1804,7 +1814,7 @@ function FloatingTerminalEmptyState({
         <Button
           type="button"
           variant="ghost"
-          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-3 py-0 text-sm font-normal"
+          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
           data-contextual-tour-target="floating-workspace-new-terminal"
           onClick={onNewTerminal}
         >
@@ -1820,7 +1830,7 @@ function FloatingTerminalEmptyState({
         <Button
           type="button"
           variant="ghost"
-          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-3 py-0 text-sm font-normal"
+          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
           data-contextual-tour-target="floating-workspace-new-markdown"
           onClick={onNewMarkdown}
         >
@@ -1836,7 +1846,7 @@ function FloatingTerminalEmptyState({
         <Button
           type="button"
           variant="ghost"
-          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-3 py-0 text-sm font-normal"
+          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
           onClick={onOpenMarkdown}
         >
           <FileText className="size-3.5 opacity-90" />
@@ -1851,7 +1861,7 @@ function FloatingTerminalEmptyState({
         <Button
           type="button"
           variant="ghost"
-          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-3 py-0 text-sm font-normal"
+          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
           onClick={onNewBrowser}
         >
           <Globe className="size-3.5 opacity-90" />
@@ -1866,7 +1876,7 @@ function FloatingTerminalEmptyState({
         <Button
           type="button"
           variant="ghost"
-          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-3 py-0 text-sm font-normal"
+          className="text-foreground hover:bg-muted/40 hover:text-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
           onClick={onClose}
         >
           <Minus className="size-3.5 opacity-90" />

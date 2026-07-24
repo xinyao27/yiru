@@ -1,3 +1,4 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import WebSocket from 'ws'
 
 import type { PairingOffer } from './pairing'
@@ -30,7 +31,6 @@ import type {
   SharedControlSubscriptionCallbacks
 } from './remote-runtime-shared-control-types'
 import type { RemoteRuntimeSocketLivenessOptions } from './remote-runtime-socket-liveness'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 
 export class RemoteRuntimeSharedControlConnection {
   private state: SharedControlConnectionState = 'closed'

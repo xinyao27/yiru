@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import {
   remoteRuntimeTimeoutError,
   remoteRuntimeUnavailableError
@@ -7,7 +9,6 @@ import {
 import { toRemoteRuntimeClientError } from './remote-runtime-shared-control-protocol'
 import { rejectSharedControlPendingRequest } from './remote-runtime-shared-control-state'
 import type { SharedControlPendingRequest } from './remote-runtime-shared-control-types'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 
 export function requestSharedControl<TResult>(args: {
   pendingRequests: Map<string, SharedControlPendingRequest<unknown>>

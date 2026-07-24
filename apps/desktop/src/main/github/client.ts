@@ -2,10 +2,14 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+import type {
+  CreateHostedReviewInput,
+  CreateHostedReviewResult
+} from '@yiru/workbench-model/review'
+
 import { splitRemoteBranchName } from '../../shared/git-effective-upstream'
 import { normalizeGitHubPRMergeMethodSettings } from '../../shared/github-pr-merge-methods'
 import { isGitHubWorkItemsQueryTooLarge } from '../../shared/github-work-items-query-bounds'
-import type { CreateHostedReviewInput, CreateHostedReviewResult } from '../../shared/hosted-review'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef
@@ -71,7 +75,8 @@ export {
   listPullRequestLabels,
   listPullRequestAssignableUsers
 } from './pull-request-metadata'
-import { YIRU_GITHUB_REPOSITORY_SLUG } from '../../shared/yiru-github-repository'
+import { YIRU_GITHUB_REPOSITORY_SLUG } from '@yiru/workbench-model/product'
+
 import { mapGraphQLReactionGroups, type GitHubGraphQLReactionGroup } from './comment-reactions'
 import {
   mapCheckRunRESTStatus,

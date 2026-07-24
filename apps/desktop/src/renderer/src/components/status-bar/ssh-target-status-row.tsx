@@ -1,13 +1,14 @@
 import { Warning as AlertTriangle, Cloud } from '@phosphor-icons/react'
+import type { SshConnectionStatus } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { useAppStore } from '../../store'
 import type { RemoteWorkspaceSyncStatus } from '../../store/slices/ssh'
 import { STATUS_LABELS, statusColor } from '../settings/ssh-target-card'
@@ -106,7 +107,7 @@ export function SshTargetStatusRow({
 
   return (
     <div className="flex items-center gap-2.5 px-2 py-1.5">
-      <span className={cn('size-1.5 shrink-0 rounded-full', statusColor(status))} />
+      <span className={cn('size-1.5 shrink-0', statusColor(status))} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[12px] font-medium">{label}</div>
         <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-[10px]">
@@ -137,21 +138,25 @@ export function SshTargetStatusRow({
       {busy ? (
         <LoadingIndicator className="text-muted-foreground size-3 shrink-0" />
       ) : isReconnectable(status) ? (
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           onClick={() => void handleConnect()}
-          className="text-foreground hover:bg-accent/70 focus-visible:bg-accent/70 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium outline-none"
+          className="text-foreground hover:bg-accent/70 focus-visible:bg-accent/70 h-auto gap-0 border-0 px-1.5 py-0.5 text-[10px]"
         >
           {translate('auto.components.status.bar.SshStatusSegment.63f36455cc', 'Connect')}
-        </button>
+        </Button>
       ) : status === 'connected' ? (
-        <button
+        <Button
+          variant="quiet"
+          size="xs"
           type="button"
           onClick={() => void handleDisconnect()}
-          className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px] outline-none"
+          className="/70 /70 h-auto gap-0 border-0 px-1.5 py-0.5 text-[10px] font-normal"
         >
           {translate('auto.components.status.bar.SshStatusSegment.59b553e2aa', 'Disconnect')}
-        </button>
+        </Button>
       ) : null}
     </div>
   )

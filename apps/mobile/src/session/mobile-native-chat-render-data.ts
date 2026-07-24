@@ -1,9 +1,10 @@
-import { formatAgentTypeLabel } from '../../../desktop/src/shared/agent-type-label'
 import {
   formatNativeChatEmptyStateCopy,
   type NativeChatEmptyStateCopy
-} from '../../../desktop/src/shared/native-chat-empty-state'
-import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+import { formatAgentTypeLabel } from '@yiru/workbench-model/agent'
+
 import { foldToolMessages } from './mobile-native-chat-blocks'
 import { stripNoiseMessages } from './mobile-native-chat-noise'
 import type { MobileNativeChatStatus } from './use-mobile-native-chat-session'

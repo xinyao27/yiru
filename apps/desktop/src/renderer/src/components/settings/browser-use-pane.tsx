@@ -213,7 +213,7 @@ export function BrowserUseSetup({
   }
 
   return (
-    <div className="border-border/60 bg-card/30 space-y-3 rounded-2xl border p-4">
+    <div className="border-border/60 bg-card/30 space-y-3 border p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="space-y-0.5">
           <p className="text-sm font-semibold">
@@ -229,7 +229,7 @@ export function BrowserUseSetup({
         <div className="flex shrink-0 items-center gap-2">
           <span
             className={cn(
-              'rounded-full px-2 py-0.5 text-[10px] font-medium',
+              'px-2 py-0.5 text-[10px] font-medium',
               completedCount === 3
                 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                 : 'bg-muted text-muted-foreground'
@@ -271,10 +271,7 @@ export function BrowserUseSetup({
             "Install the Browser Use skill so agents can operate Yiru's browser."
           )}
           keywords={getBrowserUsePaneSearchEntries()[1].keywords}
-          className={cn(
-            'rounded-xl border border-border/60 bg-card/50 p-4',
-            step2Blocked && 'opacity-60'
-          )}
+          className={cn('border border-border/60 bg-card/50 p-4', step2Blocked && 'opacity-60')}
         >
           <BrowserUseSkillStep
             command={browserUseInstallCommand}

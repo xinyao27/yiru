@@ -46,7 +46,12 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
     try {
       const nextScanState = (await window.api.openCodeUsage.setEnabled({
         enabled
-      })) as OpenCodeUsageScanState
+      })) as OpenCodeUsageScanState | undefined
+      // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
+      // undefined; keep the unavailable state stable instead of fabricating one.
+      if (!nextScanState) {
+        return
+      }
       set({
         openCodeUsageScanState: enabled
           ? {
@@ -82,7 +87,12 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
 
   fetchOpenCodeUsage: async (opts) => {
     try {
-      const scanState = (await window.api.openCodeUsage.getScanState()) as OpenCodeUsageScanState
+      const scanState = (await window.api.openCodeUsage.getScanState()) as
+        | OpenCodeUsageScanState
+        | undefined
+      if (!scanState) {
+        return
+      }
       const currentScanState = get().openCodeUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&

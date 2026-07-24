@@ -1,5 +1,6 @@
 import type { ComponentProps, JSX } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -7,20 +8,18 @@ import { cn } from '@/lib/class-names'
 // Kept in a single module so the two pages stay aligned (same diff data,
 // same icon set, same caret/cursor scaffolding).
 
-// Why: animated feature previews use native buttons outside the shared Button primitive.
+// Why: animated previews own bespoke geometry while sharing Button interaction behavior.
 export function ReviewAnimatedVisualButton({
   className,
   focusBorder = false,
   ...props
 }: ComponentProps<'button'> & { focusBorder?: boolean }): JSX.Element {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
-      className={cn(
-        'outline-none',
-        focusBorder ? 'focus-visible:border-ring' : 'focus-visible:bg-accent',
-        className
-      )}
+      className={cn('h-auto p-0', !focusBorder && 'focus-visible:bg-accent', className)}
       {...props}
     />
   )

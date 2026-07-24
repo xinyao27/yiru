@@ -1102,6 +1102,11 @@
   color: var(--muted-foreground);
 }
 
+/* Why: chrome-free search fields rely on their host surface for visible keyboard focus. */
+.rich-markdown-slash-search:focus-within {
+  background: var(--accent);
+}
+
 .rich-markdown-slash-search input {
   width: 100%;
   min-width: 0;
@@ -1350,4 +1355,8 @@
 
 .rich-markdown-link-input::placeholder {
   color: var(--muted-foreground);
+}
+
+.rich-markdown-link-input:focus-visible {
+  background: var(--accent);
 }

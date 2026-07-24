@@ -8,6 +8,7 @@ import {
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
@@ -30,7 +31,7 @@ export function EntryStatusRow({
   message: string
 }): React.JSX.Element {
   return (
-    <div className="text-muted-foreground flex min-h-6 items-center gap-1.5 rounded-[7px] px-1 text-[11px] leading-5">
+    <div className="text-muted-foreground flex min-h-6 items-center gap-1.5 px-1 text-[11px] leading-5">
       {loading ? <LoadingIndicator className="size-3.5 shrink-0" aria-hidden="true" /> : null}
       <span className="truncate">{message}</span>
     </div>
@@ -51,16 +52,16 @@ export function EntryActionRow({
   const presentation = getActionPresentation(option)
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
       id={id}
       role="option"
       aria-selected={selected}
       className={cn(
-        'flex h-6 w-full items-center gap-1.5 rounded-[7px] px-1 text-left text-[11px] leading-5 outline-none',
-        selected
-          ? 'bg-black/8 text-accent-foreground dark:bg-white/14'
-          : 'text-muted-foreground hover:bg-black/8 hover:text-accent-foreground dark:hover:bg-white/14'
+        'border-0 justify-start whitespace-normal font-normal flex w-full gap-1.5 px-1 text-left text-[11px] leading-5',
+        selected ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent'
       )}
       onClick={onClick}
     >
@@ -76,7 +77,7 @@ export function EntryActionRow({
           <span className="min-w-0 truncate">{presentation.detail}</span>
         </>
       ) : null}
-    </button>
+    </Button>
   )
 }
 

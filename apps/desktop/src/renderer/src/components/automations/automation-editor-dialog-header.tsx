@@ -35,17 +35,19 @@ function AutomationTemplateCard({
   onSelect: () => void
 }): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="outline"
+      size="default"
       type="button"
       onClick={onSelect}
-      className="border-border/70 bg-background hover:bg-accent hover:text-accent-foreground rounded-md border px-3 py-2 text-left transition-colors focus-visible:outline-none"
+      className="border-border/70 justify-start gap-0 px-3 text-left font-normal whitespace-normal transition-colors"
     >
       <div className="text-muted-foreground text-[11px] font-medium uppercase">
         {template.category}
       </div>
       <div className="mt-1 text-sm font-medium">{template.label}</div>
       <div className="text-muted-foreground mt-1 line-clamp-2 text-xs">{template.description}</div>
-    </button>
+    </Button>
   )
 }
 

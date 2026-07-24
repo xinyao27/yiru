@@ -1,11 +1,12 @@
-import type { RetainedAgentEntry } from '@/store/slices/agent-status'
-import type { AppState } from '@/store/types'
-
 import type {
   AgentStatusEntry,
   AgentStatusOrchestrationContext,
   MigrationUnsupportedPtyEntry
-} from '../../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+
+import type { RetainedAgentEntry } from '@/store/slices/agent-status'
+import type { AppState } from '@/store/types'
+
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 

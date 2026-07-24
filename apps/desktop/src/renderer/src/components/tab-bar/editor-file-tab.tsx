@@ -25,19 +25,18 @@ import { useRepoById, useWorktreeById } from '@/store/selectors'
 
 import type { GitFileStatus } from '../../../../shared/types'
 import type { OpenFile } from '../../store/slices/editor'
-import { STATUS_COLORS, STATUS_LABELS } from '../right-sidebar/status-display'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
-import {
-  getDropIndicatorClasses,
-  getTabDividerClasses,
-  getTabRootStateClasses,
-  type DropIndicator
-} from './drop-indicator'
+import { STATUS_COLORS, STATUS_LABELS } from '../workspace-panel/status-display'
+import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'
 import { EditorFileTabContextMenu } from './editor-file-tab-context-menu'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './sortable-tab'
+import {
+  getTitlebarTabStateClasses,
+  TAB_LEADING_ICON_CLASSES,
+  TAB_ROOT_CLASSES
+} from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
-import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
@@ -222,10 +221,9 @@ export default function EditorFileTab({
     onActivate,
     disabled: isRenaming
   })
-  const tabIconTone = isActive ? 'text-foreground' : 'text-muted-foreground'
-  const tabIconClassName = cn('mr-1 size-4 shrink-0', tabIconTone)
+  const tabIconClassName = cn(TAB_LEADING_ICON_CLASSES, 'text-muted-foreground')
   const conflictIconClassName = cn(
-    'mr-1 size-4 shrink-0',
+    TAB_LEADING_ICON_CLASSES,
     isActive ? 'text-orange-400' : 'text-orange-400/70'
   )
 
@@ -238,9 +236,8 @@ export default function EditorFileTab({
       {...dragListeners}
       className={cn(
         TAB_ROOT_CLASSES,
-        getTabDividerClasses(hasTabsToRight),
         getDropIndicatorClasses(dropIndicator ?? null),
-        getTabRootStateClasses(isActive)
+        getTitlebarTabStateClasses(isActive)
       )}
       onPointerDown={(e) => {
         onTabPointerDown(
@@ -281,12 +278,14 @@ export default function EditorFileTab({
       ) : (
         <FileIcon className={tabIconClassName} />
       )}
-      {isPinned && <Pin className="text-muted-foreground mr-1 size-4 shrink-0" aria-hidden />}
+      {isPinned && <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />}
       <span className="mr-1 flex min-w-0 flex-1 items-baseline gap-1">
         {isRenaming ? (
           <Input
             ref={setRenameInputElement}
             data-tab-rename-input="true"
+            size="inline-edit"
+            variant="subtle"
             aria-label={translate(
               'auto.components.tab.bar.EditorFileTab.3da7445c84',
               'Rename file {{value0}}',
@@ -295,7 +294,7 @@ export default function EditorFileTab({
             defaultValue={basename(file.filePath)}
             // Why: keep the inline field compact enough for the titlebar while
             // giving filenames a little more room than the static tab label.
-            className="bg-input/40 text-foreground mr-1 h-5 w-[12ch] max-w-[132px] min-w-[72px] rounded-sm px-1 py-0 text-xs md:text-xs"
+            className="mr-1 w-[12ch] max-w-[132px] min-w-[72px]"
             spellCheck={false}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -365,7 +364,7 @@ export default function EditorFileTab({
           status dot's slot, which the hover close affordance replaces in place. */}
       {file.isDirty ? (
         <div className="relative flex h-4 w-4 shrink-0 items-center justify-center">
-          <span className="bg-foreground/60 absolute size-1.5 rounded-full group-focus-within:hidden group-hover:hidden" />
+          <span className="bg-foreground/60 absolute size-1.5 group-focus-within:hidden group-hover:hidden" />
           {!isPinned && (
             <TabCloseButton
               className="right-0"

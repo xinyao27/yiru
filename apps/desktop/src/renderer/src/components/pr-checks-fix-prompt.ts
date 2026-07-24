@@ -5,4 +5,4 @@ export {
   getBrokenChecks,
   getCheckDetailsPromptKey,
   truncateLogTailForPrompt
-} from '../../../shared/pr-checks-fix-prompt'
+} from '@yiru/workbench-model/review'

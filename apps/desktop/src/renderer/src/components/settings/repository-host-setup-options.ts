@@ -1,11 +1,12 @@
-import { translate } from '@/i18n/i18n'
-
-import { getExecutionHostLabel, type ExecutionHostId } from '../../../../shared/execution-host'
-import type { ExecutionHostRegistryEntry } from '../../../../shared/execution-host-registry'
 import {
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-} from '../../../../shared/protocol-version'
+} from '@yiru/runtime-protocol/capabilities'
+import { getExecutionHostLabel, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+
+import { translate } from '@/i18n/i18n'
+
+import type { ExecutionHostRegistryEntry } from '../../../../shared/execution-host-registry'
 import type { ProjectHostSetup, ProjectHostSetupState } from '../../../../shared/types'
 
 export type SetupHostOption = {
@@ -13,6 +14,7 @@ export type SetupHostOption = {
   label: string
   detail: string
   isAvailable: boolean
+  canUsePathActions: boolean
 }
 
 export function getSetupStateLabel(setupState: ProjectHostSetupState): string {
@@ -51,11 +53,21 @@ export function buildSetupHostOptions({
     .filter((host) => !setupHostIds.has(host.id))
     .map((host) => {
       const availability = getHostSetupAvailability(host)
+      // Why: disconnected hosts remain useful as placeholders, but importing
+      // or cloning requires a live execution host.
+      const canUsePathActions = host.health === 'local' || host.health === 'available'
       return {
         id: host.id,
         label: host.label || getExecutionHostLabel(host.id),
-        detail: availability.detail,
-        isAvailable: availability.isAvailable
+        detail:
+          availability.isAvailable && !canUsePathActions
+            ? translate(
+                'auto.components.settings.RepositoryPane.hostSetupConnectionRequired',
+                'Connect this host before importing or cloning the project'
+              )
+            : availability.detail,
+        isAvailable: availability.isAvailable,
+        canUsePathActions
       }
     })
 }

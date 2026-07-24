@@ -2,12 +2,12 @@ import { memo, useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useBrowserMobileDriverForAny } from '@/lib/pane-manager/browser-mobile-driver-state'
+import { registerBrowserOverlaySlotViewport } from '@/runtime/browser-page-viewport'
 
 import type { BrowserTab as BrowserTabState, Tab, TabGroup } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { tabGroupBodyAnchorName } from '../tab-group/tab-group-body-anchor'
 import { useBrowserAutomationVisibilityForAny } from './browser-automation-visibility'
-import { registerBrowserOverlaySlotViewport } from './browser-page-viewport'
 import BrowserPane from './browser-pane'
 
 // Why: Electron `<webview>` destroys its guest contents whenever its DOM

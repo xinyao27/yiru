@@ -1,7 +1,8 @@
+import { getLinkedWorkItemWorkspaceName } from '@yiru/workbench-model/workspace'
+
 import type { ProjectSourceContext } from '../../../shared/project-source-context'
 import { getProjectSourceCacheScope } from '../../../shared/project-source-context'
 import type { GitHubWorkItem, GitPushTarget } from '../../../shared/types'
-import { getLinkedWorkItemWorkspaceName } from '../../../shared/workspace-name'
 import { parseGitHubPullRequestLink } from './github-links'
 import type { LinkedWorkItemSummary } from './new-workspace'
 

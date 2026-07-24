@@ -20,6 +20,7 @@ import {
   buildTerminalUnsubscribeParams,
   updateTerminalSubscriptionViewport as updateCachedTerminalSubscriptionViewport
 } from './rpc-client-terminal-subscription'
+import { markRpcDeliveryUnknown } from './rpc-delivery-ambiguity'
 import { isRpcResponse } from './rpc-response-shape'
 import { describeSocketEvent } from './socket-event-debug'
 import type {
@@ -719,7 +720,7 @@ export function connect(
     if (intentionallyClosed) {
       console.log('[net] handleSocketClosed — intentional close')
       setState('disconnected')
-      rejectAllPending('Connection closed')
+      rejectAllPending('Connection closed', { deliveryUnknown: true })
       return
     }
     console.log('[net] handleSocketClosed → reconnect', {
@@ -729,7 +730,7 @@ export function connect(
       attempt: reconnectAttempt
     })
     emitLog('warn', 'WebSocket closed', 'Will attempt to reconnect')
-    rejectAllPending('Connection interrupted')
+    rejectAllPending('Connection interrupted', { deliveryUnknown: true })
     setState('reconnecting')
     scheduleReconnect()
   }
@@ -880,8 +881,12 @@ export function connect(
     }
   }
 
-  function rejectAllPending(reason: string) {
-    const error = new Error(reason)
+  function rejectAllPending(reason: string, options?: { deliveryUnknown?: boolean }) {
+    // Why: pending requests were written successfully, so losing their response
+    // is ambiguous even when the socket close itself was intentional.
+    const error = options?.deliveryUnknown
+      ? markRpcDeliveryUnknown(new Error(reason))
+      : new Error(reason)
     for (const [id, req] of pending) {
       pending.delete(id)
       queueMicrotask(() => req.reject(error))
@@ -1082,7 +1087,7 @@ export function connect(
             timeoutMs,
             state
           })
-          reject(new Error(`Request timed out: ${method}`))
+          reject(markRpcDeliveryUnknown(new Error(`Request timed out: ${method}`)))
         }, timeoutMs)
 
         pending.set(id, {
@@ -1256,7 +1261,7 @@ export function connect(
       }
       sharedKey = null
       setState('disconnected')
-      rejectAllPending('Client closed')
+      rejectAllPending('Client closed', { deliveryUnknown: true })
     }
   }
 }

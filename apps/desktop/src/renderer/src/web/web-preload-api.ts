@@ -1,3 +1,26 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
+import { buildNativeChatUnsubscribe } from '@yiru/workbench-model/agent'
+import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
+import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
+import {
+  applyPRBotAuthorOverride,
+  normalizePRBotAuthorOverrides
+} from '@yiru/workbench-model/review'
+import {
+  assertClipboardTextWriteWithinLimitWithYield,
+  assertClipboardTextWithinLimitWithYield,
+  type ReadClipboardTextOptions
+} from '@yiru/workbench-model/ui'
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostScope,
+  normalizeExecutionHostId,
+  toRuntimeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+
 import { getDefaultCreateProjectParent } from '@/components/sidebar/create-project-defaults'
 import { translate } from '@/i18n/i18n'
 
@@ -12,9 +35,7 @@ import type {
   NativeChatReadSessionResult,
   NativeChatAppendedMessages
 } from '../../../preload/api-types'
-import type { AiVaultListArgs, AiVaultListResult } from '../../../shared/ai-vault-types'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../../../shared/auto-rename-branch-from-work-settings'
-import { legacyBaseRefSearchResult } from '../../../shared/base-ref-search-result'
 import {
   CLIPBOARD_IMAGE_MAX_BASE64_CHARS,
   CLIPBOARD_IMAGE_MAX_PIXELS,
@@ -23,11 +44,6 @@ import {
   assertClipboardImageByteLengthWithinLimit,
   assertClipboardImageDimensionsWithinLimit
 } from '../../../shared/clipboard-image'
-import {
-  assertClipboardTextWriteWithinLimitWithYield,
-  assertClipboardTextWithinLimitWithYield,
-  type ReadClipboardTextOptions
-} from '../../../shared/clipboard-text'
 import type {
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
@@ -42,14 +58,6 @@ import {
   ONBOARDING_FLOW_VERSION
 } from '../../../shared/constants'
 import { normalizeContextualTourIds, type ContextualTourId } from '../../../shared/contextual-tours'
-import { relativePathInsideRoot } from '../../../shared/cross-platform-path'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  normalizeExecutionHostScope,
-  normalizeExecutionHostId,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../../shared/execution-host'
 import {
   normalizeFeatureInteractions,
   type FeatureInteractionId,
@@ -67,19 +75,30 @@ import {
   type KeybindingOverrides,
   type KeybindingPlatform
 } from '../../../shared/keybindings'
-import { buildNativeChatUnsubscribe } from '../../../shared/native-chat-stream-unsubscribe'
-import {
-  applyPRBotAuthorOverride,
-  normalizePRBotAuthorOverrides
-} from '../../../shared/pr-bot-author-overrides'
 import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '../../../shared/pty-delivery-diagnostics'
 import type { RateLimitState } from '../../../shared/rate-limit-types'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../../shared/runtime-method-contract'
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../../shared/runtime-method-contracts/ai-vault-contracts'
+import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
+import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
+import {
+  REPO_ADD_CONTRACT,
+  REPO_LIST_CONTRACT,
+  REPO_SEARCH_REFS_CONTRACT,
+  WORKTREE_CREATE_CONTRACT,
+  WORKTREE_LIST_CONTRACT,
+  WORKTREE_REMOVE_CONTRACT,
+  WORKTREE_SET_CONTRACT
+} from '../../../shared/runtime-method-contracts/workspace-contracts'
 import { RuntimeRpcCallQueuePool } from '../../../shared/runtime-rpc-call-queue'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type { RuntimeStatus, RuntimeSyncWindowGraph } from '../../../shared/runtime-types'
 import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
 import type { SkillDiscoveryResult } from '../../../shared/skills'
-import type { SshConnectionState, SshTarget } from '../../../shared/ssh-types'
+import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
 import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal-cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '../../../shared/terminal-custom-themes'
 import {
@@ -96,7 +115,6 @@ import type {
   OnboardingState,
   PersistedUIState,
   Repo,
-  RemoveWorktreeResult,
   SearchResult,
   StatsSummary,
   Worktree,
@@ -385,15 +403,6 @@ export function installWebPreloadApi(): void {
 }
 
 function createWebPreloadApi(): Partial<PreloadApi> {
-  const webYiruProfileAuthStatus = () =>
-    Promise.resolve({
-      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-      configured: false,
-      state: 'unconfigured' as const,
-      persistence: 'none' as const,
-      setupMessage: 'Yiru Cloud sign-in is not available in the browser fallback.'
-    })
-
   return {
     app: {
       getIdentity: () =>
@@ -447,17 +456,12 @@ function createWebPreloadApi(): Partial<PreloadApi> {
           profiles: [createDefaultLocalYiruProfile(0)],
           multiProfileUi: false
         }),
-      authStatus: webYiruProfileAuthStatus,
       createLocal: () =>
         Promise.resolve({
           activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
           profiles: [createDefaultLocalYiruProfile(0)],
           profile: createDefaultLocalYiruProfile(0)
         }),
-      createCloudLinked: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
       switchProfile: () => Promise.resolve({ status: 'already-active' }),
       transferProject: (args) =>
         Promise.resolve({
@@ -467,30 +471,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
           sourceRepoId: args.repoId,
           duplicateRepoId: args.repoId
         }),
-      findProjectProfiles: async () => ({ projects: [] }),
-      connectCurrent: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
-      refreshAuth: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
-      signOutCurrent: async () => ({
-        status: 'signed-out',
-        auth: await webYiruProfileAuthStatus(),
-        activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-        profiles: [createDefaultLocalYiruProfile(0)]
-      }),
-      selectOrg: async () => ({
-        status: 'unconfigured',
-        auth: await webYiruProfileAuthStatus()
-      }),
-      orgMembersList: async () => ({ status: 'unconfigured' }),
-      orgMemberInvite: async () => ({ status: 'unconfigured' }),
-      orgInviteRevoke: async () => ({ status: 'unconfigured' }),
-      orgMemberChangeRole: async () => ({ status: 'unconfigured' }),
-      orgMemberRemove: async () => ({ status: 'unconfigured' })
+      findProjectProfiles: async () => ({ projects: [] })
     },
     settings: {
       get: async () => getRuntimeBackedStoredSettings(),
@@ -546,8 +527,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       collectBundle: () => Promise.reject(new Error('Review files are unavailable on web.')),
       openBundlePreview: () => Promise.reject(new Error('Review files are unavailable on web.')),
       discardBundlePreview: () => Promise.resolve(),
-      uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.')),
-      deleteBundle: () => Promise.reject(new Error('Sent diagnostics are unavailable on web.'))
+      uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
     },
     session: {
       // hostId mirrors the desktop bridge: omitted/'local' targets the existing
@@ -681,10 +661,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       revokeDevice: () => Promise.resolve({ revoked: false }),
       listRuntimeAccessGrants: () => Promise.resolve({ grants: [] }),
       revokeRuntimeAccess: () => Promise.resolve({ revoked: false }),
-      isWebSocketReady: () =>
-        Promise.resolve({ ready: Boolean(activeEnvironment), endpoint: null }),
-      getRelayStatus: () => Promise.resolve({ status: 'offline' as const }),
-      onRelayStatusChanged: () => noopUnsubscribe
+      isWebSocketReady: () => Promise.resolve({ ready: Boolean(activeEnvironment), endpoint: null })
     },
     telemetryTrack: () => Promise.resolve(),
     telemetrySetOptIn: () => Promise.resolve(),
@@ -1193,7 +1170,7 @@ function createRuntimeEnvironmentsApi(): NonNullable<Partial<PreloadApi>['runtim
       return { disconnected: redactStoredWebRuntimeEnvironment(environment) }
     },
     getStatus: ({ selector, timeoutMs }) =>
-      callEnvironmentEnvelope<RuntimeStatus>(selector, 'status.get', undefined, timeoutMs),
+      callEnvironmentEnvelope(selector, STATUS_GET_CONTRACT, undefined, timeoutMs),
     call: ({ selector, method, params, timeoutMs }) =>
       callEnvironmentEnvelope(selector, method, params, timeoutMs),
     subscribe: async ({ selector, method, params, timeoutMs }, callbacks) => {
@@ -1217,10 +1194,10 @@ function createAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault']> {
       }
       // Why: the browser client has no local filesystem; every history scan
       // runs on the paired server and must be stamped as that runtime host.
-      return callRuntimeResult<AiVaultListResult>('aiVault.listSessions', {
+      return callRuntimeResult(AI_VAULT_LIST_SESSIONS_CONTRACT, {
         limit: args?.limit,
         force: args?.force,
-        scopePaths: args?.scopePaths,
+        scopePaths: args?.scopePaths ? [...args.scopePaths] : undefined,
         executionHostId
       })
     },
@@ -1252,10 +1229,10 @@ function webAiVaultUnavailableResult(executionHostId: ExecutionHostId): AiVaultL
 
 function createReposApi(): NonNullable<Partial<PreloadApi>['repos']> {
   return {
-    list: async () => (await callRuntimeResult<{ repos: Repo[] }>('repo.list')).repos,
+    list: async () => (await callRuntimeResult(REPO_LIST_CONTRACT, undefined)).repos,
     add: async ({ path, kind }) => {
       invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult('repo.add', { path, kind })
+      return callRuntimeResult(REPO_ADD_CONTRACT, { path, kind })
     },
     remove: async ({ repoId }) => {
       await callRuntimeResult('repo.rm', { repo: repoId })
@@ -1297,7 +1274,7 @@ function createReposApi(): NonNullable<Partial<PreloadApi>['repos']> {
     cloneAbort: () => Promise.resolve(),
     addRemote: async ({ remotePath, displayName, kind }) => {
       invalidateRuntimeWorktreeCaches()
-      const result = await callRuntimeResult<{ repo: Repo }>('repo.add', {
+      const result = await callRuntimeResult(REPO_ADD_CONTRACT, {
         path: remotePath,
         kind
       })
@@ -1328,17 +1305,14 @@ function createReposApi(): NonNullable<Partial<PreloadApi>['repos']> {
       callRuntimeResult('repo.baseRefDefault', { repo: repoId }),
     searchBaseRefs: async ({ repoId, query, limit }) =>
       (
-        await callRuntimeResult<{ refs: string[] }>('repo.searchRefs', {
+        await callRuntimeResult(REPO_SEARCH_REFS_CONTRACT, {
           repo: repoId,
           query,
           limit
         })
       ).refs,
     searchBaseRefDetails: async ({ repoId, query, limit }) => {
-      const result = await callRuntimeResult<{
-        refs: string[]
-        refDetails?: { refName: string; localBranchName: string }[]
-      }>('repo.searchRefs', {
+      const result = await callRuntimeResult(REPO_SEARCH_REFS_CONTRACT, {
         repo: repoId,
         query,
         limit
@@ -1353,7 +1327,7 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
   return {
     list: async ({ repoId }) =>
       (
-        await callRuntimeResult<{ worktrees: Worktree[] }>('worktree.list', {
+        await callRuntimeResult(WORKTREE_LIST_CONTRACT, {
           repo: repoId,
           limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT
         })
@@ -1362,7 +1336,7 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
     listAll: () => listAllRuntimeWorktrees(),
     create: async (args) => {
       invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult('worktree.create', {
+      return callRuntimeResult(WORKTREE_CREATE_CONTRACT, {
         repo: args.repoId,
         name: args.name,
         baseBranch: args.baseBranch,
@@ -1378,7 +1352,6 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
         pushTarget: args.pushTarget,
         setupDecision: args.setupDecision,
         createdWithAgent: args.createdWithAgent,
-        pendingFirstAgentMessageRename: args.pendingFirstAgentMessageRename,
         ...(args.startup
           ? {
               startupCommand: args.startup.command,
@@ -1425,7 +1398,7 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
       }),
     remove: async ({ worktreeId, force, skipArchive }) => {
       invalidateRuntimeWorktreeCaches()
-      return callRuntimeResult<RemoveWorktreeResult>('worktree.rm', {
+      return callRuntimeResult(WORKTREE_REMOVE_CONTRACT, {
         worktree: toRuntimeWorktreeSelector(worktreeId),
         force,
         runHooks: skipArchive !== true
@@ -1449,7 +1422,7 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
           ? { ...updates, pushTarget: null }
           : updates
       return (
-        await callRuntimeResult<{ worktree: Worktree }>('worktree.set', {
+        await callRuntimeResult(WORKTREE_SET_CONTRACT, {
           worktree: toRuntimeWorktreeSelector(worktreeId),
           ...rpcUpdates
         })
@@ -1462,9 +1435,7 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
       }>('worktree.lineageList'),
     updateLineage: async ({ worktreeId, parentWorktreeId, noParent }) => {
       invalidateRuntimeWorktreeCaches()
-      const result = await callRuntimeResult<{
-        worktree: Worktree & { lineage?: WorktreeLineage | null }
-      }>('worktree.set', {
+      const result = await callRuntimeResult(WORKTREE_SET_CONTRACT, {
         worktree: toRuntimeWorktreeSelector(worktreeId),
         parentWorktree: parentWorktreeId,
         noParent
@@ -1512,6 +1483,9 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
     downloadFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
     },
+    downloadFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
     saveDownloadedFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
     },
@@ -1526,6 +1500,21 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
     },
     cancelDownloadedFile: async () => {
       throw new Error('Remote file download is unavailable in paired web clients.')
+    },
+    startDownloadedFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    createDownloadedFolderDirectory: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    appendDownloadedFolderFileChunk: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    finishDownloadedFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
+    },
+    cancelDownloadedFolder: async () => {
+      throw new Error('Remote folder download is unavailable in paired web clients.')
     },
     listMarkdownDocuments: async ({ rootPath }) => {
       const file = await resolveRuntimeFilePath(rootPath)
@@ -1645,10 +1634,10 @@ function createFileApi(): NonNullable<Partial<PreloadApi>['fs']> {
 // can abort the matching subscription and close its remote request context.
 const webGitStatusAbortControllers = new Map<string, AbortController>()
 
-async function callAbortableRuntimeStatus<TResult>(
+async function callAbortableRuntimeStatus(
   requestToken: string,
-  params: unknown
-): Promise<TResult> {
+  params: RuntimeMethodParams<typeof GIT_STATUS_CONTRACT>
+): Promise<RuntimeMethodResult<typeof GIT_STATUS_CONTRACT>> {
   const environment = requireActiveEnvironment()
   webGitStatusAbortControllers.get(requestToken)?.abort()
   const controller = new AbortController()
@@ -1656,7 +1645,7 @@ async function callAbortableRuntimeStatus<TResult>(
   try {
     const response = await callAbortableRuntimeEnvironment(
       environment.id,
-      'git.status',
+      GIT_STATUS_CONTRACT,
       params,
       undefined,
       controller.signal
@@ -1665,7 +1654,7 @@ async function callAbortableRuntimeStatus<TResult>(
     if (!response.ok) {
       throw new Error(response.error.message)
     }
-    return response.result as TResult
+    return response.result
   } finally {
     if (webGitStatusAbortControllers.get(requestToken) === controller) {
       webGitStatusAbortControllers.delete(requestToken)
@@ -1693,7 +1682,7 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
       // call transport. With one, route through the subscription bridge so
       // cancelStatus can close the request context and abort the remote scan.
       if (!requestToken) {
-        return callRuntimeResult('git.status', params)
+        return callRuntimeResult(GIT_STATUS_CONTRACT, params)
       }
       return callAbortableRuntimeStatus(requestToken, params)
     },
@@ -2559,11 +2548,7 @@ function createComputerUsePermissionsApi(): NonNullable<
 function createSkillsApi(): NonNullable<Partial<PreloadApi>['skills']> {
   return {
     discover: (target) =>
-      callRuntimeResult<SkillDiscoveryResult>('skills.discover', target, 15_000).catch(() => ({
-        skills: [],
-        sources: [],
-        scannedAt: Date.now()
-      })),
+      callRuntimeResult<SkillDiscoveryResult>('skills.discover', target, 15_000),
     // Why: browser clients have no local skill homes, and remote-host
     // freshness stays disabled until its update rail has equivalent coverage.
     freshnessInventory: (): Promise<SkillFreshnessInventory> =>
@@ -2865,10 +2850,21 @@ function createSshApi(): NonNullable<Partial<PreloadApi>['ssh']> {
 }
 
 async function callRuntimeEnvelope<TResult = unknown>(
-  method: string,
+  contract: string,
+  params?: unknown,
+  timeoutMs?: number
+): Promise<RuntimeRpcResponse<TResult>>
+async function callRuntimeEnvelope<TContract extends RuntimeMethodContract>(
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>,
+  timeoutMs?: number
+): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
+async function callRuntimeEnvelope<TResult = unknown>(
+  contract: string | RuntimeMethodContract,
   params?: unknown,
   timeoutMs?: number
 ): Promise<RuntimeRpcResponse<TResult>> {
+  const method = typeof contract === 'string' ? contract : contract.name
   const environment = requireActiveEnvironment()
   const response = await runtimeCallQueuePool.enqueue(environment.id, method, () =>
     getClientForEnvironment(environment).call(method, params, { timeoutMs })
@@ -2879,10 +2875,23 @@ async function callRuntimeEnvelope<TResult = unknown>(
 
 async function callEnvironmentEnvelope<TResult = unknown>(
   selector: string,
-  method: string,
+  contract: string,
+  params?: unknown,
+  timeoutMs?: number
+): Promise<RuntimeRpcResponse<TResult>>
+async function callEnvironmentEnvelope<TContract extends RuntimeMethodContract>(
+  selector: string,
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>,
+  timeoutMs?: number
+): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
+async function callEnvironmentEnvelope<TResult = unknown>(
+  selector: string,
+  contract: string | RuntimeMethodContract,
   params?: unknown,
   timeoutMs?: number
 ): Promise<RuntimeRpcResponse<TResult>> {
+  const method = typeof contract === 'string' ? contract : contract.name
   const environment = resolveEnvironment(selector)
   const response = await runtimeCallQueuePool.enqueue(environment.id, method, () =>
     getClientForEnvironment(environment).call(method, params, { timeoutMs })
@@ -2892,11 +2901,25 @@ async function callEnvironmentEnvelope<TResult = unknown>(
 }
 
 async function callRuntimeResult<TResult>(
-  method: string,
+  contract: string,
+  params?: unknown,
+  timeoutMs?: number
+): Promise<TResult>
+async function callRuntimeResult<TContract extends RuntimeMethodContract>(
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>,
+  timeoutMs?: number
+): Promise<RuntimeMethodResult<TContract>>
+async function callRuntimeResult<TResult>(
+  contract: string | RuntimeMethodContract,
   params?: unknown,
   timeoutMs?: number
 ): Promise<TResult> {
-  const response = await callRuntimeEnvelope(method, params, timeoutMs)
+  const response = await callRuntimeEnvelope<TResult>(
+    typeof contract === 'string' ? contract : contract.name,
+    params,
+    timeoutMs
+  )
   if (!response.ok) {
     throw new Error(response.error.message)
   }
@@ -2968,7 +2991,7 @@ async function saveClipboardImageAsTempFileInRuntime(
 }
 
 async function getRemoteRuntimeStatus(): Promise<RuntimeStatus> {
-  return callRuntimeResult<RuntimeStatus>('status.get', undefined, 15_000)
+  return callRuntimeResult(STATUS_GET_CONTRACT, undefined, 15_000)
 }
 
 function getClientForEnvironment(environment: StoredWebRuntimeEnvironment): WebRuntimeClient {
@@ -3296,6 +3319,9 @@ function mergeWebUIState(
     ),
     usagePercentageDisplay: normalizeUsagePercentageDisplay(
       safeUpdates.usagePercentageDisplay ?? base.usagePercentageDisplay
+    ),
+    statusBarUsageMode: normalizeStatusBarUsageMode(
+      safeUpdates.statusBarUsageMode ?? base.statusBarUsageMode
     )
   }
 }
@@ -3379,7 +3405,7 @@ async function listAllRuntimeWorktrees(): Promise<Worktree[]> {
   if (cachedWorktrees && Date.now() - cachedWorktrees.loadedAt < 5_000) {
     return cachedWorktrees.worktrees
   }
-  const result = await callRuntimeResult<{ worktrees: Worktree[] }>('worktree.list', {
+  const result = await callRuntimeResult(WORKTREE_LIST_CONTRACT, {
     limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT
   })
   cachedWorktrees = { loadedAt: Date.now(), worktrees: result.worktrees }
@@ -3391,7 +3417,7 @@ async function listAllRuntimeDetectedWorktrees(): Promise<Worktree[]> {
     return cachedDetectedWorktrees.worktrees
   }
 
-  const repos = (await callRuntimeResult<{ repos: Repo[] }>('repo.list')).repos
+  const repos = (await callRuntimeResult(REPO_LIST_CONTRACT, undefined)).repos
   const detectedLists = await Promise.all(
     repos.map((repo) => callRuntimeDetectedWorktrees(repo.id))
   )
@@ -3413,8 +3439,8 @@ async function callRuntimeDetectedWorktrees(repoId: string): Promise<DetectedWor
     throw new Error(response.error.message)
   }
 
-  const legacy = await callRuntimeResult<{ worktrees: Worktree[] }>(
-    'worktree.list',
+  const legacy = await callRuntimeResult(
+    WORKTREE_LIST_CONTRACT,
     { repo: repoId, limit: WEB_RUNTIME_WORKTREE_LIST_LIMIT },
     15_000
   )

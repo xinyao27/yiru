@@ -2,15 +2,33 @@ import { randomUUID } from 'node:crypto'
 import { createConnection } from 'node:net'
 
 import { findTransport, type RuntimeMetadata } from '../../shared/runtime-bootstrap'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../shared/runtime-method-contract'
 import { isKeepaliveFrame, RuntimeRpcEnvelopeSchema } from './envelope-schema'
 import { RuntimeClientError, type RuntimeRpcResponse } from './types'
 
-export async function sendRequest<TResult>(
+export function sendRequest<TContract extends RuntimeMethodContract>(
+  metadata: RuntimeMetadata,
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>,
+  timeoutMs: number
+): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
+export function sendRequest<TResult>(
   metadata: RuntimeMetadata,
   method: string,
   params: unknown,
   timeoutMs: number
+): Promise<RuntimeRpcResponse<TResult>>
+export async function sendRequest<TResult>(
+  metadata: RuntimeMetadata,
+  contract: string | RuntimeMethodContract,
+  params: unknown,
+  timeoutMs: number
 ): Promise<RuntimeRpcResponse<TResult>> {
+  const method = typeof contract === 'string' ? contract : contract.name
   return await new Promise((resolve, reject) => {
     const transport = findTransport(metadata, 'unix', 'named-pipe')
     if (!transport) {

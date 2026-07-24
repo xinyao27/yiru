@@ -2,6 +2,7 @@ import type { RpcClient } from '../transport/rpc-client'
 import type { MobileGitStatusResult } from './mobile-git-status'
 import {
   prepareMobileHostedReviewCreateIntent,
+  type MobileHostedReviewCreateIntentFailure,
   type MobileHostedReviewCreateIntentProgress
 } from './mobile-hosted-review-create-intent'
 import {
@@ -29,13 +30,7 @@ export type MobileHostedReviewCreateIntentRunOutcome =
       status: MobileGitStatusResult | null
       committed: boolean
     }
-  | {
-      ok: false
-      error: string
-      committed?: boolean
-      status?: MobileGitStatusResult | null
-      commitMessage?: string
-    }
+  | MobileHostedReviewCreateIntentFailure
 
 export function isMobileHostedReviewCommitFailure(
   outcome: MobileHostedReviewCreateIntentRunOutcome,

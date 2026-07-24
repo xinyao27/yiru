@@ -1,6 +1,7 @@
-import { GitBranch } from '@phosphor-icons/react'
-import { useCallback, useMemo, type Dispatch, type SetStateAction } from 'react'
+import { GitMerge } from '@phosphor-icons/react'
+import { useMemo, type Dispatch, type SetStateAction } from 'react'
 
+import { Checkbox } from '@/components/ui/checkbox'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getRepoDisplayLabelKey, getRepoDisplayLabelsByPath } from '@/lib/repo-display-labels'
@@ -21,23 +22,13 @@ function NestedRepoSelectAllRow({
   const allSelected = total > 0 && selectedCount === total
   const noneSelected = selectedCount === 0
   const isMixed = !allSelected && !noneSelected
-  const handleCheckboxRef = useCallback(
-    (checkbox: HTMLInputElement | null) => {
-      if (checkbox) {
-        checkbox.indeterminate = isMixed
-      }
-    },
-    [isMixed]
-  )
   return (
     <label className="bg-muted/30 hover:bg-muted/50 flex min-w-0 cursor-pointer items-center gap-2.5 px-3 py-2 text-sm">
-      <input
-        ref={handleCheckboxRef}
-        type="checkbox"
-        className="focus-visible:border-ring size-3.5 outline-none"
+      <Checkbox
         checked={allSelected}
+        indeterminate={isMixed}
         disabled={disabled}
-        onChange={onToggle}
+        onCheckedChange={onToggle}
         aria-label={
           allSelected
             ? translate('auto.components.repo.NestedRepoChecklist.929734aea5', 'Deselect all')
@@ -75,7 +66,7 @@ export function NestedRepoChecklist({
   return (
     <div
       className={cn(
-        'flex max-h-64 min-h-0 min-w-0 max-w-full flex-col overflow-hidden rounded-md border border-border bg-background/60',
+        'flex max-h-64 min-h-0 min-w-0 max-w-full flex-col overflow-hidden border border-border bg-background/60',
         className
       )}
     >
@@ -96,15 +87,13 @@ export function NestedRepoChecklist({
         {scan.repos.map((repo) => (
           <li key={repo.path}>
             <label className="border-border hover:bg-accent flex max-w-full min-w-0 cursor-pointer items-center gap-2.5 overflow-hidden border-t px-3 py-2 text-sm">
-              <input
-                type="checkbox"
-                className="focus-visible:border-ring size-3.5 outline-none"
+              <Checkbox
                 checked={selectedPaths.has(repo.path)}
                 disabled={disabled}
-                onChange={(event) => {
+                onCheckedChange={(checked) => {
                   onSelectedPathsChange((previous) => {
                     const next = new Set(previous)
-                    if (event.target.checked) {
+                    if (checked) {
                       next.add(repo.path)
                     } else {
                       next.delete(repo.path)
@@ -113,7 +102,7 @@ export function NestedRepoChecklist({
                   })
                 }}
               />
-              <GitBranch className="text-muted-foreground size-3.5 shrink-0" />
+              <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
               <span
                 className={cn(
                   'min-w-0 flex-1 truncate text-[13px] font-medium',

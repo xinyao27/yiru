@@ -1,9 +1,9 @@
+import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import React from 'react'
 
 import { translate } from '@/i18n/i18n'
 
 import gitForWindowsLogoUrl from '../../../../../resources/git-for-windows-logo.svg?url'
-import { WINDOWS_GIT_BASH_SHELL } from '../../../../shared/windows-terminal-shell'
 
 export type WindowsShell = 'powershell.exe' | 'cmd.exe' | 'wsl.exe' | typeof WINDOWS_GIT_BASH_SHELL
 

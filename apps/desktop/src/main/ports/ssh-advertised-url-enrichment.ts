@@ -5,8 +5,13 @@
 // What the SSH side lacks is the link between a connection's port scan and
 // the worktreeIds the watcher keyed those URLs under.
 
-import type { DetectedPort, EnrichedDetectedPort, PortForwardEntry } from '../../shared/ssh-types'
-import { splitWorktreeId } from '../../shared/worktree-id'
+import type {
+  DetectedPort,
+  EnrichedDetectedPort,
+  PortForwardEntry
+} from '@yiru/runtime-protocol/ssh-connection'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { Store } from '../persistence'
 import {
   advertisedUrlWatcher,

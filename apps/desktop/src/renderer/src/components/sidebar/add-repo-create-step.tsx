@@ -1,4 +1,4 @@
-import { GitBranch, CaretDown as ChevronDown } from '@phosphor-icons/react'
+import { GitMerge, CaretDown as ChevronDown } from '@phosphor-icons/react'
 // Step for AddRepoDialog (yiru#763), split out so create-project state stays scoped.
 import React, { useMemo, useState } from 'react'
 
@@ -174,15 +174,17 @@ export function CreateStep({
 
         {/* Summary card doubles as the disclosure for the uncommon settings, so the
           defaults and the controls to change them live in one place. */}
-        <div className="border-border bg-muted/30 min-w-0 rounded-md border">
-          <button
+        <div className="border-border bg-muted/30 min-w-0 border">
+          <Button
+            variant="ghost"
+            size="default"
             type="button"
             onClick={() => setAdvancedOpen((open) => !open)}
             aria-expanded={advancedOpen}
-            className="hover:bg-accent/50 flex w-full min-w-0 cursor-pointer items-start gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors focus-visible:outline-none"
+            className="hover:bg-accent/50 flex h-auto w-full min-w-0 items-start justify-start gap-2.5 border-0 px-3 py-2.5 text-left font-normal whitespace-normal transition-colors"
           >
-            <span className="border-border bg-background/60 text-muted-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md border">
-              <GitBranch className="size-3.5" />
+            <span className="border-border bg-background/60 text-muted-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center border">
+              <GitMerge className="size-3.5" />
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">
@@ -227,12 +229,13 @@ export function CreateStep({
               ) : null}
             </div>
             <ChevronDown
+              weight="regular"
               className={cn(
                 'size-4 shrink-0 self-center text-muted-foreground transition-transform',
                 advancedOpen && 'rotate-180'
               )}
             />
-          </button>
+          </Button>
 
           {advancedOpen && (
             <div className="border-border space-y-3 border-t px-3 py-3">
@@ -249,7 +252,7 @@ export function CreateStep({
               />
 
               {targetPathPreview && (
-                <p className="border-border bg-background/40 text-muted-foreground min-w-0 rounded-md border px-2.5 py-2 font-mono text-[11px] break-all">
+                <p className="border-border bg-background/40 text-muted-foreground min-w-0 border px-2.5 py-2 font-mono text-[11px] break-all">
                   {targetPathPreview}
                 </p>
               )}

@@ -1,7 +1,7 @@
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FlatList } from 'react-native'
 
-import type { DiffComment } from '../../../desktop/src/shared/types'
 import { canOpenMobileBranchCompareDiff } from '../source-control/mobile-branch-compare'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'

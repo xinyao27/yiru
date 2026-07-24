@@ -98,7 +98,7 @@ type RightLine =
 type CursorTarget = { kind: 'hidden' } | { kind: 'pane' } | { kind: 'split-row' }
 
 const KBD_CLASS =
-  'rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[11.5px] text-foreground'
+  'border border-border bg-card px-1.5 py-0.5 font-mono text-[11.5px] text-foreground'
 
 // Beat timings — kept in named constants so the loop reads top-to-bottom.
 const PRE_HOVER_MS = 450
@@ -421,13 +421,13 @@ export function WorkbenchAnimatedVisual(props: {
   return (
     <div
       ref={panelRef}
-      className="border-border bg-card text-foreground relative overflow-hidden rounded-xl border"
+      className="border-border bg-card text-foreground relative overflow-hidden border"
     >
       {/* Faux titlebar — three traffic lights, nothing else. */}
       <div className="border-border bg-muted/40 flex h-7 items-center gap-1.5 border-b px-3">
-        <span className="size-2.5 rounded-full bg-rose-400/70" />
-        <span className="size-2.5 rounded-full bg-amber-400/70" />
-        <span className="size-2.5 rounded-full bg-emerald-400/70" />
+        <span className="size-2.5 bg-rose-400/70" />
+        <span className="size-2.5 bg-amber-400/70" />
+        <span className="size-2.5 bg-emerald-400/70" />
       </div>
 
       {/* Why: onboarding previews can flip theme without remounting this visual;
@@ -710,7 +710,7 @@ function ContextMenu(props: {
   return (
     <div
       className={cn(
-        'absolute left-[110px] top-[78px] z-10 min-w-[218px] origin-top-left rounded-lg border border-border bg-card p-1.5 font-sans text-[12px] text-foreground   transition-[opacity,transform] duration-[160ms] ease-out',
+        'absolute left-[110px] top-[78px] z-10 min-w-[218px] origin-top-left border border-border bg-card p-1.5 font-sans text-[12px] text-foreground transition-[opacity,transform] duration-[160ms] ease-out',
         props.shown ? 'opacity-100' : '-translate-y-[3px] scale-[0.985] opacity-0'
       )}
       style={{ pointerEvents: 'none' }}
@@ -721,7 +721,7 @@ function ContextMenu(props: {
       <div
         ref={props.splitRowRef}
         className={cn(
-          'grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 rounded-[5px] px-1.5 py-1 pl-1.5',
+          'grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 px-1.5 py-1 pl-1.5',
           props.splitRowActive ? 'bg-foreground/[0.07]  ' : null
         )}
       >
@@ -738,7 +738,7 @@ function ContextMenu(props: {
           {props.splitRightShortcutLabel}
         </span>
       </div>
-      <div className="grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 rounded-[5px] px-1.5 py-1 pl-1.5">
+      <div className="grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 px-1.5 py-1 pl-1.5">
         <span className="text-muted-foreground inline-flex items-center justify-center">
           <SplitDownIcon />
         </span>
@@ -762,10 +762,7 @@ function ContextMenu(props: {
 function CtxSkeleton(props: { width: number }): JSX.Element {
   return (
     <div className="flex h-[18px] items-center px-2.5">
-      <span
-        className="bg-foreground/[0.16] block h-1.5 rounded-[3px]"
-        style={{ width: `${props.width}%` }}
-      />
+      <span className="bg-foreground/[0.16] block h-1.5" style={{ width: `${props.width}%` }} />
     </div>
   )
 }
@@ -861,7 +858,7 @@ function RightPaneScrollback(props: {
               )
             ) : null}
             <span
-              className="bg-foreground/[0.18] inline-block h-[7px] rounded-[3px] align-[1px]"
+              className="bg-foreground/[0.18] inline-block h-[7px] align-[1px]"
               style={{ width: `${line.widthPct}%` }}
             />
           </TermLine>

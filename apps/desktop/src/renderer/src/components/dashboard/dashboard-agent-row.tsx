@@ -1,3 +1,4 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import React, { useState, useCallback } from 'react'
 
 import { AgentStateDot, agentStateLabel, type AgentDotState } from '@/components/agent-state-dot'
@@ -7,11 +8,11 @@ import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
 import { agentTypeToIconAgent, formatAgentTypeLabel } from '@/lib/agent-status'
 import { cn } from '@/lib/class-names'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 import { DashboardAgentChildDisclosure } from './dashboard-agent-child-disclosure'
 import { DashboardAgentRowMessage } from './dashboard-agent-row-message'
 import { DashboardAgentRowToolStep } from './dashboard-agent-row-tool-step'
 import { DashboardAgentRowTrailingControls } from './dashboard-agent-row-trailing-controls'
+import { useAgentRowConversationName } from './use-agent-row-conversation-name'
 import type { DashboardAgentRow as DashboardAgentRowData } from './use-dashboard-data'
 
 // Why: the dashboard tracks its own rollup states (incl. 'idle'); narrow to the
@@ -199,7 +200,8 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
   )
   const startedAt = agent.startedAt > 0 ? agent.startedAt : null
   const doneAt = lastEnteredDoneAt(agent)
-  const prompt = getAgentRowPrimaryText(agent.entry)
+  const conversationName = useAgentRowConversationName(agent)
+  const prompt = conversationName ?? getAgentRowPrimaryText(agent.entry)
   // Why: `agent.entry.prompt` is normalized to '' when the prompt is unknown
   // (fresh agent, missing telemetry). Rendering the row with an empty primary
   // slot would collapse the text column and leave the row with no human-
@@ -207,6 +209,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
   // ("Working", "Done", "Waiting", …) so every row is identifiable at a
   // glance.
   const displayLabel = prompt || agentStateLabel(asDotState(agent.state))
+  const model = agent.entry.model?.trim() ?? ''
   // Why: the tool row describes what the agent is *currently* doing; once it
   // leaves working, that line goes stale and misleads (a done row showing
   // "Bash: pnpm test" reads as if the command is still running). Gate tool
@@ -226,7 +229,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
       ? `${formatAgentTypeLabel(agent.agentType)} - dispatched ${lineageChildCount} ${
           lineageChildCount === 1 ? 'agent' : 'agents'
         }`
-      : formatAgentTypeLabel(agent.agentType)
+      : [formatAgentTypeLabel(agent.agentType), model].filter(Boolean).join(' · ')
   // Why: interrupted is a terminal outcome the user needs to scan in the
   // leading state column; the secondary-line text below provides the
   // explanation without competing with the prompt or timestamp.
@@ -268,23 +271,15 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
         // ancestor groups from workspace cards must not reveal every row's X.
         'group/agent-row relative flex flex-col -ml-2 py-1',
         isLineageChild ? 'pl-5 pr-2' : 'px-2',
-        // Why: inline agent rows sit inside a hoverable workspace card, so
-        // their hover wash must stay softer than the parent card highlight.
-        'cursor-pointer rounded-sm',
+        'cursor-pointer ',
         isFocusedPane
-          ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
+          ? 'bg-accent text-accent-foreground'
           : isLineageChild
             ? 'bg-[color-mix(in_srgb,var(--sidebar)_74%,var(--background))] dark:bg-[color-mix(in_srgb,var(--accent)_10%,var(--sidebar))]'
             : hasChildDisclosure
               ? 'bg-[color-mix(in_srgb,var(--sidebar-foreground)_3%,var(--sidebar))] dark:bg-[color-mix(in_srgb,var(--accent)_22%,var(--sidebar))]'
               : undefined,
-        isLineageChild
-          ? 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_4%,var(--sidebar))] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,var(--sidebar))]'
-          : hasChildDisclosure
-            ? 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_6%,var(--sidebar))] dark:hover:bg-[color-mix(in_srgb,var(--accent)_30%,var(--sidebar))]'
-            : isFocusedPane
-              ? 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_12%,var(--sidebar-accent))] dark:hover:bg-[color-mix(in_srgb,var(--accent)_70%,transparent)]'
-              : 'hover:bg-[color-mix(in_srgb,var(--sidebar-foreground)_1.25%,transparent)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]',
+        'hover:bg-accent',
         isLineageChild &&
           "relative before:absolute before:top-1/2 before:left-[0.15rem] before:w-[0.35rem] before:border-t before:border-t-[color:color-mix(in_srgb,var(--sidebar-foreground)_20%,transparent)] before:content-[''] dark:before:border-t-[color:color-mix(in_srgb,var(--accent)_42%,transparent)]",
         sendTargetStatus === 'sending' && 'cursor-progress opacity-75',
@@ -396,6 +391,14 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
         >
           {displayLabel}
         </span>
+        {model && (
+          <span
+            className="text-muted-foreground/70 max-w-24 shrink-0 truncate font-mono text-[10px]"
+            title={model}
+          >
+            {model}
+          </span>
+        )}
         {/* Why: "+N" badge mirrors the leading chevron — without it the
             parent row reads identical to a leaf row when collapsed, and the
             child count is invisible. Hidden when expanded because the

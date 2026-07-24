@@ -1,3 +1,4 @@
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { useMemo } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 
@@ -12,7 +13,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { DiffComment } from '../../../desktop/src/shared/types'
 import { mobileReviewCountLabel } from '../session/mobile-diff-review-screen-model'
 import type { useMobileDiffReviewController } from '../session/use-mobile-diff-review-controller'
 import type { ActionSheetAction } from './action-sheet-modal'

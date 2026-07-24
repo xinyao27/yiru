@@ -271,7 +271,7 @@ export default function TabBarCreateEntry({
             'auto.components.tab.bar.TabBarCreateEntry.39676a184c',
             'Open any file, URL, agent, ...'
           )}
-          className="text-foreground placeholder:text-muted-foreground h-9 rounded-none border-0 bg-transparent px-0 text-xs font-normal placeholder:font-normal focus-visible:border-0 aria-invalid:border-0 md:text-xs dark:bg-transparent"
+          className="text-foreground placeholder:text-muted-foreground h-9 border-0 bg-transparent px-0 text-xs font-normal placeholder:font-normal focus-visible:border-0 aria-invalid:border-0 md:text-xs dark:bg-transparent"
         />
       </div>
       {error || activeOptions.length > 0 || hasQuery ? (

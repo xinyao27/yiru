@@ -5,6 +5,7 @@ import {
   trackContextualTourOutcome,
   trackContextualTourShown
 } from '@/lib/feature-education-telemetry'
+import { isContextualTourAllowedForModal } from '@/runtime/contextual-tour-gate'
 import { useAppStore } from '@/store'
 
 import {
@@ -13,7 +14,6 @@ import {
   type ContextualTourStepAction
 } from '../../../../shared/contextual-tours'
 import type { ContextualTourOutcome } from '../../../../shared/feature-education-telemetry'
-import { isContextualTourAllowedForModal } from './contextual-tour-gate'
 import {
   getContextualTourCleanupOutcome,
   measureContextualTourOverlayRenderState

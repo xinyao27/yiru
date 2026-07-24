@@ -1,9 +1,10 @@
+import { resolveComposerManualBranchNameChange } from '@yiru/workbench-model/review'
+import { resolveGitHubWorkItemIdentity } from '@yiru/workbench-model/review'
+import type { GitLabWorkItem } from '@yiru/workbench-model/review'
+import type { GitHubWorkItem } from '@yiru/workbench-model/review'
+import { getForkPushWarning } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { resolveComposerManualBranchNameChange } from '../../../desktop/src/shared/composer-branch-selection'
-import { getForkPushWarning } from '../../../desktop/src/shared/new-workspace/fork-push-warning'
-import { resolveGitHubWorkItemIdentity } from '../../../desktop/src/shared/new-workspace/github-work-item-identity'
-import type { GitHubWorkItem, GitLabWorkItem } from '../../../desktop/src/shared/types'
 import type { RpcClient } from '../transport/rpc-client'
 import {
   buildGitHubLinkedWorkItem,

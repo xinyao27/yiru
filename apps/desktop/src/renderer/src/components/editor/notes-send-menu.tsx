@@ -1,6 +1,7 @@
 import { PaperPlaneRight as Send, Sparkle as Sparkles } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +43,8 @@ export type NotesSendMenuProps<TNote> = {
   disabledTooltip?: string
   iconClassName?: string
   align?: 'start' | 'center' | 'end'
+  openRequestNonce?: number | null
+  onOpenRequestHandled?: () => void
   onDelivered: (notes: readonly TNote[]) => void
 }
 
@@ -66,6 +69,8 @@ export function NotesSendMenu<TNote>({
   disabledTooltip = 'All notes sent',
   iconClassName = 'size-3.5',
   align = 'end',
+  openRequestNonce = null,
+  onOpenRequestHandled,
   onDelivered
 }: NotesSendMenuProps<TNote>): React.JSX.Element {
   const openAgentSendPopoverTargetMode = useAppStore((s) => s.openAgentSendPopoverTargetMode)
@@ -150,6 +155,18 @@ export function NotesSendMenu<TNote>({
     [closeAgentSendPopoverTargetMode, targetModeId]
   )
 
+  useEffect(() => {
+    if (openRequestNonce === null) {
+      return
+    }
+    // Why: consume even an undeliverable request so remounts cannot replay it.
+    if (hasDeliverableNotes && defaultScope) {
+      setSendMenuOpen(true)
+      openTargetMode(defaultScope)
+    }
+    onOpenRequestHandled?.()
+  }, [defaultScope, hasDeliverableNotes, onOpenRequestHandled, openRequestNonce, openTargetMode])
+
   return (
     <DropdownMenu modal={false} open={effectiveSendMenuOpen} onOpenChange={handleOpenChange}>
       <Tooltip>
@@ -157,11 +174,13 @@ export function NotesSendMenu<TNote>({
           render={
             <DropdownMenuTrigger
               render={
-                <button
+                <Button
+                  variant="quiet"
+                  size="xs"
                   type="button"
                   className={cn(
-                    'outline-none focus-visible:bg-accent focus-visible:text-foreground',
-                    'inline-flex items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
+                    'p-0 h-auto border-0 ',
+                    ' disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
                     triggerClassName
                   )}
                   disabled={!hasDeliverableNotes}
@@ -183,7 +202,7 @@ export function NotesSendMenu<TNote>({
                       <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
                       <span className="whitespace-nowrap">{triggerLabel}</span>
                       {triggerCount !== undefined ? (
-                        <span className="bg-background/80 text-muted-foreground rounded-full px-1 text-[10px] tabular-nums">
+                        <span className="bg-background/80 text-muted-foreground px-1 text-[10px] tabular-nums">
                           {triggerCount}
                         </span>
                       ) : null}
@@ -192,7 +211,7 @@ export function NotesSendMenu<TNote>({
                   ) : null}
                   <Send className={iconClassName} />
                   {actionLabel ? <span className="whitespace-nowrap">{actionLabel}</span> : null}
-                </button>
+                </Button>
               }
             />
           }

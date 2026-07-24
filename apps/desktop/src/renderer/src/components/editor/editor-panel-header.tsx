@@ -112,7 +112,7 @@ export function EditorPanelHeader({
   const nextChangeShortcut = useShortcutKeyDetails('editor.nextChange')
 
   return (
-    <div className="flex min-h-9 shrink-0 items-center gap-1 border-b border-b-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[var(--editor-surface)] px-3.5 py-1.5">
+    <div className="bg-background flex min-h-9 shrink-0 items-center gap-1 border-b border-b-[color-mix(in_srgb,var(--border)_72%,transparent)] px-3.5 py-1.5">
       <EditorPanelHeaderPath
         activeFile={activeFile}
         copiedPathVisible={copiedPathVisible}
@@ -128,9 +128,9 @@ export function EditorPanelHeader({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="quiet"
                   size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground size-6 shrink-0 [&_svg]:size-3.5"
+                  className="size-6 shrink-0 [&_svg]:size-3.5"
                   onClick={onOpenPreviewToSide}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.fb8331694e',
@@ -157,9 +157,9 @@ export function EditorPanelHeader({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="quiet"
                   size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground size-6 shrink-0 [&_svg]:size-3.5"
+                  className="size-6 shrink-0 [&_svg]:size-3.5"
                   onClick={() => onOpenDiffTargetFile(isMarkdown ? 'rich' : undefined)}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.a10d9b8337',
@@ -199,7 +199,7 @@ export function EditorPanelHeader({
           showFileScope
           triggerLabel="AI notes"
           triggerCount={fileDiffComments.length}
-          triggerClassName="h-6 shrink-0 gap-1 rounded-full border border-border bg-muted px-2 text-[11px] font-medium leading-none text-foreground/80 hover:bg-accent hover:text-foreground"
+          triggerClassName="h-6 shrink-0 gap-1 border border-border bg-muted px-2 text-[11px] font-medium leading-none text-foreground/80 hover:bg-accent hover:text-foreground"
           iconClassName="size-3"
         />
       )}
@@ -212,9 +212,9 @@ export function EditorPanelHeader({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="quiet"
                   size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground size-6 shrink-0 [&_svg]:size-3.5"
+                  className="size-6 shrink-0 [&_svg]:size-3.5"
                   onClick={onToggleSideBySide}
                 >
                   {sideBySide ? <Rows2 size={14} /> : <Columns2 size={14} />}
@@ -238,9 +238,9 @@ export function EditorPanelHeader({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="quiet"
                   size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground size-6 shrink-0 [&_svg]:size-3.5"
+                  className="size-6 shrink-0 [&_svg]:size-3.5"
                   onClick={goToPreviousDiff}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.2076ecfc9c',
@@ -248,7 +248,7 @@ export function EditorPanelHeader({
                   )}
                   disabled={changeCount === 0}
                 >
-                  <ArrowUp size={14} />
+                  <ArrowUp weight="regular" size={14} />
                 </Button>
               }
             />
@@ -257,6 +257,7 @@ export function EditorPanelHeader({
               {previousChangeShortcut.keys.length > 0 && (
                 <ShortcutKeyCombo
                   keys={previousChangeShortcut.keys}
+                  variant="inverted"
                   doubleTap={previousChangeShortcut.doubleTap}
                   className="ml-1.5"
                 />
@@ -268,9 +269,9 @@ export function EditorPanelHeader({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="quiet"
                   size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground size-6 shrink-0 [&_svg]:size-3.5"
+                  className="size-6 shrink-0 [&_svg]:size-3.5"
                   onClick={goToNextDiff}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.631dab0df3',
@@ -278,7 +279,7 @@ export function EditorPanelHeader({
                   )}
                   disabled={changeCount === 0}
                 >
-                  <ArrowDown size={14} />
+                  <ArrowDown weight="regular" size={14} />
                 </Button>
               }
             />
@@ -287,6 +288,7 @@ export function EditorPanelHeader({
               {nextChangeShortcut.keys.length > 0 && (
                 <ShortcutKeyCombo
                   keys={nextChangeShortcut.keys}
+                  variant="inverted"
                   doubleTap={nextChangeShortcut.doubleTap}
                   className="ml-1.5"
                 />
@@ -312,13 +314,13 @@ export function EditorPanelHeader({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="quiet"
                   size="icon-xs"
                   className={cn(
-                    'size-6 shrink-0 hover:text-foreground [&_svg]:size-3.5',
+                    'size-6 shrink-0 [&_svg]:size-3.5',
                     showMarkdownTableOfContents && !isMarkdownTableOfContentsDisabled
                       ? 'bg-accent text-foreground'
-                      : 'text-muted-foreground'
+                      : ''
                   )}
                   onClick={onToggleMarkdownTableOfContents}
                   disabled={isMarkdownTableOfContentsDisabled}

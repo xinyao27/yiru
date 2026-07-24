@@ -82,7 +82,7 @@ function FullDiskAccessButtonIcon(props: FullDiskAccessButtonState): React.JSX.E
   if (props.ready) {
     return <Check className="size-3.5" />
   }
-  return <ExternalLink className="size-3.5" />
+  return <ExternalLink weight="regular" className="size-3.5" />
 }
 
 function useFullDiskAccessStatus(): FullDiskAccessStatusState & { refresh: () => void } {
@@ -198,7 +198,7 @@ export function FullDiskAccessSetupPrompt(): React.JSX.Element | null {
   }
 
   return (
-    <div className="border-border/60 bg-muted/20 mt-5 flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
+    <div className="border-border/60 bg-muted/20 mt-5 flex items-center justify-between gap-4 border px-4 py-3">
       <div className="flex min-w-0 items-start gap-3">
         <div className="text-muted-foreground mt-0.5">
           <HardDrive className="size-4" />

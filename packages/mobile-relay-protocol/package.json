@@ -1,0 +1,80 @@
+{
+  "name": "@yiru/mobile-relay-protocol",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Yiru mobile relay pairing, credential, and encrypted transport contracts",
+  "type": "commonjs",
+  "sideEffects": false,
+  "exports": {
+    "./credential-contract": {
+      "types": "./src/mobile-relay-credential-contract.ts",
+      "react-native": "./src/mobile-relay-credential-contract.ts",
+      "browser": "./src/mobile-relay-credential-contract.ts",
+      "development": "./src/mobile-relay-credential-contract.ts",
+      "import": "./dist/esm/credential-contract.mjs",
+      "require": "./dist/mobile-relay-credential-contract.js",
+      "default": "./dist/mobile-relay-credential-contract.js"
+    },
+    "./e2ee-contract": {
+      "types": "./src/mobile-e2ee-v2-contract.ts",
+      "react-native": "./src/mobile-e2ee-v2-contract.ts",
+      "browser": "./src/mobile-e2ee-v2-contract.ts",
+      "development": "./src/mobile-e2ee-v2-contract.ts",
+      "import": "./dist/esm/e2ee-contract.mjs",
+      "require": "./dist/mobile-e2ee-v2-contract.js",
+      "default": "./dist/mobile-e2ee-v2-contract.js"
+    },
+    "./e2ee-framing": {
+      "types": "./src/mobile-e2ee-v2-framing.ts",
+      "react-native": "./src/mobile-e2ee-v2-framing.ts",
+      "browser": "./src/mobile-e2ee-v2-framing.ts",
+      "development": "./src/mobile-e2ee-v2-framing.ts",
+      "import": "./dist/esm/e2ee-framing.mjs",
+      "require": "./dist/mobile-e2ee-v2-framing.js",
+      "default": "./dist/mobile-e2ee-v2-framing.js"
+    },
+    "./outbound-backpressure": {
+      "types": "./src/ws-outbound-backpressure-queue.ts",
+      "react-native": "./src/ws-outbound-backpressure-queue.ts",
+      "browser": "./src/ws-outbound-backpressure-queue.ts",
+      "development": "./src/ws-outbound-backpressure-queue.ts",
+      "import": "./dist/esm/outbound-backpressure.mjs",
+      "require": "./dist/ws-outbound-backpressure-queue.js",
+      "default": "./dist/ws-outbound-backpressure-queue.js"
+    },
+    "./pairing-offer": {
+      "types": "./src/mobile-relay-pairing-offer.ts",
+      "react-native": "./src/mobile-relay-pairing-offer.ts",
+      "browser": "./src/mobile-relay-pairing-offer.ts",
+      "development": "./src/mobile-relay-pairing-offer.ts",
+      "import": "./dist/esm/pairing-offer.mjs",
+      "require": "./dist/mobile-relay-pairing-offer.js",
+      "default": "./dist/mobile-relay-pairing-offer.js"
+    },
+    "./phone-protocol": {
+      "types": "./src/mobile-relay-phone-protocol.ts",
+      "react-native": "./src/mobile-relay-phone-protocol.ts",
+      "browser": "./src/mobile-relay-phone-protocol.ts",
+      "development": "./src/mobile-relay-phone-protocol.ts",
+      "import": "./dist/esm/phone-protocol.mjs",
+      "require": "./dist/mobile-relay-phone-protocol.js",
+      "default": "./dist/mobile-relay-phone-protocol.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
+    "fmt": "pnpm --workspace-root exec vp fmt packages/mobile-relay-protocol",
+    "lint": "pnpm --workspace-root exec vp lint packages/mobile-relay-protocol --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm --workspace-root exec vp test packages/mobile-relay-protocol"
+  },
+  "dependencies": {
+    "tweetnacl": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:desktop",
+    "vite": "catalog:"
+  },
+  "packageManager": "pnpm@11.15.0"
+}

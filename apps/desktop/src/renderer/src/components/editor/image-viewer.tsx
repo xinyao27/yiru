@@ -5,12 +5,13 @@ import {
   MagnifyingGlassMinus as ZoomOut,
   ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
+import { buildImageDataUri } from '@yiru/workbench-model/ui'
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { buildImageDataUri } from '../../../../shared/image-data-uri'
 import {
   type ApplyImageViewerZoomChange,
   applyAnchoredImageViewerZoomChange,
@@ -306,9 +307,11 @@ export default function ImageViewer({
         </div>
         <div className="text-muted-foreground flex items-center gap-4 border-t px-4 py-2 text-xs">
           <div className="flex items-center gap-1">
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
+              className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
               onClick={() =>
                 applyInlineZoomChange((currentZoom) => currentZoom / IMAGE_VIEWER_ZOOM_STEP)
               }
@@ -316,19 +319,23 @@ export default function ImageViewer({
               title={translate('auto.components.editor.ImageViewer.be27304574', 'Zoom out')}
             >
               <ZoomOut size={14} />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
+              className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
               onClick={() => applyInlineZoomChange(() => 1)}
               disabled={inlineZoom === 1}
               title={translate('auto.components.editor.ImageViewer.6c89c73d9f', 'Reset zoom')}
             >
-              <RotateCcw size={14} />
-            </button>
-            <button
+              <RotateCcw weight="regular" size={14} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
+              className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
               onClick={() =>
                 applyInlineZoomChange((currentZoom) => currentZoom * IMAGE_VIEWER_ZOOM_STEP)
               }
@@ -336,7 +343,7 @@ export default function ImageViewer({
               title={translate('auto.components.editor.ImageViewer.3c9217f5a6', 'Zoom in')}
             >
               <ZoomIn size={14} />
-            </button>
+            </Button>
             <span className="ml-1 tabular-nums">{inlineZoomPercent}%</span>
           </div>
           <span className="min-w-0 truncate" title={filename}>

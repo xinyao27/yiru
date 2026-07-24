@@ -1,4 +1,5 @@
-import type { TuiAgent } from '../../../desktop/src/shared/types'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+
 import {
   filterEnabledMobileTuiAgents,
   isMobileTuiAgent,

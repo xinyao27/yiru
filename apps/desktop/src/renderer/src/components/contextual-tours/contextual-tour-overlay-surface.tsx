@@ -73,7 +73,7 @@ if (typeof window !== 'undefined') {
 }
 
 const PANEL_BASE_CLASSES =
-  'yiru-contextual-tour-panel rounded-lg border border-border text-popover-foreground outline-none'
+  'yiru-contextual-tour-panel  border border-border text-popover-foreground outline-none'
 
 const PANEL_ANIMATION_CLASSES = 'animate-in fade-in-0 zoom-in-95 duration-200 ease-out'
 
@@ -169,7 +169,7 @@ export function ContextualTourOverlaySurface({
       <div key={stepKey} className="animate-in fade-in-0 p-4 duration-150 ease-out">
         <Button
           type="button"
-          variant="ghost"
+          variant="quiet"
           size="icon-xs"
           aria-label={
             renderState.isLastStep
@@ -183,9 +183,9 @@ export function ContextualTourOverlaySurface({
                 )
           }
           onClick={() => onSkip(activeTourId)}
-          className="text-muted-foreground hover:text-foreground absolute top-2 right-2"
+          className="absolute top-2 right-2"
         >
-          <X />
+          <X weight="regular" />
         </Button>
         <h2 className="text-foreground pr-6 text-sm font-semibold tracking-tight">
           {renderState.title}
@@ -209,7 +209,7 @@ export function ContextualTourOverlaySurface({
                 )}
                 onClick={onBack}
               >
-                <ArrowLeft />
+                <ArrowLeft weight="regular" />
                 {translate(
                   'auto.components.contextual.tours.ContextualTourOverlaySurface.4a9568f773',
                   'Back'
@@ -238,7 +238,9 @@ export function ContextualTourOverlaySurface({
                 }
               >
                 {primaryAction.label}
-                {primaryAction.kind === 'next' && !renderState.isLastStep ? <ArrowRight /> : null}
+                {primaryAction.kind === 'next' && !renderState.isLastStep ? (
+                  <ArrowRight weight="regular" />
+                ) : null}
               </Button>
             ) : null}
           </div>

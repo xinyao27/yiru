@@ -1,12 +1,16 @@
 import type { RpcClient } from './rpc-client'
 import type { ConnectionState, RpcResponse } from './types'
 
-export type MobileConnectionPath = 'lan' | 'tailscale' | 'relay'
+export type MobileConnectionPath = 'lan' | 'tailscale'
 
 export class LogicalClientCutoverError extends Error {
   constructor() {
     super('RPC interrupted by connection migration')
   }
+}
+
+export function isLogicalClientCutoverError(error: unknown): boolean {
+  return error instanceof LogicalClientCutoverError
 }
 
 type SubscriptionRecord = {
@@ -142,14 +146,12 @@ export function createStableLogicalRpcClient(
       closed = true
       activeStateUnsubscribe?.()
       activeStateUnsubscribe = null
-      for (const pending of pendingRequests) {
-        pending.reject(new Error('Client closed'))
-      }
-      pendingRequests.clear()
       for (const record of subscriptions.values()) {
         record.disposePhysical?.()
       }
       subscriptions.clear()
+      // Why: the physical client knows whether each request reached the wire and
+      // preserves that ambiguity; a blanket logical rejection would erase it.
       activeSession.close()
       publishState('disconnected')
     },
@@ -161,14 +163,12 @@ export function createStableLogicalRpcClient(
       suspended = true
       activeStateUnsubscribe?.()
       activeStateUnsubscribe = null
-      for (const pending of pendingRequests) {
-        pending.reject(new Error('Client suspended'))
-      }
-      pendingRequests.clear()
       for (const record of subscriptions.values()) {
         record.disposePhysical?.()
         record.disposePhysical = null
       }
+      // Why: let the physical close settle in-flight requests with delivery
+      // evidence instead of turning every suspend into a definite rejection.
       activeSession.close()
       publishState('disconnected')
     },

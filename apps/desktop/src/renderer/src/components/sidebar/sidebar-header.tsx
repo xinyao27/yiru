@@ -36,7 +36,6 @@ const SidebarHeader = React.memo(function SidebarHeader() {
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                 aria-label={translate(
                   'auto.components.sidebar.SidebarHeader.25a95899c9',
                   'Add Project'
@@ -58,7 +57,6 @@ const SidebarHeader = React.memo(function SidebarHeader() {
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                 onClick={() => {
                   if (!canCreateWorkspace) {
                     return
@@ -74,7 +72,8 @@ const SidebarHeader = React.memo(function SidebarHeader() {
                 disabled={!canCreateWorkspace}
                 data-contextual-tour-target="workspace-create-control"
               >
-                <Plus className="size-3.5" strokeWidth={2.25} />
+                {/* Why: this compact creation control is an intentional regular-weight exception. */}
+                <Plus className="size-3.5" weight="regular" />
               </Button>
             }
           />

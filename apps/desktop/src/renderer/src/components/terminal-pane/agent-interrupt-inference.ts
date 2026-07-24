@@ -1,3 +1,5 @@
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 
 import {
@@ -5,10 +7,6 @@ import {
   type AgentInterruptInferenceRequest,
   type AgentInterruptInputIntent
 } from '../../../../shared/agent-interrupt-intent'
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../../shared/agent-status-types'
 
 export type AgentInterruptInference = {
   observeInputIntent(intent: AgentInterruptInputIntent): void

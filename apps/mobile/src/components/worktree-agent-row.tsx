@@ -1,8 +1,8 @@
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { Text, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
 import { agentDisplayLabel, agentDotState, formatTimeAgo } from '../worktree/agent-row-display'
 import { AgentStateDot } from './agent-state-dot'
 import { MobileAgentIcon } from './mobile-agent-icon'

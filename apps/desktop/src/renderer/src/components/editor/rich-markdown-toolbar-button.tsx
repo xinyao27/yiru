@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'
 
@@ -21,10 +22,12 @@ export function RichMarkdownToolbarButton({
       <Tooltip>
         <TooltipTrigger
           render={
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               className={cn(
-                'outline-none focus-visible:bg-accent',
+                'p-0 h-auto w-auto focus-visible:bg-accent',
                 'rich-markdown-toolbar-button',
                 active && 'is-active'
               )}
@@ -33,7 +36,7 @@ export function RichMarkdownToolbarButton({
               onClick={onClick}
             >
               {children}
-            </button>
+            </Button>
           }
         />
         <TooltipContent side="bottom" sideOffset={4}>

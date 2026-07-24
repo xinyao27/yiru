@@ -1,9 +1,11 @@
 import { isWatcherProcessFailure } from '../../../ipc/parcel-watcher-process-failure'
 import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { RuntimeFileCommands } from '../../yiru-runtime-files'
 import { createFileWatchEventBatcher } from './file-watch-event-batcher'
 
 export async function runFileWatchStream(args: {
   runtime: YiruRuntimeService
+  fileCommands: RuntimeFileCommands
   worktree: string
   connectionId?: string
   signal?: AbortSignal
@@ -114,7 +116,7 @@ export async function runFileWatchStream(args: {
     // waiting indefinitely for global child capacity, before ready exists.
     args.runtime.registerSubscriptionCleanup(args.subscriptionId, cleanup, args.connectionId)
     args.emit({ type: 'starting', subscriptionId: args.subscriptionId })
-    setupPromise = args.runtime.watchFileExplorer(
+    setupPromise = args.fileCommands.watchFileExplorer(
       args.worktree,
       (events) => eventBatcher.push(events),
       handleTerminalError,

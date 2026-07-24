@@ -1,8 +1,9 @@
 import { Folder, FolderOpen, CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
 
-import type { SourceControlTreeNode } from '@/components/right-sidebar/source-control-tree'
-import { STATUS_COLORS, STATUS_LABELS } from '@/components/right-sidebar/status-display'
+import { Button } from '@/components/ui/button'
+import type { SourceControlTreeNode } from '@/components/workspace-panel/source-control-tree'
+import { STATUS_COLORS, STATUS_LABELS } from '@/components/workspace-panel/status-display'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { basename, dirname, joinPath } from '@/lib/path'
@@ -62,13 +63,16 @@ export function CombinedDiffFileTreeRow({
           event.dataTransfer.effectAllowed = 'copy'
         }}
       >
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 text-left outline-none"
+          className="focus-visible:bg-accent flex h-auto min-w-0 flex-1 justify-start border-0 p-0 text-left font-normal whitespace-normal"
           onClick={() => onToggleDirectory(node.key)}
           aria-expanded={!isCollapsed}
         >
           <ChevronDown
+            weight="regular"
             className={cn('size-3 shrink-0 transition-transform', isCollapsed && '-rotate-90')}
           />
           {isCollapsed ? (
@@ -77,7 +81,7 @@ export function CombinedDiffFileTreeRow({
             <FolderOpen className="size-3 shrink-0" />
           )}
           <span className="min-w-0 flex-1 truncate">{node.name}</span>
-        </button>
+        </Button>
         <span className="text-muted-foreground/80 w-4 shrink-0 text-center text-[10px] font-bold tabular-nums">
           {node.fileCount}
         </span>
@@ -94,11 +98,13 @@ export function CombinedDiffFileTreeRow({
   const disabled = !sectionIndexByKey.has(sectionKey)
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
       className={cn(
-        'outline-none focus-visible:bg-accent/40',
-        'group flex w-full min-w-0 cursor-pointer items-center gap-1 py-1 pr-3 text-left text-xs transition-colors hover:bg-accent/40 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent',
+        'h-auto border-0 justify-start whitespace-normal font-normal focus-visible:bg-accent/40',
+        'group flex w-full min-w-0 py-1 pr-3 text-left transition-colors hover:bg-accent/40 disabled:cursor-default disabled:hover:bg-transparent',
         activeSectionKey === sectionKey && 'bg-accent/60'
       )}
       style={{
@@ -130,6 +136,6 @@ export function CombinedDiffFileTreeRow({
       >
         {STATUS_LABELS[status]}
       </span>
-    </button>
+    </Button>
   )
 }

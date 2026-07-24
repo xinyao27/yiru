@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { ExecutionHostRegistryEntry } from '../../../shared/execution-host-registry'
 import { projectHostSetupProjectionFromRepos } from '../../../shared/project-host-setup-projection'
 import type { Project, ProjectGroup, ProjectHostSetup, Repo } from '../../../shared/types'

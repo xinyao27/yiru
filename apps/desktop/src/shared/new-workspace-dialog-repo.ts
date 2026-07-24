@@ -3,7 +3,8 @@ import {
   getRepoExecutionHostId,
   isRuntimeOwnedSshTargetId,
   type ExecutionHostScope
-} from './execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import { isGitRepoKind } from './repo-kind'
 import type { Repo } from './types'
 

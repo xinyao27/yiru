@@ -3,7 +3,8 @@ import { lstat, open } from 'node:fs/promises'
 import type { Writable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
-import type { SshTarget } from '../../shared/ssh-types'
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import { shellEscape } from './ssh-connection-utils'
 import { isWindowsRemoteHost, type RemoteHostPlatform } from './ssh-remote-platform'
 import { powerShellCommand, powerShellLiteral } from './ssh-remote-powershell'

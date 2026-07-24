@@ -1,10 +1,10 @@
-import type { RuntimeRpcFailure } from '../../shared/runtime-rpc-envelope'
+import type { RuntimeRpcFailure } from '@yiru/runtime-protocol/rpc-envelope'
 
 export type {
   RuntimeRpcFailure,
   RuntimeRpcResponse,
   RuntimeRpcSuccess
-} from '../../shared/runtime-rpc-envelope'
+} from '@yiru/runtime-protocol/rpc-envelope'
 
 export class RuntimeClientError extends Error {
   readonly code: string

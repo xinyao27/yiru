@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { relativePathInsideRoot } from '../shared/cross-platform-path'
+import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
 
 export type LanguageServerPathFlavor = 'posix' | 'windows'
 

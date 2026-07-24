@@ -1,6 +1,7 @@
 import { PaperPlaneRight as Send, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -69,14 +70,16 @@ export function DashboardAgentRowTrailingControls({
     <span className="relative ml-auto flex h-3.5 w-12 shrink-0 items-center justify-end">
       {(sendTargetStatus === 'eligible' || sendTargetStatus === 'sending') && (
         // Why: target styling belongs on the action so the surrounding agent row stays ordinary.
-        <button
+        <Button
+          variant="outline"
+          size="xs"
           type="button"
           onClick={handleInlineSendTargetClick}
           onMouseDown={stopMouseDown}
           onKeyDown={stopKeyDown}
           disabled={sendTargetStatus === 'sending'}
           className={cn(
-            'absolute top-1/2 right-0 z-10 inline-flex h-5 -translate-y-1/2 items-center gap-1 rounded-md border border-[color:color-mix(in_srgb,var(--ai-action-accent)_72%,transparent)] bg-[color-mix(in_srgb,var(--ai-action-accent)_12%,transparent)] px-1.5 text-[10px] leading-none font-medium text-foreground transition-[background-color,border-color,color,opacity] outline-none hover:border-[color:color-mix(in_srgb,var(--ai-action-accent)_88%,transparent)] hover:bg-[color-mix(in_srgb,var(--ai-action-accent)_18%,transparent)] focus-visible:bg-accent',
+            'absolute top-1/2 right-0 z-10 h-5 -translate-y-1/2 border-[color:color-mix(in_srgb,var(--ai-action-accent)_72%,transparent)] bg-[color-mix(in_srgb,var(--ai-action-accent)_12%,transparent)] px-1.5 text-[10px] leading-none transition-[background-color,border-color,color,opacity] hover:border-[color:color-mix(in_srgb,var(--ai-action-accent)_88%,transparent)] hover:bg-[color-mix(in_srgb,var(--ai-action-accent)_18%,transparent)] focus-visible:bg-accent',
             sendTargetStatus === 'sending' && 'cursor-progress opacity-75'
           )}
           aria-label={translate(
@@ -90,7 +93,7 @@ export function DashboardAgentRowTrailingControls({
         >
           <Send className="size-3" />
           <span>{translate('auto.components.dashboard.DashboardAgentRow.912e136cd9', 'Send')}</span>
-        </button>
+        </Button>
       )}
       {!sendTargetStatus && hideDismiss && relativeTimestamp !== null && (
         <span
@@ -114,14 +117,16 @@ export function DashboardAgentRowTrailingControls({
           >
             {relativeTimestamp}
           </span>
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
             onClick={handleDismiss}
             onMouseDown={stopMouseDown}
             onKeyDown={stopKeyDown}
             className={cn(
-              'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-              '[grid-area:1/1] inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground',
+              'p-0 h-auto border-0 ',
+              '[grid-area:1/1] /70 ',
               'can-hover:opacity-0 transition-opacity duration-150',
               'group-hover/agent-row:opacity-100 focus-visible:opacity-100'
             )}
@@ -131,19 +136,21 @@ export function DashboardAgentRowTrailingControls({
             )}
             title={translate('auto.components.dashboard.DashboardAgentRow.5ae84475cc', 'Dismiss')}
           >
-            <X className="size-3.5" />
-          </button>
+            <X weight="regular" className="size-3.5" />
+          </Button>
         </span>
       )}
       {!sendTargetStatus && !hideDismiss && relativeTimestamp === null && (
-        <button
+        <Button
+          variant="quiet"
+          size="xs"
           type="button"
           onClick={handleDismiss}
           onMouseDown={stopMouseDown}
           onKeyDown={stopKeyDown}
           className={cn(
-            'outline-none focus-visible:text-foreground focus-visible:bg-accent',
-            'inline-flex shrink-0 items-center justify-center text-muted-foreground/70 hover:text-foreground',
+            'p-0 h-auto border-0 ',
+            '/70 ',
             'can-hover:opacity-0 transition-opacity duration-150',
             'group-hover/agent-row:opacity-100 focus-visible:opacity-100'
           )}
@@ -153,16 +160,18 @@ export function DashboardAgentRowTrailingControls({
           )}
           title={translate('auto.components.dashboard.DashboardAgentRow.5ae84475cc', 'Dismiss')}
         >
-          <X className="size-3.5" />
-        </button>
+          <X weight="regular" className="size-3.5" />
+        </Button>
       )}
       {!hideExpand && (
-        <button
+        <Button
+          variant="quiet"
+          size="xs"
           type="button"
           onClick={handleToggleExpand}
           onMouseDown={stopMouseDown}
           onKeyDown={stopKeyDown}
-          className="text-muted-foreground/60 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex shrink-0 items-center justify-center outline-none"
+          className="/60 h-auto border-0 p-0"
           aria-label={
             expanded
               ? translate(
@@ -177,9 +186,10 @@ export function DashboardAgentRowTrailingControls({
           aria-expanded={expanded}
         >
           <ChevronDown
+            weight="regular"
             className={cn('size-3.5 transition-transform duration-150', expanded && 'rotate-180')}
           />
-        </button>
+        </Button>
       )}
     </span>
   )

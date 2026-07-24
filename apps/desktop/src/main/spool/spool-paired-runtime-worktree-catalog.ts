@@ -1,4 +1,5 @@
-import { getRepoExecutionHostId } from '../../shared/execution-host'
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { SpoolPairedRuntimeWorktreeCatalogSchema } from '../../shared/spool/spool-paired-runtime-result-contract'
 import type { DetectedWorktreeListResult, Repo } from '../../shared/types'
 import { callRuntimeEnvironmentExistingRoute } from '../ipc/runtime-environment-existing-route'

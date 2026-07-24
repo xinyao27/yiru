@@ -38,7 +38,11 @@ export function getYiruManagedCodexHomePath(): string {
   return managedHomePath
 }
 
-function getYiruUserDataPath(): string {
+export function getCodexSessionBackfillStateDirPath(): string {
+  return join(getYiruUserDataPath(), 'codex-session-backfill')
+}
+
+export function getYiruUserDataPath(): string {
   if (process.env.YIRU_USER_DATA_PATH) {
     return process.env.YIRU_USER_DATA_PATH
   }
@@ -53,11 +57,13 @@ function getYiruUserDataPath(): string {
   return join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'yiru')
 }
 
-export function syncSystemCodexResourcesIntoManagedHome(): void {
+// Why: every Yiru-managed account home is a complete CODEX_HOME without
+// writing or symlinking back into the user's real ~/.codex.
+export function syncSystemCodexResourcesIntoManagedHome(managedHomePath?: string): void {
+  const targetHome = managedHomePath ?? getYiruManagedCodexHomePath()
   const systemHomePath = getSystemCodexHomePath()
-  const managedHomePath = getYiruManagedCodexHomePath()
   for (const entryName of CODEX_SYSTEM_RESOURCE_ENTRIES) {
-    linkSystemCodexResource(systemHomePath, managedHomePath, entryName)
+    linkSystemCodexResource(systemHomePath, targetHome, entryName)
   }
 }
 

@@ -23,16 +23,12 @@ export function FeatureTourWorkspaceCard({
   return (
     <div
       className={cn(
-        'flex min-w-0 flex-col rounded-md border bg-background px-3 py-2',
+        'flex min-w-0 flex-col border bg-background px-3 py-2',
         status === 'done' ? 'border-border/70' : 'border-border'
       )}
     >
       <div className="flex items-center gap-2">
-        {status === 'working' ? (
-          <WorkingSpinner />
-        ) : (
-          <span className="size-2 rounded-full bg-emerald-500" />
-        )}
+        {status === 'working' ? <WorkingSpinner /> : <span className="size-2 bg-emerald-500" />}
         <span
           className={cn(
             'truncate text-[16.5px] leading-none',
@@ -48,7 +44,7 @@ export function FeatureTourWorkspaceCard({
             {agent.state === 'working' ? (
               <WorkingSpinner size="xs" />
             ) : (
-              <span className="inline-block size-1.5 rounded-full bg-emerald-500" />
+              <span className="inline-block size-1.5 bg-emerald-500" />
             )}
             {agent.kind === 'claude' ? (
               <ClaudeIcon size={13} />
@@ -57,7 +53,7 @@ export function FeatureTourWorkspaceCard({
             ) : (
               <OpenCodeGoIcon size={13} />
             )}
-            <span className="bg-foreground/15 h-2 rounded-full" style={{ width: agent.barWidth }} />
+            <span className="bg-foreground/15 h-2" style={{ width: agent.barWidth }} />
           </div>
         ))}
       </div>

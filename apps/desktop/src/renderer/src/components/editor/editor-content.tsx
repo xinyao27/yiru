@@ -105,8 +105,8 @@ function FileLoadErrorView({
   onRetry: () => void
 }): React.JSX.Element {
   return (
-    <div className="text-muted-foreground flex h-full items-center justify-center bg-[var(--editor-surface)] p-6 text-sm">
-      <div className="border-border bg-background flex max-w-xl items-start gap-3 rounded-md border p-4">
+    <div className="bg-background text-muted-foreground flex h-full items-center justify-center p-6 text-sm">
+      <div className="border-border bg-background flex max-w-xl items-start gap-3 border p-4">
         <AlertCircle className="text-destructive mt-0.5 size-4 flex-shrink-0" />
         <div className="min-w-0">
           <div className="text-foreground font-medium">
@@ -114,7 +114,7 @@ function FileLoadErrorView({
           </div>
           <div className="mt-1 break-words">{message}</div>
           <Button type="button" variant="outline" size="sm" className="mt-3" onClick={onRetry}>
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
             {translate('auto.components.editor.EditorContent.2a512bb46a', 'Retry')}
           </Button>
         </div>
@@ -636,7 +636,7 @@ export function EditorContent({
     })
 
     return (
-      <div className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto bg-[var(--editor-surface)]">
+      <div className="scrollbar-sleek bg-background min-h-0 flex-1 overflow-y-auto">
         {unresolvedEntries.map(renderConflictReviewInlineFile)}
       </div>
     )

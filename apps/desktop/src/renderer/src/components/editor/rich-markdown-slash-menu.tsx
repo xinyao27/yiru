@@ -2,6 +2,8 @@ import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import type { Editor } from '@tiptap/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -39,7 +41,7 @@ export function RichMarkdownSlashMenu({
     >
       <div className="rich-markdown-slash-search" onMouseDown={(event) => event.preventDefault()}>
         <Search className="size-3.5" />
-        <input
+        <Input
           aria-label={translate(
             'auto.components.editor.RichMarkdownSlashMenu.550189b06c',
             'Search blocks'
@@ -51,7 +53,7 @@ export function RichMarkdownSlashMenu({
             'auto.components.editor.RichMarkdownSlashMenu.dbdd2ad15f',
             'Search blocks...'
           )}
-          className="focus-visible:border-ring outline-none"
+          variant="chrome-free"
         />
       </div>
       <div className="rich-markdown-slash-results scrollbar-sleek" role="listbox">
@@ -71,13 +73,15 @@ export function RichMarkdownSlashMenu({
                 {showGroup ? (
                   <div className="rich-markdown-slash-section">{command.group}</div>
                 ) : null}
-                <button
+                <Button
+                  variant="ghost"
+                  size="xs"
                   type="button"
                   title={command.description}
                   role="option"
                   aria-selected={index === selectedIndex}
                   className={cn(
-                    'outline-none focus-visible:bg-accent',
+                    'p-0 h-auto border-0 gap-0 whitespace-normal font-normal focus-visible:bg-accent',
                     'rich-markdown-slash-item',
                     index === selectedIndex && 'is-active'
                   )}
@@ -88,7 +92,7 @@ export function RichMarkdownSlashMenu({
                 >
                   <span className="rich-markdown-slash-icon">
                     {command.icon.kind === 'component' ? (
-                      <command.icon.component className="size-3.5" />
+                      <command.icon.component className="size-3.5" weight={command.icon.weight} />
                     ) : (
                       <span className="text-sm leading-none">{command.icon.value}</span>
                     )}
@@ -98,7 +102,7 @@ export function RichMarkdownSlashMenu({
                       {command.label}
                     </span>
                   </span>
-                </button>
+                </Button>
               </React.Fragment>
             )
           })

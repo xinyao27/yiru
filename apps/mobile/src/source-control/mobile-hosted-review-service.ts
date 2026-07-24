@@ -1,10 +1,14 @@
 import type {
-  CreateHostedReviewResult,
   HostedReviewCreationBlockedReason,
   HostedReviewCreationEligibility,
   HostedReviewCreationNextAction,
   HostedReviewProvider
-} from '../../../desktop/src/shared/hosted-review'
+} from '@yiru/workbench-model/review'
+import {
+  interpretSourceControlHostedReviewCreateResult,
+  type CreateHostedReviewResult
+} from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import { hostedReviewCopy } from './hosted-review-copy'
@@ -169,18 +173,15 @@ async function pushMobileBranchBeforeCreate(
 }
 
 function formatMobileHostedReviewCreateError(
-  result: CreateHostedReviewResult,
+  error: string,
   pushed: boolean,
   shortLabel: string
 ): string {
-  if (result.ok) {
-    return ''
-  }
   if (!pushed) {
-    return result.error
+    return error
   }
   const prefix = new RegExp(`^Create ${shortLabel} failed:\\s*`, 'i')
-  return `Push succeeded, but ${shortLabel} creation failed: ${result.error.replace(prefix, '')}`
+  return `Push succeeded, but ${shortLabel} creation failed: ${error.replace(prefix, '')}`
 }
 
 async function finishMobileHostedReviewCreateSuccess(
@@ -227,15 +228,16 @@ export async function createMobileHostedReview(
       return { ok: false, error: response.error?.message || 'Failed to create pull request' }
     }
     const result = (response as RpcSuccess).result as CreateHostedReviewResult
-    if (result.ok) {
-      return finishMobileHostedReviewCreateSuccess(client, worktreeId, input, result)
+    const outcome = interpretSourceControlHostedReviewCreateResult(result)
+    if (outcome.kind === 'created') {
+      return finishMobileHostedReviewCreateSuccess(client, worktreeId, input, outcome)
     }
-    if (result.existingReview?.url) {
-      const number = result.existingReview.number
+    if (outcome.kind === 'existing') {
+      const number = outcome.number
       if (!number) {
         return {
           ok: true,
-          url: result.existingReview.url,
+          url: outcome.url,
           existing: true
         }
       }
@@ -243,7 +245,7 @@ export async function createMobileHostedReview(
         client,
         worktreeId,
         input,
-        { number, url: result.existingReview.url },
+        { number, url: outcome.url },
         true
       )
     }
@@ -251,7 +253,7 @@ export async function createMobileHostedReview(
       ok: false,
       error:
         formatMobileHostedReviewCreateError(
-          result,
+          outcome.error,
           pushed,
           hostedReviewCopy(input.provider).shortLabel
         ) || 'Failed to create pull request'

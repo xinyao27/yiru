@@ -2,6 +2,7 @@ import { Check, Monitor, Moon, GearSix as Settings2, Sun } from '@phosphor-icons
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -223,21 +224,21 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
         {themes.map(({ id, label, hint, icon: Icon }) => {
           const selected = theme === id
           return (
-            <button
+            <Button
+              variant="outline"
+              size="xs"
               key={id}
               className={cn(
-                'outline-none focus-visible:bg-muted/60',
-                'group overflow-hidden rounded-xl border p-3 text-left transition-all',
-                selected
-                  ? 'border-violet-500/60 bg-violet-500/10'
-                  : 'border-border bg-muted/30 hover:bg-muted/60'
+                'h-auto justify-start gap-0 whitespace-normal font-normal focus-visible:bg-muted/60',
+                'group overflow-hidden p-3 text-left',
+                selected ? 'border-violet-500/60 bg-violet-500/10' : 'bg-muted/30 hover:bg-muted/60'
               )}
               onClick={() => applyOnboardingThemeSelection(id, onThemeChange, updateSettings)}
             >
-              <div className="border-border relative mb-3 h-24 overflow-hidden rounded-lg border">
+              <div className="border-border relative mb-3 h-24 overflow-hidden border">
                 <ChromePreview variant={id} />
                 {selected && (
-                  <div className="absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full bg-violet-500 text-white">
+                  <div className="absolute top-1.5 right-1.5 grid size-5 place-items-center bg-violet-500 text-white">
                     <Check className="size-3" strokeWidth={3} />
                   </div>
                 )}
@@ -249,7 +250,7 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
                 </div>
                 <div className="text-muted-foreground text-[11px]">{hint}</div>
               </div>
-            </button>
+            </Button>
           )
         })}
       </div>

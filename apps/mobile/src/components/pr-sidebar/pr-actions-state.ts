@@ -1,4 +1,4 @@
-import type { GitHubPRMergeMethod, PRState } from '../../../../desktop/src/shared/types'
+import type { GitHubPRMergeMethod, PRState } from '@yiru/workbench-model/review'
 
 // Which actions the PR actions section may offer for a given PR state. Merged PRs
 // expose only unlink (+ open-on-host elsewhere); closed PRs add reopen; open/draft

@@ -1,5 +1,6 @@
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
 import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
-import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
 import { agentKindSchema } from '../../shared/telemetry-events'
 import {
   parseTerminalOscColorQuery,
@@ -135,12 +136,11 @@ function writeStartupTerminalColorQueryReplies(
     return false
   }
   try {
-    for (const [index, reply] of replies.entries()) {
-      const slot = slots[index]
-      if (slot === undefined) {
-        return false
-      }
-      provider.write(ptyId, reply)
+    // Why: one provider write makes a multi-slot query all-or-nothing at this
+    // boundary; otherwise a later throw can expose the query to another responder
+    // after an earlier slot was already answered.
+    provider.write(ptyId, replies.join(''))
+    for (const slot of slots) {
       state.answeredSlots.add(slot)
     }
     return true

@@ -1,11 +1,9 @@
 import { resolve as resolvePath } from 'node:path'
 
-import { isPathInsideOrEqual } from '../shared/cross-platform-path'
-import type {
-  ComputerAppQuery,
-  RuntimeWorktreeListResult,
-  RuntimeWorktreeRecord
-} from '../shared/runtime-types'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+
+import { WORKTREE_LIST_CONTRACT } from '../shared/runtime-method-contracts/workspace-contracts'
+import type { ComputerAppQuery, RuntimeWorktreeRecord } from '../shared/runtime-types'
 import { getOptionalStringFlag, getRequiredStringFlag } from './flags'
 import type { RuntimeClient } from './runtime-client'
 import { RuntimeClientError } from './runtime-client'
@@ -51,7 +49,7 @@ export async function resolveCurrentWorktreeSelector(
   assertLocalCwdWorktreeSelector('current', client)
 
   const currentPath = resolvePath(cwd)
-  const worktrees = await client.call<RuntimeWorktreeListResult>('worktree.list', {
+  const worktrees = await client.call(WORKTREE_LIST_CONTRACT, {
     limit: 10_000
   })
   let enclosingWorktree: RuntimeWorktreeRecord | undefined

@@ -1,6 +1,9 @@
-import { translate } from '@/i18n/i18n'
+import { X } from '@phosphor-icons/react'
+import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 
-import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { translate } from '@/i18n/i18n'
 const SSH_PREFIX = 'SSH connection is not active'
 const STALE_NODE_PTY_DAEMON_MARKERS = [
   "Daemon's node-pty install is gone",
@@ -32,6 +35,7 @@ export function TerminalErrorToast({
 }): React.JSX.Element {
   const ssh = isSshError(error)
   const showDaemonRestart = !ssh && onRestartDaemon && shouldOfferDaemonRestart(error)
+  const dismissLabel = translate('auto.components.ui.dialog.f26c4baeda', 'Close')
 
   return (
     <div
@@ -85,7 +89,9 @@ export function TerminalErrorToast({
           ) : null}
         </span>
         {showDaemonRestart ? (
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             onClick={onRestartDaemon}
             style={{
               marginLeft: 12,
@@ -99,30 +105,42 @@ export function TerminalErrorToast({
               whiteSpace: 'nowrap',
               flexShrink: 0
             }}
-            className="focus-visible:bg-accent outline-none"
+            className="focus-visible:bg-accent h-auto border-0 p-0"
           >
             {translate(
               'auto.components.terminal.pane.TerminalErrorToast.e4aa243f8c',
               'Restart daemon'
             )}
-          </button>
+          </Button>
         ) : null}
-        <button
-          onClick={onDismiss}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: ssh ? '#fde68a' : '#fca5a5',
-            cursor: 'pointer',
-            fontSize: 14,
-            padding: '0 0 0 8px',
-            lineHeight: 1,
-            flexShrink: 0
-          }}
-          className="focus-visible:bg-accent outline-none"
-        >
-          ×
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={onDismiss}
+                aria-label={dismissLabel}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: ssh ? '#fde68a' : '#fca5a5',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  padding: '0 0 0 8px',
+                  lineHeight: 1,
+                  flexShrink: 0
+                }}
+                className="focus-visible:bg-accent h-auto border-0 p-0"
+              >
+                <X weight="regular" className="size-3.5" />
+              </Button>
+            }
+          />
+          <TooltipContent side="top" sideOffset={4}>
+            {dismissLabel}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   )

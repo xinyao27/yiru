@@ -1,3 +1,5 @@
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+
 import { subscribeToPtyData } from '@/components/terminal-pane/pty-data-sidecar-subscriptions'
 import { subscribeToPtyExit } from '@/components/terminal-pane/pty-dispatcher'
 import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
@@ -11,7 +13,6 @@ import {
 import { useAppStore } from '@/store'
 
 import { createAgentStatusOscProcessor } from '../../../shared/agent-status-osc'
-import type { ParsedAgentStatusPayload } from '../../../shared/agent-status-types'
 
 export async function observeExistingAutomationSession(args: {
   ptyId: string

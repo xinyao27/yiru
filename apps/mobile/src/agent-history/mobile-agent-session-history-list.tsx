@@ -1,11 +1,11 @@
+import { recentSessionConversationTurns } from '@yiru/workbench-model/agent'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, SectionList, Text, View } from 'react-native'
 
 import { Play } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { recentSessionConversationTurns } from '../../../desktop/src/shared/ai-vault-session-display'
-import type { AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
 import { MobileAgentIcon } from '../components/mobile-agent-icon'
 import type { MobileAgentHistorySection } from './agent-history-sections'
 import type { MobileAgentHistoryCard } from './agent-history-session-card'

@@ -1,4 +1,5 @@
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { AppState } from '../../store/types'
 
 export type ProjectRuntimeSessionSummary = {

@@ -3,12 +3,13 @@
 // surfaces before the transcript flushes the final assistant message, then is
 // superseded once it lands) is unit-testable without IPC or the store.
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 import type {
   AgentType,
   NativeChatSession,
   NativeChatSessionStatus
-} from '../../../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+
 import { assembleNativeChatSession, type NativeChatSources } from './native-chat-session-assembler'
 
 export type NativeChatLiveMergeInput = {

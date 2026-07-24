@@ -13,6 +13,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
@@ -246,7 +247,7 @@ export function CrashReportDialogSurface({
         <div className="space-y-3">
           {report ? (
             <>
-              <div className="border-border/70 bg-muted/30 rounded-md border p-3 text-xs">
+              <div className="border-border/70 bg-muted/30 border p-3 text-xs">
                 <div className="text-foreground font-medium">{formatSummary(report)}</div>
                 <div className="text-muted-foreground mt-1">
                   {new Date(report.createdAt).toLocaleString()} · {report.platform} {report.arch} ·
@@ -261,13 +262,13 @@ export function CrashReportDialogSurface({
                     'Diagnostic text'
                   )}
                 </div>
-                <pre className="border-border bg-muted/20 text-muted-foreground scrollbar-sleek max-h-44 overflow-auto rounded-md border p-3 font-mono text-[11px] leading-5 break-words whitespace-pre-wrap">
+                <pre className="border-border bg-muted/20 text-muted-foreground scrollbar-sleek max-h-44 overflow-auto border p-3 font-mono text-[11px] leading-5 break-words whitespace-pre-wrap">
                   {diagnosticText}
                 </pre>
               </div>
             </>
           ) : (
-            <div className="border-border/70 bg-muted/30 text-muted-foreground rounded-md border p-3 text-xs">
+            <div className="border-border/70 bg-muted/30 text-muted-foreground border p-3 text-xs">
               {loading
                 ? translate(
                     'auto.components.crash.report.CrashReportDialog.765591798d',
@@ -279,14 +280,14 @@ export function CrashReportDialogSurface({
                   )}
             </div>
           )}
-          <textarea
+          <Textarea
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
             rows={4}
             placeholder={getNotesPlaceholder(report)}
-            className="border-border bg-background placeholder:text-muted-foreground min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none"
+            className="border-border bg-background placeholder:text-muted-foreground min-h-24 w-full border px-3 py-2 text-sm outline-none"
           />
-          <div className="border-border/70 bg-muted/20 flex items-start gap-2 rounded-md border p-3">
+          <div className="border-border/70 bg-muted/20 flex items-start gap-2 border p-3">
             <Checkbox
               id="crash-report-attach-diagnostics"
               checked={includeDiagnosticLogs}
@@ -324,7 +325,7 @@ export function CrashReportDialogSurface({
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleDismiss}
             disabled={submitting}

@@ -1,15 +1,16 @@
 import {
+  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
+  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
+} from '@yiru/runtime-protocol/capabilities'
+import {
   getExecutionHostLabel,
   isRuntimeOwnedSshTargetId,
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { ExecutionHostRegistryEntry } from '../../../shared/execution-host-registry'
-import {
-  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-} from '../../../shared/protocol-version'
 import { isEphemeralVmRuntimeEnvironment } from '../../../shared/runtime-environments'
 import type { ProjectHostSetup, Repo } from '../../../shared/types'
 

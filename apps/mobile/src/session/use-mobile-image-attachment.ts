@@ -8,6 +8,11 @@ import {
   pickMobileImage,
   type MobileImageSource
 } from './mobile-image-source-picker'
+import {
+  getMobileNativeChatInputHealingState,
+  healMobileNativeChatInput,
+  recordMobileNativeChatImagePasteOutcome
+} from './mobile-native-chat-input-healing'
 
 type CurrentRef<T> = {
   readonly current: T
@@ -58,19 +63,43 @@ export function useMobileImageAttachment({
         return
       }
       try {
-        const sent = await attachMobileImageToTerminal(source, {
+        const inputHealingState = getMobileNativeChatInputHealingState(client)
+        const outcome = await attachMobileImageToTerminal(source, {
           client,
           terminal: activeHandle,
           deviceToken: deviceTokenRef.current,
           getConnectionId: getActiveWorktreeConnectionId,
           pickImage: pickMobileImage,
           onUploadStart: () => setIsAttaching(true),
-          beforeTerminalSend
+          beforeTerminalSend: async (terminal) => {
+            if (beforeTerminalSend && !(await beforeTerminalSend(terminal))) {
+              return false
+            }
+            return healMobileNativeChatInput({
+              state: inputHealingState,
+              client,
+              terminal,
+              ...(deviceTokenRef.current
+                ? {
+                    mobileClient: {
+                      id: deviceTokenRef.current,
+                      type: 'mobile' as const
+                    }
+                  }
+                : {})
+            })
+          }
         })
-        // Cancelled picker: no error, no toast.
-        if (sent) {
-          onSuccess()
+        if (outcome === 'cancelled' || outcome === 'blocked') {
+          return
         }
+        recordMobileNativeChatImagePasteOutcome(inputHealingState, activeHandle, outcome)
+        if (outcome === 'accepted') {
+          onSuccess()
+          return
+        }
+        onError()
+        showToast(outcome === 'unknown' ? 'Attach delivery unconfirmed' : 'Attach failed', 1500)
       } catch (error) {
         onError()
         if (connState !== 'connected') {

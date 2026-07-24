@@ -1,4 +1,5 @@
-import type { AgentStatusIpcPayload } from '../../shared/agent-status-types'
+import type { AgentStatusIpcPayload } from '@yiru/workbench-model/agent'
+
 import { isValidTerminalTabId } from '../../shared/terminal-tab-id'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 

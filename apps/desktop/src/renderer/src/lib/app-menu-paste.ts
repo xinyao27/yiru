@@ -1,7 +1,8 @@
 import {
   isClipboardTextTooLargeError,
   type ReadClipboardTextOptions
-} from '../../../shared/clipboard-text'
+} from '@yiru/workbench-model/ui'
+
 import { TEXT_CONTROL_PASTE_MAX_BYTES, pasteTextIntoTextControl } from './text-control-paste'
 import { createTextControlRejectedResult } from './text-control-paste-diagnostics'
 import {

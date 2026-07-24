@@ -1,7 +1,5 @@
-import type {
-  GitHistoryItem,
-  GitHistoryResult
-} from '../../../desktop/src/shared/git-history-types'
+import type { GitHistoryItem, GitHistoryResult } from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 

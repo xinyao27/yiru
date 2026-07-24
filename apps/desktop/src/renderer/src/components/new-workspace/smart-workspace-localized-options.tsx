@@ -1,6 +1,6 @@
 import {
   TextAa as CaseSensitive,
-  GitBranch,
+  GitMerge,
   GithubLogo as Github,
   GitlabLogo as Gitlab,
   Sparkle as Sparkles
@@ -69,7 +69,7 @@ export function getSmartWorkspaceNameModes(): SmartWorkspaceNameModeOption[] {
         'auto.components.new.workspace.SmartWorkspaceNameField.2e4c7c95fe',
         'Branch'
       ),
-      Icon: GitBranch
+      Icon: GitMerge
     },
     {
       id: 'text',

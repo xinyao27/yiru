@@ -24,7 +24,7 @@ export function AutomationEditorPromptSection({
   return (
     <div className="scrollbar-sleek min-h-0 flex-1 overflow-auto px-5 py-4">
       {draft.scheduleWarning ? (
-        <div className="border-border bg-muted/40 text-muted-foreground mb-3 rounded-md border px-3 py-2 text-xs">
+        <div className="border-border bg-muted/40 text-muted-foreground mb-3 border px-3 py-2 text-xs">
           {draft.scheduleWarning}
         </div>
       ) : null}
@@ -47,7 +47,7 @@ export function AutomationEditorPromptSection({
             'auto.components.automations.AutomationEditorDialog.827b25a81e',
             'Supports skills, file paths, and built-in commands like'
           )}{' '}
-          <code className="bg-muted rounded px-1 font-mono text-[11px]">
+          <code className="bg-muted px-1 font-mono text-[11px]">
             {translate('auto.components.automations.AutomationEditorDialog.a4ac8fcc62', '/goal')}
           </code>
           .

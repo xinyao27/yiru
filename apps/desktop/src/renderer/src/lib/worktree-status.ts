@@ -1,7 +1,7 @@
-import { resolveAgentTypeFromTerminalTitle } from '@/components/sidebar/worktree-title-derived-agent-rows'
 import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
 import { resolveRuntimePaneTitleLeafIdFromRoot } from '@/lib/runtime-pane-title-leaf-id'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
+import { resolveAgentTypeFromTerminalTitle } from '@/lib/terminal-title-agent-type'
 
 import type {
   TerminalLayoutSnapshot,

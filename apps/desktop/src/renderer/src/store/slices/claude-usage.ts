@@ -46,7 +46,12 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
     try {
       const nextScanState = (await window.api.claudeUsage.setEnabled({
         enabled
-      })) as ClaudeUsageScanState
+      })) as ClaudeUsageScanState | undefined
+      // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
+      // undefined; keep the unavailable state stable instead of fabricating one.
+      if (!nextScanState) {
+        return
+      }
       set({
         // Why: every enable should look like a fresh scan cycle in the UI.
         // Reusing the last completed timestamp makes repeated toggles skip the
@@ -85,7 +90,12 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
 
   fetchClaudeUsage: async (opts) => {
     try {
-      const scanState = (await window.api.claudeUsage.getScanState()) as ClaudeUsageScanState
+      const scanState = (await window.api.claudeUsage.getScanState()) as
+        | ClaudeUsageScanState
+        | undefined
+      if (!scanState) {
+        return
+      }
       const currentScanState = get().claudeUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&

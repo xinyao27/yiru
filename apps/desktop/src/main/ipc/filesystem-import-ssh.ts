@@ -1,7 +1,8 @@
 import { lstat } from 'node:fs/promises'
 import { basename, posix, resolve } from 'node:path'
 
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { FileUploadSession, IFilesystemProvider } from '../providers/types'
 import { assertSafeRemotePathSegment, type RemotePathFlavor } from '../ssh/ssh-remote-platform'

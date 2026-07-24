@@ -1,6 +1,10 @@
+import { resolveTuiAgentLaunchArgs, resolveTuiAgentLaunchEnv } from '@yiru/workbench-model/agent'
+
 import { isTuiAgent } from './tui-agent-config'
 import { YOLO_TUI_AGENT_ARGS, YOLO_TUI_AGENT_ENV } from './tui-agent-permissions'
 import type { TuiAgent } from './types'
+
+export { resolveTuiAgentLaunchArgs, resolveTuiAgentLaunchEnv }
 
 const UNSUPPORTED_TUI_AGENT_ARGS: Partial<Record<TuiAgent, readonly string[]>> = {
   opencode: ['--dangerously-skip-permissions'],
@@ -77,28 +81,4 @@ export function getTuiAgentDefaultArgs(agent: TuiAgent): string {
 
 export function getTuiAgentDefaultEnv(agent: TuiAgent): Record<string, string> {
   return { ...DEFAULT_TUI_AGENT_ENV[agent] }
-}
-
-export function resolveTuiAgentLaunchArgs(
-  agent: TuiAgent,
-  configuredArgs: Partial<Record<TuiAgent, string>> | null | undefined
-): string {
-  if (
-    configuredArgs &&
-    Object.prototype.hasOwnProperty.call(configuredArgs, agent) &&
-    typeof configuredArgs[agent] === 'string'
-  ) {
-    return configuredArgs[agent] ?? ''
-  }
-  return getTuiAgentDefaultArgs(agent)
-}
-
-export function resolveTuiAgentLaunchEnv(
-  agent: TuiAgent,
-  configuredEnv: Partial<Record<TuiAgent, Record<string, string>>> | null | undefined
-): Record<string, string> {
-  if (configuredEnv && Object.prototype.hasOwnProperty.call(configuredEnv, agent)) {
-    return { ...configuredEnv[agent] }
-  }
-  return getTuiAgentDefaultEnv(agent)
 }

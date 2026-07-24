@@ -1,4 +1,10 @@
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../../shared/runtime-method-contract'
 
 export function createRuntimeRpcAbortError(): Error {
   const error = new Error('Runtime request aborted')
@@ -6,13 +12,28 @@ export function createRuntimeRpcAbortError(): Error {
   return error
 }
 
-export async function callAbortableRuntimeEnvironment(
+export function callAbortableRuntimeEnvironment<TContract extends RuntimeMethodContract>(
+  environmentId: string,
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>,
+  timeoutMs: number | undefined,
+  signal: AbortSignal
+): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
+export function callAbortableRuntimeEnvironment(
   environmentId: string,
   method: string,
   params: unknown,
   timeoutMs: number | undefined,
   signal: AbortSignal
+): Promise<RuntimeRpcResponse<unknown>>
+export async function callAbortableRuntimeEnvironment(
+  environmentId: string,
+  contract: string | RuntimeMethodContract,
+  params: unknown,
+  timeoutMs: number | undefined,
+  signal: AbortSignal
 ): Promise<RuntimeRpcResponse<unknown>> {
+  const method = typeof contract === 'string' ? contract : contract.name
   if (signal.aborted) {
     throw createRuntimeRpcAbortError()
   }

@@ -22,8 +22,8 @@
 //   POST body so Yiru's warn-once protocol diagnostics still fire. The relay
 //   default env is `remote`, a location marker ignored by dev-vs-prod checks.
 
-import type { AgentProviderSessionMetadata } from './agent-session-resume'
-import type { ParsedAgentStatusPayload } from './agent-status-types'
+import type { AgentProviderSessionMetadata } from '@yiru/workbench-model/agent'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 
 // Why: the local hook server knows the discriminator from URL pathname routing
 // (`/hook/<source>`); the relay equally must tag each forwarded notification
@@ -31,24 +31,7 @@ import type { ParsedAgentStatusPayload } from './agent-status-types'
 // Promoted from `src/main/agent-hooks/server.ts` so the relay can import it
 // without dragging Electron in (the shared listener module is the only place
 // that consumes it from the relay side).
-export type AgentHookSource =
-  | 'claude'
-  | 'codex'
-  | 'gemini'
-  | 'antigravity'
-  | 'amp'
-  | 'opencode'
-  | 'mimo-code'
-  | 'cursor'
-  | 'pi'
-  | 'omp'
-  | 'droid'
-  | 'command-code'
-  | 'grok'
-  | 'copilot'
-  | 'hermes'
-  | 'devin'
-  | 'kimi'
+export type { AgentHookSource }
 
 /** Env marker used by the remote relay. It is a transport/location marker, not
  *  a dev-vs-prod build tag, so main-process env mismatch diagnostics ignore it. */
@@ -80,6 +63,8 @@ export type AgentHookRelayEnvelope = {
   toolAgentType?: string
   /** Provider-owned conversation/session id needed to resume a sleeping agent. */
   providerSession?: AgentProviderSessionMetadata
+  /** True when this envelope updates resume identity without changing turn status. */
+  providerSessionOnly?: boolean
   /** True when the relay is replaying its cache after Yiru reconnects. */
   isReplay?: boolean
   /** Forwarded from the agent CLI POST body. The relay default is `remote`,
@@ -121,3 +106,4 @@ export function isRemoteAgentHooksEnabled(env: NodeJS.ProcessEnv = process.env):
   }
   return true
 }
+import type { AgentHookSource } from '@yiru/workbench-model/agent'

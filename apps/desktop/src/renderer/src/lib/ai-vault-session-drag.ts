@@ -1,7 +1,7 @@
-import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
-import { AI_VAULT_AGENTS, type AiVaultAgent } from '../../../shared/ai-vault-types'
-import { measureClipboardTextByteLength } from '../../../shared/clipboard-text'
-import { normalizeExecutionHostId, type ExecutionHostId } from '../../../shared/execution-host'
+import { AI_VAULT_AGENTS, type AiVaultAgent } from '@yiru/workbench-model/agent'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
+import { normalizeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export const AI_VAULT_SESSION_DRAG_TYPE = 'application/x-yiru-ai-vault-session'
 export const AI_VAULT_SESSION_DRAG_START_EVENT = 'yiru-ai-vault-session-drag-start'
@@ -17,8 +17,9 @@ export type AiVaultSessionDragPayload = {
   // WSL) to reject SSH panes that cannot reach it.
   sessionFilePath?: string
   sessionExecutionHostId?: ExecutionHostId
-  // Why: drag/drop resume must preserve planned env/default args, not just the shell command.
+  // Why: drag/drop resume must preserve planned env mutations/default args, not just the command.
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
 }
 
@@ -44,6 +45,14 @@ function isStringRecord(value: unknown): value is Record<string, string> {
   return Object.values(value).every((entry) => typeof entry === 'string')
 }
 
+function isEnvDeletionList(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length <= 32 &&
+    value.every((entry) => typeof entry === 'string' && entry.length > 0 && entry.length <= 256)
+  )
+}
+
 function isLaunchConfig(value: unknown): value is SleepingAgentLaunchConfig {
   if (!value || typeof value !== 'object') {
     return false
@@ -51,6 +60,7 @@ function isLaunchConfig(value: unknown): value is SleepingAgentLaunchConfig {
   const config = value as Partial<SleepingAgentLaunchConfig>
   return (
     (config.agentCommand === undefined || typeof config.agentCommand === 'string') &&
+    (config.ompResumeFilePath === undefined || isNonEmptyString(config.ompResumeFilePath)) &&
     typeof config.agentArgs === 'string' &&
     isStringRecord(config.agentEnv)
   )
@@ -72,6 +82,7 @@ function isSerializedPayload(value: unknown): value is SerializedAiVaultSessionD
     (payload.sessionExecutionHostId === undefined ||
       Boolean(normalizeExecutionHostId(payload.sessionExecutionHostId))) &&
     (payload.env === undefined || isStringRecord(payload.env)) &&
+    (payload.envToDelete === undefined || isEnvDeletionList(payload.envToDelete)) &&
     (payload.launchConfig === undefined || isLaunchConfig(payload.launchConfig))
   )
 }
@@ -126,6 +137,7 @@ export function readAiVaultSessionDragData(
       sessionFilePath,
       sessionExecutionHostId,
       env,
+      envToDelete,
       launchConfig
     } = parsed
     return {
@@ -136,6 +148,7 @@ export function readAiVaultSessionDragData(
       ...(sessionFilePath ? { sessionFilePath } : {}),
       ...(sessionExecutionHostId ? { sessionExecutionHostId } : {}),
       ...(env ? { env } : {}),
+      ...(envToDelete ? { envToDelete } : {}),
       ...(launchConfig ? { launchConfig } : {})
     }
   } catch {

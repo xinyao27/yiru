@@ -1,4 +1,5 @@
-import { isMeaningfulOpenCodeTerminalTitle } from './opencode-terminal-title'
+import { isMeaningfulOpenCodeTerminalTitle } from '@yiru/workbench-model/agent'
+
 import type { Tab, TerminalTab } from './types'
 
 export function resolveTerminalTabTitle(

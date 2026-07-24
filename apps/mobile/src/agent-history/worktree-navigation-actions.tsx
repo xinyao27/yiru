@@ -1,4 +1,4 @@
-import { GitBranch } from '@/components/uniwind-icons'
+import { GitMerge } from '@/components/uniwind-icons'
 
 import type { ActionSheetAction } from '../components/action-sheet-modal'
 import { MOBILE_AI_VAULT_CAPABILITY } from './agent-history-capability'
@@ -22,7 +22,7 @@ export function buildWorktreeNavigationActions(args: Args): ActionSheetAction[] 
   const actions: ActionSheetAction[] = [
     {
       label: 'Source Control',
-      icon: GitBranch,
+      icon: GitMerge,
       onPress: () => {
         const params = new URLSearchParams({ name: args.worktreeName, origin: 'host' })
         args.navigate(

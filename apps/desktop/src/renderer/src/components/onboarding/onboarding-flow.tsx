@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -176,6 +177,8 @@ export default function OnboardingFlow({
 
   return (
     <TooltipProvider delay={0} timeout={0}>
+      {/* Why: modal backdrops intentionally reveal and dim the app beneath;
+          unlike foreground surfaces, this alpha is part of the interaction. */}
       <div
         className="text-foreground fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black/50 p-4 backdrop-blur-[2px]"
         data-onboarding-overlay
@@ -201,7 +204,7 @@ export default function OnboardingFlow({
           aria-modal="true"
           data-onboarding-modal
           className={cn(
-            'relative flex h-[calc(100vh-2rem)] max-h-[960px] min-h-0 w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground   transition-[max-width] duration-[760ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+            'relative flex h-[calc(100vh-2rem)] max-h-[960px] min-h-0 w-[calc(100vw-2rem)] flex-col overflow-hidden border border-border bg-card text-card-foreground transition-[max-width] duration-[760ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
             'max-w-[1100px]'
           )}
         >
@@ -226,12 +229,14 @@ export default function OnboardingFlow({
                   <Tooltip key={step.id}>
                     <TooltipTrigger
                       render={
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
                           type="button"
                           className={cn(
                             // Why: the visible bars stay 4px tall, but the invisible
                             // hit area makes hover/click/tooltip targeting reliable.
-                            'relative h-1 rounded-full outline-none transition-all duration-300 before:absolute before:-inset-y-2 before:-inset-x-1 focus-visible:bg-foreground',
+                            'border-0 relative h-1 duration-300 before:absolute before:-inset-y-2 before:-inset-x-1 focus-visible:bg-foreground',
                             isActive
                               ? 'w-10 bg-foreground'
                               : isDone

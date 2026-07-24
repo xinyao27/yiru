@@ -1,19 +1,21 @@
+import type { RuntimeGitLocalBranches } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { useRouter } from 'expo-router'
 import { useCallback, type MutableRefObject } from 'react'
 
-import type { RuntimeGitLocalBranches } from '../../../desktop/src/shared/runtime-types'
-import { triggerError, triggerSuccess } from '../platform/haptics'
 import type { RpcClient } from '../transport/rpc-client'
 import type {
   MobileCommitFailureRecovery,
   RecordMobileCommitFailure
 } from './mobile-commit-failure-recovery'
 import type { MobileGitStatusResult } from './mobile-git-status'
+import type { MobileSourceControlWorkflowResult } from './mobile-source-control-operation'
 import type { LoadStatusOptions } from './mobile-source-control-screen-state'
 import { useMobileCommitMessageGeneration } from './use-mobile-commit-message-generation'
 import { useMobileCreatePrRunner } from './use-mobile-create-pr-runner'
 import { useMobileSourceControlActionSheetRunners } from './use-mobile-source-control-action-sheet-runners'
 import { useMobileSourceControlCommitRunners } from './use-mobile-source-control-commit-runners'
+import { useMobileSourceControlHistoryOpener } from './use-mobile-source-control-history-opener'
+import { useMobileSourceControlWorkflowRunner } from './use-mobile-source-control-workflow-runner'
 
 type GitStep = { method: string; params?: Record<string, unknown> }
 type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
@@ -32,7 +34,7 @@ type Params = {
   router: ReturnType<typeof useRouter>
   sendGitRequest: SendGitRequest
   sendCommitRequest: (message: string) => Promise<unknown>
-  runGitSyncSteps: () => Promise<void>
+  runGitSyncSteps: () => Promise<MobileSourceControlWorkflowResult>
   loadStatus: (options?: LoadStatusOptions) => Promise<boolean>
   mountedRef: MutableRefObject<boolean>
   busyActionRef: MutableRefObject<string | null>
@@ -48,11 +50,9 @@ type Params = {
   recordCommitFailure: RecordMobileCommitFailure
   // Hub override: switch to the History segment instead of pushing the route.
   onOpenHistory?: () => void
+  onHostedReviewRefresh?: () => void
 }
 
-// All git workflow + action-sheet runners for the source-control panel. Split
-// out of the state hook to keep each file under the line limit; behavior is
-// unchanged from the original inline definitions.
 export function useMobileSourceControlRunners(params: Params) {
   const {
     client,
@@ -82,59 +82,21 @@ export function useMobileSourceControlRunners(params: Params) {
     setCreatedPrUrl,
     setCreatedPrWarning,
     recordCommitFailure,
-    onOpenHistory
+    onOpenHistory,
+    onHostedReviewRefresh
   } = params
 
-  const runGitWorkflow = useCallback(
-    async (
-      actionId: string,
-      runner: () => Promise<void>,
-      options?: { clearCommitMessage?: boolean }
-    ) => {
-      if (busyActionRef.current) {
-        return false
-      }
-      busyActionRef.current = actionId
-      setBusyAction(actionId)
-      setActionError(null)
-      recordCommitFailure(null)
-      try {
-        await runner()
-        if (!mountedRef.current) {
-          return false
-        }
-        if (options?.clearCommitMessage) {
-          setCommitMessage('')
-        }
-        triggerSuccess()
-        await loadStatus({ preserveReadyOnFailure: true, force: true })
-        return true
-      } catch (err) {
-        if (!mountedRef.current) {
-          return false
-        }
-        triggerError()
-        setActionError(err instanceof Error ? err.message : 'Source control action failed')
-        return false
-      } finally {
-        if (busyActionRef.current === actionId) {
-          busyActionRef.current = null
-          if (mountedRef.current) {
-            setBusyAction(null)
-          }
-        }
-      }
-    },
-    [
-      busyActionRef,
-      loadStatus,
-      mountedRef,
-      recordCommitFailure,
-      setActionError,
-      setBusyAction,
-      setCommitMessage
-    ]
-  )
+  const runGitWorkflow = useMobileSourceControlWorkflowRunner({
+    sendGitRequest,
+    loadStatus,
+    mountedRef,
+    busyActionRef,
+    setBusyAction,
+    setActionError,
+    setCommitMessage,
+    recordCommitFailure,
+    onHostedReviewRefresh
+  })
 
   const runGitAction = useCallback(
     async (actionId: string, method: string, p: Record<string, unknown>) => {
@@ -192,7 +154,8 @@ export function useMobileSourceControlRunners(params: Params) {
     setBusyAction,
     setActionError,
     setCommitMessage,
-    recordCommitFailure
+    recordCommitFailure,
+    onHostedReviewRefresh
   })
 
   const { generateCommitMessage, cancelGenerateCommitMessage } = useMobileCommitMessageGeneration({
@@ -250,28 +213,14 @@ export function useMobileSourceControlRunners(params: Params) {
     setShowBranchPicker
   ])
 
-  const openHistory = useCallback(() => {
-    setShowActionSheet(false)
-    // Inside the hub, History is a segment — switch to it rather than pushing a
-    // route. Fallback pushes the hub with `tab=history` (not the redirecting
-    // /history route) so deep links land in one hop.
-    if (onOpenHistory) {
-      onOpenHistory()
-      return
-    }
-    if (hostId && worktreeId) {
-      router.push({
-        pathname: '/h/[hostId]/source-control/[worktreeId]',
-        params: {
-          hostId,
-          worktreeId,
-          tab: 'history'
-        }
-      } as Parameters<typeof router.push>[0])
-    }
-  }, [hostId, onOpenHistory, router, setShowActionSheet, worktreeId])
+  const openHistory = useMobileSourceControlHistoryOpener({
+    hostId,
+    worktreeId,
+    router,
+    setShowActionSheet,
+    onOpenHistory
+  })
 
-  // Switch to a local branch, then reload status.
   const checkoutBranch = useCallback(
     async (branch: string) => {
       setShowBranchPicker(false)
@@ -293,7 +242,6 @@ export function useMobileSourceControlRunners(params: Params) {
     setShowActionSheet
   })
 
-  // Abort an in-progress merge/rebase from the conflict banner.
   const abortConflictOperation = useCallback(
     async (operation: string) => {
       const method =

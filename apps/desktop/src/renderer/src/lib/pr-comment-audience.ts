@@ -1,10 +1,11 @@
-import { translate } from '@/i18n/i18n'
-import { createLocalizedCatalog } from '@/i18n/localized-catalog'
-
 import {
   createBotAuthorOverrideSet,
   normalizePRCommentAuthorLogin
-} from '../../../shared/pr-bot-author-overrides'
+} from '@yiru/workbench-model/review'
+
+import { translate } from '@/i18n/i18n'
+import { createLocalizedCatalog } from '@/i18n/localized-catalog'
+
 import type { PRComment } from '../../../shared/types'
 
 export { createBotAuthorOverrideSet, normalizePRCommentAuthorLogin }

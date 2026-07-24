@@ -4,7 +4,8 @@ import { lstat, open, readdir } from 'node:fs/promises'
 import { join as pathJoin } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 
-import type { SshTarget } from '../../shared/ssh-types'
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import { shellEscape, wrapRemoteCommandForPosixShell } from './ssh-connection-utils'
 import { isWindowsRemoteHost, joinRemotePath, type RemoteHostPlatform } from './ssh-remote-platform'
 import { powerShellCommand } from './ssh-remote-powershell'

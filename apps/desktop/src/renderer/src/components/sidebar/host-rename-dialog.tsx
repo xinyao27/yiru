@@ -1,3 +1,4 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,6 @@ import { Label } from '@/components/ui/label'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import { applyHostRename, getHostDisplayLabelOverride } from './host-rename-remove'
 
 type HostRenameDialogProps = {

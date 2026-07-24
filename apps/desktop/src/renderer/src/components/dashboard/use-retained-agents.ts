@@ -1,3 +1,4 @@
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useEffect, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -5,10 +6,6 @@ import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import { useAppStore } from '@/store'
 import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../../shared/agent-status-types'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { Repo, TerminalTab, Worktree } from '../../../../shared/types'
 import type { DashboardAgentRow } from './use-dashboard-data'

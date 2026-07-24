@@ -1,6 +1,7 @@
 import { Check } from '@phosphor-icons/react'
 import type { JSX, KeyboardEvent } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -90,9 +91,11 @@ export function FeatureWallRail(props: {
           const showSubSteps = subSteps !== null && isSelected
           return (
             <div key={workflow.id}>
-              <button
+              <Button
+                variant="ghost"
+                size="default"
                 ref={(node) => {
-                  railRefs.current[index] = node
+                  railRefs.current[index] = node instanceof HTMLButtonElement ? node : null
                 }}
                 type="button"
                 role="tab"
@@ -103,14 +106,13 @@ export function FeatureWallRail(props: {
                 onClick={() => onSelect(workflow)}
                 onKeyDown={(event) => onRailKeyDown(event, index)}
                 className={cn(
-                  'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm outline-none transition-colors',
-                  'hover:bg-accent',
+                  'flex w-full justify-start gap-2.5 border-0 px-2.5 text-left font-normal whitespace-normal transition-colors',
                   isSelected && 'bg-accent text-accent-foreground'
                 )}
               >
                 <span
                   className={cn(
-                    'flex size-7 shrink-0 items-center justify-center rounded-sm border font-mono text-xs',
+                    'flex size-7 shrink-0 items-center justify-center border font-mono text-xs',
                     isDone
                       ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
                       : 'border-border bg-card text-muted-foreground'
@@ -127,7 +129,7 @@ export function FeatureWallRail(props: {
                   {isDone ? <Check className="size-3.5" aria-hidden /> : index + 1}
                 </span>
                 <span className="min-w-0 truncate leading-tight font-medium">{workflow.title}</span>
-              </button>
+              </Button>
               {subSteps ? (
                 <div
                   aria-hidden={!showSubSteps}
@@ -143,21 +145,22 @@ export function FeatureWallRail(props: {
                         const isStepDone = subSteps.done[step.id] === true
                         const label = SUB_STEP_LABELS[stepIdx] ?? String(stepIdx + 1)
                         return (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             key={step.id}
                             type="button"
                             tabIndex={showSubSteps ? 0 : -1}
                             onClick={() => subSteps.onSelect(step.id)}
                             aria-current={isStepActive ? 'step' : undefined}
                             className={cn(
-                              'flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[13px] outline-none transition-colors',
-                              'hover:bg-accent',
+                              'border-0 justify-start whitespace-normal font-normal gap-2 flex w-full px-2.5 py-1.5 text-left text-[13px] transition-colors',
                               isStepActive && 'bg-accent text-accent-foreground'
                             )}
                           >
                             <span
                               className={cn(
-                                'flex size-5 shrink-0 items-center justify-center rounded-sm border font-mono text-[10px]',
+                                'flex size-5 shrink-0 items-center justify-center border font-mono text-[10px]',
                                 isStepDone
                                   ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
                                   : 'border-border bg-card text-muted-foreground'
@@ -181,7 +184,7 @@ export function FeatureWallRail(props: {
                             >
                               {step.name}
                             </span>
-                          </button>
+                          </Button>
                         )
                       })}
                     </div>

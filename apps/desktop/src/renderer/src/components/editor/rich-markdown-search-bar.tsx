@@ -102,7 +102,11 @@ export function RichMarkdownSearchBar({
         aria-expanded={isReplaceMode}
         className="rich-markdown-search-toggle"
       >
-        {isReplaceMode ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        {isReplaceMode ? (
+          <ChevronDown weight="regular" size={14} />
+        ) : (
+          <ChevronRight weight="regular" size={14} />
+        )}
       </Button>
       <div className="rich-markdown-search-rows">
         <div className="rich-markdown-search-row">
@@ -200,7 +204,7 @@ export function RichMarkdownSearchBar({
             )}
             className="rich-markdown-search-button"
           >
-            <ChevronUp size={14} />
+            <ChevronUp weight="regular" size={14} />
           </Button>
           <Button
             type="button"
@@ -219,7 +223,7 @@ export function RichMarkdownSearchBar({
             )}
             className="rich-markdown-search-button"
           >
-            <ChevronDown size={14} />
+            <ChevronDown weight="regular" size={14} />
           </Button>
           <div className="rich-markdown-search-divider" />
           <Button
@@ -238,7 +242,7 @@ export function RichMarkdownSearchBar({
             )}
             className="rich-markdown-search-button"
           >
-            <X size={14} />
+            <X weight="regular" size={14} />
           </Button>
         </div>
         {isReplaceMode ? (
@@ -311,7 +315,7 @@ export function RichMarkdownSearchBar({
               )}
               className="rich-markdown-search-button"
             >
-              <ReplaceAll size={14} />
+              <ReplaceAll weight="regular" size={14} />
             </Button>
             {replaceDisabled ? (
               <span id={readOnlyExplanationId} className="sr-only" role="status">

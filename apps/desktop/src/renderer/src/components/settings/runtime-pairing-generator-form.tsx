@@ -139,7 +139,11 @@ export function RuntimePairingGeneratorForm({
                     )}
                     className="text-muted-foreground"
                   >
-                    {refreshingNetworkInterfaces ? <LoadingIndicator /> : <RefreshCw />}
+                    {refreshingNetworkInterfaces ? (
+                      <LoadingIndicator />
+                    ) : (
+                      <RefreshCw weight="regular" />
+                    )}
                   </Button>
                 }
               />
@@ -167,7 +171,7 @@ export function RuntimePairingGeneratorForm({
             onClick={onGenerate}
             disabled={isGeneratingPairing}
           >
-            {isGeneratingPairing ? <LoadingIndicator /> : <RefreshCw />}
+            {isGeneratingPairing ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
             {translate(
               'auto.components.settings.RuntimePairingUrlGenerator.8de0f84fff',
               'Generate Access Link'

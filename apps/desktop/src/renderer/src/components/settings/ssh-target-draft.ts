@@ -4,7 +4,7 @@ import {
   MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MIN_SSH_RELAY_GRACE_PERIOD_SECONDS,
   type SshTarget
-} from '../../../../shared/ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
 
 export type EditingTarget = {
   label: string

@@ -145,7 +145,7 @@ export function WorktreeCardReviewDetailSection({
                 )}
                 onClick={dismissAndOpenReview}
               >
-                <MonitorUp className="size-3" />
+                <MonitorUp weight="regular" className="size-3" />
               </MetadataActionIcon>
             )}
             {review.url && (
@@ -157,7 +157,7 @@ export function WorktreeCardReviewDetailSection({
                 )}
                 href={review.url}
               >
-                <ExternalLink className="size-3" />
+                <ExternalLink weight="regular" className="size-3" />
               </MetadataActionIcon>
             )}
           </>

@@ -87,7 +87,8 @@
     "minimizeNotice": {
       "body": "Yiruはシステムトレイで実行中です"
     },
-    "activityWaiting": "Yiru - アクティビティ待機中"
+    "activityWaiting": "Yiru - アクティビティ待機中",
+    "activityWaitingSuffix": "アクティビティ待機中"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -189,6 +190,20 @@
         }
       }
     },
+    "runtime": {
+      "remoteServerUpdateErrors": {
+        "manualRequired": "このサーバーはサービスマネージャーから手動で更新する必要があります。",
+        "notAvailable": "サーバーで更新を利用できなくなりました。もう一度確認してください。",
+        "notDownloaded": "サーバー更新のダウンロードが完了していません。",
+        "legacyServer": "リモート更新を有効にするには、このサーバーを一度手動で更新してください。",
+        "updaterTimeout": "サーバー更新プログラムの待機がタイムアウトしました。",
+        "requestedVersionUnavailable": "要求した Yiru バージョンがサーバー更新プログラムから提供されませんでした。",
+        "updateUnavailable": "サーバーから利用可能な更新が報告されませんでした。",
+        "downloadIncomplete": "サーバー更新のダウンロードが完了しませんでした。",
+        "reconnectTimeout": "更新後のサーバーが再接続しませんでした。",
+        "runtimeChanged": "更新中にペアリング済みサーバーが変更されました。再試行前にもう一度確認してください。"
+      }
+    },
     "store": {
       "slices": {
         "browser": {
@@ -275,16 +290,6 @@
         "yiru": {
           "profiles": {
             "612f7f6861": "プロファイルの作成に失敗しました",
-            "319d7cf39b": "クラウド プロファイルが作成されました",
-            "d6e764e7db": "このプロファイルを再接続してください",
-            "f0c9e11a6d": "クラウド プロファイルの作成に失敗しました",
-            "8b8fa73174": "Yiru Cloud のサインインが構成されていません",
-            "33290e88ed": "プロファイルの接続に失敗しました",
-            "9fcb07a796": "プロファイルが接続されました",
-            "2f6c78a039": "プロファイル認証の更新に失敗しました",
-            "a37b5e6d37": "プロファイルからサインアウトしました",
-            "83600521e7": "サインアウトに失敗しました",
-            "76deec8f58": "組織の切り替えに失敗しました",
             "7d4bc516ee": "プロファイルの切り替えに失敗しました",
             "f518e89aa5": "プロジェクトはそのプロファイルに既に存在します",
             "f03ae7f27b": "プロジェクトの転送に失敗しました"
@@ -727,7 +732,7 @@
         "9263e75f49": "Codex は前のアカウントを使用しています",
         "a4c8e1b2f7": "Codex はまだ {{value0}} としてサインインしています",
         "d3e8a1f4b2": "アカウントを切り替えました",
-        "e9b2c7d1a5": "{{value0}} を使用するにはこのセッションを再起動してください。現在のアカウントで作業を続けるには折りたたんでください。",
+        "e9b2c7d1a5": "{{value0}} を使用するにはこのセッションを再起動してください。",
         "f1a6c8e3b4": "折りたたむ"
       },
       "FirstLaunchBanner": {
@@ -2010,6 +2015,16 @@
             "fd1d3b3a1d": "アップデートのダウンロード、{{value0}} パーセント。クリックして展開します。",
             "9d13213a56": "Yiru v{{value0}} をインストールする準備ができました"
           },
+          "RemoteServerUpdateStatusSegment": {
+            "updating": "更新中 {{value0}}/{{value1}}",
+            "updatingTooltip": "リモート Yiru サーバーを更新しています",
+            "failed": "{{value0}} 件のサーバー更新に失敗しました",
+            "failedTooltip": "リモート Yiru サーバー更新を開いて確認・再試行",
+            "updated": "{{value0}} 台のサーバーを更新しました",
+            "updatedTooltip": "リモート Yiru サーバーの更新が完了しました",
+            "failedOne": "1 件のサーバー更新に失敗しました",
+            "updatedOne": "1 台のサーバーを更新しました"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "更新されました",
             "9be86c46a0": "無料可能",
@@ -2167,6 +2182,19 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "UsageRosterPanel": {
+            "title": "Usage",
+            "openDetails": "Open usage details",
+            "notSignedIn": "not signed in",
+            "allAgents": "visible agents",
+            "usageDetails": "Usage details & history",
+            "loadingUsage": "Loading usage…",
+            "usageUnavailable": "Usage unavailable",
+            "noUsageData": "No usage data",
+            "detailed": "Detailed",
+            "compact": "Compact",
+            "footerDetailAria": "Usage footer detail"
           },
           "LanguageServerStatusSegment": {
             "aria": "Language server: {{value0}}",
@@ -3186,7 +3214,17 @@
           "0bed8727db": "移動または削除された可能性があります。ワークスペースを更新するか、Yiru からワークスペースを削除します。",
           "3921d3d9a5": "ワークスペースフォルダーが見つかりませんでした。",
           "f387af445b": "ワークスペース パスは有効なローカル パスではありません。",
-          "3ec372b664": "ファイルマネージャー"
+          "3ec372b664": "ファイルマネージャー",
+          "localOnly": "Local only",
+          "checkingHost": "Checking host…",
+          "hostUnsupported": "Host unsupported",
+          "remoteSsh": "Remote SSH",
+          "remoteRuntimeUnsupported": "Opening this path in a local app is not available on this host.",
+          "sshTargetUnavailable": "SSH host configuration is no longer available.",
+          "sshAliasRequired": "VS Code needs an SSH config alias for this host.",
+          "sshAliasRequiredDetail": "Add a Host alias for {{host}}:{{port}}, reconnect the workspace, then try again.",
+          "remoteEditorUnsupported": "This app cannot open SSH workspaces. Choose VS Code instead.",
+          "remoteLaunchFailed": "Could not open the path in VS Code."
         },
         "WorktreeTitleInlineRename": {
           "2f42ae024f": "未読:",
@@ -4024,7 +4062,8 @@
           "remoteScopeAccounts": "{{value0}} が管理するアカウントを表示しています。アカウントの追加や再認証はそのサーバー上で行ってください。",
           "remoteScopeAuthContext": "各アカウントは {{value0}} 上に独自のサインインコンテキストを保持します。",
           "remoteEmptyClaudeAccounts": "{{value0}} に管理対象の Claude アカウントはありません。システム既定の Claude ログインを使用します。アカウントの追加はそのサーバー上で行ってください。",
-          "remoteEmptyCodexAccounts": "{{value0}} に管理対象の Codex アカウントはありません。システム既定の Codex ログインを使用します。アカウントの追加はそのサーバー上で行ってください。"
+          "remoteEmptyCodexAccounts": "{{value0}} に管理対象の Codex アカウントはありません。システム既定の Codex ログインを使用します。アカウントの追加はそのサーバー上で行ってください。",
+          "codexSystemDefaultCustomProvider": "カスタムプロバイダー — 使用量は追跡されません。"
         },
         "AdvancedPane": {
           "40b29e0bf3": "再起動",
@@ -4558,6 +4597,53 @@
           "7ddd66fede": "エディターのワードラップ",
           "9b18de6eea": "水平スクロールを使わずに、ファイルエディターで長い行を折り返します。"
         },
+        "EditorFontFamilySetting": {
+          "title": "エディタのフォントファミリー",
+          "description": "ファイルエディタと差分ビューで使用するフォントです。空欄にするとターミナルのフォントを使用します。",
+          "placeholder": "ターミナルと同じフォント"
+        },
+        "GeneralRemoteServerUpdates": {
+          "serverCount": "{{value0}} 台のペアリング済みサーバー",
+          "availableCount": "{{value0}} 台を更新可能",
+          "currentCount": "{{value0}} 台は最新",
+          "manualCount": "{{value0}} 台は手動更新",
+          "offlineCount": "{{value0}} 台はオフライン",
+          "title": "リモート Yiru サーバー",
+          "description": "このクライアントからペアリング済み Yiru サーバーを確認・更新します。",
+          "updating": "サーバーを更新中…",
+          "reviewServers": "サーバー更新を確認",
+          "serverCountOne": "1 台のペアリング済みサーバー"
+        },
+        "RemoteServerUpdateDialog": {
+          "versionUnavailable": "バージョンを取得できません",
+          "restartingHelp": "新しいバージョンの代替サーバーが再接続するのを待っています。",
+          "retry": "再試行",
+          "update": "このサーバーを更新",
+          "title": "リモート Yiru サーバーを更新",
+          "description": "ペアリング済みサーバーを確認し、この Yiru クライアントから対応インストールを更新します。",
+          "restartWarning": "更新するとサーバーが再起動します。{{value0}} 個のライブタブと {{value1}} 個のターミナルペインが一時的に切断される場合があります。",
+          "checking": "ペアリング済みサーバーを確認中…",
+          "empty": "ペアリング済みのリモート Yiru サーバーはありません。",
+          "updateAll": "{{value0}} 台すべてを更新",
+          "noUpdates": "すべてのサーバーは最新です。",
+          "downloadProgress": "{{value0}} のダウンロード進行状況"
+        },
+        "RemoteServerUpdateStatus": {
+          "checking": "確認中…",
+          "available": "更新あり",
+          "current": "最新",
+          "manual": "手動更新",
+          "offline": "オフライン",
+          "queued": "待機中",
+          "checkingUpdate": "更新を確認中…",
+          "downloading": "ダウンロード中…",
+          "restarting": "再起動中…",
+          "updated": "更新済み",
+          "failed": "更新失敗",
+          "serviceManagerHelp": "このサーバーを起動するサービスマネージャーから Yiru を更新してください。",
+          "unpackedHelp": "開発ビルドはソースチェックアウトから更新する必要があります。",
+          "legacyHelp": "リモート更新を有効にするには、このサーバーを一度手動で更新してください。"
+        },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "ローカルホスト、127.0.0.1、*.internal",
           "33ee3ca3af": "オプション。ホストはカンマ、セミコロン、または改行で区切ります。",
@@ -4689,6 +4775,11 @@
         },
         "YamlThemeImportButton": {
           "label": "YAML からインポート"
+        },
+        "BranchPrefixFeedback": {
+          "6c40c0908f": "プレフィックスにスペースや ~ ^ : ? * [ \\ など Git で予約された文字は使用できません",
+          "64d70b156a": "ブランチ名は {{example}} になります",
+          "808f9a726e": "プレフィックスは適用されません"
         },
         "GitPane": {
           "e02ea23a32": "Yiru の帰属",
@@ -5092,9 +5183,9 @@
           "2801d4ce22": "参照 ID をコピー",
           "d8be621237": "先に確認用ファイルを開いてください。",
           "61676df223": "診断情報を送信しました。サポートにこの参照 ID を共有してください: {{value0}}。",
-          "fd7b3891af": "確認用ファイル（{{value0}}）を開きました。このファイルをサポートに送信するか、破棄できます。",
-          "62340d4439": "確認用ファイル（{{value0}}）の準備ができました。開いて送信内容を確認してから、サポートに送信するか選択してください。",
-          "19ec5e29b3": "最近のアプリ操作とエラーを、送信前に確認できる編集済みファイルにまとめます。送信を選ぶまで何もアップロードされません。"
+          "fd7b3891af": "ローカルの確認用ファイル（{{value0}}）を開きました。送信すると、制限付きの編集済み抜粋とメタデータがサポートに共有されます。完全なファイルはこのデバイスに残ります。",
+          "62340d4439": "ローカルの確認用ファイル（{{value0}}）の準備ができました。開いて元データを確認できます。送信されるのは制限付きの編集済み抜粋とメタデータだけで、完全なファイルはこのデバイスに残ります。",
+          "19ec5e29b3": "最近のアプリ操作とエラーをローカルの編集済みファイルにまとめます。送信時に PostHog へアップロードされるのは、制限付きの編集済み抜粋とメタデータだけです。完全なファイルはこのデバイスに残ります。"
         },
         "PrivacyDiagnosticsSection": {
           "af2fc82cde": "アプリ診断情報をサポートに送信",
@@ -5282,6 +5373,7 @@
           "removeSetup": "削除",
           "hostSetupBlockedVersion": "Yiru server version is incompatible",
           "hostSetupMissingCapability": "Update Yiru on this host to set up projects",
+          "hostSetupConnectionRequired": "プロジェクトをインポートまたはクローンする前に、このホストに接続してください",
           "setupProjectOnHost": "別のホストで設定",
           "setupProjectOnHostHelp": "Choose a host, then import an existing checkout, clone the repository there, or track a setup that will be provisioned later.",
           "setupExistingFolder": "既存フォルダをインポート",
@@ -5448,7 +5540,12 @@
           "advertiseThisApp": "このアプリをサーバーとして公開",
           "advertiseThisAppHelp": "ブラウザー、モバイルクライアント、または別の Yiru クライアントがこの実行中のアプリへ接続できるように、アクセスリンクを作成します。",
           "runtimeReachable": "{{value0}} に到達できます。",
-          "hostModelCapabilityProjectSourceContext": "project source context"
+          "hostModelCapabilityProjectSourceContext": "project source context",
+          "reviewServerUpdates": "サーバー更新を確認",
+          "updatingServers": "サーバーを更新中…",
+          "yiruVersion": "Yiru v{{value0}}",
+          "versionUnavailable": "Yiru バージョンを取得できません",
+          "updateServer": "更新"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "{{value0}}をコピー"
@@ -6374,7 +6471,11 @@
             "d6c0a9e2f4": "grok",
             "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "使用率",
-            "usagePercentageDisplayDescription": "プロバイダーの制限を使用済みまたは残りの割合で表示するかを選択します。"
+            "usagePercentageDisplayDescription": "プロバイダーの制限を使用済みまたは残りの割合で表示するかを選択します。",
+            "showPinnedWorktreesInGroups": {
+              "title": "ピン留めしたワークツリーを元のリストにも表示",
+              "description": "ピン留めしたワークツリーを Pinned に残したまま、すべて、プロジェクト、ステータス、レビューにも表示します。"
+            }
           }
         },
         "auto": {
@@ -6818,6 +6919,8 @@
             "4497e2e2bb": "Show browser spelling underlines and suggestions while editing rich Markdown.",
             "e61157e926": "エディターのワードラップ",
             "005be5c699": "水平スクロールを使わずに、ファイルエディターで長い行を折り返します。",
+            "editorFontFamily": "エディタのフォントファミリー",
+            "editorFontFamilyDesc": "ファイルエディタと差分ビューで使用するフォントです。空欄にするとターミナルのフォントを使用します。",
             "languageServer": "Language Server (Experimental)",
             "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
@@ -7943,14 +8046,7 @@
           "behindBaseRefToastDescription": "インラインの設定リンクとフッターアクション付きの永続プロンプト。",
           "notificationPlayground": "Notification playground",
           "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
-          "devOnly": "Dev only",
-          "yiruCloud": "Yiru Cloud",
-          "yiruCloudDescription": "第一方クラウドサインインの開発者限定プレビュー。本番環境では非表示。開発環境では、YIRU_CLOUD_API_URLとYIRU_CLOUD_CLIENT_IDを設定するとサイドバーのアカウント切替にも表示されます。",
-          "yiruCloudStatus": "ステータス",
-          "yiruCloudSignOut": "サインアウト",
-          "yiruCloudConnect": "プロファイルを接続",
-          "yiruCloudRefresh": "ステータスを更新",
-          "yiruCloudNotConfigured": "YIRU_CLOUD_API_URLとYIRU_CLOUD_CLIENT_IDを設定して、この開発ビルドでYiru Cloudのサインインをプレビューします。"
+          "devOnly": "Dev only"
         },
         "EphemeralVmRecipeRow": {
           "useInWorkspace": "ワークスペースでの使用"
@@ -8563,6 +8659,7 @@
             "createPrIntentPublishing": "ブランチを公開中…",
             "createPrIntentForcePushing": "lease 付きで強制プッシュ中…",
             "createPrIntentPushing": "commits をプッシュ中…",
+            "createPrIntentFastForwarding": "ブランチを更新中…",
             "createPrIntentRemoteFailed": "リモートブランチを更新できませんでした。Create PR を再試行してください。",
             "createPrIntentGeneratingDetails": "レビューの詳細を生成中…",
             "createPrIntentBranchChangedDuringDetails": "レビューの詳細を生成中にブランチが変更されました。Create PR を再試行してください。",
@@ -9532,7 +9629,8 @@
           },
           "ProjectCombobox": {
             "search": "Search projects...",
-            "empty": "No projects match your search."
+            "empty": "No projects match your search.",
+            "addProject": "新しいプロジェクトを追加"
           }
         }
       },
@@ -11797,20 +11895,6 @@
       "yiru": {
         "profiles": {
           "switcher": {
-            "cloud": {
-              "unavailable": "Yiruへのサインインは利用できません"
-            },
-            "reconnect": "プロファイルを再接続",
-            "connect": "プロファイルを接続",
-            "organization": "組織",
-            "create": {
-              "profile": {
-                "for": {
-                  "org": "組織用のプロフィールを作成"
-                }
-              }
-            },
-            "signout": "サインアウト",
             "16e3681072": "新しいローカル プロファイル",
             "e3b91a3d90": "プロジェクトとワークツリーを分けるための空のプロファイルを作成します。",
             "f322e1f4d6": "プロファイル名",
@@ -11818,18 +11902,7 @@
             "b4f9d1125d": "ローカル",
             "4815f7d163": "プロファイルを切り替え",
             "d00d853e2a": "プロファイルを管理",
-            "c106c674fe": "新しいローカル プロファイル",
-            "account": "アカウント",
-            "org": {
-              "members": "組織メンバー"
-            },
-            "signInWaiting": "サインインを待機中…",
-            "signInAgain": "もう一度サインイン",
-            "signIn": "Yiruにサインイン",
-            "accountTitle": "Yiruアカウント",
-            "accountSignedIn": "サインイン済み",
-            "accountSignInRequired": "サインインが必要です",
-            "accountSignedOut": "サインアウト済み"
+            "c106c674fe": "新しいローカル プロファイル"
           },
           "management": {
             "04e7bd2a23": "転送",
@@ -11870,14 +11943,6 @@
               }
             }
           },
-          "signout": {
-            "confirm": {
-              "title": "Yiruからログアウトしますか？",
-              "description": "このデバイスでYiruからログアウトします。ローカルのプロジェクトとワークツリーには影響しません。",
-              "cancel": "キャンセル",
-              "action": "ログアウト"
-            }
-          },
           "switch": {
             "confirm": {
               "target": "選択されたプロフィール",
@@ -11894,61 +11959,6 @@
               "agentPlural": "{{count}}個のアクティブなエージェント",
               "browserSingular": "{{count}}個のブラウザワークスペース",
               "browserPlural": "{{count}}個のブラウザワークスペース"
-            }
-          },
-          "org": {
-            "members": {
-              "role": {
-                "label": "役割",
-                "owner": "オーナー",
-                "admin": "管理者",
-                "member": "メンバー"
-              },
-              "not": {
-                "signed": {
-                  "in": "まだYiruにサインインしていません。"
-                }
-              },
-              "remove": {
-                "confirm": "削除",
-                "cancel": "キャンセル",
-                "label": "チームメンバーを削除"
-              },
-              "title": "組織メンバー",
-              "load": {
-                "error": "組織メンバーを読み込めませんでした。"
-              },
-              "retry": "再試行",
-              "pending": {
-                "title": "保留中の招待",
-                "revoke": "取り消し"
-              },
-              "invite": {
-                "title": "招待",
-                "placeholder": "teammate@example.com",
-                "role": "招待役割",
-                "submit": "送信"
-              },
-              "error": {
-                "forbidden": "この役割では実行できません。",
-                "conflict": "既にメンバーまたは招待済みです。",
-                "remove": {
-                  "self": "自分自身を削除することはできません。"
-                },
-                "own": {
-                  "role": "自分の役割を変更することはできません。"
-                },
-                "not": {
-                  "found": "そのチームメンバーはこの組織にいません。"
-                },
-                "reconnect": "メンバーを管理するには、プロフィールを再接続してください。",
-                "unconfigured": "このビルドでは組織管理が利用できません。",
-                "failed": "問題が発生しました。もう一度お試しください。"
-              },
-              "subtitle": {
-                "named": "{{orgName}}でYiruに協力できる人々。",
-                "default": "組織でYiruに協力できる人々。"
-              }
             }
           }
         }
@@ -12001,6 +12011,32 @@
     }
   },
   "components": {
+    "agentSessionContinuation": {
+      "continueInNewSession": "新しいセッションで続ける…",
+      "dialogTitle": "新しいセッションで続ける",
+      "dialogDescription": "この時点から新しいエージェントセッションを開始します。元のセッションは変更されません。",
+      "untitledSession": "現在のセッション",
+      "originalAgent": "元のエージェント: {{agent}}",
+      "agent": "エージェント",
+      "selectAgent": "エージェントを選択",
+      "detectingAgents": "このワークスペースホストでエージェントを検出中…",
+      "detectionFailed": "このワークスペースホストでエージェントを検出できませんでした。",
+      "noAgents": "このワークスペースホストで有効なエージェントが検出されませんでした。",
+      "context": "コンテキスト",
+      "modeFocused": "要点を引き継ぐ（推奨）",
+      "modeFocusedDescription": "最新の状態と現在のワークスペースを使い、必要な場合だけ過去の詳細を読みます。",
+      "modeFull": "セッション全文",
+      "modeFullDescription": "続行前に、保存されたセッション全体を新しいエージェントに読ませます。時間がかかり、多くのコンテキスト、プラン使用量、またはAPIクレジットを消費する可能性があります。",
+      "startsIn": "開始場所:",
+      "startSession": "新しいセッションを開始",
+      "starting": "開始中…",
+      "noContext": "新しいセッションで続けるためのコンテキストがありません。",
+      "agentDisabled": "エージェント設定で {{agent}} が無効になっています。",
+      "agentUnavailable": "このワークスペースホストで {{agent}} が検出されませんでした。",
+      "sent": "セッションコンテキストを新しい {{agent}} セッションに送信しました。",
+      "deliveryFailed": "新しい {{agent}} セッションは開始しましたが、コンテキストを送信できませんでした。",
+      "launchFailed": "新しい {{agent}} セッションを開始できませんでした。"
+    },
     "native-chat": {
       "composer": {
         "imageUnsupported": "この agent では画像の貼り付けはサポートされていません。",
@@ -12013,6 +12049,21 @@
         "startDictation": "ディクテーションを開始する",
         "stopDictation": "ディクテーションを停止する",
         "noSkills": "一致するスキルがありません",
+        "noCommandsOrSkills": "一致するコマンドやスキルがありません",
+        "noCommands": "一致するコマンドがありません",
+        "commands": "コマンド",
+        "skills": "スキル",
+        "loadingSkills": "スキルを読み込み中…",
+        "skillsLoaded": "スキルを読み込みました",
+        "skillsUnavailableHost": "このホストではスキルが利用できません",
+        "skillsLoadFailed": "このホストからスキルを読み込めませんでした",
+        "retrySkills": "再試行",
+        "skillCommandCollision": "スキル名でもあります - エージェントが判断します",
+        "skillMultipleSources": "{{sourceCount}} 個のソース - エージェントが解決します",
+        "skillScopeProject": "プロジェクト",
+        "skillScopePersonal": "個人",
+        "skillScopeBuiltIn": "組み込み",
+        "skillScopePlugin": "プラグイン",
         "localAttachmentUnsupported": "ローカル添付ファイルはリモート セッションでは使用できません。",
         "removeAttachment": "添付ファイルを削除する",
         "pastedImageLabel": "貼り付けた画像",

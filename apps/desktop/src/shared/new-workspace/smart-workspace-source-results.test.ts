@@ -1,6 +1,5 @@
+import { getVisibleBranchResults } from '@yiru/workbench-model/workspace'
 import { describe, expect, it } from 'vite-plus/test'
-
-import { getVisibleBranchResults } from './smart-workspace-source-results'
 
 const branch = (refName: string, localBranchName = refName) => ({ refName, localBranchName })
 

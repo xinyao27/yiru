@@ -1,4 +1,5 @@
-import { BRACKETED_PASTE_END, BRACKETED_PASTE_START } from './terminal-bracketed-paste'
+import { BRACKETED_PASTE_END, BRACKETED_PASTE_START } from '@/lib/terminal-bracketed-paste'
+
 import { iterateTerminalPastePlanChunks } from './terminal-paste-chunks'
 import { createRedactedPasteExecutionDiagnostic } from './terminal-paste-diagnostics'
 import {

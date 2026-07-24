@@ -219,7 +219,7 @@ export function AutomationDetail({
       </div>
 
       {automation.executionTargetType === 'ssh' ? (
-        <div className="border-border/50 bg-muted/50 text-muted-foreground rounded-md border p-3 text-sm">
+        <div className="border-border/50 bg-muted/50 text-muted-foreground border p-3 text-sm">
           {translate(
             'auto.components.automations.AutomationDetail.dbef8dc110',
             'This SSH automation runs only while Yiru can reach the SSH host. If reconnect needs interactive credentials or the host is unavailable, the run is recorded as skipped.'
@@ -228,12 +228,12 @@ export function AutomationDetail({
       ) : null}
 
       {runNowAvailability?.canRunNow === false ? (
-        <div className="border-border/50 bg-muted/40 text-muted-foreground rounded-md border p-3 text-sm">
+        <div className="border-border/50 bg-muted/40 text-muted-foreground border p-3 text-sm">
           {runNowAvailability.message}
         </div>
       ) : null}
 
-      <div className="border-border/50 bg-muted/30 grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-5 rounded-md border px-4 py-3">
+      <div className="border-border/50 bg-muted/30 grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-5 border px-4 py-3">
         <DetailMetric
           label={translate('auto.components.automations.AutomationDetail.18763ded26', 'Schedule')}
           value={formatAutomationSchedule(automation.rrule)}
@@ -288,7 +288,7 @@ export function AutomationDetail({
         </div>
       </div>
 
-      <div className="border-border/50 bg-muted/20 grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-5 rounded-md border px-4 py-3">
+      <div className="border-border/50 bg-muted/20 grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-5 border px-4 py-3">
         <DetailMetric
           label={translate('auto.components.automations.AutomationDetail.a7c312430d', 'Last run')}
           value={formatAutomationDateTimeWithRelative(automation.lastRunAt, now)}
@@ -310,7 +310,7 @@ export function AutomationDetail({
         />
       </div>
 
-      <div className="border-border/50 bg-muted/20 rounded-md border">
+      <div className="border-border/50 bg-muted/20 border">
         <div className="border-border/50 border-b px-3 py-2 text-sm font-medium">
           {translate('auto.components.automations.AutomationDetail.007c8ad874', 'Prompt')}
         </div>

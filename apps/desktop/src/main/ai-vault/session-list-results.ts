@@ -2,8 +2,9 @@ import type {
   AiVaultListResult,
   AiVaultScanIssue,
   AiVaultSession
-} from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { sessionSortTime } from './session-scanner-accumulator'
 
 export function aiVaultScanIssueResult(args: {

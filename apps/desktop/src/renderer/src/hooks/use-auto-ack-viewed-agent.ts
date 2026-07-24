@@ -1,9 +1,9 @@
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useEffect } from 'react'
 
 import { useAppStore } from '@/store'
 import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot } from '../../../shared/types'
 

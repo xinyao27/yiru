@@ -6,18 +6,19 @@ import {
   ArrowClockwise as RotateCw,
   X
 } from '@phosphor-icons/react'
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 /* eslint-disable max-lines -- Why: the update card owns the full updater lifecycle in one
    renderer surface. Keeping the state machine and its presentation variants together avoids
    scattering tightly coupled update behavior across multiple files. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Button as UiButton } from '@/components/ui/button'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { ChangelogData } from '../../../shared/types'
-import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { useAppStore } from '../store'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
@@ -83,12 +84,14 @@ function CompactCardContent({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm">{text}</p>
         {action && (
-          <button
-            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mt-0.5 text-xs underline outline-none"
+          <UiButton
+            variant="ghost"
+            size="xs"
+            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mt-0.5 h-auto border-0 p-0 underline"
             onClick={() => void window.api.shell.openUrl(action.url)}
           >
             {action.label}
-          </button>
+          </UiButton>
         )}
       </div>
       {onClose && (
@@ -99,7 +102,7 @@ function CompactCardContent({
           onClick={onClose}
           aria-label={translate('auto.components.UpdateCard.a726967bd3', 'Dismiss')}
         >
-          <X className="size-3.5" />
+          <X weight="regular" className="size-3.5" />
         </Button>
       )}
     </div>
@@ -618,7 +621,7 @@ export function UpdateCard() {
               onClick={markReassuranceSeen}
               aria-label={translate('auto.components.UpdateCard.7274ef6e59', 'Dismiss tip')}
             >
-              <X className="size-3.5" />
+              <X weight="regular" className="size-3.5" />
             </Button>
           </div>
         </Card>
@@ -681,23 +684,20 @@ function RichCardContent({
           onClick={onClose}
           aria-label={translate('auto.components.UpdateCard.318d3b4bc7', 'Dismiss update')}
         >
-          <X className="size-3.5" />
+          <X weight="regular" className="size-3.5" />
         </Button>
       </div>
 
       {showMedia && (
-        <div className="relative overflow-hidden rounded-md">
+        <div className="relative overflow-hidden">
           {!mediaLoaded && (
             // Shimmer placeholder while image loads
-            <div
-              className="bg-muted/50 w-full animate-pulse rounded-md"
-              style={{ aspectRatio: '16/9' }}
-            />
+            <div className="bg-muted/50 w-full animate-pulse" style={{ aspectRatio: '16/9' }} />
           )}
           <img
             src={release.mediaUrl}
             alt=""
-            className={cn('w-full rounded-md', mediaLoaded ? '' : 'absolute inset-0')}
+            className={cn('w-full', mediaLoaded ? '' : 'absolute inset-0')}
             style={!mediaLoaded ? { visibility: 'hidden' } : undefined}
             onError={onMediaError}
             onLoad={onMediaLoad}
@@ -710,23 +710,27 @@ function RichCardContent({
         {releasesBehind !== null && releasesBehind > 1 && (
           <>
             {' '}
-            <button
-              className="text-muted-foreground/70 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline text-xs underline outline-none"
+            <UiButton
+              variant="ghost"
+              size="xs"
+              className="text-muted-foreground/70 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline h-auto border-0 p-0 underline"
               onClick={() => void window.api.shell.openUrl(release.releaseNotesUrl)}
             >
               +{releasesBehind - 1}{' '}
               {translate('auto.components.UpdateCard.ccd8b0a793', 'more since your last update')}
-            </button>
+            </UiButton>
           </>
         )}
       </p>
 
-      <button
-        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-start text-xs underline outline-none"
+      <UiButton
+        variant="ghost"
+        size="xs"
+        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline"
         onClick={() => void window.api.shell.openUrl(release.releaseNotesUrl)}
       >
         {translate('auto.components.UpdateCard.aad383aecc', 'Read the full release notes')}
-      </button>
+      </UiButton>
 
       <Button variant="default" size="sm" onClick={onUpdate} className="w-full cursor-pointer">
         {translate('auto.components.UpdateCard.ec8fe71cfc', 'Update')}
@@ -761,7 +765,7 @@ function SimpleCardContent({
           onClick={onClose}
           aria-label={translate('auto.components.UpdateCard.318d3b4bc7', 'Dismiss update')}
         >
-          <X className="size-3.5" />
+          <X weight="regular" className="size-3.5" />
         </Button>
       </div>
 
@@ -775,12 +779,14 @@ function SimpleCardContent({
         {translate('auto.components.UpdateCard.fdd4a364fa', "Sessions won't be interrupted.")}
       </p>
 
-      <button
-        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-start text-xs underline underline-offset-2 outline-none"
+      <UiButton
+        variant="ghost"
+        size="xs"
         onClick={() => void window.api.shell.openUrl(releaseUrl)}
+        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline underline-offset-2"
       >
         {translate('auto.components.UpdateCard.44324ef542', 'Release notes')}
-      </button>
+      </UiButton>
 
       <Button
         variant="default"
@@ -846,17 +852,14 @@ function DownloadingContent({
       </div>
 
       {showMedia && release?.mediaUrl && (
-        <div className="relative overflow-hidden rounded-md">
+        <div className="relative overflow-hidden">
           {!mediaLoaded && (
-            <div
-              className="bg-muted/50 w-full animate-pulse rounded-md"
-              style={{ aspectRatio: '16/9' }}
-            />
+            <div className="bg-muted/50 w-full animate-pulse" style={{ aspectRatio: '16/9' }} />
           )}
           <img
             src={release.mediaUrl}
             alt=""
-            className={cn('w-full rounded-md', mediaLoaded ? '' : 'absolute inset-0')}
+            className={cn('w-full', mediaLoaded ? '' : 'absolute inset-0')}
             style={!mediaLoaded ? { visibility: 'hidden' } : undefined}
             onError={onMediaError}
             onLoad={onMediaLoad}
@@ -872,8 +875,10 @@ function DownloadingContent({
             })}
       </p>
 
-      <button
-        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-start text-xs underline outline-none"
+      <UiButton
+        variant="ghost"
+        size="xs"
+        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline"
         onClick={() =>
           void window.api.shell.openUrl(
             release ? release.releaseNotesUrl : releaseUrlForVersion(version)
@@ -883,7 +888,7 @@ function DownloadingContent({
         {release
           ? translate('auto.components.UpdateCard.aad383aecc', 'Read the full release notes')
           : translate('auto.components.UpdateCard.44324ef542', 'Release notes')}
-      </button>
+      </UiButton>
 
       <div className="mt-1 flex flex-col gap-2">
         <Progress value={percent} className="h-1.5" />
@@ -924,7 +929,7 @@ function ErrorCardContent({
   return (
     <div className="flex flex-col gap-3 p-4">
       <div className="flex items-start gap-3">
-        <div className="border-border bg-muted/50 text-muted-foreground mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border">
+        <div className="border-border bg-muted/50 text-muted-foreground mt-0.5 flex size-9 shrink-0 items-center justify-center border">
           <Icon className="size-4" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
@@ -943,7 +948,7 @@ function ErrorCardContent({
       </div>
 
       {isCompatibility ? (
-        <div className="border-border/70 bg-muted/30 rounded-md border px-3 py-2">
+        <div className="border-border/70 bg-muted/30 border px-3 py-2">
           <p className="text-muted-foreground text-xs leading-relaxed">
             {translate(
               'auto.components.UpdateCard.90559b14e3',
@@ -953,7 +958,7 @@ function ErrorCardContent({
         </div>
       ) : null}
 
-      <div className="bg-muted/40 rounded-md px-3 py-2">
+      <div className="bg-muted/40 px-3 py-2">
         <p className="text-muted-foreground mb-1 text-[11px] font-medium uppercase">
           {translate('auto.components.UpdateCard.3553a8672f', 'Last error')}
         </p>
@@ -974,7 +979,7 @@ function ErrorCardContent({
             {primaryAction.isPending ? (
               <LoadingIndicator className="size-3.5" />
             ) : isCompatibility ? (
-              <RotateCw className="size-3.5" />
+              <RotateCw weight="regular" className="size-3.5" />
             ) : null}
             {primaryAction.isPending && primaryAction.pendingLabel
               ? primaryAction.pendingLabel

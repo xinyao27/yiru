@@ -1,9 +1,9 @@
 import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 import React from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import { formatKeybindingList, type KeybindingDefinition } from '../../../../shared/keybindings'
 import { cn } from '../../lib/class-names'
 import { Button } from '../ui/button'
@@ -165,7 +165,7 @@ export function ShortcutFilterRail({
               onClick={() => onQueryChange('')}
               className="text-muted-foreground absolute top-1/2 right-1 -translate-y-1/2"
             >
-              <X className="size-3" />
+              <X weight="regular" className="size-3" />
             </Button>
           ) : null}
         </div>
@@ -183,20 +183,20 @@ export function ShortcutFilterRail({
         </p>
         <div className="grid gap-1">
           {filters.map((option) => (
-            <button
+            <Button
+              variant="quiet"
+              size="sm"
               key={option.id}
               type="button"
               onClick={() => onFilterChange(option.id)}
               className={cn(
-                'flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none transition-colors',
-                filter === option.id
-                  ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                'border-0 whitespace-normal gap-2 flex justify-between px-2 py-1.5 text-left text-xs ',
+                filter === option.id ? 'bg-accent text-accent-foreground' : ' /60 '
               )}
             >
               <span className="truncate">{option.label}</span>
               <span className="text-[11px] tabular-nums opacity-80">{option.count}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </nav>

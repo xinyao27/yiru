@@ -13,6 +13,11 @@ const SNAPSHOT_REGISTRY_SCHEMA_VERSION = 1
 const RELEASE_MAPPING_SCHEMA_VERSION = 1
 const SCRIPT_DIR = import.meta.dirname
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..')
+// Why: tagged paths are repository-root relative even when pnpm runs this script from apps/desktop.
+const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+  cwd: REPO_ROOT,
+  encoding: 'utf8'
+}).trim()
 const SKILLS_ROOT = path.join(REPO_ROOT, 'skills')
 const OUTPUT_ROOT = path.join(REPO_ROOT, 'resources', 'skills')
 const CURRENT_MANIFEST_PATH = path.join(OUTPUT_ROOT, 'current-manifest.json')
@@ -168,7 +173,7 @@ async function collectPackageFiles(packageRoot) {
 }
 
 function collectGitSkillTreeEntries(treeSha) {
-  const output = execFileSync('git', ['ls-tree', '-r', '-z', treeSha])
+  const output = execFileSync('git', ['ls-tree', '-r', '-z', treeSha], { cwd: GIT_ROOT })
     .toString('utf8')
     .split('\0')
     .filter(Boolean)
@@ -200,6 +205,7 @@ function readGitBlobs(objectShas) {
   // Why: released history spans hundreds of tags. Batch mode avoids a Git
   // subprocess per historical file while remaining available on Git 2.25.
   const output = execFileSync('git', ['cat-file', '--batch'], {
+    cwd: GIT_ROOT,
     input: `${uniqueShas.join('\n')}\n`,
     maxBuffer: 64 * 1024 * 1024
   })
@@ -290,7 +296,7 @@ function releaseTags() {
   return execFileSync(
     'git',
     ['for-each-ref', '--sort=creatordate', '--format=%(refname:short)', 'refs/tags/v*'],
-    { encoding: 'utf8' }
+    { cwd: GIT_ROOT, encoding: 'utf8' }
   )
     .split('\n')
     .filter((tag) => /^v\d+\.\d+\.\d+(?:[-.][0-9A-Za-z.-]+)?$/.test(tag))
@@ -304,6 +310,7 @@ function skillsTreeShasAtRefs(refs) {
     RELEASED_SKILLS_PATHS.map((skillsPath) => `${ref}:${skillsPath}`)
   )
   const output = execFileSync('git', ['cat-file', '--batch-check=%(objectname) %(objecttype)'], {
+    cwd: GIT_ROOT,
     input: `${requests.join('\n')}\n`,
     encoding: 'utf8'
   })

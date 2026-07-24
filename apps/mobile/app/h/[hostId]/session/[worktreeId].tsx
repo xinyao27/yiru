@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
+import type { DiffComment } from '@yiru/workbench-model/workspace'
 import * as Clipboard from 'expo-clipboard'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
@@ -31,7 +34,7 @@ import {
   Folder,
   File,
   FileText,
-  GitBranch,
+  GitMerge,
   Globe,
   Keyboard as KeyboardIcon,
   Chat as MessageSquare,
@@ -47,8 +50,6 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '../../../../../desktop/src/shared/protocol-version'
-import type { DiffComment } from '../../../../../desktop/src/shared/types'
 import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/agent-history-capability'
 import { normalizeBrowserUrl } from '../../../../src/browser/browser-url'
 import { MobileBrowserPane } from '../../../../src/browser/mobile-browser-pane'
@@ -65,6 +66,7 @@ import { MobileDictationSetupSheet } from '../../../../src/components/mobile-dic
 import { MobileHtmlPreview } from '../../../../src/components/mobile-html-preview'
 import { MobileRichMarkdownEditor } from '../../../../src/components/mobile-rich-markdown-editor'
 import { MobileSyntaxSegments } from '../../../../src/components/mobile-syntax-segments'
+import { PhosphorIconContextProvider } from '../../../../src/components/phosphor-icon-context-provider'
 import { StatusDot } from '../../../../src/components/status-dot'
 import { TextInputModal } from '../../../../src/components/text-input-modal'
 import {
@@ -81,8 +83,10 @@ import {
   triggerError,
   triggerEdgeBump
 } from '../../../../src/platform/haptics'
+import { isFloatingWorkspaceWorktreeId } from '../../../../src/session/floating-workspace'
 import { resolveMarkdownFloatingActionsBottom } from '../../../../src/session/markdown-floating-actions-layout'
 import { MobileBrowserTabActionSheet } from '../../../../src/session/mobile-browser-tab-action-sheet'
+import { sendMobileBufferedTerminalInput } from '../../../../src/session/mobile-buffered-terminal-send'
 import {
   addMobileDiffComment,
   formatDiffComments,
@@ -102,11 +106,8 @@ import {
 } from '../../../../src/session/mobile-markdown-disk-fallback'
 import { MobileNativeChatOverlay } from '../../../../src/session/mobile-native-chat-overlay'
 import * as nativeChatTerminalStream from '../../../../src/session/mobile-native-chat-terminal-stream'
-import {
-  buildMobileNewTabAgentOptions,
-  type MobileNewTabAgentOption,
-  type MobileNewTabAgentSettings
-} from '../../../../src/session/mobile-new-tab-agent-options'
+import { loadMobileNewTabAgentOptions } from '../../../../src/session/mobile-new-tab-agent-loader'
+import type { MobileNewTabAgentOption } from '../../../../src/session/mobile-new-tab-agent-options'
 import {
   createMobileSessionCreateWarningState,
   dismissMobileSessionCreateWarningState,
@@ -149,6 +150,7 @@ import {
   resolveMobileTerminalTabAgentId
 } from '../../../../src/session/mobile-terminal-tab-agent'
 import { activateOpenedSourceControlDiffTab } from '../../../../src/session/opened-mobile-session-tab'
+import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
 import { SessionDockColumn } from '../../../../src/session/session-dock-column'
 import {
   type ActivePanel,
@@ -184,6 +186,12 @@ import {
   type MobileTerminalLinkOpenMode
 } from '../../../../src/storage/preferences'
 import { sendMobileTerminalQueryReply } from '../../../../src/terminal/mobile-terminal-query-reply'
+import {
+  buildMobileQuickCommandLaunch,
+  shouldShowMobileQuickCommandsAction,
+  supportsMobileQuickCommands,
+  type MobileQuickCommandLaunch
+} from '../../../../src/terminal/quick-commands'
 import {
   getDefaultTerminalAccessoryBuiltInIds,
   getVisibleTerminalAccessoryKeys,
@@ -258,6 +266,7 @@ import type {
   TerminalGestureInputQueue
 } from './mobile-session-route-types'
 import { styles } from './mobile-session-styles'
+import { QuickCommandsTabButton } from './quick-commands-tab-button'
 
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 
@@ -816,7 +825,9 @@ export default function SessionScreen() {
     created?: string
     warning?: string
   }>()
-  const isFolderWorkspaceRoute = worktreeId.startsWith('folder:')
+  const isFolderWorkspaceRoute = worktreeId.startsWith('folder:') // Synthetic ids have no repo scope.
+  // Why: the floating sentinel has no repo/worktree, so repo-backed surfaces must stay hidden.
+  const isFloatingWorkspaceRoute = isFloatingWorkspaceWorktreeId(worktreeId)
   const router = useRouter()
   const insets = useSafeAreaInsets()
   // Why: shared client per host owned by RpcClientProvider. See
@@ -836,11 +847,13 @@ export default function SessionScreen() {
   const { isWideLayout } = useResponsiveLayout()
   const [activePanel, setActivePanel] = useState<ActivePanel>(null)
   const [sessionContentRowWidth, setSessionContentRowWidth] = useState(0)
-  const canDockPanel = canDockSessionPanel({
-    isWideLayout,
-    availableWidth: sessionContentRowWidth,
-    dockWidth: HOST_DOCK_MIN_WIDTH
-  })
+  const canDockPanel =
+    !isFloatingWorkspaceRoute &&
+    canDockSessionPanel({
+      isWideLayout,
+      availableWidth: sessionContentRowWidth,
+      dockWidth: HOST_DOCK_MIN_WIDTH
+    })
   // Why: docking needs enough measured row width. If rotation/split-screen makes
   // the session row too narrow while a panel is docked, clear activePanel so the
   // icon state and live mounted panel do not survive into overlay/push mode.
@@ -854,7 +867,8 @@ export default function SessionScreen() {
   // hub are loaded inside MobileSourceControlPanel — skip the unused identity RPCs.
   const { isGithubRepo: prIsGithubRepo, repoLoaded: prRepoContextLoaded } =
     useMobilePrBranchContext({
-      client,
+      // Why: a null client parks the hook without probing a repo the sentinel cannot own.
+      client: isFloatingWorkspaceRoute ? null : client,
       connState,
       worktreeId,
       includeBranchIdentity: false
@@ -928,6 +942,7 @@ export default function SessionScreen() {
     createMobileSessionCreateWarningState(initialCreateWarning)
   )
   const [showCreateTabDrawer, setShowCreateTabDrawer] = useState(false)
+  const [showQuickCommands, setShowQuickCommands] = useState(false)
   const [createTabAgentLoadState, setCreateTabAgentLoadState] =
     useState<MobileNewTabAgentLoadState>('idle')
   const [createTabAgentOptions, setCreateTabAgentOptions] = useState<MobileNewTabAgentOption[]>([])
@@ -1100,6 +1115,7 @@ export default function SessionScreen() {
   const [agentSessionHistorySupported, setAgentSessionHistorySupported] = useState<boolean | null>(
     null
   )
+  const [quickCommandsSupported, setQuickCommandsSupported] = useState<boolean | null>(null)
   // Why: stable callbacks (handleFileTap) read the live value via this ref, since
   // the capability probe resolves after the callbacks are created.
   const browserScreencastSupportedRef = useRef(browserScreencastSupported)
@@ -2074,7 +2090,7 @@ export default function SessionScreen() {
   )
 
   const loadDiffComments = useCallback(async (): Promise<void> => {
-    if (!client || connState !== 'connected' || !worktreeId) {
+    if (!client || connState !== 'connected' || !worktreeId || isFloatingWorkspaceRoute) {
       setDiffComments([])
       return
     }
@@ -2088,7 +2104,7 @@ export default function SessionScreen() {
       worktree?: { diffComments?: unknown }
     }
     setDiffComments(normalizeMobileDiffComments(result.worktree?.diffComments, worktreeId))
-  }, [client, connState, worktreeId])
+  }, [client, connState, isFloatingWorkspaceRoute, worktreeId])
 
   const persistDiffComments = useCallback(
     async (comments: readonly DiffComment[]): Promise<void> => {
@@ -2452,9 +2468,14 @@ export default function SessionScreen() {
     if (!client || connState !== 'connected') {
       setBrowserScreencastSupported(null)
       setAgentSessionHistorySupported(null)
+      setQuickCommandsSupported(null)
+      setShowQuickCommands(false)
       hostQueryReplyInputSupportedRef.current = false
       return
     }
+    // Why: a client swap may stay connected while moving to an older host.
+    setQuickCommandsSupported(null)
+    setShowQuickCommands(false)
     let stale = false
     void client
       .sendRequest('status.get')
@@ -2469,6 +2490,7 @@ export default function SessionScreen() {
         setAgentSessionHistorySupported(
           status.capabilities?.includes(MOBILE_AI_VAULT_CAPABILITY) === true
         )
+        setQuickCommandsSupported(supportsMobileQuickCommands(status.capabilities))
         // Why: hosts without this capability strip inputKind from terminal.send,
         // so a forwarded xterm reply would become floor-stealing shell input.
         hostQueryReplyInputSupportedRef.current =
@@ -2478,6 +2500,8 @@ export default function SessionScreen() {
         if (!stale) {
           setBrowserScreencastSupported(false)
           setAgentSessionHistorySupported(false)
+          setQuickCommandsSupported(false)
+          setShowQuickCommands(false)
           hostQueryReplyInputSupportedRef.current = false
         }
       })
@@ -2775,7 +2799,7 @@ export default function SessionScreen() {
           showToast('Open Yiru on the host to wake sleeping agents.', 3000)
         }
       }
-      if (client && created !== '1') {
+      if (client && created !== '1' && !isFloatingWorkspaceRoute) {
         // Why: mobile needs host-owned tabs hydrated for this route, but should
         // not pull other paired clients, especially desktop, into this worktree.
         void client
@@ -2799,7 +2823,7 @@ export default function SessionScreen() {
       }
       addTimer(() => void fetchTerminals({ allowEmptyLoaded: false }), 750)
       addTimer(() => void fetchTerminals({ allowEmptyLoaded: true }), 1500)
-      if (client && created === '1') {
+      if (client && created === '1' && !isFloatingWorkspaceRoute) {
         addTimer(() => {
           if (activeHandleRef.current) {
             return
@@ -2827,7 +2851,16 @@ export default function SessionScreen() {
         clearTimeout(t)
       }
     }
-  }, [client, connState, created, fetchSessionTabs, fetchTerminals, showToast, worktreeId])
+  }, [
+    client,
+    connState,
+    created,
+    fetchSessionTabs,
+    fetchTerminals,
+    isFloatingWorkspaceRoute,
+    showToast,
+    worktreeId
+  ])
 
   useEffect(() => {
     if (!client || connState !== 'connected') {
@@ -3147,19 +3180,16 @@ export default function SessionScreen() {
     setInput('')
 
     try {
-      await client.sendRequest('terminal.send', {
+      const outcome = await sendMobileBufferedTerminalInput({
+        client,
         terminal: activeHandle,
         text,
-        enter: true,
-        // Why: presence-lock take-floor signal. Identifies this phone as
-        // the active mobile actor so the runtime can resolve multi-mobile
-        // contention (most-recent-actor's viewport wins).
-        ...(deviceTokenRef.current
-          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-          : {})
+        deviceToken: deviceTokenRef.current
       })
-    } catch {
-      setInput(text)
+      // Why: restoring an unknown, possibly delivered command invites duplicate retries.
+      if (outcome === 'rejected' && activeHandleRef.current === activeHandle) {
+        setInput(text)
+      }
     } finally {
       sendingRef.current = false
     }
@@ -3419,13 +3449,14 @@ export default function SessionScreen() {
       if (handle !== activeHandleRef.current) {
         return
       }
-      if (terminalLinkOpenMode === 'phone-browser') {
+      // Why: host browser creation resolves a real worktree; floating URL taps stay phone-local.
+      if (terminalLinkOpenMode === 'phone-browser' || isFloatingWorkspaceRoute) {
         void Linking.openURL(url).catch(() => {})
         return
       }
       void handleCreateBrowserRef.current?.(url)
     },
-    [terminalLinkOpenMode]
+    [isFloatingWorkspaceRoute, terminalLinkOpenMode]
   )
 
   const toggleLiveInput = useCallback(() => {
@@ -3783,7 +3814,8 @@ export default function SessionScreen() {
   }, [])
 
   const getActiveWorktreeConnectionId = useCallback(async (): Promise<string | null> => {
-    if (!client) {
+    // Why: floating terminals always belong to the paired runtime, never an SSH repo target.
+    if (!client || isFloatingWorkspaceRoute) {
       return null
     }
     const repoId = getRepoIdFromMobileWorktreeId(worktreeId)
@@ -3794,7 +3826,7 @@ export default function SessionScreen() {
     const repos =
       ((repoResponse as RpcSuccess).result as { repos?: RuntimeRepoSummary[] }).repos ?? []
     return repos.find((repo) => repo.id === repoId)?.connectionId?.trim() || null
-  }, [client, worktreeId])
+  }, [client, isFloatingWorkspaceRoute, worktreeId])
 
   const refreshCanPaste = useCallback(() => {
     void Promise.all([
@@ -3891,43 +3923,11 @@ export default function SessionScreen() {
     setCreateTabAgentOptions([])
 
     void (async () => {
-      const [settingsResponse, repoResponse] = await Promise.all([
-        client.sendRequest('settings.get'),
-        client.sendRequest('repo.list')
-      ])
-      if (!settingsResponse.ok) {
-        throw new Error((settingsResponse as RpcFailure).error.message)
-      }
-      const settings = (
-        (settingsResponse as RpcSuccess).result as {
-          settings?: MobileNewTabAgentSettings
-        }
-      ).settings
-      if (!repoResponse.ok) {
-        throw new Error((repoResponse as RpcFailure).error.message)
-      }
-      const repoId = getRepoIdFromMobileWorktreeId(worktreeId)
-      if (!repoId) {
-        throw new Error('worktree_repo_missing')
-      }
-      const repos =
-        ((repoResponse as RpcSuccess).result as { repos?: RuntimeRepoSummary[] }).repos ?? []
-      const repo = repos.find((candidate) => candidate.id === repoId)
-      if (!repo) {
-        throw new Error('worktree_repo_not_found')
-      }
-      const connectionId = repo.connectionId?.trim() || null
-      const detectedResponse = connectionId
-        ? await client.sendRequest('preflight.detectRemoteAgents', { connectionId })
-        : await client.sendRequest('preflight.detectAgents')
-      if (!detectedResponse.ok) {
-        throw new Error((detectedResponse as RpcFailure).error.message)
-      }
+      const options = await loadMobileNewTabAgentOptions({ client, worktreeId })
       if (stale) {
         return
       }
-      const detectedAgentIds = (detectedResponse as RpcSuccess).result as unknown[]
-      setCreateTabAgentOptions(buildMobileNewTabAgentOptions(settings, detectedAgentIds))
+      setCreateTabAgentOptions(options)
       setCreateTabAgentLoadState('loaded')
     })().catch(() => {
       if (!stale) {
@@ -3943,7 +3943,10 @@ export default function SessionScreen() {
 
   async function handleCreateTerminal(
     agent?: MobileNewTabAgentOption['agent'],
-    options?: { initialPrompt?: string; onPromptSent?: () => void }
+    options?: MobileQuickCommandLaunch['options'] & {
+      onPromptSent?: () => void
+      errorToast?: string
+    }
   ) {
     if (!client || creatingTerminalRef.current) {
       return
@@ -3966,6 +3969,11 @@ export default function SessionScreen() {
         worktree: `id:${worktreeId}`,
         afterTabId: activeSessionTabId ?? undefined,
         clientMutationId,
+        ...(options?.startupCommand ? { command: options.startupCommand } : {}),
+        ...(options?.startupCommandDelivery
+          ? { startupCommandDelivery: options.startupCommandDelivery }
+          : {}),
+        ...(options?.agentPrompt ? { agentPrompt: options.agentPrompt } : {}),
         ...(agent ? { agent } : {})
       })
       if (response.ok) {
@@ -4023,7 +4031,7 @@ export default function SessionScreen() {
               .sendRequest('terminal.send', {
                 terminal: createdHandle,
                 text: options.initialPrompt,
-                enter: true,
+                enter: options.enter !== false,
                 ...(deviceTokenRef.current
                   ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
                   : {})
@@ -4041,13 +4049,20 @@ export default function SessionScreen() {
                   throw new Error('Terminal input is locked by another client.')
                 }
                 triggerSuccess()
-                showToast('Notes sent')
+                showToast(options.successToast ?? 'Notes sent')
                 options.onPromptSent?.()
               })
               .catch((err) => {
                 triggerError()
-                showToast(err instanceof Error ? err.message : "Couldn't send notes", 1800)
+                showToast(
+                  options.errorToast ??
+                    (err instanceof Error ? err.message : "Couldn't send notes"),
+                  1800
+                )
               })
+          } else if (options?.successToast) {
+            triggerSuccess()
+            showToast(options.successToast)
           }
         } else {
           // Why: a prior pending handle must not outlive a create that returned
@@ -4058,14 +4073,50 @@ export default function SessionScreen() {
         }
         scheduleDelayedAction(() => void fetchSessionTabs(), 500)
       } else {
-        setCreateError('Failed to create terminal')
+        const message = options?.errorToast ?? 'Failed to create terminal'
+        setCreateError(message)
+        if (options?.errorToast) {
+          triggerError()
+          showToast(message, 1800)
+        }
       }
     } catch {
-      setCreateError('Failed to create terminal')
+      const message = options?.errorToast ?? 'Failed to create terminal'
+      setCreateError(message)
+      if (options?.errorToast) {
+        triggerError()
+        showToast(message, 1800)
+      }
     } finally {
       creatingTerminalRef.current = false
       setCreating(false)
     }
+  }
+
+  // Why: Quick Commands mirror desktop by spawning a fresh terminal; runnable
+  // content uses host-built shell-ready delivery while insert-only text stays a draft.
+  function launchQuickCommand(command: TerminalQuickCommand): boolean {
+    if (
+      !client ||
+      connState !== 'connected' ||
+      creatingTerminalRef.current ||
+      creatingBrowser ||
+      creatingMarkdown
+    ) {
+      return false
+    }
+    const launch = buildMobileQuickCommandLaunch(command)
+    if (!launch) {
+      triggerError()
+      showToast('Edit this quick command before running it', 1800)
+      return false
+    }
+    const label = command.label.trim() || 'Quick command'
+    void handleCreateTerminal(launch.agent, {
+      ...launch.options,
+      errorToast: `Couldn't run ${label}`
+    })
+    return true
   }
 
   async function handleCreateMarkdownNote() {
@@ -4560,9 +4611,9 @@ export default function SessionScreen() {
     router.push(`/h/${hostId}/agent-history/${encodeURIComponent(worktreeId)}?${params.toString()}`)
   }
   const showAgentSessionHistoryAction =
-    !isFolderWorkspaceRoute && agentSessionHistorySupported === true
+    !isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && agentSessionHistorySupported === true
   const showChecksAction = shouldShowSessionHeaderChecksAction({
-    isFolderWorkspaceRoute,
+    isFolderWorkspaceRoute: isFolderWorkspaceRoute || isFloatingWorkspaceRoute,
     repoContextLoaded: prRepoContextLoaded,
     hostedChecksSupported: prIsGithubRepo
   })
@@ -4603,17 +4654,19 @@ export default function SessionScreen() {
                 </Text>
               </Pressable>
             </View>
-            <MobileSessionHeaderIconButton
-              active={activePanel === 'files'}
-              accessibilityLabel="Open file explorer"
-              icon={Folder}
-              onPress={() => handlePanelTap('files')}
-            />
-            {!isFolderWorkspaceRoute && (
+            {!isFloatingWorkspaceRoute ? (
+              <MobileSessionHeaderIconButton
+                active={activePanel === 'files'}
+                accessibilityLabel="Open file explorer"
+                icon={Folder}
+                onPress={() => handlePanelTap('files')}
+              />
+            ) : null}
+            {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
               <MobileSessionHeaderIconButton
                 active={activePanel === 'sourceControl'}
                 accessibilityLabel="Open source control"
-                icon={GitBranch}
+                icon={GitMerge}
                 onPress={() => handlePanelTap('sourceControl')}
               />
             )}
@@ -4671,31 +4724,34 @@ export default function SessionScreen() {
                     }}
                     delayLongPress={400}
                   >
-                    <View className={styles.tabLabelRow}>
-                      {t.type === 'browser' && (
-                        <Globe size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'markdown' && (
-                        <FileText size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'file' && (
-                        <File size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'terminal' &&
-                        (() => {
-                          const agentId = resolveMobileTerminalTabAgentId(t)
-                          return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
-                        })()}
-                      <Text
-                        className={cn(
-                          styles.tabText,
-                          t.id === activeSessionTabId && styles.tabTextActive
+                    <PhosphorIconContextProvider weight="regular">
+                      <View className={styles.tabLabelRow}>
+                        {/* Why: tab identity glyphs match desktop's compact regular-weight chrome. */}
+                        {t.type === 'browser' && (
+                          <Globe size={13} colorClassName="accent-muted-foreground" />
                         )}
-                        numberOfLines={1}
-                      >
-                        {getMobileSessionTabTitle(t)}
-                      </Text>
-                    </View>
+                        {t.type === 'markdown' && (
+                          <FileText size={13} colorClassName="accent-muted-foreground" />
+                        )}
+                        {t.type === 'file' && (
+                          <File size={13} colorClassName="accent-muted-foreground" />
+                        )}
+                        {t.type === 'terminal' &&
+                          (() => {
+                            const agentId = resolveMobileTerminalTabAgentId(t)
+                            return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
+                          })()}
+                        <Text
+                          className={cn(
+                            styles.tabText,
+                            t.id === activeSessionTabId && styles.tabTextActive
+                          )}
+                          numberOfLines={1}
+                        >
+                          {getMobileSessionTabTitle(t)}
+                        </Text>
+                      </View>
+                    </PhosphorIconContextProvider>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -4717,8 +4773,22 @@ export default function SessionScreen() {
                 }}
                 accessibilityLabel="New tab"
               >
-                <Plus size={16} colorClassName="accent-muted-foreground" />
+                <Plus size={16} weight="regular" colorClassName="accent-muted-foreground" />
               </Pressable>
+              {shouldShowMobileQuickCommandsAction(quickCommandsSupported) ? (
+                <QuickCommandsTabButton
+                  disabled={
+                    creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
+                  }
+                  onPress={() => {
+                    if (quickCommandsSupported === true) {
+                      setShowQuickCommands(true)
+                      return
+                    }
+                    showToast('Checking desktop capabilities - try again in a moment', 1600)
+                  }}
+                />
+              ) : null}
             </View>
           )}
         </SafeAreaView>
@@ -5262,6 +5332,19 @@ export default function SessionScreen() {
         onClose={() => setShowHeaderMoreActions(false)}
       />
 
+      <QuickCommandsSheet
+        visible={showQuickCommands && quickCommandsSupported === true}
+        onClose={() => setShowQuickCommands(false)}
+        client={client}
+        repoId={
+          isFolderWorkspaceRoute || isFloatingWorkspaceRoute
+            ? null
+            : getRepoIdFromMobileWorktreeId(worktreeId) || null
+        }
+        repoName={worktreeName || null}
+        onLaunch={launchQuickCommand}
+      />
+
       <ActionSheetModal
         visible={showCreateTabDrawer}
         title="New Tab"
@@ -5275,26 +5358,31 @@ export default function SessionScreen() {
               void handleCreateTerminal()
             }
           },
-          {
-            label: 'Browser',
-            icon: Globe,
-            onPress: () => {
-              setShowCreateTabDrawer(false)
-              if (browserScreencastSupported !== true) {
-                showToast('Desktop update required for mobile browser streaming', 1600)
-                return
-              }
-              setShowCreateBrowserModal(true)
-            }
-          },
-          {
-            label: 'Markdown Note',
-            icon: FileText,
-            onPress: () => {
-              setShowCreateTabDrawer(false)
-              void handleCreateMarkdownNote()
-            }
-          }
+          // Why: these RPCs resolve a real worktree; the floating sentinel is terminal-only.
+          ...(isFloatingWorkspaceRoute
+            ? []
+            : [
+                {
+                  label: 'Browser',
+                  icon: Globe,
+                  onPress: () => {
+                    setShowCreateTabDrawer(false)
+                    if (browserScreencastSupported !== true) {
+                      showToast('Desktop update required for mobile browser streaming', 1600)
+                      return
+                    }
+                    setShowCreateBrowserModal(true)
+                  }
+                },
+                {
+                  label: 'Markdown Note',
+                  icon: FileText,
+                  onPress: () => {
+                    setShowCreateTabDrawer(false)
+                    void handleCreateMarkdownNote()
+                  }
+                }
+              ])
         ]}
         onClose={() => setShowCreateTabDrawer(false)}
       />

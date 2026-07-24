@@ -1,4 +1,4 @@
-import type { PRComment } from '../../../../desktop/src/shared/types'
+import type { PRComment } from '@yiru/workbench-model/review'
 
 // Thread grouping for the PR comment timeline, ported from the desktop helper
 // (src/renderer/src/lib/pr-comment-groups.ts) minus the DOM class constants.

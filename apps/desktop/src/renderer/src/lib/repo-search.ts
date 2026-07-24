@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { Repo } from '../../../shared/types'
 
 // Display-name matches must always outrank path-only matches. This offset is

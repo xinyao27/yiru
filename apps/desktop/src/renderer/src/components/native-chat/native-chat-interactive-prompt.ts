@@ -1,5 +1,3 @@
-import { translate } from '@/i18n/i18n'
-
 import {
   buildAskAnswerKeys,
   formatAskAnswer,
@@ -12,7 +10,9 @@ import {
   type AskPrompt,
   type AskQuestion,
   type InteractiveQuestionParser
-} from '../../../../shared/native-chat-ask'
+} from '@yiru/workbench-model/agent'
+
+import { translate } from '@/i18n/i18n'
 
 export {
   buildAskAnswerKeys,

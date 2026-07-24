@@ -1,3 +1,5 @@
+import * as executionHost from '@yiru/workbench-model/workspace'
+
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import {
   callRuntimeRpc,
@@ -7,7 +9,6 @@ import {
 import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
 import type { useAppStore } from '@/store'
 
-import { parseExecutionHostId, type ExecutionHostId } from '../../../shared/execution-host'
 import type { LocalhostWorktreeLabelRoute } from '../../../shared/localhost-worktree-labels'
 import type {
   WorkspacePort,
@@ -217,9 +218,9 @@ export function workspacePortRuntimeTargetKey(target: RuntimeClientTarget): stri
 }
 
 export function runtimeTargetForExecutionHostId(
-  hostId: ExecutionHostId
+  hostId: executionHost.ExecutionHostId
 ): RuntimeClientTarget | null {
-  const parsed = parseExecutionHostId(hostId)
+  const parsed = executionHost.parseExecutionHostId(hostId)
   if (parsed?.kind === 'local') {
     return { kind: 'local' }
   }

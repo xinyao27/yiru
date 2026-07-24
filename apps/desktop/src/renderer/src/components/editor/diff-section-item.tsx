@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { MutableRefObject, ReactNode } from 'react'
 
 import { isDiffComment } from '@/lib/diff-comment-compat'
+import { resolveEditorFontFamily } from '@/lib/editor-font-family'
 import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
 import { detectLanguage } from '@/lib/language-detect'
 import { monaco } from '@/lib/monaco-setup'
@@ -63,6 +64,7 @@ export function DiffSectionItem({
   settings: {
     terminalFontSize?: number
     terminalFontFamily?: string
+    editorFontFamily?: string
     diffWordWrap?: boolean
   } | null
   sectionHeight: number | undefined
@@ -427,7 +429,7 @@ export function DiffSectionItem({
           isEditable={isEditable}
           diffEditorFontSize={diffEditorFontSize}
           diffWordWrap={settings?.diffWordWrap}
-          terminalFontFamily={settings?.terminalFontFamily}
+          editorFontFamily={resolveEditorFontFamily(settings)}
           onCancelComment={() => setPopover(null)}
           onSubmitComment={commentActions.onSubmitComment}
           onRetrySection={retrySection}

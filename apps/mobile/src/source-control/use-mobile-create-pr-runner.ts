@@ -17,9 +17,12 @@ import {
   runMobileHostedReviewCreateIntent,
   type MobileHostedReviewCreateIntentRunOutcome
 } from './mobile-hosted-review-create-intent-runner'
+import {
+  markMobileRemoteOperationError,
+  type RunMobileSourceControlWorkflow
+} from './mobile-source-control-operation'
 import type { LoadStatusOptions } from './mobile-source-control-screen-state'
 
-type RunGitWorkflow = (actionId: string, runner: () => Promise<void>) => Promise<boolean>
 type LoadStatus = (options?: LoadStatusOptions) => Promise<boolean>
 
 type Params = {
@@ -30,7 +33,7 @@ type Params = {
   commitMessage: string
   stagedEntries: MobileCommitFailureRecovery['stagedEntries']
   mountedRef: MutableRefObject<boolean>
-  runGitWorkflow: RunGitWorkflow
+  runGitWorkflow: RunMobileSourceControlWorkflow
   loadStatus: LoadStatus
   setActionError: (next: string | null) => void
   setCommitMessage: (next: string) => void
@@ -82,7 +85,9 @@ export function useMobileCreatePrRunner({
           }
         })
         if (!created.current.ok) {
-          throw new Error(created.current.error)
+          const error = new Error(created.current.error)
+          const remoteOperation = created.current.remoteOperation
+          throw remoteOperation ? markMobileRemoteOperationError(error, remoteOperation) : error
         }
       })
       const outcome = created.current

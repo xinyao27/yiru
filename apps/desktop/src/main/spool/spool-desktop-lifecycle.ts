@@ -1,4 +1,5 @@
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type { SpoolDesktopService } from './spool-desktop-service'

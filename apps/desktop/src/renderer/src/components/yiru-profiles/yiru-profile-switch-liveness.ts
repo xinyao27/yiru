@@ -1,13 +1,11 @@
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { detectAgentStatusFromTitle, isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import type { AppState } from '@/store/types'
 
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../../shared/agent-status-types'
 import type { TerminalTab } from '../../../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 
 export type YiruProfileSwitchLiveWorkState = Pick<
   AppState,

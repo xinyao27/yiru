@@ -3,10 +3,12 @@ import {
   parseGitHubPullRequestLink,
   type GitHubPullRequestLink,
   type RepoSlug
-} from '../../../desktop/src/shared/new-workspace/github-links'
-import { parseGitLabMergeRequestLink } from '../../../desktop/src/shared/new-workspace/gitlab-links'
-import { isSmartWorkspaceSourceQueryWithinLimit } from '../../../desktop/src/shared/new-workspace/smart-workspace-source-results'
-import type { GitHubWorkItem, GitLabWorkItem } from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
+import { parseGitLabMergeRequestLink } from '@yiru/workbench-model/review'
+import type { GitLabWorkItem } from '@yiru/workbench-model/review'
+import type { GitHubWorkItem } from '@yiru/workbench-model/review'
+import { isSmartWorkspaceSourceQueryWithinLimit } from '@yiru/workbench-model/workspace'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 

@@ -12,7 +12,7 @@ export function YiruProfileAvatar({
   return (
     <span
       className={cn(
-        'inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-[11px] font-semibold text-muted-foreground',
+        'inline-flex size-5 shrink-0 items-center justify-center border border-border bg-muted text-[11px] font-semibold text-muted-foreground',
         className
       )}
       aria-hidden

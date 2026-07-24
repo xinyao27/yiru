@@ -1,5 +1,6 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { YIRU_BROWSER_PARTITION } from './constants'
-import type { ExecutionHostId } from './execution-host'
 
 export const YIRU_PROFILE_INDEX_SCHEMA_VERSION = 1
 export const DEFAULT_LOCAL_YIRU_PROFILE_ID = 'local-default'
@@ -12,46 +13,7 @@ export type YiruProfileAvatar = {
   color: 'neutral'
 }
 
-export type YiruProfileKind = 'local' | 'cloud-linked'
-
-export type YiruProfileCloudSummary = {
-  cloudProfileId: string
-  userId: string
-  email: string
-  displayName?: string
-  activeOrgId?: string
-  activeOrgName?: string
-  linkedAt: number
-}
-
-export type YiruCloudOrgSummary = {
-  orgId: string
-  name: string
-  role?: string
-}
-
-export type YiruCloudCapabilityFlags = Record<string, boolean>
-
-export type YiruCloudCapabilities = {
-  flags: YiruCloudCapabilityFlags
-  refreshedAt: number
-}
-
-export type YiruCloudSessionPersistence = 'none' | 'encrypted' | 'memory-only' | 'dev-plaintext'
-
-export type YiruProfileAuthState = 'local' | 'unconfigured' | 'connected' | 'reconnect-required'
-
-export type YiruProfileAuthStatus = {
-  activeProfileId: string
-  configured: boolean
-  state: YiruProfileAuthState
-  persistence: YiruCloudSessionPersistence
-  cloud?: YiruProfileCloudSummary
-  organizations?: YiruCloudOrgSummary[]
-  capabilities?: YiruCloudCapabilities
-  credentialError?: string
-  setupMessage?: string
-}
+export type YiruProfileKind = 'local'
 
 export type YiruProfileSummary = {
   id: string
@@ -61,7 +23,6 @@ export type YiruProfileSummary = {
   createdAt: number
   updatedAt: number
   lastOpenedAt: number
-  cloud?: YiruProfileCloudSummary
 }
 
 export type YiruProfileIndex = {
@@ -87,11 +48,6 @@ export type CreateLocalYiruProfileArgs = {
 
 export type CreateLocalYiruProfileResult = YiruProfileListState & {
   profile: YiruProfileSummary
-}
-
-export type CreateCloudLinkedYiruProfileArgs = {
-  orgId?: string
-  name?: string
 }
 
 export type SwitchYiruProfileArgs = {
@@ -148,157 +104,6 @@ export type TransferYiruProfileProjectResult =
       sourceRepoId: string
       duplicateRepoId: string
     }
-
-export type ConnectCurrentYiruProfileResult =
-  | {
-      status: 'connected'
-      auth: YiruProfileAuthStatus
-      activeProfileId: string
-      profiles: YiruProfileSummary[]
-    }
-  | {
-      status: 'unconfigured'
-      auth: YiruProfileAuthStatus
-    }
-  | {
-      status: 'cancelled'
-      auth: YiruProfileAuthStatus
-    }
-  | {
-      status: 'failed'
-      auth: YiruProfileAuthStatus
-      error: string
-    }
-
-export type CreateCloudLinkedYiruProfileResult =
-  | {
-      status: 'created'
-      auth: YiruProfileAuthStatus
-      activeProfileId: string
-      profiles: YiruProfileSummary[]
-      profile: YiruProfileSummary
-    }
-  | {
-      status: 'unconfigured' | 'reconnect-required'
-      auth: YiruProfileAuthStatus
-    }
-  | {
-      status: 'failed'
-      auth: YiruProfileAuthStatus
-      error: string
-    }
-
-export type SignOutCurrentYiruProfileResult = {
-  status: 'signed-out'
-  auth: YiruProfileAuthStatus
-  activeProfileId: string
-  profiles: YiruProfileSummary[]
-}
-
-export type SelectYiruProfileOrgArgs = {
-  orgId: string
-}
-
-export type SelectYiruProfileOrgResult =
-  | {
-      status: 'selected'
-      auth: YiruProfileAuthStatus
-      activeProfileId: string
-      profiles: YiruProfileSummary[]
-    }
-  | {
-      status: 'unconfigured' | 'reconnect-required'
-      auth: YiruProfileAuthStatus
-    }
-  | {
-      status: 'failed'
-      auth: YiruProfileAuthStatus
-      error: string
-    }
-
-export type RefreshCurrentYiruProfileAuthResult =
-  | {
-      status: 'refreshed'
-      auth: YiruProfileAuthStatus
-      activeProfileId: string
-      profiles: YiruProfileSummary[]
-    }
-  | {
-      status: 'local' | 'unconfigured' | 'reconnect-required'
-      auth: YiruProfileAuthStatus
-    }
-  | {
-      status: 'failed'
-      auth: YiruProfileAuthStatus
-      error: string
-    }
-
-// Why: organization roles are a fixed server-side enum; the desktop UI mirrors
-// exactly these three so role selects can't drift from what the API accepts.
-export type YiruOrgRole = 'owner' | 'admin' | 'member'
-
-export type YiruOrgMember = {
-  // Why: null for teammates provisioned server-side who never signed into Yiru;
-  // mutation actions are disabled for them since the API keys on a real userId.
-  userId: string | null
-  email: string
-  displayName?: string
-  role: YiruOrgRole
-}
-
-export type YiruOrgPendingInvite = {
-  email: string
-  role: YiruOrgRole
-  createdAt: number
-}
-
-export type YiruOrgMembersRoster = {
-  members: YiruOrgMember[]
-  pendingInvites: YiruOrgPendingInvite[]
-  viewerRole: YiruOrgRole
-  canManageMembers: boolean
-}
-
-export type YiruProfileOrgMembersListArgs = {
-  orgId: string
-}
-
-export type YiruProfileOrgMemberInviteArgs = {
-  orgId: string
-  email: string
-  role: YiruOrgRole
-}
-
-export type YiruProfileOrgInviteRevokeArgs = {
-  orgId: string
-  email: string
-}
-
-export type YiruProfileOrgMemberChangeRoleArgs = {
-  orgId: string
-  userId: string
-  role: YiruOrgRole
-}
-
-export type YiruProfileOrgMemberRemoveArgs = {
-  orgId: string
-  userId: string
-}
-
-export type YiruProfileOrgMembersListResult =
-  | { status: 'ok'; roster: YiruOrgMembersRoster }
-  | { status: 'unconfigured' | 'reconnect-required' }
-  | { status: 'failed'; error: string }
-
-export type YiruOrgInviteConflictReason = 'already_member' | 'already_invited'
-export type YiruOrgMutationInvalidReason = 'cannot_change_own_role' | 'cannot_remove_self'
-
-export type YiruProfileOrgMemberMutationResult =
-  | { status: 'ok' }
-  | { status: 'unconfigured' | 'reconnect-required' | 'forbidden' | 'not-found' }
-  | { status: 'conflict'; reason: YiruOrgInviteConflictReason }
-  | { status: 'invalid'; reason: YiruOrgMutationInvalidReason }
-  | { status: 'failed'; error: string }
 
 export function createDefaultLocalYiruProfile(now: number): YiruProfileSummary {
   return {

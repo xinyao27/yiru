@@ -3,9 +3,9 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  statSync,
   writeFileSync,
   chmodSync,
-  copyFileSync,
   renameSync,
   unlinkSync
 } from 'node:fs'
@@ -13,7 +13,9 @@ import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
 import type { AgentHookSource } from '../../shared/agent-hook-relay'
+import { writeRollingFileBackup } from '../rolling-file-backup'
 import { grantDirAcl, isPermissionError } from '../win32-utils'
+import { resolveHooksJsonWritePath } from './hook-config-write-path'
 import { POSIX_HOOK_STDIN_DRAIN_COMMAND } from './hook-stdin-contract'
 
 export type HookCommandConfig = {
@@ -62,22 +64,12 @@ export function buildManagedCommandDefinition(command: string): HookDefinition {
   return { command, timeout: MANAGED_HOOK_TIMEOUT_SECONDS }
 }
 
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-export function readHooksJson(configPath: string): HooksConfig | null {
-  if (!existsSync(configPath)) {
-    return {}
-  }
-
-  try {
-    const parsed = JSON.parse(readFileSync(configPath, 'utf-8'))
-    return isPlainObject(parsed) ? parsed : null
-  } catch {
-    return null
-  }
-}
+export {
+  isPlainObject,
+  readHooksJson,
+  readHooksJsonWithRaw,
+  type HooksJsonSnapshot
+} from './hooks-json-read'
 
 // Why: callers in install/remove need to match not just the exact current
 // managed command, but also stale entries pointing at old script paths — e.g.
@@ -354,8 +346,13 @@ function writeScriptWithAclRetry(scriptPath: string, content: string): void {
   }
 }
 
-export function writeHooksJson(configPath: string, config: HooksConfig): void {
-  const dir = dirname(configPath)
+export function writeHooksJson(
+  configPath: string,
+  config: HooksConfig,
+  options?: { preserveMode?: boolean }
+): void {
+  const writePath = resolveHooksJsonWritePath(configPath)
+  const dir = dirname(writePath)
   mkdirSync(dir, { recursive: true })
 
   // Why: write to a temp file then rename so a crash or disk-full mid-write
@@ -369,14 +366,16 @@ export function writeHooksJson(configPath: string, config: HooksConfig): void {
   // UUID suffix makes the tmp path unique per call.
   const tmpPath = join(dir, `.${Date.now()}-${randomUUID()}.tmp`)
   const serialized = `${JSON.stringify(config, null, 2)}\n`
+  const existingMode =
+    options?.preserveMode === true && existsSync(writePath) ? statSync(writePath).mode : undefined
 
   // Why: skip the write (and therefore the .bak rotation) when the on-disk
   // content is already identical. Without this, every install() rewrites the
   // file and rolls the backup forward, which can silently destroy the last
   // recoverable copy if install() is called repeatedly (e.g. on app start).
-  if (existsSync(configPath)) {
+  if (existsSync(writePath)) {
     try {
-      if (readFileSync(configPath, 'utf-8') === serialized) {
+      if (readFileSync(writePath, 'utf-8') === serialized) {
         return
       }
     } catch {
@@ -387,14 +386,14 @@ export function writeHooksJson(configPath: string, config: HooksConfig): void {
   }
 
   try {
-    writeFileSync(tmpPath, serialized, 'utf-8')
+    writeFileSync(tmpPath, serialized, { encoding: 'utf-8', mode: existingMode })
     // Why: single rolling backup — one file, no accumulation in ~/.claude.
     // Protects against a merge-logic bug producing bad JSON; the original is
     // always recoverable from <configPath>.bak until the next write.
-    if (existsSync(configPath)) {
-      copyFileSync(configPath, `${configPath}.bak`)
+    if (existsSync(writePath)) {
+      writeRollingFileBackup(writePath, `${writePath}.bak`)
     }
-    renameSync(tmpPath, configPath)
+    renameSync(tmpPath, writePath)
   } finally {
     // Clean up temp file if rename failed.
     if (existsSync(tmpPath)) {

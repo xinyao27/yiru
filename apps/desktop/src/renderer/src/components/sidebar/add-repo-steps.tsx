@@ -1,3 +1,4 @@
+import type { SshTarget, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -7,7 +8,6 @@ import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { useAppStore } from '@/store'
 
 import { createNestedRepoTelemetryAttemptId } from '../../../../shared/nested-repo-telemetry'
-import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 import type { NestedRepoScanResult } from '../../../../shared/types'
 import { upsertAddedRepoWithProjectHostSetup } from './add-repo-store-upsert'
 

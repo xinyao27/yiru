@@ -3,11 +3,13 @@ import {
   Star,
   ArrowSquareOut as ExternalLink,
   FolderPlus,
-  GitBranch as GitBranchPlus,
+  GitMerge,
   X
 } from '@phosphor-icons/react'
+import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -15,7 +17,6 @@ import { translate } from '@/i18n/i18n'
 import logo from '../../../../resources/logo.svg'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'
-import { YIRU_GITHUB_STARGAZERS_URL } from '../../../shared/yiru-github-repository'
 import { cn } from '../lib/class-names'
 import { useAppStore } from '../store'
 import {
@@ -107,21 +108,26 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
 
   return (
     <div ref={wrapperRef} className="relative inline-block">
-      <button
+      <Button
+        variant="outline"
+        size="default"
         className={cn(
-          'outline-none focus-visible:border-amber-500/80 focus-visible:bg-amber-400/10 dark:focus-visible:border-amber-400/50 dark:focus-visible:bg-amber-400/[0.08]',
-          'inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[13px] font-medium transition-all duration-300',
+          'focus-visible:border-amber-500/80 focus-visible:bg-amber-400/10 dark:focus-visible:border-amber-400/50 dark:focus-visible:bg-amber-400/[0.08]',
+          'py-1.5 text-[13px] duration-300',
           state === 'loading' && 'pointer-events-none opacity-0',
           state !== 'starred' &&
-            'cursor-pointer border-amber-500/60 text-amber-700 hover:border-amber-500/80 hover:bg-amber-400/10 dark:border-amber-400/30 dark:text-amber-300/90 dark:hover:border-amber-400/50 dark:hover:bg-amber-400/[0.08]',
+            'border-amber-500/60 text-amber-700 hover:border-amber-500/80 hover:bg-amber-400/10 dark:border-amber-400/30 dark:text-amber-300/90 dark:hover:border-amber-400/50 dark:hover:bg-amber-400/[0.08]',
           state === 'starred' &&
-            'cursor-pointer border-amber-500/50 bg-amber-400/10 text-amber-700 dark:border-amber-400/25 dark:bg-amber-400/[0.06] dark:text-amber-400/60'
+            'border-amber-500/50 bg-amber-400/10 text-amber-700 dark:border-amber-400/25 dark:bg-amber-400/[0.06] dark:text-amber-400/60'
         )}
         onClick={handleClick}
         disabled={state === 'loading'}
       >
         {state === 'web-fallback' ? (
-          <ExternalLink className="size-3.5 text-amber-600 transition-all duration-300 dark:text-amber-400/80" />
+          <ExternalLink
+            weight="regular"
+            className="size-3.5 text-amber-600 transition-all duration-300 dark:text-amber-400/80"
+          />
         ) : (
           <Star
             className={cn(
@@ -137,18 +143,20 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
           : state === 'web-fallback'
             ? translate('auto.components.Landing.157bb5ecbb', 'Open GitHub')
             : translate('auto.components.Landing.0d0ace8861', 'Star on GitHub')}
-      </button>
+      </Button>
       {state === 'starred' && menuOpen && (
-        <div className="border-border bg-popover absolute top-[calc(100%+4px)] right-0 z-10 min-w-[100px] rounded-md border py-1">
-          <button
-            className="text-foreground hover:bg-muted focus-visible:bg-muted w-full px-3 py-1.5 text-left text-[13px] outline-none"
+        <div className="border-border bg-popover absolute top-[calc(100%+4px)] right-0 z-10 min-w-[100px] border py-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-foreground hover:bg-muted focus-visible:bg-muted w-full justify-start gap-0 border-0 py-1.5 text-left text-[13px] font-normal whitespace-normal"
             onClick={() => {
               setMenuOpen(false)
               setState('hidden')
             }}
           >
             {translate('auto.components.Landing.c1cf168479', 'Hide')}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -203,32 +211,33 @@ function PreflightBanner({
     // centered content stack instead of stretching edge-to-edge. The styleguide
     // reserves color for true error state — these are soft setup nudges, so use
     // the quiet muted/border surface, not an amber frame.
-    <div className="border-border bg-muted/40 w-full max-w-sm space-y-1.5 rounded-lg border p-3">
+    <div className="border-border bg-muted/40 w-full max-w-sm space-y-1.5 border p-3">
       {visibleIssues.map((issue) => (
-        <div
-          key={issue.id}
-          className="flex items-start gap-3 rounded-md px-1 py-1.5 first:pt-0 last:pb-0"
-        >
+        <div key={issue.id} className="flex items-start gap-3 px-1 py-1.5 first:pt-0 last:pb-0">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500/70" />
           <div className="min-w-0 flex-1 space-y-0.5">
             <p className="text-foreground text-[13px] leading-snug font-medium">{issue.title}</p>
             <p className="text-muted-foreground text-xs leading-snug">{issue.description}</p>
-            <button
-              className="text-primary focus-visible:bg-accent mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium underline-offset-4 outline-none hover:underline"
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-primary focus-visible:bg-accent mt-1 h-auto border-0 p-0 underline-offset-4 hover:underline"
               onClick={() => window.api.shell.openUrl(issue.fixUrl)}
             >
               {issue.fixLabel}
-              <ExternalLink className="size-3" />
-            </button>
+              <ExternalLink weight="regular" className="size-3" />
+            </Button>
           </div>
           {issue.dismissible && (
-            <button
-              className="text-muted-foreground/70 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground -mt-0.5 -mr-1 shrink-0 cursor-pointer rounded p-1 transition-colors outline-none"
+            <Button
+              variant="quiet"
+              size="xs"
+              className="/70 -mt-0.5 -mr-1 h-auto border-0 p-1"
               onClick={() => dismiss(issue)}
               aria-label={translate('auto.components.Landing.preflightDismiss', 'Dismiss')}
             >
-              <X className="size-3.5" />
-            </button>
+              <X weight="regular" className="size-3.5" />
+            </Button>
           )}
         </div>
       ))}
@@ -327,7 +336,7 @@ export default function Landing(): React.JSX.Element {
       <div className="w-full max-w-lg px-6">
         <div className="flex flex-col items-center gap-4 py-8">
           <div
-            className="border-border/80 flex size-20 items-center justify-center rounded-2xl border"
+            className="border-border/80 flex size-20 items-center justify-center border"
             style={{ backgroundColor: '#12181e' }}
           >
             <img
@@ -352,16 +361,20 @@ export default function Landing(): React.JSX.Element {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <button
-              className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors outline-none"
+            <Button
+              variant="secondary"
+              size="default"
+              className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent gap-1.5 border text-sm transition-colors"
               onClick={() => openModal('add-repo')}
             >
               <FolderPlus className="size-3.5" />
               {translate('auto.components.Landing.f9eaa9e12d', 'Add Project')}
-            </button>
+            </Button>
 
-            <button
-              className="bg-secondary/70 border-border/80 text-foreground enabled:hover:bg-accent enabled:focus-visible:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors outline-none enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            <Button
+              variant="secondary"
+              size="default"
+              className="bg-secondary/70 border-border/80 text-foreground enabled:hover:bg-accent enabled:focus-visible:bg-accent gap-1.5 border text-sm transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
               disabled={!canCreateWorktree}
               title={
                 !canCreateWorktree
@@ -370,10 +383,10 @@ export default function Landing(): React.JSX.Element {
               }
               onClick={() => openModal('new-workspace-composer', { telemetrySource: 'unknown' })}
             >
-              <GitBranchPlus className="size-3.5" />
+              <GitMerge className="size-3.5" />
               {translate('auto.components.Landing.76a95f7f47', 'Create')}{' '}
               {createTargetLabel.toLowerCase()}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-6 w-full max-w-xs space-y-2">

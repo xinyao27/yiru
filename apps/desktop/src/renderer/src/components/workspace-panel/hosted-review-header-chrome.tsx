@@ -1,0 +1,79 @@
+import { GitMerge } from '@phosphor-icons/react'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import React from 'react'
+
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/class-names'
+
+import { PullRequestIcon } from './checks-panel-content'
+
+function hostedReviewStateClass(review: HostedReviewInfo): string {
+  if (review.state === 'merged') {
+    return 'text-purple-500/80'
+  }
+  if (review.state === 'open') {
+    return 'text-emerald-500/80'
+  }
+  if (review.state === 'closed') {
+    return 'text-muted-foreground/60'
+  }
+  return 'text-muted-foreground/50'
+}
+
+export function HostedReviewIcon({
+  review,
+  className
+}: {
+  review: HostedReviewInfo
+  className?: string
+}): React.JSX.Element {
+  const Icon = review.provider === 'gitlab' ? GitMerge : PullRequestIcon
+  return <Icon className={cn(className, hostedReviewStateClass(review))} />
+}
+
+function hostedReviewLabel(review: HostedReviewInfo): string {
+  return `${review.provider === 'gitlab' ? 'MR' : 'PR'} #${review.number}`
+}
+
+export function HostedReviewHeaderLink({
+  review,
+  onOpenHostedReviewInChecks
+}: {
+  review: HostedReviewInfo
+  onOpenHostedReviewInChecks: () => void
+}): React.JSX.Element {
+  const label = hostedReviewLabel(review)
+  const className =
+    'shrink-0 border-0 bg-transparent p-0 text-left font-medium leading-none text-foreground underline decoration-border underline-offset-2 opacity-80 hover:text-foreground hover:decoration-foreground'
+
+  if (review.provider === 'github' || review.provider === 'gitlab') {
+    return (
+      <Button
+        variant="ghost"
+        size="xs"
+        type="button"
+        className={cn('p-0 h-auto w-auto focus-visible:bg-accent', className)}
+        onClick={(e) => {
+          e.stopPropagation()
+          // Why: GitHub PR and GitLab MR details live in Yiru's Checks tab; keep
+          // the sidebar workflow in-app instead of opening the browser.
+          onOpenHostedReviewInChecks()
+        }}
+      >
+        {label}
+      </Button>
+    )
+  }
+
+  return (
+    <a
+      href={review.url}
+      target="_blank"
+      rel="noreferrer"
+      className={cn('outline-none focus-visible:bg-accent', className)}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {label}
+    </a>
+  )
+}

@@ -1,7 +1,8 @@
 import { useEffect, useSyncExternalStore } from 'react'
 
+import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from '@/runtime/installed-agent-skill-discovery-state'
+
 import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
-import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from './installed-agent-skills-change-event'
 
 // Why: window focus fires on every alt-tab, and each scan re-reads and re-hashes
 // every installed package; a just-completed scan stays authoritative briefly.

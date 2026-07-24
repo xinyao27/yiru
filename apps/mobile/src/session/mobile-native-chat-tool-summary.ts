@@ -4,4 +4,4 @@ export {
   summarizeToolInput,
   summarizeToolRun,
   toolFilePath
-} from '../../../desktop/src/shared/native-chat-tool-summary'
+} from '@yiru/workbench-model/agent'

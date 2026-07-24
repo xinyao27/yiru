@@ -3,7 +3,7 @@ import {
   isFreshNonDoneAgentStatus,
   type AgentStatusState,
   type AgentType
-} from './agent-status-types'
+} from '@yiru/workbench-model/agent'
 
 type ExistingAgentIdentity = {
   agentType?: AgentType

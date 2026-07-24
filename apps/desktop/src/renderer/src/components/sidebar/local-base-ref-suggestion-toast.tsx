@@ -100,17 +100,19 @@ function SuggestionToastBody({
             value2: commitNoun
           }
         )}{' '}
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           onClick={openSetting}
-          className="text-popover-foreground hover:text-primary focus-visible:text-primary focus-visible:bg-accent cursor-pointer font-medium underline underline-offset-2 outline-none"
+          className="text-popover-foreground hover:text-primary focus-visible:text-primary focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
         >
           {translate(
             'auto.components.sidebar.local.base.ref.suggestion.toast.3d260e1a5d',
             'Settings › {{value0}}',
             { value0: keepLocalMainUpToDateTitle }
           )}
-        </button>
+        </Button>
       </p>
       <div className="flex justify-end">
         {/* No explicit Dismiss: the toast is persistent and sonner's close (X)

@@ -2,6 +2,7 @@ import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { useState } from 'react'
 import type { JSX } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { track } from '@/lib/telemetry'
 
@@ -25,7 +26,7 @@ export function PreviewMedia(props: {
 
   return (
     <figure
-      className="border-border bg-muted relative aspect-[16/10] w-full overflow-hidden rounded-md border"
+      className="border-border bg-muted relative aspect-[16/10] w-full overflow-hidden border"
       aria-hidden
     >
       {renderPoster ? (
@@ -77,7 +78,9 @@ export function RelatedFeatures(props: {
       <ul className="flex flex-col gap-1" role="list">
         {items.map((tile) => (
           <li key={tile.id}>
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               onClick={() => {
                 track('feature_wall_docs_clicked', {
@@ -88,11 +91,11 @@ export function RelatedFeatures(props: {
                 track('feature_wall_tile_clicked', { tile_id: tile.id })
                 void window.api.shell.openUrl(tile.docsUrl)
               }}
-              className="focus-visible:bg-accent inline-flex items-center gap-1.5 text-left text-[13px] outline-none hover:underline hover:underline-offset-2"
+              className="focus-visible:bg-accent h-auto justify-start gap-1.5 border-0 p-0 text-left text-[13px] font-normal whitespace-normal hover:underline hover:underline-offset-2"
             >
               {tile.title}
-              <ChevronRight className="text-muted-foreground size-3" />
-            </button>
+              <ChevronRight weight="regular" className="text-muted-foreground size-3" />
+            </Button>
           </li>
         ))}
       </ul>

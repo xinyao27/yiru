@@ -13,7 +13,10 @@ import {
   getStatusBarToggles,
   getUsagePercentageDisplayEntry
 } from './appearance-search'
-import { getLeftSidebarAppearanceEntry } from './appearance-sidebar-search'
+import {
+  getLeftSidebarAppearanceEntry,
+  getShowPinnedWorktreesInGroupsEntry
+} from './appearance-sidebar-search'
 import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from './appearance-usage-percentage-search'
 import { LeftSidebarAppearanceSetting } from './left-sidebar-appearance-setting'
 import { SearchableSetting } from './searchable-setting'
@@ -70,6 +73,7 @@ export function AppearanceWindowSidebarSection({
   const visibleStatusBarToggles = useAvailableStatusBarToggles(getStatusBarToggles())
   const usagePercentageDisplayEntry = getUsagePercentageDisplayEntry()
   const leftSidebarAppearanceEntry = getLeftSidebarAppearanceEntry()
+  const showPinnedWorktreesInGroupsEntry = getShowPinnedWorktreesInGroupsEntry()
   const sidebarEntries = getSidebarEntries()
   const layoutEntries = getLayoutEntries()
   const statusBarTitle = translate(
@@ -240,6 +244,23 @@ export function AppearanceWindowSidebarSection({
                       checked={settings.showMobileButton !== false}
                       onChange={() =>
                         updateSettings({ showMobileButton: !(settings.showMobileButton !== false) })
+                      }
+                    />
+                  </SearchableSetting>
+
+                  <SearchableSetting
+                    title={showPinnedWorktreesInGroupsEntry.title}
+                    description={showPinnedWorktreesInGroupsEntry.description}
+                    keywords={showPinnedWorktreesInGroupsEntry.keywords}
+                  >
+                    <SettingsSwitchRow
+                      label={showPinnedWorktreesInGroupsEntry.title}
+                      description={showPinnedWorktreesInGroupsEntry.description}
+                      checked={settings.showPinnedWorktreesInGroups === true}
+                      onChange={() =>
+                        updateSettings({
+                          showPinnedWorktreesInGroups: settings.showPinnedWorktreesInGroups !== true
+                        })
                       }
                     />
                   </SearchableSetting>

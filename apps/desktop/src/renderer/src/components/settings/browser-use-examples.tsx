@@ -31,7 +31,7 @@ async function handleCopyText(text: string, label: string): Promise<void> {
 
 export function BrowserUseExamples(): React.JSX.Element {
   return (
-    <div className="border-border/60 bg-card/50 rounded-xl border p-4">
+    <div className="border-border/60 bg-card/50 border p-4">
       <div className="flex items-center gap-2">
         <Sparkles className="text-muted-foreground size-3.5" />
         <p className="text-sm font-medium">
@@ -51,7 +51,7 @@ export function BrowserUseExamples(): React.JSX.Element {
         {EXAMPLE_PROMPTS.map((prompt) => (
           <li
             key={prompt}
-            className="border-border/50 bg-background/60 flex items-start gap-2 rounded-lg border px-3 py-2"
+            className="border-border/50 bg-background/60 flex items-start gap-2 border px-3 py-2"
           >
             <p className="text-foreground/90 flex-1 text-[11px] leading-relaxed">
               {translate('auto.components.settings.BrowserUseExamples.59722f31b4', '"')}

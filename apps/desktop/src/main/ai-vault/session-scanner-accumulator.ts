@@ -6,8 +6,9 @@ import {
   type AiVaultAgent,
   type AiVaultSession,
   type AiVaultSessionPreviewMessage
-} from '../../shared/ai-vault-types'
-import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type {
   FileWithMtime,
   ResumableSessionParseState,
@@ -42,6 +43,7 @@ export function createAccumulator(args: {
     messageCount: 0,
     totalTokens: 0,
     previewMessages: [],
+    lastUserPrompt: null,
     queuedMessageCount: 0,
     subagentTranscriptCount: 0,
     latestTimestampMs: 0
@@ -113,6 +115,7 @@ export function finalizeSession(
     messageCount: accumulator.messageCount,
     totalTokens: accumulator.totalTokens,
     previewMessages: accumulator.previewMessages,
+    ...(accumulator.lastUserPrompt ? { lastUserPrompt: accumulator.lastUserPrompt } : {}),
     queuedMessageCount: accumulator.queuedMessageCount,
     subagentTranscriptCount: accumulator.subagentTranscriptCount,
     resumeCommand: buildAiVaultResumeCommand({
@@ -186,16 +189,20 @@ export function updateLatestLocation(
   accumulator: SessionAccumulator,
   record: Record<string, unknown>
 ): void {
+  // Why: Claude resolves resume ids under the project derived from the first
+  // cwd, so later transcript cwd drift must not replace the session origin.
+  if (accumulator.cwd === null) {
+    const startCwd = extractString(record.cwd)
+    if (startCwd) {
+      accumulator.cwd = startCwd
+    }
+  }
   const timestamp = extractString(record.timestamp)
   const parsed = timestamp ? Date.parse(timestamp) : accumulator.latestTimestampMs
   if (!Number.isFinite(parsed) || parsed < accumulator.latestTimestampMs) {
     return
   }
-  const cwd = extractString(record.cwd)
   const branch = extractString(record.gitBranch)
-  if (cwd) {
-    accumulator.cwd = cwd
-  }
   if (branch) {
     accumulator.branch = branch
   }

@@ -10,6 +10,7 @@ import {
   X
 } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,10 +102,12 @@ export function EditorFileTabContextMenu({
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             aria-hidden
             tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
+            className="pointer-events-none fixed size-px border-0 opacity-0"
             style={{ left: menuPoint.x, top: menuPoint.y }}
           />
         }
@@ -148,12 +151,12 @@ export function EditorFileTabContextMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
-          <X className="size-3.5" />
+          <X weight="regular" className="size-3.5" />
           {translate('auto.components.tab.bar.EditorFileTabContextMenu.1ba8492c5b', 'Close')}
           {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onCloseAll}>
-          <ListX className="size-3.5" />
+          <ListX weight="regular" className="size-3.5" />
           {translate(
             'auto.components.tab.bar.EditorFileTabContextMenu.ba1369dd24',
             'Close All Editor Tabs'
@@ -163,7 +166,7 @@ export function EditorFileTabContextMenu({
           ) : null}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
-          <PanelRightClose className="size-3.5" />
+          <PanelRightClose weight="regular" className="size-3.5" />
           {translate(
             'auto.components.tab.bar.EditorFileTabContextMenu.e5ff31ccaf',
             'Close Tabs To The Right'
@@ -231,7 +234,7 @@ export function EditorFileTabContextMenu({
             window.api.shell.openPath(file.filePath)
           }}
         >
-          <ExternalLink className="size-3.5" />
+          <ExternalLink weight="regular" className="size-3.5" />
           {revealLabel}
         </DropdownMenuItem>
       </DropdownMenuContent>

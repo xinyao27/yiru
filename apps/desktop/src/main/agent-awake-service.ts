@@ -1,6 +1,6 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { powerMonitor, powerSaveBlocker } from 'electron'
 
-import type { AgentStatusState } from '../shared/agent-status-types'
 import { LinuxLidSleepAssertion } from './linux-lid-sleep-assertion'
 import { MacosSystemSleepAssertion } from './macos-system-sleep-assertion'
 

@@ -1,4 +1,5 @@
-import type { ParsedAgentStatusPayload } from '../../../shared/agent-status-types'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
+
 import {
   getSyntheticAgentTerminalTitle,
   getSyntheticAgentTitleProfile

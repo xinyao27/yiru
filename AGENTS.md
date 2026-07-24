@@ -2,7 +2,7 @@
 
 ## Design System
 
-All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/style-guide.md`](./docs/style-guide.md). Use the tokens defined in `apps/desktop/src/renderer/src/assets/main.css` (the canonical source) and the shadcn primitives in `apps/desktop/src/renderer/src/components/ui/`. Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When `style-guide.md` is silent, follow the resolution order in its final section.
+All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/style-guide.md`](./docs/style-guide.md). **First principle:** reuse primitives in `apps/desktop/src/renderer/src/components/ui/` before native controls or hand-rolled class recipes; extend a primitive's `variant`/`size` when call sites would otherwise repeat overrides. Use the tokens in `apps/desktop/src/renderer/src/assets/main.css` (canonical). Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When `style-guide.md` is silent, follow the resolution order in its final section.
 
 ## Code Comments: Document the "Why", Briefly
 

@@ -13,11 +13,11 @@ import {
   PDFLinkService,
   PDFViewer as PdfJsViewer
 } from 'pdfjs-dist/web/pdf_viewer.mjs'
-
-import 'pdfjs-dist/web/pdf_viewer.css'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: PDF loading drives pdf.js document/viewer instances and decode errors through an external worker lifecycle. */
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import 'pdfjs-dist/web/pdf_viewer.css'
+import { Button } from '@/components/ui/button'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
@@ -251,37 +251,45 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
       </div>
       <div className="text-muted-foreground flex items-center gap-4 border-t px-4 py-2 text-xs">
         <div className="flex items-center gap-1">
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
+            className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
             onClick={zoomOut}
             disabled={scale <= MIN_SCALE}
             title={translate('auto.components.editor.PdfViewer.fa5d096b00', 'Zoom out')}
           >
             <ZoomOut size={14} />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none"
+            className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
             onClick={zoomReset}
             title={translate('auto.components.editor.PdfViewer.c0119616d6', 'Fit to width')}
           >
-            <RotateCcw size={14} />
-          </button>
-          <button
+            <RotateCcw weight="regular" size={14} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
             type="button"
-            className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
+            className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
             onClick={zoomIn}
             disabled={scale >= MAX_SCALE}
             title={translate('auto.components.editor.PdfViewer.2b6eb1ccd6', 'Zoom in')}
           >
             <ZoomIn size={14} />
-          </button>
+          </Button>
           <span className="ml-1 tabular-nums">{zoomPercent}%</span>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
-          className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none"
+          className="hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground h-auto border-0 p-1"
           onClick={() => setFindOpen(true)}
           title={translate(
             'auto.components.editor.PdfViewer.069ff59932',
@@ -290,7 +298,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
           )}
         >
           <Search size={14} />
-        </button>
+        </Button>
         <span className="min-w-0 truncate" title={filename}>
           {filename}
         </span>

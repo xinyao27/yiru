@@ -1,9 +1,9 @@
 import { GitMerge, GitPullRequest, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import type React from 'react'
 
-import { CHECK_COLOR, CHECK_ICON } from '@/components/right-sidebar/check-status-presentation'
-import { ChecksList } from '@/components/right-sidebar/checks-panel-content'
 import { Button } from '@/components/ui/button'
+import { CHECK_COLOR, CHECK_ICON } from '@/components/workspace-panel/check-status-presentation'
+import { ChecksList } from '@/components/workspace-panel/checks-panel-content'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -45,10 +45,10 @@ export function SpoolChecksResult({
               type="button"
               variant="outline"
               size="xs"
-              className="border-sidebar-border bg-sidebar text-sidebar-foreground hover:border-muted-foreground/35 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring dark:border-sidebar-border dark:bg-sidebar dark:hover:bg-sidebar-accent"
+              className="bg-sidebar text-sidebar-foreground dark:bg-sidebar"
               onClick={() => openOwnerUrl(reviewUrl)}
             >
-              <ExternalLink aria-hidden="true" className="size-3" />
+              <ExternalLink weight="regular" aria-hidden="true" className="size-3" />
               {translate('auto.components.spool.SpoolChecksPane.openReview', 'Open review')}
             </Button>
           ) : null}

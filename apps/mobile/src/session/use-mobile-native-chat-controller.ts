@@ -13,6 +13,10 @@ import type { RpcClient } from '../transport/rpc-client'
 import type { parseAskFromStatus } from './mobile-native-chat-ask'
 import type { AskAnswerSelection, AskPrompt } from './mobile-native-chat-ask'
 import { type MobileNativeChatTab, resolveMobileNativeChat } from './mobile-native-chat-eligibility'
+import {
+  createMobileNativeChatInputHealingState,
+  getMobileNativeChatInputHealingState
+} from './mobile-native-chat-input-healing'
 import { openMobileNativeChatFile } from './mobile-native-chat-open-file'
 import type { detectAgentPermission } from './mobile-native-chat-permission'
 import { useMobileNativeChatPermissionSend } from './mobile-native-chat-permission-send'
@@ -21,6 +25,7 @@ import { sendMobileNativeChatMessage } from './mobile-native-chat-send'
 import { useMobileNativeChatAnswerSend } from './use-mobile-native-chat-answer-send'
 import { useMobileNativeChatDrafts } from './use-mobile-native-chat-drafts'
 import { useMobileNativeChatFileSearch } from './use-mobile-native-chat-file-search'
+import { useMobileNativeChatMessageSend } from './use-mobile-native-chat-message-send'
 import { useMobileNativeChatPrompts } from './use-mobile-native-chat-prompts'
 import { useMobileNativeChatSession } from './use-mobile-native-chat-session'
 import { useMobileNativeChatStop } from './use-mobile-native-chat-stop'
@@ -84,6 +89,10 @@ export function useMobileNativeChatController(args: {
     onSendError
   } = args
   const [chatTabIds, setChatTabIds] = useState<Set<string>>(new Set())
+  const disconnectedInputHealingStateRef = useRef(createMobileNativeChatInputHealingState())
+  const inputHealingState = client
+    ? getMobileNativeChatInputHealingState(client)
+    : disconnectedInputHealingStateRef.current
   const chatTabIdsToggledRef = useRef(false)
 
   useEffect(() => {
@@ -145,7 +154,8 @@ export function useMobileNativeChatController(args: {
     setComposerText: setChatComposerText,
     pending: chatPending,
     captureSendOrigin,
-    acceptSend
+    acceptSend,
+    holdUnconfirmedSend
   } = useMobileNativeChatDrafts({
     hostId,
     worktreeId,
@@ -251,39 +261,17 @@ export function useMobileNativeChatController(args: {
     worktreeId
   })
 
-  const handleNativeChatSend = useCallback(
-    async (text: string): Promise<boolean> => {
-      const handle = activeHandleRef.current
-      const origin = captureSendOrigin(text)
-      if (!client || !handle || !origin || !nativeChatInputLeaseReady) {
-        onSendError('Message not sent (disconnected)')
-        return false
-      }
-      const accepted = await sendMobileNativeChatMessage({
-        client,
-        terminal: handle,
-        text,
-        ...(deviceTokenRef.current
-          ? { mobileClient: { id: deviceTokenRef.current, type: 'mobile' } }
-          : {})
-      })
-      if (!accepted) {
-        onSendError('Message not sent')
-        return false
-      }
-      acceptSend(origin, text)
-      return true
-    },
-    [
-      acceptSend,
-      activeHandleRef,
-      captureSendOrigin,
-      client,
-      deviceTokenRef,
-      nativeChatInputLeaseReady,
-      onSendError
-    ]
-  )
+  const handleNativeChatSend = useMobileNativeChatMessageSend({
+    client,
+    activeHandleRef,
+    deviceTokenRef,
+    inputHealingState,
+    inputLeaseReady: nativeChatInputLeaseReady,
+    captureSendOrigin,
+    acceptSend,
+    holdUnconfirmedSend,
+    onSendError
+  })
 
   return {
     chatTabIds,

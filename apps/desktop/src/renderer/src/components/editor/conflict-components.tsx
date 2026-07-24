@@ -127,7 +127,7 @@ export function ConflictBanner({
                     )}
                     onClick={() => conflictNavigation.onJump('previous')}
                   >
-                    <ChevronUp className="size-3.5" />
+                    <ChevronUp weight="regular" className="size-3.5" />
                   </Button>
                 }
               />
@@ -151,7 +151,7 @@ export function ConflictBanner({
                     )}
                     onClick={() => conflictNavigation.onJump('next')}
                   >
-                    <ChevronDown className="size-3.5" />
+                    <ChevronDown weight="regular" className="size-3.5" />
                   </Button>
                 }
               />
@@ -281,7 +281,7 @@ export function ConflictReviewPanel({
               {translate('auto.components.editor.ConflictComponents.28e7db4a90', 'Source Control')}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={onDismiss}>
-              <X className="size-3.5" />
+              <X weight="regular" className="size-3.5" />
               {translate('auto.components.editor.ConflictComponents.58ad5ad431', 'Dismiss')}
             </Button>
           </div>
@@ -348,7 +348,7 @@ export function ConflictReviewPanel({
             </div>
           </div>
           <Button type="button" size="sm" variant="outline" onClick={onRefreshSnapshot}>
-            <RefreshCw className="size-3.5" />
+            <RefreshCw weight="regular" className="size-3.5" />
             {translate('auto.components.editor.ConflictComponents.90d576adb2', 'Refresh')}
           </Button>
         </div>

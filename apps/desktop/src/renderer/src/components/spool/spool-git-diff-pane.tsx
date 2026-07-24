@@ -37,10 +37,10 @@ export function SpoolGitDiffPane({
     )
   }
   return (
-    <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
+    <section className="bg-background flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="border-border bg-sidebar text-sidebar-foreground flex min-h-9 shrink-0 items-center gap-2 border-b px-3 py-1">
         <Button type="button" size="xs" variant="ghost" onClick={onBack}>
-          <ChevronLeft aria-hidden="true" />
+          <ChevronLeft weight="regular" aria-hidden="true" />
           {translate('auto.components.spool.SpoolGitDiffPane.back', 'Back')}
         </Button>
         <GitCompareArrows aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
@@ -85,7 +85,7 @@ export function SpoolGitDiffPane({
 
 function GitDiffMessage({ message }: { message: string }): React.JSX.Element {
   return (
-    <div className="text-muted-foreground flex min-h-0 flex-1 items-center justify-center bg-[var(--editor-surface)] p-6 text-xs">
+    <div className="bg-background text-muted-foreground flex min-h-0 flex-1 items-center justify-center p-6 text-xs">
       {message}
     </div>
   )

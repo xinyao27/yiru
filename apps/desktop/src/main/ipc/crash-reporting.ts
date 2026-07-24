@@ -2,12 +2,12 @@
    error capture, diagnostic upload, and crash-store submission state. */
 import os from 'node:os'
 
-import { app, clipboard, ipcMain } from 'electron'
-
 import {
   assertClipboardTextWriteWithinLimit,
   isClipboardTextWriteTooLargeError
-} from '../../shared/clipboard-text'
+} from '@yiru/workbench-model/ui'
+import { app, clipboard, ipcMain } from 'electron'
+
 import {
   type CrashReportBreadcrumbData,
   type CrashReportCopyDiagnosticsArgs,
@@ -27,7 +27,6 @@ import {
   recordCrashBreadcrumb
 } from '../crash-reporting/crash-breadcrumb-store'
 import {
-  diagnosticBundleForReportOnlyRetry,
   prepareCrashDiagnosticBundle,
   resolveSubmittedDiagnosticBundle
 } from '../crash-reporting/crash-feedback-diagnostic-bundle'
@@ -449,7 +448,6 @@ export function registerCrashReportingHandlers(store: CrashReportStore): void {
       if (!report) {
         const diagnosticUpload = prepareCrashDiagnosticBundle(args.includeDiagnosticLogs !== false)
         const diagnosticBundle = diagnosticUpload.diagnosticBundle
-        const reportOnlyDiagnosticBundle = diagnosticBundleForReportOnlyRetry(diagnosticUpload)
         const result = await submitFeedback({
           feedback: buildUncapturedCrashReportText(args.notes, diagnosticBundle),
           submissionType: 'crash',
@@ -458,11 +456,7 @@ export function registerCrashReportingHandlers(store: CrashReportStore): void {
           githubEmail: args.githubEmail,
           ...(diagnosticUpload.feedbackDiagnosticBundle
             ? {
-                diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle,
-                feedbackWithoutDiagnosticBundle: buildUncapturedCrashReportText(
-                  args.notes,
-                  reportOnlyDiagnosticBundle
-                )
+                diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle
               }
             : {})
         })
@@ -502,7 +496,6 @@ export function registerCrashReportingHandlers(store: CrashReportStore): void {
       try {
         const diagnosticUpload = prepareCrashDiagnosticBundle(args.includeDiagnosticLogs !== false)
         const diagnosticBundle = diagnosticUpload.diagnosticBundle
-        const reportOnlyDiagnosticBundle = diagnosticBundleForReportOnlyRetry(diagnosticUpload)
         const result = await submitFeedback({
           feedback: formatCrashReportText(report, args.notes, diagnosticBundle),
           submissionType: 'crash',
@@ -511,12 +504,7 @@ export function registerCrashReportingHandlers(store: CrashReportStore): void {
           githubEmail: args.githubEmail,
           ...(diagnosticUpload.feedbackDiagnosticBundle
             ? {
-                diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle,
-                feedbackWithoutDiagnosticBundle: formatCrashReportText(
-                  report,
-                  args.notes,
-                  reportOnlyDiagnosticBundle
-                )
+                diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle
               }
             : {})
         })

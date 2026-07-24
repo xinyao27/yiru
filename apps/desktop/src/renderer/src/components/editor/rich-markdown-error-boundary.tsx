@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { reportReactErrorBoundaryCrash } from '@/lib/react-error-boundary-reporting'
 
@@ -67,12 +68,14 @@ export class RichMarkdownErrorBoundary extends React.Component<Props, State> {
               'Switch to source mode, or click retry to reload the rich view.'
             )}
           </div>
-          <button
-            className="border-border/60 hover:bg-accent focus-visible:bg-accent rounded border px-3 py-1 text-xs outline-none"
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-border/60 focus-visible:bg-accent py-1 text-xs"
             onClick={this.handleReset}
           >
             {translate('auto.components.editor.RichMarkdownErrorBoundary.aad0998127', 'Retry')}
-          </button>
+          </Button>
         </div>
       )
     }

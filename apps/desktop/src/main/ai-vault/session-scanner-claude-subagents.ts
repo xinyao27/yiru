@@ -8,7 +8,8 @@ import type {
   AiVaultSession,
   AiVaultSubagentListResult,
   AiVaultSubagentRunStatus
-} from '../../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+
 import { sessionIdFromFileName, sessionSortTime } from './session-scanner-accumulator'
 import { parseClaudeSessionFile } from './session-scanner-primary-parsers'
 import {

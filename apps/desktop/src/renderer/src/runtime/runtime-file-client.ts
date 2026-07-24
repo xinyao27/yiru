@@ -1,10 +1,8 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
+
 import { basename, joinPath, normalizeRelativePath } from '@/lib/path'
 
-import {
-  isWindowsAbsolutePathLike,
-  relativePathInsideRoot
-} from '../../../shared/cross-platform-path'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 import type {
   RuntimeFilePreviewResult,
   RuntimeFileReadChunkResult,
@@ -271,6 +269,35 @@ export async function downloadRuntimeFile(
   } finally {
     if (!finished) {
       await window.api.fs.cancelDownloadedFile({ transferId: download.transferId }).catch(() => {})
+    }
+  }
+}
+
+export async function streamRuntimeFileDownloadChunks(
+  context: RuntimeFileOperationArgs,
+  filePath: string,
+  consume: (chunk: { contentBase64: string; first: boolean; last: boolean }) => Promise<void>
+): Promise<void> {
+  const remoteArgs = getRemoteFileArgs(context, filePath)
+  if (!remoteArgs) {
+    throw new Error('Remote file is outside the owning runtime worktree')
+  }
+  let offset = 0
+  let first = true
+  for (;;) {
+    const chunk = await readRemoteDownloadChunk(remoteArgs, offset)
+    if (chunk.bytesRead <= 0 && !chunk.eof) {
+      throw new Error('Remote download stalled before reaching EOF')
+    }
+    await consume({
+      contentBase64: chunk.contentBase64,
+      first,
+      last: chunk.eof
+    })
+    first = false
+    offset += chunk.bytesRead
+    if (chunk.eof) {
+      return
     }
   }
 }

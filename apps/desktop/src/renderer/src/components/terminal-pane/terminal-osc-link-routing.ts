@@ -1,6 +1,7 @@
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+
 import { resolveTerminalFileLinkText } from '@/lib/terminal-links'
 
-import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
 import { openDetectedFilePath } from './terminal-file-open-routing'
 import { resolveTerminalFileUrlTarget } from './terminal-file-url-target'
 import { isTerminalLinkActivation } from './terminal-link-activation'

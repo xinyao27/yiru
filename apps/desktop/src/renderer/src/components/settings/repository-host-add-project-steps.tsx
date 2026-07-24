@@ -9,12 +9,14 @@ import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 export function HostSetupStartActions({
-  disabled,
+  pathActionsDisabled,
+  planDisabled,
   onBrowse,
   onClone,
   onPlan
 }: {
-  disabled: boolean
+  pathActionsDisabled: boolean
+  planDisabled: boolean
   onBrowse: () => void
   onClone: () => void
   onPlan: () => void
@@ -28,7 +30,7 @@ export function HostSetupStartActions({
           'auto.components.settings.RepositoryPane.browseFolderHelp',
           'Use an existing checkout or folder on this host.'
         )}
-        disabled={disabled}
+        disabled={pathActionsDisabled}
         selected
         onClick={onBrowse}
       />
@@ -36,7 +38,7 @@ export function HostSetupStartActions({
         <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
           {translate('auto.components.settings.RepositoryPane.otherWaysToAdd', 'Other ways to add')}
         </p>
-        <div className="border-input bg-background overflow-hidden rounded-md border">
+        <div className="border-input bg-background overflow-hidden border">
           <HostSetupActionButton
             icon={Download}
             title={translate(
@@ -47,10 +49,10 @@ export function HostSetupStartActions({
               'auto.components.settings.RepositoryPane.cloneFromUrlHelp',
               'Clone this repository onto the selected host.'
             )}
-            disabled={disabled}
+            disabled={pathActionsDisabled}
             onClick={onClone}
-            className="rounded-t-md"
           />
+
           <HostSetupActionButton
             icon={Plus}
             title={translate(
@@ -61,9 +63,9 @@ export function HostSetupStartActions({
               'auto.components.settings.RepositoryPane.addPlannedHostHelp',
               'Remember this host and finish adding the project later.'
             )}
-            disabled={disabled}
+            disabled={planDisabled}
             onClick={onPlan}
-            className="border-border/70 rounded-b-md border-t"
+            className="border-border/70 border-t"
           />
         </div>
       </div>
@@ -91,7 +93,7 @@ export function HostSetupExistingFolderStep({
   onSubmit: () => void
 }): React.JSX.Element {
   return (
-    <div className="border-border bg-muted/20 space-y-3 rounded-md border p-3">
+    <div className="border-border bg-muted/20 space-y-3 border p-3">
       <StepBackButton
         onBack={onBack}
         label={translate(
@@ -162,7 +164,7 @@ export function HostSetupCloneStep({
   onSubmit: () => void
 }): React.JSX.Element {
   return (
-    <div className="border-border bg-muted/20 space-y-3 rounded-md border p-3">
+    <div className="border-border bg-muted/20 space-y-3 border p-3">
       <StepBackButton
         onBack={onBack}
         label={translate('auto.components.settings.RepositoryPane.cloneFromUrl', 'Clone from URL')}
@@ -223,7 +225,7 @@ export function HostSetupPlannedStep({
   )
 
   return (
-    <div className="border-border bg-muted/20 space-y-3 rounded-md border p-3">
+    <div className="border-border bg-muted/20 space-y-3 border p-3">
       <StepBackButton
         onBack={onBack}
         label={translate(
@@ -262,7 +264,7 @@ function StepBackButton({
 }): React.JSX.Element {
   return (
     <Button type="button" variant="ghost" size="sm" className="-ml-2 gap-2" onClick={onBack}>
-      <ArrowLeft className="size-4" />
+      <ArrowLeft weight="regular" className="size-4" />
       {label}
     </Button>
   )
@@ -286,21 +288,23 @@ function HostSetupActionButton({
   onClick: () => void
 }): React.JSX.Element {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="default"
       type="button"
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:bg-accent disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
+        'h-auto justify-start whitespace-normal font-normal flex min-h-[3.25rem] w-full gap-3 border px-3 py-2.5 text-left transition-colors  focus-visible:bg-accent disabled:cursor-default disabled:opacity-40',
         selected
-          ? 'rounded-md border-ring bg-foreground/10 text-foreground dark:bg-accent dark:text-accent-foreground'
-          : 'hover:bg-accent',
+          ? 'border-ring bg-foreground/10 text-foreground dark:bg-accent dark:text-accent-foreground'
+          : '',
         className
       )}
     >
       <span
         className={cn(
-          'grid size-7 shrink-0 place-items-center rounded-md',
+          'grid size-7 shrink-0 place-items-center',
           selected ? 'bg-background/70 text-accent-foreground' : 'text-muted-foreground'
         )}
       >
@@ -319,6 +323,6 @@ function HostSetupActionButton({
           {description}
         </span>
       </span>
-    </button>
+    </Button>
   )
 }

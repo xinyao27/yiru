@@ -1,6 +1,7 @@
 import { posix } from 'node:path'
 
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { gitExecFileAsync } from '../git/runner'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { requireSingleSpoolGitPath, toSpoolLocalAccessPath } from './spool-canonical-host-path'

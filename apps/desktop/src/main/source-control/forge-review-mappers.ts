@@ -1,4 +1,5 @@
-import type { HostedReviewInfo } from '../../shared/hosted-review'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+
 import { hostedReviewInfoFromGitHubPRInfo } from '../../shared/hosted-review-github'
 import type { MRInfo, PRInfo } from '../../shared/types'
 import type { AzureDevOpsPullRequestInfo } from '../azure-devops/pull-request-mappers'

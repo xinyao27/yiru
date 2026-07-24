@@ -1,3 +1,4 @@
+import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
@@ -6,7 +7,6 @@ import { CaretLeft as ChevronLeft, ArrowClockwise as RefreshCw } from '@/compone
 import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import type { AiVaultScope, AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import {
   buildMobileAiVaultResumeLaunch,

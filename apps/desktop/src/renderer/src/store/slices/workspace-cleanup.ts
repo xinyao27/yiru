@@ -1,3 +1,4 @@
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: cleanup scan persistence, renderer safety
    enrichment, dismissals, and destructive preflight/delete orchestration share
    one store state contract. */
@@ -6,10 +7,6 @@ import type { StateCreator } from 'zustand'
 import { translate } from '@/i18n/i18n'
 import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-agent-evidence'
 
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../../shared/agent-status-types'
 import { mapWithConcurrency } from '../../../../shared/map-with-concurrency'
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,

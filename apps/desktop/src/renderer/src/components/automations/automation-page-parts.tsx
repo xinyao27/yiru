@@ -112,7 +112,7 @@ export function Field({
 
 export function Metric({ label, value }: { label: string; value: string }): React.JSX.Element {
   return (
-    <div className="border-border min-w-0 rounded-md border p-3">
+    <div className="border-border min-w-0 border p-3">
       <div className="text-muted-foreground text-xs">{label}</div>
       <div className="mt-1 truncate text-sm font-medium">{value}</div>
     </div>

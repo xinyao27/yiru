@@ -1,9 +1,11 @@
 import { GithubLogo as Github, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
+import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -12,12 +14,11 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 import type { GitHubViewer } from '../../../../shared/types'
-import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
 
 type SubmitIdentity = {
   githubLogin: string | null
@@ -164,7 +165,7 @@ export function SidebarFeedbackDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="border-border/70 bg-muted/30 space-y-2 rounded-md border p-3">
+        <div className="border-border/70 bg-muted/30 space-y-2 border p-3">
           <div className="text-foreground text-xs font-medium">
             {translate(
               'auto.components.sidebar.SidebarFeedbackDialog.9b33530b3d',
@@ -184,12 +185,12 @@ export function SidebarFeedbackDialog({
                 'auto.components.sidebar.SidebarFeedbackDialog.d245c4ef6c',
                 'GitHub issues'
               )}
-              <ExternalLink className="size-3.5" />
+              <ExternalLink weight="regular" className="size-3.5" />
             </Button>
           </div>
         </div>
 
-        <textarea
+        <Textarea
           ref={feedbackTextareaRef}
           value={feedback}
           onChange={(event) => setFeedback(event.target.value)}
@@ -198,10 +199,10 @@ export function SidebarFeedbackDialog({
             'What could we improve?'
           )}
           rows={7}
-          className="border-border bg-background placeholder:text-muted-foreground min-h-32 w-full rounded-md border px-3 py-2 text-sm outline-none"
+          className="min-h-32"
         />
 
-        <div className="border-border/70 bg-muted/30 min-h-9 rounded-md border px-3 py-2">
+        <div className="border-border/70 bg-muted/30 min-h-9 border px-3 py-2">
           {viewer ? (
             <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               <span>
@@ -212,15 +213,9 @@ export function SidebarFeedbackDialog({
                 </span>
               </span>
               <label className="text-foreground flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={submitAnonymously}
-                  onChange={(event) => setSubmitAnonymously(event.target.checked)}
-                  className={cn(
-                    'outline-none focus-visible:border-ring',
-                    'size-3.5 rounded border border-border bg-background align-middle',
-                    'accent-foreground'
-                  )}
+                  onCheckedChange={(checked) => setSubmitAnonymously(checked === true)}
                 />
                 {translate(
                   'auto.components.sidebar.SidebarFeedbackDialog.5b120b9634',

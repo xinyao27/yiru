@@ -1,12 +1,12 @@
 import { posix, resolve } from 'node:path'
 
-import { ipcMain } from 'electron'
-
 import type {
   CreateHostedReviewArgs,
   HostedReviewCreationEligibilityArgs,
   HostedReviewForBranchArgs
-} from '../../shared/hosted-review'
+} from '@yiru/workbench-model/review'
+import { ipcMain } from 'electron'
+
 import type { Repo } from '../../shared/types'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'

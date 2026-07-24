@@ -1,4 +1,5 @@
-import { isTailscaleEndpoint } from '../../../desktop/src/shared/remote-runtime-tailscale-hint'
+import { isTailscaleEndpoint } from '@yiru/runtime-protocol/tailscale-endpoint'
+
 import type { ConnectionState } from './types'
 
 // Why: thresholds for escalating connection UX from neutral

@@ -1,4 +1,4 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 
 export const FIND_QUERY_MAX_BYTES = 2 * 1024
 

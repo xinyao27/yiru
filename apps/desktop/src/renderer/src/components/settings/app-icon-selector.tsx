@@ -64,18 +64,18 @@ export function AppIconSelector({ value, onChange }: AppIconSelectorProps): Reac
         label={translate('auto.components.settings.AppIconSelector.5f5142a62a', 'Previous icon')}
         onClick={() => onChange(getOffsetIcon(selected, -1))}
       >
-        <ChevronLeft className="size-4" />
+        <ChevronLeft weight="regular" className="size-4" />
       </IconCycleButton>
       <img
         src={APP_ICON_URLS[selected]}
         alt={translate('auto.components.settings.AppIconSelector.415fa76f64', 'Selected app icon')}
-        className="size-24 rounded-2xl object-contain"
+        className="size-24 object-contain"
       />
       <IconCycleButton
         label={translate('auto.components.settings.AppIconSelector.d5a112dc9b', 'Next icon')}
         onClick={() => onChange(getOffsetIcon(selected, 1))}
       >
-        <ChevronRight className="size-4" />
+        <ChevronRight weight="regular" className="size-4" />
       </IconCycleButton>
     </div>
   )

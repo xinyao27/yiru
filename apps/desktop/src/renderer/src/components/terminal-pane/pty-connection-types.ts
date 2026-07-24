@@ -1,4 +1,5 @@
-import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { EventProps } from '../../../../shared/telemetry-events'
 import type { TerminalColorSchemeMode } from '../../../../shared/terminal-color-scheme-protocol'
@@ -20,6 +21,7 @@ export type PtyConnectionDeps = {
     delivery?: 'terminal-paste'
     startupCommandDelivery?: StartupCommandDelivery
     env?: Record<string, string>
+    envToDelete?: string[]
     launchConfig?: SleepingAgentLaunchConfig
     launchToken?: string
     launchAgent?: TuiAgent

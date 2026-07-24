@@ -4,6 +4,7 @@ import {
   Plus,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -18,7 +19,6 @@ import {
   MCP_STARTER_CONFIG
 } from '../../../../shared/mcp-config'
 import type { Repo, Worktree } from '../../../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { extractIpcErrorMessage } from '../../lib/ipc-error'
 import { joinPath } from '../../lib/path'
 import { useAppStore } from '../../store'
@@ -270,7 +270,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
             {loading ? (
               <LoadingIndicator className="size-3.5" />
             ) : (
-              <RefreshCw className="size-3.5" />
+              <RefreshCw weight="regular" className="size-3.5" />
             )}
           </Button>
           {canCreateStarter ? (
@@ -295,7 +295,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
         </div>
       </div>
 
-      <div className="border-border/50 bg-muted/20 rounded-md border">
+      <div className="border-border/50 bg-muted/20 border">
         <div className="border-border/50 text-muted-foreground flex items-center justify-between border-b px-3 py-2 text-xs">
           <span>
             {detectedCount}{' '}

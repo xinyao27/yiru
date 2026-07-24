@@ -1,17 +1,17 @@
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+import {
+  getSettingsFocusedExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import {
-  getSettingsFocusedExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { isEphemeralVmRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import type { SshConnectionState } from '../../../../shared/ssh-types'
 import type { AddRepoDialogStep } from './add-repo-dialog-types'
 import { canSelectAddRepoHost } from './add-repo-host-availability'
 import { useSidebarHostScopeOptions } from './use-sidebar-host-scope-options'

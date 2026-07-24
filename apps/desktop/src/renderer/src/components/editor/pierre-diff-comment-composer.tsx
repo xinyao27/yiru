@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import {
   getCommentBodySubmitState,
@@ -77,7 +78,7 @@ export function PierreDiffCommentComposer({
                   )}
             </div>
           </div>
-          <textarea
+          <Textarea
             ref={(node) => {
               if (node) {
                 mountedRef.current = true
@@ -113,7 +114,9 @@ export function PierreDiffCommentComposer({
             </Button>
             <Button size="sm" disabled={!canSubmit} onClick={() => void submit()}>
               {submitting ? (submittingLabel ?? 'Saving…') : (submitLabel ?? 'Add note')}
-              {!submitting && <CornerDownLeft className="ml-1 size-3 opacity-70" />}
+              {!submitting && (
+                <CornerDownLeft weight="regular" className="ml-1 size-3 opacity-70" />
+              )}
             </Button>
           </div>
         </div>

@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { SlashCommand } from './rich-markdown-slash-commands'
 
 export const RICH_MARKDOWN_SLASH_COMMAND_QUERY_MAX_BYTES = 2 * 1024

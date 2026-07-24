@@ -73,16 +73,6 @@ function resolveSubmodulePushFailureMessage(
   return detail ? `${operationLabel} failed. ${truncateDetail(detail)}` : null
 }
 
-function isNonFastForwardRemoteError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false
-  }
-  return (
-    /non-fast-forward|fetch first|updates were rejected|stale info/i.test(error.message) ||
-    formatSubmodulePushFailureDetail(error.message)?.includes('has remote changes') === true
-  )
-}
-
 export type RemoteOperationErrorOptions = {
   publish?: boolean
   isPush?: boolean
@@ -306,5 +296,3 @@ export function resolveRemoteOperationErrorMessage(
 
   return error.message
 }
-
-export { isNonFastForwardRemoteError }

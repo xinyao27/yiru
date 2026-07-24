@@ -1,4 +1,4 @@
-import type { TuiAgent } from '../../../desktop/src/shared/types'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
 
 // Why: Metro runs from the mobile package and cannot consume this desktop
 // runtime module. Keep the order mirrored with src/shared/tui-agent-selection.ts.

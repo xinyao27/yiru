@@ -38,14 +38,15 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
         delay={150}
         closeDelay={80}
         render={
-          <button
+          <Button
+            variant="status-bar-quiet"
+            size="status-bar"
             type="button"
             onClick={handleOpenSettings}
             aria-label={translate(
               'auto.components.status.bar.StatusBarUsageEmptyCta.d663430cf9',
               'Configure usage tracking'
             )}
-            className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground inline-flex h-5 cursor-pointer items-center gap-1.5 rounded px-1.5 text-xs font-normal transition-colors outline-none"
           >
             <BarChart3 className="size-3.5" />
             <span>
@@ -54,7 +55,7 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
                 'Configure usage tracking'
               )}
             </span>
-          </button>
+          </Button>
         }
       />
       <HoverCardContent side="top" align="start" sideOffset={8} className="w-[260px] p-2.5">
@@ -71,17 +72,19 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button
+                    variant="quiet"
+                    size="icon-xs"
                     type="button"
                     onClick={handleHide}
                     aria-label={translate(
                       'auto.components.status.bar.StatusBarUsageEmptyCta.9a542f46c7',
                       'Hide from status bar'
                     )}
-                    className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground -mt-0.5 -mr-1 inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded transition-colors outline-none"
+                    className="/70 /70 -mt-0.5 -mr-1 size-5"
                   >
                     <EyeOff className="size-3.5" />
-                  </button>
+                  </Button>
                 }
               />
               <TooltipContent side="top" sideOffset={6}>

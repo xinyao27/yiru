@@ -35,6 +35,24 @@ export type TerminalThemeOption = {
   previewTheme: ITheme | null
 }
 
+function alignDefaultTerminalThemeToAppBackground(
+  theme: ITheme | null,
+  shouldAlign: boolean
+): ITheme | null {
+  if (!theme || !shouldAlign || typeof document === 'undefined') {
+    return theme
+  }
+  const background = getComputedStyle(document.documentElement)
+    .getPropertyValue('--background')
+    .trim()
+  if (!background) {
+    return theme
+  }
+  // Why: xterm cannot consume CSS variables directly, so resolve the canonical
+  // app canvas at runtime while user-selected terminal themes retain their paint.
+  return { ...theme, background, cursorAccent: background }
+}
+
 export function getSystemPrefersDark(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return true
@@ -131,13 +149,17 @@ export function resolveEffectiveTerminalAppearance(
   const dividerColor = useLightVariant
     ? normalizeColor(settings.terminalDividerColorLight, DEFAULT_TERMINAL_DIVIDER_LIGHT)
     : normalizeColor(settings.terminalDividerColorDark, DEFAULT_TERMINAL_DIVIDER_DARK)
+  const theme = getTerminalThemePreview(themeName, settings, useLightVariant ? 'light' : 'dark')
+  const shouldAlignDefaultTheme = useLightVariant
+    ? themeName === DEFAULT_TERMINAL_THEME_LIGHT
+    : sourceTheme === 'dark' && themeName === DEFAULT_TERMINAL_THEME_DARK
 
   return {
     mode: sourceTheme,
     sourceTheme: settings.theme,
     themeName,
     dividerColor,
-    theme: getTerminalThemePreview(themeName, settings, useLightVariant ? 'light' : 'dark'),
+    theme: alignDefaultTerminalThemeToAppBackground(theme, shouldAlignDefaultTheme),
     systemPrefersDark
   }
 }

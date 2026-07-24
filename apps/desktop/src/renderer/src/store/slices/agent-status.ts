@@ -1,25 +1,12 @@
-/* eslint-disable max-lines -- Why: the agent-status slice co-locates live map, retained snapshots, retention-suppression, and tab-prefix sweep so the teardown contract stays readable end-to-end. Splitting across files would scatter the drop/remove/retain interactions that must stay in lockstep. */
-import type { StateCreator } from 'zustand'
-
 import {
-  getAgentRowGeneratedTitleText,
-  getYiruDispatchTaskId,
-  isYiruDispatchPrompt,
-  orchestrationLabelsMatchLiveDispatch
-} from '@/lib/agent-row-primary-text'
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-
-import {
+  agentProviderSessionsEqual,
   getAgentResumeArgv,
   isResumableTuiAgent,
   type AgentProviderSessionMetadata,
+  type ResumableTuiAgent,
   type SleepingAgentLaunchConfig,
   type SleepingAgentSessionRecord
-} from '../../../../shared/agent-session-resume'
-import {
-  resolveAgentStatusIdentity,
-  shouldSuppressInheritedTerminalStatus
-} from '../../../../shared/agent-status-identity'
+} from '@yiru/workbench-model/agent'
 import {
   AGENT_STATUS_STALE_AFTER_MS,
   AGENT_STATE_HISTORY_MAX,
@@ -30,7 +17,23 @@ import {
   type AgentType,
   type MigrationUnsupportedPtyEntry,
   type ParsedAgentStatusPayload
-} from '../../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+/* eslint-disable max-lines -- Why: the agent-status slice co-locates live map, retained snapshots, retention-suppression, and tab-prefix sweep so the teardown contract stays readable end-to-end. Splitting across files would scatter the drop/remove/retain interactions that must stay in lockstep. */
+import type { StateCreator } from 'zustand'
+
+import {
+  getAgentRowGeneratedTitleText,
+  getYiruDispatchTaskId,
+  isYiruDispatchPrompt,
+  orchestrationLabelsMatchLiveDispatch
+} from '@/lib/agent-row-primary-text'
+import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
+import { isCompletedAgentWithLiveRecoveryRecord } from '@/lib/completed-agent-live-recovery-record'
+
+import {
+  resolveAgentStatusIdentity,
+  shouldSuppressInheritedTerminalStatus
+} from '../../../../shared/agent-status-identity'
 import { isCommandCodeNewTurnWhileWorking } from '../../../../shared/command-code-turn-boundary'
 import type { TerminalTab } from '../../../../shared/types'
 import type { AppState } from '../types'
@@ -62,6 +65,8 @@ export type AgentStatusWorktreeShutdownReason =
   | 'manual-sleep'
   | 'remove-worktree'
   | 'auto-hibernate-completed-agent'
+
+type AllAgentSessionCaptureMode = 'periodic' | 'quit'
 
 type DropAgentStatusByWorktreeOptions = {
   shutdownReason?: AgentStatusWorktreeShutdownReason
@@ -160,12 +165,27 @@ export type AgentStatusSlice = {
     },
     terminalTitle?: string,
     timing?: { updatedAt?: number; stateStartedAt?: number },
-    routing?: { tabId?: string; worktreeId?: string; terminalHandle?: string },
+    routing?: {
+      tabId?: string
+      worktreeId?: string
+      terminalHandle?: string
+      connectionId?: string | null
+    },
     metadata?: {
       providerSession?: AgentProviderSessionMetadata
       launchConfig?: SleepingAgentLaunchConfig
       launchToken?: string
     }
+  ) => void
+
+  /** Record durable resume identity without creating a visible turn row. */
+  recordAgentProviderSession: (
+    paneKey: string,
+    agent: ResumableTuiAgent,
+    providerSession: AgentProviderSessionMetadata,
+    timing?: { updatedAt?: number },
+    routing?: { tabId?: string; worktreeId?: string; connectionId?: string | null },
+    metadata?: { launchToken?: string }
   ) => void
 
   registerAgentLaunchConfig: (
@@ -226,9 +246,8 @@ export type AgentStatusSlice = {
   dropAgentStatusByWorktree: (worktreeId: string, opts?: DropAgentStatusByWorktreeOptions) => void
 
   captureSleepingAgentSessionsByWorktree: (worktreeId: string, paneKeys?: string[]) => void
-  /** Capture resumable agent sessions across every worktree. Called from the
-   *  quit flush so provider session ids survive an app restart. */
-  captureAllSleepingAgentSessions: () => void
+  /** Capture resumable sessions for crash recovery or confirmed quit. */
+  captureAllSleepingAgentSessions: (mode: AllAgentSessionCaptureMode) => void
   clearSleepingAgentSession: (paneKey: string) => void
   clearSleepingAgentSessionsByPaneKey: (paneKeys: readonly string[]) => void
   clearSleepingAgentSessionsByWorktree: (worktreeId: string) => void
@@ -467,7 +486,9 @@ function sleepingRecordFromEntry(args: {
   if (!isResumableTuiAgent(agent) || !args.entry.providerSession) {
     return null
   }
-  if (!getAgentResumeArgv(agent, args.entry.providerSession)) {
+  if (
+    !getAgentResumeArgv(agent, args.entry.providerSession, args.launchConfig?.ompResumeFilePath)
+  ) {
     return null
   }
   const tab = args.tab ?? findTabForAgentEntry(args.state, args.worktreeId, args.entry)
@@ -487,6 +508,7 @@ function sleepingRecordFromEntry(args: {
     ...(args.entry.lastAssistantMessage
       ? { lastAssistantMessage: args.entry.lastAssistantMessage }
       : {}),
+    ...(args.entry.connectionId !== undefined ? { connectionId: args.entry.connectionId } : {}),
     ...(args.launchConfig ? { launchConfig: copyLaunchConfig(args.launchConfig) } : {}),
     ...(args.entry.interrupted ? { interrupted: true } : {}),
     ...(args.origin ? { origin: args.origin } : {})
@@ -571,6 +593,34 @@ export function collectSleepingAgentSessionRecordsForWorktree(
     : undefined
   const tabPrefixes = (state.tabsByWorktree[worktreeId] ?? []).map((tab) => `${tab.id}:`)
   const records: Record<string, SleepingAgentSessionRecord> = {}
+
+  if (isManualWorktreeSleep) {
+    for (const existing of Object.values(state.sleepingAgentSessionsByPaneKey)) {
+      const liveEntry = state.agentStatusByPaneKey[existing.paneKey]
+      if (
+        existing.worktreeId !== worktreeId ||
+        existing.origin !== 'live' ||
+        (liveEntry !== undefined && !isCompletedAgentWithLiveRecoveryRecord(liveEntry, existing)) ||
+        (allowedPaneKeys && !allowedPaneKeys.has(existing.paneKey)) ||
+        !getAgentResumeArgv(
+          existing.agent,
+          existing.providerSession,
+          existing.launchConfig?.ompResumeFilePath
+        )
+      ) {
+        continue
+      }
+      // Why: a completed resumable TUI remains live at its prompt; manual
+      // sleep must promote that checkpoint instead of deleting its identity.
+      records[existing.paneKey] = {
+        ...existing,
+        state: 'working',
+        capturedAt,
+        updatedAt: capturedAt,
+        origin: 'worktree-sleep'
+      }
+    }
+  }
 
   for (const retained of Object.values(state.retainedAgentsByPaneKey)) {
     if (isCompletedAgentHibernation) {
@@ -673,8 +723,7 @@ function sleepingRecordsEquivalentIgnoringCaptureTime(
     existing.tabId === next.tabId &&
     existing.worktreeId === next.worktreeId &&
     existing.agent === next.agent &&
-    existing.providerSession.key === next.providerSession.key &&
-    existing.providerSession.id === next.providerSession.id &&
+    agentProviderSessionsEqual(existing.agent, existing.providerSession, next.providerSession) &&
     existing.prompt === next.prompt &&
     existing.state === next.state &&
     existing.updatedAt === next.updatedAt &&
@@ -698,9 +747,23 @@ function recoveryRecordMatches(
     existing.agent === next.agent &&
     existing.worktreeId === next.worktreeId &&
     existing.tabId === next.tabId &&
-    existing.providerSession.key === next.providerSession.key &&
-    existing.providerSession.id === next.providerSession.id &&
+    agentProviderSessionsEqual(existing.agent, existing.providerSession, next.providerSession) &&
     launchConfigsEqual(existing.launchConfig, next.launchConfig)
+  )
+}
+
+function recoveryRecordTargetsSameSession(
+  existing: SleepingAgentSessionRecord | undefined,
+  next: SleepingAgentSessionRecord
+): boolean {
+  if (!existing) {
+    return false
+  }
+  return (
+    existing.agent === next.agent &&
+    existing.worktreeId === next.worktreeId &&
+    existing.tabId === next.tabId &&
+    agentProviderSessionsEqual(existing.agent, existing.providerSession, next.providerSession)
   )
 }
 
@@ -708,7 +771,8 @@ function copyLaunchConfig(config: SleepingAgentLaunchConfig): SleepingAgentLaunc
   return {
     ...(config.agentCommand ? { agentCommand: config.agentCommand } : {}),
     agentArgs: config.agentArgs,
-    agentEnv: { ...config.agentEnv }
+    agentEnv: { ...config.agentEnv },
+    ...(config.ompResumeFilePath ? { ompResumeFilePath: config.ompResumeFilePath } : {})
   }
 }
 
@@ -719,22 +783,16 @@ function launchConfigsEqual(
   if (a === undefined || b === undefined) {
     return a === b
   }
-  if (a.agentCommand !== b.agentCommand || a.agentArgs !== b.agentArgs) {
+  if (
+    a.agentCommand !== b.agentCommand ||
+    a.agentArgs !== b.agentArgs ||
+    a.ompResumeFilePath !== b.ompResumeFilePath
+  ) {
     return false
   }
   const aKeys = Object.keys(a.agentEnv)
   const bKeys = Object.keys(b.agentEnv)
   return aKeys.length === bKeys.length && aKeys.every((key) => a.agentEnv[key] === b.agentEnv[key])
-}
-
-function providerSessionsEqual(
-  a: AgentProviderSessionMetadata | undefined,
-  b: AgentProviderSessionMetadata | undefined
-): boolean {
-  if (a === undefined || b === undefined) {
-    return a === b
-  }
-  return a.key === b.key && a.id === b.id
 }
 
 function normalizeLaunchConfigRegistrationMetadata(
@@ -763,7 +821,11 @@ function launchConfigRegistryEntriesEqual(
     a.identity.tabId === b.identity.tabId &&
     a.identity.leafId === b.identity.leafId &&
     a.identity.terminalHandle === b.identity.terminalHandle &&
-    providerSessionsEqual(a.identity.providerSession, b.identity.providerSession)
+    agentProviderSessionsEqual(
+      a.identity.agentType ?? b.identity.agentType,
+      a.identity.providerSession,
+      b.identity.providerSession
+    )
   )
 }
 
@@ -807,7 +869,11 @@ function registryEntryMatchesStatus(args: {
     return false
   }
   if (identity.providerSession !== undefined) {
-    return providerSessionsEqual(identity.providerSession, args.providerSession)
+    return agentProviderSessionsEqual(
+      args.agentType,
+      identity.providerSession,
+      args.providerSession
+    )
   }
   if (identity.launchToken !== undefined) {
     return true
@@ -816,7 +882,11 @@ function registryEntryMatchesStatus(args: {
     return true
   }
   if (args.existingProviderSession && args.providerSession) {
-    return providerSessionsEqual(args.existingProviderSession, args.providerSession)
+    return agentProviderSessionsEqual(
+      args.agentType,
+      args.existingProviderSession,
+      args.providerSession
+    )
   }
   return false
 }
@@ -846,7 +916,11 @@ function getLaunchConfigForEntry(
   return sleepingRecord?.launchConfig &&
     sleepingRecord.agent === entry.agentType &&
     entry.providerSession &&
-    providerSessionsEqual(sleepingRecord.providerSession, entry.providerSession)
+    agentProviderSessionsEqual(
+      entry.agentType,
+      sleepingRecord.providerSession,
+      entry.providerSession
+    )
     ? sleepingRecord.launchConfig
     : undefined
 }
@@ -1384,6 +1458,133 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
       })
     },
 
+    recordAgentProviderSession: (paneKey, agent, providerSession, timing, routing, metadata) => {
+      paneKey = resolveAgentPaneAuthorityKey(paneKey)
+      const updatedAt = timing?.updatedAt ?? Date.now()
+      if (
+        paneKey in get().recentlyRetiredAgentStatusPaneKeys ||
+        isRecentlyClosedAgentStatusTab(
+          get().recentlyClosedAgentStatusTabIds,
+          getTabIdFromPaneKey(paneKey)
+        ) ||
+        !getAgentResumeArgv(agent, providerSession)
+      ) {
+        return
+      }
+      let removedLiveStatus = false
+      set((s) => {
+        const existingStatus = s.agentStatusByPaneKey[paneKey]
+        const existingRecord = s.sleepingAgentSessionsByPaneKey[paneKey]
+        if (
+          (existingStatus && updatedAt < existingStatus.updatedAt) ||
+          (existingRecord && updatedAt < existingRecord.updatedAt)
+        ) {
+          return s
+        }
+        const tabId = routing?.tabId ?? getTabIdFromPaneKey(paneKey) ?? existingRecord?.tabId
+        const worktreeId =
+          routing?.worktreeId ??
+          existingStatus?.worktreeId ??
+          existingRecord?.worktreeId ??
+          findAgentPaneWorktreeId(s, paneKey)
+        if (!worktreeId) {
+          return s
+        }
+        const registryEntry = s.agentLaunchConfigByPaneKey[paneKey]
+        const registryMatches = registryEntryMatchesStatus({
+          entry: registryEntry,
+          paneKey,
+          agentType: agent,
+          tabId,
+          terminalHandle: undefined,
+          launchToken: metadata?.launchToken,
+          providerSession,
+          existingProviderSession: existingRecord?.providerSession,
+          providerSessionChanged: false
+        })
+        const launchConfig =
+          (registryMatches ? registryEntry?.launchConfig : undefined) ??
+          (existingRecord?.agent === agent &&
+          agentProviderSessionsEqual(agent, existingRecord.providerSession, providerSession)
+            ? existingRecord.launchConfig
+            : undefined)
+        const record: SleepingAgentSessionRecord = {
+          paneKey,
+          ...(tabId ? { tabId } : {}),
+          worktreeId,
+          agent,
+          providerSession,
+          prompt: '',
+          // Why: this is durable process identity rather than visible turn
+          // state; a non-done value keeps cold restore eligible.
+          state: 'working',
+          capturedAt: updatedAt,
+          updatedAt,
+          ...(existingStatus?.terminalTitle
+            ? { terminalTitle: existingStatus.terminalTitle }
+            : existingRecord?.terminalTitle
+              ? { terminalTitle: existingRecord.terminalTitle }
+              : {}),
+          ...(routing?.connectionId !== undefined
+            ? { connectionId: routing.connectionId }
+            : existingRecord?.connectionId !== undefined
+              ? { connectionId: existingRecord.connectionId }
+              : {}),
+          ...(launchConfig ? { launchConfig: copyLaunchConfig(launchConfig) } : {}),
+          origin: 'live'
+        }
+        removedLiveStatus = existingStatus !== undefined
+        const nextLive = removedLiveStatus ? { ...s.agentStatusByPaneKey } : s.agentStatusByPaneKey
+        if (removedLiveStatus) {
+          delete nextLive[paneKey]
+        }
+        const nextRetained =
+          paneKey in s.retainedAgentsByPaneKey
+            ? { ...s.retainedAgentsByPaneKey }
+            : s.retainedAgentsByPaneKey
+        if (nextRetained !== s.retainedAgentsByPaneKey) {
+          delete nextRetained[paneKey]
+        }
+        // Why: identity mismatch invalidates both the durable launch config
+        // and its ephemeral registry proof.
+        let nextLaunchConfigs = s.agentLaunchConfigByPaneKey
+        if (registryMatches && registryEntry) {
+          nextLaunchConfigs = {
+            ...nextLaunchConfigs,
+            [paneKey]: {
+              ...registryEntry,
+              identity: { ...registryEntry.identity, providerSession }
+            }
+          }
+        } else if (registryEntry) {
+          nextLaunchConfigs = { ...nextLaunchConfigs }
+          delete nextLaunchConfigs[paneKey]
+        }
+        return {
+          agentStatusByPaneKey: nextLive,
+          retainedAgentsByPaneKey: nextRetained,
+          sleepingAgentSessionsByPaneKey: {
+            ...s.sleepingAgentSessionsByPaneKey,
+            [paneKey]: record
+          },
+          agentLaunchConfigByPaneKey: nextLaunchConfigs,
+          acknowledgedAgentsByPaneKey: removePaneKeys(
+            s.acknowledgedAgentsByPaneKey,
+            new Set([paneKey])
+          ),
+          unreadAgentCompletionPanes: removePaneKeys(
+            s.unreadAgentCompletionPanes,
+            new Set([paneKey])
+          ),
+          agentStatusEpoch: removedLiveStatus ? s.agentStatusEpoch + 1 : s.agentStatusEpoch,
+          sortEpoch: removedLiveStatus ? s.sortEpoch + 1 : s.sortEpoch
+        }
+      })
+      if (removedLiveStatus) {
+        queueMicrotask(() => freshness.schedule())
+      }
+    },
+
     setAgentStatus: (paneKey, payload, terminalTitle, timing, routing, metadata) => {
       paneKey = resolveAgentPaneAuthorityKey(paneKey)
       const updatedAt = timing?.updatedAt ?? Date.now()
@@ -1512,20 +1713,24 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           payload.state === 'done' ? existing?.orchestration : undefined
         const orchestration =
           payloadMergedOrchestration ?? runtimeMergedOrchestration ?? completedFallbackOrchestration
-        const canReuseExistingIdentity =
+        // Why: waiting/blocked remain the same resumable turn; child permission hooks omit the root session id.
+        const canReuseExistingProviderSession =
           existing?.agentType === identity.agentType &&
-          !isAgentCompletionState(existing.state) &&
-          !isAgentCompletionState(payload.state)
+          existing.state !== 'done' &&
+          payload.state !== 'done'
         const providerSession =
           metadata?.providerSession ??
-          (canReuseExistingIdentity ? existing.providerSession : undefined)
-        const existingProviderSession = canReuseExistingIdentity
+          (canReuseExistingProviderSession ? existing.providerSession : undefined)
+        const existingProviderSession = canReuseExistingProviderSession
           ? existing.providerSession
           : undefined
         const providerSessionChanged =
           Boolean(metadata?.providerSession && existingProviderSession) &&
-          (metadata?.providerSession?.key !== existingProviderSession?.key ||
-            metadata?.providerSession?.id !== existingProviderSession?.id)
+          !agentProviderSessionsEqual(
+            identity.agentType,
+            metadata?.providerSession,
+            existingProviderSession
+          )
         const statusTabId =
           routing?.tabId ?? existing?.tabId ?? getTabIdFromPaneKey(paneKey) ?? undefined
         const statusTerminalHandle = routing?.terminalHandle ?? existing?.terminalHandle
@@ -1544,12 +1749,25 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           ? registryEntry?.launchConfig
           : undefined
         const existingSleepingRecord = s.sleepingAgentSessionsByPaneKey[paneKey]
+        const retainsResumableRecoveryIdentity =
+          payload.state === 'done' &&
+          isResumableTuiAgent(identity.agentType) &&
+          providerSession !== undefined &&
+          getAgentResumeArgv(
+            identity.agentType,
+            providerSession,
+            existingSleepingRecord?.launchConfig?.ompResumeFilePath
+          ) !== null
         const matchedSleepingLaunchConfig =
-          payload.state !== 'done' &&
+          (payload.state !== 'done' || retainsResumableRecoveryIdentity) &&
           existingSleepingRecord?.launchConfig &&
           existingSleepingRecord.agent === identity.agentType &&
           providerSession &&
-          providerSessionsEqual(existingSleepingRecord.providerSession, providerSession)
+          agentProviderSessionsEqual(
+            identity.agentType,
+            existingSleepingRecord.providerSession,
+            providerSession
+          )
             ? existingSleepingRecord.launchConfig
             : undefined
         // Why: pane keys can be reused after a manually-started agent replaces
@@ -1567,6 +1785,9 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           updatedAt,
           stateStartedAt,
           agentType: identity.agentType,
+          model:
+            payload.model ??
+            (existing?.agentType === identity.agentType ? existing.model : undefined),
           paneKey,
           terminalHandle: statusTerminalHandle,
           worktreeId:
@@ -1574,6 +1795,11 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
             existing?.worktreeId ??
             findAgentPaneWorktreeId(s, paneKey) ??
             undefined,
+          ...(routing?.connectionId !== undefined
+            ? { connectionId: routing.connectionId }
+            : existing?.connectionId !== undefined
+              ? { connectionId: existing.connectionId }
+              : {}),
           tabId: statusTabId,
           terminalTitle: effectiveTitle,
           stateHistory: history,
@@ -1659,6 +1885,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
             entry.updatedAt !== existing.updatedAt ||
             entry.stateStartedAt !== existing.stateStartedAt ||
             entry.agentType !== existing.agentType ||
+            entry.model !== existing.model ||
             entry.terminalTitle !== existing.terminalTitle ||
             entry.toolName !== existing.toolName ||
             entry.toolInput !== existing.toolInput ||
@@ -1697,13 +1924,17 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           (entry) => entry.paneKey === paneKey
         )
         const liveRecoveryWorktreeId =
-          entry.state === 'done'
+          entry.state === 'done' && !retainsResumableRecoveryIdentity
             ? null
             : (entry.worktreeId ?? findAgentPaneWorktreeId(s, entry.paneKey))
         const liveRecoveryRecord = liveRecoveryWorktreeId
           ? sleepingRecordFromEntry({
               state: s,
-              entry,
+              // Why: a completed resumable turn leaves the TUI alive. Preserve
+              // its resume identity without representing done as pending work.
+              entry: retainsResumableRecoveryIdentity
+                ? { ...entry, state: 'working', prompt: '', lastAssistantMessage: undefined }
+                : entry,
               worktreeId: liveRecoveryWorktreeId,
               capturedAt: updatedAt,
               launchConfig: launchConfigSource,
@@ -1716,7 +1947,11 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
           matchedRegistryLaunchConfig &&
           registryEntry &&
           providerSession &&
-          !providerSessionsEqual(registryEntry.identity.providerSession, providerSession)
+          !agentProviderSessionsEqual(
+            identity.agentType,
+            registryEntry.identity.providerSession,
+            providerSession
+          )
         ) {
           nextLaunchConfigs = {
             ...nextLaunchConfigs,
@@ -2522,20 +2757,30 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
       })
     },
 
-    captureAllSleepingAgentSessions: () => {
-      // Why: the quit flush must persist provider session ids for every live
-      // agent pane — otherwise agents whose daemon PTYs die while the app is
-      // closed have nothing to `--resume` from (#5232). Only live entries are
-      // captured: retained rows belong to panes the user already closed, and
-      // `done` sessions have nothing to resume.
+    captureAllSleepingAgentSessions: (mode) => {
+      // Why: periodic checkpoints and quit flushes both persist live provider
+      // identities, but only a confirmed quit may claim quit precedence.
       set((s) => {
         const capturedAt = Date.now()
+        const origin = mode === 'quit' ? ('quit' as const) : ('live' as const)
         const next: Record<string, SleepingAgentSessionRecord> = {
           ...s.sleepingAgentSessionsByPaneKey
         }
         let changed = false
         for (const entry of Object.values(s.agentStatusByPaneKey)) {
           if (entry.state === 'done') {
+            const existing = next[entry.paneKey]
+            if (!isCompletedAgentWithLiveRecoveryRecord(entry, existing)) {
+              continue
+            }
+            if (mode === 'periodic') {
+              continue
+            }
+            const record = { ...existing, capturedAt, origin }
+            if (!sleepingRecordsEquivalentIgnoringCaptureTime(existing, record)) {
+              next[entry.paneKey] = record
+              changed = true
+            }
             continue
           }
           const worktreeId = entry.worktreeId ?? findAgentPaneWorktreeId(s, entry.paneKey)
@@ -2548,12 +2793,20 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
             worktreeId,
             capturedAt,
             launchConfig: getLaunchConfigForEntry(s, entry),
-            origin: 'quit'
+            origin
           })
+          const existing = next[entry.paneKey]
+          // Why: a periodic timer racing a confirmed close must not downgrade
+          // its shutdown snapshot; a new live hook supersedes it elsewhere.
           if (
+            mode === 'periodic' &&
+            existing?.origin === 'quit' &&
             record &&
-            !sleepingRecordsEquivalentIgnoringCaptureTime(next[record.paneKey], record)
+            recoveryRecordTargetsSameSession(existing, record)
           ) {
+            continue
+          }
+          if (record && !sleepingRecordsEquivalentIgnoringCaptureTime(existing, record)) {
             next[record.paneKey] = record
             changed = true
           }

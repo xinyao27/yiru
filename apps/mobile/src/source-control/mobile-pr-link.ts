@@ -1,4 +1,5 @@
-import type { HostedReviewProvider } from '../../../desktop/src/shared/hosted-review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 

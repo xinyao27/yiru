@@ -1,5 +1,5 @@
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
-import { AGENT_STATUS_STALE_AFTER_MS } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
 
 export type FreshnessSchedulerDeps = {
   getEntries: () => AgentStatusEntry[]

@@ -1,11 +1,22 @@
 import { spawn as spawnProcess, type SpawnOptions } from 'node:child_process'
-import { dirname, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { StringDecoder } from 'node:string_decoder'
 
 import {
   getEphemeralVmRecipeResultConnection,
   parseEphemeralVmRecipeResult
 } from '../../shared/ephemeral-vm-recipes'
+import { getMacAppBundlePath } from './mac-app-update-bundle'
+import { getDefaultUserDataPath } from './metadata'
+import {
+  buildServeUpdateChildEnvironment,
+  resolveServeUpdateHandoffLaunchPath
+} from './serve-update-launch-config'
+import {
+  readServeUpdateHandoffSync,
+  resumeInterruptedServeUpdate,
+  superviseForegroundServe
+} from './serve-update-supervisor'
 import { RuntimeClientError } from './types'
 
 const IGNORED_NON_RECIPE_STDOUT = '[serve] ignored non-recipe stdout'
@@ -102,48 +113,54 @@ export function serveYiruApp(
     childArgs.push('--serve-recipe-json', '--serve-project-root', args.projectRoot)
   }
 
-  const child = spawnProcess(executable, childArgs, {
+  const handoffPath = resolveServeUpdateHandoffLaunchPath({
+    executable,
+    recipeJson: args.recipeJson === true,
+    userDataPath: getDefaultUserDataPath()
+  })
+  const childEnv = buildServeUpdateChildEnvironment(
+    stripElectronRunAsNode(process.env),
+    handoffPath
+  )
+  const spawnOptions: SpawnOptions = {
     detached: args.recipeJson === true,
     cwd: resolveAppRoot(),
-    stdio: args.recipeJson === true ? ['ignore', 'pipe', 'inherit'] : 'inherit',
+    stdio:
+      args.recipeJson === true
+        ? ['ignore', 'pipe', 'inherit']
+        : handoffPath
+          ? ['inherit', 'inherit', 'inherit', 'ipc']
+          : 'inherit',
     ...getExecutableSpawnOptions(executable),
-    env: stripElectronRunAsNode(process.env)
-  })
+    env: childEnv
+  }
+  const interruptedHandoff = handoffPath ? readServeUpdateHandoffSync(handoffPath) : null
+  if (interruptedHandoff?.phase === 'install-requested') {
+    // Why: the node-mode CLI remains alive while ShipIt replaces the app and
+    // can recover an interrupted handoff after a service-manager restart.
+    return resumeInterruptedServeUpdate({
+      executable,
+      childArgs,
+      spawnOptions,
+      spawnChild: spawnProcess,
+      handoffPath: handoffPath!,
+      handoff: interruptedHandoff
+    })
+  }
+  const child = spawnProcess(executable, childArgs, spawnOptions)
 
   if (args.recipeJson) {
     return waitForRecipeJson(child)
   }
 
-  return new Promise((resolve, reject) => {
-    let forceKillTimer: ReturnType<typeof setTimeout> | null = null
-    const forwardSignal = (signal: NodeJS.Signals): void => {
-      child.kill(signal)
-      forceKillTimer ??= setTimeout(() => {
-        child.kill('SIGKILL')
-      }, 5000)
-    }
-    const cleanup = (): void => {
-      process.off('SIGINT', forwardSignal)
-      process.off('SIGTERM', forwardSignal)
-      if (forceKillTimer) {
-        clearTimeout(forceKillTimer)
-        forceKillTimer = null
-      }
-    }
-    process.on('SIGINT', forwardSignal)
-    process.on('SIGTERM', forwardSignal)
-    child.once('error', (error) => {
-      cleanup()
-      reject(error)
-    })
-    child.once('exit', (code, signal) => {
-      cleanup()
-      if (typeof code === 'number') {
-        resolve(code)
-        return
-      }
-      reject(new RuntimeClientError('runtime_serve_failed', `Yiru serve exited via ${signal}`))
-    })
+  return superviseForegroundServe({
+    executable,
+    childArgs,
+    spawnOptions,
+    spawnChild: spawnProcess,
+    child,
+    handoffPath,
+    expectedHandoff: null
   })
 }
 
@@ -271,14 +288,4 @@ export function stripElectronRunAsNode(env: NodeJS.ProcessEnv): NodeJS.ProcessEn
   const next = { ...env }
   delete next.ELECTRON_RUN_AS_NODE
   return next
-}
-
-function getMacAppBundlePath(execPath: string): string | null {
-  if (process.platform !== 'darwin') {
-    return null
-  }
-  const macOsDir = dirname(execPath)
-  const contentsDir = dirname(macOsDir)
-  const appBundlePath = dirname(contentsDir)
-  return appBundlePath.endsWith('.app') ? appBundlePath : null
 }

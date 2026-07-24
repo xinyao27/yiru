@@ -1,6 +1,5 @@
-// Why: multi-profile management is downscoped to an accounts-first UX, not
-// removed — the full switcher stays reachable behind this product-scope toggle
-// (safe in packaged builds; it is not a security escape hatch).
+// Why: local multi-profile management remains opt-in while its product scope is
+// finalized; this is a UI rollout toggle, not a security boundary.
 export function isMultiProfileUiEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.YIRU_MULTI_PROFILE_UI === '1'
 }

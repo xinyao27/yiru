@@ -208,7 +208,7 @@ export function FloatingTerminalToggleButton({
               variant="outline"
               size="icon"
               // Why: the global accent token is translucent; this launcher must stay opaque over content.
-              className="relative cursor-grab rounded-lg hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--foreground)_14%,var(--background))] active:translate-y-0 active:cursor-grabbing dark:hover:bg-[color-mix(in_srgb,var(--foreground)_14%,var(--background))]"
+              className="relative cursor-grab hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--foreground)_14%,var(--background))] active:translate-y-0 active:cursor-grabbing dark:hover:bg-[color-mix(in_srgb,var(--foreground)_14%,var(--background))]"
               data-floating-terminal-toggle
               aria-label={
                 open
@@ -241,7 +241,7 @@ export function FloatingTerminalToggleButton({
                 <span
                   aria-hidden
                   data-floating-terminal-attention
-                  className="pointer-events-none absolute top-1 right-1 size-2 rounded-full bg-amber-500"
+                  className="pointer-events-none absolute top-1 right-1 size-2 bg-amber-500"
                 />
               ) : null}
             </Button>

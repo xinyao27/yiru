@@ -33,6 +33,7 @@ const AccountsUnsubscribeParams = z.object({
 export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
   defineMethod({
     name: 'accounts.list',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime }) => {
       // Why: ensure the snapshot reflects the latest provider state before
@@ -45,11 +46,13 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'accounts.selectClaude',
+    mobile: true,
     params: SelectAccountParams,
     handler: async (params, { runtime }) => runtime.selectClaudeAccount(params.accountId)
   }),
   defineMethod({
     name: 'accounts.selectCodex',
+    mobile: true,
     params: SelectAccountParams,
     handler: async (params, { runtime }) => runtime.selectCodexAccount(params.accountId)
   }),
@@ -68,6 +71,7 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
   // accounts on either side. Mirrors the notifications.subscribe pattern.
   defineStreamingMethod({
     name: 'accounts.subscribe',
+    mobile: true,
     params: null,
     handler: async (_params, { runtime, connectionId }, emit) => {
       await new Promise<void>((resolve) => {
@@ -103,6 +107,7 @@ export const ACCOUNT_METHODS: readonly RpcAnyMethod[] = [
   }),
   defineMethod({
     name: 'accounts.unsubscribe',
+    mobile: true,
     params: AccountsUnsubscribeParams,
     handler: async (params, { runtime }) => {
       runtime.cleanupSubscription(params.subscriptionId)

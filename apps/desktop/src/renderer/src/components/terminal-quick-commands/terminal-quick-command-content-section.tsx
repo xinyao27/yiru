@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
@@ -130,7 +131,7 @@ export function TerminalQuickCommandContentSection({
                 'Command Text'
               )}
         </Label>
-        <textarea
+        <Textarea
           value={isTerminalAgentQuickCommand(draft) ? draft.prompt : draft.command}
           onChange={(event) => {
             const text = event.target.value
@@ -162,7 +163,7 @@ export function TerminalQuickCommandContentSection({
           }
           rows={4}
           className={cn(
-            'min-h-24 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none transition-[color] focus-visible:border-ring',
+            'min-h-24 w-full resize-y border border-input bg-transparent px-3 py-2 text-sm outline-none transition-[color] focus-visible:border-ring',
             !isAgentAction && 'font-mono'
           )}
         />
@@ -188,7 +189,7 @@ export function TerminalQuickCommandContentSection({
               'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.e604bd40d6',
               'Supports skills, file paths, and built-in commands like'
             )}{' '}
-            <code className="bg-muted rounded px-1 font-mono text-[11px]">
+            <code className="bg-muted px-1 font-mono text-[11px]">
               {translate(
                 'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.97e96cc027',
                 '/goal'

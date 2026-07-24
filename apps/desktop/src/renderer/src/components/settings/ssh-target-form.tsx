@@ -45,7 +45,7 @@ export function SshTargetForm({
 
   return (
     <form
-      className="border-border/50 bg-card/40 space-y-4 rounded-lg border p-4"
+      className="border-border/50 bg-card/40 space-y-4 border p-4"
       onSubmit={(e) => {
         e.preventDefault()
         onSave()

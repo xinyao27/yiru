@@ -49,7 +49,10 @@ export function TerminalQuickCommandAdvancedSection({
           'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.925b8e0f6e',
           'Advanced'
         )}
-        <ChevronDown className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')} />
+        <ChevronDown
+          weight="regular"
+          className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
+        />
       </Button>
 
       <div

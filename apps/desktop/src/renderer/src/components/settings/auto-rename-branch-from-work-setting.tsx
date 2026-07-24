@@ -1,6 +1,8 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -174,50 +176,29 @@ export function AutoRenameBranchFromWorkSetting({
             )}
           </p>
         </div>
-        <button
-          role="switch"
-          aria-checked={settings.autoRenameBranchFromWork}
-          onClick={() =>
-            updateSettings({
-              autoRenameBranchFromWork: !settings.autoRenameBranchFromWork
-            })
-          }
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            settings.autoRenameBranchFromWork ? 'bg-foreground' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              settings.autoRenameBranchFromWork ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        <Switch
+          checked={settings.autoRenameBranchFromWork}
+          onCheckedChange={(checked) => updateSettings({ autoRenameBranchFromWork: checked })}
+        />
       </div>
 
       <Collapsible open={advancedOpen} onOpenChange={setOptionsOpen}>
         <CollapsibleTrigger
           render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground -ml-2 h-7 px-2 text-xs"
-            >
+            <Button type="button" variant="quiet" size="sm" className="-ml-2 h-7 px-2 text-xs">
               {translate(
                 'auto.components.settings.AutoRenameBranchFromWorkSetting.e784ea62dc',
                 'Advanced'
               )}
               <ChevronDown
+                weight="regular"
                 className={cn('size-3.5 transition-transform', advancedOpen && 'rotate-180')}
               />
             </Button>
           }
         />
         <CollapsibleContent>
-          <div className="border-border/60 bg-muted/20 mt-2 space-y-3 rounded-md border px-3 py-3">
+          <div className="border-border/60 bg-muted/20 mt-2 space-y-3 border px-3 py-3">
             <div className="space-y-2">
               <div className="space-y-0.5">
                 <Label htmlFor="git-auto-rename-branch-name-template">
@@ -244,15 +225,17 @@ export function AutoRenameBranchFromWorkSetting({
                   <Popover>
                     <PopoverTrigger
                       render={
-                        <button
+                        <Button
+                          variant="outline"
+                          size="xs"
                           type="button"
-                          className="text-foreground decoration-border hover:decoration-foreground inline rounded-sm font-medium underline underline-offset-2 focus-visible:outline-none"
+                          className="decoration-border hover:decoration-foreground inline h-auto underline underline-offset-2"
                         >
                           {translate(
                             'auto.components.settings.AutoRenameBranchFromWorkSetting.9c9b54e4ea',
                             'built-in branch-name prompt'
                           )}
-                        </button>
+                        </Button>
                       }
                     />
                     <PopoverContent
@@ -261,7 +244,7 @@ export function AutoRenameBranchFromWorkSetting({
                       className="w-[520px] max-w-[calc(100vw-2rem)] p-3"
                     >
                       <div>
-                        <pre className="scrollbar-sleek border-border bg-background text-muted-foreground max-h-72 overflow-auto rounded-md border px-3 py-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
+                        <pre className="scrollbar-sleek border-border bg-background text-muted-foreground max-h-72 overflow-auto border px-3 py-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
                           {BUILT_IN_BRANCH_NAME_PROMPT}
                         </pre>
                       </div>
@@ -303,7 +286,7 @@ export function AutoRenameBranchFromWorkSetting({
                   )}
                 </p>
               </div>
-              <textarea
+              <Textarea
                 id="git-auto-rename-branch-name-template"
                 rows={4}
                 value={branchNameTemplateDraft}
@@ -312,7 +295,7 @@ export function AutoRenameBranchFromWorkSetting({
                   'auto.components.settings.AutoRenameBranchFromWorkSetting.c71770c455',
                   '{basePrompt}'
                 )}
-                className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 w-full resize-y rounded-md border px-2 py-1.5 font-mono text-xs outline-none"
+                className="font-mono"
               />
               <SourceControlActionVariableChips
                 actionId="branchName"

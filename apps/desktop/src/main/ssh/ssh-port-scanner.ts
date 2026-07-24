@@ -1,4 +1,5 @@
-import type { DetectedPort } from '../../shared/ssh-types'
+import type { DetectedPort } from '@yiru/runtime-protocol/ssh-connection'
+
 import type { SshChannelMultiplexer } from './ssh-channel-multiplexer'
 
 // Why: every tick walks /proc/*/fd on the remote relay, so cadence is remote

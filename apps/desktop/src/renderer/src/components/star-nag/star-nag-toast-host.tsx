@@ -1,12 +1,11 @@
 import { Check, Star, ArrowSquareOut as ExternalLink, X } from '@phosphor-icons/react'
+import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-
-import { YIRU_GITHUB_REPOSITORY_URL } from '../../../../shared/yiru-github-repository'
 
 type StarNagMode = 'gh' | 'web'
 type StarNagToastStatus = 'idle' | 'busy' | 'starred' | 'opened'
@@ -97,15 +96,15 @@ function StarNagToast({
     : 'min-w-0 flex-1 gap-1.5 border-amber-400/60 bg-amber-400/15 text-amber-800 hover:bg-amber-400/25 dark:text-amber-100'
 
   return (
-    <div className="border-border bg-popover text-popover-foreground relative w-[340px] max-w-[calc(100vw-32px)] overflow-hidden rounded-lg border p-3.5">
+    <div className="border-border bg-popover text-popover-foreground relative w-[340px] max-w-[calc(100vw-32px)] overflow-hidden border p-3.5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-2">
             <span
               className={
                 completedStar
-                  ? 'flex size-6 shrink-0 items-center justify-center rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-500'
-                  : 'flex size-6 shrink-0 items-center justify-center rounded-full border border-green-700/25 bg-green-700/10 text-green-700 dark:border-green-300/25 dark:bg-green-300/10 dark:text-green-300'
+                  ? 'flex size-6 shrink-0 items-center justify-center border border-amber-400/40 bg-amber-400/10 text-amber-500'
+                  : 'flex size-6 shrink-0 items-center justify-center border border-green-700/25 bg-green-700/10 text-green-700 dark:border-green-300/25 dark:bg-green-300/10 dark:text-green-300'
               }
               aria-hidden="true"
             >
@@ -137,7 +136,7 @@ function StarNagToast({
           disabled={busy}
           aria-label={translate('auto.components.star.nag.StarNagToastHost.dismiss', 'Dismiss')}
         >
-          <X className="size-3.5" />
+          <X weight="regular" className="size-3.5" />
         </Button>
       </div>
       <div className="mt-3 flex gap-2">
@@ -151,7 +150,7 @@ function StarNagToast({
           {busy ? (
             <LoadingIndicator className="size-3.5" />
           ) : mode === 'web' ? (
-            <ExternalLink className="size-3.5" />
+            <ExternalLink weight="regular" className="size-3.5" />
           ) : (
             <Star className="size-3.5" />
           )}

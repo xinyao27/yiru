@@ -1,5 +1,4 @@
-import type { AppState } from '@/store/types'
-
+import { isWslUncPath } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
@@ -7,11 +6,13 @@ import {
   parseExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
+import type { AppState } from '@/store/types'
+
 import type { Repo } from '../../../shared/types'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../../shared/worktree-id'
-import { isWslUncPath } from '../../../shared/wsl-paths'
 import { getFolderWorkspaceCandidateRepos } from './folder-workspace-connection'
 
 export type AiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'

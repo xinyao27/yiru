@@ -1,3 +1,9 @@
+import {
+  getSettingsFocusedExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  toRuntimeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
@@ -17,16 +23,12 @@ import {
   type RuntimeClientTarget
 } from '@/runtime/runtime-rpc-client'
 import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { createWebSessionBrowserTabCommand } from '@/runtime/web-session-commands'
+import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
 
 import { GRAB_BUDGET, type BrowserPageAnnotation } from '../../../../shared/browser-grab-types'
 import { redactKagiSessionToken } from '../../../../shared/browser-url'
 import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
-import {
-  getSettingsFocusedExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID,
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import type {
   BrowserDetectProfilesResult,
   BrowserProfileClearDefaultCookiesResult,
@@ -94,6 +96,22 @@ type BrowserTabPageState = {
 type ClosedBrowserWorkspaceSnapshot = {
   workspace: BrowserWorkspace
   pages: BrowserPage[]
+}
+
+function findRemoteBrowserPage(
+  state: AppState,
+  environmentId: string,
+  remotePageId: string
+): string | null {
+  for (const pages of Object.values(state.browserPagesByWorkspace)) {
+    for (const page of pages) {
+      const handle = state.remoteBrowserPageHandlesByPageId[page.id]
+      if (handle?.environmentId === environmentId && handle.remotePageId === remotePageId) {
+        return page.id
+      }
+    }
+  }
+  return null
 }
 
 function sanitizeBrowserPageAnnotation(annotation: BrowserPageAnnotation): BrowserPageAnnotation {
@@ -628,28 +646,51 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
     const defaultUrl = state.browserDefaultUrl ?? 'about:blank'
     const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(state, worktreeId)
     if (runtimeEnvironmentId) {
-      const { createWebRuntimeSessionBrowserTab } = await import('@/runtime/web-runtime-session')
-      try {
-        const created = await createWebRuntimeSessionBrowserTab({
-          worktreeId,
-          environmentId: runtimeEnvironmentId,
-          url: defaultUrl,
-          targetGroupId: groupId
-        })
-        if (created) {
-          get().recordFeatureInteraction('browser-tab-created')
-          return
-        }
-      } catch (error) {
-        // Why: a remote-owned workspace must NOT silently fall back to a local
-        // desktop browser tab — that creates confusing split ownership. Headless
-        // remotes that support browser panes advertise browser.headless.v1 and
-        // succeed above; if creation fails, surface it instead of going local.
+      const result = await createWebSessionBrowserTabCommand({
+        worktreeId,
+        environmentId: runtimeEnvironmentId,
+        url: defaultUrl,
+        targetGroupId: groupId
+      })
+      if (result.status === 'failed') {
         console.warn(
           '[browser] remote browser tab creation failed:',
-          error instanceof Error ? error.message : String(error)
+          result.error instanceof Error ? result.error.message : String(result.error)
         )
+        return
       }
+      const existingPageId = findRemoteBrowserPage(
+        get(),
+        runtimeEnvironmentId,
+        result.value.browserPageId
+      )
+      if (existingPageId) {
+        get().focusBrowserTabInWorktree(worktreeId, existingPageId, { surfacePane: true })
+        get().recordFeatureInteraction('browser-tab-created')
+        void requestWebSessionTabsRefresh({
+          environmentId: runtimeEnvironmentId,
+          worktreeId
+        })
+        return
+      }
+      const browserTab = get().createBrowserTab(worktreeId, defaultUrl, {
+        title: defaultUrl === 'about:blank' ? 'New Browser Tab' : defaultUrl,
+        focusAddressBar: true,
+        browserRuntimeEnvironmentId: runtimeEnvironmentId,
+        targetGroupId: groupId
+      })
+      const pageId = browserTab.activePageId ?? browserTab.pageIds?.[0] ?? null
+      if (pageId) {
+        get().setRemoteBrowserPageHandle(pageId, {
+          environmentId: runtimeEnvironmentId,
+          remotePageId: result.value.browserPageId
+        })
+      }
+      void requestWebSessionTabsRefresh({
+        environmentId: runtimeEnvironmentId,
+        worktreeId
+      })
+      get().recordFeatureInteraction('browser-tab-created')
       return
     }
     get().createBrowserTab(worktreeId, defaultUrl, {

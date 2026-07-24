@@ -1,4 +1,5 @@
-import type { SshConnectionState } from './ssh-types'
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+
 import type {
   CreateWorktreeResult,
   WorktreeDefaultTabsLaunch,

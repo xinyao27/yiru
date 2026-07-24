@@ -1,22 +1,19 @@
 // IPC surface for the error-tracking lane (telemetry-error-tracking.md
-// §User controls). Six renderer-facing channels:
+// §User controls). Five renderer-facing channels:
 //
 //   diagnostics:getStatus            — read-only snapshot for the Privacy pane.
 //   diagnostics:collectBundle        — assemble and retain a redacted payload.
 //   diagnostics:openBundlePreview    — open the retained payload in the OS.
 //   diagnostics:discardBundlePreview — delete a retained, unuploaded payload.
-//   diagnostics:uploadBundle         — POST the main-retained payload.
-//   diagnostics:deleteBundle         — delete an uploaded bundle by ticket ID.
+//   diagnostics:uploadBundle         — send a bounded excerpt to PostHog.
 //
 // Same threat model as the product-telemetry IPC (`ipc/telemetry.ts`):
 // renderer can pass anything over the wire, type-narrow here. Everything
 // that touches the network or filesystem stays in main — the renderer
 // only sees the resulting status / preview / ticket-id.
 //
-// Hardening item §Endpoint contract #10 ("No renderer access to any of
-// these endpoints"): the upload endpoint URL never crosses IPC. The
-// renderer triggers the flow; main reads the URL from a build-time
-// constant or env var and does the POST itself.
+// The renderer never receives PostHog configuration or the retained payload.
+// It can only ask main to submit the bounded report assembled below.
 
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs'
 import { arch as osArch, platform as osPlatform, release as osRelease } from 'node:os'
@@ -27,20 +24,16 @@ import { app, dialog, ipcMain, shell } from 'electron'
 
 import {
   collectDiagnosticBundle,
-  deleteDiagnosticBundle,
   getDiagnosticsStatus,
-  uploadDiagnosticBundle,
   type DiagnosticsStatus
 } from '../observability'
 import type { CollectedBundle } from '../observability/bundle'
-import type { UploadBundleResult } from '../observability/diagnostic-bundle-upload'
-import {
-  resolveDiagnosticYiruChannel,
-  resolveDiagnosticTokenEndpoint
-} from '../observability/diagnostic-upload-endpoint'
+import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
+import { buildSupportReportDraft } from '../support-report/support-report-payload'
+import { submitSupportReport } from '../telemetry/client'
 
 export type DiagnosticsBundlePreview = Omit<CollectedBundle, 'payload'>
-type UploadBundleIpcResult = UploadBundleResult | { canceled: true }
+type UploadBundleIpcResult = { readonly ticketId: string } | { readonly canceled: true }
 
 const PENDING_BUNDLE_TTL_MS = 15 * 60 * 1000
 const MAX_PENDING_BUNDLES = 8
@@ -188,19 +181,17 @@ function deletePreviewFile(filePath: string): void {
   }
 }
 
-function isTicketId(value: unknown): value is string {
-  return typeof value === 'string' && /^[A-Za-z0-9_-]{16,64}$/.test(value)
-}
-
 async function confirmBundleUpload(bundle: CollectedBundle): Promise<boolean> {
   const result = await dialog.showMessageBox({
     type: 'question',
     buttons: ['Send', 'Cancel'],
     defaultId: 1,
     cancelId: 1,
-    title: 'Send this file to support?',
-    message: 'This uploads the redacted app diagnostics file you reviewed.',
-    detail: `Diagnostic ID: ${bundle.bundleSubmissionId}\nDiagnostic records: ${bundle.spanCount}\nSize: ${Math.round(
+    title: 'Send diagnostics to support?',
+    message: 'This sends a bounded redacted excerpt and metadata to PostHog.',
+    // Why: the full multi-megabyte preview is never attached to a PostHog
+    // event; make that privacy boundary explicit at the final consent step.
+    detail: `The full review file does not leave this device.\n\nDiagnostic ID: ${bundle.bundleSubmissionId}\nDiagnostic records: ${bundle.spanCount}\nSize: ${Math.round(
       bundle.bytes / 1024
     )} KB`
   })
@@ -265,20 +256,25 @@ export function registerDiagnosticsHandlers(): void {
       if (!getDiagnosticsStatus().bundleEnabled) {
         throw new Error('sending diagnostics is disabled')
       }
-      const tokenEndpoint = resolveDiagnosticTokenEndpoint()
-      if (!tokenEndpoint) {
-        throw new Error('sending diagnostics is not configured for this build')
+      const result = await submitSupportReport(
+        buildSupportReportDraft({
+          reportType: 'diagnostics',
+          diagnosticBundle: {
+            bundleSubmissionId: bundle.bundleSubmissionId,
+            content: payload,
+            bytes: bundle.bytes,
+            spanCount: bundle.spanCount
+          }
+        })
+      )
+      if (!result.ok) {
+        throw new Error(result.error)
       }
-      const result = await uploadDiagnosticBundle({
-        tokenEndpoint,
-        payload,
-        bundleSubmissionId: bundle.bundleSubmissionId
-      })
       const uploadedPending = pendingBundles.get(bundle.bundleSubmissionId)
       if (uploadedPending) {
         deletePendingBundle(bundle.bundleSubmissionId)
       }
-      return result
+      return { ticketId: result.reportId }
     }
   )
 
@@ -296,16 +292,5 @@ export function registerDiagnosticsHandlers(): void {
 
   ipcMain.handle('diagnostics:discardBundlePreview', (_event, bundleSubmissionId: unknown) => {
     discardPendingBundle(bundleSubmissionId)
-  })
-
-  ipcMain.handle('diagnostics:deleteBundle', async (_event, ticketId: unknown): Promise<void> => {
-    if (!isTicketId(ticketId)) {
-      throw new Error('ticketId has invalid format')
-    }
-    const tokenEndpoint = resolveDiagnosticTokenEndpoint()
-    if (!tokenEndpoint) {
-      throw new Error('diagnostic upload endpoint is not configured for this build')
-    }
-    await deleteDiagnosticBundle({ tokenEndpoint, ticketId })
   })
 }

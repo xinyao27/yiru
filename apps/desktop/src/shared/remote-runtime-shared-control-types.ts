@@ -1,5 +1,6 @@
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import type { RemoteRuntimeClientError } from './remote-runtime-client-error'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 
 export type SharedControlConnectionState =
   | 'closed'

@@ -1,11 +1,21 @@
-import { toast } from 'sonner'
+import { isPositiveHostedReviewNumber } from '@yiru/workbench-model/review'
+import {
+  CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
+  getClientWorktreeCreateCandidate,
+  isRetryableWorktreeCreateConflict
+} from '@yiru/workbench-model/review'
+import {
+  getRepoExecutionHostId,
+  getSettingsFocusedExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId,
+  toSshExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
-import { showLocalBaseRefUpdateSuggestionToast } from '@/components/sidebar/local-base-ref-suggestion-toast'
-import { showPreservedBranchToast } from '@/components/sidebar/preserved-branch-toast'
-import { requestVirtualizedScrollAnchorRecord } from '@/hooks/request-virtualized-scroll-anchor-record'
-import { translate } from '@/i18n/i18n'
 import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
 import { ensureHooksConfirmed } from '@/lib/ensure-hooks-confirmed'
@@ -19,24 +29,17 @@ import {
   migrateHugeRepoWarningDismissal
 } from '@/lib/source-control-huge-repo-warning-dismissals'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
+import { requestVirtualizedScrollAnchorRecord } from '@/runtime/virtualized-scroll-anchor-record-request'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import {
-  getRepoExecutionHostId,
-  getSettingsFocusedExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID,
-  parseExecutionHostId,
-  toSshExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import { isPositiveHostedReviewNumber } from '../../../../shared/hosted-review'
 import {
-  CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
-  getClientWorktreeCreateCandidate,
-  isRetryableWorktreeCreateConflict
-} from '../../../../shared/new-workspace/worktree-create-retry-policy'
-import type { RuntimeWorktreeListResult } from '../../../../shared/runtime-types'
+  WORKTREE_CREATE_CONTRACT,
+  WORKTREE_LIST_CONTRACT,
+  WORKTREE_REMOVE_CONTRACT,
+  WORKTREE_SET_CONTRACT
+} from '../../../../shared/runtime-method-contracts/workspace-contracts'
 import type {
   DetectedWorktreeListResult,
   TerminalLayoutSnapshot,
@@ -48,7 +51,6 @@ import type {
   Worktree,
   WorkspaceVisibleTabType,
   GitPushTarget,
-  RemoveWorktreeResult,
   WorktreeLineage,
   WorkspaceLineage,
   ProjectHostSetup,
@@ -61,13 +63,11 @@ import {
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace-scope'
-import { splitWorktreeIdForFilesystem } from '../../../../shared/worktree-id'
 import {
   classifyWorktreeForceDeleteReason,
   getLockedWorktreeRemovalReason,
   isLockedWorktreeRemovalError
 } from '../../../../shared/worktree-removal'
-import { disposeRemovedWorktreeParkedTerminalWatchers } from '../../components/terminal-pane/terminal-parked-watcher-registry'
 import {
   callRuntimeRpc,
   getActiveRuntimeTarget,
@@ -75,6 +75,7 @@ import {
   RuntimeRpcCallError
 } from '../../runtime/runtime-rpc-client'
 import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-selector'
+import { disposeRemovedWorktreeParkedTerminalWatchers } from '../../runtime/terminal-parked-watcher-registry'
 import type { AppState } from '../types'
 import { moveFocusToRendererBeforeFocusedWebviewHidden } from './browser-webview-cleanup'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'
@@ -90,6 +91,7 @@ import {
   getRepoIdFromWorktreeId,
   type WorktreeSlice
 } from './worktree-helpers'
+import { reconcileHydratedWorktreeReferences } from './worktree-hydration-reconciliation'
 import { routeListingBranchSwitchesThroughGitIdentity } from './worktree-listing-branch-switch'
 export type { WorktreeSlice, WorktreeDeleteState } from './worktree-helpers'
 
@@ -161,39 +163,11 @@ function shouldDeferActivationTerminalPrep(): boolean {
   return typeof window !== 'undefined' && import.meta.env.MODE !== 'test'
 }
 
-function showLocalBaseRefRefreshToast(result: LocalBaseRefRefreshResult | undefined): void {
+function publishLocalBaseRefRefreshResult(result: LocalBaseRefRefreshResult | undefined): void {
   if (!result || result.status === 'updated') {
     return
   }
-
-  let reason: string
-  switch (result.status) {
-    case 'skipped_dirty_worktree':
-      reason =
-        'the worktree where it is checked out has uncommitted changes. Commit, stash, or discard those changes, then try again.'
-      break
-    case 'skipped_not_fast_forward':
-      reason =
-        'the local branch does not exist or cannot be fast-forwarded cleanly from the remote base. Check for local-only commits before updating it manually.'
-      break
-    case 'skipped_error':
-      reason =
-        'Git returned an error while updating the local ref. Check the repo for locked refs or unusual worktree state, then try again.'
-      break
-  }
-
-  toast.warning(
-    translate('auto.store.slices.worktrees.14bc053a47', 'Local {{value0}} was not refreshed', {
-      value0: result.localBranch
-    }),
-    {
-      description: translate(
-        'auto.store.slices.worktrees.903b51c2ed',
-        'Workspace created from {{value0}}, but Yiru could not fast-forward local {{value1}} because {{value2}}',
-        { value0: result.baseRef, value1: result.localBranch, value2: reason }
-      )
-    }
-  )
+  publishRendererCommandResult({ type: 'worktree-local-base-ref-refresh', result })
 }
 
 function arraysShallowEqual(a: string[] | undefined, b: string[] | undefined): boolean {
@@ -584,25 +558,11 @@ function isRuntimeMethodNotFoundError(error: unknown): boolean {
 // otherwise be swallowed into empty workspaces on every repo. Surface one
 // deduped, actionable toast (stable id) instead of spamming per-repo, steering
 // the user to re-pair via the full-access browser link.
-const RUNTIME_SCOPE_FORBIDDEN_TOAST_ID = 'runtime-scope-forbidden'
-
 function notifyRuntimeScopeForbiddenIfNeeded(error: unknown): boolean {
   if (!isRuntimeScopeForbiddenError(error)) {
     return false
   }
-  toast.error(
-    translate(
-      'auto.store.slices.worktrees.runtimeScopeForbiddenTitle',
-      'This connection has limited (mobile) access'
-    ),
-    {
-      id: RUNTIME_SCOPE_FORBIDDEN_TOAST_ID,
-      description: translate(
-        'auto.store.slices.worktrees.runtimeScopeForbiddenDescription',
-        'Workspaces are unavailable on a mobile-scope pairing. Reconnect using the browser access link from Settings → Runtime Environments → Share this Yiru server.'
-      )
-    }
-  )
+  publishRendererCommandResult({ type: 'worktree-runtime-scope-forbidden' })
   return true
 }
 
@@ -905,9 +865,9 @@ async function listDetectedWorktreesForRepo(
     if (!isRuntimeMethodNotFoundError(error)) {
       throw error
     }
-    const legacy = await callRuntimeRpc<RuntimeWorktreeListResult>(
+    const legacy = await callRuntimeRpc(
       target,
-      'worktree.list',
+      WORKTREE_LIST_CONTRACT,
       { repo: repoId, limit: REMOTE_WORKTREE_LIST_PARITY_LIMIT },
       {
         timeoutMs: 15_000,
@@ -1058,9 +1018,9 @@ async function setWorktreeLineageForRuntime(
       lineage: await window.api.worktrees.updateLineage({ worktreeId, ...args })
     }
   }
-  const result = await callRuntimeRpc<{ worktree: WorktreeWithLineage }>(
+  const result = await callRuntimeRpc(
     target,
-    'worktree.set',
+    WORKTREE_SET_CONTRACT,
     {
       worktree: toRuntimeWorktreeSelector(worktreeId),
       ...(args.parentWorktreeId
@@ -1263,7 +1223,7 @@ async function persistWorktreeMeta(
   }
   await callRuntimeRpc(
     target,
-    'worktree.set',
+    WORKTREE_SET_CONTRACT,
     {
       worktree: toRuntimeWorktreeSelector(worktreeId),
       ...encodePushTargetClearForRuntimeRpc(updates)
@@ -3036,9 +2996,9 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           const result =
             target.kind === 'local'
               ? await window.api.worktrees.create(createArgs)
-              : await callRuntimeRpc<Awaited<ReturnType<typeof window.api.worktrees.create>>>(
+              : await callRuntimeRpc(
                   target,
-                  'worktree.create',
+                  WORKTREE_CREATE_CONTRACT,
                   {
                     repo: repoId,
                     name: candidateName,
@@ -3054,9 +3014,6 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
                     ...(linkedPR !== undefined ? { linkedPR } : {}),
                     ...(pushTarget ? { pushTarget } : {}),
                     ...(createdWithAgent ? { createdWithAgent } : {}),
-                    ...(pendingFirstAgentMessageRename === true && createdWithAgent
-                      ? { pendingFirstAgentMessageRename: true }
-                      : {}),
                     ...(manualOrder !== undefined ? { manualOrder } : {}),
                     ...(parentWorkspace ? { parentWorkspace } : {}),
                     ...(workspaceStatus !== undefined ? { workspaceStatus } : {}),
@@ -3127,13 +3084,13 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
               sortEpoch: s.sortEpoch + 1
             }
           })
-          showLocalBaseRefRefreshToast(result.localBaseRefRefresh)
-          showLocalBaseRefUpdateSuggestionToast(result.localBaseRefUpdateSuggestion, {
-            updateSettings: get().updateSettings,
-            getSettings: () => get().settings,
-            openSettingsPage: get().openSettingsPage,
-            openSettingsTarget: get().openSettingsTarget
-          })
+          publishLocalBaseRefRefreshResult(result.localBaseRefRefresh)
+          if (result.localBaseRefUpdateSuggestion) {
+            publishRendererCommandResult({
+              type: 'worktree-local-base-ref-suggestion',
+              suggestion: result.localBaseRefUpdateSuggestion
+            })
+          }
           return result
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error)
@@ -3290,9 +3247,9 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         ? window.api.worktrees.forgetLocal({ worktreeId, hostId })
         : target.kind === 'local'
           ? window.api.worktrees.remove({ worktreeId, hostId, force, skipArchive })
-          : callRuntimeRpc<RemoveWorktreeResult>(
+          : callRuntimeRpc(
               target,
-              'worktree.rm',
+              WORKTREE_REMOVE_CONTRACT,
               {
                 worktree: toRuntimeWorktreeSelector(worktreeId),
                 force,
@@ -3646,9 +3603,12 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       // prune effect cannot be the only stale-draft cleanup path.
       clearSessionCommitDraftForWorktree(worktreeId)
       const preservedBranch = removalResult?.preservedBranch
-      if (preservedBranch && options?.suppressPreservedBranchToast !== true) {
-        showPreservedBranchToast(removalResult, worktreeBeforeRemoval, (branch, expectedHead) => {
-          void get().forceDeletePreservedBranch(worktreeId, branch, expectedHead)
+      if (preservedBranch && removalResult && options?.suppressPreservedBranchToast !== true) {
+        publishRendererCommandResult({
+          type: 'worktree-preserved-branch',
+          worktreeId,
+          result: removalResult,
+          worktree: worktreeBeforeRemoval
         })
       }
       pruneHostedReviewLinkMutationGenerations([worktreeId])
@@ -3741,16 +3701,19 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
             { worktree: toRuntimeWorktreeSelector(worktreeId), branchName, expectedHead },
             { timeoutMs: 15_000 }
           ))
-      toast.success(translate('auto.store.slices.worktrees.19db0085fb', 'Local branch deleted'), {
-        description: translate('auto.store.slices.worktrees.5a58e03a26', 'Deleted "{{value0}}".', {
-          value0: branchName
-        })
+      publishRendererCommandResult({
+        type: 'worktree-branch-delete',
+        outcome: 'succeeded',
+        branchName
       })
       return { ok: true as const, ...result }
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err)
-      toast.error(translate('auto.store.slices.worktrees.0216895fb5', 'Failed to delete branch'), {
-        description: error
+      publishRendererCommandResult({
+        type: 'worktree-branch-delete',
+        outcome: 'failed',
+        branchName,
+        error
       })
       return { ok: false as const, error }
     }
@@ -4363,46 +4326,12 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
 
   pruneLastVisitedTimestamps: () => {
     set((s) => {
-      // Why: scope pruning per-repo. SSH-backed repos cannot enumerate
-      // worktrees until their connection is established, so at hydration
-      // time worktreesByRepo[sshRepoId] is empty/undefined. If we pruned
-      // globally based on the union of all repos' worktrees, we would wipe
-      // every persisted focus-recency entry for SSH worktrees — precisely
-      // the set this feature exists to preserve. Instead, only drop entries
-      // whose repo has a populated worktree list: a missing repoId means
-      // "not yet hydrated" (defer), a repoId with an empty list after a
-      // successful listing means the worktree really is gone (drop).
-      // The ssh:state-changed 'connected' handler re-fetches worktrees and
-      // a follow-up prune runs from the same site if needed.
-      const validIdsByRepo = new Map<string, Set<string>>()
-      for (const [repoId, list] of Object.entries(s.worktreesByRepo)) {
-        if (s.detectedWorktreesByRepo[repoId]) {
-          continue
-        }
-        validIdsByRepo.set(repoId, new Set(list.map((worktree) => worktree.id)))
-      }
-      for (const [repoId, result] of Object.entries(s.detectedWorktreesByRepo)) {
-        if (result.authoritative) {
-          validIdsByRepo.set(repoId, new Set(result.worktrees.map((worktree) => worktree.id)))
-        }
-      }
-      let changed = false
-      const next: Record<string, number> = {}
-      for (const [id, ts] of Object.entries(s.lastVisitedAtByWorktreeId)) {
-        const repoId = getRepoIdFromWorktreeId(id)
-        const repoIds = validIdsByRepo.get(repoId)
-        if (!repoIds) {
-          // Repo not yet hydrated (e.g. SSH not connected). Keep the entry.
-          next[id] = ts
-          continue
-        }
-        if (repoIds.has(id)) {
-          next[id] = ts
-        } else {
-          changed = true
-        }
-      }
-      return changed ? { lastVisitedAtByWorktreeId: next } : {}
+      return reconcileHydratedWorktreeReferences({
+        worktreesByRepo: s.worktreesByRepo,
+        detectedWorktreesByRepo: s.detectedWorktreesByRepo,
+        lastVisitedAtByWorktreeId: s.lastVisitedAtByWorktreeId,
+        activeWorktreeId: s.activeWorktreeId
+      })
     })
   },
 

@@ -1,6 +1,6 @@
+import type { PRCheckRunDetails } from '@yiru/workbench-model/review'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 
-import type { PRCheckRunDetails } from '../../../../desktop/src/shared/types'
 import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { presentCheckDetail, type CheckDetailJob } from './pr-check-detail-content'
 

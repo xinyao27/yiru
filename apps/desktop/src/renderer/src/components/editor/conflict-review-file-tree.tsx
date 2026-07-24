@@ -6,13 +6,13 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   buildSourceControlTree,
   compactSourceControlTree,
   flattenSourceControlTree,
   type SourceControlTreeNode
-} from '@/components/right-sidebar/source-control-tree'
-import { Button } from '@/components/ui/button'
+} from '@/components/workspace-panel/source-control-tree'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -94,7 +94,7 @@ export function ConflictReviewFileTree({
             )}
             onClick={() => onCollapsedChange(true)}
           >
-            <PanelLeftClose className="size-3.5" />
+            <PanelLeftClose weight="regular" className="size-3.5" />
           </Button>
         </div>
       </div>
@@ -138,9 +138,11 @@ function ConflictReviewFileTreeRow({
 }): React.JSX.Element {
   if (node.type === 'directory') {
     return (
-      <button
+      <Button
+        variant="quiet"
+        size="xs"
         type="button"
-        className="group text-muted-foreground hover:bg-accent/40 hover:text-foreground focus-visible:bg-accent/40 focus-visible:text-foreground flex w-full items-center gap-1 py-1 pr-3 text-left text-xs transition-colors outline-none"
+        className="group /40 /40 flex h-auto w-full justify-start border-0 py-1 pr-3 text-left font-normal whitespace-normal"
         style={{
           paddingLeft: `${node.depth * CONFLICT_REVIEW_TREE_INDENT_PX + CONFLICT_REVIEW_DIRECTORY_PADDING_PX}px`
         }}
@@ -148,6 +150,7 @@ function ConflictReviewFileTreeRow({
         aria-expanded={!isCollapsed}
       >
         <ChevronDown
+          weight="regular"
           className={cn('size-3 shrink-0 transition-transform', isCollapsed && '-rotate-90')}
         />
         {isCollapsed ? (
@@ -159,7 +162,7 @@ function ConflictReviewFileTreeRow({
         <span className="text-muted-foreground/80 w-4 shrink-0 text-center text-[10px] font-bold tabular-nums">
           {node.fileCount}
         </span>
-      </button>
+      </Button>
     )
   }
 
@@ -168,11 +171,13 @@ function ConflictReviewFileTreeRow({
   const isStillUnresolved = liveEntry?.conflictStatus === 'unresolved'
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
       className={cn(
-        'outline-none focus-visible:bg-accent/40 focus-visible:bg-accent/70',
-        'group flex w-full min-w-0 cursor-pointer items-center gap-1 py-1 pr-3 text-left text-xs transition-colors hover:bg-accent/40 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent',
+        'h-auto border-0 justify-start whitespace-normal font-normal focus-visible:bg-accent/40 focus-visible:bg-accent/70',
+        'group flex w-full min-w-0 py-1 pr-3 text-left transition-colors hover:bg-accent/40 disabled:cursor-default disabled:hover:bg-transparent',
         isSelected && 'bg-accent/60 text-accent-foreground hover:bg-accent/70'
       )}
       style={{
@@ -192,7 +197,7 @@ function ConflictReviewFileTreeRow({
       </span>
       <span
         className={cn(
-          'ml-1 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
+          'ml-1 shrink-0 px-1.5 py-0.5 text-[10px] font-semibold',
           isStillUnresolved
             ? 'bg-destructive/12 text-destructive'
             : 'bg-muted text-muted-foreground'
@@ -204,6 +209,6 @@ function ConflictReviewFileTreeRow({
             ? translate('auto.components.editor.ConflictReviewFileTree.8528a5eaf5', 'Resolved')
             : translate('auto.components.editor.ConflictReviewFileTree.496e28a932', 'Gone')}
       </span>
-    </button>
+    </Button>
   )
 }

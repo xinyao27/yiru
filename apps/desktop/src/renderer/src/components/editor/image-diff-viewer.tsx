@@ -33,7 +33,7 @@ function ImageDiffPane({
     return (
       <div
         className={cn(
-          'flex min-h-0 flex-col overflow-hidden rounded-md bg-muted/10',
+          'flex min-h-0 flex-col overflow-hidden bg-muted/10',
           isIntrinsicLayout ? 'h-auto' : 'h-full'
         )}
       >
@@ -53,7 +53,7 @@ function ImageDiffPane({
   return (
     <div
       className={cn(
-        'flex min-h-0 flex-col overflow-hidden rounded-md bg-muted/10',
+        'flex min-h-0 flex-col overflow-hidden bg-muted/10',
         isIntrinsicLayout ? 'h-auto' : 'h-full'
       )}
     >

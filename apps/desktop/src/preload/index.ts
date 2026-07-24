@@ -1,4 +1,23 @@
 import { electronAPI } from '@electron-toolkit/preload'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type {
+  SshConnectionState,
+  SshConfigImportResult,
+  SshTargetAddResult,
+  SshTarget,
+  PortForwardEntry,
+  EnrichedDetectedPort
+} from '@yiru/runtime-protocol/ssh-connection'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import type {
+  AgentStatusIpcPayload,
+  MigrationUnsupportedPtyEntry
+} from '@yiru/workbench-model/agent'
+import type { AiVaultListArgs, AiVaultSubagentListArgs } from '@yiru/workbench-model/agent'
+import type { AgentType } from '@yiru/workbench-model/agent'
+import type { HostedReviewForBranchArgs } from '@yiru/workbench-model/review'
+import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the preload bridge is the audited contract between
 renderer and Electron. Keeping the IPC surface co-located in one file makes security
 review and type drift checks easier than scattering these bindings across modules. */
@@ -6,12 +25,6 @@ import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
 
 import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
 import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
-import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
-import type {
-  AgentStatusIpcPayload,
-  MigrationUnsupportedPtyEntry
-} from '../shared/agent-status-types'
-import type { AiVaultListArgs, AiVaultSubagentListArgs } from '../shared/ai-vault-types'
 import type { AppIdentity } from '../shared/app-identity'
 import type {
   Automation,
@@ -29,7 +42,6 @@ import type {
   AutomationUpdateInput
 } from '../shared/automations-types'
 import type { CliInstallStatus } from '../shared/cli-install-types'
-import type { ReadClipboardTextOptions } from '../shared/clipboard-text'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
   CrashReportBreadcrumbData,
@@ -43,13 +55,11 @@ import {
   YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT,
   type EditorPrepareHotExitDetail
 } from '../shared/editor-save-events'
-import type { ExecutionHostId } from '../shared/execution-host'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { AppStarSource } from '../shared/gh-star-source'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
-import type { HostedReviewForBranchArgs } from '../shared/hosted-review'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
 import type { LanguageServerEvent } from '../shared/language-server'
 import type {
@@ -66,9 +76,6 @@ import type {
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
 } from '../shared/mobile-markdown-document'
-import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
-import type { MobileRelayStatus } from '../shared/mobile-relay-status'
-import type { AgentType } from '../shared/native-chat-types'
 import {
   YIRU_INTERNAL_FILE_DRAG_TYPE,
   createNativeFileDropPayload,
@@ -99,7 +106,12 @@ import {
   type RichMarkdownContextMenuCommandPayload
 } from '../shared/rich-markdown-context-menu'
 import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
-import type { RuntimeRpcResponse } from '../shared/runtime-rpc-envelope'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '../shared/runtime-method-contracts/runtime-control-contracts'
 import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
@@ -110,7 +122,11 @@ import type {
   RuntimeTerminalDriverState,
   RuntimeTerminalPresentation
 } from '../shared/runtime-types'
-import type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
+import type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type {
@@ -138,14 +154,6 @@ import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
 } from '../shared/spool/spool-windows-firewall-contract'
-import type {
-  SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '../shared/ssh-types'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {
@@ -452,6 +460,20 @@ document.addEventListener(
 
 const startupDiagnosticsEnabled = process.env.YIRU_STARTUP_DIAGNOSTICS === '1'
 
+async function invokeRuntimeMethod<TContract extends RuntimeMethodContract>(
+  contract: TContract,
+  params: RuntimeMethodParams<TContract>
+): Promise<RuntimeMethodResult<TContract>> {
+  const response = (await ipcRenderer.invoke('runtime:call', {
+    method: contract.name,
+    params
+  })) as RuntimeRpcResponse<RuntimeMethodResult<TContract>>
+  if (!response.ok) {
+    throw new Error(response.error.message)
+  }
+  return response.result
+}
+
 // Custom APIs for renderer
 const api = {
   app: {
@@ -498,21 +520,10 @@ const api = {
 
   yiruProfiles: {
     list: () => ipcRenderer.invoke('yiruProfiles:list'),
-    authStatus: () => ipcRenderer.invoke('yiruProfiles:authStatus'),
     createLocal: (args) => ipcRenderer.invoke('yiruProfiles:createLocal', args),
-    createCloudLinked: (args) => ipcRenderer.invoke('yiruProfiles:createCloudLinked', args),
     switchProfile: (args) => ipcRenderer.invoke('yiruProfiles:switch', args),
     transferProject: (args) => ipcRenderer.invoke('yiruProfiles:transferProject', args),
-    findProjectProfiles: (args) => ipcRenderer.invoke('yiruProfiles:findProjectProfiles', args),
-    connectCurrent: () => ipcRenderer.invoke('yiruProfiles:connectCurrent'),
-    refreshAuth: () => ipcRenderer.invoke('yiruProfiles:refreshAuth'),
-    signOutCurrent: () => ipcRenderer.invoke('yiruProfiles:signOutCurrent'),
-    selectOrg: (args) => ipcRenderer.invoke('yiruProfiles:selectOrg', args),
-    orgMembersList: (args) => ipcRenderer.invoke('yiruProfiles:orgMembersList', args),
-    orgMemberInvite: (args) => ipcRenderer.invoke('yiruProfiles:orgMemberInvite', args),
-    orgInviteRevoke: (args) => ipcRenderer.invoke('yiruProfiles:orgInviteRevoke', args),
-    orgMemberChangeRole: (args) => ipcRenderer.invoke('yiruProfiles:orgMemberChangeRole', args),
-    orgMemberRemove: (args) => ipcRenderer.invoke('yiruProfiles:orgMemberRemove', args)
+    findProjectProfiles: (args) => ipcRenderer.invoke('yiruProfiles:findProjectProfiles', args)
   } satisfies PreloadApi['yiruProfiles'],
 
   platform: {
@@ -1530,9 +1541,7 @@ const api = {
     discardBundlePreview: (bundleSubmissionId: string): Promise<void> =>
       ipcRenderer.invoke('diagnostics:discardBundlePreview', bundleSubmissionId),
     uploadBundle: (bundleSubmissionId: string): Promise<unknown> =>
-      ipcRenderer.invoke('diagnostics:uploadBundle', bundleSubmissionId),
-    deleteBundle: (ticketId: string): Promise<void> =>
-      ipcRenderer.invoke('diagnostics:deleteBundle', ticketId)
+      ipcRenderer.invoke('diagnostics:uploadBundle', bundleSubmissionId)
   },
 
   settings: {
@@ -1843,8 +1852,14 @@ const api = {
     openInFileManager: (path: string): Promise<ShellOpenLocalPathResult> =>
       ipcRenderer.invoke('shell:openInFileManager', path),
 
-    openInExternalEditor: (path: string, command?: string): Promise<ShellOpenLocalPathResult> =>
-      ipcRenderer.invoke('shell:openInExternalEditor', path, command),
+    openInExternalEditor: (
+      request: ShellOpenExternalEditorRequest | string,
+      command?: string
+    ): Promise<ShellOpenExternalEditorResult> =>
+      ipcRenderer.invoke(
+        'shell:openInExternalEditor',
+        typeof request === 'string' ? { path: request, command } : request
+      ),
 
     openUrl: (url: string): Promise<void> => ipcRenderer.invoke('shell:openUrl', url),
 
@@ -2461,6 +2476,11 @@ const api = {
       connectionId: string
     }): Promise<{ canceled: true } | { canceled: false; destinationPath: string }> =>
       ipcRenderer.invoke('fs:downloadFile', args),
+    downloadFolder: (args: {
+      dirPath: string
+      connectionId: string
+    }): Promise<{ canceled: true } | { canceled: false; destinationPath: string }> =>
+      ipcRenderer.invoke('fs:downloadFolder', args),
     saveDownloadedFile: (args: {
       suggestedName: string
       content: string
@@ -2482,6 +2502,28 @@ const api = {
       ipcRenderer.invoke('fs:finishDownloadedFile', args),
     cancelDownloadedFile: (args: { transferId: string }): Promise<{ ok: true }> =>
       ipcRenderer.invoke('fs:cancelDownloadedFile', args),
+    startDownloadedFolder: (args: {
+      suggestedName: string
+    }): Promise<
+      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
+    > => ipcRenderer.invoke('fs:startDownloadedFolder', args),
+    createDownloadedFolderDirectory: (args: {
+      transferId: string
+      pathSegments: string[]
+    }): Promise<{ ok: true }> => ipcRenderer.invoke('fs:createDownloadedFolderDirectory', args),
+    appendDownloadedFolderFileChunk: (args: {
+      transferId: string
+      pathSegments: string[]
+      contentBase64: string
+      first: boolean
+      last: boolean
+    }): Promise<{ ok: true }> => ipcRenderer.invoke('fs:appendDownloadedFolderFileChunk', args),
+    finishDownloadedFolder: (args: {
+      transferId: string
+    }): Promise<{ canceled: false; destinationPath: string }> =>
+      ipcRenderer.invoke('fs:finishDownloadedFolder', args),
+    cancelDownloadedFolder: (args: { transferId: string }): Promise<{ ok: true }> =>
+      ipcRenderer.invoke('fs:cancelDownloadedFolder', args),
     listMarkdownDocuments: (args: {
       rootPath: string
       connectionId?: string
@@ -3613,7 +3655,7 @@ const api = {
   runtime: {
     syncWindowGraph: (graph: RuntimeSyncWindowGraph): Promise<RuntimeSyncWindowGraphResult> =>
       ipcRenderer.invoke('runtime:syncWindowGraph', graph),
-    getStatus: (): Promise<RuntimeStatus> => ipcRenderer.invoke('runtime:getStatus'),
+    getStatus: (): Promise<RuntimeStatus> => invokeRuntimeMethod(STATUS_GET_CONTRACT, undefined),
     call: (args: { method: string; params?: unknown }): Promise<RuntimeRpcResponse<unknown>> =>
       ipcRenderer.invoke('runtime:call', args),
     getTerminalFitOverrides: (): Promise<
@@ -3999,7 +4041,6 @@ const api = {
 
     getPairingQR: (args?: {
       address?: string
-      connectionMode?: MobilePairingConnectionMode
       rotate?: boolean
     }): Promise<
       | { available: false }
@@ -4046,17 +4087,7 @@ const api = {
       ipcRenderer.invoke('mobile:revokeRuntimeAccess', args),
 
     isWebSocketReady: (): Promise<{ ready: boolean; endpoint: string | null }> =>
-      ipcRenderer.invoke('mobile:isWebSocketReady'),
-
-    getRelayStatus: (): Promise<{ status: MobileRelayStatus }> =>
-      ipcRenderer.invoke('mobile:getRelayStatus'),
-
-    onRelayStatusChanged: (callback: (status: MobileRelayStatus) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, status: MobileRelayStatus) =>
-        callback(status)
-      ipcRenderer.on('mobile:relayStatusChanged', listener)
-      return () => ipcRenderer.removeListener('mobile:relayStatusChanged', listener)
-    }
+      ipcRenderer.invoke('mobile:isWebSocketReady')
   },
 
   agentStatus: {

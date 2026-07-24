@@ -1,16 +1,16 @@
-import { useMemo } from 'react'
-
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
-import { useAppStore } from '@/store'
-
 import {
   AGENT_STATUS_STALE_AFTER_MS,
   type AgentStatusEntry,
   type AgentStatusState,
   type AgentType,
   type MigrationUnsupportedPtyEntry
-} from '../../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+import { useMemo } from 'react'
+
+import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
+import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
+import { useAppStore } from '@/store'
+
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { Repo, Worktree, TerminalTab } from '../../../../shared/types'
 

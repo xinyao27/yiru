@@ -7,6 +7,14 @@ import { defineConfig } from 'electron-vite'
 import { createElectronViteRolldownOptionsBridge } from './build-plugins/electron-vite-rolldown-options-bridge'
 import { createPlainNodeEntryGuardPlugin } from './build-plugins/plain-node-entry-guard'
 
+// Why: source-owned workspace packages are not sandbox preload dependencies.
+// Inline runtime subpath imports anywhere Electron cannot resolve node_modules.
+const CROSS_CLIENT_WORKSPACE_PACKAGES = [
+  '@yiru/mobile-relay-protocol',
+  '@yiru/runtime-protocol',
+  '@yiru/workbench-model'
+]
+
 // Why: the telemetry transport is gated by two compile-time constants that
 // only the official CI release workflow sets. Contributor / `pnpm dev` /
 // third-party rebuilds must substitute literal `null` at these sites so
@@ -31,12 +39,6 @@ const YIRU_POSTHOG_WRITE_KEY_LITERAL =
   typeof yiruPostHogWriteKey === 'string' && yiruPostHogWriteKey.length > 0
     ? JSON.stringify(yiruPostHogWriteKey)
     : 'null'
-const yiruDiagnosticsTokenUrl = process.env.YIRU_DIAGNOSTICS_TOKEN_URL
-const YIRU_DIAGNOSTICS_TOKEN_URL_LITERAL =
-  typeof yiruDiagnosticsTokenUrl === 'string' && yiruDiagnosticsTokenUrl.length > 0
-    ? JSON.stringify(yiruDiagnosticsTokenUrl)
-    : 'null'
-
 function createStartupDiagnosticsBanner(chunkName: string): string {
   return `
 ;(() => {
@@ -177,7 +179,7 @@ export default defineConfig({
       // directory cannot reach into app.asar, so pure-JS dependencies used
       // by the daemon must be bundled rather than externalized.
       externalizeDeps: {
-        exclude: ['@xterm/headless', '@xterm/addon-serialize']
+        exclude: ['@xterm/headless', '@xterm/addon-serialize', ...CROSS_CLIENT_WORKSPACE_PACKAGES]
       },
       rollupOptions: {
         // Why: CLI and plain-Node sidecars share the out/ tree, whose package
@@ -196,6 +198,11 @@ export default defineConfig({
           // Why: forked with ELECTRON_RUN_AS_NODE so @parcel/watcher faults
           // can't take down the main process (issue #7547).
           'parcel-watcher-process-entry': resolve('src/main/ipc/parcel-watcher-process-entry.ts'),
+          // Why: the synchronous launch gate needs a short-lived plain-Node
+          // child so the app-server JSONL session can keep a live event loop.
+          'codex/codex-app-server-grant-entry': resolve(
+            'src/main/codex/codex-app-server-grant-entry.ts'
+          ),
           // Why: electron-vite cleans out/main in dev. The dev CLI imports
           // this path for `yiru agent hooks ...`, so it must survive rebuilds.
           'agent-hooks/managed-agent-hook-controls': resolve(
@@ -209,8 +216,7 @@ export default defineConfig({
     // above for the full rationale.
     define: {
       YIRU_BUILD_IDENTITY: YIRU_BUILD_IDENTITY_LITERAL,
-      YIRU_POSTHOG_WRITE_KEY: YIRU_POSTHOG_WRITE_KEY_LITERAL,
-      YIRU_DIAGNOSTICS_TOKEN_URL: YIRU_DIAGNOSTICS_TOKEN_URL_LITERAL
+      YIRU_POSTHOG_WRITE_KEY: YIRU_POSTHOG_WRITE_KEY_LITERAL
     },
     // Why: @xterm/headless declares "exports": null in package.json, which
     // prevents Vite's default resolver from finding the CJS entry. Point
@@ -228,7 +234,7 @@ export default defineConfig({
     plugins: [createElectronViteRolldownOptionsBridge()],
     build: {
       externalizeDeps: {
-        exclude: ['@electron-toolkit/preload']
+        exclude: ['@electron-toolkit/preload', ...CROSS_CLIENT_WORKSPACE_PACKAGES]
       },
       // Why: preload is packaged beside the CommonJS main-process output.
       rollupOptions: {

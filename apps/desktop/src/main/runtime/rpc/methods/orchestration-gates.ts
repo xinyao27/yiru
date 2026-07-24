@@ -1,9 +1,13 @@
 import { z } from 'zod'
 
+import {
+  OptionalFiniteNumber,
+  OptionalString,
+  requiredString
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 import { Coordinator } from '../../orchestration/coordinator'
 import type { GateStatus } from '../../orchestration/db'
 import { defineMethod, type RpcMethod } from '../core'
-import { OptionalFiniteNumber, OptionalString, requiredString } from '../schemas'
 
 // Why: the coordinator instance is stored at module scope so orchestration.runStop
 // can signal it to halt. Only one coordinator can run at a time (enforced by

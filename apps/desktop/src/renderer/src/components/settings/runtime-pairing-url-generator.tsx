@@ -322,7 +322,7 @@ export function RuntimePairingUrlGenerator({
   }
 
   const containerClassName = framed
-    ? 'space-y-3 rounded-lg border border-border/50 bg-muted/25 p-3'
+    ? 'space-y-3 border border-border/50 bg-muted/25 p-3'
     : 'space-y-4'
   const sharedAccessClassName = showGeneratorForm ? 'border-t border-border/40 pt-3' : ''
 

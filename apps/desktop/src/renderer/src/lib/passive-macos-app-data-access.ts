@@ -1,8 +1,4 @@
-import type {
-  ActiveRightSidebarTab,
-  OpenFile,
-  RightSidebarExplorerView
-} from '@/store/slices/editor'
+import type { ActiveRightSidebarTab, RightSidebarExplorerView } from '../../../shared/types'
 
 const MAC_APP_DATA_SEGMENT_RE = /(^|\/)Library\/(Containers|Group Containers)\//
 
@@ -26,7 +22,7 @@ export type ActiveGitStatusPollingArgs = {
   rightSidebarOpen: boolean
   rightSidebarTab: ActiveRightSidebarTab
   rightSidebarExplorerView?: RightSidebarExplorerView
-  openFiles?: OpenFile[]
+  openFiles?: readonly { worktreeId: string }[]
   userAgent?: string
 }
 

@@ -1,135 +1,166 @@
-import { net } from 'electron'
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
+import type { UpdateInfo } from 'electron-updater'
 
 import type { ChangelogData } from '../shared/types'
-import { compareVersions } from './updater-fallback'
 
-type ChangelogEntry = {
-  version: string
-  title: string
-  description: string
-  mediaUrl?: string
-  releaseNotesUrl: string
+type GitHubReleaseUpdateInfo = Pick<UpdateInfo, 'version' | 'releaseName' | 'releaseNotes'>
+type CachedReleaseChangelog = { title: string | null; notes: string }
+
+const DESCRIPTION_MAX_LENGTH = 280
+const TITLE_MAX_LENGTH = 120
+const RELEASE_TAG_URL_PREFIX = `${YIRU_GITHUB_RELEASES_URL}/tag/`
+let cachedReleaseChangelog = new Map<string, CachedReleaseChangelog>()
+
+function decodeCodePoint(value: string, radix: number, fallback: string): string {
+  const codePoint = Number.parseInt(value, radix)
+  return Number.isSafeInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
+    ? String.fromCodePoint(codePoint)
+    : fallback
 }
 
-const CHANGELOG_URL = 'https://yiru.ai/changelog'
-
-function isValidEntry(entry: ChangelogEntry): boolean {
-  return (
-    typeof entry.title === 'string' &&
-    typeof entry.description === 'string' &&
-    typeof entry.releaseNotesUrl === 'string'
-  )
-}
-
-/** Returns true when the entry has showcase media (gif/screenshot) worth demoing. */
-function hasRichContent(entry: ChangelogEntry): boolean {
-  return Boolean(entry.mediaUrl)
-}
-
-/**
- * Fetches the remote changelog and finds the best entry to show the user.
- *
- * 1. If the incoming version has an exact match with rich content, use it.
- * 2. Otherwise, find the most recent entry that has rich content. If the user's
- *    local version is behind that entry, show it anyway — demoing an older
- *    highlight is better than showing nothing. In this fallback case the
- *    release notes link points to the generic changelog page instead of a
- *    version-specific URL.
- *
- * Why net.fetch instead of fetch: Electron's `net` module respects the app's
- * proxy/certificate settings and has no CORS restrictions.
- */
-export async function fetchChangelog(
-  incomingVersion: string,
-  localVersion: string
-): Promise<ChangelogData | null> {
-  const res = await net.fetch('https://yiru.ai/whats-new/changelog.json', {
-    signal: AbortSignal.timeout(5000)
+function decodeHtmlEntities(value: string): string {
+  const named = new Map([
+    ['amp', '&'],
+    ['apos', "'"],
+    ['gt', '>'],
+    ['lt', '<'],
+    ['nbsp', ' '],
+    ['quot', '"']
+  ])
+  return value.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, entity: string) => {
+    if (entity.startsWith('#x')) {
+      return decodeCodePoint(entity.slice(2), 16, match)
+    }
+    if (entity.startsWith('#')) {
+      return decodeCodePoint(entity.slice(1), 10, match)
+    }
+    return named.get(entity.toLowerCase()) ?? match
   })
-  if (!res.ok) {
-    return null
-  }
-  const json: unknown = await res.json()
+}
 
-  // Why: the JSON endpoint is external and could serve malformed data.
-  // Validate the shape before indexing into it to avoid runtime errors
-  // that would propagate up and delay the 'available' status broadcast.
-  if (!Array.isArray(json)) {
-    return null
-  }
-  const entries = json as ChangelogEntry[]
+function releaseNoteLines(value: string): string[] {
+  // Why: GitHub's Atom feed supplies rendered HTML while generated metadata may
+  // carry Markdown; reduce both to bounded plain text before crossing into UI.
+  const decodedMarkup = decodeHtmlEntities(value)
+  const plain = decodeHtmlEntities(
+    decodedMarkup
+      .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+      .replace(/<(?:br|hr)\s*\/?\s*>/gi, '\n')
+      .replace(/<\/(?:h[1-6]|li|p|div|blockquote|tr)>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+  )
 
-  const localIndex = entries.findIndex((e) => e.version === localVersion)
+  return plain
+    .split(/\r?\n/)
+    .map((line) =>
+      line
+        .trim()
+        .replace(/^#{1,6}\s+/, '')
+        .replace(/^[-*+]\s+/, '')
+        .replace(/\[([^\]]+)]\([^\s)]+(?:\s+"[^"]*")?\)/g, '$1')
+        .replace(/[*_`~]/g, '')
+        .replace(/\s+by\s+@\S+\s+in\s+https?:\/\/\S+$/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+    )
+    .filter(Boolean)
+}
 
-  // ── Try exact match first ────────────────────────────────────────
-  const incomingIndex = entries.findIndex((e) => e.version === incomingVersion)
-  if (incomingIndex !== -1) {
-    const entry = entries[incomingIndex]
-    if (isValidEntry(entry) && hasRichContent(entry)) {
-      const releasesBehind =
-        localIndex === -1
-          ? null
-          : localIndex - incomingIndex > 0
-            ? localIndex - incomingIndex
-            : null
-      const { version: _, ...release } = entry
-      return { release, releasesBehind }
-    }
-  }
+function elementValue(entry: string, elementName: string): string | null {
+  const match = entry.match(
+    new RegExp(`<${elementName}\\b[^>]*>([\\s\\S]*?)<\\/${elementName}>`, 'i')
+  )
+  return match?.[1]?.trim() || null
+}
 
-  // ── Fallback: find the most recent entry with rich content ────────
-  // Why: releases often ship without rich media/description. Rather than
-  // showing the plain card, we look for the latest entry that does have
-  // rich content. As long as the user's local version is behind that
-  // entry, the demo is still relevant — it highlights something they
-  // haven't seen yet. We swap the release notes URL to the generic
-  // changelog page since the shown content doesn't match the incoming
-  // version.
-  for (let i = 0; i < entries.length; i++) {
-    const candidate = entries[i]
-    if (!isValidEntry(candidate) || !hasRichContent(candidate)) {
+/** Cache release bodies from the same public Atom feed used to select update tags. */
+export function cacheGitHubReleaseFeed(feedXml: string): void {
+  const nextCache = new Map<string, CachedReleaseChangelog>()
+  for (const entryMatch of feedXml.matchAll(/<entry\b[^>]*>([\s\S]*?)<\/entry>/gi)) {
+    const entry = entryMatch[1]
+    const releaseUrl = [...entry.matchAll(/\bhref=["']([^"']+)["']/gi)]
+      .map((match) => decodeHtmlEntities(match[1]))
+      .find((href) => href.startsWith(RELEASE_TAG_URL_PREFIX))
+    const notes = elementValue(entry, 'content')
+    if (!releaseUrl || !notes) {
       continue
     }
 
-    // Only show this entry if the user's local version is at or behind it.
-    // Why: the user hasn't necessarily seen the rich card for their own
-    // version (e.g., they updated silently or dismissed the card), so
-    // entries at the same version as localVersion are still worth showing.
-    // When localIndex === -1 the local version isn't in the JSON at all —
-    // this could mean it's very old OR very new (e.g., a patch release not
-    // yet in the changelog). Fall back to semver comparison to avoid
-    // showing stale content to users who are already ahead.
-    if (localIndex !== -1) {
-      if (localIndex < i) {
-        continue
-      }
-    } else if (compareVersions(localVersion, candidate.version) >= 0) {
-      // localVersion is newer than (or same as) this candidate — user already
-      // passed it. Why >=: compareVersions returns 0 both for genuinely equal
-      // versions and for unparseable strings. In the localIndex === -1 path,
-      // equal means localVersion literally matches the candidate but wasn't
-      // found by findIndex (shouldn't happen), and unparseable means we can't
-      // determine the relationship. Either way, skipping is the safe default
-      // to avoid showing stale content.
-      continue
-    }
-
-    // Why: releasesBehind counts how far behind the user is from the
-    // incoming update, not from the shown content entry. When incomingIndex
-    // is -1, the incoming version is newer than anything in the JSON —
-    // treat it as being at the front (index 0) for counting purposes.
-    const effectiveIncomingIndex = incomingIndex !== -1 ? incomingIndex : 0
-    const releasesBehind =
-      localIndex === -1
-        ? null
-        : localIndex - effectiveIncomingIndex > 0
-          ? localIndex - effectiveIncomingIndex
-          : null
-    const { version: _, ...release } = candidate
-    // Why: the shown content is from an older entry, not the incoming version.
-    // Point to the generic changelog page so the link doesn't mislead.
-    return { release: { ...release, releaseNotesUrl: CHANGELOG_URL }, releasesBehind }
+    const tag = releaseUrl.slice(RELEASE_TAG_URL_PREFIX.length)
+    const version = tag.replace(/^v/i, '')
+    const title = elementValue(entry, 'title')
+    nextCache.set(version, {
+      title: title ? decodeHtmlEntities(title) : null,
+      notes
+    })
   }
 
-  return null
+  // Why: a transient malformed response should not erase the last feed that
+  // successfully drove the current update check.
+  if (nextCache.size > 0) {
+    cachedReleaseChangelog = nextCache
+  }
+}
+
+function releaseDescription(value: string): string | null {
+  const line = releaseNoteLines(value).find(
+    (candidate) =>
+      !/^what'?s changed:?$/i.test(candidate) &&
+      !/^full changelog:?\s*(?:https?:\/\/\S+)?$/i.test(candidate) &&
+      !/^https?:\/\/\S+$/i.test(candidate)
+  )
+  if (!line) {
+    return null
+  }
+  return line.length <= DESCRIPTION_MAX_LENGTH
+    ? line
+    : `${line.slice(0, DESCRIPTION_MAX_LENGTH - 1).trimEnd()}…`
+}
+
+function releaseTitle(info: GitHubReleaseUpdateInfo): string {
+  const cachedTitle = cachedReleaseChangelog.get(info.version)?.title
+  const supplied = info.releaseName
+    ? releaseNoteLines(info.releaseName)[0]
+    : cachedTitle
+      ? releaseNoteLines(cachedTitle)[0]
+      : undefined
+  const title =
+    supplied && supplied !== `v${info.version}` && supplied !== info.version
+      ? supplied
+      : `Yiru ${info.version}`
+  return title.length <= TITLE_MAX_LENGTH
+    ? title
+    : `${title.slice(0, TITLE_MAX_LENGTH - 1).trimEnd()}…`
+}
+
+function latestReleaseNote(info: GitHubReleaseUpdateInfo): string | null {
+  if (typeof info.releaseNotes === 'string') {
+    return info.releaseNotes
+  }
+  if (!Array.isArray(info.releaseNotes)) {
+    return cachedReleaseChangelog.get(info.version)?.notes ?? null
+  }
+  const supplied =
+    info.releaseNotes.find((entry) => entry.version === info.version && entry.note)?.note ??
+    info.releaseNotes.find((entry) => entry.note)?.note ??
+    null
+  return supplied ?? cachedReleaseChangelog.get(info.version)?.notes ?? null
+}
+
+/** Build the update card from GitHub Release data resolved during update feed selection. */
+export function changelogFromUpdateInfo(info: GitHubReleaseUpdateInfo): ChangelogData | null {
+  const note = latestReleaseNote(info)
+  const description = note ? releaseDescription(note) : null
+  if (!description) {
+    return null
+  }
+
+  return {
+    release: {
+      title: releaseTitle(info),
+      description,
+      releaseNotesUrl: `${YIRU_GITHUB_RELEASES_URL}/tag/v${encodeURIComponent(info.version)}`
+    },
+    releasesBehind: Array.isArray(info.releaseNotes) ? info.releaseNotes.length : null
+  }
 }

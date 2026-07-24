@@ -1,4 +1,4 @@
-import type { HostedReviewProvider } from '../../../desktop/src/shared/hosted-review'
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import type {
   CheckStatus,
   GitHubAssignableUser,
@@ -11,7 +11,7 @@ import type {
   PRMergeableState,
   PRReviewDecision,
   PRState
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
 
 // Primitive + enum value readers shared by the github.* PR parsers. Each narrows
 // `unknown` defensively (never throws) so RPC payloads can be parsed safely.

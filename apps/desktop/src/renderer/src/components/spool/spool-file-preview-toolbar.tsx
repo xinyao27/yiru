@@ -71,7 +71,7 @@ export function SpoolFilePreviewToolbar({
           variant="ghost"
           onClick={onBack}
         >
-          <ChevronLeft aria-hidden="true" />
+          <ChevronLeft weight="regular" aria-hidden="true" />
         </SpoolTooltipIconButton>
         <SpoolTruncatedPathLabel
           path={file.relativePath}
@@ -81,7 +81,7 @@ export function SpoolFilePreviewToolbar({
           label={translate('auto.components.spool.SpoolFilePreview.reload', 'Reload')}
           onClick={onRefresh}
         >
-          <RefreshCw aria-hidden="true" />
+          <RefreshCw weight="regular" aria-hidden="true" />
         </SpoolTooltipIconButton>
         {file.encoding === 'utf8' ? (
           <SpoolTooltipIconButton
@@ -106,7 +106,6 @@ export function SpoolFilePreviewToolbar({
                       type="button"
                       size="icon-xs"
                       variant="outline"
-                      className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                       aria-label={translate(
                         'auto.components.spool.SpoolFilePreview.fileActions',
                         'File actions'
@@ -140,9 +139,8 @@ export function SpoolFilePreviewToolbar({
             size="xs"
             variant="ghost"
             className={cn(
-              'min-w-0 bg-sidebar px-1.5 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-              mode === 'content' &&
-                'bg-sidebar-accent text-sidebar-accent-foreground dark:bg-sidebar-accent'
+              'min-w-0 px-1.5',
+              mode === 'content' && 'bg-accent text-accent-foreground'
             )}
             onClick={() => onModeChange('content')}
           >
@@ -153,9 +151,8 @@ export function SpoolFilePreviewToolbar({
             size="xs"
             variant="ghost"
             className={cn(
-              'min-w-0 bg-sidebar px-1.5 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-              mode === 'working-diff' &&
-                'bg-sidebar-accent text-sidebar-accent-foreground dark:bg-sidebar-accent'
+              'min-w-0 px-1.5',
+              mode === 'working-diff' && 'bg-accent text-accent-foreground'
             )}
             onClick={() => onModeChange('working-diff')}
           >
@@ -166,9 +163,8 @@ export function SpoolFilePreviewToolbar({
             size="xs"
             variant="ghost"
             className={cn(
-              'min-w-0 bg-sidebar px-1.5 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
-              mode === 'staged-diff' &&
-                'bg-sidebar-accent text-sidebar-accent-foreground dark:bg-sidebar-accent'
+              'min-w-0 px-1.5',
+              mode === 'staged-diff' && 'bg-accent text-accent-foreground'
             )}
             onClick={() => onModeChange('staged-diff')}
           >
@@ -186,7 +182,7 @@ export function SpoolFilePreviewToolbar({
             disabled={!hasPreviousChunk}
             onClick={onPreviousChunk}
           >
-            <ChevronLeft aria-hidden="true" />
+            <ChevronLeft weight="regular" aria-hidden="true" />
           </SpoolTooltipIconButton>
           <span className="text-muted-foreground min-w-0 flex-1 truncate text-center text-[11px]">
             {formatFileByteRange(file)}
@@ -196,7 +192,7 @@ export function SpoolFilePreviewToolbar({
             disabled={!hasNextChunk}
             onClick={onNextChunk}
           >
-            <ChevronRight aria-hidden="true" />
+            <ChevronRight weight="regular" aria-hidden="true" />
           </SpoolTooltipIconButton>
         </div>
       ) : null}

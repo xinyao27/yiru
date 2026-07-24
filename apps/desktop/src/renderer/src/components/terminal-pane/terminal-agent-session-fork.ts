@@ -1,3 +1,5 @@
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
@@ -16,8 +18,6 @@ import type { ProjectExecutionRuntimeResolution } from '../../../../shared/proje
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
 import type { TuiAgent } from '../../../../shared/types'
-import { slugifyForWorkspaceName } from '../../../../shared/workspace-name'
-import { isWslUncPath } from '../../../../shared/wsl-paths'
 
 type ForkAgentSessionFromPaneArgs = {
   pane: ManagedPane

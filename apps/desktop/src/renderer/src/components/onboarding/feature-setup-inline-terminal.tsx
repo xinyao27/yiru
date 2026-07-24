@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, type KeyboardEvent } from 'react'
 
-import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { translate } from '@/i18n/i18n'
 import { track } from '@/lib/telemetry'
+import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
 import {
   onboardingFeatureSetupTelemetrySelection,

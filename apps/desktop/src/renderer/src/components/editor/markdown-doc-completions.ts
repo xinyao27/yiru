@@ -1,4 +1,5 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import type { MarkdownDocument } from '../../../../shared/types'
 
 export type MarkdownDocCompletionContext = {

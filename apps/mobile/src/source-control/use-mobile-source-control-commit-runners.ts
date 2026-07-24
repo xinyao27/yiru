@@ -5,23 +5,26 @@ import type {
   MobileCommitFailureRecovery,
   RecordMobileCommitFailure
 } from './mobile-commit-failure-recovery'
+import type {
+  MobileSourceControlWorkflowResult,
+  RunMobileSourceControlWorkflow
+} from './mobile-source-control-operation'
+import {
+  applyMobileHostedReviewRefresh,
+  resolveMobileSourceControlOperationFollowUp
+} from './mobile-source-control-operation'
+import { recoverMobileRejectedPush } from './mobile-source-control-rejected-push-recovery'
 import type { LoadStatusOptions } from './mobile-source-control-screen-state'
 
 type GitStep = { method: string; params?: Record<string, unknown> }
 type SendGitRequest = <T>(method: string, params?: Record<string, unknown>) => Promise<T>
-type RunGitWorkflow = (
-  actionId: string,
-  runner: () => Promise<void>,
-  options?: { clearCommitMessage?: boolean }
-) => Promise<boolean>
-
 type Params = {
   commitMessage: string
   stagedEntries: MobileCommitFailureRecovery['stagedEntries']
   sendGitRequest: SendGitRequest
   sendCommitRequest: (message: string) => Promise<unknown>
-  runGitSyncSteps: () => Promise<void>
-  runGitWorkflow: RunGitWorkflow
+  runGitSyncSteps: () => Promise<MobileSourceControlWorkflowResult>
+  runGitWorkflow: RunMobileSourceControlWorkflow
   loadStatus: (options?: LoadStatusOptions) => Promise<boolean>
   mountedRef: MutableRefObject<boolean>
   busyActionRef: MutableRefObject<string | null>
@@ -29,6 +32,7 @@ type Params = {
   setActionError: (next: string | null) => void
   setCommitMessage: (next: string) => void
   recordCommitFailure: RecordMobileCommitFailure
+  onHostedReviewRefresh?: () => void
 }
 
 // Commit + commit-then-action runners. Split from the main runners hook to keep
@@ -47,7 +51,8 @@ export function useMobileSourceControlCommitRunners(params: Params) {
     setBusyAction,
     setActionError,
     setCommitMessage,
-    recordCommitFailure
+    recordCommitFailure,
+    onHostedReviewRefresh
   } = params
 
   const commit = useCallback(async () => {
@@ -74,7 +79,10 @@ export function useMobileSourceControlCommitRunners(params: Params) {
   }, [commitMessage, recordCommitFailure, runGitWorkflow, sendCommitRequest, stagedEntries])
 
   const runCommitFollowUps = useCallback(
-    async (actionId: string, afterCommit: () => Promise<void>) => {
+    async (
+      actionId: string,
+      afterCommit: () => Promise<MobileSourceControlWorkflowResult | void>
+    ) => {
       const message = commitMessage.trim()
       if (!message) {
         return false
@@ -90,13 +98,19 @@ export function useMobileSourceControlCommitRunners(params: Params) {
       try {
         await sendCommitRequest(message)
         didCommit = true
-        await afterCommit()
+        const result = await afterCommit()
         if (!mountedRef.current) {
           return false
         }
         setCommitMessage('')
         triggerSuccess()
-        await loadStatus({ preserveReadyOnFailure: true, force: true })
+        const followUp = resolveMobileSourceControlOperationFollowUp(actionId, 'succeeded', result)
+        await loadStatus({
+          preserveReadyOnFailure:
+            followUp === null || followUp.statusRefresh === 'preserve_previous',
+          force: true
+        })
+        applyMobileHostedReviewRefresh(actionId, followUp, onHostedReviewRefresh)
         return true
       } catch (err) {
         if (!mountedRef.current) {
@@ -109,11 +123,19 @@ export function useMobileSourceControlCommitRunners(params: Params) {
         }
         if (didCommit) {
           setCommitMessage('')
-          await loadStatus({
-            preserveReadyOnFailure: true,
-            clearActionErrorOnSuccess: false,
-            force: true
+          const recovered = await recoverMobileRejectedPush({
+            actionId,
+            error: err,
+            sendGitRequest,
+            loadStatus
           })
+          if (!recovered) {
+            await loadStatus({
+              preserveReadyOnFailure: true,
+              clearActionErrorOnSuccess: false,
+              force: true
+            })
+          }
         }
         setActionError(errorMessage)
         return false
@@ -131,8 +153,10 @@ export function useMobileSourceControlCommitRunners(params: Params) {
       commitMessage,
       loadStatus,
       mountedRef,
+      onHostedReviewRefresh,
       recordCommitFailure,
       sendCommitRequest,
+      sendGitRequest,
       setActionError,
       setBusyAction,
       setCommitMessage,

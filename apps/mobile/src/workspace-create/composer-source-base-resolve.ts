@@ -1,4 +1,5 @@
-import type { GitHubPrStartPoint } from '../../../desktop/src/shared/types'
+import type { GitHubPrStartPoint } from '@yiru/workbench-model/workspace'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 

@@ -37,7 +37,7 @@ export function WorkspaceTabCreateMenu({
       variant="ghost"
       size="icon-xs"
       className={cn(
-        'ml-1 my-auto h-7 w-6 shrink-0 text-muted-foreground hover:text-accent-foreground',
+        'my-auto ml-1 text-muted-foreground',
         disabled && 'cursor-not-allowed opacity-50 hover:bg-background hover:text-muted-foreground'
       )}
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -61,7 +61,8 @@ export function WorkspaceTabCreateMenu({
         }
       }}
     >
-      <Plus className="size-4" />
+      {/* Why: the compact glyph matches adjacent tab identities without recreating a tab cell. */}
+      <Plus className="size-3.5" weight="regular" />
     </Button>
   )
   const trigger = <TooltipTrigger render={<DropdownMenuTrigger render={triggerButton} />} />
@@ -87,7 +88,7 @@ export function WorkspaceTabCreateMenu({
       <DropdownMenuContent
         align="start"
         sideOffset={6}
-        className="border-border/80 w-72 max-w-[calc(100vw-1rem)] rounded-lg p-1"
+        className="border-border/80 w-72 max-w-[calc(100vw-1rem)] p-1"
         finalFocus={finalFocus}
       >
         {children}
@@ -109,7 +110,7 @@ export function WorkspaceNewTerminalMenuItem({
     <DropdownMenuItem
       disabled={disabled}
       onClick={onSelect}
-      className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+      className="gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
     >
       <TerminalSquare className="text-muted-foreground size-4" />
       <span className="flex-1">

@@ -1,6 +1,7 @@
 import { resolve } from 'node:path'
 
-import { splitWorktreeId } from '../../shared/worktree-id'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { Store } from '../persistence'
 import {
   getLocalProjectWorktreeGitOptions,

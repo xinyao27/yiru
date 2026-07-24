@@ -1,7 +1,8 @@
+import type { BuiltInWindowsTerminalShell } from '@yiru/workbench-model/platform'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import { translate } from '@/i18n/i18n'
 
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
-import type { BuiltInWindowsTerminalShell } from '../../../../shared/windows-terminal-shell'
 import { normalizeMatchQuery, scoreQueryTokens } from './query-token-match'
 
 export type TabCreateMenuOptionKind =

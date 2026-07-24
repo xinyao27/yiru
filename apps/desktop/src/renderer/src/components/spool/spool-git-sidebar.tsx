@@ -81,7 +81,7 @@ export function SpoolGitSidebar({
             </p>
           </div>
           <Button type="button" size="xs" variant="ghost" disabled={loading} onClick={onRefresh}>
-            <RefreshCw aria-hidden="true" />
+            <RefreshCw weight="regular" aria-hidden="true" />
             {translate('auto.components.spool.SpoolGitSidebar.refresh', 'Refresh')}
           </Button>
         </div>
@@ -93,18 +93,12 @@ export function SpoolGitSidebar({
       >
         <TabsList
           variant="line"
-          className="border-border h-9 w-full shrink-0 justify-start rounded-none border-b px-2 py-0"
+          className="border-border h-9 w-full shrink-0 justify-start border-b px-2 py-0"
         >
-          <TabsTrigger
-            value="changes"
-            className="h-8 flex-none rounded-none px-2 text-xs font-normal"
-          >
+          <TabsTrigger value="changes" className="h-8 flex-none px-2 text-xs font-normal">
             {translate('auto.components.spool.SpoolGitSidebar.changes', 'Changes')}
           </TabsTrigger>
-          <TabsTrigger
-            value="history"
-            className="h-8 flex-none rounded-none px-2 text-xs font-normal"
-          >
+          <TabsTrigger value="history" className="h-8 flex-none px-2 text-xs font-normal">
             {translate('auto.components.spool.SpoolGitSidebar.history', 'History')}
           </TabsTrigger>
         </TabsList>
@@ -206,16 +200,16 @@ function HistoryList({
         />
       ) : (
         history.entries.map((entry) => (
-          <button
+          <Button
+            variant="ghost"
+            size="default"
             key={entry.commitRef}
             type="button"
             data-current={selectedKey === entry.commitRef ? 'true' : undefined}
             onClick={() => onSelect(entry)}
             className={cn(
-              'block w-full rounded-md px-2 py-2 text-left focus-visible:outline-none',
-              selectedKey === entry.commitRef
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'hover:bg-sidebar-accent'
+              'border-0 justify-start gap-0 whitespace-normal font-normal block w-full px-2 text-left ',
+              selectedKey === entry.commitRef ? 'bg-accent text-accent-foreground' : ''
             )}
           >
             <span className="block truncate text-xs font-medium">
@@ -225,7 +219,7 @@ function HistoryList({
               <span className="font-mono">{entry.commitRef.slice(0, 8)}</span>
               <span className="min-w-0 truncate">{entry.author}</span>
             </span>
-          </button>
+          </Button>
         ))
       )}
       {history?.hasMore ? (

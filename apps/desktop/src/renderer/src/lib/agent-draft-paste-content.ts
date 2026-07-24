@@ -3,7 +3,7 @@ import {
   BRACKETED_PASTE_START,
   normalizeTerminalPasteLineEndings,
   wrapTerminalBracketedPasteText
-} from '@/components/terminal-pane/terminal-bracketed-paste'
+} from '@/lib/terminal-bracketed-paste'
 import { sendRuntimePtyInputVerified } from '@/runtime/runtime-terminal-inspection'
 
 import type { GlobalSettings } from '../../../shared/types'

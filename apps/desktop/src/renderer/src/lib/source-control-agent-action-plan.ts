@@ -1,3 +1,5 @@
+import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
+
 import { translate } from '@/i18n/i18n'
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
 import {
@@ -11,7 +13,6 @@ import type { SessionOptionValue } from '../../../shared/native-chat-session-opt
 import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
 import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../../shared/types'
-import { resolveLocalWindowsAgentStartupShell } from '../../../shared/windows-terminal-shell'
 
 export type SourceControlLaunchPlanDelivery =
   | 'argv'

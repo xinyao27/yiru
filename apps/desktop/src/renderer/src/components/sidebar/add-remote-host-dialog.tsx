@@ -1,3 +1,7 @@
+import {
+  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -13,7 +17,6 @@ import {
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import { MAX_SSH_RELAY_GRACE_PERIOD_SECONDS, type SshTarget } from '../../../../shared/ssh-types'
 import {
   EMPTY_FORM,
   getSshTargetDraftConnectionFields,
@@ -265,9 +268,11 @@ export function AddRemoteHostDialog({
 
         <DialogFooter className="sm:justify-between">
           {mode === 'ssh' ? (
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
-              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-center text-left text-xs underline-offset-2 outline-none hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto justify-start gap-0 self-center border-0 p-0 text-left font-normal whitespace-normal underline-offset-2 hover:underline disabled:cursor-not-allowed"
               onClick={() => void importSshConfig()}
               disabled={isSaving || isImporting}
             >
@@ -277,7 +282,7 @@ export function AddRemoteHostDialog({
                     'auto.components.sidebar.AddRemoteHostDialog.importSshConfig',
                     'or import ~/.ssh/config'
                   )}
-            </button>
+            </Button>
           ) : (
             <span />
           )}

@@ -164,7 +164,7 @@ export function NotificationStep({
 
   if (!notificationSettings) {
     return (
-      <div className="border-border bg-muted/20 text-muted-foreground rounded-xl border px-5 py-4 text-sm">
+      <div className="border-border bg-muted/20 text-muted-foreground border px-5 py-4 text-sm">
         {translate(
           'auto.components.onboarding.NotificationStep.e52aacf380',
           'Loading notification settings…'

@@ -221,7 +221,11 @@ export function RepositoryForkSyncSection({
           disabled={syncing}
           className="shrink-0"
         >
-          {syncing ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
+          {syncing ? (
+            <LoadingIndicator className="size-3.5" />
+          ) : (
+            <RefreshCw weight="regular" className="size-3.5" />
+          )}
           {syncing
             ? translate('auto.components.settings.RepositoryForkSyncSection.syncing', 'Syncing')
             : translate('auto.components.settings.RepositoryForkSyncSection.syncNow', 'Sync Now')}

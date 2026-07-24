@@ -1,6 +1,6 @@
+import type { DiffComment, MobileDiffReviewState } from '@yiru/workbench-model/workspace'
 import { useCallback, type Dispatch, type SetStateAction } from 'react'
 
-import type { DiffComment, MobileDiffReviewState } from '../../../desktop/src/shared/types'
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'

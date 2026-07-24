@@ -1,7 +1,8 @@
 import {
   getRepoExecutionHostId,
   getSettingsFocusedExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings, Repo } from '../../../../shared/types'
 
 export type RepoReorderHostGroup = {

@@ -1,12 +1,12 @@
 import { resolve } from 'node:path'
 
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: all GitHub IPC handlers stay co-located so
 the repo-path validation, preference-threading, and stats wiring patterns are
 reviewable as one surface. Splitting by feature area would risk drifting
 validation/gate conventions across handler files. */
 import { ipcMain } from 'electron'
 
-import { getRepoExecutionHostId } from '../../shared/execution-host'
 import { appStarSourceSchema } from '../../shared/gh-star-source'
 import type { ProjectSourceContext } from '../../shared/project-source-context'
 import type {

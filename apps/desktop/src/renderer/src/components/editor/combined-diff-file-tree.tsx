@@ -6,15 +6,15 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   buildGitStatusSourceControlTree,
   buildSourceControlTree,
   compactSourceControlTree,
   flattenSourceControlTree
-} from '@/components/right-sidebar/source-control-tree'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+} from '@/components/workspace-panel/source-control-tree'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -192,7 +192,7 @@ export function CombinedDiffFileTree({
             )}
             onClick={() => onCollapsedChange(true)}
           >
-            <PanelLeftClose className="size-3.5" />
+            <PanelLeftClose weight="regular" className="size-3.5" />
           </Button>
         </div>
         <div className="border-border flex items-center gap-2 border-b px-2 py-2">
@@ -236,24 +236,28 @@ export function CombinedDiffFileTree({
                 {availableExtensions.map((extension) => {
                   const checked = !excludedExtensions.has(extension)
                   return (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       key={extension}
                       type="button"
-                      className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors outline-none"
+                      className="focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full justify-start gap-2 border-0 py-1.5 text-left text-xs font-normal whitespace-normal transition-colors"
                       onClick={() => toggleExtension(extension)}
                     >
                       <Check
                         className={cn('size-3.5 shrink-0', checked ? 'opacity-100' : 'opacity-0')}
                       />
                       <span className="min-w-0 flex-1 truncate">{extension}</span>
-                    </button>
+                    </Button>
                   )
                 })}
               </div>
               <div className="border-border border-t py-1">
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   type="button"
-                  className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors outline-none"
+                  className="focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full justify-start gap-2 border-0 py-1.5 text-left text-xs font-normal whitespace-normal transition-colors"
                   onClick={() => setIncludeViewed((prev) => !prev)}
                 >
                   <Check
@@ -265,18 +269,20 @@ export function CombinedDiffFileTree({
                       'Viewed files'
                     )}
                   </span>
-                </button>
+                </Button>
                 {activeFilterCount > 0 && (
-                  <button
+                  <Button
+                    variant="quiet"
+                    size="sm"
                     type="button"
-                    className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground w-full px-3 py-1.5 text-left text-xs transition-colors outline-none"
+                    className="w-full justify-start gap-0 border-0 py-1.5 text-left text-xs font-normal whitespace-normal"
                     onClick={resetFilters}
                   >
                     {translate(
                       'auto.components.editor.CombinedDiffFileTree.eafe1aeb53',
                       'Reset filters'
                     )}
-                  </button>
+                  </Button>
                 )}
               </div>
             </PopoverContent>

@@ -1,9 +1,9 @@
+import type { GitHubAssignableUser } from '@yiru/workbench-model/review'
 import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
 import { Check } from '@/components/uniwind-icons'
 
-import type { GitHubAssignableUser } from '../../../../desktop/src/shared/types'
 import { fetchAssignableUsers } from '../../session/github-pr-rpc'
 import type { RpcClient } from '../../transport/rpc-client'
 import { BottomDrawer } from '../bottom-drawer'

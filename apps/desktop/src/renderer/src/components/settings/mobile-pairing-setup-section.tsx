@@ -3,12 +3,10 @@ import {
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
-import type { ReactNode } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 
-import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import { NetworkInterfacePicker } from '../mobile/network-interface-picker'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 import { Button } from '../ui/button'
@@ -18,8 +16,6 @@ import type { MobileNetworkInterface } from './mobile-network-interface-selectio
 const TAILSCALE_DOWNLOAD_URL = 'https://tailscale.com/download'
 
 type MobilePairingSetupSectionProps = {
-  connectionMode: MobilePairingConnectionMode
-  relayConnectionControl: ReactNode
   networkInterfaces: MobileNetworkInterface[]
   selectedAddress: string | undefined
   onSelectedAddressChange: (address: string) => void
@@ -31,8 +27,6 @@ type MobilePairingSetupSectionProps = {
 }
 
 export function MobilePairingSetupSection({
-  connectionMode,
-  relayConnectionControl,
   networkInterfaces,
   selectedAddress,
   onSelectedAddressChange,
@@ -48,17 +42,11 @@ export function MobilePairingSetupSection({
         {translate('auto.components.settings.MobilePairingSetupSection.title', 'Pair a phone')}
       </h3>
       <p className="text-muted-foreground mt-1 text-xs">
-        {connectionMode === 'automatic'
-          ? translate(
-              'auto.components.settings.MobilePairingSetupSection.automaticDescription',
-              'The pairing code includes direct access and encrypted Yiru Relay fallback.'
-            )
-          : translate(
-              'auto.components.settings.MobilePairingSetupSection.localDescription',
-              'The pairing code connects only through the local network address below.'
-            )}
+        {translate(
+          'auto.components.settings.MobilePairingSetupSection.localDescription',
+          'The pairing code connects through the local or private-network address below.'
+        )}
       </p>
-      <div className="mt-2">{relayConnectionControl}</div>
       <Button
         onClick={onGenerateQr}
         disabled={loading || !selectedAddress}
@@ -68,7 +56,7 @@ export function MobilePairingSetupSection({
         {loading ? (
           <LoadingIndicator className="size-3.5" />
         ) : hasQrCode ? (
-          <RefreshCw className="size-3.5" />
+          <RefreshCw weight="regular" className="size-3.5" />
         ) : (
           <QrCode className="size-3.5" />
         )}
@@ -117,7 +105,11 @@ export function MobilePairingSetupSection({
                   )}
                   className="text-muted-foreground"
                 >
-                  {refreshingNetworkInterfaces ? <LoadingIndicator /> : <RefreshCw />}
+                  {refreshingNetworkInterfaces ? (
+                    <LoadingIndicator />
+                  ) : (
+                    <RefreshCw weight="regular" />
+                  )}
                 </Button>
               }
             />
@@ -146,17 +138,19 @@ export function MobilePairingSetupSection({
                 'Install Tailscale on this computer and your phone, sign in to the same tailnet, then select its 100.x.y.z address above.'
               )}
             </p>
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               type="button"
               onClick={() => void window.api.shell.openUrl(TAILSCALE_DOWNLOAD_URL)}
-              className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 font-medium underline-offset-2 outline-none hover:underline"
+              className="text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline-offset-2 hover:underline"
             >
               {translate(
                 'auto.components.settings.MobilePairingSetupSection.getTailscale',
                 'Get Tailscale'
               )}
-              <ExternalLink className="size-3" />
-            </button>
+              <ExternalLink weight="regular" className="size-3" />
+            </Button>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

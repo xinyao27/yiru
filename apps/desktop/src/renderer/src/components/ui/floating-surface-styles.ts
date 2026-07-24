@@ -1,7 +1,7 @@
-// Why: every portaled surface must use one opaque elevation recipe so content
-// behind menus never bleeds through or drifts across headless wrappers.
+// Why: every portaled surface needs one opaque, bordered recipe; outline-none
+// prevents focused Base UI popups from adding a second browser-native stroke.
 export const floatingSurfaceClass =
-  'border border-border !bg-popover text-popover-foreground !backdrop-blur-none'
+  'border border-border outline-none !bg-popover text-popover-foreground !backdrop-blur-none'
 
 export const modalSurfaceClass = 'border-border bg-background text-foreground !backdrop-blur-none'
 

@@ -13,6 +13,7 @@ import { combinedDiffSectionScrollbarOptions } from './diff-editor-scrollbar-opt
 import { buildDiffEditorWordWrapOptions } from './diff-editor-word-wrap-options'
 import type { DiffSection } from './diff-section-types'
 import { LargeDiffFallback } from './large-diff-fallback'
+import { monacoFindOptions } from './monaco-find-options'
 import { PierreDiffViewer } from './pierre-diff-viewer'
 import type { PierreDiffSectionCommentProps } from './use-diff-section-comment-actions'
 
@@ -41,7 +42,7 @@ type DiffSectionBodyProps = {
   isEditable: boolean
   diffEditorFontSize: number
   diffWordWrap?: boolean
-  terminalFontFamily?: string
+  editorFontFamily?: string
   onCancelComment: () => void
   onSubmitComment: (body: string) => Promise<void>
   onRetrySection: (index: number) => void
@@ -67,7 +68,7 @@ export function DiffSectionBody({
   isEditable,
   diffEditorFontSize,
   diffWordWrap,
-  terminalFontFamily,
+  editorFontFamily,
   onCancelComment,
   onSubmitComment,
   onRetrySection,
@@ -102,7 +103,7 @@ export function DiffSectionBody({
       ) : null}
       {section.loading ? (
         <div className="bg-muted/10 text-muted-foreground flex h-full items-center gap-2 px-3 text-[11px]">
-          <span className="bg-muted-foreground/50 h-1.5 w-1.5 rounded-full" />
+          <span className="bg-muted-foreground/50 h-1.5 w-1.5" />
           <span>
             {translate('auto.components.editor.DiffSectionBody.f5cf81cec2', 'Loading diff...')}
           </span>
@@ -123,7 +124,7 @@ export function DiffSectionBody({
               onRetrySection(index)
             }}
           >
-            <RefreshCw className="size-3" />
+            <RefreshCw weight="regular" className="size-3" />
             {translate('auto.components.editor.DiffSectionBody.cef4cf0ff5', 'Retry')}
           </Button>
         </div>
@@ -188,7 +189,7 @@ export function DiffSectionBody({
           sideBySide={sideBySide}
           isDark={isDark}
           fontSize={diffEditorFontSize}
-          fontFamily={terminalFontFamily}
+          fontFamily={editorFontFamily}
           wordWrap={diffWordWrap}
           worktreeId={pierreCommentProps.worktreeId}
           comments={pierreCommentProps.comments}
@@ -223,18 +224,14 @@ export function DiffSectionBody({
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             fontSize: diffEditorFontSize,
-            fontFamily: terminalFontFamily || 'monospace',
+            fontFamily: editorFontFamily || 'monospace',
             lineNumbers: 'on',
             ...buildDiffEditorWordWrapOptions(diffWordWrap),
             automaticLayout: true,
             renderOverviewRuler: false,
             scrollbar: combinedDiffSectionScrollbarOptions,
             hideUnchangedRegions: { enabled: true },
-            find: {
-              addExtraSpaceOnTop: false,
-              autoFindInSelection: 'never',
-              seedSearchStringFromSelection: 'never'
-            }
+            find: monacoFindOptions
           }}
         />
       )}

@@ -1,14 +1,16 @@
-import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
-
 import {
   getAgentResumeArgv,
   isResumableTuiAgent,
   type SleepingAgentSessionRecord
-} from '../../../shared/agent-session-resume'
-import type { AgentStatusEntry } from '../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
+import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
+
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { GlobalSettings, TerminalLayoutSnapshot, TerminalTab } from '../../../shared/types'
 import { lastInputBlocksHibernation } from './agent-hibernation-input-guard'
+import { isCompletedAgentWithLiveRecoveryRecord } from './completed-agent-live-recovery-record'
 
 export const DEFAULT_AGENT_HIBERNATION_IDLE_MS = 30 * 60 * 1000
 export const MIN_AGENT_HIBERNATION_IDLE_MS = 60 * 1000
@@ -132,10 +134,18 @@ function getEligiblePane(args: {
     foregroundTerminalLastSeenAtByTabId,
     mobileLockedPtyIds
   } = args
+  const sleepingRecord = sleepingAgentSessionsByPaneKey[entry.paneKey]
+  // Why: a done hook ends a turn, not a resumable TUI. Its live recovery
+  // checkpoint must not make the still-running pane look already hibernated.
+  const hasOnlyLiveRecoveryIdentity = isCompletedAgentWithLiveRecoveryRecord(
+    entry,
+    sleepingRecord,
+    tab.worktreeId
+  )
   if (
     entry.state !== 'done' ||
     entry.interrupted === true ||
-    sleepingAgentSessionsByPaneKey[entry.paneKey]
+    (sleepingRecord && !hasOnlyLiveRecoveryIdentity)
   ) {
     return null
   }

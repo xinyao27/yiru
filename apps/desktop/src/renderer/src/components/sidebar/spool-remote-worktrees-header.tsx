@@ -37,6 +37,7 @@ export function SpoolRemoteWorktreesHeader({
         }}
       >
         <ProjectHeaderActions>
+          {/* Why: the visible project-header disclosure uses the row's regular treatment. */}
           <SidebarDisclosure
             expanded={expanded}
             dataAttribute="repo-header-collapse"

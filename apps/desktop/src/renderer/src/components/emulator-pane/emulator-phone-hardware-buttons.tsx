@@ -15,11 +15,13 @@ export function PhoneHardwareButtons({ layout }: { layout: DeviceFrameLayout }) 
     width: sideButtonThickness
   }
 
+  // Why: these blocks depict physical phone hardware, so their near-black
+  // material color is illustration data rather than interactive app chrome.
   return (
     <>
       <div
         aria-hidden="true"
-        className="absolute rounded-l-sm bg-black/80"
+        className="absolute bg-black/80"
         style={{
           ...leftStyle,
           top: `${layout.shellHeight * 0.16}px`,
@@ -28,7 +30,7 @@ export function PhoneHardwareButtons({ layout }: { layout: DeviceFrameLayout }) 
       />
       <div
         aria-hidden="true"
-        className="absolute rounded-l-sm bg-black/80"
+        className="absolute bg-black/80"
         style={{
           ...leftStyle,
           top: `${layout.shellHeight * 0.24}px`,
@@ -37,7 +39,7 @@ export function PhoneHardwareButtons({ layout }: { layout: DeviceFrameLayout }) 
       />
       <div
         aria-hidden="true"
-        className="absolute rounded-l-sm bg-black/80"
+        className="absolute bg-black/80"
         style={{
           ...leftStyle,
           top: `${layout.shellHeight * 0.33}px`,
@@ -46,7 +48,7 @@ export function PhoneHardwareButtons({ layout }: { layout: DeviceFrameLayout }) 
       />
       <div
         aria-hidden="true"
-        className="absolute rounded-r-sm bg-black/80"
+        className="absolute bg-black/80"
         style={{
           ...rightStyle,
           top: `${layout.shellHeight * 0.24}px`,

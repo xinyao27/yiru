@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { extractCodexAuthError, isCodexAuthError } from '../../shared/codex-auth-errors'
 /* eslint-disable max-lines -- Why: keeping both Codex RPC and PTY fallback
 paths together in one file makes it easier to audit the protocol/parsing
@@ -16,7 +18,6 @@ import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
 } from '../../shared/wsl-login-shell-command'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { resolveCodexCommand } from '../codex-cli/command'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import { getCmdExePath, getSpawnArgsForWindows } from '../win32-utils'
@@ -25,6 +26,13 @@ import {
   type SharedAuthFilesystemOperation
 } from './auth-filesystem-operation'
 import { probeCodexAuthPresence } from './codex-auth-presence'
+import {
+  classifyCodexRateLimitWindows,
+  CODEX_SESSION_WINDOW_MINUTES,
+  CODEX_WEEKLY_WINDOW_MINUTES,
+  type CodexRpcRateLimits,
+  type CodexRpcRateWindow
+} from './codex-rate-limit-window-classification'
 import { cleanupHiddenRateLimitPty, registerHiddenRateLimitPty } from './hidden-pty-cleanup'
 import {
   getHiddenRateLimitWslCwdSetupCommands,
@@ -56,12 +64,6 @@ type RpcResponse = {
   error?: { code: number; message: string }
 }
 
-type RpcRateWindow = {
-  usedPercent?: number
-  windowDurationMins?: number
-  resetsAt?: number // Unix seconds
-}
-
 type RateLimitResetCredits = {
   availableCount: number
   totalEarnedCount?: number
@@ -73,15 +75,10 @@ type RateLimitResetCredits = {
   }[]
 }
 
-type RpcRateLimitsResult = {
-  primary?: RpcRateWindow
-  secondary?: RpcRateWindow
-}
-
 // Why: the Codex app-server wraps rate limit data inside a `rateLimits` key.
 // The actual response shape is `{ rateLimits: { primary, secondary, ... } }`.
 type RpcRateLimitsResponse = {
-  rateLimits?: RpcRateLimitsResult
+  rateLimits?: CodexRpcRateLimits | null
   rateLimitResetCredits?: {
     availableCount?: number
     totalEarnedCount?: number
@@ -456,7 +453,7 @@ export async function consumeCodexRateLimitResetCredit(options: {
 }
 
 function mapRpcWindow(
-  raw: RpcRateWindow | undefined,
+  raw: CodexRpcRateWindow | null | undefined,
   expectedWindowMinutes: number
 ): RateLimitWindow | null {
   if (!raw || typeof raw.usedPercent !== 'number' || !Number.isFinite(raw.usedPercent)) {
@@ -484,8 +481,7 @@ function mapRpcWindow(
 
   return {
     usedPercent: Math.min(100, Math.max(0, raw.usedPercent)),
-    // Why: Codex currently reports remaining minutes in `windowDurationMins`.
-    // Yiru's UI needs the fixed bucket duration so labels stay "5h" / "wk".
+    // Why: older app-server builds can report canonical bucket lengths off by one minute.
     windowMinutes: expectedWindowMinutes,
     resetsAt,
     resetDescription
@@ -545,6 +541,8 @@ async function fetchViaBackend(
     provider: 'codex',
     session: mapBackendUsageWindow(payload.rate_limit?.primary_window, 300),
     weekly: mapBackendUsageWindow(payload.rate_limit?.secondary_window, 10080),
+    // Why: the consolidated roster uses the backend tier to distinguish active Codex accounts.
+    planType: payload.plan_type,
     ...(payload.rate_limit_reset_credits !== undefined
       ? {
           rateLimitResetCredits:
@@ -725,8 +723,9 @@ async function fetchViaRpc(options?: FetchCodexRateLimitsOptions): Promise<Provi
 
             const wrapper = msg.result as RpcRateLimitsResponse | undefined
             const result = wrapper?.rateLimits
-            const session = mapRpcWindow(result?.primary, 300)
-            const weekly = mapRpcWindow(result?.secondary, 10080)
+            const classifiedWindows = classifyCodexRateLimitWindows(result)
+            const session = mapRpcWindow(classifiedWindows.session, CODEX_SESSION_WINDOW_MINUTES)
+            const weekly = mapRpcWindow(classifiedWindows.weekly, CODEX_WEEKLY_WINDOW_MINUTES)
             const rateLimitResetCredits = mapRpcRateLimitResetCredits(
               wrapper?.rateLimitResetCredits
             )

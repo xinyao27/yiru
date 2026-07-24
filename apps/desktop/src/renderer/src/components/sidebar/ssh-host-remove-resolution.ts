@@ -1,4 +1,5 @@
-import type { SshConnectionState } from '../../../../shared/ssh-types'
+import type { SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
+
 import type { Repo, Worktree } from '../../../../shared/types'
 
 /**

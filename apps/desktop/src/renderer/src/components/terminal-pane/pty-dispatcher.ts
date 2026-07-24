@@ -6,14 +6,21 @@
  * and the eager-buffer reconnection logic share.
  */
 import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal-scrollback-limits'
-import { clampUtf8Tail, type EagerBufferChunk } from './pty-eager-buffer-clamp'
-import { deliverPtyExitToHandlers } from './pty-exit-delivery'
+import type { PtyDataMeta } from '../../runtime/pty-data-meta'
+import { clampUtf8Tail, type EagerBufferChunk } from '../../runtime/pty-eager-buffer-clamp'
+import {
+  ptyDataHandlers,
+  ptyDataSidecars,
+  ptyExitHandlers,
+  ptyReplayHandlers
+} from '../../runtime/pty-handler-registry'
 import {
   bufferPreHandlerPtyData,
   clearPreHandlerPtyState,
   drainPreHandlerPtyData,
   drainPreHandlerPtyExit
-} from './pty-pre-handler-buffer'
+} from '../../runtime/pty-pre-handler-buffer'
+import { deliverPtyExitToHandlers } from './pty-exit-delivery'
 import {
   clearReceivedPtyCharTotal,
   recordPtyDataReceived,
@@ -32,89 +39,23 @@ import {
 // PTY ID. Eliminates the N-listener problem that triggers
 // MaxListenersExceededWarning with many panes/tabs.
 
-export type PtyDataMeta = {
-  seq?: number
-  rawLength?: number
-  background?: boolean
-  /** Main dropped this PTY's buffered output at the pending cap; the pane
-   *  must repaint from the main-owned snapshot instead of the live stream. */
-  droppedOutput?: boolean
-}
+export type { PtyDataMeta } from '../../runtime/pty-data-meta'
 
-export const ptyDataHandlers = new Map<string, (data: string, meta?: PtyDataMeta) => void>()
-/** Sidecar subscriptions that observe PTY data without owning the primary
- *  handler. Used by features that need to react to the live byte stream
- *  (e.g. agent-paste-draft watching for DECSET 2004 / bracketed-paste-
- *  enable). Sidecars are invoked AFTER the primary handler so xterm rendering
- *  is never delayed by a side-effect-only watcher. Each Set entry is one
- *  active subscription; removal is by Set.delete inside the unsubscribe fn. */
-export const ptyDataSidecars = new Map<string, Set<(data: string) => void>>()
+export {
+  ptyDataHandlers,
+  ptyDataSidecars,
+  ptyExitHandlers,
+  ptyReplayHandlers,
+  ptyTeardownHandlers,
+  restorePtyDataHandlersAfterFailedShutdown,
+  unregisterPtyDataHandlers
+} from '../../runtime/pty-handler-registry'
 
-/** Per-PTY replay handlers for relay pty.attach replay data. Routed through
- *  a dedicated pty:replay IPC channel so the renderer can engage the replay
- *  guard and suppress xterm auto-replies during replay. */
-export const ptyReplayHandlers = new Map<string, (data: string) => void>()
-export const ptyExitHandlers = new Map<string, (code: number) => void>()
 const ptyExitSidecars = new Map<
   string,
   Set<(code: number, context: { hadPrimary: boolean }) => void>
 >()
-/** Per-PTY teardown callbacks registered by each transport to clear closure
- *  state (stale-title timer, agent tracker) that would otherwise fire after
- *  the data handler is removed. */
-export const ptyTeardownHandlers = new Map<string, () => void>()
 let ptyDispatcherAttached = false
-
-export type PtyDataHandlerShutdownSnapshot = {
-  ptyId: string
-  dataHandler?: (data: string, meta?: PtyDataMeta) => void
-  replayHandler?: (data: string) => void
-  teardownHandler?: () => void
-}
-
-/**
- * Remove data and status handlers for the given PTY IDs so that any final
- * data flushed by the main process during PTY teardown cannot trigger
- * bell / agent-status notifications from a worktree that is being shut down.
- * Also invokes per-transport teardown callbacks to cancel accumulated closure
- * state (e.g. staleTitleTimer, agent tracker) that could independently fire
- * stale notifications.
- * Exit handlers are intentionally kept alive so the normal exit-cleanup
- * path (unregister, clear stale timers, update store) still runs.
- */
-export function unregisterPtyDataHandlers(ptyIds: string[]): PtyDataHandlerShutdownSnapshot[] {
-  const snapshots: PtyDataHandlerShutdownSnapshot[] = []
-  for (const id of ptyIds) {
-    snapshots.push({
-      ptyId: id,
-      dataHandler: ptyDataHandlers.get(id),
-      replayHandler: ptyReplayHandlers.get(id),
-      teardownHandler: ptyTeardownHandlers.get(id)
-    })
-    ptyDataHandlers.delete(id)
-    ptyReplayHandlers.delete(id)
-    ptyTeardownHandlers.get(id)?.()
-    ptyTeardownHandlers.delete(id)
-    clearPreHandlerPtyState(id)
-  }
-  return snapshots
-}
-
-export function restorePtyDataHandlersAfterFailedShutdown(
-  snapshots: readonly PtyDataHandlerShutdownSnapshot[]
-): void {
-  for (const snapshot of snapshots) {
-    if (snapshot.dataHandler) {
-      ptyDataHandlers.set(snapshot.ptyId, snapshot.dataHandler)
-    }
-    if (snapshot.replayHandler) {
-      ptyReplayHandlers.set(snapshot.ptyId, snapshot.replayHandler)
-    }
-    if (snapshot.teardownHandler) {
-      ptyTeardownHandlers.set(snapshot.ptyId, snapshot.teardownHandler)
-    }
-  }
-}
 
 let pushListenerUnsubscribes: (() => void)[] = []
 

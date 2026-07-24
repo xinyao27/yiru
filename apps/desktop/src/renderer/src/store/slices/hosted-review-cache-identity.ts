@@ -2,7 +2,8 @@ import {
   getSettingsFocusedExecutionHostId,
   normalizeExecutionHostId,
   toSshExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings } from '../../../../shared/types'
 
 export type LinkedReviewHints = {

@@ -9,6 +9,7 @@ import { clampNumber } from '@/lib/terminal-theme'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
+import { Switch } from '../ui/switch'
 import { SearchableSetting } from './searchable-setting'
 import { ColorField, NumberField } from './settings-form-controls'
 
@@ -124,31 +125,14 @@ export function TerminalWindowSection({
                 )}
               </p>
             </div>
-            <button
-              role="switch"
-              aria-checked={settings.windowBackgroundBlur ?? false}
-              onClick={() =>
-                updateSettings({ windowBackgroundBlur: !settings.windowBackgroundBlur })
-              }
-              className={cn(
-                'outline-none focus-visible:border-ring',
-                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-                (settings.windowBackgroundBlur ?? false)
-                  ? 'bg-foreground'
-                  : 'bg-muted-foreground/30'
-              )}
-            >
-              <span
-                className={cn(
-                  'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                  (settings.windowBackgroundBlur ?? false) ? 'translate-x-4' : 'translate-x-0.5'
-                )}
-              />
-            </button>
+            <Switch
+              checked={settings.windowBackgroundBlur ?? false}
+              onCheckedChange={(checked) => updateSettings({ windowBackgroundBlur: checked })}
+            />
           </div>
 
           {blurPendingRestart ? (
-            <div className="flex items-center justify-between gap-3 rounded-md border border-yellow-500/50 bg-yellow-500/10 px-3 py-2.5">
+            <div className="flex items-center justify-between gap-3 border border-yellow-500/50 bg-yellow-500/10 px-3 py-2.5">
               <div className="min-w-0 flex-1 space-y-0.5">
                 <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
                   {translate(
@@ -173,7 +157,7 @@ export function TerminalWindowSection({
                 {relaunchingBlur ? (
                   <LoadingIndicator className="size-3" />
                 ) : (
-                  <RotateCw className="size-3" />
+                  <RotateCw weight="regular" className="size-3" />
                 )}
                 {relaunchingBlur
                   ? translate(
@@ -265,31 +249,10 @@ export function TerminalWindowSection({
               )}
             </Label>
           </div>
-          <button
-            role="switch"
-            aria-checked={settings.terminalMouseHideWhileTyping ?? false}
-            onClick={() =>
-              updateSettings({
-                terminalMouseHideWhileTyping: !settings.terminalMouseHideWhileTyping
-              })
-            }
-            className={cn(
-              'outline-none focus-visible:border-ring',
-              'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-              (settings.terminalMouseHideWhileTyping ?? false)
-                ? 'bg-foreground'
-                : 'bg-muted-foreground/30'
-            )}
-          >
-            <span
-              className={cn(
-                'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                (settings.terminalMouseHideWhileTyping ?? false)
-                  ? 'translate-x-4'
-                  : 'translate-x-0.5'
-              )}
-            />
-          </button>
+          <Switch
+            checked={settings.terminalMouseHideWhileTyping ?? false}
+            onCheckedChange={(checked) => updateSettings({ terminalMouseHideWhileTyping: checked })}
+          />
         </SearchableSetting>
 
         <SearchableSetting
@@ -305,9 +268,11 @@ export function TerminalWindowSection({
           className="space-y-3"
         >
           <div className="space-y-2">
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               onClick={() => setColorOverridesExpanded((prev) => !prev)}
-              className="focus-visible:bg-accent flex items-center gap-2 text-sm font-medium outline-none"
+              className="focus-visible:bg-accent flex h-auto gap-2 border-0 p-0 text-sm"
             >
               <span
                 className={cn('transition-transform', colorOverridesExpanded ? 'rotate-90' : '')}
@@ -318,7 +283,7 @@ export function TerminalWindowSection({
                 'auto.components.settings.TerminalWindowSection.63f8d9336e',
                 'Color Overrides'
               )}
-            </button>
+            </Button>
             <div
               className={cn(
                 'grid overflow-hidden transition-all duration-300 ease-out',

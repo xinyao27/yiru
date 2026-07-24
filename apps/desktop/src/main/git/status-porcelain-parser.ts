@@ -1,5 +1,6 @@
+import type { GitStatusEntry } from '@yiru/workbench-model/review'
+
 import { decodeGitCQuotedPath } from '../../shared/git-cquoted-path'
-import type { GitStatusEntry } from '../../shared/git-status-types'
 
 /**
  * Incremental parser for `git status --porcelain=v2 --branch` output.

@@ -33,6 +33,7 @@ type Props = {
   onRetry: () => void
   // Re-fetches authoritative PR data after a successful mutation (U3/U6) or create.
   refetch: () => void
+  onSourceControlRefresh: () => void | Promise<void>
   // Threaded to sections for github.* fetches + mutations.
   client: RpcClient | null
   connState: ConnectionState
@@ -50,6 +51,7 @@ export function MobilePRSidebar({
   state,
   onRetry,
   refetch,
+  onSourceControlRefresh: _onSourceControlRefresh,
   client,
   connState,
   worktreeId,
@@ -115,6 +117,7 @@ export function MobilePRSidebar({
         state={state}
         onRetry={onRetry}
         refetch={refetch}
+        onSourceControlRefresh={_onSourceControlRefresh}
         client={client}
         connState={connState}
         worktreeId={worktreeId}
@@ -136,6 +139,7 @@ function PrSidebarContent({
   state,
   onRetry,
   refetch,
+  onSourceControlRefresh: _onSourceControlRefresh,
   client,
   connState,
   worktreeId,
@@ -152,6 +156,7 @@ function PrSidebarContent({
   state: PrSidebarState
   onRetry: () => void
   refetch: () => void
+  onSourceControlRefresh: () => void | Promise<void>
   client: RpcClient | null
   connState: ConnectionState
   worktreeId: string
@@ -214,6 +219,7 @@ function PrSidebarContent({
         gitStatus={gitStatus}
         connState={connState}
         onCreated={refetch}
+        onSourceControlRefresh={_onSourceControlRefresh}
       />
     )
   }

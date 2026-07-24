@@ -62,7 +62,7 @@ export default function ProjectHostSetupCombobox({
                 )}
               </span>
             )}
-            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+            <ChevronsUpDown weight="regular" className="size-3.5 shrink-0 opacity-50" />
           </Button>
         }
       />

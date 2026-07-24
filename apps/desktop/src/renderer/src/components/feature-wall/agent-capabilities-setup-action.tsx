@@ -164,7 +164,7 @@ const AGENT_CAPABILITY_SETUP_ROWS: readonly AgentCapabilitySetupRow[] = [
         'Let agents coordinate through Yiru to keep large, multi-step tasks moving to completion.'
       )
     },
-    icon: <Workflow className="size-4" />
+    icon: <Workflow weight="regular" className="size-4" />
   },
   {
     id: 'browserUse',
@@ -264,25 +264,26 @@ function AgentCapabilitySetupChecklist(props: {
           const selected = props.value[row.id]
           const installStatus = props.installStatus[row.id]
           return (
-            <button
+            <Button
+              variant="outline"
+              size="default"
               key={row.id}
               type="button"
               role="checkbox"
               aria-checked={selected}
               aria-label={`${selected ? 'Disable' : 'Enable'} ${row.title}`}
               className={cn(
-                'flex min-h-24 flex-col rounded-lg border px-4 py-3 text-left transition-colors',
-                'outline-none focus-visible:border-ring',
+                'h-auto justify-start gap-0 whitespace-normal font-normal flex min-h-24 flex-col py-3 text-left transition-colors',
                 selected
-                  ? 'border-ring bg-accent text-foreground'
-                  : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
+                  ? 'border-ring bg-accent'
+                  : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
               )}
               onClick={() => props.onChange({ ...props.value, [row.id]: !selected })}
             >
               <span className="flex items-start justify-between gap-3">
                 <span
                   className={cn(
-                    'flex size-8 items-center justify-center rounded-lg border',
+                    'flex size-8 items-center justify-center border',
                     selected
                       ? 'border-border bg-background text-foreground'
                       : 'border-border bg-muted/40'
@@ -293,7 +294,7 @@ function AgentCapabilitySetupChecklist(props: {
                 <span
                   aria-hidden
                   className={cn(
-                    'flex size-5 items-center justify-center rounded-full border transition-colors',
+                    'flex size-5 items-center justify-center border transition-colors',
                     selected
                       ? 'border-primary bg-primary text-primary-foreground'
                       : 'border-border bg-background'
@@ -307,7 +308,7 @@ function AgentCapabilitySetupChecklist(props: {
                 {row.description}
               </span>
               <AgentCapabilityStatusNote status={installStatus} />
-            </button>
+            </Button>
           )
         })}
       </div>
@@ -321,7 +322,7 @@ function AgentCapabilityStatusNote(props: {
   if (props.status.installed) {
     return (
       <span className="mt-2 flex flex-wrap items-center gap-1.5">
-        <span className="rounded-full border border-green-500/45 bg-green-500/10 px-2 py-0.5 text-[11px] leading-none font-semibold text-green-700 dark:text-green-300">
+        <span className="border border-green-500/45 bg-green-500/10 px-2 py-0.5 text-[11px] leading-none font-semibold text-green-700 dark:text-green-300">
           {translate(
             'auto.components.feature.wall.AgentCapabilitiesSetupAction.b8dc9dd8a2',
             'Installed'

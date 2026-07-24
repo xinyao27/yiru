@@ -2,7 +2,7 @@
 // 13-byte framing header matching VS Code's PersistentProtocol wire format.
 // See design-ssh-support.md § JSON-RPC Protocol Specification.
 
-import { DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS } from '../../shared/ssh-types'
+import { DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS } from '@yiru/runtime-protocol/ssh-connection'
 
 export const RELAY_VERSION = '0.1.0'
 export const RELAY_SENTINEL = `YIRU-RELAY v${RELAY_VERSION} READY\n`

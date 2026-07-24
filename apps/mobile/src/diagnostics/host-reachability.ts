@@ -1,4 +1,4 @@
-import { isTailscaleEndpoint } from '../../../desktop/src/shared/remote-runtime-tailscale-hint'
+import { isTailscaleEndpoint } from '@yiru/runtime-protocol/tailscale-endpoint'
 
 const HOST_REACHABILITY_TIMEOUT_MS = 4000
 

@@ -15,7 +15,6 @@ import { YiruLogo } from '../src/components/yiru-logo'
 import { getNotificationNavigationPath } from '../src/notifications/notification-routing'
 import { RpcClientProvider } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
-import { recoverMobileRelayPairing } from '../src/transport/mobile-relay-pairing-recovery'
 import { extractPairingCodeFromUrl } from '../src/transport/pairing'
 
 // Why: keeps the native splash screen visible until the React tree is mounted
@@ -52,12 +51,6 @@ export default function RootLayout() {
     'fontFamily' | 'fontSize' | 'fontWeight'
   > & { color?: string }
   const contentStyle = useResolveClassNames('bg-background') as ViewStyle
-
-  useEffect(() => {
-    // Why: pairing publication is journaled across process death; startup must
-    // reconcile the server result before another scan can replace that journal.
-    void recoverMobileRelayPairing()
-  }, [])
 
   // Why: route `yiru://pair?...` deep links to the confirm screen so
   // the same pairing flow runs whether the link arrived via QR scan,

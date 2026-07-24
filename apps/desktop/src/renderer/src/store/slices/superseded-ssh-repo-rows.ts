@@ -1,5 +1,6 @@
-import { getRepoExecutionHostId, toSshExecutionHostId } from '../../../../shared/execution-host'
-import type { SshRepoReadoption } from '../../../../shared/ssh-types'
+import type { SshRepoReadoption } from '@yiru/runtime-protocol/ssh-connection'
+import { getRepoExecutionHostId, toSshExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { Repo } from '../../../../shared/types'
 
 export type SshRepoReconciliation = {

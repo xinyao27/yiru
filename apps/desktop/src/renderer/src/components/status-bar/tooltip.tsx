@@ -1,11 +1,9 @@
+import { formatResetCountdown, formatResetDuration } from '@yiru/workbench-model/ui'
+
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
 
-import {
-  formatResetCountdown,
-  formatResetDuration
-} from '../../../../shared/rate-limit-reset-format'
 import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
 import {
   clampUsedPercent,
@@ -19,6 +17,7 @@ import {
   getProviderUsageStatusLabel
 } from './usage-error-copy'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
+import { getUsageUrgency } from './usage-roster-formatting'
 
 // Re-exported from its shared home so status-bar callers keep a single import.
 export { clampUsedPercent }
@@ -187,17 +186,17 @@ export function getWindowSections(
 // `text-background` for primary text and `text-background/50` for secondary
 // to stay readable inside the inverted tooltip container.
 
-// Why: color always tracks % used so urgency reads correctly even when the meter
-// fills with % remaining (#8560) — low remaining still turns red, not green.
-// Green = comfortable (<60% used), yellow = caution (60-80%), red = critical (≥80%).
+// Why: urgency color tracks % used even when fill represents % remaining;
+// low usage stays neutral so persistent status-bar chrome stays quiet.
 export function barColor(usedPct: number): string {
-  if (usedPct < 60) {
-    return 'bg-green-500'
+  switch (getUsageUrgency(usedPct)) {
+    case 'critical':
+      return 'bg-red-500'
+    case 'warning':
+      return 'bg-yellow-500'
+    case 'neutral':
+      return 'bg-muted-foreground/40'
   }
-  if (usedPct < 80) {
-    return 'bg-yellow-500'
-  }
-  return 'bg-red-500'
 }
 
 export function ProviderPanel({
@@ -288,10 +287,10 @@ export function ProviderPanel({
     return (
       <div className="space-y-1">
         <div className={cn('font-medium', textClass)}>{label}</div>
-        <div className={cn('h-[6px] w-full overflow-hidden rounded-full', emptyBarClass)}>
+        <div className={cn('h-[6px] w-full overflow-hidden', emptyBarClass)}>
           {/* Why: fill follows the selected percentage; color still signals consumption urgency. */}
           <div
-            className={cn('h-full rounded-full', barColor(usedPct), 'transition-all duration-300')}
+            className={cn('h-full', barColor(usedPct), 'transition-all duration-300')}
             style={{ width: `${displayedPct}%` }}
           />
         </div>

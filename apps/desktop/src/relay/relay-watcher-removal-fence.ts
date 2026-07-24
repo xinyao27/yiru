@@ -1,4 +1,5 @@
-import { isPathInsideOrEqual } from '../shared/cross-platform-path'
+import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
+
 import type { RelayDispatcher } from './dispatcher'
 import type { RelayWatcherPendingSetup } from './relay-watcher-setup-tracking'
 import type {

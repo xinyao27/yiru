@@ -1,8 +1,14 @@
+import {
+  normalizeExecutionHostOrder,
+  normalizeExecutionHostScope,
+  normalizeVisibleExecutionHostIds,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
-import { translate } from '@/i18n/i18n'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
 import { buildAgentNotificationId } from '../../../../shared/agent-notification-id'
 import {
@@ -14,7 +20,6 @@ import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
   DEFAULT_SHOW_SLEEPING_WORKSPACES,
-  DEFAULT_STATUS_BAR_ITEMS,
   DEFAULT_WORKTREE_CARD_PROPERTIES,
   normalizeAgentActivityDisplayMode,
   normalizeWorktreeCardProperties
@@ -24,12 +29,6 @@ import {
   normalizeContextualTourIds,
   type ContextualTourId
 } from '../../../../shared/contextual-tours'
-import {
-  normalizeExecutionHostOrder,
-  normalizeExecutionHostScope,
-  normalizeVisibleExecutionHostIds,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import {
   hasFeatureInteraction,
   normalizeFeatureInteractions,
@@ -45,6 +44,15 @@ import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-pane
 import { persistedUIValuesEqual } from '../../../../shared/persisted-ui-equality'
 import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
+import {
+  DEFAULT_STATUS_BAR_ITEMS,
+  normalizeStatusBarItems
+} from '../../../../shared/status-bar-defaults'
+import {
+  DEFAULT_STATUS_BAR_USAGE_MODE,
+  normalizeStatusBarUsageMode,
+  type StatusBarUsageMode
+} from '../../../../shared/status-bar-usage-mode'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type {
   ChangelogData,
@@ -79,15 +87,8 @@ import {
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
 } from '../../../../shared/workspace-statuses'
-import {
-  getContextualTourRequestDecision,
-  hasContextualTourTarget,
-  getNextVisibleContextualTourStepIndex,
-  getPreviousVisibleContextualTourStepIndex
-} from '../../components/contextual-tours/contextual-tour-gate'
-import { revokeCustomPetBlobUrl } from '../../components/pet/pet-blob-cache'
-import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/pet-models'
 import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
+import { DEFAULT_PET_ID, isBundledPetId } from '../../lib/pet-id'
 import {
   deriveRunningAgentSendTargets,
   resolveRunningAgentSendTarget
@@ -98,6 +99,13 @@ import {
   sanitizeSetupScriptPromptDismissals
 } from '../../lib/setup-script-prompt'
 import type { YiruHookScriptKind } from '../../lib/yiru-hook-trust'
+import {
+  getContextualTourRequestDecision,
+  hasContextualTourTarget,
+  getNextVisibleContextualTourStepIndex,
+  getPreviousVisibleContextualTourStepIndex
+} from '../../runtime/contextual-tour-gate'
+import { revokeCustomPetBlobUrl } from '../../runtime/custom-pet-blob-cache'
 import { normalizeRightSidebarRoute } from '../right-sidebar-route'
 import type { AppState } from '../types'
 import { findPrevLiveWorktreeHistoryIndex } from './worktree-nav-history'
@@ -216,27 +224,7 @@ function clampPetSize(size: number): number {
   return Math.max(PET_SIZE_MIN, Math.min(PET_SIZE_MAX, Math.round(size)))
 }
 
-// Why: persisted UI state pre-dated the consolidation of `memory` + `sessions`
-// into a single `resource-usage` entry. Rewrite legacy ids in place and
-// de-duplicate. We leave unknown ids alone so a downgrade→upgrade cycle
-// doesn't strip a newer build's ids out of the user's settings.
-function migrateStatusBarItems(items: readonly string[] | undefined): StatusBarItem[] {
-  const source = items ?? DEFAULT_STATUS_BAR_ITEMS
-  const out: string[] = []
-  for (const id of source) {
-    const mapped = id === 'memory' || id === 'sessions' ? 'resource-usage' : id
-    if (!out.includes(mapped)) {
-      out.push(mapped)
-    }
-  }
-  return out as StatusBarItem[]
-}
-
 const DEFAULT_ON_PORTS_STATUS_BAR_ITEM: StatusBarItem = 'ports'
-const DEFAULT_ON_KIMI_STATUS_BAR_ITEM: StatusBarItem = 'kimi'
-const DEFAULT_ON_MINIMAX_STATUS_BAR_ITEM: StatusBarItem = 'minimax'
-const DEFAULT_ON_ANTIGRAVITY_STATUS_BAR_ITEM: StatusBarItem = 'antigravity'
-const DEFAULT_ON_GROK_STATUS_BAR_ITEM: StatusBarItem = 'grok'
 
 function normalizeHydratedVisibleWorkspaceHostIds(ui: PersistedUIState): VisibleWorkspaceHostIds {
   const visibleHostIds = normalizeVisibleExecutionHostIds(ui.visibleWorkspaceHostIds)
@@ -482,6 +470,10 @@ export type UISlice = {
   openAgentSendPopoverTargetMode: (args: OpenAgentSendPopoverTargetModeArgs) => void
   closeAgentSendPopoverTargetMode: (id?: string, instanceId?: string) => void
   sendPromptToSidebarAgentTarget: (paneKey: string) => Promise<boolean>
+  diffNotesSendMenuOpenRequest: { worktreeId: string; nonce: number; issuedAt: number } | null
+  /** Requests the active workspace's notes menu; false means there is nothing to send. */
+  openDiffNotesSendMenuForActiveWorktree: () => boolean
+  consumeDiffNotesSendMenuOpenRequest: (worktreeId: string) => void
   /** Per-agent "I've looked at this" timestamps, keyed by paneKey. Set when
    *  the user clicks an agent row or its parent workspace card from the
    *  dashboard. A row is considered unvisited when no ack exists OR the
@@ -739,6 +731,8 @@ export type UISlice = {
   setStatusBarVisible: (v: boolean) => void
   usagePercentageDisplay: UsagePercentageDisplay
   setUsagePercentageDisplay: (display: UsagePercentageDisplay) => void
+  statusBarUsageMode: StatusBarUsageMode
+  setStatusBarUsageMode: (mode: StatusBarUsageMode) => void
   workspacePortScan: { key: string; result: WorkspacePortScanResult } | null
   workspacePortScansByKey: Record<string, WorkspacePortScanResult>
   workspacePortScanRefreshing: boolean
@@ -871,6 +865,27 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       get().revealWorktreeInSidebar(args.worktreeId, { behavior: 'auto', highlight: true })
     }
   },
+  diffNotesSendMenuOpenRequest: null,
+  openDiffNotesSendMenuForActiveWorktree: () => {
+    const worktreeId = get().activeWorktreeId
+    if (
+      !worktreeId ||
+      !get()
+        .getDiffComments(worktreeId)
+        .some((comment) => !comment.sentAt)
+    ) {
+      return false
+    }
+    const nonce = (get().diffNotesSendMenuOpenRequest?.nonce ?? 0) + 1
+    set({ diffNotesSendMenuOpenRequest: { worktreeId, nonce, issuedAt: Date.now() } })
+    return true
+  },
+  consumeDiffNotesSendMenuOpenRequest: (worktreeId) =>
+    set((state) =>
+      state.diffNotesSendMenuOpenRequest?.worktreeId === worktreeId
+        ? { diffNotesSendMenuOpenRequest: null }
+        : state
+    ),
   closeAgentSendPopoverTargetMode: (id, instanceId) =>
     set((s) => {
       if (!s.agentSendPopoverTargetMode) {
@@ -916,6 +931,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     const { activeAgentNotesSendFailureMessage, sendNotesToActiveAgentSession } =
       await import('@/lib/active-agent-note-send')
     const result = await sendNotesToActiveAgentSession({
+      state: get(),
       worktreeId: mode.worktreeId,
       prompt: mode.prompt,
       noteTarget: { tabId: target.tabId, leafId: target.leafId }
@@ -948,20 +964,19 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
             }
           : s
       )
-      const { toast } = await import('sonner')
       if (!stillCurrent()) {
         return false
       }
-      toast.error(
-        translate('auto.store.slices.ui.53883b7bc3', "Couldn't send to {{value0}}", {
-          value0: label
-        }),
-        { description: message }
-      )
+      publishRendererCommandResult({
+        type: 'agent-note-send',
+        outcome: 'failed',
+        label,
+        error: message
+      })
       return false
     }
 
-    const [{ toast }, { track }] = await Promise.all([import('sonner'), import('@/lib/telemetry')])
+    const { track } = await import('@/lib/telemetry')
     if (!stillCurrent()) {
       return false
     }
@@ -971,9 +986,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       launch_source: mode.launchSource,
       request_kind: 'followup'
     })
-    toast.success(
-      translate('auto.store.slices.ui.66e3bd7ce6', 'Sent to {{value0}}', { value0: label })
-    )
+    publishRendererCommandResult({ type: 'agent-note-send', outcome: 'succeeded', label })
     get().closeAgentSendPopoverTargetMode(mode.id, mode.instanceId)
     return true
   },
@@ -1781,6 +1794,12 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       usagePercentageDisplayChangeNoticeDismissed: true
     })
   },
+  statusBarUsageMode: DEFAULT_STATUS_BAR_USAGE_MODE,
+  setStatusBarUsageMode: (mode) => {
+    const normalized = normalizeStatusBarUsageMode(mode)
+    window.api.ui.set({ statusBarUsageMode: normalized }).catch(console.error)
+    set({ statusBarUsageMode: normalized })
+  },
   workspacePortScan: null,
   workspacePortScansByKey: {},
   workspacePortScanRefreshing: false,
@@ -1968,38 +1987,30 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       //     flag — not here — so that users who intentionally select the new
       //     'recent' sort keep it across restarts.
       const sortBy = ui.sortBy
-      const migratedStatusBarItems = migrateStatusBarItems(ui.statusBarItems)
+      const migratedStatusBarItems = normalizeStatusBarItems(ui.statusBarItems)
       const statusBarItemsWithPorts =
         ui._portsStatusBarDefaultAdded || migratedStatusBarItems.includes('ports')
           ? migratedStatusBarItems
           : [...migratedStatusBarItems, DEFAULT_ON_PORTS_STATUS_BAR_ITEM]
-      const statusBarItems =
-        ui._kimiStatusBarDefaultAdded || statusBarItemsWithPorts.includes('kimi')
-          ? statusBarItemsWithPorts
-          : [...statusBarItemsWithPorts, DEFAULT_ON_KIMI_STATUS_BAR_ITEM]
-      const statusBarItemsWithMiniMax =
-        ui._minimaxStatusBarDefaultAdded || statusBarItems.includes('minimax')
-          ? statusBarItems
-          : [...statusBarItems, DEFAULT_ON_MINIMAX_STATUS_BAR_ITEM]
-      const statusBarItemsWithAntigravity =
-        ui._antigravityStatusBarDefaultAdded || statusBarItemsWithMiniMax.includes('antigravity')
-          ? statusBarItemsWithMiniMax
-          : [...statusBarItemsWithMiniMax, DEFAULT_ON_ANTIGRAVITY_STATUS_BAR_ITEM]
-      const statusBarItemsWithGrok =
-        ui._grokStatusBarDefaultAdded || statusBarItemsWithAntigravity.includes('grok')
-          ? statusBarItemsWithAntigravity
-          : [...statusBarItemsWithAntigravity, DEFAULT_ON_GROK_STATUS_BAR_ITEM]
+      const persistedStatusBarItems = ui.statusBarItems ?? []
+      const statusBarItemsChanged =
+        persistedStatusBarItems.length !== statusBarItemsWithPorts.length ||
+        persistedStatusBarItems.some((item, index) => item !== statusBarItemsWithPorts[index])
+      const historicalStatusBarDefaultsHandled =
+        ui._portsStatusBarDefaultAdded &&
+        ui._kimiStatusBarDefaultAdded &&
+        ui._minimaxStatusBarDefaultAdded &&
+        ui._antigravityStatusBarDefaultAdded &&
+        ui._grokStatusBarDefaultAdded
       if (
-        (!ui._portsStatusBarDefaultAdded ||
-          !ui._kimiStatusBarDefaultAdded ||
-          !ui._minimaxStatusBarDefaultAdded ||
-          !ui._antigravityStatusBarDefaultAdded ||
-          !ui._grokStatusBarDefaultAdded) &&
+        (statusBarItemsChanged || !historicalStatusBarDefaultsHandled) &&
         typeof window !== 'undefined'
       ) {
         window.api.ui
           .set({
-            statusBarItems: statusBarItemsWithGrok,
+            statusBarItems: statusBarItemsWithPorts,
+            // Why: retire the former provider-default migrations without
+            // re-enabling their meters when this quieter default is hydrated.
             _portsStatusBarDefaultAdded: true,
             _kimiStatusBarDefaultAdded: true,
             _minimaxStatusBarDefaultAdded: true,
@@ -2069,9 +2080,10 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         worktreeCardProperties: normalizeWorktreeCardProperties(ui.worktreeCardProperties),
         agentActivityDisplayMode: normalizeAgentActivityDisplayMode(ui.agentActivityDisplayMode),
         workspaceStatuses: normalizeWorkspaceStatuses(ui.workspaceStatuses),
-        statusBarItems: statusBarItemsWithGrok,
+        statusBarItems: statusBarItemsWithPorts,
         statusBarVisible: ui.statusBarVisible ?? true,
         usagePercentageDisplay: normalizeUsagePercentageDisplay(ui.usagePercentageDisplay),
+        statusBarUsageMode: normalizeStatusBarUsageMode(ui.statusBarUsageMode),
         // Why: absent → true so existing users see the pet the first time
         // they enable the experimental flag. Only an explicit Hide pet
         // dismissal persists a `false` value.

@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { isYiruCliAvailableOnPath } from '@/lib/agent-skill-cli-prerequisite'
 import { cn } from '@/lib/class-names'
+import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
 import { IntegrationStatusPill } from '../integration-status-pill'
 import { OnboardingInlineCommandTerminal } from '../onboarding/onboarding-inline-command-terminal'
@@ -228,7 +228,11 @@ export function AgentSkillSetupPanel({
           }}
           disabled={loading}
         >
-          {loading ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
+          {loading ? (
+            <LoadingIndicator className="size-3.5" />
+          ) : (
+            <RefreshCw weight="regular" className="size-3.5" />
+          )}
           {translate('auto.components.settings.AgentSkillSetupPanel.c689392435', 'Re-check')}
         </Button>
       ) : null}
@@ -248,7 +252,7 @@ export function AgentSkillSetupPanel({
     <div
       className={cn(
         'min-w-0',
-        variant === 'card' ? 'rounded-xl border border-border bg-muted/20' : null,
+        variant === 'card' ? 'border border-border bg-muted/20' : null,
         className
       )}
     >
@@ -263,7 +267,7 @@ export function AgentSkillSetupPanel({
           <div className="flex items-center gap-4">
             {leading}
             {icon ? (
-              <div className="border-border bg-background text-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border">
+              <div className="border-border bg-background text-foreground flex size-10 shrink-0 items-center justify-center border">
                 {icon}
               </div>
             ) : null}
@@ -326,7 +330,7 @@ export function AgentSkillSetupPanel({
             variant === 'card' ? 'px-5 pb-5' : 'mt-2'
           )}
         >
-          <div className="border-border bg-muted/35 flex max-w-full min-w-0 items-center gap-2 overflow-hidden rounded-md border px-3 py-2">
+          <div className="border-border bg-muted/35 flex max-w-full min-w-0 items-center gap-2 overflow-hidden border px-3 py-2">
             <code className="scrollbar-sleek text-muted-foreground min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap">
               {openTerminalCommand}
             </code>

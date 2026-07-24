@@ -10,7 +10,7 @@ import {
   OptionalString,
   requiredString,
   requiredStringAllowingEmpty
-} from '../schemas'
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
 
 const OptionalNonNegativeInt = z.number().int().nonnegative().optional()
 const OptionalPositiveInt = z.number().int().positive().optional()

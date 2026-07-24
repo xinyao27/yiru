@@ -1,4 +1,4 @@
-import type { HostedReviewInfo } from '../../../shared/hosted-review'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 
 type SearchableReview = Pick<HostedReviewInfo, 'number' | 'title' | 'provider'>
 type WorktreePaletteReviewMatch = {

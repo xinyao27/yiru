@@ -32,8 +32,18 @@ import { arch as osArch, platform as osPlatform, release as osRelease } from 'no
 import { app } from 'electron'
 import { PostHog } from 'posthog-node'
 
-import type { CommonProps, EventName, EventProps, OptInVia } from '../../shared/telemetry-events'
+import type {
+  CommonProps,
+  EventName,
+  EventProps,
+  OptInVia,
+  SupportReportDraft
+} from '../../shared/telemetry-events'
 import type { Store } from '../persistence'
+import {
+  sendSupportReport,
+  type SupportReportSubmitResult
+} from '../support-report/support-report-client'
 import { consumeBurstToken, resetBurstCapsForSession } from './burst-cap'
 import { getCohortAtEmit } from './cohort-classifier'
 import { resolveConsent, type ConsentState } from './consent'
@@ -49,6 +59,7 @@ import { commonPropsSchema, validate } from './validator'
 // If you refactor this (e.g. let, export, computed-from-env, moved into a
 // config object), update the regex in that script too.
 const TELEMETRY_ENABLED = true
+const POSTHOG_HOST = 'https://us.i.posthog.com'
 
 // Eligible-to-transmit only if the CI release pipeline injected BOTH the
 // build-identity constant and a write key. One without the other is treated
@@ -150,7 +161,7 @@ export function initTelemetry(store: Store): void {
   }
 
   posthog = new PostHog(WRITE_KEY as string, {
-    host: 'https://us.i.posthog.com',
+    host: POSTHOG_HOST,
     flushAt: 20,
     flushInterval: 10_000,
     // Strip every auto-attached property we do not want on our wire: no
@@ -238,6 +249,11 @@ export function track<N extends EventName>(name: N, props: EventProps<N>): void 
   if (!IS_OFFICIAL_BUILD || !TELEMETRY_ENABLED) {
     return
   }
+  // Why: renderer telemetry IPC accepts every EventName. Support reports must
+  // only use submitSupportReport() so their distinct ID can never be install_id.
+  if (name === 'support_report_submitted') {
+    return
+  }
 
   // (1) Shutdown gate. Late IPC arrivals should not attempt to enqueue
   // against a client that is actively flushing.
@@ -287,6 +303,22 @@ export function track<N extends EventName>(name: N, props: EventProps<N>): void 
       ...result.props,
       $process_person_profile: false
     }
+  })
+}
+
+/**
+ * Send an explicitly user-approved support report without joining it to the
+ * product analytics identity. This intentionally bypasses analytics consent:
+ * clicking Send is consent for this one report, not an analytics opt-in.
+ */
+export async function submitSupportReport(
+  draft: SupportReportDraft
+): Promise<SupportReportSubmitResult> {
+  return sendSupportReport(draft, {
+    enabled: TELEMETRY_ENABLED && IS_OFFICIAL_BUILD,
+    shuttingDown,
+    writeKey: WRITE_KEY,
+    channel: BUILD_IDENTITY
   })
 }
 

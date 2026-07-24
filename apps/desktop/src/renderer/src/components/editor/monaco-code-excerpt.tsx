@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { cn } from '@/lib/class-names'
 import { resolveDocumentTheme } from '@/lib/document-theme'
+import { resolveEditorFontFamily } from '@/lib/editor-font-family'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { useAppStore } from '@/store'
@@ -52,7 +53,7 @@ export default function MonacoCodeExcerpt({
     settings?.terminalFontSize ?? 13,
     editorFontZoomLevel
   )
-  const fontFamily = settings?.terminalFontFamily || 'monospace'
+  const fontFamily = resolveEditorFontFamily(settings)
   const isDark = resolveDocumentTheme(settings?.theme ?? 'system')
   const code = useMemo(() => lines.join('\n'), [lines])
   const [htmlLines, setHtmlLines] = useState<string[]>(() => lines.map(() => ''))

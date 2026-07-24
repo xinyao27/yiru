@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
 import type { ContextualTourStepControl } from '../../../../shared/contextual-tours'
@@ -35,7 +35,7 @@ function AutoRenameBranchFromWorkControl(): JSX.Element {
   const updateSettings = useAppStore((s) => s.updateSettings)
 
   return (
-    <div className="border-border/70 bg-muted/35 mt-3 rounded-md border px-3 py-2.5">
+    <div className="border-border/70 bg-muted/35 mt-3 border px-3 py-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-foreground text-xs font-medium">
@@ -45,34 +45,20 @@ function AutoRenameBranchFromWorkControl(): JSX.Element {
             )}
           </div>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
+        <Switch
+          checked={enabled}
           aria-label={translate(
             'auto.components.contextual.tours.ContextualTourControl.186eecc34f',
             'Auto-name workspace from first agent message'
           )}
-          onClick={() => {
+          onCheckedChange={() => {
             toggleAutoRenameBranchFromWork({
               enabled,
               updateSettings,
               dispatchEvent: (event) => window.dispatchEvent(event)
             })
           }}
-          className={cn(
-            'outline-none focus-visible:border-ring',
-            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-            enabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-          )}
-        >
-          <span
-            className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-              enabled ? 'translate-x-4' : 'translate-x-0.5'
-            )}
-          />
-        </button>
+        />
       </div>
     </div>
   )

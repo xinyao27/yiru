@@ -1,3 +1,4 @@
+import { Checkbox } from '@/components/ui/checkbox'
 import { translate } from '@/i18n/i18n'
 
 import type { SourceControlAiSettings } from '../../../../shared/source-control-ai-types'
@@ -109,17 +110,16 @@ export function HostedReviewCreationDefaults({
         {getHostedReviewDefaultRows().map((row) => (
           <label
             key={row.key}
-            className="border-border flex items-start justify-between gap-4 rounded-md border px-3 py-2"
+            className="border-border flex items-start justify-between gap-4 border px-3 py-2"
           >
             <span className="space-y-0.5">
               <span className="text-foreground block text-xs font-medium">{row.label}</span>
               <span className="text-muted-foreground block text-[11px]">{row.description}</span>
             </span>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={prDefaults[row.key] === true}
-              onChange={(event) => onPrDefaultChange(row.key, event.target.checked)}
-              className="border-border accent-primary focus-visible:border-ring mt-0.5 size-4 rounded outline-none"
+              onCheckedChange={(checked) => onPrDefaultChange(row.key, checked === true)}
+              className="mt-0.5"
             />
           </label>
         ))}

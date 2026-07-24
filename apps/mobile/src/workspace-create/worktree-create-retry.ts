@@ -2,7 +2,8 @@ import {
   CLIENT_WORKTREE_CREATE_MAX_ATTEMPTS,
   getClientWorktreeCreateCandidate,
   isRetryableWorktreeCreateConflict
-} from '../../../desktop/src/shared/new-workspace/worktree-create-retry-policy'
+} from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import { WORKTREE_CREATE_TIMEOUT_MS } from './workspace-create-timeout'

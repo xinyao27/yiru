@@ -1,3 +1,4 @@
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
@@ -30,7 +31,6 @@ import {
 import { track } from '@/lib/telemetry'
 import { useAppStore } from '@/store'
 
-import type { AgentStatusState } from '../../../../shared/agent-status-types'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 
 type OrderedSendTarget = {
@@ -157,6 +157,7 @@ export function ReviewNotesSendMenuContent({
       runNotesSend(
         () =>
           sendNotesToActiveAgentSession({
+            state: useAppStore.getState(),
             worktreeId,
             prompt,
             noteTarget: { tabId: target.tabId, leafId: target.leafId }
@@ -258,7 +259,7 @@ function AgentTargetMenuItem({
       // hover tooltip rather than inline text, matching DashboardAgentRow's
       // title-attribute treatment of the same disabledReason.
       title={target.status === 'disabled' ? target.disabledReason : undefined}
-      className="min-w-[240px] gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+      className="min-w-[240px] gap-2 px-2 py-1.5 text-[12px] leading-5 font-medium"
     >
       <AgentStateDot state={state} size="sm" className="shrink-0" />
       <AgentIcon agent={agentTypeToIconAgent(target.agentType ?? agent?.agentType)} size={14} />

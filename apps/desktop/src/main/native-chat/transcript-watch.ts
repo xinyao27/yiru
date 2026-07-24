@@ -1,6 +1,7 @@
 import { extname } from 'node:path'
 
-import type { NativeChatMessage } from '../../shared/native-chat-types'
+import type { NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import { resolveSessionFilePath } from './session-file-resolver'
 import { nativeChatLineDecoderForAgent } from './transcript-tail-reader'
 import {

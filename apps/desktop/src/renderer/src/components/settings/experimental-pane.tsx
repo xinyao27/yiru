@@ -1,10 +1,10 @@
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
 import {
   MAX_AGENT_HIBERNATION_IDLE_MS,
   MIN_AGENT_HIBERNATION_IDLE_MS,
   getEffectiveAgentHibernationIdleMs
 } from '@/lib/agent-hibernation-planner'
-import { cn } from '@/lib/class-names'
 
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'
@@ -80,26 +80,10 @@ export function ExperimentalPane({
                 )}
               </p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.experimentalPet}
-              onClick={() => {
-                updateSettings({ experimentalPet: !settings.experimentalPet })
-              }}
-              className={cn(
-                'outline-none focus-visible:border-ring',
-                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-                settings.experimentalPet ? 'bg-foreground' : 'bg-muted-foreground/30'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-3.5 w-3.5 transform rounded-full bg-background transition-transform',
-                  settings.experimentalPet ? 'translate-x-4' : 'translate-x-0.5'
-                )}
-              />
-            </button>
+            <Switch
+              checked={settings.experimentalPet}
+              onCheckedChange={(checked) => updateSettings({ experimentalPet: checked })}
+            />
           </div>
         </SearchableSetting>
       ) : null}
@@ -126,28 +110,10 @@ export function ExperimentalPane({
                 )}
               </p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.experimentalActivity}
-              onClick={() =>
-                updateSettings({
-                  experimentalActivity: !settings.experimentalActivity
-                })
-              }
-              className={cn(
-                'outline-none focus-visible:border-ring',
-                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-                settings.experimentalActivity ? 'bg-foreground' : 'bg-muted-foreground/30'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-3.5 w-3.5 transform rounded-full bg-background transition-transform',
-                  settings.experimentalActivity ? 'translate-x-4' : 'translate-x-0.5'
-                )}
-              />
-            </button>
+            <Switch
+              checked={settings.experimentalActivity}
+              onCheckedChange={(checked) => updateSettings({ experimentalActivity: checked })}
+            />
           </div>
         </SearchableSetting>
       ) : null}
@@ -184,28 +150,12 @@ export function ExperimentalPane({
                 )}
               </p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.experimentalTerminalAttention}
-              onClick={() =>
-                updateSettings({
-                  experimentalTerminalAttention: !settings.experimentalTerminalAttention
-                })
+            <Switch
+              checked={settings.experimentalTerminalAttention}
+              onCheckedChange={(checked) =>
+                updateSettings({ experimentalTerminalAttention: checked })
               }
-              className={cn(
-                'outline-none focus-visible:border-ring',
-                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-                settings.experimentalTerminalAttention ? 'bg-foreground' : 'bg-muted-foreground/30'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-3.5 w-3.5 transform rounded-full bg-background transition-transform',
-                  settings.experimentalTerminalAttention ? 'translate-x-4' : 'translate-x-0.5'
-                )}
-              />
-            </button>
+            />
           </div>
         </SearchableSetting>
       ) : null}

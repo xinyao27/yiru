@@ -1,3 +1,5 @@
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+
 /**
  * Phase 5 of the terminal model/view architecture: main-side terminal query
  * authority (docs/reference/terminal-query-authority.md).
@@ -9,7 +11,6 @@
  * so the runtime emulator can register the DA1 override before byte zero.
  */
 import type { GlobalSettings } from '../../shared/types'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import {
   isHiddenPtyDeliveryGateEnabled,
   shouldDropHiddenRendererPtyData
@@ -19,6 +20,8 @@ export type TerminalModelQueryAuthoritySettings = Pick<
   GlobalSettings,
   'terminalMainSideEffectAuthority' | 'terminalHiddenDeliveryGate' | 'terminalModelQueryAuthority'
 >
+
+export type TerminalQueryReplyOwner = 'model' | 'remote-view' | 'renderer'
 
 /** Responder kill switch: requires BOTH Phase-4 gate switches (no marks/drops
  *  exist without them) plus the Phase-5-specific independent off switch. */
@@ -34,16 +37,21 @@ export function isTerminalModelQueryAuthorityEnabled(
  *  diverge for live chunks. Remote view subscribers (mobile/web/remote
  *  desktop xterms on the multiplexed stream) keep view authority, so main
  *  yields while one is attached. */
-export function shouldModelAnswerHiddenPtyQueries(opts: {
+export function resolveTerminalQueryReplyOwner(opts: {
   ptyId: string
   settings: TerminalModelQueryAuthoritySettings | null | undefined
   hasRemoteViewSubscriber: boolean
-}): boolean {
-  return (
+}): TerminalQueryReplyOwner {
+  if (opts.hasRemoteViewSubscriber) {
+    return 'remote-view'
+  }
+  if (
     isTerminalModelQueryAuthorityEnabled(opts.settings) &&
-    !opts.hasRemoteViewSubscriber &&
     shouldDropHiddenRendererPtyData(opts.ptyId, opts.settings)
-  )
+  ) {
+    return 'model'
+  }
+  return 'renderer'
 }
 
 /** Main-side mirror of the renderer's isLocalNativeWindowsPty

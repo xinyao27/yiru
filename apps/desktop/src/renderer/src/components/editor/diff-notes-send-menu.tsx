@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { translate } from '@/i18n/i18n'
 import { formatDiffComments } from '@/lib/diff-comments-format'
@@ -6,6 +6,9 @@ import { useAppStore } from '@/store'
 
 import type { DiffComment } from '../../../../shared/types'
 import { NotesSendMenu, type NotesSendMenuScope } from './notes-send-menu'
+
+// Why: a request missed during navigation must not reopen on a later remount.
+const OPEN_REQUEST_TTL_MS = 5000
 
 export function DiffNotesSendMenu({
   worktreeId,
@@ -18,7 +21,8 @@ export function DiffNotesSendMenu({
   triggerCount,
   actionLabel,
   iconClassName = 'size-3.5',
-  align = 'end'
+  align = 'end',
+  respondToOpenRequest = false
 }: {
   worktreeId: string
   groupId: string
@@ -31,8 +35,22 @@ export function DiffNotesSendMenu({
   actionLabel?: string
   iconClassName?: string
   align?: 'start' | 'center' | 'end'
+  /** Enable on exactly one notes menu per worktree. */
+  respondToOpenRequest?: boolean
 }): React.JSX.Element {
   const clearDeliveredDiffComments = useAppStore((s) => s.clearDeliveredDiffComments)
+  const openRequest = useAppStore((s) => s.diffNotesSendMenuOpenRequest)
+  const consumeOpenRequest = useAppStore((s) => s.consumeDiffNotesSendMenuOpenRequest)
+  const openRequestNonce =
+    respondToOpenRequest &&
+    openRequest?.worktreeId === worktreeId &&
+    Date.now() - openRequest.issuedAt < OPEN_REQUEST_TTL_MS
+      ? openRequest.nonce
+      : null
+  const handleOpenRequestHandled = useCallback(
+    () => consumeOpenRequest(worktreeId),
+    [consumeOpenRequest, worktreeId]
+  )
   const unsentNotes = useMemo(() => comments.filter((comment) => !comment.sentAt), [comments])
   const unsentPrompt = useMemo(() => formatDiffComments(unsentNotes), [unsentNotes])
   const fileNotes = useMemo(
@@ -78,6 +96,8 @@ export function DiffNotesSendMenu({
       actionLabel={actionLabel}
       iconClassName={iconClassName}
       align={align}
+      openRequestNonce={openRequestNonce}
+      onOpenRequestHandled={handleOpenRequestHandled}
       onDelivered={(notes) => void clearDeliveredDiffComments(worktreeId, notes)}
     />
   )

@@ -1,10 +1,9 @@
 import { Chat as MessageSquare, Warning as TriangleAlert } from '@phosphor-icons/react'
+import { NATIVE_CHAT_EMPTY_STATE_COPY } from '@yiru/workbench-model/agent'
+import type { NativeChatSession } from '@yiru/workbench-model/agent'
 
 import { translate } from '@/i18n/i18n'
 import { formatAgentTypeLabel } from '@/lib/agent-status'
-
-import { NATIVE_CHAT_EMPTY_STATE_COPY } from '../../../../shared/native-chat-empty-state'
-import type { NativeChatSession } from '../../../../shared/native-chat-types'
 
 export function NativeChatEmptyState({
   kind,
@@ -21,8 +20,8 @@ export function NativeChatEmptyState({
       <div
         className={
           kind === 'error'
-            ? 'bg-destructive/10 text-destructive flex size-12 items-center justify-center rounded-full'
-            : 'bg-accent text-accent-foreground flex size-12 items-center justify-center rounded-full'
+            ? 'bg-destructive/10 text-destructive flex size-12 items-center justify-center'
+            : 'bg-accent text-accent-foreground flex size-12 items-center justify-center'
         }
       >
         {kind === 'error' ? (

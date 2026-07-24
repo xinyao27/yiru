@@ -1,16 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import {
-  applyAppend,
-  createNativeChatMerger,
-  replaceList
-} from '../../../../shared/native-chat-merge'
+import { applyAppend, createNativeChatMerger, replaceList } from '@yiru/workbench-model/agent'
 import {
   NATIVE_CHAT_SOURCE_PRIORITY,
   type AgentType,
   type NativeChatMessage,
   type NativeChatSession
-} from '../../../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat-agent-profiles'
+import { surfaceSkillInvocationUserTurns } from '../../../../shared/native-chat-command-envelope'
 import { useAppStore } from '../../store'
 import {
   applyAppends,
@@ -397,9 +395,21 @@ export function useNativeChatLiveSession(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseMessages, appended, sessionId, agent])
 
+  // Why: Claude-family harnesses record slash inputs as command envelopes,
+  // which the noise filter hides. A skill invocation is the user's chat turn,
+  // so surface it before pending-echo pruning; catalog commands keep their marker.
+  const surfacedMessages = useMemo(
+    () =>
+      surfaceSkillInvocationUserTurns(
+        assembledMessages,
+        new Set(getVerifiedNativeChatCommands(agent).map((command) => command.name))
+      ),
+    [assembledMessages, agent]
+  )
+
   return useMemo<NativeChatLiveSession>(() => {
     const session = mergeNativeChatLiveSession({
-      sources: { transcript: assembledMessages },
+      sources: { transcript: surfacedMessages },
       sessionId,
       agent,
       hookState,
@@ -413,7 +423,7 @@ export function useNativeChatLiveSession(
     })
     return { ...session, hasMore, loadingEarlier, loadEarlier }
   }, [
-    assembledMessages,
+    surfacedMessages,
     read,
     sessionId,
     agent,

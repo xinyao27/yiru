@@ -1,5 +1,7 @@
 import { execFile } from 'node:child_process'
 
+import { terminateWindowsProcessTree, type WindowsTreeKiller } from './windows-process-tree-kill'
+
 export const DESCENDANT_KILL_GRACE_MS = 2_000
 export const DESCENDANT_SNAPSHOT_TIMEOUT_MS = 1_000
 // Why: a full process table on a busy host can exceed execFile's 1MB default;
@@ -191,8 +193,8 @@ type SnapshotDeps = {
  * Snapshots a PTY root's live descendant tree. Must run BEFORE the root is
  * signalled: once the root dies, surviving descendants reparent to pid 1 and
  * can no longer be found by a ppid walk. Resolves null (never rejects) on
- * Windows, ps failure, or timeout — callers then degrade to today's
- * shell-only kill.
+ * Windows, ps failure, or timeout — callers then degrade to shell-only kill
+ * on POSIX, or Windows `taskkill /T` via killWithDescendantSweep.
  */
 export async function captureDescendantSnapshot(
   rootPid: number,
@@ -213,17 +215,36 @@ export async function captureDescendantSnapshot(
   return collectDescendantRows(rootPid, capture.rows, capture.capturedAtMs)
 }
 
+type KillSweepDeps = SnapshotDeps &
+  TerminateDeps & {
+    ownsRoot?: () => boolean
+    killWindowsTree?: WindowsTreeKiller
+  }
+
 /**
- * Standard agent-session kill sequencing: snapshot the descendant tree,
- * signal its members, then run the caller's root kill. Callers must not signal
- * the root before this runs — a dead root's descendants reparent to pid 1 and
- * become unfindable. Snapshot failure degrades to killRoot alone.
+ * Standard agent-session kill sequencing: POSIX snapshots and signals known
+ * descendants before the root; Windows delegates the full tree to taskkill.
+ * Snapshot or taskkill failure degrades to the caller-owned root cleanup.
  */
 export async function killWithDescendantSweep(
   rootPid: number,
   killRoot: () => void,
-  deps: SnapshotDeps & TerminateDeps & { ownsRoot?: () => boolean } = {}
+  deps: KillSweepDeps = {}
 ): Promise<void> {
+  const platform = deps.platform ?? process.platform
+  if (platform === 'win32') {
+    try {
+      if ((deps.ownsRoot?.() ?? true) && Number.isInteger(rootPid) && rootPid > 0) {
+        const killTree = deps.killWindowsTree ?? terminateWindowsProcessTree
+        // Why: taskkill may race an already-exited tree; root cleanup must still finish.
+        await killTree(rootPid).catch(() => {})
+      }
+    } finally {
+      killRoot()
+    }
+    return
+  }
+
   const snapshot = await captureDescendantSnapshot(rootPid, deps)
   try {
     // Signal the captured descendants while their parent links still exist;

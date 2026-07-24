@@ -1,11 +1,11 @@
+import type {
+  AgentStatusIpcPayload,
+  MigrationUnsupportedPtyEntry
+} from '@yiru/workbench-model/agent'
 import { ipcMain } from 'electron'
 
 import type { AgentHookInstallStatus } from '../../shared/agent-hook-types'
 import type { AgentInterruptInferenceRequest } from '../../shared/agent-interrupt-intent'
-import type {
-  AgentStatusIpcPayload,
-  MigrationUnsupportedPtyEntry
-} from '../../shared/agent-status-types'
 import {
   clearMigrationUnsupportedPtysByTabPrefix,
   clearMigrationUnsupportedPtysForPaneKey,

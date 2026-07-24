@@ -9,7 +9,7 @@ export function CodexUsageRecentSessionsTable({
   recentSessions: CodexUsageSessionRow[]
 }): React.JSX.Element {
   return (
-    <section className="border-border/60 bg-card/40 rounded-lg border p-4">
+    <section className="border-border/60 bg-card/40 border p-4">
       <div className="mb-3">
         <h4 className="text-foreground text-sm font-semibold">
           {translate('auto.components.stats.CodexUsagePane.0cb0983c07', 'Recent sessions')}

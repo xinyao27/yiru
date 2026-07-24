@@ -1,7 +1,7 @@
+import { upstreamOnlyCommitsArePatchEquivalent } from '../../shared/git-cherry-patch-equivalence'
 import { getEffectiveGitUpstreamStatus } from '../../shared/git-effective-upstream'
 import { getPublishTargetStatus } from '../../shared/git-publish-target-status'
 import { isNoUpstreamError, normalizeGitErrorMessage } from '../../shared/git-remote-error'
-import { upstreamOnlyCommitsArePatchEquivalent } from '../../shared/git-upstream-status'
 import type { GitPushTarget, GitUpstreamStatus } from '../../shared/types'
 import { validateGitPushTarget } from './push-target-validation'
 import { gitExecFileAsync } from './runner'

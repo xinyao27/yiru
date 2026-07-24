@@ -1,6 +1,7 @@
 import type { Editor } from '@tiptap/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -44,11 +45,13 @@ export function RichMarkdownDocLinkMenu({
         rows.map((row, index) => {
           const rowKey = row.kind === 'document' ? row.document.filePath : row.id
           return (
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               key={rowKey}
               type="button"
               className={cn(
-                'outline-none focus-visible:bg-accent',
+                'p-0 h-auto border-0 focus-visible:bg-accent',
                 'rich-markdown-doc-link-item',
                 index === selectedIndex && 'is-active'
               )}
@@ -68,7 +71,7 @@ export function RichMarkdownDocLinkMenu({
               ) : (
                 <span className="truncate text-sm">{row.label}</span>
               )}
-            </button>
+            </Button>
           )
         })
       )}

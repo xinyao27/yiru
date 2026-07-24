@@ -1,6 +1,7 @@
+import { getRepoExecutionHostId, toSshExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { useAppStore } from '@/store'
 
-import { getRepoExecutionHostId, toSshExecutionHostId } from '../../../../shared/execution-host'
 import type { SshHostRemoveResolution } from './ssh-host-remove-resolution'
 
 export type ClearSshHostWorkspacesResult = {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 
 import {
   classifyTitleActivity,
@@ -11,13 +11,7 @@ import {
 } from '@/lib/worktree-runtime-owner'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
-import { useAppStore } from '@/store'
-import type { AppState } from '@/store/types'
 
-import {
-  AGENT_STATUS_STALE_AFTER_MS,
-  type AgentStatusEntry
-} from '../../../shared/agent-status-types'
 import type { RuntimeTerminalListResult } from '../../../shared/runtime-types'
 import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot } from '../../../shared/types'
@@ -32,10 +26,10 @@ export type ActiveTerminalNoteTarget = {
 }
 
 export type ActiveTerminalNoteTargetState = {
-  activeWorktreeId: AppState['activeWorktreeId']
-  activeTabType: AppState['activeTabType']
-  activeTabId: AppState['activeTabId']
-  activeTabIdByWorktree: AppState['activeTabIdByWorktree']
+  activeWorktreeId: string | null
+  activeTabType: string
+  activeTabId: string | null
+  activeTabIdByWorktree: Record<string, string | null | undefined>
   tabsByWorktree: Record<
     string,
     readonly { id: string; title?: string; launchAgent?: unknown }[] | undefined
@@ -80,48 +74,6 @@ export function getActiveTerminalNoteTarget(
 
   const leafId = state.terminalLayoutsByTabId[tabId]?.activeLeafId
   return leafId ? { tabId, leafId } : null
-}
-
-export function useCanSendNotesToActiveTerminal(worktreeId: string): boolean {
-  const canSendFromRendererState = useAppStore(
-    (state) => getActiveAgentNoteTarget(state, worktreeId) !== null
-  )
-  const probeKey = useAppStore(
-    (state) => getActiveAgentRuntimeProbeDescriptor(state, worktreeId)?.key ?? null
-  )
-  const [runtimeProbe, setRuntimeProbe] = useState<{ key: string; canSend: boolean } | null>(null)
-
-  useEffect(() => {
-    if (canSendFromRendererState || !probeKey) {
-      return
-    }
-    const probeDescriptor = getActiveAgentRuntimeProbeDescriptor(useAppStore.getState(), worktreeId)
-    if (!probeDescriptor || probeDescriptor.key !== probeKey) {
-      return
-    }
-
-    let cancelled = false
-    void probeActiveAgentNoteTarget(probeDescriptor)
-      .then((canSend) => {
-        if (!cancelled) {
-          setRuntimeProbe({ key: probeKey, canSend })
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setRuntimeProbe({ key: probeKey, canSend: false })
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [canSendFromRendererState, probeKey, worktreeId])
-
-  return (
-    canSendFromRendererState ||
-    (runtimeProbe !== null && runtimeProbe.key === probeKey && runtimeProbe.canSend)
-  )
 }
 
 export function getActiveAgentNoteTarget(

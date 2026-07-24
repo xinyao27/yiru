@@ -2,7 +2,7 @@ import type { BrowserPage, BrowserWorkspace } from '../../../../shared/types'
 import {
   destroyPersistentWebview,
   moveFocusToRendererBeforeFocusedWebviewHidden
-} from '../../components/browser-pane/webview-registry'
+} from '../../runtime/browser-webview-registry'
 
 export { moveFocusToRendererBeforeFocusedWebviewHidden }
 

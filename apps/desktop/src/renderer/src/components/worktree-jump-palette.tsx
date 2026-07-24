@@ -8,6 +8,7 @@ import {
   TerminalWindow as SquareTerminal,
   Plus
 } from '@phosphor-icons/react'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -116,7 +117,6 @@ import { getRepoMapFromState, useAllWorktrees } from '@/store/selectors'
 import { getRepoHostIdentity } from '@/store/slices/repo-host-identity'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { isRuntimeOwnedSshTargetId } from '../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../shared/host-setting-overrides'
 import { buildProjectSourceContextFromRepo } from '../../../shared/project-source-context'
 import { isGitRepoKind } from '../../../shared/repo-kind'
@@ -264,7 +264,7 @@ function PaletteState({ title, subtitle }: { title: string; subtitle: string }):
 
 function FooterKey({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span className="border-border/60 bg-muted/35 text-foreground/85 rounded-full border px-2 py-0.5 text-[10px] font-medium">
+    <span className="border-border/60 bg-muted/35 text-foreground/85 border px-2 py-0.5 text-[10px] font-medium">
       {children}
     </span>
   )
@@ -286,7 +286,7 @@ function PaletteHostBadgeChip({
         'Host: {{value0}}',
         { value0: badge.label }
       )}
-      className="border-border/60 bg-background/45 text-muted-foreground/88 max-w-[140px] truncate rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium"
+      className="border-border/60 bg-background/45 text-muted-foreground/88 max-w-[140px] truncate border px-1.5 py-px text-[9px] leading-normal font-medium"
     >
       {badge.label}
     </span>
@@ -1713,10 +1713,13 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
   })()
 
   return (
+    // Why: modal backdrops intentionally use alpha to preserve page context
+    // while separating the command palette from the workspace beneath it.
     <CommandDialog
       open={visible}
       onOpenChange={handleOpenChange}
       shouldFilter={false}
+      density="compact"
       onOpenAutoFocus={handleOpenAutoFocus}
       onCloseAutoFocus={handleCloseAutoFocus}
       title={translate('auto.components.WorktreeJumpPalette.4ee378034d', 'Jump to...')}
@@ -1725,7 +1728,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
         'Search worktrees, settings, tabs, and actions'
       )}
       overlayClassName="bg-black/55 backdrop-blur-[2px]"
-      contentClassName="top-[13%] w-[736px] max-w-[94vw] overflow-hidden rounded-xl border border-border/70 bg-background "
+      contentClassName="top-[13%] w-[736px] max-w-[94vw] overflow-hidden border border-border/70 bg-background"
       commandProps={{
         loop: true,
         value: commandSelectedItemId,
@@ -1734,17 +1737,17 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
       }}
     >
       <CommandInput
+        size="sm"
+        variant="inset"
         placeholder={translate(
           'auto.components.WorktreeJumpPalette.1ebe225fee',
           'Search worktrees, settings, tabs, and actions...'
         )}
         value={query}
         onValueChange={handleQueryChange}
-        wrapperClassName="mx-3 mt-3 rounded-lg border border-border/55 bg-muted/28 px-3.5 "
-        iconClassName="mr-2.5 h-4 w-4 text-muted-foreground/60"
-        className="placeholder:text-muted-foreground/75 h-12 text-[14px]"
+        wrapperClassName="mx-2 mt-2"
       />
-      <CommandList ref={listRef} className="max-h-[min(460px,62vh)] px-2.5 pt-2 pb-2.5">
+      <CommandList ref={listRef} className="max-h-[min(460px,62vh)] px-1.5 pt-2 pb-2.5">
         {isLoading && selectableItems.length === 0 && !showCreateAction ? (
           <PaletteState
             title={translate(
@@ -1793,9 +1796,9 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                     key={entry.id}
                     value={CREATE_WORKTREE_ITEM_ID}
                     onSelect={handleCreateWorktree}
-                    className="group data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground mx-0.5 mt-1 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 text-left transition-[background-color,border-color] outline-none"
+                    className="group data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground mx-0.5 mt-1 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-1.5 text-left transition-[background-color,border-color] outline-none"
                   >
-                    <div className="border-border/60 bg-muted/25 text-muted-foreground/70 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-dashed">
+                    <div className="border-border/60 bg-muted/25 text-muted-foreground/70 flex h-5 w-5 shrink-0 items-center justify-center border border-dashed">
                       <Plus size={13} aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -1844,11 +1847,18 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                     onSelect={() => handleSelectItem(entry)}
                     data-current={isCurrentWorktree ? 'true' : undefined}
                     className={cn(
-                      'group mx-0.5 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
+                      'group mx-0.5 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
                       'data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground'
                     )}
                   >
-                    <div className="flex w-4 shrink-0 items-center justify-center self-start pt-0.5">
+                    {/* Why: single-line rows center the status with the title; search context
+                    keeps it pinned to the first line instead of centering across both lines. */}
+                    <div
+                      className={cn(
+                        'flex w-4 shrink-0 items-center justify-center',
+                        entry.match.supportingText ? 'self-start pt-0.5' : 'self-center'
+                      )}
+                    >
                       <StatusIndicator status={status} aria-hidden="true" />
                       <span className="sr-only">{statusLabel}</span>
                     </div>
@@ -1892,7 +1902,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                               )}
                             </span>
                             {isCurrentWorktree && (
-                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                                 {translate(
                                   'auto.components.WorktreeJumpPalette.556e7232ca',
                                   'Current'
@@ -1900,7 +1910,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                               </span>
                             )}
                             {worktree.isMainWorktree && (
-                              <span className="border-muted-foreground/30 bg-muted-foreground/5 text-muted-foreground shrink-0 self-center rounded border px-1.5 py-px text-[9px] leading-normal font-medium">
+                              <span className="border-muted-foreground/30 bg-muted-foreground/5 text-muted-foreground shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                                 {translate(
                                   'auto.components.WorktreeJumpPalette.739bda980c',
                                   'primary'
@@ -1921,7 +1931,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                           </div>
                           {entry.match.supportingText && (
                             <div className="text-muted-foreground/88 mt-1.5 flex min-w-0 items-center gap-2 text-[12px] leading-5">
-                              <span className="border-border bg-foreground/[0.04] text-muted-foreground inline-flex h-[18px] shrink-0 items-center rounded border px-1.5 text-[10px] font-semibold tracking-wide uppercase">
+                              <span className="border-border bg-foreground/[0.04] text-muted-foreground inline-flex h-[18px] shrink-0 items-center border px-1.5 text-[10px] font-semibold tracking-wide uppercase">
                                 {getPaletteSupportingTextLabel(
                                   entry.match.supportingText.labelKind
                                 )}
@@ -1938,7 +1948,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                         <div className="flex shrink-0 items-center gap-1.5">
                           <PaletteHostBadgeChip badge={hostBadge} />
                           {repoName && (
-                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] leading-none font-semibold">
+                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 border px-2 py-1 text-[11px] leading-none font-semibold">
                               <RepoBadgeMark color={repo?.badgeColor} />
                               <span className="truncate">
                                 {entry.match.repoRange ? (
@@ -1972,7 +1982,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                     value={entry.id}
                     onSelect={() => handleSelectItem(entry)}
                     className={cn(
-                      'group mx-0.5 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
+                      'group mx-0.5 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
                       'data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground'
                     )}
                   >
@@ -1986,7 +1996,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                             <span className="text-foreground truncate text-[14px] font-semibold">
                               {result.title}
                             </span>
-                            <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                            <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 border px-1.5 py-px text-[9px] leading-normal font-medium">
                               {badgeLabel}
                             </span>
                           </div>
@@ -1994,7 +2004,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                         {isProject ? (
                           <div className="flex shrink-0 items-center gap-1.5">
                             <PaletteHostBadgeChip badge={hostBadge} />
-                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] leading-none font-semibold">
+                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 border px-2 py-1 text-[11px] leading-none font-semibold">
                               <RepoBadgeMark color={result.repo.badgeColor} />
                               <span className="truncate">{result.repo.displayName}</span>
                             </span>
@@ -2019,7 +2029,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                     value={entry.id}
                     onSelect={() => handleSelectItem(entry)}
                     className={cn(
-                      'group mx-0.5 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
+                      'group mx-0.5 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
                       'data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground'
                     )}
                   >
@@ -2031,7 +2041,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                         <span className="text-foreground truncate text-[14px] font-semibold tracking-[-0.01em]">
                           {result.title}
                         </span>
-                        <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                        <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 border px-1.5 py-px text-[9px] leading-normal font-medium">
                           {kindLabel}
                         </span>
                       </div>
@@ -2060,11 +2070,11 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                     value={entry.id}
                     onSelect={() => handleSelectItem(entry)}
                     className={cn(
-                      'group mx-0.5 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
+                      'group mx-0.5 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
                       'data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground'
                     )}
                   >
-                    <div className="text-muted-foreground/85 flex w-4 shrink-0 items-center justify-center self-start pt-0.5">
+                    <div className="text-muted-foreground/85 flex w-4 shrink-0 items-center justify-center self-center">
                       <WorkspaceTabIcon className="size-3.5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -2075,7 +2085,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                               <HighlightedText text={result.title} matchRange={result.titleRange} />
                             </span>
                             {result.isCurrentTab && (
-                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                                 {translate(
                                   'auto.components.WorktreeJumpPalette.52404f8096',
                                   'Current Tab'
@@ -2083,7 +2093,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                               </span>
                             )}
                             {!result.isCurrentTab && result.isCurrentWorktree && (
-                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                                 {translate(
                                   'auto.components.WorktreeJumpPalette.c5081f2814',
                                   'Current Worktree'
@@ -2109,7 +2119,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                         <div className="flex shrink-0 items-center gap-1.5">
                           <PaletteHostBadgeChip badge={workspaceTabHostBadge} />
                           {workspaceTabRepoName && (
-                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] leading-none font-semibold">
+                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 border px-2 py-1 text-[11px] leading-none font-semibold">
                               <RepoBadgeMark color={workspaceTabRepo?.badgeColor} />
                               <span className="truncate">
                                 <HighlightedText
@@ -2141,11 +2151,11 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                     value={entry.id}
                     onSelect={() => handleSelectItem(entry)}
                     className={cn(
-                      'group mx-0.5 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
+                      'group mx-0.5 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
                       'data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground'
                     )}
                   >
-                    <div className="text-muted-foreground/85 flex w-4 shrink-0 items-center justify-center self-start pt-0.5">
+                    <div className="text-muted-foreground/85 flex w-4 shrink-0 items-center justify-center self-center">
                       <Smartphone className="size-3.5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -2156,7 +2166,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                               <HighlightedText text={result.title} matchRange={result.titleRange} />
                             </span>
                             {result.isCurrentTab && (
-                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                                 {translate(
                                   'auto.components.WorktreeJumpPalette.52404f8096',
                                   'Current Tab'
@@ -2164,7 +2174,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                               </span>
                             )}
                             {!result.isCurrentTab && result.isCurrentWorktree && (
-                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                              <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                                 {translate(
                                   'auto.components.WorktreeJumpPalette.c5081f2814',
                                   'Current Worktree'
@@ -2190,7 +2200,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                         <div className="flex shrink-0 items-center gap-1.5">
                           <PaletteHostBadgeChip badge={simulatorHostBadge} />
                           {simulatorRepoName && (
-                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] leading-none font-semibold">
+                            <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 border px-2 py-1 text-[11px] leading-none font-semibold">
                               <RepoBadgeMark color={simulatorRepo?.badgeColor} />
                               <span className="truncate">
                                 <HighlightedText
@@ -2219,11 +2229,11 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                   value={entry.id}
                   onSelect={() => handleSelectItem(entry)}
                   className={cn(
-                    'group mx-0.5 flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
+                    'group mx-0.5 flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2.5 text-left outline-none transition-[background-color,border-color]',
                     'data-[selected=true]:border-border data-[selected=true]:bg-accent data-[selected=true]:text-foreground'
                   )}
                 >
-                  <div className="text-muted-foreground/85 flex w-4 shrink-0 items-center justify-center self-start pt-0.5">
+                  <div className="text-muted-foreground/85 flex w-4 shrink-0 items-center justify-center self-center">
                     <Globe className="size-3.5" aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -2234,7 +2244,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                             <HighlightedText text={result.title} matchRange={result.titleRange} />
                           </span>
                           {result.isCurrentPage && (
-                            <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                            <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                               {translate(
                                 'auto.components.WorktreeJumpPalette.52404f8096',
                                 'Current Tab'
@@ -2242,7 +2252,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                             </span>
                           )}
                           {!result.isCurrentPage && result.isCurrentWorktree && (
-                            <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center rounded-[6px] border px-1.5 py-px text-[9px] leading-normal font-medium">
+                            <span className="border-border/60 bg-background/45 text-muted-foreground/88 shrink-0 self-center border px-1.5 py-px text-[9px] leading-normal font-medium">
                               {translate(
                                 'auto.components.WorktreeJumpPalette.c5081f2814',
                                 'Current Worktree'
@@ -2268,7 +2278,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
                       <div className="flex shrink-0 items-center gap-1.5">
                         <PaletteHostBadgeChip badge={browserHostBadge} />
                         {browserRepoName && (
-                          <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] leading-none font-semibold">
+                          <span className="border-border bg-muted text-foreground inline-flex max-w-[180px] items-center gap-1.5 border px-2 py-1 text-[11px] leading-none font-semibold">
                             <RepoBadgeMark color={browserRepo?.badgeColor} />
                             <span className="truncate">
                               <HighlightedText

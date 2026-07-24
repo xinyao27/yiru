@@ -1,5 +1,6 @@
+import type { SshConnectionState, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
-import type { SshConnectionState, SshTarget } from '../../../../shared/ssh-types'
 import type { AppState } from '../types'
 
 export function sshConnectionStatesEqual(
@@ -11,6 +12,7 @@ export function sshConnectionStatesEqual(
     a?.status === b.status &&
     a?.error === b.error &&
     a?.reconnectAttempt === b.reconnectAttempt &&
+    a?.supportsFolderDownload === b.supportsFolderDownload &&
     a?.remotePlatform === b.remotePlatform
   )
 }

@@ -1,5 +1,6 @@
 import { ArrowRight } from '@phosphor-icons/react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -46,17 +47,19 @@ export function HeroIntro({ onStart }: { onStart: () => void }): React.JSX.Eleme
         </span>
       </div>
       <div className={mobilePageStyles.ctaRow}>
-        <button
+        <Button
+          variant="ghost"
+          size="xs"
           type="button"
           className={cn(
-            'outline-none border border-transparent focus-visible:border-ring',
+            'p-0 h-auto border',
             `${mobilePageStyles.primaryAction} ${mobilePageStyles.flowPrimaryAction}`
           )}
           onClick={onStart}
         >
           {translate('auto.components.mobile.MobileHero.10d27b4cba', 'Get started')}
-          <ArrowRight className="size-3.5" />
-        </button>
+          <ArrowRight weight="regular" className="size-3.5" />
+        </Button>
       </div>
     </div>
   )

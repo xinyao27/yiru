@@ -86,13 +86,13 @@ export function GrokAccountsSection(): React.JSX.Element {
           className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
         >
           {translate('auto.components.settings.GrokAccountsSection.0d8e77bc40', 'Grok CLI docs')}
-          <ExternalLink className="size-3" />
+          <ExternalLink weight="regular" className="size-3" />
         </a>
       </div>
 
       <div
         className={cn(
-          'flex items-start gap-3 rounded-lg border bg-muted/20 p-3',
+          'flex items-start gap-3 border bg-muted/20 p-3',
           signedIn && tokenFresh ? 'border-border/60' : 'border-border/40'
         )}
       >
@@ -150,7 +150,11 @@ export function GrokAccountsSection(): React.JSX.Element {
           onClick={() => void handleRefreshUsage()}
           className="shrink-0 gap-1"
         >
-          {refreshing ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
+          {refreshing ? (
+            <LoadingIndicator className="size-3" />
+          ) : (
+            <RefreshCw weight="regular" className="size-3" />
+          )}
           {translate('auto.components.settings.GrokAccountsSection.3325d996cb', 'Refresh usage')}
         </Button>
       </div>

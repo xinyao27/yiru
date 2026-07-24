@@ -108,7 +108,7 @@ export function WorkspacesAnimatedVisual(props: { reducedMotion: boolean }): JSX
   const renderedPromotedWorkspaceId = reducedMotion ? null : promotedWorkspaceId
 
   return (
-    <div className="border-border bg-card text-foreground overflow-hidden rounded-xl border p-2.5">
+    <div className="border-border bg-card text-foreground overflow-hidden border p-2.5">
       <div className="relative" style={{ height: VISUAL_HEIGHT_PX }}>
         {WORKSPACES.map((ws) => {
           const isSelected = ws.id === SELECTED_ID
@@ -120,7 +120,7 @@ export function WorkspacesAnimatedVisual(props: { reducedMotion: boolean }): JSX
               key={ws.id}
               data-ws-id={ws.id}
               className={cn(
-                'absolute inset-x-0 rounded-[10px] px-2 py-2.5 transition-[background,transform] duration-[1100ms] [transition-timing-function:cubic-bezier(.2,.8,.2,1)]',
+                'absolute inset-x-0 px-2 py-2.5 transition-[background,transform] duration-[1100ms] [transition-timing-function:cubic-bezier(.2,.8,.2,1)]',
                 isSelected ? 'bg-accent' : 'bg-card'
               )}
               // Why: the card that was bottom before rotation must pass above the
@@ -132,7 +132,7 @@ export function WorkspacesAnimatedVisual(props: { reducedMotion: boolean }): JSX
               }}
             >
               <div className="grid grid-cols-[14px_minmax(0,1fr)] items-center gap-3 px-1.5">
-                <span className="inline-block size-[9px] rounded-full bg-emerald-500" />
+                <span className="inline-block size-[9px] bg-emerald-500" />
                 <div className="min-w-0">
                   <div className="text-foreground truncate text-[15px] leading-[1.2] font-semibold">
                     {ws.name}
@@ -152,7 +152,7 @@ export function WorkspacesAnimatedVisual(props: { reducedMotion: boolean }): JSX
                       </span>
                       <AgentIcon kind={kind} />
                       <span
-                        className="bg-foreground/[0.16] block h-[9px] rounded-[5px]"
+                        className="bg-foreground/[0.16] block h-[9px]"
                         style={{ width: `${60 + ((i * 7) % 20)}%` }}
                       />
                     </div>

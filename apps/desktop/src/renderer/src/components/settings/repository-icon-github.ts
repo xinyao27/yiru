@@ -1,6 +1,7 @@
+import { githubAvatarIcon, type RepoIcon } from '@yiru/workbench-model/workspace'
+
 import { callRuntimeRpc, type getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 
-import { githubAvatarIcon, type RepoIcon } from '../../../../shared/repo-icon'
 import type { GitHubRepositoryIdentity, Repo } from '../../../../shared/types'
 
 type RuntimeTarget = ReturnType<typeof getActiveRuntimeTarget>

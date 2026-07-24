@@ -1,3 +1,5 @@
+import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
@@ -8,12 +10,10 @@ import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentResumeStartupPlan } from '@/lib/tui-agent-startup'
 import { useAppStore } from '@/store'
 
-import type { SleepingAgentSessionRecord } from '../../../shared/agent-session-resume'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
 } from '../../../shared/tui-agent-launch-defaults'
-import { isWslUncPath } from '../../../shared/wsl-paths'
 
 export type ResumeSleepingAgentSessionsOptions = {
   suppressNavigation?: boolean
@@ -83,6 +83,9 @@ export function launchSleepingAgentSession(
         ? launchConfig.agentEnv
         : resolveTuiAgentLaunchEnv(record.agent, state.settings?.agentDefaultEnv),
     ...(launchConfig?.agentCommand ? { agentCommand: launchConfig.agentCommand } : {}),
+    ...(launchConfig?.ompResumeFilePath
+      ? { ompResumeFilePath: launchConfig.ompResumeFilePath }
+      : {}),
     platform: getResumeLaunchPlatform(record.worktreeId)
   })
   if (!startupPlan) {
@@ -105,9 +108,6 @@ export function launchSleepingAgentSession(
     launchConfig: startupPlan.launchConfig,
     resumeProviderSession: record.providerSession,
     launchAgent: record.agent,
-    ...(startupPlan.startupCommandDelivery
-      ? { startupCommandDelivery: startupPlan.startupCommandDelivery }
-      : {}),
     showSessionRestoredBanner: true,
     telemetry: {
       agent_kind: tuiAgentToAgentKind(record.agent),

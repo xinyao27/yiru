@@ -1,12 +1,12 @@
 import { GithubLogo as Github, Image, LinkSimple as Link2 } from '@phosphor-icons/react'
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import { faviconUrlFromWebsite } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import type { RepoIcon } from '../../../../shared/repo-icon'
-import { faviconUrlFromWebsite } from '../../../../shared/repo-icon'
 import { getRepoLucideIconOptions } from '../repo/repo-icon'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'

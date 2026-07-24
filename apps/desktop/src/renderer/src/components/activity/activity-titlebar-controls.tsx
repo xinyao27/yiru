@@ -28,14 +28,14 @@ export function ActivityTitlebarControls(): React.JSX.Element {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="dark:hover:bg-accent bg-[var(--bg-titlebar,var(--card))] dark:bg-[var(--bg-titlebar,var(--card))]"
+                className="bg-background dark:hover:bg-accent"
                 onClick={closeActivityPage}
                 aria-label={translate(
                   'auto.components.activity.ActivityTitlebarControls.dc708f3eff',
                   'Close agents'
                 )}
               >
-                <ArrowLeft className="size-3.5" />
+                <ArrowLeft weight="regular" className="size-3.5" />
               </Button>
             }
           />

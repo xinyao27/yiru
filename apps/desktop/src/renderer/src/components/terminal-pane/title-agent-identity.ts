@@ -1,14 +1,15 @@
 import {
-  detectAgentStatusFromTitle,
-  isGeminiTerminalTitle,
-  isPiTerminalTitle
-} from '../../../../shared/agent-detection'
-import {
   AGY_AGENT_NAME_RE,
   DROID_AGENT_NAME_RE,
   HERMES_AGENT_NAME_RE,
   titleHasAnyLegacyAgentName
-} from '../../../../shared/agent-name-token-match'
+} from '@yiru/workbench-model/agent'
+
+import {
+  detectAgentStatusFromTitle,
+  isGeminiTerminalTitle,
+  isPiTerminalTitle
+} from '../../../../shared/agent-detection'
 
 const EXTRA_TITLE_AGENT_TOKEN_RE =
   /(?<![\w./\\-])(?:cursor-agent|pi)(?:\.(?:exe|cmd|bat|ps1))?(?![\w./\\-])/i

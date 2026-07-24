@@ -1,3 +1,6 @@
+import { LANGUAGE_SERVER_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+
 import {
   assertRuntimeEnvironmentCapability,
   callRuntimeRpc,
@@ -16,8 +19,6 @@ import type {
   LanguageServerStartArgs,
   LanguageServerStartResult
 } from '../../../shared/language-server'
-import { LANGUAGE_SERVER_RUNTIME_CAPABILITY } from '../../../shared/protocol-version'
-import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'
 
 export type LanguageServerSessionTransport = {
   start: (args: LanguageServerStartArgs) => Promise<LanguageServerStartResult>

@@ -1,7 +1,4 @@
-import type {
-  AgentStatusEntry,
-  MigrationUnsupportedPtyEntry
-} from '../../../shared/agent-status-types'
+import type { AgentStatusEntry, MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
 
 const cachedMigrationUnsupportedEntries = new WeakMap<
   MigrationUnsupportedPtyEntry,

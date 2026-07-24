@@ -117,7 +117,7 @@ export function StatsPane(): React.JSX.Element {
       {summary ? (
         <div className="space-y-3">
           {summary.totalAgentsSpawned === 0 && summary.totalPRsCreated === 0 ? (
-            <div className="border-border/60 bg-card/30 text-muted-foreground flex min-h-[8rem] items-center justify-center rounded-lg border border-dashed text-sm">
+            <div className="border-border/60 bg-card/30 text-muted-foreground flex min-h-[8rem] items-center justify-center border border-dashed text-sm">
               {translate(
                 'auto.components.stats.StatsPane.73ed07859c',
                 'Start your first agent to begin tracking'
@@ -179,7 +179,11 @@ export function StatsPane(): React.JSX.Element {
                     <UsageAnalyticsOptionIcon tab={activeUsageOption.id} />
                     <span className="truncate">{activeUsageOption.label}</span>
                   </span>
-                  <ChevronDown className="text-muted-foreground ml-1 size-3.5" aria-hidden />
+                  <ChevronDown
+                    weight="regular"
+                    className="text-muted-foreground ml-1 size-3.5"
+                    aria-hidden
+                  />
                 </Button>
               }
             />

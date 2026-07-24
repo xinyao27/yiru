@@ -1,5 +1,5 @@
-import type { ExecutionHostId } from '../../../desktop/src/shared/execution-host'
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type Worktree = {
   sectionListKey?: string

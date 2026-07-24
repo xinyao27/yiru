@@ -1,7 +1,8 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { AiVaultScanIssue } from '../../shared/ai-vault-types'
+import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
+
 import {
   isAntigravityTranscriptPath,
   shouldDescendAntigravityBrainDirectory

@@ -1,4 +1,5 @@
-import type { GitHubPRMergeMethod } from '../../../desktop/src/shared/types'
+import type { GitHubPRMergeMethod } from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import { buildGithubPrParams, type GitHubPrRepoSlug } from './github-pr-rpc'
 

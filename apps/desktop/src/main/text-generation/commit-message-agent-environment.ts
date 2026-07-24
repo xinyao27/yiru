@@ -1,4 +1,5 @@
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { applyClaudeEnvPatch } from '../claude-accounts/environment'
 import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
 import { readShellStartupEnvVar } from '../pty/shell-startup-env'
@@ -22,6 +23,15 @@ function cloneProcessEnv(): Record<string, string> {
       env[key] = value
     }
   }
+  return env
+}
+
+function cloneProcessEnvWithoutYiruCodexHomeOverride(): Record<string, string> {
+  const env = cloneProcessEnv()
+  if (env.YIRU_CODEX_HOME && env.CODEX_HOME === env.YIRU_CODEX_HOME) {
+    delete env.CODEX_HOME
+  }
+  delete env.YIRU_CODEX_HOME
   return env
 }
 
@@ -89,8 +99,8 @@ export async function prepareLocalCommitMessageAgentEnv(
         return {
           ok: true,
           env: codexHomeForTarget
-            ? { ...cloneProcessEnv(), CODEX_HOME: codexHomeForTarget }
-            : undefined
+            ? { ...cloneProcessEnvWithoutYiruCodexHomeOverride(), CODEX_HOME: codexHomeForTarget }
+            : cloneProcessEnvWithoutYiruCodexHomeOverride()
         }
       }
       if (codexHomePath && wslCodexHome) {
@@ -100,7 +110,9 @@ export async function prepareLocalCommitMessageAgentEnv(
       }
       return {
         ok: true,
-        env: codexHomePath ? { ...cloneProcessEnv(), CODEX_HOME: codexHomePath } : undefined
+        env: codexHomePath
+          ? { ...cloneProcessEnv(), CODEX_HOME: codexHomePath }
+          : cloneProcessEnvWithoutYiruCodexHomeOverride()
       }
     }
 

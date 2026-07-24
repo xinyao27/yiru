@@ -1,4 +1,4 @@
-import type { ExecutionHostId } from '../../../shared/execution-host'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type ProjectSourceHostAvailability = {
   hostId: ExecutionHostId

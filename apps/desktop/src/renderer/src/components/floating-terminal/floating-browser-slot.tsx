@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
-import { registerBrowserOverlaySlotViewport } from '@/components/browser-pane/browser-page-viewport'
 import BrowserPane from '@/components/browser-pane/browser-pane'
+import { registerBrowserOverlaySlotViewport } from '@/runtime/browser-page-viewport'
 
 import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 

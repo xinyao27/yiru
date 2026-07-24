@@ -5,7 +5,8 @@ import {
   normalizeRuntimePathForComparison,
   relativePathInsideRoot,
   resolveRuntimePath
-} from '../../shared/cross-platform-path'
+} from '@yiru/workbench-model/platform'
+
 import type { NestedRepoScanResult, ProjectGroup, ProjectGroupImportMode } from '../../shared/types'
 
 type CreateGroupInput = {

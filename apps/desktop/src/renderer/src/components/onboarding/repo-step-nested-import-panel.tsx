@@ -1,4 +1,5 @@
 import { StopCircle as CircleStop, FolderOpen, ArrowLeft } from '@phosphor-icons/react'
+import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -7,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 
-import { getRuntimePathBasename } from '../../../../shared/cross-platform-path'
 import type { NestedRepoScanResult } from '../../../../shared/types'
 import { NestedRepoScanLimitNotice } from '../repo/nested-repo-scan-limit-notice'
 
@@ -40,9 +40,9 @@ export function RepoStepNestedImportPanel({
   const nestedImportDisabled = disabled || nestedScanInProgress
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col gap-3">
-      <div className="border-border bg-muted/30 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border p-5">
+      <div className="border-border bg-muted/30 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border p-5">
         <div className="flex min-w-0 shrink-0 items-center gap-4">
-          <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center rounded-lg">
+          <div className="bg-muted text-foreground grid size-11 shrink-0 place-items-center">
             <FolderOpen className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -116,32 +116,36 @@ export function RepoStepNestedImportPanel({
           </div>
         ) : null}
         <div className="mt-4 flex shrink-0 flex-wrap items-center gap-2">
-          <button
+          <Button
+            variant="quiet"
+            size="default"
             type="button"
-            className="text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60 focus-visible:text-foreground inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm outline-none disabled:opacity-40"
+            className="hover:bg-muted/60 focus-visible:bg-muted/60 h-auto gap-1 border-0 px-3 py-3 disabled:opacity-40"
             disabled={disabled && !nestedScanInProgress}
             onClick={onCancelNested}
           >
-            <ArrowLeft className="size-3.5" />
+            <ArrowLeft weight="regular" className="size-3.5" />
             {translate('auto.components.onboarding.RepoStep.27ca610db1', 'Back')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="default"
+            size="default"
             type="button"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 ml-auto rounded-lg px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
+            className="ml-auto h-auto border-0 py-3 disabled:opacity-40"
             disabled={nestedImportDisabled || nestedSelectedPaths.size === 0}
             onClick={onImportNested}
           >
             {translate('auto.components.onboarding.RepoStep.2d20200346', 'Import repositories')}
-          </button>
+          </Button>
         </div>
       </div>
       {busyLabel ? (
-        <div className="shrink-0 rounded-lg border border-blue-400/30 bg-blue-400/10 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-200">
+        <div className="shrink-0 border border-blue-400/30 bg-blue-400/10 px-4 py-2.5 text-sm text-blue-700 dark:text-blue-200">
           {busyLabel}
         </div>
       ) : null}
       {error ? (
-        <div className="shrink-0 rounded-lg border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-700 dark:text-red-200">
+        <div className="shrink-0 border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-700 dark:text-red-200">
           {error}
         </div>
       ) : null}

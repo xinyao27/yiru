@@ -17,8 +17,9 @@
  * registry, mirroring the spawn-time gate (the `if (!args.connectionId)` block around the `registerPty` call in `src/main/ipc/pty.ts`).
  */
 
-import { parsePtySessionId } from '../../shared/pty-session-id-format'
-import { splitWorktreeId } from '../../shared/worktree-id'
+import { parsePtySessionId } from '@yiru/workbench-model/workspace'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { getDaemonProvider } from '../daemon/daemon-init'
 import type { DaemonPtyAdapter } from '../daemon/daemon-pty-adapter'
 import { DaemonPtyRouter } from '../daemon/daemon-pty-router'

@@ -1,7 +1,7 @@
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
+
 import { translate } from '@/i18n/i18n'
 import { shouldHandleTextControlPaste } from '@/lib/text-control-paste'
-
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 export type DirEntry = {
   name: string
   isDirectory: boolean

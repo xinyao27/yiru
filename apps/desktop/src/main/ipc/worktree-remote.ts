@@ -11,9 +11,9 @@ import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { posix, win32 } from 'node:path'
 
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import type { BrowserWindow } from 'electron'
 
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
 import { assertGitPushTargetShape } from '../../shared/git-push-target-validation'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { TUI_AGENT_CONFIG, isTuiAgent } from '../../shared/tui-agent-config'
@@ -75,6 +75,9 @@ import { runWorktreeChangeInvalidators } from './worktree-change-invalidators'
 type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
   automationProvenance?: AutomationWorkspaceProvenance
 }
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
+import type { BranchPrefixSettings } from '../../shared/branch-prefix'
 import { createSequencedSetupAgentCommands } from '../../shared/setup-agent-sequencing'
 import { shouldWaitForSetupBeforeAgentStartup } from '../../shared/setup-agent-startup-policy'
 import {
@@ -82,7 +85,6 @@ import {
   getSetupRunnerCommandPlatformForPath
 } from '../../shared/setup-runner-command'
 import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import {
   markCodexProjectTrusted,
   markCopilotFolderTrusted,
@@ -105,7 +107,7 @@ import { normalizeSparseDirectories } from './sparse-checkout-directories'
 import {
   sanitizeWorktreeName,
   sanitizeWorktreeDisplayName,
-  computeBranchName,
+  computeValidatedBranchName,
   computeWorktreePath,
   computeRemoteWorktreePath,
   computeWorkspaceRoot,
@@ -524,12 +526,12 @@ async function resolveCreateBranchName(
   repoPath: string,
   branchNameOverride: string | undefined,
   sanitizedName: string,
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   username: string | null,
   gitOptions: { wslDistro?: string } = {}
 ): Promise<string> {
   if (!branchNameOverride) {
-    return computeBranchName(sanitizedName, settings, username)
+    return computeValidatedBranchName(sanitizedName, settings, username)
   }
   if (branchNameOverride.startsWith('-')) {
     throw new Error('Branch name must not start with "-"')
@@ -546,11 +548,11 @@ async function resolveCreateBranchNameSsh(
   repoPath: string,
   branchNameOverride: string | undefined,
   sanitizedName: string,
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   username: string | null
 ): Promise<string> {
   if (!branchNameOverride) {
-    return computeBranchName(sanitizedName, settings, username)
+    return computeValidatedBranchName(sanitizedName, settings, username)
   }
   if (branchNameOverride.startsWith('-')) {
     throw new Error('Branch name must not start with "-"')

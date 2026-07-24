@@ -2,11 +2,12 @@
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path'
 
-import { normalizeRuntimePathSeparators } from '../../shared/cross-platform-path'
+import { normalizeRuntimePathSeparators } from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { isForEachRefExcludeUnsupportedError } from '../../shared/git-ref-command-capabilities'
 import { parseGitRevListAheadBehindCounts } from '../../shared/git-rev-list-output'
 import type { BaseRefSearchResult } from '../../shared/types'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 import { toWindowsWslPath } from '../wsl'
 import { getLocalGitCapabilityCache } from './git-capability-state'
 import { buildHostedRemoteCommitUrl, buildHostedRemoteFileUrl } from './hosted-remote-url'

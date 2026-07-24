@@ -1,4 +1,5 @@
-import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import {
   clearHostSettingOverride,
   getHostSettingOverride,

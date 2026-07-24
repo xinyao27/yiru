@@ -1,4 +1,5 @@
-import type { AiVaultAgent, AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
+
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import { joinRemotePath } from '../ssh/ssh-remote-platform'
 import { remoteCodexIndexTitles } from './remote-session-scanner-codex-index'
@@ -196,6 +197,7 @@ function remoteCodexSources(
   ].map((codexHome) => ({
     agent: 'codex',
     rootDir: joinRemotePath(hostPlatform, codexHome, 'sessions'),
+    codexHome,
     extensions: ['.jsonl'],
     parse: (file, content, context) =>
       parseCodexSessionContent({

@@ -1,4 +1,5 @@
-import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
+import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
+
 import type { Worktree } from './workspace-list-sections'
 
 export function areWorktreeListsEqual(

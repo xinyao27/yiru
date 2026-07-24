@@ -1,4 +1,5 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import { remoteCodexIndexTitles } from './remote-session-scanner-codex-index'
 import type { RemoteScannerContext } from './remote-session-scanner-types'

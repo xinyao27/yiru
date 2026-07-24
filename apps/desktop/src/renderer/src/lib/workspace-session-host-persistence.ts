@@ -3,7 +3,9 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type {
   Repo,
   Worktree,
@@ -11,7 +13,6 @@ import type {
   WorkspaceSessionState
 } from '../../../shared/types'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../../../shared/worktree-id'
 import {
   mergeWorkspaceSessionsFromHosts,
   splitWorkspaceSessionByHost,

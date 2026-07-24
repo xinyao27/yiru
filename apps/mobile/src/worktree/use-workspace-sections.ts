@@ -1,6 +1,6 @@
+import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 import { useMemo } from 'react'
 
-import type { WorkspaceStatusDefinition } from '../../../desktop/src/shared/types'
 import { repoColor } from './repo-color'
 import {
   buildSections,

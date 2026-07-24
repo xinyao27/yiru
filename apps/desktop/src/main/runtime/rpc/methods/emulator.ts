@@ -161,96 +161,97 @@ export const EMULATOR_METHODS: RpcMethod[] = [
   defineMethod({
     name: 'emulator.list',
     params: ListParams,
-    handler: async (params, { runtime }) => runtime.emulatorList(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorList(params)
   }),
   defineMethod({
     name: 'emulator.attach',
     params: AttachParams,
-    handler: async (params, { runtime }) => runtime.emulatorAttach(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAttach(params)
   }),
   defineMethod({
     name: 'emulator.tap',
     params: TapParams,
-    handler: async (params, { runtime }) => runtime.emulatorTap(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorTap(params)
   }),
   defineMethod({
     name: 'emulator.gesture',
     params: GestureParams,
-    handler: async (params, { runtime }) => runtime.emulatorGesture(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorGesture(params)
   }),
   defineMethod({
     name: 'emulator.type',
     params: TypeParams,
-    handler: async (params, { runtime }) => runtime.emulatorType(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorType(params)
   }),
   defineMethod({
     name: 'emulator.button',
     params: ButtonParams,
-    handler: async (params, { runtime }) => runtime.emulatorButton(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorButton(params)
   }),
   defineMethod({
     name: 'emulator.rotate',
     params: RotateParams,
-    handler: async (params, { runtime }) => runtime.emulatorRotate(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorRotate(params)
   }),
   defineMethod({
     name: 'emulator.exec',
     params: ExecParams,
-    handler: async (params, { runtime }) => runtime.emulatorExec(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorExec(params)
   }),
   defineMethod({
     name: 'emulator.kill',
     params: KillParams,
-    handler: async (params, { runtime }) => runtime.emulatorKill(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorKill(params)
   }),
   defineMethod({
     name: 'emulator.shutdown',
     params: ShutdownParams,
-    handler: async (params, { runtime }) => runtime.emulatorShutdown(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorShutdown(params)
   }),
   defineMethod({
     name: 'emulator.listSimulators',
     params: z.object({ worktree: z.string().optional() }).partial(),
-    handler: async (params, { runtime }) => runtime.emulatorListSimulators(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorListSimulators(params)
   }),
   defineMethod({
     name: 'emulator.availability',
     params: z.object({ worktree: z.string().optional() }).partial(),
-    handler: async (params, { runtime }) => runtime.emulatorAvailability(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAvailability(params)
   }),
   defineMethod({
     name: 'emulator.listDevices',
     params: z.object({ worktree: z.string().optional() }).partial(),
-    handler: async (params, { runtime }) => runtime.emulatorListDevices(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorListDevices(params)
   }),
   defineMethod({
     name: 'emulator.install',
     params: InstallParams,
-    handler: async (params, { runtime }) => runtime.emulatorInstall(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorInstall(params)
   }),
   defineMethod({
     name: 'emulator.launch',
     params: LaunchParams,
-    handler: async (params, { runtime }) => runtime.emulatorLaunch(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorLaunch(params)
   }),
   defineMethod({
     name: 'emulator.permissions',
     params: PermissionsParams,
-    handler: async (params, { runtime }) => runtime.emulatorPermissions(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorPermissions(params)
   }),
   defineMethod({
     name: 'emulator.ax',
     params: AxParams,
-    handler: async (params, { runtime }) => runtime.emulatorAx(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorAx(params)
   }),
   defineMethod({
     name: 'emulator.logcat',
     params: LogcatParams,
-    handler: async (params, { runtime }) => runtime.emulatorLogcat(params)
+    handler: async (params, { emulatorCommands }) => emulatorCommands.emulatorLogcat(params)
   }),
   defineMethod({
     name: 'emulator.unregisterActive',
     params: z.object({ worktree: z.string().optional() }).partial(),
-    handler: async (params, { runtime }) => runtime.emulatorUnregisterActive(params)
+    handler: async (params, { emulatorCommands }) =>
+      emulatorCommands.emulatorUnregisterActive(params)
   })
 ]

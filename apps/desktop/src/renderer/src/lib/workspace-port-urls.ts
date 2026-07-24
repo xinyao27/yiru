@@ -1,4 +1,5 @@
-import type { PortForwardEntry, EnrichedDetectedPort } from '../../../shared/ssh-types'
+import type { PortForwardEntry, EnrichedDetectedPort } from '@yiru/runtime-protocol/ssh-connection'
+
 import type { WorkspacePort } from '../../../shared/workspace-ports'
 
 const HTTPS_PORTS = new Set([443, 8443])

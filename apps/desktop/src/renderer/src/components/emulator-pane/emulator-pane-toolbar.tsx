@@ -59,7 +59,7 @@ export function EmulatorPaneToolbar({
       <span
         className={cn(
           'shrink-0 text-[11px]',
-          !subtleStatus && 'rounded border px-1.5 py-0.5 text-[10px]',
+          !subtleStatus && 'border px-1.5 py-0.5 text-[10px]',
           statusClassName
         )}
       >
@@ -102,7 +102,7 @@ export function EmulatorPaneToolbar({
                 'Rotate'
               )}
             >
-              <RotateCw className="size-3.5" />
+              <RotateCw weight="regular" className="size-3.5" />
               <span className="hidden sm:inline">
                 {translate(
                   'auto.components.emulator.pane.emulator.pane.toolbar.6bd8dff42a',

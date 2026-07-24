@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto'
 import { hostname } from 'node:os'
 import { isDeepStrictEqual } from 'node:util'
 
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { ipcMain, type BrowserWindow } from 'electron'
 
 import { exportRemoteWorkspaceSession } from '../../shared/remote-workspace-session-projection'
@@ -13,9 +15,7 @@ import type {
   RemoteWorkspaceSession,
   RemoteWorkspaceSnapshot
 } from '../../shared/remote-workspace-types'
-import type { SshTarget } from '../../shared/ssh-types'
 import type { WorkspaceSessionState } from '../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import { registerRemoteWorkspaceNotificationHandler } from './remote-workspace-events'
 import { getRemoteWorkspaceNamespace } from './remote-workspace-namespace'

@@ -1,8 +1,9 @@
 import { join } from 'node:path'
 
-import type { AiVaultScanIssue, AiVaultSession } from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import type { AiVaultScanIssue, AiVaultSession } from '@yiru/workbench-model/agent'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { AiVaultSessionInventoryCursorStore } from './session-inventory-cursor-store'
 import type {
   AiVaultSessionInventoryPage,

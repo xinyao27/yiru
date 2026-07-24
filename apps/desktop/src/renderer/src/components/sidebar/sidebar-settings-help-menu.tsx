@@ -11,6 +11,7 @@ import {
   ArrowClockwise as RefreshCw,
   ArrowClockwise as RotateCw
 } from '@phosphor-icons/react'
+import { YIRU_GITHUB_RELEASES_URL, YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -32,14 +33,12 @@ import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-che
 import { useAppStore } from '@/store'
 
 import logo from '../../../../../resources/logo.svg'
-import { YIRU_GITHUB_REPOSITORY_URL } from '../../../../shared/yiru-github-repository'
 import { showOnboardingFromRenderer } from '../onboarding/show-onboarding-event'
 import { SetupGuideProgressRing } from '../setup-guide/setup-guide-progress-ring'
 import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'
 import { SidebarFeedbackDialog } from './sidebar-feedback-dialog'
 
 const DOCS_URL = 'https://yiru.ai/docs'
-const CHANGELOG_URL = 'https://yiru.ai/changelog'
 const NO_UPDATE_CHECK_MODIFIERS = { ctrlKey: false, metaKey: false, shiftKey: false }
 
 function openExternalUrl(url: string): void {
@@ -59,7 +58,7 @@ function ExternalMenuItem({
     <DropdownMenuItem onClick={() => openExternalUrl(url)}>
       {icon}
       {label}
-      <ExternalLink className="text-muted-foreground ml-auto size-3" />
+      <ExternalLink weight="regular" className="text-muted-foreground ml-auto size-3" />
     </DropdownMenuItem>
   )
 }
@@ -180,10 +179,11 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             {settingsShortcut.keys.length > 0 ? (
               <ShortcutKeyCombo
                 keys={settingsShortcut.keys}
+                variant="inverted"
                 doubleTap={settingsShortcut.doubleTap}
                 className="gap-0.5"
-                keyCapClassName="min-w-0 border-background/20 bg-background/10 px-1 py-0 text-[10px] text-background "
-                separatorClassName="text-[10px] text-background/70"
+                keyCapClassName="min-w-0 px-1 py-0 text-[10px]"
+                separatorClassName="text-[10px]"
               />
             ) : null}
           </TooltipContent>
@@ -274,7 +274,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                 'auto.components.sidebar.SidebarSettingsHelpMenu.5f83d86d92',
                 'Changelog'
               )}
-              url={CHANGELOG_URL}
+              url={YIRU_GITHUB_RELEASES_URL}
               icon={<ScrollText className="size-3.5" />}
             />
             <DropdownMenuSeparator />
@@ -296,7 +296,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               {updateStatus.state === 'checking' ? (
                 <LoadingIndicator className="size-3.5" />
               ) : (
-                <RefreshCw className="size-3.5" />
+                <RefreshCw weight="regular" className="size-3.5" />
               )}
               {translate(
                 'auto.components.sidebar.SidebarSettingsHelpMenu.29c56f30ee',
@@ -307,7 +307,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleRestartYiru} disabled={isRestartingYiru}>
-                  <RotateCw className="size-3.5" />
+                  <RotateCw weight="regular" className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.SidebarSettingsHelpMenu.ad3d3ed7f1',
                     'Restart Yiru'

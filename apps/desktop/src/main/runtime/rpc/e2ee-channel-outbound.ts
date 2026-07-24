@@ -1,9 +1,9 @@
-import type { WebSocket } from 'ws'
-
 import {
   createWsOutboundBackpressureQueue,
   type WsOutboundBackpressureQueue
-} from '../../../shared/ws-outbound-backpressure-queue'
+} from '@yiru/mobile-relay-protocol/outbound-backpressure'
+import type { WebSocket } from 'ws'
+
 import { encrypt, encryptBytes } from './e2ee-crypto'
 import {
   createDesktopMobileE2EEV2OutboundQueue,

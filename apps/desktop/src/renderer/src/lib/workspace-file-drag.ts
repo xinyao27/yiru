@@ -1,5 +1,6 @@
-import { measureClipboardTextByteLength } from '../../../shared/clipboard-text'
-import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
+
 import {
   NATIVE_FILE_DROP_MAX_PATH_BYTES,
   NATIVE_FILE_DROP_MAX_PATHS,

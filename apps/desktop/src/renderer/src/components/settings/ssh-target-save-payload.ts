@@ -1,4 +1,8 @@
-import { MAX_SSH_RELAY_GRACE_PERIOD_SECONDS, type SshTarget } from '../../../../shared/ssh-types'
+import {
+  MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
+
 import { translate } from '../../i18n/i18n'
 import {
   getSshTargetDraftConnectionFields,

@@ -1,4 +1,8 @@
+import type { AiVaultAgent } from '@yiru/workbench-model/agent'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
+import type { TabSplitDirection } from '@/lib/tab-split-direction'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import {
@@ -6,10 +10,6 @@ import {
   isWebRuntimeSessionActive
 } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
-import type { TabSplitDirection } from '@/store/slices/tabs'
-
-import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
-import type { AiVaultAgent } from '../../../shared/ai-vault-types'
 
 export type LaunchAiVaultSessionInNewTabResult =
   | { tabId: string; groupId?: string }
@@ -20,6 +20,7 @@ export function launchAiVaultSessionInNewTab(args: {
   worktreeId: string
   command: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
   targetGroupId?: string
   splitDirection?: TabSplitDirection
@@ -34,6 +35,7 @@ export function launchAiVaultSessionInNewTab(args: {
       ...(targetGroupId ? { targetGroupId } : {}),
       command: args.command,
       ...(args.env ? { env: args.env } : {}),
+      ...(args.envToDelete ? { envToDelete: args.envToDelete } : {}),
       ...(args.launchConfig ? { launchConfig: args.launchConfig } : {}),
       launchAgent: args.agent,
       activate: true
@@ -60,6 +62,7 @@ export function launchAiVaultSessionInNewTab(args: {
   store.queueTabStartupCommand(tab.id, {
     command: args.command,
     ...(args.env ? { env: args.env } : {}),
+    ...(args.envToDelete ? { envToDelete: args.envToDelete } : {}),
     ...(args.launchConfig ? { launchConfig: args.launchConfig, launchAgent: args.agent } : {}),
     telemetry: {
       agent_kind: tuiAgentToAgentKind(args.agent),

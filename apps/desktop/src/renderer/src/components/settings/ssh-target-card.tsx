@@ -7,18 +7,18 @@ import {
   Trash as Trash2,
   ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
+import {
+  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  type SshConnectionState,
+  type SshConnectionStatus,
+  type SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
 import { useCallback, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import {
-  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  type SshConnectionState,
-  type SshConnectionStatus,
-  type SshTarget
-} from '../../../../shared/ssh-types'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { isSshTargetConnecting, type SshTargetBusyAction } from './ssh-target-action-state'
@@ -228,7 +228,7 @@ export function SshTargetCard({
             {resetInFlight ? (
               <LoadingIndicator className="size-3" />
             ) : (
-              <RotateCcw className="size-3" />
+              <RotateCcw weight="regular" className="size-3" />
             )}
           </Button>
         }
@@ -301,14 +301,14 @@ export function SshTargetCard({
   return (
     <div
       ref={handleCardRef}
-      className="border-border/50 bg-card/40 flex items-center gap-3 rounded-lg border px-4 py-3"
+      className="border-border/50 bg-card/40 flex items-center gap-3 border px-4 py-3"
     >
       <Server className="text-muted-foreground size-4 shrink-0" />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-medium">{target.label}</span>
-          <span className={cn('size-2 shrink-0 rounded-full', statusColor(status))} />
+          <span className={cn('size-2 shrink-0', statusColor(status))} />
           <span className="text-muted-foreground text-[11px]">{STATUS_LABELS[status]}</span>
         </div>
         <p className="text-muted-foreground truncate text-xs">

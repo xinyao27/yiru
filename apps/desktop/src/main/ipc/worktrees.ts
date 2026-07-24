@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import { readFile, stat } from 'node:fs/promises'
 
+import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import type { BrowserWindow } from 'electron'
 import { ipcMain } from 'electron'
 
-import { getRepoExecutionHostId, type ExecutionHostId } from '../../shared/execution-host'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { isFolderRepo } from '../../shared/repo-kind'
 import { inspectSetupScriptImportCandidates } from '../../shared/setup-script-imports'
@@ -75,6 +75,7 @@ import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
+import { persistExistingWorktreeSortOrder } from '../worktree-sort-order-persistence'
 import { shouldEmitBoundedWarning } from './bounded-warning-dedupe'
 import {
   invalidateAuthorizedRootsCache,
@@ -158,12 +159,13 @@ function getRepoForWorktreeRemoval(
     ? legacyMatch
     : undefined
 }
-import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import {
   FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
   getRepoIdFromWorktreeId
-} from '../../shared/worktree-id'
+} from '@yiru/workbench-model/workspace'
+
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
 import {
   getLocalWorktreePathAccess,
   removeLocalWorktreePath,
@@ -2109,13 +2111,7 @@ export function registerWorktreeHandlers(
     if (!Array.isArray(args?.orderedIds) || args.orderedIds.length === 0) {
       return
     }
-    const now = Date.now()
-    for (let i = 0; i < args.orderedIds.length; i++) {
-      // Descending timestamps so that the first item has the highest
-      // sortOrder value (most recent), making b.sortOrder - a.sortOrder
-      // a natural "first wins" comparator on cold start.
-      store.setWorktreeMeta(args.orderedIds[i], { sortOrder: now - i * 1000 })
-    }
+    persistExistingWorktreeSortOrder(store, args.orderedIds)
   })
 
   // Why: the full generation-failure output is main-memory only (never in

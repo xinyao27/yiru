@@ -10,44 +10,30 @@ import { join } from 'node:path'
 
 import type { WebSocket } from 'ws'
 
-import type { MobilePairingConnectionMode } from '../../shared/mobile-pairing-connection-mode'
-import type {
-  DeviceCredentialInstalled,
-  PairingGetEndpointsParams,
-  PairingGetEndpointsResult,
-  PairingProvisionRelayParams
-} from '../../shared/mobile-relay-credential-contract'
-import type { PairingRelay } from '../../shared/mobile-relay-pairing-offer'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '../../shared/pairing'
 import {
   readRemoteRuntimeCancellationRequestId,
   REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
 } from '../../shared/remote-runtime-request-cancellation'
 import type { RuntimeMetadata, RuntimeTransportMetadata } from '../../shared/runtime-bootstrap'
+import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
 import {
   decodeTerminalStreamFrame,
   type TerminalStreamFrame
 } from '../../shared/terminal-stream-protocol'
 import { DeviceRegistry, type DeviceScope } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
-import {
-  RelayRevokeOutbox,
-  type RelayDeviceBinding,
-  type RelayRevokeOutboxItem
-} from './relay/relay-revoke-outbox'
 import type { RpcRequest, RpcResponse } from './rpc/core'
 import { RpcDispatcher } from './rpc/dispatcher'
 import { errorResponse, successResponse } from './rpc/errors'
-import {
-  MobileSocketWiring,
-  type AuthenticatedMobileSocket,
-  type MobileSocketTransportMetadata
-} from './rpc/mobile-socket-wiring'
+import { ALL_RPC_METHODS } from './rpc/methods'
+import { MobileSocketWiring } from './rpc/mobile-socket-wiring'
 import type { RpcMessageContext, RpcTransport } from './rpc/transport'
 import { UnixSocketTransport } from './rpc/unix-socket-transport'
 import { readWsFallbackPort, writeWsFallbackPort } from './rpc/ws-fallback-port-store'
 import { WebSocketTransport } from './rpc/ws-transport'
 import { writeRuntimeMetadata } from './runtime-metadata'
+import { isLongPollRequest } from './runtime-rpc-long-poll-classification'
 import type { YiruRuntimeService } from './yiru-runtime'
 
 const DEFAULT_WS_PORT = 6768
@@ -65,28 +51,6 @@ type YiruRuntimeRpcServerOptions = {
   preferPinnedWsPort?: boolean
   webClientRoot?: string
 }
-
-type MobileRelayPairingProvider = {
-  createPairingRelay(
-    relayDeviceId: string
-  ): Promise<{ relay: PairingRelay; binding: RelayDeviceBinding }>
-  onDeviceRevokeQueued(item: RelayRevokeOutboxItem): void
-  onDemandStateChanged?(): void
-  getEndpoints(
-    context: MobilePairingConnectionContext,
-    params: PairingGetEndpointsParams
-  ): Promise<PairingGetEndpointsResult>
-  provisionRelay(
-    context: MobilePairingConnectionContext,
-    params: PairingProvisionRelayParams
-  ): Promise<DeviceCredentialInstalled>
-}
-
-export type MobilePairingConnectionContext = Readonly<{
-  deviceId: string
-  connectionId: string
-  transport: MobileSocketTransportMetadata
-}>
 
 // Why: long-poll slot cap. With keepalives a `check --wait --timeout-ms
 // 600000` can hold a connection for up to 10 minutes; unbounded that would
@@ -152,222 +116,6 @@ function webClientPathForEndpoint(pathname: string): string {
   return `${pathname.replace(/\/$/, '')}/web-index.html`
 }
 
-const MOBILE_RPC_METHOD_ALLOWLIST = new Set([
-  'accounts.list',
-  'accounts.selectClaude',
-  'accounts.selectCodex',
-  'accounts.subscribe',
-  'accounts.unsubscribe',
-  'aiVault.listSessions',
-  'browser.back',
-  'browser.dialogAccept',
-  'browser.dialogDismiss',
-  'browser.forward',
-  'browser.goto',
-  'browser.keyboardInsertText',
-  'browser.keypress',
-  'browser.mouseDown',
-  'browser.mouseClick',
-  'browser.mouseMove',
-  'browser.mouseUp',
-  'browser.mouseWheel',
-  'browser.reload',
-  'browser.screencast',
-  'browser.screencast.unsubscribe',
-  'browser.tabCreate',
-  'browser.viewport',
-  'clipboard.abortImageUpload',
-  'clipboard.appendImageUploadChunk',
-  'clipboard.commitImageUpload',
-  'clipboard.saveImageAsTempFile',
-  'clipboard.startImageUpload',
-  'diagnostics.memory',
-  'files.browseServerDir',
-  'files.createFile',
-  'files.list',
-  'files.open',
-  'files.openDiff',
-  'files.read',
-  'files.readChunk',
-  'files.readDir',
-  'files.readPreview',
-  'files.readTerminalArtifact',
-  'files.readTerminalArtifactPreview',
-  'files.resolveTerminalPath',
-  'files.searchPaths',
-  'files.writeTerminalArtifact',
-  'folderWorkspace.list',
-  'git.abortMerge',
-  'git.abortRebase',
-  'git.bulkStage',
-  'git.bulkUnstage',
-  'git.branchCompare',
-  'git.branchDiff',
-  'git.cancelGenerateCommitMessage',
-  'git.cancelGeneratePullRequestFields',
-  'git.checkout',
-  'git.commit',
-  'git.commitCompare',
-  'git.commitDiff',
-  'git.discard',
-  'git.discoverCommitMessageModels',
-  'git.diff',
-  'git.fetch',
-  'git.forkSync',
-  'git.fastForward',
-  'git.generateCommitMessage',
-  'git.generatePullRequestFields',
-  'git.history',
-  'git.localBranches',
-  'git.pull',
-  'git.push',
-  'git.rebaseFromBase',
-  'git.stage',
-  'git.status',
-  'git.unstage',
-  'git.upstreamStatus',
-  'github.addPRComment',
-  'github.addPRReviewComment',
-  'github.addPRReviewCommentReply',
-  'github.listAssignableUsers',
-  'github.listLabels',
-  'github.listWorkItems',
-  'github.mergePR',
-  'github.setPRAutoMerge',
-  'github.requestPRReviewers',
-  'github.removePRReviewers',
-  'github.prForBranch',
-  'github.prFileContents',
-  'github.prChecks',
-  'github.prCheckDetails',
-  'github.rerunPRChecks',
-  'github.resolveReviewThread',
-  'github.setPRFileViewed',
-  'github.updatePR',
-  'github.updatePRTitle',
-  'github.updatePRState',
-  'github.repoSlug',
-  'github.workItem',
-  'github.workItemByOwnerRepo',
-  'github.workItemDetails',
-  'gitlab.addMRComment',
-  'gitlab.listMRs',
-  'gitlab.workItemByPath',
-  'gitlab.mergeMR',
-  'gitlab.resolveMRDiscussion',
-  'gitlab.updateMR',
-  'gitlab.updateMRState',
-  'gitlab.workItemDetails',
-  'host.gitBash.isAvailable',
-  'host.platform',
-  'host.pwsh.isAvailable',
-  'host.wsl.isAvailable',
-  'host.wsl.listDistros',
-  'hostedReview.create',
-  'hostedReview.forBranch',
-  'hostedReview.getCreationEligibility',
-  'markdown.readTab',
-  'markdown.saveTab',
-  'notifications.getMissedSince',
-  'notifications.subscribe',
-  'notifications.unsubscribe',
-  'pairing.getEndpoints',
-  'pairing.provisionRelay',
-  'preflight.check',
-  'preflight.detectAgents',
-  'preflight.detectRemoteAgents',
-  'projectGroup.list',
-  'repo.baseRefDefault',
-  'repo.gitAvailable',
-  'repo.hooks',
-  'repo.list',
-  'repo.saveSparsePreset',
-  'repo.searchRefs',
-  'repo.sparsePresets',
-  'repo.update',
-  'runtime.clientEvents.subscribe',
-  'runtime.clientEvents.unsubscribe',
-  'session.tabs.activate',
-  'session.tabs.close',
-  'session.tabs.createTerminal',
-  'session.tabs.list',
-  'session.tabs.listAll',
-  'session.tabs.move',
-  'session.tabs.subscribe',
-  'session.tabs.subscribeAll',
-  'session.tabs.unsubscribe',
-  'session.tabs.unsubscribeAll',
-  'nativeChat.readSession',
-  'nativeChat.subscribe',
-  'nativeChat.unsubscribe',
-  'settings.get',
-  'settings.update',
-  'ssh.connect',
-  'ssh.getState',
-  'ssh.listRemovedTargetLabels',
-  'ssh.listTargets',
-  'speech.dictation.cancel',
-  'speech.dictation.chunk',
-  'speech.dictation.finish',
-  'speech.dictation.setup',
-  'speech.dictation.start',
-  'speech.models.delete',
-  'speech.models.download',
-  'speech.models.list',
-  'stats.summary',
-  'status.get',
-  'agentTeams.prepareLaunch',
-  'agentTeams.tmuxCompat',
-  'terminal.clearBuffer',
-  'terminal.close',
-  'terminal.closeTab',
-  'terminal.create',
-  'terminal.focus',
-  'terminal.agentStatus',
-  'terminal.getAutoRestoreFit',
-  'terminal.isRunningAgent',
-  'terminal.list',
-  'terminal.multiplex',
-  'terminal.read',
-  'terminal.rename',
-  'terminal.send',
-  'terminal.setAutoRestoreFit',
-  'terminal.setDisplayMode',
-  'terminal.subscribe',
-  'terminal.unsubscribe',
-  'terminal.updateViewport',
-  'terminal.wait',
-  'ui.get',
-  'ui.recordFeatureInteraction',
-  'ui.set',
-  'worktree.activate',
-  'worktree.create',
-  'worktree.forceDeleteBranch',
-  'worktree.prefetchCreateBase',
-  'worktree.ps',
-  'worktree.show',
-  'worktree.resolveMrBase',
-  'worktree.resolvePrBase',
-  'worktree.rm',
-  'worktree.set',
-  'worktree.sleep'
-])
-
-// Why: a long-poll request is one whose handler blocks waiting for an external
-// event. This function is the single place that classifies it — the long-poll
-// counter, abort wiring, keepalives, and runtime_busy admission check all
-// share this decision. See §3.1.
-function isLongPollRequest(request: RpcRequest): boolean {
-  if (request.method === 'terminal.wait') {
-    return true
-  }
-  if (request.method === 'orchestration.check') {
-    const params = request.params as { wait?: unknown } | undefined
-    return params?.wait === true
-  }
-  return false
-}
-
 // Why: stamp the authenticated connection's scope onto the status.get success
 // envelope. status.get has no per-connection context inside the dispatcher, so
 // the scope is added here at the transport boundary where the device is known.
@@ -396,14 +144,12 @@ export class YiruRuntimeRpcServer {
   private readonly preferPinnedWsPort: boolean
   private readonly webClientRoot: string | undefined
   private readonly authToken = randomBytes(24).toString('hex')
-  private readonly relayRevokeOutbox: RelayRevokeOutbox
   private deviceRegistry: DeviceRegistry | null = null
   private e2eeKeypair: E2EEKeypair | null = null
   private tlsFingerprint: string | null = null
   private activeTransports: RpcTransport[] = []
   private transports: RuntimeTransportMetadata[] = []
   private mobileSocketWiring: MobileSocketWiring | null = null
-  private mobileRelayPairingProvider: MobileRelayPairingProvider | null = null
   private readonly binaryStreamHandlers = new Map<
     string,
     Map<number, (frame: TerminalStreamFrame) => void>
@@ -432,7 +178,7 @@ export class YiruRuntimeRpcServer {
     webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
-    this.dispatcher = new RpcDispatcher({ runtime })
+    this.dispatcher = new RpcDispatcher({ runtime, methods: ALL_RPC_METHODS })
     this.userDataPath = userDataPath
     this.pid = pid
     this.platform = platform
@@ -440,7 +186,6 @@ export class YiruRuntimeRpcServer {
     this.wsPort = wsPort
     this.preferPinnedWsPort = preferPinnedWsPort
     this.webClientRoot = webClientRoot
-    this.relayRevokeOutbox = new RelayRevokeOutbox(userDataPath)
   }
 
   getDeviceRegistry(): DeviceRegistry | null {
@@ -463,50 +208,14 @@ export class YiruRuntimeRpcServer {
     return this.mobileSocketWiring
   }
 
-  getRelayRevokeOutbox(): RelayRevokeOutbox {
-    return this.relayRevokeOutbox
-  }
-
-  setMobileRelayBinding(deviceId: string, binding: RelayDeviceBinding): boolean {
-    const current = this.deviceRegistry?.getDevice(deviceId)
-    if (
-      current?.scope !== 'mobile' ||
-      this.deviceRegistry?.getMobilePairingConnectionMode(deviceId) === 'local-only'
-    ) {
-      return false
-    }
-    if (
-      current.relayBinding &&
-      (current.relayBinding.relayHostId !== binding.relayHostId ||
-        current.relayBinding.ownerIdentityKey !== binding.ownerIdentityKey)
-    ) {
-      // Why: switching the account/host that owns this local pairing cannot
-      // strand the old cloud credential family even if that account is offline.
-      this.queueRelayDeviceRevoke(current.relayBinding)
-    }
-    const updated = this.deviceRegistry?.setRelayBinding(deviceId, binding) ?? false
-    if (updated) {
-      this.mobileRelayPairingProvider?.onDemandStateChanged?.()
-    }
-    return updated
-  }
-
-  setMobileRelayPairingProvider(provider: MobileRelayPairingProvider | null): void {
-    this.mobileRelayPairingProvider = provider
-  }
-
   async revokeMobileDevice(deviceId: string): Promise<boolean> {
     const device = this.deviceRegistry?.getDevice(deviceId)
     if (device?.scope !== 'mobile') {
       return false
     }
-    if (device.relayBinding) {
-      this.queueRelayDeviceRevoke(device.relayBinding)
-    }
     if (!this.deviceRegistry?.removeDevice(deviceId)) {
       return false
     }
-    this.mobileRelayPairingProvider?.onDemandStateChanged?.()
     this.mobileSocketWiring?.terminateDeviceConnections(device.token)
     return true
   }
@@ -568,69 +277,17 @@ export class YiruRuntimeRpcServer {
     }
   }
 
-  async createMobilePairingOffer(args: {
+  createMobilePairingOffer(args: {
     address?: string | null
-    connectionMode?: MobilePairingConnectionMode
     name?: string
     rotate?: boolean
-  }): Promise<ReturnType<YiruRuntimeRpcServer['createPairingOffer']>> {
-    // Why: the renderer is outside the trust boundary; only the explicit
-    // local-only value may suppress Relay provisioning.
-    const connectionMode = args.connectionMode === 'local-only' ? 'local-only' : 'automatic'
-    const pending = this.deviceRegistry?.getPendingDevice('mobile')
-    const switchingPendingToLocal =
-      connectionMode === 'local-only' && pending?.relayBinding !== undefined
-    if (args.rotate || switchingPendingToLocal) {
-      if (pending?.relayBinding) {
-        // Why: the durable cloud revoke is recorded before rotating the local
-        // token, so a previously displayed relay invite cannot outlive the QR.
-        this.queueRelayDeviceRevoke(pending.relayBinding)
-      }
-    }
-    const direct = this.createPairingOffer({
+  }): ReturnType<YiruRuntimeRpcServer['createPairingOffer']> {
+    // Why: Yiru Mobile is direct-only; the advertised address may still be a
+    // LAN, Tailscale, ZeroTier, or user-provided private-network endpoint.
+    return this.createPairingOffer({
       ...args,
-      rotate: args.rotate || switchingPendingToLocal,
       scope: 'mobile'
     })
-    if (!direct.available) {
-      return direct
-    }
-    this.deviceRegistry?.setMobilePairingConnectionMode(direct.deviceId, connectionMode)
-    if (connectionMode === 'local-only' || !this.mobileRelayPairingProvider) {
-      return direct
-    }
-    const device = this.deviceRegistry?.getDevice(direct.deviceId)
-    const publicKeyB64 = this.getE2EEPublicKey()
-    if (!device || !publicKeyB64) {
-      return direct
-    }
-    try {
-      const relayPairing = await this.mobileRelayPairingProvider.createPairingRelay(device.deviceId)
-      if (!this.deviceRegistry?.setRelayBinding(device.deviceId, relayPairing.binding)) {
-        return direct
-      }
-      this.mobileRelayPairingProvider.onDemandStateChanged?.()
-      return {
-        ...direct,
-        pairingUrl: encodePairingOffer({
-          v: PAIRING_OFFER_VERSION,
-          endpoint: direct.endpoint,
-          deviceToken: device.token,
-          publicKeyB64,
-          scope: 'mobile',
-          relay: relayPairing.relay
-        })
-      }
-    } catch {
-      // Why: relay is additive. A transient auth/director/control outage must
-      // still yield the valid LAN/Tailscale pairing offer.
-      return direct
-    }
-  }
-
-  private queueRelayDeviceRevoke(binding: RelayDeviceBinding): void {
-    const item = this.relayRevokeOutbox.enqueue(binding)
-    this.mobileRelayPairingProvider?.onDeviceRevokeQueued(item)
   }
 
   private registerBinaryStreamHandler(
@@ -838,12 +495,10 @@ export class YiruRuntimeRpcServer {
               sendBinary,
               undefined,
               socket.ws,
-              socket.device.deviceToken,
-              socket
+              socket.device.deviceToken
             )
           },
           onBinary: (socket, bytes) => this.handleWebSocketBinaryMessage(bytes, socket.ws),
-          onReady: () => this.mobileRelayPairingProvider?.onDemandStateChanged?.(),
           onClose: (socket, hasOtherConnections) => {
             if (!socket) {
               return
@@ -997,8 +652,7 @@ export class YiruRuntimeRpcServer {
     sendBinary: (response: Uint8Array<ArrayBufferLike>) => boolean | void,
     wsTransport?: WebSocketTransport,
     ws?: WebSocket,
-    authenticatedDeviceToken?: string | null,
-    authenticatedSocket?: AuthenticatedMobileSocket
+    authenticatedDeviceToken?: string | null
   ): Promise<void> {
     let request: RpcRequest
     try {
@@ -1037,7 +691,7 @@ export class YiruRuntimeRpcServer {
       reply(JSON.stringify(this.buildError(request.id, 'unauthorized', 'Invalid device token')))
       return
     }
-    if (device.scope === 'mobile' && !MOBILE_RPC_METHOD_ALLOWLIST.has(request.method)) {
+    if (device.scope === 'mobile' && !this.dispatcher.isAvailableToMobile(request.method)) {
       reply(
         JSON.stringify(
           this.buildError(
@@ -1107,35 +761,11 @@ export class YiruRuntimeRpcServer {
     // Why: older/saved WebSocket pairings may not carry scope metadata, so
     // stamp the authenticated scope onto the one method that probes the runtime.
     const replyForRequest =
-      request.method === 'status.get'
+      request.method === STATUS_GET_CONTRACT.name
         ? (response: string): void => reply(injectDeviceScope(response, device.scope))
         : reply
 
     const connectionId = ws ? this.mobileSocketWiring?.getConnectionId(ws) : undefined
-    const pairingProvider = this.mobileRelayPairingProvider
-    const pairingContext =
-      pairingProvider && authenticatedSocket
-        ? {
-            getEndpoints: (params: PairingGetEndpointsParams) =>
-              pairingProvider.getEndpoints(
-                {
-                  deviceId: authenticatedSocket.device.deviceId,
-                  connectionId: authenticatedSocket.connectionId,
-                  transport: authenticatedSocket.transport
-                },
-                params
-              ),
-            provisionRelay: (params: PairingProvisionRelayParams) =>
-              pairingProvider.provisionRelay(
-                {
-                  deviceId: authenticatedSocket.device.deviceId,
-                  connectionId: authenticatedSocket.connectionId,
-                  transport: authenticatedSocket.transport
-                },
-                params
-              )
-          }
-        : undefined
     try {
       await this.dispatcher.dispatchStreaming(request, replyForRequest, {
         connectionId,
@@ -1148,7 +778,6 @@ export class YiruRuntimeRpcServer {
         // Why: gates the mobile-only payload diet (native-chat char clipping) so
         // full-screen web/desktop runtime clients aren't truncated.
         clientKind: device.scope,
-        pairing: pairingContext,
         signal: abortRegistration?.signal,
         sendBinary,
         registerBinaryStreamHandler: (streamId, handler) =>

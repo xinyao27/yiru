@@ -1,14 +1,17 @@
 import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import {
   TextAa as CaseSensitive,
-  GitBranch,
   GitMerge,
   GitPullRequest,
   MagnifyingGlass as Search,
   ArrowSquareOut as ExternalLink,
-  GitBranch as GitBranchPlus,
   X
 } from '@phosphor-icons/react'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: the smart name field owns source tabs,
 search orchestration, and result rendering so the unified create flow stays
 in one predictable form control instead of splitting state across fragments. */
@@ -56,11 +59,6 @@ import {
 } from '@/runtime/runtime-repo-client'
 import { useAppStore } from '@/store'
 
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
@@ -1291,7 +1289,7 @@ export default function SmartWorkspaceNameField({
                     event.preventDefault()
                     onPlainEnter?.()
                   }}
-                  className="border-input focus-within:border-ring flex h-9 w-full min-w-0 items-center gap-2 rounded-md border bg-transparent px-2.5 text-sm outline-none"
+                  className="border-input focus-within:border-ring flex h-9 w-full min-w-0 items-center gap-2 border bg-transparent px-2.5 text-sm outline-none"
                 >
                   <SelectionIcon kind={selectedSource.kind} />
                   <span className="text-foreground min-w-0 flex-1 truncate leading-none font-medium">
@@ -1303,16 +1301,16 @@ export default function SmartWorkspaceNameField({
                         render={
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="quiet"
                             size="icon-xs"
                             onClick={() => void window.api.shell.openUrl(selectedSource.url!)}
-                            className="text-muted-foreground hover:text-foreground size-6 shrink-0 rounded-sm"
+                            className="size-6 shrink-0"
                             aria-label={translate(
                               'auto.components.new.workspace.SmartWorkspaceNameField.2c69728c2a',
                               'Open link in browser'
                             )}
                           >
-                            <ExternalLink className="size-3.5" />
+                            <ExternalLink weight="regular" className="size-3.5" />
                           </Button>
                         }
                       />
@@ -1329,16 +1327,16 @@ export default function SmartWorkspaceNameField({
                       render={
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="quiet"
                           size="icon-xs"
                           onClick={onClearSelectedSource}
-                          className="text-muted-foreground hover:text-foreground size-6 shrink-0 rounded-sm"
+                          className="size-6 shrink-0"
                           aria-label={translate(
                             'auto.components.new.workspace.SmartWorkspaceNameField.7199ff19c7',
                             'Clear selected source'
                           )}
                         >
-                          <X className="size-3.5" />
+                          <X weight="regular" className="size-3.5" />
                         </Button>
                       }
                     />
@@ -1479,7 +1477,7 @@ export default function SmartWorkspaceNameField({
               {loading && searchResultRows.length === 0 ? (
                 <div className="space-y-1 p-1">
                   {[0, 1, 2].map((index) => (
-                    <div key={index} className="bg-muted/40 h-8 animate-pulse rounded" />
+                    <div key={index} className="bg-muted/40 h-8 animate-pulse" />
                   ))}
                 </div>
               ) : searchResultRows.length === 0 && !typedTextActionRow ? (
@@ -1563,7 +1561,7 @@ function RowIcon({ row }: { row: RowEntry }): React.JSX.Element {
     return <CaseSensitive className="text-muted-foreground size-3.5 shrink-0" />
   }
   if (row.kind === 'create-branch') {
-    return <GitBranchPlus className="text-muted-foreground size-3.5 shrink-0" />
+    return <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
   }
   if (row.kind === 'github') {
     return <GitPullRequest className="text-muted-foreground size-3.5 shrink-0" />
@@ -1572,9 +1570,9 @@ function RowIcon({ row }: { row: RowEntry }): React.JSX.Element {
     return <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
   }
   if (row.kind === 'branch') {
-    return <GitBranch className="text-muted-foreground size-3.5 shrink-0" />
+    return <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
   }
-  return <GitBranch className="text-muted-foreground size-3.5 shrink-0" />
+  return <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
 }
 
 function SelectionIcon({ kind }: { kind: SmartWorkspaceNameSelection['kind'] }): React.JSX.Element {
@@ -1584,7 +1582,7 @@ function SelectionIcon({ kind }: { kind: SmartWorkspaceNameSelection['kind'] }):
   if (kind === 'gitlab-mr') {
     return <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
   }
-  return <GitBranch className="text-muted-foreground size-3.5 shrink-0" />
+  return <GitMerge className="text-muted-foreground size-3.5 shrink-0" />
 }
 
 function RowLabel({ row }: { row: RowEntry }): React.JSX.Element {

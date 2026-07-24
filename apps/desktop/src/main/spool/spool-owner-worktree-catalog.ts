@@ -1,7 +1,8 @@
-import { getRepoExecutionHostId, parseExecutionHostId } from '../../shared/execution-host'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+
 import { mapWithConcurrency } from '../../shared/map-with-concurrency'
 import type { DetectedWorktreeListResult, ProjectHostSetup, Repo } from '../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type {

@@ -1,4 +1,5 @@
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+
 import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 
 export type SshPaneConnectGate = {

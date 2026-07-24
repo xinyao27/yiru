@@ -1,15 +1,18 @@
-import type { AiVaultAgent } from '../../shared/ai-vault-types'
+import type { AiVaultAgent } from '@yiru/workbench-model/agent'
 import type {
   AiVaultScanIssue,
   AiVaultSession,
   AiVaultSessionPreviewMessage
-} from '../../shared/ai-vault-types'
-import type { ExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 export type AiVaultScanOptions = {
   claudeProjectsDir?: string
   codexSessionsDir?: string
   additionalCodexSessionsDirs?: readonly string[]
+  // Why: tests can inject a disposable real home while preserving canonical
+  // Codex resume attribution for the system-default lane.
+  defaultCodexHomeDir?: string
   wslHomeDirs?: readonly string[]
   geminiSessionsDir?: string
   antigravityBrainDir?: string
@@ -44,6 +47,9 @@ export type FileWithMtime = {
   // unchanged/truncated files without a second stat. Synthetic candidates
   // (OpenCode SQLite rows, remote files) omit it.
   sizeBytes?: number
+  dev?: number
+  ino?: number
+  nlink?: number
 }
 
 export type SessionFileCandidate = {
@@ -99,6 +105,7 @@ export type SessionAccumulator = {
   messageCount: number
   totalTokens: number
   previewMessages: AiVaultSessionPreviewMessage[]
+  lastUserPrompt: string | null
   // Recoverable signal for a zero-turn transcript (see AiVaultSession).
   queuedMessageCount: number
   subagentTranscriptCount: number

@@ -32,7 +32,7 @@ export function TerminalSessionStateSaveFailureDialog({
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader className="gap-3">
           <div className="flex items-center gap-3">
-            <div className="border-border bg-muted/40 flex size-8 shrink-0 items-center justify-center rounded-md border">
+            <div className="border-border bg-muted/40 flex size-8 shrink-0 items-center justify-center border">
               <HardDrive className="text-muted-foreground size-4" />
             </div>
             <DialogTitle className="text-base">
@@ -50,7 +50,7 @@ export function TerminalSessionStateSaveFailureDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="border-border bg-muted/35 text-muted-foreground rounded-md border px-3 py-2.5 text-xs leading-5">
+        <div className="border-border bg-muted/35 text-muted-foreground border px-3 py-2.5 text-xs leading-5">
           {translate(
             'auto.components.terminal.pane.TerminalSessionStateSaveFailureDialog.38c282a2c4',
             'The analyzer opens directly from here. You can also open it later from the lower-left toolbox menu by choosing Space Analyzer.'

@@ -1,6 +1,7 @@
 import { Info } from '@phosphor-icons/react'
 import React from 'react'
 
+import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
@@ -27,16 +28,18 @@ export function AutomationSessionField({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
+                  variant="quiet"
+                  size="xs"
                   type="button"
                   aria-label={translate(
                     'auto.components.automations.AutomationSessionField.4bdce31f37',
                     'Session reuse help'
                   )}
-                  className="text-muted-foreground hover:text-foreground rounded-sm outline-none"
+                  className="h-auto border-0 p-0"
                 >
                   <Info className="size-3.5" />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="top" sideOffset={6} className="max-w-72">

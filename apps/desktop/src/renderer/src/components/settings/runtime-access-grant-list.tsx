@@ -58,7 +58,7 @@ export function RuntimeAccessGrantList({
                   'Refresh shared access'
                 )}
               >
-                {isLoading ? <LoadingIndicator /> : <RefreshCw />}
+                {isLoading ? <LoadingIndicator /> : <RefreshCw weight="regular" />}
               </Button>
             }
           />
@@ -86,7 +86,7 @@ export function RuntimeAccessGrantList({
             return (
               <div
                 key={grant.deviceId}
-                className="border-border/60 flex min-w-0 items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                className="border-border/60 flex min-w-0 items-center justify-between gap-3 border px-3 py-2"
               >
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex min-w-0 items-center gap-2">

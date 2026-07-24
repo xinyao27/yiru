@@ -1,3 +1,11 @@
+import { collectLeafIdsInOrder } from '@/lib/terminal-layout-leaf-ids'
+import { discardPreHandlerPtyState } from '@/runtime/pty-pre-handler-buffer'
+import {
+  capturedPanesByTabId,
+  disposeParkedTabWatchers,
+  parkedWatchersByTabId,
+  type ParkedTerminalPaneCapture
+} from '@/runtime/terminal-parked-watcher-registry'
 import { useAppStore } from '@/store'
 
 /**
@@ -17,20 +25,12 @@ import type { TerminalTab } from '../../../../shared/types'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
 import { startParkedTerminalByteWatcher } from './parked-terminal-byte-watcher'
 import { subscribeToPtyExit } from './pty-dispatcher'
-import { discardPreHandlerPtyState } from './pty-pre-handler-buffer'
 import { isSnapshotBackedTerminalPty } from './terminal-hidden-view-parking'
 import { detachTerminalLayoutLeaf } from './terminal-layout-leaf-detach'
-import { collectLeafIdsInOrder } from './terminal-layout-leaf-ids'
 import {
   resolveTabTitleAfterPaneClose,
   shouldClearLaunchAgentForClosedPane
 } from './terminal-pane-close-identity'
-import {
-  capturedPanesByTabId,
-  disposeParkedTabWatchers,
-  parkedWatchersByTabId,
-  type ParkedTerminalPaneCapture
-} from './terminal-parked-watcher-registry'
 
 // Why: re-exported so park wiring keeps one import surface; the registry
 // split exists only to break the store-slice import cycle.
@@ -42,8 +42,8 @@ export {
   disposeParkedTerminalWatchersForWorktree,
   getParkedTerminalWatcherTabIds,
   pruneParkedTerminalWatchers
-} from './terminal-parked-watcher-registry'
-export type { ParkedTerminalPaneCapture } from './terminal-parked-watcher-registry'
+} from '@/runtime/terminal-parked-watcher-registry'
+export type { ParkedTerminalPaneCapture } from '@/runtime/terminal-parked-watcher-registry'
 
 export type ParkableTerminalTabModel = Pick<TerminalTab, 'id' | 'ptyId'>
 export type ParkedTerminalPtyEligibility = (ptyId: string) => boolean

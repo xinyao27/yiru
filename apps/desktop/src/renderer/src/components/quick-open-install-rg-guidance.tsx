@@ -2,6 +2,7 @@ import { Warning as AlertTriangle, Check, Copy } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 export type QuickOpenInstallRgGuidanceParts = {
@@ -100,7 +101,7 @@ export function QuickOpenInstallRgGuidance({
     <div className="text-muted-foreground space-y-3 px-4 py-5 text-sm">
       <div
         role="alert"
-        className="flex items-start gap-2.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300"
+        className="flex items-start gap-2.5 border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300"
       >
         <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
         <p className="text-[13px] leading-5">
@@ -110,7 +111,7 @@ export function QuickOpenInstallRgGuidance({
       </div>
       <p>
         {translate('auto.components.QuickOpen.2ca749c15d', 'Install')}{' '}
-        <code className="bg-muted text-foreground rounded px-1 py-0.5 font-mono">
+        <code className="bg-muted text-foreground px-1 py-0.5 font-mono">
           {translate('auto.components.QuickOpen.5d80dc39bb', 'ripgrep')}
         </code>{' '}
         {translate(
@@ -119,20 +120,22 @@ export function QuickOpenInstallRgGuidance({
         )}
       </p>
       {command ? (
-        <div className="border-border bg-muted/50 text-foreground flex items-center gap-2 rounded border px-3 py-2 font-mono text-xs">
+        <div className="border-border bg-muted/50 text-foreground flex items-center gap-2 border px-3 py-2 font-mono text-xs">
           <span className="flex-1 truncate">{command}</span>
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             ref={setCopyButtonRef}
             type="button"
             onClick={handleCopy}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors outline-none"
+            className="hover:bg-muted focus-visible:bg-muted flex h-auto border-0 py-1"
             aria-label={translate('auto.components.QuickOpen.73b44e7bde', 'Copy install command')}
           >
             {copied ? <Check size={12} /> : <Copy size={12} />}
             {copied
               ? translate('auto.components.QuickOpen.cf144856dc', 'Copied')
               : translate('auto.components.QuickOpen.995be8ea22', 'Copy')}
-          </button>
+          </Button>
         </div>
       ) : guidance ? (
         <p className="text-foreground text-[13px] leading-5">{guidance}</p>

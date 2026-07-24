@@ -1,3 +1,6 @@
+import { PROJECT_HOST_SETUP_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import { toRuntimeExecutionHostId, toSshExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { translate } from '@/i18n/i18n'
 import { assertRuntimeEnvironmentCapability } from '@/runtime/runtime-rpc-client'
 
@@ -5,8 +8,6 @@ import {
   getEphemeralVmRecipeResultProjectRoot,
   type EphemeralVmRecipeResultWarning
 } from '../../../shared/ephemeral-vm-recipes'
-import { toRuntimeExecutionHostId, toSshExecutionHostId } from '../../../shared/execution-host'
-import { PROJECT_HOST_SETUP_RUNTIME_CAPABILITY } from '../../../shared/protocol-version'
 import type {
   ProjectHostSetupExistingFolderArgs,
   ProjectHostSetupResult

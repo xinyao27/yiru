@@ -1,4 +1,4 @@
-import type { HostedReviewInfo } from '../../../desktop/src/shared/hosted-review'
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import type {
   GitHubAssignableUser,
   GitHubPRReviewSummary,
@@ -10,7 +10,8 @@ import type {
   PRCheckRunDetails,
   PRCheckStep,
   PRInfo
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
+
 import { readPRComments } from './github-pr-comment-parsers'
 import {
   isRecord,

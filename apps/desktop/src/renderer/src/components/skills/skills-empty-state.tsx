@@ -46,7 +46,7 @@ export function SkillsEmptyState({
         </div>
         {!loading ? (
           <Button variant="outline" size="sm" onClick={onRefresh}>
-            <ArrowClockwise className="size-4" />
+            <ArrowClockwise weight="regular" className="size-4" />
             {translate('auto.components.skills.SkillsPage.cb142070b4', 'Refresh')}
           </Button>
         ) : null}

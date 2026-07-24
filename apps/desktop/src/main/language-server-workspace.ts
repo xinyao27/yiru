@@ -1,14 +1,15 @@
 import { realpath, stat } from 'node:fs/promises'
 
-import { normalizeRuntimePathForComparison } from '../shared/cross-platform-path'
-import { getLocalExecutionHostLabel, parseExecutionHostId } from '../shared/execution-host'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { getLocalExecutionHostLabel, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import type {
   LanguageServerDocumentUriResult,
   LanguageServerLocationResult,
   LanguageServerSettings
 } from '../shared/language-server'
-import { splitWorktreeIdForFilesystem } from '../shared/worktree-id'
-import { parseWslUncPath } from '../shared/wsl-paths'
 import { getActiveSshHostPlatform } from './ipc/ssh'
 import {
   authorizedLanguageServerRelativePath,

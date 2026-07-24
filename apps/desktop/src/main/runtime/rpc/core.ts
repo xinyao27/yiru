@@ -4,29 +4,28 @@
 // against the same shape the handler consumed during development.
 import { ZodError, type ZodType } from 'zod'
 
-import type {
-  DeviceCredentialInstalled,
-  PairingGetEndpointsParams,
-  PairingGetEndpointsResult,
-  PairingProvisionRelayParams
-} from '../../../shared/mobile-relay-credential-contract'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../../shared/runtime-method-contract'
 import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
+import type { MobileNotificationChannel } from '../mobile-notification-channel'
 import type { YiruRuntimeService } from '../yiru-runtime'
-
-export type PairingRpcContext = {
-  getEndpoints(params: PairingGetEndpointsParams): Promise<PairingGetEndpointsResult>
-  provisionRelay(params: PairingProvisionRelayParams): Promise<DeviceCredentialInstalled>
-}
+import type { RuntimeBrowserCommands } from '../yiru-runtime-browser'
+import type { RuntimeEmulatorCommands } from '../yiru-runtime-emulator'
+import type { RuntimeFileCommands } from '../yiru-runtime-files'
+import type { RuntimeGitCommands } from '../yiru-runtime-git'
 
 export type RpcEnvelopeMeta = {
   runtimeId: string
 }
 
-export type RpcSuccess = {
+export type RpcSuccess<TResult = unknown> = {
   id: string
   ok: true
-  result: unknown
+  result: TResult
   streaming?: true
   _meta: RpcEnvelopeMeta
 }
@@ -42,7 +41,7 @@ export type RpcFailure = {
   _meta: RpcEnvelopeMeta
 }
 
-export type RpcResponse = RpcSuccess | RpcFailure
+export type RpcResponse<TResult = unknown> = RpcSuccess<TResult> | RpcFailure
 
 export type RpcRequest = {
   id: string
@@ -53,6 +52,11 @@ export type RpcRequest = {
 
 export type RpcContext = {
   runtime: YiruRuntimeService
+  fileCommands: RuntimeFileCommands
+  gitCommands: RuntimeGitCommands
+  browserCommands: RuntimeBrowserCommands
+  emulatorCommands: RuntimeEmulatorCommands
+  mobileNotifications: MobileNotificationChannel
   /** Immutable identity established by the encrypted transport, when present. */
   principal?: AuthenticatedRpcPrincipal
   // Why: long-poll handlers (e.g. orchestration.check with wait=true) need to
@@ -79,7 +83,6 @@ export type RpcContext = {
   // clients. Carries the paired device's scope so handlers can gate the diet to
   // phones only. Undefined for in-process callers → treat as full-class (no clip).
   clientKind?: 'mobile' | 'runtime'
-  pairing?: PairingRpcContext
   // Why: mobile terminal traffic is byte-oriented and bypasses JSON streaming
   // responses after the binary terminal cutover. Undefined on Unix/socket
   // transports and non-E2EE WebSocket paths.
@@ -93,7 +96,10 @@ export type RpcContext = {
   ) => () => void
 }
 
-export type RpcHandler<TParams> = (params: TParams, ctx: RpcContext) => Promise<unknown> | unknown
+export type RpcHandler<TParams, TResult = unknown> = (
+  params: TParams,
+  ctx: RpcContext
+) => Promise<TResult> | TResult
 
 // Why: defineMethod preserves the inferred param type locally so each handler
 // is fully typed, but the erased `RpcMethod` form is what the dispatcher
@@ -103,21 +109,43 @@ export type RpcHandler<TParams> = (params: TParams, ctx: RpcContext) => Promise<
 export type RpcMethod = {
   readonly name: string
   readonly params: ZodType | null
+  readonly mobile: boolean
   readonly handler: (params: unknown, ctx: RpcContext) => Promise<unknown> | unknown
 }
 
 type DefineMethodSpec<TSchema extends ZodType | null> = {
   name: string
   params: TSchema
+  mobile?: boolean
   handler: RpcHandler<TSchema extends ZodType ? TSchema['_output'] : void>
 }
 
+type DefineContractMethodSpec<TContract extends RuntimeMethodContract> = {
+  contract: TContract
+  handler: RpcHandler<RuntimeMethodParams<TContract>, RuntimeMethodResult<TContract>>
+}
+
+export function defineMethod<TContract extends RuntimeMethodContract>(
+  spec: DefineContractMethodSpec<TContract>
+): RpcMethod
 export function defineMethod<TSchema extends ZodType | null>(
   spec: DefineMethodSpec<TSchema>
+): RpcMethod
+export function defineMethod(
+  spec: DefineMethodSpec<ZodType | null> | DefineContractMethodSpec<RuntimeMethodContract>
 ): RpcMethod {
+  if ('contract' in spec) {
+    return {
+      name: spec.contract.name,
+      params: spec.contract.params,
+      mobile: spec.contract.mobile,
+      handler: spec.handler as RpcMethod['handler']
+    }
+  }
   return {
     name: spec.name,
     params: spec.params,
+    mobile: spec.mobile ?? false,
     handler: spec.handler as RpcMethod['handler']
   }
 }
@@ -134,6 +162,7 @@ export type RpcStreamingHandler<TParams> = (
 export type RpcStreamingMethod = {
   readonly name: string
   readonly params: ZodType | null
+  readonly mobile: boolean
   readonly stream: true
   readonly handler: (
     params: unknown,
@@ -145,6 +174,7 @@ export type RpcStreamingMethod = {
 type DefineStreamingMethodSpec<TSchema extends ZodType | null> = {
   name: string
   params: TSchema
+  mobile?: boolean
   handler: RpcStreamingHandler<TSchema extends ZodType ? TSchema['_output'] : void>
 }
 
@@ -154,6 +184,7 @@ export function defineStreamingMethod<TSchema extends ZodType | null>(
   return {
     name: spec.name,
     params: spec.params,
+    mobile: spec.mobile ?? false,
     stream: true,
     handler: spec.handler as RpcStreamingMethod['handler']
   }

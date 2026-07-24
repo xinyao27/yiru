@@ -1,4 +1,4 @@
-import type { AiVaultListResult, AiVaultSession } from '../shared/ai-vault-types'
+import type { AiVaultListResult, AiVaultSession } from '@yiru/workbench-model/agent'
 
 export function formatSessionList(result: AiVaultListResult): string {
   if (result.sessions.length === 0) {

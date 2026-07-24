@@ -1,6 +1,7 @@
 import { X } from '@phosphor-icons/react'
 import type { CSSProperties, JSX } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -43,14 +44,16 @@ export default function ImageViewerPopup({
         </DialogDescription>
         <div className="border-border/60 bg-background flex shrink-0 items-center justify-between border-b px-3 py-2">
           <div className="text-foreground min-w-0 truncate text-sm font-medium">{filename}</div>
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
-            className="border-border/60 bg-background text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs outline-none"
+            className="border-border/60 h-auto py-1"
             onClick={() => onOpenChange(false)}
           >
-            <X size={14} />
+            <X weight="regular" size={14} />
             <span>{translate('auto.components.editor.ImageViewerPopup.535f4e2b56', 'Close')}</span>
-          </button>
+          </Button>
         </div>
         <div
           ref={setSurfaceRef}

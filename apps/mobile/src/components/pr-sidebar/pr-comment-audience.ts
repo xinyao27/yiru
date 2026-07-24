@@ -1,8 +1,8 @@
 import {
   createBotAuthorOverrideSet,
   normalizePRCommentAuthorLogin
-} from '../../../../desktop/src/shared/pr-bot-author-overrides'
-import type { PRComment } from '../../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
+import type { PRComment } from '@yiru/workbench-model/review'
 
 export { createBotAuthorOverrideSet }
 

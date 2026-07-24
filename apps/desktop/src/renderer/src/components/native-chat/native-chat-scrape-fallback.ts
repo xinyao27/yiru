@@ -6,11 +6,8 @@
 // so the assembler ranks it below transcript/hook copies of the same turn. See
 // docs/plans/2026-06-17-001-feat-native-chat-view-plan.md (U6).
 
-import type {
-  AgentType,
-  NativeChatMessage,
-  NativeChatSession
-} from '../../../../shared/native-chat-types'
+import type { AgentType, NativeChatMessage, NativeChatSession } from '@yiru/workbench-model/agent'
+
 import { assembleNativeChatSession } from './native-chat-session-assembler'
 
 // Why: replicate (not import) the minimal ANSI/control-sequence strip used by

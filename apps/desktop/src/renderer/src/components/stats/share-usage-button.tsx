@@ -1,10 +1,10 @@
 import { Check, Copy, ShareNetwork as Share2 } from '@phosphor-icons/react'
+import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '@yiru/workbench-model/product'
 import { toPng } from 'html-to-image'
 import { useCallback, useRef, useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '../../../../shared/yiru-github-repository'
 import { Button } from '../ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'

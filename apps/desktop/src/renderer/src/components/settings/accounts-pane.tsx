@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { markLiveCodexSessionsForRestart } from '@/lib/codex-session-restart'
@@ -36,6 +37,7 @@ import {
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
+  CodexSystemDefaultIdentity,
   GlobalSettings
 } from '../../../../shared/types'
 import { useAppStore } from '../../store'
@@ -175,6 +177,26 @@ function getCodexAccountLabel(
     return 'System default'
   }
   return state.accounts.find((account) => account.id === accountId)?.email ?? 'Codex account'
+}
+
+function getCodexSystemDefaultSubtitle(
+  identity: CodexSystemDefaultIdentity | undefined,
+  runtimeSentenceLabel: string
+): string {
+  if (identity?.authKind === 'oauth' && identity.email) {
+    return identity.email
+  }
+  if (identity?.authKind === 'api-key') {
+    return translate(
+      'auto.components.settings.AccountsPane.codexSystemDefaultCustomProvider',
+      'Custom provider — no usage tracked.'
+    )
+  }
+  return translate(
+    'auto.components.settings.AccountsPane.fcc4093fc1',
+    'Use your current {{value0}} Codex login.',
+    { value0: runtimeSentenceLabel }
+  )
 }
 
 function getClaudeAccountLabel(
@@ -387,6 +409,8 @@ export function AccountsPane({
   ).some((account) =>
     providerAccountIsActiveInView(account, claudeAccounts, accountRuntime, accountVisibilityOptions)
   )
+  const systemCodexIdentity =
+    accountRuntime.runtime === 'host' ? codexAccounts.systemDefault : undefined
   // Why: the auth warning is derived from the desktop's own rate-limit poll;
   // with a remote owner it would misattribute local auth state to the server.
   const activeCodexAuthWarning =
@@ -396,7 +420,8 @@ export function AccountsPane({
           target: codexRateLimitTarget,
           runtime: accountRuntime,
           activeAccountId: activeCodexAccountId,
-          accountId: activeCodexAccountId
+          accountId: activeCodexAccountId,
+          authKind: activeCodexAccountId === null ? systemCodexIdentity?.authKind : undefined
         })
       : null
   const systemCodexNeedsReauthentication =
@@ -810,12 +835,12 @@ export function AccountsPane({
               </Button>
               {claudeAction === 'adding' ? (
                 <Button
-                  variant="ghost"
+                  variant="quiet"
                   size="xs"
                   onClick={() => void window.api.claudeAccounts.cancelPendingLogin()}
-                  className="text-muted-foreground hover:text-foreground gap-1.5"
+                  className="gap-1.5"
                 >
-                  <X className="size-3" />
+                  <X weight="regular" className="size-3" />
                   {translate('auto.components.settings.AccountsPane.dbb9626ed1', 'Cancel')}
                 </Button>
               ) : null}
@@ -823,7 +848,9 @@ export function AccountsPane({
           </div>
 
           <div className="space-y-2">
-            <button
+            <Button
+              variant="outline"
+              size="default"
               type="button"
               onClick={() =>
                 void runClaudeAccountAction('select:system', () =>
@@ -836,8 +863,8 @@ export function AccountsPane({
               }
               disabled={claudeAction !== 'idle' || accountRuntimeUnavailable}
               className={cn(
-                'outline-none focus-visible:border-border focus-visible:bg-accent/8',
-                'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
+                'h-auto whitespace-normal font-normal focus-visible:border-border focus-visible:bg-accent/8',
+                'flex w-full justify-between gap-3 px-3 py-2.5 text-left transition-colors',
                 systemClaudeActive
                   ? 'border-foreground/20 bg-accent/15'
                   : 'border-border/70 hover:border-border hover:bg-accent/8',
@@ -855,7 +882,7 @@ export function AccountsPane({
                   {systemClaudeActive ? (
                     <Badge
                       variant="outline"
-                      className="text-foreground/80 h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                      className="text-foreground/80 h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                     >
                       {translate('auto.components.settings.AccountsPane.e74831fb6b', 'Active')}
                     </Badge>
@@ -869,9 +896,9 @@ export function AccountsPane({
                   )}
                 </span>
               </div>
-            </button>
+            </Button>
             {visibleClaudeAccounts.length === 0 ? (
-              <div className="border-border/70 text-muted-foreground rounded-md border border-dashed px-3 py-4 text-xs">
+              <div className="border-border/70 text-muted-foreground border border-dashed px-3 py-4 text-xs">
                 {isRemoteAccountScope
                   ? translate(
                       'auto.components.settings.AccountsPane.remoteEmptyClaudeAccounts',
@@ -899,14 +926,16 @@ export function AccountsPane({
                   <div
                     key={account.id}
                     className={cn(
-                      'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
+                      'flex w-full items-center justify-between gap-3 border px-3 py-2.5 text-left transition-colors',
                       isActive
                         ? 'border-foreground/20 bg-accent/15'
                         : 'border-border/70 hover:border-border hover:bg-accent/8'
                     )}
                   >
                     <div className="flex w-full items-center justify-between gap-3 max-md:flex-col max-md:items-start">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         type="button"
                         onClick={() => {
                           const accountRuntimeView = getProviderAccountRuntime(account)
@@ -921,20 +950,20 @@ export function AccountsPane({
                           )
                         }}
                         disabled={isBusy}
-                        className="focus-visible:bg-accent flex min-w-0 flex-1 flex-col gap-0.5 text-left outline-none disabled:cursor-default"
+                        className="focus-visible:bg-accent flex h-auto min-w-0 flex-1 flex-col justify-start gap-0.5 border-0 p-0 text-left font-normal whitespace-normal disabled:cursor-default"
                       >
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="truncate text-sm font-medium">{account.email}</span>
                           <Badge
                             variant="outline"
-                            className="text-foreground/70 h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                            className="text-foreground/70 h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                           >
                             {getClaudeAccountRuntimeLabel(account, accountRuntime.label)}
                           </Badge>
                           {isActive ? (
                             <Badge
                               variant="outline"
-                              className="text-foreground/80 h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                              className="text-foreground/80 h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                             >
                               {translate(
                                 'auto.components.settings.AccountsPane.e74831fb6b',
@@ -948,10 +977,10 @@ export function AccountsPane({
                             ? `${account.organizationName} · ${formatAccountTimestamp(account.lastAuthenticatedAt)}`
                             : formatAccountTimestamp(account.lastAuthenticatedAt)}
                         </span>
-                      </button>
+                      </Button>
                       <div className="flex shrink-0 items-center justify-end gap-1 max-md:w-full max-md:flex-wrap">
                         <Button
-                          variant="ghost"
+                          variant="quiet"
                           size="xs"
                           onClick={(event) => {
                             event.stopPropagation()
@@ -965,12 +994,12 @@ export function AccountsPane({
                             )
                           }}
                           disabled={isRemoteAccountScope || isBusy}
-                          className="text-muted-foreground hover:text-foreground h-6 px-2"
+                          className="h-6 px-2"
                         >
                           {isReauthing ? (
                             <LoadingIndicator className="size-3" />
                           ) : (
-                            <RefreshCw className="size-3" />
+                            <RefreshCw weight="regular" className="size-3" />
                           )}
                           {translate(
                             'auto.components.settings.AccountsPane.8a0f870153',
@@ -1053,7 +1082,7 @@ export function AccountsPane({
           avoids dumping the user at the top of Accounts and making them hunt
           for the actual Codex account controls. */}
           {activeCodexAuthWarning ? (
-            <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-xs">
+            <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 border px-3 py-2 text-xs">
               <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
               <span>
                 {activeCodexAccountId
@@ -1119,7 +1148,9 @@ export function AccountsPane({
           </div>
 
           <div className="space-y-2">
-            <button
+            <Button
+              variant="destructive"
+              size="default"
               type="button"
               onClick={() =>
                 void runCodexAccountAction('select:system', () =>
@@ -1132,8 +1163,8 @@ export function AccountsPane({
               }
               disabled={codexAction !== 'idle' || accountRuntimeUnavailable}
               className={cn(
-                'outline-none focus-visible:border-border focus-visible:bg-accent/8',
-                'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
+                'h-auto whitespace-normal font-normal focus-visible:border-border focus-visible:bg-accent/8',
+                'flex w-full justify-between gap-3 border px-3 py-2.5 text-left transition-colors',
                 systemCodexNeedsReauthentication
                   ? 'border-destructive/50 bg-destructive/5'
                   : systemCodexActive
@@ -1153,7 +1184,7 @@ export function AccountsPane({
                   {systemCodexActive ? (
                     <Badge
                       variant="outline"
-                      className="text-foreground/80 h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                      className="text-foreground/80 h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                     >
                       {translate('auto.components.settings.AccountsPane.e74831fb6b', 'Active')}
                     </Badge>
@@ -1161,7 +1192,7 @@ export function AccountsPane({
                   {systemCodexNeedsReauthentication ? (
                     <Badge
                       variant="destructive"
-                      className="h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                      className="h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                     >
                       {translate(
                         'auto.components.settings.AccountsPane.93c47b333a',
@@ -1182,16 +1213,15 @@ export function AccountsPane({
                         'Codex reported this {{value0}} login is out of date.',
                         { value0: accountRuntimeSentenceLabel }
                       )
-                    : translate(
-                        'auto.components.settings.AccountsPane.fcc4093fc1',
-                        'Use your current {{value0}} Codex login.',
-                        { value0: accountRuntimeSentenceLabel }
+                    : getCodexSystemDefaultSubtitle(
+                        systemCodexIdentity,
+                        accountRuntimeSentenceLabel
                       )}
                 </span>
               </div>
-            </button>
+            </Button>
             {visibleCodexAccounts.length === 0 ? (
-              <div className="border-border/70 text-muted-foreground rounded-md border border-dashed px-3 py-4 text-xs">
+              <div className="border-border/70 text-muted-foreground border border-dashed px-3 py-4 text-xs">
                 {isRemoteAccountScope
                   ? translate(
                       'auto.components.settings.AccountsPane.remoteEmptyCodexAccounts',
@@ -1232,7 +1262,7 @@ export function AccountsPane({
                   <div
                     key={account.id}
                     className={cn(
-                      'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
+                      'flex w-full items-center justify-between gap-3  border px-3 py-2.5 text-left transition-colors',
                       needsReauthentication
                         ? 'border-destructive/50 bg-destructive/5'
                         : isActive
@@ -1241,7 +1271,9 @@ export function AccountsPane({
                     )}
                   >
                     <div className="flex w-full items-center justify-between gap-3 max-md:flex-col max-md:items-start">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         type="button"
                         onClick={() => {
                           const accountRuntimeView = getProviderAccountRuntime(account)
@@ -1256,20 +1288,20 @@ export function AccountsPane({
                           )
                         }}
                         disabled={isBusy}
-                        className="focus-visible:bg-accent flex min-w-0 flex-1 flex-col gap-0.5 text-left outline-none disabled:cursor-default"
+                        className="focus-visible:bg-accent flex h-auto min-w-0 flex-1 flex-col justify-start gap-0.5 border-0 p-0 text-left font-normal whitespace-normal disabled:cursor-default"
                       >
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="truncate text-sm font-medium">{account.email}</span>
                           <Badge
                             variant="outline"
-                            className="text-foreground/70 h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                            className="text-foreground/70 h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                           >
                             {getCodexAccountRuntimeLabel(account, accountRuntime.label)}
                           </Badge>
                           {isActive ? (
                             <Badge
                               variant="outline"
-                              className="text-foreground/80 h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                              className="text-foreground/80 h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                             >
                               {translate(
                                 'auto.components.settings.AccountsPane.e74831fb6b',
@@ -1280,7 +1312,7 @@ export function AccountsPane({
                           {needsReauthentication ? (
                             <Badge
                               variant="destructive"
-                              className="h-4 shrink-0 rounded px-1.5 text-[10px] leading-none font-medium"
+                              className="h-4 shrink-0 px-1.5 text-[10px] leading-none font-medium"
                             >
                               {translate(
                                 'auto.components.settings.AccountsPane.589eba1eee',
@@ -1312,14 +1344,14 @@ export function AccountsPane({
                             {formatAccountTimestamp(account.lastAuthenticatedAt)}
                           </span>
                         </div>
-                      </button>
+                      </Button>
 
                       <div className="flex shrink-0 items-center justify-end gap-1 max-md:w-full max-md:flex-wrap">
                         {/* Why: selecting an account is the primary action in this row.
                         Keeping maintenance actions visually lighter prevents re-auth/remove
                         controls from overpowering the selection affordance in a dense list. */}
                         <Button
-                          variant="ghost"
+                          variant="quiet"
                           size="xs"
                           onClick={(event) => {
                             event.stopPropagation()
@@ -1333,12 +1365,12 @@ export function AccountsPane({
                             )
                           }}
                           disabled={isRemoteAccountScope || isBusy}
-                          className="text-muted-foreground hover:text-foreground h-6 px-2"
+                          className="h-6 px-2"
                         >
                           {isReauthing ? (
                             <LoadingIndicator className="size-3" />
                           ) : (
-                            <RefreshCw className="size-3" />
+                            <RefreshCw weight="regular" className="size-3" />
                           )}
                           {translate(
                             'auto.components.settings.AccountsPane.8a0f870153',
@@ -1425,28 +1457,13 @@ export function AccountsPane({
               )}
             </p>
           </div>
-          <button
-            role="switch"
-            aria-checked={settings.geminiCliOAuthEnabled}
-            onClick={() => {
+          <Switch
+            checked={settings.geminiCliOAuthEnabled}
+            onCheckedChange={(checked) => {
               recordFeatureInteraction('usage-tracking')
-              updateSettings({
-                geminiCliOAuthEnabled: !settings.geminiCliOAuthEnabled
-              })
+              updateSettings({ geminiCliOAuthEnabled: checked })
             }}
-            className={cn(
-              'outline-none focus-visible:border-ring',
-              'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
-              settings.geminiCliOAuthEnabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-            )}
-          >
-            <span
-              className={cn(
-                'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                settings.geminiCliOAuthEnabled ? 'translate-x-4' : 'translate-x-0.5'
-              )}
-            />
-          </button>
+          />
         </SearchableSetting>
       </section>
     ) : null,
@@ -1500,13 +1517,13 @@ export function AccountsPane({
             />
             {settings.opencodeSessionCookie && (
               <Button
-                variant="ghost"
+                variant="quiet"
                 size="xs"
                 onClick={() => {
                   recordFeatureInteraction('usage-tracking')
                   updateSettings({ opencodeSessionCookie: '' })
                 }}
-                className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+                className="h-7 shrink-0 text-xs"
               >
                 {translate('auto.components.settings.AccountsPane.b398b834c9', 'Clear')}
               </Button>
@@ -1566,13 +1583,13 @@ export function AccountsPane({
             />
             {settings.opencodeWorkspaceId && (
               <Button
-                variant="ghost"
+                variant="quiet"
                 size="xs"
                 onClick={() => {
                   recordFeatureInteraction('usage-tracking')
                   updateSettings({ opencodeWorkspaceId: '' })
                 }}
-                className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+                className="h-7 shrink-0 text-xs"
               >
                 {translate('auto.components.settings.AccountsPane.b398b834c9', 'Clear')}
               </Button>
@@ -1616,13 +1633,13 @@ export function AccountsPane({
             className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
           >
             {translate('auto.components.settings.AccountsPane.0d8e77bc40', 'Open console')}
-            <ExternalLink className="size-3" />
+            <ExternalLink weight="regular" className="size-3" />
           </a>
         </div>
 
         <div
           className={cn(
-            'flex items-start gap-3 rounded-lg border bg-muted/20 p-3',
+            'flex items-start gap-3 border bg-muted/20 p-3',
             miniMaxConfigured ? 'border-border/60' : 'border-border/40'
           )}
         >
@@ -1669,7 +1686,7 @@ export function AccountsPane({
               </Label>
               <Badge
                 variant={miniMaxConfigured ? 'secondary' : 'outline'}
-                className="text-muted-foreground h-5 gap-1 rounded-full px-2 text-[10px] font-medium"
+                className="text-muted-foreground h-5 gap-1 px-2 text-[10px] font-medium"
               >
                 {miniMaxConfigured ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
                 {miniMaxConfigured
@@ -1680,11 +1697,7 @@ export function AccountsPane({
             <Popover>
               <PopoverTrigger
                 render={
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    className="text-muted-foreground hover:text-foreground h-6 gap-1 px-2 text-xs"
-                  >
+                  <Button variant="quiet" size="xs" className="h-6 gap-1 px-2 text-xs">
                     <HelpCircle className="size-3" />
                     {translate('auto.components.settings.AccountsPane.43d7a45b97', 'How to copy')}
                   </Button>
@@ -1720,11 +1733,11 @@ export function AccountsPane({
             </Button>
             {miniMaxConfigured ? (
               <Button
-                variant="ghost"
+                variant="quiet"
                 size="xs"
                 onClick={() => void clearMiniMaxCookie()}
                 disabled={miniMaxCredentialBusy}
-                className="text-muted-foreground hover:text-foreground h-7 shrink-0 text-xs"
+                className="h-7 shrink-0 text-xs"
               >
                 {translate('auto.components.settings.AccountsPane.316ca4e610', 'Forget cookie')}
               </Button>
@@ -1755,7 +1768,7 @@ export function AccountsPane({
           </p>
         </SearchableSetting>
 
-        <div className="border-border/60 bg-muted/20 space-y-3 rounded-lg border p-3">
+        <div className="border-border/60 bg-muted/20 space-y-3 border p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="space-y-1">
               <h4 className="text-muted-foreground text-xs font-semibold">

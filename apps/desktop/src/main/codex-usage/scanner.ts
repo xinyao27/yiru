@@ -5,6 +5,7 @@ import { basename, join, win32, posix } from 'node:path'
 import { createInterface } from 'node:readline'
 
 import type { Repo } from '../../shared/types'
+import { getCodexAccountHomeSessionDirectories } from '../codex/codex-account-home-discovery'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../codex/codex-home-paths'
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../codex/codex-session-bridge'
 import { areWorktreePathsEqual } from '../ipc/worktree-logic'
@@ -134,11 +135,13 @@ export function getCodexSessionsDirectory(): string {
 }
 
 export function getCodexSessionDirectories(): string[] {
-  // Why: upgraded users still have ordinary Codex history under ~/.codex, while
-  // new Yiru-launched sessions are written under Yiru's managed runtime home.
-  return [getCodexSessionsDirectory(), join(getSystemCodexHomePath(), 'sessions')].filter(
-    (dirPath, index, allDirPaths) => allDirPaths.indexOf(dirPath) === index
-  )
+  // Why: shared runtime, real-home, and self-contained account sessions all
+  // contribute usage; omitting any host lane silently undercounts the roster.
+  return [
+    getCodexSessionsDirectory(),
+    join(getSystemCodexHomePath(), 'sessions'),
+    ...getCodexAccountHomeSessionDirectories()
+  ].filter((dirPath, index, allDirPaths) => allDirPaths.indexOf(dirPath) === index)
 }
 
 function hasLegacyCopiedSessionBridgeMarkers(): boolean {

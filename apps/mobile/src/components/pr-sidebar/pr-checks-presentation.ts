@@ -1,4 +1,5 @@
-import type { PRCheckDetail, PRState } from '../../../../desktop/src/shared/types'
+import type { PRCheckDetail, PRState } from '@yiru/workbench-model/review'
+
 import { prStateToken } from '../pr-state-token'
 
 // Pure presentation logic for the PR sidebar's checks and state badge.

@@ -113,7 +113,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
                   size="sm"
                   onClick={() => window.api.shell.openUrl('https://cli.github.com')}
                 >
-                  <ExternalLink className="mr-1.5 size-3.5" />
+                  <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
                   {translate(
                     'auto.components.settings.cli.source.control.integration.cards.7755c28af5',
                     'Install GitHub CLI'
@@ -150,7 +150,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
                     window.api.shell.openUrl('https://cli.github.com/manual/gh_auth_login')
                   }
                 >
-                  <ExternalLink className="mr-1.5 size-3.5" />
+                  <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
                   {translate(
                     'auto.components.settings.cli.source.control.integration.cards.8cbc39f862',
                     'Learn more'
@@ -244,7 +244,7 @@ export function GitLabIntegrationCard(): React.JSX.Element {
                     window.api.shell.openUrl('https://gitlab.com/gitlab-org/cli#installation')
                   }
                 >
-                  <ExternalLink className="mr-1.5 size-3.5" />
+                  <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
                   {translate(
                     'auto.components.settings.cli.source.control.integration.cards.54a640af7a',
                     'Install GitLab CLI'
@@ -283,7 +283,7 @@ export function GitLabIntegrationCard(): React.JSX.Element {
                     )
                   }
                 >
-                  <ExternalLink className="mr-1.5 size-3.5" />
+                  <ExternalLink weight="regular" className="mr-1.5 size-3.5" />
                   {translate(
                     'auto.components.settings.cli.source.control.integration.cards.8cbc39f862',
                     'Learn more'

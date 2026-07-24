@@ -1,9 +1,6 @@
-import {
-  buildFixBrokenChecksPrompt,
-  getBrokenChecks
-} from '../../../desktop/src/shared/pr-checks-fix-prompt'
-import { buildResolvePullRequestConflictsPrompt } from '../../../desktop/src/shared/source-control-conflict-prompts'
-import type { PRCheckDetail } from '../../../desktop/src/shared/types'
+import { buildResolvePullRequestConflictsPrompt } from '@yiru/workbench-model/review'
+import { buildFixBrokenChecksPrompt, getBrokenChecks } from '@yiru/workbench-model/review'
+import type { PRCheckDetail } from '@yiru/workbench-model/review'
 
 // Pure prompt builders for the mobile PR sidebar's "Fix checks with AI" /
 // "Resolve conflicts with AI" triage actions.

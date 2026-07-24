@@ -6,11 +6,13 @@ import type { StateCreator } from 'zustand'
 
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { emitNativeChatToggled } from '@/lib/native-chat-telemetry'
+import type { TabSplitDirection } from '@/lib/tab-split-direction'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
 } from '@/lib/workspace-session-hydration-keys'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { setWebSessionTabPropsCommand } from '@/runtime/web-session-commands'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import type {
@@ -43,7 +45,7 @@ import {
 import { buildHydratedTabState, pruneTabGroupLayoutForGroups } from './tabs-hydration'
 import { buildOrphanTerminalCleanupPatch, getOrphanTerminalIds } from './terminal-orphan-helpers'
 
-export type TabSplitDirection = 'left' | 'right' | 'up' | 'down'
+export type { TabSplitDirection } from '@/lib/tab-split-direction'
 
 export type TabsSlice = {
   unifiedTabsByWorktree: Record<string, Tab[]>
@@ -216,17 +218,16 @@ function mirrorTabPinnedToHost(state: AppState, tabId: string, isPinned: boolean
   // Why: only terminal tab pins are persisted host-side today (browser/editor
   // tracked in #5729), so skip the RPC for other types instead of a no-op round
   // trip.
-  if (
-    !found ||
-    found.tab.contentType !== 'terminal' ||
-    !getRuntimeEnvironmentIdForWorktree(state, found.worktreeId)
-  ) {
+  const environmentId = found && getRuntimeEnvironmentIdForWorktree(state, found.worktreeId)
+  if (!found || found.tab.contentType !== 'terminal' || !environmentId) {
     return
   }
-  const worktreeId = found.worktreeId
-  void import('@/runtime/web-runtime-session').then(({ setWebRuntimeTabProps }) =>
-    setWebRuntimeTabProps({ worktreeId, tabId, isPinned })
-  )
+  setWebSessionTabPropsCommand({
+    environmentId,
+    worktreeId: found.worktreeId,
+    tabId,
+    isPinned
+  })
 }
 
 // Why: viewMode is host-tracked like color/pin, so mirror the local toggle/set to
@@ -241,17 +242,16 @@ function mirrorTabViewModeToHost(
   const found = findTabAndWorktree(state.unifiedTabsByWorktree, tabId)
   // Why: only terminal tab viewMode is persisted host-side; skip the RPC for other
   // types instead of a no-op round trip.
-  if (
-    !found ||
-    found.tab.contentType !== 'terminal' ||
-    !getRuntimeEnvironmentIdForWorktree(state, found.worktreeId)
-  ) {
+  const environmentId = found && getRuntimeEnvironmentIdForWorktree(state, found.worktreeId)
+  if (!found || found.tab.contentType !== 'terminal' || !environmentId) {
     return
   }
-  const worktreeId = found.worktreeId
-  void import('@/runtime/web-runtime-session').then(({ setWebRuntimeTabProps }) =>
-    setWebRuntimeTabProps({ worktreeId, tabId, viewMode })
-  )
+  setWebSessionTabPropsCommand({
+    environmentId,
+    worktreeId: found.worktreeId,
+    tabId,
+    viewMode
+  })
 }
 
 function buildSplitNode(

@@ -2,7 +2,8 @@ import type {
   AgentStateHistoryEntry,
   AgentStatusEntry,
   AgentStatusState
-} from '../../../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+
 import type { TerminalTab, Worktree } from '../../../shared/types'
 import {
   getAgentRowPrimaryText,

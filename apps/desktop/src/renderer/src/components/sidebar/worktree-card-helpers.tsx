@@ -1,6 +1,6 @@
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import React from 'react'
 
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type {
   PRState,
   CheckStatus,

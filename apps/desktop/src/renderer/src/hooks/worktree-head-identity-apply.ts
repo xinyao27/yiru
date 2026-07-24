@@ -1,4 +1,5 @@
-import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
+import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
+
 import type { Worktree, WorktreeHeadIdentity } from '../../../shared/types'
 
 export type WorktreeHeadIdentityApplyDeps = {

@@ -166,7 +166,7 @@ export function BrowserImportHintButton({
             type="button"
             variant="secondary"
             size="sm"
-            className="h-7 shrink-0 rounded-full px-2.5 text-xs"
+            className="h-7 shrink-0 px-2.5 text-xs"
             aria-label={translate(
               'auto.components.browser.pane.BrowserImportHintButton.4f5ffaa6a1',
               'Import browser data'
@@ -263,27 +263,31 @@ export function BrowserImportHintButton({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <button
+            <Button
+              variant="quiet"
+              size="xs"
               type="button"
               onClick={handleOpenBrowserSettings}
-              className="text-muted-foreground hover:text-foreground rounded-sm text-xs focus-visible:outline-none"
+              className="h-auto border-0 p-0"
             >
               {translate(
                 'auto.components.browser.pane.BrowserImportHintButton.77351d22f5',
                 'Browser Settings'
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="quiet"
+              size="xs"
               type="button"
               onClick={handleHideHint}
-              className="text-muted-foreground hover:text-foreground ml-auto rounded-sm text-xs focus-visible:outline-none"
+              className="ml-auto h-auto border-0 p-0"
             >
               {translate(
                 'auto.components.browser.pane.BrowserImportHintButton.05e675fe96',
                 'Hide Hint'
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </PopoverContent>

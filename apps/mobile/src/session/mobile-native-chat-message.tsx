@@ -1,3 +1,4 @@
+import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
 import * as Clipboard from 'expo-clipboard'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
@@ -10,10 +11,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type {
-  NativeChatBlock,
-  NativeChatMessage
-} from '../../../desktop/src/shared/native-chat-types'
 import { MobileMarkdown } from '../components/mobile-markdown'
 import {
   isImageRefBlock,

@@ -1,9 +1,16 @@
-import { withRemoteRuntimeTailscaleHint } from '../../../shared/remote-runtime-tailscale-hint'
 /* eslint-disable max-lines -- Why: this browser runtime client owns the E2EE
    WebSocket state machine, JSON-RPC request routing, streaming callbacks, and
    binary frame forwarding as one transport boundary. */
-import type { RuntimeRpcResponse, RuntimeRpcSuccess } from '../../../shared/runtime-rpc-envelope'
-import { isKeepaliveFrame } from '../../../shared/runtime-rpc-envelope'
+import type { RuntimeRpcResponse, RuntimeRpcSuccess } from '@yiru/runtime-protocol/rpc-envelope'
+import { isKeepaliveFrame } from '@yiru/runtime-protocol/rpc-envelope'
+import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
+
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../../shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import {
   decrypt,
   decryptBytes,
@@ -112,11 +119,22 @@ export class WebRuntimeClient {
     this.openConnection()
   }
 
+  call<TContract extends RuntimeMethodContract>(
+    contract: TContract,
+    params: RuntimeMethodParams<TContract>,
+    options?: { timeoutMs?: number }
+  ): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
+  call(
+    contract: string,
+    params?: unknown,
+    options?: { timeoutMs?: number }
+  ): Promise<RuntimeRpcResponse<unknown>>
   async call(
-    method: string,
+    contract: string | RuntimeMethodContract,
     params?: unknown,
     options?: { timeoutMs?: number }
   ): Promise<RuntimeRpcResponse<unknown>> {
+    const method = typeof contract === 'string' ? contract : contract.name
     await this.waitForConnected(options?.timeoutMs)
     return new Promise((resolve, reject) => {
       const id = this.nextId()
@@ -844,7 +862,7 @@ export class WebRuntimeClient {
         this.sendEncrypted({
           id: `web-heartbeat-${this.nextId()}`,
           deviceToken: this.pairing.deviceToken,
-          method: 'status.get'
+          method: STATUS_GET_CONTRACT.name
         })
       ) {
         this.heartbeatProbeSentAt = now

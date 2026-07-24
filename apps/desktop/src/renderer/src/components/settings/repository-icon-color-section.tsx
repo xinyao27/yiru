@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -25,7 +26,9 @@ export function RepositoryIconColorSection({
       </Label>
       <div className="flex flex-wrap items-center gap-2">
         {REPO_COLORS.map((color) => (
-          <button
+          <Button
+            variant="ghost"
+            size="icon-xs"
             key={color}
             type="button"
             onClick={() => onBadgeColorChange(color)}
@@ -36,7 +39,7 @@ export function RepositoryIconColorSection({
             )}
             aria-pressed={selectedBadgeColor === color}
             className={cn(
-              'size-7 rounded-[4px] border border-transparent outline-none transition-colors',
+              'size-7 border transition-colors',
               selectedBadgeColor === color ? 'border-foreground' : 'hover:border-muted-foreground'
             )}
             style={{ backgroundColor: color }}

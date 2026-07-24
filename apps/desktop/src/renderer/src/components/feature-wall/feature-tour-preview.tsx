@@ -131,7 +131,7 @@ function OrchestrationFrame(): JSX.Element {
             then a Claude agent row underneath — so the user reads it as "a
             workspace running Claude as the orchestrator," consistent with how
             workspaces look elsewhere in the app. */}
-        <div className="border-border bg-background absolute top-1/2 left-0 flex w-[34%] -translate-y-1/2 flex-col rounded-md border px-3 py-2">
+        <div className="border-border bg-background absolute top-1/2 left-0 flex w-[34%] -translate-y-1/2 flex-col border px-3 py-2">
           <div className="flex items-center gap-2">
             <WorkingSpinner />
             <span className="text-foreground truncate text-[15px] leading-none font-medium">
@@ -160,7 +160,7 @@ function OrchestrationFrame(): JSX.Element {
           <div
             key={key}
             className={cn(
-              'feature-tour-orch-child absolute right-0 flex w-[36%] flex-col rounded-md border border-border bg-background px-3 py-2',
+              'feature-tour-orch-child absolute right-0 flex w-[36%] flex-col border border-border bg-background px-3 py-2',
               key,
               position
             )}
@@ -180,7 +180,7 @@ function OrchestrationFrame(): JSX.Element {
               ) : (
                 <OpenCodeGoIcon size={12} />
               )}
-              <span className="bg-foreground/15 h-2 flex-1 rounded-full" />
+              <span className="bg-foreground/15 h-2 flex-1" />
             </div>
           </div>
         ))}
@@ -210,17 +210,17 @@ function ReviewFrame(): JSX.Element {
       </div>
       <div className="relative grid flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-4 px-4">
         <div className="flex flex-col gap-2">
-          <div className="border-border bg-background flex h-9 items-center gap-2.5 rounded-md border px-3">
-            <span className="border-border bg-muted text-muted-foreground inline-flex h-5 items-center justify-center rounded-[3px] border px-1.5 font-mono text-[13px] leading-none">
+          <div className="border-border bg-background flex h-9 items-center gap-2.5 border px-3">
+            <span className="border-border bg-muted text-muted-foreground inline-flex h-5 items-center justify-center border px-1.5 font-mono text-[13px] leading-none">
               {translate('auto.components.feature.wall.FeatureTourPreview.0688842445', 'PR #1799')}
             </span>
             {/* Why: surrounding rows show only the review number + a skeleton
                 so the user's eye is drawn to the row that has real text — the
                 one the cursor clicks on. */}
-            <span className="bg-foreground/12 h-2 w-[60%] rounded-full" />
+            <span className="bg-foreground/12 h-2 w-[60%]" />
           </div>
-          <div className="feature-tour-review-row border-border bg-background relative flex h-9 items-center gap-2.5 rounded-md border px-3">
-            <span className="border-border bg-muted text-muted-foreground inline-flex h-5 items-center justify-center rounded-[3px] border px-1.5 font-mono text-[13px] leading-none">
+          <div className="feature-tour-review-row border-border bg-background relative flex h-9 items-center gap-2.5 border px-3">
+            <span className="border-border bg-muted text-muted-foreground inline-flex h-5 items-center justify-center border px-1.5 font-mono text-[13px] leading-none">
               {translate('auto.components.feature.wall.FeatureTourPreview.fc0cc0b267', 'PR #1842')}
             </span>
             <span className="text-foreground truncate text-[15px] leading-none font-medium">
@@ -229,7 +229,7 @@ function ReviewFrame(): JSX.Element {
                 'Worktree picker truncates'
               )}
             </span>
-            <span className="feature-tour-review-pill relative ml-auto flex h-6 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/15">
+            <span className="feature-tour-review-pill relative ml-auto flex h-6 items-center justify-center overflow-hidden border border-emerald-500/30 bg-emerald-500/15">
               <span className="feature-tour-review-pill-label text-primary-foreground flex items-center gap-1 pr-2.5 pl-3 text-[13px] leading-none font-semibold tracking-[0.01em] whitespace-nowrap">
                 {translate('auto.components.feature.wall.FeatureTourPreview.40bbd92ef4', 'Open')}
                 <svg
@@ -256,15 +256,15 @@ function ReviewFrame(): JSX.Element {
             </span>
             <span className="feature-tour-review-click-ring" aria-hidden />
           </div>
-          <div className="border-border bg-background flex h-9 items-center gap-2.5 rounded-md border px-3">
-            <span className="border-border bg-muted text-muted-foreground inline-flex h-5 items-center justify-center rounded-[3px] border px-1.5 font-mono text-[13px] leading-none">
+          <div className="border-border bg-background flex h-9 items-center gap-2.5 border px-3">
+            <span className="border-border bg-muted text-muted-foreground inline-flex h-5 items-center justify-center border px-1.5 font-mono text-[13px] leading-none">
               {translate('auto.components.feature.wall.FeatureTourPreview.d54aefe09e', 'MR !329')}
             </span>
-            <span className="bg-foreground/12 h-2 w-[45%] rounded-full" />
+            <span className="bg-foreground/12 h-2 w-[45%]" />
           </div>
         </div>
 
-        <div className="feature-tour-review-workspace border-border bg-background flex flex-col gap-2 rounded-md border px-4 py-2.5">
+        <div className="feature-tour-review-workspace border-border bg-background flex flex-col gap-2 border px-4 py-2.5">
           <div className="flex items-center gap-2.5">
             <WorkingSpinner />
             <span className="text-foreground truncate text-[15.5px] leading-none font-medium">
@@ -280,7 +280,7 @@ function ReviewFrame(): JSX.Element {
           <div className="flex items-center gap-2.5 pl-4">
             <WorkingSpinner size="xs" />
             <ClaudeIcon size={12} />
-            <span className="bg-foreground/15 h-2 w-[55%] rounded-full" />
+            <span className="bg-foreground/15 h-2 w-[55%]" />
           </div>
           <div className="text-muted-foreground text-[13.5px] leading-none">
             {translate(
@@ -298,7 +298,7 @@ export function FeatureTourPreview(props: { className?: string }): JSX.Element {
   return (
     <div
       className={cn(
-        'relative h-[260px] w-full overflow-hidden rounded-lg border border-border bg-muted/40',
+        'relative h-[260px] w-full overflow-hidden border border-border bg-muted/40',
         props.className
       )}
       aria-hidden

@@ -76,10 +76,10 @@ function SkillCard({ skill }: { skill: DiscoveredSkill }): React.JSX.Element {
   }
 
   return (
-    <Card className="rounded-lg">
+    <Card>
       <CardContent className="space-y-3 p-4">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="border-border bg-background mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border">
+          <div className="border-border bg-background mt-0.5 flex size-8 shrink-0 items-center justify-center border">
             <BookOpen className="text-muted-foreground size-4" />
           </div>
           <div className="min-w-0 flex-1 space-y-1">
@@ -242,7 +242,7 @@ export default function SkillsPage(): React.JSX.Element {
     <main className="bg-background flex min-h-0 flex-1 flex-col">
       <header className="border-border flex shrink-0 items-center gap-3 border-b px-5 py-3">
         <Button variant="outline" size="sm" onClick={closeSkillsPage} className="shrink-0 gap-1.5">
-          <ArrowLeft className="size-3.5" />
+          <ArrowLeft weight="regular" className="size-3.5" />
           {translate('auto.components.skills.SkillsPage.7e828fb2c6', 'Back')}
         </Button>
         <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -347,14 +347,18 @@ export default function SkillsPage(): React.JSX.Element {
                 void loadSkills()
               }}
             >
-              {loading ? <LoadingIndicator className="size-4" /> : <RefreshCw className="size-4" />}
+              {loading ? (
+                <LoadingIndicator className="size-4" />
+              ) : (
+                <RefreshCw weight="regular" className="size-4" />
+              )}
               {translate('auto.components.skills.SkillsPage.cb142070b4', 'Refresh')}
             </Button>
           </div>
         </div>
         <div className="text-muted-foreground flex flex-wrap gap-2 text-[11px]">
           {(['home', 'repo', 'bundled', 'plugin'] as const).map((sourceKind) => (
-            <span key={sourceKind} className="border-border rounded-full border px-2 py-1">
+            <span key={sourceKind} className="border-border border px-2 py-1">
               {sourceLabels[sourceKind]} {sourceCounts[sourceKind]}
             </span>
           ))}

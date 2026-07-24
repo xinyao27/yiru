@@ -1,10 +1,10 @@
+import type { GitBranchChangeEntry } from '@yiru/workbench-model/review'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
 
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { GitBranchChangeEntry } from '../../../desktop/src/shared/types'
 import { spacing } from '../theme/uniwind-theme-values'
 import { useForceReconnect } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'

@@ -1,8 +1,8 @@
+import type { RuntimeGitLocalBranches } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 
-import type { RuntimeGitLocalBranches } from '../../../desktop/src/shared/runtime-types'
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useHostClient, useForceReconnect } from '../transport/client-context'
 import {
@@ -33,8 +33,6 @@ import { useMobileSourceControlLoaders } from './use-mobile-source-control-loade
 import { useMobileSourceControlOpeners } from './use-mobile-source-control-openers'
 import { useMobileSourceControlRunners } from './use-mobile-source-control-runners'
 
-type MobileGitLocalBranches = RuntimeGitLocalBranches
-
 export type MobileSourceControlStateParams = {
   hostId: string
   worktreeId: string
@@ -47,6 +45,7 @@ export type MobileSourceControlStateParams = {
   // When the panel runs inside the hub, "History" switches the segment instead of
   // pushing the standalone route. Absent for the standalone/dock usage.
   onOpenHistory?: () => void
+  onHostedReviewRefresh?: () => void
 }
 
 export function useMobileSourceControlState(params: MobileSourceControlStateParams) {
@@ -68,7 +67,7 @@ export function useMobileSourceControlState(params: MobileSourceControlStatePara
   const [commitMessage, setCommitMessage] = useState('')
   const [generatingMessage, setGeneratingMessage] = useState(false)
   const [showBranchPicker, setShowBranchPicker] = useState(false)
-  const [localBranches, setLocalBranches] = useState<MobileGitLocalBranches | null>(null)
+  const [localBranches, setLocalBranches] = useState<RuntimeGitLocalBranches | null>(null)
   const [createdPrUrl, setCreatedPrUrl] = useState<string | null>(null)
   const [createdPrWarning, setCreatedPrWarning] = useState<string | null>(null)
   const [discardTarget, setDiscardTarget] = useState<MobileGitStatusEntry | null>(null)
@@ -205,7 +204,8 @@ export function useMobileSourceControlState(params: MobileSourceControlStatePara
     setCreatedPrUrl,
     setCreatedPrWarning,
     recordCommitFailure,
-    onOpenHistory
+    onOpenHistory,
+    onHostedReviewRefresh: params.onHostedReviewRefresh
   })
   const createPrAction = useMobileSourceControlCreatePrAction({
     client,

@@ -1,4 +1,5 @@
-import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
+import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
+
 import { parseWslPath } from '../wsl'
 import { parsePtySessionId } from './pty-session-id'
 

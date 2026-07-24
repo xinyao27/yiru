@@ -2,6 +2,13 @@ import { inspectRuntimeTerminalProcess } from '@/runtime/runtime-terminal-inspec
 import type { AppState } from '@/store'
 import { useAppStore } from '@/store'
 
+// Why: account restarts must wait through slow prompt integrations before
+// writing Codex into the replacement shell.
+export const CODEX_ACCOUNT_RESTART_STARTUP = {
+  command: 'codex',
+  startupCommandDelivery: 'shell-ready'
+} as const
+
 function normalizeProcessName(processName: string | null): string | null {
   if (!processName) {
     return null

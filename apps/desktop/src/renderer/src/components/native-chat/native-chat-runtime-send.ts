@@ -2,17 +2,18 @@
 // as a SEPARATE delayed pty write. Kept apart from the pure byte builders in
 // native-chat-send.ts so those stay IO-free and unit-testable without aliases.
 
+import {
+  NATIVE_CHAT_ADVANCE_BUFFER_MS,
+  NATIVE_CHAT_QUESTION_STEP_MS,
+  NATIVE_CHAT_SUBMIT_DELAY_MS
+} from '@yiru/workbench-model/agent'
+
 import type { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
 import {
   sendRuntimePtyInput,
   sendRuntimePtyInputVerified
 } from '@/runtime/runtime-terminal-inspection'
 
-import {
-  NATIVE_CHAT_ADVANCE_BUFFER_MS,
-  NATIVE_CHAT_QUESTION_STEP_MS,
-  NATIVE_CHAT_SUBMIT_DELAY_MS
-} from '../../../../shared/native-chat-answer-stepping'
 import type { AskAnswerKeyGroup } from './native-chat-interactive-prompt'
 import {
   buildNativeChatImagePasteBytes,

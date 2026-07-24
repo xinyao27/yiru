@@ -1,6 +1,6 @@
-import type { AgentStatusEntry } from '../../../desktop/src/shared/agent-status-types'
-import { isRuntimeOwnedSshTargetId } from '../../../desktop/src/shared/execution-host'
-import { isNativeChatSupportedAgent } from '../../../desktop/src/shared/native-chat-agent-support'
+import { isNativeChatSupportedAgent } from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 // Why: native chat renders an agent's own JSONL transcript, and the host
 // resolver knows these transcript layouts. Grok is additionally gated on host

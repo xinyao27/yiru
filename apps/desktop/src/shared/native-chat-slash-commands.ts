@@ -4,7 +4,7 @@
 // mirrored copy to drift, unlike the agent-specific parsers in src/shared that
 // Metro forces us to duplicate.
 
-import type { AgentType } from './agent-status-types'
+import type { AgentType } from '@yiru/workbench-model/agent'
 
 export type SlashCommandSuggestion = {
   /** The command token without its leading slash, e.g. `clear`. */

@@ -2,9 +2,9 @@ import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Switch } from '@/components/ui/switch'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'
 
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
@@ -146,7 +146,7 @@ export function WslCliRegistration({
 
   return (
     <>
-      <div className="border-border/60 bg-card/50 space-y-3 rounded-xl border p-4">
+      <div className="border-border/60 bg-card/50 space-y-3 border p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
             <Label>
@@ -183,7 +183,7 @@ export function WslCliRegistration({
                         'Refresh WSL CLI status'
                       )}
                     >
-                      <RefreshCw className="size-3.5" />
+                      <RefreshCw weight="regular" className="size-3.5" />
                     </Button>
                   }
                 />
@@ -192,34 +192,18 @@ export function WslCliRegistration({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <button
-              role="switch"
-              aria-checked={isEnabled}
+            <Switch
+              checked={isEnabled}
               disabled={loading || !isSupported || busyAction !== null}
-              onClick={() => setDialogOpen(true)}
-              className={cn(
-                'outline-none focus-visible:border-ring',
-                'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
-                isEnabled ? 'bg-foreground' : 'bg-muted-foreground/30',
-                loading || !isSupported || busyAction !== null
-                  ? 'cursor-not-allowed opacity-60'
-                  : 'cursor-pointer'
-              )}
-            >
-              <span
-                className={cn(
-                  'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
-                  isEnabled ? 'translate-x-4' : 'translate-x-0.5'
-                )}
-              />
-            </button>
+              onCheckedChange={() => setDialogOpen(true)}
+            />
           </div>
         </div>
 
         {status?.commandPath ? (
           <p className="text-muted-foreground text-xs">
             {translate('auto.components.settings.WslCliRegistration.554305956d', 'Command path:')}{' '}
-            <code className="bg-muted rounded px-1 py-0.5 text-[11px]">{status.commandPath}</code>
+            <code className="bg-muted px-1 py-0.5 text-[11px]">{status.commandPath}</code>
           </p>
         ) : null}
 
@@ -266,7 +250,7 @@ export function WslCliRegistration({
           {status?.commandPath ? (
             <p className="text-muted-foreground text-xs">
               {translate('auto.components.settings.WslCliRegistration.119fef6cd2', 'Target path:')}{' '}
-              <code className="bg-muted rounded px-1 py-0.5 text-[11px]">{status.commandPath}</code>
+              <code className="bg-muted px-1 py-0.5 text-[11px]">{status.commandPath}</code>
             </p>
           ) : null}
           <DialogFooter>

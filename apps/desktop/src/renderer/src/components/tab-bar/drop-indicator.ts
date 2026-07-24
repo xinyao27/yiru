@@ -13,15 +13,3 @@ export function getDropIndicatorClasses(dropIndicator: DropIndicator): string {
   }
   return ''
 }
-
-export function getTabRootStateClasses(isActive: boolean): string {
-  return isActive
-    ? 'bg-accent text-accent-foreground'
-    : 'bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground'
-}
-
-export function getTabDividerClasses(hasTabsToRight: boolean): string {
-  // Why: inset dividers keep adjacent idle tabs scannable without restoring
-  // the full-height bordered-card treatment this compact strip replaces.
-  return hasTabsToRight ? 'border-r border-border/70' : ''
-}

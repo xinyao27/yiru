@@ -64,7 +64,7 @@ export function WorkspaceTabStripViewport({
           {...stripProps}
           ref={tabStripRef}
           className={cn(
-            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch gap-0.5 overflow-x-auto overflow-y-hidden pl-1',
+            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch overflow-x-auto overflow-y-hidden',
             getTabStripScrollMaskClassName(tabStripOverflowState),
             stripClassName
           )}
@@ -111,9 +111,12 @@ function TabStripScrollButton({
       <TooltipTrigger
         render={
           <Button
-            variant="outline"
+            variant="quiet"
             size="icon-xs"
-            className="text-muted-foreground hover:text-foreground mx-0.5 my-auto h-6 w-5 disabled:opacity-35"
+            className={cn(
+              ' h-full w-8 border-b-0 disabled:opacity-35',
+              isStart ? 'mr-[-1px]' : '-ml-px'
+            )}
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             aria-label={label}
             aria-disabled={!canScroll}
@@ -122,7 +125,7 @@ function TabStripScrollButton({
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
           >
-            <Icon className="size-4" />
+            <Icon className="size-3.5" weight="regular" />
           </Button>
         }
       />

@@ -379,9 +379,9 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
             <ReviewNotesTerminalTail />
           </div>
         </div>
-        <button className="ravs-add-note-btn" data-add-note-btn aria-hidden type="button">
+        <ReviewAnimatedVisualButton className="ravs-add-note-btn" data-add-note-btn aria-hidden>
           <PlusIcon />
-        </button>
+        </ReviewAnimatedVisualButton>
         <div className="ravs-popover" data-note-popover>
           <div className="ravs-pop-label">
             {translate('auto.components.feature.wall.ReviewNotesAnimatedVisual.a7a89d8f94', 'Line')}

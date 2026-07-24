@@ -6,7 +6,8 @@ import type {
   NativeChatBlock,
   NativeChatImageRefBlock,
   NativeChatToolResultBlock
-} from '../../shared/native-chat-types'
+} from '@yiru/workbench-model/agent'
+
 import { asRecord, extractString } from '../ai-vault/session-scanner-values'
 
 /** Coerce an arbitrary tool-result payload into a single output string. */

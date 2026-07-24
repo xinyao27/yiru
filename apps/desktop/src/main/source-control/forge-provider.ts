@@ -3,7 +3,8 @@ import type {
   CreateHostedReviewResult,
   HostedReviewInfo,
   HostedReviewProvider
-} from '../../shared/hosted-review'
+} from '@yiru/workbench-model/review'
+
 import {
   getAzureDevOpsPullRequest,
   getAzureDevOpsPullRequestForBranch,

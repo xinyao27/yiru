@@ -1,11 +1,11 @@
 import { resolve } from 'node:path'
 
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: parallel to ipc/github.ts — keeping all
 GitLab IPC handlers co-located keeps the repo-path validation pattern
 reviewable as one surface. */
 import { ipcMain } from 'electron'
 
-import { getRepoExecutionHostId } from '../../shared/execution-host'
 import type { ProjectSourceContext } from '../../shared/project-source-context'
 import type { GitLabMRInlineCommentInput, GitLabMRUpdate, Repo } from '../../shared/types'
 import {

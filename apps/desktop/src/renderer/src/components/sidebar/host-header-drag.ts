@@ -1,3 +1,4 @@
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import {
   useCallback,
   useEffect,
@@ -6,7 +7,6 @@ import {
   type PointerEvent as ReactPointerEvent
 } from 'react'
 
-import type { ExecutionHostId } from '../../../../shared/execution-host'
 import {
   isHostHeaderActionTarget,
   readHostHeaderRects,

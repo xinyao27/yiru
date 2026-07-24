@@ -5,9 +5,10 @@ import {
   isRuntimePathAbsolute,
   isWindowsAbsolutePathLike,
   normalizeRuntimePathForComparison
-} from '../../shared/cross-platform-path'
-import type { ExecutionHostId } from '../../shared/execution-host'
-import { parseWslUncPath } from '../../shared/wsl-paths'
+} from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import type { IFilesystemProvider } from '../providers/types'
 import { toWindowsWslPath } from '../wsl'
 import type { SpoolWorktreeRootComparison } from './spool-worktree-incarnation'

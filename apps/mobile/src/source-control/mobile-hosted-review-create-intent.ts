@@ -1,3 +1,5 @@
+import type { SourceControlRemoteOpKind } from '@yiru/workbench-model/review'
+
 import type { RpcClient } from '../transport/rpc-client'
 import { requestMobileCommitMessage } from './mobile-commit-message-ai'
 import { getStageablePaths, type MobileGitStatusResult } from './mobile-git-status'
@@ -18,11 +20,13 @@ export type MobileHostedReviewCreateIntentProgress =
   | 'publishing'
   | 'pushing'
   | 'force_pushing'
+  | 'fast_forwarding'
   | 'creating_review'
 
-type MobileHostedReviewCreateIntentFailure = {
+export type MobileHostedReviewCreateIntentFailure = {
   ok: false
   error: string
+  remoteOperation?: SourceControlRemoteOpKind
   committed?: boolean
   status?: MobileGitStatusResult | null
   commitMessage?: string
@@ -61,6 +65,8 @@ export function mobileHostedReviewCreateIntentProgressMessage(
       return 'Pushing commits...'
     case 'force_pushing':
       return 'Force pushing with lease...'
+    case 'fast_forwarding':
+      return 'Updating branch...'
     case 'creating_review':
       return 'Creating review...'
   }

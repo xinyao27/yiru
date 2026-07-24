@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
 
-import type { AiVaultSession } from '../../shared/ai-vault-types'
-import { normalizeExecutionHostId } from '../../shared/execution-host'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import {
   resolveSpoolLiveSessionIdentity,
   spoolObservedAgentProvider

@@ -9,4 +9,4 @@ export {
   resolveComposerReuseOverride,
   type ComposerBranchPick,
   type ComposerBranchSelection
-} from '../../../shared/composer-branch-selection'
+} from '@yiru/workbench-model/review'

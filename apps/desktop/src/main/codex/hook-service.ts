@@ -1,10 +1,11 @@
 /* eslint-disable max-lines -- Why: getStatus + install + remove all share the managed-command and trust-key derivation. Splitting would hide that the three operations must agree on group index, event label, and command bytes. */
-import { existsSync, readFileSync, unlinkSync } from 'node:fs'
+import { existsSync, readFileSync, statSync, unlinkSync } from 'node:fs'
 import { join, win32 as pathWin32 } from 'node:path'
 
 import type { SFTPWrapper } from 'ssh2'
 
 import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent-hook-types'
+import { resolveHooksJsonWritePath } from '../agent-hooks/hook-config-write-path'
 import {
   buildPosixHookPayloadCapture,
   buildWindowsHookEnvironmentGuardLines,
@@ -19,6 +20,7 @@ import {
   hookDefinitionHasManagedCommand,
   MANAGED_HOOK_TIMEOUT_SECONDS,
   readHooksJson,
+  readHooksJsonWithRaw,
   removeManagedCommands,
   wrapPosixHookCommand,
   wrapWindowsCmdHookCommand,
@@ -33,6 +35,7 @@ import {
   writeManagedScriptRemote,
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
+import { writeFileAtomically } from '../codex-accounts/fs-utils'
 import { syncSystemConfigIntoManagedCodexHome } from './codex-config-mirror'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
 import {
@@ -41,6 +44,16 @@ import {
   getCodexHookTrustSignature,
   getCodexManagedScriptFileName
 } from './codex-hook-identity'
+import { grantManagedCodexHookTrust } from './codex-hook-trust-grant'
+import {
+  getCodexLedgerTrustedHash,
+  readCodexTrustGrantLedgerHomeForReconciliation,
+  removeCodexManagedHookTrustEntries,
+  removeStaleWslCodexManagedHookTrustEntries
+} from './codex-managed-trust-reconciliation'
+import { readCurrentCodexTrustGrantLedgerHome } from './codex-trust-grant-host'
+import type { CodexTrustGrantLedgerHome } from './codex-trust-grant-ledger'
+import { mutateRealHomeHooksPreservingUserTrust } from './codex-user-hook-trust-rebase'
 import {
   createCodexWslRuntimeHookInstallPlan,
   type CodexWslRuntimeHookInstallPlan,
@@ -48,10 +61,12 @@ import {
   type WslCanonicalPathSettlement
 } from './codex-wsl-hook-install-plan'
 import {
+  codexHookSourcePathsEqual,
   computeTrustKey,
   computeTrustedHash,
   escapeTomlString,
-  getCodexCanonicalTrustPath,
+  getCodexExplicitHomeHookSourcePath,
+  normalizeCodexHookSourcePath,
   normalizeCodexProjectPathForLookup,
   normalizeHookTrustKeyForLookup,
   parseTrustKey,
@@ -80,11 +95,13 @@ const CODEX_EVENTS = [
   'PreToolUse',
   'PermissionRequest',
   'PostToolUse',
+  'SubagentStart',
+  'SubagentStop',
   'Stop'
 ] as const
 
-function getConfigPath(): string {
-  return join(getYiruManagedCodexHomePath(), 'hooks.json')
+function getConfigPath(runtimeHomePath: string = getYiruManagedCodexHomePath()): string {
+  return join(runtimeHomePath, 'hooks.json')
 }
 
 function writeCodexHooksJson(configPath: string, hooks: Record<string, HookDefinition[]>): void {
@@ -93,8 +110,8 @@ function writeCodexHooksJson(configPath: string, hooks: Record<string, HookDefin
   writeHooksJson(configPath, { hooks })
 }
 
-function getCodexConfigTomlPath(): string {
-  return join(getYiruManagedCodexHomePath(), 'config.toml')
+function getCodexConfigTomlPath(runtimeHomePath: string = getYiruManagedCodexHomePath()): string {
+  return join(runtimeHomePath, 'config.toml')
 }
 
 // Why: the managed-event subset of the shared PascalCase→label map; the
@@ -105,6 +122,8 @@ const CODEX_EVENT_LABEL: Record<(typeof CODEX_EVENTS)[number], CodexEventLabel> 
   PreToolUse: CODEX_HOOK_EVENT_LABEL.PreToolUse!,
   PermissionRequest: CODEX_HOOK_EVENT_LABEL.PermissionRequest!,
   PostToolUse: CODEX_HOOK_EVENT_LABEL.PostToolUse!,
+  SubagentStart: CODEX_HOOK_EVENT_LABEL.SubagentStart!,
+  SubagentStop: CODEX_HOOK_EVENT_LABEL.SubagentStop!,
   Stop: CODEX_HOOK_EVENT_LABEL.Stop!
 }
 
@@ -136,6 +155,38 @@ function getManagedCommand(scriptPath: string): string {
   return process.platform === 'win32'
     ? wrapWindowsCmdHookCommand(scriptPath)
     : wrapPosixHookCommand(scriptPath)
+}
+
+export type CodexManagedHookInstallMaterial = {
+  events: readonly (typeof CODEX_EVENTS)[number][]
+  eventLabel: Record<(typeof CODEX_EVENTS)[number], CodexEventLabel>
+  scriptPath: string
+  command: string
+  script: string
+}
+
+// Why: the real-home installer must byte-match the managed lane's events,
+// command, and script, or trust signatures diverge between the two homes.
+export function getCodexManagedHookInstallMaterial(): CodexManagedHookInstallMaterial {
+  const scriptPath = getManagedScriptPath()
+  return {
+    events: CODEX_EVENTS,
+    eventLabel: CODEX_EVENT_LABEL,
+    scriptPath,
+    command: getManagedCommand(scriptPath),
+    script: getManagedScript()
+  }
+}
+
+// Why: when the real-home lane owns ~/.codex/hooks.json (system-default flag ON
+// with hooks enabled), the legacy system-home sweep must stand down or every
+// managed install would delete the entry the real-home installer just wrote.
+// Injected as a gate because this module is bundled into plain-node CLI entries
+// that have no settings store; the CLI default keeps the sweep active.
+let systemCodexHomeHookSweepSuppressed: () => boolean = () => false
+
+export function setSystemCodexHomeHookSweepSuppressed(gate: () => boolean): void {
+  systemCodexHomeHookSweepSuppressed = gate
 }
 
 export { createCodexWslRuntimeHookInstallPlan }
@@ -189,7 +240,10 @@ function collectManagedTrustEntries(
   return entries
 }
 
-function removeMatchingTrustEntries(configPath: string, entries: readonly CodexTrustEntry[]): void {
+function removeSelfComputedMatchingTrustEntries(
+  configPath: string,
+  entries: readonly CodexTrustEntry[]
+): void {
   if (entries.length === 0) {
     return
   }
@@ -217,11 +271,11 @@ function removeStaleRuntimeHookTrustEntries(
       entry.trustedHash ?? computeTrustedHash(entry)
     ])
   )
-  const canonicalRuntimeHooksPath = getCodexCanonicalTrustPath(runtimeHooksPath)
+  const canonicalRuntimeHooksPath = getCodexExplicitHomeHookSourcePath(runtimeHooksPath)
   const staleKeys: string[] = []
   for (const [key, state] of readHookTrustEntries(tomlPath)) {
     const parsed = parseTrustKey(key)
-    if (!parsed || getCodexCanonicalTrustPath(parsed.sourcePath) !== canonicalRuntimeHooksPath) {
+    if (!parsed || !codexHookSourcePathsEqual(parsed.sourcePath, canonicalRuntimeHooksPath)) {
       continue
     }
     if (expectedHashes.get(normalizeHookTrustKeyForLookup(key)) === state.trustedHash) {
@@ -250,14 +304,14 @@ function removeCodexPluginEnvironmentCommands(definitions: HookDefinition[]): Ho
 
 function getRuntimeHooksWithSystemUserHooks(
   runtimeHooks: Record<string, HookDefinition[]> | undefined,
-  isManagedCommand: (command: string | undefined) => boolean
+  isManagedCommand: (command: string | undefined) => boolean,
+  runtimeConfigPath: string = getConfigPath()
 ): {
   hooks: Record<string, HookDefinition[]>
   trustEntries: MirroredRuntimeUserHookTrustEntry[]
 } {
   const systemConfigPath = getSystemConfigPath()
-  const runtimeConfigPath = getConfigPath()
-  if (systemConfigPath === getConfigPath()) {
+  if (systemConfigPath === runtimeConfigPath) {
     return { hooks: { ...runtimeHooks }, trustEntries: [] }
   }
 
@@ -389,13 +443,13 @@ function getTrustedSystemHookHashesByEvent(
   trustEntries: ReadonlyMap<string, CodexHookTrustState>
 ): Map<CodexEventLabel, Map<string, boolean>> {
   const trustedHashesByEvent = new Map<CodexEventLabel, Map<string, boolean>>()
-  const canonicalSystemConfigPath = getCodexCanonicalTrustPath(systemConfigPath)
+  const canonicalSystemConfigPath = normalizeCodexHookSourcePath(systemConfigPath)
   for (const [key, state] of trustEntries) {
     const parsed = parseTrustKey(key)
     if (!parsed || !state.trustedHash) {
       continue
     }
-    if (getCodexCanonicalTrustPath(parsed.sourcePath) !== canonicalSystemConfigPath) {
+    if (!codexHookSourcePathsEqual(parsed.sourcePath, canonicalSystemConfigPath)) {
       continue
     }
     let hashes = trustedHashesByEvent.get(parsed.eventLabel)
@@ -424,6 +478,7 @@ function collectMirroredRuntimeUserHookTrustEntries(
   }
 
   const entries: MirroredRuntimeUserHookTrustEntry[] = []
+  const trustSourcePath = getCodexExplicitHomeHookSourcePath(runtimeConfigPath)
   for (const [eventName, definitions] of Object.entries(runtimeHooks)) {
     if (!Array.isArray(definitions)) {
       continue
@@ -435,7 +490,7 @@ function collectMirroredRuntimeUserHookTrustEntries(
           return
         }
         const entry = createCodexHookTrustEntry(
-          runtimeConfigPath,
+          trustSourcePath,
           eventName,
           groupIndex,
           handlerIndex,
@@ -534,15 +589,37 @@ function dedupeHookDefinitions(definitions: readonly HookDefinition[]): HookDefi
   })
 }
 
+function removeSystemManagedHookTrustEntries(systemHomePath: string, hooksJsonPath: string): void {
+  removeCodexManagedHookTrustEntries({
+    tomlPath: getSystemCodexConfigTomlPath(),
+    runtimeHomePath: systemHomePath,
+    sourcePath: hooksJsonPath,
+    command: getManagedCommand(getManagedScriptPath()),
+    managedEventLabels: CODEX_MANAGED_EVENT_LABELS,
+    timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
+  })
+}
+
 function cleanupLegacySystemManagedHooks(): void {
+  if (systemCodexHomeHookSweepSuppressed()) {
+    return
+  }
   const legacyConfigPath = getSystemConfigPath()
   const runtimeConfigPath = getConfigPath()
   if (legacyConfigPath === runtimeConfigPath) {
     return
   }
 
-  const config = readHooksJson(legacyConfigPath)
-  if (!config?.hooks) {
+  const systemHomePath = getSystemCodexHomePath()
+  const hasRecordedRealHomeGrant =
+    readCodexTrustGrantLedgerHomeForReconciliation(systemHomePath) !== null
+  // Why: the pre-write guard below compares against these bytes; a separate
+  // later read would let a concurrent save land between parse and snapshot.
+  const { raw: previousRaw, config } = readHooksJsonWithRaw(legacyConfigPath)
+  if (!config?.hooks || previousRaw === null) {
+    if (hasRecordedRealHomeGrant) {
+      removeSystemManagedHookTrustEntries(systemHomePath, legacyConfigPath)
+    }
     return
   }
 
@@ -580,9 +657,36 @@ function cleanupLegacySystemManagedHooks(): void {
   if (removedManagedHook) {
     // Why: this is the user's system hooks file, not Yiru's runtime copy.
     // Remove only stale Yiru hook entries and preserve other managers' metadata.
-    writeHooksJson(legacyConfigPath, { ...config, hooks: nextHooks })
+    const hooksWritePath = resolveHooksJsonWritePath(legacyConfigPath)
+    const previousMode = statSync(hooksWritePath).mode
+    mutateRealHomeHooksPreservingUserTrust({
+      sourcePath: legacyConfigPath,
+      runtimeHomePath: systemHomePath,
+      tomlPath: getSystemCodexConfigTomlPath(),
+      beforeHooks: config.hooks,
+      afterHooks: nextHooks,
+      writeHooks: () => {
+        if (
+          readFileSync(legacyConfigPath, 'utf-8') !== previousRaw ||
+          resolveHooksJsonWritePath(legacyConfigPath) !== hooksWritePath
+        ) {
+          // Why: the pre-mutation RPC may overlap a user save; downgrade must
+          // never replace that newer dotfiles generation with our stale parse.
+          throw new Error('System Codex hooks changed during trust repair')
+        }
+        writeHooksJson(hooksWritePath, { ...config, hooks: nextHooks }, { preserveMode: true })
+      },
+      restoreHooks: () => writeFileAtomically(hooksWritePath, previousRaw, { mode: previousMode })
+    })
+    // Why: stale dev/version entries can reference an older managed script
+    // path that is not represented by the current grant ledger.
+    removeSelfComputedMatchingTrustEntries(getSystemCodexConfigTomlPath(), trustEntries)
   }
-  removeMatchingTrustEntries(getSystemCodexConfigTomlPath(), trustEntries)
+  if (removedManagedHook || hasRecordedRealHomeGrant) {
+    // Why: the ledger recognizes Codex-computed hashes and remains a retry
+    // marker if a prior cleanup removed hooks.json but could not update TOML.
+    removeSystemManagedHookTrustEntries(systemHomePath, legacyConfigPath)
+  }
 }
 
 function stripLegacyManagedProfileBlock(content: string): string {
@@ -634,52 +738,15 @@ function cleanupLegacyManagedHookRepresentations(): void {
 
 function removeRuntimeManagedHookTrustEntries(configPath: string): void {
   try {
-    const tomlPath = getCodexConfigTomlPath()
-    const existingEntries = readHookTrustEntries(tomlPath)
-    const scriptPath = getManagedScriptPath()
-    const command = getManagedCommand(scriptPath)
-    const managedEventLabels = new Set<CodexEventLabel>(
-      CODEX_EVENTS.map((event) => CODEX_EVENT_LABEL[event])
-    )
-    // Why: only drop entries WE wrote. The same config.toml can contain
-    // user-approved trust entries for non-Yiru commands, so match by hash
-    // equivalence to our managed command — a sourcePath-only filter would
-    // wipe the user's manually-approved entries.
-    const ourKeys: string[] = []
-    const canonicalConfigPath = getCodexCanonicalTrustPath(configPath)
-    for (const [key, state] of existingEntries) {
-      const parts = parseTrustKey(key)
-      if (parts === null) {
-        continue
-      }
-      if (getCodexCanonicalTrustPath(parts.sourcePath) !== canonicalConfigPath) {
-        continue
-      }
-      if (!managedEventLabels.has(parts.eventLabel)) {
-        continue
-      }
-      const expectedEntry: CodexTrustEntry = {
-        sourcePath: configPath,
-        eventLabel: parts.eventLabel,
-        groupIndex: parts.groupIndex,
-        handlerIndex: parts.handlerIndex,
-        command,
-        // Why: match the timeout install() wrote, or remove() would fail to
-        // recognize (and clean up) its own managed trust entries.
-        timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
-      }
-      const recognizedHashes = new Set([
-        computeTrustedHash(expectedEntry),
-        computeTrustedHash({ ...expectedEntry, timeoutSec: undefined })
-      ])
-      if (!state.trustedHash || !recognizedHashes.has(state.trustedHash)) {
-        continue
-      }
-      ourKeys.push(key)
-    }
-    if (ourKeys.length > 0) {
-      removeHookTrustEntries(tomlPath, ourKeys)
-    }
+    removeCodexManagedHookTrustEntries({
+      tomlPath: getCodexConfigTomlPath(),
+      runtimeHomePath: getYiruManagedCodexHomePath(),
+      sourcePath: configPath,
+      command: getManagedCommand(getManagedScriptPath()),
+      managedEventLabels: CODEX_MANAGED_EVENT_LABELS,
+      timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS,
+      sourceUsesExplicitCodexHome: true
+    })
   } catch (error) {
     // Best effort — stale trust entries are harmless once hooks.json no
     // longer references the hook. Log so a programmer error doesn't disappear silently.
@@ -689,43 +756,14 @@ function removeRuntimeManagedHookTrustEntries(configPath: string): void {
 
 function removeWslRuntimeManagedHookTrustEntries(plan: CodexWslRuntimeHookInstallPlan): void {
   try {
-    const existingEntries = readHookTrustEntries(plan.tomlPath)
-    const command = wrapReadablePosixHookCommand(plan.commandScriptPath)
-    const managedEventLabels = new Set<CodexEventLabel>(
-      CODEX_EVENTS.map((event) => CODEX_EVENT_LABEL[event])
-    )
-    const canonicalConfigPath = getCodexCanonicalTrustPath(plan.trustConfigPath)
-    const ourKeys: string[] = []
-    for (const [key, state] of existingEntries) {
-      const parts = parseTrustKey(key)
-      if (parts === null) {
-        continue
-      }
-      if (getCodexCanonicalTrustPath(parts.sourcePath) !== canonicalConfigPath) {
-        continue
-      }
-      if (!managedEventLabels.has(parts.eventLabel)) {
-        continue
-      }
-      const expectedEntry: CodexTrustEntry = {
-        sourcePath: plan.trustConfigPath,
-        eventLabel: parts.eventLabel,
-        groupIndex: parts.groupIndex,
-        handlerIndex: parts.handlerIndex,
-        command,
-        timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
-      }
-      const recognizedHashes = new Set([
-        computeTrustedHash(expectedEntry),
-        computeTrustedHash({ ...expectedEntry, timeoutSec: undefined })
-      ])
-      if (state.trustedHash && recognizedHashes.has(state.trustedHash)) {
-        ourKeys.push(key)
-      }
-    }
-    if (ourKeys.length > 0) {
-      removeHookTrustEntries(plan.tomlPath, ourKeys)
-    }
+    removeCodexManagedHookTrustEntries({
+      tomlPath: plan.tomlPath,
+      runtimeHomePath: pathWin32.dirname(plan.tomlPath),
+      sourcePath: plan.trustConfigPath,
+      command: wrapReadablePosixHookCommand(plan.commandScriptPath),
+      managedEventLabels: CODEX_MANAGED_EVENT_LABELS,
+      timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
+    })
   } catch (error) {
     // Why: removing disabled WSL status hooks should be best-effort like the
     // host cleanup path; stale trust is inert once hooks.json no longer points at us.
@@ -735,48 +773,19 @@ function removeWslRuntimeManagedHookTrustEntries(plan: CodexWslRuntimeHookInstal
 
 function removeStaleWslRuntimeManagedHookTrustEntries(
   tomlPath: string,
-  desiredEntries: readonly CodexTrustEntry[]
+  desiredEntries: readonly CodexTrustEntry[],
+  priorLedgerHomes: readonly CodexTrustGrantLedgerHome[] = []
 ): void {
-  const desiredKeys = new Set(
-    desiredEntries.map((entry) => normalizeHookTrustKeyForLookup(computeTrustKey(entry)))
-  )
-  const existingEntries = readHookTrustEntries(tomlPath)
-  const ourKeys: string[] = []
-  for (const [key, state] of existingEntries) {
-    if (desiredKeys.has(normalizeHookTrustKeyForLookup(key))) {
-      continue
-    }
-    const parts = parseTrustKey(key)
-    if (!parts || !CODEX_MANAGED_EVENT_LABELS.has(parts.eventLabel)) {
-      continue
-    }
-    const sourcePath = parts.sourcePath
-    // Why: this cleanup owns only guest-side WSL trust. A runtime config can
-    // still contain user Windows/remote hooks, which must remain untouched.
-    if (!sourcePath.startsWith('/') || !sourcePath.endsWith('/hooks.json')) {
-      continue
-    }
-    const runtimeHome = sourcePath.slice(0, -'/hooks.json'.length)
-    const command = wrapReadablePosixHookCommand(`${runtimeHome}/.yiru/agent-hooks/codex-hook.sh`)
-    const expectedEntry: CodexTrustEntry = {
-      sourcePath: parts.sourcePath,
-      eventLabel: parts.eventLabel,
-      groupIndex: parts.groupIndex,
-      handlerIndex: parts.handlerIndex,
-      command,
-      timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
-    }
-    const recognizedHashes = new Set([
-      computeTrustedHash(expectedEntry),
-      computeTrustedHash({ ...expectedEntry, timeoutSec: undefined })
-    ])
-    if (state.trustedHash && recognizedHashes.has(state.trustedHash)) {
-      ourKeys.push(key)
-    }
-  }
-  if (ourKeys.length > 0) {
-    removeHookTrustEntries(tomlPath, ourKeys)
-  }
+  removeStaleWslCodexManagedHookTrustEntries({
+    tomlPath,
+    runtimeHomePath: pathWin32.dirname(tomlPath),
+    desiredEntries,
+    managedEventLabels: CODEX_MANAGED_EVENT_LABELS,
+    timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS,
+    buildManagedCommand: (linuxRuntimeHome) =>
+      wrapReadablePosixHookCommand(`${linuxRuntimeHome}/.yiru/agent-hooks/codex-hook.sh`),
+    priorLedgerHomes
+  })
 }
 
 function getManagedScript(target: 'local' | 'posix' = 'local'): string {
@@ -925,10 +934,31 @@ function installManagedHooksIntoWslRuntime(
   writeManagedScript(plan.scriptPath, getManagedScript('posix'))
   writeCodexHooksJson(plan.configPath, nextHooks)
   try {
-    // Why: WSL runtime homes may carry user hook approvals we did not rebuild
-    // here; only upsert Yiru's entries instead of sweeping the whole source.
-    upsertHookTrustEntries(plan.tomlPath, trustEntries)
-    removeStaleWslRuntimeManagedHookTrustEntries(plan.tomlPath, trustEntries)
+    // Why: same grant-then-fallback split as the host install — codex runs
+    // inside the distro so the hash authority matches the codex the pane runs.
+    const runtimeHomePath = pathWin32.dirname(plan.tomlPath)
+    // Why: a successful re-grant replaces the ledger. Keep the previous
+    // records long enough to prove ownership of stale canonical-path keys.
+    const previousLedgerHome = readCodexTrustGrantLedgerHomeForReconciliation(runtimeHomePath)
+    // Why: Codex's verified RPC write must be the final config mutation. A
+    // host-side rewrite after verification can race or invalidate that grant.
+    removeStaleWslRuntimeManagedHookTrustEntries(
+      plan.tomlPath,
+      trustEntries,
+      previousLedgerHome ? [previousLedgerHome] : []
+    )
+    const grant = grantManagedCodexHookTrust({
+      runtimeHomePath,
+      tomlPath: plan.tomlPath,
+      managedCommand: command,
+      managedEntries: trustEntries,
+      host: { kind: 'wsl', distro: plan.wslDistro, linuxRuntimeHome: plan.linuxRuntimeHome }
+    })
+    if (grant.lane === 'fallback') {
+      // Why: WSL runtime homes may carry user hook approvals we did not rebuild
+      // here; only upsert Yiru's entries instead of sweeping the whole source.
+      upsertHookTrustEntries(plan.tomlPath, trustEntries)
+    }
   } catch (error) {
     return {
       agent: 'codex',
@@ -998,12 +1028,19 @@ function getWslHookReconciliationAction(args: {
   isCurrentGeneration: boolean
   installedTrustConfigPath: string | null
   resolvedTrustConfigPath: string | null
+  /** Whether the synchronous install for this generation wrote trust. */
+  installSucceeded: boolean
 }): 'none' | 'remove' | 'reinstall' {
   if (!args.isCurrentGeneration) {
     return 'none'
   }
   if (args.settlement.status === 'missing') {
-    return 'remove'
+    // Why: a `missing` directory probe right after a verified install/grant is
+    // a false negative — the RPC (or fallback) just wrote and read trust in
+    // that home, so it exists. Revoking here would delete the fresh grant the
+    // launching pane needs, resurfacing "hooks need review". A genuinely moved
+    // home resolves to a different path and takes the `reinstall` branch below.
+    return args.installSucceeded ? 'none' : 'remove'
   }
   if (
     args.settlement.status !== 'resolved' ||
@@ -1040,6 +1077,10 @@ export class CodexHookService {
   ): AgentHookInstallStatus | null {
     const generation = this.supersedeWslReconciliation(runtimeHomePath)
     let installedTrustConfigPath: string | null = null
+    // Why: JS is single-threaded, so the synchronous install below finishes
+    // before any async `wsl.exe` settlement callback runs — this flag is
+    // always set by the time the callback reads it.
+    let installSucceeded = false
     const onCanonicalPathSettled = (settlement: WslCanonicalPathSettlement): void => {
       if (!runtimeHomePath) {
         return
@@ -1057,7 +1098,8 @@ export class CodexHookService {
         settlement,
         isCurrentGeneration: this.wslReconciliationGeneration.get(key) === generation,
         installedTrustConfigPath,
-        resolvedTrustConfigPath: resolvedPlan?.trustConfigPath ?? null
+        resolvedTrustConfigPath: resolvedPlan?.trustConfigPath ?? null,
+        installSucceeded
       })
       if (action === 'none') {
         return
@@ -1082,6 +1124,7 @@ export class CodexHookService {
         return
       }
       installedTrustConfigPath = resolvedPlan.trustConfigPath
+      installSucceeded = status.state === 'installed'
     }
     const wslPlan = createCodexWslRuntimeHookInstallPlan(
       runtimeHomePath,
@@ -1090,7 +1133,9 @@ export class CodexHookService {
       onCanonicalPathSettled
     )
     installedTrustConfigPath = wslPlan?.trustConfigPath ?? null
-    return wslPlan ? installManagedHooksIntoWslRuntime(wslPlan) : null
+    const status = wslPlan ? installManagedHooksIntoWslRuntime(wslPlan) : null
+    installSucceeded = status?.state === 'installed'
+    return status
   }
 
   refreshRuntimeUserHooksForRuntimeHome(
@@ -1102,8 +1147,15 @@ export class CodexHookService {
     return wslPlan ? refreshWslRuntimeUserHooks(wslPlan) : null
   }
 
-  getStatus(): AgentHookInstallStatus {
-    const configPath = getConfigPath()
+  getStatus(runtimeHomePath: string = getYiruManagedCodexHomePath()): AgentHookInstallStatus {
+    return this.getStatusAfterInstall(null, runtimeHomePath)
+  }
+
+  private getStatusAfterInstall(
+    recentGrantEntries: readonly CodexTrustEntry[] | null,
+    runtimeHomePath: string = getYiruManagedCodexHomePath()
+  ): AgentHookInstallStatus {
+    const configPath = getConfigPath(runtimeHomePath)
     const scriptPath = getManagedScriptPath()
     const config = readHooksJson(configPath)
     if (!config) {
@@ -1120,7 +1172,7 @@ export class CodexHookService {
     // trust entries are missing/stale. Codex 0.129+ silently drops untrusted
     // hooks, so a green status without trust verification is misleading.
     const command = getManagedCommand(scriptPath)
-    const tomlPath = getCodexConfigTomlPath()
+    const tomlPath = getCodexConfigTomlPath(runtimeHomePath)
     // Why: an unreadable config.toml (EACCES/EIO) is distinct from "file
     // absent" (which returns an empty Map without throwing). Hooks.json may
     // still be fine, so report partial with a specific reason rather than
@@ -1133,10 +1185,29 @@ export class CodexHookService {
       trustEntries = new Map()
       trustReadError = error instanceof Error ? error.message : String(error)
     }
+    // Why: RPC-granted entries store Codex's own hash, which is authoritative
+    // even when it differs from computeTrustedHash — that difference is the
+    // drift bug class this lane exists to absorb, not a stale entry.
+    // Why: install() already resolved the binary and either verified Codex's
+    // hashes or wrote fallback hashes. Re-resolving PATH here doubles sync launch work.
+    const ledgerHome =
+      recentGrantEntries === null
+        ? readCurrentCodexTrustGrantLedgerHome(runtimeHomePath, { kind: 'native' })
+        : null
+    const recentGrantHashes = new Map<string, { signature: string; trustedHash: string }>()
+    for (const entry of recentGrantEntries ?? []) {
+      if (entry.trustedHash) {
+        recentGrantHashes.set(normalizeHookTrustKeyForLookup(computeTrustKey(entry)), {
+          signature: getCodexHookTrustSignature(entry),
+          trustedHash: entry.trustedHash
+        })
+      }
+    }
 
     const missing: string[] = []
     const trustMissing: string[] = []
     const disabled: string[] = []
+    const trustSourcePath = getCodexExplicitHomeHookSourcePath(configPath)
     let presentCount = 0
     for (const eventName of CODEX_EVENTS) {
       const definitions = Array.isArray(config.hooks?.[eventName]) ? config.hooks![eventName]! : []
@@ -1170,16 +1241,28 @@ export class CodexHookService {
       // Codex folds the handler timeout into its trust hash. Hash the same
       // timeout here or status would report every managed hook as stale-trust.
       const trustInput: CodexTrustEntry = {
-        sourcePath: configPath,
+        sourcePath: trustSourcePath,
         eventLabel: CODEX_EVENT_LABEL[eventName],
         groupIndex: foundGroupIndex,
         handlerIndex: foundHandlerIndex,
         command,
         timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
       }
-      const expectedHash = computeTrustedHash(trustInput)
-      const actualState = trustEntries.get(computeTrustKey(trustInput))
-      if (actualState?.trustedHash !== expectedHash) {
+      const trustKey = computeTrustKey(trustInput)
+      const validHashes = new Set([computeTrustedHash(trustInput)])
+      const grantedHash = getCodexLedgerTrustedHash(ledgerHome, trustKey, trustInput)
+      if (grantedHash) {
+        validHashes.add(grantedHash)
+      }
+      const recentGrant = recentGrantHashes.get(normalizeHookTrustKeyForLookup(trustKey))
+      if (
+        recentGrant?.signature === getCodexHookTrustSignature(trustInput) &&
+        recentGrant.trustedHash
+      ) {
+        validHashes.add(recentGrant.trustedHash)
+      }
+      const actualState = trustEntries.get(trustKey)
+      if (!actualState?.trustedHash || !validHashes.has(actualState.trustedHash)) {
         trustMissing.push(eventName)
       } else if (actualState?.enabled === false) {
         disabled.push(eventName)
@@ -1220,14 +1303,17 @@ export class CodexHookService {
     return { agent: 'codex', state, configPath, managedHooksPresent, detail }
   }
 
-  install(): AgentHookInstallStatus {
-    const configPath = getConfigPath()
+  // Why: runtimeHomePath defaults to the shared managed mirror, but a managed
+  // account launching against its own self-contained CODEX_HOME passes that
+  // per-account home so hooks.json/config.toml/trust land where codex reads.
+  install(runtimeHomePath: string = getYiruManagedCodexHomePath()): AgentHookInstallStatus {
+    const configPath = getConfigPath(runtimeHomePath)
     const scriptPath = getManagedScriptPath()
     // Why: must run before this install rewrites hooks.json/config.toml —
     // approvals the user made inside Yiru-launched Codex are keyed to the
     // previous launch's runtime layout, and stale-trust cleanup below would
     // delete them once the system config stops backing them.
-    promoteCodexRuntimeHookApprovalsToSystem()
+    promoteCodexRuntimeHookApprovalsToSystem(runtimeHomePath)
     const config = readHooksJson(configPath)
     if (!config) {
       return {
@@ -1245,7 +1331,7 @@ export class CodexHookService {
     // accumulate duplicate hook entries pointing at defunct scripts.
     const isManagedCommand = createManagedCommandMatcher(getCodexManagedScriptFileName())
     const command = getManagedCommand(scriptPath)
-    const hookPlan = getRuntimeHooksWithSystemUserHooks(config.hooks, isManagedCommand)
+    const hookPlan = getRuntimeHooksWithSystemUserHooks(config.hooks, isManagedCommand, configPath)
     const nextHooks = hookPlan.hooks
     const managedEvents = new Set<string>(CODEX_EVENTS)
 
@@ -1279,7 +1365,11 @@ export class CodexHookService {
     const mirroredUserTrustEntries = moveMirroredRuntimeUserTrustAfterManagedStatusHook(
       hookPlan.trustEntries
     )
-    const trustEntries: CodexTrustEntry[] = mirroredUserTrustEntries.map(({ entry }) => entry)
+    const mirroredTrustEntries: CodexTrustEntry[] = mirroredUserTrustEntries.map(
+      ({ entry }) => entry
+    )
+    const managedTrustEntries: CodexTrustEntry[] = []
+    const trustSourcePath = getCodexExplicitHomeHookSourcePath(configPath)
     for (const eventName of CODEX_EVENTS) {
       const current = Array.isArray(nextHooks[eventName]) ? nextHooks[eventName] : []
       const cleaned = removeManagedCommands(current, isManagedCommand)
@@ -1292,8 +1382,8 @@ export class CodexHookService {
       // state while Codex visibly reports that hooks are still running.
       // timeoutSec mirrors the hook's `timeout` so the trust hash matches the
       // entry actually written to hooks.json.
-      trustEntries.push({
-        sourcePath: configPath,
+      managedTrustEntries.push({
+        sourcePath: trustSourcePath,
         eventLabel: CODEX_EVENT_LABEL[eventName],
         groupIndex: 0,
         handlerIndex: 0,
@@ -1301,6 +1391,8 @@ export class CodexHookService {
         timeoutSec: MANAGED_HOOK_TIMEOUT_SECONDS
       })
     }
+    const trustEntries: CodexTrustEntry[] = [...mirroredTrustEntries, ...managedTrustEntries]
+    let recentGrantEntries: readonly CodexTrustEntry[] = []
 
     config.hooks = nextHooks
     writeManagedScript(scriptPath, getManagedScript())
@@ -1309,15 +1401,40 @@ export class CodexHookService {
     // pointing at a hook that doesn't exist. Surface failures — without this,
     // getStatus would report green for a hook Codex won't actually fire.
     try {
-      const tomlPath = getCodexConfigTomlPath()
-      syncSystemConfigIntoManagedCodexHome()
-      // Why: system user hook approvals are mirrored into runtime CODEX_HOME.
-      // If the user later revokes approval in ~/.codex/config.toml, preserving
-      // all old runtime [hooks.state.*] blocks would keep Yiru Codex trusted.
-      // Upsert first so duplicate repair can preserve a disabled managed copy
-      // before stale cleanup removes old managed hook keys.
-      upsertHookTrustEntries(tomlPath, trustEntries)
-      removeStaleRuntimeHookTrustEntries(tomlPath, configPath, trustEntries)
+      const tomlPath = getCodexConfigTomlPath(runtimeHomePath)
+      syncSystemConfigIntoManagedCodexHome({
+        runtimeHomePath,
+        systemHomePath: getSystemCodexHomePath()
+      })
+      // Why: Codex is the only authority on its trust-hash algorithm, so the
+      // managed entries are granted through codex app-server RPCs (verified by
+      // re-list) whenever the installed CLI supports them; the granted entries
+      // then carry Codex's verbatim hashes into stale cleanup so it cannot
+      // delete what Codex just wrote. Mirrored user trust keeps its existing
+      // verbatim-carry lane either way.
+      const grant = grantManagedCodexHookTrust({
+        runtimeHomePath,
+        tomlPath,
+        managedCommand: command,
+        managedEntries: managedTrustEntries,
+        host: { kind: 'native' }
+      })
+      if (grant.lane === 'rpc') {
+        recentGrantEntries = grant.entries
+        upsertHookTrustEntries(tomlPath, mirroredTrustEntries)
+        removeStaleRuntimeHookTrustEntries(tomlPath, configPath, [
+          ...mirroredTrustEntries,
+          ...grant.entries
+        ])
+      } else {
+        // Why: system user hook approvals are mirrored into runtime CODEX_HOME.
+        // If the user later revokes approval in ~/.codex/config.toml, preserving
+        // all old runtime [hooks.state.*] blocks would keep Yiru Codex trusted.
+        // Upsert first so duplicate repair can preserve a disabled managed copy
+        // before stale cleanup removes old managed hook keys.
+        upsertHookTrustEntries(tomlPath, trustEntries)
+        removeStaleRuntimeHookTrustEntries(tomlPath, configPath, trustEntries)
+      }
       applyMirroredRuntimeUserHookTrustStates(tomlPath, mirroredUserTrustEntries)
     } catch (error) {
       return {
@@ -1328,14 +1445,14 @@ export class CodexHookService {
         detail: `Hooks installed but trust entries could not be written: ${error instanceof Error ? error.message : String(error)}. Run /hooks in Codex to approve.`
       }
     }
-    snapshotCodexRuntimeHookTrustProvenance()
+    snapshotCodexRuntimeHookTrustProvenance(runtimeHomePath)
     try {
       cleanupLegacySystemManagedHooks()
       cleanupLegacyCodexProfileHooks()
     } catch (error) {
       console.warn('[codex-hook-service] failed to clean legacy Codex hooks', error)
     }
-    return this.getStatus()
+    return this.getStatusAfterInstall(recentGrantEntries, runtimeHomePath)
   }
 
   async installRemote(
@@ -1460,11 +1577,13 @@ export class CodexHookService {
     }
   }
 
-  refreshRuntimeUserHooks(): AgentHookInstallStatus {
-    const configPath = getConfigPath()
+  refreshRuntimeUserHooks(
+    runtimeHomePath: string = getYiruManagedCodexHomePath()
+  ): AgentHookInstallStatus {
+    const configPath = getConfigPath(runtimeHomePath)
     // Why: same as install() — capture in-Yiru approvals before this refresh
     // rewrites the runtime files they are keyed against.
-    promoteCodexRuntimeHookApprovalsToSystem()
+    promoteCodexRuntimeHookApprovalsToSystem(runtimeHomePath)
     const config = readHooksJson(configPath)
     if (!config) {
       // Why: disabled launch prep used to call remove(); preserve its legacy
@@ -1480,14 +1599,17 @@ export class CodexHookService {
     }
 
     const isManagedCommand = createManagedCommandMatcher(getCodexManagedScriptFileName())
-    const hookPlan = getRuntimeHooksWithSystemUserHooks(config.hooks, isManagedCommand)
+    const hookPlan = getRuntimeHooksWithSystemUserHooks(config.hooks, isManagedCommand, configPath)
     config.hooks = hookPlan.hooks
     writeCodexHooksJson(configPath, hookPlan.hooks)
 
     try {
-      const tomlPath = getCodexConfigTomlPath()
+      const tomlPath = getCodexConfigTomlPath(runtimeHomePath)
       const trustEntries = hookPlan.trustEntries.map(({ entry }) => entry)
-      syncSystemConfigIntoManagedCodexHome()
+      syncSystemConfigIntoManagedCodexHome({
+        runtimeHomePath,
+        systemHomePath: getSystemCodexHomePath()
+      })
       // Why: this path is used when Yiru status hooks are disabled. The
       // runtime CODEX_HOME should keep user hooks, but not Yiru-managed trust.
       // Write current mirrored user trust first so stale cleanup compares
@@ -1504,10 +1626,10 @@ export class CodexHookService {
         detail: `User hooks refreshed but trust entries could not be written: ${error instanceof Error ? error.message : String(error)}. Run /hooks in Codex to approve.`
       }
     }
-    snapshotCodexRuntimeHookTrustProvenance()
+    snapshotCodexRuntimeHookTrustProvenance(runtimeHomePath)
 
     cleanupLegacyManagedHookRepresentations()
-    return this.getStatus()
+    return this.getStatus(runtimeHomePath)
   }
 
   remove(): AgentHookInstallStatus {

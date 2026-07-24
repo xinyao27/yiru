@@ -2,7 +2,7 @@ import {
   bufferPreHandlerPtyExit,
   clearPreHandlerPtyState,
   consumePreHandlerPtyState
-} from './pty-pre-handler-buffer'
+} from '@/runtime/pty-pre-handler-buffer'
 
 type PtyExitDelivery = {
   ptyId: string

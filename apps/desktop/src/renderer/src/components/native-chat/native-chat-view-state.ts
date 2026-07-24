@@ -3,7 +3,7 @@
 // the empty/loading/error/working/ready dispatch testable and keeps the render
 // tree to one switch.
 
-import type { NativeChatSession } from '../../../../shared/native-chat-types'
+import type { NativeChatSession } from '@yiru/workbench-model/agent'
 
 /** The mutually-exclusive surfaces the chat view can show. `ready` and
  *  `working` both render the message list; `working` additionally shows the

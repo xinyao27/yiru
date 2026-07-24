@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import WebSocket from 'ws'
 
 import { decrypt, encrypt } from './e2ee-crypto'
@@ -14,7 +15,6 @@ import {
   remoteRuntimeUnavailableError
 } from './remote-runtime-request-frames'
 import { openRemoteRuntimeWebSocket } from './remote-runtime-request-websocket'
-import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 
 type ConnectionState = 'closed' | 'awaiting_ready' | 'awaiting_authenticated' | 'ready'
 

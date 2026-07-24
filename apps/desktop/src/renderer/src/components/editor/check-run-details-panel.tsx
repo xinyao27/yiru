@@ -3,9 +3,9 @@ import React from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { SourceControlFixSplitButton } from '@/components/right-sidebar/source-control-fix-split-button'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import { Button } from '@/components/ui/button'
+import { SourceControlFixSplitButton } from '@/components/workspace-panel/source-control-fix-split-button'
 import { translate } from '@/i18n/i18n'
 
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
@@ -129,7 +129,7 @@ export function CheckRunDetailsPanel({
   const hasJobs = jobs.length > 0
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--editor-surface)]">
+    <div className="bg-background flex h-full min-h-0 flex-col">
       <div className="border-border border-b px-5 py-4">
         <div className="flex min-w-0 items-start gap-3">
           <h1 className="text-foreground min-w-0 flex-1 truncate text-base font-medium">
@@ -183,8 +183,8 @@ export function CheckRunDetailsPanel({
                 variant="default"
                 size="sm"
                 iconClassName="size-3.5"
-                primaryClassName="rounded-r-none font-medium"
-                chevronClassName="rounded-l-none border-l border-primary-foreground/20 px-2"
+                primaryClassName=" font-medium"
+                chevronClassName=" border-l border-primary-foreground/20 px-2"
                 savedAgentId={savedAgentId}
                 savedCommandInputTemplate={savedCommandInputTemplate}
                 savedAgentArgs={savedAgentArgs}
@@ -213,7 +213,7 @@ export function CheckRunDetailsPanel({
                 {loading ? (
                   <LoadingIndicator className="size-3.5" />
                 ) : (
-                  <RefreshCw className="size-3.5" />
+                  <RefreshCw weight="regular" className="size-3.5" />
                 )}
                 {translate('auto.components.editor.CheckRunDetailsPanel.b7f5e2c91a', 'Refresh')}
               </Button>
@@ -266,7 +266,7 @@ export function CheckRunDetailsPanel({
             {error && <div className="text-muted-foreground text-sm">{error}</div>}
 
             {hasOutput && (
-              <section className="border-border bg-background rounded-md border">
+              <section className="border-border bg-background border">
                 <div className="border-border border-b px-3 py-2 text-sm font-medium">
                   {translate('auto.components.editor.CheckRunDetailsPanel.d098e5529a', 'Output')}
                 </div>
@@ -319,7 +319,7 @@ export function CheckRunDetailsPanel({
             onClick={() => window.api.shell.openUrl(openUrl)}
           >
             {translate('auto.components.editor.CheckRunDetailsPanel.a916648574', 'Open details')}
-            <ExternalLink className="size-3.5" />
+            <ExternalLink weight="regular" className="size-3.5" />
           </Button>
         </div>
       )}

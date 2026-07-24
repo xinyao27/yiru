@@ -1,4 +1,5 @@
-import type { WorkspaceStatusDefinition } from '../../../desktop/src/shared/types'
+import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
+
 import { applyMobileWorkspaceLineage } from './mobile-workspace-lineage'
 import {
   DEFAULT_MOBILE_WORKSPACE_STATUSES,

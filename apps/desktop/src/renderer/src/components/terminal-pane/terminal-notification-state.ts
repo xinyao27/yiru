@@ -1,8 +1,9 @@
+import { AGENT_STATUS_STALE_AFTER_MS } from '@yiru/workbench-model/agent'
+
 import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import type { useAppStore } from '@/store'
 import { getWorktreeMapFromState } from '@/store/selectors'
 
-import { AGENT_STATUS_STALE_AFTER_MS } from '../../../../shared/agent-status-types'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalPaneLayoutNode } from '../../../../shared/types'
 

@@ -1,6 +1,6 @@
+import { shouldStepNativeChatAskAnswer } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, type MutableRefObject } from 'react'
 
-import { shouldStepNativeChatAskAnswer } from '../../../desktop/src/shared/native-chat-agent-support'
 import type { RpcClient } from '../transport/rpc-client'
 import { MOBILE_NATIVE_CHAT_QUESTION_STEP_MS } from './mobile-native-chat-answer-stepping'
 import {

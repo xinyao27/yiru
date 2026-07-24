@@ -1,3 +1,4 @@
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
 import {
@@ -5,10 +6,7 @@ import {
   normalizeAutomationPrecheckTimeoutSeconds
 } from '../../../../shared/automation-precheck'
 import { isValidAutomationSchedule } from '../../../../shared/automation-schedules'
-import { normalizeExecutionHostId } from '../../../../shared/execution-host'
 import type { ProjectSourceIdentity as SharedProjectSourceIdentity } from '../../../../shared/project-source-context'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
-import { defineMethod, type RpcMethod } from '../core'
 import {
   OptionalBoolean,
   OptionalPlainString,
@@ -16,7 +14,9 @@ import {
   OptionalString,
   requiredNumber,
   requiredString
-} from '../schemas'
+} from '../../../../shared/runtime-method-contracts/runtime-method-params'
+import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { defineMethod, type RpcMethod } from '../core'
 
 const TuiAgent = requiredString('Missing provider').refine(isTuiAgent, {
   message: 'Unknown provider'

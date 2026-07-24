@@ -1,8 +1,8 @@
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import { wrapTerminalBracketedPasteText } from '@/lib/terminal-bracketed-paste'
 
 import { shellEscapePath } from './pane-helpers'
 import type { PtyTransport } from './pty-transport'
-import { wrapTerminalBracketedPasteText } from './terminal-bracketed-paste'
 import { canPasteImageDropPathRaw, isImageDropPath } from './terminal-drop-image-path'
 import type { TerminalTargetShell } from './terminal-drop-shell'
 import {

@@ -1,22 +1,20 @@
-import nacl from 'tweetnacl'
-
 import {
   encodeMobileE2EEV2Transcript,
   validateMobileE2EEV2Handshake,
-  type MobileE2EETransport,
   type MobileE2EEV2Hello,
   type MobileE2EEV2Ready
-} from '../../../shared/mobile-e2ee-v2-contract'
+} from '@yiru/mobile-relay-protocol/e2ee-contract'
 import {
   openMobileE2EEV2Frame,
   sealMobileE2EEV2Frame
-} from '../../../shared/mobile-e2ee-v2-framing'
+} from '@yiru/mobile-relay-protocol/e2ee-framing'
+import nacl from 'tweetnacl'
+
 import { deriveSharedKey } from './e2ee-crypto'
 import { deriveMobileE2EEV2KeySchedule } from './mobile-e2ee-v2-key-schedule'
 
 export type DesktopMobileE2EEV2Context = {
-  transport: MobileE2EETransport
-  relayHostId?: string
+  transport: 'direct'
 }
 
 export class DesktopMobileE2EEV2Session {
@@ -134,9 +132,7 @@ function hasExpectedContext(
     return false
   }
   const candidate = context as { transport?: unknown; relayHostId?: unknown }
-  return (
-    candidate.transport === expected.transport && candidate.relayHostId === expected.relayHostId
-  )
+  return candidate.transport === expected.transport && candidate.relayHostId === undefined
 }
 
 function decodeCanonicalBase64(value: string): Uint8Array | null {

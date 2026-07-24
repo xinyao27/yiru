@@ -7,10 +7,11 @@ import os from 'node:os'
 import { isAbsolute, join } from 'node:path'
 
 import { electronApp, is } from '@electron-toolkit/utils'
+import type { AgentStatusState } from '@yiru/workbench-model/agent'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'electron'
 import * as QRCode from 'qrcode'
 
-import type { AgentStatusState } from '../shared/agent-status-types'
 import {
   HEADLESS_RUNTIME_WINDOW_ID,
   type RuntimeDesktopWindowStatus
@@ -24,7 +25,6 @@ import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-fac
 import { resolveTuiAgentPermissionMode } from '../shared/tui-agent-permissions'
 import type { UpdateCheckOptions } from '../shared/types'
 import { parseWorkspaceKey } from '../shared/workspace-scope'
-import { getRepoIdFromWorktreeId } from '../shared/worktree-id'
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 import { AgentAwakeService } from './agent-awake-service'
 import { rememberBranchRenameFailureOutput } from './agent-hooks/branch-rename-failure-output'
@@ -64,7 +64,14 @@ import {
 } from './codex-accounts/runtime-selection'
 import { CodexAccountService } from './codex-accounts/service'
 import { CodexUsageStore, initCodexUsagePath } from './codex-usage/store'
-import { codexHookService } from './codex/hook-service'
+import {
+  ensureRealHomeCodexHookState,
+  isRealHomeCodexHookLaneUsable
+} from './codex/codex-real-home-hook-install'
+import { startCodexSessionBackfillInBackground } from './codex/codex-session-backfill'
+import { startCodexSessionIndexHealInBackground } from './codex/codex-session-index-heal'
+import { resolveHostCodexSessionSourceHome } from './codex/codex-session-source-home'
+import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
 import {
   recordCoalescedCrashBreadcrumb,
   recordCrashBreadcrumb
@@ -85,6 +92,7 @@ import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemo
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/emulator-bridge'
+import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { GlobalAssistantService } from './global-assistant/global-assistant-service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
@@ -124,12 +132,15 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
-import { DesktopRelayService } from './runtime/relay/desktop-relay-service'
-import type { RelayBrokerStatus } from './runtime/relay/relay-session-broker'
+import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
 import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
 import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
 import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/yiru-runtime-files'
+import {
+  installServeSupervisorDisconnectQuit,
+  notifyServeSupervisorReady
+} from './serve-update-handoff'
 import {
   createSpoolDesktopComposition,
   type SpoolDesktopComposition
@@ -203,7 +214,17 @@ import {
   setTrayAttention,
   type SystemTrayOptions
 } from './tray/system-tray'
-import { checkForUpdatesFromMenu, isQuittingForUpdate } from './updater'
+import {
+  checkForRemoteServerUpdate,
+  checkForUpdatesFromMenu,
+  configureRemoteServerUpdateInstallMode,
+  downloadRemoteServerUpdate,
+  getRemoteServerUpdaterSnapshot,
+  installRemoteServerUpdate,
+  isQuittingForUpdate,
+  resolveUpdateInstallMode,
+  setupAutoUpdater
+} from './updater'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import {
   attachMainWindowServices,
@@ -213,9 +234,7 @@ import { createMainWindow, loadMainWindow } from './window/create-main-window'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { notifyMainWindowBecameVisible } from './window/main-window-visibility'
 import { getDefaultWslDistro } from './wsl'
-import { getYiruCloudAuthConfig } from './yiru-profiles/profile-cloud-auth-config'
 import { ensureActiveYiruProfile, initYiruProfilePaths } from './yiru-profiles/profile-index-store'
-import { getProfileUserDataPath } from './yiru-profiles/profile-storage-paths'
 
 let mainWindow: BrowserWindow | null = null
 /** Whether a manual app.quit() (Cmd+Q, etc.) is in progress. Shared with the
@@ -235,8 +254,6 @@ let runtime: YiruRuntimeService | null = null
 let globalAssistant: GlobalAssistantService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
-let desktopRelayService: DesktopRelayService | null = null
-let desktopRelayStatus: RelayBrokerStatus = 'offline'
 let spoolDesktop: SpoolDesktopComposition | null = null
 let unregisterSpoolSharingHandlers: (() => void) | null = null
 // Why: set during early startup; gates whether headless serve installs the
@@ -457,6 +474,12 @@ installUncaughtPipeErrorGuard()
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
 // electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
 process.env.YIRU_APP_VERSION = app.getVersion()
+configureRemoteServerUpdater({
+  getSnapshot: getRemoteServerUpdaterSnapshot,
+  check: checkForRemoteServerUpdate,
+  download: downloadRemoteServerUpdate,
+  install: installRemoteServerUpdate
+})
 patchPackagedProcessPath()
 // Why: patchPackagedProcessPath seeds a minimal list of well-known system
 // dirs synchronously so early IPC (e.g. preflight before the shell spawn
@@ -475,6 +498,8 @@ if (app.isPackaged && process.platform !== 'win32') {
 }
 configureDevUserDataPath(is.dev)
 configureYiruUserDataPathEnv()
+configureRemoteServerUpdateInstallMode(resolveUpdateInstallMode(isServeMode))
+installServeSupervisorDisconnectQuit(isServeMode)
 
 // Why: just past createMainWindow's 10s ready-to-show reveal fallback,
 // so a window revealed on that path still gets its tray icon.
@@ -758,8 +783,34 @@ function startTerminalRuntimeStartupServices(): Promise<void> {
   return firstWindowStartupServicesReady
 }
 
-function prepareCodexRuntimeHomeForLaunch(target?: CodexAccountSelectionTarget): string | null {
-  const runtimeHomePath = codexRuntimeHome!.prepareForCodexLaunch(target)
+function prepareCodexRuntimeHomeForLaunch(
+  target?: CodexAccountSelectionTarget,
+  launchEnv?: NodeJS.ProcessEnv
+): string | null {
+  const ensureRealHomeHooksIfSelected = (): boolean => {
+    if (
+      target?.runtime === 'wsl' ||
+      !codexRuntimeHome!.isHostSystemDefaultRealHomeSelected(launchEnv)
+    ) {
+      return false
+    }
+    ensureRealHomeCodexHookState({
+      hooksEnabled: isAgentStatusHooksEnabled(store?.getSettings()),
+      userDataPath: app.getPath('userData')
+    })
+    return true
+  }
+  let realHomeHooksPrepared = ensureRealHomeHooksIfSelected()
+  let runtimeHomePath = codexRuntimeHome!.prepareForCodexLaunch(target, launchEnv)
+  if (runtimeHomePath === null && !realHomeHooksPrepared) {
+    realHomeHooksPrepared = ensureRealHomeHooksIfSelected()
+    if (realHomeHooksPrepared) {
+      runtimeHomePath = codexRuntimeHome!.prepareForCodexLaunch(target, launchEnv)
+    }
+  }
+  if (runtimeHomePath === null && target?.runtime !== 'wsl') {
+    return null
+  }
   const hookTarget =
     target?.runtime === 'wsl'
       ? {
@@ -773,9 +824,9 @@ function prepareCodexRuntimeHomeForLaunch(target?: CodexAccountSelectionTarget):
     // the persisted off switch so those launches cannot reinstall removed hooks.
     const status = hooksEnabled
       ? (codexHookService.installForRuntimeHome(runtimeHomePath, hookTarget) ??
-        codexHookService.install())
+        codexHookService.install(runtimeHomePath ?? undefined))
       : (codexHookService.refreshRuntimeUserHooksForRuntimeHome(runtimeHomePath, hookTarget) ??
-        codexHookService.refreshRuntimeUserHooks())
+        codexHookService.refreshRuntimeUserHooks(runtimeHomePath ?? undefined))
     if (status.state === 'error') {
       console.warn(
         `[codex-hook-service] failed to ${
@@ -857,6 +908,8 @@ function getSystemTrayOptions(): SystemTrayOptions | null {
   }
   return {
     appIcon: store.getSettings().appIcon,
+    isDevInstance: devInstanceIdentity.isDev,
+    devInstanceLabel: devInstanceIdentity.devLabel,
     onOpen: showMainWindowFromTray,
     onOpenSettings: openSettingsFromSystemMenu,
     onCheckForUpdates: () => {
@@ -1057,16 +1110,13 @@ function openMainWindow(): BrowserWindow {
     keybindings,
     {
       getAdditionalAiVaultCodexHomePaths: () =>
-        codexRuntimeHome ? [codexRuntimeHome.getHostRuntimeHomePath()] : [],
+        codexRuntimeHome ? codexRuntimeHome.getHostCodexHomePathsForSessionDiscovery() : [],
       resolveAiVaultClaudeProjectsDirs: (target) =>
         claudeRuntimeAuth!.resolveSessionProjectRoots(target),
       onBeforeRelaunch: async () => {
         isQuitting = true
-        desktopRelayService?.fenceAndCloseNow()
         await preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
-      },
-      onYiruProfileAuthMutation: () => desktopRelayService?.authMutated(),
-      onBeforeYiruProfileSignOut: () => desktopRelayService?.fenceAndCloseNow()
+      }
     }
   )
   automations.setWebContents(window.webContents)
@@ -1143,10 +1193,28 @@ function openMainWindow(): BrowserWindow {
       stateStartedAt,
       launchToken,
       providerSession,
+      providerSessionOnly,
       promptInteractionKey,
       isReplay
     }) => {
       if (mainWindow?.isDestroyed()) {
+        return
+      }
+      if (providerSessionOnly) {
+        // Why: Pi session_start refreshes resume identity while the TUI is
+        // idle, so it must not drive titles, telemetry, or visible status.
+        mainWindow?.webContents.send('agentStatus:set', {
+          ...payload,
+          paneKey,
+          ...(launchToken ? { launchToken } : {}),
+          tabId,
+          worktreeId,
+          connectionId,
+          receivedAt,
+          stateStartedAt,
+          ...(providerSession ? { providerSession } : {}),
+          providerSessionOnly: true
+        })
         return
       }
       maybeAutoRenameBranchOnFirstWorkFromHook({ paneKey, tabId, worktreeId, payload, isReplay })
@@ -1776,7 +1844,13 @@ app.whenReady().then(async () => {
   const activeYiruProfile = ensureActiveYiruProfile()
   store = new Store({ dataFile: activeYiruProfile.dataFile })
   logStartupMilestone('store-loaded')
+  // Why: global provider discovery has no repository cwd from which to infer a WSL distro.
+  setDefaultWslDistroOverride(store.getSettings().terminalWindowsWslDistro ?? null)
   store.onSettingsChanged((updates, settings) => {
+    if ('terminalWindowsWslDistro' in updates) {
+      // Why: the pinned fallback must follow settings changes without an app restart.
+      setDefaultWslDistroOverride(settings.terminalWindowsWslDistro ?? null)
+    }
     if ('showMenuBarIcon' in updates) {
       // Why: Store is the mutation authority for renderer, RPC, and future
       // settings writes, so every macOS toggle updates the native item live.
@@ -1851,7 +1925,34 @@ app.whenReady().then(async () => {
   openCodeUsage = new OpenCodeUsageStore(store)
   rateLimits = new RateLimitService()
   codexRuntimeHome = new CodexRuntimeHomeService(store)
+  codexRuntimeHome.setRealHomeLaneGate(() => isRealHomeCodexHookLaneUsable())
+  setSystemCodexHomeHookSweepSuppressed(
+    () =>
+      codexRuntimeHome !== null &&
+      codexRuntimeHome.isHostSystemDefaultRealHome() &&
+      isAgentStatusHooksEnabled(store?.getSettings())
+  )
   codexAccounts = new CodexAccountService(store, rateLimits, codexRuntimeHome)
+  setTimeout(() => {
+    if (!codexRuntimeHome?.isHostSystemDefaultRealHome()) {
+      return
+    }
+    const systemCodexHomePathOverride = resolveHostCodexSessionSourceHome(store!.getSettings())
+    const shouldStopSessionMigration = (): boolean =>
+      isQuitting || codexRuntimeHome?.isHostSystemDefaultRealHome() !== true
+    void startCodexSessionBackfillInBackground(
+      { shouldStop: shouldStopSessionMigration },
+      systemCodexHomePathOverride
+    ).then(() => {
+      if (!codexRuntimeHome?.isHostSystemDefaultRealHome()) {
+        return
+      }
+      return startCodexSessionIndexHealInBackground(
+        { shouldStop: shouldStopSessionMigration },
+        systemCodexHomePathOverride
+      )
+    })
+  }, 15_000)
   claudeRuntimeAuth = new ClaudeRuntimeAuthService(store)
   claudeAccounts = new ClaudeAccountService(store, rateLimits, claudeRuntimeAuth)
   rateLimits.setCodexHomePathResolver((target) =>
@@ -1938,10 +2039,11 @@ app.whenReady().then(async () => {
     getDesktopWindowStatus: getDesktopWindowStatus,
     // Why: hook-reported agent status is the same source the desktop sidebar
     // reads. worktree.ps pulls it at query time so mobile shows the same agents.
-    getAgentStatusSnapshot: () => agentHookServer.getStatusSnapshot(),
+    getAgentStatusSnapshot: () =>
+      agentHookServer.getStatusSnapshot().filter((entry) => entry.providerSessionOnly !== true),
     // Why: Claude and Codex history roots must be wired before either desktop or serve mode starts.
     getAdditionalAiVaultCodexHomePaths: () =>
-      codexRuntimeHome ? [codexRuntimeHome.getHostRuntimeHomePath()] : [],
+      codexRuntimeHome ? codexRuntimeHome.getHostCodexHomePathsForSessionDiscovery() : [],
     resolveAiVaultClaudeProjectsDirs: (target) =>
       claudeRuntimeAuth!.resolveSessionProjectRoots(target),
     buildAgentHookPtyEnv: () =>
@@ -2069,6 +2171,12 @@ app.whenReady().then(async () => {
   const emulatorBridge = new EmulatorBridge()
   runtimeService.setEmulatorBridge(emulatorBridge)
   nativeTheme.themeSource = store.getSettings().theme ?? 'system'
+  if (codexRuntimeHome.isHostSystemDefaultRealHomeSelected()) {
+    ensureRealHomeCodexHookState({
+      hooksEnabled: isAgentStatusHooksEnabled(store.getSettings()),
+      userDataPath: app.getPath('userData')
+    })
+  }
   if (shouldInstallManagedHooks(is.dev)) {
     // Why: the persisted off switch must run before any auto-install path so
     // users who removed Yiru-managed hooks do not see them silently reappear on launch.
@@ -2216,12 +2324,22 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc, { getRelayStatus: () => desktopRelayStatus })
+  registerMobileHandlers(runtimeRpc)
 
   startTerminalRuntimeStartupServices()
   app.on('activate', requestDesktopActivation)
 
   if (serveOptions) {
+    // Why: headless servers have no BrowserWindow to initialize updater
+    // listeners, so use a silent status sink before advertising control.
+    setupAutoUpdater(
+      { webContents: { send: () => undefined } },
+      {
+        getLastUpdateCheckAt: () => store!.getUI().lastUpdateCheckAt,
+        onBeforeQuit: () => store!.flush(),
+        setLastUpdateCheckAt: (timestamp) => store!.updateUI({ lastUpdateCheckAt: timestamp })
+      }
+    )
     // Why: give managed WSL launchers a brief chance to migrate before headless
     // PTYs become reachable without letting slow repairs withhold all RPC readiness.
     logStartupMilestone('wsl-cli-barrier-start')
@@ -2287,6 +2405,7 @@ app.whenReady().then(async () => {
     // Why: headless serve never opens a renderer, so arm scheduled automation dispatch here.
     automations.start()
     await printServeReady(serveOptions)
+    notifyServeSupervisorReady(runtime.getRuntimeId())
     return
   }
 
@@ -2324,36 +2443,6 @@ app.whenReady().then(async () => {
     spoolDesktop?.start()
   ])
 
-  const cloudAuth = getYiruCloudAuthConfig()
-  if (cloudAuth.configured) {
-    try {
-      const relayService = new DesktopRelayService({
-        authConfig: cloudAuth.config,
-        userDataPath: getProfileUserDataPath(),
-        appVersion: app.getVersion(),
-        runtimeRpc,
-        onStatus: (status) => {
-          desktopRelayStatus = status
-          mainWindow?.webContents.send('mobile:relayStatusChanged', status)
-        }
-      })
-      desktopRelayService = relayService
-      runtimeRpc.setMobileRelayPairingProvider({
-        createPairingRelay: (relayDeviceId) => relayService.createPairingRelay(relayDeviceId),
-        onDeviceRevokeQueued: (item) => relayService.onDeviceRevokeQueued(item),
-        onDemandStateChanged: () => relayService.demandStateChanged(),
-        getEndpoints: (context, params) => relayService.getEndpoints(context, params),
-        provisionRelay: (context, params) => relayService.provisionRelay(context, params)
-      })
-      relayService.start()
-    } catch (error) {
-      console.warn(
-        '[relay] Desktop relay startup unavailable:',
-        error instanceof Error ? error.message : String(error)
-      )
-    }
-  }
-
   // Why: the macOS notification permission dialog must fire after the window
   // is visible and focused. If it fires before the window exists, the system
   // dialog either doesn't appear or gets immediately covered by the maximized
@@ -2378,8 +2467,6 @@ app.on('before-quit', () => {
     })
   }
   isQuitting = true
-  desktopRelayService?.fenceAndCloseNow()
-  runtimeRpc?.setMobileRelayPairingProvider(null)
   unsubscribeSystemResumeBroadcast?.()
   unsubscribeSystemResumeBroadcast = null
   unsubscribeAgentAwakeStatusChanges?.()

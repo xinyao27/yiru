@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { translate } from '@/i18n/i18n'
 
-import type { RuntimeStatus } from '../../../shared/runtime-types'
+import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import { parseWebPairingInput } from './web-pairing'
 import { WebRuntimeClient } from './web-runtime-client'
 import {
@@ -64,13 +64,15 @@ export default function WebConnect({
     const environment = createStoredWebRuntimeEnvironment({ name, offer: parsedOffer })
     const client = new WebRuntimeClient(parsedOffer)
     try {
-      const response = await client.call('status.get', undefined, { timeoutMs: 15_000 })
+      const response = await client.call(STATUS_GET_CONTRACT, undefined, {
+        timeoutMs: 15_000
+      })
       if (!response.ok) {
         throw new Error(response.error.message)
       }
       // Why: older pairing offers may not carry scope metadata. The server
       // stamps it onto status.get so those links still fail before app entry.
-      if ((response.result as RuntimeStatus | null)?.deviceScope === 'mobile') {
+      if (response.result.deviceScope === 'mobile') {
         setError(
           translate(
             'auto.web.WebConnect.mobileScopeRejected',
@@ -113,9 +115,9 @@ export default function WebConnect({
 
   return (
     <div className="bg-background text-foreground flex min-h-dvh items-center justify-center px-4 py-6">
-      <div className="border-border bg-card flex w-full max-w-[520px] flex-col gap-5 rounded-lg border p-5">
+      <div className="border-border bg-card flex w-full max-w-[520px] flex-col gap-5 border p-5">
         <div className="flex items-start gap-3">
-          <div className="border-border bg-muted flex size-9 shrink-0 items-center justify-center rounded-md border">
+          <div className="border-border bg-muted flex size-9 shrink-0 items-center justify-center border">
             <Server size={18} aria-hidden />
           </div>
           <div className="min-w-0">
@@ -158,13 +160,13 @@ export default function WebConnect({
         </div>
 
         {parsedOffer && (
-          <div className="border-border bg-muted text-muted-foreground rounded-md border px-3 py-2 text-xs">
+          <div className="border-border bg-muted text-muted-foreground border px-3 py-2 text-xs">
             {translate('auto.web.WebConnect.4a4c017be1', 'Endpoint:')} {parsedOffer.endpoint}
           </div>
         )}
 
         {error && (
-          <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
+          <div className="border-destructive/40 bg-destructive/10 text-destructive border px-3 py-2 text-sm">
             {error}
           </div>
         )}

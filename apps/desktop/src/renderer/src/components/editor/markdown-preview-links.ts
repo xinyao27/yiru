@@ -1,11 +1,11 @@
-import type { HttpLinkSourceOwner, OpenHttpLinkOptions } from '@/lib/http-link-routing'
-
-import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import {
   filesystemPathHrefToFileUri,
   filesystemPathToFileUri,
   fileUriToFilesystemPath
-} from '../../../../shared/file-uri-path'
+} from '@yiru/workbench-model/platform'
+
+import type { HttpLinkSourceOwner, OpenHttpLinkOptions } from '@/lib/http-link-routing'
 
 function toFileUrl(filePath: string): string {
   return filesystemPathToFileUri(filePath)

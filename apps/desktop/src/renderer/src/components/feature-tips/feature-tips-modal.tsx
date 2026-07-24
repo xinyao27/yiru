@@ -41,9 +41,7 @@ const WAVEFORM_BAR_HEIGHTS = [30, 60, 90, 70, 100, 50, 80, 35, 65]
 
 function WorktreePromptTerm({ children }: { children: string }): JSX.Element {
   return (
-    <span className="bg-foreground/10 text-foreground rounded-sm px-1 py-0.5 font-medium">
-      {children}
-    </span>
+    <span className="bg-foreground/10 text-foreground px-1 py-0.5 font-medium">{children}</span>
   )
 }
 
@@ -60,7 +58,7 @@ function FeatureTipVisual({ tip }: { tip: FeatureTip }): JSX.Element {
     case 'enable-voice':
       return (
         <div className="flex flex-col items-center gap-2.5">
-          <div className="bg-foreground text-background flex size-14 items-center justify-center rounded-full">
+          <div className="bg-foreground text-background flex size-14 items-center justify-center">
             <Mic className="size-5" />
           </div>
           {/* Animated waveform — purely decorative, signals "voice" without copy */}
@@ -68,7 +66,7 @@ function FeatureTipVisual({ tip }: { tip: FeatureTip }): JSX.Element {
             {WAVEFORM_BAR_HEIGHTS.map((height, i) => (
               <span
                 key={i}
-                className="bg-foreground/60 block w-[3px] origin-center animate-[waveform_1.4s_ease-in-out_infinite] rounded-[2px]"
+                className="bg-foreground/60 block w-[3px] origin-center animate-[waveform_1.4s_ease-in-out_infinite]"
                 style={{ height: `${height}%`, animationDelay: `${i * 0.1}s` }}
               />
             ))}
@@ -299,7 +297,7 @@ export default function FeatureTipsModal(): JSX.Element | null {
                 <div
                   aria-hidden={skillTerminalOpen}
                   className={cn(
-                    'max-w-sm space-y-2 overflow-hidden rounded-md border text-sm leading-relaxed text-muted-foreground transition-[max-height,opacity,transform,margin,padding,border-color] duration-300 ease-out motion-reduce:transition-none',
+                    'max-w-sm space-y-2 overflow-hidden border text-sm leading-relaxed text-muted-foreground transition-[max-height,opacity,transform,margin,padding,border-color] duration-300 ease-out motion-reduce:transition-none',
                     skillTerminalOpen
                       ? 'pointer-events-none mt-0 max-h-0 -translate-y-2 border-transparent p-0 opacity-0'
                       : 'mt-3 max-h-64 translate-y-0 border-border/70 bg-muted/35 p-3 opacity-100'

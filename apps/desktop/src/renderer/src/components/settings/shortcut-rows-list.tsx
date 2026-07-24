@@ -48,7 +48,7 @@ export function ShortcutRowsList({
     return (
       <div
         className={cn(
-          'rounded-md border border-dashed border-border/70 px-4 py-8 text-center text-sm text-muted-foreground',
+          'border border-dashed border-border/70 px-4 py-8 text-center text-sm text-muted-foreground',
           className
         )}
       >

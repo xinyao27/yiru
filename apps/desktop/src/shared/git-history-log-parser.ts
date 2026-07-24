@@ -1,4 +1,4 @@
-import type { GitHistoryItem, GitHistoryItemRef } from './git-history-types'
+import type { GitHistoryItem, GitHistoryItemRef } from '@yiru/workbench-model/review'
 
 const GIT_HISTORY_DECORATION_SEPARATOR = '\x1f'
 

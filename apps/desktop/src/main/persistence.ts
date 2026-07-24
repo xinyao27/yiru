@@ -1,34 +1,36 @@
-import { createHash, randomUUID } from 'node:crypto'
-import {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  existsSync,
-  renameSync,
-  unlinkSync,
-  copyFileSync,
-  statSync,
-  realpathSync
-} from 'node:fs'
-import { writeFile, rename, mkdir, rm, copyFile } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
+import { mkdirSync, existsSync, copyFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join, dirname, isAbsolute, resolve, sep } from 'node:path'
+import { join, isAbsolute, resolve } from 'node:path'
 
-/* eslint-disable max-lines -- Why: persistence keeps schema defaults, migration,
-load/save, and flush logic in one file so the full storage contract is reviewable
-as a unit instead of being scattered across modules. */
-import { app, safeStorage } from 'electron'
+import type {
+  RemovedSshTargetTombstone,
+  SshRemotePtyLease,
+  SshTarget
+} from '@yiru/runtime-protocol/ssh-connection'
+import type { MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
+import { isPathInsideOrEqual, isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  normalizeExecutionHostId,
+  toSshExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
+import {
+  FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
+  getRepoIdFromWorktreeId,
+  getWorktreePathBasenameFromId
+} from '@yiru/workbench-model/workspace'
+/* eslint-disable max-lines -- Why: Store remains the single mutation authority
+while its codecs, file mechanics, and notifications are extracted incrementally. */
+import { app } from 'electron'
 
-import type { MigrationUnsupportedPtyEntry } from '../shared/agent-status-types'
-import { normalizeAppIconId } from '../shared/app-icon'
-import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../shared/auto-rename-branch-from-work-settings'
 import { normalizeAutomationPrecheck } from '../shared/automation-precheck'
 import { getAutomationLegacyRepoId } from '../shared/automation-run-identity'
-import {
-  backfillAutomationRunNumbers,
-  nextAutomationRunNumber,
-  pruneAutomationRuns
-} from '../shared/automation-run-retention'
+import { nextAutomationRunNumber, pruneAutomationRuns } from '../shared/automation-run-retention'
 import {
   latestAutomationOccurrenceAtOrBefore,
   nextAutomationOccurrenceAfter
@@ -44,35 +46,11 @@ import type {
   AutomationRunTrigger,
   AutomationUpdateInput
 } from '../shared/automations-types'
-import { normalizeBrowserPageZoomLevel } from '../shared/browser-page-zoom'
 import {
-  getDefaultPersistedState,
-  getDefaultNotificationSettings,
   getDefaultOnboardingState,
-  getDefaultVoiceSettings,
-  getDefaultUIState,
   getDefaultRepoHookSettings,
-  getDefaultWorkspaceSession,
-  normalizeAgentActivityDisplayMode,
-  normalizeWorktreeCardProperties,
-  ONBOARDING_FLOW_VERSION,
-  ONBOARDING_FINAL_STEP
+  getDefaultWorkspaceSession
 } from '../shared/constants'
-import { normalizeContextualTourIds } from '../shared/contextual-tours'
-import {
-  isPathInsideOrEqual,
-  isWindowsAbsolutePathLike,
-  normalizeRuntimePathForComparison
-} from '../shared/cross-platform-path'
-import { getRepoExecutionHostId, parseExecutionHostId } from '../shared/execution-host'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  normalizeExecutionHostOrder,
-  normalizeExecutionHostId,
-  normalizeVisibleExecutionHostIds,
-  toSshExecutionHostId,
-  type ExecutionHostId
-} from '../shared/execution-host'
 import {
   compareFeatureInteractionUsageBuckets,
   getFeatureInteractionCategory,
@@ -81,82 +59,31 @@ import {
   normalizeFeatureInteractionTelemetryBuckets,
   type FeatureInteractionId
 } from '../shared/feature-interactions'
-import { normalizeFeatureTipIds } from '../shared/feature-tips'
-import {
-  normalizeFolderWorkspaceName,
-  normalizeFolderWorkspaces
-} from '../shared/folder-workspaces'
+import { normalizeFolderWorkspaceName } from '../shared/folder-workspaces'
 import type { GitRemoteIdentity } from '../shared/git-remote-identity'
-import { normalizeTerminalShortcutPolicy } from '../shared/keybindings'
-import { normalizeLanguageServerSettings } from '../shared/language-server'
-import { normalizeLoaderStyle } from '../shared/loader-style'
-import { normalizeManualRepoOrder } from '../shared/manual-repo-order'
-import { clampMarkdownTocPanelWidth } from '../shared/markdown-toc-panel-width'
-import { normalizeOpenInApplications } from '../shared/open-in-applications'
-import { persistedUIValuesEqual } from '../shared/persisted-ui-equality'
-import { normalizePRBotAuthorOverrides } from '../shared/pr-bot-author-overrides'
-import {
-  deriveGlobalWindowsRuntimeDefaultFromLegacySettings,
-  normalizeProjectRuntimePreference
-} from '../shared/project-execution-runtime'
+import { normalizeProjectRuntimePreference } from '../shared/project-execution-runtime'
 import {
   clearMissingProjectGroupMemberships,
   createProjectGroup,
   getNextProjectGroupOrder,
   getProjectGroupSubtreeIds,
-  normalizeProjectGroupName,
-  normalizeProjectGroups
+  normalizeProjectGroupName
 } from '../shared/project-groups'
 import { projectHostSetupProjectionFromRepos } from '../shared/project-host-setup-projection'
-import { isExistingPersistedProfile } from '../shared/project-order-manual-default-notice'
 import {
   buildProjectSourceContextFromRepo,
   buildWorkspaceRunContext
 } from '../shared/project-source-context'
 import { normalizeRepoBadgeColor } from '../shared/repo-badge-color'
-import { sanitizeRepoIcon } from '../shared/repo-icon'
 import { isFolderRepo } from '../shared/repo-kind'
 import { hardenExistingSecureFile } from '../shared/secure-file'
-import {
-  mergeLegacyCommitMessageAiIntoSourceControlAi,
-  normalizeRepoSourceControlAiOverrides,
-  normalizeSourceControlAiSettings,
-  projectSourceControlAiToLegacyCommitMessageAi,
-  sourceControlAiSettingsFromLegacy
-} from '../shared/source-control-ai'
-import {
-  DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
-  SOURCE_CONTROL_TEXT_ACTION_IDS
-} from '../shared/source-control-ai-actions'
-import { normalizeSourceControlGroupOrder } from '../shared/source-control-group-order'
-import {
-  LEGACY_DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  type RemovedSshTargetTombstone,
-  type SshRemotePtyLease,
-  type SshTarget
-} from '../shared/ssh-types'
+import { normalizeRepoSourceControlAiOverrides } from '../shared/source-control-ai'
 import {
   isTerminalLeafId,
   makePaneKey,
   parseLegacyNumericPaneKey,
   parsePaneKey
 } from '../shared/stable-pane-id'
-import { normalizeTerminalCursorStyleDefault } from '../shared/terminal-cursor-style-settings'
-import { normalizeTerminalCustomThemes } from '../shared/terminal-custom-themes'
-import { normalizeTerminalLineHeight } from '../shared/terminal-line-height-settings'
-import { normalizeTerminalQuickCommands } from '../shared/terminal-quick-commands'
-import {
-  legacyTerminalScrollbackBytesToRows,
-  normalizeDesktopTerminalScrollbackRows
-} from '../shared/terminal-scrollback-policy'
-import {
-  DEFAULT_TUI_AGENT_ARGS,
-  DEFAULT_TUI_AGENT_ENV,
-  hasUnsupportedTuiAgentArgs,
-  normalizeTuiAgentArgsRecord,
-  normalizeTuiAgentEnvRecord
-} from '../shared/tui-agent-launch-defaults'
-import { normalizeDisabledTuiAgents } from '../shared/tui-agent-selection'
 import type {
   PersistedState,
   Project,
@@ -178,11 +105,7 @@ import type {
   WorkspaceLineage,
   WorkspaceKey,
   GlobalSettings,
-  YiruWorkspaceLayout,
-  NotificationSettings,
   OnboardingChecklistState,
-  OnboardingOutcome,
-  OnboardingState,
   LegacyPaneKeyAliasEntry,
   TerminalPaneLayoutNode,
   TerminalLayoutSnapshot,
@@ -190,35 +113,36 @@ import type {
   WorkspaceSessionPatch,
   WorkspaceSessionState
 } from '../shared/types'
-import { normalizeUiLanguage } from '../shared/ui-language'
-import { normalizeUsagePercentageDisplay } from '../shared/usage-percentage-display'
-import { resolveUsagePercentageDisplayChangeNoticeDismissed } from '../shared/usage-percentage-display-change-notice'
 import {
   folderWorkspaceKey,
-  isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../shared/workspace-scope'
 import { pruneWorkspaceSessionBrowserHistory } from '../shared/workspace-session-browser-history'
-import { parseWorkspaceSession } from '../shared/workspace-session-schema'
 import { pruneLocalTerminalScrollbackBuffers } from '../shared/workspace-session-terminal-buffers'
-import {
-  DEFAULT_WORKSPACE_STATUS_ID,
-  normalizePersistedWorkspaceStatuses,
-  normalizeWorkspaceStatuses
-} from '../shared/workspace-statuses'
-import {
-  FOLDER_WORKSPACE_INSTANCE_SEPARATOR,
-  getRepoIdFromWorktreeId,
-  getWorktreePathBasenameFromId
-} from '../shared/worktree-id'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../shared/workspace-statuses'
 import { isLegacyRepoForExternalWorktreeVisibility } from '../shared/worktree-ownership'
-import { isWslUncPath } from '../shared/wsl-paths'
 import {
   setMigrationUnsupportedPty,
   setMigrationUnsupportedPtyPersistenceListener
 } from './agent-hooks/migration-unsupported-pty-state'
 import { agentHookServer } from './agent-hooks/server'
+import { DurableStateFile } from './persisted-state/durable-state-file'
+import { GitHubCacheFile } from './persisted-state/github-cache-file'
+import { applyPersistedSettingsUpdate } from './persisted-state/persisted-settings-mutations'
+import { normalizePersistedSshTarget as normalizeSshTarget } from './persisted-state/persisted-ssh-codec'
+import { decodePersistedState } from './persisted-state/persisted-state-codec'
+import { PersistedStateNotifications } from './persisted-state/persisted-state-notifications'
+import {
+  MAX_CLAUDE_LIVE_PTY_SESSION_IDS,
+  normalizePersistedLegacyPaneKeyAliasEntries as normalizeLegacyPaneKeyAliasEntries,
+  normalizePersistedMigrationUnsupportedPtyEntries as normalizeMigrationUnsupportedPtyEntries
+} from './persisted-state/persisted-terminal-session-codec'
+import { applyPersistedUiUpdate, readPersistedUi } from './persisted-state/persisted-ui-mutations'
+import {
+  removeRepoFromWorkspaceSessionsForHost,
+  removeWorkspaceSessionOwner
+} from './persisted-state/workspace-session-owner-removal'
 import { createNestedProjectGroupResolver } from './project-groups/nested-repo-import'
 import { toRelaySshPtyId } from './providers/ssh-pty-id'
 import { MOBILE_PAIRING_USERDATA_FILES } from './runtime/mobile-pairing-files'
@@ -226,7 +150,6 @@ import {
   migrateUiHostScopeSshTargetId,
   migrateWorkspaceSessionSshTargetId
 } from './ssh/ssh-target-id-migration'
-import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from './startup/startup-diagnostics'
 import { track } from './telemetry/client'
 import { getCohortAtEmit } from './telemetry/cohort-classifier'
 import {
@@ -238,83 +161,7 @@ import {
   type TerminalScrollbackSnapshotStorage
 } from './terminal-scrollback-snapshots'
 
-function encrypt(plaintext: string): string {
-  if (!plaintext || !safeStorage.isEncryptionAvailable()) {
-    return plaintext
-  }
-  try {
-    return safeStorage.encryptString(plaintext).toString('base64')
-  } catch (err) {
-    console.error('[persistence] Encryption failed:', err)
-    return plaintext
-  }
-}
-
-function decrypt(ciphertext: string): string {
-  if (!ciphertext || !safeStorage.isEncryptionAvailable()) {
-    return ciphertext
-  }
-  try {
-    return safeStorage.decryptString(Buffer.from(ciphertext, 'base64'))
-  } catch {
-    // Why: if decryption fails, it likely means the value was stored as
-    // plaintext (pre-encryption build) or the OS keychain changed. Fall
-    // back to the raw string so users don't lose their cookie after upgrade.
-    console.warn(
-      '[persistence] safeStorage decryption failed — returning ciphertext as-is. Possible keychain reset.'
-    )
-    return ciphertext
-  }
-}
-
-function encryptOptionalSecret(value: string | null | undefined): string | null {
-  return value ? encrypt(value) : null
-}
-
-function decryptOptionalSecret(value: string | null | undefined): string | null {
-  return value ? decrypt(value) : null
-}
-
-function retireLegacyInstructionsForClearedTextActionRecipes(
-  sourceControlAi: GlobalSettings['sourceControlAi'],
-  previousSettings: GlobalSettings
-): GlobalSettings['sourceControlAi'] {
-  if (!sourceControlAi?.actions) {
-    return sourceControlAi
-  }
-
-  const previousSourceControlAi = normalizeSourceControlAiSettings(
-    previousSettings.sourceControlAi,
-    previousSettings.commitMessageAi
-  )
-  let instructionsByOperation = sourceControlAi.instructionsByOperation
-  let changed = false
-  for (const actionId of SOURCE_CONTROL_TEXT_ACTION_IDS) {
-    if (
-      sourceControlAi.actions[actionId]?.commandInputTemplate !==
-      DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES[actionId]
-    ) {
-      continue
-    }
-    if (
-      previousSourceControlAi.actions?.[actionId]?.commandInputTemplate ===
-        DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES[actionId] ||
-      instructionsByOperation?.[actionId] !==
-        previousSourceControlAi.instructionsByOperation[actionId]
-    ) {
-      continue
-    }
-    if (instructionsByOperation?.[actionId] === '') {
-      continue
-    }
-    // Why: `{basePrompt}` is the explicit clear state; an empty instruction
-    // shadows rollback `commitMessageAi.customPrompt` during normalize/project.
-    instructionsByOperation = { ...instructionsByOperation, [actionId]: '' }
-    changed = true
-  }
-
-  return changed ? { ...sourceControlAi, instructionsByOperation } : sourceControlAi
-}
+export { sanitizeOnboardingUpdate } from './persisted-state/persisted-onboarding-codec'
 
 // Why: the data-file path must not be a module-level constant. Module-level
 // code runs at import time — before configureDevUserDataPath() redirects the
@@ -346,16 +193,6 @@ function getDataFile(): string {
     _dataFile = join(userDataDir, 'yiru-data.json')
   }
   return _dataFile
-}
-
-// Why a sidecar: githubCache is a refetchable 5-min-TTL poll cache whose
-// fetchedAt stamps change on every refresh — keeping it inside yiru-data.json
-// made every poll cycle rewrite the whole multi-MB durable state (defeating
-// the content-hash guard by design). It lives in memory during the session
-// and is snapshotted here best-effort at quit so PR badges still paint
-// instantly on the next launch. Loss of this file costs nothing.
-function getGithubCacheFile(dataFile = getDataFile()): string {
-  return join(dirname(dataFile), 'yiru-github-cache.json')
 }
 
 // Why: worktrees deleted outside Yiru (git CLI worktree remove, rm -rf,
@@ -434,20 +271,6 @@ function gcStaleWorktreeMeta(state: PersistedState): number {
   return removed
 }
 
-function readGithubCacheSnapshot(dataFile: string): PersistedState['githubCache'] | null {
-  try {
-    const parsed = JSON.parse(readFileSync(getGithubCacheFile(dataFile), 'utf-8')) as unknown
-    const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
-      typeof value === 'object' && value !== null && !Array.isArray(value)
-    if (isPlainRecord(parsed) && isPlainRecord((parsed as { pr?: unknown }).pr)) {
-      return { pr: (parsed as PersistedState['githubCache']).pr }
-    }
-  } catch {
-    // Missing or corrupt snapshot: start with an empty cache and refetch.
-  }
-  return null
-}
-
 /**
  * Return the userData directory captured at initDataPath() time, before
  * app.setName() can change how app.getPath('userData') resolves.
@@ -500,449 +323,15 @@ export function migrateMobilePairingDataToCanonicalUserDataPath(sourceUserDataDi
   }
 }
 
-// Why (issue #1158): keep 5 rolling backups of yiru-data.json so a corrupt or
-// empty write leaves at least one earlier copy recoverable. Five snapshots at
-// >=1-hour spacing cover recent work without churning disk on every debounce.
-const BACKUP_COUNT = 5
-const BACKUP_MIN_INTERVAL_MS = 60 * 60 * 1000
 const WORKSPACE_SESSION_PATCH_FULL_NORMALIZATION_KEYS = new Set<keyof WorkspaceSessionState>([
   'tabsByWorktree',
   'terminalLayoutsByTabId'
 ])
 
-function logPersistenceStartupMilestone(
-  event: string,
-  details: Record<string, unknown> = {}
-): void {
-  if (isStartupDiagnosticsEnabled()) {
-    logStartupDiagnostic(event, { t: Math.round(performance.now()), ...details })
-  }
-}
-
 function workspaceSessionPatchNeedsFullNormalization(patch: WorkspaceSessionPatch): boolean {
   return Object.keys(patch).some((key) =>
     WORKSPACE_SESSION_PATCH_FULL_NORMALIZATION_KEYS.has(key as keyof WorkspaceSessionState)
   )
-}
-
-/** Normalize the persisted non-'local' host partitions. 'local' is intentionally
- *  dropped here — it is the legacy workspaceSession blob — so the two surfaces
- *  never diverge. Each partition is zod-validated independently: a corrupt host
- *  drops to defaults without taking out the others. Idempotent: re-running on an
- *  already-normalized map yields the same shape. */
-function parseWorkspaceSessionsByHostId(
-  raw: unknown,
-  defaults: WorkspaceSessionState
-): Partial<Record<ExecutionHostId, WorkspaceSessionState>> {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    return {}
-  }
-  const partitions: Partial<Record<ExecutionHostId, WorkspaceSessionState>> = {}
-  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
-    const hostId = normalizeExecutionHostId(key)
-    // Why: 'local' belongs in workspaceSession; an invalid/local key here is
-    // legacy noise and must not shadow the canonical local partition.
-    if (!hostId || hostId === LOCAL_EXECUTION_HOST_ID) {
-      continue
-    }
-    const result = parseWorkspaceSession(value)
-    if (!result.ok) {
-      console.error(
-        `[persistence] Corrupt workspace session for host ${hostId}, using defaults:`,
-        result.error
-      )
-      continue
-    }
-    partitions[hostId] = { ...defaults, ...result.value }
-  }
-  return partitions
-}
-
-function backupPath(dataFile: string, index: number): string {
-  return `${dataFile}.bak.${index}`
-}
-
-function buildWorkspaceDirHistoryForUpdate(
-  current: GlobalSettings,
-  updates: Partial<GlobalSettings>
-): YiruWorkspaceLayout[] | null {
-  if (!('workspaceDir' in updates) && !('nestWorkspaces' in updates)) {
-    return null
-  }
-  const nextPath = updates.workspaceDir ?? current.workspaceDir
-  const nextNestWorkspaces = updates.nestWorkspaces ?? current.nestWorkspaces
-  if (
-    normalizeRuntimePathForComparison(nextPath) ===
-      normalizeRuntimePathForComparison(current.workspaceDir) &&
-    nextNestWorkspaces === current.nestWorkspaces
-  ) {
-    return null
-  }
-
-  const previousLayout = {
-    path: current.workspaceDir,
-    nestWorkspaces: current.nestWorkspaces
-  }
-  const existing = current.workspaceDirHistory ?? []
-  const next = [...existing]
-  const previousKey = getWorkspaceLayoutHistoryKey(previousLayout)
-  if (!next.some((layout) => getWorkspaceLayoutHistoryKey(layout) === previousKey)) {
-    next.push(previousLayout)
-  }
-  return next
-}
-
-type LegacyTerminalScrollbackSettings = {
-  terminalScrollbackRows?: unknown
-  terminalScrollbackBytes?: unknown
-}
-
-const LEGACY_TERMINAL_TUI_SCROLL_SENSITIVITY_DEFAULT = 3
-
-function readLegacyTerminalScrollbackSettings(settings: unknown): LegacyTerminalScrollbackSettings {
-  return settings && typeof settings === 'object'
-    ? (settings as LegacyTerminalScrollbackSettings)
-    : {}
-}
-
-// Why: settings are merged with object spreads, so old profile keys must be
-// removed explicitly or later saves would preserve retired product state.
-function stripRetiredGlobalSettings(
-  settings: Partial<GlobalSettings> | undefined
-): Partial<GlobalSettings> {
-  const {
-    terminalScrollbackBytes: _legacyScrollbackBytes,
-    experimentalNewWorktreeCardStyle: _retiredCardStyle,
-    compactWorktreeCards: _retiredCompactCards,
-    experimentalCompactWorktreeCards: _retiredExperimentalCompactCards,
-    ...rest
-  } = (settings ?? {}) as Partial<GlobalSettings> & {
-    terminalScrollbackBytes?: unknown
-    experimentalNewWorktreeCardStyle?: unknown
-    compactWorktreeCards?: unknown
-    experimentalCompactWorktreeCards?: unknown
-  }
-  void _legacyScrollbackBytes
-  void _retiredCardStyle
-  void _retiredCompactCards
-  void _retiredExperimentalCompactCards
-  return rest
-}
-
-function migrateTerminalScrollbackRows(settings: unknown): {
-  rows: number
-  needsSave: boolean
-} {
-  const legacySettings = readLegacyTerminalScrollbackSettings(settings)
-  const hasRows = Object.prototype.hasOwnProperty.call(legacySettings, 'terminalScrollbackRows')
-  const hasLegacyBytes = Object.prototype.hasOwnProperty.call(
-    legacySettings,
-    'terminalScrollbackBytes'
-  )
-  const rows = hasRows
-    ? normalizeDesktopTerminalScrollbackRows(legacySettings.terminalScrollbackRows)
-    : legacyTerminalScrollbackBytesToRows(legacySettings.terminalScrollbackBytes)
-
-  return {
-    rows,
-    needsSave: !hasRows || hasLegacyBytes || legacySettings.terminalScrollbackRows !== rows
-  }
-}
-
-function migrateTerminalTuiScrollSensitivityDefault(settings: GlobalSettings | undefined): {
-  settings: Pick<
-    GlobalSettings,
-    'terminalTuiScrollSensitivity' | 'terminalTuiScrollSensitivityDefaultedToOne'
-  >
-  needsSave: boolean
-} {
-  const alreadyDefaultedToOne = settings?.terminalTuiScrollSensitivityDefaultedToOne === true
-  const current = settings?.terminalTuiScrollSensitivity
-  const shouldMoveInheritedDefault =
-    !alreadyDefaultedToOne &&
-    (current === undefined || current === LEGACY_TERMINAL_TUI_SCROLL_SENSITIVITY_DEFAULT)
-  const terminalTuiScrollSensitivity = shouldMoveInheritedDefault ? 1 : (current ?? 1)
-
-  return {
-    settings: {
-      terminalTuiScrollSensitivity,
-      terminalTuiScrollSensitivityDefaultedToOne: true
-    },
-    needsSave: !alreadyDefaultedToOne || current === undefined
-  }
-}
-
-function getWorkspaceLayoutHistoryKey(layout: YiruWorkspaceLayout): string {
-  return `${normalizeRuntimePathForComparison(layout.path)}:${layout.nestWorkspaces}`
-}
-
-function migrateAgentYoloDefaults(
-  settings: GlobalSettings | undefined
-): Pick<GlobalSettings, 'agentDefaultArgs' | 'agentDefaultEnv' | 'agentYoloDefaultsMigrated'> {
-  const existingArgs = normalizeTuiAgentArgsRecord(settings?.agentDefaultArgs)
-  const existingEnv = normalizeTuiAgentEnvRecord(settings?.agentDefaultEnv)
-  if (settings?.agentYoloDefaultsMigrated === true) {
-    return {
-      agentDefaultArgs: existingArgs,
-      agentDefaultEnv: existingEnv,
-      agentYoloDefaultsMigrated: true
-    }
-  }
-
-  const commandOverrides = settings?.agentCmdOverrides ?? {}
-  const migratedArgs = { ...existingArgs }
-  for (const [agent, args] of Object.entries(DEFAULT_TUI_AGENT_ARGS)) {
-    if (agent in migratedArgs) {
-      continue
-    }
-    if (agent in commandOverrides) {
-      migratedArgs[agent as keyof typeof DEFAULT_TUI_AGENT_ARGS] = ''
-      continue
-    }
-    migratedArgs[agent as keyof typeof DEFAULT_TUI_AGENT_ARGS] = args
-  }
-
-  const migratedEnv = { ...existingEnv }
-  for (const [agent, env] of Object.entries(DEFAULT_TUI_AGENT_ENV)) {
-    if (agent in migratedEnv) {
-      continue
-    }
-    if (agent in commandOverrides) {
-      migratedEnv[agent as keyof typeof DEFAULT_TUI_AGENT_ENV] = {}
-      continue
-    }
-    migratedEnv[agent as keyof typeof DEFAULT_TUI_AGENT_ENV] = { ...env }
-  }
-
-  return {
-    // Why: legacy users could only customize per-agent launch defaults via
-    // command overrides, so those agents are treated as already user-owned.
-    agentDefaultArgs: migratedArgs,
-    agentDefaultEnv: migratedEnv,
-    agentYoloDefaultsMigrated: true
-  }
-}
-
-function normalizeGroupBy(groupBy: unknown): PersistedState['ui']['groupBy'] {
-  if (
-    groupBy === 'none' ||
-    groupBy === 'workspace-status' ||
-    groupBy === 'repo' ||
-    groupBy === 'pr-status'
-  ) {
-    return groupBy
-  }
-  if (groupBy === 'flat') {
-    return 'none'
-  }
-  return getDefaultUIState().groupBy
-}
-
-function normalizeShowDotfilesByWorktree(value: unknown): Record<string, boolean> {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    return {}
-  }
-  const out: Record<string, boolean> = {}
-  for (const [worktreeId, showDotfiles] of Object.entries(value as Record<string, unknown>)) {
-    if (
-      !worktreeId ||
-      worktreeId === '__proto__' ||
-      worktreeId === 'constructor' ||
-      worktreeId === 'prototype' ||
-      typeof showDotfiles !== 'boolean'
-    ) {
-      continue
-    }
-    out[worktreeId] = showDotfiles
-  }
-  return out
-}
-
-function mergeFeatureInteractions(
-  current: PersistedState['ui']['featureInteractions'],
-  incoming: PersistedState['ui']['featureInteractions']
-): PersistedState['ui']['featureInteractions'] {
-  const currentNormalized = normalizeFeatureInteractions(current)
-  const incomingNormalized = normalizeFeatureInteractions(incoming)
-  const merged = { ...currentNormalized }
-  for (const [id, incomingRecord] of Object.entries(incomingNormalized)) {
-    const currentRecord = currentNormalized[id as keyof typeof currentNormalized]
-    merged[id as keyof typeof merged] = currentRecord
-      ? {
-          firstInteractedAt: Math.min(
-            currentRecord.firstInteractedAt,
-            incomingRecord.firstInteractedAt
-          ),
-          interactionCount: Math.max(
-            currentRecord.interactionCount,
-            incomingRecord.interactionCount
-          )
-        }
-      : incomingRecord
-  }
-  return merged
-}
-
-function mergeContextualTourSeenIds(
-  current: PersistedState['ui']['contextualToursSeenIds'],
-  incoming: PersistedState['ui']['contextualToursSeenIds']
-): PersistedState['ui']['contextualToursSeenIds'] {
-  const merged = new Set(normalizeContextualTourIds(current))
-  for (const id of normalizeContextualTourIds(incoming)) {
-    merged.add(id)
-  }
-  return [...merged]
-}
-
-function stripReservedAndRetiredUIState(
-  value: Partial<PersistedState['ui']> | undefined
-): Partial<PersistedState['ui']> {
-  if (!value || typeof value !== 'object') {
-    return {}
-  }
-  const {
-    featureInteractionTelemetryBuckets: _reserved,
-    _worktreeCardModeDefaulted: _retiredCardModeMarker,
-    ...ui
-  } = value as Partial<PersistedState['ui']> & {
-    featureInteractionTelemetryBuckets?: unknown
-    _worktreeCardModeDefaulted?: unknown
-  }
-  void _reserved
-  void _retiredCardModeMarker
-  return ui
-}
-
-function normalizeSortBy(sortBy: unknown): PersistedState['ui']['sortBy'] {
-  if (
-    sortBy === 'smart' ||
-    sortBy === 'recent' ||
-    sortBy === 'repo' ||
-    sortBy === 'name' ||
-    sortBy === 'manual'
-  ) {
-    return sortBy
-  }
-  return getDefaultUIState().sortBy
-}
-
-function normalizeProjectOrderBy(projectOrderBy: unknown): PersistedState['ui']['projectOrderBy'] {
-  if (projectOrderBy === 'manual' || projectOrderBy === 'recent') {
-    return projectOrderBy
-  }
-  return getDefaultUIState().projectOrderBy
-}
-
-function normalizeRightSidebarTab(tab: unknown): PersistedState['ui']['rightSidebarTab'] {
-  if (
-    tab === 'explorer' ||
-    tab === 'search' ||
-    tab === 'vault' ||
-    tab === 'workspaces' ||
-    tab === 'source-control' ||
-    tab === 'checks' ||
-    tab === 'ports'
-  ) {
-    return tab
-  }
-  return getDefaultUIState().rightSidebarTab
-}
-
-function normalizeWorkspaceLineageByChildKey(
-  value: unknown
-): Record<WorkspaceKey, WorkspaceLineage> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {}
-  }
-  const normalized: Record<WorkspaceKey, WorkspaceLineage> = {}
-  for (const [key, entry] of Object.entries(value)) {
-    if (!isWorkspaceKey(key) || !entry || typeof entry !== 'object') {
-      continue
-    }
-    const lineage = entry as Partial<WorkspaceLineage>
-    const childWorkspaceKey =
-      typeof lineage.childWorkspaceKey === 'string' && isWorkspaceKey(lineage.childWorkspaceKey)
-        ? lineage.childWorkspaceKey
-        : key
-    const parentWorkspaceKey = lineage.parentWorkspaceKey
-    if (
-      !isWorkspaceKey(childWorkspaceKey) ||
-      typeof parentWorkspaceKey !== 'string' ||
-      !isWorkspaceKey(parentWorkspaceKey) ||
-      childWorkspaceKey !== key ||
-      childWorkspaceKey === parentWorkspaceKey
-    ) {
-      continue
-    }
-    normalized[childWorkspaceKey] = {
-      childWorkspaceKey,
-      childInstanceId: lineage.childInstanceId ?? null,
-      parentWorkspaceKey,
-      parentInstanceId: lineage.parentInstanceId ?? null,
-      origin: lineage.origin ?? 'cli',
-      capture: lineage.capture ?? { source: 'manual-action', confidence: 'inferred' },
-      ...(lineage.taskId ? { taskId: lineage.taskId } : {}),
-      ...(lineage.orchestrationRunId ? { orchestrationRunId: lineage.orchestrationRunId } : {}),
-      ...(lineage.coordinatorHandle ? { coordinatorHandle: lineage.coordinatorHandle } : {}),
-      ...(lineage.createdByTerminalHandle
-        ? { createdByTerminalHandle: lineage.createdByTerminalHandle }
-        : {}),
-      createdAt: Number.isFinite(lineage.createdAt) ? Number(lineage.createdAt) : Date.now()
-    }
-  }
-  return normalized
-}
-
-function normalizeRightSidebarExplorerView(
-  view: unknown,
-  tab?: unknown
-): PersistedState['ui']['rightSidebarExplorerView'] {
-  // Why: older builds persisted Search as a standalone activity tab.
-  if (tab === 'search') {
-    return 'search'
-  }
-  if (view === 'files' || view === 'search') {
-    return view
-  }
-  return getDefaultUIState().rightSidebarExplorerView
-}
-
-function normalizeNotificationSettings(value: unknown): NotificationSettings {
-  const defaults = getDefaultNotificationSettings()
-  const candidate =
-    value && typeof value === 'object' ? (value as Partial<NotificationSettings>) : {}
-  const rawSoundId = (candidate as { customSoundId?: unknown }).customSoundId
-  const customSoundId =
-    rawSoundId === 'system' ||
-    rawSoundId === 'two-tone' ||
-    rawSoundId === 'bong' ||
-    rawSoundId === 'thump' ||
-    rawSoundId === 'blip' ||
-    rawSoundId === 'sonar' ||
-    rawSoundId === 'blop' ||
-    rawSoundId === 'ding' ||
-    rawSoundId === 'clack' ||
-    rawSoundId === 'beep' ||
-    rawSoundId === 'custom'
-      ? rawSoundId
-      : rawSoundId === 'yiru' || rawSoundId === 'chime'
-        ? 'two-tone'
-        : rawSoundId === 'pop'
-          ? 'blop'
-          : typeof candidate.customSoundPath === 'string'
-            ? 'custom'
-            : defaults.customSoundId
-  const rawVolume = candidate.customSoundVolume
-  const customSoundVolume =
-    typeof rawVolume === 'number' && Number.isFinite(rawVolume)
-      ? Math.min(100, Math.max(0, rawVolume))
-      : defaults.customSoundVolume
-  return {
-    ...defaults,
-    ...candidate,
-    customSoundId,
-    customSoundVolume
-  }
 }
 
 function normalizeAutomationRunWorkspaceDisplayName(value: string | null): string | null {
@@ -1154,240 +543,6 @@ function backfillLegacyAutomationContexts(
   }
 }
 
-type LegacySshTarget = SshTarget & {
-  remoteWorkspaceSyncEnabled?: unknown
-  remoteWorkspaceSyncGracePeriodSeconds?: unknown
-}
-
-// Why: old persisted targets predate configHost. Default to label-based lookup
-// so imported SSH aliases keep resolving through ssh -G after upgrade.
-function normalizeSshTarget(t: SshTarget): SshTarget {
-  const target = { ...(t as LegacySshTarget) }
-  const legacySyncEnabled = target.remoteWorkspaceSyncEnabled
-  const currentGracePeriodSeconds = target.relayGracePeriodSeconds
-  const legacyGracePeriodSeconds = target.remoteWorkspaceSyncGracePeriodSeconds
-  const systemSshConnectionReuse = target.systemSshConnectionReuse
-  // Why: remote workspace sync now follows the SSH relay lifecycle, so the
-  // retired per-target sync opt-out and grace-period fields stop at disk load.
-  delete target.remoteWorkspaceSyncEnabled
-  delete target.remoteWorkspaceSyncGracePeriodSeconds
-  delete target.relayGracePeriodSeconds
-  delete target.systemSshConnectionReuse
-  // Why: synced legacy targets ignored stale relayGracePeriodSeconds values.
-  // Prefer the synced grace so a user's "unlimited" (0) survives migration.
-  const relayGracePeriodSeconds =
-    legacySyncEnabled === true && typeof legacyGracePeriodSeconds === 'number'
-      ? legacyGracePeriodSeconds
-      : currentGracePeriodSeconds
-  const normalized: SshTarget = {
-    ...target,
-    configHost: target.configHost ?? target.label ?? target.host
-  }
-  // Why: the old SSH form eagerly persisted 10800 even when the user had not
-  // chosen a timeout; treat that legacy default as the new implicit default.
-  if (
-    relayGracePeriodSeconds !== undefined &&
-    relayGracePeriodSeconds !== LEGACY_DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS
-  ) {
-    normalized.relayGracePeriodSeconds = relayGracePeriodSeconds
-  }
-  if (systemSshConnectionReuse === false) {
-    normalized.systemSshConnectionReuse = false
-  }
-  return normalized
-}
-
-// Why: shared by load-time merge and the IPC update handler so the same
-// strict whitelist guards every entry into onboarding state — arbitrary
-// renderer/disk input cannot inject unknown keys or wrong-typed values.
-// Returns only validated fields; unknown keys are dropped silently.
-// Why: returns Partial<...> with a partial checklist so the IPC update path
-// merges over current state without wiping previously-true keys. Invalid
-// top-level fields are OMITTED (not coerced to fallbacks) so partial updates
-// don't clobber valid persisted state; the load-path caller spreads defaults.
-type SanitizeOnboardingUpdateOptions = {
-  migrateLegacyProgress?: boolean
-}
-
-function remapLegacyOnboardingLastCompletedStep(
-  lastCompletedStep: number,
-  raw: Record<string, unknown>
-): number {
-  if (raw.outcome === 'completed' && lastCompletedStep >= 4) {
-    return ONBOARDING_FINAL_STEP
-  }
-  // Why: v3 was the four-step flow before the Windows terminal preference
-  // page. Step 4 already meant notifications, so open progress should resume
-  // there rather than treating it as the newly inserted Windows step.
-  if (raw.flowVersion === 3) {
-    return Math.min(4, lastCompletedStep)
-  }
-  // Why: v2 was the five-step flow; missing/older versions were seven-step
-  // data where step 4 was removed agent setup, not completed integrations.
-  if (raw.flowVersion === 2) {
-    if (lastCompletedStep === 3) {
-      return 2
-    }
-    if (lastCompletedStep >= 4) {
-      return 3
-    }
-    return lastCompletedStep
-  }
-  if (lastCompletedStep === 3) {
-    return 2
-  }
-  if (lastCompletedStep === 4) {
-    return 2
-  }
-  if (lastCompletedStep >= 5) {
-    return 3
-  }
-  return lastCompletedStep
-}
-
-export function sanitizeOnboardingUpdate(
-  input: unknown,
-  options: SanitizeOnboardingUpdateOptions = {}
-): Partial<Omit<OnboardingState, 'checklist'>> & { checklist?: Partial<OnboardingChecklistState> } {
-  if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    return {}
-  }
-  const raw = input as Record<string, unknown>
-  const out: Partial<Omit<OnboardingState, 'checklist'>> & {
-    checklist?: Partial<OnboardingChecklistState>
-  } = {}
-
-  if ('closedAt' in raw) {
-    // Why: `typeof raw.closedAt === 'number'` would let NaN/Infinity through;
-    // JSON.stringify writes those as `null` on save, which silently reverts
-    // closedAt and re-opens the wizard on next load. Require a finite,
-    // non-negative timestamp so live state matches what disk can persist.
-    if (typeof raw.closedAt === 'number' && Number.isFinite(raw.closedAt) && raw.closedAt >= 0) {
-      out.closedAt = raw.closedAt
-    } else if (raw.closedAt === null) {
-      out.closedAt = null
-    }
-    // else: omit — preserve existing persisted value on merge.
-  }
-  if ('outcome' in raw) {
-    const v = raw.outcome
-    if (v === 'completed' || v === 'dismissed') {
-      out.outcome = v as OnboardingOutcome
-    } else if (v === null) {
-      out.outcome = null
-    }
-    // else: omit.
-  }
-  if ('flowVersion' in raw) {
-    const v = raw.flowVersion
-    if (typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= ONBOARDING_FLOW_VERSION) {
-      out.flowVersion = v
-    }
-    // else: omit.
-  }
-  if ('lastCompletedStep' in raw) {
-    const v = raw.lastCompletedStep
-    if (typeof v === 'number' && Number.isInteger(v) && v >= -1) {
-      const isLegacyFlow =
-        options.migrateLegacyProgress && raw.flowVersion !== ONBOARDING_FLOW_VERSION
-      // Why: removing two wizard pages changed numeric meanings. Migrate raw
-      // legacy disk values before the new final-step bound can drop them.
-      const normalized = isLegacyFlow ? remapLegacyOnboardingLastCompletedStep(v, raw) : v
-      if (normalized <= ONBOARDING_FINAL_STEP) {
-        out.lastCompletedStep = normalized
-      }
-    }
-    // else: omit.
-  }
-  if ('checklist' in raw) {
-    const rawChecklist = raw.checklist
-    if (rawChecklist && typeof rawChecklist === 'object' && !Array.isArray(rawChecklist)) {
-      // Why: copy ONLY caller-sent boolean keys so partial updates (e.g.
-      // `{ addedRepo: true }`) don't reset other checklist items to false.
-      const defaults = getDefaultOnboardingState().checklist
-      const rc = rawChecklist as Record<string, unknown>
-      const checklist: Partial<OnboardingChecklistState> = {}
-      for (const key of Object.keys(defaults) as (keyof OnboardingChecklistState)[]) {
-        if (key in rc && typeof rc[key] === 'boolean') {
-          checklist[key] = rc[key] as boolean
-        }
-      }
-      out.checklist = checklist
-    }
-  }
-  if (options.migrateLegacyProgress) {
-    out.flowVersion = ONBOARDING_FLOW_VERSION
-  }
-  return out
-}
-
-function normalizeLoadedOnboardingState(
-  input: unknown,
-  defaults: OnboardingState
-): OnboardingState {
-  // Why: if we successfully parsed an existing yiru-data.json that lacks an
-  // onboarding block, this is an upgrade-cohort user — backfill as completed
-  // (not dismissed) so they don't get dropped into the wizard regardless of
-  // whether they currently have repos, SSH targets, or just non-default
-  // settings. Analytics still distinguish this from users who explicitly
-  // bailed mid-funnel.
-  if (!input) {
-    return {
-      ...defaults,
-      closedAt: Date.now(),
-      outcome: 'completed',
-      lastCompletedStep: ONBOARDING_FINAL_STEP
-    }
-  }
-  // Why: validate every persisted onboarding key explicitly via the shared
-  // sanitizer instead of spreading raw values. A type-flipped field on disk
-  // (string where number expected, unknown checklist key) is dropped or
-  // coerced to the default rather than poisoning in-memory state.
-  const sanitized = sanitizeOnboardingUpdate(input, {
-    migrateLegacyProgress: true
-  })
-  // Why: a persisted completed/dismissed outcome means the user left
-  // onboarding. Recover from a bad/missing/null closedAt instead of reopening
-  // the new-user sidebar checklist.
-  const recoveredClosedAt =
-    typeof sanitized.closedAt === 'number'
-      ? sanitized.closedAt
-      : sanitized.outcome !== null && sanitized.outcome !== undefined
-        ? Date.now()
-        : sanitized.closedAt
-  return {
-    ...defaults,
-    ...sanitized,
-    closedAt: recoveredClosedAt ?? defaults.closedAt,
-    checklist: {
-      ...defaults.checklist,
-      ...sanitized.checklist
-    }
-  }
-}
-
-function resolveSetupGuideSidebarDismissedOnLoad(
-  persistedDismissed: unknown,
-  onboarding: OnboardingState
-): boolean {
-  // Why: the sidebar checklist is a new-user prompt. Once onboarding is
-  // closed, persisted false is just the old default value, not a user opt-in.
-  return onboarding.closedAt !== null || persistedDismissed === true
-}
-
-// Why: read a settings field that was removed from GlobalSettings but can
-// still exist on disk. One-shot use for the inline-agents migration.
-function readDeprecatedExperimentFlag(parsed: PersistedState | undefined): boolean {
-  return (
-    (parsed?.settings as { experimentalAgentDashboard?: boolean } | undefined)
-      ?.experimentalAgentDashboard === true
-  )
-}
-
-function readLegacySidekickFlag(parsed: PersistedState | undefined): boolean | undefined {
-  return (parsed?.settings as { experimentalSidekick?: boolean } | undefined)?.experimentalSidekick
-}
-
 function sanitizeRepoUpstream(value: unknown): Repo['upstream'] | undefined {
   if (value === undefined) {
     return undefined
@@ -1504,108 +659,6 @@ function sanitizeRepoUpdatesForPersistence<
     }
   }
   return sanitized
-}
-
-function expandFloatingWorkspaceHomePath(input: string, home: string): string {
-  if (input === '~') {
-    return home
-  }
-  if (input.startsWith(`~${sep}`) || (process.platform === 'win32' && input.startsWith('~/'))) {
-    return join(home, input.slice(2))
-  }
-  return input
-}
-
-function resolveFloatingWorkspacePath(input: string, home: string): string {
-  const expanded = expandFloatingWorkspaceHomePath(input, home)
-  return isAbsolute(expanded) ? resolve(expanded) : resolve(home, expanded)
-}
-
-function canonicalizePersistedFloatingWorkspaceDirectory(
-  input: string,
-  home: string
-): string | null {
-  const trimmed = input.trim()
-  if (!trimmed) {
-    return null
-  }
-  try {
-    const canonicalPath = resolve(realpathSync(resolveFloatingWorkspacePath(trimmed, home)))
-    return statSync(canonicalPath).isDirectory() ? canonicalPath : null
-  } catch {
-    return null
-  }
-}
-
-function normalizeFloatingWorkspaceTrustedCwds(
-  input: unknown,
-  home: string
-): { trustedCwds: string[]; changed: boolean } {
-  const rawTrustedCwds = Array.isArray(input) ? input : []
-  const trustedCwds: string[] = []
-  const seen = new Set<string>()
-  let changed = input !== undefined && !Array.isArray(input)
-
-  for (const rawTrustedCwd of rawTrustedCwds) {
-    if (typeof rawTrustedCwd !== 'string') {
-      changed = true
-      continue
-    }
-    const trimmedTrustedCwd = rawTrustedCwd.trim()
-    if (!trimmedTrustedCwd) {
-      changed = true
-      continue
-    }
-    const canonicalPath = canonicalizePersistedFloatingWorkspaceDirectory(trimmedTrustedCwd, home)
-    const normalizedPath = canonicalPath ?? resolveFloatingWorkspacePath(trimmedTrustedCwd, home)
-    if (!normalizedPath) {
-      changed = true
-      continue
-    }
-    if (seen.has(normalizedPath)) {
-      changed = true
-      continue
-    }
-    seen.add(normalizedPath)
-    trustedCwds.push(normalizedPath)
-    if (rawTrustedCwd !== normalizedPath) {
-      changed = true
-    }
-  }
-
-  return { trustedCwds, changed }
-}
-
-function normalizeSshRemotePtyLease(value: unknown): SshRemotePtyLease | null {
-  if (!value || typeof value !== 'object') {
-    return null
-  }
-  const raw = value as Partial<SshRemotePtyLease>
-  if (typeof raw.targetId !== 'string' || typeof raw.ptyId !== 'string') {
-    return null
-  }
-  const state = raw.state ?? 'detached'
-  if (!['attached', 'detached', 'terminated', 'expired'].includes(state)) {
-    return null
-  }
-  const now = Date.now()
-  return {
-    targetId: raw.targetId,
-    ptyId: raw.ptyId,
-    ...(typeof raw.worktreeId === 'string' ? { worktreeId: raw.worktreeId } : {}),
-    ...(typeof raw.worktreeInstanceId === 'string' &&
-    raw.worktreeInstanceId.trim() &&
-    raw.worktreeInstanceId.length <= 512
-      ? { worktreeInstanceId: raw.worktreeInstanceId }
-      : {}),
-    ...(typeof raw.tabId === 'string' ? { tabId: raw.tabId } : {}),
-    ...(typeof raw.leafId === 'string' && raw.leafId.length <= 256 ? { leafId: raw.leafId } : {}),
-    state,
-    createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : now,
-    updatedAt: typeof raw.updatedAt === 'number' ? raw.updatedAt : now,
-    ...(typeof raw.lastAttachedAt === 'number' ? { lastAttachedAt: raw.lastAttachedAt } : {}),
-    ...(typeof raw.lastDetachedAt === 'number' ? { lastDetachedAt: raw.lastDetachedAt } : {})
-  }
 }
 
 type LayoutLeafNormalization = {
@@ -2211,84 +1264,9 @@ function remapAcknowledgedAgentPaneKeys(
   return { acknowledgements: next, changed }
 }
 
-// Why: bounds a corrupt/bloated persisted list — the gate only ever needs the
-// handful of Claude sessions a daemon can realistically keep alive.
-const MAX_CLAUDE_LIVE_PTY_SESSION_IDS = 200
-
 // Why: bound the removed-SSH-target history so remove/re-add churn can't grow
 // the state file without limit. Re-adoption only needs recent removals.
 const MAX_REMOVED_SSH_TARGET_TOMBSTONES = 50
-
-function normalizeClaudeLivePtySessionIds(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-  // Why: scan newest-first so the cap keeps the most recent ids, matching
-  // addClaudeLivePtySessionId's eviction policy while bounding the work done
-  // on an oversized/corrupt list.
-  const ids: string[] = []
-  for (let index = value.length - 1; index >= 0; index -= 1) {
-    const entry = value[index]
-    if (typeof entry !== 'string' || entry.length === 0 || entry.length > 512) {
-      continue
-    }
-    if (!ids.includes(entry)) {
-      ids.push(entry)
-    }
-    if (ids.length >= MAX_CLAUDE_LIVE_PTY_SESSION_IDS) {
-      break
-    }
-  }
-  return ids.toReversed()
-}
-
-function normalizeMigrationUnsupportedPtyEntries(value: unknown): MigrationUnsupportedPtyEntry[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-  return value.filter((entry): entry is MigrationUnsupportedPtyEntry => {
-    if (!entry || typeof entry !== 'object') {
-      return false
-    }
-    const candidate = entry as Partial<MigrationUnsupportedPtyEntry>
-    return (
-      typeof candidate.ptyId === 'string' &&
-      candidate.ptyId.length > 0 &&
-      (candidate.worktreeId === undefined || typeof candidate.worktreeId === 'string') &&
-      (candidate.tabId === undefined || typeof candidate.tabId === 'string') &&
-      (candidate.leafId === undefined || isTerminalLeafId(candidate.leafId)) &&
-      (candidate.paneKey === undefined || typeof candidate.paneKey === 'string') &&
-      candidate.reason === 'legacy-numeric-pane-key' &&
-      (candidate.source === 'local' || candidate.source === 'ssh') &&
-      Number.isFinite(candidate.updatedAt)
-    )
-  })
-}
-
-function normalizeLegacyPaneKeyAliasEntries(value: unknown): LegacyPaneKeyAliasEntry[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-  return value.filter((entry): entry is LegacyPaneKeyAliasEntry => {
-    if (!entry || typeof entry !== 'object') {
-      return false
-    }
-    const candidate = entry as Partial<LegacyPaneKeyAliasEntry>
-    if (
-      typeof candidate.ptyId !== 'string' ||
-      candidate.ptyId.trim().length === 0 ||
-      typeof candidate.legacyPaneKey !== 'string' ||
-      typeof candidate.stablePaneKey !== 'string' ||
-      !Number.isFinite(candidate.updatedAt)
-    ) {
-      return false
-    }
-    const legacy = parseLegacyNumericPaneKey(candidate.legacyPaneKey)
-    const relocatedSource = parsePaneKey(candidate.legacyPaneKey)
-    const stable = parsePaneKey(candidate.stablePaneKey)
-    return Boolean(stable && ((legacy && legacy.tabId === stable.tabId) || relocatedSource))
-  })
-}
 
 function registerPersistedPaneKeyAlias(entry: LegacyPaneKeyAliasEntry): void {
   if (parseLegacyNumericPaneKey(entry.legacyPaneKey)) {
@@ -2460,90 +1438,6 @@ function createMinimalPersistedTerminalTab(args: {
   }
 }
 
-function cloneWorkspaceSessionState(session: WorkspaceSessionState): WorkspaceSessionState {
-  return structuredClone(session)
-}
-
-function removeWorkspaceSessionOwner(
-  session: WorkspaceSessionState | undefined,
-  ownerKey: string
-): WorkspaceSessionState | undefined {
-  if (!session) {
-    return session
-  }
-  const next = cloneWorkspaceSessionState(session)
-  const removedTerminalTabs = next.tabsByWorktree?.[ownerKey] ?? []
-  if (next.tabsByWorktree) {
-    delete next.tabsByWorktree[ownerKey]
-  }
-  for (const tab of removedTerminalTabs) {
-    delete next.terminalLayoutsByTabId[tab.id]
-    if (next.activeTabId === tab.id) {
-      next.activeTabId = null
-    }
-  }
-
-  if (next.openFilesByWorktree) {
-    delete next.openFilesByWorktree[ownerKey]
-  }
-  if (next.activeFileIdByWorktree) {
-    delete next.activeFileIdByWorktree[ownerKey]
-  }
-  const browserWorkspaces = next.browserTabsByWorktree?.[ownerKey] ?? []
-  if (next.browserTabsByWorktree) {
-    delete next.browserTabsByWorktree[ownerKey]
-  }
-  if (next.browserPagesByWorkspace) {
-    for (const workspace of browserWorkspaces) {
-      delete next.browserPagesByWorkspace[workspace.id]
-    }
-  }
-  if (next.activeBrowserTabIdByWorktree) {
-    delete next.activeBrowserTabIdByWorktree[ownerKey]
-  }
-  if (next.activeTabTypeByWorktree) {
-    delete next.activeTabTypeByWorktree[ownerKey]
-  }
-  if (next.activeTabIdByWorktree) {
-    delete next.activeTabIdByWorktree[ownerKey]
-  }
-  if (next.unifiedTabs) {
-    delete next.unifiedTabs[ownerKey]
-  }
-  if (next.tabGroups) {
-    delete next.tabGroups[ownerKey]
-  }
-  if (next.tabGroupLayouts) {
-    delete next.tabGroupLayouts[ownerKey]
-  }
-  if (next.activeGroupIdByWorktree) {
-    delete next.activeGroupIdByWorktree[ownerKey]
-  }
-  if (next.lastVisitedAtByWorktreeId) {
-    delete next.lastVisitedAtByWorktreeId[ownerKey]
-  }
-  if (next.defaultTerminalTabsAppliedByWorktreeId) {
-    delete next.defaultTerminalTabsAppliedByWorktreeId[ownerKey]
-  }
-  if (next.sleepingAgentSessionsByPaneKey) {
-    for (const [paneKey, record] of Object.entries(next.sleepingAgentSessionsByPaneKey)) {
-      if (record.worktreeId === ownerKey) {
-        delete next.sleepingAgentSessionsByPaneKey[paneKey]
-      }
-    }
-  }
-  if (next.activeWorkspaceKey === ownerKey) {
-    next.activeWorkspaceKey = null
-  }
-  if (next.activeWorktreeId === ownerKey) {
-    next.activeWorktreeId = null
-  }
-  next.activeWorktreeIdsOnShutdown = next.activeWorktreeIdsOnShutdown?.filter(
-    (worktreeId) => worktreeId !== ownerKey
-  )
-  return next
-}
-
 function inferFolderScopeConnectionIdForMigration(args: {
   folderPath: string
   projectGroupId: string
@@ -2668,36 +1562,21 @@ export class Store {
   private state: PersistedState
   private readonly dataFile: string
   private readonly terminalScrollbackSnapshotStorage: TerminalScrollbackSnapshotStorage
-  private writeTimer: ReturnType<typeof setTimeout> | null = null
-  private pendingWrite: Promise<void> | null = null
-  private writeGeneration = 0
-  // Why: after a profile transfer rewrites this store's file on disk behind
-  // its back, the stale in-memory state must never be persisted again — a
-  // late sync flush before the relaunch would resurrect the moved project.
-  private writesFrozen = false
-  // Why: hash of the plaintext state as of the last successful write. Saves
-  // triggered by mutations that net out to identical state skip the full
-  // 1.6MB pretty-print + tmp write + rename. Hashing plaintext (not the
-  // written payload) because encrypt() uses a random IV per call, so the
-  // on-disk bytes differ even for identical state.
-  private lastWrittenStateHash: string | null = null
-  private firstPendingSaveAt: number | null = null
-  private githubCacheDirty = false
+  private readonly durableStateFile: DurableStateFile
+  private readonly githubCacheFile: GitHubCacheFile
+  private readonly notifications = new PersistedStateNotifications()
   private gitUsernameCache = new Map<string, string>()
   private loadNeedsSave = false
-  private settingsChangeListeners = new Set<
-    (
-      updates: Partial<GlobalSettings>,
-      settings: GlobalSettings,
-      originWebContentsId?: number
-    ) => void
-  >()
-  private uiChangeListeners = new Set<(ui: PersistedState['ui']) => void>()
 
   constructor(options: StoreOptions = {}) {
     // Why: profile switching creates more than one possible state path. Capture
     // the path per Store instance so late async writes cannot follow a global path.
     this.dataFile = options.dataFile ?? getDataFile()
+    this.durableStateFile = new DurableStateFile({
+      dataFile: this.dataFile,
+      readState: () => this.state
+    })
+    this.githubCacheFile = new GitHubCacheFile(this.dataFile)
     const profileSnapshotRoot = getProfileTerminalScrollbackSnapshotRoot(this.dataFile)
     const legacySnapshotRoot = getProfileTerminalScrollbackSnapshotRoot(getDataFile())
     this.terminalScrollbackSnapshotStorage = {
@@ -2811,94 +1690,7 @@ export class Store {
     return changed
   }
 
-  // Why (issue #1158): debounced writes fire as often as every 300ms during
-  // active use. The backup ring should capture meaningfully different moments,
-  // not five near-identical snapshots from one burst of store updates.
-  private shouldRotateBackups(now: number, dataFile: string): boolean {
-    try {
-      const mtime = statSync(backupPath(dataFile, 0)).mtimeMs
-      return now - mtime >= BACKUP_MIN_INTERVAL_MS
-    } catch {
-      return true
-    }
-  }
-
-  // Why: rotate oldest to discarded and shift .bak.i to .bak.i+1 by rename;
-  // then copy the current data file to .bak.0 so load() has a JSON recovery
-  // source even if a later primary write is truncated or corrupted.
-  private async rotateBackupsAsync(dataFile: string): Promise<void> {
-    if (!existsSync(dataFile)) {
-      return
-    }
-    await rm(backupPath(dataFile, BACKUP_COUNT - 1)).catch((err: unknown) => {
-      if (err && (err as NodeJS.ErrnoException).code !== 'ENOENT') {
-        console.error('[persistence] Failed to remove oldest backup:', err)
-      }
-    })
-    for (let i = BACKUP_COUNT - 2; i >= 0; i--) {
-      const src = backupPath(dataFile, i)
-      const dst = backupPath(dataFile, i + 1)
-      if (existsSync(src)) {
-        await rename(src, dst).catch((err) => {
-          console.error('[persistence] Failed to rotate backup', src, '->', dst, err)
-        })
-      }
-    }
-    await copyFile(dataFile, backupPath(dataFile, 0)).catch((err) => {
-      console.error('[persistence] Failed to snapshot current file to .bak.0:', err)
-    })
-  }
-
-  private rotateBackupsSync(dataFile: string): void {
-    if (!existsSync(dataFile)) {
-      return
-    }
-    try {
-      unlinkSync(backupPath(dataFile, BACKUP_COUNT - 1))
-    } catch (err) {
-      if (err && (err as NodeJS.ErrnoException).code !== 'ENOENT') {
-        console.error('[persistence] Failed to remove oldest backup:', err)
-      }
-    }
-    for (let i = BACKUP_COUNT - 2; i >= 0; i--) {
-      const src = backupPath(dataFile, i)
-      const dst = backupPath(dataFile, i + 1)
-      if (existsSync(src)) {
-        try {
-          renameSync(src, dst)
-        } catch (err) {
-          console.error('[persistence] Failed to rotate backup', src, '->', dst, err)
-        }
-      }
-    }
-    try {
-      copyFileSync(dataFile, backupPath(dataFile, 0))
-    } catch (err) {
-      console.error('[persistence] Failed to snapshot current file to .bak.0:', err)
-    }
-  }
-
-  private restoreFromBackup(dataFile: string): boolean {
-    for (let i = 0; i < BACKUP_COUNT; i++) {
-      const path = backupPath(dataFile, i)
-      if (!existsSync(path)) {
-        continue
-      }
-      try {
-        const raw = readFileSync(path, 'utf-8')
-        JSON.parse(raw)
-        mkdirSync(dirname(dataFile), { recursive: true })
-        writeFileSync(dataFile, raw, 'utf-8')
-        console.warn(`[persistence] Recovered state from backup slot ${i}: ${path}`)
-        return true
-      } catch (err) {
-        console.error(`[persistence] Backup slot ${i} unusable, trying next:`, err)
-      }
-    }
-    return false
-  }
-
-  private load(allowBackupRecovery = true): PersistedState {
+  private load(): PersistedState {
     // Capture once, at the top: this is the unambiguous "has the user run
     // Yiru before?" signal used by the telemetry cohort migration below.
     // Field-based inference (e.g., `settings.telemetry` presence) does not
@@ -2906,624 +1698,20 @@ export class Store {
     // would be absent on every pre-telemetry install and misclassify existing
     // users as fresh, flipping them to default-on in violation of the
     // social contract we installed them under.
-    const dataFile = this.dataFile
-    const fileExistedOnLoad = existsSync(dataFile)
-    logPersistenceStartupMilestone('persistence-load-start', {
-      fileExists: fileExistedOnLoad
-    })
-
-    let result: PersistedState | null = null
-    try {
-      if (fileExistedOnLoad) {
-        const readStartedAt = performance.now()
-        const raw = readFileSync(dataFile, 'utf-8')
-        logPersistenceStartupMilestone('persistence-read-done', {
-          bytes: Buffer.byteLength(raw),
-          durationMs: Math.round(performance.now() - readStartedAt)
-        })
-        logPersistenceStartupMilestone('persistence-json-parse-start')
-        const parsed = JSON.parse(raw) as PersistedState
-        logPersistenceStartupMilestone('persistence-json-parse-done')
-
-        // Why: secret settings are stored encrypted on disk via safeStorage.
-        // Decrypt at the load boundary so the rest of the app sees plaintext.
-        if (parsed.settings?.opencodeSessionCookie) {
-          parsed.settings.opencodeSessionCookie = decrypt(parsed.settings.opencodeSessionCookie)
-        }
-        if (parsed.settings?.httpProxyUrl) {
-          parsed.settings.httpProxyUrl = decrypt(parsed.settings.httpProxyUrl)
-        }
-        if (parsed.ui?.browserKagiSessionLink) {
-          parsed.ui.browserKagiSessionLink = decryptOptionalSecret(parsed.ui.browserKagiSessionLink)
-        }
-
-        // Merge with defaults in case new fields were added
-        const homeDir = homedir()
-        const defaults = getDefaultPersistedState(homeDir)
-        const systemTypographyDefaultsMigrated =
-          parsed.settings?.systemTypographyDefaultsMigrated === true
-        const rawAppFontFamily = parsed.settings?.appFontFamily
-        const rawTerminalFontSize = parsed.settings?.terminalFontSize
-        // Why: old defaults were persisted like user choices. Move only those
-        // inherited values once; the guard preserves later Geist/14px selections.
-        const migratedAppFontFamily = systemTypographyDefaultsMigrated
-          ? (rawAppFontFamily ?? defaults.settings.appFontFamily)
-          : rawAppFontFamily === undefined || rawAppFontFamily === 'Geist'
-            ? defaults.settings.appFontFamily
-            : rawAppFontFamily
-        const migratedTerminalFontSize = systemTypographyDefaultsMigrated
-          ? (rawTerminalFontSize ?? defaults.settings.terminalFontSize)
-          : rawTerminalFontSize === undefined || rawTerminalFontSize === 14
-            ? defaults.settings.terminalFontSize
-            : rawTerminalFontSize
-        if (!systemTypographyDefaultsMigrated) {
-          this.loadNeedsSave = true
-        }
-        const migratedTerminalScrollback = migrateTerminalScrollbackRows(parsed.settings)
-        if (migratedTerminalScrollback.needsSave) {
-          this.loadNeedsSave = true
-        }
-        const migratedTerminalTuiScrollSensitivity = migrateTerminalTuiScrollSensitivityDefault(
-          parsed.settings
-        )
-        if (migratedTerminalTuiScrollSensitivity.needsSave) {
-          this.loadNeedsSave = true
-        }
-        const rawSourceControlAi = parsed.settings?.sourceControlAi
-        const rawSourceControlAiMissing = rawSourceControlAi === undefined
-        const rawSourceControlAiActionsMissing =
-          rawSourceControlAi !== undefined && rawSourceControlAi.actions === undefined
-        if (rawSourceControlAiMissing || rawSourceControlAiActionsMissing) {
-          this.loadNeedsSave = true
-        }
-        const legacyCommitMessageAi = parsed.settings?.commitMessageAi
-        const migratedSourceControlAi = rawSourceControlAiMissing
-          ? sourceControlAiSettingsFromLegacy(
-              legacyCommitMessageAi ?? defaults.settings.commitMessageAi
-            )
-          : mergeLegacyCommitMessageAiIntoSourceControlAi(
-              parsed.settings?.sourceControlAi,
-              legacyCommitMessageAi
-            )
-        // Why: before the layout-aware 'auto' mode shipped (issue #903),
-        // terminalMacOptionAsAlt defaulted to 'true' globally. That silently
-        // broke Option-layer characters (@ on Turkish via Option+Q, @ on
-        // German via Option+L, € on French via Option+E) for non-US users.
-        // We can't distinguish a persisted 'true' that the user chose
-        // explicitly from one they inherited from the old default — so on
-        // first launch after upgrade, flip 'true' back to 'auto' and let
-        // the renderer's keyboard-layout probe pick the right value per
-        // layout. US users land on 'true' via detection (no change); non-US
-        // users land on 'false' (correct). 'false'/'left'/'right' are
-        // definitionally explicit choices (they never matched the old
-        // default) so we carry those forward unchanged. The migrated flag
-        // guards against re-running this on subsequent launches.
-        const rawOptionAsAlt = parsed.settings?.terminalMacOptionAsAlt
-        const alreadyMigrated = parsed.settings?.terminalMacOptionAsAltMigrated === true
-        const migratedOptionAsAlt: 'auto' | 'true' | 'false' | 'left' | 'right' = alreadyMigrated
-          ? (rawOptionAsAlt ?? 'auto')
-          : rawOptionAsAlt === undefined || rawOptionAsAlt === 'true'
-            ? 'auto'
-            : rawOptionAsAlt
-        const floatingTerminalDefaultedForAllUsers =
-          parsed.settings?.floatingTerminalDefaultedForAllUsers === true
-        // Why: early floating-terminal builds persisted the old off-by-default
-        // value into user profiles. Flip only unmigrated profiles so a later
-        // deliberate opt-out still survives reload.
-        const migratedFloatingTerminalEnabled = floatingTerminalDefaultedForAllUsers
-          ? (parsed.settings?.floatingTerminalEnabled ?? true)
-          : true
-        const floatingTerminalCwdMigrated =
-          parsed.settings?.floatingTerminalCwdMigratedToAppWorkspace === true
-        // Why: an earlier migration wrote '' for the default app-owned notes
-        // directory. Floating terminals should still open at home by default;
-        // markdown notes resolve their app-owned directory through a separate IPC.
-        const migratedFloatingTerminalCwd = floatingTerminalCwdMigrated
-          ? !parsed.settings?.floatingTerminalCwd
-            ? defaults.settings.floatingTerminalCwd
-            : parsed.settings.floatingTerminalCwd
-          : parsed.settings?.floatingTerminalCwd === undefined
-            ? defaults.settings.floatingTerminalCwd
-            : parsed.settings.floatingTerminalCwd
-        const normalizedFloatingTerminalTrustedCwds = normalizeFloatingWorkspaceTrustedCwds(
-          parsed.settings?.floatingTerminalTrustedCwds,
-          homeDir
-        )
-        const migratedFloatingTerminalTrustedCwds = [
-          ...normalizedFloatingTerminalTrustedCwds.trustedCwds
-        ]
-        const rawLegacyFloatingTerminalCwd = parsed.settings?.floatingTerminalCwd
-        const shouldTrustLegacyFloatingTerminalCwd =
-          !floatingTerminalCwdMigrated &&
-          typeof rawLegacyFloatingTerminalCwd === 'string' &&
-          rawLegacyFloatingTerminalCwd.trim().length > 0 &&
-          rawLegacyFloatingTerminalCwd.trim() !== '~'
-        if (!floatingTerminalCwdMigrated) {
-          this.loadNeedsSave = true
-        }
-        if (shouldTrustLegacyFloatingTerminalCwd && rawLegacyFloatingTerminalCwd) {
-          const canonicalLegacyCwd = canonicalizePersistedFloatingWorkspaceDirectory(
-            rawLegacyFloatingTerminalCwd,
-            homeDir
-          )
-          if (
-            canonicalLegacyCwd &&
-            !migratedFloatingTerminalTrustedCwds.includes(canonicalLegacyCwd)
-          ) {
-            // Why: pre-grant profiles with an explicit Floating Workspace cwd
-            // already represented user intent; migrate only that legacy value.
-            migratedFloatingTerminalTrustedCwds.push(canonicalLegacyCwd)
-            normalizedFloatingTerminalTrustedCwds.changed = true
-          }
-        }
-        if (normalizedFloatingTerminalTrustedCwds.changed) {
-          this.loadNeedsSave = true
-        }
-        const experimentalActivityDefaultedOffForAllUsers =
-          parsed.settings?.experimentalActivityDefaultedOffForAllUsers === true
-        // Why: the Agents view moved back behind Experimental. Flip every
-        // pre-migration profile off once, then preserve future user opt-ins.
-        const migratedExperimentalActivity = experimentalActivityDefaultedOffForAllUsers
-          ? (parsed.settings?.experimentalActivity ?? false)
-          : false
-        const autoRenameBranchFromWorkDefaultedOn =
-          parsed.settings?.autoRenameBranchFromWorkDefaultedOn === true
-        // Why: default-on rollout should activate old profiles once, but a
-        // later Settings opt-out must survive reloads.
-        const migratedAutoRenameBranchFromWork = normalizeAutoRenameBranchFromWorkDefaultOn(
-          parsed.settings
-        )
-        const migratedTerminalCursorStyle = normalizeTerminalCursorStyleDefault(parsed.settings)
-        const migratedTerminalLineHeight = normalizeTerminalLineHeight(
-          parsed.settings?.terminalLineHeight
-        )
-        const terminalRightClickToPasteDefaultedForPlatform =
-          parsed.settings?.terminalRightClickToPasteDefaultedForPlatform === true
-        if (!terminalRightClickToPasteDefaultedForPlatform) {
-          this.loadNeedsSave = true
-        }
-        if (
-          parsed.settings?.terminalLineHeight !== undefined &&
-          parsed.settings.terminalLineHeight !== migratedTerminalLineHeight
-        ) {
-          this.loadNeedsSave = true
-        }
-        const primarySelectionDefaultedForLinux =
-          parsed.settings?.primarySelectionMiddleClickPasteDefaultedForLinux === true
-        const primarySelectionDefaultedForTerminalDefaults =
-          parsed.settings?.primarySelectionMiddleClickPasteDefaultedForTerminalDefaults === true
-        const primarySelectionPlatformDefaultEnabled =
-          defaults.settings.primarySelectionMiddleClickPaste === true
-        const primarySelectionAlreadyDefaultedForPlatform =
-          primarySelectionDefaultedForTerminalDefaults ||
-          (process.platform === 'linux' && primarySelectionDefaultedForLinux)
-        const migratePrimarySelectionPlatformDefault =
-          primarySelectionPlatformDefaultEnabled && !primarySelectionAlreadyDefaultedForPlatform
-        const stampPrimarySelectionTerminalDefaults =
-          primarySelectionPlatformDefaultEnabled && !primarySelectionDefaultedForTerminalDefaults
-        if (migratePrimarySelectionPlatformDefault || stampPrimarySelectionTerminalDefaults) {
-          this.loadNeedsSave = true
-        }
-        const claudeAgentTeamsDefaultDisabledMigrated =
-          parsed.settings?.claudeAgentTeamsDefaultDisabledMigrated === true
-        if (!claudeAgentTeamsDefaultDisabledMigrated) {
-          this.loadNeedsSave = true
-        }
-        const migratedDisabledTuiAgents = normalizeDisabledTuiAgents(
-          parsed.settings?.disabledTuiAgents
-        )
-        const migratedAgentYoloDefaults = migrateAgentYoloDefaults(parsed.settings)
-        if (
-          parsed.settings?.agentYoloDefaultsMigrated !== true ||
-          hasUnsupportedTuiAgentArgs('opencode', parsed.settings?.agentDefaultArgs?.opencode) ||
-          hasUnsupportedTuiAgentArgs('kilo', parsed.settings?.agentDefaultArgs?.kilo)
-        ) {
-          this.loadNeedsSave = true
-        }
-        if (
-          !claudeAgentTeamsDefaultDisabledMigrated &&
-          !migratedDisabledTuiAgents.includes('claude-agent-teams')
-        ) {
-          migratedDisabledTuiAgents.push('claude-agent-teams')
-        }
-        const migratedWindowsRuntimeDefault =
-          parsed.settings?.localWindowsRuntimeDefault === undefined
-            ? deriveGlobalWindowsRuntimeDefaultFromLegacySettings(parsed.settings).defaultRuntime
-            : parsed.settings.localWindowsRuntimeDefault
-        if (
-          parsed.settings?.localWindowsRuntimeDefault === undefined &&
-          migratedWindowsRuntimeDefault.kind === 'wsl'
-        ) {
-          this.loadNeedsSave = true
-        }
-        if (!autoRenameBranchFromWorkDefaultedOn) {
-          this.loadNeedsSave = true
-        }
-        const normalizedOnboarding = normalizeLoadedOnboardingState(
-          parsed.onboarding,
-          defaults.onboarding
-        )
-        if (!parsed.onboarding) {
-          this.loadNeedsSave = true
-        }
-        const normalizedProjectGroups = normalizeProjectGroups(parsed.projectGroups)
-        const normalizedSourceControlGroupOrder = normalizeSourceControlGroupOrder(
-          parsed.settings?.sourceControlGroupOrder
-        )
-        // Why: the updated worktree card is now the only implementation; drop
-        // retired rollout/layout flags so old profiles cannot carry dead state.
-        if (
-          [
-            'experimentalNewWorktreeCardStyle',
-            'compactWorktreeCards',
-            'experimentalCompactWorktreeCards'
-          ].some((key) => Object.prototype.hasOwnProperty.call(parsed.settings ?? {}, key))
-        ) {
-          this.loadNeedsSave = true
-        }
-        if (
-          parsed.settings?.sourceControlGroupOrder !== undefined &&
-          parsed.settings.sourceControlGroupOrder !== normalizedSourceControlGroupOrder
-        ) {
-          this.loadNeedsSave = true
-        }
-        result = {
-          ...defaults,
-          ...parsed,
-          featureInteractionTelemetryBuckets: normalizeFeatureInteractionTelemetryBuckets(
-            parsed.featureInteractionTelemetryBuckets
-          ),
-          projectGroups: normalizedProjectGroups,
-          folderWorkspaces: normalizeFolderWorkspaces(
-            parsed.folderWorkspaces,
-            normalizedProjectGroups
-          ),
-          worktreeLineageById: parsed.worktreeLineageById ?? {},
-          workspaceLineageByChildKey: normalizeWorkspaceLineageByChildKey(
-            parsed.workspaceLineageByChildKey
-          ),
-          settings: {
-            ...defaults.settings,
-            ...stripRetiredGlobalSettings(parsed.settings),
-            prBotAuthorOverrides: normalizePRBotAuthorOverrides(
-              parsed.settings?.prBotAuthorOverrides
-            ),
-            // Why: v1.3.42 renamed the cosmetic sidekick setting to pet. Carry
-            // the old persisted flag forward once so enabled users don't lose it.
-            experimentalPet:
-              parsed.settings?.experimentalPet ?? readLegacySidekickFlag(parsed) ?? false,
-            // Why: early primary-selection builds saved the disabled default.
-            // Flip Linux/macOS profiles once so terminal-style defaults match
-            // platform convention; the guards preserve future opt-outs.
-            primarySelectionMiddleClickPaste: migratePrimarySelectionPlatformDefault
-              ? true
-              : (parsed.settings?.primarySelectionMiddleClickPaste ??
-                defaults.settings.primarySelectionMiddleClickPaste),
-            primarySelectionMiddleClickPasteDefaultedForLinux:
-              primarySelectionDefaultedForLinux ||
-              (process.platform === 'linux' && migratePrimarySelectionPlatformDefault),
-            primarySelectionMiddleClickPasteDefaultedForTerminalDefaults:
-              primarySelectionDefaultedForTerminalDefaults || stampPrimarySelectionTerminalDefaults,
-            ...migratedAutoRenameBranchFromWork,
-            ...migratedTerminalCursorStyle,
-            terminalLineHeight: migratedTerminalLineHeight,
-            // Why: the old global true default was inherited, while false was
-            // always an explicit opt-out and must survive this one-shot reset.
-            terminalRightClickToPaste: terminalRightClickToPasteDefaultedForPlatform
-              ? (parsed.settings?.terminalRightClickToPaste ??
-                defaults.settings.terminalRightClickToPaste)
-              : parsed.settings?.terminalRightClickToPaste === false
-                ? false
-                : defaults.settings.terminalRightClickToPaste,
-            terminalRightClickToPasteDefaultedForPlatform: true,
-            ...migratedTerminalTuiScrollSensitivity.settings,
-            experimentalActivity: migratedExperimentalActivity,
-            experimentalActivityDefaultedOffForAllUsers: true,
-            terminalMacOptionAsAlt: migratedOptionAsAlt,
-            terminalMacOptionAsAltMigrated: true,
-            localWindowsRuntimeDefault: migratedWindowsRuntimeDefault,
-            floatingTerminalEnabled: migratedFloatingTerminalEnabled,
-            floatingTerminalDefaultedForAllUsers: true,
-            floatingTerminalCwd: migratedFloatingTerminalCwd,
-            floatingTerminalTrustedCwds: migratedFloatingTerminalTrustedCwds,
-            floatingTerminalCwdMigratedToAppWorkspace: true,
-            terminalScrollbackRows: migratedTerminalScrollback.rows,
-            terminalQuickCommands: normalizeTerminalQuickCommands(
-              parsed.settings?.terminalQuickCommands
-            ),
-            terminalCustomThemes: normalizeTerminalCustomThemes(
-              parsed.settings?.terminalCustomThemes
-            ),
-            appIcon: normalizeAppIconId(parsed.settings?.appIcon),
-            loaderStyle: normalizeLoaderStyle(parsed.settings?.loaderStyle),
-            languageServer: normalizeLanguageServerSettings(parsed.settings?.languageServer),
-            appFontFamily: migratedAppFontFamily,
-            terminalFontSize: migratedTerminalFontSize,
-            systemTypographyDefaultsMigrated: true,
-            // Why: persisted settings can be user-edited or written by older
-            // builds; keep tray-minimize false unless the stored value is true.
-            minimizeToTrayOnClose: parsed.settings?.minimizeToTrayOnClose === true,
-            // Why: missing means default-on, and the value must round-trip
-            // unchanged on non-mac hosts; the darwin consumers gate the effect.
-            showMenuBarIcon: parsed.settings?.showMenuBarIcon !== false,
-            uiLanguage: normalizeUiLanguage(parsed.settings?.uiLanguage),
-            terminalShortcutPolicy: normalizeTerminalShortcutPolicy(
-              parsed.settings?.terminalShortcutPolicy
-            ),
-            disabledTuiAgents: migratedDisabledTuiAgents,
-            ...migratedAgentYoloDefaults,
-            claudeAgentTeamsDefaultDisabledMigrated: true,
-            openInApplications: normalizeOpenInApplications(parsed.settings?.openInApplications, {
-              seedDefaults: true
-            }),
-            notifications: normalizeNotificationSettings(parsed.settings?.notifications),
-            sourceControlAi: migratedSourceControlAi,
-            sourceControlGroupOrder: normalizedSourceControlGroupOrder,
-            // Why: new builds read sourceControlAi, but rollback builds still
-            // write commitMessageAi; after merging those writes, refresh the
-            // legacy projection for continued rollback compatibility.
-            commitMessageAi: projectSourceControlAiToLegacyCommitMessageAi(
-              migratedSourceControlAi,
-              parsed.settings?.commitMessageAi ?? defaults.settings.commitMessageAi
-            ),
-            voice: {
-              ...getDefaultVoiceSettings(),
-              ...parsed.settings?.voice
-            }
-          },
-          // Why: 'recent' used to mean the weighted smart sort. One-shot
-          // migration moves it to 'smart'; the flag prevents re-firing after
-          // a user intentionally selects the new last-activity 'recent' sort.
-          // Gate on the *raw* persisted value, not the normalized one: the
-          // default sortBy is now 'recent', so a fresh install with no
-          // persisted sortBy would otherwise be mis-migrated to 'smart'.
-          ui: (() => {
-            const rawSort = parsed.ui?.sortBy
-            const sort = normalizeSortBy(rawSort)
-            const migrate = !parsed.ui?._sortBySmartMigrated && rawSort === 'recent'
-            const rightSidebarOpen =
-              typeof parsed.ui?.rightSidebarOpen === 'boolean'
-                ? parsed.ui.rightSidebarOpen
-                : typeof parsed.settings?.rightSidebarOpenByDefault === 'boolean'
-                  ? parsed.settings.rightSidebarOpenByDefault
-                  : defaults.ui.rightSidebarOpen
-            if (typeof parsed.ui?.rightSidebarOpen !== 'boolean') {
-              this.loadNeedsSave = true
-            }
-            const workspaceStatusesDefaultOrderMigrated =
-              parsed.ui?._workspaceStatusesDefaultOrderMigrated === true
-            // Why: a short-lived default put Done on the left. Repair only
-            // the exact raw payload once; user-authored reorders then survive.
-            const workspaceStatusesReorderedDefaultRepaired =
-              parsed.ui?._workspaceStatusesReorderedDefaultRepaired === true
-            // Why: only exact legacy default payloads are migrated; users who
-            // customized status labels, colors, icons, or order keep theirs.
-            const workspaceStatusesDefaultWorkflowMigrated =
-              parsed.ui?._workspaceStatusesDefaultWorkflowMigrated === true
-            // Why: visual migration has its own guard so later user choices
-            // of valid legacy color/icon IDs are preserved by runtime writes.
-            const workspaceStatusesDefaultVisualsMigrated =
-              parsed.ui?._workspaceStatusesDefaultVisualsMigrated === true
-            const workspaceStatuses = normalizePersistedWorkspaceStatuses(
-              parsed.ui?.workspaceStatuses,
-              {
-                migrateDefaultWorkflowStatuses: !workspaceStatusesDefaultWorkflowMigrated,
-                repairReorderedDefaultStatuses: !workspaceStatusesReorderedDefaultRepaired,
-                migrateLegacyDefaultStatusVisuals: !workspaceStatusesDefaultVisualsMigrated
-              }
-            )
-            if (
-              !workspaceStatusesDefaultOrderMigrated ||
-              !workspaceStatusesReorderedDefaultRepaired ||
-              !workspaceStatusesDefaultWorkflowMigrated ||
-              !workspaceStatusesDefaultVisualsMigrated
-            ) {
-              this.loadNeedsSave = true
-            }
-            const rawCardProps = parsed.ui?.worktreeCardProperties
-            if (
-              Object.prototype.hasOwnProperty.call(parsed.ui ?? {}, '_worktreeCardModeDefaulted')
-            ) {
-              this.loadNeedsSave = true
-            }
-            const inlineAgentsMigrated = parsed.ui?._inlineAgentsDefaultedForAllUsers === true
-            const expandedCardPropsMigrated =
-              parsed.ui?._expandedWorktreeCardPropertiesDefaulted === true
-            const hadExperimentOn = readDeprecatedExperimentFlag(parsed)
-            const deliberateUncheck =
-              hadExperimentOn &&
-              Array.isArray(rawCardProps) &&
-              !rawCardProps.includes('inline-agents')
-            const needsInlineAgentsMigration =
-              !inlineAgentsMigrated &&
-              !deliberateUncheck &&
-              Array.isArray(rawCardProps) &&
-              !rawCardProps.includes('inline-agents')
-            const migratedCardProps = (() => {
-              if (!Array.isArray(rawCardProps)) {
-                return undefined
-              }
-              const candidate = needsInlineAgentsMigration
-                ? [...rawCardProps, 'inline-agents' as const]
-                : rawCardProps
-              const expandedCandidate = (() => {
-                if (expandedCardPropsMigrated) {
-                  return candidate
-                }
-                const next = [...candidate]
-                if (!candidate.includes('ports')) {
-                  next.push('ports' as const)
-                }
-                return next
-              })()
-              const normalized = normalizeWorktreeCardProperties(expandedCandidate)
-              const changed =
-                normalized.length !== rawCardProps.length ||
-                normalized.some((property, index) => property !== rawCardProps[index])
-              return changed ? normalized : undefined
-            })()
-            if (
-              migratedCardProps !== undefined ||
-              !inlineAgentsMigrated ||
-              !expandedCardPropsMigrated
-            ) {
-              this.loadNeedsSave = true
-            }
-            const setupGuideSidebarDismissed = resolveSetupGuideSidebarDismissedOnLoad(
-              parsed.ui?.setupGuideSidebarDismissed,
-              normalizedOnboarding
-            )
-            if (
-              parsed.ui?.setupGuideSidebarDismissed !== setupGuideSidebarDismissed &&
-              (setupGuideSidebarDismissed || parsed.ui?.setupGuideSidebarDismissed !== undefined)
-            ) {
-              this.loadNeedsSave = true
-            }
-            // Why: only upgraded profiles that still use the new default get
-            // the one-time usage-display change notice; brand-new profiles and
-            // users who already chose remaining stay quiet.
-            const usagePercentageDisplayChangeNoticeDismissed =
-              resolveUsagePercentageDisplayChangeNoticeDismissed({
-                rawDismissed: parsed.ui?.usagePercentageDisplayChangeNoticeDismissed,
-                rawUsagePercentageDisplay: parsed.ui?.usagePercentageDisplay,
-                isExistingProfile: isExistingPersistedProfile({
-                  repoCount: parsed.repos?.length ?? 0,
-                  onboardingClosedAt: normalizedOnboarding.closedAt,
-                  ui: parsed.ui
-                })
-              })
-            if (
-              parsed.ui?.usagePercentageDisplayChangeNoticeDismissed !==
-              usagePercentageDisplayChangeNoticeDismissed
-            ) {
-              this.loadNeedsSave = true
-            }
-            return {
-              ...defaults.ui,
-              ...stripReservedAndRetiredUIState(parsed.ui),
-              // Why: migrate once from the retired Appearance setting only
-              // when no explicit persisted chrome preference exists yet.
-              rightSidebarOpen,
-              rightSidebarTab: normalizeRightSidebarTab(parsed.ui?.rightSidebarTab),
-              setupGuideSidebarDismissed,
-              usagePercentageDisplayChangeNoticeDismissed,
-              setupGuideBrowserMilestoneMigrated:
-                typeof parsed.ui?.setupGuideBrowserMilestoneMigrated === 'boolean'
-                  ? parsed.ui.setupGuideBrowserMilestoneMigrated
-                  : false,
-              setupGuideBrowserMilestoneLegacyComplete:
-                parsed.ui?.setupGuideBrowserMilestoneLegacyComplete === true,
-              sortBy: migrate ? ('smart' as const) : sort,
-              showDotfilesByWorktree: normalizeShowDotfilesByWorktree(
-                parsed.ui?.showDotfilesByWorktree
-              ),
-              workspaceStatuses,
-              _workspaceStatusesDefaultOrderMigrated: true,
-              _workspaceStatusesReorderedDefaultRepaired: true,
-              _workspaceStatusesDefaultWorkflowMigrated: true,
-              _workspaceStatusesDefaultVisualsMigrated: true,
-              _sortBySmartMigrated: true,
-              ...(migratedCardProps !== undefined
-                ? { worktreeCardProperties: migratedCardProps }
-                : {}),
-              // Why: keep stamping the legacy flag for forward-compat with
-              // a rollback to a pre-default-on build that still reads it.
-              // The new flag is the one that actually gates the migration.
-              _inlineAgentsDefaultedForExperiment: true,
-              _inlineAgentsDefaultedForAllUsers: true,
-              _expandedWorktreeCardPropertiesDefaulted: true
-            }
-          })(),
-          // Why: the workspace session is the most volatile persisted surface
-          // (schema evolves per release, daemon session IDs embedded in it).
-          // Zod-validate at the read boundary so a field-type flip from an
-          // older build — or a truncated write from a crash — gets rejected
-          // cleanly instead of poisoning Zustand state and crashing the
-          // renderer on mount. On validation failure, fall back to defaults
-          // and log; a corrupt session file shouldn't trap the user out.
-          workspaceSession: (() => {
-            if (parsed.workspaceSession === undefined) {
-              return defaults.workspaceSession
-            }
-            const result = parseWorkspaceSession(parsed.workspaceSession)
-            if (!result.ok) {
-              console.error(
-                '[persistence] Corrupt workspace session, using defaults:',
-                result.error
-              )
-              return defaults.workspaceSession
-            }
-            return { ...defaults.workspaceSession, ...result.value }
-          })(),
-          // Why: per-host session partitions for non-'local' hosts. 'local'
-          // stays in workspaceSession (legacy field) so a downgrade still
-          // reads the user's workspace. Each entry is zod-validated the same
-          // way as the legacy blob — a corrupt partition drops to that host's
-          // defaults without poisoning the others.
-          workspaceSessionsByHostId: parseWorkspaceSessionsByHostId(
-            parsed.workspaceSessionsByHostId,
-            defaults.workspaceSession
-          ),
-          sshTargets: (parsed.sshTargets ?? []).map(normalizeSshTarget),
-          deletedSshConfigAliases: Array.isArray(parsed.deletedSshConfigAliases)
-            ? parsed.deletedSshConfigAliases.filter(
-                (alias): alias is string => typeof alias === 'string'
-              )
-            : [],
-          sshRemotePtyLeases: (parsed.sshRemotePtyLeases ?? [])
-            .map(normalizeSshRemotePtyLease)
-            .filter((lease): lease is SshRemotePtyLease => lease !== null),
-          claudeLivePtySessionIds: normalizeClaudeLivePtySessionIds(parsed.claudeLivePtySessionIds),
-          migrationUnsupportedPtyEntries: normalizeMigrationUnsupportedPtyEntries(
-            parsed.migrationUnsupportedPtyEntries
-          ),
-          legacyPaneKeyAliasEntries: normalizeLegacyPaneKeyAliasEntries(
-            parsed.legacyPaneKeyAliasEntries
-          ),
-          automations: Array.isArray(parsed.automations) ? parsed.automations : [],
-          automationRuns: (() => {
-            if (!Array.isArray(parsed.automationRuns)) {
-              return []
-            }
-            const runs = pruneAutomationRuns(backfillAutomationRunNumbers(parsed.automationRuns))
-            // Why: nothing else on the load path marks state dirty, so without
-            // this an oversized legacy file only shrinks at the next unrelated save.
-            if (runs.length !== parsed.automationRuns.length) {
-              this.loadNeedsSave = true
-            }
-            return runs
-          })(),
-          onboarding: normalizedOnboarding
-        }
-      }
-    } catch (err) {
-      console.error('[persistence] Failed to load primary state, trying backups:', err)
+    const decoded = this.durableStateFile.readDecoded(({ value, fileExistedOnLoad }) =>
+      decodePersistedState(value, {
+        homeDir: homedir(),
+        platform: process.platform,
+        fileExistedOnLoad,
+        createInstallId: randomUUID
+      })
+    )
+    this.loadNeedsSave ||= decoded.needsSave
+    for (const warning of decoded.warnings) {
+      const scope = warning.hostId ? ` for host ${warning.hostId}` : ''
+      console.error(`[persistence] ${warning.code}${scope}:`, warning.detail)
     }
-
-    // Corrupt-file catch path and "no file on disk" path converge here. The
-    // telemetry migration below runs on whichever branch produced `result`,
-    // because a user whose `yiru-data.json` got corrupted is not a fresh
-    // install of the telemetry release — they still count as existing and
-    // must see the opt-in banner, not the default-on toast.
-    if (result === null && allowBackupRecovery) {
-      let hasBackup = false
-      for (let i = 0; i < BACKUP_COUNT; i++) {
-        if (existsSync(backupPath(dataFile, i))) {
-          hasBackup = true
-          break
-        }
-      }
-      if (fileExistedOnLoad || hasBackup) {
-        if (this.restoreFromBackup(dataFile)) {
-          return this.load(false)
-        }
-        console.error('[persistence] No usable state file or backup found, using defaults')
-      }
-    }
-
-    if (result === null) {
-      result = getDefaultPersistedState(homedir())
-    }
+    let result = decoded.state
 
     const workspaceSession = pruneWorkspaceSessionBrowserHistory(
       pruneLocalTerminalScrollbackBuffers(result.workspaceSession, result.repos)
@@ -3571,274 +1759,31 @@ export class Store {
       this.loadNeedsSave = true
     }
 
-    const migrated = this.migrateTelemetry(result, fileExistedOnLoad)
-
-    // githubCache lives in a sidecar file now (see getGithubCacheFile). A
+    // githubCache lives in a sidecar file now. A
     // legacy in-file cache (pre-sidecar build, or a downgrade round-trip) is
     // kept as this session's seed and stripped from the durable file by the
     // save scheduled below; otherwise seed from the sidecar snapshot.
-    const legacyCache = migrated.githubCache
+    const legacyCache = result.githubCache
     const hasLegacyCache = Object.keys(legacyCache?.pr ?? {}).length > 0
     if (hasLegacyCache) {
       this.loadNeedsSave = true
       // Why: mark dirty so the first flush writes the sidecar even if no
       // poll refresh happens this session — the seed survives the migration.
-      this.githubCacheDirty = true
+      this.githubCacheFile.markDirty()
     } else {
-      migrated.githubCache = readGithubCacheSnapshot(this.dataFile) ?? migrated.githubCache
+      result.githubCache = this.githubCacheFile.read() ?? result.githubCache
     }
 
-    logPersistenceStartupMilestone('persistence-load-done', {
-      repos: migrated.repos.length,
-      workspaceSessionBytes: Buffer.byteLength(JSON.stringify(migrated.workspaceSession))
-    })
-    return migrated
+    this.durableStateFile.logLoaded(result)
+    return result
   }
-
-  // One-shot telemetry cohort migration. Runs on every `load()` but is a
-  // no-op once `existedBeforeTelemetryRelease` is set, so subsequent launches
-  // pay only the property lookup. Populates:
-  //   - `existedBeforeTelemetryRelease` — cohort discriminator (drives
-  //     whether the existing-user opt-in banner is shown in PR 3;
-  //     new users get no first-launch surface).
-  //   - `optedIn` — new users start opted in; existing users are `null` until
-  //     the banner resolves (the consent resolver returns `pending_banner`
-  //     until then, so nothing transmits).
-  //   - `installId` — anonymous UUID v4. Stable across launches; not surfaced in the UI.
-  private migrateTelemetry(state: PersistedState, fileExistedOnLoad: boolean): PersistedState {
-    const existing = state.settings?.telemetry
-    // Why: the one-shot is complete only when all three invariants hold.
-    // Keying on `existedBeforeTelemetryRelease` alone would let a partially-
-    // written telemetry block (crash mid-save, hand-edit, future bug) short-
-    // circuit migration and leave `installId` undefined or `optedIn` wiped.
-    if (
-      typeof existing?.existedBeforeTelemetryRelease === 'boolean' &&
-      typeof existing.installId === 'string' &&
-      existing.installId.length > 0 &&
-      (existing.optedIn === true || existing.optedIn === false || existing.optedIn === null)
-    ) {
-      return state
-    }
-    // Why: cohort is the authoritative discriminator per invariant #8, so
-    // resolve it once and reuse it below — the `optedIn` fallback must not
-    // re-infer cohort from `fileExistedOnLoad` or field presence, or a
-    // partially-written telemetry block could land a new user in the
-    // existing-user `pending_banner` state.
-    const resolvedExistedBefore =
-      typeof existing?.existedBeforeTelemetryRelease === 'boolean'
-        ? existing.existedBeforeTelemetryRelease
-        : fileExistedOnLoad
-    return {
-      ...state,
-      settings: {
-        ...state.settings,
-        telemetry: {
-          ...existing,
-          existedBeforeTelemetryRelease: resolvedExistedBefore,
-          // Why: preserve an explicit opt-in/out if the user has ever resolved
-          // it. Only fall back to the cohort default (new users: on; existing
-          // users: undecided until the first-launch banner resolves) when
-          // optedIn is truly unset (undefined), never when it is `false`.
-          optedIn:
-            existing?.optedIn === true || existing?.optedIn === false || existing?.optedIn === null
-              ? existing.optedIn
-              : resolvedExistedBefore
-                ? null
-                : true,
-          installId:
-            typeof existing?.installId === 'string' && existing.installId.length > 0
-              ? existing.installId
-              : randomUUID()
-        }
-      }
-    }
-  }
-
-  // Why 1s trailing + 5s max-wait (previously 300ms trailing, unbounded):
-  // sustained sub-interval mutation bursts used to either rewrite the full
-  // multi-MB state ~3x/sec or postpone the write indefinitely by resetting
-  // the timer. The max-wait bounds crash staleness at 5s while bursts
-  // coalesce; the content-hash guard in the writers skips no-op payloads.
-  private static SAVE_DEBOUNCE_MS = 1_000
-  private static SAVE_MAX_WAIT_MS = 5_000
 
   private scheduleSave(): void {
-    const now = Date.now()
-    this.firstPendingSaveAt ??= now
-    if (this.writeTimer) {
-      clearTimeout(this.writeTimer)
-    }
-    const untilMaxWait = Math.max(0, this.firstPendingSaveAt + Store.SAVE_MAX_WAIT_MS - now)
-    const delay = Math.min(Store.SAVE_DEBOUNCE_MS, untilMaxWait)
-    this.writeTimer = setTimeout(() => {
-      this.writeTimer = null
-      this.firstPendingSaveAt = null
-      // Why (issue #1158): serialize async writes so backup rotation never has
-      // two callers racing over the same dataFile/tmp/.bak paths.
-      const prev = this.pendingWrite ?? Promise.resolve()
-      const next = prev
-        .then(() => this.writeToDiskAsync())
-        .catch((err) => {
-          console.error('[persistence] Failed to write state:', err)
-        })
-        .finally(() => {
-          if (this.pendingWrite === next) {
-            this.pendingWrite = null
-          }
-        })
-      this.pendingWrite = next
-    }, delay)
-  }
-
-  // Why githubCache is omitted: it is memory-only during the session (see
-  // getGithubCacheFile) — excluding it from both the payload and the hash
-  // keeps cache refreshes from ever touching the durable file.
-  private getDurableState(): Omit<PersistedState, 'githubCache'> {
-    const { githubCache: _memoryOnly, ...durable } = this.state
-    return durable
-  }
-
-  private computeStateHash(): string {
-    return createHash('sha1').update(JSON.stringify(this.getDurableState())).digest('hex')
-  }
-
-  // Why: builds the on-disk payload synchronously so the hash and the
-  // serialized bytes reflect the same state tick (no mutation can interleave
-  // before an await).
-  private buildStateToSave(): string {
-    // Why: secrets must be encrypted on disk. Clone state so the in-memory
-    // this.state stays plaintext for the rest of the app.
-    const stateToSave = {
-      ...this.getDurableState(),
-      settings: {
-        ...this.state.settings,
-        opencodeSessionCookie: encrypt(this.state.settings.opencodeSessionCookie),
-        httpProxyUrl: encrypt(this.state.settings.httpProxyUrl ?? '')
-      },
-      ui: {
-        ...this.state.ui,
-        browserKagiSessionLink: encryptOptionalSecret(this.state.ui.browserKagiSessionLink)
-      }
-    }
-    return JSON.stringify(stateToSave, null, 2)
-  }
-
-  // Why: async writes avoid blocking the main Electron thread on every
-  // debounced save during active use.
-  private async writeToDiskAsync(): Promise<void> {
-    if (this.writesFrozen) {
-      return
-    }
-    const gen = this.writeGeneration
-    const stateHash = this.computeStateHash()
-    // Why: a mutation burst that nets out to already-persisted state (or a
-    // flush that raced ahead) must not rewrite a byte-identical multi-MB file.
-    if (stateHash === this.lastWrittenStateHash) {
-      return
-    }
-    const payload = this.buildStateToSave()
-    const dataFile = this.dataFile
-    const dir = dirname(dataFile)
-    await mkdir(dir, { recursive: true }).catch(() => {})
-    const tmpFile = `${dataFile}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
-
-    // Why: wrap write+rename in try/finally-on-error so any failure (ENOSPC,
-    // ENFILE, EIO, permission) removes the tmp file rather than leaving a
-    // multi-megabyte orphan behind. Successful rename consumes the tmp file.
-    let renamed = false
-    try {
-      await writeFile(tmpFile, payload, 'utf-8')
-      // Why: if flush() ran while this async write was in-flight, it bumped
-      // writeGeneration and already wrote the latest state synchronously.
-      // Renaming this stale tmp file would overwrite the fresh data.
-      if (this.writeGeneration !== gen) {
-        return
-      }
-      await rename(tmpFile, dataFile)
-      renamed = true
-      // Why the gen re-check: a sync flush can interleave during the rename
-      // await, write fresher state, and record its own hash. Recording this
-      // stale hash over it would make later saves skip against content that
-      // is not what the file holds.
-      if (this.writeGeneration === gen) {
-        this.lastWrittenStateHash = stateHash
-      }
-    } finally {
-      if (!renamed) {
-        await rm(tmpFile).catch(() => {})
-      }
-    }
-    // Why (issue #1158): rotate only after the atomic rename succeeded; then
-    // re-check the generation so a concurrent flush owns any backup rotation.
-    if (this.writeGeneration !== gen) {
-      return
-    }
-    const now = Date.now()
-    if (this.shouldRotateBackups(now, dataFile)) {
-      await this.rotateBackupsAsync(dataFile)
-    }
-  }
-
-  // Why: synchronous variant kept only for flush() at shutdown, where the
-  // process may exit before an async write completes.
-  private writeToDiskSync(opts: { force?: boolean } = {}): void {
-    if (this.writesFrozen) {
-      return
-    }
-    const stateHash = this.computeStateHash()
-    // Why: skipping is safe under flushOrThrow's durability contract — a
-    // matching hash means this exact state is already the file's content.
-    // Except when an async write was in flight at flush entry (force): its
-    // rename may already be dispatched past the generation check, and only
-    // an unconditional sync write afterwards reliably out-orders it.
-    if (!opts.force && stateHash === this.lastWrittenStateHash) {
-      return
-    }
-    const dataFile = this.dataFile
-    const dir = dirname(dataFile)
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
-    }
-    const tmpFile = `${dataFile}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
-
-    const payload = this.buildStateToSave()
-
-    // Why: mirror the async path — on any failure between writeFileSync and
-    // renameSync, remove the tmp file so crashes during shutdown don't leak
-    // orphans into userData.
-    let renamed = false
-    try {
-      writeFileSync(tmpFile, payload, 'utf-8')
-      renameSync(tmpFile, dataFile)
-      renamed = true
-      this.lastWrittenStateHash = stateHash
-    } finally {
-      if (!renamed) {
-        try {
-          unlinkSync(tmpFile)
-        } catch {
-          // Best-effort cleanup; the write already failed, swallow secondary error.
-        }
-      }
-    }
-    const now = Date.now()
-    if (this.shouldRotateBackups(now, dataFile)) {
-      this.rotateBackupsSync(dataFile)
-    }
+    this.durableStateFile.scheduleSave()
   }
 
   flushOrThrow(): void {
-    if (this.writeTimer) {
-      clearTimeout(this.writeTimer)
-      this.writeTimer = null
-    }
-    this.firstPendingSaveAt = null
-    const asyncWriteWasInFlight = this.pendingWrite !== null
-    // Why: bump writeGeneration so any in-flight async writeToDiskAsync skips
-    // its rename, preventing a stale snapshot from overwriting this sync write.
-    this.writeGeneration++
-    this.pendingWrite = null
-    this.writeToDiskSync({ force: asyncWriteWasInFlight })
+    this.durableStateFile.flushOrThrow()
   }
 
   // ── Repos ──────────────────────────────────────────────────────────
@@ -4360,6 +2305,16 @@ export class Store {
   // missing hostId is treated as local).
   private pruneWorktreeStateForRepo(id: string, hostId: ExecutionHostId | null): void {
     const prefix = `${id}::`
+    // Why: owner ids do not encode their execution host, so only the selected
+    // host partition may be pruned while another host still owns the repo id.
+    const sessions = removeRepoFromWorkspaceSessionsForHost({
+      workspaceSession: this.state.workspaceSession,
+      workspaceSessionsByHostId: this.state.workspaceSessionsByHostId,
+      repoId: id,
+      hostId
+    })
+    this.state.workspaceSession = sessions.workspaceSession
+    this.state.workspaceSessionsByHostId = sessions.workspaceSessionsByHostId
     // Why: snapshot host membership up front. Lineage pruning below checks the
     // meta.hostId of worktree keys that may already have been deleted from
     // worktreeMeta in the first loop, so reading hostId live would misclassify
@@ -4988,7 +2943,7 @@ export class Store {
     if (changes.length === 0) {
       return []
     }
-    if (this.writesFrozen) {
+    if (this.durableStateFile.frozen) {
       throw new Error('spool_visibility_store_frozen')
     }
     const previousMeta = this.state.worktreeMeta
@@ -5328,19 +3283,7 @@ export class Store {
       originWebContentsId?: number
     ) => void
   ): () => void {
-    this.settingsChangeListeners.add(listener)
-    return () => {
-      this.settingsChangeListeners.delete(listener)
-    }
-  }
-
-  private notifySettingsChanged(
-    updates: Partial<GlobalSettings>,
-    originWebContentsId?: number
-  ): void {
-    for (const listener of this.settingsChangeListeners) {
-      listener(updates, this.state.settings, originWebContentsId)
-    }
+    return this.notifications.onSettingsChanged(listener)
   }
 
   // Why: UI view-state (group/sort/filters etc.) is written from both the
@@ -5348,313 +3291,38 @@ export class Store {
   // Without this, a mobile change persisted but the desktop renderer — which
   // hydrates UI state once — never learned of it, breaking bi-directional sync.
   onUIChanged(listener: (ui: PersistedState['ui']) => void): () => void {
-    this.uiChangeListeners.add(listener)
-    return () => {
-      this.uiChangeListeners.delete(listener)
-    }
-  }
-
-  private notifyUIChanged(): void {
-    if (this.uiChangeListeners.size === 0) {
-      return
-    }
-    const ui = this.getUI()
-    for (const listener of this.uiChangeListeners) {
-      listener(ui)
-    }
+    return this.notifications.onUiChanged(listener)
   }
 
   updateSettings(
     updates: Partial<GlobalSettings>,
     options: { notifyListeners?: boolean; originWebContentsId?: number } = {}
   ): GlobalSettings {
-    const sanitizedUpdates = stripRetiredGlobalSettings(updates)
-    // Why: coerce strictly to boolean here (not at the IPC edge) so every write
-    // path is covered and a non-bool renderer payload can never persist a
-    // truthy non-bool that later reads as "tray-minimize on".
-    if ('minimizeToTrayOnClose' in updates) {
-      sanitizedUpdates.minimizeToTrayOnClose = updates.minimizeToTrayOnClose === true
-    }
-    if ('showMenuBarIcon' in updates) {
-      sanitizedUpdates.showMenuBarIcon = updates.showMenuBarIcon === true
-    }
-    if ('disabledTuiAgents' in updates) {
-      sanitizedUpdates.disabledTuiAgents = normalizeDisabledTuiAgents(updates.disabledTuiAgents)
-    }
-    if ('agentDefaultArgs' in updates) {
-      sanitizedUpdates.agentDefaultArgs = normalizeTuiAgentArgsRecord(updates.agentDefaultArgs)
-      sanitizedUpdates.agentYoloDefaultsMigrated = true
-    }
-    if ('agentDefaultEnv' in updates) {
-      sanitizedUpdates.agentDefaultEnv = normalizeTuiAgentEnvRecord(updates.agentDefaultEnv)
-      sanitizedUpdates.agentYoloDefaultsMigrated = true
-    }
-    if ('terminalQuickCommands' in updates) {
-      sanitizedUpdates.terminalQuickCommands = normalizeTerminalQuickCommands(
-        updates.terminalQuickCommands
-      )
-    }
-    if ('terminalCustomThemes' in updates) {
-      sanitizedUpdates.terminalCustomThemes = normalizeTerminalCustomThemes(
-        updates.terminalCustomThemes
-      )
-    }
-    if ('terminalScrollbackRows' in updates) {
-      sanitizedUpdates.terminalScrollbackRows = normalizeDesktopTerminalScrollbackRows(
-        updates.terminalScrollbackRows
-      )
-    }
-    if (
-      'terminalTuiScrollSensitivity' in updates ||
-      'terminalTuiScrollSensitivityDefaultedToOne' in updates
-    ) {
-      sanitizedUpdates.terminalTuiScrollSensitivityDefaultedToOne = true
-    }
-    if ('autoRenameBranchFromWork' in updates || 'autoRenameBranchFromWorkDefaultedOn' in updates) {
-      sanitizedUpdates.autoRenameBranchFromWorkDefaultedOn = true
-    }
-    if ('openInApplications' in updates) {
-      sanitizedUpdates.openInApplications = normalizeOpenInApplications(updates.openInApplications)
-    }
-    if ('terminalShortcutPolicy' in updates) {
-      sanitizedUpdates.terminalShortcutPolicy = normalizeTerminalShortcutPolicy(
-        updates.terminalShortcutPolicy
-      )
-    }
-    if ('sourceControlGroupOrder' in updates) {
-      sanitizedUpdates.sourceControlGroupOrder = normalizeSourceControlGroupOrder(
-        updates.sourceControlGroupOrder
-      )
-    }
-    if ('appIcon' in updates) {
-      sanitizedUpdates.appIcon = normalizeAppIconId(updates.appIcon)
-    }
-    if ('loaderStyle' in updates) {
-      sanitizedUpdates.loaderStyle = normalizeLoaderStyle(updates.loaderStyle)
-    }
-    if ('languageServer' in updates) {
-      sanitizedUpdates.languageServer = normalizeLanguageServerSettings(updates.languageServer)
-    }
-    if ('uiLanguage' in updates) {
-      sanitizedUpdates.uiLanguage = normalizeUiLanguage(updates.uiLanguage)
-    }
-    if ('prBotAuthorOverrides' in updates) {
-      // Why: every writer (desktop IPC, paired web RPC, and migrations) reaches
-      // this boundary, so the persisted list stays bounded and well-formed.
-      sanitizedUpdates.prBotAuthorOverrides = normalizePRBotAuthorOverrides(
-        updates.prBotAuthorOverrides
-      )
-    }
-    const historyWithPreviousLayout = buildWorkspaceDirHistoryForUpdate(
-      this.state.settings,
-      sanitizedUpdates
-    )
-    if (historyWithPreviousLayout) {
-      sanitizedUpdates.workspaceDirHistory = historyWithPreviousLayout
-    }
-    // Why: `telemetry` is deep-merged for the same reason `notifications` is —
-    // partial updates from the Privacy pane / consent flow (e.g., flipping
-    // only `optedIn`) must not clobber sibling fields like `installId` or
-    // `existedBeforeTelemetryRelease`. The field is optional, so we only
-    // synthesize a `telemetry` key on the result when at least one side has
-    // one.
-    const mergedTelemetry =
-      sanitizedUpdates.telemetry !== undefined
-        ? { ...this.state.settings.telemetry, ...sanitizedUpdates.telemetry }
-        : this.state.settings.telemetry
-    if ('sourceControlAi' in sanitizedUpdates) {
-      sanitizedUpdates.sourceControlAi = retireLegacyInstructionsForClearedTextActionRecipes(
-        sanitizedUpdates.sourceControlAi,
-        this.state.settings
-      )
-      const normalizedSourceControlAi = normalizeSourceControlAiSettings(
-        sanitizedUpdates.sourceControlAi,
-        this.state.settings.commitMessageAi
-      )
-      sanitizedUpdates.sourceControlAi = normalizedSourceControlAi
-      sanitizedUpdates.commitMessageAi = projectSourceControlAiToLegacyCommitMessageAi(
-        normalizedSourceControlAi,
-        this.state.settings.commitMessageAi
-      )
-    } else if ('commitMessageAi' in sanitizedUpdates) {
-      sanitizedUpdates.sourceControlAi = mergeLegacyCommitMessageAiIntoSourceControlAi(
-        this.state.settings.sourceControlAi,
-        sanitizedUpdates.commitMessageAi
-      )
-    }
-    const previousSettings = this.state.settings
-    this.state.settings = {
-      ...this.state.settings,
-      ...sanitizedUpdates,
-      notifications: normalizeNotificationSettings({
-        ...this.state.settings.notifications,
-        ...sanitizedUpdates.notifications
-      }),
-      ...(mergedTelemetry !== undefined ? { telemetry: mergedTelemetry } : {})
-    }
+    const mutation = applyPersistedSettingsUpdate(this.state.settings, updates)
+    this.state.settings = mutation.settings
     this.scheduleSave()
-    const changedUpdates = {} as Partial<GlobalSettings> & Record<string, unknown>
-    for (const key of Object.keys(sanitizedUpdates) as (keyof GlobalSettings)[]) {
-      if (!Object.is(previousSettings[key], this.state.settings[key])) {
-        changedUpdates[String(key)] = this.state.settings[key]
-      }
-    }
-    if (options.notifyListeners === true && Object.keys(changedUpdates).length > 0) {
-      this.notifySettingsChanged(changedUpdates, options.originWebContentsId)
-    }
-    return this.state.settings
+    this.notifications.publishSettingsMutation(
+      mutation,
+      options.notifyListeners === true,
+      options.originWebContentsId
+    )
+    return mutation.settings
   }
 
   // ── UI State ───────────────────────────────────────────────────────
 
   getUI(): PersistedState['ui'] {
-    const uiState = stripReservedAndRetiredUIState(this.state.ui)
-    return {
-      ...getDefaultUIState(),
-      ...uiState,
-      groupBy: normalizeGroupBy(this.state.ui?.groupBy),
-      sortBy: normalizeSortBy(this.state.ui?.sortBy),
-      projectOrderBy: normalizeProjectOrderBy(this.state.ui?.projectOrderBy),
-      rightSidebarTab: normalizeRightSidebarTab(this.state.ui?.rightSidebarTab),
-      rightSidebarExplorerView: normalizeRightSidebarExplorerView(
-        this.state.ui?.rightSidebarExplorerView,
-        this.state.ui?.rightSidebarTab
-      ),
-      worktreeCardProperties: normalizeWorktreeCardProperties(
-        this.state.ui?.worktreeCardProperties
-      ),
-      agentActivityDisplayMode: normalizeAgentActivityDisplayMode(
-        this.state.ui?.agentActivityDisplayMode
-      ),
-      workspaceStatuses: normalizeWorkspaceStatuses(this.state.ui?.workspaceStatuses),
-      usagePercentageDisplay: normalizeUsagePercentageDisplay(
-        this.state.ui?.usagePercentageDisplay
-      ),
-      // Why: strict boolean coercion so a missing/legacy value reads as false
-      // (first-run notice still fires) rather than leaking a non-bool through.
-      trayMinimizeNoticeShown: this.state.ui?.trayMinimizeNoticeShown === true,
-      markdownTocPanelWidth: clampMarkdownTocPanelWidth(this.state.ui?.markdownTocPanelWidth),
-      visibleWorkspaceHostIds: normalizeVisibleExecutionHostIds(
-        this.state.ui?.visibleWorkspaceHostIds
-      ),
-      workspaceHostOrder: normalizeExecutionHostOrder(this.state.ui?.workspaceHostOrder),
-      manualRepoOrder: normalizeManualRepoOrder(this.state.ui?.manualRepoOrder),
-      browserDefaultZoomLevel: normalizeBrowserPageZoomLevel(
-        this.state.ui?.browserDefaultZoomLevel
-      ),
-      showDotfilesByWorktree: normalizeShowDotfilesByWorktree(
-        this.state.ui?.showDotfilesByWorktree
-      ),
-      featureTipsSeenIds: normalizeFeatureTipIds(this.state.ui?.featureTipsSeenIds),
-      contextualToursSeenIds: normalizeContextualTourIds(this.state.ui?.contextualToursSeenIds),
-      featureInteractions: normalizeFeatureInteractions(this.state.ui?.featureInteractions)
-    }
+    return readPersistedUi(this.state.ui)
   }
 
   updateUI(updates: Partial<PersistedState['ui']>): void {
-    const sanitizedUpdates = stripReservedAndRetiredUIState(updates)
-    const previousUI = this.getUI()
-    const currentUI = {
-      ...getDefaultUIState(),
-      ...stripReservedAndRetiredUIState(this.state.ui)
-    }
-    const nextRightSidebarTab =
-      sanitizedUpdates.rightSidebarTab !== undefined
-        ? normalizeRightSidebarTab(sanitizedUpdates.rightSidebarTab)
-        : normalizeRightSidebarTab(this.state.ui?.rightSidebarTab)
-    const nextRightSidebarExplorerView =
-      sanitizedUpdates.rightSidebarExplorerView !== undefined
-        ? normalizeRightSidebarExplorerView(
-            sanitizedUpdates.rightSidebarExplorerView,
-            nextRightSidebarTab
-          )
-        : sanitizedUpdates.rightSidebarTab === 'search'
-          ? 'search'
-          : normalizeRightSidebarExplorerView(
-              this.state.ui?.rightSidebarExplorerView,
-              nextRightSidebarTab
-            )
-    const nextUI = {
-      ...currentUI,
-      ...sanitizedUpdates,
-      groupBy: sanitizedUpdates.groupBy
-        ? normalizeGroupBy(sanitizedUpdates.groupBy)
-        : normalizeGroupBy(this.state.ui?.groupBy),
-      sortBy: sanitizedUpdates.sortBy
-        ? normalizeSortBy(sanitizedUpdates.sortBy)
-        : normalizeSortBy(this.state.ui?.sortBy),
-      projectOrderBy: updates.projectOrderBy
-        ? normalizeProjectOrderBy(updates.projectOrderBy)
-        : normalizeProjectOrderBy(this.state.ui?.projectOrderBy),
-      rightSidebarTab: nextRightSidebarTab,
-      rightSidebarExplorerView: nextRightSidebarExplorerView,
-      worktreeCardProperties:
-        sanitizedUpdates.worktreeCardProperties !== undefined
-          ? normalizeWorktreeCardProperties(sanitizedUpdates.worktreeCardProperties)
-          : normalizeWorktreeCardProperties(this.state.ui?.worktreeCardProperties),
-      agentActivityDisplayMode:
-        updates.agentActivityDisplayMode !== undefined
-          ? normalizeAgentActivityDisplayMode(updates.agentActivityDisplayMode)
-          : normalizeAgentActivityDisplayMode(this.state.ui?.agentActivityDisplayMode),
-      workspaceStatuses:
-        sanitizedUpdates.workspaceStatuses !== undefined
-          ? normalizeWorkspaceStatuses(sanitizedUpdates.workspaceStatuses)
-          : normalizeWorkspaceStatuses(this.state.ui?.workspaceStatuses),
-      usagePercentageDisplay: normalizeUsagePercentageDisplay(
-        sanitizedUpdates.usagePercentageDisplay ?? this.state.ui?.usagePercentageDisplay
-      ),
-      markdownTocPanelWidth: clampMarkdownTocPanelWidth(
-        sanitizedUpdates.markdownTocPanelWidth ?? this.state.ui?.markdownTocPanelWidth
-      ),
-      visibleWorkspaceHostIds:
-        updates.visibleWorkspaceHostIds !== undefined
-          ? normalizeVisibleExecutionHostIds(updates.visibleWorkspaceHostIds)
-          : normalizeVisibleExecutionHostIds(this.state.ui?.visibleWorkspaceHostIds),
-      workspaceHostOrder:
-        updates.workspaceHostOrder !== undefined
-          ? normalizeExecutionHostOrder(updates.workspaceHostOrder)
-          : normalizeExecutionHostOrder(this.state.ui?.workspaceHostOrder),
-      manualRepoOrder:
-        updates.manualRepoOrder !== undefined
-          ? normalizeManualRepoOrder(updates.manualRepoOrder)
-          : normalizeManualRepoOrder(this.state.ui?.manualRepoOrder),
-      browserDefaultZoomLevel: normalizeBrowserPageZoomLevel(
-        updates.browserDefaultZoomLevel ?? this.state.ui?.browserDefaultZoomLevel
-      ),
-      showDotfilesByWorktree:
-        updates.showDotfilesByWorktree !== undefined
-          ? normalizeShowDotfilesByWorktree(updates.showDotfilesByWorktree)
-          : normalizeShowDotfilesByWorktree(this.state.ui?.showDotfilesByWorktree),
-      featureTipsSeenIds:
-        sanitizedUpdates.featureTipsSeenIds !== undefined
-          ? normalizeFeatureTipIds(sanitizedUpdates.featureTipsSeenIds)
-          : normalizeFeatureTipIds(this.state.ui?.featureTipsSeenIds),
-      // Why: renderer and paired clients can mark different tours seen from
-      // stale UI snapshots; union them so completed tours stay suppressed.
-      contextualToursSeenIds:
-        updates.contextualToursSeenIds !== undefined
-          ? mergeContextualTourSeenIds(
-              this.state.ui?.contextualToursSeenIds,
-              updates.contextualToursSeenIds
-            )
-          : normalizeContextualTourIds(this.state.ui?.contextualToursSeenIds),
-      // Why: runtime RPCs and the renderer can both record education state.
-      // Merge instead of replacing so a stale renderer snapshot cannot erase
-      // runtime-only feature interactions.
-      featureInteractions:
-        sanitizedUpdates.featureInteractions !== undefined
-          ? mergeFeatureInteractions(
-              this.state.ui?.featureInteractions,
-              sanitizedUpdates.featureInteractions
-            )
-          : normalizeFeatureInteractions(this.state.ui?.featureInteractions)
-    }
-    if (persistedUIValuesEqual(previousUI, nextUI)) {
+    const mutation = applyPersistedUiUpdate(this.state.ui, updates)
+    if (!mutation.changed) {
       return
     }
-    this.state.ui = nextUI
+    this.state.ui = mutation.ui
     this.scheduleSave()
-    this.notifyUIChanged()
+    this.notifications.publishUiMutation(() => this.getUI())
   }
 
   recordFeatureInteraction(id: FeatureInteractionId): PersistedState['ui'] {
@@ -5746,7 +3414,7 @@ export class Store {
     // refresh restamps fetchedAt, so persisting here rewrote the whole
     // durable state file once per poll cycle for refetchable data.
     this.state.githubCache = cache
-    this.githubCacheDirty = true
+    this.githubCacheFile.markDirty()
   }
 
   // ── Workspace Session ─────────────────────────────────────────────
@@ -6125,7 +3793,7 @@ export class Store {
     if (!session) {
       return
     }
-    const sessionBeforeBinding = cloneWorkspaceSessionState(session)
+    const sessionBeforeBinding = structuredClone(session)
     const tabs = session.tabsByWorktree?.[args.worktreeId]
     const tab = tabs?.find((t) => t.id === args.tabId)
     if (tab) {
@@ -6670,40 +4338,14 @@ export class Store {
     } catch (err) {
       console.error('[persistence] Failed to flush state:', err)
     }
-    this.writeGithubCacheSnapshotSync()
+    this.githubCacheFile.writeIfDirty(this.state.githubCache)
   }
 
   // Why: called after a project move rewrote this store's data file directly.
   // From that point until relaunch, the in-memory state is stale and any
   // write (debounced, sync, or shutdown flush) would undo the transfer.
   freezeWrites(): void {
-    this.writesFrozen = true
-    if (this.writeTimer) {
-      clearTimeout(this.writeTimer)
-      this.writeTimer = null
-    }
-  }
-
-  // Why best-effort: the sidecar is a refetchable cache — a failed write only
-  // costs a cold badge paint on next launch, never data.
-  private writeGithubCacheSnapshotSync(): void {
-    if (!this.githubCacheDirty) {
-      return
-    }
-    const cacheFile = getGithubCacheFile(this.dataFile)
-    const tmpFile = `${cacheFile}.${process.pid}.tmp`
-    try {
-      writeFileSync(tmpFile, JSON.stringify(this.state.githubCache), 'utf-8')
-      renameSync(tmpFile, cacheFile)
-      this.githubCacheDirty = false
-    } catch (err) {
-      try {
-        unlinkSync(tmpFile)
-      } catch {
-        // Best-effort cleanup.
-      }
-      console.warn('[persistence] Failed to write github cache snapshot:', err)
-    }
+    this.durableStateFile.freezeWrites()
   }
 }
 

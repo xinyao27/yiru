@@ -241,9 +241,9 @@ export default function SparseCheckoutPresetSelect({
             {isLoadingPresets ? (
               <LoadingIndicator className="size-3.5 opacity-60" />
             ) : hasPresetLoadError || !presetsLoaded ? (
-              <RefreshCcw className="size-3.5 opacity-60" />
+              <RefreshCcw weight="regular" className="size-3.5 opacity-60" />
             ) : (
-              <ChevronsUpDown className="size-3.5 opacity-50" />
+              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
             )}
           </Button>
         }
@@ -272,12 +272,14 @@ export default function SparseCheckoutPresetSelect({
                 <span className="break-words">{presetsLoadError}</span>
               </div>
             ) : null}
-            <button
+            <Button
+              variant="ghost"
+              size="default"
               type="button"
-              className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-xs outline-none"
+              className="focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full justify-start border-0 px-2 text-left text-xs font-normal whitespace-normal"
               onClick={handleRetryLoadPresets}
             >
-              <RefreshCcw className="text-muted-foreground size-3.5" />
+              <RefreshCcw weight="regular" className="text-muted-foreground size-3.5" />
               <span className="truncate">
                 {hasPresetLoadError
                   ? translate(
@@ -289,19 +291,21 @@ export default function SparseCheckoutPresetSelect({
                       'Load presets'
                     )}
               </span>
-            </button>
+            </Button>
           </div>
         ) : (
           <div>
             <div className="py-1">
-              <button
+              <Button
+                variant="ghost"
+                size="default"
                 type="button"
-                className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground mx-1 flex h-9 w-[calc(100%-0.5rem)] items-center gap-2 rounded-md px-2 text-left text-xs outline-none"
+                className="focus-visible:bg-accent focus-visible:text-accent-foreground mx-1 flex w-[calc(100%-0.5rem)] justify-start border-0 px-2 text-left text-xs font-normal whitespace-normal"
                 onClick={handleSelectOff}
               >
                 <Check className={cn('size-4', selectedPreset ? 'opacity-0' : 'opacity-100')} />
                 {translate('auto.components.sparse.SparseCheckoutPresetSelect.c7f9b3f0c1', 'Off')}
-              </button>
+              </Button>
             </div>
             {visiblePresets.length > 0 ? (
               <>
@@ -310,11 +314,13 @@ export default function SparseCheckoutPresetSelect({
                   {visiblePresets.map((preset) => (
                     <div
                       key={preset.id}
-                      className="hover:bg-accent hover:text-accent-foreground mx-1 flex items-center rounded-md"
+                      className="hover:bg-accent hover:text-accent-foreground mx-1 flex items-center"
                     >
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="default"
                         type="button"
-                        className="focus-visible:bg-accent flex h-9 min-w-0 flex-1 items-center gap-2 rounded-l-md px-2 text-left text-xs outline-none"
+                        className="focus-visible:bg-accent flex min-w-0 flex-1 justify-start border-0 px-2 text-left text-xs font-normal whitespace-normal"
                         onClick={() => handleSelectPreset(preset)}
                       >
                         <Check
@@ -324,17 +330,17 @@ export default function SparseCheckoutPresetSelect({
                           )}
                         />
                         <span className="truncate">{preset.name}</span>
-                      </button>
+                      </Button>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="quiet"
                         size="icon-xs"
                         aria-label={translate(
                           'auto.components.sparse.SparseCheckoutPresetSelect.7c3275d307',
                           'Edit {{value0}}',
                           { value0: preset.name }
                         )}
-                        className="text-muted-foreground hover:bg-background/35 hover:text-foreground mr-1 size-7 shrink-0 rounded-md"
+                        className="hover:bg-background/35 mr-1 size-7 shrink-0"
                         onClick={() => startEditPreset(preset)}
                       >
                         <Pencil className="size-3.5" />
@@ -349,7 +355,7 @@ export default function SparseCheckoutPresetSelect({
                 type="button"
                 variant="ghost"
                 onClick={startNewPreset}
-                className="mx-1 my-1 h-8 w-[calc(100%-0.5rem)] justify-start rounded-md px-2 text-xs font-normal"
+                className="mx-1 my-1 h-8 w-[calc(100%-0.5rem)] justify-start px-2 text-xs font-normal"
               >
                 <Plus className="text-muted-foreground size-3.5" />
                 {translate(

@@ -2,17 +2,15 @@ export const SIDEBAR_TREE_INDENT = 18
 // Why: project-grouped cards need to read as children even after the card
 // surface inset is subtracted, while lineage rows keep the base tree step.
 const PROJECT_WORKTREE_CARD_EXTRA_INDENT = 2
-// Why: flush cards span the full row, so their content is pulled back from the
-// raw tree indent to sit under the group header. A smaller pullback nudges
-// content rightward for clearer nesting; this is the knob to tune that gap.
-export const FLUSH_CARD_CONTENT_PULLBACK = 4
+// Why: flush surfaces share the row edge with group headers; matching the
+// content pullback to that margin preserves the existing inner anchor.
+export const WORKTREE_CARD_SURFACE_MARGIN = 0
+export const FLUSH_CARD_CONTENT_PULLBACK = WORKTREE_CARD_SURFACE_MARGIN
 // Why: cards reserve a fixed status lane inside the padded content box; pull
 // the box back so title/meta text stay on the tree step.
 export const STATUS_LANE_EXTRA_PULLBACK = 6
-// Why: even at zero indent a flush card keeps this minimal left inset so its
-// surface never sits hard against the sidebar edge.
+// Why: even at zero indent, flush-card content should not sit against the sidebar edge.
 export const FLUSH_CARD_MIN_CONTENT_INSET = 2
-export const WORKTREE_CARD_SURFACE_MARGIN = 4
 // Why: pre-refactor level-1 lineage used the grouped card content step; keep
 // that anchor while nested levels advance evenly instead of accumulating depth.
 export const LINEAGE_IMMEDIATE_PARENT_STEP =

@@ -23,7 +23,7 @@ import { useActiveWorktree } from '@/store/selectors'
 
 function FooterKey({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span className="border-border/60 bg-muted/35 text-foreground/85 rounded-full border px-2 py-0.5 text-[10px] font-medium">
+    <span className="border-border/60 bg-muted/35 text-foreground/85 border px-2 py-0.5 text-[10px] font-medium">
       {children}
     </span>
   )

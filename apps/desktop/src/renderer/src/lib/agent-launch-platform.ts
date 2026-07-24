@@ -1,7 +1,8 @@
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
+
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
 import type { AppState } from '@/store'
 
-import { isWindowsAbsolutePathLike } from '../../../shared/cross-platform-path'
 import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-execution-runtime'
 
 export function getAgentLaunchPlatformForRepo(

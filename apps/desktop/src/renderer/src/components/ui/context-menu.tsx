@@ -58,7 +58,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      <ChevronRightIcon weight="regular" className="ml-auto size-4" />
     </ContextMenuPrimitive.SubmenuTrigger>
   )
 }

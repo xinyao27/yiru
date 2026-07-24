@@ -1,4 +1,4 @@
-import type { MigrationUnsupportedPtyEntry } from '../../shared/agent-status-types'
+import type { MigrationUnsupportedPtyEntry } from '@yiru/workbench-model/agent'
 
 type MigrationUnsupportedPtyEvent =
   | { type: 'set'; entry: MigrationUnsupportedPtyEntry }

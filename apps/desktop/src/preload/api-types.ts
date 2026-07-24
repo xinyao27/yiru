@@ -1,12 +1,25 @@
 import type { ElectronAPI } from '@electron-toolkit/preload'
-
-import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
-import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type {
   AgentStatusIpcPayload,
   MigrationUnsupportedPtyEntry
-} from '../shared/agent-status-types'
+} from '@yiru/workbench-model/agent'
+/* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
+import type {
+  CreateHostedReviewArgs,
+  CreateHostedReviewResult,
+  HostedReviewCreationEligibility,
+  HostedReviewCreationEligibilityArgs,
+  HostedReviewForBranchArgs,
+  HostedReviewInfo,
+  HostedReviewProvider
+} from '@yiru/workbench-model/review'
+import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
+import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+
+import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser-annotation-viewport-bridge'
 import type {
@@ -30,7 +43,6 @@ import type {
   BrowserPopupEvent
 } from '../shared/browser-guest-events'
 import type { CliInstallStatus } from '../shared/cli-install-types'
-import type { ReadClipboardTextOptions } from '../shared/clipboard-text'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
@@ -50,7 +62,6 @@ import type {
   EphemeralVmRecipeResultWarning
 } from '../shared/ephemeral-vm-recipes'
 import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm-runtimes'
-import type { ExecutionHostId } from '../shared/execution-host'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '../shared/feature-interactions'
 import type {
@@ -59,16 +70,6 @@ import type {
 } from '../shared/folder-workspace-path-status'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
-/* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
-import type {
-  CreateHostedReviewArgs,
-  CreateHostedReviewResult,
-  HostedReviewCreationEligibility,
-  HostedReviewCreationEligibilityArgs,
-  HostedReviewForBranchArgs,
-  HostedReviewInfo,
-  HostedReviewProvider
-} from '../shared/hosted-review'
 import type {
   LanguageServerDocumentUriArgs,
   LanguageServerDocumentUriResult,
@@ -90,8 +91,6 @@ import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
 } from '../shared/localhost-worktree-labels'
-import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
-import type { MobileRelayStatus } from '../shared/mobile-relay-status'
 import type { NativeFileDropPayload } from '../shared/native-file-drop'
 import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
 import type { PtyMainDeliveryDiagnostics } from '../shared/pty-delivery-diagnostics'
@@ -103,7 +102,6 @@ import type {
 import type { RichMarkdownContextMenuCommandPayload } from '../shared/rich-markdown-context-menu'
 import type { RuntimeAccessGrant } from '../shared/runtime-access-grants'
 import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
-import type { RuntimeRpcResponse } from '../shared/runtime-rpc-envelope'
 import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
@@ -115,7 +113,11 @@ import type {
   RuntimeTerminalPresentation
 } from '../shared/runtime-types'
 import type { SetupScriptImportCandidate } from '../shared/setup-script-imports'
-import type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
+import type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control-ai'
@@ -273,42 +275,41 @@ import type {
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
-  CreateCloudLinkedYiruProfileArgs,
-  CreateCloudLinkedYiruProfileResult,
-  ConnectCurrentYiruProfileResult,
   FindYiruProfileProjectsByPathArgs,
   FindYiruProfileProjectsByPathResult,
   YiruProfileListResult,
-  YiruProfileAuthStatus,
-  RefreshCurrentYiruProfileAuthResult,
-  SelectYiruProfileOrgArgs,
-  SelectYiruProfileOrgResult,
-  SignOutCurrentYiruProfileResult,
   SwitchYiruProfileArgs,
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
-  TransferYiruProfileProjectResult,
-  YiruProfileOrgInviteRevokeArgs,
-  YiruProfileOrgMemberChangeRoleArgs,
-  YiruProfileOrgMemberInviteArgs,
-  YiruProfileOrgMemberMutationResult,
-  YiruProfileOrgMemberRemoveArgs,
-  YiruProfileOrgMembersListArgs,
-  YiruProfileOrgMembersListResult
+  TransferYiruProfileProjectResult
 } from '../shared/yiru-profiles'
 
-export type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
+export type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../shared/shell-open-types'
 
 type RuntimeEnvironmentSubscriptionHandle = {
   unsubscribe: () => void
   sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => void
 }
 import type {
+  SshConnectionState,
+  SshConfigImportResult,
+  SshTargetAddResult,
+  SshTarget,
+  PortForwardEntry,
+  EnrichedDetectedPort
+} from '@yiru/runtime-protocol/ssh-connection'
+import type {
   AiVaultListArgs,
   AiVaultListResult,
   AiVaultSubagentListArgs,
   AiVaultSubagentListResult
-} from '../shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
+
 import type {
   Automation,
   AutomationCreateInput,
@@ -364,7 +365,6 @@ import type {
   RuntimeMobileMarkdownRequest,
   RuntimeMobileMarkdownResponse
 } from '../shared/mobile-markdown-document'
-import type { AgentType, NativeChatMessage } from '../shared/native-chat-types'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -395,14 +395,6 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '../shared/speech-types'
-import type {
-  SshConnectionState,
-  SshConfigImportResult,
-  SshTargetAddResult,
-  SshTarget,
-  PortForwardEntry,
-  EnrichedDetectedPort
-} from '../shared/ssh-types'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {
@@ -892,11 +884,7 @@ export type PreloadApi = {
   app: AppApi
   yiruProfiles: {
     list: () => Promise<YiruProfileListResult>
-    authStatus: () => Promise<YiruProfileAuthStatus>
     createLocal: (args?: CreateLocalYiruProfileArgs) => Promise<CreateLocalYiruProfileResult>
-    createCloudLinked: (
-      args?: CreateCloudLinkedYiruProfileArgs
-    ) => Promise<CreateCloudLinkedYiruProfileResult>
     switchProfile: (args: SwitchYiruProfileArgs) => Promise<SwitchYiruProfileResult>
     transferProject: (
       args: TransferYiruProfileProjectArgs
@@ -904,25 +892,6 @@ export type PreloadApi = {
     findProjectProfiles: (
       args: FindYiruProfileProjectsByPathArgs
     ) => Promise<FindYiruProfileProjectsByPathResult>
-    connectCurrent: () => Promise<ConnectCurrentYiruProfileResult>
-    refreshAuth: () => Promise<RefreshCurrentYiruProfileAuthResult>
-    signOutCurrent: () => Promise<SignOutCurrentYiruProfileResult>
-    selectOrg: (args: SelectYiruProfileOrgArgs) => Promise<SelectYiruProfileOrgResult>
-    orgMembersList: (
-      args: YiruProfileOrgMembersListArgs
-    ) => Promise<YiruProfileOrgMembersListResult>
-    orgMemberInvite: (
-      args: YiruProfileOrgMemberInviteArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
-    orgInviteRevoke: (
-      args: YiruProfileOrgInviteRevokeArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
-    orgMemberChangeRole: (
-      args: YiruProfileOrgMemberChangeRoleArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
-    orgMemberRemove: (
-      args: YiruProfileOrgMemberRemoveArgs
-    ) => Promise<YiruProfileOrgMemberMutationResult>
   }
   platform: {
     get: () => {
@@ -1221,6 +1190,7 @@ export type PreloadApi = {
       cwd?: string
       cwdFallback?: 'worktree'
       env?: Record<string, string>
+      envToDelete?: string[]
       command?: string
       launchConfig?: SleepingAgentLaunchConfig
       launchToken?: string
@@ -1787,7 +1757,6 @@ export type PreloadApi = {
     openBundlePreview: (bundleSubmissionId: string) => Promise<void>
     discardBundlePreview: (bundleSubmissionId: string) => Promise<void>
     uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadPayload>
-    deleteBundle: (ticketId: string) => Promise<void>
   }
   /** Read-only view of effective consent state, including the reason if
    *  disabled (env var / user opt-out / CI / pending banner). Used by the
@@ -1938,7 +1907,10 @@ export type PreloadApi = {
   shell: {
     openPath: (path: string) => Promise<void>
     openInFileManager: (path: string) => Promise<ShellOpenLocalPathResult>
-    openInExternalEditor: (path: string, command?: string) => Promise<ShellOpenLocalPathResult>
+    openInExternalEditor: {
+      (request: ShellOpenExternalEditorRequest): Promise<ShellOpenExternalEditorResult>
+      (path: string, command?: string): Promise<ShellOpenLocalPathResult>
+    }
     openUrl: (url: string) => Promise<void>
     openFilePath: (path: string) => Promise<boolean>
     openFileUri: (uri: string) => Promise<void>
@@ -2118,6 +2090,10 @@ export type PreloadApi = {
       filePath: string
       connectionId: string
     }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
+    downloadFolder: (args: {
+      dirPath: string
+      connectionId: string
+    }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
     saveDownloadedFile: (args: {
       suggestedName: string
       content: string
@@ -2136,6 +2112,26 @@ export type PreloadApi = {
       transferId: string
     }) => Promise<{ canceled: false; destinationPath: string }>
     cancelDownloadedFile: (args: { transferId: string }) => Promise<{ ok: true }>
+    startDownloadedFolder: (args: {
+      suggestedName: string
+    }) => Promise<
+      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
+    >
+    createDownloadedFolderDirectory: (args: {
+      transferId: string
+      pathSegments: string[]
+    }) => Promise<{ ok: true }>
+    appendDownloadedFolderFileChunk: (args: {
+      transferId: string
+      pathSegments: string[]
+      contentBase64: string
+      first: boolean
+      last: boolean
+    }) => Promise<{ ok: true }>
+    finishDownloadedFolder: (args: {
+      transferId: string
+    }) => Promise<{ canceled: false; destinationPath: string }>
+    cancelDownloadedFolder: (args: { transferId: string }) => Promise<{ ok: true }>
     listMarkdownDocuments: (args: {
       rootPath: string
       connectionId?: string
@@ -2896,11 +2892,7 @@ export type PreloadApi = {
     listNetworkInterfaces: () => Promise<{
       interfaces: { name: string; address: string }[]
     }>
-    getPairingQR: (args?: {
-      address?: string
-      connectionMode?: MobilePairingConnectionMode
-      rotate?: boolean
-    }) => Promise<
+    getPairingQR: (args?: { address?: string; rotate?: boolean }) => Promise<
       | { available: false }
       | {
           available: true
@@ -2943,8 +2935,6 @@ export type PreloadApi = {
     listRuntimeAccessGrants: () => Promise<{ grants: RuntimeAccessGrant[] }>
     revokeRuntimeAccess: (args: { deviceId: string }) => Promise<{ revoked: boolean }>
     isWebSocketReady: () => Promise<{ ready: boolean; endpoint: string | null }>
-    getRelayStatus: () => Promise<{ status: MobileRelayStatus }>
-    onRelayStatusChanged: (callback: (status: MobileRelayStatus) => void) => () => void
   }
   speech: {
     getCatalog: () => Promise<SpeechModelManifest[]>

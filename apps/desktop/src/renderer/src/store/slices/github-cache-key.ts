@@ -2,7 +2,8 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   toSshExecutionHostId
-} from '../../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings } from '../../../../shared/types'
 
 type RuntimeFocusSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined

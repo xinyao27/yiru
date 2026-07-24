@@ -5,7 +5,8 @@ import {
   parseExecutionHostId,
   toRuntimeExecutionHostId,
   toSshExecutionHostId
-} from './execution-host'
+} from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings, ProjectProviderIdentity, Repo } from './types'
 
 export type ProjectSourceProvider = 'github' | 'gitlab'

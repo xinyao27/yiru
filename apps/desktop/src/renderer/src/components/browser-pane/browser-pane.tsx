@@ -45,9 +45,9 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { floatingSurfaceClass } from '@/components/ui/floating-surface-styles'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
+import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getShortcutPlatform, useShortcutLabel } from '@/hooks/use-shortcut-label'
@@ -71,6 +71,20 @@ import {
   WORKSPACE_FILE_PATH_MIME
 } from '@/lib/workspace-file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { rememberLiveBrowserUrl } from '@/runtime/browser-live-url'
+import {
+  applyBrowserPageViewportLayout,
+  ensureBrowserPageViewport,
+  getBrowserOverlaySlotViewport,
+  parkBrowserPageViewport,
+  subscribeBrowserOverlaySlotViewport,
+  syncBrowserPageChromeInset
+} from '@/runtime/browser-page-viewport'
+import {
+  destroyPersistentWebview,
+  moveFocusToRendererBeforeWebviewDetach,
+  registeredWebContentsIds
+} from '@/runtime/browser-webview-registry'
 import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
@@ -117,14 +131,14 @@ import {
 } from '../../../../shared/browser-viewport-presets'
 import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '../../../../shared/constants'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
+import { STATUS_GET_CONTRACT } from '../../../../shared/runtime-method-contracts/runtime-control-contracts'
 import { withBrowserPaneUiRuntimeRpcSource } from '../../../../shared/runtime-rpc-feature-interaction-source'
 import type {
   BrowserBackResult,
   BrowserGotoResult,
   BrowserReloadResult,
   BrowserScreencastResult,
-  BrowserTabInfo,
-  RuntimeStatus
+  BrowserTabInfo
 } from '../../../../shared/runtime-types'
 import type {
   BrowserCertificateProceedResult,
@@ -149,14 +163,6 @@ import { BrowserLoadFailureOverlay } from './browser-load-failure-overlay'
 import { BrowserMobileDriverOverlay } from './browser-mobile-driver-overlay'
 import { formatByteCount, formatPermissionNotice, formatPopupNotice } from './browser-notices'
 import { isBrowserPagePanePaintable } from './browser-page-paintability'
-import {
-  applyBrowserPageViewportLayout,
-  ensureBrowserPageViewport,
-  getBrowserOverlaySlotViewport,
-  parkBrowserPageViewport,
-  subscribeBrowserOverlaySlotViewport,
-  syncBrowserPageChromeInset
-} from './browser-page-viewport'
 import { ensureBrowserPageWebview } from './browser-page-webview'
 import {
   addBrowserPageZoomEventListener,
@@ -169,7 +175,6 @@ import {
   type BrowserPageZoomDirection
 } from './browser-page-zoom'
 import { getBrowserPagesForWorkspace } from './browser-pane-page-selection'
-import { rememberLiveBrowserUrl } from './browser-runtime'
 import { BrowserToolbarMenu } from './browser-toolbar-menu'
 import { shouldPollChromiumErrorPage } from './chromium-error-page-polling'
 import { formatGrabPayloadAsText } from './grab-confirmation-sheet'
@@ -183,11 +188,6 @@ import {
   getRemoteBrowserKeypressKey
 } from './remote-browser-keyboard'
 import { useGrabMode } from './use-grab-mode'
-import {
-  destroyPersistentWebview,
-  moveFocusToRendererBeforeWebviewDetach,
-  registeredWebContentsIds
-} from './webview-registry'
 
 type BrowserTabPageState = Partial<
   Pick<
@@ -243,10 +243,6 @@ const BROWSER_ANNOTATION_INTENT_OPTIONS = [
 // compatibility, but the annotation UI no longer exposes urgency choices.
 const DEFAULT_BROWSER_ANNOTATION_PRIORITY: BrowserAnnotationPriority = 'important'
 const BROWSER_PAGE_ZOOM_FEEDBACK_MS = 1400
-const BROWSER_CONTEXT_MENU_CLASS = cn(
-  floatingSurfaceClass,
-  'fixed z-50 min-w-[13rem] overflow-hidden p-1'
-)
 
 type BrowserOverlayViewport = {
   scrollX: number
@@ -442,7 +438,7 @@ function PendingBrowserAnnotationCard({
         <Label htmlFor="browser-annotation-comment" className="sr-only">
           {translate('auto.components.browser.pane.BrowserPane.d2a7092e6e', 'Annotation comment')}
         </Label>
-        <textarea
+        <Textarea
           id="browser-annotation-comment"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
@@ -451,7 +447,7 @@ function PendingBrowserAnnotationCard({
             'Describe what the agent should change here...'
           )}
           maxLength={GRAB_BUDGET.annotationCommentMaxLength}
-          className="border-input bg-background placeholder:text-muted-foreground h-24 w-full resize-none rounded-md border px-3 py-2 text-sm outline-none"
+          className="border-input bg-background placeholder:text-muted-foreground h-24 w-full resize-none border px-3 py-2 text-sm outline-none"
           autoFocus
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
@@ -516,9 +512,9 @@ function PendingBrowserAnnotationCard({
           >
             <MessageSquarePlus className="size-3.5" />
             {translate('auto.components.browser.pane.BrowserPane.90d021f2ad', 'Add')}
-            <span className="ml-1 inline-flex items-center gap-0.5 rounded border border-white/20 px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
+            <span className="ml-1 inline-flex items-center gap-0.5 border border-current/20 px-1.5 py-0.5 text-[10px] leading-none font-medium text-current/80">
               <span>{submitModifierLabel}</span>
-              <CornerDownLeft className="size-3" />
+              <CornerDownLeft weight="regular" className="size-3" />
             </span>
           </Button>
         </div>
@@ -846,7 +842,7 @@ export default function BrowserPane({
         onSetUrl={setBrowserPageUrl}
       />
     ) : (
-      <div className="bg-background flex h-full min-h-0 flex-1" />
+      <div className="bg-background text-foreground flex h-full min-h-0 flex-1" />
     )
   }
 
@@ -1634,7 +1630,7 @@ function RemoteBrowserPagePane({
       if (!operationToken || !isCurrentRemoteOperationToken(operationToken)) {
         return null
       }
-      const status = await callRuntimeRpc<RuntimeStatus>(target, 'status.get', undefined, {
+      const status = await callRuntimeRpc(target, STATUS_GET_CONTRACT, undefined, {
         timeoutMs: 15_000
       })
       if (!status.capabilities?.includes('browser.screencast.v1')) {
@@ -2419,118 +2415,52 @@ function RemoteBrowserPagePane({
   })
 
   return (
-    <div className="bg-background relative flex h-full min-h-0 flex-1 flex-col">
-      {contextMenu
-        ? createPortal(
-            <>
-              <div className="fixed inset-0 z-50" onPointerDown={() => setContextMenu(null)} />
-              <div
-                ref={contextMenuRef}
-                role="menu"
-                data-testid="remote-browser-context-menu"
+    <div className="bg-background text-foreground relative flex h-full min-h-0 flex-1 flex-col">
+      {contextMenu ? (
+        <Popover open onOpenChange={(open) => !open && setContextMenu(null)}>
+          <PopoverAnchor
+            render={
+              <span
+                className="pointer-events-none fixed size-px"
                 style={{ left: contextMenu.x, top: contextMenu.y }}
-                className={BROWSER_CONTEXT_MENU_CLASS}
-              >
-                {contextMenu.linkUrl ? (
-                  <>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        createBrowserTab(worktreeId, contextMenu.linkUrl!, {
-                          title: contextMenu.linkUrl!
-                        })
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate(
-                        'auto.components.browser.pane.BrowserPane.b5b87d6cbb',
-                        'Open Link In Yiru Browser'
-                      )}
-                    </button>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
-                        if (targetUrl) {
-                          void window.api.shell.openUrl(targetUrl)
-                        }
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate(
-                        'auto.components.browser.pane.BrowserPane.8ce4f6b12e',
-                        'Open Link In Default Browser'
-                      )}
-                    </button>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        void window.api.ui.writeClipboardText(contextMenu.linkUrl ?? '')
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate(
-                        'auto.components.browser.pane.BrowserPane.efb0e8f7f3',
-                        'Copy Link Address'
-                      )}
-                    </button>
-                    <div className="bg-border/70 my-1 h-px" />
-                  </>
-                ) : null}
-                {contextMenu.selectionText.trim() ? (
-                  <>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        void window.api.ui.writeClipboardText(contextMenu.selectionText)
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate('auto.components.browser.pane.BrowserPane.2a4c4b8e1f', 'Copy')}
-                    </button>
-                    <div className="bg-border/70 my-1 h-px" />
-                  </>
-                ) : null}
-                <button
+              />
+            }
+          />
+          <PopoverContent
+            ref={contextMenuRef}
+            role="menu"
+            data-testid="remote-browser-context-menu"
+            side="bottom"
+            align="start"
+            sideOffset={0}
+            className="min-w-[13rem] p-1"
+          >
+            {contextMenu.linkUrl ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void runRemoteNavigation('browser.back')
+                    createBrowserTab(worktreeId, contextMenu.linkUrl!, {
+                      title: contextMenu.linkUrl!
+                    })
                     setContextMenu(null)
                   }}
                 >
-                  {translate('auto.components.browser.pane.BrowserPane.40edfa75cb', 'Back')}
-                </button>
-                <button
+                  {translate(
+                    'auto.components.browser.pane.BrowserPane.b5b87d6cbb',
+                    'Open Link In Yiru Browser'
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void runRemoteNavigation('browser.forward')
-                    setContextMenu(null)
-                  }}
-                >
-                  {translate('auto.components.browser.pane.BrowserPane.250a9b3e42', 'Forward')}
-                </button>
-                <button
-                  role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                  onClick={() => {
-                    void runRemoteNavigation('browser.reload')
-                    setContextMenu(null)
-                  }}
-                >
-                  {translate('auto.components.browser.pane.BrowserPane.0e080d820e', 'Reload')}
-                </button>
-                <div className="bg-border/70 my-1 h-px" />
-                <button
-                  role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                  onClick={() => {
-                    const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
+                    const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
                     if (targetUrl) {
                       void window.api.shell.openUrl(targetUrl)
                     }
@@ -2538,28 +2468,115 @@ function RemoteBrowserPagePane({
                   }}
                 >
                   {translate(
-                    'auto.components.browser.pane.BrowserPane.f7ab83f7ed',
-                    'Open Page In Default Browser'
+                    'auto.components.browser.pane.BrowserPane.8ce4f6b12e',
+                    'Open Link In Default Browser'
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.ui.writeClipboardText(contextMenu.pageUrl)
+                    void window.api.ui.writeClipboardText(contextMenu.linkUrl ?? '')
                     setContextMenu(null)
                   }}
                 >
                   {translate(
-                    'auto.components.browser.pane.BrowserPane.1b179ab561',
-                    'Copy Page URL'
+                    'auto.components.browser.pane.BrowserPane.efb0e8f7f3',
+                    'Copy Link Address'
                   )}
-                </button>
-              </div>
-            </>,
-            document.body
-          )
-        : null}
+                </Button>
+                <div className="bg-border/70 my-1 h-px" />
+              </>
+            ) : null}
+            {contextMenu.selectionText.trim() ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  role="menuitem"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+                  onClick={() => {
+                    void window.api.ui.writeClipboardText(contextMenu.selectionText)
+                    setContextMenu(null)
+                  }}
+                >
+                  {translate('auto.components.browser.pane.BrowserPane.2a4c4b8e1f', 'Copy')}
+                </Button>
+                <div className="bg-border/70 my-1 h-px" />
+              </>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                void runRemoteNavigation('browser.back')
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.40edfa75cb', 'Back')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                void runRemoteNavigation('browser.forward')
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.250a9b3e42', 'Forward')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                void runRemoteNavigation('browser.reload')
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.0e080d820e', 'Reload')}
+            </Button>
+            <div className="bg-border/70 my-1 h-px" />
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
+                if (targetUrl) {
+                  void window.api.shell.openUrl(targetUrl)
+                }
+                setContextMenu(null)
+              }}
+            >
+              {translate(
+                'auto.components.browser.pane.BrowserPane.f7ab83f7ed',
+                'Open Page In Default Browser'
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                void window.api.ui.writeClipboardText(contextMenu.pageUrl)
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.1b179ab561', 'Copy Page URL')}
+            </Button>
+          </PopoverContent>
+        </Popover>
+      ) : null}
       <div
         className="border-border/70 bg-background relative z-10 flex items-center gap-2 border-b px-3 py-1.5"
         data-contextual-tour-target="browser-toolbar"
@@ -2570,7 +2587,7 @@ function RemoteBrowserPagePane({
           className="h-7 w-7"
           onClick={() => void runRemoteNavigation('browser.back')}
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft weight="regular" className="size-4" />
         </Button>
         <Button
           size="icon"
@@ -2578,7 +2595,7 @@ function RemoteBrowserPagePane({
           className="h-7 w-7"
           onClick={() => void runRemoteNavigation('browser.forward')}
         >
-          <ArrowRight className="size-4" />
+          <ArrowRight weight="regular" className="size-4" />
         </Button>
         <Button
           size="icon"
@@ -2589,7 +2606,7 @@ function RemoteBrowserPagePane({
           {busy || browserTab.loading ? (
             <LoadingIndicator className="size-4" />
           ) : (
-            <RefreshCw className="size-4" />
+            <RefreshCw weight="regular" className="size-4" />
           )}
         </Button>
         <BrowserAddressBar
@@ -2728,7 +2745,7 @@ function RemoteBrowserPagePane({
           />
         ) : null}
         {remoteError ? (
-          <div className="border-border bg-popover text-popover-foreground absolute bottom-4 left-1/2 max-w-md -translate-x-1/2 rounded-md border px-3 py-2 text-xs">
+          <div className="border-border bg-popover text-popover-foreground absolute bottom-4 left-1/2 max-w-md -translate-x-1/2 border px-3 py-2 text-xs">
             {remoteError}
           </div>
         ) : null}
@@ -4916,119 +4933,51 @@ function BrowserPagePane({
       {/* IPC-driven context menu — rendered in a Portal so position: fixed is
           relative to the viewport, not affected by ancestor backdrop-filter or
           transform properties that create new containing blocks. */}
-      {contextMenu
-        ? createPortal(
-            <>
-              <div className="fixed inset-0 z-50" onPointerDown={() => setContextMenu(null)} />
-              <div
-                ref={contextMenuRef}
-                role="menu"
-                data-testid="browser-context-menu"
+      {contextMenu ? (
+        <Popover open onOpenChange={(open) => !open && setContextMenu(null)}>
+          <PopoverAnchor
+            render={
+              <span
+                className="pointer-events-none fixed size-px"
                 style={{ left: contextMenu.x, top: contextMenu.y }}
-                className={BROWSER_CONTEXT_MENU_CLASS}
-              >
-                {contextMenu.linkUrl ? (
-                  <>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        createBrowserTab(worktreeId, contextMenu.linkUrl!, {
-                          title: contextMenu.linkUrl!
-                        })
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate(
-                        'auto.components.browser.pane.BrowserPane.b5b87d6cbb',
-                        'Open Link In Yiru Browser'
-                      )}
-                    </button>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
-                        if (targetUrl) {
-                          void window.api.shell.openUrl(targetUrl)
-                        }
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate(
-                        'auto.components.browser.pane.BrowserPane.8ce4f6b12e',
-                        'Open Link In Default Browser'
-                      )}
-                    </button>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        void window.api.ui.writeClipboardText(contextMenu.linkUrl ?? '')
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate(
-                        'auto.components.browser.pane.BrowserPane.efb0e8f7f3',
-                        'Copy Link Address'
-                      )}
-                    </button>
-                    <div className="bg-border/70 my-1 h-px" />
-                  </>
-                ) : null}
-                {contextMenu.selectionText.trim() ? (
-                  <>
-                    <button
-                      role="menuitem"
-                      className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                      onClick={() => {
-                        void window.api.ui.writeClipboardText(contextMenu.selectionText)
-                        setContextMenu(null)
-                      }}
-                    >
-                      {translate('auto.components.browser.pane.BrowserPane.2a4c4b8e1f', 'Copy')}
-                    </button>
-                    <div className="bg-border/70 my-1 h-px" />
-                  </>
-                ) : null}
-                <button
+              />
+            }
+          />
+          <PopoverContent
+            ref={contextMenuRef}
+            role="menu"
+            data-testid="browser-context-menu"
+            side="bottom"
+            align="start"
+            sideOffset={0}
+            className="min-w-[13rem] p-1"
+          >
+            {contextMenu.linkUrl ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  disabled={!browserTab.canGoBack}
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    webviewRef.current?.goBack()
+                    createBrowserTab(worktreeId, contextMenu.linkUrl!, {
+                      title: contextMenu.linkUrl!
+                    })
                     setContextMenu(null)
                   }}
                 >
-                  {translate('auto.components.browser.pane.BrowserPane.40edfa75cb', 'Back')}
-                </button>
-                <button
+                  {translate(
+                    'auto.components.browser.pane.BrowserPane.b5b87d6cbb',
+                    'Open Link In Yiru Browser'
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  disabled={!browserTab.canGoForward}
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    webviewRef.current?.goForward()
-                    setContextMenu(null)
-                  }}
-                >
-                  {translate('auto.components.browser.pane.BrowserPane.250a9b3e42', 'Forward')}
-                </button>
-                <button
-                  role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                  onClick={() => {
-                    webviewRef.current?.reload()
-                    setContextMenu(null)
-                  }}
-                >
-                  {translate('auto.components.browser.pane.BrowserPane.0e080d820e', 'Reload')}
-                </button>
-                <div className="bg-border/70 my-1 h-px" />
-                <button
-                  role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
-                  onClick={() => {
-                    const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
+                    const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
                     if (targetUrl) {
                       void window.api.shell.openUrl(targetUrl)
                     }
@@ -5036,39 +4985,130 @@ function BrowserPagePane({
                   }}
                 >
                   {translate(
-                    'auto.components.browser.pane.BrowserPane.f7ab83f7ed',
-                    'Open Page In Default Browser'
+                    'auto.components.browser.pane.BrowserPane.8ce4f6b12e',
+                    'Open Link In Default Browser'
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.ui.writeClipboardText(contextMenu.pageUrl)
+                    void window.api.ui.writeClipboardText(contextMenu.linkUrl ?? '')
                     setContextMenu(null)
                   }}
                 >
                   {translate(
-                    'auto.components.browser.pane.BrowserPane.1b179ab561',
-                    'Copy Page URL'
+                    'auto.components.browser.pane.BrowserPane.efb0e8f7f3',
+                    'Copy Link Address'
                   )}
-                </button>
+                </Button>
                 <div className="bg-border/70 my-1 h-px" />
-                <button
+              </>
+            ) : null}
+            {contextMenu.selectionText.trim() ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="xs"
                   role="menuitem"
-                  className="relative flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-0.5 text-[12px] leading-5 font-medium outline-none select-none hover:bg-black/8 dark:hover:bg-white/14"
+                  className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
                   onClick={() => {
-                    void window.api.browser.openDevTools({ browserPageId: browserTab.id })
+                    void window.api.ui.writeClipboardText(contextMenu.selectionText)
                     setContextMenu(null)
                   }}
                 >
-                  {translate('auto.components.browser.pane.BrowserPane.a8f37f70c3', 'Inspect Page')}
-                </button>
-              </div>
-            </>,
-            document.body
-          )
-        : null}
+                  {translate('auto.components.browser.pane.BrowserPane.2a4c4b8e1f', 'Copy')}
+                </Button>
+                <div className="bg-border/70 my-1 h-px" />
+              </>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              disabled={!browserTab.canGoBack}
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                webviewRef.current?.goBack()
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.40edfa75cb', 'Back')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              disabled={!browserTab.canGoForward}
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                webviewRef.current?.goForward()
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.250a9b3e42', 'Forward')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                webviewRef.current?.reload()
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.0e080d820e', 'Reload')}
+            </Button>
+            <div className="bg-border/70 my-1 h-px" />
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
+                if (targetUrl) {
+                  void window.api.shell.openUrl(targetUrl)
+                }
+                setContextMenu(null)
+              }}
+            >
+              {translate(
+                'auto.components.browser.pane.BrowserPane.f7ab83f7ed',
+                'Open Page In Default Browser'
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                void window.api.ui.writeClipboardText(contextMenu.pageUrl)
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.1b179ab561', 'Copy Page URL')}
+            </Button>
+            <div className="bg-border/70 my-1 h-px" />
+            <Button
+              variant="ghost"
+              size="xs"
+              role="menuitem"
+              className="hover:bg-accent relative flex h-auto w-full cursor-default justify-start gap-2 border-0 py-0.5 text-[12px] leading-5 whitespace-normal select-none"
+              onClick={() => {
+                void window.api.browser.openDevTools({ browserPageId: browserTab.id })
+                setContextMenu(null)
+              }}
+            >
+              {translate('auto.components.browser.pane.BrowserPane.a8f37f70c3', 'Inspect Page')}
+            </Button>
+          </PopoverContent>
+        </Popover>
+      ) : null}
 
       <div ref={chromeHeaderRef} className="pointer-events-auto shrink-0">
         <div
@@ -5082,7 +5122,7 @@ function BrowserPagePane({
             onClick={() => webviewRef.current?.goBack()}
             disabled={!browserTab.canGoBack}
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft weight="regular" className="size-4" />
           </Button>
           <Button
             size="icon"
@@ -5091,7 +5131,7 @@ function BrowserPagePane({
             onClick={() => webviewRef.current?.goForward()}
             disabled={!browserTab.canGoForward}
           >
-            <ArrowRight className="size-4" />
+            <ArrowRight weight="regular" className="size-4" />
           </Button>
           <Button
             size="icon"
@@ -5114,7 +5154,7 @@ function BrowserPagePane({
             {browserTab.loading ? (
               <LoadingIndicator className="size-4" />
             ) : (
-              <RefreshCw className="size-4" />
+              <RefreshCw weight="regular" className="size-4" />
             )}
           </Button>
 
@@ -5193,7 +5233,7 @@ function BrowserPagePane({
                   >
                     <MessageSquarePlus className="size-4" />
                     {browserAnnotations.length > 0 ? (
-                      <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-4">
+                      <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex min-w-4 items-center justify-center px-1 text-[10px] leading-4">
                         {browserAnnotations.length}
                       </span>
                     ) : null}
@@ -5245,7 +5285,7 @@ function BrowserPagePane({
             )}
             disabled={!externalUrl}
           >
-            <ExternalLink className="size-4" />
+            <ExternalLink weight="regular" className="size-4" />
           </Button>
 
           <BrowserToolbarMenu
@@ -5339,7 +5379,7 @@ function BrowserPagePane({
                             void handleOpenDownloadedFile(download)
                           }}
                         >
-                          <ExternalLink className="size-3" />
+                          <ExternalLink weight="regular" className="size-3" />
                           {translate('auto.components.browser.pane.BrowserPane.756bfc25c9', 'Open')}
                         </Button>
                         <Button
@@ -5363,7 +5403,7 @@ function BrowserPagePane({
                             'Dismiss'
                           )}
                         >
-                          <X className="size-3.5" />
+                          <X weight="regular" className="size-3.5" />
                         </Button>
                       </>
                     ) : (
@@ -5377,7 +5417,7 @@ function BrowserPagePane({
                           'Dismiss'
                         )}
                       >
-                        <X className="size-3.5" />
+                        <X weight="regular" className="size-3.5" />
                       </Button>
                     )}
                   </div>
@@ -5389,17 +5429,19 @@ function BrowserPagePane({
         {resourceNotice ? (
           <div className="border-border/60 bg-background text-muted-foreground flex items-center justify-between gap-2 border-b px-3 py-1.5 text-xs">
             <span>{resourceNotice}</span>
-            <button
+            <Button
+              variant="quiet"
+              size="xs"
               type="button"
               onClick={() => setResourceNotice(null)}
-              className="text-muted-foreground/60 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 outline-none"
+              className="/60 h-auto border-0 p-0"
               aria-label={translate(
                 'auto.components.browser.pane.BrowserPane.2fdca7df09',
                 'Dismiss'
               )}
             >
               ✕
-            </button>
+            </Button>
           </div>
         ) : null}
         {grab.state !== 'idle' ? (
@@ -5513,8 +5555,7 @@ function BrowserPagePane({
                     render={
                       <Button
                         size="icon-xs"
-                        variant="ghost"
-                        className="text-muted-foreground hover:text-foreground h-6 w-6"
+                        variant="quiet"
                         onClick={handleClearBrowserAnnotations}
                         aria-label={translate(
                           'auto.components.browser.pane.BrowserPane.734e4343ec',
@@ -5534,15 +5575,17 @@ function BrowserPagePane({
                 </Tooltip>
               </>
             ) : null}
-            <button
-              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent ml-auto shrink-0 rounded px-2 py-0.5 transition-colors outline-none"
+            <Button
+              variant="quiet"
+              size="xs"
+              className="ml-auto h-auto border-0 py-0.5"
               onClick={() => {
                 setPendingAnnotationPayload(null)
                 grab.cancel()
               }}
             >
               {translate('auto.components.browser.pane.BrowserPane.fa6ea61de3', 'Cancel')}
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>
@@ -5562,7 +5605,7 @@ function BrowserPagePane({
                 aria-live="polite"
                 aria-hidden={browserZoomIndicatorState.ariaHidden}
                 className={cn(
-                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground transition-opacity duration-300 ease-out',
+                  'pointer-events-none absolute top-3 right-3 z-30 border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground transition-opacity duration-300 ease-out',
                   browserZoomIndicatorState.opacityClassName
                 )}
               >
@@ -5611,7 +5654,7 @@ function BrowserPagePane({
               {isBlankTab ? (
                 <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent_58%)] px-6">
                   <div className="flex flex-col items-center px-8 py-8 text-center opacity-70">
-                    <div className="border-border/70 bg-muted/30 mb-4 rounded-full border p-3">
+                    <div className="border-border/70 bg-muted/30 mb-4 border p-3">
                       <Globe className="text-muted-foreground size-5" />
                     </div>
                     <div className="text-center">
@@ -5646,7 +5689,7 @@ function BrowserPagePane({
                 />
               ) : null}
               {browserAnnotations.length > 0 && browserAnnotationTrayOpen ? (
-                <div className="border-border bg-popover text-popover-foreground absolute right-3 bottom-3 z-30 flex max-h-[45%] w-[min(20rem,calc(100%-1.5rem))] flex-col overflow-hidden rounded-lg border">
+                <div className="border-border bg-popover text-popover-foreground absolute right-3 bottom-3 z-30 flex max-h-[45%] w-[min(20rem,calc(100%-1.5rem))] flex-col overflow-hidden border">
                   <div className="border-border flex items-center gap-2 border-b px-3 py-2">
                     <MessageSquarePlus className="text-muted-foreground size-4" />
                     <div className="min-w-0 flex-1 text-sm font-medium">
@@ -5719,8 +5762,7 @@ function BrowserPagePane({
                         render={
                           <Button
                             size="icon-xs"
-                            variant="ghost"
-                            className="text-muted-foreground hover:text-foreground"
+                            variant="quiet"
                             onClick={handleClearBrowserAnnotations}
                             aria-label={translate(
                               'auto.components.browser.pane.BrowserPane.734e4343ec',
@@ -5743,9 +5785,9 @@ function BrowserPagePane({
                     {browserAnnotations.map((annotation, index) => (
                       <div
                         key={annotation.id}
-                        className="group hover:bg-accent focus-within:bg-accent flex gap-2 rounded-md px-2 py-1.5 text-xs"
+                        className="group hover:bg-accent focus-within:bg-accent flex gap-2 px-2 py-1.5 text-xs"
                       >
-                        <div className="bg-primary text-primary-foreground mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold">
+                        <div className="bg-primary text-primary-foreground mt-0.5 flex size-5 shrink-0 items-center justify-center text-[10px] font-semibold">
                           {index + 1}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -5797,10 +5839,12 @@ function BrowserPagePane({
               >
                 <DropdownMenuTrigger
                   render={
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
                       aria-hidden
                       tabIndex={-1}
-                      className="pointer-events-none absolute size-px opacity-0"
+                      className="pointer-events-none absolute size-px border-0 opacity-0"
                       style={(() => {
                         if (!grab.payload) {
                           return { left: 0, top: 0 }
@@ -5878,7 +5922,7 @@ function BrowserPagePane({
                   />
                   <div
                     className={cn(
-                      'flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5',
+                      'flex items-center gap-1.5 py-1.5 pl-3 pr-1.5',
                       grabToast.type === 'success'
                         ? 'bg-white text-gray-900'
                         : 'bg-white text-red-600'
@@ -5904,9 +5948,13 @@ function BrowserPagePane({
                       >
                         <DropdownMenuTrigger
                           render={
-                            <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors outline-none hover:bg-black/10 hover:text-gray-700 focus-visible:bg-black/10 focus-visible:text-gray-700">
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="hover:bg-accent focus-visible:bg-accent flex text-gray-500 transition-colors hover:text-gray-700 focus-visible:text-gray-700"
+                            >
                               <span className="text-sm leading-none font-bold">···</span>
-                            </button>
+                            </Button>
                           }
                         />
                         <DropdownMenuContent align="start" sideOffset={4}>

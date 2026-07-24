@@ -1,4 +1,4 @@
-import { isRuntimeOwnedSshTargetId } from '../../../shared/execution-host'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
 /** Model-A SSH stores Grok transcripts on a host this renderer cannot read. */
 export function isNativeChatTranscriptLocalReadable(

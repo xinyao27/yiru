@@ -1,6 +1,7 @@
 import { Copy, Check } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 type CodeBlockCopyButtonProps = React.HTMLAttributes<HTMLPreElement> & {
@@ -69,10 +70,12 @@ export default function CodeBlockCopyButton({
   return (
     <div className="code-block-wrapper">
       <pre {...props}>{children}</pre>
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         ref={setCopyButtonRef}
         type="button"
-        className="code-block-copy-btn focus-visible:bg-accent outline-none"
+        className="code-block-copy-btn focus-visible:bg-accent h-auto border-0 p-0"
         onClick={handleCopy}
         aria-label={translate('auto.components.editor.CodeBlockCopyButton.1f9f4def45', 'Copy code')}
         title={translate('auto.components.editor.CodeBlockCopyButton.1f9f4def45', 'Copy code')}
@@ -87,7 +90,7 @@ export default function CodeBlockCopyButton({
         ) : (
           <Copy size={14} />
         )}
-      </button>
+      </Button>
     </div>
   )
 }

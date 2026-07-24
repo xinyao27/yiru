@@ -1,6 +1,11 @@
 import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { isXtermInstanceDisposed } from '@/lib/pane-manager/xterm-instance-disposed'
+import {
+  getLeftmostLeafId,
+  normalizeTerminalLayoutSnapshot,
+  resolveRootlessTerminalLayoutLeafId
+} from '@/lib/terminal-layout-leaf-ids'
 
 import { isTerminalLeafId } from '../../../../shared/stable-pane-id'
 import type {
@@ -9,18 +14,13 @@ import type {
   TerminalPaneSplitDirection
 } from '../../../../shared/types'
 import { replayIntoTerminal, type ReplayingPanesRef } from './replay-guard'
-import {
-  getLeftmostLeafId,
-  normalizeTerminalLayoutSnapshot,
-  resolveRootlessTerminalLayoutLeafId
-} from './terminal-layout-leaf-ids'
 import type { RestoredViewportBlankingPanesRef } from './terminal-restored-viewport'
 
 export {
   collectLeafIdsInOrder,
   collectLeafIdsInReplayCreationOrder,
   normalizeTerminalLayoutSnapshot
-} from './terminal-layout-leaf-ids'
+} from '@/lib/terminal-layout-leaf-ids'
 
 export const EMPTY_LAYOUT: TerminalLayoutSnapshot = {
   root: null,

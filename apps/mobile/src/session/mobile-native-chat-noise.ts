@@ -1,1 +1,1 @@
-export { isNoiseMessage, stripNoiseMessages } from '../../../desktop/src/shared/native-chat-noise'
+export { isNoiseMessage, stripNoiseMessages } from '@yiru/workbench-model/agent'

@@ -2,7 +2,7 @@ import type {
   GitBranchChangeEntry,
   GitBranchCompareResult,
   GitBranchCompareSummary
-} from '../../../desktop/src/shared/types'
+} from '@yiru/workbench-model/review'
 
 export type MobileGitBranchChangeEntry = GitBranchChangeEntry
 export type MobileGitBranchCompareSummary = GitBranchCompareSummary

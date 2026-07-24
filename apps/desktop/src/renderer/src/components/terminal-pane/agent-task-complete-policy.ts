@@ -8,7 +8,8 @@
  * deliberately dependency-light — no pane/xterm imports — so pane-less
  * consumers can use it.
  */
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import type { GlobalSettings } from '../../../../shared/types'
 
 /** Delay before BEL/completion OS notifications so the richer

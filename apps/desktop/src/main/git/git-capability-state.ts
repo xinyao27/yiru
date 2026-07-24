@@ -1,5 +1,6 @@
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { GitCapabilityCache } from '../../shared/git-capability-cache'
-import { parseWslUncPath } from '../../shared/wsl-paths'
 
 type LocalGitCapabilityTarget = {
   cwd?: string
@@ -9,7 +10,7 @@ type LocalGitCapabilityTarget = {
 const localCapabilitiesByExecutionHost = new Map<string, GitCapabilityCache>()
 // Why: reconnecting creates a new provider, while concurrent IPC/runtime users
 // of one SSH connection must share the same remote Git capability results.
-let sshCapabilitiesByProvider = new WeakMap<object, GitCapabilityCache>()
+const sshCapabilitiesByProvider = new WeakMap<object, GitCapabilityCache>()
 
 function getLocalGitExecutionHostKey(target: LocalGitCapabilityTarget): string {
   const wslDistro =

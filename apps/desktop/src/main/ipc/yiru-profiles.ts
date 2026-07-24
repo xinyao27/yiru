@@ -1,38 +1,18 @@
+import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { app, ipcMain } from 'electron'
 
-import { normalizeExecutionHostId } from '../../shared/execution-host'
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
-  CreateCloudLinkedYiruProfileArgs,
-  CreateCloudLinkedYiruProfileResult,
   FindYiruProfileProjectsByPathArgs,
   FindYiruProfileProjectsByPathResult,
   YiruProfileListResult,
-  RefreshCurrentYiruProfileAuthResult,
   SwitchYiruProfileArgs,
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
-  TransferYiruProfileProjectResult,
-  ConnectCurrentYiruProfileResult,
-  YiruProfileAuthStatus,
-  SelectYiruProfileOrgArgs,
-  SelectYiruProfileOrgResult,
-  SignOutCurrentYiruProfileResult
+  TransferYiruProfileProjectResult
 } from '../../shared/yiru-profiles'
 import type { Store } from '../persistence'
-import {
-  createCloudLinkedYiruProfile,
-  connectCurrentYiruProfile,
-  getCurrentYiruProfileAuthStatus,
-  refreshCurrentYiruProfileAuth,
-  selectCurrentYiruProfileOrg,
-  signOutCurrentYiruProfile
-} from '../yiru-profiles/profile-cloud-service'
-import {
-  cloudSessionIdentity,
-  recordCloudSessionIdentityMutation
-} from '../yiru-profiles/profile-cloud-session-mutation'
 import {
   createLocalYiruProfile,
   getYiruProfileListState,
@@ -43,12 +23,9 @@ import { findYiruProfileProjectsByPath } from '../yiru-profiles/profile-project-
 import { transferYiruProfileProject } from '../yiru-profiles/profile-project-transfer'
 import { getProfileUserDataPath } from '../yiru-profiles/profile-storage-paths'
 import { isMultiProfileUiEnabled } from '../yiru-profiles/profile-ui-scope'
-import { registerYiruProfileOrgMemberHandlers } from './yiru-profile-org-members-handlers'
 
 type RegisterYiruProfileHandlersOptions = {
   onBeforeRelaunch?: () => void | Promise<void>
-  onAuthMutation?: () => void
-  onBeforeSignOut?: () => void
 }
 
 function profileIdFromArgs(args: unknown): string {
@@ -117,30 +94,6 @@ function findProjectsByPathArgsFromUnknown(args: unknown): FindYiruProfileProjec
   }
 }
 
-function orgIdFromUnknown(args: unknown): string {
-  if (!args || typeof args !== 'object') {
-    throw new Error('invalid_yiru_profile_org_selection')
-  }
-  const orgId = (args as SelectYiruProfileOrgArgs).orgId?.trim()
-  if (!orgId) {
-    throw new Error('invalid_yiru_profile_org_selection')
-  }
-  return orgId
-}
-
-function createCloudLinkedProfileArgsFromUnknown(args: unknown): CreateCloudLinkedYiruProfileArgs {
-  if (!args || typeof args !== 'object') {
-    return {}
-  }
-  const candidate = args as CreateCloudLinkedYiruProfileArgs
-  const orgId = typeof candidate.orgId === 'string' ? candidate.orgId.trim() : undefined
-  const name = typeof candidate.name === 'string' ? candidate.name.trim() : undefined
-  return {
-    ...(orgId ? { orgId } : {}),
-    ...(name ? { name } : {})
-  }
-}
-
 async function runBeforeProfileRelaunch(
   onBeforeRelaunch?: () => void | Promise<void>
 ): Promise<void> {
@@ -177,11 +130,6 @@ export function registerYiruProfileHandlers(
   )
 
   ipcMain.handle(
-    'yiruProfiles:authStatus',
-    (): YiruProfileAuthStatus => getCurrentYiruProfileAuthStatus(getProfileUserDataPath())
-  )
-
-  ipcMain.handle(
     'yiruProfiles:createLocal',
     (_event, args?: CreateLocalYiruProfileArgs): CreateLocalYiruProfileResult => {
       const result = createLocalYiruProfile(args)
@@ -199,17 +147,6 @@ export function registerYiruProfileHandlers(
         return { status: 'already-active' }
       }
 
-      const activeProfile = current.profiles.find(
-        (profile) => profile.id === current.activeProfileId
-      )
-      if (activeProfile?.cloud) {
-        // Why: profile selection changes the expected identity synchronously;
-        // stale refresh saves must fail even before relaunch teardown finishes.
-        recordCloudSessionIdentityMutation(
-          cloudSessionIdentity(activeProfile.id, activeProfile.cloud),
-          getProfileUserDataPath()
-        )
-      }
       // Why: the current profile must be persisted before the global index
       // points startup at the target profile.
       await runBeforeProfileRelaunch(options.onBeforeRelaunch)
@@ -263,68 +200,4 @@ export function registerYiruProfileHandlers(
         getProfileUserDataPath()
       )
   )
-
-  ipcMain.handle(
-    'yiruProfiles:connectCurrent',
-    async (): Promise<ConnectCurrentYiruProfileResult> => {
-      const result = await connectCurrentYiruProfile(getProfileUserDataPath())
-      if (result.status === 'connected') {
-        options.onAuthMutation?.()
-      }
-      return result
-    }
-  )
-
-  ipcMain.handle(
-    'yiruProfiles:createCloudLinked',
-    async (
-      _event,
-      rawArgs?: CreateCloudLinkedYiruProfileArgs
-    ): Promise<CreateCloudLinkedYiruProfileResult> => {
-      const result = await createCloudLinkedYiruProfile(
-        getProfileUserDataPath(),
-        createCloudLinkedProfileArgsFromUnknown(rawArgs)
-      )
-      if (result.status === 'created') {
-        seedNewYiruProfileTelemetryConsent(result.profile.id, store.getSettings().telemetry)
-        options.onAuthMutation?.()
-      }
-      return result
-    }
-  )
-
-  ipcMain.handle(
-    'yiruProfiles:refreshAuth',
-    async (): Promise<RefreshCurrentYiruProfileAuthResult> => {
-      const result = await refreshCurrentYiruProfileAuth(getProfileUserDataPath())
-      if (result.status === 'refreshed') {
-        options.onAuthMutation?.()
-      }
-      return result
-    }
-  )
-
-  ipcMain.handle(
-    'yiruProfiles:signOutCurrent',
-    async (): Promise<SignOutCurrentYiruProfileResult> => {
-      options.onBeforeSignOut?.()
-      return signOutCurrentYiruProfile(getProfileUserDataPath())
-    }
-  )
-
-  ipcMain.handle(
-    'yiruProfiles:selectOrg',
-    async (_event, rawArgs: SelectYiruProfileOrgArgs): Promise<SelectYiruProfileOrgResult> => {
-      const result = await selectCurrentYiruProfileOrg(
-        getProfileUserDataPath(),
-        orgIdFromUnknown(rawArgs)
-      )
-      if (result.status === 'selected') {
-        options.onAuthMutation?.()
-      }
-      return result
-    }
-  )
-
-  registerYiruProfileOrgMemberHandlers()
 }

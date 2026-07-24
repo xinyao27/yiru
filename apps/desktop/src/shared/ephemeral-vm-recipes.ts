@@ -1,11 +1,11 @@
-import { z } from 'zod'
-
-import { parsePairingCode } from './pairing'
 import {
   DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MAX_SSH_RELAY_GRACE_PERIOD_SECONDS,
   MIN_SSH_RELAY_GRACE_PERIOD_SECONDS
-} from './ssh-types'
+} from '@yiru/runtime-protocol/ssh-connection'
+import { z } from 'zod'
+
+import { parsePairingCode } from './pairing'
 // Why: ephemeral-vm-recipe-doctor imports Node's fs/path, so it must NOT be
 // re-exported through this barrel — the renderer/web-client imports this module
 // and would otherwise pull Node built-ins into the browser bundle (build fails).

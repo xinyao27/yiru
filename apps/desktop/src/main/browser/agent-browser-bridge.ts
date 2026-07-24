@@ -4,9 +4,9 @@ import { existsSync, accessSync, chmodSync, readFileSync, constants } from 'node
 import { platform, arch } from 'node:os'
 import { join } from 'node:path'
 
+import { assertClipboardTextWriteWithinLimitWithYield } from '@yiru/workbench-model/ui'
 import { app, type WebContents } from 'electron'
 
-import { assertClipboardTextWriteWithinLimitWithYield } from '../../shared/clipboard-text'
 import type {
   BrowserTabInfo,
   BrowserTabListResult,

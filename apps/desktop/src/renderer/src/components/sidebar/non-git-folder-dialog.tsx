@@ -11,6 +11,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
+import { addNonGitFolderAndActivate } from '@/lib/add-non-git-folder-command'
 import { buildDismissedOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
 import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
@@ -20,7 +21,6 @@ const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
   const activeModal = useAppStore((s) => s.activeModal)
   const modalData = useAppStore((s) => s.modalData)
   const closeModal = useAppStore((s) => s.closeModal)
-  const addNonGitFolder = useAppStore((s) => s.addNonGitFolder)
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
 
   const isOpen = activeModal === 'confirm-non-git-folder'
@@ -77,7 +77,7 @@ const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
           if (folderWorktree) {
             const onboarding = await window.api.onboarding.get().catch(() => null)
             // Why: SSH users can hit this dialog from Add Project after
-            // dismissing onboarding, bypassing the local addNonGitFolder path.
+            // dismissing onboarding, bypassing the local folder-add command.
             const startup = buildDismissedOnboardingFolderAgentStartup(
               useAppStore.getState().settings,
               onboarding,
@@ -102,12 +102,12 @@ const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
         }
       })()
     } else if (folderPath) {
-      void addNonGitFolder(folderPath, {
+      void addNonGitFolderAndActivate(useAppStore.getState, folderPath, {
         runtimeEnvironmentId: runtimeEnvironmentId || null
       })
     }
     closeModal()
-  }, [addNonGitFolder, closeModal, folderPath, connectionId, runtimeEnvironmentId])
+  }, [closeModal, folderPath, connectionId, runtimeEnvironmentId])
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -135,7 +135,7 @@ const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
         </DialogHeader>
 
         {folderPath && (
-          <div className="border-border/70 bg-muted/35 rounded-md border px-3 py-2 text-xs">
+          <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
             <div className="text-muted-foreground break-all">{folderPath}</div>
           </div>
         )}

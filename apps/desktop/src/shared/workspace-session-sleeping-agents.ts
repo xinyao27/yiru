@@ -1,6 +1,10 @@
+import {
+  getAgentResumeArgv,
+  normalizeAgentProviderSession,
+  RESUMABLE_TUI_AGENTS
+} from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
-import { normalizeAgentProviderSession, RESUMABLE_TUI_AGENTS } from './agent-session-resume'
 import { isValidTerminalTabId } from './terminal-tab-id'
 
 const terminalTabIdSchema = z
@@ -12,7 +16,10 @@ const agentProviderSessionSchema = z.preprocess(
   (raw) => normalizeAgentProviderSession(raw) ?? undefined,
   z.object({
     key: z.enum(['session_id', 'conversation_id']),
-    id: z.string().min(1).max(512)
+    id: z.string().min(1).max(512),
+    // Why: Pi resumes by this authoritative session file, so hydration must
+    // retain it with the provider id instead of silently making the row inert.
+    transcriptPath: z.string().min(1).optional()
   })
 )
 
@@ -58,7 +65,13 @@ const sleepingAgentLaunchEnvSchema = z.preprocess(
 const sleepingAgentLaunchConfigBaseSchema = z.object({
   agentCommand: z.string().optional(),
   agentArgs: z.string(),
-  agentEnv: sleepingAgentLaunchEnvSchema
+  agentEnv: sleepingAgentLaunchEnvSchema,
+  ompResumeFilePath: z
+    .string()
+    .min(1)
+    .max(32 * 1024)
+    .refine((value) => !hasUnsafeLaunchEnvChars(value))
+    .optional()
 })
 
 export const sleepingAgentLaunchConfigSchema = z.preprocess((raw) => {
@@ -66,23 +79,38 @@ export const sleepingAgentLaunchConfigSchema = z.preprocess((raw) => {
   return parsed.success ? parsed.data : undefined
 }, sleepingAgentLaunchConfigBaseSchema.optional())
 
-const sleepingAgentSessionRecordSchema = z.object({
-  paneKey: z.string().refine((value) => value.length > 0),
-  tabId: terminalTabIdSchema.optional(),
-  worktreeId: z.string().min(1),
-  agent: z.enum(RESUMABLE_TUI_AGENTS),
-  providerSession: agentProviderSessionSchema,
-  prompt: z.string(),
-  state: z.enum(['working', 'blocked', 'waiting', 'done']),
-  capturedAt: z.number().finite().positive(),
-  updatedAt: z.number().finite().positive(),
-  terminalTitle: z.string().optional(),
-  lastAssistantMessage: z.string().optional(),
-  interrupted: z.boolean().optional(),
-  connectionId: z.string().nullable().optional(),
-  launchConfig: sleepingAgentLaunchConfigSchema.optional(),
-  origin: z.enum(['worktree-sleep', 'quit', 'live']).optional()
-})
+const sleepingAgentSessionRecordSchema = z
+  .object({
+    paneKey: z.string().refine((value) => value.length > 0),
+    tabId: terminalTabIdSchema.optional(),
+    worktreeId: z.string().min(1),
+    agent: z.enum(RESUMABLE_TUI_AGENTS),
+    providerSession: agentProviderSessionSchema,
+    prompt: z.string(),
+    state: z.enum(['working', 'blocked', 'waiting', 'done']),
+    capturedAt: z.number().finite().positive(),
+    updatedAt: z.number().finite().positive(),
+    terminalTitle: z.string().optional(),
+    lastAssistantMessage: z.string().optional(),
+    interrupted: z.boolean().optional(),
+    connectionId: z.string().nullable().optional(),
+    launchConfig: sleepingAgentLaunchConfigSchema.optional(),
+    origin: z.enum(['worktree-sleep', 'quit', 'live']).optional()
+  })
+  .refine(
+    (record) =>
+      getAgentResumeArgv(
+        record.agent,
+        record.providerSession,
+        record.launchConfig?.ompResumeFilePath
+      ) !== null,
+    {
+      // Why: hydration must not retain records that cannot be launched safely;
+      // Pi additionally needs its session file and every agent needs the right key.
+      message: 'provider session is not resumable for this agent',
+      path: ['providerSession']
+    }
+  )
 
 export const sleepingAgentSessionsByPaneKeySchema = z.preprocess((raw) => {
   if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {

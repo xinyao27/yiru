@@ -1,4 +1,7 @@
-import type { RuntimeWorktreeCreateResult } from '../../shared/runtime-types'
+import type { RuntimeMethodResult } from '../../shared/runtime-method-contract'
+import type { WORKTREE_CREATE_CONTRACT } from '../../shared/runtime-method-contracts/workspace-contracts'
+
+type WorktreeCreateResult = RuntimeMethodResult<typeof WORKTREE_CREATE_CONTRACT>
 
 function getLineageSourceLabel(source: string): string {
   switch (source) {
@@ -19,7 +22,7 @@ function getLineageSourceLabel(source: string): string {
   }
 }
 
-export function printLineageSummary(result: RuntimeWorktreeCreateResult, json: boolean): void {
+export function printLineageSummary(result: WorktreeCreateResult, json: boolean): void {
   if (json) {
     return
   }

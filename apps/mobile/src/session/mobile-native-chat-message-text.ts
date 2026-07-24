@@ -1,4 +1,5 @@
-import type { NativeChatBlock } from '../../../desktop/src/shared/native-chat-types'
+import type { NativeChatBlock } from '@yiru/workbench-model/agent'
+
 import { isTextBlock } from './mobile-native-chat-blocks'
 
 /** Concatenate a message's text blocks into a single copyable string. Tool

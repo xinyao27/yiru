@@ -1,17 +1,25 @@
 import { spawn } from 'node:child_process'
 import { constants, copyFile, readFile, stat } from 'node:fs/promises'
-import { basename, extname, isAbsolute, normalize } from 'node:path'
+import { basename, extname, isAbsolute, normalize, posix, win32 } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { MAX_REPO_ICON_UPLOAD_BYTES } from '@yiru/workbench-model/workspace'
 import { ipcMain, shell, dialog } from 'electron'
 
-import { MAX_REPO_ICON_UPLOAD_BYTES } from '../../shared/repo-icon'
-import type { ShellOpenLocalPathResult } from '../../shared/shell-open-types'
+import type {
+  ShellOpenExternalEditorRequest,
+  ShellOpenExternalEditorResult,
+  ShellOpenLocalPathResult
+} from '../../shared/shell-open-types'
 import {
   EXTERNAL_EDITOR_CLI_COMMAND,
-  resolveExternalEditorLaunchSpec
+  resolveExternalEditorLaunchSpec,
+  resolveVsCodeRemoteSshLaunchSpec,
+  type ExternalEditorLaunchSpec
 } from '../external-editor-launch'
+import { resolveVsCodeSshAuthority } from '../ssh/vscode-ssh-authority'
 import { getSpawnArgsForWindows } from '../win32-utils'
+import { getRegisteredSshTarget } from './ssh'
 
 export { EXTERNAL_EDITOR_CLI_COMMAND }
 
@@ -56,8 +64,7 @@ async function openInFileManager(pathValue: string): Promise<ShellOpenLocalPathR
   }
 }
 
-async function launchExternalEditor(pathValue: string, command?: string): Promise<void> {
-  const launchSpec = resolveExternalEditorLaunchSpec(command, pathValue)
+async function launchExternalEditor(launchSpec: ExternalEditorLaunchSpec): Promise<void> {
   const { spawnCmd, spawnArgs } =
     launchSpec.kind === 'executable'
       ? getSpawnArgsForWindows(launchSpec.spawnCmd, launchSpec.spawnArgs)
@@ -100,16 +107,47 @@ async function launchExternalEditor(pathValue: string, command?: string): Promis
   })
 }
 
-async function openInExternalEditor(
-  pathValue: string,
-  command?: string
-): Promise<ShellOpenLocalPathResult> {
-  const target = await validateLocalPathTarget(pathValue)
+export async function openInExternalEditor(
+  request: ShellOpenExternalEditorRequest
+): Promise<ShellOpenExternalEditorResult> {
+  const connectionId = request.connectionId?.trim()
+  if (connectionId) {
+    const sshTarget = getRegisteredSshTarget(connectionId)
+    if (!sshTarget) {
+      return { ok: false, reason: 'ssh-target-not-found' }
+    }
+    if (sshTarget.owner?.type === 'on-demand-runtime') {
+      return { ok: false, reason: 'remote-runtime-unsupported' }
+    }
+    if (!posix.isAbsolute(request.path) && !win32.isAbsolute(request.path)) {
+      return { ok: false, reason: 'not-absolute' }
+    }
+    const authority = resolveVsCodeSshAuthority(sshTarget)
+    if (!authority.ok) {
+      return authority
+    }
+    const launchSpec = resolveVsCodeRemoteSshLaunchSpec(
+      request.command,
+      request.path,
+      authority.authority
+    )
+    if (!launchSpec) {
+      return { ok: false, reason: 'remote-editor-unsupported' }
+    }
+    try {
+      await launchExternalEditor(launchSpec)
+      return { ok: true }
+    } catch {
+      return { ok: false, reason: 'launch-failed' }
+    }
+  }
+
+  const target = await validateLocalPathTarget(request.path)
   if (!target.ok) {
     return target
   }
   try {
-    await launchExternalEditor(target.path, command)
+    await launchExternalEditor(resolveExternalEditorLaunchSpec(request.command, target.path))
     return { ok: true }
   } catch {
     return { ok: false, reason: 'launch-failed' }
@@ -143,8 +181,8 @@ export function registerShellHandlers(): void {
 
   ipcMain.handle(
     'shell:openInExternalEditor',
-    (_event, path: string, command?: string): Promise<ShellOpenLocalPathResult> =>
-      openInExternalEditor(path, command)
+    (_event, request: ShellOpenExternalEditorRequest): Promise<ShellOpenExternalEditorResult> =>
+      openInExternalEditor(request)
   )
 
   ipcMain.handle('shell:openUrl', (_event, rawUrl: string) => {

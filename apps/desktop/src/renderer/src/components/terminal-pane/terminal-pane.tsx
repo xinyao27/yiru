@@ -1,10 +1,17 @@
 import type { IDisposable } from '@xterm/xterm'
+import {
+  assertClipboardTextWithinLimitWithYield,
+  type ReadClipboardTextOptions
+} from '@yiru/workbench-model/ui'
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: terminal pane component co-locates title state, layout serialization, and portal rendering to keep pane lifecycle consistent. */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
 
+import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/agent-session-continuation-dialog'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
 import { DaemonActionDialog, useDaemonActions } from '@/components/shared/use-daemon-actions'
 import {
@@ -12,7 +19,9 @@ import {
   TerminalQuickCommandDialog
 } from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
 import TerminalSearch from '@/components/terminal-search'
+import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
+import { CODEX_ACCOUNT_RESTART_STARTUP } from '@/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
 import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
 import { requestGlobalAssistant } from '@/lib/global-assistant'
@@ -39,7 +48,12 @@ import type {
 import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/pane-manager-registry'
 import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
 import { clearTerminalScrollbackAndFollowOutput } from '@/lib/pane-manager/terminal-scrollback-clear'
-import { isPrimarySelectionEnabled, readPrimarySelectionText } from '@/lib/primary-selection'
+import {
+  armPrimarySelectionNativePasteSuppression,
+  isPrimarySelectionEnabled,
+  readPrimarySelectionText
+} from '@/lib/primary-selection'
+import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
   sanitizeTerminalLayoutPaneTitles
@@ -74,7 +88,6 @@ import {
 } from '@/store/slices/runtime-environment-ssh'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
@@ -87,7 +100,6 @@ import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal-s
 import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal-zero-dimensions-diagnostic'
 import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
 import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace-session-terminal-buffers'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { useAppStore } from '../../store'
 import { canToggleNativeChat } from '../native-chat/native-chat-availability'
 import {
@@ -125,15 +137,20 @@ import {
   type SessionRestoredBannerDismissEvent
 } from './session-restored-banner-pane-state'
 import { SessionRestoredBannerPortals } from './session-restored-banner-portals'
+import { canContinueAgentSessionInNewSession } from './terminal-agent-session-continuation'
 import type { PreparedAgentSessionFork } from './terminal-agent-session-fork'
 import { TerminalAgentSessionForkDialog } from './terminal-agent-session-fork-dialog'
+import {
+  firesNativePasteEvent,
+  getClipboardEventText,
+  isClipboardEventPasteRequired
+} from './terminal-clipboard-event-paste'
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import TerminalContextMenu from './terminal-context-menu'
 import { handleInternalTerminalFileDrop } from './terminal-drop-handler'
 import { TerminalErrorToast } from './terminal-error-toast'
 import { restoreTerminalFitToDesktop, restoreTerminalFitsToDesktop } from './terminal-fit-restore'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
-import { resolveTerminalLayoutActiveLeafId } from './terminal-layout-leaf-ids'
 import {
   isHostAuthoritativeLayout,
   planTerminalLiveLayoutInsertions
@@ -166,6 +183,11 @@ function isInsideNativeChatRoot(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(NATIVE_CHAT_ROOT_SELECTOR) !== null
 }
 
+import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
+// Why: registry lives in a leaf module so the store slice can import it
+// without re-entering the `slice → TerminalPane → store → slice` cycle
+// that otherwise leaves createTerminalSlice undefined at store-init time.
+import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
 import { useRepoById } from '@/store/selectors'
 
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
@@ -177,11 +199,6 @@ import {
   resyncTerminalFocusForWindowFocus,
   setRegularTerminalInputFocusAttribute
 } from './regular-terminal-focus-ownership'
-// Why: registry lives in a leaf module so the store slice can import it
-// without re-entering the `slice → TerminalPane → store → slice` cycle
-// that otherwise leaves createTerminalSlice undefined at store-init time.
-import { shutdownBufferCaptures } from './shutdown-buffer-captures'
-import { pasteTerminalText } from './terminal-bracketed-paste'
 import { refreshTerminalImeInputContext } from './terminal-ime-input-context-refresh'
 import {
   applyTerminalPaneAttentionToManager,
@@ -414,6 +431,8 @@ export default function TerminalPane({
   // Add action starts with a fresh draft instead of reusing cancelled text.
   const [quickCommandDraft, setQuickCommandDraft] = useState(createTerminalQuickCommandDraft)
   const [agentSessionFork, setAgentSessionFork] = useState<PreparedAgentSessionFork | null>(null)
+  const [agentSessionContinuation, setAgentSessionContinuation] =
+    useState<AgentSessionContinuationRequest | null>(null)
   const [terminalError, setTerminalError] = useState<string | null>(null)
   const [sessionStateSaveFailureOpen, setSessionStateSaveFailureOpen] = useState(false)
   const daemonActions = useDaemonActions()
@@ -1755,7 +1774,7 @@ export default function TerminalPane({
         tabId,
         worktreeId,
         cwd,
-        startup: { command: 'codex' },
+        startup: CODEX_ACCOUNT_RESTART_STARTUP,
         paneTransportsRef,
         paneMode2031Ref,
         paneKittyKeyboardModesRef,
@@ -2162,7 +2181,9 @@ export default function TerminalPane({
 
     const pasteFromClipboard = (
       pane: ManagedPane,
-      source: Extract<TerminalPasteSource, 'keyboard' | 'paste-event'>
+      source: Extract<TerminalPasteSource, 'keyboard' | 'paste-event'>,
+      readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string> = window.api.ui
+        .readClipboardText
     ): void => {
       const connectionId = getConnectionId(worktreeId) ?? null
       const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(
@@ -2171,7 +2192,7 @@ export default function TerminalPane({
       )
       const activeElementAtDispatch = document.activeElement
       void pasteTerminalClipboard({
-        readClipboardText: window.api.ui.readClipboardText,
+        readClipboardText,
         saveClipboardImageAsTempFile: window.api.ui.saveClipboardImageAsTempFile,
         connectionId,
         runtimeEnvironmentId,
@@ -2227,6 +2248,11 @@ export default function TerminalPane({
         }
         return
       }
+      if (isClipboardEventPasteRequired() && firesNativePasteEvent(e, isMac)) {
+        // Why: insecure web clients can only read clipboard text from the
+        // native paste event dispatched after this chord.
+        return
+      }
       e.preventDefault()
       e.stopPropagation()
       const manager = managerRef.current
@@ -2276,6 +2302,13 @@ export default function TerminalPane({
       }
       const pane = manager.getActivePane() ?? manager.getPanes()[0]
       if (!pane) {
+        return
+      }
+      if (isClipboardEventPasteRequired()) {
+        const eventText = getClipboardEventText(e)
+        pasteFromClipboard(pane, 'paste-event', (options) =>
+          assertClipboardTextWithinLimitWithYield(eventText, options)
+        )
         return
       }
       pasteFromClipboard(pane, 'paste-event')
@@ -2702,6 +2735,7 @@ export default function TerminalPane({
     onClearPaneTitle: handleClearPaneTitleShortcut,
     onPasteError: setTerminalError,
     onAgentSessionForkReady: setAgentSessionFork,
+    onAgentSessionContinuationReady: setAgentSessionContinuation,
     forceBracketedMultilineTextPaste,
     rightClickToPaste
   })
@@ -2829,6 +2863,9 @@ export default function TerminalPane({
       }
       event.preventDefault()
       event.stopPropagation()
+      // Why: preventDefault on mousedown does not stop Chromium's native X11
+      // paste follow-up, which would otherwise reach xterm a second time.
+      armPrimarySelectionNativePasteSuppression()
       clickedPane.terminal.focus()
       void readPrimarySelectionText().then(async (text) => {
         if (!text) {
@@ -2902,6 +2939,9 @@ export default function TerminalPane({
       ) {
         event.preventDefault()
         event.stopPropagation()
+        // Why: re-arm at release so slow middle clicks still cover Chromium's
+        // imminent native paste event.
+        armPrimarySelectionNativePasteSuppression()
       }
     },
     [getPrimarySelectionMiddleClickPane]
@@ -3033,6 +3073,27 @@ export default function TerminalPane({
   const activePaneIsChatLeaf = Boolean(
     isChatViewMode && activePane?.leafId && activePane.leafId === chatLeafId
   )
+  // Why: a split can host different agents, so continuation resolves the target leaf first.
+  const resolveAgentForLeaf = (leafId: string | null): string | null => {
+    const detectedAgent = leafId ? (tabAgentTypeByLeaf[leafId] ?? null) : null
+    if (detectedAgent) {
+      return detectedAgent
+    }
+    return (
+      nativeChatLaunchAgentForLeaf({
+        launchAgent: terminalTab?.launchAgent,
+        launchAgentLeafId: getTabWideAgentHintLeafId(),
+        leafId,
+        leafIds: getNativeChatLeafIds()
+      }) ?? resolveTitleAgentForLeaf(leafId)
+    )
+  }
+  const activePaneCanContinueInNewSession = canContinueAgentSessionInNewSession(
+    resolveAgentForLeaf(activePane?.leafId ?? null)
+  )
+  const contextMenuCanContinueInNewSession = canContinueAgentSessionInNewSession(
+    resolveAgentForLeaf(contextMenuLeafId)
+  )
   // Header toggle gates on the active leaf; the context-menu toggle gates on the
   // leaf the menu was opened over — so a split mixing supported/unsupported
   // agents shows the toggle only on the leaf that can actually render chat.
@@ -3125,7 +3186,7 @@ export default function TerminalPane({
       />
       {effectiveChatViewMode && chatPane?.container
         ? createPortal(
-            <div className="bg-background absolute inset-0 z-10 flex min-h-0 min-w-0">
+            <div className="bg-background text-foreground absolute inset-0 z-10 flex min-h-0 min-w-0">
               <NativeChatView
                 terminalTabId={tabId}
                 paneKey={makePaneKey(tabId, chatPane.leafId)}
@@ -3147,6 +3208,14 @@ export default function TerminalPane({
                   isPaneExpanded: expandedPaneId === chatPane.id,
                   onToggleExpand: () =>
                     contextMenu.runForPane(chatPane.id, contextMenu.onToggleExpand),
+                  canContinueAgentSessionInNewSession: canContinueAgentSessionInNewSession(
+                    resolveAgentForLeaf(chatPane.leafId)
+                  ),
+                  onContinueAgentSessionInNewSession: () =>
+                    contextMenu.runForPane(
+                      chatPane.id,
+                      contextMenu.onContinueAgentSessionInNewSession
+                    ),
                   onForkAgentSession: () =>
                     void contextMenu.runForPane(chatPane.id, contextMenu.onForkAgentSession),
                   onSetTitle: () => contextMenu.runForPane(chatPane.id, contextMenu.onSetTitle),
@@ -3182,6 +3251,8 @@ export default function TerminalPane({
         onEqualizePaneSizes={contextMenu.onEqualizePaneSizes}
         onClosePane={contextMenu.onClosePane}
         onClearScreen={contextMenu.onClearScreen}
+        canContinueAgentSessionInNewSession={contextMenuCanContinueInNewSession}
+        onContinueAgentSessionInNewSession={contextMenu.onContinueAgentSessionInNewSession}
         onForkAgentSession={() => void contextMenu.onForkAgentSession()}
         canToggleNativeChat={contextMenuCanToggleChat}
         isNativeChatView={contextMenuIsChatView}
@@ -3220,6 +3291,17 @@ export default function TerminalPane({
           }
         }}
       />
+      {agentSessionContinuation ? (
+        <AgentSessionContinuationDialog
+          open
+          request={agentSessionContinuation}
+          onOpenChange={(open) => {
+            if (!open) {
+              setAgentSessionContinuation(null)
+            }
+          }}
+        />
+      ) : null}
       <TerminalPaneHeaderOverlay
         tabId={tabId}
         worktreeId={worktreeId}
@@ -3243,6 +3325,10 @@ export default function TerminalPane({
         canToggleNativeChat={activePaneCanToggleChat}
         isChatViewMode={activePaneIsChatLeaf}
         onToggleNativeChat={handleToggleNativeChat}
+        canContinueAgentSessionInNewSession={activePaneCanContinueInNewSession}
+        onContinueAgentSessionInNewSession={(pane) =>
+          contextMenu.runForPane(pane.id, contextMenu.onContinueAgentSessionInNewSession)
+        }
         onSplitPane={splitTerminalPaneFromHeader}
         onBeginPaneDrag={beginPaneDragFromHeader}
         onActivatePaneTitleInteraction={activatePaneTitleInteraction}

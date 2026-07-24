@@ -1,4 +1,5 @@
-import type { PRComment } from '../../../desktop/src/shared/types'
+import type { PRComment } from '@yiru/workbench-model/review'
+
 import {
   prStateBadge,
   summarizePRChecks,

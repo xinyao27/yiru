@@ -1,4 +1,5 @@
 import { Pencil, Play, Trash as Trash2, Plus } from '@phosphor-icons/react'
+import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useMemo, useState } from 'react'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
@@ -26,7 +27,6 @@ import {
   isTerminalQuickCommandComplete
 } from '../../../../shared/terminal-quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
-import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { useTabBarQuickCommandsShortcut } from './tab-bar-quick-commands-shortcut'
 
 type TabBarQuickCommandsButtonProps = {

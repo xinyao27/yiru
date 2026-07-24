@@ -4,10 +4,11 @@ safety wiring spread across spawn/event-routing; splitting would scatter tightly
 adapter ↔ history lifecycle logic. */
 import { basename } from 'node:path'
 
+import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
+
 import { isShellProcess } from '../../shared/agent-detection'
 import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
 import { shouldUseShellReadyStartupDelivery } from '../../shared/codex-startup-delivery'
-import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
 import type {
   IPtyProvider,
   PtyBackgroundStreamEvent,

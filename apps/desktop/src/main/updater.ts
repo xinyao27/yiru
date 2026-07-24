@@ -1,13 +1,25 @@
 import { is } from '@electron-toolkit/utils'
+import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '@yiru/workbench-model/product'
 /* eslint-disable max-lines */
 import { app, BrowserWindow, powerMonitor } from 'electron'
 
+import type {
+  RemoteServerUpdateInstallMode,
+  RemoteServerUpdateInstallResult,
+  RemoteServerUpdaterSnapshot,
+  RemoteServerUpdateSupport
+} from '../shared/remote-server-update'
 import type { UpdateCheckOptions, UpdateStatus } from '../shared/types'
-import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '../shared/yiru-github-repository'
 import { writeMainThreadDiagnosticMarker } from './diagnostics/main-thread-churn-probe'
 import { loadElectronAutoUpdater, type ElectronAutoUpdater } from './electron-updater-loader'
 import { killAllPty } from './ipc/pty'
 import { withUpdaterSpan } from './observability/instrumentation'
+import { resolveRemoteServerUpdateSupport } from './remote-server-update-support'
+import {
+  failServeUpdateHandoff,
+  hasServeUpdateSupervisor,
+  requestServeUpdateHandoff
+} from './serve-update-handoff'
 import {
   armUpdateInstallExitWatchdog,
   disarmUpdateInstallExitWatchdog
@@ -29,7 +41,6 @@ import {
   markMacQuitAndInstallInFlight,
   resetMacInstallState
 } from './updater-mac-install'
-import { fetchNudge, shouldApplyNudge } from './updater-nudge'
 import {
   fetchNewerReleaseTagsWithReadiness,
   getReleaseDownloadUrl
@@ -49,18 +60,19 @@ const AUTO_UPDATE_RETRY_INTERVAL_MS = 60 * 60 * 1000
 // delay per consecutive failure up to this cap; any completed check resets.
 // Release-publishing windows resolve within the first (still 1h) retry.
 const MAX_AUTO_UPDATE_RETRY_INTERVAL_MS = 6 * 60 * 60 * 1000
-const NUDGE_POLL_INTERVAL_MS = 30 * 60 * 1000
-const NUDGE_ACTIVATION_COOLDOWN_MS = 5 * 60 * 1000
 const QUIT_AND_INSTALL_DELAY_MS = 100
 const PRE_QUIT_CLEANUP_TIMEOUT_MS = 2_500
 const UPDATE_CHECK_SILENT_SETTLE_DELAY_MS = 1_000
 const UPDATE_CHECK_STALL_TIMEOUT_MS = 45_000
 
-let mainWindowRef: BrowserWindow | null = null
+type UpdaterStatusTarget = { webContents: { send: (channel: string, ...args: unknown[]) => void } }
+
+let mainWindowRef: UpdaterStatusTarget | null = null
 let currentStatus: UpdateStatus = { state: 'idle' }
 let userInitiatedCheck = false
 let onBeforeQuitCleanup: (() => void | Promise<void>) | null = null
 let autoUpdaterInitialized = false
+let remoteServerUpdateInstallMode: RemoteServerUpdateInstallMode = 'interactive'
 // Why: modifier-clicking "Check for Updates" can target prerelease manifests.
 // The generic feed still gets pinned to a concrete tag on every check so
 // cancelled prereleases without manifests are skipped.
@@ -70,7 +82,6 @@ let availableReleaseUrl: string | null = null
 let pendingCheckFailureKey: string | null = null
 let pendingCheckFailurePromise: Promise<void> | null = null
 let autoUpdateCheckTimer: ReturnType<typeof setTimeout> | null = null
-let nudgeCheckTimer: ReturnType<typeof setTimeout> | null = null
 let pendingQuitAndInstallTimer: ReturnType<typeof setTimeout> | null = null
 let quitAndInstallInProgress = false
 // Why: once quitAndInstall has committed (Win/Linux install, or macOS with
@@ -97,8 +108,6 @@ let updateAvailableEventPendingAttemptId: number | null = null
 let pendingUserInitiatedCheckAfterInFlight: UpdateCheckVariant | null = null
 let activeUpdateNudgeId: string | null = null
 let awaitingNudgeCheckOutcome = false
-let nudgeCheckInFlight = false
-let lastNudgeCheckAt = 0
 let publishingWindowLastGoodCheck: { lastGoodTag: string } | null = null
 let pendingPrereleaseFallback: {
   primaryTag: string
@@ -116,7 +125,6 @@ let pendingPrereleaseFallback: {
 } | null = null
 
 let _getPendingUpdateNudgeId: (() => string | null) | null = null
-let _getDismissedUpdateNudgeId: (() => string | null) | null = null
 let _setPendingUpdateNudgeId: ((id: string | null) => void) | null = null
 let _setDismissedUpdateNudgeId: ((id: string | null) => void) | null = null
 // Why: guards against duplicate download() calls when both the card and
@@ -550,6 +558,13 @@ function getCheckFailureKey(message: string, userInitiated?: boolean): string {
   return `${userInitiated ? 'user' : 'auto'}:${message}`
 }
 
+export function resolveUpdateInstallMode(isServeMode: boolean): RemoteServerUpdateInstallMode {
+  if (!isServeMode) {
+    return 'interactive'
+  }
+  return hasServeUpdateSupervisor() ? 'supervised-headless-serve' : 'unsupported-headless-serve'
+}
+
 function clearPrereleaseFallbackContextIfSettled(): void {
   if (
     pendingPrereleaseFallback?.fallbackResultHandled &&
@@ -601,6 +616,18 @@ async function performQuitAndInstall(): Promise<void> {
       await runBeforeUpdateQuitCleanup()
       span.addEvent('pre_quit_cleanup_done')
 
+      if (
+        remoteServerUpdateInstallMode === 'supervised-headless-serve' &&
+        !requestServeUpdateHandoff(pendingVersion)
+      ) {
+        sendErrorStatus(
+          'Could not prepare the supervised server restart. Yiru remains running.',
+          true
+        )
+        resetQuitForUpdateState()
+        return
+      }
+
       recordUpdaterLifecycle('quit_and_install_invoking_native', {
         version: pendingVersion || null
       })
@@ -615,7 +642,8 @@ async function performQuitAndInstall(): Promise<void> {
       // Why: invoke quitAndInstall before killAllPty/remove close listeners so a
       // sync 'error' (common "no filepath" path) recovers while windows and
       // local PTYs are still intact.
-      getAutoUpdater().quitAndInstall(false, true)
+      const supervisorOwnsRelaunch = remoteServerUpdateInstallMode === 'supervised-headless-serve'
+      getAutoUpdater().quitAndInstall(supervisorOwnsRelaunch, !supervisorOwnsRelaunch)
       span.addEvent('native_quit_and_install_invoked')
 
       // Why: handleQuitAndInstallFailure may clear quitAndInstallInProgress
@@ -648,6 +676,7 @@ async function performQuitAndInstall(): Promise<void> {
       }
     })
   } catch (error) {
+    failServeUpdateHandoff('Could not invoke the native updater.')
     resetQuitForUpdateState()
     recordUpdaterLifecycle(
       'quit_and_install_failed',
@@ -682,6 +711,7 @@ function handleQuitAndInstallFailure(): boolean {
   if (!quitAndInstallInProgress || !quitAndInstallNativeInvoked || updateInstallCommitted) {
     return false
   }
+  failServeUpdateHandoff('The native updater rejected the install request.')
   resetQuitForUpdateState()
   recordUpdaterLifecycle('quit_and_install_failed_via_event', undefined, {
     level: 'warn',
@@ -827,6 +857,69 @@ async function sendCheckFailureStatus(
 
 export function getUpdateStatus(): UpdateStatus {
   return currentStatus
+}
+
+export function configureRemoteServerUpdateInstallMode(
+  installMode: RemoteServerUpdateInstallMode
+): void {
+  remoteServerUpdateInstallMode = installMode
+}
+
+export function getRemoteServerUpdateSupport(): RemoteServerUpdateSupport {
+  return resolveRemoteServerUpdateSupport({
+    installMode: remoteServerUpdateInstallMode,
+    isPackaged: app.isPackaged,
+    isDev: is.dev,
+    updaterInitialized: autoUpdaterInitialized
+  })
+}
+
+export function getRemoteServerUpdaterSnapshot(runtimeId: string): RemoteServerUpdaterSnapshot {
+  return {
+    appVersion: app.getVersion(),
+    runtimeId,
+    support: getRemoteServerUpdateSupport(),
+    status: getUpdateStatus()
+  }
+}
+
+function assertRemoteServerUpdateAvailable(): void {
+  if (!getRemoteServerUpdateSupport().automatic) {
+    throw new Error('remote_update_manual_required')
+  }
+}
+
+export function checkForRemoteServerUpdate(
+  runtimeId: string,
+  options?: UpdateCheckOptions
+): RemoteServerUpdaterSnapshot {
+  assertRemoteServerUpdateAvailable()
+  checkForUpdatesFromMenu(options)
+  return getRemoteServerUpdaterSnapshot(runtimeId)
+}
+
+export function downloadRemoteServerUpdate(runtimeId: string): RemoteServerUpdaterSnapshot {
+  assertRemoteServerUpdateAvailable()
+  if (currentStatus.state !== 'available') {
+    throw new Error('remote_update_not_available')
+  }
+  downloadUpdate()
+  return getRemoteServerUpdaterSnapshot(runtimeId)
+}
+
+export function installRemoteServerUpdate(runtimeId: string): RemoteServerUpdateInstallResult {
+  assertRemoteServerUpdateAvailable()
+  if (currentStatus.state !== 'downloaded') {
+    throw new Error('remote_update_not_downloaded')
+  }
+  const result: RemoteServerUpdateInstallResult = {
+    accepted: true,
+    fromVersion: app.getVersion(),
+    targetVersion: currentStatus.version,
+    runtimeId
+  }
+  quitAndInstall()
+  return result
 }
 
 let consecutiveAutomaticRetrySchedules = 0
@@ -1288,63 +1381,6 @@ export function quitAndInstall(): void {
   }, QUIT_AND_INSTALL_DELAY_MS)
 }
 
-async function checkForUpdateNudge(): Promise<void> {
-  if (!app.isPackaged || is.dev) {
-    return
-  }
-  if (nudgeCheckInFlight) {
-    return
-  }
-
-  const now = Date.now()
-  if (now - lastNudgeCheckAt < NUDGE_ACTIVATION_COOLDOWN_MS) {
-    return
-  }
-  lastNudgeCheckAt = now
-
-  nudgeCheckInFlight = true
-  try {
-    const nudge = await fetchNudge()
-    if (!nudge) {
-      return
-    }
-
-    if (currentStatus.state === 'checking' || currentStatus.state === 'downloading') {
-      return
-    }
-
-    const appVersion = app.getVersion()
-    const pendingUpdateNudgeId = _getPendingUpdateNudgeId?.() ?? null
-    const dismissedUpdateNudgeId = _getDismissedUpdateNudgeId?.() ?? null
-
-    if (
-      shouldApplyNudge({
-        nudge,
-        appVersion,
-        pendingUpdateNudgeId,
-        dismissedUpdateNudgeId
-      })
-    ) {
-      awaitingNudgeCheckOutcome = true
-      _setPendingUpdateNudgeId?.(nudge.id)
-      mainWindowRef?.webContents.send('updater:clearDismissal')
-      runBackgroundUpdateCheck(nudge.id)
-    }
-  } finally {
-    nudgeCheckInFlight = false
-  }
-}
-
-function scheduleUpdateNudgeCheck(): void {
-  if (nudgeCheckTimer) {
-    clearTimeout(nudgeCheckTimer)
-  }
-  nudgeCheckTimer = setTimeout(() => {
-    void checkForUpdateNudge()
-    scheduleUpdateNudgeCheck()
-  }, NUDGE_POLL_INTERVAL_MS)
-}
-
 export function dismissNudge(): void {
   const pendingId = activeUpdateNudgeId ?? _getPendingUpdateNudgeId?.() ?? null
   if (pendingId) {
@@ -1354,13 +1390,12 @@ export function dismissNudge(): void {
 }
 
 export function setupAutoUpdater(
-  mainWindow: BrowserWindow,
+  mainWindow: UpdaterStatusTarget,
   opts?: {
     getLastUpdateCheckAt?: () => number | null
     onBeforeQuit?: () => void | Promise<void>
     setLastUpdateCheckAt?: (timestamp: number) => void
     getPendingUpdateNudgeId?: () => string | null
-    getDismissedUpdateNudgeId?: () => string | null
     setPendingUpdateNudgeId?: (id: string | null) => void
     setDismissedUpdateNudgeId?: (id: string | null) => void
   }
@@ -1370,7 +1405,6 @@ export function setupAutoUpdater(
   persistLastUpdateCheckAt = opts?.setLastUpdateCheckAt ?? null
   _getLastUpdateCheckAt = opts?.getLastUpdateCheckAt ?? null
   _getPendingUpdateNudgeId = opts?.getPendingUpdateNudgeId ?? null
-  _getDismissedUpdateNudgeId = opts?.getDismissedUpdateNudgeId ?? null
   _setPendingUpdateNudgeId = opts?.setPendingUpdateNudgeId ?? null
   _setDismissedUpdateNudgeId = opts?.setDismissedUpdateNudgeId ?? null
 
@@ -1463,11 +1497,7 @@ export function setupAutoUpdater(
     }
   })
 
-  void checkForUpdateNudge()
-  scheduleUpdateNudgeCheck()
-
   const checkDailyOnWake = () => {
-    void checkForUpdateNudge()
     if (
       backgroundCheckLaunchPending ||
       currentStatus.state === 'checking' ||

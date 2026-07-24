@@ -1,11 +1,15 @@
+import {
+  resolveSourceControlCommitAreaPrimaryActionDecision,
+  type SourceControlCommitAreaPrimaryActionDecision,
+  type SourceControlCommitAreaPrimaryActionKind
+} from '@yiru/workbench-model/review'
+
 import type { MobileGitBranchCompareResult } from './mobile-branch-compare'
 import type { MobileGitStatusResult } from './mobile-git-status'
-import {
-  resolveMobileSourceControlCommitAreaPrimaryActionDecision,
-  type MobileSourceControlPrimaryActionDecision,
-  type MobileSourceControlPrimaryActionKind,
-  type MobileSourceControlRemoteOpKind
-} from './mobile-source-control-primary-action-decision'
+import { getMobileSourceControlRemoteOperation } from './mobile-source-control-operation'
+
+type MobileSourceControlPrimaryActionDecision = SourceControlCommitAreaPrimaryActionDecision
+type MobileSourceControlPrimaryActionKind = SourceControlCommitAreaPrimaryActionKind
 
 type GitStep = { method: string; params?: Record<string, unknown> }
 
@@ -44,18 +48,15 @@ export type MobileSourceControlPrimaryActionArgs = {
 export function buildMobileSourceControlPrimaryAction(
   args: MobileSourceControlPrimaryActionArgs
 ): MobileSourceControlPrimaryAction {
-  const decision = resolveMobileSourceControlCommitAreaPrimaryActionDecision({
+  const decision = resolveSourceControlCommitAreaPrimaryActionDecision({
     stagedCount: args.stagedCount,
     hasUnstagedChanges: args.unstagedCount > 0,
     hasStageableChanges: args.stageablePaths.length > 0,
-    // Why: the commit-area decision keeps the desktop input shape, but partial
-    // staging only matters to commit eligibility/dropdowns. Avoid an extra entry scan.
-    hasPartiallyStagedChanges: false,
     hasMessage: args.commitMessage.trim().length > 0,
     hasUnresolvedConflicts: args.hasUnresolvedConflicts,
     isCommitting: args.busyAction === 'commit',
     isRemoteOperationActive: isMobileRemoteOperationActive(args.busyAction),
-    inFlightRemoteOpKind: getInFlightRemoteOpKind(args.busyAction),
+    inFlightRemoteOpKind: getMobileSourceControlRemoteOperation(args.busyAction),
     upstreamStatus: args.status?.upstreamStatus,
     branchCommitsAhead: getMobileBranchCommitsAhead(args),
     hasCurrentBranch: Boolean(args.status?.branch)
@@ -82,35 +83,7 @@ export function buildMobileSourceControlPrimaryAction(
 }
 
 function isMobileRemoteOperationActive(busyAction: string | null): boolean {
-  return getInFlightRemoteOpKind(busyAction) !== null
-}
-
-function getInFlightRemoteOpKind(
-  busyAction: string | null
-): MobileSourceControlRemoteOpKind | null {
-  switch (busyAction) {
-    case 'push':
-    case 'commit-push':
-    case 'push-create-pr':
-      return 'push'
-    case 'force-push':
-      return 'force_push'
-    case 'pull':
-      return 'pull'
-    case 'sync':
-    case 'commit-sync':
-      return 'sync'
-    case 'fetch':
-      return 'fetch'
-    case 'publish':
-      return 'publish'
-    case 'fast-forward':
-      return 'fast_forward'
-    case 'rebase':
-      return 'rebase'
-    default:
-      return null
-  }
+  return getMobileSourceControlRemoteOperation(busyAction) !== null
 }
 
 function getMobileBranchCommitsAhead(
@@ -167,6 +140,18 @@ function getMobilePrimaryActionHint(decision: MobileSourceControlPrimaryActionDe
       return 'Stage at least one file to commit.'
     case 'checkout_branch_before_publish':
       return 'Check out a branch before publishing commits.'
+    case 'checking_review_status':
+    case 'checking_review_creation':
+      return 'Checking review status.'
+    case 'review_already_merged':
+      return 'The linked review is already merged.'
+    case 'prepare_review':
+    case 'create_review':
+      return 'Prepare this branch for review.'
+    case 'push_linked_review':
+      return 'Push updates to the linked review branch.'
+    case 'linked_review_target_unavailable':
+      return 'The linked review branch target is unavailable.'
     case 'publish_branch':
       return 'Publish this branch to origin.'
     case 'force_push_with_lease':

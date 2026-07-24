@@ -1,4 +1,4 @@
-import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
+import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 
 export const GITHUB_MARKDOWN_IMAGE_URL_MAX_BYTES = 8 * 1024
 

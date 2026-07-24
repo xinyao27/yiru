@@ -1,4 +1,5 @@
-import { parseExecutionHostId } from '../../shared/execution-host'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+
 import { SpoolExecutionError } from './spool-execution-error'
 import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'

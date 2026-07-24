@@ -1,18 +1,17 @@
-import { isResumableTuiAgent } from '../../../desktop/src/shared/agent-session-resume'
-import type { SleepingAgentLaunchConfig } from '../../../desktop/src/shared/agent-session-resume'
-import type { AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import {
   buildAiVaultResumeCommand,
-  buildAiVaultResumeShellCommand
-} from '../../../desktop/src/shared/ai-vault-types'
-import {
-  resolveTuiAgentLaunchArgs,
-  resolveTuiAgentLaunchEnv
-} from '../../../desktop/src/shared/tui-agent-launch-defaults'
-import { buildAgentResumeStartupPlan } from '../../../desktop/src/shared/tui-agent-startup'
-import type { TuiAgent } from '../../../desktop/src/shared/types'
-import { resolveWindowsShellStartupFamily } from '../../../desktop/src/shared/windows-terminal-shell'
-import { parseWslUncPath } from '../../../desktop/src/shared/wsl-paths'
+  buildAiVaultResumeShellCommand,
+  realHomeCodexResumeEnvDeletion
+} from '@yiru/workbench-model/agent'
+import { resolveTuiAgentLaunchArgs, resolveTuiAgentLaunchEnv } from '@yiru/workbench-model/agent'
+import { isResumableTuiAgent } from '@yiru/workbench-model/agent'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import { buildAgentResumeStartupPlan } from '@yiru/workbench-model/agent'
+import type { TuiAgent } from '@yiru/workbench-model/agent'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { resolveWindowsShellStartupFamily } from '@yiru/workbench-model/platform'
+
 import type { MobileAiVaultResumeTargetStatus } from '../agent-history/agent-history-resume-target'
 import type { RpcClient } from '../transport/rpc-client'
 import {
@@ -71,6 +70,7 @@ export type MobileAiVaultResumeSettings = {
 export type MobileAiVaultResumeLaunch = {
   command: string
   env?: Record<string, string>
+  envToDelete?: string[]
   launchConfig?: SleepingAgentLaunchConfig
   launchAgent?: TuiAgent
 }
@@ -98,6 +98,7 @@ export function buildMobileAiVaultResumeLaunch(args: {
       cmdOverrides,
       platform: args.hostPlatform,
       shell,
+      ompResumeFilePath: args.session.filePath,
       agentArgs: resolveTuiAgentLaunchArgs(args.session.agent, args.settings?.agentDefaultArgs),
       agentEnv: resolveTuiAgentLaunchEnv(args.session.agent, args.settings?.agentDefaultEnv)
     })
@@ -111,6 +112,9 @@ export function buildMobileAiVaultResumeLaunch(args: {
           shell
         }),
         ...(startupPlan.env ? { env: startupPlan.env } : {}),
+        // Why: the command is typed after pane creation, so the pane itself
+        // must start without an inherited managed Codex home.
+        ...realHomeCodexResumeEnvDeletion(args.session),
         launchConfig: startupPlan.launchConfig,
         launchAgent: startupPlan.agent
       }
@@ -122,7 +126,8 @@ export function buildMobileAiVaultResumeLaunch(args: {
       hostPlatform: args.hostPlatform,
       hostTerminalWindowsShell: args.hostTerminalWindowsShell,
       commandOverride
-    })
+    }),
+    ...realHomeCodexResumeEnvDeletion(args.session)
   }
 }
 
@@ -155,6 +160,7 @@ export async function resumeAiVaultSessionInTerminal(
     {
       worktree: `id:${worktreeId}`,
       ...(launch.env ? { env: launch.env } : {}),
+      ...(launch.envToDelete ? { envToDelete: launch.envToDelete } : {}),
       ...(launch.launchConfig ? { launchConfig: launch.launchConfig } : {}),
       ...(launch.launchAgent ? { launchAgent: launch.launchAgent } : {}),
       ...(launch.clientMutationId ? { clientMutationId: launch.clientMutationId } : {})

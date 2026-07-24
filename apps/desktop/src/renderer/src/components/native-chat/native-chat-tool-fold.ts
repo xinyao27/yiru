@@ -3,4 +3,4 @@ export {
   pairToolBlocks,
   splitNativeChatBlocks,
   type NativeChatToolPair
-} from '../../../../shared/native-chat-tool-fold'
+} from '@yiru/workbench-model/agent'

@@ -66,7 +66,7 @@ export function CliRegistrationDialog({
         {commandPath ? (
           <p className="text-muted-foreground text-xs">
             {translate('auto.components.settings.CliSection.a4aafe46e3', 'Target path:')}{' '}
-            <code className="bg-muted rounded px-1 py-0.5 text-[11px]">{commandPath}</code>
+            <code className="bg-muted px-1 py-0.5 text-[11px]">{commandPath}</code>
           </p>
         ) : null}
         <DialogFooter>

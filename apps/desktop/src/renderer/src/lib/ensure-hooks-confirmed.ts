@@ -1,11 +1,12 @@
-import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
-import type { AppState } from '@/store/types'
-
 import {
   getRepoExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../../../shared/execution-host'
+} from '@yiru/workbench-model/workspace'
+
+import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
+import type { AppState } from '@/store/types'
+
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import type { YiruHooks } from '../../../shared/types'
 import { getRuntimeEnvironmentIdForRepo } from './repo-runtime-owner'

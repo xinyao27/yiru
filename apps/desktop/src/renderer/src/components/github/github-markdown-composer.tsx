@@ -355,9 +355,11 @@ export function GitHubMarkdownComposer({
   )
 
   const attachmentFooter = isTabbed ? (
-    <button
+    <Button
+      variant="ghost"
+      size="xs"
       type="button"
-      className="github-markdown-composer-attachment focus-visible:bg-accent outline-none"
+      className="github-markdown-composer-attachment focus-visible:bg-accent h-auto border-0 p-0"
       disabled={disabled}
       onClick={openImagePicker}
     >
@@ -368,14 +370,14 @@ export function GitHubMarkdownComposer({
           'Paste, drop, or click to add files'
         )}
       </span>
-    </button>
+    </Button>
   ) : null
 
   return (
     <div
       ref={rootRef}
       className={cn(
-        'github-markdown-composer relative overflow-hidden rounded-md border border-input bg-background',
+        'github-markdown-composer relative overflow-hidden border border-input bg-background',
         isTabbed && 'github-markdown-composer-tabbed',
         disabled && 'opacity-60',
         className

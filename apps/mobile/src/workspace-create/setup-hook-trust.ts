@@ -1,4 +1,5 @@
-import type { PersistedTrustedYiruHooks } from '../../../desktop/src/shared/types'
+import type { PersistedTrustedYiruHooks } from '@yiru/workbench-model/workspace'
+
 import type { RpcClient } from '../transport/rpc-client'
 
 export type SetupHookTrust = {

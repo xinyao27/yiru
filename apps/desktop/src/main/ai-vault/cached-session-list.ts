@@ -1,5 +1,6 @@
-import type { AiVaultListArgs, AiVaultListResult } from '../../shared/ai-vault-types'
-import { LOCAL_EXECUTION_HOST_ID } from '../../shared/execution-host'
+import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
+import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
+
 import { getWslHomeAsync, listWslDistrosAsync } from '../wsl'
 import { getConfiguredAiVaultAdditionalCodexSessionsDirs } from './session-root-configuration'
 import { scanAiVaultSessions } from './session-scanner'

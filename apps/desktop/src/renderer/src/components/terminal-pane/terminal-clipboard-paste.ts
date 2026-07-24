@@ -1,7 +1,8 @@
 import {
   isClipboardTextTooLargeError,
   type ReadClipboardTextOptions
-} from '../../../../shared/clipboard-text'
+} from '@yiru/workbench-model/ui'
+
 import {
   TERMINAL_PASTE_MAX_BYTES,
   type TerminalPasteTextOptions

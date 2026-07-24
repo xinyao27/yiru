@@ -1,4 +1,5 @@
-import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+
 import type { AgentCompletionStatusSnapshot } from './agent-completion-coordinator-types'
 
 export function isSupersededAgentCompletionSnapshot(

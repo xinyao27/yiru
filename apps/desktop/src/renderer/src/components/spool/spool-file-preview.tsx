@@ -3,6 +3,7 @@ import type React from 'react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -100,7 +101,7 @@ export function SpoolFilePreview({
     }
   }
   return (
-    <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
+    <section className="bg-background flex min-h-0 min-w-0 flex-1 flex-col">
       <SpoolFilePreviewToolbar
         canControl={canControl}
         dirty={dirty}
@@ -160,17 +161,14 @@ function TextProjection({
           )}
         />
       ) : null}
-      <textarea
+      <Textarea
+        variant="editor"
         value={draft}
         readOnly={!editable}
         spellCheck={false}
         aria-label={translate('auto.components.spool.SpoolFilePreview.editorLabel', 'File content')}
         onChange={(event) => onDraftChange(event.currentTarget.value)}
-        className={cn(
-          'scrollbar-editor min-h-0 flex-1 resize-none bg-[var(--editor-surface)] font-mono text-xs leading-5 text-foreground outline-none',
-          'p-3',
-          !editable && 'cursor-default'
-        )}
+        className={cn('flex-1', !editable && 'cursor-default')}
       />
     </div>
   )
@@ -292,7 +290,7 @@ function FilePreviewMessage({
       {onBack ? (
         <header className="border-border bg-sidebar text-sidebar-foreground flex h-9 shrink-0 items-center border-b px-1.5">
           <Button type="button" size="xs" variant="ghost" onClick={onBack}>
-            <ChevronLeft aria-hidden="true" />
+            <ChevronLeft weight="regular" aria-hidden="true" />
             {translate('auto.components.spool.SpoolFilePreview.back', 'Back to files')}
           </Button>
         </header>

@@ -1,14 +1,15 @@
-import { z } from 'zod'
-
 import {
   AI_VAULT_AGENTS,
   AI_VAULT_SCOPE_PATHS_MAX_COUNT,
   type AiVaultListArgs,
   type AiVaultListResult,
   type AiVaultSession
-} from '../../shared/ai-vault-types'
-import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '../../shared/execution-host'
+} from '@yiru/workbench-model/agent'
+import { normalizeExecutionHostId, toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
+import { z } from 'zod'
+
 import { listEnvironments } from '../../shared/runtime-environment-store'
+import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../shared/runtime-method-contracts/ai-vault-contracts'
 import { callRuntimeEnvironment } from '../ipc/runtime-environment-transport-routing'
 
 export type RuntimeAiVaultHostInfo = {
@@ -72,6 +73,8 @@ const aiVaultListResultSchema = z.object({
       messageCount: z.number(),
       totalTokens: z.number(),
       previewMessages: z.array(aiVaultSessionPreviewMessageSchema),
+      // Optional keeps paired hosts on older builds compatible.
+      lastUserPrompt: z.string().nullable().optional(),
       // Default keeps remote hosts running an older build (no recoverable-signal
       // fields) parseable; they simply report no recoverable-empty sessions.
       queuedMessageCount: z.number().default(0),
@@ -119,7 +122,7 @@ export async function scanRuntimeAiVaultSessions(
   const response = await callRuntimeEnvironment(
     userDataPath,
     environmentId,
-    'aiVault.listSessions',
+    AI_VAULT_LIST_SESSIONS_CONTRACT,
     {
       limit: args.limit,
       force: args.force,

@@ -1,6 +1,7 @@
 import { Question as CircleHelp } from '@phosphor-icons/react'
 import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import type { NestedRepoScanResult } from '../../../../shared/types'
@@ -47,7 +48,9 @@ export function NestedRepoScanLimitNotice({ scan }: { scan: NestedRepoScanResult
       <Popover open={detailsOpen} onOpenChange={setDetailsOpen}>
         <PopoverTrigger
           render={
-            <button
+            <Button
+              variant="quiet"
+              size="icon-xs"
               type="button"
               aria-label={translate(
                 'auto.components.repo.NestedRepoScanLimitNotice.642a43c139',
@@ -55,14 +58,14 @@ export function NestedRepoScanLimitNotice({ scan }: { scan: NestedRepoScanResult
               )}
               aria-expanded={detailsOpen}
               title={detailsText}
-              className="text-muted-foreground hover:text-foreground inline-flex size-4 shrink-0 items-center justify-center rounded-sm transition focus-visible:outline-none"
+              className="size-4 transition"
               onClick={(event) => {
                 event.stopPropagation()
                 setDetailsOpen(true)
               }}
             >
               <CircleHelp className="size-3.5" />
-            </button>
+            </Button>
           }
         />
         <PopoverContent

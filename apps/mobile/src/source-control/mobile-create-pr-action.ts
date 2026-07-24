@@ -1,8 +1,9 @@
 import type {
   HostedReviewCreationBlockedReason,
   HostedReviewCreationEligibility
-} from '../../../desktop/src/shared/hosted-review'
-import { supportsHostedReviewCreation } from '../../../desktop/src/shared/hosted-review-creation-providers'
+} from '@yiru/workbench-model/review'
+import { supportsHostedReviewCreation } from '@yiru/workbench-model/review'
+
 import { hostedReviewCopy } from './hosted-review-copy'
 import { getMobilePrCreateBlockMessage } from './mobile-pr-create'
 

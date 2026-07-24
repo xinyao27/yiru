@@ -1,5 +1,6 @@
-import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '../../shared/cross-platform-path'
-import { parseWslUncPath } from '../../shared/wsl-paths'
+import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
+import { parseWslUncPath } from '@yiru/workbench-model/platform'
+
 import { SpoolExecutionError } from './spool-execution-error'
 import {
   SPOOL_FOLDER_INCARNATION_MARKER_FILENAME,

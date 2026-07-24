@@ -1,5 +1,6 @@
-import { RUNTIME_OWNED_SSH_TARGET_ID_PREFIX } from '../../shared/execution-host'
-import type { SshRepoReadoption, SshTarget } from '../../shared/ssh-types'
+import type { SshRepoReadoption, SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+import { RUNTIME_OWNED_SSH_TARGET_ID_PREFIX } from '@yiru/workbench-model/workspace'
+
 import type { Store } from '../persistence'
 import { loadUserSshConfig, sshConfigHostsToTargets } from './ssh-config-parser'
 import {

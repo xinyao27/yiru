@@ -132,15 +132,17 @@ export function CreateProjectLocationField({
           </Tooltip>
         </div>
       ) : createParent ? (
-        <div className="group border-border bg-background/40 flex h-11 min-w-0 items-center gap-2.5 rounded-md border px-3 text-sm">
+        <div className="group border-border bg-background/40 flex h-11 min-w-0 items-center gap-2.5 border px-3 text-sm">
           <span className="min-w-0 flex-1 truncate font-mono text-[12px]" title={createParent}>
             {createParent}
           </span>
-          <button
+          <Button
+            variant="quiet"
+            size="xs"
             type="button"
             onClick={onPickParent}
             disabled={isCreating}
-            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] transition-colors outline-none disabled:cursor-not-allowed"
+            className="h-auto border-0 p-0 text-[11px] disabled:cursor-not-allowed"
             aria-label={translate(
               'auto.components.sidebar.CreateProjectLocationField.afaf54f245',
               'Change parent folder'
@@ -148,7 +150,7 @@ export function CreateProjectLocationField({
           >
             <Pencil className="size-3" />
             {translate('auto.components.sidebar.CreateProjectLocationField.632b456b1b', 'Change')}
-          </button>
+          </Button>
         </div>
       ) : (
         <Button
@@ -158,7 +160,7 @@ export function CreateProjectLocationField({
           disabled={isCreating}
           className="text-muted-foreground h-11 w-full justify-start gap-2.5 text-sm font-normal"
         >
-          <span className="border-border/70 bg-background/40 inline-flex size-7 shrink-0 items-center justify-center rounded-md border">
+          <span className="border-border/70 bg-background/40 inline-flex size-7 shrink-0 items-center justify-center border">
             <Folder className="size-3.5" />
           </span>
           {translate(

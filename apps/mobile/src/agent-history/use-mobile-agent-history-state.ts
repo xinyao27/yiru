@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
 import type {
   AiVaultListResult,
   AiVaultScanIssue,
   AiVaultScope,
   AiVaultSession
-} from '../../../desktop/src/shared/ai-vault-types'
+} from '@yiru/workbench-model/agent'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import { useHostClient, useForceReconnect } from '../transport/client-context'
 import type { RpcSuccess } from '../transport/types'
 import type { Worktree } from '../worktree/workspace-list-types'

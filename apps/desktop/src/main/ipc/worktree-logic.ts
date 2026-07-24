@@ -1,15 +1,20 @@
 import { resolve, relative, isAbsolute, posix, sep, win32 } from 'node:path'
 
-import { isWindowsAbsolutePathLike, resolveRuntimePath } from '../../shared/cross-platform-path'
+import { isWindowsAbsolutePathLike, resolveRuntimePath } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
+import { splitWorktreeId } from '@yiru/workbench-model/workspace'
+
 import type { GlobalSettings, YiruWorkspaceLayout, Repo } from '../../shared/types'
-import { splitWorktreeId } from '../../shared/worktree-id'
-import { isWslUncPath } from '../../shared/wsl-paths'
 import { getWslHome, parseWslPath } from '../wsl'
 
 type WorktreePathSettings = Pick<GlobalSettings, 'nestWorkspaces' | 'workspaceDir'>
 type WorktreeBasePathRepo = Pick<Repo, 'path' | 'worktreeBasePath'>
 
-export { computeBranchName, getConfiguredBranchPrefix } from './worktree-branch-name'
+export {
+  computeBranchName,
+  computeValidatedBranchName,
+  getConfiguredBranchPrefix
+} from './worktree-branch-name'
 export { mergeWorktree } from './worktree-metadata-merge'
 export { areWorktreePathsEqual } from './worktree-path-comparison'
 
@@ -126,9 +131,11 @@ export function computeRemoteWorktreePath(
     return computeWorktreePath(sanitizedName, repoPath, settings)
   }
   // Why: absolute global workspaceDir values belong to the desktop machine.
-  // SSH worktrees keep the legacy repo-sibling root unless a repo-specific
-  // path opts into a remote-host location.
-  return getRuntimePathOps(repoPath, repoPath).join(repoPath, '..', sanitizedName)
+  // Qualify SSH sibling paths by repository so common branch names do not
+  // collide across repositories on the same execution host.
+  const pathOps = getRuntimePathOps(repoPath, repoPath)
+  const repoName = pathOps.basename(repoPath).replace(/\.git$/, '')
+  return pathOps.join(repoPath, '..', `${repoName}-${sanitizedName}`)
 }
 
 export function getWorktreePathSettings(

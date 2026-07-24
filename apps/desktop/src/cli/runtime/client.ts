@@ -1,9 +1,17 @@
-import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
-import { describeRuntimeCompatBlock, evaluateRuntimeCompat } from '../../shared/protocol-compat'
 import {
+  describeRuntimeCompatBlock,
+  evaluateRuntimeCompat,
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
   RUNTIME_PROTOCOL_VERSION
-} from '../../shared/protocol-version'
+} from '@yiru/runtime-protocol/capabilities'
+
+import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../../shared/runtime-method-contract'
+import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
 import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
 import { markEnvironmentUsed, resolveEnvironmentPairingOffer } from './environments'
 import { launchYiruApp } from './launch'
@@ -48,15 +56,26 @@ export class RuntimeClient {
   }
 
   async call<TResult>(
-    method: string,
+    contract: string,
     params?: unknown,
     options?: {
       timeoutMs?: number
     }
+  ): Promise<RuntimeRpcSuccess<TResult>>
+  async call<TContract extends RuntimeMethodContract>(
+    contract: TContract,
+    params: RuntimeMethodParams<TContract>,
+    options?: { timeoutMs?: number }
+  ): Promise<RuntimeRpcSuccess<RuntimeMethodResult<TContract>>>
+  async call<TResult>(
+    contract: string | RuntimeMethodContract,
+    params?: unknown,
+    options?: { timeoutMs?: number }
   ): Promise<RuntimeRpcSuccess<TResult>> {
+    const method = typeof contract === 'string' ? contract : contract.name
     const effectiveTimeoutMs = options?.timeoutMs ?? this.resolveMethodTimeoutMs(method, params)
     if (this.remotePairing) {
-      if (method !== 'status.get') {
+      if (method !== STATUS_GET_CONTRACT.name) {
         await this.ensureRemoteRuntimeCompatible(effectiveTimeoutMs)
       }
       const response = await sendWebSocketRequest<TResult>(
@@ -103,7 +122,7 @@ export class RuntimeClient {
 
   async getCliStatus(): Promise<RuntimeRpcSuccess<CliStatusResult>> {
     if (this.remotePairing) {
-      const response = await this.call<RuntimeStatus>('status.get')
+      const response = await this.call(STATUS_GET_CONTRACT, undefined)
       this.assertRemoteRuntimeStatusCompatible(response.result)
       this.remoteCompatChecked = true
       const graphState = response.result.graphStatus
@@ -126,7 +145,12 @@ export class RuntimeClient {
           runtime: {
             state: graphState === 'ready' ? 'ready' : 'graph_not_ready',
             reachable: true,
-            runtimeId: response.result.runtimeId
+            runtimeId: response.result.runtimeId,
+            ...(response.result.appVersion ? { appVersion: response.result.appVersion } : {}),
+            ...(response.result.remoteUpdateSupport
+              ? { remoteUpdateSupport: response.result.remoteUpdateSupport }
+              : {}),
+            ...(response.result.capabilities ? { capabilities: response.result.capabilities } : {})
           },
           graph: {
             state: graphState
@@ -142,9 +166,9 @@ export class RuntimeClient {
     if (!this.remotePairing || this.remoteCompatChecked) {
       return
     }
-    const response = await sendWebSocketRequest<RuntimeStatus>(
+    const response = await sendWebSocketRequest(
       this.remotePairing,
-      'status.get',
+      STATUS_GET_CONTRACT,
       undefined,
       timeoutMs
     )

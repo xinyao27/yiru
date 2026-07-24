@@ -1,6 +1,5 @@
 import { translate } from '@/i18n/i18n'
 
-import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice } from './mobile-hero'
 import type { StepIndex } from './mobile-hero'
@@ -26,8 +25,6 @@ type MobilePageContentProps = {
   openInstallUrl: () => void
   pairAnotherDevice: () => void
   pairLoading: boolean
-  connectionMode: MobilePairingConnectionMode
-  handleConnectionModeChange: (mode: MobilePairingConnectionMode) => void
   pairQrDataUrl: string | null
   pairingUrl: string | null
   platform: MobilePlatform
@@ -36,11 +33,9 @@ type MobilePageContentProps = {
   revokingDeviceIds: string[]
   selectedAddress: string | undefined
   onPlatformChange: (platform: MobilePlatform) => void
-  showMobileButton: boolean
   showPairedDevices: (deviceCount: number) => void
   stage: MobilePageStage | null
   stepIdx: StepIndex
-  toggleMobileSidebarButton: () => void
 }
 
 export function MobilePageContent({
@@ -59,8 +54,6 @@ export function MobilePageContent({
   openInstallUrl,
   pairAnotherDevice,
   pairLoading,
-  connectionMode,
-  handleConnectionModeChange,
   pairQrDataUrl,
   pairingUrl,
   platform,
@@ -69,19 +62,13 @@ export function MobilePageContent({
   revokingDeviceIds,
   selectedAddress,
   onPlatformChange,
-  showMobileButton,
   showPairedDevices,
   stage,
-  stepIdx,
-  toggleMobileSidebarButton
+  stepIdx
 }: MobilePageContentProps): React.JSX.Element {
   return (
     <div className={mobilePageStyles.root}>
-      <MobilePageToolbar
-        showMobileButton={showMobileButton}
-        onClose={closeMobilePage}
-        onToggleMobileSidebarButton={toggleMobileSidebarButton}
-      />
+      <MobilePageToolbar onClose={closeMobilePage} />
       <section className={mobilePageStyles.hero}>
         <div className={mobilePageStyles.heroCopy}>
           {stage === null ? null : stage === 'intro' ? (
@@ -105,8 +92,6 @@ export function MobilePageContent({
               pairQrDataUrl={pairQrDataUrl}
               pairingUrl={pairingUrl}
               pairLoading={pairLoading}
-              connectionMode={connectionMode}
-              onConnectionModeChange={handleConnectionModeChange}
               onRegeneratePairing={() => generatePairing(true)}
               onCopyPairingCode={copyPairingCode}
               networkInterfaces={networkInterfaces}

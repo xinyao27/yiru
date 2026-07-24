@@ -1,3 +1,10 @@
+import {
+  assertBranchPrefixValid,
+  normalizeBranchPrefix,
+  selectBranchPrefixInput,
+  type BranchPrefixSettings
+} from '../../shared/branch-prefix'
+
 /**
  * Resolve the branch prefix segment (the part before `/`) the configured
  * strategy will prepend, or null when no prefix applies. Exposed so callers can
@@ -5,16 +12,11 @@
  * it gets prepended a second time.
  */
 export function getConfiguredBranchPrefix(
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   gitUsername: string | null
 ): string | null {
-  if (settings.branchPrefix === 'git-username') {
-    return gitUsername || null
-  }
-  if (settings.branchPrefix === 'custom' && settings.branchPrefixCustom) {
-    return settings.branchPrefixCustom
-  }
-  return null
+  const rawPrefix = selectBranchPrefixInput(settings, gitUsername)
+  return rawPrefix ? normalizeBranchPrefix(rawPrefix) || null : null
 }
 
 /**
@@ -22,9 +24,22 @@ export function getConfiguredBranchPrefix(
  */
 export function computeBranchName(
   sanitizedName: string,
-  settings: { branchPrefix: string; branchPrefixCustom?: string },
+  settings: BranchPrefixSettings,
   gitUsername: string | null
 ): string {
   const prefix = getConfiguredBranchPrefix(settings, gitUsername)
   return prefix ? `${prefix}/${sanitizedName}` : sanitizedName
+}
+
+export function computeValidatedBranchName(
+  sanitizedName: string,
+  settings: BranchPrefixSettings,
+  gitUsername: string | null
+): string {
+  const prefix = getConfiguredBranchPrefix(settings, gitUsername)
+  if (prefix === null) {
+    return sanitizedName
+  }
+  assertBranchPrefixValid(prefix)
+  return `${prefix}/${sanitizedName}`
 }

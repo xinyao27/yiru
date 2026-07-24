@@ -2,7 +2,8 @@ import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SshTarget } from '../../shared/ssh-types'
+import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
+
 import { expandSshConfigIncludes } from './ssh-config-include-expander'
 import { resolveSshConfigHomePath } from './ssh-config-path-expansion'
 export { parseSshGOutput, resolveWithSshG, type SshResolvedConfig } from './ssh-g-config-resolution'

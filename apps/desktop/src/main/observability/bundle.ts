@@ -1,8 +1,6 @@
-// Diagnostic bundle collection + upload (Mode 3 from
-// telemetry-error-tracking.md). The single user-initiated network path from
-// the error-tracking lane to Yiru infrastructure. Every step here implements
-// a hardening requirement from §Endpoint contract — the comments name the
-// requirement number when they apply.
+// Diagnostic bundle collection for the user-initiated support-report flow.
+// The full redacted NDJSON stays local for preview/export; the send action
+// derives a bounded excerpt for PostHog in support-report-payload.ts.
 //
 // Lifecycle:
 //   1. `collectBundle()` — read the last N minutes of NDJSON across the
@@ -11,22 +9,10 @@
 //      `bundle_submission_id`. NEVER carries `install_id` (Issue 8 in the
 //      security review).
 //   2. (renderer) — preview the bundle as plain text. User can copy or cancel.
-//      Main retains the uploadable payload so renderer cannot substitute
+//      Main retains the report payload so renderer cannot substitute
 //      arbitrary bytes after preview.
-//   3. `uploadBundle()` — two-step:
-//      a) POST `/diagnostics/token` → token + upload_url
-//      b) POST `<upload_url>` with `Authorization: Bearer <token>` and the
-//         collected NDJSON payload. Returns ticket ID.
-//   4. (renderer) — surface the support reference ID; offer copy/delete
-//      controls. Delete posts only the server-issued ID.
-//
-// Server-side endpoint contract is fully specified in
-// telemetry-error-tracking.md §Endpoint contract. Implementation of those
-// endpoints (token issuance, rate limit, storage, server-side redaction,
-// retention, deletion) is operational TBD — flagged as an open question to
-// the human dispatching this task. We ship the *client* of that contract
-// with all hardening invariants the client controls (content-type pinning,
-// body-size cap on upload, token-handling discipline).
+//   3. (main) — send only a bounded redacted excerpt + metadata to PostHog.
+//   4. (renderer) — surface the random report reference ID.
 
 import { randomBytes } from 'node:crypto'
 import { readFileSync, statSync } from 'node:fs'
@@ -58,7 +44,7 @@ export type CollectedBundle = {
   readonly bundleSubmissionId: string
   /** UTF-8 NDJSON payload — header line + N redacted span lines. */
   readonly payload: string
-  /** Byte length of `payload`. Pre-checked against the 4 MiB upload cap. */
+  /** Byte length of `payload`. Pre-checked against the 4 MiB local-file cap. */
   readonly bytes: number
   /** Span-line count, for the preview window's "N spans" label. */
   readonly spanCount: number
@@ -94,9 +80,9 @@ function* readLinesNewestFirst(text: string): Iterable<string> {
 /**
  * Read the last N minutes of NDJSON across the rotated family and produce
  * a redacted bundle payload. Caller renders this as preview text; main keeps
- * the uploadable payload and `uploadBundle()` ships only those collected
- * bytes. This keeps compromised renderer code from substituting arbitrary
- * upload content after preview.
+ * the retained payload and the support-report flow derives its bounded
+ * excerpt. This keeps compromised renderer code from substituting arbitrary
+ * report content after preview.
  */
 export function collectBundle(opts: CollectBundleOptions): CollectedBundle {
   const lookbackMs = (opts.lookbackMinutes ?? DEFAULT_LOOKBACK_MINUTES) * 60 * 1000

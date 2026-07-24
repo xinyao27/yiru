@@ -1,9 +1,9 @@
+import { applyPRBotAuthorOverride } from '@yiru/workbench-model/review'
 import { BrowserWindow, ipcMain, nativeTheme } from 'electron'
 
 import { normalizeAppIconId } from '../../shared/app-icon'
 import { normalizeLoaderStyle } from '../../shared/loader-style'
 import { normalizeProxyBypassRules, normalizeProxyUrl } from '../../shared/network-proxy'
-import { applyPRBotAuthorOverride } from '../../shared/pr-bot-author-overrides'
 import { SETTINGS_CHANGED_WHITELIST, type SettingsChangedKey } from '../../shared/telemetry-events'
 import { normalizeTerminalCustomThemes } from '../../shared/terminal-custom-themes'
 import { normalizeTerminalLineHeight } from '../../shared/terminal-line-height-settings'

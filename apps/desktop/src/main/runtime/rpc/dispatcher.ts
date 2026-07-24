@@ -15,8 +15,8 @@ import {
   formatZodError,
   isStreamingMethod,
   type RpcAnyMethod,
+  type RpcContext,
   type RpcEnvelopeMeta,
-  type PairingRpcContext,
   type RpcRegistry,
   type RpcRequest,
   type RpcResponse
@@ -29,20 +29,32 @@ import {
   mapRuntimeError,
   successResponse
 } from './errors'
-import { ALL_RPC_METHODS } from './methods'
 
 export type DispatcherOptions = {
   runtime: YiruRuntimeService
-  methods?: readonly RpcAnyMethod[]
+  methods: readonly RpcAnyMethod[]
 }
 
 export class RpcDispatcher {
   private readonly runtime: YiruRuntimeService
   private readonly registry: RpcRegistry
+  private readonly moduleContext: RpcContext
 
-  constructor({ runtime, methods = ALL_RPC_METHODS }: DispatcherOptions) {
+  constructor({ runtime, methods }: DispatcherOptions) {
     this.runtime = runtime
     this.registry = buildRegistry(methods)
+    this.moduleContext = {
+      runtime,
+      fileCommands: runtime.fileCommands,
+      gitCommands: runtime.gitCommands,
+      browserCommands: runtime.browserCommands,
+      emulatorCommands: runtime.emulatorCommands,
+      mobileNotifications: runtime.mobileNotifications
+    }
+  }
+
+  isAvailableToMobile(method: string): boolean {
+    return this.registry.get(method)?.mobile === true
   }
 
   async dispatch(request: RpcRequest, options?: { signal?: AbortSignal }): Promise<RpcResponse> {
@@ -80,7 +92,7 @@ export class RpcDispatcher {
     }
     try {
       const result = await method.handler(parsedParams.value, {
-        runtime: this.runtime,
+        ...this.moduleContext,
         signal: options?.signal
       })
       this.recordRuntimeFeatureInteraction(request.method, result, undefined, request.params)
@@ -104,7 +116,6 @@ export class RpcDispatcher {
       signal?: AbortSignal
       clientId?: string
       clientKind?: 'mobile' | 'runtime'
-      pairing?: PairingRpcContext
       principal?: AuthenticatedRpcPrincipal
       sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
       registerBinaryStreamHandler?: (
@@ -133,13 +144,12 @@ export class RpcDispatcher {
     if (!isStreamingMethod(method)) {
       try {
         const result = await method.handler(parsedParams.value, {
-          runtime: this.runtime,
+          ...this.moduleContext,
           signal: options?.signal,
           requestId: request.id,
           connectionId: options?.connectionId,
           clientId: options?.clientId,
           clientKind: options?.clientKind,
-          pairing: options?.pairing,
           principal: options?.principal,
           sendBinary: options?.sendBinary,
           registerBinaryStreamHandler: options?.registerBinaryStreamHandler
@@ -169,13 +179,12 @@ export class RpcDispatcher {
       const result = await method.handler(
         parsedParams.value,
         {
-          runtime: this.runtime,
+          ...this.moduleContext,
           signal: options?.signal,
           requestId: request.id,
           connectionId: options?.connectionId,
           clientId: options?.clientId,
           clientKind: options?.clientKind,
-          pairing: options?.pairing,
           principal: options?.principal,
           sendBinary: options?.sendBinary,
           registerBinaryStreamHandler: options?.registerBinaryStreamHandler

@@ -84,7 +84,7 @@ export function QuickCommandsScopeFilter({
                 effectiveSelection={effectiveSelection}
                 repos={repos}
               />
-              <ChevronsUpDown className="size-3.5 opacity-50" />
+              <ChevronsUpDown weight="regular" className="size-3.5 opacity-50" />
             </Button>
           }
         />
@@ -94,13 +94,15 @@ export function QuickCommandsScopeFilter({
         >
           <Command>
             <div className="border-border border-b">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={handleSelectAll}
                 onMouseDown={(event) => event.preventDefault()}
                 className={cn(
-                  'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+                  'border-0 justify-start whitespace-normal font-normal gap-2 focus-visible:bg-accent focus-visible:text-accent-foreground',
+                  'flex w-full py-1.5 text-left text-xs text-foreground transition-colors',
                   showAll && 'opacity-80'
                 )}
               >
@@ -116,7 +118,7 @@ export function QuickCommandsScopeFilter({
                     'All commands'
                   )}
                 </span>
-              </button>
+              </Button>
             </div>
             <CommandList>
               <CommandItem

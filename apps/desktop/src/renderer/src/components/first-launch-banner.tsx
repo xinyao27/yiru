@@ -1,3 +1,4 @@
+import { X } from '@phosphor-icons/react'
 // Existing-user first-launch notice. Shown to users whose cohort marker is
 // `existedBeforeTelemetryRelease === true` and whose `optedIn` is still
 // `null`, i.e. users who installed Yiru before the telemetry release and
@@ -32,10 +33,9 @@
 // No auto-dismiss, no delayed re-ask: once resolved (Got it / ✕ / Turn
 // off), the notice never returns, because the cohort condition
 // (`optedIn === null`) clears in all three resolving paths.
-
-import { X } from '@phosphor-icons/react'
 import { useState } from 'react'
 
+import { Button as UiButton } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
@@ -127,7 +127,7 @@ export function FirstLaunchBanner({
     // `relative` is load-bearing: the absolutely-positioned ✕ anchors to
     // this container.
     <div
-      className="border-border bg-card fixed top-2 left-1/2 z-40 flex w-[min(44.625rem,calc(100vw-2rem))] -translate-x-1/2 items-start gap-4 rounded-lg border py-3 pr-3 pl-4"
+      className="border-border bg-card fixed top-2 left-1/2 z-40 flex w-[min(44.625rem,calc(100vw-2rem))] -translate-x-1/2 items-start gap-4 border py-3 pr-3 pl-4"
       role="region"
       aria-label={translate('auto.components.FirstLaunchBanner.fcbee32f08', 'Telemetry notice')}
       aria-live="polite"
@@ -146,13 +146,15 @@ export function FirstLaunchBanner({
             'auto.components.FirstLaunchBanner.958d2cc31b',
             'Anonymous counts of which features you use help us prioritize what to build. No file contents, prompts, terminal output, or anything that identifies you. Change anytime in Settings -> Privacy & Telemetry.'
           )}{' '}
-          <button
+          <UiButton
+            variant="ghost"
+            size="xs"
             type="button"
-            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline underline-offset-2 outline-none"
+            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
             onClick={() => void window.api.shell.openUrl(PRIVACY_URL)}
           >
             {translate('auto.components.FirstLaunchBanner.d1deebb050', 'Privacy policy')}
-          </button>
+          </UiButton>
           .
         </p>
       </div>
@@ -178,15 +180,17 @@ export function FirstLaunchBanner({
       </div>
       {/* aria-label says "Dismiss" — the action persists silent opt-in,
           not just hides the UI. */}
-      <button
+      <UiButton
+        variant="ghost"
+        size="xs"
         type="button"
         aria-label={translate('auto.components.FirstLaunchBanner.b9e1b966c7', 'Dismiss notice')}
         onClick={handleAcknowledge}
         disabled={inFlight}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground absolute top-1.5 right-1.5 rounded p-1 transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground absolute top-1.5 right-1.5 h-auto w-auto border-0 p-1 transition-colors disabled:cursor-not-allowed"
       >
-        <X className="size-3.5" />
-      </button>
+        <X weight="regular" className="size-3.5" />
+      </UiButton>
     </div>
   )
 }

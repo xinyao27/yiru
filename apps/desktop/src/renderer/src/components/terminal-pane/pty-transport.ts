@@ -1,4 +1,14 @@
+import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
+
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
+import type { PtyDataMeta } from '@/runtime/pty-data-meta'
+import {
+  clearConsumedPreHandlerPtyExit,
+  drainPreHandlerPtyData,
+  drainPreHandlerPtyExit,
+  hasPreHandlerPtyExit,
+  isPreHandlerPtyStateDiscarded
+} from '@/runtime/pty-pre-handler-buffer'
 
 /* oxlint-disable max-lines -- Why: the PTY transport manages lifecycle, data flow,
 agent status extraction, and title tracking for terminal panes. Splitting would
@@ -15,7 +25,6 @@ import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
 } from '../../../../shared/agent-status-osc'
-import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { createBellDetector } from '../../../../shared/terminal-bell-detector'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
@@ -30,15 +39,7 @@ import {
   ensurePtyDispatcher,
   getEagerPtyBufferHandle
 } from './pty-dispatcher'
-import type { PtyDataMeta } from './pty-dispatcher'
 import { createPtyInputWriteQueue } from './pty-input-write-queue'
-import {
-  clearConsumedPreHandlerPtyExit,
-  drainPreHandlerPtyData,
-  drainPreHandlerPtyExit,
-  hasPreHandlerPtyExit,
-  isPreHandlerPtyStateDiscarded
-} from './pty-pre-handler-buffer'
 import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty-transport-types'
 import {
   hasTerminalDisplayContent,
@@ -500,6 +501,7 @@ export function createIpcPtyTransport(opts: IpcPtyTransportOptions = {}): PtyTra
     cwd,
     cwdFallback,
     env,
+    envToDelete,
     command,
     launchConfig,
     launchToken,
@@ -739,6 +741,9 @@ export function createIpcPtyTransport(opts: IpcPtyTransportOptions = {}): PtyTra
           cwd,
           ...(shouldSendLocalCwdFallback ? { cwdFallback } : {}),
           env: options.env ?? env,
+          ...((options.envToDelete ?? envToDelete)
+            ? { envToDelete: options.envToDelete ?? envToDelete }
+            : {}),
           command: options.command ?? command,
           ...((options.launchConfig ?? launchConfig)
             ? { launchConfig: options.launchConfig ?? launchConfig }

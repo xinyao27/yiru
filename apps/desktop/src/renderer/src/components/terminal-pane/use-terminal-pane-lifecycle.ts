@@ -1,4 +1,6 @@
 import type { IDisposable, Terminal } from '@xterm/xterm'
+import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
+import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: terminal pane lifecycle wiring is intentionally co-located so PTY attach, theme sync, and runtime graph publication remain consistent for live terminals. */
 import { useEffect, useRef } from 'react'
 
@@ -37,15 +39,15 @@ import {
   isPrimarySelectionEnabled,
   setPrimarySelectionText
 } from '@/lib/primary-selection'
+import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import { resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
 import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
 import { consumePendingWebRuntimeSplitMirrorTelemetry } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
 
-import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
-import type { ParsedAgentStatusPayload } from '../../../../shared/agent-status-types'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { TerminalPaneSplitSource } from '../../../../shared/feature-education-telemetry'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
@@ -64,7 +66,6 @@ import type {
   TerminalLayoutSnapshot,
   TuiAgent
 } from '../../../../shared/types'
-import { acquireWebviewsDragPassthrough } from '../browser-pane/webview-registry'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
 import { applyExpandedLayoutTo, restoreExpandedLayoutFrom } from './expand-collapse'
 import {
@@ -105,7 +106,6 @@ import { installTerminalImeLinuxCandidateState } from './terminal-ime-linux-cand
 import { installTerminalImeNativeTextForwarder } from './terminal-ime-native-text-forwarder'
 import { resolveTerminalJisYenInput } from './terminal-jis-yen-input'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'
-import { resolveTerminalLayoutActiveLeafId } from './terminal-layout-leaf-ids'
 import {
   createFilePathLinkProvider,
   getTerminalFileOpenHint,
@@ -216,6 +216,7 @@ type UseTerminalPaneLifecycleDeps = {
     delivery?: 'terminal-paste'
     startupCommandDelivery?: StartupCommandDelivery
     env?: Record<string, string>
+    envToDelete?: string[]
     launchConfig?: SleepingAgentLaunchConfig
     launchToken?: string
     launchAgent?: TuiAgent

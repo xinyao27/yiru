@@ -469,6 +469,22 @@ const nativeChatMessageSentSchema = z
     runtime: nativeChatRuntimeSchema
   })
   .strict()
+const nativeChatPickerOpenedSchema = z
+  .object({ agent_kind: agentKindSchema, prefix: z.enum(['slash', 'dollar']) })
+  .strict()
+const nativeChatPickerItemAcceptedSchema = z
+  .object({ agent_kind: agentKindSchema, item_kind: z.enum(['command', 'skill']) })
+  .strict()
+const nativeChatSendClassifiedSchema = z
+  .object({ agent_kind: agentKindSchema, outcome: z.enum(['chat', 'command', 'unknown-token']) })
+  .strict()
+const nativeChatSkillDiscoverySchema = z
+  .object({
+    agent_kind: agentKindSchema,
+    outcome: z.enum(['ready', 'error', 'timeout', 'unavailable']),
+    execution_host_kind: z.enum(['local', 'runtime', 'ssh'])
+  })
+  .strict()
 
 const telemetryOptedInSchema = z.object({ via: optInViaSchema }).strict()
 const telemetryOptedOutSchema = z.object({ via: optInViaSchema }).strict()
@@ -1355,6 +1371,93 @@ const editorExternalChangeConflictActionSchema = z
   })
   .strict()
 
+// Support reports are deliberately separate from product analytics: they are
+// sent only after an explicit user action and use a report-scoped distinct ID.
+// Free-form fields are allowed here, but their hard caps keep one PostHog event
+// small enough for reliable ingestion and force producers to redact first.
+export const SUPPORT_REPORT_TEXT_MAX_LENGTH = 8_000
+export const SUPPORT_REPORT_DIAGNOSTIC_EXCERPT_MAX_LENGTH = 16_000
+export const SUPPORT_REPORT_GITHUB_LOGIN_MAX_LENGTH = 128
+export const SUPPORT_REPORT_GITHUB_EMAIL_MAX_LENGTH = 254
+
+const supportReportSubmittedSchema = z
+  .object({
+    report_id: z.string().uuid(),
+    report_type: z.enum(['feedback', 'crash', 'diagnostics']),
+    report_text: z.string().min(1).max(SUPPORT_REPORT_TEXT_MAX_LENGTH).optional(),
+    submit_anonymously: z.boolean(),
+    github_login: z.string().min(1).max(SUPPORT_REPORT_GITHUB_LOGIN_MAX_LENGTH).optional(),
+    github_email: z.string().min(1).max(SUPPORT_REPORT_GITHUB_EMAIL_MAX_LENGTH).optional(),
+    app_version: z.string().max(64),
+    platform: z.string().max(64),
+    arch: z.string().max(64),
+    os_release: z.string().max(64),
+    yiru_channel: z.enum(['stable', 'rc']),
+    diagnostic_bundle_id: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{16,64}$/)
+      .optional(),
+    diagnostic_excerpt: z
+      .string()
+      .min(1)
+      .max(SUPPORT_REPORT_DIAGNOSTIC_EXCERPT_MAX_LENGTH)
+      .optional(),
+    diagnostic_bytes: z
+      .number()
+      .int()
+      .min(0)
+      .max(4 * 1024 * 1024)
+      .optional(),
+    diagnostic_span_count: z.number().int().min(0).max(1_000_000).optional(),
+    diagnostic_excerpt_truncated: z.boolean().optional()
+  })
+  .strict()
+  .superRefine((props, ctx) => {
+    const diagnosticKeys = [
+      props.diagnostic_bundle_id,
+      props.diagnostic_excerpt,
+      props.diagnostic_bytes,
+      props.diagnostic_span_count,
+      props.diagnostic_excerpt_truncated
+    ]
+    const diagnosticFieldCount = diagnosticKeys.filter((value) => value !== undefined).length
+    if (diagnosticFieldCount !== 0 && diagnosticFieldCount !== diagnosticKeys.length) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['diagnostic_excerpt'],
+        message: 'diagnostic report fields must be provided together'
+      })
+    }
+    if (props.report_type === 'diagnostics' && diagnosticFieldCount !== diagnosticKeys.length) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['diagnostic_excerpt'],
+        message: 'diagnostics reports require a bounded excerpt and metadata'
+      })
+    }
+    if (props.report_type !== 'diagnostics' && !props.report_text) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['report_text'],
+        message: 'feedback and crash reports require report text'
+      })
+    }
+    if (props.report_type === 'feedback' && diagnosticFieldCount !== 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['diagnostic_excerpt'],
+        message: 'feedback reports cannot include diagnostics'
+      })
+    }
+    if (props.submit_anonymously && (props.github_login || props.github_email)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['submit_anonymously'],
+        message: 'anonymous reports cannot include GitHub identity'
+      })
+    }
+  })
+
 // ── Event registry: the one record the validator consumes ───────────────
 //
 // The validator does `eventSchemas[name].safeParse(props)`. `EventMap` is
@@ -1398,9 +1501,14 @@ export const eventSchemas = {
 
   native_chat_toggled: nativeChatToggledSchema,
   native_chat_message_sent: nativeChatMessageSentSchema,
+  native_chat_picker_opened: nativeChatPickerOpenedSchema,
+  native_chat_picker_item_accepted: nativeChatPickerItemAcceptedSchema,
+  native_chat_send_classified: nativeChatSendClassifiedSchema,
+  native_chat_skill_discovery: nativeChatSkillDiscoverySchema,
 
   telemetry_opted_in: telemetryOptedInSchema,
   telemetry_opted_out: telemetryOptedOutSchema,
+  support_report_submitted: supportReportSubmittedSchema,
 
   yiru_cli_feature_tip_shown: yiruCliFeatureTipShownSchema,
   yiru_cli_feature_tip_setup_clicked: yiruCliFeatureTipSetupClickedSchema,
@@ -1454,6 +1562,10 @@ export const eventSchemas = {
 export type EventMap = { [N in keyof typeof eventSchemas]: z.infer<(typeof eventSchemas)[N]> }
 export type EventName = keyof EventMap
 export type EventProps<N extends EventName> = EventMap[N]
+export type SupportReportDraft = Omit<
+  EventProps<'support_report_submitted'>,
+  'report_id' | 'app_version' | 'platform' | 'arch' | 'os_release' | 'yiru_channel'
+>
 
 // Why: events whose schemas declare a given property name. Extracted so the
 // cast (Object.entries → [EventName, ZodTypeAny]) stays in one place; if the

@@ -1,3 +1,4 @@
+import type { PRCheckDetail } from '@yiru/workbench-model/review'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
 
@@ -10,7 +11,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { PRCheckDetail } from '../../../../desktop/src/shared/types'
 import { fetchPRCheckDetails, type GitHubPrRepoSlug } from '../../session/github-pr-rpc'
 import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
 import type { RpcClient } from '../../transport/rpc-client'

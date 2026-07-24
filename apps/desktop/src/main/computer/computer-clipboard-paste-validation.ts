@@ -4,7 +4,8 @@ import {
   assertClipboardTextWriteWithinLimit,
   assertClipboardTextWriteWithinLimitWithYield,
   isClipboardTextWriteTooLargeError
-} from '../../shared/clipboard-text'
+} from '@yiru/workbench-model/ui'
+
 import { RuntimeClientError } from './runtime-client-error'
 
 export function validateComputerClipboardPasteText(text: string): void {

@@ -25,16 +25,17 @@ import { homedir } from 'node:os'
 import { resolve, join } from 'node:path'
 
 import {
+  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
+  SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
+} from '@yiru/runtime-protocol/ssh-connection'
+
+import {
   AGENT_HOOK_INSTALL_PLUGINS_METHOD,
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD
 } from '../shared/agent-hook-relay'
 import { detectPiAgentKindFromCommand } from '../shared/pi-agent-kind'
 import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
-import {
-  DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
-  SSH_RELAY_CONFIGURE_GRACE_TIME_METHOD
-} from '../shared/ssh-types'
 import { AgentExecHandler } from './agent-exec-handler'
 import { endpointDirForRelaySocket, RelayAgentHookServer } from './agent-hook-server'
 import { RelayContext } from './context'
@@ -63,6 +64,7 @@ import { pickRemoteCliEnv } from './remote-cli-env'
 import { shouldReadRemoteCliStdin } from './remote-cli-stdin'
 import { remoteCliRequestTimeoutMs } from './remote-cli-timeout'
 import { installRelayLogRotation } from './rotating-log-writer'
+import { registerSkillDiscoveryHandlers } from './skill-discovery-handler'
 import { WorkspaceSessionHandler } from './workspace-session-handler'
 
 const DEFAULT_GRACE_MS = DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS * 1000
@@ -465,6 +467,8 @@ async function main(): Promise<void> {
     }
     return { resolvedPath: inputPath }
   })
+
+  registerSkillDiscoveryHandlers(dispatcher)
 
   const ptyHandler = new PtyHandler(dispatcher, graceTimeMs)
   const fsHandler = new FsHandler(dispatcher, context)

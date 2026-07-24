@@ -1,3 +1,5 @@
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 import { useFocusEffect, useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
@@ -24,13 +26,12 @@ import {
   Funnel as Filter,
   Check,
   UserCircle,
-  SidebarSimple as PanelLeftClose
+  SidebarSimple as PanelLeftClose,
+  TerminalWindow as SquareTerminal
 } from '@/components/uniwind-icons'
 import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import type { RepoIcon } from '../../../../desktop/src/shared/repo-icon'
-import type { WorkspaceStatusDefinition } from '../../../../desktop/src/shared/types'
 import { buildWorktreeNavigationActions } from '../../../src/agent-history/worktree-navigation-actions'
 import { setCachedRepos } from '../../../src/cache/repo-cache'
 import { getCachedWorktrees, setCachedWorktrees } from '../../../src/cache/worktree-cache'
@@ -56,6 +57,7 @@ import {
 } from '../../../src/host-route-action-state'
 import { leaveHostRoute } from '../../../src/host-route-exit'
 import { useResponsiveLayout } from '../../../src/layout/responsive-layout'
+import { floatingWorkspaceSessionPath } from '../../../src/session/floating-workspace'
 import { loadPinnedIds, savePinnedIds } from '../../../src/storage/preferences'
 import {
   useHostClient,
@@ -71,12 +73,12 @@ import {
   type ConnectionVerdict
 } from '../../../src/transport/connection-health'
 import { removeHostAndCloseClient } from '../../../src/transport/host-removal-lifecycle'
+import { useHostStatusGates } from '../../../src/transport/host-status-gates'
 import { loadHosts, updateLastConnected } from '../../../src/transport/host-store'
-import { evaluateCompat, type CompatVerdict } from '../../../src/transport/protocol-compat'
 import type { RpcClient } from '../../../src/transport/rpc-client'
 import type { RpcSuccess } from '../../../src/transport/types'
 import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'
-import type { DesktopStatus, RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
+import type { RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
 import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/mobile-workspace-lineage'
 import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '../../../src/worktree/mobile-workspace-statuses'
 import { repoColor } from '../../../src/worktree/repo-color'
@@ -167,7 +169,6 @@ export function HostScreen({
   const [repoIconsByName, setRepoIconsByName] = useState<Map<string, RepoIcon>>(new Map())
   const [hostName, setHostName] = useState('')
   const [error, setError] = useState('')
-  const [compatVerdict, setCompatVerdict] = useState<CompatVerdict>({ kind: 'ok' })
   const [lastKnownWorktrees, setLastKnownWorktrees] = useState<Worktree[]>(initialCache ?? [])
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
@@ -189,7 +190,11 @@ export function HostScreen({
   const [showGroupPicker, setShowGroupPicker] = useState(false)
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [actionTarget, setActionTarget] = useState<Worktree | null>(null)
-  const [hostCapabilities, setHostCapabilities] = useState<string[]>([])
+  const { hostCapabilities, floatingWorkspaceEnabled, compatVerdict } = useHostStatusGates({
+    hostId,
+    client,
+    connState
+  })
   const [confirmDelete, setConfirmDelete] = useState<Worktree | null>(null)
   const [confirmRemoveHost, setConfirmRemoveHost] = useState(false)
   const [routeActionState, setRouteActionState] = useState(() =>
@@ -339,7 +344,6 @@ export function HostScreen({
   useEffect(() => {
     setHostName('')
     setError('')
-    setCompatVerdict({ kind: 'ok' })
     setRepoColorsByName(new Map())
     setRepoIconsByName(new Map())
     repoMetadataFetchedAtRef.current = 0
@@ -521,61 +525,6 @@ export function HostScreen({
     [client, connState, hostId]
   )
 
-  // Why: read desktop's protocol version from status.get on every connect
-  // and re-evaluate compatibility. If the desktop declares this mobile
-  // build too old (or vice versa via the local minimum), the host detail
-  // screen swaps to a hard-block screen instead of the worktree list.
-  // Today's compat constants are wide-open so this never blocks; the wire
-  // format is in place to flip a switch in a future release.
-  useEffect(() => {
-    if (connState !== 'connected' || !client) {
-      // Why: drop the prior host's capabilities while disconnected/switching so
-      // a capability-gated action (e.g. Agent Session History) can't linger for
-      // a host that doesn't support it.
-      setHostCapabilities([])
-      return
-    }
-    let cancelled = false
-    const requestClient = client
-    void (async () => {
-      try {
-        const response = await requestClient.sendRequest('status.get')
-        if (cancelled || clientRef.current !== requestClient) {
-          return
-        }
-        if (!response.ok) {
-          setHostCapabilities([])
-          return
-        }
-        const status = (response as RpcSuccess).result as DesktopStatus & {
-          capabilities?: string[]
-        }
-        setHostCapabilities(status.capabilities ?? [])
-        const verdict = evaluateCompat({
-          desktopProtocolVersion: status.protocolVersion,
-          desktopMinCompatibleMobileVersion: status.minCompatibleMobileVersion
-        })
-        setCompatVerdict(verdict)
-        if (verdict.kind === 'blocked') {
-          // Why: deterministic breadcrumb so support can confirm a block
-          // actually fired (vs a render bug). No PII — just version ints.
-          console.warn('[protocol-compat] blocked', {
-            reason: verdict.reason,
-            desktopVersion: verdict.desktopVersion,
-            requiredMobileVersion: verdict.requiredMobileVersion,
-            requiredDesktopVersion: verdict.requiredDesktopVersion
-          })
-        }
-      } catch {
-        // Why: rare path — sendRequest can throw on transport tear-down.
-        // Treat as transient; verdict stays at previous value.
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [connState, client])
-
   useFocusEffect(
     useCallback(() => {
       // Why: opening the host is a strong user signal — reset a backed-off or
@@ -746,6 +695,11 @@ export function HostScreen({
     },
     [embedded, hostId, pathname, router]
   )
+
+  const openFloatingWorkspace = useCallback(() => {
+    // Why: the sentinel has no worktree record; session.tabs.list hydrates its host-owned tabs.
+    navigateFromHostList(floatingWorkspaceSessionPath(hostId))
+  }, [hostId, navigateFromHostList])
 
   const openWorktreeSession = useCallback(
     (item: Worktree) => {
@@ -938,6 +892,26 @@ export function HostScreen({
               </>
             )
           })()}
+          {!embedded && floatingWorkspaceEnabled ? (
+            <Pressable
+              className={cn(
+                styles.toolbarIconButton,
+                connState !== 'connected' && styles.toolbarIconDisabled
+              )}
+              onPress={openFloatingWorkspace}
+              disabled={connState !== 'connected'}
+              accessibilityRole="button"
+              accessibilityLabel="Floating Workspace"
+              hitSlop={8}
+            >
+              <SquareTerminal
+                size={18}
+                colorClassName={
+                  connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
+                }
+              />
+            </Pressable>
+          ) : null}
           {embedded && onHideSidebar ? (
             <Pressable
               className={styles.sidebarCollapseButton}
@@ -955,6 +929,21 @@ export function HostScreen({
         {embedded ? (
           <View className={styles.embeddedToolbar}>
             <View className={styles.embeddedToolbarRow}>
+              {floatingWorkspaceEnabled ? (
+                <Pressable
+                  className={cn(
+                    styles.embeddedToolbarIconButton,
+                    connState !== 'connected' && styles.toolbarIconDisabled
+                  )}
+                  onPress={openFloatingWorkspace}
+                  disabled={connState !== 'connected'}
+                  accessibilityRole="button"
+                  accessibilityLabel="Floating Workspace"
+                >
+                  <SquareTerminal size={16} colorClassName="accent-muted-foreground" />
+                </Pressable>
+              ) : null}
+
               <Pressable
                 className={cn(
                   styles.filterChip,
@@ -1039,6 +1028,7 @@ export function HostScreen({
               >
                 <Plus
                   size={16}
+                  weight="regular"
                   colorClassName={
                     connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
                   }
@@ -1393,7 +1383,7 @@ export function HostScreen({
                       hostId,
                       worktreeId: actionTarget.worktreeId,
                       worktreeName: actionTarget.displayName || actionTarget.repo,
-                      hostCapabilities,
+                      hostCapabilities: hostCapabilities ?? [],
                       navigate: navigateFromHostList,
                       onDone: () => setActionTarget(null)
                     }),
@@ -1447,6 +1437,7 @@ export function HostScreen({
         routeVisible={showNewWorktree}
         client={client}
         hostId={hostId}
+        hostCapabilities={hostCapabilities}
         existingWorktreePaths={existingWorktreePaths}
         existingWorktrees={worktrees}
         onVisibleChange={(visible) => {

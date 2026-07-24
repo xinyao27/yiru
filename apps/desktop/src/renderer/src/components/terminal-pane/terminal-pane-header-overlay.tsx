@@ -1,4 +1,5 @@
 import {
+  ChatCentered as MessageSquarePlus,
   Chat as MessageSquare,
   SquareSplitVertical,
   TerminalWindow as SquareTerminal,
@@ -7,6 +8,7 @@ import {
 import type { CSSProperties, RefObject } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
@@ -51,6 +53,8 @@ type TerminalPaneHeaderOverlayProps = {
   isChatViewMode?: boolean
   /** Flip the active pane between the terminal and the native chat view. */
   onToggleNativeChat?: () => void
+  canContinueAgentSessionInNewSession?: boolean
+  onContinueAgentSessionInNewSession?: (pane: ManagedPane) => void
   onSplitPane: (pane: ManagedPane, direction: 'vertical' | 'horizontal') => void
   onBeginPaneDrag: (paneId: number, handle: HTMLElement, event: PointerEvent) => void
   onActivatePaneTitleInteraction: (paneId: number) => void
@@ -87,6 +91,8 @@ export default function TerminalPaneHeaderOverlay({
   canToggleNativeChat,
   isChatViewMode,
   onToggleNativeChat,
+  canContinueAgentSessionInNewSession,
+  onContinueAgentSessionInNewSession,
   onSplitPane,
   onBeginPaneDrag,
   onActivatePaneTitleInteraction,
@@ -180,8 +186,9 @@ export default function TerminalPaneHeaderOverlay({
             }}
           >
             {isEditing ? (
-              <input
+              <Input
                 ref={renameInputRef}
+                variant="chrome-free"
                 className="pane-title-input focus-visible:border-ring outline-none"
                 aria-label={translate(
                   'auto.components.terminal.pane.TerminalPane.7dbbfcbecc',
@@ -227,9 +234,11 @@ export default function TerminalPaneHeaderOverlay({
                   />
                 )}
                 {title ? (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     type="button"
-                    className="pane-title-text focus-visible:bg-accent outline-none"
+                    className="pane-title-text focus-visible:bg-accent h-auto w-auto p-0"
                     onClick={() => onStartRename(pane.id)}
                     aria-label={translate(
                       'auto.components.terminal.pane.TerminalPane.cc5a2dc706',
@@ -238,9 +247,39 @@ export default function TerminalPaneHeaderOverlay({
                     )}
                   >
                     {title}
-                  </button>
+                  </Button>
                 ) : null}
                 <div className="pane-title-actions ml-auto flex shrink-0 items-center gap-0">
+                  {canContinueAgentSessionInNewSession && isActivePane ? (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="pane-title-split-trigger"
+                            aria-label={translate(
+                              'components.agentSessionContinuation.continueInNewSession',
+                              'Continue in New Session…'
+                            )}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onContinueAgentSessionInNewSession?.(pane)
+                            }}
+                          >
+                            <MessageSquarePlus className="size-3" />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent side="bottom" sideOffset={4}>
+                        {translate(
+                          'components.agentSessionContinuation.continueInNewSession',
+                          'Continue in New Session…'
+                        )}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : null}
                   {canToggleNativeChat && isActivePane ? (
                     <Tooltip>
                       <TooltipTrigger
@@ -330,7 +369,7 @@ export default function TerminalPaneHeaderOverlay({
                               { value0: title }
                             )}
                           >
-                            <X className="size-3" />
+                            <X weight="regular" className="size-3" />
                           </Button>
                         }
                       />
@@ -359,7 +398,7 @@ export default function TerminalPaneHeaderOverlay({
                               'Close Pane'
                             )}
                           >
-                            <X className="size-3" />
+                            <X className="size-3" weight="regular" />
                           </Button>
                         }
                       />

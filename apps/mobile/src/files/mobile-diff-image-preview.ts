@@ -1,4 +1,4 @@
-import { buildImageDataUri } from '../../../desktop/src/shared/image-data-uri'
+import { buildImageDataUri } from '@yiru/workbench-model/ui'
 
 // modifiedDeleted marks a proven deletion (modified side genuinely absent); an
 // empty modifiedContent alone can't, since a relay/SSH read failure also arrives

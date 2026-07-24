@@ -87,7 +87,8 @@
     "minimizeNotice": {
       "body": "Yiru sigue ejecutándose en la bandeja del sistema"
     },
-    "activityWaiting": "Yiru: actividad en espera"
+    "activityWaiting": "Yiru: actividad en espera",
+    "activityWaitingSuffix": "actividad en espera"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -189,6 +190,20 @@
         }
       }
     },
+    "runtime": {
+      "remoteServerUpdateErrors": {
+        "manualRequired": "Este servidor debe actualizarse manualmente mediante su gestor de servicios.",
+        "notAvailable": "El servidor ya no informa de una actualización disponible. Compruébalo de nuevo.",
+        "notDownloaded": "La actualización del servidor aún no terminó de descargarse.",
+        "legacyServer": "Actualiza este servidor manualmente una vez para habilitar las actualizaciones remotas.",
+        "updaterTimeout": "Se agotó el tiempo de espera del actualizador del servidor.",
+        "requestedVersionUnavailable": "El actualizador del servidor no ofreció la versión solicitada de Yiru.",
+        "updateUnavailable": "El servidor no informó de una actualización disponible.",
+        "downloadIncomplete": "La actualización del servidor no terminó de descargarse.",
+        "reconnectTimeout": "El servidor no volvió a conectarse con la versión actualizada.",
+        "runtimeChanged": "El servidor emparejado cambió durante la actualización. Compruébalo antes de reintentar."
+      }
+    },
     "store": {
       "slices": {
         "browser": {
@@ -275,16 +290,6 @@
         "yiru": {
           "profiles": {
             "612f7f6861": "Error al crear perfil",
-            "319d7cf39b": "Perfil en la nube creado",
-            "d6e764e7db": "Reconectar este perfil",
-            "f0c9e11a6d": "Error al crear perfil en la nube",
-            "8b8fa73174": "El inicio de sesión de Yiru Cloud no está configurado",
-            "33290e88ed": "Error al conectar perfil",
-            "9fcb07a796": "Perfil conectado",
-            "2f6c78a039": "Error al actualizar autenticación del perfil",
-            "a37b5e6d37": "Sesión cerrada del perfil",
-            "83600521e7": "Error al cerrar sesión",
-            "76deec8f58": "Error al cambiar organización",
             "7d4bc516ee": "Error al cambiar perfil",
             "f518e89aa5": "El proyecto ya existe en ese perfil",
             "f03ae7f27b": "Error al transferir proyecto"
@@ -727,7 +732,7 @@
         "9263e75f49": "Codex está usando la cuenta anterior.",
         "a4c8e1b2f7": "Codex sigue conectado como {{value0}}",
         "d3e8a1f4b2": "Cuenta cambiada",
-        "e9b2c7d1a5": "Reinicia esta sesión para usar {{value0}}. Contrae para seguir trabajando con la cuenta actual.",
+        "e9b2c7d1a5": "Reinicia esta sesión para usar {{value0}}.",
         "f1a6c8e3b4": "Contraer"
       },
       "FirstLaunchBanner": {
@@ -2010,6 +2015,16 @@
             "fd1d3b3a1d": "Descargando actualización, {{value0}} por ciento. Haz clic para expandir.",
             "9d13213a56": "Yiru v{{value0}} lista para instalar"
           },
+          "RemoteServerUpdateStatusSegment": {
+            "updating": "Actualizando {{value0}}/{{value1}}",
+            "updatingTooltip": "Las actualizaciones de servidores Yiru remotos están en curso",
+            "failed": "Fallaron {{value0}} actualizaciones de servidor",
+            "failedTooltip": "Abrir las actualizaciones de servidores Yiru remotos para revisar y reintentar",
+            "updated": "{{value0}} servidores actualizados",
+            "updatedTooltip": "Actualizaciones de servidores Yiru remotos completadas",
+            "failedOne": "Falló 1 actualización de servidor",
+            "updatedOne": "1 servidor actualizado"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "Actualizado",
             "9be86c46a0": "Liberable",
@@ -2167,6 +2182,19 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "UsageRosterPanel": {
+            "title": "Usage",
+            "openDetails": "Open usage details",
+            "notSignedIn": "not signed in",
+            "allAgents": "visible agents",
+            "usageDetails": "Usage details & history",
+            "loadingUsage": "Loading usage…",
+            "usageUnavailable": "Usage unavailable",
+            "noUsageData": "No usage data",
+            "detailed": "Detailed",
+            "compact": "Compact",
+            "footerDetailAria": "Usage footer detail"
           },
           "LanguageServerStatusSegment": {
             "aria": "Language server: {{value0}}",
@@ -3205,7 +3233,17 @@
           "0bed8727db": "Puede que se haya movido o eliminado. Actualiza los espacios de trabajo o quítalo de Yiru.",
           "3921d3d9a5": "No se encontró la carpeta del espacio de trabajo.",
           "f387af445b": "La ruta del espacio de trabajo no es una ruta local válida.",
-          "3ec372b664": "gestor de archivos"
+          "3ec372b664": "gestor de archivos",
+          "localOnly": "Local only",
+          "checkingHost": "Checking host…",
+          "hostUnsupported": "Host unsupported",
+          "remoteSsh": "Remote SSH",
+          "remoteRuntimeUnsupported": "Opening this path in a local app is not available on this host.",
+          "sshTargetUnavailable": "SSH host configuration is no longer available.",
+          "sshAliasRequired": "VS Code needs an SSH config alias for this host.",
+          "sshAliasRequiredDetail": "Add a Host alias for {{host}}:{{port}}, reconnect the workspace, then try again.",
+          "remoteEditorUnsupported": "This app cannot open SSH workspaces. Choose VS Code instead.",
+          "remoteLaunchFailed": "Could not open the path in VS Code."
         },
         "WorktreeTitleInlineRename": {
           "2f42ae024f": "No leído:",
@@ -4039,7 +4077,8 @@
           "remoteScopeAccounts": "Mostrando las cuentas administradas por {{value0}}. Agrega o vuelve a autenticar cuentas en ese servidor.",
           "remoteScopeAuthContext": "Cada cuenta mantiene su propio contexto de inicio de sesión en {{value0}}.",
           "remoteEmptyClaudeAccounts": "No hay cuentas de Claude administradas en {{value0}}. Usa su inicio de sesión de Claude predeterminado del sistema; agrega cuentas en ese servidor.",
-          "remoteEmptyCodexAccounts": "No hay cuentas de Codex administradas en {{value0}}. Usa su inicio de sesión de Codex predeterminado del sistema; agrega cuentas en ese servidor."
+          "remoteEmptyCodexAccounts": "No hay cuentas de Codex administradas en {{value0}}. Usa su inicio de sesión de Codex predeterminado del sistema; agrega cuentas en ese servidor.",
+          "codexSystemDefaultCustomProvider": "Proveedor personalizado — no se registra el uso."
         },
         "AdvancedPane": {
           "40b29e0bf3": "Reiniciar",
@@ -4573,6 +4612,53 @@
           "7ddd66fede": "Ajuste de línea en el editor",
           "9b18de6eea": "Ajusta las líneas largas en editores de archivos en lugar de requerir desplazamiento horizontal."
         },
+        "EditorFontFamilySetting": {
+          "title": "Familia tipográfica del editor",
+          "description": "Fuente usada por los editores de archivos y las vistas de diferencias. Déjalo vacío para usar la fuente del terminal.",
+          "placeholder": "Igual que la fuente del terminal"
+        },
+        "GeneralRemoteServerUpdates": {
+          "serverCount": "{{value0}} servidores emparejados",
+          "availableCount": "{{value0}} listos para actualizar",
+          "currentCount": "{{value0}} actualizados",
+          "manualCount": "{{value0}} manuales",
+          "offlineCount": "{{value0}} sin conexión",
+          "title": "Servidores Yiru remotos",
+          "description": "Comprueba y actualiza servidores Yiru emparejados desde este cliente.",
+          "updating": "Actualizando servidores…",
+          "reviewServers": "Buscar actualizaciones de servidores",
+          "serverCountOne": "1 servidor emparejado"
+        },
+        "RemoteServerUpdateDialog": {
+          "versionUnavailable": "Versión no disponible",
+          "restartingHelp": "Esperando a que el servidor de reemplazo vuelva a conectarse con la nueva versión.",
+          "retry": "Reintentar",
+          "update": "Actualizar este servidor",
+          "title": "Actualizar servidores Yiru remotos",
+          "description": "Revisa los servidores emparejados y actualiza las instalaciones compatibles desde este cliente Yiru.",
+          "restartWarning": "La actualización reinicia estos servidores. {{value0}} pestañas activas y {{value1}} paneles de terminal pueden desconectarse brevemente.",
+          "checking": "Comprobando servidores emparejados…",
+          "empty": "No hay servidores Yiru remotos emparejados.",
+          "updateAll": "Actualizar los {{value0}} servidores",
+          "noUpdates": "Todos los servidores están actualizados.",
+          "downloadProgress": "Progreso de descarga de {{value0}}"
+        },
+        "RemoteServerUpdateStatus": {
+          "checking": "Comprobando…",
+          "available": "Actualización disponible",
+          "current": "Actualizado",
+          "manual": "Actualización manual",
+          "offline": "Sin conexión",
+          "queued": "En cola",
+          "checkingUpdate": "Buscando actualización…",
+          "downloading": "Descargando…",
+          "restarting": "Reiniciando…",
+          "updated": "Actualizado",
+          "failed": "Error de actualización",
+          "serviceManagerHelp": "Actualiza Yiru mediante el gestor de servicios que inicia este servidor.",
+          "unpackedHelp": "Las compilaciones de desarrollo deben actualizarse desde su repositorio de origen.",
+          "legacyHelp": "Actualiza este servidor manualmente una vez para habilitar las actualizaciones remotas."
+        },
         "AdvancedNetworkSettingsSection": {
           "3e431564b5": "localhost, 127.0.0.1, *.internal",
           "33ee3ca3af": "Opcional. Separa hosts con comas, punto y coma o líneas nuevas.",
@@ -4667,6 +4753,11 @@
           "d2f33670a9": "Importar desde Ghostty",
           "273e7e81fe": "Configuraciones",
           "1f744a72f4": "configuración"
+        },
+        "BranchPrefixFeedback": {
+          "6c40c0908f": "El prefijo no puede contener espacios ni caracteres reservados de Git como ~ ^ : ? * [ o \\",
+          "64d70b156a": "Las ramas se llamarán {{example}}",
+          "808f9a726e": "No se aplicará ningún prefijo"
         },
         "GitPane": {
           "e02ea23a32": "Atribución de Yiru",
@@ -5070,9 +5161,9 @@
           "2801d4ce22": "Copiar ID de referencia",
           "d8be621237": "Abre primero el archivo de revisión.",
           "61676df223": "Diagnósticos enviados. Comparte este ID de referencia con soporte: {{value0}}.",
-          "fd7b3891af": "Abriste el archivo de revisión ({{value0}}). Envía ese archivo a soporte o descártalo.",
-          "62340d4439": "Tu archivo de revisión está listo ({{value0}}). Ábrelo para ver qué se enviaría y luego elige si quieres enviarlo a soporte.",
-          "19ec5e29b3": "Recopila actividad reciente y errores de la app en un archivo depurado que puedes revisar antes de enviarlo. Nada se sube hasta que elijas enviarlo."
+          "fd7b3891af": "Abriste el archivo de revisión local ({{value0}}). Al enviar, se comparte con soporte un fragmento depurado y limitado junto con metadatos; el archivo completo permanece en este dispositivo.",
+          "62340d4439": "Tu archivo de revisión local está listo ({{value0}}). Ábrelo para revisar los datos de origen. Al enviar, solo se comparten un fragmento depurado y limitado y metadatos; el archivo completo permanece en este dispositivo.",
+          "19ec5e29b3": "Recopila la actividad reciente y los errores en un archivo local depurado. Al enviar, solo se suben a PostHog un fragmento limitado y metadatos; el archivo completo permanece en este dispositivo."
         },
         "PrivacyDiagnosticsSection": {
           "af2fc82cde": "Enviar diagnósticos de la app a soporte",
@@ -5260,6 +5351,7 @@
           "removeSetup": "Eliminar",
           "hostSetupBlockedVersion": "La versión del servidor Yiru no es compatible",
           "hostSetupMissingCapability": "Actualiza Yiru en este host para configurar proyectos",
+          "hostSetupConnectionRequired": "Conecta este host antes de importar o clonar el proyecto",
           "setupProjectOnHost": "Configurar en otro host",
           "setupProjectOnHostHelp": "Elige un host y luego importa un checkout existente, clona el repositorio allí o registra una configuración que se aprovisionará más tarde.",
           "setupExistingFolder": "Importar carpeta existente",
@@ -5426,7 +5518,12 @@
           "advertiseThisApp": "Anunciar esta app como servidor",
           "advertiseThisAppHelp": "Crea enlaces de acceso para que navegadores, clientes móviles u otro cliente de Yiru se conecten a esta app en ejecución.",
           "runtimeReachable": "{{value0}} está accesible.",
-          "hostModelCapabilityProjectSourceContext": "project source context"
+          "hostModelCapabilityProjectSourceContext": "project source context",
+          "reviewServerUpdates": "Buscar actualizaciones de servidores",
+          "updatingServers": "Actualizando servidores…",
+          "yiruVersion": "Yiru v{{value0}}",
+          "versionUnavailable": "Versión de Yiru no disponible",
+          "updateServer": "Actualizar"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "Copiar {{value0}}"
@@ -6352,7 +6449,11 @@
             "d6c0a9e2f4": "grok",
             "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "Porcentajes de uso",
-            "usagePercentageDisplayDescription": "Elige si los límites del proveedor muestran el porcentaje usado o restante."
+            "usagePercentageDisplayDescription": "Elige si los límites del proveedor muestran el porcentaje usado o restante.",
+            "showPinnedWorktreesInGroups": {
+              "title": "Mostrar también los worktrees fijados en sus listas originales",
+              "description": "Los worktrees fijados permanecen en Fijados y también aparecen en Todos, Proyecto, Estado y Revisión."
+            }
           }
         },
         "auto": {
@@ -6796,6 +6897,8 @@
             "4497e2e2bb": "Muestra subrayados y sugerencias ortográficas del navegador al editar Rich Markdown.",
             "e61157e926": "Ajuste de línea en el editor",
             "005be5c699": "Ajusta las líneas largas en editores de archivos en lugar de requerir desplazamiento horizontal.",
+            "editorFontFamily": "Familia tipográfica del editor",
+            "editorFontFamilyDesc": "Fuente usada por los editores de archivos y las vistas de diferencias. Déjalo vacío para usar la fuente del terminal.",
             "languageServer": "Language Server (Experimental)",
             "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
@@ -7943,14 +8046,7 @@
           "behindBaseRefToastDescription": "Aviso persistente con un enlace a Ajustes y una acción en el pie.",
           "notificationPlayground": "Panel de prueba de notificaciones",
           "notificationPlaygroundDescription": "Disparadores solo para desarrollo para comprobar el diseño de toasts, acciones de recuperación y ajuste de texto largo.",
-          "devOnly": "Solo para desarrollo",
-          "yiruCloud": "Yiru Cloud",
-          "yiruCloudDescription": "Vista previa solo para desarrolladores del inicio de sesión de la nube propia. Oculto en producción; en desarrollo también aparece en el selector de cuentas de la barra lateral cuando se configuran YIRU_CLOUD_API_URL y YIRU_CLOUD_CLIENT_ID.",
-          "yiruCloudStatus": "Estado",
-          "yiruCloudSignOut": "Cerrar sesión",
-          "yiruCloudConnect": "Conectar perfil",
-          "yiruCloudRefresh": "Actualizar estado",
-          "yiruCloudNotConfigured": "Configura YIRU_CLOUD_API_URL y YIRU_CLOUD_CLIENT_ID para previsualizar el inicio de sesión de Yiru Cloud en esta versión de desarrollo."
+          "devOnly": "Solo para desarrollo"
         },
         "EphemeralVmRecipeRow": {
           "useInWorkspace": "Usar en el espacio de trabajo"
@@ -8563,6 +8659,7 @@
             "createPrIntentPublishing": "Publicando rama…",
             "createPrIntentForcePushing": "Haciendo force push con lease…",
             "createPrIntentPushing": "Haciendo push de commits…",
+            "createPrIntentFastForwarding": "Actualizando rama…",
             "createPrIntentRemoteFailed": "No se pudo actualizar la rama remota. Vuelve a intentar Crear PR.",
             "createPrIntentGeneratingDetails": "Generando detalles de revisión…",
             "createPrIntentBranchChangedDuringDetails": "La rama cambió mientras se generaban los detalles de la revisión. Vuelve a intentar Crear PR.",
@@ -9532,7 +9629,8 @@
           },
           "ProjectCombobox": {
             "search": "Buscar proyectos...",
-            "empty": "Ningún proyecto coincide con tu búsqueda."
+            "empty": "Ningún proyecto coincide con tu búsqueda.",
+            "addProject": "Agregar un proyecto nuevo"
           }
         }
       },
@@ -11797,21 +11895,6 @@
       "yiru": {
         "profiles": {
           "switcher": {
-            "cloud": {
-              "unavailable": "Inicio de sesión en Yiru no disponible"
-            },
-            "account": "Cuenta",
-            "reconnect": "Reconectar perfil",
-            "connect": "Conectar perfil",
-            "organization": "Organización",
-            "create": {
-              "profile": {
-                "for": {
-                  "org": "Crear perfil para organización"
-                }
-              }
-            },
-            "signout": "Cerrar sesión",
             "16e3681072": "Nuevo perfil local",
             "e3b91a3d90": "Crear un perfil vacío para proyectos y worktrees separados.",
             "f322e1f4d6": "Nombre del perfil",
@@ -11819,17 +11902,7 @@
             "b4f9d1125d": "Local",
             "4815f7d163": "Cambiar perfil",
             "d00d853e2a": "Gestionar perfiles",
-            "c106c674fe": "Nuevo perfil local",
-            "org": {
-              "members": "Miembros de la organización"
-            },
-            "signInWaiting": "Esperando el inicio de sesión…",
-            "signInAgain": "Volver a iniciar sesión",
-            "signIn": "Iniciar sesión en Yiru",
-            "accountTitle": "Cuenta de Yiru",
-            "accountSignedIn": "Sesión iniciada",
-            "accountSignInRequired": "Inicio de sesión requerido",
-            "accountSignedOut": "Sesión cerrada"
+            "c106c674fe": "Nuevo perfil local"
           },
           "management": {
             "04e7bd2a23": "Transferir",
@@ -11870,14 +11943,6 @@
               }
             }
           },
-          "signout": {
-            "confirm": {
-              "title": "¿Cerrar sesión en Yiru?",
-              "description": "Se cerrará tu sesión de Yiru en este dispositivo. Tus proyectos y worktrees locales no se verán afectados.",
-              "cancel": "Cancelar",
-              "action": "Cerrar sesión"
-            }
-          },
           "switch": {
             "confirm": {
               "target": "el perfil seleccionado",
@@ -11894,61 +11959,6 @@
               "agentPlural": "{{count}} agentes activos",
               "browserSingular": "{{count}} espacio de trabajo del navegador",
               "browserPlural": "{{count}} espacios de trabajo del navegador"
-            }
-          },
-          "org": {
-            "members": {
-              "role": {
-                "label": "Rol",
-                "owner": "Propietario",
-                "admin": "Administrador",
-                "member": "Miembro"
-              },
-              "not": {
-                "signed": {
-                  "in": "Aún no han iniciado sesión en Yiru."
-                }
-              },
-              "remove": {
-                "confirm": "Eliminar",
-                "cancel": "Cancelar",
-                "label": "Eliminar compañero"
-              },
-              "title": "Miembros de la organización",
-              "load": {
-                "error": "No se pudieron cargar los miembros de la organización."
-              },
-              "retry": "Intentar de nuevo",
-              "pending": {
-                "title": "Invitaciones pendientes",
-                "revoke": "Revocar"
-              },
-              "invite": {
-                "title": "Invitar",
-                "placeholder": "teammate@example.com",
-                "role": "Rol de invitación",
-                "submit": "Enviar"
-              },
-              "error": {
-                "forbidden": "Tu rol no puede hacer eso.",
-                "conflict": "Ya es miembro o fue invitado.",
-                "remove": {
-                  "self": "No puedes eliminarte a ti mismo."
-                },
-                "own": {
-                  "role": "No puedes cambiar tu propio rol."
-                },
-                "not": {
-                  "found": "Ese compañero ya no está en esta organización."
-                },
-                "reconnect": "Reconecta tu perfil para gestionar miembros.",
-                "unconfigured": "La gestión de organización no está disponible en esta compilación.",
-                "failed": "Algo salió mal. Por favor, intenta de nuevo."
-              },
-              "subtitle": {
-                "named": "Personas en {{orgName}} que pueden colaborar en Yiru.",
-                "default": "Personas en tu organización que pueden colaborar en Yiru."
-              }
             }
           }
         }
@@ -12001,6 +12011,32 @@
     }
   },
   "components": {
+    "agentSessionContinuation": {
+      "continueInNewSession": "Continuar en una sesión nueva…",
+      "dialogTitle": "Continuar en una sesión nueva",
+      "dialogDescription": "Inicia una sesión nueva del agente desde este punto. La sesión original no cambia.",
+      "untitledSession": "Sesión actual",
+      "originalAgent": "Agente original: {{agent}}",
+      "agent": "Agente",
+      "selectAgent": "Selecciona un agente",
+      "detectingAgents": "Detectando agentes en el host de este espacio de trabajo…",
+      "detectionFailed": "No se pudieron detectar agentes en el host de este espacio de trabajo.",
+      "noAgents": "No se detectaron agentes habilitados en el host de este espacio de trabajo.",
+      "context": "Contexto",
+      "modeFocused": "Traspaso enfocado (recomendado)",
+      "modeFocusedDescription": "Usa el estado más reciente y el espacio de trabajo actual, y consulta detalles anteriores solo cuando hacen falta.",
+      "modeFull": "Transcripción completa de la sesión",
+      "modeFullDescription": "Pide al nuevo agente que lea toda la sesión guardada antes de continuar. Puede tardar más y consumir una cantidad considerable de contexto, uso del plan o créditos de API.",
+      "startsIn": "Se inicia en:",
+      "startSession": "Iniciar sesión nueva",
+      "starting": "Iniciando…",
+      "noContext": "No hay contexto de sesión disponible para continuar en una sesión nueva.",
+      "agentDisabled": "{{agent}} está deshabilitado en la configuración de agentes.",
+      "agentUnavailable": "No se detectó {{agent}} en el host de este espacio de trabajo.",
+      "sent": "El contexto de la sesión se envió a {{agent}} en una sesión nueva.",
+      "deliveryFailed": "La nueva sesión de {{agent}} se inició, pero no se pudo enviar su contexto.",
+      "launchFailed": "No se pudo iniciar una sesión nueva de {{agent}}."
+    },
     "native-chat": {
       "composer": {
         "imageUnsupported": "Este agente no admite pegar imágenes.",
@@ -12013,6 +12049,21 @@
         "startDictation": "Iniciar dictado",
         "stopDictation": "Detener dictado",
         "noSkills": "Sin habilidades coincidentes",
+        "noCommandsOrSkills": "No hay comandos o habilidades coincidentes",
+        "noCommands": "No hay comandos coincidentes",
+        "commands": "Comandos",
+        "skills": "Habilidades",
+        "loadingSkills": "Cargando habilidades…",
+        "skillsLoaded": "Habilidades cargadas",
+        "skillsUnavailableHost": "Las habilidades no están disponibles para este host",
+        "skillsLoadFailed": "No se pudieron cargar las habilidades de este host",
+        "retrySkills": "Reintentar",
+        "skillCommandCollision": "También es un nombre de habilidad - el agente decide",
+        "skillMultipleSources": "{{sourceCount}} fuentes - el agente resuelve",
+        "skillScopeProject": "Proyecto",
+        "skillScopePersonal": "Personal",
+        "skillScopeBuiltIn": "Integrado",
+        "skillScopePlugin": "Plugin",
         "localAttachmentUnsupported": "Los archivos adjuntos locales no están disponibles para sesiones remotas.",
         "removeAttachment": "Quitar archivo adjunto",
         "pastedImageLabel": "Imagen pegada",

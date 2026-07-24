@@ -1,3 +1,4 @@
+import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: quick-open file lists are fetched over local or SSH runtime IPC, so loading/error/results track the request lifecycle. */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -6,14 +7,13 @@ import {
   getFileExplorerOperationOwnerFromState,
   getFileExplorerOwnerUnresolvedMessage,
   getFileExplorerOperationRoute
-} from '@/components/right-sidebar/file-explorer-operation-owner'
-import type { FileExplorerOperationOwner } from '@/components/right-sidebar/file-explorer-types'
+} from '@/components/workspace-panel/file-explorer-operation-owner'
+import type { FileExplorerOperationOwner } from '@/components/workspace-panel/file-explorer-types'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { cancelRuntimeFileList, listRuntimeFiles } from '@/runtime/runtime-file-client'
 import { useAppStore } from '@/store'
 import { useWorktreesForRepo } from '@/store/selectors'
 
-import { isWindowsAbsolutePathLike } from '../../../shared/cross-platform-path'
 import type { Worktree } from '../../../shared/types'
 
 export type RuntimeFileListState = {
