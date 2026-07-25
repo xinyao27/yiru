@@ -1,6 +1,7 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: setup-guide readiness is driven by bounded IPC probes and browser focus events; the state cannot be derived synchronously from render inputs. */
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 
+import { hasEffectiveSetupCommand } from '@/components/setup-guide/setup-script-status'
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
@@ -11,7 +12,6 @@ import {
   YIRU_CLI_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
 } from '@/lib/agent-feature-install-commands'
-import { hasEffectiveSetupCommand } from '@/lib/setup-script-status'
 import { checkRuntimeHooks } from '@/runtime/hooks-client'
 import { useAppStore } from '@/store'
 
