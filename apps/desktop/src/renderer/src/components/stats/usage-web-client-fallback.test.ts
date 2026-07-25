@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 import { createClaudeUsageSlice } from './claude-usage'
 import { createCodexUsageSlice } from './codex-usage'
 import { createOpenCodeUsageSlice } from './opencode-usage'

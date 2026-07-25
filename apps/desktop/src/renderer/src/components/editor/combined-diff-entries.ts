@@ -1,4 +1,4 @@
-import type { OpenFile } from '@/store/slices/editor'
+import type { OpenFile } from '@/components/editor/state'
 
 import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../shared/types'
 import type { CombinedDiffFileTreeMode } from './combined-diff-file-tree-model'

@@ -1,7 +1,7 @@
 import type React from 'react'
 
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import { RightSidebarPanelContent } from '@/components/workspace-panel/right-sidebar-panel-content'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type {
   SpoolSessionCatalogEntry,

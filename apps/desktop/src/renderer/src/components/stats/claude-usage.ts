@@ -10,7 +10,7 @@ import type {
   ClaudeUsageSnapshot,
   ClaudeUsageSummary
 } from '../../../../shared/claude-usage-types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type ClaudeUsageSlice = {
   claudeUsageScope: ClaudeUsageScope

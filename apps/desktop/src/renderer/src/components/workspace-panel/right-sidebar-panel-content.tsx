@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 
+import type { ActiveRightSidebarTab } from '@/components/editor/state'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,

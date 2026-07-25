@@ -1,4 +1,4 @@
-import type { MarkdownViewMode } from '@/store/slices/editor'
+import type { MarkdownViewMode } from '@/components/editor/state'
 
 export type MarkdownRenderMode = 'source' | 'rich-editor' | 'preview'
 

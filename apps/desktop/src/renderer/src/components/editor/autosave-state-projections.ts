@@ -1,5 +1,5 @@
+import type { OpenFile } from '@/components/editor/state'
 import type { AppState } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 export type AutosaveSubscriberInputs = {
   openFiles: AppState['openFiles']

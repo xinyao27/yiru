@@ -10,11 +10,11 @@
 // timer and a slow remote read would lose.
 import type { StoreApi } from 'zustand'
 
+import type { OpenFile } from '@/components/editor/state'
 import { getConnectionIdForFile } from '@/lib/connection-context'
 import { readRuntimeFileContent } from '@/runtime/file-client'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import type { AppState } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import { canAutoSaveOpenFile } from './autosave'
 import { markFileChangedOnDisk } from './changed-on-disk-mark'

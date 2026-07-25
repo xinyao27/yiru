@@ -5,11 +5,7 @@ import type {
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
 import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
-import type {
-  SpoolExpandedRefsByDesktop,
-  SpoolSharingState,
-  SpoolWorkspaceRoute
-} from './spool-sharing-types'
+import type { SpoolExpandedRefsByDesktop, SpoolSharingState, SpoolWorkspaceRoute } from './types'
 
 type SpoolDesktopState = Pick<SpoolSharingState, 'spoolRemoteDesktops'>
 

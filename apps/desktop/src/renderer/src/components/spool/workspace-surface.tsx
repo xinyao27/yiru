@@ -11,6 +11,12 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import {
+  selectActiveSpoolWorkspace,
+  selectSpoolCanControl,
+  selectSpoolRequesterControlState
+} from '@/components/spool/selectors'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
+import {
   WORKSPACE_COLUMN_BODY_CLASS_NAME,
   WORKSPACE_COLUMN_FRAME_CLASS_NAME
 } from '@/components/tab-group/workspace-column-chrome'
@@ -19,12 +25,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import {
-  selectActiveSpoolWorkspace,
-  selectSpoolCanControl,
-  selectSpoolRequesterControlState
-} from '@/store/slices/spool-sharing-selectors'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type {
   SpoolSessionCatalogEntry,

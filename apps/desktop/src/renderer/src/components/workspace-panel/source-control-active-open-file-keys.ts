@@ -1,4 +1,4 @@
-import type { DiffSource } from '@/store/slices/editor'
+import type { DiffSource } from '@/components/editor/state'
 
 const EMPTY_OPEN_ROW_KEYS: ReadonlySet<string> = new Set()
 

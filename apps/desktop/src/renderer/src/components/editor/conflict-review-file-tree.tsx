@@ -6,6 +6,7 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
+import type { ConflictReviewEntry } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
 import {
   buildSourceControlTree,
@@ -16,7 +17,6 @@ import {
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
-import type { ConflictReviewEntry } from '@/store/slices/editor'
 
 import type { GitStatusEntry } from '../../../../shared/types'
 

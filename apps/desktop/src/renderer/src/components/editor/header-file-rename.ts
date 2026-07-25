@@ -1,10 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 import type { RefCallback } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { basename } from '@/lib/path'
 import { renameFileOnDisk } from '@/lib/rename-file'
 import { useWorktreeById } from '@/store/selectors'
-import type { OpenFile } from '@/store/slices/editor'
 
 import { getUntitledFileRoot } from './untitled-file-rename-path'
 

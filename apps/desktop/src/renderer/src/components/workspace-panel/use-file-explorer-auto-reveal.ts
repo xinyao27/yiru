@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import type { FileExplorerRowProjection } from './file-explorer-row-projection'
 

@@ -11,10 +11,10 @@ import {
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { MarkdownViewMode } from '@/components/editor/state'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import type { MarkdownViewMode } from '@/store/slices/editor'
 
 // Why: 'changes' is not a MarkdownViewMode in the store — it lives on the
 // orthogonal editorViewMode slice. This toggle unifies both dimensions into a

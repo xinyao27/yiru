@@ -2,13 +2,10 @@ import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { resolveSpoolWorktreeRoute, selectSpoolCanControl } from '@/components/spool/selectors'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import {
-  resolveSpoolWorktreeRoute,
-  selectSpoolCanControl
-} from '@/store/slices/spool-sharing-selectors'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import {
   SPOOL_FILE_READ_MAX_BYTES,

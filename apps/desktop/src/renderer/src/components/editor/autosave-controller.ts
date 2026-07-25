@@ -3,6 +3,7 @@ coordination, and dirty-file shutdown hooks; keeping those lifecycles together
 avoids split-brain saves across visible and hidden editors. */
 import type { StoreApi } from 'zustand'
 
+import type { OpenFile } from '@/components/editor/state'
 import { getConnectionIdForFile } from '@/lib/connection-context'
 import {
   buildWorkspaceSessionPayload,
@@ -12,7 +13,6 @@ import { persistWorkspaceSessionByHostSync } from '@/lib/workspace-session-host-
 import { writeRuntimeFile } from '@/runtime/file-client'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import type { AppState } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
 import {

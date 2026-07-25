@@ -24,7 +24,7 @@ import { translate } from '@/i18n/i18n'
 import { showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
 import { useAppStore } from '@/store'
 
-import type { OpenFile } from '../../store/slices/editor'
+import type { OpenFile } from '../editor/state'
 import { shouldBlockEditorTabLocalOpen } from './editor-tab-local-open-guard'
 import { TabWorkspaceLayoutMenuSection } from './tab-workspace-layout-menu-section'
 

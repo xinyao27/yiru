@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type CommitMessageGenerationRuntimeTargetSettings = Pick<
   GlobalSettings,

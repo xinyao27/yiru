@@ -5,11 +5,8 @@ import type {
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
 import { isSpoolProjectIdentityKey } from '../../../../shared/spool/spool-catalog-contract'
-import { isSpoolRefExpanded } from '../../store/slices/spool-sharing-selectors'
-import type {
-  SpoolExpandedRefsByDesktop,
-  SpoolWorkspaceRoute
-} from '../../store/slices/spool-sharing-types'
+import { isSpoolRefExpanded } from '../spool/selectors'
+import type { SpoolExpandedRefsByDesktop, SpoolWorkspaceRoute } from '../spool/types'
 
 export type SpoolRemoteDesktopSidebarContext = {
   userDisplayName: string

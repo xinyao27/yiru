@@ -24,7 +24,7 @@ import { useAppStore } from '@/store'
 import { useRepoById, useWorktreeById } from '@/store/selectors'
 
 import type { GitFileStatus } from '../../../../shared/types'
-import type { OpenFile } from '../../store/slices/editor'
+import type { OpenFile } from '../editor/state'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { STATUS_COLORS, STATUS_LABELS } from '../workspace-panel/status-display'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'

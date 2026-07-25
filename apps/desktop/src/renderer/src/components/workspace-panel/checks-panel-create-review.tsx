@@ -2,9 +2,9 @@ import { interpretSourceControlHostedReviewCreateResult } from '@yiru/workbench-
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { clearPullRequestGenerationRequiresPushBeforeCreate } from '@/components/workspace-panel/pull-request-generation-state'
 import { translate } from '@/i18n/i18n'
 import { openHttpLink } from '@/lib/http-link-routing'
-import { clearPullRequestGenerationRequiresPushBeforeCreate } from '@/store/slices/pull-request-generation'
 
 import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
 import type { useChecksPanelReviewCreationState } from './checks-panel-review-creation-actions'

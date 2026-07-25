@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
 
-import { shouldHydratePullRequestGenerationResult } from '@/store/slices/pull-request-generation'
+import { shouldHydratePullRequestGenerationResult } from '@/components/workspace-panel/pull-request-generation-state'
 
 import {
   checksPanelAsyncResultKey,

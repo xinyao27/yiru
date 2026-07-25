@@ -4,6 +4,7 @@ import {
 } from '@yiru/workbench-model/platform'
 import { useEffect, useRef } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import {
   YIRU_WORKTREE_FILE_CHANGE_EVENT,
   type WorktreeFileChangeEventDetail
@@ -12,7 +13,6 @@ import { shouldPollActiveGitStatus } from '@/lib/passive-macos-app-data-access'
 import { isWindowVisible } from '@/lib/window-visibility-interval'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import type {
   ActiveRightSidebarTab,

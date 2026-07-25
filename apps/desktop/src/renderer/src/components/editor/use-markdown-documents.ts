@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { MarkdownViewMode, OpenFile } from '@/components/editor/state'
 import { getConnectionId } from '@/lib/connection-context'
 import { statRuntimePath } from '@/runtime/file-client'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
-import type { MarkdownViewMode, OpenFile } from '@/store/slices/editor'
 
 import type { MarkdownDocument } from '../../../../shared/types'
 import {

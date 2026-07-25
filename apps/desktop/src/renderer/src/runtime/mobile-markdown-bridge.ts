@@ -5,10 +5,10 @@ import {
   type EditorFileSavedDetail
 } from '@/components/editor/autosave'
 import { flushPendingEditorChange } from '@/components/editor/pending-flush'
+import type { OpenFile } from '@/components/editor/state'
 import { getActiveTabNavOrder } from '@/components/tab-bar/group-tab-order'
 import { getConnectionIdForFile } from '@/lib/connection-context'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import {
   hashMarkdownContent,

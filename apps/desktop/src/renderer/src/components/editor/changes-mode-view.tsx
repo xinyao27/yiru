@@ -1,8 +1,8 @@
 import React from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { translate } from '@/i18n/i18n'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import type { OpenFile } from '@/store/slices/editor'
 
 import type { GitDiffResult, GitStatusEntry } from '../../../../shared/types'
 import { ConflictBanner } from './conflict-components'

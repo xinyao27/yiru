@@ -7,6 +7,7 @@ renderers (MonacoEditor, DiffViewer, ChangesModeView, MarkdownPreview, etc.)
 already live in their own modules. */
 import React from 'react'
 
+import type { MarkdownViewMode, OpenFile, PendingEditorReveal } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { detectLanguage } from '@/lib/language-detect'
@@ -14,7 +15,6 @@ import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { joinPath } from '@/lib/path'
 import { useAppStore } from '@/store'
-import type { MarkdownViewMode, OpenFile, PendingEditorReveal } from '@/store/slices/editor'
 
 import type { GitStatusEntry, GitDiffResult } from '../../../../shared/types'
 import { ChangesModeView } from './changes-mode-view'

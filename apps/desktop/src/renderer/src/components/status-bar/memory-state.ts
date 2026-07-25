@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 
 import type { MemorySnapshot } from '../../../../shared/types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type MemorySlice = {
   memorySnapshot: MemorySnapshot | null

@@ -55,10 +55,10 @@ import {
   normalizeBrowserHistoryEntries,
   normalizeBrowserHistoryUrl
 } from '../../../../shared/workspace-session-browser-history'
-import type { AppState } from '../types'
-import { destroyWorkspaceWebviews } from './browser-webview-cleanup'
-import { pushRecentlyClosedTabKind } from './recently-closed-tabs'
-import { pickNeighbor } from './tab-group-state'
+import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
+import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
+import { pickNeighbor } from '../../store/slices/tab-group-state'
+import type { AppState } from '../../store/types'
 
 type CreateBrowserTabOptions = {
   activate?: boolean

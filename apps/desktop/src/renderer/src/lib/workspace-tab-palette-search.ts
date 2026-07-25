@@ -1,5 +1,5 @@
 import { getEditorDisplayLabel } from '@/components/editor/labels'
-import type { OpenFile } from '@/store/slices/editor'
+import type { OpenFile } from '@/components/editor/state'
 
 import {
   resolveTerminalTabTitle,

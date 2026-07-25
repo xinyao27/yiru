@@ -1,16 +1,16 @@
 import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
 
-import { localizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'
-import { useAppStore } from '@/store'
-import { prChecksCacheSuffix, prCommentsCacheSuffix } from '@/store/slices/github'
-import { getGitHubRepoCacheKey } from '@/store/slices/github-cache-key'
+import { prChecksCacheSuffix, prCommentsCacheSuffix } from '@/components/github/state'
 import {
   getPullRequestGenerationRecordKey,
   getPullRequestGenerationSeedRestoreKey,
   markPullRequestGenerationRequiresPushBeforeCreate,
   type PullRequestGenerationContext
-} from '@/store/slices/pull-request-generation'
+} from '@/components/workspace-panel/pull-request-generation-state'
+import { localizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'
+import { useAppStore } from '@/store'
+import { getGitHubRepoCacheKey } from '@/store/slices/github-cache-key'
 
 import {
   readChecksPanelPublishActionGitStatus,

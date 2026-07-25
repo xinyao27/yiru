@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
+import {
+  getCommitMessageGenerationRecordKey,
+  type CommitMessageGenerationRecord
+} from '@/components/workspace-panel/commit-message-generation-state'
+import {
+  getPullRequestGenerationRecordKey,
+  getPullRequestGenerationSeedRestoreKey
+} from '@/components/workspace-panel/pull-request-generation-state'
 import { getConnectionId } from '@/lib/connection-context'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { loadSessionCommitDrafts } from '@/lib/source-control-commit-draft-session'
 import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
 import { useAppStore } from '@/store'
-import {
-  getCommitMessageGenerationRecordKey,
-  type CommitMessageGenerationRecord
-} from '@/store/slices/commit-message-generation'
-import {
-  getPullRequestGenerationRecordKey,
-  getPullRequestGenerationSeedRestoreKey
-} from '@/store/slices/pull-request-generation'
 
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { GitConflictOperation } from '../../../../shared/types'

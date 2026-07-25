@@ -1,11 +1,11 @@
 import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
 
+import type { PullRequestFieldRevisions } from '@/components/workspace-panel/pull-request-generation-state'
 import type {
   RuntimeGeneratePullRequestFieldsOverrides,
   RuntimeGitContext
 } from '@/runtime/git-client'
 import type { AppState } from '@/store'
-import type { PullRequestFieldRevisions } from '@/store/slices/pull-request-generation'
 
 import type { SourceControlAiPrCreationDefaults } from '../../../../shared/source-control-ai-types'
 import type { Repo } from '../../../../shared/types'

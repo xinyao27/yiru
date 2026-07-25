@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-import { useAppStore } from '@/store'
 import {
   buildGitHubPRRefreshStateClearToken,
   getGitHubPRRefreshStateExpiryAt
-} from '@/store/slices/github'
+} from '@/components/github/state'
+import { useAppStore } from '@/store'
 import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 

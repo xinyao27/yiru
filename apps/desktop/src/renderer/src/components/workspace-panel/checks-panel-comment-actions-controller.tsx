@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { mergePRCommentIntoList } from '@/components/github/state'
 import { translate } from '@/i18n/i18n'
-import { mergePRCommentIntoList } from '@/store/slices/github'
 
 import type { PRComment } from '../../../../shared/types'
 import { checksPanelAsyncResultKey } from './checks-panel-async-result-key'

@@ -1,8 +1,8 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 
+import { prChecksCacheSuffix } from '@/components/github/state'
 import { getWorktreeCardPrDisplay } from '@/components/sidebar/worktree-card-pr-display'
 import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
-import { prChecksCacheSuffix } from '@/store/slices/github'
 import { getGitHubRepoCacheKey } from '@/store/slices/github-cache-key'
 import { getHostedReviewCacheKey, linkedReviewHintKey } from '@/store/slices/hosted-review'
 

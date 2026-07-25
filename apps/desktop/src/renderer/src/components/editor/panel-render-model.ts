@@ -1,7 +1,7 @@
+import type { MarkdownViewMode, OpenFile } from '@/components/editor/state'
 import { canPreviewLanguage } from '@/lib/file-preview'
 import { detectLanguage } from '@/lib/language-detect'
 import type { useAppStore } from '@/store'
-import type { MarkdownViewMode, OpenFile } from '@/store/slices/editor'
 
 import { getEditorHeaderOpenFileState } from './header'
 import {

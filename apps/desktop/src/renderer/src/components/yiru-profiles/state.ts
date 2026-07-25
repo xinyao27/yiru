@@ -8,7 +8,7 @@ import type {
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
 } from '../../../../shared/yiru-profiles'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type YiruProfilesSlice = {
   yiruProfiles: YiruProfileSummary[]

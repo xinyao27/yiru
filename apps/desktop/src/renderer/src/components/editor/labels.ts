@@ -1,5 +1,5 @@
+import type { OpenFile } from '@/components/editor/state'
 import { basename } from '@/lib/path'
-import type { OpenFile } from '@/store/slices/editor'
 
 type EditorLabelVariant = 'fileName' | 'relativePath' | 'fullPath'
 

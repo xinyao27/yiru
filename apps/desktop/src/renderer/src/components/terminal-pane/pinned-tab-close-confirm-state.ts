@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 /** A pending request to confirm closing a pinned tab. `onConfirm` runs the
  *  original close once the user accepts; the label is shown in the dialog. */

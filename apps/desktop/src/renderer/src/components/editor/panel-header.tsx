@@ -9,6 +9,7 @@ import {
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -18,7 +19,6 @@ import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 
 import { useDiffNavigation } from './diff-navigation-context'

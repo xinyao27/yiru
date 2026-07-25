@@ -42,11 +42,14 @@ import {
   PER_REPO_FETCH_LIMIT
 } from '../../../../shared/work-items'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/rpc-client'
-import type { AppState } from '../types'
-import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from './github-cache-key'
-import { deriveCheckStatusFromChecks, syncPRChecksStatus } from './github-checks'
-import { isGitHubWorkItemsQueryTooLarge } from './github-work-items-query-bounds'
-import { getHostedReviewCacheKey, linkedReviewHintKey } from './hosted-review-cache-identity'
+import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from '../../store/slices/github-cache-key'
+import {
+  getHostedReviewCacheKey,
+  linkedReviewHintKey
+} from '../../store/slices/hosted-review-cache-identity'
+import type { AppState } from '../../store/types'
+import { deriveCheckStatusFromChecks, syncPRChecksStatus } from './checks'
+import { isGitHubWorkItemsQueryTooLarge } from './work-items-query-bounds'
 
 function getRuntimeRepoTarget(
   state: AppState,

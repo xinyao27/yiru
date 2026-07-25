@@ -1,6 +1,7 @@
 import { Copy, Eye, Pencil, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -14,7 +15,6 @@ import { Input } from '@/components/ui/input'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import type { OpenFile } from '@/store/slices/editor'
 
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '../tab-bar/sortable-tab'
 import { getEditorHeaderCopyState } from './header'

@@ -39,9 +39,9 @@ import type {
   TerminalTab,
   TuiAgent
 } from '../../../shared/types'
+import type { OpenFile } from '../components/editor/state'
 import type { AppState } from '../store'
 import { useAppStore } from '../store'
-import type { OpenFile } from '../store/slices/editor'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
 import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './terminal-stream'
 import {

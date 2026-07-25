@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 
 export type SpoolWorktreeRoute = Pick<
   SpoolWorkspaceRoute,

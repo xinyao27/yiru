@@ -1,6 +1,6 @@
+import type { OpenFile } from '@/components/editor/state'
 import { joinPath } from '@/lib/path'
 import type { AppState } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 type EditorDraftState = Pick<AppState, 'editorDrafts'>
 type EditorPanelDraftSelector = (state: EditorDraftState) => Record<string, string>

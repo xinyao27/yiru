@@ -3,12 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import { resolveSpoolWorkspaceRoute, selectSpoolCanControl } from '@/components/spool/selectors'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import {
-  resolveSpoolWorkspaceRoute,
-  selectSpoolCanControl
-} from '@/store/slices/spool-sharing-selectors'
 
 import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
 import { getSpoolRequesterTransportErrorCode } from './requester-error'

@@ -1,17 +1,13 @@
 import type { StateCreator } from 'zustand'
 
 import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 import {
   getSpoolWorktreeBindingKey,
   isSpoolRequesterControlCurrent,
   resolveSpoolWorkspaceRoute
-} from './spool-sharing-selectors'
-import type {
-  SpoolExpandedRefsByDesktop,
-  SpoolSharingSlice,
-  SpoolSharingState
-} from './spool-sharing-types'
+} from './selectors'
+import type { SpoolExpandedRefsByDesktop, SpoolSharingSlice, SpoolSharingState } from './types'
 
 export type {
   SpoolExpandedRefsByDesktop,
@@ -19,7 +15,7 @@ export type {
   SpoolSharingSlice,
   SpoolSharingState,
   SpoolWorkspaceRoute
-} from './spool-sharing-types'
+} from './types'
 export {
   getSpoolWorktreeBindingKey,
   isSpoolRefExpanded,
@@ -27,7 +23,7 @@ export {
   selectActiveSpoolWorkspace,
   selectSpoolCanControl,
   selectSpoolRequesterControlState
-} from './spool-sharing-selectors'
+} from './selectors'
 
 function createInitialSpoolSharingState(): SpoolSharingState {
   return {

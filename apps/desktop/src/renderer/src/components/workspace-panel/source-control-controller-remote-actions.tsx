@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 
+import { resolveCommitMessageGenerationCancel } from '@/components/workspace-panel/commit-message-generation-state'
 import { getConnectionId } from '@/lib/connection-context'
 import { isSyncPushStageError } from '@/lib/source-control-remote-error'
 import { cancelRuntimeGenerateCommitMessage } from '@/runtime/git-client'
-import { resolveCommitMessageGenerationCancel } from '@/store/slices/commit-message-generation'
 
 import {
   captureSourceControlRecoveryEntrySnapshot,

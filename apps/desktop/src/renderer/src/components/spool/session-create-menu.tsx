@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import { AgentLaunchMenuItems } from '@/components/tab-bar/agent-launch-menu-items'
 import {
   buildTabAgentLaunchOptions,
@@ -19,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 import { createBrowserUuid } from '@/lib/browser-uuid'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
 import type {

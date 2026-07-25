@@ -4,7 +4,7 @@ import type {
   WorkspaceSpaceAnalysis,
   WorkspaceSpaceScanProgress
 } from '../../../../shared/workspace-space-types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 let inFlightScan: Promise<WorkspaceSpaceAnalysis> | null = null
 

@@ -1,4 +1,4 @@
-import type { ActiveRightSidebarTab } from '@/store/slices/editor'
+import type { ActiveRightSidebarTab } from '@/components/editor/state'
 
 const TOP_ACTIVITY_BUTTON_WIDTH = 36
 const TOP_ACTIVITY_MORE_BUTTON_WIDTH = 32

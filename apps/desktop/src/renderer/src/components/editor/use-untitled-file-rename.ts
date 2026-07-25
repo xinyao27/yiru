@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
 import { dirname, joinPath } from '@/lib/path'
 import { createRuntimePath, renameRuntimePath, runtimePathExists } from '@/runtime/file-client'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import { requestEditorFileSave, requestEditorSaveQuiesce } from './autosave'
 import { getUntitledFileRoot } from './untitled-file-rename-path'

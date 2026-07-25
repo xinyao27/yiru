@@ -1,8 +1,8 @@
-import { translate } from '@/i18n/i18n'
 import type {
   WorkspaceCleanupFailure,
   WorkspaceCleanupRemoveResult
-} from '@/store/slices/workspace-cleanup'
+} from '@/components/workspace-cleanup/state'
+import { translate } from '@/i18n/i18n'
 
 import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
 

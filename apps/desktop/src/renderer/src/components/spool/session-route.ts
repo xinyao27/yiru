@@ -1,4 +1,4 @@
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 
 export type SpoolSessionRoute = SpoolWorkspaceRoute & { sessionRef: string }
 

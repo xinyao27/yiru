@@ -8,7 +8,7 @@ import { fetchRuntimeGit } from '@/runtime/git-client'
 
 import { resolveSourceControlOperationOwner } from '../../../../shared/source-control-operation-owner'
 import type { GitPushTarget, GlobalSettings } from '../../../../shared/types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type RemoteOperationFollowUpArgs = {
   operation: SourceControlRemoteOpKind

@@ -13,6 +13,7 @@ import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, use
 import { toast } from 'sonner'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
+import type { OpenFile } from '@/components/editor/state'
 import EmulatorPane from '@/components/emulator-pane/emulator-pane'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
@@ -56,7 +57,6 @@ import {
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { useAppStore } from '@/store'
 import { destroyWorkspaceWebviews } from '@/store/slices/browser-webview-cleanup'
-import type { OpenFile } from '@/store/slices/editor'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import {

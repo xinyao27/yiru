@@ -1,7 +1,7 @@
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 
+import type { OpenFile } from '@/components/editor/state'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import type {
   LspResourceOperation,

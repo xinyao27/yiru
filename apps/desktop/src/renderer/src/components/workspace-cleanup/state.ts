@@ -22,7 +22,7 @@ import {
   type WorkspaceCleanupScanProgress,
   type WorkspaceCleanupScanResult
 } from '../../../../shared/workspace-cleanup'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type WorkspaceCleanupFailure = {
   worktreeId: string

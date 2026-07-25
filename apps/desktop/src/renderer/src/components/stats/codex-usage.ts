@@ -10,7 +10,7 @@ import type {
   CodexUsageSnapshot,
   CodexUsageSummary
 } from '../../../../shared/codex-usage-types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type CodexUsageSlice = {
   codexUsageScope: CodexUsageScope

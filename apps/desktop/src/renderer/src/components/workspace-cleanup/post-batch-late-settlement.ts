@@ -2,7 +2,7 @@ import type {
   WorkspaceCleanupFailure,
   WorkspaceCleanupRemoveOptions,
   WorkspaceCleanupRemoveResult
-} from '@/store/slices/workspace-cleanup'
+} from '@/components/workspace-cleanup/state'
 
 import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
 import {

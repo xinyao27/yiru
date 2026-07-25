@@ -10,7 +10,7 @@ import type {
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '../../../../shared/opencode-usage-types'
-import type { AppState } from '../types'
+import type { AppState } from '../../store/types'
 
 export type OpenCodeUsageSlice = {
   openCodeUsageScope: OpenCodeUsageScope

@@ -18,6 +18,7 @@ more error-prone than keeping the whole viewer flow together. */
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import type { OpenFile } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -42,8 +43,8 @@ import { formatDiffComments } from '@/lib/diff-comments-format'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
 import { setWithLRU } from '@/lib/scroll-cache'
-import { writeRuntimeFile } from '@/runtime/file-client'
 import '@/lib/monaco-setup'
+import { writeRuntimeFile } from '@/runtime/file-client'
 import {
   getRuntimeGitBranchDiff,
   getRuntimeGitCommitDiff,
@@ -52,7 +53,6 @@ import {
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 

@@ -10,8 +10,8 @@ import { WORKTREE_SET_CONTRACT } from '../../../../shared/runtime-method-contrac
 import type { DiffComment, Worktree } from '../../../../shared/types'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/rpc-client'
 import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
-import type { AppState } from '../types'
-import { findWorktreeById, getRepoIdFromWorktreeId } from './worktree-helpers'
+import { findWorktreeById, getRepoIdFromWorktreeId } from '../../store/slices/worktree-helpers'
+import type { AppState } from '../../store/types'
 
 export type DiffCommentsSlice = {
   getDiffComments: (worktreeId: string | null | undefined) => DiffComment[]

@@ -1,5 +1,5 @@
 import type { SpoolChecksReadState } from '@/components/spool/checks-pane'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 
 import type {
   SpoolSessionCatalogEntry,

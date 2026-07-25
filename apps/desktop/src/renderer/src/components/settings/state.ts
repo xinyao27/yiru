@@ -22,8 +22,8 @@ import {
 import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
 import type { GlobalSettings } from '../../../../shared/types'
 import { normalizeUiLanguage } from '../../../../shared/ui-language'
-import type { AppState } from '../types'
-import { createSettingsSearchState, type SettingsSearchState } from './settings-search-state'
+import type { AppState } from '../../store/types'
+import { createSettingsSearchState, type SettingsSearchState } from './search-state'
 
 export type SettingsSlice = SettingsSearchState & {
   settings: GlobalSettings | null

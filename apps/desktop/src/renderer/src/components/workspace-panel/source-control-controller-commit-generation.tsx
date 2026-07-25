@@ -1,16 +1,16 @@
 import { useCallback } from 'react'
 
+import {
+  createRunningCommitMessageGenerationRecord,
+  resolveCommitMessageGenerationFailure,
+  resolveCommitMessageGenerationSuccess
+} from '@/components/workspace-panel/commit-message-generation-state'
 import { getConnectionId } from '@/lib/connection-context'
 import {
   generateRuntimeCommitMessage,
   type RuntimeGenerateCommitMessageOverrides
 } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
-import {
-  createRunningCommitMessageGenerationRecord,
-  resolveCommitMessageGenerationFailure,
-  resolveCommitMessageGenerationSuccess
-} from '@/store/slices/commit-message-generation'
 
 import { isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
 import type { SourceControlCommitActionController } from './source-control-controller-commit-action'

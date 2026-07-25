@@ -2,10 +2,10 @@ import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { selectSpoolCanControl } from '@/components/spool/selectors'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { selectSpoolCanControl } from '@/store/slices/spool-sharing-selectors'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type {
   SpoolGitDiffResult,

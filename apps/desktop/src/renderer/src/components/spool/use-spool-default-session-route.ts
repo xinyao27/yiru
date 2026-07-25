@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
 

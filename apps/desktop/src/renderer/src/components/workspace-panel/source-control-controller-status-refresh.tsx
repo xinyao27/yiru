@@ -3,6 +3,7 @@ import { resolveHostedReviewCreationProvider } from '@yiru/workbench-model/revie
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import type { PullRequestGenerationContext } from '@/components/workspace-panel/pull-request-generation-state'
 import { localizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
@@ -12,7 +13,6 @@ import {
   markHugeRepoWarningDismissed
 } from '@/lib/source-control-huge-repo-warning-dismissals'
 import { getRuntimeRepoBaseRefDefault } from '@/runtime/repo-client'
-import type { PullRequestGenerationContext } from '@/store/slices/pull-request-generation'
 
 import { refreshGitStatusForWorktree } from './git-status-refresh'
 import {

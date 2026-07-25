@@ -1,6 +1,6 @@
 import { useEffect, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
 
-import type { OpenFile } from '@/store/slices/editor'
+import type { OpenFile } from '@/components/editor/state'
 
 import {
   WORKTREE_OWNER_NOT_READY_ERROR,

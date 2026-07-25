@@ -1,12 +1,5 @@
 import { useCallback } from 'react'
 
-import { getConnectionId } from '@/lib/connection-context'
-import {
-  cancelRuntimeGeneratePullRequestFields,
-  generateRuntimePullRequestFields,
-  type RuntimeGeneratePullRequestFieldsOverrides
-} from '@/runtime/git-client'
-import { useAppStore } from '@/store'
 import {
   createRunningPullRequestGenerationRecord,
   markPullRequestGenerationTerminalSeedRestored,
@@ -16,7 +9,14 @@ import {
   type PullRequestFieldRevisions,
   type PullRequestGenerationContext,
   type PullRequestGenerationFields
-} from '@/store/slices/pull-request-generation'
+} from '@/components/workspace-panel/pull-request-generation-state'
+import { getConnectionId } from '@/lib/connection-context'
+import {
+  cancelRuntimeGeneratePullRequestFields,
+  generateRuntimePullRequestFields,
+  type RuntimeGeneratePullRequestFieldsOverrides
+} from '@/runtime/git-client'
+import { useAppStore } from '@/store'
 
 import type { SourceControlConflictActionsController } from './source-control-controller-conflict-actions'
 import {

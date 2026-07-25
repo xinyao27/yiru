@@ -3,10 +3,10 @@ import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type { SpoolChecksReadResult } from '../../../../shared/spool/spool-operation-contract'
 import { SpoolChecksResult } from './checks-result'

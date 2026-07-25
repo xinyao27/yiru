@@ -2,6 +2,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import type React from 'react'
 import { useMemo, useRef } from 'react'
 
+import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import { Button } from '@/components/ui/button'
 import {
   AiVaultPanelNotice,
@@ -11,7 +12,6 @@ import { translate } from '@/i18n/i18n'
 import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type {
   SpoolSessionCatalogEntry,

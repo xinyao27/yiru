@@ -1,6 +1,6 @@
+import type { OpenFile } from '@/components/editor/state'
 import { joinPath } from '@/lib/path'
 import { clampNumber } from '@/lib/terminal-theme'
-import type { OpenFile } from '@/store/slices/editor'
 
 import {
   DEFAULT_EDITOR_AUTO_SAVE_DELAY_MS,

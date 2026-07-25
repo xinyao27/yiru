@@ -72,10 +72,10 @@ import type {
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
-import type { AppState } from '../types'
-import { pushRecentlyClosedTabKind } from './recently-closed-tabs'
+import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
+import { findWorktreeById, getRepoIdFromWorktreeId } from '../../store/slices/worktree-helpers'
+import type { AppState } from '../../store/types'
 import { applyRemoteOperationFollowUp } from './source-control-operation-follow-up'
-import { findWorktreeById, getRepoIdFromWorktreeId } from './worktree-helpers'
 
 type RemoteOpKind = SourceControlRemoteOpKind
 
