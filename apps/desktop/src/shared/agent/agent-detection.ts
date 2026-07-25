@@ -36,5 +36,5 @@ export {
   extractAllOscTitles,
   extractLastOscTitle,
   MAX_OSC_TITLE_CHARS
-} from './osc-title-extraction'
-export { isShellProcess } from './shell-process-detection'
+} from '../osc-title-extraction'
+export { isShellProcess } from '../shell-process-detection'

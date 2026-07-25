@@ -35,8 +35,8 @@ import {
   setWorktreeNavViewActivator
 } from '@/store/slices/worktree-nav-history'
 
-import { agentKindToTuiAgent } from '../../../shared/agent-kind'
-import { repoIsRemote } from '../../../shared/agent-launch-remote'
+import { agentKindToTuiAgent } from '../../../shared/agent/agent-kind'
+import { repoIsRemote } from '../../../shared/agent/agent-launch-remote'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
 import type { SessionOptionValue } from '../../../shared/native-chat-session-options'

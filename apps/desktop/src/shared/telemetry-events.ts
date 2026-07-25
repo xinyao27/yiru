@@ -15,7 +15,7 @@
 
 import { z } from 'zod'
 
-import { AGENT_HOOK_TARGETS } from './agent-hook-types'
+import { AGENT_HOOK_TARGETS } from './agent/agent-hook-types'
 import {
   CONTEXTUAL_TOUR_OUTCOMES,
   FEATURE_EDUCATION_CONTEXTUAL_TOUR_IDS,

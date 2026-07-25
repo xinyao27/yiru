@@ -12,8 +12,8 @@ import {
   resolveTitleDerivedAgentType
 } from '@/lib/terminal-title-agent-type'
 
-import { isClaudeManagementTitle } from '../../../../shared/agent-detection'
-import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent-title-owner'
+import { isClaudeManagementTitle } from '../../../../shared/agent/agent-detection'
+import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent/agent-title-owner'
 import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,

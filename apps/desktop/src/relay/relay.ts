@@ -33,7 +33,7 @@ import {
   AGENT_HOOK_INSTALL_PLUGINS_METHOD,
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD
-} from '../shared/agent-hook-relay'
+} from '../shared/agent/agent-hook-relay'
 import { detectPiAgentKindFromCommand } from '../shared/pi-agent-kind'
 import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
 import { AgentExecHandler } from './agent-exec-handler'

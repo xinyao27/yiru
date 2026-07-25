@@ -4,8 +4,8 @@ import type {
 } from '@yiru/workbench-model/agent'
 import { ipcMain } from 'electron'
 
-import type { AgentHookInstallStatus } from '../../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../../shared/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../../shared/agent/agent-hook-types'
+import type { AgentInterruptInferenceRequest } from '../../shared/agent/agent-interrupt-intent'
 import {
   clearMigrationUnsupportedPtysByTabPrefix,
   clearMigrationUnsupportedPtysForPaneKey,

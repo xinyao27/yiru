@@ -1,7 +1,7 @@
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 
-import { isShellProcess } from './agent-detection'
-import { inlineAgentDraftFitsPlatform } from './agent-draft-platform-limit'
+import { isShellProcess } from './agent/agent-detection'
+import { inlineAgentDraftFitsPlatform } from './agent/agent-draft-platform-limit'
 export { buildAgentResumeStartupPlan } from '@yiru/workbench-model/agent'
 import type { StartupCommandDelivery } from './codex-startup-delivery'
 import { planHermesStartupQuery } from './hermes-startup-query'

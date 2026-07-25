@@ -10,7 +10,7 @@ import type { StateCreator } from 'zustand'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
-import { buildAgentNotificationId } from '../../../../shared/agent-notification-id'
+import { buildAgentNotificationId } from '../../../../shared/agent/agent-notification-id'
 import {
   DEFAULT_BROWSER_PAGE_ZOOM_LEVEL,
   normalizeBrowserPageZoomLevel

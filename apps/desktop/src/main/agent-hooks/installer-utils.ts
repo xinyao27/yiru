@@ -12,7 +12,7 @@ import {
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import type { AgentHookSource } from '../../shared/agent-hook-relay'
+import type { AgentHookSource } from '../../shared/agent/agent-hook-relay'
 import { writeRollingFileBackup } from '../rolling-file-backup'
 import { grantDirAcl, isPermissionError } from '../win32-utils'
 import { resolveHooksJsonWritePath } from './hook-config-write-path'

@@ -7,7 +7,7 @@ import {
   applyAgentStatusHooksEnabled,
   getManagedAgentHookStatuses
 } from '../../main/agent-hooks/managed-agent-hook-controls'
-import type { AgentHookInstallStatus } from '../../shared/agent-hook-types'
+import type { AgentHookInstallStatus } from '../../shared/agent/agent-hook-types'
 import { getDefaultPersistedState } from '../../shared/constants'
 import type { PersistedState } from '../../shared/types'
 import type { CommandHandler } from '../dispatch'

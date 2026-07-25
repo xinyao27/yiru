@@ -7,7 +7,7 @@ import {
   type CatalogMidSessionApply,
   type CatalogModel,
   type CatalogOptionApply
-} from '../../../../shared/agent-session-option-catalog'
+} from '../../../../shared/agent/agent-session-option-catalog'
 import type {
   SessionOptionDescriptor,
   SessionOptionsSurface,

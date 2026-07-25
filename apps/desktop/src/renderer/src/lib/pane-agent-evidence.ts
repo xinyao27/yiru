@@ -6,8 +6,8 @@ import {
 } from '@yiru/workbench-model/agent'
 import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 
-import type { AgentStatus } from '../../../shared/agent-detection'
-import { detectAgentStatusFromTitle, getAgentLabel } from '../../../shared/agent-detection'
+import type { AgentStatus } from '../../../shared/agent/agent-detection'
+import { detectAgentStatusFromTitle, getAgentLabel } from '../../../shared/agent/agent-detection'
 import type { TuiAgent } from '../../../shared/types'
 
 // Why: explicit agent status entries (from hook-based reports) can go stale if

@@ -3,7 +3,7 @@ import {
   type AgentSessionOptionCatalog,
   type CatalogMidSessionApply,
   type CatalogModel
-} from '../../../../shared/agent-session-option-catalog'
+} from '../../../../shared/agent/agent-session-option-catalog'
 import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
 import type { NativeChatSessionOptionRecord } from './session-option-cache'
 import {

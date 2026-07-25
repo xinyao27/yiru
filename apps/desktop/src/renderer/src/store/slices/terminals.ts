@@ -55,8 +55,8 @@ import {
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
 import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
-import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent-decorative-title-signature'
-import { deriveGeneratedTabTitle } from '../../../../shared/agent-tab-title'
+import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent/agent-decorative-title-signature'
+import { deriveGeneratedTabTitle } from '../../../../shared/agent/agent-tab-title'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import {
   DEFAULT_REPO_BADGE_COLOR,

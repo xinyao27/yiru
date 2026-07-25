@@ -42,8 +42,6 @@ import {
   type ParsedAgentStatusPayload
 } from '@yiru/workbench-model/agent'
 
-import { REMOTE_AGENT_HOOK_ENV, type AgentHookSource } from './agent-hook-relay'
-import { YIRU_HOOK_PROTOCOL_VERSION } from './agent-hook-types'
 import {
   claudeRosterHasWorkingSubagent,
   claudeRosterToSnapshots,
@@ -54,7 +52,7 @@ import {
   removeClaudeTeammateByName,
   upsertWorkingClaudeSubagent,
   type ClaudeSubagentRoster
-} from './claude-subagent-roster'
+} from '../claude-subagent-roster'
 import {
   codexRosterEffectiveState,
   codexRosterToSnapshots,
@@ -62,7 +60,7 @@ import {
   seedCodexSubagentRoster,
   upsertCodexSubagent,
   type CodexSubagentRoster
-} from './codex-subagent-roster'
+} from '../codex-subagent-roster'
 import {
   buildGrokChatHistoryPathCandidates,
   findGrokChatHistoryBySessionId,
@@ -71,8 +69,10 @@ import {
   isSafeGrokSessionId,
   resolveGrokChatHistoryPathSync,
   resolveGrokSessionsDir
-} from './grok-session-paths'
-import { parsePaneKey } from './stable-pane-id'
+} from '../grok-session-paths'
+import { parsePaneKey } from '../stable-pane-id'
+import { REMOTE_AGENT_HOOK_ENV, type AgentHookSource } from './agent-hook-relay'
+import { YIRU_HOOK_PROTOCOL_VERSION } from './agent-hook-types'
 
 /** Maximum request body size accepted by the listener (1 MB). */
 export const HOOK_REQUEST_MAX_BYTES = 1_000_000

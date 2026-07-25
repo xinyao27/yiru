@@ -76,29 +76,29 @@ import {
   isCursorNativeAgentTitle,
   isShellProcess,
   normalizeTerminalTitle
-} from '../../shared/agent-detection'
-import type { AgentStatus } from '../../shared/agent-detection'
-import { repoIsRemote } from '../../shared/agent-launch-remote'
+} from '../../shared/agent/agent-detection'
+import type { AgentStatus } from '../../shared/agent/agent-detection'
+import { repoIsRemote } from '../../shared/agent/agent-launch-remote'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
   recognizeAgentProcess
-} from '../../shared/agent-process-recognition'
+} from '../../shared/agent/agent-process-recognition'
 import {
   AGENT_PROMPT_BRACKETED_PASTE_END,
   AGENT_PROMPT_SUBMIT,
   AGENT_PROMPT_SUBMIT_DELAY_MS,
   buildAgentPromptPasteBytes
-} from '../../shared/agent-prompt-injection'
+} from '../../shared/agent/agent-prompt-injection'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
-} from '../../shared/agent-status-osc'
+} from '../../shared/agent/agent-status-osc'
 import {
   hasCompatibleAgentTitleIdentity,
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../shared/agent-title-owner'
+} from '../../shared/agent/agent-title-owner'
 import type {
   Automation,
   AutomationCreateInput,

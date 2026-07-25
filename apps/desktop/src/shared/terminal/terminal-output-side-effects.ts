@@ -16,7 +16,7 @@ import {
   extractAllOscTitles,
   isCursorNativeAgentTitle,
   normalizeTerminalTitle
-} from '../agent-detection'
+} from '../agent/agent-detection'
 import { createBellDetector } from './terminal-bell-detector'
 import { scanMode2031Sequences } from './terminal-color-scheme-protocol'
 import {

@@ -8,8 +8,8 @@
 // same mapping. Centralizing here means a new TuiAgent member is one edit,
 // not a sweep across renderer + main.
 
-import type { AgentKind } from './telemetry-events'
-import type { TuiAgent } from './types'
+import type { AgentKind } from '../telemetry-events'
+import type { TuiAgent } from '../types'
 
 type ConcreteAgentKind = Exclude<AgentKind, 'other'>
 

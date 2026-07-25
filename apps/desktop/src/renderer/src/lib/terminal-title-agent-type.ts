@@ -3,7 +3,7 @@ import type { AgentType } from '@yiru/workbench-model/agent'
 import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
-} from '../../../shared/agent-title-owner'
+} from '../../../shared/agent/agent-title-owner'
 import { resolveTitleActivityLabel } from './pane-agent-evidence'
 
 const TITLE_AGENT_LABEL_TO_TYPE: Record<string, AgentType> = {

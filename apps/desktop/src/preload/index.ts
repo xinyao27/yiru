@@ -23,8 +23,8 @@ renderer and Electron. Keeping the IPC surface co-located in one file makes secu
 review and type drift checks easier than scattering these bindings across modules. */
 import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
 
-import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../shared/agent/agent-hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent/agent-interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type {
   Automation,

@@ -1,12 +1,12 @@
 import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
 import { isLegacyPiCompatibleTitle } from '@yiru/workbench-model/agent'
 
-import { detectAgentStatusFromTitle, getAgentLabel } from './agent-detection'
 import {
   getSyntheticAgentTitleProfile,
   SYNTHETIC_AGENT_TITLE_PROFILES,
   type SyntheticAgentTitleProfile
-} from './synthetic-agent-title'
+} from '../synthetic-agent-title'
+import { detectAgentStatusFromTitle, getAgentLabel } from './agent-detection'
 
 type TitleProfileMatch = {
   profile: SyntheticAgentTitleProfile

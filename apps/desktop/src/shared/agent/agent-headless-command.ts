@@ -1,6 +1,6 @@
-import { isAnteHeadlessOneShotCommand } from './ante-headless-command'
-import { isClaudeHeadlessOneShotCommand } from './claude-headless-command'
-import type { TuiAgent } from './types'
+import { isAnteHeadlessOneShotCommand } from '../ante-headless-command'
+import { isClaudeHeadlessOneShotCommand } from '../claude-headless-command'
+import type { TuiAgent } from '../types'
 
 export function isHeadlessOneShotAgentCommand(agent: TuiAgent, tokens: readonly string[]): boolean {
   if (agent === 'claude') {

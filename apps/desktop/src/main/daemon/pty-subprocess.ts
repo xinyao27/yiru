@@ -10,7 +10,7 @@ import {
   isAgentForegroundWrapperProcess,
   recognizeAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../shared/agent-process-recognition'
+} from '../../shared/agent/agent-process-recognition'
 import {
   shouldUseShellReadyStartupDelivery,
   type StartupCommandDelivery

@@ -117,7 +117,7 @@ import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { resolveWorktreeCreateBaseBranch } from '@/runtime/worktree-create-base'
 import { useAppStore } from '@/store'
 
-import { repoIsRemote } from '../../../../shared/agent-launch-remote'
+import { repoIsRemote } from '../../../../shared/agent/agent-launch-remote'
 import { getDefaultRepoHookSettings } from '../../../../shared/constants'
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'

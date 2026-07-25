@@ -6,8 +6,8 @@ import {
   type AgentType
 } from '@yiru/workbench-model/agent'
 
-import { SYNTHETIC_AGENT_TITLE_PROFILES } from './synthetic-agent-title'
-import type { TerminalTab } from './types'
+import { SYNTHETIC_AGENT_TITLE_PROFILES } from '../synthetic-agent-title'
+import type { TerminalTab } from '../types'
 
 export type ConversationNameTab = Pick<
   TerminalTab,

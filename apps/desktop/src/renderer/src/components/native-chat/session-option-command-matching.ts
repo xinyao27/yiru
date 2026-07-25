@@ -1,4 +1,4 @@
-import type { CatalogMidSessionApply } from '../../../../shared/agent-session-option-catalog'
+import type { CatalogMidSessionApply } from '../../../../shared/agent/agent-session-option-catalog'
 import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
 
 export function parseBuiltSessionOptionCommand(

@@ -20,11 +20,11 @@ import {
   createAgentStatusTracker,
   normalizeTerminalTitle,
   extractAllOscTitles
-} from '../../../../shared/agent-detection'
+} from '../../../../shared/agent/agent-detection'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
-} from '../../../../shared/agent-status-osc'
+} from '../../../../shared/agent/agent-status-osc'
 import { createBellDetector } from '../../../../shared/terminal/terminal-bell-detector'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
@@ -63,7 +63,7 @@ export type {
   PtyConnectResult,
   PtyTransport
 } from './pty-transport-types'
-export { extractLastOscTitle } from '../../../../shared/agent-detection'
+export { extractLastOscTitle } from '../../../../shared/agent/agent-detection'
 
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
 // Why: an app SSH PTY id embeds the connection it was created under. When a pane

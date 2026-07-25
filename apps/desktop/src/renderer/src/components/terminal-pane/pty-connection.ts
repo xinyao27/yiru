@@ -111,15 +111,15 @@ import { getWorktreeMapFromState } from '@/store/selectors'
 import {
   AGENT_INTERRUPT_SETTLE_MS,
   type AgentInterruptInputIntent
-} from '../../../../shared/agent-interrupt-intent'
+} from '../../../../shared/agent/agent-interrupt-intent'
 import {
   isExpectedAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../../../shared/agent-process-recognition'
+} from '../../../../shared/agent/agent-process-recognition'
 import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
-} from '../../../../shared/agent-title-owner'
+} from '../../../../shared/agent/agent-title-owner'
 import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
 import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'

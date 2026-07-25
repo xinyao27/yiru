@@ -1,4 +1,4 @@
-import { recognizeAgentProcessFromCommandLine } from './agent-process-recognition'
+import { recognizeAgentProcessFromCommandLine } from './agent/agent-process-recognition'
 
 export type StartupCommandDelivery = 'fast' | 'shell-ready'
 

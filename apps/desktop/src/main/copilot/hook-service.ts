@@ -7,7 +7,10 @@ import { join } from 'node:path'
 
 import type { SFTPWrapper } from 'ssh2'
 
-import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent-hook-types'
+import type {
+  AgentHookInstallState,
+  AgentHookInstallStatus
+} from '../../shared/agent/agent-hook-types'
 import { buildPosixHookPayloadCapture } from '../agent-hooks/hook-stdin-contract'
 import {
   createManagedCommandMatcher,

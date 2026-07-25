@@ -1,4 +1,4 @@
-import { getAgentSessionOptionCatalog } from '../../../../shared/agent-session-option-catalog'
+import { getAgentSessionOptionCatalog } from '../../../../shared/agent/agent-session-option-catalog'
 import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
 import { stripScrollbackAnsi } from './scrape-fallback'
 

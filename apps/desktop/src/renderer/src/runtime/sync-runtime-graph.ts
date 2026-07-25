@@ -15,7 +15,7 @@ import { sanitizeTerminalLayoutPaneTitles } from '@/lib/terminal-pane-title-sani
 import { getSystemPrefersDark, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import type { AppState } from '@/store/types'
 
-import { isClaudeManagementTitle } from '../../../shared/agent-detection'
+import { isClaudeManagementTitle } from '../../../shared/agent/agent-detection'
 import type {
   RuntimeMobileSessionBrowserTab,
   RuntimeMobileSessionFileTab,

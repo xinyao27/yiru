@@ -4,7 +4,7 @@ import {
   getAgentSessionOptionCatalog,
   mergeCatalogModels,
   type CatalogModel
-} from '../../../../shared/agent-session-option-catalog'
+} from '../../../../shared/agent/agent-session-option-catalog'
 
 type CatalogEnrichmentEntry = {
   state: 'idle' | 'pending' | 'settled'

@@ -22,7 +22,7 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
-import { isRemoteAgentHooksEnabled } from '../../shared/agent-hook-relay'
+import { isRemoteAgentHooksEnabled } from '../../shared/agent/agent-hook-relay'
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import {
   getCommandTokenPathBasename,

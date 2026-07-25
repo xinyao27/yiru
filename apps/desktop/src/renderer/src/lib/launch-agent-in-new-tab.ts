@@ -23,7 +23,7 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { isWebRuntimeSessionActive } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
 
-import { repoIsRemote } from '../../../shared/agent-launch-remote'
+import { repoIsRemote } from '../../../shared/agent/agent-launch-remote'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
 import type { LaunchSource } from '../../../shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'

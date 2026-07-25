@@ -17,7 +17,7 @@ import { useAppStore } from '@/store'
  * moves to main. See docs/reference/terminal-hidden-view-parking.md and
  * docs/reference/terminal-side-effect-authority.md.
  */
-import { isClaudeAgent } from '../../../../shared/agent-detection'
+import { isClaudeAgent } from '../../../../shared/agent/agent-detection'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import {
   mode2031SequenceFor,

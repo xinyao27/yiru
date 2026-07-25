@@ -10,7 +10,7 @@ import {
 } from '@/runtime/terminal-inspection'
 import { useAppStore } from '@/store'
 
-import { isExpectedAgentProcess } from '../../../shared/agent-process-recognition'
+import { isExpectedAgentProcess } from '../../../shared/agent/agent-process-recognition'
 import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
 import type { TuiAgent } from '../../../shared/types'
 import type { GlobalSettings } from '../../../shared/types'

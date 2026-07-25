@@ -3,8 +3,8 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vite-plus/test'
 
+import { makePaneKey } from '../stable-pane-id'
 import { createHookListenerState, normalizeHookPayload } from './agent-hook-listener'
-import { makePaneKey } from './stable-pane-id'
 
 const PANE_KEY = makePaneKey('tab-1', '11111111-1111-4111-8111-111111111111')
 const PI_SESSION_FILE = join(tmpdir(), 'pi-session.jsonl')

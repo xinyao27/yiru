@@ -3,12 +3,15 @@ import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 import type { RuntimeTerminalProcessInspection } from '@/runtime/terminal-inspection'
 
 /* oxlint-disable max-lines */
-import { detectAgentStatusFromTitle, type AgentStatus } from '../../../../shared/agent-detection'
+import {
+  detectAgentStatusFromTitle,
+  type AgentStatus
+} from '../../../../shared/agent/agent-detection'
 import {
   isRecognizedAgentType,
   recognizeAgentProcess,
   type RecognizedAgentProcess
-} from '../../../../shared/agent-process-recognition'
+} from '../../../../shared/agent/agent-process-recognition'
 import { isPiCompatibleAgentType } from '../../../../shared/pi-agent-kind'
 import type {
   AgentCompletionCoordinator,

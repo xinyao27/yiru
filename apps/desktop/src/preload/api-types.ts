@@ -18,8 +18,8 @@ import type {
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../shared/agent/agent-hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent/agent-interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser-annotation-viewport-bridge'
 import type {

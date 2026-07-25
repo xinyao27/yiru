@@ -23,7 +23,7 @@ import {
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD,
   isRemoteAgentHooksEnabled
-} from '../../shared/agent-hook-relay'
+} from '../../shared/agent/agent-hook-relay'
 import type { PtyModelRestoreNeededEvent } from '../../shared/pty-model-restore-marker'
 import { isTerminalLeafId, makePaneKey } from '../../shared/stable-pane-id'
 import { isValidTerminalTabId } from '../../shared/terminal/terminal-tab-id'
@@ -952,7 +952,7 @@ export class SshRelaySession {
       // dev-vs-prod diagnostics fire on remote events the same as on local
       // ones — see docs/design/agent-status-over-ssh.md §3 ("Replay /
       // version mismatch") and the relay's wire envelope at
-      // src/shared/agent-hook-relay.ts.
+      // src/shared/agent/agent-hook-relay.ts.
       agentHookServer.ingestRemote(
         {
           paneKey: envelope.paneKey,

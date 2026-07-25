@@ -6,7 +6,7 @@ import {
   AGENT_INTERRUPT_SETTLE_MS,
   type AgentInterruptInferenceRequest,
   type AgentInterruptInputIntent
-} from '../../../../shared/agent-interrupt-intent'
+} from '../../../../shared/agent/agent-interrupt-intent'
 
 export type AgentInterruptInference = {
   observeInputIntent(intent: AgentInterruptInputIntent): void

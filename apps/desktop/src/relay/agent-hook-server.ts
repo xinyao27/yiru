@@ -30,13 +30,13 @@ import {
   writeEndpointFile,
   type AgentHookEventPayload,
   type HookListenerState
-} from '../shared/agent-hook-listener'
+} from '../shared/agent/agent-hook-listener'
 import {
   REMOTE_AGENT_HOOK_ENV,
   type AgentHookRelayEnvelope,
   type AgentHookSource
-} from '../shared/agent-hook-relay'
-import { YIRU_HOOK_PROTOCOL_VERSION } from '../shared/agent-hook-types'
+} from '../shared/agent/agent-hook-relay'
+import { YIRU_HOOK_PROTOCOL_VERSION } from '../shared/agent/agent-hook-types'
 
 export type RelayHookForward = (envelope: AgentHookRelayEnvelope) => void
 
