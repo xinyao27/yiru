@@ -1,11 +1,11 @@
-import { translate } from '@/i18n/i18n'
 import {
   DEFAULT_PET_ID,
   GREMLIN_PET_ID,
   isBundledPetId,
   OPENCODE_PET_ID,
   type BundledPetId
-} from '@/lib/pet-id'
+} from '@/components/pet/id'
+import { translate } from '@/i18n/i18n'
 
 import claudeUrl from '../../../../../resources/claude.webp?url'
 import gremlinUrl from '../../../../../resources/gremlin.webp?url'

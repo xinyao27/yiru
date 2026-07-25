@@ -84,14 +84,14 @@ import {
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
   type WorkspaceCleanupDismissal
-} from '../../../../shared/workspace-cleanup'
-import type { WorkspacePortScanResult } from '../../../../shared/workspace-ports'
+} from '../../../../shared/workspace/workspace-cleanup'
+import type { WorkspacePortScanResult } from '../../../../shared/workspace/workspace-ports'
 import {
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
-} from '../../../../shared/workspace-statuses'
+} from '../../../../shared/workspace/workspace-statuses'
+import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/id'
 import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
-import { DEFAULT_PET_ID, isBundledPetId } from '../../lib/pet-id'
 import {
   deriveRunningAgentSendTargets,
   resolveRunningAgentSendTarget
