@@ -2226,10 +2226,13 @@ function App(): React.JSX.Element {
           Settings and non-stack page views. */}
       {showWorktreeHistoryControls && (
         // Why: workspace navigation begins immediately after the traffic-light gutter.
-        <div className="flex h-full items-center">
-          {/* Why: grouped full-height controls share seams and finish flush against the sidebar edge. */}
-          <ButtonGroup className="h-full">
+        // Search stays between sidebar and history, and flex-grows to fill the header.
+        <div className={cn('flex h-full items-stretch', sidebarOpen && 'min-w-0 flex-1')}>
+          <ButtonGroup className={cn('h-full', sidebarOpen && 'w-full min-w-0')}>
             {sidebarToggleControl}
+            {sidebarOpen ? (
+              <SidebarWorkspaceSearchButton variant={titlebarControlVariant} stretch />
+            ) : null}
             {/* Why: compact history arrows use the quieter regular-weight chrome treatment. */}
             <PhosphorIconContextProvider weight="regular">
               <Tooltip>
@@ -2261,12 +2264,10 @@ function App(): React.JSX.Element {
                       type="button"
                       variant={titlebarControlVariant}
                       size="icon-titlebar"
-                      className={cn(
-                        TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME,
-                        // Why: collapsed chrome lets its container own the outer seam,
-                        // so disabled button opacity cannot make that edge look faint.
-                        leftTitlebarChromeLayout.isFloating && 'border-r-0'
-                      )}
+                      // Why: titlebar-left owns the right seam against the tab strip
+                      // in both open and floating chrome; a trailing control border
+                      // doubles that hairline (and looks faint when disabled).
+                      className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
                       onClick={() => useAppStore.getState().goForwardWorktree()}
                       disabled={!canGoForwardWorktree}
                       aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
@@ -2285,12 +2286,6 @@ function App(): React.JSX.Element {
           </ButtonGroup>
         </div>
       )}
-      {showWorktreeHistoryControls && sidebarOpen ? (
-        // Why: the remaining header surface is one search target, with its icon centered in the region.
-        <div className="flex h-full min-w-0 flex-1 items-stretch">
-          <SidebarWorkspaceSearchButton />
-        </div>
-      ) : null}
     </div>
   )
 

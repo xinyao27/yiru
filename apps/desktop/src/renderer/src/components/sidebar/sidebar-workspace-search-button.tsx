@@ -1,4 +1,5 @@
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
+import type { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
@@ -6,9 +7,20 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
-export function SidebarWorkspaceSearchButton(): React.JSX.Element {
+type SidebarWorkspaceSearchButtonProps = {
+  variant?: ComponentProps<typeof Button>['variant']
+  // Why: titlebar cluster gives search the flexible middle slot between
+  // sidebar toggle and history arrows; the icon stays centered in that region.
+  stretch?: boolean
+}
+
+export function SidebarWorkspaceSearchButton({
+  variant = 'quiet',
+  stretch = false
+}: SidebarWorkspaceSearchButtonProps): React.JSX.Element {
   // Why: this control moved outside SidebarNav's translation subscription into titlebar chrome.
   useTranslation()
   const worktreePaletteShortcutCombos = useShortcutKeyComboDetails('worktree.palette')
@@ -24,12 +36,12 @@ export function SidebarWorkspaceSearchButton(): React.JSX.Element {
       <TooltipTrigger
         render={
           <Button
-            variant="quiet"
+            variant={variant}
             size="icon-titlebar"
             type="button"
             onClick={() => openModal('worktree-palette')}
             aria-label={label}
-            className="w-full [-webkit-app-region:no-drag]"
+            className={cn('[-webkit-app-region:no-drag]', stretch && 'w-full min-w-0 flex-1')}
           >
             <Search weight="regular" />
           </Button>
