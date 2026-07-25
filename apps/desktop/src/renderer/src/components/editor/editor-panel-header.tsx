@@ -305,7 +305,7 @@ export function EditorPanelHeader({
         (isMarkdown && (shouldShowMarkdownExportAction || canShowMarkdownFrontmatterToggle))) && (
         // Why: view-mode, TOC, and More are one header chrome cluster; ButtonGroup
         // collapses their seams so none of the trailing controls float apart.
-        <ButtonGroup className="h-[23px] shrink-0 [&>[data-slot=toggle-group]:not(:last-child)_[data-slot=toggle-group-item]:last-child]:rounded-r-none">
+        <ButtonGroup className="h-[23px] shrink-0">
           {hasEditorToggle && (
             <EditorViewToggle
               value={effectiveToggleValue}

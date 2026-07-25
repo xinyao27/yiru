@@ -101,7 +101,7 @@ export function TabBarOpenInMenuButton({
     <div
       data-workspace-titlebar-slot={titlebarIndex != null ? String(titlebarIndex) : undefined}
       className={cn(
-        'relative flex h-full items-stretch rounded-md border border-y-0 border-border [-webkit-app-region:no-drag] dark:border-input',
+        'relative flex h-full items-stretch border border-y-0 border-border [-webkit-app-region:no-drag] dark:border-input',
         pinDraggable && 'cursor-grab active:cursor-grabbing',
         getDropIndicatorClasses(dropIndicator)
       )}
@@ -117,7 +117,7 @@ export function TabBarOpenInMenuButton({
                 type="button"
                 variant="outline-transparent"
                 size="icon-titlebar-compact"
-                className="text-muted-foreground rounded-none border-0"
+                className="text-muted-foreground border-0"
                 aria-label={openLabel}
                 onClick={() => openEntry(preferredEntry)}
               >
@@ -145,7 +145,7 @@ export function TabBarOpenInMenuButton({
                     type="button"
                     variant="outline-transparent"
                     size="icon-titlebar-compact"
-                    className="text-muted-foreground rounded-none border-0"
+                    className="text-muted-foreground border-0"
                     aria-label={chooseLabel}
                   >
                     {/* Why: the compact chooser affordance is intentionally quieter than menu icons. */}

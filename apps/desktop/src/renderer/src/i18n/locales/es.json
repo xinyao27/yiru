@@ -1346,6 +1346,11 @@
             "unknownBaseBlocker": "No se pudieron verificar confirmaciones sin enviar",
             "dismissedBlocker": "Ignorado"
           }
+        },
+        "panel": {
+          "titlebar": {
+            "openIn": "Open in editor"
+          }
         }
       },
       "ui": {
@@ -1820,7 +1825,9 @@
             "50ec9a165e": "Choose application"
           },
           "TabBarMoreButton": {
-            "more": "Más"
+            "more": "Más",
+            "panelsSection": "Titlebar actions",
+            "panelsEmptyHint": "Drag an action here to hide it from the titlebar"
           }
         }
       },
@@ -11968,6 +11975,10 @@
           "undo": "Deshacer",
           "widthOption": "{{value0}} px"
         }
+      },
+      "WorkspacePanelEditorEmptyState": {
+        "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
+        "agentLaunchFailed": "Could not start {{value0}}."
       }
     },
     "i18n": {
