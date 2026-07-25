@@ -5,9 +5,12 @@ import { useCallback, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import type { OpenFile } from '@/components/editor/state'
+import {
+  ensureSimulatorTab,
+  getSimulatorTabForWorktree
+} from '@/components/tab-group/ensure-simulator-tab'
 import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
 import { buildDuplicatedBrowserTabOptions } from '@/lib/duplicate-browser-tab-options'
-import { ensureSimulatorTab, getSimulatorTabForWorktree } from '@/lib/ensure-simulator-tab'
 import { openMobileEmulatorTab } from '@/lib/open-mobile-emulator-tab'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { browserWorkspaceHasRemoteOwner } from '@/runtime/remote-browser-tab-ownership'
@@ -19,7 +22,7 @@ import type {
   TabGroup,
   TerminalTab
 } from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/workspace-panel-tab'
 import { focusTerminalTabSurface } from '../../lib/focus-terminal-tab-surface'
 import {
   activateWebRuntimeSessionTab,

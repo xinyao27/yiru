@@ -31,6 +31,7 @@ import {
   handleSwitchTerminalTab
 } from '@/components/tab-bar/ipc-tab-switch'
 import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/components/tab-bar/quick-commands-menu-events'
+import { ensureSimulatorTab } from '@/components/tab-group/ensure-simulator-tab'
 import { shouldSuppressCodexAutoApprovalStatus } from '@/components/terminal-pane/codex-auto-approval-notification-suppression'
 import { collectLeafIdsInOrder } from '@/components/terminal-pane/layout-serialization'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
@@ -42,7 +43,6 @@ import { activateTabAndFocusPane } from '@/lib/activate-tab-and-focus-pane'
 import { resolveAgentStatusTerminalTitle } from '@/lib/agent-status-terminal-title'
 import { getConnectionIdFromState } from '@/lib/connection-context'
 import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
-import { ensureSimulatorTab } from '@/lib/ensure-simulator-tab'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
 import {
   createFloatingWorkspaceBrowserTab,

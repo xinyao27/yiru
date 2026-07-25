@@ -17,7 +17,10 @@ import {
   cancelPendingSimulatorPaneShutdown,
   shutdownManagedSimulatorIfNoPane
 } from '../components/emulator-pane/simulator-pane-shutdown-scheduler'
-import { ensureSimulatorTab, getSimulatorTabForWorktree } from './ensure-simulator-tab'
+import {
+  ensureSimulatorTab,
+  getSimulatorTabForWorktree
+} from '../components/tab-group/ensure-simulator-tab'
 
 type OpenMobileEmulatorTabOptions = {
   targetGroupId?: string
