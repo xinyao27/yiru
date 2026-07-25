@@ -18,7 +18,7 @@ vi.mock('@/lib/primary-selection', () => ({
 import { usePrimarySelectionPaste } from './use-primary-selection-paste'
 
 function Probe(): null {
-  usePrimarySelectionPaste(true)
+  usePrimarySelectionPaste()
   return null
 }
 

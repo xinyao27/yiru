@@ -1,4 +1,6 @@
-const EAGER_SECTION_IDS = new Set(['general'])
+// Why: the pane Settings opens on must mount eagerly so the first paint is not
+// an empty lazy placeholder.
+const EAGER_SECTION_IDS = new Set(['appearance'])
 
 export function deriveNeededSectionIds(args: {
   navSectionIds: string[]

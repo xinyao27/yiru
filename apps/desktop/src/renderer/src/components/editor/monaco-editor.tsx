@@ -29,7 +29,6 @@ import {
   getDiffCommentPopoverTop
 } from '../diff-comments/diff-comment-popover-position'
 import { useDiffCommentDecorator } from '../diff-comments/use-diff-comment-decorator'
-import { isLinuxUserAgent } from '../terminal-pane/pane-helpers'
 import {
   installEditorAddReviewNoteShortcut,
   installEditorSaveShortcut,
@@ -944,10 +943,10 @@ export default function MonacoEditor({
           cursorSmoothCaretAnimation: 'off',
           padding: { top: 0 },
           find: monacoFindOptions,
-          // Why: Monaco has its own Linux primary-selection integration; keep
-          // it aligned with Yiru's app-level opt-out instead of relying on the
-          // global DOM hook, which does not own Monaco's rendered line surface.
-          selectionClipboard: settings?.primarySelectionMiddleClickPaste ?? isLinuxUserAgent()
+          // Why: Monaco owns its rendered line surface, so the global DOM hook
+          // cannot reach it — enable Monaco's own primary-selection integration
+          // to match app-wide middle-click paste.
+          selectionClipboard: true
         }}
         path={filePath}
         // Why: keepCurrentModel preserves the Monaco text model so undo/redo

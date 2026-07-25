@@ -96,10 +96,6 @@ function defaultTerminalFontFamily(): string {
   return 'SF Mono' // macOS default
 }
 
-export const getDefaultPrimarySelectionMiddleClickPaste = (
-  platform = typeof process !== 'undefined' ? process.platform : ''
-): boolean => platform === 'linux' || platform === 'darwin'
-
 export const getDefaultTerminalRightClickToPaste = (
   platform = typeof process !== 'undefined' ? process.platform : ''
 ): boolean => platform === 'win32'
@@ -214,11 +210,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     editorWordWrap: true,
     richMarkdownSpellcheckEnabled: true,
     markdownReviewToolsEnabled: true,
-    primarySelectionMiddleClickPaste: getDefaultPrimarySelectionMiddleClickPaste(),
-    primarySelectionMiddleClickPasteDefaultedForLinux:
-      typeof process !== 'undefined' && process.platform === 'linux',
-    primarySelectionMiddleClickPasteDefaultedForTerminalDefaults:
-      getDefaultPrimarySelectionMiddleClickPaste(),
     terminalFontSize: DEFAULT_TERMINAL_FONT_SIZE,
     terminalFontFamily: defaultTerminalFontFamily(),
     terminalFontWeight: DEFAULT_TERMINAL_FONT_WEIGHT,

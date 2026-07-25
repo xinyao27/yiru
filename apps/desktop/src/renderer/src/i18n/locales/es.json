@@ -669,8 +669,6 @@
         "94295ebfb3": "Atajos",
         "7682607591": "Notificaciones de escritorio nativas para eventos de agentes y terminales.",
         "2eece16ad1": "Notificaciones",
-        "1f452cbd4c": "Comportamiento de selección y edición.",
-        "0c6ee88a5f": "Entrada y edición",
         "b11a5a48a2": "Tema, zoom, apariencia de la aplicación y del terminal, barras laterales y barra de estado.",
         "93d88d20bf": "Apariencia",
         "2d0659f6f0": "Terminal global, navegador y pestañas Markdown.",
@@ -4813,10 +4811,6 @@
           "232cf83de8": "Alternadores no listados para pruebas internas. Aquí no se admite nada.",
           "3e9e827ca5": "experimental oculto"
         },
-        "InputPane": {
-          "db15068196": "Habilitado de forma predeterminada en Linux y macOS. Linux usa el portapapeles de selección del sistema; otras plataformas utilizan un búfer privado.",
-          "ad31c3c5fb": "Pegar desde la selección con clic central"
-        },
         "IntegrationsPane": {
           "e7b2dd46f9": "Pruebas…",
           "fe4d378dc4": "Verificado",
@@ -5587,8 +5581,6 @@
           "23bf7a1ad4": "Atajos",
           "7210ac09c4": "Notificaciones de escritorio nativas para la actividad de los agentes y eventos de terminal.",
           "9907545fa3": "Notificaciones",
-          "d0b7021d64": "Comportamiento de selección y edición.",
-          "d7a3e635b6": "Entrada y edición",
           "6d1a27e193": "Tema, zoom, apariencia de la aplicación y del terminal, barras laterales y barra de estado.",
           "2b4474780a": "Apariencia",
           "3d9adfe6a5": "Pestañas globales de terminal, navegador y Markdown.",
@@ -6962,23 +6954,6 @@
             "repositoryDefault": "predeterminada del repositorio",
             "branchUpstream": "upstream de la rama",
             "118c23484b": "Add Yiru attribution to commits and PRs."
-          }
-        },
-        "input": {
-          "search": {
-            "886597d6b3": "macos",
-            "26c83b06c5": "Linux",
-            "71905435dd": "x11",
-            "7059cfb00a": "portapapeles",
-            "c4440c3986": "pegar",
-            "5fb84ba77f": "botón central del mouse",
-            "31ba58c8ae": "clic central",
-            "de51e18ee9": "selección primaria",
-            "e5cd0e7a46": "selección",
-            "e25165320e": "edición",
-            "b51d47ceb7": "entrada",
-            "874d88f4a6": "Habilitado de forma predeterminada en Linux y macOS. Linux usa el portapapeles de selección del sistema; otras plataformas utilizan un búfer privado.",
-            "d952ce9b46": "Pegar desde la selección con clic central"
           }
         },
         "integrations": {

@@ -25,7 +25,6 @@ import {
   DeviceMobile as Smartphone,
   Devices as TabletSmartphone,
   TerminalWindow as SquareTerminal,
-  CursorText as TextCursorInput,
   UserGear as UserCog,
   Wrench
 } from '@phosphor-icons/react'
@@ -46,7 +45,6 @@ import { getFloatingWorkspaceSearchEntries } from '@/components/settings/floatin
 import { getGeneralPaneSearchEntries } from '@/components/settings/general-search'
 import { getGitProviderApiBudgetSearchEntries } from '@/components/settings/git-provider-api-budget-search'
 import { getGitPaneSearchEntries } from '@/components/settings/git-search'
-import { getInputPaneSearchEntries } from '@/components/settings/input-search'
 import { getIntegrationsPaneSearchEntries } from '@/components/settings/integrations-search'
 import { getMobileEmulatorSearchEntries } from '@/components/settings/mobile-emulator-search'
 import { getMobileSettingsPaneSearchEntries } from '@/components/settings/mobile-settings-search'
@@ -142,6 +140,61 @@ export function buildSettingsNavigationMetadata({
     // Why: this array's order must mirror SETTINGS_NAV_GROUPS so the Settings
     // sidebar and the Cmd+J palette both read top-to-bottom in the same grouped
     // order — keep each new entry beside its group's siblings.
+    {
+      id: 'appearance',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.93d88d20bf', 'Appearance'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.b11a5a48a2',
+        'Theme, zoom, app and terminal appearance, sidebars, and status bar.'
+      ),
+      icon: Palette,
+      searchEntries: getAppearancePaneSearchEntries({
+        showWarpImport: showDesktopOnlySettings,
+        showSystemTray: showDesktopOnlySettings && isWindows,
+        showMenuBarIcon: showDesktopOnlySettings && isMac
+      }),
+      group: 'interface'
+    },
+    ...(showDesktopOnlySettings
+      ? [
+          {
+            id: 'notifications',
+            title: translate(
+              'auto.hooks.useSettingsNavigationMetadata.2eece16ad1',
+              'Notifications'
+            ),
+            description: translate(
+              'auto.hooks.useSettingsNavigationMetadata.7682607591',
+              'Native desktop notifications for agent and terminal events.'
+            ),
+            icon: Bell,
+            searchEntries: getNotificationsPaneSearchEntries(),
+            group: 'interface'
+          }
+        ]
+      : []),
+    {
+      id: 'shortcuts',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.94295ebfb3', 'Shortcuts'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.dcd0d9b74f',
+        'Keyboard shortcuts for common actions.'
+      ),
+      icon: Keyboard,
+      searchEntries: getShortcutsPaneSearchEntries(),
+      group: 'interface'
+    },
+    {
+      id: 'stats',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.d72a58b5b9', 'Stats & Usage'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.b351014180',
+        'Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.'
+      ),
+      icon: BarChart3,
+      searchEntries: getStatsPaneSearchEntries(),
+      group: 'interface'
+    },
     {
       id: 'agents',
       title: translate('auto.hooks.useSettingsNavigationMetadata.b49abbd2f7', 'Agents'),
@@ -360,72 +413,6 @@ export function buildSettingsNavigationMetadata({
       icon: PanelsTopLeft,
       searchEntries: getFloatingWorkspaceSearchEntries(),
       group: 'workflows'
-    },
-    {
-      id: 'appearance',
-      title: translate('auto.hooks.useSettingsNavigationMetadata.93d88d20bf', 'Appearance'),
-      description: translate(
-        'auto.hooks.useSettingsNavigationMetadata.b11a5a48a2',
-        'Theme, zoom, app and terminal appearance, sidebars, and status bar.'
-      ),
-      icon: Palette,
-      searchEntries: getAppearancePaneSearchEntries({
-        showWarpImport: showDesktopOnlySettings,
-        showSystemTray: showDesktopOnlySettings && isWindows,
-        showMenuBarIcon: showDesktopOnlySettings && isMac
-      }),
-      group: 'interface'
-    },
-    {
-      id: 'input',
-      title: translate('auto.hooks.useSettingsNavigationMetadata.0c6ee88a5f', 'Input & Editing'),
-      description: translate(
-        'auto.hooks.useSettingsNavigationMetadata.1f452cbd4c',
-        'Selection and editing behavior.'
-      ),
-      icon: TextCursorInput,
-      searchEntries: getInputPaneSearchEntries(),
-      group: 'interface'
-    },
-    ...(showDesktopOnlySettings
-      ? [
-          {
-            id: 'notifications',
-            title: translate(
-              'auto.hooks.useSettingsNavigationMetadata.2eece16ad1',
-              'Notifications'
-            ),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.7682607591',
-              'Native desktop notifications for agent and terminal events.'
-            ),
-            icon: Bell,
-            searchEntries: getNotificationsPaneSearchEntries(),
-            group: 'interface'
-          }
-        ]
-      : []),
-    {
-      id: 'shortcuts',
-      title: translate('auto.hooks.useSettingsNavigationMetadata.94295ebfb3', 'Shortcuts'),
-      description: translate(
-        'auto.hooks.useSettingsNavigationMetadata.dcd0d9b74f',
-        'Keyboard shortcuts for common actions.'
-      ),
-      icon: Keyboard,
-      searchEntries: getShortcutsPaneSearchEntries(),
-      group: 'interface'
-    },
-    {
-      id: 'stats',
-      title: translate('auto.hooks.useSettingsNavigationMetadata.d72a58b5b9', 'Stats & Usage'),
-      description: translate(
-        'auto.hooks.useSettingsNavigationMetadata.b351014180',
-        'Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.'
-      ),
-      icon: BarChart3,
-      searchEntries: getStatsPaneSearchEntries(),
-      group: 'interface'
     },
     ...(showDesktopOnlySettings
       ? [

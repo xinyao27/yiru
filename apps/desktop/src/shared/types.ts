@@ -1665,16 +1665,6 @@ export type GlobalSettings = {
   richMarkdownSpellcheckEnabled?: boolean
   /** Whether local markdown review note controls and the review panel are shown. */
   markdownReviewToolsEnabled: boolean
-  /** Why: mirrors terminal selection-paste muscle memory without mutating the
-   *  normal system clipboard; Linux and macOS enable it by default, Windows
-   *  leaves middle-click semantics unchanged unless the user opts in. */
-  primarySelectionMiddleClickPaste?: boolean
-  /** One-shot migration guard for turning the Linux default on for profiles
-   *  that persisted the earlier off-by-default value. */
-  primarySelectionMiddleClickPasteDefaultedForLinux?: boolean
-  /** One-shot migration guard for widening the terminal-style default to
-   *  Linux/macOS while preserving later explicit opt-outs. */
-  primarySelectionMiddleClickPasteDefaultedForTerminalDefaults?: boolean
   terminalFontSize: number
   terminalFontFamily: string
   terminalFontWeight: number

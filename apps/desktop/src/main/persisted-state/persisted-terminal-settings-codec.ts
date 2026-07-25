@@ -70,8 +70,7 @@ function decodeDividerThickness(
 
 export function decodePersistedTerminalSettings(
   value: Partial<GlobalSettings> | undefined,
-  defaults: GlobalSettings,
-  platform: NodeJS.Platform
+  defaults: GlobalSettings
 ): PersistedTerminalSettingsDecodeResult {
   const settings = (value ?? {}) as LegacyTerminalSettings
   const typographyMigrated = settings.systemTypographyDefaultsMigrated === true
@@ -81,17 +80,6 @@ export function decodePersistedTerminalSettings(
   const tuiScrollSensitivity = decodeTuiScrollSensitivity(settings)
   const dividerThickness = decodeDividerThickness(settings, defaults)
   const terminalLineHeight = normalizeTerminalLineHeight(settings.terminalLineHeight)
-  const primarySelectionDefaultedForLinux =
-    settings.primarySelectionMiddleClickPasteDefaultedForLinux === true
-  const primarySelectionDefaultedForTerminalDefaults =
-    settings.primarySelectionMiddleClickPasteDefaultedForTerminalDefaults === true
-  const platformDefaultEnabled = defaults.primarySelectionMiddleClickPaste === true
-  const alreadyDefaultedForPlatform =
-    primarySelectionDefaultedForTerminalDefaults ||
-    (platform === 'linux' && primarySelectionDefaultedForLinux)
-  const migratePrimarySelection = platformDefaultEnabled && !alreadyDefaultedForPlatform
-  const stampPrimarySelectionDefaults =
-    platformDefaultEnabled && !primarySelectionDefaultedForTerminalDefaults
 
   return {
     settings: {
@@ -128,14 +116,7 @@ export function decodePersistedTerminalSettings(
         : settings.terminalFontSize === undefined || settings.terminalFontSize === 14
           ? defaults.terminalFontSize
           : settings.terminalFontSize,
-      systemTypographyDefaultsMigrated: true,
-      primarySelectionMiddleClickPaste: migratePrimarySelection
-        ? true
-        : (settings.primarySelectionMiddleClickPaste ?? defaults.primarySelectionMiddleClickPaste),
-      primarySelectionMiddleClickPasteDefaultedForLinux:
-        primarySelectionDefaultedForLinux || (platform === 'linux' && migratePrimarySelection),
-      primarySelectionMiddleClickPasteDefaultedForTerminalDefaults:
-        primarySelectionDefaultedForTerminalDefaults || stampPrimarySelectionDefaults
+      systemTypographyDefaultsMigrated: true
     },
     needsSave:
       !typographyMigrated ||
@@ -145,8 +126,6 @@ export function decodePersistedTerminalSettings(
       tuiScrollSensitivity.needsSave ||
       dividerThickness.needsSave ||
       (settings.terminalLineHeight !== undefined &&
-        settings.terminalLineHeight !== terminalLineHeight) ||
-      migratePrimarySelection ||
-      stampPrimarySelectionDefaults
+        settings.terminalLineHeight !== terminalLineHeight)
   }
 }
