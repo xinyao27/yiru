@@ -2,6 +2,7 @@ import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_SHOW_SLEEPING_WORKSPACES,
   DEFAULT_STATUS_BAR_ITEMS,
+  DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS,
   DEFAULT_WORKTREE_CARD_PROPERTIES
 } from '../../../shared/constants'
 import type { PersistedUIState } from '../../../shared/types'
@@ -56,6 +57,7 @@ export function getStartupErrorFallbackUI(uiHydrated: boolean): PersistedUIState
     worktreeCardProperties: [...DEFAULT_WORKTREE_CARD_PROPERTIES],
     statusBarItems: [...DEFAULT_STATUS_BAR_ITEMS],
     statusBarVisible: true,
+    workspacePanelTitlebarPinnedIds: [...DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS],
     dismissedUpdateVersion: null,
     lastUpdateCheckAt: null
   }

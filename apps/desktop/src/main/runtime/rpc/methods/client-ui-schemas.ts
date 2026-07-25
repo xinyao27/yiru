@@ -12,6 +12,7 @@ import {
   normalizeTuiAgentEnvRecord
 } from '../../../../shared/tui-agent-launch-defaults'
 import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
+import { normalizeWorkspacePanelTitlebarPinnedIds } from '../../../../shared/workspace-panel-titlebar-pinned'
 import { normalizeWorktreeCardProperties } from '../../../../shared/worktree-card-properties'
 const NullableString = z.string().nullable()
 const StringArray = z.array(z.string())
@@ -44,6 +45,20 @@ const StatusBarItem = z.enum([
   'resource-usage',
   'ports'
 ])
+const WorkspacePanelTitlebarPinnedId = z.enum([
+  'explorer',
+  'vault',
+  'workspaces',
+  'pr-checks',
+  'source-control',
+  'checks',
+  'ports',
+  'open-in',
+  'commands'
+])
+const WorkspacePanelTitlebarPinnedIds = z
+  .array(WorkspacePanelTitlebarPinnedId)
+  .transform((value) => normalizeWorkspacePanelTitlebarPinnedIds(value))
 const WorkspaceStatusDefinition = z.object({
   id: z.string(),
   label: z.string(),
@@ -165,6 +180,7 @@ export const UiUpdate = z
     _antigravityStatusBarDefaultAdded: z.boolean().optional(),
     _grokStatusBarDefaultAdded: z.boolean().optional(),
     statusBarVisible: z.boolean().optional(),
+    workspacePanelTitlebarPinnedIds: WorkspacePanelTitlebarPinnedIds.optional(),
     usagePercentageDisplay: z.enum(['used', 'remaining']).optional(),
     statusBarUsageMode: z.enum(['verbose', 'compact']).optional(),
     dismissedUpdateVersion: NullableString.optional(),

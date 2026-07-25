@@ -2296,6 +2296,8 @@ export type FloatingTerminalTriggerLocation = 'floating-button' | 'status-bar'
 
 export type RightSidebarTab = WorkspacePanelTabContentType | 'search'
 export type ActiveRightSidebarTab = WorkspacePanelTabContentType
+/** Titlebar strip actions: workspace panels, Open in, and Command. */
+export type WorkspaceTitlebarActionId = ActiveRightSidebarTab | 'open-in' | 'commands'
 export type RightSidebarExplorerView = 'files' | 'search'
 
 export type ProjectOrderBy = 'manual' | 'recent'
@@ -2400,6 +2402,9 @@ export type PersistedUIState = {
   _grokStatusBarDefaultAdded?: boolean
   statusBarItems: StatusBarItem[]
   statusBarVisible: boolean
+  /** Ordered ids pinned to the workspace titlebar strip (panels + Open in).
+   *  Remaining available actions live in the More menu and can be dragged in/out. */
+  workspacePanelTitlebarPinnedIds?: WorkspaceTitlebarActionId[]
   /** Why: this is client-side presentation, not a provider/account or execution-host setting. */
   usagePercentageDisplay?: UsagePercentageDisplay
   /** Why: usage roster density follows the user across native, web, and SSH runtimes. */

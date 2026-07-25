@@ -94,7 +94,7 @@ function MarkdownTocRow({
           variant="ghost"
           size="xs"
           type="button"
-          className="markdown-toc-title-button focus-visible:bg-accent h-auto border-0 p-0"
+          className="markdown-toc-title-button focus-visible:bg-accent h-auto justify-start border-0 p-0"
           onClick={() => onNavigate(item.id)}
         >
           <span className="markdown-toc-title">{item.title}</span>

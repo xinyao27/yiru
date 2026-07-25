@@ -54,6 +54,7 @@ import {
   getDefaultUIState,
   getDefaultWorkspaceSession,
   normalizeAgentActivityDisplayMode,
+  normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties,
   ONBOARDING_FLOW_VERSION
 } from '../../../shared/constants'
@@ -3313,6 +3314,9 @@ function mergeWebUIState(
     ...safeUpdates,
     worktreeCardProperties: normalizeWorktreeCardProperties(
       safeUpdates.worktreeCardProperties ?? base.worktreeCardProperties
+    ),
+    workspacePanelTitlebarPinnedIds: normalizeWorkspacePanelTitlebarPinnedIds(
+      safeUpdates.workspacePanelTitlebarPinnedIds ?? base.workspacePanelTitlebarPinnedIds
     ),
     agentActivityDisplayMode: normalizeAgentActivityDisplayMode(
       safeUpdates.agentActivityDisplayMode ?? base.agentActivityDisplayMode

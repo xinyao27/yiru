@@ -47,11 +47,13 @@ export function EditorPanelMarkdownActionsMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
+          // Why: lives in the editor header ButtonGroup beside view-mode/TOC
+          // segments. Default Button size uses has-[>svg]:px-3 which widens
+          // icon-only triggers past the shared 23×30/px-2 segment chrome.
           <Button
-            variant="quiet"
-            size="xs"
+            variant="outline"
             type="button"
-            className="h-auto flex-shrink-0 border-0 p-1"
+            className="h-[23px] w-[30px] shrink-0 px-2 py-0 focus:z-10 focus-visible:z-10 has-[>svg]:px-2"
             aria-label={translate(
               'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
               'More actions'
@@ -61,7 +63,7 @@ export function EditorPanelMarkdownActionsMenu({
               'More actions'
             )}
           >
-            <MoreHorizontal size={14} />
+            <MoreHorizontal className="size-3.5" weight="regular" />
           </Button>
         }
       />

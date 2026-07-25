@@ -11,6 +11,8 @@ import { useMemo } from 'react'
 
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { Toggle } from '@/components/ui/toggle'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -297,69 +299,81 @@ export function EditorPanelHeader({
           </Tooltip>
         </TooltipProvider>
       )}
-      {hasEditorToggle && (
-        <EditorViewToggle
-          value={effectiveToggleValue}
-          modes={availableEditorToggleModes}
-          onChange={onEditorToggleChange}
-          metadataOverride={
-            isCsv ? CSV_VIEW_MODE_METADATA : isNotebook ? NOTEBOOK_VIEW_MODE_METADATA : undefined
-          }
-        />
-      )}
-      {canShowMarkdownTableOfContents && (
-        <TooltipProvider delay={300}>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="quiet"
-                  size="icon-xs"
-                  className={cn(
-                    'size-6 shrink-0 [&_svg]:size-3.5',
-                    showMarkdownTableOfContents && !isMarkdownTableOfContentsDisabled
-                      ? 'bg-accent text-foreground'
-                      : ''
-                  )}
-                  onClick={onToggleMarkdownTableOfContents}
-                  disabled={isMarkdownTableOfContentsDisabled}
-                  aria-label={translate(
-                    'auto.components.editor.EditorPanelHeader.5447c4f68f',
-                    'Table of Contents'
-                  )}
-                  aria-pressed={showMarkdownTableOfContents}
-                >
-                  <ListTree size={14} />
-                </Button>
+      {(hasEditorToggle ||
+        canShowMarkdownTableOfContents ||
+        isDiffSurface ||
+        (isMarkdown && (shouldShowMarkdownExportAction || canShowMarkdownFrontmatterToggle))) && (
+        // Why: view-mode, TOC, and More are one header chrome cluster; ButtonGroup
+        // collapses their seams so none of the trailing controls float apart.
+        <ButtonGroup className="h-[23px] shrink-0 [&>[data-slot=toggle-group]:not(:last-child)_[data-slot=toggle-group-item]:last-child]:rounded-r-none">
+          {hasEditorToggle && (
+            <EditorViewToggle
+              value={effectiveToggleValue}
+              modes={availableEditorToggleModes}
+              onChange={onEditorToggleChange}
+              metadataOverride={
+                isCsv
+                  ? CSV_VIEW_MODE_METADATA
+                  : isNotebook
+                    ? NOTEBOOK_VIEW_MODE_METADATA
+                    : undefined
               }
             />
-            <TooltipContent side="bottom" sideOffset={4}>
-              {isMarkdownTableOfContentsDisabled
-                ? translate(
-                    'auto.components.editor.EditorPanelHeader.146cb5473c',
-                    'Table of Contents is available in rich or preview mode'
-                  )
-                : translate(
-                    'auto.components.editor.EditorPanelHeader.5447c4f68f',
-                    'Table of Contents'
-                  )}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+          )}
+          {canShowMarkdownTableOfContents && (
+            <TooltipProvider delay={300}>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    // Why: match EditorViewToggle segment chrome (Toggle outline/sm +
+                    // the same 23×24/px-2 recipe) so TOC reads as a fourth segment.
+                    <Toggle
+                      variant="outline"
+                      size="sm"
+                      pressed={showMarkdownTableOfContents}
+                      onPressedChange={onToggleMarkdownTableOfContents}
+                      disabled={isMarkdownTableOfContentsDisabled}
+                      aria-label={translate(
+                        'auto.components.editor.EditorPanelHeader.5447c4f68f',
+                        'Table of Contents'
+                      )}
+                      className={cn(
+                        'h-[23px] w-[30px] min-w-[30px] shrink-0 px-2 focus:z-10 focus-visible:z-10',
+                        'data-pressed:border-foreground/20 data-pressed:bg-foreground/10 data-pressed:text-foreground data-pressed:hover:bg-foreground/15 data-pressed:hover:text-foreground'
+                      )}
+                    >
+                      <ListTree className="size-3.5" />
+                    </Toggle>
+                  }
+                />
+                <TooltipContent side="bottom" sideOffset={4}>
+                  {isMarkdownTableOfContentsDisabled
+                    ? translate(
+                        'auto.components.editor.EditorPanelHeader.146cb5473c',
+                        'Table of Contents is available in rich or preview mode'
+                      )
+                    : translate(
+                        'auto.components.editor.EditorPanelHeader.5447c4f68f',
+                        'Table of Contents'
+                      )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <EditorPanelMarkdownActionsMenu
+            isMarkdown={isMarkdown}
+            isDiffSurface={isDiffSurface}
+            diffWordWrap={diffWordWrap}
+            shouldShowMarkdownExportAction={shouldShowMarkdownExportAction}
+            canExportMarkdownToPdf={canExportMarkdownToPdf}
+            canShowMarkdownFrontmatterToggle={canShowMarkdownFrontmatterToggle}
+            markdownFrontmatterVisible={markdownFrontmatterVisible}
+            onToggleDiffWordWrap={() => void updateSettings({ diffWordWrap: !diffWordWrap })}
+            onToggleMarkdownFrontmatter={onToggleMarkdownFrontmatter}
+            onExportMarkdownToPdf={onExportMarkdownToPdf}
+          />
+        </ButtonGroup>
       )}
-      <EditorPanelMarkdownActionsMenu
-        isMarkdown={isMarkdown}
-        isDiffSurface={isDiffSurface}
-        diffWordWrap={diffWordWrap}
-        shouldShowMarkdownExportAction={shouldShowMarkdownExportAction}
-        canExportMarkdownToPdf={canExportMarkdownToPdf}
-        canShowMarkdownFrontmatterToggle={canShowMarkdownFrontmatterToggle}
-        markdownFrontmatterVisible={markdownFrontmatterVisible}
-        onToggleDiffWordWrap={() => void updateSettings({ diffWordWrap: !diffWordWrap })}
-        onToggleMarkdownFrontmatter={onToggleMarkdownFrontmatter}
-        onExportMarkdownToPdf={onExportMarkdownToPdf}
-      />
     </div>
   )
 }

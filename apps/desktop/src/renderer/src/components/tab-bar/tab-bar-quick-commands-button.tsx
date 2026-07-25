@@ -7,6 +7,7 @@ import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog
 } from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
+import { Button } from '@/components/ui/button'
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,7 +17,9 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import { runQuickCommandInNewTab } from '@/lib/run-quick-command-in-new-tab'
 import { useAppStore } from '@/store'
 
@@ -27,22 +30,36 @@ import {
   isTerminalQuickCommandComplete
 } from '../../../../shared/terminal-quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
+import { WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID } from '../../../../shared/workspace-panel-titlebar-pinned'
+import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
+import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
+import type { DropIndicator } from './drop-indicator'
 import { useTabBarQuickCommandsShortcut } from './tab-bar-quick-commands-shortcut'
 
 type TabBarQuickCommandsButtonProps = {
   worktreeId: string
   groupId: string
-  moreMenuOpen: boolean
-  onMoreMenuOpenChange: (open: boolean) => void
+  presentation: 'menu-item' | 'titlebar-icon'
+  moreMenuOpen?: boolean
+  onMoreMenuOpenChange?: (open: boolean) => void
   separatorAfter?: boolean
+  titlebarModel?: WorkspacePanelTitlebarModel | null
+  titlebarIndex?: number
+  titlebarSource?: 'visible' | 'overflow'
+  dropIndicator?: DropIndicator
 }
 
 export function TabBarQuickCommandsButton({
   worktreeId,
   groupId,
-  moreMenuOpen,
+  presentation,
+  moreMenuOpen = false,
   onMoreMenuOpenChange,
-  separatorAfter = false
+  separatorAfter = false,
+  titlebarModel = null,
+  titlebarIndex,
+  titlebarSource = 'visible',
+  dropIndicator = null
 }: TabBarQuickCommandsButtonProps): React.JSX.Element | null {
   const allCommands = useAppStore((state) => state.settings?.terminalQuickCommands)
   const updateSettings = useAppStore((state) => state.updateSettings)
@@ -53,10 +70,12 @@ export function TabBarQuickCommandsButton({
     mode: 'add' | 'edit'
     command: TerminalQuickCommand
   } | null>(null)
+  // Why: the keybinding should open the command picker whether Command is pinned
+  // on the strip or still living in More — toggling More alone is not enough.
   useTabBarQuickCommandsShortcut({
     enabled: true,
-    menuOpen: moreMenuOpen,
-    onOpenChange: onMoreMenuOpenChange
+    menuOpen: pickerOpen,
+    onOpenChange: setPickerOpen
   })
   // Why: floating terminals use a synthetic worktree id, while quick commands
   // need a real repository target for both saved scope and execution.
@@ -138,14 +157,34 @@ export function TabBarQuickCommandsButton({
     }
   }
   const hasCommands = visibleCommands.length > 0
+  const commandLabel = translate(
+    'auto.components.tab.bar.TabBarQuickCommandsButton.a2c7a33831',
+    'Command'
+  )
+  const openPicker = (): void => {
+    if (moreMenuOpen) {
+      onMoreMenuOpenChange?.(false)
+    }
+    if (hasCommands) {
+      setPickerOpen(true)
+      return
+    }
+    addRepoCommand()
+  }
+  const pinDraggable = Boolean(titlebarModel)
+  const startPinDrag = (event: React.PointerEvent): void => {
+    if (!titlebarModel) {
+      return
+    }
+    titlebarModel.handleItemPointerDown(
+      event,
+      WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID,
+      titlebarSource
+    )
+  }
 
-  return (
+  const dialogs = (
     <>
-      <DropdownMenuItem onClick={hasCommands ? () => setPickerOpen(true) : addRepoCommand}>
-        <Play className="size-4" />
-        {translate('auto.components.tab.bar.TabBarQuickCommandsButton.a2c7a33831', 'Command')}
-      </DropdownMenuItem>
-      {separatorAfter ? <DropdownMenuSeparator /> : null}
       <CommandDialog
         open={pickerOpen}
         onOpenChange={setPickerOpen}
@@ -173,12 +212,7 @@ export function TabBarQuickCommandsButton({
               'No commands match'
             )}
           </CommandEmpty>
-          <CommandGroup
-            heading={translate(
-              'auto.components.tab.bar.TabBarQuickCommandsButton.a2c7a33831',
-              'Command'
-            )}
-          >
+          <CommandGroup heading={commandLabel}>
             {visibleCommands.map((command) => (
               <CommandItem
                 key={`run:${command.id}`}
@@ -242,6 +276,60 @@ export function TabBarQuickCommandsButton({
         onOpenChange={(open) => !open && setEditor(null)}
         onSave={saveCommand}
       />
+    </>
+  )
+
+  if (presentation === 'titlebar-icon') {
+    return (
+      <>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline-transparent"
+                size="icon-titlebar-wide"
+                data-workspace-titlebar-slot={
+                  titlebarIndex != null ? String(titlebarIndex) : undefined
+                }
+                className={cn(
+                  'relative text-muted-foreground [-webkit-app-region:no-drag]',
+                  pinDraggable && 'cursor-grab active:cursor-grabbing',
+                  getDropIndicatorClasses(dropIndicator)
+                )}
+                aria-label={commandLabel}
+                onClick={openPicker}
+                onPointerDown={pinDraggable ? startPinDrag : undefined}
+              >
+                <Play className="size-3.5" weight="regular" />
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={6}>
+            {commandLabel}
+          </TooltipContent>
+        </Tooltip>
+        {dialogs}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <DropdownMenuItem
+        // Why: start the pointer drag before the menu row steals the gesture.
+        onPointerDown={(event) => {
+          event.stopPropagation()
+          startPinDrag(event)
+        }}
+        onClick={openPicker}
+        className={cn(pinDraggable && 'cursor-grab active:cursor-grabbing')}
+      >
+        <Play className="size-4" />
+        {commandLabel}
+      </DropdownMenuItem>
+      {separatorAfter ? <DropdownMenuSeparator /> : null}
+      {dialogs}
     </>
   )
 }
