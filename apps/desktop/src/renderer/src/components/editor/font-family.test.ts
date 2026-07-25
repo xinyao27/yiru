@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test'
 
-import { resolveEditorFontFamily, resolveEditorFontFamilyOrInherit } from './editor-font-family'
+import { resolveEditorFontFamily, resolveEditorFontFamilyOrInherit } from './font-family'
 
 describe('resolveEditorFontFamily', () => {
   it('follows the terminal font when the editor override is unset or blank', () => {

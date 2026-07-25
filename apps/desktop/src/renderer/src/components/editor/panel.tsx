@@ -1,9 +1,12 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 
+import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '@/components/editor/local-path-open-guard'
 import { getConnectionId } from '@/lib/connection-context'
 import { openFilePreviewToSide } from '@/lib/file-preview'
 import { detectLanguage } from '@/lib/language-detect'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 

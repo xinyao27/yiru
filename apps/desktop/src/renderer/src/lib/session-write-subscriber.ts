@@ -1,7 +1,10 @@
 import { isDecorativeAgentTitleFrameChange } from '../../../shared/agent/agent-decorative-title-signature'
 import type { WorkspaceSessionPatch } from '../../../shared/types'
+import {
+  SESSION_RELEVANT_FIELDS,
+  shouldPersistWorkspaceSession
+} from '../components/editor/workspace-session'
 import type { AppState } from '../store'
-import { SESSION_RELEVANT_FIELDS, shouldPersistWorkspaceSession } from './workspace-session'
 import { buildWorkspaceSessionPatch } from './workspace-session-patch'
 
 type SessionRelevantField = (typeof SESSION_RELEVANT_FIELDS)[number]

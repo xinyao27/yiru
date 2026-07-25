@@ -1,4 +1,4 @@
-import { getCommentBodyLayoutLineCount } from '@/lib/comment-body-line-count'
+import { getCommentBodyLayoutLineCount } from '@/components/editor/comment-body-line-count'
 
 import type { DiffComment } from '../../../../shared/types'
 

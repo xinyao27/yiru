@@ -1,19 +1,19 @@
 import type { GlobalSettings } from '../../../shared/types'
 import {
+  applyMarkdownTemplatePlaceholders,
+  getMarkdownTemplateTitleForFileName,
+  listMarkdownDocumentTemplates,
+  readMarkdownDocumentTemplateContent,
+  type MarkdownDocumentTemplate
+} from '../components/editor/markdown-document-templates'
+import { requestMarkdownTemplateSelection } from '../components/editor/markdown-template-picker-request'
+import {
   createRuntimePath,
   deleteRuntimePath,
   runtimePathExists,
   writeRuntimeFile
 } from '../runtime/file-client'
 import { detectLanguage } from './language-detect'
-import {
-  applyMarkdownTemplatePlaceholders,
-  getMarkdownTemplateTitleForFileName,
-  listMarkdownDocumentTemplates,
-  readMarkdownDocumentTemplateContent,
-  type MarkdownDocumentTemplate
-} from './markdown-document-templates'
-import { requestMarkdownTemplateSelection } from './markdown-template-picker-request'
 import { joinPath } from './path'
 
 export type UntitledMarkdownFileInfo = {

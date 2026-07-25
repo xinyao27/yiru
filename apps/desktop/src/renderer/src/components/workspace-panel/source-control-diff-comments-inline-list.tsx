@@ -1,10 +1,13 @@
 import { Check, Copy, Trash, Trash as Trash2 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 
+import {
+  getDiffCommentLineLabel,
+  getDiffCommentSource
+} from '@/components/editor/diff-comment-compat'
+import { formatDiffComment } from '@/components/editor/diff-comments-format'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { getDiffCommentLineLabel, getDiffCommentSource } from '@/lib/diff-comment-compat'
-import { formatDiffComment } from '@/lib/diff-comments-format'
 
 import type { DiffComment, GitStatusEntry } from '../../../../shared/types'
 import { useCopyFeedbackState } from './source-control-copy-feedback-state'

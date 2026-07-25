@@ -2,7 +2,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 
-import type { GlobalSettings } from '../../../shared/types'
+import type { GlobalSettings } from '../../../../shared/types'
 
 export function isLocalPathOpenBlocked(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,

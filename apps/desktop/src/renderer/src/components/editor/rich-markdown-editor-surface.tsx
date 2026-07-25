@@ -2,8 +2,8 @@ import { EditorContent } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
 import type React from 'react'
 
+import type { MarkdownReviewNote } from '@/components/editor/markdown-review-notes'
 import { cn } from '@/lib/class-names'
-import type { MarkdownReviewNote } from '@/lib/markdown-review-notes'
 
 import type { DiffComment } from '../../../../shared/types'
 import type { MarkdownTocItem } from './markdown-table-of-contents'

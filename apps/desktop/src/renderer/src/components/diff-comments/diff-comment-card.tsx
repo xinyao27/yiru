@@ -1,11 +1,11 @@
 import { Pencil, Trash, ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
+import { getDiffCommentLineLabel } from '@/components/editor/diff-comment-compat'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
-import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
 
 // Why: the saved-note card lives inside a Monaco view zone's DOM node.
 // useDiffCommentDecorator creates a React root per zone and renders this

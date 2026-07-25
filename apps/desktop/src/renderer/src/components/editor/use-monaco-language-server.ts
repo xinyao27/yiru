@@ -2,9 +2,9 @@ import * as monaco from 'monaco-editor'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+import { getConnectionIdForFileFromState } from '@/components/editor/connection-owner-resolution'
+import { monacoLanguageServerManager } from '@/components/editor/monaco-language-server-manager'
 import { translate } from '@/i18n/i18n'
-import { getConnectionIdForFileFromState } from '@/lib/connection-owner-resolution'
-import { monacoLanguageServerManager } from '@/lib/monaco-language-server-manager'
 import { useAppStore } from '@/store'
 
 import type { LanguageServerSettings } from '../../../../shared/language-server'

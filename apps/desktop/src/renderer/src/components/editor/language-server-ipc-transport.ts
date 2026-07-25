@@ -10,7 +10,7 @@ import type {
   LanguageServerEvent,
   LanguageServerJsonRpcMessage,
   LanguageServerSessionStatus
-} from '../../../shared/language-server'
+} from '../../../../shared/language-server'
 import type { LanguageServerSessionTransport } from './language-server-session-transport'
 
 export class LanguageServerIpcReader extends AbstractMessageReader {

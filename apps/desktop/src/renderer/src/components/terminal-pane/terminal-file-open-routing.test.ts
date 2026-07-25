@@ -20,7 +20,9 @@ const state = {
 }
 
 vi.mock('@/lib/connection-context', () => ({ getConnectionId: () => null }))
-vi.mock('@/lib/markdown-internal-links', () => ({ absolutePathToFileUri: (path: string) => path }))
+vi.mock('@/components/editor/markdown-internal-links', () => ({
+  absolutePathToFileUri: (path: string) => path
+}))
 vi.mock('@/lib/terminal-links', () => ({
   isPathInsideWorktree: (path: string, root: string) => path.startsWith(`${root}/`),
   toWorktreeRelativePath: (path: string, root: string) => path.slice(root.length + 1)

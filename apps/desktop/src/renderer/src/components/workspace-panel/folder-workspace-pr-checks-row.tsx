@@ -4,11 +4,11 @@ import {
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
 
+import { openHttpLink } from '@/components/editor/http-link-routing'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import { openHttpLink } from '@/lib/http-link-routing'
 
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
 import {

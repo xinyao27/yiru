@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { startFixChecksAgent } from '@/components/editor/fix-checks-agent-launch'
 import { translate } from '@/i18n/i18n'
-import { startFixChecksAgent } from '@/lib/fix-checks-agent-launch'
 import { groupPRComments, type PRCommentGroup } from '@/lib/pr-comment-groups'
 
 import type { PRCheckRunDetails } from '../../../../shared/types'

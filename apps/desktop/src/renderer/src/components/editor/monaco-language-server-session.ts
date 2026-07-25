@@ -12,7 +12,7 @@ import type {
   LanguageServerLocationResult,
   LanguageServerSessionStatus,
   LanguageServerStartResult
-} from '../../../shared/language-server'
+} from '../../../../shared/language-server'
 import {
   getLanguageServerWorkspaceName,
   stageThreeClientCapabilities,

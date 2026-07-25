@@ -11,14 +11,14 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 
 import { installMonacoContextMenuPaste } from '@/components/editor/install-monaco-context-menu-paste'
 
+import { registerAstroLanguage } from '../../lib/monaco-languages/register-astro'
+import { registerJsonlLanguage } from '../../lib/monaco-languages/register-jsonl'
+import { registerNimLanguage } from '../../lib/monaco-languages/register-nim'
+import { registerSvelteLanguage } from '../../lib/monaco-languages/register-svelte'
+import { registerVueLanguage } from '../../lib/monaco-languages/register-vue'
 import { registerCursorMonacoThemes } from './cursor-monaco-theme'
 import { installMonacoDelayerCancellationGuard } from './monaco-delayer-cancellation-guard'
 import { installMonacoDiffEditorDisposalGuard } from './monaco-diff-editor-disposal'
-import { registerAstroLanguage } from './monaco-languages/register-astro'
-import { registerJsonlLanguage } from './monaco-languages/register-jsonl'
-import { registerNimLanguage } from './monaco-languages/register-nim'
-import { registerSvelteLanguage } from './monaco-languages/register-svelte'
-import { registerVueLanguage } from './monaco-languages/register-vue'
 import { installMonacoPeekReferencesPreviewOptions } from './monaco-peek-preview-options'
 
 globalThis.MonacoEnvironment = {

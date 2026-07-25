@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { monaco } from '@/lib/monaco-setup'
+import { monaco } from '@/components/editor/monaco-setup'
 
 import {
   disposeUnattachedDiffViewerMonacoModels,

@@ -17,6 +17,10 @@ import {
 import { toast } from 'sonner'
 
 import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '@/components/editor/local-path-open-guard'
+import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
@@ -26,7 +30,6 @@ import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { openFileInBrowserTab } from '@/lib/file-preview'
 import { detectLanguage } from '@/lib/language-detect'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
 import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
+import { registerHttpLinkStoreAccessor } from '@/components/editor/http-link-routing'
 import {
   registerRendererMemoryProfileContributor,
   summarizeStateCollectionSizes

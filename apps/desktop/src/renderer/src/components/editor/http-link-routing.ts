@@ -1,10 +1,10 @@
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import {
   parseLoopbackUrlWithPort,
   type LocalhostWorktreeLabelRoute
-} from '../../../shared/localhost-worktree-labels'
-import type { GlobalSettings } from '../../../shared/types'
-import type { WorkspacePort, WorkspacePortScanResult } from '../../../shared/workspace-ports'
+} from '../../../../shared/localhost-worktree-labels'
+import type { GlobalSettings } from '../../../../shared/types'
+import type { WorkspacePort, WorkspacePortScanResult } from '../../../../shared/workspace-ports'
 
 export type OpenHttpLinkOptions = {
   worktreeId?: string | null

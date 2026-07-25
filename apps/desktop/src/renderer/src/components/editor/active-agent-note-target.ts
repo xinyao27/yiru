@@ -12,10 +12,10 @@ import {
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
-import type { RuntimeTerminalListResult } from '../../../shared/runtime-types'
-import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
-import type { TerminalLayoutSnapshot } from '../../../shared/types'
-import { resolveRuntimePaneTitleForLeaf } from './runtime-pane-title-leaf-id'
+import type { RuntimeTerminalListResult } from '../../../../shared/runtime-types'
+import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
+import type { TerminalLayoutSnapshot } from '../../../../shared/types'
+import { resolveRuntimePaneTitleForLeaf } from '../../lib/runtime-pane-title-leaf-id'
 
 const ACTIVE_AGENT_PROBE_RPC_TIMEOUT_MS = 3000
 const ACTIVE_AGENT_TERMINAL_LIST_LIMIT = 200

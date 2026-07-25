@@ -1,9 +1,9 @@
 import { toast } from 'sonner'
 
+import { findGithubPrWorkspaceAttachment } from '@/components/editor/github-work-item-workspace-attachment'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { findGithubPrWorkspaceAttachment } from '@/lib/github-work-item-workspace-attachment'
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
@@ -16,18 +16,18 @@ import { planAgentCliArgsSuffix } from '@/lib/tui-agent-startup'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { useAppStore } from '@/store'
 
-import { resolveSourceControlActionRecipe } from '../../../shared/source-control-ai'
+import { resolveSourceControlActionRecipe } from '../../../../shared/source-control-ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   renderSourceControlActionCommandTemplate
-} from '../../../shared/source-control-ai-actions'
-import type { LaunchSource } from '../../../shared/telemetry-events'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
+} from '../../../../shared/source-control-ai-actions'
+import type { LaunchSource } from '../../../../shared/telemetry-events'
+import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type {
   GitHubWorkItem,
   TuiAgent,
   WorkspaceCreateTelemetrySource
-} from '../../../shared/types'
+} from '../../../../shared/types'
 
 type StartFixChecksAgentArgs = {
   repoId: string

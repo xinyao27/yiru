@@ -10,10 +10,10 @@ import {
   buildSanitizedTerminalLayoutsByTabId,
   buildTerminalSessionData,
   type WorkspaceSessionSnapshot
-} from './workspace-session'
-import { buildLastVisitedAtByWorktreeId } from './workspace-session-focus-recency'
-import { buildSleepingAgentSessionData } from './workspace-session-sleeping-agents'
-import { buildPersistedUnifiedTabSessionData } from './workspace-session-unified-tabs'
+} from '../components/editor/workspace-session'
+import { buildLastVisitedAtByWorktreeId } from '../components/editor/workspace-session-focus-recency'
+import { buildSleepingAgentSessionData } from '../components/editor/workspace-session-sleeping-agents'
+import { buildPersistedUnifiedTabSessionData } from '../components/editor/workspace-session-unified-tabs'
 
 type SessionRelevantField = keyof WorkspaceSessionSnapshot
 

@@ -4,7 +4,7 @@ import type { Disposable } from 'vscode-jsonrpc/browser'
 import {
   normalizeLanguageServerSettings,
   type LanguageServerSettings
-} from '../../../shared/language-server'
+} from '../../../../shared/language-server'
 import type { LanguageServerDocumentAttachment } from './language-server-document-attachment'
 import type {
   LanguageServerManagerSnapshot,

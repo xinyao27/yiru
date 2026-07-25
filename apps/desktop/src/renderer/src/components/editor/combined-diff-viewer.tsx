@@ -18,6 +18,9 @@ more error-prone than keeping the whole viewer flow together. */
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import { getDiffCommentLineLabel } from '@/components/editor/diff-comment-compat'
+import { formatDiffComments } from '@/components/editor/diff-comments-format'
+import { setWithLRU } from '@/components/editor/scroll-cache'
 import type { OpenFile } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
 import {
@@ -38,12 +41,9 @@ import { getVirtualizedScrollAnchorForOffset } from '@/hooks/virtualized-scroll-
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getConnectionIdForFile } from '@/lib/connection-context'
-import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
-import { formatDiffComments } from '@/lib/diff-comments-format'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
-import { setWithLRU } from '@/lib/scroll-cache'
-import '@/lib/monaco-setup'
+import '@/components/editor/monaco-setup'
 import { writeRuntimeFile } from '@/runtime/file-client'
 import {
   getRuntimeGitBranchDiff,

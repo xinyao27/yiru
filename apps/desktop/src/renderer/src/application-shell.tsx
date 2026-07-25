@@ -85,9 +85,20 @@ import { useAutomationDispatchEvents } from './components/automations/use-automa
 import { ConfirmationDialogProvider } from './components/confirmation-dialog'
 import { CrashReportDialog } from './components/crash-report/dialog'
 import RetainedAgentsSyncGate from './components/dashboard/retained-agents-sync-gate'
+import { applyDocumentTheme } from './components/editor/document-theme'
+import { getSelectedTextForFileSearch } from './components/editor/file-search-selection'
 import { LanguageServerWorkspaceEditDialog } from './components/editor/language-server-workspace-edit-dialog'
 import { MarkdownTemplatePicker } from './components/editor/markdown-template-picker'
 import { useEditorExternalWatch } from './components/editor/use-editor-external-watch'
+import {
+  buildWorkspaceSessionPayload,
+  shouldPersistWorkspaceSession
+} from './components/editor/workspace-session'
+import {
+  fetchWorkspaceSessionWithRuntimeHostOwners,
+  patchWorkspaceSessionByHost,
+  persistWorkspaceSessionByHostSync
+} from './components/editor/workspace-session-host-persistence'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
 import {
   getFeatureTipsAppOpenDecision,
@@ -146,9 +157,7 @@ import { useShortcutLabel } from './hooks/use-shortcut-label'
 import { useUnreadDockBadge } from './hooks/use-unread-dock-badge'
 import type { VirtualizedScrollAnchor } from './hooks/use-virtualized-scroll-anchor'
 import { resolveMountedLazyModalIds, type LazyModalId } from './lazy-modal-mount-state'
-import { applyDocumentTheme } from './lib/document-theme'
 import { isEditableTarget } from './lib/editable-target'
-import { getSelectedTextForFileSearch } from './lib/file-search-selection'
 import { createSessionWriteSubscriber } from './lib/session-write-subscriber'
 import {
   getStartupErrorFallbackUI,
@@ -157,15 +166,6 @@ import {
 import { getSystemPrefersDark } from './lib/terminal-theme'
 import { shouldShowWorktreeHistoryControls } from './lib/titlebar-worktree-history-controls'
 import { registerUpdaterBeforeUnloadBypass } from './lib/updater-beforeunload'
-import {
-  buildWorkspaceSessionPayload,
-  shouldPersistWorkspaceSession
-} from './lib/workspace-session'
-import {
-  fetchWorkspaceSessionWithRuntimeHostOwners,
-  patchWorkspaceSessionByHost,
-  persistWorkspaceSessionByHostSync
-} from './lib/workspace-session-host-persistence'
 import { collectFolderWorkspaceKeysFromSession } from './lib/workspace-session-hydration-keys'
 import {
   canSkipRuntimeMobileSessionSyncKeyBuild,

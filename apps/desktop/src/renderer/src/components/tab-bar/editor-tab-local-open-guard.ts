@@ -1,4 +1,4 @@
-import { isLocalPathOpenBlocked } from '@/lib/local-path-open-guard'
+import { isLocalPathOpenBlocked } from '@/components/editor/local-path-open-guard'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 
 import type { GlobalSettings } from '../../../../shared/types'

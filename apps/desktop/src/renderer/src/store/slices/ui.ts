@@ -934,7 +934,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
 
     const label = formatAgentTypeLabel(target.entry.agentType)
     const { activeAgentNotesSendFailureMessage, sendNotesToActiveAgentSession } =
-      await import('@/lib/active-agent-note-send')
+      await import('@/components/editor/active-agent-note-send')
     const result = await sendNotesToActiveAgentSession({
       state: get(),
       worktreeId: mode.worktreeId,

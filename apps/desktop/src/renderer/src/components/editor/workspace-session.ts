@@ -4,11 +4,11 @@ import type {
   PersistedOpenFile,
   WorkspaceSessionState,
   WorkspaceVisibleTabType
-} from '../../../shared/types'
-import { normalizeBrowserHistoryEntries } from '../../../shared/workspace-session-browser-history'
-import { pruneLocalTerminalScrollbackBuffers } from '../../../shared/workspace-session-terminal-buffers'
-import type { OpenFile } from '../components/editor/state'
-import type { AppState } from '../store'
+} from '../../../../shared/types'
+import { normalizeBrowserHistoryEntries } from '../../../../shared/workspace-session-browser-history'
+import { pruneLocalTerminalScrollbackBuffers } from '../../../../shared/workspace-session-terminal-buffers'
+import type { AppState } from '../../store'
+import type { OpenFile } from './state'
 import { buildLastVisitedAtByWorktreeId } from './workspace-session-focus-recency'
 import { buildActiveConnectionIdsAtShutdown } from './workspace-session-reconnect-targets'
 import { buildSleepingAgentSessionData } from './workspace-session-sleeping-agents'

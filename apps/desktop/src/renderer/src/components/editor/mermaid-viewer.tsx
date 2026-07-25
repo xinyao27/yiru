@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react'
 
-import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
+import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { useAppStore } from '@/store'
 
 import MermaidBlock from './mermaid-block'

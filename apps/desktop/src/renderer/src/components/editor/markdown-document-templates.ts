@@ -5,8 +5,8 @@ import {
   runtimePathExists
 } from '@/runtime/file-client'
 
-import type { DirEntry, GlobalSettings } from '../../../shared/types'
-import { basename, joinPath, normalizeRelativePath } from './path'
+import type { DirEntry, GlobalSettings } from '../../../../shared/types'
+import { basename, joinPath, normalizeRelativePath } from '../../lib/path'
 
 const MARKDOWN_TEMPLATE_ROOT = '.yiru/templates'
 const MARKDOWN_TEMPLATE_MAX_DEPTH = 8

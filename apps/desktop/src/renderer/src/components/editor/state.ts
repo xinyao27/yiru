@@ -9,19 +9,22 @@ import {
 /* eslint-disable max-lines */
 import type { StateCreator, StoreApi } from 'zustand'
 
+import { getConnectionIdForFileFromState } from '@/components/editor/connection-owner-resolution'
+import { openHttpLink, type HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '@/components/editor/local-path-open-guard'
+import { resolveMarkdownLinkTarget } from '@/components/editor/markdown-internal-links'
 import { translate } from '@/i18n/i18n'
 import {
   buildCheckRunDetailsTabId,
   getCheckRunDetailsTabLabel,
   type OpenCheckRunDetailsState
 } from '@/lib/check-run-details-tab'
-import { getConnectionIdForFileFromState } from '@/lib/connection-owner-resolution'
 import { createUntitledMarkdownFileWithTemplateSelection } from '@/lib/create-untitled-markdown'
-import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { detectLanguage } from '@/lib/language-detect'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
-import { resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
 import { joinPath } from '@/lib/path'
 import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/lib/push-target-upstream-refresh-cache'
 import { markSyncPushStageError } from '@/lib/source-control-remote-error'

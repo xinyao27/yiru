@@ -1,5 +1,5 @@
-import type { HttpLinkSourceOwner } from '@/lib/http-link-routing'
-import { resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
+import type { HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import { resolveMarkdownLinkTarget } from '@/components/editor/markdown-internal-links'
 
 export type RichMarkdownHtmlSuperscriptLinkContextSnapshot = {
   version: number

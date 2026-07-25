@@ -18,7 +18,7 @@ import type {
   LanguageServerSettings,
   LanguageServerStartArgs,
   LanguageServerStartResult
-} from '../../../shared/language-server'
+} from '../../../../shared/language-server'
 
 export type LanguageServerSessionTransport = {
   start: (args: LanguageServerStartArgs) => Promise<LanguageServerStartResult>

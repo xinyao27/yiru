@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { formatDiffComments } from '@/components/editor/diff-comments-format'
 import { translate } from '@/i18n/i18n'
-import { formatDiffComments } from '@/lib/diff-comments-format'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
 import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
 import { useAppStore } from '@/store'

@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react'
 
+import { getDiffCommentSource } from '@/components/editor/diff-comment-compat'
 import { getConnectionId } from '@/lib/connection-context'
-import { getDiffCommentSource } from '@/lib/diff-comment-compat'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
 import { stageRuntimeGitPath } from '@/runtime/git-client'

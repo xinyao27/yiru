@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/react'
 import { useLayoutEffect, type RefObject } from 'react'
 
-import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
+import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
 
 /**
  * Saves and restores scroll position for the rich markdown editor.

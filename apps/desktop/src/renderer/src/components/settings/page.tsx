@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
+import { applyDocumentTheme } from '@/components/editor/document-theme'
 import { useSkillFreshness } from '@/components/skills/use-skill-freshness'
 import { isMacUserAgent, isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
@@ -32,7 +33,6 @@ import {
   ORCHESTRATION_SKILL_NAME
 } from '@/lib/agent-feature-install-commands'
 import { cn } from '@/lib/class-names'
-import { applyDocumentTheme } from '@/lib/document-theme'
 import type {
   SettingsNavGroup,
   SettingsNavInstallStatus,

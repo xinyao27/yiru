@@ -1,7 +1,7 @@
 import type { editor } from 'monaco-editor'
 
+import { monaco } from '@/components/editor/monaco-setup'
 import { formatShortcutLabel } from '@/hooks/use-shortcut-label'
-import { monaco } from '@/lib/monaco-setup'
 import {
   PRIMARY_SELECTION_MAX_LENGTH,
   isPrimarySelectionEnabled,

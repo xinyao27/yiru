@@ -11,8 +11,8 @@ import type {
   Worktree,
   WorkspaceSessionPatch,
   WorkspaceSessionState
-} from '../../../shared/types'
-import { parseWorkspaceKey } from '../../../shared/workspace-scope'
+} from '../../../../shared/types'
+import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import {
   mergeWorkspaceSessionsFromHosts,
   splitWorkspaceSessionByHost,

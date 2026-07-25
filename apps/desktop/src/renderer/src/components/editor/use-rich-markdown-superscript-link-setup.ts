@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useState } from 'react'
 
-import { createConnectionIdForFileSelector } from '@/lib/connection-owner-resolution'
-import type { HttpLinkSourceOwner } from '@/lib/http-link-routing'
+import { createConnectionIdForFileSelector } from '@/components/editor/connection-owner-resolution'
+import type { HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 import { getIndexedWorktreeById } from '@/store/worktree-repo-index'

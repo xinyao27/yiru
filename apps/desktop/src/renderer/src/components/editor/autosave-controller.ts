@@ -4,12 +4,12 @@ avoids split-brain saves across visible and hidden editors. */
 import type { StoreApi } from 'zustand'
 
 import type { OpenFile } from '@/components/editor/state'
-import { getConnectionIdForFile } from '@/lib/connection-context'
 import {
   buildWorkspaceSessionPayload,
   shouldPersistWorkspaceSession
-} from '@/lib/workspace-session'
-import { persistWorkspaceSessionByHostSync } from '@/lib/workspace-session-host-persistence'
+} from '@/components/editor/workspace-session'
+import { persistWorkspaceSessionByHostSync } from '@/components/editor/workspace-session-host-persistence'
+import { getConnectionIdForFile } from '@/lib/connection-context'
 import { writeRuntimeFile } from '@/runtime/file-client'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import type { AppState } from '@/store'

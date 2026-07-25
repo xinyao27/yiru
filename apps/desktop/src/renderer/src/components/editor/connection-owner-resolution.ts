@@ -7,8 +7,8 @@ import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import type { AppState } from '@/store/types'
 import { getIndexedRepoMap, getIndexedWorktreeMap } from '@/store/worktree-repo-index'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
-import { parseWorkspaceKey } from '../../../shared/workspace-scope'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import {
   getFolderWorkspaceCandidateRepos,
   getFolderWorkspaceConnectionId

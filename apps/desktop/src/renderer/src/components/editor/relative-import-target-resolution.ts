@@ -5,7 +5,7 @@ import {
 } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
-import { getConnectionIdForFileFromState } from '@/lib/connection-owner-resolution'
+import { getConnectionIdForFileFromState } from '@/components/editor/connection-owner-resolution'
 import { basename, dirname, joinPath } from '@/lib/path'
 import {
   readRuntimeDirectory,

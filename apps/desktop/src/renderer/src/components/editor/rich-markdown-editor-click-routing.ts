@@ -3,13 +3,16 @@ import type { Editor } from '@tiptap/react'
 import type { MutableRefObject } from 'react'
 import { toast } from 'sonner'
 
-import { translate } from '@/i18n/i18n'
-import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
+import { openHttpLink, type HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '@/components/editor/local-path-open-guard'
 import {
   absolutePathToFileUri as toFileUrlForOsEscape,
   resolveMarkdownLinkTarget
-} from '@/lib/markdown-internal-links'
+} from '@/components/editor/markdown-internal-links'
+import { translate } from '@/i18n/i18n'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 
 import type { DiffComment } from '../../../../shared/types'

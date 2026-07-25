@@ -6,12 +6,12 @@ coordination so those invariants stay in one place. */
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 
+import { getCommentBodyLayoutLineCount } from '@/components/editor/comment-body-line-count'
+import { getDiffCommentLineLabel } from '@/components/editor/diff-comment-compat'
+import { formatDiffComments } from '@/components/editor/diff-comments-format'
 import { PhosphorIconContextProvider } from '@/components/phosphor-icon-context-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { getCommentBodyLayoutLineCount } from '@/lib/comment-body-line-count'
-import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
-import { formatDiffComments } from '@/lib/diff-comments-format'
 import { useAppStore } from '@/store'
 
 import type { DiffComment } from '../../../../shared/types'

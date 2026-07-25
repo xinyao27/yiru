@@ -3,17 +3,17 @@ import { resolveTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 
 import type { AppState } from '@/store/types'
 
-import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
-import type { TerminalTab } from '../../../shared/types'
-import { detectAgentSendTitleStatus } from './agent-send-title-status'
+import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
+import type { TerminalTab } from '../../../../shared/types'
+import { detectAgentSendTitleStatus } from '../../lib/agent-send-title-status'
 import {
   deriveRunningAgentSendTargets,
   type RunningAgentTargetState
-} from './running-agent-targets'
+} from '../../lib/running-agent-targets'
 import {
   resolveRuntimePaneTitleLeafResolution,
   type RuntimePaneTitleLeafResolution
-} from './runtime-pane-title-leaf-id'
+} from '../../lib/runtime-pane-title-leaf-id'
 
 export type NotesSendAgentTargetState = RunningAgentTargetState &
   Pick<AppState, 'runtimePaneTitlesByTabId'>

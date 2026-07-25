@@ -1,13 +1,13 @@
 import { Check, Copy } from '@phosphor-icons/react'
 
-import { Button } from '@/components/ui/button'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 import {
   formatMarkdownReviewNotes,
   getMarkdownReviewCardQuote,
   type MarkdownReviewNote
-} from '@/lib/markdown-review-notes'
+} from '@/components/editor/markdown-review-notes'
+import { Button } from '@/components/ui/button'
+import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 import type { DiffComment } from '../../../../shared/types'
 import { DiffCommentCard } from '../diff-comments/diff-comment-card'

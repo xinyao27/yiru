@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 
-import { copyMarkdownReviewNotesForAgent } from '@/lib/markdown-review-note-copy'
-import type { MarkdownReviewNote } from '@/lib/markdown-review-notes'
+import { copyMarkdownReviewNotesForAgent } from '@/components/editor/markdown-review-note-copy'
+import type { MarkdownReviewNote } from '@/components/editor/markdown-review-notes'
 
 type UseRichMarkdownReviewCopyFeedbackOptions = {
   markdownReviewContent: string

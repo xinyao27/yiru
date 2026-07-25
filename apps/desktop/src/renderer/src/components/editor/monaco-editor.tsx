@@ -8,16 +8,19 @@ handling, and editor-local UI overlays so split-pane state remains coherent. */
 import React, { useRef, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
+import { registerFileSearchSelectedTextProvider } from '@/components/editor/file-search-selection'
+import { resolveEditorFontFamily } from '@/components/editor/font-family'
+import { computeEditorFontSize } from '@/components/editor/font-zoom'
+import {
+  formatMarkdownReviewNotes,
+  type MarkdownReviewNote
+} from '@/components/editor/markdown-review-notes'
+import { resolveCursorThemeName } from '@/components/editor/monaco-setup'
+import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { isMarkdownComment } from '@/lib/diff-comment-compat'
-import { resolveEditorFontFamily } from '@/lib/editor-font-family'
-import { computeEditorFontSize } from '@/lib/editor-font-zoom'
-import { registerFileSearchSelectedTextProvider } from '@/lib/file-search-selection'
-import { formatMarkdownReviewNotes, type MarkdownReviewNote } from '@/lib/markdown-review-notes'
-import { resolveCursorThemeName } from '@/lib/monaco-setup'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/lib/scroll-cache'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 

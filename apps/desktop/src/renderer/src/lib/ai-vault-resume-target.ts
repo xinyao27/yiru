@@ -13,7 +13,7 @@ import type { AppState } from '@/store/types'
 
 import type { Repo } from '../../../shared/types'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { getFolderWorkspaceCandidateRepos } from './folder-workspace-connection'
+import { getFolderWorkspaceCandidateRepos } from '../components/editor/folder-workspace-connection'
 
 export type AiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'
 

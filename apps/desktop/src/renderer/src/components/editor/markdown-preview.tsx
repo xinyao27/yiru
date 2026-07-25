@@ -35,6 +35,27 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
 
+import { createConnectionIdForFileSelector } from '@/components/editor/connection-owner-resolution'
+import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
+import { computeEditorFontSize } from '@/components/editor/font-zoom'
+import { openHttpLink, type HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '@/components/editor/local-path-open-guard'
+import {
+  absolutePathToFileUri,
+  resolveMarkdownLinkTarget
+} from '@/components/editor/markdown-internal-links'
+import { copyMarkdownReviewNotesForAgent } from '@/components/editor/markdown-review-note-copy'
+import {
+  formatMarkdownReviewCardQuote,
+  formatMarkdownReviewNotes,
+  getMarkdownReviewCardQuote,
+  sortMarkdownReviewNotes,
+  type MarkdownReviewNote
+} from '@/components/editor/markdown-review-notes'
+import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -42,23 +63,8 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getConnectionIdForFile } from '@/lib/connection-context'
-import { createConnectionIdForFileSelector } from '@/lib/connection-owner-resolution'
-import { isMarkdownComment } from '@/lib/diff-comment-compat'
-import { computeEditorFontSize } from '@/lib/editor-font-zoom'
-import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { detectLanguage } from '@/lib/language-detect'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
-import { absolutePathToFileUri, resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
-import { copyMarkdownReviewNotesForAgent } from '@/lib/markdown-review-note-copy'
-import {
-  formatMarkdownReviewCardQuote,
-  formatMarkdownReviewNotes,
-  getMarkdownReviewCardQuote,
-  sortMarkdownReviewNotes,
-  type MarkdownReviewNote
-} from '@/lib/markdown-review-notes'
 import { dirname } from '@/lib/path'
-import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { statRuntimePath } from '@/runtime/file-client'
 import { settingsForRuntimeOwner } from '@/runtime/rpc-client'

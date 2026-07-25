@@ -2,11 +2,11 @@ import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
 import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import type { RefObject } from 'react'
 
+import { resolveCursorThemeName } from '@/components/editor/monaco-setup'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { resolveCursorThemeName } from '@/lib/monaco-setup'
 
 import { DiffCommentPopover } from '../diff-comments/diff-comment-popover'
 import { combinedDiffSectionScrollbarOptions } from './diff-editor-scrollbar-options'

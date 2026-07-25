@@ -5,8 +5,8 @@ import type { Tab, TabGroup, TerminalTab } from '../../../shared/types'
 import {
   buildSanitizedTabsByWorktree,
   buildSanitizedTerminalLayoutsByTabId
-} from './workspace-session'
-import { buildPersistedUnifiedTabSessionData } from './workspace-session-unified-tabs'
+} from '../components/editor/workspace-session'
+import { buildPersistedUnifiedTabSessionData } from '../components/editor/workspace-session-unified-tabs'
 
 const groupId = 'floating-group'
 

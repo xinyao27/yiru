@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 
-import { translate } from '@/i18n/i18n'
-import { isMarkdownComment } from '@/lib/diff-comment-compat'
+import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
 import {
   formatMarkdownReviewNotes,
   sortMarkdownReviewNotes,
   type MarkdownReviewNote
-} from '@/lib/markdown-review-notes'
+} from '@/components/editor/markdown-review-notes'
+import { translate } from '@/i18n/i18n'
 import { getRelativePathInsideRoot, normalizeRelativePath } from '@/lib/path'
 
 import type { DiffComment } from '../../../../shared/types'

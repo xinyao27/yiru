@@ -4,6 +4,16 @@ import { MultiFileDiff, type DiffLineAnnotation, type SelectedLineRange } from '
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import type { DecoratedDiffComment } from '@/components/diff-comments/use-diff-comment-decorator'
+import {
+  CURSOR_PIERRE_UNSAFE_CSS,
+  registerCursorPierreThemes
+} from '@/components/editor/cursor-pierre-theme'
+import {
+  CURSOR_DARK_THEME_NAME,
+  CURSOR_LIGHT_THEME_NAME
+} from '@/components/editor/cursor-theme-source'
+import { buildEditorFontFamily } from '@/components/editor/font-family'
+import { setWithLRU } from '@/components/editor/scroll-cache'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'
 import {
   ContextMenu,
@@ -14,10 +24,6 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import { translate } from '@/i18n/i18n'
-import { CURSOR_PIERRE_UNSAFE_CSS, registerCursorPierreThemes } from '@/lib/cursor-pierre-theme'
-import { CURSOR_DARK_THEME_NAME, CURSOR_LIGHT_THEME_NAME } from '@/lib/cursor-theme-source'
-import { buildEditorFontFamily } from '@/lib/editor-font-family'
-import { setWithLRU } from '@/lib/scroll-cache'
 
 import { PierreDiffCommentAnnotation } from './pierre-diff-comment-annotation'
 import { PierreDiffCommentComposer } from './pierre-diff-comment-composer'

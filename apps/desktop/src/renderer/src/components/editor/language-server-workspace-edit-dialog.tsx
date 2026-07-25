@@ -1,6 +1,10 @@
 import { FileCode, WarningCircle } from '@phosphor-icons/react'
 import React, { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 
+import {
+  languageServerWorkspaceEditController,
+  type LanguageServerWorkspaceEditRequest
+} from '@/components/editor/language-server-workspace-edit-controller'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,10 +18,6 @@ import {
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { detectLanguage } from '@/lib/language-detect'
-import {
-  languageServerWorkspaceEditController,
-  type LanguageServerWorkspaceEditRequest
-} from '@/lib/language-server-workspace-edit-controller'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import { useAppStore } from '@/store'
 

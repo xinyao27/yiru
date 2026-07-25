@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor'
 
-import { monacoLanguageServerManager } from '@/lib/monaco-language-server-manager'
+import { monacoLanguageServerManager } from '@/components/editor/monaco-language-server-manager'
 
 import {
   getImportModuleSpecifierAtPosition,
