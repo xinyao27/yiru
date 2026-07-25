@@ -18,7 +18,6 @@ inline apps/desktop/src/main/browser/browser-guest-ui.ts
 inline apps/desktop/src/main/browser/browser-manager.ts
 inline apps/desktop/src/main/browser/browser-screencast-stream.ts
 inline apps/desktop/src/main/browser/browser-session-registry.ts
-inline apps/desktop/src/main/browser/cdp-bridge.ts
 inline apps/desktop/src/main/browser/cdp-ws-proxy.ts
 inline apps/desktop/src/main/browser/grab-guest-script.ts
 inline apps/desktop/src/main/browser/snapshot-engine.ts

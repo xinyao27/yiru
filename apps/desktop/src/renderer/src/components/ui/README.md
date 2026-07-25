@@ -82,7 +82,6 @@ Import primitives directly from their module (`@/components/ui/button`), not thr
 | `dropdown-menu.tsx` | `DropdownMenu` family | Click-revealed action menus |
 | `context-menu.tsx` | `ContextMenu` family | Pointer context actions |
 | `dialog.tsx` | `Dialog` family | Blocking decisions and short modal forms |
-| `sheet.tsx` | `Sheet` family | Edge-attached panels |
 | `command.tsx` | `Command` family | Searchable actions and large option sets |
 
 `floating-surface-styles.ts`, `menu-item-styles.ts`, and `popover-content-ref.ts` are private implementation modules shared by these wrappers. Screens should import rendered primitives, not those modules.
