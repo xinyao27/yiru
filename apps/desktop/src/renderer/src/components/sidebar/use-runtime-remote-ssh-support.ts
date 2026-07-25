@@ -1,7 +1,7 @@
 import { EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import { useEffect, useState } from 'react'
 
-import { runtimeEnvironmentSupportsCapability } from '@/runtime/runtime-rpc-client'
+import { runtimeEnvironmentSupportsCapability } from '@/runtime/rpc-client'
 
 import type { RuntimeRemoteSshSupport } from './worktree-path-opening'
 

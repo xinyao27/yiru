@@ -43,7 +43,7 @@ import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut
 import { isIntentionalAppRestartInProgress } from '@/lib/updater-beforeunload'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { browserWorkspaceHasRemoteOwner } from '@/runtime/remote-browser-tab-ownership'
-import { isRemoteRuntimePtyId } from '@/runtime/runtime-terminal-inspection'
+import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import {
   activateWebRuntimeSessionTab,
   closeWebRuntimeSessionTab,
@@ -82,10 +82,10 @@ import {
   findActivityTerminalPortal,
   useActivityTerminalPortals,
   type ActivityTerminalPortalTarget
-} from './activity/activity-terminal-portal'
+} from './activity/terminal-portal'
 import { useBrowserAutomationVisibilityForAny } from './browser-pane/browser-automation-visibility'
 import BrowserPane from './browser-pane/browser-pane'
-import BrowserPaneOverlayLayer from './browser-pane/browser-pane-overlay-layer'
+import BrowserPaneOverlayLayer from './browser-pane/overlay-layer'
 import CodexRestartChip from './codex-restart-chip'
 import { useContextualTour } from './contextual-tours/use-contextual-tour'
 import {
@@ -94,21 +94,21 @@ import {
   YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT,
   type EditorRequestFileCloseDetail,
   requestEditorSaveQuiesce
-} from './editor/editor-autosave'
-import EditorAutosaveController from './editor/editor-autosave-controller-host'
-import EmulatorPaneOverlayLayer from './emulator-pane/emulator-pane-overlay-layer'
+} from './editor/autosave'
+import EditorAutosaveController from './editor/autosave-controller-host'
+import EmulatorPaneOverlayLayer from './emulator-pane/overlay-layer'
 import TabBar from './tab-bar/tab-bar'
 import { TAB_CONTENT_SURFACE_CLASSES } from './tab-bar/tab-chrome-classes'
 import { openTabBarEntry, type TabCreateEntryArgs } from './tab-bar/tab-create-entry-action'
 import AiVaultSessionDropLayer from './tab-group/ai-vault-session-drop-layer'
-import TabGroupSplitLayout from './tab-group/tab-group-split-layout'
+import TabGroupSplitLayout from './tab-group/split-layout'
+import TerminalPaneOverlayLayer from './terminal-pane/overlay-layer'
 import {
   getTerminalWorktreeColdParkRecheckDelayMs,
   selectColdParkedTerminalWorktrees,
   type TerminalWorktreeColdParkCandidate
 } from './terminal-pane/terminal-hidden-view-parking'
 import TerminalPane from './terminal-pane/terminal-pane'
-import TerminalPaneOverlayLayer from './terminal-pane/terminal-pane-overlay-layer'
 import {
   canWatcherCoverParkedTerminalTab,
   disposeAllParkedTerminalWatchers,
@@ -130,17 +130,17 @@ import {
 } from './terminal/background-terminal-worktree-mount'
 import { scheduleBackgroundTerminalWorktreeMeasure } from './terminal/background-terminal-worktree-visibility'
 import { shouldAutoCreateInitialTerminal } from './terminal/initial-terminal'
+import { terminalProviderHasAuthoritativeSnapshot } from './terminal/provider-snapshot-capability'
 import {
   getEffectiveLayoutForWorktree as getEffectiveLayout,
   anyMountedWorktreeHasLayout as computeAnyMountedWorktreeHasLayout
 } from './terminal/split-group-mount'
-import { terminalProviderHasAuthoritativeSnapshot } from './terminal/terminal-provider-snapshot-capability'
-import { closeTerminalTab } from './terminal/terminal-tab-actions'
+import { closeTerminalTab } from './terminal/tab-actions'
 import { appendUniqueOpenFileIds } from './terminal/unsaved-close-queue'
 import { useTerminalProviderSnapshotCapability } from './terminal/use-terminal-provider-snapshot-capability'
 import { setWindowCloseRequestHandler } from './window-close-request-coordinator'
 
-const EditorPanel = lazy(() => import('./editor/editor-panel'))
+const EditorPanel = lazy(() => import('./editor/panel'))
 
 // Why: after a close-dialog handler advances the queue and renders the next
 // dialog, gate new handler runs for this long so a stray carry-over click

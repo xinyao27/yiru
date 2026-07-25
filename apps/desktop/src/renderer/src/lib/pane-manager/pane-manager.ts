@@ -12,19 +12,6 @@ import { beginPaneDragFromPointerDown } from './pane-drag-pointer'
 import { cancelActivePaneDrag, createDragReorderState, handlePaneDrop } from './pane-drag-reorder'
 import { PaneIdentityRegistry } from './pane-identity-registry'
 import { createPaneDOM, openTerminal, setLigaturesEnabled, disposePane } from './pane-lifecycle'
-import { registerLivePaneManager, unregisterLivePaneManager } from './pane-manager-registry'
-/* eslint-disable max-lines -- Why: PaneManager keeps live pane lifecycle, drag, rendering, and identity callbacks under one owner. */
-import type {
-  PaneManagerOptions,
-  PaneStyleOptions,
-  ManagedPane,
-  ManagedPaneInternal,
-  PaneRenderingDiagnostics,
-  DropZone,
-  PaneExternalDropHandler,
-  PaneExternalDropResolver,
-  PaneExternalDropTarget
-} from './pane-manager-types'
 import { toPublicPane } from './pane-public-view'
 import {
   markPaneComplexScriptOutput,
@@ -49,7 +36,20 @@ import {
   refitPanesUnder
 } from './pane-tree-ops'
 import { rebuildAttachedWebgl } from './pane-webgl-reattach'
+import { registerLivePaneManager, unregisterLivePaneManager } from './registry'
 import { getTerminalWebglAutoDecision } from './terminal-webgl-auto-policy'
+/* eslint-disable max-lines -- Why: PaneManager keeps live pane lifecycle, drag, rendering, and identity callbacks under one owner. */
+import type {
+  PaneManagerOptions,
+  PaneStyleOptions,
+  ManagedPane,
+  ManagedPaneInternal,
+  PaneRenderingDiagnostics,
+  DropZone,
+  PaneExternalDropHandler,
+  PaneExternalDropResolver,
+  PaneExternalDropTarget
+} from './types'
 
 export type {
   PaneManagerOptions,

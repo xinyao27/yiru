@@ -7,8 +7,8 @@ import type { Repo } from '../../../../shared/types'
 import { getRepositoryGitAuthorSearchEntries } from './repository-git-author-search-entries'
 import { getRepositoryGitHooksSearchEntries } from './repository-git-hooks-search-entries'
 import { getRepositoryGitWorktreeSearchEntries } from './repository-git-worktree-search-entries'
-import type { SettingsSearchEntry } from './settings-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import type { SettingsSearchEntry } from './search'
+import { translateSearchKeyword } from './search-keywords'
 
 type RepositoryPaneSearchOptions = {
   isLocalWindowsProject?: boolean

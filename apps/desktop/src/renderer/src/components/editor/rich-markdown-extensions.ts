@@ -15,7 +15,7 @@ import { Markdown } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
 import { createLowlight, common } from 'lowlight'
 
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 
 import { DragSelectionGuard } from './drag-selection-guard'
 import {

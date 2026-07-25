@@ -2,7 +2,7 @@ import { Pencil, Play, Trash as Trash2 } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { SettingsSwitch } from '@/components/settings/settings-form-controls'
+import { SettingsSwitch } from '@/components/settings/form-controls'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

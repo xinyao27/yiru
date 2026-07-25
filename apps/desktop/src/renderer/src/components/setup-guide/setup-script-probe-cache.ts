@@ -1,7 +1,4 @@
-import {
-  INITIAL_SETUP_SCRIPT_PROBE_STATE,
-  type SetupScriptProbeState
-} from './setup-guide-progress-readiness'
+import { INITIAL_SETUP_SCRIPT_PROBE_STATE, type SetupScriptProbeState } from './progress-readiness'
 
 // Why: probe results are shared across every mounted setup-guide consumer so a
 // single bounded probe can settle readiness for all of them at once.

@@ -9,10 +9,10 @@ import { cn } from '@/lib/class-names'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import { useAppStore } from '@/store'
 
+import SidebarHeader from './header'
+import SidebarNav from './nav'
 import SetupScriptPromptCard from './setup-script-prompt-card'
-import SidebarHeader from './sidebar-header'
-import SidebarNav from './sidebar-nav'
-import SidebarToolbar from './sidebar-toolbar'
+import SidebarToolbar from './toolbar'
 import { useSidebarProjectDrop } from './use-sidebar-project-drop'
 import WorktreeList from './worktree-list'
 

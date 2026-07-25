@@ -1,4 +1,3 @@
-import type { ManagedPaneInternal } from './pane-manager-types'
 import { safeFit } from './pane-tree-ops'
 import { reattachWebglIfNeeded } from './pane-webgl-reattach'
 import {
@@ -8,6 +7,7 @@ import {
   markComplexScriptOutput,
   resetWebglTextureAtlas
 } from './pane-webgl-renderer'
+import type { ManagedPaneInternal } from './types'
 
 export function setPaneGpuRenderingState(
   panes: Map<number, ManagedPaneInternal>,

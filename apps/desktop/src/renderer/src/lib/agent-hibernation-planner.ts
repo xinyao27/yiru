@@ -5,7 +5,7 @@ import {
 } from '@yiru/workbench-model/agent'
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
-import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
+import { parseRemoteRuntimePtyId } from '@/runtime/terminal-stream'
 
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import type { GlobalSettings, TerminalLayoutSnapshot, TerminalTab } from '../../../shared/types'

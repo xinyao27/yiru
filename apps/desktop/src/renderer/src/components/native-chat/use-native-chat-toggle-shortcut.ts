@@ -7,12 +7,12 @@ import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
 
 import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import { canToggleNativeChat } from './native-chat-availability'
+import { canToggleNativeChat } from './availability'
 import {
   isNativeChatTabWideFallbackSafe,
   resolveNativeChatActiveLayoutLeafId
-} from './native-chat-leaf-routing'
-import { isMacPlatform, matchesNativeChatToggleShortcut } from './native-chat-shortcut'
+} from './leaf-routing'
+import { isMacPlatform, matchesNativeChatToggleShortcut } from './shortcut'
 
 export function resolveNativeChatToggleShortcutDetectedAgent({
   terminalTabId,

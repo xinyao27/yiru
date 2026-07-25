@@ -12,7 +12,7 @@ import {
 import { applyCodexSpriteTimingDefaults } from '../../../../shared/codex-pet-sprite-defaults'
 import type { CustomPet } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import { BUNDLED_PET, findBundledPet, isBundledPetId } from './pet-models'
+import { BUNDLED_PET, findBundledPet, isBundledPetId } from './models'
 
 // Re-export so existing callers (the store slice) that point at this module
 // keep working without knowing about the cache module split.

@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { getConnectionId } from '@/lib/connection-context'
 import { basename, dirname, joinPath } from '@/lib/path'
-import { copyRuntimePath, runtimePathExists } from '@/runtime/runtime-file-client'
+import { copyRuntimePath, runtimePathExists } from '@/runtime/file-client'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'
 import type { TreeNode } from './file-explorer-types'

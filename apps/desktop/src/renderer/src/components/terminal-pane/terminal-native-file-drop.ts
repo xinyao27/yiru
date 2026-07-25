@@ -9,7 +9,7 @@ import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-co
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { importExternalPathsToRuntime } from '@/runtime/runtime-file-client'
+import { importExternalPathsToRuntime } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
 import type { PtyTransport } from './pty-transport'

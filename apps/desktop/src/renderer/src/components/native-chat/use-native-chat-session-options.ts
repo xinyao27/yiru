@@ -8,17 +8,17 @@ import { readClaudeSessionOptionsFromTerminalScreen } from './claude-terminal-se
 import {
   createNativeChatPtySessionOptions,
   type NativeChatPtySessionOptionsSurface
-} from './native-chat-pty-session-options'
-import type { NativeChatSessionOptionDispatchCommand } from './native-chat-session-option-command-dispatch'
+} from './pty-session-options'
+import type { NativeChatSessionOptionDispatchCommand } from './session-option-command-dispatch'
 import {
   discoverNativeChatCatalogModels,
   resolveNativeChatModelDiscoveryContext
-} from './native-chat-session-option-discovery'
+} from './session-option-discovery'
 import {
   ensureNativeChatModelEnrichment,
   readNativeChatEnrichedModels,
   subscribeNativeChatEnrichedModels
-} from './native-chat-session-option-enrichment'
+} from './session-option-enrichment'
 
 const EMPTY_SNAPSHOT: SessionOptionDescriptor[] = []
 const subscribeEmpty = (): (() => void) => () => {}

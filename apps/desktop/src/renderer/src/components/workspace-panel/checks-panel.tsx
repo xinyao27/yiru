@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SpoolChecksPane } from '@/components/spool/spool-checks-pane'
+import { SpoolChecksPane } from '@/components/spool/checks-pane'
 
 import { useChecksPanelAgentActions } from './checks-panel-agent-actions'
 import { useChecksPanelChecksLoading } from './checks-panel-checks-loading'

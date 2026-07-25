@@ -18,15 +18,15 @@ import {
   getShowPinnedWorktreesInGroupsEntry
 } from './appearance-sidebar-search'
 import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from './appearance-usage-percentage-search'
-import { LeftSidebarAppearanceSetting } from './left-sidebar-appearance-setting'
-import { SearchableSetting } from './searchable-setting'
 import {
   SettingsRow,
   SettingsSegmentedControl,
   SettingsSubsectionHeader,
   SettingsSwitchRow
-} from './settings-form-controls'
-import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './settings-search'
+} from './form-controls'
+import { LeftSidebarAppearanceSetting } from './left-sidebar-appearance-setting'
+import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './search'
+import { SearchableSetting } from './searchable-setting'
 
 type AppearanceWindowSidebarSectionProps = {
   settings: GlobalSettings

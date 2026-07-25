@@ -3,7 +3,7 @@ import { GitMerge, HardDrives as Server } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
+import { RepoBadgeMark } from '@/components/repo/badge-label'
 import {
   Command,
   CommandEmpty,

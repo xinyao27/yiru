@@ -14,7 +14,7 @@ import {
 } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/floating-terminal-icon-context-menu'
+import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/icon-context-menu'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -54,8 +54,8 @@ import {
   fetchProviderAccountsSnapshot,
   selectClaudeProviderAccount,
   selectCodexProviderAccount
-} from '@/runtime/runtime-provider-accounts-client'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+} from '@/runtime/provider-accounts-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type {
   ProviderRateLimits,
@@ -73,20 +73,20 @@ import {
 } from '../../../../shared/usage-percentage-display'
 import { useAppStore } from '../../store'
 import { selectFloatingWorkspaceHasUnread } from '../../store/selectors'
+import { isStatusBarItemAvailable } from './agent-gating'
 import { summarizeCodexRestartStatus } from './codex-restart-status-summary'
-import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
-import { ProviderLetterBadge, ProviderUsageSegment } from './provider-usage-segment'
-import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-segment'
-import { SpoolAvailabilityStatusSegment } from './spool-availability-status-segment'
-import { isStatusBarItemAvailable } from './status-bar-agent-gating'
 import {
   STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS,
   shouldOpenStatusBarContextMenu
-} from './status-bar-context-menu-policy'
-import { getVisibleUsageProvider, isUsageEmptyState } from './status-bar-provider-visibility'
-import { StatusBarUsageEmptyCta } from './status-bar-usage-empty-cta'
+} from './context-menu-policy'
+import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
+import { ProviderLetterBadge, ProviderUsageSegment } from './provider-usage-segment'
+import { getVisibleUsageProvider, isUsageEmptyState } from './provider-visibility'
+import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-segment'
+import { SpoolAvailabilityStatusSegment } from './spool-availability-status-segment'
 import { ProviderPanel, barColor, clampUsedPercent, formatResetCreditExpiry } from './tooltip'
 import { UpdateStatusSegment } from './update-status-segment'
+import { StatusBarUsageEmptyCta } from './usage-empty-cta'
 import { UsagePercentageDisplayChangeNotice } from './usage-percentage-display-change-notice'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { getUsageProviderAccountsSectionId } from './usage-provider-settings-target'

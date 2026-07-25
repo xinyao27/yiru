@@ -13,8 +13,8 @@ import {
   resolveTerminalLigaturesEnabled
 } from '../../../../shared/terminal-ligatures'
 import type { GlobalSettings } from '../../../../shared/types'
+import { NumberField, SettingsRow, SettingsSegmentedControl } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { NumberField, SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
 import { getTerminalAdvancedTypographySearchEntries } from './terminal-typography-search'
 
 type TerminalAdvancedTypographyControlsProps = {

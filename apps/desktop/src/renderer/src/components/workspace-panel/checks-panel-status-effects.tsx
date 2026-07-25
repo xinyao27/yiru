@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/runtime-git-client'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/git-client'
 
 import {
   RUNTIME_SSH_STATUS_REFRESH_MS,

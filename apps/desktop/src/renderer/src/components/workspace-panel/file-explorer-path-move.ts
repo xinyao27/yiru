@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import { requestEditorSaveQuiesce } from '@/components/editor/editor-autosave'
+import { requestEditorSaveQuiesce } from '@/components/editor/autosave'
 import { getConnectionId } from '@/lib/connection-context'
 import { basename, dirname, joinPath } from '@/lib/path'
 import { remapOpenEditorTabsForPathChange } from '@/lib/remap-open-editor-tabs-for-path-change'
-import { renameRuntimePath } from '@/runtime/runtime-file-client'
+import { renameRuntimePath } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'

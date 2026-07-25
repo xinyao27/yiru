@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { cancelRuntimeGeneratePullRequestFields } from '@/runtime/runtime-git-client'
+import { cancelRuntimeGeneratePullRequestFields } from '@/runtime/git-client'
 import type {
   PullRequestFieldName,
   PullRequestFieldRevisions

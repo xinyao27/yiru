@@ -5,7 +5,7 @@ import {
   isPaneDropNoOp,
   showDropOverlay
 } from './pane-drag-reorder'
-import type { DropZone, ManagedPaneInternal, PaneExternalDropTarget } from './pane-manager-types'
+import type { DropZone, ManagedPaneInternal, PaneExternalDropTarget } from './types'
 
 const DRAG_THRESHOLD = 5
 

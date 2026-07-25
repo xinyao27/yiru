@@ -4,19 +4,19 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import { AndroidLogo, IosBrandIcon } from '../mobile/mobile-brand-icons'
+import { AndroidLogo, IosBrandIcon } from '../mobile/brand-icons'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { SettingsRow, SettingsSwitchRow } from './form-controls'
 import { MobileEmulatorAgentControlRow } from './mobile-emulator-agent-control-row'
 import { MobileEmulatorAvailabilityDetails } from './mobile-emulator-availability-details'
 import { getMobileEmulatorSearchEntries } from './mobile-emulator-search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSwitchRow } from './settings-form-controls'
 
 type SimulatorDeviceRow = {
   name: string

@@ -79,10 +79,10 @@ import {
 import { supportsNativeSidebarMaterial } from '../../shared/native-sidebar-material-support'
 import type { RemoteWorkspacePatchResult } from '../../shared/remote-workspace-types'
 import type { OnboardingState, UpdateStatus } from '../../shared/types'
-import { ActivityTitlebarControls } from './components/activity/activity-titlebar-controls'
+import { ActivityTitlebarControls } from './components/activity/titlebar-controls'
 import { AgentHibernationGate } from './components/agent-hibernation-gate'
 import { ConfirmationDialogProvider } from './components/confirmation-dialog'
-import { CrashReportDialog } from './components/crash-report/crash-report-dialog'
+import { CrashReportDialog } from './components/crash-report/dialog'
 import RetainedAgentsSyncGate from './components/dashboard/retained-agents-sync-gate'
 import { LanguageServerWorkspaceEditDialog } from './components/editor/language-server-workspace-edit-dialog'
 import { MarkdownTemplatePicker } from './components/editor/markdown-template-picker'
@@ -95,22 +95,22 @@ import {
   trackCmdJPaletteFeatureTipShown,
   trackYiruCliFeatureTipShown
 } from './components/feature-tips/feature-tip-telemetry'
-import { FloatingTerminalToggleButton } from './components/floating-terminal/floating-terminal-toggle-button'
+import { FloatingTerminalToggleButton } from './components/floating-terminal/toggle-button'
 import NewWorkspaceComposerModal from './components/new-workspace-composer-modal'
 import { shouldShowOnboarding } from './components/onboarding/should-show-onboarding'
 import { onOnboardingReopened } from './components/onboarding/show-onboarding-event'
-import { shouldRenderPetOverlay } from './components/pet/pet-overlay-visibility'
+import { shouldRenderPetOverlay } from './components/pet/overlay-visibility'
 import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
 import { WorkspacePortScanner } from './components/ports/workspace-port-scanner'
 import { installRendererCommandToasts } from './components/renderer-command-toasts'
 import Sidebar from './components/sidebar/index'
-import { SidebarWorkspaceSearchButton } from './components/sidebar/sidebar-workspace-search-button'
+import { SidebarWorkspaceSearchButton } from './components/sidebar/workspace-search-button'
 import { SkillFreshnessNudge } from './components/skills/skill-freshness-nudge'
 import { SkillFreshnessUpdateDialog } from './components/skills/skill-freshness-update-dialog'
-import { SpoolControlRequestDialog } from './components/spool/spool-control-request-dialog'
+import { SpoolControlRequestDialog } from './components/spool/control-request-dialog'
 import { StarNagCard } from './components/star-nag-card'
-import { StarNagAgentValueMomentObserver } from './components/star-nag/star-nag-agent-value-moment-observer'
-import { StarNagToastHost } from './components/star-nag/star-nag-toast-host'
+import { StarNagAgentValueMomentObserver } from './components/star-nag/agent-value-moment-observer'
+import { StarNagToastHost } from './components/star-nag/toast-host'
 import RecentTabSwitcher from './components/tab-bar/recent-tab-switcher'
 import { TelemetryFirstLaunchSurface } from './components/telemetry-first-launch-surface'
 import PinnedTabCloseDialog from './components/terminal-pane/pinned-tab-close-dialog'
@@ -177,12 +177,12 @@ import {
 } from './runtime/sync-runtime-graph'
 import { shutdownBufferCaptures } from './runtime/terminal-shutdown-buffer-captures'
 import { useWebSessionTabsSync } from './runtime/web-session-tabs-sync'
-import { reconnectSshTargetForRendererStartup } from './startup/ssh-startup-reconnect'
 import {
   logRendererStartupDiagnostic,
   timeRendererStartupStep,
   timeRendererStartupSyncStep
-} from './startup/startup-diagnostics'
+} from './startup/diagnostics'
+import { reconnectSshTargetForRendererStartup } from './startup/ssh-startup-reconnect'
 import { useAppStore } from './store'
 import { selectActiveTerminalChromeState } from './store/active-terminal-chrome-selector'
 import { selectFloatingVisibleTabCount } from './store/selectors'
@@ -345,28 +345,24 @@ function WindowControls(): React.JSX.Element {
 }
 
 const Landing = lazy(() => import('./components/landing-page'))
-const WorktreeCreationPanel = lazy(
-  () => import('./components/worktree-creation/worktree-creation-panel')
-)
-const AutomationsPage = lazy(() => import('./components/automations/automations-page'))
-const ActivityPrototypePage = lazy(() => import('./components/activity/activity-prototype-page'))
-const Settings = lazy(() => import('./components/settings/settings-page'))
-const SkillsPage = lazy(() => import('./components/skills/skills-page'))
-const WorkspaceSpacePage = lazy(() => import('./components/workspace-space/workspace-space-page'))
-const MobilePage = lazy(() => import('./components/mobile/mobile-page'))
+const WorktreeCreationPanel = lazy(() => import('./components/worktree-creation/panel'))
+const AutomationsPage = lazy(() => import('./components/automations/page'))
+const ActivityPrototypePage = lazy(() => import('./components/activity/prototype-page'))
+const Settings = lazy(() => import('./components/settings/page'))
+const SkillsPage = lazy(() => import('./components/skills/page'))
+const WorkspaceSpacePage = lazy(() => import('./components/workspace-space/page'))
+const MobilePage = lazy(() => import('./components/mobile/page'))
 const QuickOpen = lazy(() => import('./components/quick-open'))
 const WorktreeJumpPalette = lazy(() => import('./components/worktree-jump-palette'))
-const WorkspaceCleanupDialog = lazy(
-  () => import('./components/workspace-cleanup/workspace-cleanup-dialog')
-)
+const WorkspaceCleanupDialog = lazy(() => import('./components/workspace-cleanup/dialog'))
 const Terminal = lazy(() => import('./components/terminal-workspace'))
-const SpoolWorkspaceSurface = lazy(() => import('./components/spool/spool-workspace-surface'))
+const SpoolWorkspaceSurface = lazy(() => import('./components/spool/workspace-surface'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
-const SetupGuideModal = lazy(() => import('./components/setup-guide/setup-guide-modal'))
-const FeatureWallModal = lazy(() => import('./components/feature-wall/feature-wall-modal'))
-const FeatureTipsModal = lazy(() => import('./components/feature-tips/feature-tips-modal'))
+const SetupGuideModal = lazy(() => import('./components/setup-guide/modal'))
+const FeatureWallModal = lazy(() => import('./components/feature-wall/modal'))
+const FeatureTipsModal = lazy(() => import('./components/feature-tips/modal'))
 const AddRepoDialog = lazy(() => import('./components/sidebar/add-repo-dialog'))
 const NonGitFolderDialog = lazy(() => import('./components/sidebar/non-git-folder-dialog'))
 const AddProjectFromFolderDialog = lazy(
@@ -375,7 +371,7 @@ const AddProjectFromFolderDialog = lazy(
 const ProjectAddedDialog = lazy(() => import('./components/sidebar/project-added-dialog'))
 const DeleteWorktreeDialog = lazy(() => import('./components/sidebar/delete-worktree-dialog'))
 const DictationController = lazy(() =>
-  import('./components/dictation/dictation-controller').then((module) => ({
+  import('./components/dictation/controller').then((module) => ({
     default: module.DictationController
   }))
 )
@@ -396,22 +392,22 @@ const ContextualTourOverlay = lazy(() =>
   }))
 )
 const SetupGuideTelemetryObserver = lazy(() =>
-  import('./components/setup-guide/setup-guide-telemetry-observer').then((module) => ({
+  import('./components/setup-guide/telemetry-observer').then((module) => ({
     default: module.SetupGuideTelemetryObserver
   }))
 )
 const FloatingTerminalPanel = lazy(() =>
-  import('./components/floating-terminal/floating-terminal-panel').then((module) => ({
+  import('./components/floating-terminal/panel').then((module) => ({
     default: module.FloatingTerminalPanel
   }))
 )
 // Why: lazy-loaded so the WebP asset + overlay module aren't fetched unless
 // the user opts into the experimental flag.
-const PetOverlay = lazy(() => import('./components/pet/pet-overlay'))
+const PetOverlay = lazy(() => import('./components/pet/overlay'))
 // Why: lazy so onboarding's step modules + assets aren't fetched for users
 // past first-launch. The gate `shouldShowOnboarding` lives in its own tiny
 // module so no eager import path pulls OnboardingFlow into the main chunk.
-const OnboardingFlow = lazy(() => import('./components/onboarding/onboarding-flow'))
+const OnboardingFlow = lazy(() => import('./components/onboarding/flow'))
 
 function applyRemoteWorkspacePatchStatus(
   targetId: string,

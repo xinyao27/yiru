@@ -9,9 +9,9 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
 import { getFloatingWorkspaceSearchEntries } from './floating-workspace-search'
+import { SettingsRow, SettingsSwitchRow } from './form-controls'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSwitchRow } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 type FloatingWorkspacePaneProps = {
   settings: GlobalSettings

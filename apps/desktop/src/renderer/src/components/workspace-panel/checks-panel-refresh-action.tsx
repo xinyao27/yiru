@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/runtime-git-client'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 import { buildGitHubPRRefreshStateClearToken } from '@/store/slices/github'
 import { refreshHostedReviewCard } from '@/store/slices/hosted-review'

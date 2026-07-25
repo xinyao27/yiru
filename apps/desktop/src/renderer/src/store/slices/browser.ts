@@ -21,10 +21,10 @@ import {
   callRuntimeRpc,
   getActiveRuntimeTarget,
   type RuntimeClientTarget
-} from '@/runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+} from '@/runtime/rpc-client'
 import { createWebSessionBrowserTabCommand } from '@/runtime/web-session-commands'
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
 import { GRAB_BUDGET, type BrowserPageAnnotation } from '../../../../shared/browser-grab-types'
 import { redactKagiSessionToken } from '../../../../shared/browser-url'

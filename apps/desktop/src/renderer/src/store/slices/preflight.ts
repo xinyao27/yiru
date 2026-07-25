@@ -5,7 +5,7 @@ import {
   localPreflightContextKey,
   type LocalPreflightContext
 } from '@/lib/local-preflight-context'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { PreflightRuntimeContext, PreflightStatus } from '../../../../preload/api-types'
 import type { AppState } from '../types'

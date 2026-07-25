@@ -2,7 +2,6 @@ import type { Terminal } from '@xterm/xterm'
 import { useCallback, useEffect, useRef } from 'react'
 
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import type { ScrollState } from '@/lib/pane-manager/pane-manager-types'
 import {
   cancelDeferredScrollRestore,
   captureScrollState,
@@ -13,6 +12,7 @@ import {
   getTerminalScrollIntentKind,
   markTerminalFollowOutput
 } from '@/lib/pane-manager/terminal-scroll-intent'
+import type { ScrollState } from '@/lib/pane-manager/types'
 
 type VisibleScrollSnapshot = {
   scrollState: ScrollState

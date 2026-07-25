@@ -6,8 +6,8 @@ import { getLeftSidebarAppearanceEntry, getSidebarEntries } from './appearance-s
 import { getStatusBarToggles } from './appearance-status-bar-search'
 import { getMenuBarIconEntries, getSystemTrayEntries } from './appearance-system-presence-search'
 import { getUsagePercentageDisplayEntry } from './appearance-usage-percentage-search'
-import type { SettingsSearchEntry } from './settings-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import type { SettingsSearchEntry } from './search'
+import { translateSearchKeyword } from './search-keywords'
 import { getTerminalAppearanceSearchEntries } from './terminal-search'
 
 export {

@@ -11,8 +11,8 @@ import { Label } from '../ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { AdvancedNetworkSettingsSection } from './advanced-network-settings-section'
 import { getAdvancedPaneSearchEntries, getAdvancedSearchEntry } from './advanced-search'
+import { SettingsSubsectionHeader, SettingsSwitch } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader, SettingsSwitch } from './settings-form-controls'
 
 export { getAdvancedPaneSearchEntries }
 

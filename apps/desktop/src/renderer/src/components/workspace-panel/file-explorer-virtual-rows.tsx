@@ -3,7 +3,7 @@ import React from 'react'
 
 import { cn } from '@/lib/class-names'
 import { dirname, normalizeRelativePath } from '@/lib/path'
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 
 import type { GitFileStatus } from '../../../../shared/types'
 import { FileExplorerRow, InlineInputRow, type InlineInput } from './file-explorer-row'

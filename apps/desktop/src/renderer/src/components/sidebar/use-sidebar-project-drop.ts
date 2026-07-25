@@ -13,7 +13,7 @@ import {
   getSidebarProjectDropAffordance,
   isRemoteRuntimeActive,
   resolveSidebarProjectDropPath
-} from './sidebar-project-drop'
+} from './project-drop'
 
 type SidebarProjectDropHandlers = {
   onDragEnter: (event: React.DragEvent<HTMLElement>) => void

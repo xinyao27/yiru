@@ -11,7 +11,7 @@ import { translate } from '@/i18n/i18n'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import { buildSidebarHostOptions } from '../sidebar/sidebar-host-options'
+import { buildSidebarHostOptions } from '../sidebar/host-options'
 import { BrowserDefaultZoomSetting } from './browser-default-zoom-setting'
 import {
   createBrowserHomePageDraftState,
@@ -27,7 +27,7 @@ import { BrowserSearchEngineSetting } from './browser-search-engine-setting'
 import { BrowserSessionCookiesSection } from './browser-session-cookies-section'
 import { BrowserUseSetup } from './browser-use-pane'
 import { getBrowserUsePaneSearchEntries } from './browser-use-search'
-import { matchesSettingsSearch } from './settings-search'
+import { matchesSettingsSearch } from './search'
 export { getBrowserPaneCombinedSearchEntries }
 
 type BrowserPaneProps = {

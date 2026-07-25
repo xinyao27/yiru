@@ -4,7 +4,7 @@ import {
   type SourceControlRemoteOpKind
 } from '@yiru/workbench-model/review'
 
-import { fetchRuntimeGit } from '@/runtime/runtime-git-client'
+import { fetchRuntimeGit } from '@/runtime/git-client'
 
 import { resolveSourceControlOperationOwner } from '../../../../shared/source-control-operation-owner'
 import type { GitPushTarget, GlobalSettings } from '../../../../shared/types'

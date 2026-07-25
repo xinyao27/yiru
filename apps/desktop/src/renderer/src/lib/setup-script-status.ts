@@ -1,4 +1,4 @@
-import type { HookCheckResult } from '@/runtime/runtime-hooks-client'
+import type { HookCheckResult } from '@/runtime/hooks-client'
 
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import type { Repo, RepoHookSettings } from '../../../shared/types'

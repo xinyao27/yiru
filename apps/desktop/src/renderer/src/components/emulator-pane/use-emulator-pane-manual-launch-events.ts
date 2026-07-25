@@ -6,7 +6,7 @@ import {
 } from '@/lib/simulator-launch-coordination'
 import { useAppStore } from '@/store'
 
-import type { EmulatorPaneSession } from './emulator-pane-types'
+import type { EmulatorPaneSession } from './types'
 
 type UseEmulatorPaneManualLaunchEventsArgs = {
   worktreeId: string

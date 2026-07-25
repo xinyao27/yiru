@@ -5,7 +5,7 @@ import {
   assertRuntimeEnvironmentCapability,
   callRuntimeRpc,
   type RuntimeClientTarget
-} from '@/runtime/runtime-rpc-client'
+} from '@/runtime/rpc-client'
 
 import type {
   LanguageServerDocumentUriArgs,

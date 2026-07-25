@@ -21,6 +21,8 @@ import { isTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-c
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import type { PtyTransport } from './pty-transport'
 import type { PaneCwdMap } from './resolve-split-cwd'
+import { recordCreatedTerminalPaneSplit } from './split-completion'
+import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'
 import { prepareAgentSessionContinuationFromPane } from './terminal-agent-session-continuation'
 import {
   copyAgentSessionContextFromPane,
@@ -30,8 +32,6 @@ import {
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import { copyTerminalHandleForPane } from './terminal-handle-copy'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
-import { recordCreatedTerminalPaneSplit } from './terminal-pane-split-completion'
-import { splitTerminalPaneWithInheritedCwd } from './terminal-pane-split-with-inherited-cwd'
 import {
   executeTerminalPastePlan,
   planTerminalPasteWithYield,

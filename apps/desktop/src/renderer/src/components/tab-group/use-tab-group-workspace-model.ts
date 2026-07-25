@@ -30,9 +30,9 @@ import {
 } from '../../runtime/web-runtime-session'
 import { useAppStore } from '../../store'
 import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
-import { requestEditorFileClose } from '../editor/editor-autosave'
+import { requestEditorFileClose } from '../editor/autosave'
 import { openTabBarEntry, type TabCreateEntryArgs } from '../tab-bar/tab-create-entry-action'
-import { closeTerminalTab } from '../terminal/terminal-tab-actions'
+import { closeTerminalTab } from '../terminal/tab-actions'
 
 export function recordTerminalTabGroupSplit(createdTerminal: TerminalTab | null | undefined): void {
   if (!createdTerminal) {

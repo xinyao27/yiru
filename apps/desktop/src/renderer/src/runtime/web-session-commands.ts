@@ -7,11 +7,11 @@ import type {
   RuntimeMobileSessionCreateTerminalResult
 } from '../../../shared/runtime-types'
 import type { TuiAgent } from '../../../shared/types'
-import { unwrapRuntimeRpcResult } from './runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
+import { unwrapRuntimeRpcResult } from './rpc-client'
 import { recordWebSessionCloseIntent } from './web-session-close-intent'
 import { recordWebSessionFocusIntent } from './web-session-focus-intent'
 import { isWebTerminalSurfaceTabId, toHostSessionTabId } from './web-terminal-surface-id'
+import { toRuntimeWorktreeSelector } from './worktree-selector'
 
 export type WebSessionCommandResult<T> =
   | { status: 'completed'; value: T }

@@ -5,7 +5,7 @@ import {
   cancelRuntimeGeneratePullRequestFields,
   generateRuntimePullRequestFields,
   type RuntimeGeneratePullRequestFieldsOverrides
-} from '@/runtime/runtime-git-client'
+} from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 import {
   createRunningPullRequestGenerationRecord,

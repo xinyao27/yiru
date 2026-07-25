@@ -4,8 +4,8 @@ import { translate } from '@/i18n/i18n'
 
 import type { TerminalShortcutPolicy } from '../../../../shared/keybindings'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { SettingsRow } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow } from './settings-form-controls'
 
 export function ShortcutTerminalPolicyControl({
   terminalShortcutPolicy,

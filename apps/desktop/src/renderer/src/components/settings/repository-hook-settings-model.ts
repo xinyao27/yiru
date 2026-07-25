@@ -6,7 +6,7 @@ import type {
   RepoHookSettings,
   SetupRunPolicy
 } from '../../../../shared/types'
-import { DEFAULT_REPO_HOOK_SETTINGS } from './settings-constants'
+import { DEFAULT_REPO_HOOK_SETTINGS } from './constants'
 
 export type PolicyOption<P> = { policy: P; label: string; description: string }
 export type LocalHookName = 'setup' | 'archive'

@@ -37,8 +37,8 @@ import { OrchestrationExampleDialog } from './orchestration-examples-dialog'
 import { getOrchestrationPaneSearchEntries } from './orchestration-search'
 import { OrchestrationSkillAgentCoverage } from './orchestration-skill-agent-coverage'
 import { OrchestrationSkillPromptDialog } from './orchestration-skill-prompt-dialog'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { matchesSettingsSearch } from './settings-search'
 
 const EXAMPLE_ICONS = {
   handoff: ArrowRightLeft,

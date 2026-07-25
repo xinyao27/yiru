@@ -5,8 +5,8 @@ import {
   getEditorSelfWriteHostId,
   recordSelfWrite,
   SELF_WRITE_REMOTE_TTL_MS
-} from '@/components/editor/editor-self-write-registry'
-import { readRuntimeFileContent, writeRuntimeFile } from '@/runtime/runtime-file-client'
+} from '@/components/editor/self-write-registry'
+import { readRuntimeFileContent, writeRuntimeFile } from '@/runtime/file-client'
 
 export class LanguageServerWorkspaceFiles {
   constructor(

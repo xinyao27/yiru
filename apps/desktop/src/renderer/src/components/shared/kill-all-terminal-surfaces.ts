@@ -6,10 +6,7 @@ import {
   type TerminalTabRetirementState
 } from '@/store/slices/terminal-tab-retirement'
 
-import {
-  closeTerminalTab,
-  type PrecomputedTerminalCloseState
-} from '../terminal/terminal-tab-actions'
+import { closeTerminalTab, type PrecomputedTerminalCloseState } from '../terminal/tab-actions'
 
 const CLOSE_BATCH_SIZE = 2
 

@@ -1,6 +1,6 @@
 import type React from 'react'
 
-import { SpoolWindowsFirewallNotice } from '@/components/spool/spool-windows-firewall-notice'
+import { SpoolWindowsFirewallNotice } from '@/components/spool/windows-firewall-notice'
 import { useAppStore } from '@/store'
 
 import { SpoolRemoteDesktopStatusRow } from './spool-remote-desktop-status-row'

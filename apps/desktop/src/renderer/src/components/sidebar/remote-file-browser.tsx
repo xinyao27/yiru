@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
-import { browseRuntimeServerDirectory } from '@/runtime/runtime-server-directory-browser'
+import { browseRuntimeServerDirectory } from '@/runtime/server-directory-browser'
 
 import {
   decideEnterAction,

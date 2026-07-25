@@ -8,16 +8,16 @@ import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { AppearanceAdvancedDisclosure } from './appearance-advanced-disclosure'
+import { SettingsRow, SettingsSubsectionHeader } from './form-controls'
+import { FontAutocomplete } from './form-controls'
 import { GhosttyImportModal } from './ghostty-import-modal'
-import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSubsectionHeader } from './settings-form-controls'
-import { FontAutocomplete } from './settings-form-controls'
 import {
   matchesSettingsSearch,
   normalizeSettingsSearchQuery,
   scoreSettingsSearch,
   type SettingsSearchEntry
-} from './settings-search'
+} from './search'
+import { SearchableSetting } from './searchable-setting'
 import { TerminalAdvancedTypographyControls } from './terminal-advanced-typography-controls'
 import { TerminalCursorAppearanceSection } from './terminal-cursor-appearance-section'
 import { TerminalFontSizeSetting } from './terminal-font-size-setting'

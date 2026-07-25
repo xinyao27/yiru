@@ -11,11 +11,11 @@ import { useAppStore } from '../../store'
 import { Label } from '../ui/label'
 import { EphemeralVmsExperimentalSetting } from './ephemeral-vms-experimental-setting'
 import { getExperimentalPaneSearchEntries, getExperimentalSearchEntry } from './experimental-search'
+import { NumberField, SettingsSwitch } from './form-controls'
 import { HiddenExperimentalGroup } from './hidden-experimental-group'
 import { NativeChatExperimentalSetting } from './native-chat-experimental-setting'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { NumberField, SettingsSwitch } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 export { getExperimentalPaneSearchEntries }
 

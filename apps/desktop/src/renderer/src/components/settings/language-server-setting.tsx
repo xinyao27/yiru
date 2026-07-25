@@ -11,8 +11,8 @@ import type { GlobalSettings } from '../../../../shared/types'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Textarea } from '../ui/textarea'
+import { SettingsSubsectionHeader, SettingsSwitchRow } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader, SettingsSwitchRow } from './settings-form-controls'
 
 type LanguageServerSettingProps = {
   settings: GlobalSettings

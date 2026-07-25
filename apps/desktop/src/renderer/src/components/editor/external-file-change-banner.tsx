@@ -5,13 +5,13 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { getConnectionIdForFile } from '@/lib/connection-context'
-import { readRuntimeFileContent } from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { readRuntimeFileContent } from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 
 import { getDiskBaselineSignature } from './diff-content-signature'
-import { trackExternalChangeConflictAction } from './editor-external-change-telemetry'
+import { trackExternalChangeConflictAction } from './external-change-telemetry'
 import { ExternalFileChangeCompareDialog } from './external-file-change-compare-dialog'
 
 // Why: when an external process (usually an agent) rewrites a file while the

@@ -10,14 +10,14 @@ import {
 } from '@/lib/terminal-theme'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import { SearchableSetting } from './searchable-setting'
 import {
   ColorField,
   SettingsSegmentedControl,
   SettingsSwitchRow,
   SettingsSubsectionHeader,
   ThemePicker
-} from './settings-form-controls'
+} from './form-controls'
+import { SearchableSetting } from './searchable-setting'
 import { TerminalSettingsPreview } from './terminal-settings-preview'
 import type { UseWarpThemeImportReturn } from './use-warp-theme-import'
 import { WarpThemeImportButton } from './warp-theme-import-button'

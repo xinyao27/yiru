@@ -1,13 +1,13 @@
 import type { StateCreator } from 'zustand'
 
 import { bumpProviderRuntimeSessionGeneration } from '@/lib/provider-runtime-context'
+import { assertRuntimeStatusCompatible } from '@/runtime/protocol-compat'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
-import { assertRuntimeStatusCompatible } from '@/runtime/runtime-protocol-compat'
 import {
   clearRuntimeCompatibilityCache,
   markRuntimeEnvironmentCompatible,
   unwrapRuntimeRpcResult
-} from '@/runtime/runtime-rpc-client'
+} from '@/runtime/rpc-client'
 
 import { normalizeLoaderStyle } from '../../../../shared/loader-style'
 import { normalizeOpenInApplications } from '../../../../shared/open-in-applications'

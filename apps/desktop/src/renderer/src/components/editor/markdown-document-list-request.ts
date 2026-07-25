@@ -1,7 +1,4 @@
-import {
-  listRuntimeMarkdownDocuments,
-  type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
+import { listRuntimeMarkdownDocuments, type RuntimeFileOperationArgs } from '@/runtime/file-client'
 
 import type { MarkdownDocument } from '../../../../shared/types'
 

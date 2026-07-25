@@ -4,7 +4,7 @@ import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
 } from '@/lib/worktree-runtime-owner'
-import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
+import { parseRemoteRuntimePtyId } from '@/runtime/terminal-stream'
 
 import type { AppState } from '../types'
 

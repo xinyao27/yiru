@@ -1,7 +1,7 @@
 import { cn } from '@/lib/class-names'
 
 import { attachDividerDrag, disposeDividerDrag, type DividerCallbacks } from './pane-divider-drag'
-import type { PaneStyleOptions, ManagedPaneInternal } from './pane-manager-types'
+import type { PaneStyleOptions, ManagedPaneInternal } from './types'
 export { createDividerFlexFrameScheduler } from './pane-divider-drag'
 
 // ---------------------------------------------------------------------------

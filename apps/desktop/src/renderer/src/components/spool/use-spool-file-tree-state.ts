@@ -4,9 +4,9 @@ import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 
 import type { SpoolFileListResult } from '../../../../shared/spool/spool-operation-contract'
-import { parseSpoolFileListResult } from './spool-owner-result-validation'
-import { invokeSpoolWorkspaceRead, SpoolWorkspaceOperationError } from './spool-workspace-operation'
-import { getSpoolWorktreeRouteKey, type SpoolWorktreeRoute } from './spool-worktree-route'
+import { parseSpoolFileListResult } from './owner-result-validation'
+import { invokeSpoolWorkspaceRead, SpoolWorkspaceOperationError } from './workspace-operation'
+import { getSpoolWorktreeRouteKey, type SpoolWorktreeRoute } from './worktree-route'
 
 export function useSpoolFileTreeState(operationRoute: SpoolWorktreeRoute): {
   expanded: ReadonlySet<string>

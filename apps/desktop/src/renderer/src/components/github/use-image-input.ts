@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 
-import { getGitHubMarkdownImageUrlState } from './github-markdown-image-url'
+import { getGitHubMarkdownImageUrlState } from './markdown-image-url'
 
 export function useImageInput(
   editorRef: React.MutableRefObject<Editor | null>,

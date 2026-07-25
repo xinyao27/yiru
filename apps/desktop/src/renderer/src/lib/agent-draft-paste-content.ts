@@ -4,7 +4,7 @@ import {
   normalizeTerminalPasteLineEndings,
   wrapTerminalBracketedPasteText
 } from '@/lib/terminal-bracketed-paste'
-import { sendRuntimePtyInputVerified } from '@/runtime/runtime-terminal-inspection'
+import { sendRuntimePtyInputVerified } from '@/runtime/terminal-inspection'
 
 import type { GlobalSettings } from '../../../shared/types'
 

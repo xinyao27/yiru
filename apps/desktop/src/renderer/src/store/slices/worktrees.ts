@@ -73,9 +73,9 @@ import {
   getActiveRuntimeTarget,
   isRuntimeScopeForbiddenError,
   RuntimeRpcCallError
-} from '../../runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-selector'
+} from '../../runtime/rpc-client'
 import { disposeRemovedWorktreeParkedTerminalWatchers } from '../../runtime/terminal-parked-watcher-registry'
+import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
 import type { AppState } from '../types'
 import { moveFocusToRendererBeforeFocusedWebviewHidden } from './browser-webview-cleanup'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'

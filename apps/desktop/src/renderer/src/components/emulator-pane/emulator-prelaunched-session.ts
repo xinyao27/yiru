@@ -3,7 +3,7 @@ import {
   simulatorPreviewStreamUrl,
   type EmulatorPaneSession,
   type EmulatorStreamInfo
-} from './emulator-pane-types'
+} from './types'
 
 export type PrelaunchedEmulatorSessionState = {
   selectedUdid: string | null

@@ -3,9 +3,9 @@ import type React from 'react'
 
 import { translate } from '@/i18n/i18n'
 
+import { SidebarDisclosure } from './disclosure'
+import { SidebarProjectHeader } from './project-header'
 import { ProjectHeaderActions } from './project-header-actions'
-import { SidebarDisclosure } from './sidebar-disclosure'
-import { SidebarProjectHeader } from './sidebar-project-header'
 import { WORKTREE_SECTION_HEADER_PADDING_LEFT } from './worktree-list-indentation'
 
 export function SpoolRemoteWorktreesHeader({

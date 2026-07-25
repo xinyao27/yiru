@@ -9,8 +9,8 @@ import {
   getSettingsForWorktreeRuntimeOwner,
   type WorktreeRuntimeOwnerState
 } from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
 import type { RuntimeTerminalListResult } from '../../../shared/runtime-types'
 import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'

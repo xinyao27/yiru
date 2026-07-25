@@ -1,8 +1,8 @@
 import type { ParsedExecutionHost } from '@yiru/workbench-model/workspace'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { RuntimeClientTarget } from '@/runtime/runtime-rpc-client'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import type { RuntimeClientTarget } from '@/runtime/rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { ProjectSourceContext } from '../../../shared/project-source-context'
 import { getProjectSourceRuntimeSettings } from '../../../shared/project-source-context'

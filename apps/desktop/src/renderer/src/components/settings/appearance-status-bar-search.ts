@@ -4,7 +4,7 @@ import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 import type { StatusBarItem } from '../../../../shared/types'
 import { getAntigravityStatusBarToggleSearchEntry } from './appearance-status-bar-antigravity-toggle-search'
 import { getGrokStatusBarToggleSearchEntry } from './appearance-status-bar-grok-toggle-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import { translateSearchKeyword } from './search-keywords'
 
 export const getStatusBarToggles = createLocalizedCatalog(
   (): readonly {

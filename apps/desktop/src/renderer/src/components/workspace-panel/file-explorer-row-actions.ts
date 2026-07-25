@@ -2,8 +2,8 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
-import { downloadRuntimeFolder } from '@/runtime/runtime-folder-download'
+import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '@/runtime/file-client'
+import { downloadRuntimeFolder } from '@/runtime/folder-download'
 
 import type { TreeNode } from './file-explorer-types'
 

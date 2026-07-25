@@ -1,7 +1,7 @@
 import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useRef, useState } from 'react'
 
-import { parseRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
+import { parseRemoteRuntimePtyId } from '@/runtime/terminal-stream'
 import { useAppStore } from '@/store'
 import { worktreeUsesRemoteConnection } from '@/store/slices/terminals'
 

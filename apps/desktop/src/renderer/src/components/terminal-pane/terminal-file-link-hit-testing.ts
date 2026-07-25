@@ -1,7 +1,7 @@
 import type { IBufferLine, IBufferRange } from '@xterm/xterm'
 
 import { extractTerminalFileLinkCandidates, resolveTerminalFileLink } from '@/lib/terminal-links'
-import { isRemoteRuntimeFileOperation } from '@/runtime/runtime-file-client'
+import { isRemoteRuntimeFileOperation } from '@/runtime/file-client'
 
 import { getTerminalFileContext, openDetectedFilePath } from './terminal-file-open-routing'
 import { getTerminalPathExistsCacheKey } from './terminal-path-exists-cache'

@@ -62,12 +62,6 @@ import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
 import { useAppStore } from '@/store'
 
-import { registerPendingEditorFlush } from './editor-pending-flush'
-import {
-  editorShortcutMatches,
-  installEditorSaveShortcut,
-  installMonacoEditorFindShortcut
-} from './editor-shortcuts'
 import { getIpynbCodeCellEditorHeight, getIpynbCodeCellPreviewLines } from './ipynb-code-cell-lines'
 import {
   deleteIpynbCell,
@@ -82,6 +76,12 @@ import {
   type IpynbOutputItem
 } from './ipynb-parse'
 import MonacoCodeExcerpt from './monaco-code-excerpt'
+import { registerPendingEditorFlush } from './pending-flush'
+import {
+  editorShortcutMatches,
+  installEditorSaveShortcut,
+  installMonacoEditorFindShortcut
+} from './shortcuts'
 
 type IpynbViewerProps = {
   content: string

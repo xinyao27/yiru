@@ -10,8 +10,8 @@ import {
 import type { GlobalSettings, Project, ProjectUpdateArgs } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { SettingsRow, SettingsSegmentedControl } from './form-controls'
 import type { ProjectRuntimeSessionSummary } from './repository-runtime-session-summary'
-import { SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
 
 type ProjectRuntimeSegment = LocalWindowsRuntimePreference['kind']
 

@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/agent-session-continuation-dialog'
-import { SpoolAgentsPane } from '@/components/spool/spool-agents-pane'
+import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
+import { SpoolAgentsPane } from '@/components/spool/agents-pane'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import {

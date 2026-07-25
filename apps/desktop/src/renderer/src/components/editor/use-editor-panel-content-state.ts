@@ -5,14 +5,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { getConnectionIdForFile, isWorktreeConnectionResolved } from '@/lib/connection-context'
 import { joinPath } from '@/lib/path'
-import { getRuntimeFileReadScope, readRuntimeFileContent } from '@/runtime/runtime-file-client'
+import { getRuntimeFileReadScope, readRuntimeFileContent } from '@/runtime/file-client'
 import {
   getRuntimeGitBranchDiff,
   getRuntimeGitCommitDiff,
   getRuntimeGitDiff,
   getRuntimeGitScope
-} from '@/runtime/runtime-git-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+} from '@/runtime/git-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 
@@ -21,12 +21,12 @@ import {
   WORKTREE_OWNER_NOT_READY_ERROR,
   type DiffContent,
   type FileContent
-} from './editor-panel-content-types'
+} from './panel-content-types'
 import {
   isReloadableSingleFileDiffTab,
   shouldReloadDiffOnGitStatusChange
-} from './editor-panel-diff-reload'
-import { canUseChangesModeForFile } from './editor-panel-file-mode'
+} from './panel-diff-reload'
+import { canUseChangesModeForFile } from './panel-file-mode'
 import {
   useEditorPanelExternalContentEvents,
   usePruneClosedEditorContent

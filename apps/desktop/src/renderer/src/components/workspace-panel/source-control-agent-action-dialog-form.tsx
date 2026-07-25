@@ -8,7 +8,7 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
-import AgentCombobox from '@/components/agent/agent-combobox'
+import AgentCombobox from '@/components/agent/combobox'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -30,7 +30,7 @@ import { cn } from '@/lib/class-names'
 import type { SourceControlLaunchActionId } from '../../../../shared/source-control-ai-actions'
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
-import { SourceControlActionVariableChips } from '../source-control/source-control-action-variable-chips'
+import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { sourceControlActionRecipeMatchesTarget } from './source-control-action-recipe-match'
 import type { SourceControlAgentScopeNote } from './source-control-agent-action-dialog-result'
 

@@ -2,14 +2,14 @@ import { useCallback, useRef, useState, type RefObject } from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import type { NativeChatComposerImageAttachment } from './native-chat-composer-field'
-import { setBoundedScopeCacheEntry } from './native-chat-composer-scope-cache'
+import type { NativeChatComposerImageAttachment } from './composer-field'
+import { setBoundedScopeCacheEntry } from './composer-scope-cache'
 import {
   formatNativeChatFileReference,
   nativeChatComposerTargetIsRemote,
   type NativeChatResolvedTarget
-} from './native-chat-composer-target'
-import { isNativeChatImageAttachmentPath } from './native-chat-image-paste'
+} from './composer-target'
+import { isNativeChatImageAttachmentPath } from './image-paste'
 
 export type UseNativeChatComposerAttachmentsArgs = {
   attachmentScopeKey: string

@@ -18,9 +18,9 @@ import { isMacPlatform } from '../terminal-pane/terminal-link-open-hints'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Slider } from '../ui/slider'
+import { SettingsSubsectionHeader, SettingsSwitchRow } from './form-controls'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader, SettingsSwitchRow } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 import { getTerminalRightClickToPasteSearchEntry } from './terminal-windows-search'
 
 type TerminalInteractionSectionProps = {

@@ -10,7 +10,7 @@ import {
   getRuntimeGitCommitCompare,
   getRuntimeGitRemoteCommitUrl,
   type RuntimeGitContext
-} from '@/runtime/runtime-git-client'
+} from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
 import type { GitHistoryItem } from '../../../../shared/git-history'

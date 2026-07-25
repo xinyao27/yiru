@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import { getRepoLucideIconOptions } from '../repo/repo-icon'
+import { getRepoLucideIconOptions } from '../repo/icon'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'

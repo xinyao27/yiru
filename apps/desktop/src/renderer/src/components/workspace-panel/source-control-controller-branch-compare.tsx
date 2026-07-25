@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { getRuntimeGitBranchCompare, getRuntimeGitHistory } from '@/runtime/runtime-git-client'
+import { getRuntimeGitBranchCompare, getRuntimeGitHistory } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
 import { shouldClearBranchCompareForMissingBase } from './source-control-base-ref'

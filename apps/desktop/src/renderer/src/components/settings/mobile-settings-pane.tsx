@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
+import { SettingsSwitchRow } from './form-controls'
 import { MobilePane } from './mobile-pane'
 import {
   getMobileOverviewSearchEntry,
@@ -11,7 +12,6 @@ import {
   getMobileSettingsPaneSearchEntries
 } from './mobile-settings-search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSwitchRow } from './settings-form-controls'
 export { getMobileSettingsPaneSearchEntries }
 
 export function MobileSettingsPane(): React.JSX.Element {

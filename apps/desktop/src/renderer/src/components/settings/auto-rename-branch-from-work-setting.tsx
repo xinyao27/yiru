@@ -18,14 +18,14 @@ import type {
 } from '../../../../shared/source-control-ai-types'
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import { SourceControlActionVariableChips } from '../source-control/source-control-action-variable-chips'
+import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { Button } from '../ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { Label } from '../ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { getAutoRenameBranchAdvancedSearchEntries } from './auto-rename-branch-search'
+import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './settings-search'
 
 type AutoRenameBranchFromWorkSettingProps = {
   settings: GlobalSettings

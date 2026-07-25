@@ -4,7 +4,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { getDiffCommentSource } from '@/lib/diff-comment-compat'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
-import { stageRuntimeGitPath } from '@/runtime/runtime-git-client'
+import { stageRuntimeGitPath } from '@/runtime/git-client'
 
 import type { DiffComment, GitBranchChangeEntry } from '../../../../shared/types'
 import type { SourceControlBranchCompareController } from './source-control-controller-branch-compare'

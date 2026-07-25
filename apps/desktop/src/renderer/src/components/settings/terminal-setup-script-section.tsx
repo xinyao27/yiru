@@ -2,8 +2,8 @@ import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings, SetupScriptLaunchMode } from '../../../../shared/types'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { SettingsRow, SettingsSubsectionHeader } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSubsectionHeader } from './settings-form-controls'
 
 type TerminalSetupScriptSectionProps = {
   settings: GlobalSettings

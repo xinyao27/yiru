@@ -7,7 +7,7 @@ import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel-content'
 import { WorkspacePanelEditorEmptyState } from './workspace-panel-editor-empty-state'
 
-const EditorPanel = lazy(() => import('../editor/editor-panel'))
+const EditorPanel = lazy(() => import('../editor/panel'))
 
 export function WorkspacePanelTabContent({
   panel,

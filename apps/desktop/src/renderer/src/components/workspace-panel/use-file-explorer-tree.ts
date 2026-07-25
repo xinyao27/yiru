@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useCallback, useRef, useState } from 'react'
 
-import { statRuntimePath } from '@/runtime/runtime-file-client'
+import { statRuntimePath } from '@/runtime/file-client'
 
 import {
   createFileExplorerDirLoadTracker,

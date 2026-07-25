@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SpoolGitPane } from '@/components/spool/spool-git-pane'
+import { SpoolGitPane } from '@/components/spool/git-pane'
 
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,

@@ -9,12 +9,12 @@ import type { ITerminalOptions } from '@xterm/xterm'
 import type { TerminalLeafId } from '../../../../shared/stable-pane-id'
 import { attachPaneDrag } from './pane-drag-pointer'
 import type { DragReorderCallbacks, DragReorderState } from './pane-drag-reorder'
-import type { ManagedPaneInternal, PaneManagerOptions } from './pane-manager-types'
 import { shouldFocusTerminalFromPanePointerDown } from './pane-pointer-focus'
 import { buildDefaultTerminalOptions } from './pane-terminal-options'
 import { ENABLE_WEBGL_RENDERER } from './pane-webgl-renderer'
 import { installGuardedLinkProviderRegistration } from './terminal-link-provider-guard'
 import { installWindowsCtrlAltChordRepair } from './terminal-windows-ctrl-alt-chord-classification'
+import type { ManagedPaneInternal, PaneManagerOptions } from './types'
 
 function getTerminalUrlOpenHint(): string {
   return navigator.userAgent.includes('Mac')

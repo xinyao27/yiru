@@ -9,7 +9,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '@/runtime/runtime-git-client'
+import { abortRuntimeGitMerge, abortRuntimeGitRebase } from '@/runtime/git-client'
 
 import type { GitConflictOperation } from '../../../../shared/types'
 import type { SourceControlRemoteActionsController } from './source-control-controller-remote-actions'

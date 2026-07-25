@@ -1,5 +1,5 @@
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 

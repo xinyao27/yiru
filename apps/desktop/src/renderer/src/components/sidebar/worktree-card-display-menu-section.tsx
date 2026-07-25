@@ -10,7 +10,7 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import type { WorktreeCardProperty } from '../../../../shared/types'
-import { getWorktreeCardPropertyOptions } from './sidebar-workspace-option-items'
+import { getWorktreeCardPropertyOptions } from './workspace-option-items'
 
 export function WorktreeCardDisplayMenuSection(): React.JSX.Element {
   const worktreeCardProperties = useAppStore((s) => s.worktreeCardProperties)

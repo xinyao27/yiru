@@ -45,10 +45,10 @@ import {
 } from '@/components/cmd-j/quick-actions'
 import { buildWorktreeChecksReviewIndex } from '@/components/cmd-j/worktree-checks-review-index'
 import { selectWorktreePaletteCacheInputs } from '@/components/cmd-j/worktree-palette-cache-inputs'
-import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
+import { RepoBadgeMark } from '@/components/repo/badge-label'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
+import { buildSidebarHostOptions } from '@/components/sidebar/host-options'
 import { buildImportedWorktreesCardCandidates } from '@/components/sidebar/imported-worktrees-card-candidates'
-import { buildSidebarHostOptions } from '@/components/sidebar/sidebar-host-options'
 import { sortWorktreesSmart } from '@/components/sidebar/smart-sort'
 import StatusIndicator from '@/components/sidebar/status-indicator'
 import {

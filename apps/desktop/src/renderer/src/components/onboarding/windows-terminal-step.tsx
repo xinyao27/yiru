@@ -16,7 +16,7 @@ import { cn } from '@/lib/class-names'
 import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import { SettingsSegmentedControl } from '../settings/settings-form-controls'
+import { SettingsSegmentedControl } from '../settings/form-controls'
 import { ShellIcon } from '../tab-bar/shell-icons'
 
 type WindowsTerminalStepProps = {

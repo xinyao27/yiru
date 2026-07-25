@@ -1,7 +1,7 @@
 import {
   inspectRuntimeTerminalProcess,
   sendRuntimePtyInputVerified
-} from '@/runtime/runtime-terminal-inspection'
+} from '@/runtime/terminal-inspection'
 
 import {
   isAgentForegroundWrapperProcess,

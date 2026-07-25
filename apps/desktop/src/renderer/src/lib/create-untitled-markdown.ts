@@ -4,7 +4,7 @@ import {
   deleteRuntimePath,
   runtimePathExists,
   writeRuntimeFile
-} from '../runtime/runtime-file-client'
+} from '../runtime/file-client'
 import { detectLanguage } from './language-detect'
 import {
   applyMarkdownTemplatePlaceholders,

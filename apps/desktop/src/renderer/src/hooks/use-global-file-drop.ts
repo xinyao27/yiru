@@ -13,7 +13,7 @@ import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
+} from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
 import {

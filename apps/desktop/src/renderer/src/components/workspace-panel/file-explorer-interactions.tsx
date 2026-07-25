@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'
-import { createNewTerminalTab } from '@/components/terminal/terminal-tab-create'
+import { createNewTerminalTab } from '@/components/terminal/tab-create'
 import { renameFileOnDisk } from '@/lib/rename-file'
 import { useAppStore } from '@/store'
 

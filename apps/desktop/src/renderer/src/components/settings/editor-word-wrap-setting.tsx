@@ -2,8 +2,8 @@ import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
+import { SettingsSegmentedControl } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSegmentedControl } from './settings-form-controls'
 
 type EditorWordWrapSettingProps = {
   settings: GlobalSettings

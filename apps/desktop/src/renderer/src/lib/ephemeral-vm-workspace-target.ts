@@ -2,7 +2,7 @@ import { PROJECT_HOST_SETUP_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/ca
 import { toRuntimeExecutionHostId, toSshExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import { translate } from '@/i18n/i18n'
-import { assertRuntimeEnvironmentCapability } from '@/runtime/runtime-rpc-client'
+import { assertRuntimeEnvironmentCapability } from '@/runtime/rpc-client'
 
 import {
   getEphemeralVmRecipeResultProjectRoot,

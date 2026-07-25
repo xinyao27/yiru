@@ -60,8 +60,8 @@ import {
 import { dirname } from '@/lib/path'
 import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { statRuntimePath } from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { statRuntimePath } from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 

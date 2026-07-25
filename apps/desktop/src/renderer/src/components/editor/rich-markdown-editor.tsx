@@ -5,7 +5,7 @@ import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 
 import type { DiffComment, MarkdownDocument } from '../../../../shared/types'
-import { registerPendingEditorFlush } from './editor-pending-flush'
+import { registerPendingEditorFlush } from './pending-flush'
 import {
   isRichMarkdownContextCommandTarget,
   runRichMarkdownContextCommand

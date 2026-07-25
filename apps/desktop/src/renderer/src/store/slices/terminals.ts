@@ -37,9 +37,7 @@ import {
   restorePtyDataHandlersAfterFailedShutdown,
   unregisterPtyDataHandlers
 } from '@/runtime/pty-handler-registry'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
-import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
 // Why: import the store-free registry, not terminal-parked-tab-watchers —
 // that module imports @/store, and a slice importing it would re-enter store
@@ -49,11 +47,13 @@ import {
   retireParkedTerminalTab
 } from '@/runtime/terminal-parked-watcher-registry'
 import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
+import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '@/runtime/terminal-stream'
 import {
   createWebSessionTerminalCommand,
   setWebSessionTabPropsCommand
 } from '@/runtime/web-session-commands'
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
 import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent-decorative-title-signature'
 import { deriveGeneratedTabTitle } from '../../../../shared/agent-tab-title'

@@ -2,7 +2,7 @@ import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/revi
 import { useCallback } from 'react'
 
 import { translate } from '@/i18n/i18n'
-import { generateRuntimePullRequestFields } from '@/runtime/runtime-git-client'
+import { generateRuntimePullRequestFields } from '@/runtime/git-client'
 
 import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
 import { resolveCreateReviewDraftTitle } from './create-review-draft-title'

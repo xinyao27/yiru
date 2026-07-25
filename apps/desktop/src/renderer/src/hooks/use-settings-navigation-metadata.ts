@@ -51,19 +51,19 @@ import { getMobileSettingsPaneSearchEntries } from '@/components/settings/mobile
 import { getNotificationsPaneSearchEntries } from '@/components/settings/notifications-search'
 import { getOrchestrationPaneSearchEntries } from '@/components/settings/orchestration-search'
 import { getPrivacyPaneSearchEntries } from '@/components/settings/privacy-search'
+import { buildSettingsProjectList } from '@/components/settings/project-list'
 import { getQuickCommandsPaneSearchEntries } from '@/components/settings/quick-commands-search'
 import { getRepositoryPaneSearchEntries } from '@/components/settings/repository-search'
 import {
   getRuntimeEnvironmentsSearchEntry,
   getWebRuntimeEnvironmentsSearchEntry
 } from '@/components/settings/runtime-environments-search'
-import { buildSettingsProjectList } from '@/components/settings/settings-project-list'
 import { getShortcutsPaneSearchEntries } from '@/components/settings/shortcuts-search'
 import { getSshPaneSearchEntries } from '@/components/settings/ssh-search'
 import { getTerminalPaneSearchEntries } from '@/components/settings/terminal-search'
 import { getVoicePaneSearchEntries } from '@/components/settings/voice-pane-search'
 import { YiruLogoSettingsIcon } from '@/components/settings/yiru-logo-settings-icon'
-import { getStatsPaneSearchEntries } from '@/components/stats/stats-search'
+import { getStatsPaneSearchEntries } from '@/components/stats/search'
 import { isMacUserAgent, isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
 import { translate } from '@/i18n/i18n'
 import type { SettingsNavSection } from '@/lib/settings-navigation-types'
@@ -72,7 +72,7 @@ import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
 } from '@/lib/windows-terminal-capabilities'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { getRepoKindLabel } from '../../../shared/repo-kind'

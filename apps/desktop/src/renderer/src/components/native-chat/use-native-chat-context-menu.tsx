@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 
-import { isMacPlatform, nativeChatToggleShortcutLabel } from './native-chat-shortcut'
+import { isMacPlatform, nativeChatToggleShortcutLabel } from './shortcut'
 
 type NativeChatContextMenuState = {
   open: boolean

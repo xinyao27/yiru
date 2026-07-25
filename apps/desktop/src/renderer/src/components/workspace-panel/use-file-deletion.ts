@@ -2,18 +2,11 @@ import { useCallback, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import {
-  requestEditorFileSave,
-  requestEditorSaveQuiesce
-} from '@/components/editor/editor-autosave'
+import { requestEditorFileSave, requestEditorSaveQuiesce } from '@/components/editor/autosave'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { dirname } from '@/lib/path'
-import {
-  deleteRuntimePath,
-  readRuntimeFileContent,
-  writeRuntimeFile
-} from '@/runtime/runtime-file-client'
+import { deleteRuntimePath, readRuntimeFileContent, writeRuntimeFile } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
 import { runBatchDeletion, selectDeletionRoots } from './file-explorer-batch-deletion'

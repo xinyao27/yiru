@@ -18,7 +18,7 @@ import {
 import { useLocalhostLabelRouteForPort } from '@/lib/workspace-port-localhost-label-selector'
 import { addressForPort } from '@/lib/workspace-port-urls'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import type { WorkspacePort } from '../../../../shared/workspace-ports'

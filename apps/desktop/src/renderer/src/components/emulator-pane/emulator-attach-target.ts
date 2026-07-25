@@ -1,4 +1,4 @@
-import { pickDefaultDevice, type SimulatorDeviceRow } from './emulator-pane-types'
+import { pickDefaultDevice, type SimulatorDeviceRow } from './types'
 
 type ResolveEmulatorAttachTargetArgs = {
   configuredDefaultUdid: string | null

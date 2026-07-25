@@ -1,8 +1,8 @@
 import type { Editor } from '@tiptap/core'
 
 import { getConnectionId } from '@/lib/connection-context'
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 
 export type RichMarkdownImageRuntimeContext = Omit<RuntimeFileOperationArgs, 'connectionId'> & {
   connectionId?: string | null

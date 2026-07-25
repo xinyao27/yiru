@@ -11,18 +11,18 @@ import {
   isExternalReloadableEditorTab,
   isWorkingTreeCombinedDiffTab,
   notifyEditorExternalFileChange
-} from '@/components/editor/editor-autosave'
-import { markFileChangedOnDisk } from '@/components/editor/editor-changed-on-disk-mark'
+} from '@/components/editor/autosave'
+import { markFileChangedOnDisk } from '@/components/editor/changed-on-disk-mark'
 import {
   clearSelfWrite,
   getEditorSelfWriteHostId,
   getRecentSelfWrite,
   type RecentSelfWrite
-} from '@/components/editor/editor-self-write-registry'
+} from '@/components/editor/self-write-registry'
 import { getExternalFileChangeRelativePath } from '@/components/workspace-panel/use-file-explorer-watch'
 import { basename, joinPath } from '@/lib/path'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '@/runtime/runtime-file-client'
+import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '@/runtime/file-client'
 import { useAppStore, type AppState } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'

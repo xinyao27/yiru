@@ -33,10 +33,10 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { RepoForkIndicator } from '@/components/repo/repo-fork-indicator'
-import { RepoIconGlyph } from '@/components/repo/repo-icon'
+import { RepoForkIndicator } from '@/components/repo/fork-indicator'
+import { RepoIconGlyph } from '@/components/repo/icon'
 import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'
-import { SpoolProjectVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
+import { SpoolProjectVisibilityDialog } from '@/components/spool/worktree-visibility-dialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -112,9 +112,11 @@ import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
 } from '../../../../shared/worktree-ownership'
+import { SidebarDisclosure } from './disclosure'
 import { getEmptyProjectPlaceholderRepoIds } from './empty-project-placeholder-repos'
 import { getFolderWorkspaceCardPrDisplay } from './folder-workspace-card-pr-display'
 import { useHostHeaderDrag } from './host-header-drag'
+import { buildSidebarHostOptions } from './host-options'
 import { HostSectionHeaderMenu } from './host-section-header-menu'
 import { orderHostSectionOptions } from './host-section-order'
 import { addHostSectionRows, type HostHeaderRow, type HostSectionRow } from './host-section-rows'
@@ -145,6 +147,7 @@ import { ProjectGroupDeleteDialog } from './project-group-delete-dialog'
 import { useProjectGroupHeaderDrag } from './project-group-header-drag'
 import { getSidebarOrderedProjectGroupHeaderIdsByBucket } from './project-group-header-drop'
 import { ProjectGroupNameDialog } from './project-group-name-dialog'
+import { SidebarProjectHeader } from './project-header'
 import { ProjectHeaderActions } from './project-header-actions'
 import { resolveProjectGroupHeaderColor } from './project-header-color'
 import { isRepoHeaderActionTarget, useRepoHeaderDrag } from './project-header-drag'
@@ -157,9 +160,6 @@ import {
   REPO_HEADER_ACTION_REVEAL_CLASS
 } from './repo-header-action-button-class'
 import { getRepoHeaderCreateState } from './repo-header-create-state'
-import { SidebarDisclosure } from './sidebar-disclosure'
-import { buildSidebarHostOptions } from './sidebar-host-options'
-import { SidebarProjectHeader } from './sidebar-project-header'
 import {
   buildAttentionByWorktree,
   hasFreshAttributedAgentStatus,

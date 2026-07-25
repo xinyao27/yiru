@@ -21,14 +21,14 @@ import type {
   SourceControlAiSettings
 } from '../../../../shared/source-control-ai-types'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
-import { getRuntimeGitScope } from '../../runtime/runtime-git-client'
+import { getRuntimeGitScope } from '../../runtime/git-client'
 import { useAppStore } from '../../store'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { HostedReviewCreationDefaults } from './hosted-review-creation-defaults'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
 import { getSettingOwnershipSummary } from './setting-ownership'
-import { matchesSettingsSearch } from './settings-search'
 import { SourceControlAiActionRecipeDefaults } from './source-control-ai-action-recipe-defaults'
 
 type CommitMessageAiPaneProps = {

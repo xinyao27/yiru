@@ -16,12 +16,12 @@ import { getProjectHostSetupProjectionFromState } from '../../store/selectors'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { SettingsBadge } from './form-controls'
 import { RepositoryHostSetupActions } from './repository-host-setup-actions'
 import { buildSetupHostOptions, getSetupStateLabel } from './repository-host-setup-options'
+import { matchesSettingsSearch } from './search'
+import type { SettingsSearchEntry } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsBadge } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
-import type { SettingsSearchEntry } from './settings-search'
 
 type RepositoryHostSetupsSectionProps = {
   repo: Repo

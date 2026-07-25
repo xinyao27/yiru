@@ -4,7 +4,7 @@ import {
   getLocalAgentPreflightContext,
   localPreflightContextKey
 } from '@/lib/local-preflight-context'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 
 import type { PathSource, ShellHydrationFailureReason, TuiAgent } from '../../../../shared/types'
 import type { AppState } from '../types'

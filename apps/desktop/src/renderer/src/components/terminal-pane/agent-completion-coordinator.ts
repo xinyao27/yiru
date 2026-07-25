@@ -1,6 +1,6 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 
-import type { RuntimeTerminalProcessInspection } from '@/runtime/runtime-terminal-inspection'
+import type { RuntimeTerminalProcessInspection } from '@/runtime/terminal-inspection'
 
 /* oxlint-disable max-lines */
 import { detectAgentStatusFromTitle, type AgentStatus } from '../../../../shared/agent-detection'

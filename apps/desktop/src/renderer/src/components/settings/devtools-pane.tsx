@@ -14,7 +14,7 @@ import { showDeleteWorktreeFailureToast } from '../sidebar/delete-worktree-failu
 import { showLocalBaseRefUpdateSuggestionToast } from '../sidebar/local-base-ref-suggestion-toast'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
-import { SettingsSubsectionHeader } from './settings-form-controls'
+import { SettingsSubsectionHeader } from './form-controls'
 
 const LONG_WORKSPACE_NAME = 'feature/dev-toast-layout-with-a-long-workspace-name'
 const DEV_TOAST_DESCRIPTION =

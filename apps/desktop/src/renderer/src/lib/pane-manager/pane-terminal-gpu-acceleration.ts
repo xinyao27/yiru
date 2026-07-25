@@ -1,4 +1,3 @@
-import type { ManagedPaneInternal, PaneManagerOptions } from './pane-manager-types'
 import { safeFit } from './pane-tree-ops'
 import {
   attachWebgl,
@@ -6,6 +5,7 @@ import {
   resetTerminalWebglSuggestion,
   shouldUseTerminalWebgl
 } from './pane-webgl-renderer'
+import type { ManagedPaneInternal, PaneManagerOptions } from './types'
 
 export function applyTerminalGpuAcceleration(
   panes: Iterable<ManagedPaneInternal>,

@@ -1,3 +1,4 @@
+import { detachPaneFromTree, findPaneChildren, insertPaneNextTo } from './pane-tree-ops'
 import type {
   DropZone,
   ManagedPane,
@@ -6,8 +7,7 @@ import type {
   PaneExternalDropResolver,
   PaneExternalDropTarget,
   PaneStyleOptions
-} from './pane-manager-types'
-import { detachPaneFromTree, findPaneChildren, insertPaneNextTo } from './pane-tree-ops'
+} from './types'
 
 // ---------------------------------------------------------------------------
 // Drag-to-reorder panes

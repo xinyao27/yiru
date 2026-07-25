@@ -4,8 +4,8 @@ import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { getExperimentalSearchEntry } from './experimental-search'
+import { SettingsSwitch } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSwitch } from './settings-form-controls'
 
 type NativeChatDefaultView = 'terminal-chat' | 'native-chat'
 

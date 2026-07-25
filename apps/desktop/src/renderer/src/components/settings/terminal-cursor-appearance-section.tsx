@@ -2,14 +2,14 @@ import { translate } from '@/i18n/i18n'
 import { clampNumber } from '@/lib/terminal-theme'
 
 import type { GlobalSettings } from '../../../../shared/types'
-import { SearchableSetting } from './searchable-setting'
 import {
   NumberField,
   SettingsRow,
   SettingsSegmentedControl,
   SettingsSubsectionHeader,
   SettingsSwitchRow
-} from './settings-form-controls'
+} from './form-controls'
+import { SearchableSetting } from './searchable-setting'
 
 type TerminalCursorAppearanceSectionProps = {
   settings: GlobalSettings

@@ -18,7 +18,7 @@ import { resolveTerminalFontWeights } from '../../../../shared/terminal-fonts'
 import { resolveTerminalLigaturesEnabled } from '../../../../shared/terminal-ligatures'
 import { normalizeTerminalLineHeight } from '../../../../shared/terminal-line-height-settings'
 import type { GlobalSettings } from '../../../../shared/types'
-import { SettingsSwitch } from './settings-form-controls'
+import { SettingsSwitch } from './form-controls'
 import { PREVIEW_BUFFER } from './terminal-preview-content'
 
 // Why: pin cols/rows so PREVIEW_BUFFER never wraps. Sized so the longest

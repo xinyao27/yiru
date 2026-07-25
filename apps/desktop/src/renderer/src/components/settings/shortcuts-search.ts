@@ -2,8 +2,8 @@ import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 
 import { KEYBINDING_DEFINITIONS } from '../../../../shared/keybindings'
-import type { SettingsSearchEntry } from './settings-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import type { SettingsSearchEntry } from './search'
+import { translateSearchKeyword } from './search-keywords'
 
 export const getTerminalShortcutPolicySearchEntry = createLocalizedCatalog(
   (): SettingsSearchEntry => ({

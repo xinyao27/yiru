@@ -5,8 +5,8 @@ import { translate } from '@/i18n/i18n'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import { SettingsRow } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow } from './settings-form-controls'
 
 export function TerminalFontSizeSetting({
   settings,

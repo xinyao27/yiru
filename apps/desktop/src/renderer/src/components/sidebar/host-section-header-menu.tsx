@@ -26,10 +26,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
-import {
-  clearRuntimeCompatibilityCache,
-  unwrapRuntimeRpcResult
-} from '@/runtime/runtime-rpc-client'
+import { clearRuntimeCompatibilityCache, unwrapRuntimeRpcResult } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import type { RuntimeStatus } from '../../../../shared/runtime-types'

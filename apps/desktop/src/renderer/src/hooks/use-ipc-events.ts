@@ -12,14 +12,14 @@ import {
   acquireBrowserAutomationVisibility,
   releaseBrowserAutomationVisibility
 } from '@/components/browser-pane/browser-automation-visibility'
-import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/settings-constants'
+import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/constants'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
 import { getVisibleWorktreeIds } from '@/components/sidebar/visible-worktrees'
 import { shouldSuppressCodexAutoApprovalStatus } from '@/components/terminal-pane/codex-auto-approval-notification-suppression'
 import { collectLeafIdsInOrder } from '@/components/terminal-pane/layout-serialization'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
-import { closeTerminalTab } from '@/components/terminal/terminal-tab-actions'
+import { closeTerminalTab } from '@/components/terminal/tab-actions'
 import { SPLIT_TERMINAL_PANE_EVENT, CLOSE_TERMINAL_PANE_EVENT } from '@/constants/terminal'
 import type { SplitTerminalPaneDetail, CloseTerminalPaneDetail } from '@/constants/terminal'
 import { translate } from '@/i18n/i18n'
@@ -68,13 +68,13 @@ import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
 import { destroyPersistentWebview } from '@/runtime/browser-webview-registry'
-import { attachMobileMarkdownBridge } from '@/runtime/mobile-markdown-bridge'
-import { closeMobileSessionTabInStore } from '@/runtime/mobile-session-tab-close'
-import { subscribeRuntimeClientEvents } from '@/runtime/runtime-client-events'
+import { subscribeRuntimeClientEvents } from '@/runtime/client-events'
 import {
   applyRuntimeEnvironmentSshStateChanged,
   hydrateRuntimeEnvironmentSshState
-} from '@/runtime/runtime-environment-ssh-state'
+} from '@/runtime/environment-ssh-state'
+import { attachMobileMarkdownBridge } from '@/runtime/mobile-markdown-bridge'
+import { closeMobileSessionTabInStore } from '@/runtime/mobile-session-tab-close'
 import { hasRegisteredRuntimeTerminalTab } from '@/runtime/sync-runtime-graph'
 import { focusRuntimeTerminalSurface } from '@/runtime/sync-runtime-graph'
 import {

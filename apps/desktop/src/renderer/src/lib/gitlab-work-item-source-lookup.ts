@@ -1,4 +1,4 @@
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { ProjectSourceContext } from '../../../shared/project-source-context'
 import { getProjectSourceRuntimeSettings } from '../../../shared/project-source-context'

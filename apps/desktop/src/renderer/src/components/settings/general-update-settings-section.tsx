@@ -10,9 +10,9 @@ import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-che
 
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
+import { SettingsSubsectionHeader } from './form-controls'
 import { GeneralRemoteServerUpdates } from './general-remote-server-updates'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader } from './settings-form-controls'
 
 export function GeneralUpdateSettingsSection(): React.JSX.Element {
   const updateStatus = useAppStore((s) => s.updateStatus)

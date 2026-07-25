@@ -43,8 +43,8 @@ import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-id
 import { resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
-import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
+import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/terminal-stream'
 import { consumePendingWebRuntimeSplitMirrorTelemetry } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
 
@@ -66,7 +66,11 @@ import type {
   TerminalLayoutSnapshot,
   TuiAgent
 } from '../../../../shared/types'
-import { closeTerminalTab } from '../terminal/terminal-tab-actions'
+import { closeTerminalTab } from '../terminal/tab-actions'
+import {
+  resolveTabTitleAfterPaneClose,
+  shouldClearLaunchAgentForClosedPane
+} from './close-identity'
 import { applyExpandedLayoutTo, restoreExpandedLayoutFrom } from './expand-collapse'
 import {
   buildFontFamily,
@@ -85,6 +89,7 @@ import type { PtyTransport } from './pty-transport'
 import { isPaneReplaying, type ReplayingPanesRef } from './replay-guard'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { seedStartupSessionRestoredBanner } from './session-restored-banner-pane-state'
+import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { applyTerminalAppearance, installMode2031Handlers } from './terminal-appearance'
 import {
   reconcileMissingSessions,
@@ -115,11 +120,6 @@ import {
 import type { LinkHandlerDeps } from './terminal-link-handlers'
 import { pushMode2031SeedReply } from './terminal-mode-2031-replies'
 import { handleOscLink } from './terminal-osc-link-routing'
-import {
-  resolveTabTitleAfterPaneClose,
-  shouldClearLaunchAgentForClosedPane
-} from './terminal-pane-close-identity'
-import { recordCreatedTerminalPaneSplit } from './terminal-pane-split-completion'
 import { captureParkedTerminalPaneCandidates } from './terminal-parked-tab-watchers'
 import { guardParserHandler } from './terminal-parser-handler-guard'
 import {

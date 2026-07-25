@@ -9,7 +9,7 @@ import {
   type MarkupPoint,
   type MarkupShape,
   type MarkupTool
-} from './markup-drawing-model'
+} from './drawing-model'
 import type { PendingText } from './use-markup-keyboard-shortcuts'
 
 export type MarkupPointerParams = {

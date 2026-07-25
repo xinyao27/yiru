@@ -14,14 +14,14 @@ import {
   applyAppends,
   createIncrementalAssembler,
   reset as resetAssembler
-} from './native-chat-incremental-assembler'
-import { mergeNativeChatLiveSession } from './native-chat-live-status'
+} from './incremental-assembler'
+import { mergeNativeChatLiveSession } from './live-status'
 import {
   hasMoreNativeChatHistory,
   NATIVE_CHAT_INITIAL_LIMIT,
   nextNativeChatLimit
-} from './native-chat-pagination'
-import { getNativeChatSessionTransport } from './native-chat-session-transport'
+} from './pagination'
+import { getNativeChatSessionTransport } from './session-transport'
 import { useNativeChatCompletionRefresh } from './use-native-chat-completion-refresh'
 
 export type UseNativeChatLiveSessionArgs = {

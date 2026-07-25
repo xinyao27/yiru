@@ -2,7 +2,7 @@ import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench
 import { useEffect, useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import { isRemoteRuntimePtyId } from '@/runtime/runtime-terminal-inspection'
+import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoMap } from '@/store/selectors'
 

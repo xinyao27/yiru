@@ -8,8 +8,8 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 
 import { WORKTREE_SET_CONTRACT } from '../../../../shared/runtime-method-contracts/workspace-contracts'
 import type { DiffComment, Worktree } from '../../../../shared/types'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-selector'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
 import type { AppState } from '../types'
 import { findWorktreeById, getRepoIdFromWorktreeId } from './worktree-helpers'
 

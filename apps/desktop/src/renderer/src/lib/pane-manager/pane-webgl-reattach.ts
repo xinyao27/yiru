@@ -1,5 +1,5 @@
-import type { ManagedPaneInternal } from './pane-manager-types'
 import { attachWebgl, clearTerminalWebglAttachBackoff, disposeWebgl } from './pane-webgl-renderer'
+import type { ManagedPaneInternal } from './types'
 
 export function reattachWebglIfNeeded(pane: ManagedPaneInternal): void {
   if (pane.gpuRenderingEnabled && !pane.webglAddon && !pane.webglDisabledAfterContextLoss) {

@@ -7,7 +7,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import { useAppStore } from '../../store'
-import { normalizeSettingsSearchQuery } from './settings-search'
+import { normalizeSettingsSearchQuery } from './search'
 
 type AppearanceAdvancedDisclosureProps = {
   /** Optional override label; defaults to "Advanced". */

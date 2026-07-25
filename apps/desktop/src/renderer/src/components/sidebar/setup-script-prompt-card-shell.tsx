@@ -1,4 +1,4 @@
-import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
+import { RepoBadgeMark } from '@/components/repo/badge-label'
 import { translate } from '@/i18n/i18n'
 
 import {

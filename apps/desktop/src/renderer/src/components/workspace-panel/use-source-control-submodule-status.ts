@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { getRuntimeGitSubmoduleStatus, type RuntimeGitContext } from '@/runtime/runtime-git-client'
+import { getRuntimeGitSubmoduleStatus, type RuntimeGitContext } from '@/runtime/git-client'
 
 import type { GitStatusEntry } from '../../../../shared/types'
 import {

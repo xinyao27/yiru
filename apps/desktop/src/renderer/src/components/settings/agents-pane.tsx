@@ -49,13 +49,13 @@ import {
   buildCodexSessionSourceHomeControl,
   type AgentSessionSourceHomeControl
 } from './codex-session-source-home-control'
-import { getSettingOwnershipSummary } from './setting-ownership'
 import {
   SettingsBadge,
   SettingsSegmentedControl,
   SettingsSubsectionHeader,
   SettingsSwitchRow
-} from './settings-form-controls'
+} from './form-controls'
+import { getSettingOwnershipSummary } from './setting-ownership'
 
 export { getAgentsPaneSearchEntries } from './agents-search'
 

@@ -11,8 +11,8 @@ import { cn } from '@/lib/class-names'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
+import { SettingsSubsectionHeader } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader } from './settings-form-controls'
 
 type SupportState =
   | 'loading'

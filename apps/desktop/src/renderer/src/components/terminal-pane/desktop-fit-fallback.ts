@@ -1,6 +1,6 @@
 import { safeFit } from '@/lib/pane-manager/pane-fit'
-import type { ManagedPane } from '@/lib/pane-manager/pane-manager-types'
 import { deferTerminalGeometryMutationDuringRebuild } from '@/lib/pane-manager/terminal-scroll-intent-rebuild'
+import type { ManagedPane } from '@/lib/pane-manager/types'
 
 type DesktopFitFallbackDimensions = {
   cols: number

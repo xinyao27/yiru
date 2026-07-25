@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { getRuntimeGitIgnoredPaths } from '@/runtime/runtime-git-client'
+import { getRuntimeGitIgnoredPaths } from '@/runtime/git-client'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'
 

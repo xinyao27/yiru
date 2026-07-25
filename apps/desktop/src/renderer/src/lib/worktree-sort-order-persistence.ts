@@ -1,6 +1,6 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 
 import type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner'
 import { splitWorktreeSortOrderByHost } from './worktree-sort-order-host-split'

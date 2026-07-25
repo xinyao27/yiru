@@ -2,7 +2,7 @@ import type { Editor } from '@tiptap/react'
 import { toast } from 'sonner'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { insertRichMarkdownImageFromPath } from './rich-markdown-image-insert'

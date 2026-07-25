@@ -7,7 +7,7 @@ import {
 import {
   inspectRuntimeTerminalProcess,
   sendRuntimePtyInputVerified
-} from '@/runtime/runtime-terminal-inspection'
+} from '@/runtime/terminal-inspection'
 import { useAppStore } from '@/store'
 
 import { isExpectedAgentProcess } from '../../../shared/agent-process-recognition'

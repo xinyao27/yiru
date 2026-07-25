@@ -5,7 +5,7 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   projectSpoolAvailabilityDiagnostic,
   type SpoolAvailabilityDiagnostic
-} from '@/components/spool/spool-availability-diagnostic'
+} from '@/components/spool/availability-diagnostic'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
@@ -13,7 +13,7 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'
-import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './status-bar-context-menu-policy'
+import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 
 export function SpoolAvailabilityStatusSegment(): React.JSX.Element | null {
   const status = useAppStore((state) => state.spoolSharingStatus)

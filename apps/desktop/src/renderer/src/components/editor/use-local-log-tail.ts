@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } fr
 import type { OpenFile } from '@/store/slices/editor'
 
 import type { LocalLogTailChangedPayload } from '../../../../shared/local-log-tail-types'
-import type { FileContent } from './editor-panel-content-types'
 import { LocalLogTailDecoder } from './local-log-tail-decoder'
+import type { FileContent } from './panel-content-types'
 
 type TailSession = {
   fileId: string

@@ -4,7 +4,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import {
   generateRuntimeCommitMessage,
   type RuntimeGenerateCommitMessageOverrides
-} from '@/runtime/runtime-git-client'
+} from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 import {
   createRunningCommitMessageGenerationRecord,

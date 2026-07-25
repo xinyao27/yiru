@@ -7,8 +7,8 @@ import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+} from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { resolveKnownWorktreeRootPathLink } from './terminal-worktree-path-link'

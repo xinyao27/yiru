@@ -16,8 +16,8 @@ import {
   getFirstIncompleteFeatureWallSetupStepId,
   type FeatureWallSetupStepId
 } from '../../../../shared/feature-wall-setup-steps'
-import type { FeatureWallSetupProgress } from '../feature-wall/feature-wall-setup-progress'
-import { SetupGuideProgressRing } from '../setup-guide/setup-guide-progress-ring'
+import type { FeatureWallSetupProgress } from '../feature-wall/setup-progress'
+import { SetupGuideProgressRing } from '../setup-guide/progress-ring'
 import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'
 
 export type SetupGuideEntryVisibilityInput = {

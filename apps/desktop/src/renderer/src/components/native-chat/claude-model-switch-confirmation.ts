@@ -1,10 +1,10 @@
-import { isRemoteRuntimePtyId, sendRuntimePtyInput } from '@/runtime/runtime-terminal-inspection'
-import { subscribeToRuntimeTerminalData } from '@/runtime/runtime-terminal-stream'
+import { isRemoteRuntimePtyId, sendRuntimePtyInput } from '@/runtime/terminal-inspection'
+import { subscribeToRuntimeTerminalData } from '@/runtime/terminal-stream'
 
 import type { GlobalSettings } from '../../../../shared/types'
 import { subscribeToPtyData } from '../terminal-pane/pty-data-sidecar-subscriptions'
-import { stripScrollbackAnsi } from './native-chat-scrape-fallback'
-import { NATIVE_CHAT_SUBMIT } from './native-chat-send'
+import { stripScrollbackAnsi } from './scrape-fallback'
+import { NATIVE_CHAT_SUBMIT } from './send'
 
 const DETECTION_TIMEOUT_MS = 5_000
 const MAX_OBSERVED_BYTES = 64 * 1024

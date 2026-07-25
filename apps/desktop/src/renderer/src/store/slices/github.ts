@@ -41,7 +41,7 @@ import {
   sortWorkItemsByNumber,
   PER_REPO_FETCH_LIMIT
 } from '../../../../shared/work-items'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '../../runtime/rpc-client'
 import type { AppState } from '../types'
 import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from './github-cache-key'
 import { deriveCheckStatusFromChecks, syncPRChecksStatus } from './github-checks'

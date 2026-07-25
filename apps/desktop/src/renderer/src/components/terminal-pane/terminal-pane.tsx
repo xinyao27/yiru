@@ -11,7 +11,7 @@ import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
 
-import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/agent-session-continuation-dialog'
+import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
 import { DaemonActionDialog, useDaemonActions } from '@/components/shared/use-daemon-actions'
 import {
@@ -45,8 +45,8 @@ import type {
   PaneExternalDropTarget,
   PaneManager
 } from '@/lib/pane-manager/pane-manager'
-import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/pane-manager-registry'
 import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
+import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/registry'
 import { clearTerminalScrollbackAndFollowOutput } from '@/lib/pane-manager/terminal-scrollback-clear'
 import {
   armPrimarySelectionNativePasteSuppression,
@@ -70,11 +70,8 @@ import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
-import { hydrateRuntimeEnvironmentSshState } from '@/runtime/runtime-environment-ssh-state'
-import {
-  inspectRuntimeTerminalProcess,
-  isRemoteRuntimePtyId
-} from '@/runtime/runtime-terminal-inspection'
+import { hydrateRuntimeEnvironmentSshState } from '@/runtime/environment-ssh-state'
+import { inspectRuntimeTerminalProcess, isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import {
   clearWebRuntimeTerminalBuffer,
   closeWebRuntimeTerminal,
@@ -101,13 +98,13 @@ import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal-
 import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
 import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace-session-terminal-buffers'
 import { useAppStore } from '../../store'
-import { canToggleNativeChat } from '../native-chat/native-chat-availability'
+import { canToggleNativeChat } from '../native-chat/availability'
 import {
   nativeChatLaunchAgentForLeaf,
   resolveNativeChatLeafRoute
-} from '../native-chat/native-chat-leaf-routing'
-import { shouldChatTakeOverMobileSurface } from '../native-chat/native-chat-send-eligibility'
-import NativeChatView from '../native-chat/native-chat-view'
+} from '../native-chat/leaf-routing'
+import { shouldChatTakeOverMobileSurface } from '../native-chat/send-eligibility'
+import NativeChatView from '../native-chat/view'
 import CloseTerminalDialog, { type CloseTerminalDialogCopyKind } from './close-terminal-dialog'
 import { applyDesktopFitFallbackAfterReplay } from './desktop-fit-fallback'
 import {
@@ -116,6 +113,7 @@ import {
   createExpandCollapseActions,
   restoreExpandedLayoutFrom
 } from './expand-collapse'
+import TerminalPaneHeaderOverlay from './header-overlay'
 import { useTerminalKeyboardShortcuts, type SearchState } from './keyboard-handlers'
 import {
   collectLeafIdsInOrder,
@@ -137,6 +135,12 @@ import {
   type SessionRestoredBannerDismissEvent
 } from './session-restored-banner-pane-state'
 import { SessionRestoredBannerPortals } from './session-restored-banner-portals'
+import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'
+import {
+  detachTerminalPaneToTab,
+  isTerminalTabStripDropTarget,
+  resolveTerminalTabStripDropTarget
+} from './tab-detach'
 import { canContinueAgentSessionInNewSession } from './terminal-agent-session-continuation'
 import type { PreparedAgentSessionFork } from './terminal-agent-session-fork'
 import { TerminalAgentSessionForkDialog } from './terminal-agent-session-fork-dialog'
@@ -155,13 +159,6 @@ import {
   isHostAuthoritativeLayout,
   planTerminalLiveLayoutInsertions
 } from './terminal-live-layout-reconciliation'
-import TerminalPaneHeaderOverlay from './terminal-pane-header-overlay'
-import { splitTerminalPaneWithInheritedCwd } from './terminal-pane-split-with-inherited-cwd'
-import {
-  detachTerminalPaneToTab,
-  isTerminalTabStripDropTarget,
-  resolveTerminalTabStripDropTarget
-} from './terminal-pane-tab-detach'
 import { TerminalSessionStateSaveFailureDialog } from './terminal-session-state-save-failure-dialog'
 import type { MacOptionAsAlt } from './terminal-shortcut-policy'
 import { captureTerminalShutdownLayout } from './terminal-shutdown-layout-capture'
@@ -190,6 +187,10 @@ import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
 import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
 import { useRepoById } from '@/store/selectors'
 
+import {
+  applyTerminalPaneAttentionToManager,
+  subscribeTerminalPaneAttention
+} from './attention-subscriptions'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
 import { resolveNativeChatLeafTitleAgent } from './native-chat-leaf-title-agent'
 import {
@@ -200,10 +201,6 @@ import {
   setRegularTerminalInputFocusAttribute
 } from './regular-terminal-focus-ownership'
 import { refreshTerminalImeInputContext } from './terminal-ime-input-context-refresh'
-import {
-  applyTerminalPaneAttentionToManager,
-  subscribeTerminalPaneAttention
-} from './terminal-pane-attention-subscriptions'
 import {
   executeTerminalPastePlan,
   planTerminalPasteWithYield,

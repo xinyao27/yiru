@@ -1,10 +1,10 @@
 import { Cloud } from '@phosphor-icons/react'
 import type React from 'react'
 
-import { getSpoolSessionCatalogStatusLabel } from '@/components/spool/spool-session-catalog-status'
+import { getSpoolSessionCatalogStatusLabel } from '@/components/spool/session-catalog-status'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 
-import { SidebarDisclosure } from './sidebar-disclosure'
+import { SidebarDisclosure } from './disclosure'
 import { SpoolDesktopUsageHoverCard } from './spool-desktop-usage-hover-card'
 import type { SpoolWorktreeSidebarRow } from './spool-sidebar-rows'
 import { getSpoolWorktreeDisplayTitle } from './spool-worktree-display-title'

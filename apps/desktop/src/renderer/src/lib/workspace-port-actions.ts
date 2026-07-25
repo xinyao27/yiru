@@ -1,12 +1,8 @@
 import * as executionHost from '@yiru/workbench-model/workspace'
 
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import {
-  callRuntimeRpc,
-  RuntimeRpcCallError,
-  type RuntimeClientTarget
-} from '@/runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { callRuntimeRpc, RuntimeRpcCallError, type RuntimeClientTarget } from '@/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import type { useAppStore } from '@/store'
 
 import type { LocalhostWorktreeLabelRoute } from '../../../shared/localhost-worktree-labels'

@@ -15,6 +15,7 @@ import type {
   SetupAgentStartupPolicy,
   SetupRunPolicy
 } from '../../../../shared/types'
+import { SettingsSwitch } from './form-controls'
 import { LocalCommandSourceNotice, SegmentedPolicyToggle } from './repository-hook-policy-controls'
 import { ScriptEditor } from './repository-hook-script-editor'
 import {
@@ -28,9 +29,8 @@ import {
 } from './repository-hook-settings-model'
 import { RepositoryHooksAdvancedSection } from './repository-hooks-advanced-section'
 import { getRepositoryLocalCommandsSectionId } from './repository-settings-targets'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSwitch } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 import { useRepositoryHookSettingsDraft } from './use-repository-hook-settings-draft'
 
 export { getLocalCommandSourcePolicyNotice } from './repository-hook-settings-model'

@@ -10,14 +10,10 @@ import {
 import type { GlobalSettings } from '../../../../shared/types'
 import { Input } from '../ui/input'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { SCROLLBACK_PRESETS_ROWS } from './constants'
+import { SettingsRow, SettingsSegmentedControl, SettingsSubsectionHeader } from './form-controls'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SCROLLBACK_PRESETS_ROWS } from './settings-constants'
-import {
-  SettingsRow,
-  SettingsSegmentedControl,
-  SettingsSubsectionHeader
-} from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 import { TerminalMacKeyboardSection } from './terminal-mac-keyboard-section'
 import { getTerminalWindowsPowershellImplementationSearchEntry } from './terminal-windows-search'
 

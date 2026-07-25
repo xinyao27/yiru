@@ -1,8 +1,8 @@
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
-} from '@/runtime/runtime-terminal-stream'
+} from '@/runtime/terminal-stream'
 
 import { mapWithConcurrency } from '../../../../shared/map-with-concurrency'
 import type { GlobalSettings } from '../../../../shared/types'

@@ -8,7 +8,7 @@ import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import type React from 'react'
 
 import { AgentStateDot } from '@/components/agent-state-dot'
-import RepoBadgeLabel from '@/components/repo/repo-badge-label'
+import RepoBadgeLabel from '@/components/repo/badge-label'
 import { Badge } from '@/components/ui/badge'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'

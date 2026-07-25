@@ -7,7 +7,7 @@ import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { FeatureWallClickRing } from './feature-wall-click-ring'
+import { FeatureWallClickRing } from './click-ring'
 
 // Why: this animation tells the full Yiru story end-to-end — the user opens a
 // new browser tab, annotates a target on the pricing page, types a change,

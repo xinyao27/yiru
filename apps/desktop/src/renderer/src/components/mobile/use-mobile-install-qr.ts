@@ -1,8 +1,8 @@
 import QRCodeBrowser from 'qrcode/lib/browser'
 import { useEffect, useState } from 'react'
 
-import type { MobilePageStage } from './mobile-page-stage'
-import { getMobileReleaseLink, type MobilePlatform } from './mobile-release-link'
+import type { MobilePageStage } from './page-stage'
+import { getMobileReleaseLink, type MobilePlatform } from './release-link'
 
 async function renderQrDataUrl(text: string): Promise<string> {
   return QRCodeBrowser.toDataURL(text, {

@@ -14,6 +14,7 @@ import {
   type KeybindingInput
 } from '../../../../shared/keybindings'
 import { useAppStore } from '../../store'
+import { SettingsSubsectionHeader } from './form-controls'
 import {
   hasCommonBindingOverride,
   hasOwnBindingOverride,
@@ -21,8 +22,7 @@ import {
   sameBindings
 } from './keybinding-override-edits'
 import { KeybindingsFileActions } from './keybindings-file-actions'
-import { SettingsSubsectionHeader } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
+import { matchesSettingsSearch } from './search'
 import {
   adjustRecordingIndexAfterRemove,
   appendBinding,

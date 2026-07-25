@@ -11,7 +11,7 @@ import {
   reconcileTransientPortScanFailures,
   type PortScanDebounceState
 } from '@/lib/workspace-port-scan-debounce'
-import { getActiveRuntimeTarget, type RuntimeClientTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget, type RuntimeClientTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { getHasAnyWorktreesFromState } from '@/store/selectors'
 

@@ -3,16 +3,12 @@ import { useCallback, useState } from 'react'
 import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
 import { dirname, joinPath } from '@/lib/path'
-import {
-  createRuntimePath,
-  renameRuntimePath,
-  runtimePathExists
-} from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { createRuntimePath, renameRuntimePath, runtimePathExists } from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 
-import { requestEditorFileSave, requestEditorSaveQuiesce } from './editor-autosave'
+import { requestEditorFileSave, requestEditorSaveQuiesce } from './autosave'
 import { getUntitledFileRoot } from './untitled-file-rename-path'
 
 type UseUntitledFileRenameParams = {

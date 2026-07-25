@@ -8,7 +8,7 @@ import { useAppStore } from '@/store'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
-import { useSpoolChecksReadState, type SpoolChecksReadState } from './spool-checks-pane'
+import { useSpoolChecksReadState, type SpoolChecksReadState } from './checks-pane'
 
 export type SpoolWorkspacePanelTabs = {
   activePanel: WorkspacePanelTabContentType | null

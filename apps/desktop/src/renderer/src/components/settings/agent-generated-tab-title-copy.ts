@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
 
-import { searchKeywords } from './settings-search-keywords'
+import { searchKeywords } from './search-keywords'
 
 const AGENT_GENERATED_TAB_TITLES_TITLE_KEY =
   'auto.components.settings.agent-generated-tab-title-copy.19ad21615a'

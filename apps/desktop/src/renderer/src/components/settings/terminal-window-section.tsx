@@ -10,8 +10,8 @@ import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'
+import { ColorField, NumberField } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { ColorField, NumberField } from './settings-form-controls'
 
 type TerminalWindowSectionProps = {
   settings: GlobalSettings

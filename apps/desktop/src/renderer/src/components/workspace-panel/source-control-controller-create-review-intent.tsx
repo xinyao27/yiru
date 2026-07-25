@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { translate } from '@/i18n/i18n'
-import { bulkStageRuntimeGitPaths } from '@/runtime/runtime-git-client'
+import { bulkStageRuntimeGitPaths } from '@/runtime/git-client'
 
 import { finishCreateReviewIntent } from './source-control-controller-create-review-intent-remote'
 import type { SourceControlCreateReviewPrerequisitesController } from './source-control-controller-create-review-prerequisites'

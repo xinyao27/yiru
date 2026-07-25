@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
+import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import {
   attachEphemeralVmRuntimeToWorkspace,
@@ -23,7 +23,7 @@ import {
   type ActivateAndRevealResult,
   type WorktreeStartupPayload
 } from '@/lib/worktree-activation'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'

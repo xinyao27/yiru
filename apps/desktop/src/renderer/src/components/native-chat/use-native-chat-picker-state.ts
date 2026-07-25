@@ -27,7 +27,7 @@ import {
   type ComposerAutocomplete,
   type NativeChatPickerItem,
   type NativeChatSendClassification
-} from './native-chat-composer-state'
+} from './composer-state'
 import { useNativeChatSkills } from './use-native-chat-skills'
 
 export type NativeChatPickerState = {

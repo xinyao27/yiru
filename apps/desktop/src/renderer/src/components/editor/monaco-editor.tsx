@@ -29,11 +29,6 @@ import {
   getDiffCommentPopoverTop
 } from '../diff-comments/diff-comment-popover-position'
 import { useDiffCommentDecorator } from '../diff-comments/use-diff-comment-decorator'
-import {
-  installEditorAddReviewNoteShortcut,
-  installEditorSaveShortcut,
-  installMonacoEditorFindShortcut
-} from './editor-shortcuts'
 import { buildFileEditorWordWrapOptions } from './file-editor-word-wrap-options'
 import {
   clampMonacoAutoHeight,
@@ -71,6 +66,11 @@ import {
 } from './monaco-programmatic-sync'
 import { MAX_REVEAL_CONTENT_WAIT_FRAMES, performReveal } from './monaco-reveal'
 import { openEditorNavigationTarget } from './open-editor-navigation-target'
+import {
+  installEditorAddReviewNoteShortcut,
+  installEditorSaveShortcut,
+  installMonacoEditorFindShortcut
+} from './shortcuts'
 import { useContextualCopySetup } from './use-contextual-copy-setup'
 import { useMonacoLanguageServer } from './use-monaco-language-server'
 

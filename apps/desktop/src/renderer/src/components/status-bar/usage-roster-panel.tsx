@@ -2,7 +2,7 @@ import { CaretRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { Fragment, type ReactNode } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { SettingsSegmentedControl } from '@/components/settings/settings-form-controls'
+import { SettingsSegmentedControl } from '@/components/settings/form-controls'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'

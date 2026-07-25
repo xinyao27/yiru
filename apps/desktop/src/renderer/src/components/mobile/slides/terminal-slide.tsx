@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { mobileTerminalPreviewStyles } from '../mobile-terminal-preview-tailwind'
+import { mobileTerminalPreviewStyles } from '../terminal-preview-tailwind'
 export function TerminalSlide(): React.JSX.Element {
   return (
     <div className={mobileTerminalPreviewStyles.deviceScreen}>

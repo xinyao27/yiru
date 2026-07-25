@@ -33,7 +33,7 @@ import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared
 import type { SourceControlTextActionId } from '../../../../shared/source-control-ai-actions'
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
-import { SourceControlActionVariableChips } from '../source-control/source-control-action-variable-chips'
+import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { sourceControlTextGenerationDefaultsMatchTarget } from './source-control-text-generation-defaults'
 import {
   buildCommitMessageGenerationParams,

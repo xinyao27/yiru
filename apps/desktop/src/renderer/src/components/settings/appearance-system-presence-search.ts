@@ -3,8 +3,8 @@ import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
 import { isWebClientLocation } from '@/lib/web-client-location'
 
-import type { SettingsSearchEntry } from './settings-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import type { SettingsSearchEntry } from './search'
+import { translateSearchKeyword } from './search-keywords'
 
 const getSystemTrayEntryCatalog = createLocalizedCatalog((): SettingsSearchEntry[] => [
   {

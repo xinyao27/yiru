@@ -15,7 +15,7 @@ import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState
 } from '../../../../../shared/types'
-import { getFeatureWallUsageProviderConnection } from '../feature-wall-usage-tracking'
+import { getFeatureWallUsageProviderConnection } from '../usage-tracking'
 
 type ConnectAction = 'idle' | 'adding'
 

@@ -1,7 +1,7 @@
 import { translate } from '@/i18n/i18n'
 
 import type { StatusBarItem } from '../../../../shared/types'
-import { translateSearchKeyword } from './settings-search-keywords'
+import { translateSearchKeyword } from './search-keywords'
 
 export function getAntigravityStatusBarToggleSearchEntry(): {
   id: StatusBarItem

@@ -7,8 +7,8 @@ import { useAppStore } from '../../store'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { getAgentCacheTimerSearchEntries } from './agent-cache-timer-search'
+import { SettingsSubsectionHeader, SettingsSwitch } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader, SettingsSwitch } from './settings-form-controls'
 
 type AgentCacheTimerSectionProps = {
   settings: GlobalSettings

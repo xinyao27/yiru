@@ -11,7 +11,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
-import { getRuntimeGitStatus } from '@/runtime/runtime-git-client'
+import { getRuntimeGitStatus } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
 import { prepareActiveWorktreeFocusAfterDelete } from './active-worktree-focus-after-delete'

@@ -41,7 +41,7 @@ import {
   type VisibleTabRef
 } from '../components/tab-bar/group-tab-order'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
-import { parseRemoteRuntimePtyId } from './runtime-terminal-stream'
+import { parseRemoteRuntimePtyId } from './terminal-stream'
 
 type RegisteredTerminalTab = {
   tabId: string

@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { readNativeChatDraftCache, writeNativeChatDraftCache } from './native-chat-draft-cache'
+import { readNativeChatDraftCache, writeNativeChatDraftCache } from './draft-cache'
 
 /**
  * Composer draft state backed by the scope cache so a typed-but-unsent message

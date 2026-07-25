@@ -11,7 +11,7 @@ import {
   hasDismissedHugeRepoWarning,
   markHugeRepoWarningDismissed
 } from '@/lib/source-control-huge-repo-warning-dismissals'
-import { getRuntimeRepoBaseRefDefault } from '@/runtime/runtime-repo-client'
+import { getRuntimeRepoBaseRefDefault } from '@/runtime/repo-client'
 import type { PullRequestGenerationContext } from '@/store/slices/pull-request-generation'
 
 import { refreshGitStatusForWorktree } from './git-status-refresh'

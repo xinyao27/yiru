@@ -7,6 +7,7 @@ import { useAppStore } from '../../store'
 import { Separator } from '../ui/separator'
 import { CliSection } from './cli-section'
 import { DefaultWindowsProjectRuntimeSetting } from './default-windows-project-runtime-setting'
+import { SettingsSubsectionHeader, SettingsSwitchRow } from './form-controls'
 import { GeneralEditorSettingsSection } from './general-editor-settings-section'
 import { getGeneralProjectRuntimeSearchEntries } from './general-project-runtime-search'
 import {
@@ -22,9 +23,8 @@ import { GeneralSupportSection } from './general-support-section'
 import { GeneralUpdateSettingsSection } from './general-update-settings-section'
 import { GeneralWorkspaceSettingsSection } from './general-workspace-settings-section'
 import { RecentTabOrderControl } from './recent-tab-order-control'
+import { matchesSettingsSearch, type SettingsSearchEntry } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader, SettingsSwitchRow } from './settings-form-controls'
-import { matchesSettingsSearch, type SettingsSearchEntry } from './settings-search'
 
 export {
   createAutoSaveDelayDraftState,

@@ -10,7 +10,7 @@ import { getSelectedNestedRepoPathsInScanOrder } from '@/lib/nested-repo-selecte
 import { buildOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
 import { track } from '@/lib/telemetry'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '../../../../shared/constants'
@@ -33,7 +33,7 @@ import type {
 } from '../../../../shared/types'
 import { openProjectDefaultCheckout } from '../sidebar/project-added-default-checkout'
 import { buildAgentPickedPayload } from './agent-picked-payload'
-import { resolveOnboardingSettingsHydration } from './onboarding-settings-hydration'
+import { resolveOnboardingSettingsHydration } from './settings-hydration'
 import { persistStep, useCloseWith, usePersistCurrentStep } from './use-onboarding-flow-persistence'
 import { STEPS, type StepNumber } from './use-onboarding-flow-types'
 import { buildWindowsTerminalSnapshotPayload } from './windows-terminal-onboarding-telemetry'

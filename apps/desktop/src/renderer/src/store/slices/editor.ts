@@ -31,12 +31,11 @@ import {
 } from '@/lib/workspace-session-hydration-keys'
 import { getExplicitRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { notifyHostOfMirroredEditorClose } from '@/runtime/close-mirrored-editor-tab'
-import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 import {
   deleteRuntimePath,
   deleteRuntimeRelativePath,
   statRuntimePath
-} from '@/runtime/runtime-file-client'
+} from '@/runtime/file-client'
 import {
   fastForwardRuntimeGit,
   fetchRuntimeGit,
@@ -44,8 +43,9 @@ import {
   pullRuntimeGit,
   pushRuntimeGit,
   rebaseRuntimeGitFromBase
-} from '@/runtime/runtime-git-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+} from '@/runtime/git-client'
+import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'

@@ -1,6 +1,6 @@
-import { editorShortcutMatches } from './editor-shortcuts'
 import type { KeyHandlerContext } from './rich-markdown-key-handler'
 import { commitRichMarkdownSerialization } from './rich-markdown-serialization-commit'
+import { editorShortcutMatches } from './shortcuts'
 
 /**
  * Cmd/Ctrl+S: flush the debounced serialization, then reconcile toward the

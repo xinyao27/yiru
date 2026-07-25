@@ -13,7 +13,7 @@ import {
   type SetupScriptPromptInspection
 } from '@/lib/setup-script-prompt'
 import { track } from '@/lib/telemetry'
-import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/runtime-hooks-client'
+import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/hooks-client'
 import { useAppStore } from '@/store'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'

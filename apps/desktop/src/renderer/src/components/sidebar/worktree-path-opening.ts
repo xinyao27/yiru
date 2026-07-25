@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 import { getExternalEditorOpenCapability } from '@/lib/external-editor-open-capability'
-import { callRuntimeRpc, runtimeEnvironmentSupportsCapability } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, runtimeEnvironmentSupportsCapability } from '@/runtime/rpc-client'
 
 import { EXTERNAL_EDITOR_OPEN_REMOTE_SSH_CONTRACT } from '../../../../shared/runtime-method-contracts/external-editor-contracts'
 import type {

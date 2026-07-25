@@ -8,7 +8,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { joinPath, normalizeRelativePath, dirname } from '@/lib/path'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-client'
+import { subscribeRuntimeFileChanges } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 

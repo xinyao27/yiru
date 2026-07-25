@@ -2,7 +2,7 @@ import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/revi
 import { useCallback } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { getRuntimeGitBranchCompare } from '@/runtime/runtime-git-client'
+import { getRuntimeGitBranchCompare } from '@/runtime/git-client'
 
 import { refreshGitStatusForWorktreeStrict } from './git-status-refresh'
 import type { SourceControlCreateReviewSubmitController } from './source-control-controller-create-review-submit'

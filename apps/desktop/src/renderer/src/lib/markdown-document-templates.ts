@@ -1,9 +1,9 @@
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 import {
   readRuntimeDirectory,
   readRuntimeFileContent,
   runtimePathExists
-} from '@/runtime/runtime-file-client'
+} from '@/runtime/file-client'
 
 import type { DirEntry, GlobalSettings } from '../../../shared/types'
 import { basename, joinPath, normalizeRelativePath } from './path'

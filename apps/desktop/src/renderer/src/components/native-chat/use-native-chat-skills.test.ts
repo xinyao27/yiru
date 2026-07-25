@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   emitNativeChatSkillDiscovery: vi.fn()
 }))
 
-vi.mock('@/runtime/runtime-rpc-client', async (importOriginal) => ({
+vi.mock('@/runtime/rpc-client', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   callRuntimeRpc: mocks.callRuntimeRpc
 }))

@@ -23,12 +23,9 @@ import { createSshBackgroundStartupDelivery } from '@/lib/ssh-background-startup
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
-import {
-  subscribeToRuntimeTerminalData,
-  toRemoteRuntimePtyId
-} from '@/runtime/runtime-terminal-stream'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
+import { subscribeToRuntimeTerminalData, toRemoteRuntimePtyId } from '@/runtime/terminal-stream'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import { useAppStore } from '@/store'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 

@@ -6,7 +6,7 @@ import { buildFeatureWallTourDepthSummary } from '../../../../shared/feature-wal
 import type { FeatureWallWorkflowId } from '../../../../shared/feature-wall-workflows'
 import type { ReviewStepId } from '../../../../shared/review-steps'
 import type { WorkbenchStepId } from '../../../../shared/workbench-steps'
-import { getFeatureWallCompletionProgress } from './feature-wall-completion-progress'
+import { getFeatureWallCompletionProgress } from './completion-progress'
 
 type FeatureWallSessionDepthInput = {
   isOpen: boolean

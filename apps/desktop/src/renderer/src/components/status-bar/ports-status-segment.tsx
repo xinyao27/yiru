@@ -12,11 +12,11 @@ import {
   workspacePortScanKeyForTarget
 } from '@/lib/workspace-port-actions'
 import { getExternalWorkspacePorts, getWorkspacePortGroups } from '@/lib/workspace-port-groups'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
+import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 import { PortRow, WorkspaceGroupRows } from './ports-status-popover-rows'
-import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './status-bar-context-menu-policy'
 
 type PortsStatusSegmentProps = {
   compact?: boolean

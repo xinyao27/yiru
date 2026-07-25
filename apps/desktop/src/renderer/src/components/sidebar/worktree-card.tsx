@@ -15,7 +15,7 @@ import React, { useEffect, useCallback, useState } from 'react'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { RepoIconGlyph } from '@/components/repo/repo-icon'
+import { RepoIconGlyph } from '@/components/repo/icon'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'

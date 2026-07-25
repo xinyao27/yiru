@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
 import { isSyncPushStageError } from '@/lib/source-control-remote-error'
-import { cancelRuntimeGenerateCommitMessage } from '@/runtime/runtime-git-client'
+import { cancelRuntimeGenerateCommitMessage } from '@/runtime/git-client'
 import { resolveCommitMessageGenerationCancel } from '@/store/slices/commit-message-generation'
 
 import {

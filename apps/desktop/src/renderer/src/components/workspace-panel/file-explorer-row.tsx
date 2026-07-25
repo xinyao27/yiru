@@ -7,7 +7,7 @@ import {
   WORKSPACE_FILE_PATH_MIME,
   WORKSPACE_FILE_PATHS_MIME
 } from '@/lib/workspace-file-drag'
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 
 import type { GitFileStatus } from '../../../../shared/types'
 import { InlineInputRow, type InlineInput } from './file-explorer-inline-input-row'

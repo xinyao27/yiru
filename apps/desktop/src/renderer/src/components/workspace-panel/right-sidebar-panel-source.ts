@@ -1,4 +1,4 @@
-import type { SpoolChecksReadState } from '@/components/spool/spool-checks-pane'
+import type { SpoolChecksReadState } from '@/components/spool/checks-pane'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 
 import type {

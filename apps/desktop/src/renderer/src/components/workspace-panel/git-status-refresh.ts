@@ -4,7 +4,7 @@ import {
   invalidateAutomaticPushTargetUpstreamStatusCache,
   storeCachedAutomaticPushTargetUpstreamStatus
 } from '@/lib/push-target-upstream-refresh-cache'
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/runtime-git-client'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/git-client'
 
 import type {
   GitPushTarget,

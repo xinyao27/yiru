@@ -1,5 +1,5 @@
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { RuntimeTerminalSend, RuntimeTerminalWait } from '../../../shared/runtime-types'
 import type { ActiveAgentNotesSendResult } from './active-agent-note-send-result'

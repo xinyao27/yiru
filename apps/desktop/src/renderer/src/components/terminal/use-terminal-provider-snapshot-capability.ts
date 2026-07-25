@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { useAppStore } from '@/store'
 
-import { synchronizeTerminalProviderSnapshotCapabilities } from './terminal-provider-snapshot-capability'
+import { synchronizeTerminalProviderSnapshotCapabilities } from './provider-snapshot-capability'
 
 export function useTerminalProviderSnapshotCapability(enabled: boolean): void {
   const tabsByWorktree = useAppStore((state) => state.tabsByWorktree)

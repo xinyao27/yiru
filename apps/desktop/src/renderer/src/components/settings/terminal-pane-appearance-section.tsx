@@ -2,8 +2,8 @@ import { translate } from '@/i18n/i18n'
 import { clampNumber, resolvePaneStyleOptions } from '@/lib/terminal-theme'
 
 import type { GlobalSettings } from '../../../../shared/types'
+import { NumberField, SettingsSubsectionHeader } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { NumberField, SettingsSubsectionHeader } from './settings-form-controls'
 
 type TerminalPaneAppearanceSectionProps = {
   settings: GlobalSettings

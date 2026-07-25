@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { emitNativeChatSkillDiscovery } from '@/lib/native-chat-telemetry'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 
 import { getNativeChatAgentProfile } from '../../../../shared/native-chat-agent-profiles'
 import type { DiscoveredSkill, SkillDiscoveryResult } from '../../../../shared/skills'
@@ -12,12 +12,12 @@ import {
   resolveNativeChatSkillDiscoveryContext,
   selectNativeChatSkillStateInputs,
   type NativeChatSkillDiscoveryContext
-} from './native-chat-skill-discovery-context'
+} from './skill-discovery-context'
 
 export {
   resolveNativeChatSkillDiscoveryContext,
   resolveNativeChatSkillDiscoveryCwd
-} from './native-chat-skill-discovery-context'
+} from './skill-discovery-context'
 
 // The host scan budget honored by runtime targets that respect timeoutMs.
 const DISCOVERY_TIMEOUT_MS = 10_000

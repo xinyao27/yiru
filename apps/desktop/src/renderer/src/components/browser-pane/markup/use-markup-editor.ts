@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { createBrowserUuid } from '@/lib/browser-uuid'
 
-import { blitMarkupScene, renderCommittedLayer } from './markup-canvas-render'
+import { blitMarkupScene, renderCommittedLayer } from './canvas-render'
 import {
   canRedo,
   canUndo,
@@ -17,7 +17,7 @@ import {
   type MarkupDocument,
   type MarkupShape,
   type MarkupTool
-} from './markup-drawing-model'
+} from './drawing-model'
 import { useMarkupKeyboardShortcuts, type PendingText } from './use-markup-keyboard-shortcuts'
 import { useMarkupPointerHandlers } from './use-markup-pointer-handlers'
 

@@ -14,7 +14,7 @@ import {
 and race protection are kept together so branch review lookup invariants stay testable. */
 import type { StateCreator } from 'zustand'
 
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { Repo } from '../../../../shared/types'
 import type { AppState } from '../types'

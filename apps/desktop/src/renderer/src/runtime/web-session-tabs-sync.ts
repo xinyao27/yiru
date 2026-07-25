@@ -43,8 +43,7 @@ import type { AppState } from '../store'
 import { useAppStore } from '../store'
 import type { OpenFile } from '../store/slices/editor'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
-import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './runtime-terminal-stream'
-import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
+import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './terminal-stream'
 import {
   beginWebRuntimeWakeTerminalRespawn,
   clearAllWebRuntimeWakeTerminalRespawn,
@@ -73,6 +72,7 @@ import {
   toWebTerminalSurfaceTabId,
   WEB_TERMINAL_SURFACE_TAB_PREFIX
 } from './web-terminal-surface-id'
+import { toRuntimeWorktreeSelector } from './worktree-selector'
 
 const WEB_SESSION_GROUP_PREFIX = 'web-session-tabs:'
 

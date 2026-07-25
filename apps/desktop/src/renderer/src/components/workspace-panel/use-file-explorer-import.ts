@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { importExternalPathsToRuntime } from '@/runtime/runtime-file-client'
+import { importExternalPathsToRuntime } from '@/runtime/file-client'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'
 

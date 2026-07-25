@@ -14,7 +14,7 @@ import type {
   TerminalQuickCommand,
   TerminalQuickCommandScope
 } from '../../../../shared/types'
-import { RepoBadgeMark } from '../repo/repo-badge-label'
+import { RepoBadgeMark } from '../repo/badge-label'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { getQuickCommandRepoLabel } from './quick-commands-scope-filter'

@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import type { AddRepoExistingWorkspaceSource } from '../../../../shared/telemetry-events'

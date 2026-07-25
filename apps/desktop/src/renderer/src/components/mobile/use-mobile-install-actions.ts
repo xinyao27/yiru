@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import { getMobileReleaseLink, type MobilePlatform } from './mobile-release-link'
+import { getMobileReleaseLink, type MobilePlatform } from './release-link'
 
 export function useMobileInstallActions(platform: MobilePlatform): {
   copyInstallUrl: () => Promise<void>

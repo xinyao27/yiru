@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SpoolFilesPane } from '@/components/spool/spool-files-pane'
+import { SpoolFilesPane } from '@/components/spool/files-pane'
 
 import { FileExplorerFilesMemo } from './file-explorer-files'
 import {

@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import {
   YIRU_EDITOR_SAVE_AND_CLOSE_EVENT,
   requestEditorSaveQuiesce
-} from '@/components/editor/editor-autosave'
+} from '@/components/editor/autosave'
 import type { OpenFile } from '@/store/slices/editor'
 
 type UseTerminalSaveDialogParams = {

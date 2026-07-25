@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { commitRuntimeGit } from '@/runtime/runtime-git-client'
+import { commitRuntimeGit } from '@/runtime/git-client'
 
 import type { SourceControlLifecycleController } from './source-control-controller-lifecycle'
 import { writeCommitDraftForWorktree } from './source-control-panel-state'

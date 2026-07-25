@@ -19,7 +19,7 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '@/components/contextual-tours/contextual-tour-composer-events'
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
+import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
 import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
 import {
@@ -115,9 +115,9 @@ import {
 } from '@/lib/workspace-create-error-format'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { runBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'
-import { importExternalPathsToRuntime } from '@/runtime/runtime-file-client'
-import { checkRuntimeHooks, type HookCheckResult } from '@/runtime/runtime-hooks-client'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { importExternalPathsToRuntime } from '@/runtime/file-client'
+import { checkRuntimeHooks, type HookCheckResult } from '@/runtime/hooks-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { resolveWorktreeCreateBaseBranch } from '@/runtime/worktree-create-base'
 import { useAppStore } from '@/store'
 

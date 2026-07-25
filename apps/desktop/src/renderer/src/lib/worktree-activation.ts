@@ -4,7 +4,7 @@ import type {
 } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
+import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import { shouldAutoCreateInitialTerminal } from '@/components/terminal/initial-terminal'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
 import { getConnectionId } from '@/lib/connection-context'

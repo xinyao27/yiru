@@ -13,7 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
-import { getEditorDisplayLabel } from '@/components/editor/editor-labels'
+import { getEditorDisplayLabel } from '@/components/editor/labels'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -35,7 +35,7 @@ import {
   useWindowsTerminalCapabilities
 } from '@/lib/windows-terminal-capabilities'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import { resolveTerminalTabTitle } from '../../../../shared/tab-title-resolution'
@@ -52,11 +52,12 @@ import { useAppStore } from '../../store'
 import type { OpenFile } from '../../store/slices/editor'
 import { MobileEmulatorTabIntroCallout } from '../emulator-pane/mobile-emulator-tab-intro-callout'
 import { shouldShowMobileEmulatorTabIntro } from '../emulator-pane/mobile-emulator-tab-intro-visibility'
-import { canToggleNativeChat } from '../native-chat/native-chat-availability'
+import { canToggleNativeChat } from '../native-chat/availability'
 import { resolveTabIndicatorEdges } from '../tab-group/tab-insertion'
 import type { HoveredTabInsertion, TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { buildStatusMap } from '../workspace-panel/status-display'
 import BrowserTab, { getBrowserTabLabel } from './browser-tab'
+import TabBarCreateEntry from './create-entry'
 import type { DropIndicator } from './drop-indicator'
 import EditorFileTab from './editor-file-tab'
 import { QuickLaunchAgentMenuItems } from './quick-launch-button'
@@ -68,7 +69,6 @@ import {
   selectNativeChatTabWideFallbackUnsafeTabsById,
   selectTabAgentTypesByTabId
 } from './tab-agent-types-by-tab-id'
-import TabBarCreateEntry from './tab-bar-create-entry'
 import type { TabCreateEntryArgs } from './tab-create-entry-action'
 import { buildTabCreateMenuOptions, type TabCreateMenuOption } from './tab-create-menu-options'
 import { resolveWindowsShellLaunchTarget } from './windows-shell-launch'

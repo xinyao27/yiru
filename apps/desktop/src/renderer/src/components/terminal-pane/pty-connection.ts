@@ -34,7 +34,6 @@ import { getFitOverrideForPty, bindPanePtyId } from '@/lib/pane-manager/mobile-f
 import { requestStablePaneFit } from '@/lib/pane-manager/pane-fit-resize-observer'
 /* oxlint-disable max-lines */
 import type { PaneManager, ManagedPane } from '@/lib/pane-manager/pane-manager'
-import type { ManagedPaneInternal } from '@/lib/pane-manager/pane-manager-types'
 import {
   PANE_PTY_RESIZE_HOLD_FLUSH_EVENT,
   queuePanePtyResizeIfHeld,
@@ -77,6 +76,7 @@ import {
   isTerminalWritePipelineCertifiedDead,
   registerUndeliverableWriteHandler
 } from '@/lib/pane-manager/terminal-write-pipeline-health'
+import type { ManagedPaneInternal } from '@/lib/pane-manager/types'
 import {
   isLocalNativeWindowsConpty,
   resolveWindowsShellOverride
@@ -101,9 +101,9 @@ import {
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
 import type { PtyDataMeta } from '@/runtime/pty-data-meta'
-import { inspectRuntimeTerminalProcess } from '@/runtime/runtime-terminal-inspection'
-import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
+import { inspectRuntimeTerminalProcess } from '@/runtime/terminal-inspection'
+import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/terminal-stream'
 import { isWebTerminalSurfaceTabId } from '@/runtime/web-terminal-surface-id'
 import { useAppStore } from '@/store'
 import { getWorktreeMapFromState } from '@/store/selectors'
@@ -213,6 +213,11 @@ import { createPtySizeReassertion } from './pty-size-reassertion'
 import { reconcilePtySizeAcrossFrames, type PtySizeReconcileHandle } from './pty-size-reconcile'
 import type { PtyBufferSnapshot, PtyConnectResult } from './pty-transport'
 import { createIpcPtyTransport } from './pty-transport'
+import {
+  captureTerminalPaneRecoveryGeneration,
+  registerTerminalPaneRecoveryInstance,
+  requestTerminalPaneRecovery
+} from './recovery'
 import { shouldClaimRemoteDesktopViewport } from './remote-desktop-viewport-claim'
 import { createRemoteRuntimePtyTransport } from './remote-runtime-pty-transport'
 import {
@@ -244,11 +249,6 @@ import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
 import { isRendererHiddenPtyDeliveryGateEnabled } from './terminal-hidden-delivery-gate'
 import { resolveHiddenRestoreScrollbackRows } from './terminal-hidden-restore-scrollback'
 import { warnTerminalLifecycleAnomaly } from './terminal-lifecycle-diagnostics'
-import {
-  captureTerminalPaneRecoveryGeneration,
-  registerTerminalPaneRecoveryInstance,
-  requestTerminalPaneRecovery
-} from './terminal-pane-recovery'
 import { resolveTerminalPasteRuntime } from './terminal-paste-runtime'
 import { getTerminalPasteSshRemotePlatform } from './terminal-paste-ssh-platform'
 import { takeCurrentPtyDeliveryAckCredit } from './terminal-pty-ack-gate'

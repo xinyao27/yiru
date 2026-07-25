@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
 
-import { searchKeywords } from './settings-search-keywords'
+import { searchKeywords } from './search-keywords'
 
 const AGENT_AWAKE_TITLE_KEY = 'auto.components.settings.agent-awake-copy.e5995ce268'
 const AGENT_AWAKE_DESCRIPTION_WINDOWS_KEY = 'auto.components.settings.agent-awake-copy.95d3031db2'

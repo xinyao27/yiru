@@ -1,7 +1,7 @@
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
+import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
 import { translate } from '@/i18n/i18n'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'

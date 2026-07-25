@@ -1,8 +1,8 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
+import DashboardAgentRow from '@/components/dashboard/agent-row'
 import { buildAgentRowLineageTree } from '@/components/dashboard/agent-row-lineage-model'
-import DashboardAgentRow from '@/components/dashboard/dashboard-agent-row'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { useNow } from '@/components/dashboard/use-now'
 import { translate } from '@/i18n/i18n'

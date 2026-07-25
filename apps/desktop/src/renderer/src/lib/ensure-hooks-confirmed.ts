@@ -4,7 +4,7 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
-import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
+import { checkRuntimeHooks } from '@/runtime/hooks-client'
 import type { AppState } from '@/store/types'
 
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'

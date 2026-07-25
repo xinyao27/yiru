@@ -89,13 +89,9 @@ import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
-import {
-  callRuntimeRpc,
-  RuntimeRpcCallError,
-  type RuntimeClientTarget
-} from '@/runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+} from '@/runtime/file-client'
+import { callRuntimeRpc, RuntimeRpcCallError, type RuntimeClientTarget } from '@/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import { useAppStore } from '@/store'
 
 import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '../../../../shared/browser-annotation-viewport-bridge'
@@ -174,14 +170,14 @@ import {
   setBrowserPageZoomLevel,
   type BrowserPageZoomDirection
 } from './browser-page-zoom'
-import { getBrowserPagesForWorkspace } from './browser-pane-page-selection'
 import { BrowserToolbarMenu } from './browser-toolbar-menu'
 import { shouldPollChromiumErrorPage } from './chromium-error-page-polling'
 import { formatGrabPayloadAsText } from './grab-confirmation-sheet'
-import { deliverMarkupToClipboard } from './markup/markup-clipboard-delivery'
-import { MarkupDrawButton } from './markup/markup-draw-button'
-import { MarkupOverlay } from './markup/markup-overlay'
+import { deliverMarkupToClipboard } from './markup/clipboard-delivery'
+import { MarkupDrawButton } from './markup/draw-button'
+import { MarkupOverlay } from './markup/overlay'
 import { useMarkupMode, type MarkupCaptureContext } from './markup/use-markup-mode'
+import { getBrowserPagesForWorkspace } from './page-selection'
 import { getRemoteBrowserFrameStyle } from './remote-browser-frame-style'
 import {
   getRemoteBrowserKeyboardShortcut,

@@ -32,7 +32,7 @@ import {
   selectClaudeProviderAccount,
   selectCodexProviderAccount,
   watchProviderAccounts
-} from '@/runtime/runtime-provider-accounts-client'
+} from '@/runtime/provider-accounts-client'
 
 import type {
   ClaudeRateLimitAccountsState,
@@ -74,6 +74,7 @@ import {
   getAccountsPaneSearchEntries
 } from './accounts-search'
 import { getCodexAccountAuthWarning } from './codex-account-auth-warning'
+import { SettingsRow, SettingsSegmentedControl } from './form-controls'
 import { GrokAccountsSection } from './grok-accounts-section'
 import {
   getProviderAccountActiveIdForView,
@@ -83,9 +84,8 @@ import {
   WSL_DEFAULT_DISTRO_KEY,
   type ProviderAccountRuntimeView
 } from './provider-account-visibility'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 export { getAccountsPaneSearchEntries }
 

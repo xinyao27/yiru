@@ -8,7 +8,7 @@ import {
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { getEditorDisplayLabel } from '@/components/editor/editor-labels'
+import { getEditorDisplayLabel } from '@/components/editor/labels'
 import { canOpenMarkdownPreview } from '@/components/editor/markdown-preview-controls'
 import { getUntitledFileRoot } from '@/components/editor/untitled-file-rename-path'
 import { Input } from '@/components/ui/input'

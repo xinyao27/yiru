@@ -10,7 +10,7 @@ import {
   absolutePathToFileUri as toFileUrlForOsEscape,
   resolveMarkdownLinkTarget
 } from '@/lib/markdown-internal-links'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 
 import type { DiffComment } from '../../../../shared/types'
 import { scrollToAnchorInEditor } from './markdown-anchor-scroll'

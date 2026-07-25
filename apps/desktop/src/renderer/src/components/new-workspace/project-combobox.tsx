@@ -1,7 +1,7 @@
 import { Check, FolderOpen, FolderPlus, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import RepoBadgeLabel from '@/components/repo/repo-badge-label'
+import RepoBadgeLabel from '@/components/repo/badge-label'
 import { Button } from '@/components/ui/button'
 import {
   Command,

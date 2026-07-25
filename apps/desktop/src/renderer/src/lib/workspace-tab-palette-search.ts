@@ -1,4 +1,4 @@
-import { getEditorDisplayLabel } from '@/components/editor/editor-labels'
+import { getEditorDisplayLabel } from '@/components/editor/labels'
 import type { OpenFile } from '@/store/slices/editor'
 
 import {

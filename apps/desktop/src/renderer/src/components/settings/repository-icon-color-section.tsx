@@ -4,7 +4,7 @@ import { cn } from '@/lib/class-names'
 
 import { DEFAULT_REPO_BADGE_COLOR, REPO_COLORS } from '../../../../shared/constants'
 import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
-import { RepoColorPicker } from '../repo/repo-color-picker'
+import { RepoColorPicker } from '../repo/color-picker'
 import { Label } from '../ui/label'
 
 type RepositoryIconColorSectionProps = {

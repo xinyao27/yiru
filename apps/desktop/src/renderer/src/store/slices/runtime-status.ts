@@ -4,7 +4,7 @@ import {
   clearRecentRuntimeCompatibilityFailure,
   clearRuntimeCompatibilityCache,
   unwrapRuntimeRpcResult
-} from '@/runtime/runtime-rpc-client'
+} from '@/runtime/rpc-client'
 
 import type { PublicKnownRuntimeEnvironment } from '../../../../shared/runtime-environments'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'

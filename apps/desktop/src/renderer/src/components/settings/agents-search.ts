@@ -18,7 +18,7 @@ import {
   getAgentStatusHooksSearchKeywords,
   getAgentStatusHooksTitle
 } from './agent-status-hooks-copy'
-import { searchKeywords, translateSearchKeyword, uniqueKeywords } from './settings-search-keywords'
+import { searchKeywords, translateSearchKeyword, uniqueKeywords } from './search-keywords'
 
 function buildAgentSettingsKeywords(): string[] {
   const keywords = searchKeywords([

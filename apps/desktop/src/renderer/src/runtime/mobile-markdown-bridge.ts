@@ -3,8 +3,8 @@ import {
   requestEditorFileSave,
   requestEditorSaveQuiesce,
   type EditorFileSavedDetail
-} from '@/components/editor/editor-autosave'
-import { flushPendingEditorChange } from '@/components/editor/editor-pending-flush'
+} from '@/components/editor/autosave'
+import { flushPendingEditorChange } from '@/components/editor/pending-flush'
 import { getActiveTabNavOrder } from '@/components/tab-bar/group-tab-order'
 import { getConnectionIdForFile } from '@/lib/connection-context'
 import { useAppStore } from '@/store'
@@ -19,8 +19,8 @@ import {
   type RuntimeMobileMarkdownRequest,
   type RuntimeMobileMarkdownResponse
 } from '../../../shared/mobile-markdown-document'
-import { readRuntimeFileContent } from './runtime-file-client'
-import { settingsForRuntimeOwner } from './runtime-rpc-client'
+import { readRuntimeFileContent } from './file-client'
+import { settingsForRuntimeOwner } from './rpc-client'
 
 const MOBILE_MARKDOWN_READ_MAX_BYTES = 512 * 1024
 const saveQueues = new Map<string, Promise<void>>()

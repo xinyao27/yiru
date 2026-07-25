@@ -12,7 +12,7 @@ import {
   ORCHESTRATION_SKILL_NAME
 } from '@/lib/agent-feature-install-commands'
 import { hasEffectiveSetupCommand } from '@/lib/setup-script-status'
-import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
+import { checkRuntimeHooks } from '@/runtime/hooks-client'
 import { useAppStore } from '@/store'
 
 import { hasFeatureInteraction } from '../../../../shared/feature-interactions'
@@ -20,14 +20,14 @@ import { isGitRepoKind } from '../../../../shared/repo-kind'
 import {
   getFeatureWallSetupProgress,
   type FeatureWallSetupProgress
-} from '../feature-wall/feature-wall-setup-progress'
-import { useSetupGuideBrowserMilestoneProgress } from './setup-guide-browser-milestone-progress'
+} from '../feature-wall/setup-progress'
+import { useSetupGuideBrowserMilestoneProgress } from './browser-milestone-progress'
 import {
   getComputerUsePermissionSetupState,
   getCurrentSetupScriptProbeState,
   getSetupGuideProgressReady,
   getSetupScriptProbeSignature
-} from './setup-guide-progress-readiness'
+} from './progress-readiness'
 import {
   readSetupScriptProbeCache,
   setSetupScriptProbeCache,

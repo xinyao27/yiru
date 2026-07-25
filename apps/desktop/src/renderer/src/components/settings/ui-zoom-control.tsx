@@ -5,7 +5,7 @@ import { translate } from '@/i18n/i18n'
 import { applyUIZoom } from '@/lib/ui-zoom'
 
 import { Button } from '../ui/button'
-import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX, zoomLevelToPercent } from './settings-constants'
+import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX, zoomLevelToPercent } from './constants'
 
 export function UIZoomControl(): React.JSX.Element {
   const [zoomLevel, setZoomLevel] = useState(() => window.api.ui.getZoomLevel())

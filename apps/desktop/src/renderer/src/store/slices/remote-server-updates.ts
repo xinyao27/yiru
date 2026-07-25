@@ -8,7 +8,7 @@ import {
   type RemoteServerUpdateEntry,
   type RemoteServerUpdateTransport
 } from '@/runtime/remote-server-update-coordinator'
-import { callRuntimeRpc, getRuntimeEnvironmentStatus } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getRuntimeEnvironmentStatus } from '@/runtime/rpc-client'
 
 import { isValidAppVersion } from '../../../../shared/app-version'
 import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-environments'

@@ -21,7 +21,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { SpoolWorktreeVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
+import { SpoolWorktreeVisibilityDialog } from '@/components/spool/worktree-visibility-dialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

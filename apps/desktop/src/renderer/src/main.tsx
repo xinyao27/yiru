@@ -7,7 +7,7 @@ import App from './application-shell'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
 import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
 import { translate } from './i18n/i18n'
-import { I18nProvider } from './i18n/i18n-provider'
+import { I18nProvider } from './i18n/provider'
 import {
   installRendererCrashDiagnostics,
   recordRendererCrashBreadcrumb

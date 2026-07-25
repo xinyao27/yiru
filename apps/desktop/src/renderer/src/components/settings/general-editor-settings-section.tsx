@@ -19,14 +19,14 @@ import {
 } from './auto-save-delay-draft'
 import { EditorFontFamilySetting } from './editor-font-family-setting'
 import { EditorWordWrapSetting } from './editor-word-wrap-setting'
-import { LanguageServerSetting } from './language-server-setting'
-import { RichMarkdownSpellcheckSetting } from './rich-markdown-spellcheck-setting'
-import { SearchableSetting } from './searchable-setting'
 import {
   SettingsSegmentedControl,
   SettingsSubsectionHeader,
   SettingsSwitchRow
-} from './settings-form-controls'
+} from './form-controls'
+import { LanguageServerSetting } from './language-server-setting'
+import { RichMarkdownSpellcheckSetting } from './rich-markdown-spellcheck-setting'
+import { SearchableSetting } from './searchable-setting'
 
 type GeneralEditorSettingsSectionProps = {
   settings: GlobalSettings

@@ -1,5 +1,5 @@
 import { joinPath, normalizeRelativePath } from '@/lib/path'
-import { readRuntimeDirectory } from '@/runtime/runtime-file-client'
+import { readRuntimeDirectory } from '@/runtime/file-client'
 
 import type { DirEntry } from '../../../../shared/types'
 import { shouldIncludeFileExplorerEntry } from './file-explorer-entries'

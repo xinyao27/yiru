@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { translate } from '@/i18n/i18n'
 
 import { cn } from '../../lib/class-names'
-import { mobilePageStyles } from './mobile-page-tailwind'
+import { mobilePageStyles } from './page-tailwind'
 import { HomeSlide } from './slides/home-slide'
 import { TerminalSlide } from './slides/terminal-slide'
 import { WorktreeListSlide } from './slides/worktree-list-slide'

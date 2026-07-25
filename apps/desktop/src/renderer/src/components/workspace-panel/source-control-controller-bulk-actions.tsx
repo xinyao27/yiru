@@ -2,7 +2,7 @@ import { shouldForcePushWithLeaseForUpstream } from '@yiru/workbench-model/revie
 import { useCallback, useRef } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { bulkStageRuntimeGitPaths, bulkUnstageRuntimeGitPaths } from '@/runtime/runtime-git-client'
+import { bulkStageRuntimeGitPaths, bulkUnstageRuntimeGitPaths } from '@/runtime/git-client'
 
 import { getStageAllPaths } from './discard-all-sequence'
 import type {

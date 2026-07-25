@@ -1,4 +1,4 @@
-import { callRuntimeRpc, type RuntimeClientTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, type RuntimeClientTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { isTerminalTabPresent } from '@/store/slices/terminal-tab-retirement'
 

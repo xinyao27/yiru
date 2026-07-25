@@ -7,9 +7,9 @@ import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import {
   nativeChatWorktreeNotReadyNotice,
   type NativeChatAttachmentOwner
-} from './native-chat-attachment-upload'
-import { NATIVE_CHAT_CONTEXT_PASTE_MAX_BYTES } from './native-chat-composer-target'
-import { resolveImagePaste } from './native-chat-image-paste'
+} from './attachment-upload'
+import { NATIVE_CHAT_CONTEXT_PASTE_MAX_BYTES } from './composer-target'
+import { resolveImagePaste } from './image-paste'
 
 export type UseNativeChatComposerPasteArgs = {
   agent: AgentType

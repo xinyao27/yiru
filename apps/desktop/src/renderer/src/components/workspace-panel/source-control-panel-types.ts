@@ -3,7 +3,7 @@ import type {
   HostedReviewProvider
 } from '@yiru/workbench-model/review'
 
-import type { RuntimeGitContext } from '@/runtime/runtime-git-client'
+import type { RuntimeGitContext } from '@/runtime/git-client'
 
 import type { GitConflictOperation, GitPushTarget } from '../../../../shared/types'
 

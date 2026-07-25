@@ -8,7 +8,7 @@ import { translate } from '@/i18n/i18n'
 
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { SettingsSwitch } from './settings-form-controls'
+import { SettingsSwitch } from './form-controls'
 import type { EditingTarget } from './ssh-target-draft'
 import { SshTargetFormCollapsibleSection } from './ssh-target-form-collapsible-section'
 

@@ -56,7 +56,7 @@ import { lookupSmartGitHubSubmitItem } from '@/lib/smart-github-submit'
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefDetails
-} from '@/runtime/runtime-repo-client'
+} from '@/runtime/repo-client'
 import { useAppStore } from '@/store'
 
 import {

@@ -1,6 +1,6 @@
 import { getAgentSessionOptionCatalog } from '../../../../shared/agent-session-option-catalog'
 import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
-import { stripScrollbackAnsi } from './native-chat-scrape-fallback'
+import { stripScrollbackAnsi } from './scrape-fallback'
 
 const EFFORT_ID_BY_LABEL: Record<string, string> = {
   low: 'low',

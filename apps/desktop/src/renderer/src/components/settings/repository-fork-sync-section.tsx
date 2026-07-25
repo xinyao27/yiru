@@ -7,12 +7,12 @@ import { translate } from '@/i18n/i18n'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
 
 import type { ForkSyncMode, GitForkSyncResult, Repo } from '../../../../shared/types'
-import { syncRuntimeGitForkDefaultBranch } from '../../runtime/runtime-git-client'
+import { syncRuntimeGitForkDefaultBranch } from '../../runtime/git-client'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
+import { SettingsSegmentedControl } from './form-controls'
+import { searchKeywords } from './search-keywords'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSegmentedControl } from './settings-form-controls'
-import { searchKeywords } from './settings-search-keywords'
 
 type RepositoryForkSyncSectionProps = {
   repo: Repo

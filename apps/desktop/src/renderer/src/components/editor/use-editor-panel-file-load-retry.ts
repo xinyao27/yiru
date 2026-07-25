@@ -6,7 +6,7 @@ import {
   WORKTREE_OWNER_NOT_READY_ERROR,
   WORKTREE_OWNER_UNREACHABLE_ERROR,
   type FileContent
-} from './editor-panel-content-types'
+} from './panel-content-types'
 
 const FILE_LOAD_RETRY_DELAYS_MS = [250, 1000, 2500]
 // Why: a remote host can take a while to finish connecting. The owner-not-ready

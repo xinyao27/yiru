@@ -16,7 +16,7 @@ import type {
   SourceControlAiSettings
 } from '../../../../shared/source-control-ai-types'
 import type { TuiAgent } from '../../../../shared/types'
-import { SourceControlActionVariableChips } from '../source-control/source-control-action-variable-chips'
+import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'

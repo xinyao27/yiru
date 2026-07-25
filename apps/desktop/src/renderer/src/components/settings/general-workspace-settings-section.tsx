@@ -3,9 +3,9 @@ import type React from 'react'
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
+import { SettingsSubsectionHeader, SettingsSwitchRow } from './form-controls'
 import { OpenInMenuSetting } from './open-in-menu-setting'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSubsectionHeader, SettingsSwitchRow } from './settings-form-controls'
 import { WorkspaceDirectorySetting } from './workspace-directory-setting'
 
 type GeneralWorkspaceSettingsSectionProps = {

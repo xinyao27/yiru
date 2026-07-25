@@ -3,8 +3,8 @@ import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 
 import { getEphemeralVmsSearchEntry } from './ephemeral-vms-search'
 import { getNativeChatExperimentalSearchEntry } from './native-chat-experimental-search-entry'
-import type { SettingsSearchEntry } from './settings-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import type { SettingsSearchEntry } from './search'
+import { translateSearchKeyword } from './search-keywords'
 
 export const getExperimentalPaneSearchEntries = createLocalizedCatalog(
   (): SettingsSearchEntry[] => [

@@ -14,7 +14,7 @@ import {
 } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { OnboardingInlineCommandTerminal } from '@/components/onboarding/onboarding-inline-command-terminal'
+import { OnboardingInlineCommandTerminal } from '@/components/onboarding/inline-command-terminal'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import AgentSettingsDialog from '@/components/agent/agent-settings-dialog'
+import AgentSettingsDialog from '@/components/agent/settings-dialog'
 import NewWorkspaceComposerCard from '@/components/new-workspace-composer-card'
 import { getFolderWorkspacePrimaryActionLabel } from '@/components/sidebar/folder-workspace-composer-helpers'
 import {

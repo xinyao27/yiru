@@ -1,8 +1,8 @@
 import { toast } from 'sonner'
 
-import type { EmulatorStreamInfo } from '@/components/emulator-pane/emulator-pane-types'
+import type { EmulatorStreamInfo } from '@/components/emulator-pane/types'
 import { translate } from '@/i18n/i18n'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { ensureSimulatorTab, getSimulatorTabForWorktree } from './ensure-simulator-tab'

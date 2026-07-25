@@ -1,5 +1,5 @@
-import type { HookCheckResult } from '@/runtime/runtime-hooks-client'
-import { isRuntimeScopeForbiddenError } from '@/runtime/runtime-rpc-client'
+import type { HookCheckResult } from '@/runtime/hooks-client'
+import { isRuntimeScopeForbiddenError } from '@/runtime/rpc-client'
 
 import { getDefaultRepoHookSettings } from '../../../shared/constants'
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'

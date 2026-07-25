@@ -19,14 +19,14 @@ import {
   CompareAgainstUpstreamSetting,
   compareAgainstUpstreamMatchesSearch
 } from './compare-against-upstream-setting'
+import { SettingsRow, SettingsSegmentedControl } from './form-controls'
 import { getGitPaneSearchEntries } from './git-search'
 import {
   KEEP_LOCAL_MAIN_UP_TO_DATE_SECTION_ID,
   getKeepLocalMainUpToDateTitle
 } from './keep-local-main-up-to-date-setting'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 export { getGitPaneSearchEntries }
 

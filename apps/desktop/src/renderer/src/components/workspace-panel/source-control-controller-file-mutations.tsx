@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import {
   notifyEditorExternalFileChange,
   requestEditorSaveQuiesce
-} from '@/components/editor/editor-autosave'
+} from '@/components/editor/autosave'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import {
@@ -12,7 +12,7 @@ import {
   bulkUnstageRuntimeGitPaths,
   discardRuntimeGitPath,
   unstageRuntimeGitPath
-} from '@/runtime/runtime-git-client'
+} from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
 import type { GitStatusEntry } from '../../../../shared/types'

@@ -3,7 +3,7 @@ import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/revi
 import type {
   RuntimeGeneratePullRequestFieldsOverrides,
   RuntimeGitContext
-} from '@/runtime/runtime-git-client'
+} from '@/runtime/git-client'
 import type { AppState } from '@/store'
 import type { PullRequestFieldRevisions } from '@/store/slices/pull-request-generation'
 

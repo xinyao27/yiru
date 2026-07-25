@@ -9,8 +9,8 @@ import {
 } from '@/lib/primary-selection'
 import { useAppStore } from '@/store'
 
-import { editorShortcutMatches } from './editor-shortcuts'
 import { formatCopiedSelectionWithContext, getContextualCopyLineRange } from './selection-copy'
+import { editorShortcutMatches } from './shortcuts'
 
 export function setupContextualCopy({
   editorInstance,

@@ -14,14 +14,14 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
-import { FeatureSetupInlineTerminal } from '../onboarding/feature-setup-inline-terminal'
 import {
   DEFAULT_ONBOARDING_FEATURE_SETUP_SELECTION,
   hasSelectedOnboardingFeatureSetup,
   runOnboardingFeatureSetup,
   type OnboardingFeatureSetupId,
   type OnboardingFeatureSetupSelection
-} from '../onboarding/onboarding-feature-setup'
+} from '../onboarding/feature-setup'
+import { FeatureSetupInlineTerminal } from '../onboarding/feature-setup-inline-terminal'
 import {
   getAgentCapabilityStatusClassName,
   getDefaultAgentCapabilitySetupSelection,

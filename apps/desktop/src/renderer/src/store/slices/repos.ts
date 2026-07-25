@@ -68,13 +68,13 @@ import type {
 } from '../../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { formatFolderWorkspaceCreateError } from '../../lib/folder-workspace-path-status'
-import { syncRuntimeGitForkDefaultBranch } from '../../runtime/runtime-git-client'
+import { syncRuntimeGitForkDefaultBranch } from '../../runtime/git-client'
 import {
   assertRuntimeEnvironmentCapability,
   callRuntimeRpc,
   getActiveRuntimeTarget
-} from '../../runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-selector'
+} from '../../runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
 import type { AppState } from '../types'
 import { selectProjectGroupRemovalTargets } from './project-group-removal-targets'
 import { reconcileReadoptedSshWorktreesByRepo } from './readopted-ssh-worktree-rows'

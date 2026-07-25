@@ -4,12 +4,12 @@ import { subscribeToPtyData } from '@/components/terminal-pane/pty-data-sidecar-
 import { subscribeToPtyExit } from '@/components/terminal-pane/pty-dispatcher'
 import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
 import { getRemoteRuntimeTerminalMultiplexer } from '@/runtime/remote-runtime-terminal-multiplexer'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
-import { isRemoteRuntimePtyId } from '@/runtime/runtime-terminal-inspection'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
+import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
-} from '@/runtime/runtime-terminal-stream'
+} from '@/runtime/terminal-stream'
 import { useAppStore } from '@/store'
 
 import { createAgentStatusOscProcessor } from '../../../shared/agent-status-osc'

@@ -1,5 +1,5 @@
-import { callRuntimeRpc, RuntimeRpcCallError } from '@/runtime/runtime-rpc-client'
-import type { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, RuntimeRpcCallError } from '@/runtime/rpc-client'
+import type { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type { RuntimeTerminalAgentStatus } from '../../../shared/runtime-types'
 

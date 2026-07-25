@@ -8,7 +8,7 @@ import { formatKeybindingList, type KeybindingDefinition } from '../../../../sha
 import { cn } from '../../lib/class-names'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { matchesSettingsSearch, type SettingsSearchEntry } from './settings-search'
+import { matchesSettingsSearch, type SettingsSearchEntry } from './search'
 import type { ShortcutTerminalStatus } from './shortcut-terminal-status'
 
 export type ShortcutFilter = 'all' | 'modified' | 'unassigned' | 'conflicts'

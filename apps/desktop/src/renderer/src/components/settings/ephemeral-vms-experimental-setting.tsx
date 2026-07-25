@@ -4,8 +4,8 @@ import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
 import { EphemeralVmsPane } from './ephemeral-vms-pane'
 import { getExperimentalSearchEntry } from './experimental-search'
+import { SettingsSwitch } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSwitch } from './settings-form-controls'
 
 type EphemeralVmsExperimentalSettingProps = {
   settings: GlobalSettings

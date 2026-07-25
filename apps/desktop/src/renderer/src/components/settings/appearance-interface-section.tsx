@@ -24,15 +24,15 @@ import {
   getZoomEntries
 } from './appearance-search'
 import { ShortcutHintList } from './appearance-shortcut-hint-list'
-import { LoaderStyleSetting } from './loader-style-setting'
-import { SearchableSetting } from './searchable-setting'
 import {
   FontAutocomplete,
   SettingsRow,
   SettingsSegmentedControl,
   SettingsSwitchRow
-} from './settings-form-controls'
-import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './settings-search'
+} from './form-controls'
+import { LoaderStyleSetting } from './loader-style-setting'
+import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './search'
+import { SearchableSetting } from './searchable-setting'
 import { UIZoomControl } from './ui-zoom-control'
 
 type AppearanceInterfaceSectionProps = {

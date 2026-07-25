@@ -36,8 +36,8 @@ import {
   ensureWslCliAvailableForAgentSkillTerminal,
   getWslCliDistroRequest
 } from './cli-skill-runtime-setup'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { matchesSettingsSearch } from './settings-search'
 
 type BrowserUseSetupProps = {
   onConfigureMoreBrowsers?: () => void

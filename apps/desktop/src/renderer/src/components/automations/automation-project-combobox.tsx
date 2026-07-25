@@ -7,7 +7,7 @@ import {
 import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import RepoBadgeLabel from '@/components/repo/repo-badge-label'
+import RepoBadgeLabel from '@/components/repo/badge-label'
 import { Button } from '@/components/ui/button'
 import { Command, CommandInput, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

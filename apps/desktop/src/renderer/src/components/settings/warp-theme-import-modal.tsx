@@ -15,7 +15,7 @@ import {
   DialogTitle
 } from '../ui/dialog'
 import { ScrollArea } from '../ui/scroll-area'
-import { SettingsBadge } from './settings-form-controls'
+import { SettingsBadge } from './form-controls'
 import type { UseWarpThemeImportReturn } from './use-warp-theme-import'
 
 type WarpThemeImportModalProps = Pick<

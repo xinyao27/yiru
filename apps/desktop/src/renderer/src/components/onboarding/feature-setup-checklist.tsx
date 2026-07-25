@@ -10,10 +10,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type {
-  OnboardingFeatureSetupId,
-  OnboardingFeatureSetupSelection
-} from './onboarding-feature-setup'
+import type { OnboardingFeatureSetupId, OnboardingFeatureSetupSelection } from './feature-setup'
 
 type FeatureSetupChecklistProps = {
   value: OnboardingFeatureSetupSelection

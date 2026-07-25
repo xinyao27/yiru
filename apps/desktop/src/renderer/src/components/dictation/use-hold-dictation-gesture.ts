@@ -5,7 +5,7 @@ import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { keybindingMatchesAction, type KeybindingOverrides } from '../../../../shared/keybindings'
 import type { DictationState } from '../../../../shared/speech-types'
 import type { GlobalSettings } from '../../../../shared/types'
-import type { DictationInsertionTarget } from './dictation-insertion-target'
+import type { DictationInsertionTarget } from './insertion-target'
 
 type HoldDictationGestureOptions = {
   dictationStateRef: MutableRefObject<DictationState>

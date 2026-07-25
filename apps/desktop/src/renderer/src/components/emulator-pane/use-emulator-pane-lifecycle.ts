@@ -5,7 +5,7 @@ import {
   scheduleSimulatorPaneManagedShutdown
 } from '@/lib/simulator-pane-shutdown-scheduler'
 
-import type { SimulatorDeviceRow } from './emulator-pane-types'
+import type { SimulatorDeviceRow } from './types'
 
 type UseEmulatorPaneLifecycleArgs = {
   mountedRef: { current: boolean }

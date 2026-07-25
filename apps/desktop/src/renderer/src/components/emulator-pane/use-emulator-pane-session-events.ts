@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import type { EmulatorPaneSession, SimulatorDeviceRow } from './emulator-pane-types'
+import type { EmulatorPaneSession, SimulatorDeviceRow } from './types'
 
 export const EMULATOR_LOCAL_SHUTDOWN_EVENT = 'yiru:emulator-shutdown'
 

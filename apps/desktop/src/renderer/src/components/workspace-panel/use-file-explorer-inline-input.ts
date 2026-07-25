@@ -6,7 +6,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
 import { dirname, joinPath } from '@/lib/path'
 import { extractIpcErrorMessage, renameFileOnDisk } from '@/lib/rename-file'
-import { createRuntimePath, deleteRuntimePath } from '@/runtime/runtime-file-client'
+import { createRuntimePath, deleteRuntimePath } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
 import type { InlineInput } from './file-explorer-row'

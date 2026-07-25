@@ -1,7 +1,7 @@
 import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 
-import { translateSearchKeyword } from './settings-search-keywords'
+import { translateSearchKeyword } from './search-keywords'
 
 /** Stable Settings deep-link / scroll target for the Used/Remaining control. */
 export const USAGE_PERCENTAGE_DISPLAY_SETTING_ID = 'usage-percentage-display'

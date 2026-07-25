@@ -1,7 +1,7 @@
 import { translate } from '@/i18n/i18n'
 
-import type { SettingsSearchEntry } from './settings-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import type { SettingsSearchEntry } from './search'
+import { translateSearchKeyword } from './search-keywords'
 
 type BrowserShortcutPlatform = {
   isMac: boolean

@@ -1,11 +1,11 @@
 import type { DragReorderCallbacks } from './pane-drag-reorder'
+import { splitManagedPane } from './pane-split-close'
 import type {
   ManagedPane,
   ManagedPaneInternal,
   PaneManagerOptions,
   PaneStyleOptions
-} from './pane-manager-types'
-import { splitManagedPane } from './pane-split-close'
+} from './types'
 
 export type SplitPaneAroundLeafIdsOptions = {
   ratio?: number

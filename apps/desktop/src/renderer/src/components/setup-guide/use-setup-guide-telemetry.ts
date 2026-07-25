@@ -15,7 +15,7 @@ import {
   getFeatureWallSetupSteps,
   type FeatureWallSetupStepId
 } from '../../../../shared/feature-wall-setup-steps'
-import type { FeatureWallSetupProgress } from '../feature-wall/feature-wall-setup-progress'
+import type { FeatureWallSetupProgress } from '../feature-wall/setup-progress'
 
 type SetupGuideTelemetrySession = {
   source: SetupGuideSource

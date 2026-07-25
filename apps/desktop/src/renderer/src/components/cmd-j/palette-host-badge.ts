@@ -5,7 +5,7 @@ import {
 } from '@yiru/workbench-model/workspace'
 
 import type { Repo } from '../../../../shared/types'
-import type { SidebarHostOption } from '../sidebar/sidebar-host-options'
+import type { SidebarHostOption } from '../sidebar/host-options'
 
 export type PaletteHostBadge = {
   hostId: ExecutionHostId

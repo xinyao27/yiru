@@ -1,5 +1,5 @@
-import { editorShortcutMatches } from './editor-shortcuts'
 import type { KeyHandlerContext } from './rich-markdown-key-handler'
+import { editorShortcutMatches } from './shortcuts'
 
 /**
  * Mod+Alt+N: open the review-note composer for the current selection.

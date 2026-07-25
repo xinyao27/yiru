@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
-import { searchRuntimeFiles } from '@/runtime/runtime-file-client'
+import { searchRuntimeFiles } from '@/runtime/file-client'
 import {
   createEmptyRuntimeFileSearchResult,
   getRuntimeFileSearchRejectedField
-} from '@/runtime/runtime-file-search-bounds'
+} from '@/runtime/file-search-bounds'
 import { useAppStore } from '@/store'
 
 import type { SearchResult } from '../../../../shared/types'

@@ -16,8 +16,8 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import { canConnectAddRepoHost, canSelectAddRepoHost } from './add-repo-host-availability'
-import type { SidebarHostOption } from './sidebar-host-options'
-import { getSidebarHostHealthLabel, shouldShowHostScopeControls } from './sidebar-host-options'
+import type { SidebarHostOption } from './host-options'
+import { getSidebarHostHealthLabel, shouldShowHostScopeControls } from './host-options'
 
 type AddRepoHostSelectorProps = {
   hosts: SidebarHostOption[]

@@ -44,13 +44,13 @@ import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
 import { setWithLRU } from '@/lib/scroll-cache'
 import '@/lib/monaco-setup'
-import { writeRuntimeFile } from '@/runtime/runtime-file-client'
+import { writeRuntimeFile } from '@/runtime/file-client'
 import {
   getRuntimeGitBranchDiff,
   getRuntimeGitCommitDiff,
   getRuntimeGitDiff
-} from '@/runtime/runtime-git-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+} from '@/runtime/git-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
@@ -63,6 +63,7 @@ import type {
   GitDiffResult,
   GitStatusEntry
 } from '../../../../shared/types'
+import { YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT, type EditorPathMutationTarget } from './autosave'
 import { getCombinedDiffCommitMessageBody } from './combined-diff-commit-message'
 import {
   getCombinedBranchEntries,
@@ -89,10 +90,6 @@ import { removeDiffSectionMeasuredHeight } from './diff-section-height-cache'
 import { DiffSectionItem } from './diff-section-item'
 import { getDiffSectionEstimatedHeight, isIntrinsicHeightImageDiff } from './diff-section-layout'
 import type { DiffSection } from './diff-section-types'
-import {
-  YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT,
-  type EditorPathMutationTarget
-} from './editor-autosave'
 import { getLargeDiffRenderLimit } from './large-diff-render-limit'
 import { getStoredTextDiffContent, getStoredTextDiffResult } from './large-diff-section-content'
 

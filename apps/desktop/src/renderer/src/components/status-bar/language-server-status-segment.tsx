@@ -13,7 +13,7 @@ import {
 } from '@/lib/monaco-language-server-manager'
 import { useAppStore } from '@/store'
 
-import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './status-bar-context-menu-policy'
+import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 
 type LanguageServerStatusSegmentProps = {
   iconOnly: boolean

@@ -7,8 +7,8 @@ import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-ski
 import {
   onboardingFeatureSetupTelemetrySelection,
   type OnboardingFeatureSetupSelection
-} from './onboarding-feature-setup'
-import { OnboardingInlineCommandTerminal } from './onboarding-inline-command-terminal'
+} from './feature-setup'
+import { OnboardingInlineCommandTerminal } from './inline-command-terminal'
 
 type FeatureSetupInlineTerminalProps = {
   command: string

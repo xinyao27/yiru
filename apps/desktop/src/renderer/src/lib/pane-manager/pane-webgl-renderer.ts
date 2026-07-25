@@ -2,12 +2,12 @@ import { WebglAddon } from '@xterm/addon-webgl'
 
 import { recordTerminalWebglDiagnostic } from '../../../../shared/terminal-webgl-diagnostics'
 import { safeFitAndThen } from './pane-fit'
-import type { ManagedPaneInternal } from './pane-manager-types'
 import { forceRepaintThroughRenderPause } from './terminal-render-pause-release'
 import {
   getTerminalWebglAutoDecision,
   resetTerminalWebglAutoDecision
 } from './terminal-webgl-auto-policy'
+import type { ManagedPaneInternal } from './types'
 
 export const ENABLE_WEBGL_RENDERER = true
 let suggestedRendererType: 'dom' | undefined

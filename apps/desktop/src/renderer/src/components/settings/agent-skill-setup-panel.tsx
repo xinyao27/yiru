@@ -10,7 +10,7 @@ import { cn } from '@/lib/class-names'
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
 import { IntegrationStatusPill } from '../integration-status-pill'
-import { OnboardingInlineCommandTerminal } from '../onboarding/onboarding-inline-command-terminal'
+import { OnboardingInlineCommandTerminal } from '../onboarding/inline-command-terminal'
 import { SkillFreshnessStatusPill } from '../skills/skill-freshness-status-pill'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'

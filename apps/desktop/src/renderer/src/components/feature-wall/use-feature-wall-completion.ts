@@ -18,8 +18,8 @@ import {
   FEATURE_WALL_REVIEW_STEP_IDS,
   FEATURE_WALL_WORKBENCH_STEP_IDS,
   getFeatureWallCompletionProgress
-} from './feature-wall-completion-progress'
-import { hasFeatureWallUsageTracking } from './feature-wall-usage-tracking'
+} from './completion-progress'
+import { hasFeatureWallUsageTracking } from './usage-tracking'
 import { useFeatureWallSessionDepth } from './use-feature-wall-session-depth'
 import { usePersistedFeatureWallCompletion } from './use-persisted-feature-wall-completion'
 

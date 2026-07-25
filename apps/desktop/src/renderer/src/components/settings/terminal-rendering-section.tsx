@@ -1,12 +1,8 @@
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
+import { SettingsRow, SettingsSegmentedControl, SettingsSubsectionHeader } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import {
-  SettingsRow,
-  SettingsSegmentedControl,
-  SettingsSubsectionHeader
-} from './settings-form-controls'
 
 type TerminalRenderingSectionProps = {
   settings: GlobalSettings

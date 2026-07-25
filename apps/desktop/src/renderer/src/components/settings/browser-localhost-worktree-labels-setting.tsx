@@ -1,8 +1,8 @@
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
+import { SettingsSwitchRow } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsSwitchRow } from './settings-form-controls'
 
 type BrowserLocalhostWorktreeLabelsSettingProps = {
   settings: Pick<GlobalSettings, 'localhostWorktreeLabelsEnabled'>

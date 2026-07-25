@@ -6,7 +6,7 @@ import {
   createRuntimePath,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
+} from '@/runtime/file-client'
 import {
   createWebRuntimeSessionBrowserTab,
   isWebRuntimeSessionActive

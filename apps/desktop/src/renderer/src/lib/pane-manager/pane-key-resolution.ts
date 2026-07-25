@@ -3,7 +3,7 @@ import {
   parsePaneKey,
   type TerminalLeafId
 } from '../../../../shared/stable-pane-id'
-import type { ManagedPane } from './pane-manager-types'
+import type { ManagedPane } from './types'
 
 export type PaneKeyUnresolvedReason = 'confirmed-missing' | 'ownership-mismatch' | 'invalid'
 

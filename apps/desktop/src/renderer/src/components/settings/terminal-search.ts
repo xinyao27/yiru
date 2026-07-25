@@ -1,6 +1,6 @@
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 
-import type { SettingsSearchEntry } from './settings-search'
+import type { SettingsSearchEntry } from './search'
 import {
   getTerminalAdvancedSearchEntries,
   getTerminalGhosttyImportSearchEntries,

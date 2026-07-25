@@ -10,7 +10,7 @@ import {
   encodeTerminalStreamJson,
   encodeTerminalStreamText
 } from '../../../shared/terminal-stream-protocol'
-import { unwrapRuntimeRpcResult } from './runtime-rpc-client'
+import { unwrapRuntimeRpcResult } from './rpc-client'
 
 type RuntimeEnvironmentSubscriptionHandle = {
   unsubscribe: () => void
