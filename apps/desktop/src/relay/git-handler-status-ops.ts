@@ -23,7 +23,7 @@ import {
 } from '../shared/git-uncommitted-line-stats'
 import type { GitUpstreamStatus } from '../shared/types'
 import type { GitExec } from './git-handler-ops'
-import { parseUnmergedEntry } from './git-handler-utils'
+import { parseUnmergedEntry } from './git-handler-output-parser'
 import { parseStatusOutput } from './git-status-output-parser'
 import { readOrProbeNoEffectiveUpstreamStatus } from './git-status-upstream-negative-cache'
 

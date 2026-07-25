@@ -8,7 +8,7 @@ import {
   MAX_TEXT_FILE_SIZE,
   isBinaryBuffer,
   isBinaryFilePrefix
-} from './fs-handler-utils'
+} from './fs-handler-text-search'
 
 export async function readRelayFileContent(filePath: string) {
   const stats = await stat(filePath)

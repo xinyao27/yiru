@@ -10,7 +10,7 @@ import {
   isBinaryBuffer,
   MAX_PREVIEWABLE_BINARY_SIZE,
   MAX_TEXT_FILE_SIZE
-} from './fs-handler-utils'
+} from './fs-handler-text-search'
 
 type TerminalArtifactStat = {
   size: number

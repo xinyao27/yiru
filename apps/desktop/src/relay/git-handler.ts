@@ -49,6 +49,11 @@ import {
   branchDiffEntries,
   validateGitExecArgs
 } from './git-handler-ops'
+import {
+  isUnsupportedWorktreeListZError,
+  parseBranchDiff,
+  parseWorktreeList
+} from './git-handler-output-parser'
 import { resolveRelayPushTarget } from './git-handler-push-target'
 import { detectConflictOperation, getStatusOp } from './git-handler-status-ops'
 import {
@@ -63,11 +68,6 @@ import {
   resolveSubmoduleCommitRange,
   type SubmodulePathsCache
 } from './git-handler-submodule-ops'
-import {
-  isUnsupportedWorktreeListZError,
-  parseBranchDiff,
-  parseWorktreeList
-} from './git-handler-utils'
 import { annotatePrunableWorktreesByExistence } from './git-handler-worktree-list'
 import {
   areRelayWorktreePathsEqual,

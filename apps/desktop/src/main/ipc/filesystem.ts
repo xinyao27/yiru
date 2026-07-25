@@ -139,7 +139,7 @@ const FULL_GIT_OBJECT_ID_PATTERN = /^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$/
 // The relay (SSH) uses a smaller 10MB cap because its JSON-RPC frames are
 // bounded by MAX_MESSAGE_SIZE = 16MB; the local IPC path has no such limit,
 // so 50MB covers real-world PDFs (specs, datasheets, image-heavy contracts).
-// See src/relay/fs-handler-utils.ts for the remote-side reasoning.
+// See src/relay/fs-handler-text-search.ts for the remote-side reasoning.
 const MAX_PREVIEWABLE_BINARY_SIZE = 50 * 1024 * 1024 // 50MB
 const PREVIEWABLE_BINARY_MIME_TYPES: Record<string, string> = {
   '.png': 'image/png',

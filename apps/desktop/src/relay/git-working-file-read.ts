@@ -1,6 +1,6 @@
 import { readFile, stat } from 'node:fs/promises'
 
-import { bufferToBlob } from './git-handler-utils'
+import { bufferToBlob } from './git-handler-output-parser'
 
 const MAX_RELAY_DIFF_WORKING_FILE_BYTES = 10 * 1024 * 1024
 

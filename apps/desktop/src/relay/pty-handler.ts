@@ -31,7 +31,6 @@ import { buildStartupCommandSubmission } from '../shared/startup-command-submiss
 import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal-git-credential-guard'
 import { isTuiAgent } from '../shared/tui-agent-config'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
-import { getRelayShellLaunchConfig } from './pty-shell-launch'
 import {
   resolveDefaultShell,
   resolveDefaultCwd,
@@ -40,7 +39,8 @@ import {
   getForegroundProcessName,
   isProcessAlive,
   listShellProfiles
-} from './pty-shell-utils'
+} from './pty-shell'
+import { getRelayShellLaunchConfig } from './pty-shell-launch'
 
 function isMissingNodePtyNativeBinding(error: unknown): boolean {
   return (

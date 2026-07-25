@@ -26,7 +26,7 @@ import {
   ingestGitGrepLine,
   SEARCH_TIMEOUT_MS
 } from '../shared/text-search'
-import type { SearchOptions, SearchResult } from './fs-handler-utils'
+import type { SearchOptions, SearchResult } from './fs-handler-text-search'
 import { buildRelayGitEnv } from './relay-command-env'
 
 /**

@@ -32,7 +32,7 @@ import {
   searchWithRg,
   listFilesWithRg,
   checkRgAvailable
-} from './fs-handler-utils'
+} from './fs-handler-text-search'
 import { ListFilesScanCoordinator } from './fs-list-files-scan-coordinator'
 import { RelayStreamRegistry } from './fs-stream-registry'
 import { buildRelayCommandEnv } from './relay-command-env'

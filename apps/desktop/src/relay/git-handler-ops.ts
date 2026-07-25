@@ -9,7 +9,7 @@ import * as path from 'node:path'
 
 import { isGitBufferOverflowError } from './git-buffer-overflow'
 import { buildDiffResult } from './git-diff-result'
-import { bufferToBlob, parseBranchDiff } from './git-handler-utils'
+import { bufferToBlob, parseBranchDiff } from './git-handler-output-parser'
 import { readWorkingDiffFile } from './git-working-file-read'
 
 // ─── Executor types ──────────────────────────────────────────────────

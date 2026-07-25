@@ -11,7 +11,7 @@ import {
   MAX_PREVIEWABLE_BINARY_SIZE,
   MAX_TEXT_FILE_SIZE,
   isBinaryFilePrefix
-} from './fs-handler-utils'
+} from './fs-handler-text-search'
 import type { RelayStreamRegistry, TooManyStreamsError } from './fs-stream-registry'
 import { STREAM_ACK_WINDOW_CHUNKS, STREAM_CHUNK_SIZE, RelayErrorCode } from './protocol'
 

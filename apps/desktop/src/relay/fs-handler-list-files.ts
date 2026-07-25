@@ -1,6 +1,6 @@
 /**
  * Ripgrep-based file listing for Quick Open.
- * Extracted from fs-handler-utils.ts to keep it under 300 lines (oxlint max-lines).
+ * Extracted from fs-handler-text-search.ts to keep it under 300 lines (oxlint max-lines).
  *
  * Why a full rewrite vs. the older execFile+maxBuffer version: on a home-dir
  * worktree over SSH, rg descended into every dotfile cache, hit the timeout,

@@ -1,7 +1,7 @@
 import * as path from 'node:path'
 
 import { getLargeDiffRenderLimit } from '../shared/large-diff-render-limit'
-import { PREVIEWABLE_MIME } from './git-handler-utils'
+import { PREVIEWABLE_MIME } from './git-handler-output-parser'
 
 export function buildDiffResult(
   originalContent: string,

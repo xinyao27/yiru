@@ -21,7 +21,7 @@ describe('Windows SSH default shell', () => {
     execFileSyncMock.mockReturnValue(
       'HKEY_LOCAL_MACHINE\\SOFTWARE\\OpenSSH\n    DefaultShell    REG_SZ    C:\\Program Files\\PowerShell\\7\\pwsh.exe'
     )
-    const { readOpenSshDefaultShell } = await import('./pty-shell-utils')
+    const { readOpenSshDefaultShell } = await import('./pty-shell')
 
     expect(readOpenSshDefaultShell()).toBe('C:\\Program Files\\PowerShell\\7\\pwsh.exe')
     expect(readOpenSshDefaultShell()).toBe('C:\\Program Files\\PowerShell\\7\\pwsh.exe')
@@ -29,7 +29,7 @@ describe('Windows SSH default shell', () => {
   })
 
   it('prefers an existing OpenSSH shell and safely falls back when it is invalid', async () => {
-    const { resolveWindowsDefaultShell } = await import('./pty-shell-utils')
+    const { resolveWindowsDefaultShell } = await import('./pty-shell')
     const powershell = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'
     const pwsh = 'C:\\Program Files\\PowerShell\\7\\pwsh.exe'
     const env = { SystemRoot: 'C:\\Windows', ComSpec: 'C:\\Windows\\System32\\cmd.exe' }
