@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/lib/quick-commands-menu-events'
+import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/components/tab-bar/quick-commands-menu-events'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { useAppStore } from '@/store'
 

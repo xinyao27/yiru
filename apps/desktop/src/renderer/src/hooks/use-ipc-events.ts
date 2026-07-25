@@ -30,6 +30,7 @@ import {
   handleSwitchTabAcrossAllTypes,
   handleSwitchTerminalTab
 } from '@/components/tab-bar/ipc-tab-switch'
+import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/components/tab-bar/quick-commands-menu-events'
 import { shouldSuppressCodexAutoApprovalStatus } from '@/components/terminal-pane/codex-auto-approval-notification-suppression'
 import { collectLeafIdsInOrder } from '@/components/terminal-pane/layout-serialization'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
@@ -65,7 +66,6 @@ import {
 } from '@/lib/pane-manager/browser-mobile-driver-state'
 import { setDriverForPty, hydrateDrivers } from '@/lib/pane-manager/mobile-driver-state'
 import { setFitOverride, hydrateOverrides } from '@/lib/pane-manager/mobile-fit-overrides'
-import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/lib/quick-commands-menu-events'
 import { activateTabNumberShortcut } from '@/lib/tab-number-shortcuts'
 import { track } from '@/lib/telemetry'
 import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut-capture-notification'
