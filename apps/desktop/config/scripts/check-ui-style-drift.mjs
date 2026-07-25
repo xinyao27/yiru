@@ -32,7 +32,7 @@ const BLACK_WHITE_ALPHA_ALLOWLIST = new Set([
   'src/renderer/src/components/onboarding/theme-chrome-preview.tsx',
   'src/renderer/src/components/onboarding/onboarding-flow.tsx',
   'src/renderer/src/components/onboarding/onboarding-skip-confirmation-dialog.tsx',
-  'src/renderer/src/components/worktree-jump-palette.tsx',
+  'src/renderer/src/components/worktree-jump-palette/panel.tsx',
   'src/renderer/src/components/emulator-pane/emulator-phone-hardware-buttons.tsx',
   'src/renderer/src/components/settings/mobile-pairing-qr-section.tsx',
   'src/renderer/src/components/browser-pane/grab-confirmation-sheet.tsx'

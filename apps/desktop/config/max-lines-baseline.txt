@@ -175,7 +175,6 @@ inline apps/desktop/src/renderer/src/components/terminal-workspace.tsx
 inline apps/desktop/src/renderer/src/components/update-card.tsx
 inline apps/desktop/src/renderer/src/components/workspace-cleanup/state.ts
 inline apps/desktop/src/renderer/src/components/workspace-cleanup/workspace-cleanup-dialog.tsx
-inline apps/desktop/src/renderer/src/components/worktree-jump-palette.tsx
 inline apps/desktop/src/renderer/src/hooks/use-ipc-events.ts
 inline apps/desktop/src/renderer/src/lib/file-type-icons.ts
 inline apps/desktop/src/renderer/src/lib/pane-manager/pane-manager.ts
