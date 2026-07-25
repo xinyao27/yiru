@@ -20,18 +20,18 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { planSourceControlTextGeneration } from '@/components/workspace-panel/source-control-generation-plan'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
-import { planSourceControlTextGeneration } from '@/lib/source-control-generation-plan'
 
 import {
   CUSTOM_AGENT_ID,
   isCustomAgentId,
   listCommitMessageAgentCapabilities
 } from '../../../../shared/commit-message-agent-spec'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control-ai'
-import type { SourceControlTextActionId } from '../../../../shared/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control/source-control-ai'
+import type { SourceControlTextActionId } from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
 import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { sourceControlTextGenerationDefaultsMatchTarget } from './source-control-text-generation-defaults'

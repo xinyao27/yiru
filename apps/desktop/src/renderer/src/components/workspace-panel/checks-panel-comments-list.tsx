@@ -2,21 +2,21 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Checkbox } from '@/components/ui/checkbox'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-import { usePRBotAuthorOverrides } from '@/lib/pr-bot-author-overrides'
+import { usePRBotAuthorOverrides } from '@/components/workspace-panel/pr-bot-author-overrides'
 import {
   getPRCommentGroupActionState,
   isPRCommentGroupQueueableForAI,
   partitionPRCommentGroupsForTriage,
   sortPRCommentGroupsForTimeline
-} from '@/lib/pr-comment-action-state'
+} from '@/components/workspace-panel/pr-comment-action-state'
 import {
   filterPRCommentsByAudience,
   getPRCommentAudienceCounts,
   getPRCommentAudienceEmptyLabel,
   type PRCommentAudienceFilter
-} from '@/lib/pr-comment-audience'
+} from '@/components/workspace-panel/pr-comment-audience'
+import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import { getPRCommentGroupId, groupPRComments, type PRCommentGroup } from '@/lib/pr-comment-groups'
 
 import type { PRComment } from '../../../../shared/types'

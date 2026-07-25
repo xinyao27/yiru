@@ -4,8 +4,8 @@ import { useCallback } from 'react'
 import type React from 'react'
 
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu'
+import type { AiVaultResumeStartup } from '@/components/workspace-panel/ai-vault-resume-command'
 import { translate } from '@/i18n/i18n'
-import type { AiVaultResumeStartup } from '@/lib/ai-vault-resume-command'
 import {
   AI_VAULT_SESSION_DRAG_END_EVENT,
   AI_VAULT_SESSION_DRAG_START_EVENT,

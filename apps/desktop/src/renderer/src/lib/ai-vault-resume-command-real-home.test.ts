@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vite-plus/test'
 
-import { buildAiVaultResumeStartupForWorktree } from './ai-vault-resume-command'
+import { buildAiVaultResumeStartupForWorktree } from '../components/workspace-panel/ai-vault-resume-command'
 
 vi.mock('@/lib/new-workspace', () => ({ CLIENT_PLATFORM: 'win32' }))
 

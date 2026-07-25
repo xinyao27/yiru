@@ -19,15 +19,15 @@ import type { StateCreator } from 'zustand'
 import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
 import { forgetAgentHibernationTabOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/components/terminal-pane/agent-startup-delivery-guards'
+import { clearSessionCommitDraftForWorktree } from '@/components/workspace-panel/source-control-commit-draft-session'
+import {
+  forgetHugeRepoWarningDismissalsForWorktrees,
+  migrateHugeRepoWarningDismissal
+} from '@/components/workspace-panel/source-control-huge-repo-warning-dismissals'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { branchName } from '@/lib/git-utils'
 import { markInputQuietSchedulerInput, scheduleAfterInputQuiet } from '@/lib/input-quiet-scheduler'
-import { clearSessionCommitDraftForWorktree } from '@/lib/source-control-commit-draft-session'
-import {
-  forgetHugeRepoWarningDismissalsForWorktrees,
-  migrateHugeRepoWarningDismissal
-} from '@/lib/source-control-huge-repo-warning-dismissals'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 import { requestVirtualizedScrollAnchorRecord } from '@/runtime/virtualized-scroll-anchor-record-request'

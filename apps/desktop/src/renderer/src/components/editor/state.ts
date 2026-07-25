@@ -17,6 +17,7 @@ import {
 } from '@/components/editor/local-path-open-guard'
 import { resolveMarkdownLinkTarget } from '@/components/editor/markdown-internal-links'
 import { createUntitledMarkdownFileWithTemplateSelection } from '@/components/floating-terminal/create-untitled-markdown'
+import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/components/workspace-panel/push-target-upstream-refresh-cache'
 import { translate } from '@/i18n/i18n'
 import {
   buildCheckRunDetailsTabId,
@@ -26,7 +27,6 @@ import {
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
-import { invalidateAutomaticPushTargetUpstreamStatusCache } from '@/lib/push-target-upstream-refresh-cache'
 import { markSyncPushStageError } from '@/lib/source-control-remote-error'
 import {
   addAdditionalValidWorkspaceKeys,

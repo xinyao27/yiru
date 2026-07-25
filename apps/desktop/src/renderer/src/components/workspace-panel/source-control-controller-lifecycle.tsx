@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { saveSessionCommitDrafts } from '@/lib/source-control-commit-draft-session'
+import { saveSessionCommitDrafts } from '@/components/workspace-panel/source-control-commit-draft-session'
 
 import type { SourceControlFileModelController } from './source-control-controller-file-model'
 import { createDefaultCollapsedSections } from './source-control-panel-constants'

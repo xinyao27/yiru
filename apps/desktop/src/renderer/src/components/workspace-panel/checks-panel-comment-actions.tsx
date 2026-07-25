@@ -19,11 +19,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { setPRBotAuthorOverride } from '@/components/workspace-panel/pr-bot-author-overrides'
+import type { PRCommentGroupActionState } from '@/components/workspace-panel/pr-comment-action-state'
+import {
+  isBotPRComment,
+  normalizePRCommentAuthorLogin
+} from '@/components/workspace-panel/pr-comment-audience'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import { setPRBotAuthorOverride } from '@/lib/pr-bot-author-overrides'
-import type { PRCommentGroupActionState } from '@/lib/pr-comment-action-state'
-import { isBotPRComment, normalizePRCommentAuthorLogin } from '@/lib/pr-comment-audience'
 
 import type { PRComment } from '../../../../shared/types'
 import type { PRCommentPresentationClasses } from './pr-comment-presentation'

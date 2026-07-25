@@ -1,7 +1,7 @@
-import { planSourceControlAgentActionLaunch } from '@/lib/source-control-agent-action-plan'
+import { planSourceControlAgentActionLaunch } from '@/components/workspace-panel/source-control-agent-action-plan'
 import { useAppStore } from '@/store'
 
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat-session-option-defaults'
+import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/native-chat-session-option-defaults'
 import type { TuiAgent } from '../../../../shared/types'
 import type { SourceControlAgentActionDeliveryPlanState } from './source-control-agent-action-dialog-form'
 import { buildSourceControlAgentConnectionErrorPlan } from './source-control-agent-action-dialog-support'

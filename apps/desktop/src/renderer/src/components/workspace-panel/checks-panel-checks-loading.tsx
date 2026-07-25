@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
 
-import { installWindowVisibilityTimeoutPoller } from '@/lib/window-visibility-timeout-poller'
+import { installWindowVisibilityTimeoutPoller } from '@/components/workspace-panel/window-visibility-timeout-poller'
 
 import { gitLabPipelineJobsToPRChecks } from '../../../../shared/gitlab-pipeline-checks'
 import {

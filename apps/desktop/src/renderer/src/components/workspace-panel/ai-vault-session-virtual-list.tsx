@@ -3,8 +3,8 @@ import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
+import type { AiVaultResumeStartup } from '@/components/workspace-panel/ai-vault-resume-command'
 import { translate } from '@/i18n/i18n'
-import type { AiVaultResumeStartup } from '@/lib/ai-vault-resume-command'
 import { cn } from '@/lib/class-names'
 
 import { getActiveStickyHeaderIndexForScroll } from '../sidebar/worktree-list-virtual-rows'

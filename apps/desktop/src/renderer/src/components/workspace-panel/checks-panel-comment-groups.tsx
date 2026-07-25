@@ -13,9 +13,9 @@ import {
   ContextMenuItem,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
+import type { PRCommentGroupActionState } from '@/components/workspace-panel/pr-comment-action-state'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import type { PRCommentGroupActionState } from '@/lib/pr-comment-action-state'
 import { getPRCommentGroupId, type PRCommentGroup } from '@/lib/pr-comment-groups'
 
 import type { PRComment } from '../../../../shared/types'

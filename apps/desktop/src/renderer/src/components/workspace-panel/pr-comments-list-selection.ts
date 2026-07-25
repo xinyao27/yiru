@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { isPRCommentGroupQueueableForAI } from '@/lib/pr-comment-action-state'
+import { isPRCommentGroupQueueableForAI } from '@/components/workspace-panel/pr-comment-action-state'
 import { getPRCommentGroupId, groupPRComments, type PRCommentGroup } from '@/lib/pr-comment-groups'
 
 import type { PRComment } from '../../../../shared/types'

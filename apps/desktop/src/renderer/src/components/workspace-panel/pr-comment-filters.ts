@@ -2,4 +2,4 @@ export {
   filterPRCommentsByAudience,
   isBotPRComment as isAutomatedPRComment,
   type PRCommentAudienceFilter
-} from '@/lib/pr-comment-audience'
+} from '@/components/workspace-panel/pr-comment-audience'

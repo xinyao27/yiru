@@ -18,12 +18,12 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 import {
   getPrCommentAudienceFilters,
   type PRCommentAudienceFilter
-} from '@/lib/pr-comment-audience'
+} from '@/components/workspace-panel/pr-comment-audience'
+import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import type { PRCommentGroup } from '@/lib/pr-comment-groups'
 
 import type { PRCommentPresentationClasses } from './pr-comment-presentation'
