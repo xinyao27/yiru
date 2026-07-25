@@ -1,6 +1,10 @@
 import { ChatCentered as MessageSquarePlus } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 
+import {
+  detectAgentSessionContinuationAgents,
+  launchAgentSessionContinuation
+} from '@/components/agent-session-continuation/launch-agent-session-continuation'
 import AgentCombobox from '@/components/agent/combobox'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
@@ -28,10 +32,6 @@ import {
   type AgentSessionContinuationContextMode,
   type AgentSessionContinuationRequest
 } from '@/lib/agent-session-continuation'
-import {
-  detectAgentSessionContinuationAgents,
-  launchAgentSessionContinuation
-} from '@/lib/launch-agent-session-continuation'
 import { useAppStore } from '@/store'
 
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'

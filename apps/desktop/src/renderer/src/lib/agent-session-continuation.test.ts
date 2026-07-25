@@ -51,7 +51,8 @@ describe('agent session continuation', () => {
 
   it('continues Claude context in a new Codex session', async () => {
     const { buildAgentSessionContinuationPrompt } = await import('./agent-session-continuation')
-    const { launchAgentSessionContinuation } = await import('./launch-agent-session-continuation')
+    const { launchAgentSessionContinuation } =
+      await import('../components/agent-session-continuation/launch-agent-session-continuation')
     const prompt = buildAgentSessionContinuationPrompt(
       {
         sourceAgent: 'claude',
@@ -85,7 +86,7 @@ describe('agent session continuation', () => {
     continuationOwner.connectionId = 'ssh-1'
     continuationOwner.runtimeEnvironmentId = 'runtime-shadow'
     const { detectAgentSessionContinuationAgents } =
-      await import('./launch-agent-session-continuation')
+      await import('../components/agent-session-continuation/launch-agent-session-continuation')
 
     await expect(detectAgentSessionContinuationAgents('wt-1')).resolves.toEqual(['claude', 'codex'])
 
@@ -97,7 +98,7 @@ describe('agent session continuation', () => {
   it('detects the target agent through the paired runtime owner', async () => {
     continuationOwner.runtimeEnvironmentId = 'runtime-1'
     const { detectAgentSessionContinuationAgents } =
-      await import('./launch-agent-session-continuation')
+      await import('../components/agent-session-continuation/launch-agent-session-continuation')
 
     await expect(detectAgentSessionContinuationAgents('wt-1')).resolves.toEqual(['claude', 'codex'])
 
