@@ -1,6 +1,6 @@
 import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
 
-import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
+import { markOnboardingProjectAdded } from '@/components/sidebar/onboarding-project-checklist'
 import { track } from '@/lib/telemetry'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { useAppStore } from '@/store'

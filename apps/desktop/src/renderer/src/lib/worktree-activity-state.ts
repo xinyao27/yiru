@@ -3,7 +3,7 @@ import { isFreshNonDoneAgentStatus, type AgentStatusEntry } from '@yiru/workbenc
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 
 import type { TerminalTab } from '../../../shared/types'
-import { resolveAgentStatusWorktreeId } from './agent-status-worktree-attribution'
+import { resolveAgentStatusWorktreeId } from '../components/sidebar/agent-status-worktree-attribution'
 
 type TerminalLikeTab = Pick<TerminalTab, 'id'>
 type BrowserLikeTab = { id: string }

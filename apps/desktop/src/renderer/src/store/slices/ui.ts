@@ -91,17 +91,17 @@ import {
   normalizeWorkspaceStatuses
 } from '../../../../shared/workspace/workspace-statuses'
 import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/id'
-import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
 import {
   deriveRunningAgentSendTargets,
   resolveRunningAgentSendTarget
-} from '../../lib/running-agent-targets'
+} from '../../components/sidebar/running-agent-targets'
 import {
   filterSetupScriptPromptDismissalsToValidRepos,
   getSetupScriptPromptDismissalKey,
   sanitizeSetupScriptPromptDismissals
-} from '../../lib/setup-script-prompt'
-import type { YiruHookScriptKind } from '../../lib/yiru-hook-trust'
+} from '../../components/sidebar/setup-script-prompt'
+import type { YiruHookScriptKind } from '../../components/sidebar/yiru-hook-trust'
+import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
 import {
   getContextualTourRequestDecision,
   hasContextualTourTarget,

@@ -59,12 +59,12 @@ import type {
   WorktreeSetupLaunch
 } from '../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/workspace-scope'
-import type { AgentStartedTelemetry } from './agent-started-telemetry'
 import {
   folderWorkspaceActivationBlocked,
   getFolderWorkspacePathStatusDescription,
   getFolderWorkspacePathStatusTitle
-} from './folder-workspace-path-status'
+} from '../components/sidebar/folder-workspace-path-status'
+import type { AgentStartedTelemetry } from './agent-started-telemetry'
 import { initialAgentTabViewModeProps } from './native-chat-initial-view-mode'
 import { CLIENT_PLATFORM } from './new-workspace'
 import { buildSetupRunnerCommand } from './setup-runner'

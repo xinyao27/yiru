@@ -3,10 +3,10 @@
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { markOnboardingProjectAdded } from '@/components/sidebar/onboarding-project-checklist'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
-import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'

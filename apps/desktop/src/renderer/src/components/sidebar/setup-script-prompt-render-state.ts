@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { SetupScriptPromptInspection } from '@/lib/setup-script-prompt'
+import type { SetupScriptPromptInspection } from '@/components/sidebar/setup-script-prompt'
 
 import { getProjectHostSetupForRepo } from '../../../../shared/project-host-setup-projection'
 import type { ProjectHostSetup, Repo } from '../../../../shared/types'

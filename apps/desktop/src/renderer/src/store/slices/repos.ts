@@ -22,9 +22,9 @@ the client-server refactor would obscure the invariants this file is currently
 auditing and preserving. */
 import type { StateCreator } from 'zustand'
 
+import { filterSetupScriptPromptDismissalsToValidRepos } from '@/components/sidebar/setup-script-prompt'
 import { translate } from '@/i18n/i18n'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
-import { filterSetupScriptPromptDismissalsToValidRepos } from '@/lib/setup-script-prompt'
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
@@ -66,8 +66,8 @@ import type {
   ProjectHostSetupUpdateArgs,
   ProjectHostSetupUpdateResult
 } from '../../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
-import { formatFolderWorkspaceCreateError } from '../../lib/folder-workspace-path-status'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { formatFolderWorkspaceCreateError } from '../../components/sidebar/folder-workspace-path-status'
 import { syncRuntimeGitForkDefaultBranch } from '../../runtime/git-client'
 import {
   assertRuntimeEnvironmentCapability,

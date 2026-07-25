@@ -52,6 +52,16 @@ import {
 } from '@/components/sidebar/folder-workspace-composer-helpers'
 import { useFolderWorkspaceComposerPathStatus } from '@/components/sidebar/folder-workspace-composer-path-status'
 import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspace-composer-submit'
+import {
+  getLinkedWorkItemPromptContext,
+  resolveQuickCreateLinkedWorkItemPrompt
+} from '@/components/sidebar/linked-work-item-context'
+import {
+  canUseRepoBackedComposerSources,
+  getSelectedRepoSshGate,
+  isSshConnectInProgress
+} from '@/components/sidebar/new-workspace-ssh-gate'
+import { isWorkItemLookupText } from '@/components/sidebar/work-item-lookup-text'
 import { getSuggestedCreatureName } from '@/components/sidebar/worktree-name-suggestions'
 import { runBackgroundWorktreeCreation } from '@/components/worktree-creation/flow'
 import { queueNewWorkspaceTerminalFocus } from '@/components/worktree-creation/new-workspace-terminal-focus'
@@ -71,10 +81,6 @@ import {
   lookupGitHubWorkItemByOwnerRepoForSource,
   lookupGitHubWorkItemForSource
 } from '@/lib/github-work-item-source-lookup'
-import {
-  getLinkedWorkItemPromptContext,
-  resolveQuickCreateLinkedWorkItemPrompt
-} from '@/lib/linked-work-item-context'
 import { getLocalRepoProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import {
   CLIENT_PLATFORM,
@@ -94,11 +100,6 @@ import {
   getFullComposerCreateDisabled,
   getQuickComposerCreateDisabled
 } from '@/lib/new-workspace-create-gates'
-import {
-  canUseRepoBackedComposerSources,
-  getSelectedRepoSshGate,
-  isSshConnectInProgress
-} from '@/lib/new-workspace-ssh-gate'
 import { joinPath } from '@/lib/path'
 import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
 import {
@@ -109,7 +110,6 @@ import { getSettingsForRepoRuntimeOwner } from '@/lib/repo-runtime-owner'
 import { normalizeSparseDirectoryLines, sparseDirectoriesMatch } from '@/lib/sparse-paths'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '@/lib/tui-agent-startup'
-import { isWorkItemLookupText } from '@/lib/work-item-lookup-text'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { importExternalPathsToRuntime } from '@/runtime/file-client'
 import { checkRuntimeHooks, type HookCheckResult } from '@/runtime/hooks-client'

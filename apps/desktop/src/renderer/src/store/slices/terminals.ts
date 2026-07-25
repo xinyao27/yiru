@@ -14,6 +14,7 @@ import type { StateCreator } from 'zustand'
 
 import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
 import type { NativeChatLaunchPrompt } from '@/components/native-chat/native-chat-launch-prompt'
+import { hasWorktreeSleepIntent } from '@/components/sidebar/worktree-sleep-intent'
 import { forgetAgentHibernationTabOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/components/terminal-pane/agent-startup-delivery-guards'
 import {
@@ -32,7 +33,6 @@ import {
   type WorkspaceSessionHydrationOptions
 } from '@/lib/workspace-session-hydration-keys'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { hasWorktreeSleepIntent } from '@/lib/worktree-sleep-intent'
 import {
   restorePtyDataHandlersAfterFailedShutdown,
   unregisterPtyDataHandlers

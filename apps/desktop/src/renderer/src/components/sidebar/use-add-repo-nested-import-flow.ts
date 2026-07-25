@@ -1,8 +1,8 @@
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
+import { addNonGitFolderAndActivate } from '@/components/sidebar/add-non-git-folder-command'
 import { translate } from '@/i18n/i18n'
-import { addNonGitFolderAndActivate } from '@/lib/add-non-git-folder-command'
 import { getSelectedNestedRepoPathsInScanOrder } from '@/lib/nested-repo-selected-paths'
 import { track } from '@/lib/telemetry'
 import { useAppStore } from '@/store'

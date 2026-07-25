@@ -2,8 +2,9 @@ import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 
+import { resolveQuickCreateLinkedWorkItemPrompt } from '@/components/sidebar/linked-work-item-context'
+import { isWorkItemLookupText } from '@/components/sidebar/work-item-lookup-text'
 import { createBrowserUuid } from '@/lib/browser-uuid'
-import { resolveQuickCreateLinkedWorkItemPrompt } from '@/lib/linked-work-item-context'
 import {
   CLIENT_PLATFORM,
   ensureAgentStartupInTerminal,
@@ -15,15 +16,14 @@ import {
   buildAgentStartupPlan,
   type AgentStartupPlan
 } from '@/lib/tui-agent-startup'
-import { isWorkItemLookupText } from '@/lib/work-item-lookup-text'
 import { activateAndRevealFolderWorkspace } from '@/lib/worktree-activation'
 
-import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
+import type { SessionOptionValue } from '../../../../shared/native-chat/native-chat-session-options'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
 import type { AgentStartupShell } from '../../../../shared/tui-agent-startup-shell'
 import type { FolderWorkspace, ProjectGroup, TuiAgent } from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
+import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import {
   getLinkedItemDisplayName,
   toFolderWorkspaceLinkedReview

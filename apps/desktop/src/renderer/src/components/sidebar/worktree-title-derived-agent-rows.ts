@@ -5,12 +5,12 @@ import type {
 } from '@yiru/workbench-model/agent'
 
 import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
-import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
-import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import {
   resolveAgentTypeFromTerminalTitle,
   resolveTitleDerivedAgentType
-} from '@/lib/terminal-title-agent-type'
+} from '@/components/sidebar/terminal-title-agent-type'
+import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
+import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 
 import { isClaudeManagementTitle } from '../../../../shared/agent/agent-detection'
 import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent/agent-title-owner'

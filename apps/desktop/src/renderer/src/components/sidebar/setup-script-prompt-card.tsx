@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
 import {
   buildImportedHookSettings,
   formatCandidateProvenance,
@@ -11,7 +9,9 @@ import {
   ignoresSharedSetupScripts,
   inspectSetupScriptPromptState,
   type SetupScriptPromptInspection
-} from '@/lib/setup-script-prompt'
+} from '@/components/sidebar/setup-script-prompt'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
+import { translate } from '@/i18n/i18n'
 import { track } from '@/lib/telemetry'
 import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/hooks-client'
 import { useAppStore } from '@/store'

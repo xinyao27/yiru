@@ -10,7 +10,7 @@ import type { AppState } from '@/store/types'
 import { resolveHookCommandSourcePolicy } from '../../../../shared/hook-command-source-policy'
 import type { YiruHooks } from '../../../../shared/types'
 import { getRuntimeEnvironmentIdForRepo } from '../../lib/repo-runtime-owner'
-import { hashYiruHookScript, type YiruHookScriptKind } from '../../lib/yiru-hook-trust'
+import { hashYiruHookScript, type YiruHookScriptKind } from '../sidebar/yiru-hook-trust'
 
 export type HookScriptKind = YiruHookScriptKind
 

@@ -7,13 +7,13 @@ import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id
 import type { TerminalTab } from '../../../../shared/types'
 import { detectAgentSendTitleStatus } from '../../lib/agent-send-title-status'
 import {
-  deriveRunningAgentSendTargets,
-  type RunningAgentTargetState
-} from '../../lib/running-agent-targets'
-import {
   resolveRuntimePaneTitleLeafResolution,
   type RuntimePaneTitleLeafResolution
 } from '../../lib/runtime-pane-title-leaf-id'
+import {
+  deriveRunningAgentSendTargets,
+  type RunningAgentTargetState
+} from '../sidebar/running-agent-targets'
 
 export type NotesSendAgentTargetState = RunningAgentTargetState &
   Pick<AppState, 'runtimePaneTitlesByTabId'>

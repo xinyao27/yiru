@@ -1,4 +1,4 @@
-import type { RunningAgentTargetState } from '@/lib/running-agent-targets'
+import type { RunningAgentTargetState } from '@/components/sidebar/running-agent-targets'
 import type { AppState } from '@/store/types'
 
 export type SendTargetInputsState = Pick<

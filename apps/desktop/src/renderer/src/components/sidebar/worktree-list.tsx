@@ -36,6 +36,17 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { RepoForkIndicator } from '@/components/repo/fork-indicator'
 import { RepoIconGlyph } from '@/components/repo/icon'
 import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'
+import {
+  getFolderWorkspacePathStatusDescription,
+  getFolderWorkspacePathStatusTitle
+} from '@/components/sidebar/folder-workspace-path-status'
+import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
+import { deriveRunningAgentSendTargets } from '@/components/sidebar/running-agent-targets'
+import {
+  SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
+  type ScrollToCurrentWorkspaceRevealRequestDetail
+} from '@/components/sidebar/scroll-to-current-workspace-status'
+import { persistWorktreeSortOrderByHost } from '@/components/sidebar/worktree-sort-order-persistence'
 import { SpoolProjectVisibilityDialog } from '@/components/spool/worktree-visibility-dialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -55,23 +66,12 @@ import {
 } from '@/hooks/use-virtualized-scroll-anchor'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import {
-  getFolderWorkspacePathStatusDescription,
-  getFolderWorkspacePathStatusTitle
-} from '@/lib/folder-workspace-path-status'
-import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/lib/folder-workspace-path-status-cache-expiry'
 import { rightSidebarShowsPullRequestData } from '@/lib/right-sidebar-visibility'
-import { deriveRunningAgentSendTargets } from '@/lib/running-agent-targets'
-import {
-  SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
-  type ScrollToCurrentWorkspaceRevealRequestDetail
-} from '@/lib/scroll-to-current-workspace-status'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { track } from '@/lib/telemetry'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getWorktreeIdsWithLiveAgent } from '@/lib/worktree-activity-state'
-import { persistWorktreeSortOrderByHost } from '@/lib/worktree-sort-order-persistence'
 import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import {
@@ -107,11 +107,14 @@ import type {
   WorkspaceStatus,
   WorkspaceStatusDefinition
 } from '../../../../shared/types'
-import { folderWorkspaceKey, getActiveSidebarWorkspaceId } from '../../../../shared/workspace-scope'
+import {
+  folderWorkspaceKey,
+  getActiveSidebarWorkspaceId
+} from '../../../../shared/workspace/workspace-scope'
 import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
-} from '../../../../shared/worktree-ownership'
+} from '../../../../shared/workspace/worktree-ownership'
 import { SidebarDisclosure } from './disclosure'
 import { getEmptyProjectPlaceholderRepoIds } from './empty-project-placeholder-repos'
 import { getFolderWorkspaceCardPrDisplay } from './folder-workspace-card-pr-display'
