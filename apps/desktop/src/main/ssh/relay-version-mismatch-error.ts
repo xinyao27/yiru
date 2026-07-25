@@ -1,5 +1,5 @@
 // Why: a unique error class so callers (in particular the relay-lost retry
-// loop in src/main/ipc/ssh.ts) can branch on `instanceof
+// loop in src/main/ssh/ssh.ts) can branch on `instanceof
 // RelayVersionMismatchError` and treat the failure as terminal — i.e. skip
 // the exponential-backoff retry and surface a user-visible "please reconnect
 // manually" error. Any other transport failure remains transiently retryable.

@@ -197,7 +197,9 @@ export default defineConfig({
           'warp-theme-parser-worker': resolve('src/main/warp-themes/warp-theme-parser-worker.ts'),
           // Why: forked with ELECTRON_RUN_AS_NODE so @parcel/watcher faults
           // can't take down the main process (issue #7547).
-          'parcel-watcher-process-entry': resolve('src/main/ipc/parcel-watcher-process-entry.ts'),
+          'parcel-watcher-process-entry': resolve(
+            'src/main/filesystem/parcel-watcher-process-entry.ts'
+          ),
           // Why: the synchronous launch gate needs a short-lived plain-Node
           // child so the app-server JSONL session can keep a live event loop.
           'codex/codex-app-server-grant-entry': resolve('src/main/codex/app-server-grant-entry.ts'),

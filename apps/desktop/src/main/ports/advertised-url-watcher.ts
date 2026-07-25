@@ -344,7 +344,7 @@ export class AdvertisedUrlWatcher {
     if (!worktreeId) {
       // Why: data can arrive on daemon-backed PTYs before the spawn handler
       // resolves and we learn the worktreeId (see comment at
-      // src/main/ipc/pty.ts:1318-1323). Buffer until bindPty replays.
+      // src/main/pty/pty.ts near bindPty). Buffer until bindPty replays.
       const prior = this.pending.get(ptyId) ?? ''
       const merged = (prior + chunk).slice(-PENDING_PRE_BIND_LIMIT)
       // Why: drop+reinsert touches insertion order so this acts as an LRU

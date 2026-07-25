@@ -19,13 +19,13 @@ import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
 } from '../../shared/spool/spool-windows-firewall-contract'
-import type { SpoolSharingIpcController } from '../ipc/spool-sharing'
 import type { SpoolDesktopCatalogSnapshot, SpoolRequesterSubscriptionSink } from './desktop-catalog'
 import type {
   SpoolDesktopServiceOptions,
   SpoolOwnerWorktreeDescriptor
 } from './desktop-service-options'
 import { SpoolDesktopStartRecovery } from './desktop-start-recovery'
+import type { SpoolSharingIpcController } from './spool-sharing'
 import { SpoolWindowsFirewallRecovery } from './windows-firewall-recovery'
 
 export class SpoolDesktopService implements SpoolSharingIpcController {

@@ -3,7 +3,7 @@ import {
   SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema
 } from '../../shared/spool/spool-paired-runtime-session-contract'
-import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '../ipc/runtime-environment-existing-route'
+import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '../runtime/runtime-environment-existing-route'
 import type {
   SpoolExecutionHostSessionReadRequest,
   SpoolMobileSessionTabsResult,

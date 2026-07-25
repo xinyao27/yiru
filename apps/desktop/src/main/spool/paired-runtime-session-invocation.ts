@@ -3,7 +3,7 @@ import {
   SpoolPairedRuntimeSessionInvokeParamsSchema,
   type SpoolPairedRuntimeSessionRecord
 } from '../../shared/spool/spool-paired-runtime-session-contract'
-import { callRuntimeEnvironmentExistingRoute } from '../ipc/runtime-environment-existing-route'
+import { callRuntimeEnvironmentExistingRoute } from '../runtime/runtime-environment-existing-route'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolHostOperationContext } from './execution-gateway'
 import { invokeAdmittedPairedRuntimeOperation } from './paired-runtime-admitted-invocation'

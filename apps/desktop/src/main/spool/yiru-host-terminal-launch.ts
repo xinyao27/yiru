@@ -14,8 +14,11 @@ import {
   TUI_AGENT_AUTO_PICK_ORDER
 } from '../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../shared/types'
-import { detectInstalledAgentsWithShellPathHydration, detectRemoteAgents } from '../ipc/preflight'
 import type { Store } from '../persistence'
+import {
+  detectInstalledAgentsWithShellPathHydration,
+  detectRemoteAgents
+} from '../preflight/preflight'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { SpoolExecutionError } from './execution-error'

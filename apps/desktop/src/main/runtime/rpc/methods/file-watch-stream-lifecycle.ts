@@ -1,4 +1,4 @@
-import { isWatcherProcessFailure } from '../../../ipc/parcel-watcher-process-failure'
+import { isWatcherProcessFailure } from '../../../filesystem/parcel-watcher-process-failure'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { RuntimeFileCommands } from '../../yiru-runtime-files'
 import { createFileWatchEventBatcher } from './file-watch-event-batcher'

@@ -17,13 +17,13 @@ import {
   confirmSeededClaudeLivePtys,
   hasSeededUnconfirmedClaudePtys
 } from '../claude-accounts/live-pty-gate'
+import { getDaemonLogFilePath } from '../observability/logs-directory'
 import {
   getLocalPtyProvider,
   setLocalPtyProvider,
   unbindLocalProviderListeners,
   rebindLocalProviderListeners
-} from '../ipc/pty'
-import { getDaemonLogFilePath } from '../observability/logs-directory'
+} from '../pty/pty'
 import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from '../startup/diagnostics'
 import { DaemonClient } from './client'
 import { DegradedDaemonPtyProvider } from './degraded-daemon-pty-provider'

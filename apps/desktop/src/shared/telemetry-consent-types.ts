@@ -4,7 +4,7 @@
 //
 // The same discriminated union is what `src/main/telemetry/consent.ts`
 // produces from `resolveConsent(settings)`. Keeping it here as the source
-// of truth means the IPC getter in `src/main/ipc/telemetry.ts` returns
+// of truth means the IPC getter in `src/main/telemetry/telemetry.ts` returns
 // this exact shape and the Privacy pane renders helper text by pattern-
 // matching the `reason` without re-deriving the rules.
 

@@ -156,7 +156,7 @@ export async function commitChangesRelay(
   worktreePath: string,
   message: string
 ): Promise<{ success: boolean; error?: string }> {
-  // Why: defense-in-depth. The IPC handler at src/main/ipc/filesystem.ts validates
+  // Why: defense-in-depth. The IPC handler at src/main/filesystem/filesystem.ts validates
   // the message, but a relay caller (future automation, or an SSH client connecting
   // to the relay directly) could bypass that path. Reject empty/whitespace messages
   // here so we surface a clear error instead of git's opaque failure.

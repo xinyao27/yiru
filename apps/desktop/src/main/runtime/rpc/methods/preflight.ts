@@ -6,7 +6,7 @@ import {
   detectInstalledAgentsWithShellPathHydration,
   refreshShellPathAndDetectAgents,
   runPreflightCheck
-} from '../../../ipc/preflight'
+} from '../../../preflight/preflight'
 import { defineMethod, type RpcMethod } from '../core'
 
 const PreflightCheck = z.object({

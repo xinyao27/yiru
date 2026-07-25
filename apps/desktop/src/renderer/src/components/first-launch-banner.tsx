@@ -69,7 +69,7 @@ export function FirstLaunchBanner({
     setInFlight(true)
     // Main's `telemetry:acknowledgeBanner` handler persists `optedIn: true`
     // without an opt-in event and intentionally does NOT broadcast
-    // `settings:changed` (see src/main/ipc/telemetry.ts). Without an
+    // `settings:changed` (see src/main/telemetry/telemetry.ts). Without an
     // explicit `fetchSettings()` refresh, the renderer store would retain
     // `optedIn: null` and PrivacyPane would keep rendering its pending-
     // banner helper text until the next full relaunch. Mirror

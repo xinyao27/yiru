@@ -7,17 +7,17 @@ import type { FsChangeEvent } from '../../shared/types'
 import {
   WATCHER_IGNORE_DIRS,
   buildParcelWatcherIgnoreOptions
-} from '../ipc/filesystem-watcher-ignore'
+} from '../filesystem/filesystem-watcher-ignore'
 import {
   forgetRuntimeWatcherProcessRoot,
   subscribeViaRuntimeWatcherProcess,
   type WatcherProcessEvent,
   type WatcherProcessSubscription
-} from '../ipc/parcel-watcher-process'
+} from '../filesystem/parcel-watcher-process'
 import {
   isWatcherProcessFailure,
   type WatcherProcessFailure
-} from '../ipc/parcel-watcher-process-failure'
+} from '../filesystem/parcel-watcher-process-failure'
 import { createRuntimeRootOwnershipReleaser } from './root-watch-ownership'
 import { closeRuntimeRootWatch } from './root-watch-teardown'
 

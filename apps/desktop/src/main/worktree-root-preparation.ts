@@ -4,7 +4,7 @@ import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench
 
 import { isFolderRepo } from '../shared/repo-kind'
 import type { GlobalSettings, Repo } from '../shared/types'
-import { computeWorkspaceRoot, getWorktreePathSettings } from './ipc/worktree-logic'
+import { computeWorkspaceRoot, getWorktreePathSettings } from './worktree/worktree-logic'
 
 type WorktreeRootPreparationSettings = Pick<GlobalSettings, 'workspaceDir' | 'nestWorkspaces'>
 type WorktreeRootPreparationStore = {

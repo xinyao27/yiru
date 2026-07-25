@@ -18,7 +18,7 @@ import {
 import {
   callRuntimeEnvironmentExistingRoute,
   subscribeRuntimeEnvironmentExistingRoute
-} from '../ipc/runtime-environment-existing-route'
+} from '../runtime/runtime-environment-existing-route'
 import type {
   SpoolCanonicalHostPathResult,
   SpoolPairedRuntimeWorktreeHostAdapter

@@ -48,10 +48,10 @@ import {
   RendererRecoveryCircuitBreaker
 } from '../crash-reporting/renderer-recovery-circuit-breaker'
 import { translateMain } from '../i18n/main-i18n'
-import { clearTrustedUIRendererWebContentsId, setTrustedUIRendererWebContentsId } from '../ipc/ui'
 import type { Store } from '../persistence'
 import { resolveWindowCloseAction } from './close-decision'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
+import { clearTrustedUIRendererWebContentsId, setTrustedUIRendererWebContentsId } from './ui'
 
 function forceRepaint(window: BrowserWindow): void {
   if (window.isDestroyed()) {

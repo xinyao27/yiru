@@ -1,4 +1,4 @@
-import type { WatcherProcessEvent } from '../main/ipc/parcel-watcher-process'
+import type { WatcherProcessEvent } from '../main/filesystem/parcel-watcher-process'
 import type { RelayDispatcher } from './dispatcher'
 
 export function emitRelayWatcherEvents(

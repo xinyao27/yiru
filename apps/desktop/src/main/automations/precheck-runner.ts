@@ -4,8 +4,8 @@ import type { ClientChannel } from 'ssh2'
 
 import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '../../shared/automation-precheck'
 import type { AutomationPrecheck, AutomationPrecheckResult } from '../../shared/automations-types'
-import { getSshConnectionManager } from '../ipc/ssh'
 import { shellEscape } from '../ssh/connection-utils'
+import { getSshConnectionManager } from '../ssh/ssh'
 
 type AutomationPrecheckExecutionTarget =
   | {

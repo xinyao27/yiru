@@ -30,22 +30,6 @@ import { isValidTerminalTabId } from '../../shared/terminal/terminal-tab-id'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { installRemoteManagedAgentHooks } from '../agent-hooks/remote-managed-hook-installers'
 import { agentHookServer } from '../agent-hooks/server'
-import {
-  registerSshPtyProvider,
-  unregisterSshPtyProvider,
-  getSshPtyProvider,
-  getPtyIdsForConnection,
-  clearPtyOwnershipForConnection,
-  clearProviderPtyState,
-  deletePtyOwnership,
-  setPtyOwnership
-} from '../ipc/pty'
-import {
-  recordHiddenRendererPtyDataDrop,
-  shouldDropHiddenRendererPtyData
-} from '../ipc/pty-hidden-delivery-gate'
-import { notifyRemoteWorkspaceHandlers } from '../ipc/remote-workspace-events'
-import { answerStartupTerminalColorQueries } from '../ipc/terminal-startup-color-query-replies'
 import { getOpenCodePluginSource } from '../opencode/hook-service'
 import type { Store } from '../persistence'
 import { getPiAgentStatusExtensionSource } from '../pi/agent-status-extension-source'
@@ -63,6 +47,21 @@ import {
   isSshPtyIdentityMismatchError,
   isSshPtyNotFoundError
 } from '../providers/ssh-pty-provider'
+import {
+  registerSshPtyProvider,
+  unregisterSshPtyProvider,
+  getSshPtyProvider,
+  getPtyIdsForConnection,
+  clearPtyOwnershipForConnection,
+  clearProviderPtyState,
+  deletePtyOwnership,
+  setPtyOwnership
+} from '../pty/pty'
+import {
+  recordHiddenRendererPtyDataDrop,
+  shouldDropHiddenRendererPtyData
+} from '../pty/pty-hidden-delivery-gate'
+import { answerStartupTerminalColorQueries } from '../pty/terminal-startup-color-query-replies'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { isMainWindowVisible, onMainWindowBecameVisible } from '../window/main-window-visibility'
 import { SshChannelMultiplexer } from './channel-multiplexer'
@@ -77,6 +76,7 @@ import type { RelayVersionMismatchError } from './relay-version-mismatch-error'
 import { createRemoteCliInstallPlan } from './remote-cli-launcher'
 import { makeRemoteDirectoryCommand } from './remote-commands'
 import { joinRemotePath, isWindowsRemoteHost, type RemoteHostPlatform } from './remote-platform'
+import { notifyRemoteWorkspaceHandlers } from './remote-workspace-events'
 import { runRemoteYiruCli } from './remote-yiru-cli'
 
 export type RelaySessionState = 'idle' | 'deploying' | 'ready' | 'reconnecting' | 'disposed'
@@ -952,7 +952,7 @@ export class SshRelaySession {
       // dev-vs-prod diagnostics fire on remote events the same as on local
       // ones — see docs/design/agent-status-over-ssh.md §3 ("Replay /
       // version mismatch") and the relay's wire envelope at
-      // src/shared/agent/agent-hook-relay.ts.
+      // src/shared/agent-hook-relay.ts.
       agentHookServer.ingestRemote(
         {
           paneKey: envelope.paneKey,

@@ -9,19 +9,22 @@ import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'el
 import type { AppIdentity } from '../../shared/app-identity'
 import type { FloatingTerminalCwdRequest, MarkdownDocument } from '../../shared/types'
 import { setUnreadDockBadgeCount } from '../dock/unread-badge'
+import { authorizeExternalPath } from '../filesystem/filesystem-auth'
+import {
+  ensureDefaultFloatingWorkspacePath,
+  grantFloatingWorkspaceDirectory,
+  resolveFloatingTerminalCwd
+} from '../filesystem/floating-workspace-directory'
+import {
+  isMarkdownDocumentName,
+  markdownDocumentFromFilePath
+} from '../filesystem/markdown-documents'
 import { isGitBashAvailable } from '../git-bash'
 import type { Store } from '../persistence'
 import { isPwshAvailable } from '../pwsh'
 import { getDevInstanceIdentity } from '../startup/dev-instance-identity'
 import { destroySystemTray } from '../tray/system-tray'
 import { isWslAvailable, listWslDistros } from '../wsl'
-import { authorizeExternalPath } from './filesystem-auth'
-import {
-  ensureDefaultFloatingWorkspacePath,
-  grantFloatingWorkspaceDirectory,
-  resolveFloatingTerminalCwd
-} from './floating-workspace-directory'
-import { isMarkdownDocumentName, markdownDocumentFromFilePath } from './markdown-documents'
 
 const KEYBOARD_INPUT_SOURCE_TIMEOUT_MS = 500
 const MAC_HITOOLBOX_DOMAIN = 'com.apple.HIToolbox'

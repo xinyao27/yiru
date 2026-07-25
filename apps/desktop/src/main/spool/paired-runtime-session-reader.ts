@@ -8,7 +8,7 @@ import {
   SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema
 } from '../../shared/spool/spool-paired-runtime-session-contract'
 import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/spool-resource-limits'
-import { callRuntimeEnvironmentExistingRoute } from '../ipc/runtime-environment-existing-route'
+import { callRuntimeEnvironmentExistingRoute } from '../runtime/runtime-environment-existing-route'
 import { SpoolExecutionError } from './execution-error'
 import {
   pairedRuntimeSessionTarget,

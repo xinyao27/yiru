@@ -1,7 +1,7 @@
 import {
   isWatcherProcessFailure,
   type WatcherProcessFailure
-} from '../ipc/parcel-watcher-process-failure'
+} from '../filesystem/parcel-watcher-process-failure'
 
 type RuntimeRootOwnership = {
   rootPath: string

@@ -13,6 +13,7 @@ import { normalizeUiLanguage } from '../../shared/ui-language'
 import type { AgentAwakeService } from '../agent-awake-service'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { applyAppIcon } from '../app-icon'
+import { sanitizeFloatingWorkspaceDirectorySetting } from '../filesystem/floating-workspace-directory'
 import { previewGhosttyImport } from '../ghostty/import-preview'
 import { setMainUiLanguage } from '../i18n/main-i18n'
 import { rebuildAppMenu } from '../menu/register-app-menu'
@@ -22,8 +23,7 @@ import { listSystemFontFamilies } from '../system-fonts'
 import { track } from '../telemetry/client'
 import { previewWarpThemeImport } from '../warp-themes/import-preview'
 import { prepareLocalWorktreeRootsForRepos } from '../worktree-root-preparation'
-import { sanitizeFloatingWorkspaceDirectorySetting } from './floating-workspace-directory'
-import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from './worktree-base-directory-watcher'
+import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from '../worktree/worktree-base-directory-watcher'
 
 // Why: the whitelist is the source-of-truth for which keys we emit on. Casting
 // to a Set once at module load lets the IPC handler's per-key membership

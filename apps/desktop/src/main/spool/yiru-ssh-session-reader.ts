@@ -13,10 +13,10 @@ import {
   SPOOL_SESSION_INVENTORY_SNAPSHOT_MAX_RETAINED_BYTES,
   SPOOL_SESSION_INVENTORY_SNAPSHOT_OPENING_RESERVATION_BYTES
 } from '../ai-vault/spool-session-inventory-memory-budget'
-import { getActiveSshSpoolHostInfo } from '../ipc/ssh'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { IFilesystemProvider } from '../providers/types'
 import type { SshRelayAiVaultHostInfo } from '../ssh/relay-session'
+import { getActiveSshSpoolHostInfo } from '../ssh/ssh'
 import { SpoolExecutionError } from './execution-error'
 import type {
   SpoolExecutionHostSessionReader,

@@ -1,5 +1,5 @@
-import type { WatcherProcessSubscription } from '../main/ipc/parcel-watcher-process'
-import { isWatcherProcessFailure } from '../main/ipc/parcel-watcher-process-failure'
+import type { WatcherProcessSubscription } from '../main/filesystem/parcel-watcher-process'
+import { isWatcherProcessFailure } from '../main/filesystem/parcel-watcher-process-failure'
 import type { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
 
 export type RelayWatcherTeardownState = {

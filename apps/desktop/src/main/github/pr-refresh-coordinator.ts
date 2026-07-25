@@ -12,7 +12,7 @@ import type {
   PRRefreshOutcome
 } from '../../shared/types'
 import { recordCoalescedCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
-import { sendToTrustedUIRenderer } from '../ipc/ui'
+import { sendToTrustedUIRenderer } from '../window/ui'
 import { getPRForBranchOutcome, type GitHubPRBranchLookupOptions } from './client'
 import { getRateLimit, noteRateLimitSpend, rateLimitGuard } from './rate-limit'
 

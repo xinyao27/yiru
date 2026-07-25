@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import { WatcherProcessSupervisor } from '../main/ipc/parcel-watcher-process-supervisor'
-import { RuntimeWatcherProcessPool } from '../main/ipc/runtime-watcher-process-pool'
+import { WatcherProcessSupervisor } from '../main/filesystem/parcel-watcher-process-supervisor'
+import { RuntimeWatcherProcessPool } from '../main/filesystem/runtime-watcher-process-pool'
 
 export type RelayWatcherProcessPool = Pick<
   RuntimeWatcherProcessPool,

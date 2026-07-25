@@ -57,21 +57,21 @@ import type {
   SearchResult,
   Worktree
 } from '../../shared/types'
-import { wslAwareSpawn } from '../git/runner'
-import { isENOENT, resolveAuthorizedPath } from '../ipc/filesystem-auth'
-import { listQuickOpenFiles } from '../ipc/filesystem-list-files'
-import { searchWithGitGrep } from '../ipc/filesystem-search-git'
-import { getLocalGitOptionsForRegisteredWorktree } from '../ipc/local-worktree-runtime-options'
+import { isENOENT, resolveAuthorizedPath } from '../filesystem/filesystem-auth'
+import { listQuickOpenFiles } from '../filesystem/filesystem-list-files'
+import { searchWithGitGrep } from '../filesystem/filesystem-search-git'
+import { getLocalGitOptionsForRegisteredWorktree } from '../filesystem/local-worktree-runtime-options'
 import {
   listMarkdownDocuments,
   markdownDocumentsFromRelativePaths
-} from '../ipc/markdown-documents'
+} from '../filesystem/markdown-documents'
 import {
   isWatcherProcessFailure,
   WatcherProcessFailure
-} from '../ipc/parcel-watcher-process-failure'
-import { checkRgAvailable } from '../ipc/rg-availability'
-import { beginWatcherInstall } from '../ipc/watcher-removal-gate'
+} from '../filesystem/parcel-watcher-process-failure'
+import { checkRgAvailable } from '../filesystem/rg-availability'
+import { beginWatcherInstall } from '../filesystem/watcher-removal-gate'
+import { wslAwareSpawn } from '../git/runner'
 import type { Store } from '../persistence'
 import {
   getSshFilesystemProvider,

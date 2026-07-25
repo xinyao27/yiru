@@ -5,12 +5,12 @@ import { posix, win32 } from 'node:path'
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 
 import type { GitWorktreeInfo, Repo, WorktreeMeta } from '../shared/types'
-import { areWorktreePathsEqual } from './ipc/worktree-logic'
 import {
   gitFileProvesOrphanedWorktreeDirectory,
   type ReadPath,
   type StatPath
 } from './worktree-orphan-gitdir-proof'
+import { areWorktreePathsEqual } from './worktree/worktree-logic'
 
 type PathOps = typeof posix
 

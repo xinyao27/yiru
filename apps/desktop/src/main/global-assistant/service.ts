@@ -27,8 +27,8 @@ import {
   markCopilotFolderTrusted,
   markCursorWorkspaceTrusted
 } from '../agent-trust-presets'
-import { detectInstalledAgentsWithShellPathHydration } from '../ipc/preflight'
 import type { Store } from '../persistence'
+import { detectInstalledAgentsWithShellPathHydration } from '../preflight/preflight'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 
 const ASSISTANT_IDENTITY = `# Yiru Global Assistant

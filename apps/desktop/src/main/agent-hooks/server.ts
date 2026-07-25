@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { chmodSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 /* eslint-disable max-lines -- Why: this file owns the loopback HTTP adapter, the on-disk last-status persistence layer (hydrate, sanitize, TTL, atomic write, drop), and the relay ingest path in one place so the cache lifecycle (set → schedule → drain) lives next to the surfaces that mutate it. Splitting would force mutual `private` accessor scaffolding for a single class. */
 // Why: this module is the Yiru-main-process adapter for the shared
-// agent-hook listener pipeline (`src/shared/agent/agent-hook-listener.ts`). The
+// agent-hook listener pipeline (`src/shared/agent-hook-listener.ts`). The
 // listener internals (request parsing, payload normalization, endpoint-file
 // writing, validation) live in `shared/` so the relay can host the same
 // pipeline on the remote without dragging Electron in. This file owns:

@@ -12,8 +12,8 @@ import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
 } from '../../shared/spool/spool-windows-firewall-contract'
-import type { SpoolSharingIpcSubscriptionSink } from '../ipc/spool-requester-subscriptions'
-import type { SpoolSharingIpcController } from '../ipc/spool-sharing'
+import type { SpoolSharingIpcSubscriptionSink } from './spool-requester-subscriptions'
+import type { SpoolSharingIpcController } from './spool-sharing'
 
 const UNAVAILABLE_SNAPSHOT: SpoolSharingSnapshot = {
   status: 'unavailable',

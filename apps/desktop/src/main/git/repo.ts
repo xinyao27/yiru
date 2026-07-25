@@ -41,7 +41,7 @@ function gitExecOptions(
  * would render the ref).
  *
  * Why: shared between the local path (getDefaultBaseRefAsync) and the SSH
- * relay path in src/main/ipc/repos.ts so both resolve identical defaults
+ * relay path in src/main/project-groups/repos.ts so both resolve identical defaults
  * for equivalent repo states.
  */
 export const DEFAULT_BASE_REF_PROBES: readonly { ref: string; returnAs: string }[] = [
@@ -964,7 +964,7 @@ export async function searchBaseRefDetails(
     // Why: surface the failure for diagnostics; callers treat `[]` as "no
     // matches", but silently swallowing the error makes a missing result
     // set impossible to debug. Mirrors the SSH sibling in
-    // src/main/ipc/repos.ts.
+    // src/main/project-groups/repos.ts.
     console.warn('[searchBaseRefs] for-each-ref failed', { path, err })
     return []
   }
@@ -988,7 +988,7 @@ async function listRemoteNames(path: string, options: LocalGitExecOptions = {}):
  * pseudo-refs, honoring a limit.
  *
  * Why: shared between the local `searchBaseRefs` and the SSH branch in
- * `src/main/ipc/repos.ts` so both return identical, correctly-filtered
+ * `src/main/project-groups/repos.ts` so both return identical, correctly-filtered
  * results. The same bug class (wrong filter ordering, HEAD leaking into
  * results, duplicate short refs) that motivated this helper originally
  * lived in a single location; two copies double the regression surface.

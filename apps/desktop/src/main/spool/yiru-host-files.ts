@@ -1,6 +1,6 @@
 import { realpath } from 'node:fs/promises'
 
-import { resolveAuthorizedPath } from '../ipc/filesystem-auth'
+import { resolveAuthorizedPath } from '../filesystem/filesystem-auth'
 import type { Store } from '../persistence'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { SpoolExecutionError } from './execution-error'

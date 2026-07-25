@@ -17,9 +17,9 @@ import {
   resolveVsCodeRemoteSshLaunchSpec,
   type ExternalEditorLaunchSpec
 } from '../external-editor-launch'
+import { getRegisteredSshTarget } from '../ssh/ssh'
 import { resolveVsCodeSshAuthority } from '../ssh/vscode-ssh-authority'
 import { getSpawnArgsForWindows } from '../win32-utils'
-import { getRegisteredSshTarget } from './ssh'
 
 export { EXTERNAL_EDITOR_CLI_COMMAND }
 

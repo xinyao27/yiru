@@ -8,8 +8,8 @@ import type { Repo } from '../../shared/types'
 import { getCodexAccountHomeSessionDirectories } from '../codex/account-home-discovery'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../codex/home-paths'
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../codex/session-bridge'
-import { areWorktreePathsEqual } from '../ipc/worktree-logic'
 import { canonicalizeUsageWorktreePaths } from '../usage-worktree-canonicalizer'
+import { areWorktreePathsEqual } from '../worktree/worktree-logic'
 import type {
   CodexUsageAttributedEvent,
   CodexUsageDailyAggregate,

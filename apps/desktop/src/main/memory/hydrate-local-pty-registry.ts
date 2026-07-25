@@ -14,7 +14,7 @@
  * session, reattribute each one to its repo via the minted session-id
  * format, and only register sessions whose repo has no `connectionId`
  * (i.e. truly local). Truly remote (SSH) sessions stay out of the
- * registry, mirroring the spawn-time gate (the `if (!args.connectionId)` block around the `registerPty` call in `src/main/ipc/pty.ts`).
+ * registry, mirroring the spawn-time gate (the `if (!args.connectionId)` block around the `registerPty` call in `src/main/pty/pty.ts`).
  */
 
 import { parsePtySessionId } from '@yiru/workbench-model/workspace'
@@ -142,7 +142,7 @@ export async function hydrateLocalPtyRegistryAtBoot(store: Pick<Store, 'getRepos
       }
       // Why: SSH sessions must stay out of the registry — mirrors the
       // spawn-time `if (!args.connectionId)` gate around `registerPty` in
-      // `src/main/ipc/pty.ts`. If the repo isn't in the store, skip the
+      // `src/main/pty/pty.ts`. If the repo isn't in the store, skip the
       // session: we can't prove it's local, and the renderer-side union
       // still surfaces the session at the cost of a missing pid sample.
       if (!liveLocalWorktreeIds.has(worktreeId)) {

@@ -1,4 +1,4 @@
-import { isWatcherProcessFailure } from '../main/ipc/parcel-watcher-process-failure'
+import { isWatcherProcessFailure } from '../main/filesystem/parcel-watcher-process-failure'
 import type { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
 
 export function shouldRetryInitialRelayWatch(error: unknown): boolean {
