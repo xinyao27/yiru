@@ -3,4 +3,4 @@ export {
   hasExpandedPushFailureDetails,
   isPushHookFailure,
   summarizePushFailure
-} from '../../../../shared/source-control-push-failure'
+} from '../../../../shared/source-control/source-control-push-failure'

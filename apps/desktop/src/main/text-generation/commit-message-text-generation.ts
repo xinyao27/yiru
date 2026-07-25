@@ -38,9 +38,9 @@ import {
 import {
   resolveSourceControlAiForOperation,
   type ResolvedSourceControlAiGenerationParams
-} from '../../shared/source-control-ai'
-import { renderSourceControlActionCommandTemplate } from '../../shared/source-control-ai-actions'
-import type { SourceControlAiOperation } from '../../shared/source-control-ai-types'
+} from '../../shared/source-control/source-control-ai'
+import { renderSourceControlActionCommandTemplate } from '../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiOperation } from '../../shared/source-control/source-control-ai-types'
 import type { GlobalSettings, Repo, TuiAgent } from '../../shared/types'
 import { resolveCliCommand } from '../codex-cli/command'
 import { wslAwareSpawn } from '../git/runner'

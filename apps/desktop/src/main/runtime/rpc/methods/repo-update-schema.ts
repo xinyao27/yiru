@@ -6,7 +6,7 @@ import {
   OptionalFiniteNumber,
   OptionalString
 } from '../../../../shared/runtime-method-contracts/runtime-method-params'
-import { normalizeRepoSourceControlAiOverrides } from '../../../../shared/source-control-ai'
+import { normalizeRepoSourceControlAiOverrides } from '../../../../shared/source-control/source-control-ai'
 
 export const RepoSourceControlAiOverrides = z
   .unknown()

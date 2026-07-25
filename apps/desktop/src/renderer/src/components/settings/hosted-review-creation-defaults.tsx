@@ -1,7 +1,7 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { translate } from '@/i18n/i18n'
 
-import type { SourceControlAiSettings } from '../../../../shared/source-control-ai-types'
+import type { SourceControlAiSettings } from '../../../../shared/source-control/source-control-ai-types'
 import { Label } from '../ui/label'
 import { SearchableSetting } from './searchable-setting'
 

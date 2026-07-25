@@ -7,15 +7,15 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import { buildBranchNamePrompt } from '../../../../shared/branch-name-from-work'
-import { normalizeSourceControlAiSettings } from '../../../../shared/source-control-ai'
+import { normalizeSourceControlAiSettings } from '../../../../shared/source-control/source-control-ai'
 import {
   resolveSourceControlActionCommandTemplate,
   setSourceControlActionDefault
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import type {
   SourceControlAiSettingsPatch,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-types'
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'

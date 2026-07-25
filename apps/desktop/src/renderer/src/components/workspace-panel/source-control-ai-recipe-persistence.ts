@@ -1,16 +1,16 @@
 import type { AppState } from '@/store'
 
 import { isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control-ai'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control/source-control-ai'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId,
   SourceControlTextActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import {
   saveSourceControlActionRecipe,
   type SourceControlAiWriteTarget
-} from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-recipe-save'
 import { generationParamsToActionRecipe } from './source-control-text-generation-defaults'
 
 type SourceControlAiRecipePersistenceStoreSnapshot = Pick<AppState, 'settings' | 'repos'>

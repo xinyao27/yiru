@@ -8,14 +8,14 @@ import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message-agent-spec'
 import {
   normalizeRepoSourceControlAiOverrides,
   normalizeSourceControlAiSettings
-} from '../../../../shared/source-control-ai'
+} from '../../../../shared/source-control/source-control-ai'
 import {
   SOURCE_CONTROL_ACTION_IDS,
   type SourceControlActionId
-} from '../../../../shared/source-control-ai-actions'
-import { toSourceControlAiRepoUpdate } from '../../../../shared/source-control-ai-recipe-save'
-import type { SourceControlAiRepoUpdate } from '../../../../shared/source-control-ai-recipe-save'
-import type { RepoSourceControlAiOverrides } from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import { toSourceControlAiRepoUpdate } from '../../../../shared/source-control/source-control-ai-recipe-save'
+import type { SourceControlAiRepoUpdate } from '../../../../shared/source-control/source-control-ai-recipe-save'
+import type { RepoSourceControlAiOverrides } from '../../../../shared/source-control/source-control-ai-types'
 import type { Repo, TuiAgent } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'

@@ -13,13 +13,13 @@ import {
   resolveSourceControlAiForOperation,
   resolveSourceControlAiPrCreationDefaults,
   type ResolvedSourceControlAiGenerationParams
-} from '../../../../shared/source-control-ai'
+} from '../../../../shared/source-control/source-control-ai'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId,
   SourceControlTextActionId
-} from '../../../../shared/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
 import type { SourceControlAiControllerParams } from './source-control-ai-controller-types'
 import { buildResolveConflictsPrompt } from './source-control-ai-prompts'
 import {

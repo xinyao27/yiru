@@ -15,8 +15,8 @@ import { cn } from '@/lib/class-names'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type { TuiAgent } from '../../../../shared/types'
 import { SourceControlAgentActionDialog } from './source-control-agent-action-dialog'

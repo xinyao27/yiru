@@ -8,8 +8,8 @@ import type { RuntimeGitCheckoutResult } from '../../shared/runtime-types'
 import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   type ResolvedSourceControlAiGenerationParams
-} from '../../shared/source-control-ai'
-import type { SourceControlAiOperation } from '../../shared/source-control-ai-types'
+} from '../../shared/source-control/source-control-ai'
+import type { SourceControlAiOperation } from '../../shared/source-control/source-control-ai-types'
 /* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so local, SSH, and runtime-environment behavior remains comparable. */
 import type {
   GitBranchCompareResult,

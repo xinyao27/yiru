@@ -17,8 +17,8 @@ import { readSourceControlLaunchRecipeAgentId } from '@/lib/source-control-launc
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
 import { SourceControlFixSplitButton } from './source-control-fix-split-button'
 
 export type SourceControlRecoveryKind = 'commit' | 'push'

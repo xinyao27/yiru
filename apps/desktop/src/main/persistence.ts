@@ -77,7 +77,7 @@ import {
 import { normalizeRepoBadgeColor } from '../shared/repo-badge-color'
 import { isFolderRepo } from '../shared/repo-kind'
 import { hardenExistingSecureFile } from '../shared/secure-file'
-import { normalizeRepoSourceControlAiOverrides } from '../shared/source-control-ai'
+import { normalizeRepoSourceControlAiOverrides } from '../shared/source-control/source-control-ai'
 import {
   isTerminalLeafId,
   makePaneKey,
@@ -117,11 +117,11 @@ import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../shared/workspace-scope'
-import { pruneWorkspaceSessionBrowserHistory } from '../shared/workspace-session-browser-history'
-import { pruneLocalTerminalScrollbackBuffers } from '../shared/workspace-session-terminal-buffers'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../shared/workspace-statuses'
-import { isLegacyRepoForExternalWorktreeVisibility } from '../shared/worktree-ownership'
+} from '../shared/workspace/workspace-scope'
+import { pruneWorkspaceSessionBrowserHistory } from '../shared/workspace/workspace-session-browser-history'
+import { pruneLocalTerminalScrollbackBuffers } from '../shared/workspace/workspace-session-terminal-buffers'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../shared/workspace/workspace-statuses'
+import { isLegacyRepoForExternalWorktreeVisibility } from '../shared/workspace/worktree-ownership'
 import {
   setMigrationUnsupportedPty,
   setMigrationUnsupportedPtyPersistenceListener

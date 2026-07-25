@@ -1,5 +1,5 @@
-export { buildCommitFailureAgentCommandInput } from '../../../../shared/source-control-commit-failure-agent-command'
-export { buildPushFailureAgentCommandInput } from '../../../../shared/source-control-push-failure-agent-command'
+export { buildCommitFailureAgentCommandInput } from '../../../../shared/source-control/source-control-commit-failure-agent-command'
+export { buildPushFailureAgentCommandInput } from '../../../../shared/source-control/source-control-push-failure-agent-command'
 export {
   appendCommitFailureCustomInstruction,
   buildFixCommitFailurePrompt
@@ -7,7 +7,7 @@ export {
 export {
   appendPushFailureCustomInstruction,
   buildFixPushFailurePrompt
-} from '../../../../shared/source-control-push-failure'
+} from '../../../../shared/source-control/source-control-push-failure'
 export {
   buildResolveConflictsPrompt,
   buildResolvePullRequestConflictsPrompt

@@ -12,11 +12,11 @@ import { useActiveWorktree, useRepoById } from '@/store/selectors'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import {
   saveSourceControlActionRecipe,
   type SourceControlAiWriteTarget
-} from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-recipe-save'
 import type { PRCheckDetail, PRComment } from '../../../../shared/types'
 import type {
   HostedReviewCreationSnapshot,

@@ -6,7 +6,7 @@ import {
 
 import { fetchRuntimeGit } from '@/runtime/git-client'
 
-import { resolveSourceControlOperationOwner } from '../../../../shared/source-control-operation-owner'
+import { resolveSourceControlOperationOwner } from '../../../../shared/source-control/source-control-operation-owner'
 import type { GitPushTarget, GlobalSettings } from '../../../../shared/types'
 import type { AppState } from '../../store/types'
 

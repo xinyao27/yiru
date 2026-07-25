@@ -5,7 +5,7 @@ import {
 import {
   isPushHookFailure,
   summarizePushFailure
-} from '../../../shared/source-control-push-failure'
+} from '../../../shared/source-control/source-control-push-failure'
 
 const REMOTE_OPERATION_FAILED_MESSAGE = 'Remote operation failed'
 const REMOTE_OPERATION_DETAIL_MAX_LENGTH = 200

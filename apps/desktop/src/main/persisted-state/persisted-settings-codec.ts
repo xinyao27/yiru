@@ -11,8 +11,8 @@ import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   projectSourceControlAiToLegacyCommitMessageAi,
   sourceControlAiSettingsFromLegacy
-} from '../../shared/source-control-ai'
-import { normalizeSourceControlGroupOrder } from '../../shared/source-control-group-order'
+} from '../../shared/source-control/source-control-ai'
+import { normalizeSourceControlGroupOrder } from '../../shared/source-control/source-control-group-order'
 import type { GlobalSettings } from '../../shared/types'
 import { normalizeUiLanguage } from '../../shared/ui-language'
 import { decodePersistedAgentSettings } from './persisted-agent-settings-codec'

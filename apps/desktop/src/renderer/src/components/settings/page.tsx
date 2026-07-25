@@ -53,11 +53,11 @@ import { DEFAULT_APP_FONT_FAMILY, getDefaultVoiceSettings } from '../../../../sh
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { SkillFreshnessInventory } from '../../../../shared/skill-freshness'
-import { normalizeSourceControlAiSettings } from '../../../../shared/source-control-ai'
+import { normalizeSourceControlAiSettings } from '../../../../shared/source-control/source-control-ai'
 import type {
   SourceControlAiSettings,
   SourceControlAiSettingsPatch
-} from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-types'
 import type { SpeechModelState } from '../../../../shared/speech-types'
 import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '../../../../shared/types'
 import { useAppStore } from '../../store'

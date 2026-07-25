@@ -8,7 +8,7 @@ import {
   resolveSourceControlAiEnabled,
   resolveSourceControlAiForOperation,
   resolveSourceControlAiPrCreationDefaults
-} from '../../../../shared/source-control-ai'
+} from '../../../../shared/source-control/source-control-ai'
 import type { useChecksPanelReviewContextState } from './checks-panel-review-context'
 
 export function useChecksPanelGenerationDefaults(context: useChecksPanelReviewContextState) {

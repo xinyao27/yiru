@@ -5,7 +5,7 @@ import { translate } from '@/i18n/i18n'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-types'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { triStateValue } from './repository-source-control-ai-draft'

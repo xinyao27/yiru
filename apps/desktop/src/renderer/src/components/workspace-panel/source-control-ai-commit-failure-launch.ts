@@ -3,7 +3,7 @@ import type { AppState } from '@/store'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import {
   getDefaultSourceControlRecoveryLaunchCopy,
   launchSourceControlRecoveryAgentWithDefault

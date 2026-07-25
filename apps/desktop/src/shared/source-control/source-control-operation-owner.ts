@@ -7,7 +7,7 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
-import type { GlobalSettings, Repo, Worktree } from './types'
+import type { GlobalSettings, Repo, Worktree } from '../types'
 
 export type SourceControlOperationOwnerTarget = {
   worktreeId: string

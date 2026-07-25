@@ -9,7 +9,7 @@ import { CUSTOM_AGENT_ID, isCustomAgentId } from '../../../../shared/commit-mess
 import {
   SOURCE_CONTROL_ACTION_LABELS,
   type SourceControlActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { Button } from '../ui/button'

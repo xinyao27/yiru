@@ -10,15 +10,15 @@ import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-
 import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control-ai'
+import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/source-control-ai'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import {
   saveSourceControlActionRecipe,
   type SourceControlAiWriteTarget
-} from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-recipe-save'
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
 import {
   buildCheckRunDetailsFixBasePrompt,

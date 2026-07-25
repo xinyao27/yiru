@@ -10,11 +10,11 @@ import {
   SOURCE_CONTROL_ACTION_IDS,
   SOURCE_CONTROL_ACTION_LABELS,
   type SourceControlActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-types'
 import type { TuiAgent } from '../../../../shared/types'
 import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { Button } from '../ui/button'

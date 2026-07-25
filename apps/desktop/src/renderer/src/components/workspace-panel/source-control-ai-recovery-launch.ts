@@ -14,8 +14,8 @@ import type { AppState } from '@/store'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
-import { buildSourceControlRecoveryAgentCommandInput } from '../../../../shared/source-control-recovery-agent-command'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import { buildSourceControlRecoveryAgentCommandInput } from '../../../../shared/source-control/source-control-recovery-agent-command'
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 
 type SourceControlAiLaunchStoreSnapshot = Pick<

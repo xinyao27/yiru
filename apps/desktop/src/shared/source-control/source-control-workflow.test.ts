@@ -13,8 +13,8 @@ import {
 } from '@yiru/workbench-model/review'
 import { describe, expect, it } from 'vite-plus/test'
 
+import type { Repo, Worktree } from '../types'
 import { resolveSourceControlOperationOwner } from './source-control-operation-owner'
-import type { Repo, Worktree } from './types'
 
 function primaryActionInputs(
   overrides: Partial<SourceControlPrimaryActionDecisionInputs> = {}

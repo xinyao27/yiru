@@ -12,7 +12,7 @@ import {
 import {
   SOURCE_CONTROL_TEXT_ACTION_IDS,
   type SourceControlActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import type { TuiAgent } from '../../../../shared/types'
 
 export const SOURCE_CONTROL_TEXT_ACTION_ID_SET = new Set<string>(SOURCE_CONTROL_TEXT_ACTION_IDS)

@@ -1,10 +1,10 @@
 import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message-agent-spec'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control-ai'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control/source-control-ai'
 import {
   setSourceControlActionDefault,
   type SourceControlTextActionId
-} from '../../../../shared/source-control-ai-actions'
-import type { SourceControlAiSettings } from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiSettings } from '../../../../shared/source-control/source-control-ai-types'
 
 export function applySourceControlTextGenerationDefaults(
   current: SourceControlAiSettings,

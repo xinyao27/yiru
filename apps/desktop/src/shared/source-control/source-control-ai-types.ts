@@ -1,10 +1,10 @@
-import type { CustomAgentId } from './commit-message-agent-spec'
+import type { CustomAgentId } from '../commit-message-agent-spec'
+import type { CommitMessageAiModelCapability, TuiAgent } from '../types'
 import type {
   SourceControlAiActionDefaults,
   SourceControlActionId,
   SourceControlTextActionId
 } from './source-control-ai-actions'
-import type { CommitMessageAiModelCapability, TuiAgent } from './types'
 
 export type SourceControlAiOperation = SourceControlTextActionId
 

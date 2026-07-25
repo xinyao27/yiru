@@ -7,8 +7,8 @@ import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
 import { sourceControlActionRecipeMatchesTarget } from './source-control-action-recipe-match'

@@ -1,3 +1,4 @@
+import type { GlobalSettings, Repo } from '../types'
 import {
   normalizeRepoSourceControlAiOverrides,
   normalizeSourceControlAiSettings
@@ -16,7 +17,6 @@ import type {
   SourceControlAiSettings,
   WritableRepoSourceControlAiOverrides
 } from './source-control-ai-types'
-import type { GlobalSettings, Repo } from './types'
 
 export type SourceControlAiWriteTarget = { type: 'repo'; repoId: string } | { type: 'global' }
 

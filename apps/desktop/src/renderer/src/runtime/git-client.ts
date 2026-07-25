@@ -11,7 +11,7 @@ import type {
 import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../shared/commit-message-host-key'
 import type { GitHistoryOptions, GitHistoryResult } from '../../../shared/git/git-history'
 import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control-ai'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control/source-control-ai'
 /* eslint-disable max-lines -- Why: this module mirrors the git preload API with
 runtime-aware routing so source-control callers have one typed boundary instead
 of reimplementing local-vs-environment branching per operation. */

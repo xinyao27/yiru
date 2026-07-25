@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/source-control-ai-actions'
 import type { GitStatusEntry } from '../../../../shared/types'
 import { summarizeCommitFailure } from './commit-failure-summary'
 import type { SourceControlAiStoreSnapshot } from './source-control-ai-controller-types'

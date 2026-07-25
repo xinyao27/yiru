@@ -9,8 +9,15 @@ import {
   type CustomAgentId,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from './commit-message-agent-spec'
-import { LOCAL_COMMIT_MESSAGE_HOST_KEY } from './commit-message-host-key'
+} from '../commit-message-agent-spec'
+import { LOCAL_COMMIT_MESSAGE_HOST_KEY } from '../commit-message-host-key'
+import type {
+  CommitMessageAiModelCapability,
+  CommitMessageAiSettings,
+  GlobalSettings,
+  Repo,
+  TuiAgent
+} from '../types'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   normalizeSourceControlActionRecipe,
@@ -29,13 +36,6 @@ import type {
   SourceControlAiPrCreationDefaults,
   SourceControlAiSettings
 } from './source-control-ai-types'
-import type {
-  CommitMessageAiModelCapability,
-  CommitMessageAiSettings,
-  GlobalSettings,
-  Repo,
-  TuiAgent
-} from './types'
 
 export const DEFAULT_SOURCE_CONTROL_AI_PR_CREATION_DEFAULTS: Required<SourceControlAiPrCreationDefaults> =
   {

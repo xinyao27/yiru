@@ -5,9 +5,9 @@ import {
   resolveSourceControlActionCommandTemplate,
   type SourceControlActionId,
   type SourceControlActionRecipe
-} from '../../../../shared/source-control-ai-actions'
-import type { RepoSourceControlAiOverrides } from '../../../../shared/source-control-ai-types'
-import type { SourceControlAiSettings } from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/source-control-ai-actions'
+import type { RepoSourceControlAiOverrides } from '../../../../shared/source-control/source-control-ai-types'
+import type { SourceControlAiSettings } from '../../../../shared/source-control/source-control-ai-types'
 import type { TuiAgent } from '../../../../shared/types'
 
 export const ACTION_MODE_INHERIT = 'inherit'

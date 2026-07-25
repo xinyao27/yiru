@@ -44,7 +44,7 @@ import type {
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from './source-control-ai-types'
+} from './source-control/source-control-ai-types'
 import type { VoiceSettings } from './speech-types'
 import type { StatusBarUsageMode } from './status-bar-usage-mode'
 import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'

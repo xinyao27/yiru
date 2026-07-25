@@ -1,7 +1,7 @@
 import {
   DEFAULT_SOURCE_CONTROL_AI_PR_CREATION_DEFAULTS,
   resolveSourceControlAiForOperation
-} from '../../../../shared/source-control-ai'
+} from '../../../../shared/source-control/source-control-ai'
 import {
   normalizeCreateReviewBaseSearchResults,
   resolveCreateReviewDefaultBaseRef,
