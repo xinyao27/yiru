@@ -83,7 +83,6 @@ import { FloatingWorkspacePane } from './floating-workspace-pane'
 import { GeneralPane } from './general-pane'
 import { GitPane } from './git-pane'
 import { GitProviderApiBudgetPane } from './git-provider-api-budget-pane'
-import { InputPane } from './input-pane'
 import { IntegrationsPane } from './integrations-pane'
 import { MobileEmulatorSettingsPane } from './mobile-emulator-settings-pane'
 import { MobileSettingsPane } from './mobile-settings-pane'
@@ -124,6 +123,11 @@ const DevToolsPane = import.meta.env.DEV
 
 const SETTINGS_NAV_GROUPS = [
   {
+    id: 'interface',
+    titleKey: 'auto.components.settings.Settings.8bd117d669',
+    titleDefault: 'Interface'
+  },
+  {
     id: 'capabilities',
     titleKey: 'auto.components.settings.Settings.23c6874fdf',
     titleDefault: 'AI Capabilities'
@@ -133,11 +137,6 @@ const SETTINGS_NAV_GROUPS = [
     id: 'workflows',
     titleKey: 'auto.components.settings.Settings.e1578cd4bc',
     titleDefault: 'Workflows'
-  },
-  {
-    id: 'interface',
-    titleKey: 'auto.components.settings.Settings.8bd117d669',
-    titleDefault: 'Interface'
   },
   {
     id: 'remote',
@@ -384,7 +383,8 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     () => fontSuggestions.filter((font) => font !== DEFAULT_APP_FONT_FAMILY),
     [fontSuggestions]
   )
-  const [activeSectionId, setActiveSectionId] = useState('general')
+  // Why: Appearance leads the sidebar, so Settings opens on it by default.
+  const [activeSectionId, setActiveSectionId] = useState('appearance')
   const [mountedSectionIds, setMountedSectionIds] = useState<Set<string>>(
     getInitialMountedSectionIds
   )
@@ -1545,21 +1545,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                       warpThemes={warpThemes}
                     />
                   ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="input"
-                  title={translate(
-                    'auto.components.settings.Settings.d7a3e635b6',
-                    'Input & Editing'
-                  )}
-                  description={translate(
-                    'auto.components.settings.Settings.d0b7021d64',
-                    'Selection and editing behavior.'
-                  )}
-                  searchEntries={getSectionSearchEntries('input')}
-                >
-                  <InputPane settings={settings} updateSettings={updateSettings} />
                 </SettingsSection>
 
                 {showDesktopOnlySettings ? (

@@ -139,10 +139,7 @@ import { useGlobalAssistantFloatingTab } from './hooks/use-global-assistant-floa
 import { useGlobalFileDrop } from './hooks/use-global-file-drop'
 import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './hooks/use-ipc-events'
 import { useLargeTextControlPaste } from './hooks/use-large-text-control-paste'
-import {
-  resolvePrimarySelectionMiddleClickPaste,
-  usePrimarySelectionPaste
-} from './hooks/use-primary-selection-paste'
+import { usePrimarySelectionPaste } from './hooks/use-primary-selection-paste'
 import { useRadixBodyPointerEventsRecovery } from './hooks/use-radix-body-pointer-events-recovery'
 import { useShortcutLabel } from './hooks/use-shortcut-label'
 import { useSpoolSharingBridge } from './hooks/use-spool-sharing-bridge'
@@ -747,10 +744,7 @@ function App(): React.JSX.Element {
   const hasSshCredentialRequest = useAppStore((s) => s.sshCredentialQueue.length > 0)
   const shouldMountDictationController =
     settings?.voice?.enabled === true || dictationState !== 'idle'
-  const primarySelectionMiddleClickPaste = resolvePrimarySelectionMiddleClickPaste(
-    settings?.primarySelectionMiddleClickPaste
-  )
-  usePrimarySelectionPaste(primarySelectionMiddleClickPaste)
+  usePrimarySelectionPaste()
   useAppMenuPaste()
   useLargeTextControlPaste()
   const petEnabled = useAppStore((s) => s.settings?.experimentalPet === true)

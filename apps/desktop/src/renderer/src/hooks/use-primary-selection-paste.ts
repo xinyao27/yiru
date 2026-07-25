@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 
-import { isLinuxUserAgent, isMacUserAgent } from '@/components/terminal-pane/pane-helpers'
 import {
   readPrimarySelectionText,
   setPrimarySelectionEnabled,
@@ -15,19 +14,6 @@ import {
 } from '@/lib/primary-selection-paste'
 
 const PRIMARY_SELECTION_PENDING_TARGET_TTL_MS = 750
-
-export function resolvePrimarySelectionMiddleClickPaste(
-  setting: boolean | undefined,
-  userAgent: string = typeof navigator === 'undefined' ? '' : navigator.userAgent
-): boolean {
-  return setting ?? isDefaultPrimarySelectionMiddleClickPasteUserAgent(userAgent)
-}
-
-export function isDefaultPrimarySelectionMiddleClickPasteUserAgent(
-  userAgent: string = typeof navigator === 'undefined' ? '' : navigator.userAgent
-): boolean {
-  return isLinuxUserAgent(userAgent) || isMacUserAgent(userAgent)
-}
 
 function captureCurrentSelection(): void {
   const text = readCurrentPrimarySelectionText()
@@ -62,9 +48,9 @@ function isPrimarySelectionPasteTargetCurrent(
   )
 }
 
-export function usePrimarySelectionPaste(enabled: boolean): void {
+export function usePrimarySelectionPaste(): void {
   useEffect(() => {
-    setPrimarySelectionEnabled(enabled)
+    setPrimarySelectionEnabled(true)
     let pendingMiddleTarget: EditablePrimarySelectionPasteTarget | null = null
     let pendingMiddleUntil = 0
 
@@ -111,47 +97,6 @@ export function usePrimarySelectionPaste(enabled: boolean): void {
         shouldSuppressPrimarySelectionNativePaste()
       ) {
         suppressEvent(event)
-      }
-    }
-
-    if (!enabled) {
-      if (!isLinuxUserAgent()) {
-        return
-      }
-
-      const onMouseDown = (event: MouseEvent): void => {
-        rememberPendingTarget(event)
-      }
-      const onMouseUp = (event: MouseEvent): void => {
-        if (event.button === 1) {
-          // Why: prevent Chromium's native Linux primary paste when disabled
-          // without blocking terminal apps from receiving middle-click events.
-          event.preventDefault()
-        }
-        pendingMiddleTarget = null
-      }
-      const onAuxClick = (event: MouseEvent): void => {
-        if (event.button === 1) {
-          // Why: match the mouseup preventer for browsers that surface auxclick.
-          event.preventDefault()
-        }
-      }
-
-      // Why: when users opt out on Linux, Chromium can still perform native
-      // primary-selection paste unless the middle-click paste pipeline is stopped.
-      document.addEventListener('mousedown', onMouseDown, true)
-      document.addEventListener('beforeinput', suppressPendingPasteInput, true)
-      document.addEventListener('paste', suppressPendingPasteInput, true)
-      document.addEventListener('mouseup', onMouseUp, true)
-      document.addEventListener('auxclick', onAuxClick, true)
-
-      return () => {
-        setPrimarySelectionEnabled(false)
-        document.removeEventListener('mousedown', onMouseDown, true)
-        document.removeEventListener('beforeinput', suppressPendingPasteInput, true)
-        document.removeEventListener('paste', suppressPendingPasteInput, true)
-        document.removeEventListener('mouseup', onMouseUp, true)
-        document.removeEventListener('auxclick', onAuxClick, true)
       }
     }
 
@@ -228,5 +173,5 @@ export function usePrimarySelectionPaste(enabled: boolean): void {
       document.removeEventListener('mouseup', onMouseUp, true)
       document.removeEventListener('auxclick', onAuxClick, true)
     }
-  }, [enabled])
+  }, [])
 }

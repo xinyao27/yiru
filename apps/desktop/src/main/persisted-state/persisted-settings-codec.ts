@@ -63,7 +63,7 @@ export function decodePersistedSettings(
 ): PersistedSettingsDecodeResult {
   const defaults = getDefaultSettings(context.homeDir)
   const raw = value ?? {}
-  const terminal = decodePersistedTerminalSettings(raw, defaults, context.platform)
+  const terminal = decodePersistedTerminalSettings(raw, defaults)
   const agents = decodePersistedAgentSettings(raw)
   const floatingWorkspace = decodePersistedFloatingWorkspaceSettings(
     raw,

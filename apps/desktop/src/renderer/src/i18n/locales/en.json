@@ -692,8 +692,6 @@
         "94295ebfb3": "Shortcuts",
         "7682607591": "Native desktop notifications for agent and terminal events.",
         "2eece16ad1": "Notifications",
-        "1f452cbd4c": "Selection and editing behavior.",
-        "0c6ee88a5f": "Input & Editing",
         "b11a5a48a2": "Theme, zoom, app and terminal appearance, sidebars, and status bar.",
         "93d88d20bf": "Appearance",
         "2d0659f6f0": "Global terminal, browser, and markdown tabs.",
@@ -4873,10 +4871,6 @@
           "232cf83de8": "Unlisted toggles for internal testing. Nothing here is supported.",
           "3e9e827ca5": "Hidden experimental"
         },
-        "InputPane": {
-          "db15068196": "Enabled by default on Linux and macOS. Linux uses the system selection clipboard; other platforms use a private buffer.",
-          "ad31c3c5fb": "Middle-click Paste from Selection"
-        },
         "IntegrationsPane": {
           "e7b2dd46f9": "Testing…",
           "fe4d378dc4": "Verified",
@@ -5647,8 +5641,6 @@
           "23bf7a1ad4": "Shortcuts",
           "7210ac09c4": "Native desktop notifications for agent activity and terminal events.",
           "9907545fa3": "Notifications",
-          "d0b7021d64": "Selection and editing behavior.",
-          "d7a3e635b6": "Input & Editing",
           "6d1a27e193": "Theme, zoom, app and terminal appearance, sidebars, and status bar.",
           "2b4474780a": "Appearance",
           "3d9adfe6a5": "Global terminal, browser, and markdown tabs.",
@@ -7022,23 +7014,6 @@
             "originMaster": "origin/master",
             "committedChanges": "committed changes",
             "118c23484b": "Add Yiru attribution to commits and PRs."
-          }
-        },
-        "input": {
-          "search": {
-            "886597d6b3": "macos",
-            "26c83b06c5": "linux",
-            "71905435dd": "x11",
-            "7059cfb00a": "clipboard",
-            "c4440c3986": "paste",
-            "5fb84ba77f": "middle mouse",
-            "31ba58c8ae": "middle click",
-            "de51e18ee9": "primary selection",
-            "e5cd0e7a46": "selection",
-            "e25165320e": "editing",
-            "b51d47ceb7": "input",
-            "874d88f4a6": "Enabled by default on Linux and macOS. Linux uses the system selection clipboard; other platforms use a private buffer.",
-            "d952ce9b46": "Middle-click Paste from Selection"
           }
         },
         "integrations": {

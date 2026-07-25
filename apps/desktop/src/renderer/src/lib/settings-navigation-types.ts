@@ -18,7 +18,6 @@ export type SettingsNavTarget =
   | 'browser'
   | 'git'
   | 'appearance'
-  | 'input'
   | 'floating-workspace'
   | 'terminal'
   | 'quick-commands'
