@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { resumeSleepingAgentSessionsForWorktree } from '@/lib/resume-sleeping-agent-session'
+import { resumeSleepingAgentSessionsForWorktree } from '@/components/terminal-workspace/resume-sleeping-agent-session'
 
 import { isWebRuntimeSessionActive } from '../../runtime/web-runtime-session'
 import { useAppStore } from '../../store'

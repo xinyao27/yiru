@@ -5,13 +5,13 @@ import type {
 import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
+import { resumeSleepingAgentSessionsForWorktree } from '@/components/terminal-workspace/resume-sleeping-agent-session'
 import { shouldAutoCreateInitialTerminal } from '@/components/terminal/initial-terminal'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
 import { getConnectionId } from '@/lib/connection-context'
 import { queueHookCommandsForFirstWorktreeTab } from '@/lib/hook-command-delayed-delivery'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { resumeSleepingAgentSessionsForWorktree } from '@/lib/resume-sleeping-agent-session'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import {
   getRuntimeEnvironmentIdForWorktree,
@@ -38,8 +38,8 @@ import {
 import { agentKindToTuiAgent } from '../../../shared/agent/agent-kind'
 import { repoIsRemote } from '../../../shared/agent/agent-launch-remote'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat-session-options'
+import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/native-chat-session-option-defaults'
+import type { SessionOptionValue } from '../../../shared/native-chat/native-chat-session-options'
 import { createSequencedSetupAgentCommands } from '../../../shared/setup-agent-sequencing'
 import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup-runner-command'
 import { isTuiAgent } from '../../../shared/tui-agent-config'
@@ -58,7 +58,7 @@ import type {
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
 } from '../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/workspace-scope'
 import type { AgentStartedTelemetry } from './agent-started-telemetry'
 import {
   folderWorkspaceActivationBlocked,

@@ -13,7 +13,7 @@ import {
   isPassiveCompletedHibernationEvidence,
   recordPaneIsOwnedByPreservedPane
 } from '../components/terminal-pane/sleeping-agent-pane-ownership'
-import { resumeSleepingAgentSessionsForWorktree } from './resume-sleeping-agent-session'
+import { resumeSleepingAgentSessionsForWorktree } from '../components/terminal-workspace/resume-sleeping-agent-session'
 
 type BackgroundSleepingAgentWakeDispatcherOptions = {
   isWorkspaceSessionReady?: () => boolean
