@@ -4,7 +4,7 @@ import type {
   SessionOptionDescriptor,
   SessionOptionDisabledReason,
   SessionOptionSelectChoice
-} from '../../../../shared/native-chat-session-options'
+} from '../../../../shared/native-chat/native-chat-session-options'
 
 export function nativeChatSessionOptionLabel(descriptor: SessionOptionDescriptor): string {
   switch (descriptor.id) {

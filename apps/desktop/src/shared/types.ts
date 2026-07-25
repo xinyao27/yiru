@@ -36,7 +36,7 @@ import type { KeybindingOverrides, TerminalShortcutPolicy } from './keybindings'
 import type { LanguageServerSettings } from './language-server'
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
 import type { LoaderStyle } from './loader-style'
-import type { PersistedNativeChatSessionOptions } from './native-chat-session-options'
+import type { PersistedNativeChatSessionOptions } from './native-chat/native-chat-session-options'
 import type {
   GlobalWindowsRuntimeDefault,
   LocalWindowsRuntimePreference

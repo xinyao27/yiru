@@ -5,7 +5,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { emitNativeChatSkillDiscovery } from '@/components/native-chat/native-chat-telemetry'
 import { callRuntimeRpc } from '@/runtime/rpc-client'
 
-import { getNativeChatAgentProfile } from '../../../../shared/native-chat-agent-profiles'
+import { getNativeChatAgentProfile } from '../../../../shared/native-chat/native-chat-agent-profiles'
 import type { DiscoveredSkill, SkillDiscoveryResult } from '../../../../shared/skills'
 import { useAppStore } from '../../store'
 import {

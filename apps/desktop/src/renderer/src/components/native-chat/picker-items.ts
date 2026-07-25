@@ -1,4 +1,4 @@
-import type { SlashCommandSuggestion } from '../../../../shared/native-chat-slash-commands'
+import type { SlashCommandSuggestion } from '../../../../shared/native-chat/native-chat-slash-commands'
 import {
   isSafeDisplayCharacter,
   stripUnsafeDisplayCharacters

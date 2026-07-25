@@ -4,7 +4,7 @@ import {
   type CatalogMidSessionApply,
   type CatalogModel
 } from '../../../../shared/agent/agent-session-option-catalog'
-import type { SessionOptionValue } from '../../../../shared/native-chat-session-options'
+import type { SessionOptionValue } from '../../../../shared/native-chat/native-chat-session-options'
 import type { NativeChatSessionOptionRecord } from './session-option-cache'
 import {
   isSessionOptionAgentPickerCommand,

@@ -21,7 +21,7 @@ import type {
   SessionOptionDescriptor,
   SessionOptionsSurface,
   SessionOptionValue
-} from '../../../../shared/native-chat-session-options'
+} from '../../../../shared/native-chat/native-chat-session-options'
 import {
   nativeChatModelPillLabel,
   nativeChatOptionsPillLabel,

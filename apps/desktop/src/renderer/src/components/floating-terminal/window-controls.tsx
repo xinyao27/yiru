@@ -16,7 +16,7 @@ import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 import { useAppStore } from '@/store'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat-session-option-defaults'
+import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/native-chat-session-option-defaults'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv

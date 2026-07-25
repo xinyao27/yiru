@@ -3,7 +3,7 @@ import type { AgentType } from '@yiru/workbench-model/agent'
 import type {
   SessionOptionValue,
   SessionOptionValueSource
-} from '../../../../shared/native-chat-session-options'
+} from '../../../../shared/native-chat/native-chat-session-options'
 import { setBoundedScopeCacheEntry } from './composer-scope-cache'
 
 export type TrackedNativeChatSessionOption = {

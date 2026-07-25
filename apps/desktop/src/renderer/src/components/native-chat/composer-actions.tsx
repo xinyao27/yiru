@@ -7,7 +7,7 @@ import { translate } from '@/i18n/i18n'
 import type {
   SessionOptionDescriptor,
   SessionOptionsSurface
-} from '../../../../shared/native-chat-session-options'
+} from '../../../../shared/native-chat/native-chat-session-options'
 import { NativeChatSessionOptionPickers } from './session-option-pickers'
 
 export type NativeChatComposerActionsProps = {

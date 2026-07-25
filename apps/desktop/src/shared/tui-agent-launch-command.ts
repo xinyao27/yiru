@@ -1,5 +1,5 @@
 import { resolveAgentSessionOptionLaunch } from './agent/agent-session-option-launch'
-import type { SessionOptionValue } from './native-chat-session-options'
+import type { SessionOptionValue } from './native-chat/native-chat-session-options'
 import { getTuiAgentLaunchCommand, TUI_AGENT_CONFIG } from './tui-agent-config'
 import {
   planAgentCliArgsSuffix,

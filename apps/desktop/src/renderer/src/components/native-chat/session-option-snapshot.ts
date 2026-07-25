@@ -11,7 +11,7 @@ import type {
   SessionOptionDescriptor,
   SessionOptionSelectChoice,
   SessionOptionValue
-} from '../../../../shared/native-chat-session-options'
+} from '../../../../shared/native-chat/native-chat-session-options'
 import type {
   NativeChatSessionOptionRecord,
   TrackedNativeChatSessionOption

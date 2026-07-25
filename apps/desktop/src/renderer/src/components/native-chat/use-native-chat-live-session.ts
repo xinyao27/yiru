@@ -7,8 +7,8 @@ import {
 } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat-agent-profiles'
-import { surfaceSkillInvocationUserTurns } from '../../../../shared/native-chat-command-envelope'
+import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat/native-chat-agent-profiles'
+import { surfaceSkillInvocationUserTurns } from '../../../../shared/native-chat/native-chat-command-envelope'
 import { useAppStore } from '../../store'
 import {
   applyAppends,

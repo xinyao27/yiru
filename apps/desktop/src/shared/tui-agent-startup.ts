@@ -5,7 +5,7 @@ import { inlineAgentDraftFitsPlatform } from './agent/agent-draft-platform-limit
 export { buildAgentResumeStartupPlan } from '@yiru/workbench-model/agent'
 import type { StartupCommandDelivery } from './codex-startup-delivery'
 import { planHermesStartupQuery } from './hermes-startup-query'
-import type { SessionOptionValue } from './native-chat-session-options'
+import type { SessionOptionValue } from './native-chat/native-chat-session-options'
 import { buildSleepingAgentLaunchConfig } from './sleeping-agent-launch-config'
 import { TUI_AGENT_CONFIG } from './tui-agent-config'
 import { resolveAgentLaunchCommand } from './tui-agent-launch-command'

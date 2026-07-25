@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test'
 
-import { getNativeChatAgentProfile } from '../../../../shared/native-chat-agent-profiles'
+import { getNativeChatAgentProfile } from '../../../../shared/native-chat/native-chat-agent-profiles'
 import type { DiscoveredSkill } from '../../../../shared/skills'
 import {
   applyPickerSuggestion,
