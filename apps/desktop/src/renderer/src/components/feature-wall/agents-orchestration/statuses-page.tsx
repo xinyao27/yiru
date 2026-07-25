@@ -10,6 +10,8 @@ import { cn } from '@/lib/class-names'
 
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
 
+import './orchestration.css'
+
 type ClaudeActivity = { kind: 'tool'; tool: string; arg: string } | { kind: 'msg'; text: ReactNode }
 
 const CLAUDE_ACTIVITIES: readonly ClaudeActivity[] = [

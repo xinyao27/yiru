@@ -87,10 +87,15 @@ export function RichMarkdownSearchBar({
     : toggleReplaceLabel
 
   return (
-    <div className="rich-markdown-search" onKeyDown={(event) => event.stopPropagation()}>
+    <div
+      // Why: overlay the editor like Monaco's find widget instead of occupying
+      // layout space — otherwise opening cmd+f shifts the document content down.
+      className="border-border bg-background absolute top-2 right-3 z-20 flex w-fit max-w-[min(calc(100%-24px),520px)] items-stretch gap-0.5 border py-1 pr-1 pl-0.5"
+      onKeyDown={(event) => event.stopPropagation()}
+    >
       <Button
         type="button"
-        variant="ghost"
+        variant="quiet"
         size="icon-xs"
         onMouseDown={keepSearchFocus}
         onClick={onToggleReplaceMode}
@@ -100,7 +105,10 @@ export function RichMarkdownSearchBar({
           'Toggle replace'
         )}
         aria-expanded={isReplaceMode}
-        className="rich-markdown-search-toggle"
+        // Why: the expand toggle spans both rows on the left like the source
+        // editor's find widget, so it stays vertically centered across the
+        // find/replace stack.
+        className="h-auto w-4 min-w-4 self-stretch p-0"
       >
         {isReplaceMode ? (
           <ChevronDown weight="regular" size={14} />
@@ -108,9 +116,9 @@ export function RichMarkdownSearchBar({
           <ChevronRight weight="regular" size={14} />
         )}
       </Button>
-      <div className="rich-markdown-search-rows">
-        <div className="rich-markdown-search-row">
-          <div className="rich-markdown-search-field">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex min-w-0 items-center">
+          <div className="border-ring bg-background flex w-[240px] min-w-0 flex-initial items-center gap-px border pr-0.5">
             <Input
               ref={searchInputRef}
               value={query}
@@ -135,7 +143,7 @@ export function RichMarkdownSearchBar({
                 'auto.components.editor.RichMarkdownSearchBar.98b89276f3',
                 'Find in rich editor'
               )}
-              className="rich-markdown-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
+              className="h-7 min-w-0 flex-1 !border-0 bg-transparent px-2 text-[13px] leading-none focus-visible:!border-0"
               aria-label={translate(
                 'auto.components.editor.RichMarkdownSearchBar.158c645829',
                 'Find in rich markdown editor'
@@ -157,7 +165,7 @@ export function RichMarkdownSearchBar({
                 'auto.components.editor.RichMarkdownSearchBar.482b637099',
                 'Match case'
               )}
-              className="rich-markdown-search-option"
+              className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground h-[22px] w-[22px] min-w-[22px] flex-none border border-transparent p-0 hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)] data-[active=true]:border-[color-mix(in_srgb,var(--foreground)_20%,transparent)] data-[active=true]:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
             >
               <CaseSensitive size={14} />
             </Button>
@@ -177,19 +185,19 @@ export function RichMarkdownSearchBar({
                 'auto.components.editor.RichMarkdownSearchBar.68d090241d',
                 'Match whole word'
               )}
-              className="rich-markdown-search-option"
+              className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground h-[22px] w-[22px] min-w-[22px] flex-none border border-transparent p-0 hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)] data-[active=true]:border-[color-mix(in_srgb,var(--foreground)_20%,transparent)] data-[active=true]:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
             >
               <WholeWord size={14} />
             </Button>
           </div>
-          <div className="rich-markdown-search-status">
+          <div className="text-muted-foreground min-w-0 flex-none px-1.5 text-xs leading-none whitespace-nowrap tabular-nums">
             {query && noMatches
               ? translate('auto.components.editor.RichMarkdownSearchBar.a86958d508', 'No results')
               : `${noMatches ? 0 : activeMatchIndex + 1}/${matchCount}`}
           </div>
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-xs"
             onMouseDown={keepSearchFocus}
             onClick={() => onMoveToMatch(-1)}
@@ -202,13 +210,13 @@ export function RichMarkdownSearchBar({
               'auto.components.editor.RichMarkdownSearchBar.32ae8d7d57',
               'Previous match'
             )}
-            className="rich-markdown-search-button"
+            className="h-[22px] w-[22px] min-w-[22px] p-0"
           >
             <ChevronUp weight="regular" size={14} />
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-xs"
             onMouseDown={keepSearchFocus}
             onClick={() => onMoveToMatch(1)}
@@ -221,14 +229,14 @@ export function RichMarkdownSearchBar({
               'auto.components.editor.RichMarkdownSearchBar.f7bcecbe26',
               'Next match'
             )}
-            className="rich-markdown-search-button"
+            className="h-[22px] w-[22px] min-w-[22px] p-0"
           >
             <ChevronDown weight="regular" size={14} />
           </Button>
-          <div className="rich-markdown-search-divider" />
+          <div className="bg-border mx-0.5 h-4 w-px" />
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-xs"
             onMouseDown={keepSearchFocus}
             onClick={onClose}
@@ -240,14 +248,14 @@ export function RichMarkdownSearchBar({
               'auto.components.editor.RichMarkdownSearchBar.de68b75bde',
               'Close search'
             )}
-            className="rich-markdown-search-button"
+            className="h-[22px] w-[22px] min-w-[22px] p-0"
           >
             <X weight="regular" size={14} />
           </Button>
         </div>
         {isReplaceMode ? (
-          <div className="rich-markdown-search-row">
-            <div className="rich-markdown-search-field">
+          <div className="flex min-w-0 items-center">
+            <div className="border-ring bg-background flex w-[240px] min-w-0 flex-initial items-center gap-px border pr-0.5">
               <Input
                 value={replaceQuery}
                 onChange={(event) => onReplaceQueryChange(event.target.value)}
@@ -266,7 +274,7 @@ export function RichMarkdownSearchBar({
                   'auto.components.editor.RichMarkdownSearchBar.fd97c7e585',
                   'Replace'
                 )}
-                className="rich-markdown-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
+                className="h-7 min-w-0 flex-1 !border-0 bg-transparent px-2 text-[13px] leading-none focus-visible:!border-0"
                 aria-label={translate(
                   'auto.components.editor.RichMarkdownSearchBar.44682b4159',
                   'Replace in rich markdown editor'
@@ -276,7 +284,7 @@ export function RichMarkdownSearchBar({
             </div>
             <Button
               type="button"
-              variant="ghost"
+              variant="quiet"
               size="icon-xs"
               onMouseDown={keepSearchFocus}
               onClick={onReplaceCurrent}
@@ -290,13 +298,13 @@ export function RichMarkdownSearchBar({
                 'auto.components.editor.RichMarkdownSearchBar.fd97c7e585',
                 'Replace'
               )}
-              className="rich-markdown-search-button"
+              className="h-[22px] w-[22px] min-w-[22px] p-0"
             >
               <Replace size={14} />
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="quiet"
               size="icon-xs"
               onMouseDown={keepSearchFocus}
               onClick={onReplaceAll}
@@ -313,7 +321,7 @@ export function RichMarkdownSearchBar({
                 'auto.components.editor.RichMarkdownSearchBar.c2884f5e95',
                 'Replace all'
               )}
-              className="rich-markdown-search-button"
+              className="h-[22px] w-[22px] min-w-[22px] p-0"
             >
               <ReplaceAll weight="regular" size={14} />
             </Button>

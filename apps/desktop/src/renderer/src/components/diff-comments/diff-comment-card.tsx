@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
+import './diff-comment-styles.css'
+
 // Why: the saved-note card lives inside a Monaco view zone's DOM node.
 // useDiffCommentDecorator creates a React root per zone and renders this
 // component into it so we can use normal lucide icons and JSX instead of

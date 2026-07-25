@@ -1,0 +1,184 @@
+/* Monaco vendor overrides — Monaco ships its own DOM/class structure that we
+   don't control, so these rules patch specific upstream layout and behavior
+   bugs rather than styling app chrome. Colocated with the editor feature that
+   mounts Monaco (see monaco-setup.ts, which imports this file alongside
+   Monaco's own vendor CSS). */
+
+/* ── Vendor override: find widget ── */
+
+/* Why: ensure Monaco find widget layout is not reversed. */
+.monaco-editor .find-widget,
+.monaco-editor .find-widget .monaco-inputbox,
+.monaco-editor .find-widget .matchesCount {
+  direction: ltr !important;
+  flex-direction: row !important;
+}
+
+.monaco-editor .find-widget .button,
+.monaco-editor .find-widget .monaco-button,
+.monaco-editor .find-widget .monaco-find-input .controls .button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+  line-height: normal !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  border: none !important;
+  transition: none !important;
+}
+
+/* Why: the expand/collapse toggle (the chevron on the far left) is positioned
+   absolutely and relies on Monaco's default height:100% to vertically center
+   its icon over the find row. The generic .button override above forces a fixed
+   20px height, which pins the chevron to the top. Restore Monaco's full-height
+   18px toggle so the chevron centers like the stock find widget. */
+.monaco-editor .find-widget .button.toggle {
+  width: 18px !important;
+  height: 100% !important;
+  top: 0 !important;
+}
+
+.monaco-editor .find-widget .button > .codicon,
+.monaco-editor .find-widget .button > i {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Why: Monaco's find-widget button tooltips (Close, Find in Selection, etc.)
+   render inside a `.context-view` wrapper → `.workbench-hover-container` →
+   `.workbench-hover.compact`, positioned above the target button. The wrapper's
+   bounding box (z-index 2576, `pointer-events: auto`) overlaps the button hit
+   area, so as the tooltip appears it fires `mouseleave` on the button → 200ms
+   debounce → hover disposes → mouse is again "over" the button → `mouseover`
+   re-fires a new tooltip → loop. The visible effect is an infinitely flashing
+   tooltip that also blocks clicks on the button beneath it. The overlap is
+   only reliably reproducible when the right sidebar is open, because the find
+   widget's x-position shifts the wrapper onto the button rect; with the
+   sidebar closed the wrapper often lands slightly offset and doesn't intercept.
+
+   These are compact tooltips (`HoverStyle.Pointer` → `.workbench-hover.compact`)
+   configured with `hideOnHover: true`, so the CompositeMouseTracker only tracks
+   the target element — not the wrapper. Making the entire wrapper chain
+   non-interactive breaks the overlap feedback loop without affecting tracker
+   logic, keyboard focus traps, or interactive markdown hovers (which are never
+   `.compact`). The `:has()` selector ensures we only disable pointer events on
+   context-views that actually contain a compact hover, leaving menus, dropdown
+   popups and other context-view consumers untouched. */
+.context-view:has(> .workbench-hover-container > .workbench-hover.compact),
+.workbench-hover-container:has(> .workbench-hover.compact) {
+  pointer-events: none;
+}
+
+/* Why: compact hovers for simple label strings (e.g. "Find in Selection (⌥⌘L)")
+   get `white-space: pre-wrap` inline-set by Monaco, so when the tooltip lands
+   near the viewport edge its max-width clamps and the label wraps to 2–3 lines,
+   pushing the tooltip down over the find-widget buttons. These labels are
+   single-line by design; forcing nowrap keeps the tooltip on one line and lets
+   the positioning logic flip/shift as needed to fit. Only applies to compact
+   hovers — markdown hovers still wrap normally. */
+.workbench-hover.compact .hover-contents {
+  white-space: nowrap !important;
+}
+
+/* ── Vendor override: links, search highlight, peek preview ── */
+
+/* Why: Monaco's generated select-description links bypass renderer primitives. */
+.monaco-select-box-dropdown-container
+  > .select-box-details-pane
+  > .select-box-description-markdown
+  a:focus-visible {
+  outline: none !important;
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.monaco-editor .monaco-search-result-highlight {
+  background: color-mix(in srgb, var(--warning, #f59e0b) 34%, transparent);
+  border-radius: 3px;
+}
+
+.monaco-editor .monaco-markdown-doc-link {
+  color: #58a6ff !important;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 2px;
+}
+
+.monaco-editor .monaco-import-navigation-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  text-underline-offset: 2px;
+}
+
+/* Why: Monaco's faded scrollbar uses the class `invisible`, which collides with
+   Tailwind's `.invisible` utility (visibility: hidden) — so also restore visibility. */
+.monaco-editor
+  .reference-zone-widget
+  .monaco-scrollable-element
+  > .scrollbar.vertical.invisible.fade {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Why: Monaco leaves the peek preview container `inline-block` and only sizes the
+   editor child, so the container shrink-wraps the child in BOTH axes while the
+   inherited automaticLayout ResizeObserver measures the container — a feedback
+   loop that ratchets the preview to blank at fractional zoom/DPI (issue #7405).
+   Pinning both dimensions to the splitview slot severs the loop. */
+.monaco-editor .reference-zone-widget .preview.inline {
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Git conflict decorations (rendered via monaco-conflict-decorations.ts) ── */
+
+.monaco-editor .yiru-conflict-marker-line {
+  background: color-mix(in srgb, var(--destructive) 12%, transparent);
+}
+
+.monaco-editor .yiru-conflict-section-line {
+  border-left: 3px solid transparent;
+}
+
+.monaco-editor .yiru-conflict-current-line {
+  background: color-mix(in srgb, var(--git-decoration-modified) 12%, transparent);
+  border-left-color: color-mix(in srgb, var(--git-decoration-modified) 72%, transparent);
+}
+
+.monaco-editor .yiru-conflict-base-line {
+  background: color-mix(in srgb, var(--muted-foreground) 7%, transparent);
+  border-left-color: color-mix(in srgb, var(--muted-foreground) 36%, transparent);
+}
+
+.monaco-editor .yiru-conflict-incoming-line {
+  background: color-mix(in srgb, var(--git-decoration-renamed) 11%, transparent);
+  border-left-color: color-mix(in srgb, var(--git-decoration-renamed) 68%, transparent);
+}
+
+.monaco-editor .yiru-conflict-line-decoration {
+  width: 4px !important;
+  margin-left: 3px;
+  background: var(--destructive);
+  border-radius: 999px;
+}
+
+.monaco-editor .yiru-conflict-margin {
+  background: color-mix(in srgb, var(--destructive) 8%, transparent);
+}
+
+.monaco-editor .yiru-conflict-marker-label {
+  color: var(--destructive);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  font-style: normal;
+  opacity: 0.92;
+}

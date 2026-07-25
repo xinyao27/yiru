@@ -23,13 +23,14 @@ export function RichMarkdownToolbarButton({
         <TooltipTrigger
           render={
             <Button
-              variant="ghost"
+              variant="quiet"
               size="xs"
               type="button"
               className={cn(
-                'p-0 h-auto w-auto focus-visible:bg-accent',
-                'rich-markdown-toolbar-button',
-                active && 'is-active'
+                'inline-flex h-7 min-w-7 shrink-0 items-center justify-center border border-transparent px-2 text-xs font-semibold',
+                'hover:border-[color-mix(in_srgb,var(--border)_82%,transparent)]',
+                active &&
+                  'border-[color-mix(in_srgb,var(--border)_82%,transparent)] bg-accent text-foreground'
               )}
               aria-label={label}
               onMouseDown={(event) => event.preventDefault()}

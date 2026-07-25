@@ -24,6 +24,8 @@ import {
   type RowState
 } from './orchestration-types'
 
+import './orchestration.css'
+
 // Children start pending (no agent row visible) and reveal as the orchestrator
 // dispatches a message to them. This mirrors the "agents arrive when assigned"
 // reading the design wants.

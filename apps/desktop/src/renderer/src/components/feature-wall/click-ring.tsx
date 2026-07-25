@@ -2,6 +2,8 @@ import type { JSX } from 'react'
 
 import { cn } from '@/lib/class-names'
 
+import './click-ring.css'
+
 export function FeatureWallClickRing(props: { className?: string }): JSX.Element {
   return (
     <span

@@ -29,6 +29,8 @@ import {
 } from './contextual-tour-floating-position'
 import { ContextualTourProgressDots } from './contextual-tour-progress-dots'
 
+import './contextual-tour-overlay-surface.css'
+
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 const SKIP_BUTTON_SELECTOR = 'button[aria-label^="Skip"], button[aria-label="Dismiss tour"]'

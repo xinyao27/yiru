@@ -162,7 +162,7 @@ function LinkEditInput({
         'Paste or type a link…'
       )}
       variant="chrome-free"
-      className="rich-markdown-link-input"
+      className="text-foreground placeholder:text-muted-foreground focus-visible:bg-accent w-[280px] px-2 py-1 font-mono text-[13px]"
     />
   )
 }
@@ -290,7 +290,10 @@ export function RichMarkdownLinkBubble({
   const bubble = (
     <div
       ref={bubbleRef}
-      className="rich-markdown-link-bubble"
+      // Why: `rich-markdown-link-bubble` stays a stable hook for the
+      // `-webkit-app-region: no-drag` Electron property in
+      // rich-markdown-content.css — there is no Tailwind utility for it.
+      className="rich-markdown-link-bubble bg-popover text-popover-foreground fixed z-[60] flex items-center gap-0.5 border border-[color-mix(in_srgb,var(--border)_76%,transparent)] px-1.5 py-1"
       data-rich-markdown-link-bubble=""
       data-rich-markdown-link-bubble-owner={ownerId}
       style={positionStyle}
@@ -328,7 +331,10 @@ export function RichMarkdownLinkBubble({
         <LinkEditInput initialHref={linkBubble.href} onSave={onSave} onCancel={onEditCancel} />
       ) : (
         <>
-          <span className="rich-markdown-link-url" title={linkBubble.href}>
+          <span
+            className="text-muted-foreground max-w-[240px] truncate px-1.5 py-0.5 font-mono text-xs"
+            title={linkBubble.href}
+          >
             {linkBubble.href.length > 40 ? `${linkBubble.href.slice(0, 40)}…` : linkBubble.href}
           </span>
           <LinkBubbleAction
@@ -397,9 +403,9 @@ function LinkBubbleAction({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="icon-xs"
-            className="rich-markdown-link-button"
+            className="h-6 w-6 min-w-6 border-0 bg-transparent p-0"
             aria-label={label}
             disabled={disabled}
             onClick={onClick}

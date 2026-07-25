@@ -7,6 +7,8 @@ import { cn } from '@/lib/class-names'
 
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
 
+import './orchestration.css'
+
 type Phase = 'reset' | 'expanded' | 'targeted' | 'swapped'
 
 const EXPAND_DELAY = 2200

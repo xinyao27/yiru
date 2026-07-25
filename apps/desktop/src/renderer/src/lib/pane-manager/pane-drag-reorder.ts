@@ -1,3 +1,5 @@
+import { cn } from '@/lib/class-names'
+
 import { detachPaneFromTree, findPaneChildren, insertPaneNextTo } from './pane-tree-ops'
 import type {
   DropZone,
@@ -8,6 +10,15 @@ import type {
   PaneExternalDropTarget,
   PaneStyleOptions
 } from './types'
+
+/** Rectilinear drop-target chrome: a translucent "area" fill, or a solid
+ * accent bar for an "insertion" point between panes/tabs. */
+export function paneDropOverlayClassName(kind: 'area' | 'insertion'): string {
+  return cn(
+    'pointer-events-none absolute z-[9999]',
+    kind === 'insertion' ? 'bg-chart-2' : 'border-blue-500/50 bg-blue-500/20 border-2'
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Drag-to-reorder panes
@@ -139,7 +150,7 @@ export function handlePaneDrop(
 export function showDropOverlay(state: DragReorderState): void {
   if (!state.dropOverlay) {
     const overlay = document.createElement('div')
-    overlay.className = 'pane-drop-overlay'
+    overlay.className = paneDropOverlayClassName('area')
     document.body.appendChild(overlay)
     state.dropOverlay = overlay
   }

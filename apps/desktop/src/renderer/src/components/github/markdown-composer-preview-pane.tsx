@@ -16,7 +16,7 @@ export function GitHubMarkdownComposerPreviewPane({
   return (
     <div
       className={cn(
-        'github-markdown-composer-preview scrollbar-sleek max-h-[360px] overflow-y-auto',
+        'scrollbar-sleek max-h-[360px] overflow-y-auto px-3.5 pt-3 pb-[18px]',
         minHeightClassName
       )}
     >

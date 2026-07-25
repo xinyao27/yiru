@@ -17,6 +17,8 @@ import {
 import { FeatureTourTerminalFrame } from './feature-tour-terminal-frame'
 import { FeatureTourWorkspaceCard } from './feature-tour-workspace-card'
 
+import './feature-tour-preview.css'
+
 export { FEATURE_TOUR_PREVIEW_COPY } from './feature-tour-preview-copy'
 export type { FeatureTourPreviewFrameCopy } from './feature-tour-preview-copy'
 

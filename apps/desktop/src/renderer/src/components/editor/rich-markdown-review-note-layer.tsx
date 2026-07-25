@@ -54,7 +54,10 @@ export function RichMarkdownReviewNoteLayer({
 }: RichMarkdownReviewNoteLayerProps): React.JSX.Element {
   return (
     <div
-      className="rich-markdown-review-note-layer"
+      // Why: the review-rail's note cards reserve room via the review-rail-
+      // expanded coupling in rich-markdown-content.css; this layer's own box
+      // model is plain Tailwind.
+      className="pointer-events-none absolute top-0 right-4 z-30 w-[clamp(220px,24%,250px)]"
       aria-label={translate(
         'auto.components.editor.RichMarkdownReviewNoteLayer.3ababd949d',
         'Review notes'
@@ -64,8 +67,12 @@ export function RichMarkdownReviewNoteLayer({
         <div
           key={comment.id}
           data-rich-markdown-review-note-id={comment.id}
+          // Why: `rich-markdown-review-note-card` plus `is-active`/`is-attention`
+          // stay stable hooks for the highlight/attention treatment painted on
+          // the nested `.yiru-diff-comment-card` in rich-markdown-content.css —
+          // DiffCommentCard is a separate component with no shared JSX here.
           className={cn(
-            'rich-markdown-review-note-card',
+            'rich-markdown-review-note-card absolute right-0 w-full pointer-events-auto',
             activeCommentId === comment.id && 'is-active',
             attentionCommentId === comment.id && 'is-attention'
           )}
@@ -91,10 +98,10 @@ export function RichMarkdownReviewNoteLayer({
             headerActions={
               <>
                 <Button
-                  variant="ghost"
+                  variant="quiet"
                   size="xs"
                   type="button"
-                  className="rich-markdown-review-note-action focus-visible:bg-accent h-auto border-0 p-0"
+                  className="bg-background inline-flex h-[26px] w-[26px] items-center justify-center border border-[color-mix(in_srgb,var(--border)_76%,transparent)] p-0 disabled:cursor-default disabled:opacity-45"
                   title={
                     copiedCommentId === comment.id
                       ? translate(
@@ -149,7 +156,7 @@ export function RichMarkdownReviewNoteLayer({
                     }
                   ]}
                   targetModeLabel="This note"
-                  triggerClassName="rich-markdown-review-note-action"
+                  triggerClassName="inline-flex h-[26px] w-[26px] items-center justify-center border border-[color-mix(in_srgb,var(--border)_76%,transparent)] bg-background p-0 disabled:cursor-default disabled:opacity-45"
                   disabledTooltip="Note already sent"
                   onDelivered={onDelivered}
                 />

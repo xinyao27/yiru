@@ -3,6 +3,7 @@ import {
   handlePaneDrop,
   hideDropOverlay,
   isPaneDropNoOp,
+  paneDropOverlayClassName,
   showDropOverlay
 } from './pane-drag-reorder'
 import type { DropZone, ManagedPaneInternal, PaneExternalDropTarget } from './types'
@@ -243,6 +244,7 @@ function resolveDropZone(clientX: number, clientY: number, rect: DOMRect): DropZ
 function positionDropOverlay(overlay: HTMLElement, rect: DOMRect, zone: DropZone): void {
   overlay.style.display = ''
   overlay.dataset.paneDropOverlayKind = 'area'
+  overlay.className = paneDropOverlayClassName('area')
   const scrollX = window.scrollX
   const scrollY = window.scrollY
   const halfWidth = rect.width / 2
@@ -256,8 +258,10 @@ function positionDropOverlay(overlay: HTMLElement, rect: DOMRect, zone: DropZone
 
 function positionExternalDropOverlay(overlay: HTMLElement, target: PaneExternalDropTarget): void {
   const rect = target.rect
+  const kind = target.overlayKind ?? 'area'
   overlay.style.display = ''
-  overlay.dataset.paneDropOverlayKind = target.overlayKind ?? 'area'
+  overlay.dataset.paneDropOverlayKind = kind
+  overlay.className = paneDropOverlayClassName(kind)
   overlay.style.left = `${rect.left + window.scrollX}px`
   overlay.style.top = `${rect.top + window.scrollY}px`
   overlay.style.width = `${rect.width}px`

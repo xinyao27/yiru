@@ -230,11 +230,16 @@ export function RichMarkdownCodeBlock({
   )
 
   return (
-    <NodeViewWrapper className="rich-markdown-code-block-wrapper">
+    <NodeViewWrapper
+      // Why: `rich-markdown-code-block-wrapper` stays a stable hook for the
+      // syntax-highlight color rules in rich-markdown-content.css — the hljs
+      // spans are injected by CodeBlockLowlight's decoration plugin, not JSX.
+      className="group rich-markdown-code-block-wrapper relative my-[0.75em] border border-[color-mix(in_srgb,var(--foreground)_6%,transparent)] bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
+    >
       {/* Why: TipTap NodeView keeps an in-flow native select (contentEditable=false)
           so language changes do not open a portaled Select that steals ProseMirror focus. */}
       <select
-        className="rich-markdown-code-block-lang focus-visible:border-ring outline-none"
+        className="text-muted-foreground focus-visible:border-ring absolute top-1.5 right-1.5 z-[1] cursor-pointer border border-[color-mix(in_srgb,var(--foreground)_10%,transparent)] bg-[color-mix(in_srgb,var(--background)_80%,transparent)] px-1 py-px font-mono text-[11px] outline-none"
         contentEditable={false}
         value={language}
         onChange={onChange}
@@ -250,11 +255,11 @@ export function RichMarkdownCodeBlock({
         ) : null}
       </select>
       <Button
-        variant="ghost"
+        variant="quiet"
         size="xs"
         ref={setCopyButtonRef}
         type="button"
-        className="code-block-copy-btn focus-visible:bg-accent h-auto border-0 p-0"
+        className="absolute top-1.5 right-[115px] z-[1] flex h-auto items-center justify-center border-0 bg-transparent p-0.5 opacity-0 transition-opacity duration-150 ease-linear group-hover:opacity-100"
         contentEditable={false}
         onClick={handleCopy}
         aria-label={translate(
@@ -281,7 +286,10 @@ export function RichMarkdownCodeBlock({
           through MermaidBlock's sanitized SVG path, so it must opt out of
           Mermaid HTML labels just like markdown preview to keep labels visible. */}
       {isMermaid && node.textContent.trim() && (
-        <div contentEditable={false} className="mermaid-preview">
+        <div
+          contentEditable={false}
+          className="border-t border-[color-mix(in_srgb,var(--foreground)_8%,transparent)] px-[18px] py-3"
+        >
           <MermaidBlock content={node.textContent.trim()} isDark={isDark} htmlLabels={false} />
         </div>
       )}

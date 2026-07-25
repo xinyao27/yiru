@@ -134,7 +134,12 @@ export function createRichMarkdownEditorConfig(params: EditorConfigParams): UseE
     contentType: 'markdown' as const,
     editorProps: {
       attributes: {
-        class: 'rich-markdown-editor',
+        // Why: `rich-markdown-editor` is a stable hook for descendant content
+        // typography in rich-markdown-content.css — Tiptap's rendered markdown
+        // has no JSX to carry those classes. This element's own box model is
+        // plain Tailwind since Tiptap owns this attribute string directly.
+        class:
+          'rich-markdown-editor min-h-full px-8 pt-6 pb-24 text-[calc(14px+(var(--editor-font-zoom-level,0)*1px))] leading-[1.7] outline-none',
         spellcheck: getRichMarkdownSpellcheckAttribute(richMarkdownSpellcheckEnabled)
       },
       handleDOMEvents: {

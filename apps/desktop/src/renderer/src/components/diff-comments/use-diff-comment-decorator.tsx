@@ -20,6 +20,8 @@ import { DiffCommentCard } from './diff-comment-card'
 import { getDiffCommentPopoverTop } from './diff-comment-popover-position'
 import { installDiffCommentZoneMouseDownStopper } from './diff-comment-zone-mouse-events'
 
+import './diff-comment-styles.css'
+
 // Why: Monaco glyph-margin *decorations* don't expose click events in a way
 // that lets us show a polished popover anchored to a line. So instead we own a
 // single absolutely-positioned "+" button inside the editor DOM node, and we

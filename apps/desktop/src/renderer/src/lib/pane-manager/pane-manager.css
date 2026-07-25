@@ -1,0 +1,136 @@
+/* ── Divider ──────────────────────────────────────────────
+   Created by pane-divider.ts, dragged by pane-divider-drag.ts. Thickness/hit-
+   size/extension are CSS custom properties written from JS (createDivider,
+   applyDividerStyles) so drag state and user-configured thickness can change
+   them without a re-render. Divider: only the hairline consumes flex space.
+   ::before expands the drag target over adjacent panes, while ::after paints
+   the visible line. */
+
+.pane-divider.is-vertical,
+.pane-divider.is-horizontal {
+  --divider-thickness: 1px;
+  --divider-hit-size: 9px;
+  /* Why: override stale HMR inline values from the former layout-width hit area. */
+  --divider-extension: calc(var(--divider-thickness) / 2) !important;
+  z-index: 15;
+  background: transparent !important;
+}
+
+.pane-divider::before {
+  content: '';
+  position: absolute;
+  background: transparent;
+}
+
+.pane-divider::after {
+  content: '';
+  position: absolute;
+  border-radius: 1px;
+  background: var(--yiru-terminal-divider-color, transparent);
+  transition: background 100ms ease;
+}
+
+.pane-divider.is-vertical::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--divider-hit-size);
+  transform: translateX(-50%);
+}
+
+.pane-divider.is-vertical {
+  width: var(--divider-thickness) !important;
+}
+
+.pane-divider.is-vertical::after {
+  /* Negative insets on the cross axis extend the line into perpendicular
+     divider hit zones so that intersecting splits visually connect (├ not |-). */
+  top: calc(-1 * var(--divider-extension, 5px));
+  bottom: calc(-1 * var(--divider-extension, 5px));
+  left: 50%;
+  width: var(--divider-thickness);
+  transform: translateX(-50%);
+}
+
+.pane-divider.is-horizontal {
+  height: var(--divider-thickness) !important;
+}
+
+.pane-divider.is-horizontal::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: var(--divider-hit-size);
+  transform: translateY(-50%);
+}
+
+.pane-divider.is-horizontal::after {
+  left: calc(-1 * var(--divider-extension, 5px));
+  right: calc(-1 * var(--divider-extension, 5px));
+  top: 50%;
+  height: var(--divider-thickness);
+  transform: translateY(-50%);
+}
+
+.pane-divider.is-vertical:hover::after,
+.pane-divider.is-vertical.is-dragging::after,
+.pane-divider.is-horizontal:hover::after,
+.pane-divider.is-horizontal.is-dragging::after {
+  background: var(
+    --yiru-terminal-divider-color-strong,
+    var(--yiru-terminal-divider-color, transparent)
+  );
+}
+
+/* ── Pane drag handle ─────────────────────────────────────
+   Created by pane-dom-creation.ts; attachPaneDrag/pane-drag-pointer.ts toggle
+   the state classes below on the root and the source pane's container. */
+
+.pane-drag-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  z-index: 10;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Three-dot ellipsis indicator */
+.pane-drag-handle::after {
+  content: '···';
+  font-size: 10px;
+  letter-spacing: 1px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Only show when hovering the handle itself, and only with multiple panes */
+.has-multiple-panes .pane-drag-handle {
+  pointer-events: auto;
+}
+
+.has-multiple-panes .pane-drag-handle:hover {
+  opacity: 1;
+}
+
+.pane-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Dim the source pane while dragging. Why: !important overrides the inline
+   opacity applyPaneOpacity() writes on every pane container. */
+.pane.is-drag-source {
+  opacity: 0.4 !important;
+}
+
+/* Suppress pointer events on terminals during pane drag so overlay works */
+.is-pane-dragging .pane {
+  pointer-events: none;
+}

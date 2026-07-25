@@ -28,18 +28,35 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 import { insertToggle } from './rich-markdown-slash-command-primitives'
 import { RichMarkdownToolbarButton } from './rich-markdown-toolbar-button'
+
+// Why: the GitHub markdown composer reuses this toolbar in two denser
+// contexts (a standalone comment box and a tabbed write/preview pane) that
+// need less padding and a quieter background than the full editor's chrome
+// row — an explicit variant beats a CSS descendant override reaching across
+// two unrelated feature folders.
+type RichMarkdownToolbarVariant = 'standalone' | 'composer' | 'composer-tabbed'
+
+const TOOLBAR_VARIANT_CLASS_NAMES: Record<RichMarkdownToolbarVariant, string> = {
+  standalone: 'min-h-10 px-3.5 py-1.5 bg-[color-mix(in_srgb,var(--background)_84%,transparent)]',
+  composer: 'min-h-10 px-2 py-1.5 bg-[color-mix(in_srgb,var(--background)_92%,transparent)]',
+  'composer-tabbed': 'min-h-[38px] px-2 py-1 bg-transparent'
+}
 
 type RichMarkdownToolbarProps = {
   editor: Editor | null
   onToggleLink: () => void
   onImagePick: () => void
+  variant?: RichMarkdownToolbarVariant
 }
 
 function Separator(): React.JSX.Element {
-  return <div className="rich-markdown-toolbar-separator" />
+  return (
+    <div className="h-[18px] w-px shrink-0 bg-[color-mix(in_srgb,var(--border)_72%,transparent)]" />
+  )
 }
 
 function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): React.JSX.Element {
@@ -54,10 +71,10 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
               <DropdownMenuTrigger
                 render={
                   <Button
-                    variant="ghost"
+                    variant="quiet"
                     size="xs"
                     type="button"
-                    className="rich-markdown-toolbar-button focus-visible:bg-accent h-auto w-auto p-0"
+                    className="inline-flex h-7 w-auto min-w-7 shrink-0 items-center justify-center border border-transparent px-2 hover:border-[color-mix(in_srgb,var(--border)_82%,transparent)]"
                     aria-label={label}
                     onMouseDown={(event) => event.preventDefault()}
                   >
@@ -100,10 +117,22 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
 export function RichMarkdownToolbar({
   editor,
   onToggleLink,
-  onImagePick
+  onImagePick,
+  variant = 'standalone'
 }: RichMarkdownToolbarProps): React.JSX.Element {
   return (
-    <div className="rich-markdown-editor-toolbar">
+    <div
+      className={cn(
+        'flex min-w-0 items-center gap-1.5',
+        'border-b border-[color-mix(in_srgb,var(--border)_72%,transparent)]',
+        // Why: on a narrow panel the fixed-size buttons would otherwise spill past
+        // the chrome row and overlap neighboring content; scroll like the tab
+        // strips instead of wrapping, which would break the TOC header's
+        // shared-row alignment. The bracket variants hide the scrollbar itself.
+        'overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar]:w-0',
+        TOOLBAR_VARIANT_CLASS_NAMES[variant]
+      )}
+    >
       <RichMarkdownToolbarButton
         active={false}
         label={translate('auto.components.editor.RichMarkdownToolbar.b462641ed2', 'Body text')}

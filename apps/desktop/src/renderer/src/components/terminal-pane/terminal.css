@@ -1,0 +1,124 @@
+/* ── xterm.js vendor patches ─────────────────────────────
+   Why: these fix real xterm.js/Chromium bugs (IME candidate position,
+   scrollbar jitter, viewport background, stray caret). Keep them CSS-only —
+   they patch a vendored stylesheet selector-for-selector, not app chrome. */
+
+/* Why: terminal internals manage focus themselves; suppress Chromium's native ring locally. */
+.pane-manager-root *,
+.pane-manager-root *::before,
+.pane-manager-root *::after {
+  border-color: transparent;
+  outline: none;
+}
+
+.pane-manager-root .xterm {
+  height: 100%;
+  width: 100%;
+}
+
+.pane-manager-root .xterm-viewport {
+  /* Why: xterm/VS Code keep the scrollbar gutter stable. `auto` lets Linux
+     DOM scrollbars appear/disappear, which can feed resize/reflow jitter. */
+  overflow-y: scroll;
+}
+
+/* xterm.css hard-codes the viewport background to #000 (for opaque macOS
+   scrollbars). On light-themed terminals at fractional-pixel positions (e.g.
+   the install terminals inside centered setup modals), that black layer
+   anti-aliases into a faint 1px line above/below the themed .xterm. Match
+   xterm's own selector so this also covers terminals mounted outside the pane
+   manager, and let the themed .xterm background show through; the viewport
+   reuses the canonical editor scrollbar rules in main.css. */
+.xterm:not(.allow-transparency) .xterm-viewport {
+  background-color: transparent;
+}
+
+/* Round the xterm DOM scrollbar thumb; xterm has no option for this, and its
+   default .xterm-slider has square corners. */
+.xterm .xterm-scrollable-element > .xterm-scrollbar > .xterm-slider {
+  border-radius: 4px;
+}
+
+/* xterm.css sets position:absolute;top:0 on .xterm-helpers but omits left,
+   leaving left:auto. In Electron's Blink, left:auto can resolve to a non-zero
+   value and offset the IME candidate window away from the cursor. Anchoring it
+   explicitly to 0 matches the intended layout and fixes the IME position. */
+.pane-manager-root .xterm .xterm-helpers {
+  left: 0;
+}
+
+.pane-manager-root .xterm .xterm-helper-textarea {
+  /* Why: Chromium can still paint the native caret for xterm's hidden helper
+     textarea on Windows, which shows up as a stale cursor during redraws. */
+  caret-color: transparent;
+}
+
+/* ── Pane focus flash ────────────────────────────────────
+   Triggered by focused-pane-rim-flash.ts adding/removing the class below. */
+
+.pane.pane-focus-rim-flash::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: 30;
+  pointer-events: none;
+  border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 68%, transparent);
+  border-radius: 2px;
+  animation: pane-focus-rim-flash 1.5s ease-out forwards;
+}
+
+@keyframes pane-focus-rim-flash {
+  0% {
+    opacity: 1;
+  }
+  24% {
+    opacity: 0.42;
+  }
+  46% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pane.pane-focus-rim-flash::before {
+    animation: none;
+  }
+}
+
+/* ── Attention overlay ───────────────────────────────────
+   Toggled via attention-subscriptions.ts setting/removing
+   [data-terminal-attention] on the pane container. */
+
+.pane[data-terminal-attention] .xterm-container::after {
+  content: '';
+  position: absolute;
+  inset: 0 4px 4px 0;
+  z-index: 5;
+  pointer-events: none;
+  border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 64%, transparent);
+  border-radius: 2px;
+}
+
+/* ── xterm-container geometry ────────────────────────────
+   Baseline xterm-container layout — padding is driven by CSS custom
+   properties so Ghostty-imported window-padding-x/y can be applied without
+   inline styles. The fallback 4px preserves the legacy default. */
+.xterm-container {
+  position: relative;
+  width: calc(100% - var(--pane-padding-x, 4px));
+  height: calc(100% - var(--pane-padding-y, 4px));
+  margin-top: var(--pane-padding-y, 4px);
+  margin-left: var(--pane-padding-x, 4px);
+}
+
+/* When a pane has a title, shift the terminal content down to make room.
+   The .pane container uses position: relative, so the absolutely-positioned
+   title bar occupies the top title-height pixels. Height is reduced by the
+   same amount to prevent overflow/clipping. */
+.pane[data-has-title] .xterm-container {
+  margin-top: var(--yiru-pane-title-height);
+  height: calc(100% - var(--yiru-pane-title-height)); /* match margin-top */
+}

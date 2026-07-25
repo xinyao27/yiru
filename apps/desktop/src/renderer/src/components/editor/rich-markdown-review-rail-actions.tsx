@@ -30,12 +30,12 @@ export function RichMarkdownReviewRailActions({
   onDelivered
 }: RichMarkdownReviewRailActionsProps): React.JSX.Element {
   return (
-    <div className="rich-markdown-review-rail-actions">
+    <div className="absolute top-3 right-3.5 z-[45] inline-flex items-center gap-1">
       <Button
-        variant="ghost"
+        variant="quiet"
         size="xs"
         type="button"
-        className="rich-markdown-review-rail-toggle focus-visible:bg-accent h-auto border-0 p-0"
+        className="bg-background aria-expanded:bg-accent aria-expanded:text-foreground inline-flex h-[26px] items-center justify-center gap-[5px] border border-[color-mix(in_srgb,var(--border)_76%,transparent)] px-2 text-[11px] font-semibold"
         aria-label={
           railOpen
             ? translate(
@@ -65,10 +65,10 @@ export function RichMarkdownReviewRailActions({
         <span>{noteCount}</span>
       </Button>
       <Button
-        variant="ghost"
+        variant="quiet"
         size="xs"
         type="button"
-        className="rich-markdown-review-rail-action focus-visible:bg-accent h-auto border-0 p-0"
+        className="bg-background inline-flex h-[26px] w-[26px] items-center justify-center border border-[color-mix(in_srgb,var(--border)_76%,transparent)] p-0 disabled:cursor-default disabled:opacity-45"
         title={
           notesCopied
             ? translate(
@@ -100,7 +100,7 @@ export function RichMarkdownReviewRailActions({
         groupId={worktreeId}
         modeIdParts={['markdown-notes', worktreeId, filePath, 'rail']}
         scopes={unsentScope}
-        triggerClassName="rich-markdown-review-rail-action"
+        triggerClassName="inline-flex h-[26px] w-[26px] items-center justify-center border border-[color-mix(in_srgb,var(--border)_76%,transparent)] bg-background p-0 disabled:cursor-default disabled:opacity-45"
         onDelivered={onDelivered}
       />
     </div>

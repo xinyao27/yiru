@@ -94,8 +94,8 @@ export default function MermaidViewer({
   }, [scrollCacheKey, content])
 
   return (
-    <div ref={rootRef} className="mermaid-viewer scrollbar-editor h-full min-h-0 overflow-auto">
-      <div className="mermaid-viewer-canvas">
+    <div ref={rootRef} className="bg-background scrollbar-editor h-full min-h-0 overflow-auto">
+      <div className="flex min-h-full items-start justify-center px-6 py-8 [&_.mermaid-block]:w-full [&_.mermaid-block_svg]:h-auto [&_.mermaid-block_svg]:w-full">
         {/* Why: DOMPurify's SVG profile strips <foreignObject> elements that
            mermaid uses for HTML labels. Force SVG-native <text> labels so
            they survive sanitization — same fix as the markdown preview path. */}

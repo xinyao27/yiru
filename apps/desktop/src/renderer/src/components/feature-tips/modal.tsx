@@ -37,6 +37,8 @@ import {
   trackYiruCliFeatureTipSetupResult
 } from './feature-tip-telemetry'
 
+import './feature-tips.css'
+
 const WAVEFORM_BAR_HEIGHTS = [30, 60, 90, 70, 100, 50, 80, 35, 65]
 
 function WorktreePromptTerm({ children }: { children: string }): JSX.Element {

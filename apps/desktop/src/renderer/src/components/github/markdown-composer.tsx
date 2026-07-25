@@ -36,6 +36,11 @@ import { useAppStore } from '@/store'
 
 import type { GitHubOwnerRepo } from '../../../../shared/types'
 
+// Why: `rich-markdown-editor` is a stable hook for the content typography in
+// rich-markdown-content.css — Tiptap owns the attributes.class string
+// directly, so this element's own box model is plain Tailwind alongside it.
+const COMPOSER_EDITOR = 'rich-markdown-editor px-3.5 pt-3 pb-[18px] text-[13px] leading-[1.55]'
+
 type GitHubMarkdownComposerProps = {
   value: string
   onChange: (value: string) => void
@@ -127,7 +132,7 @@ export function GitHubMarkdownComposer({
     contentType: 'markdown',
     editorProps: {
       attributes: {
-        class: cn('rich-markdown-editor github-markdown-composer-editor', minHeightClassName),
+        class: cn(COMPOSER_EDITOR, minHeightClassName),
         spellcheck: getRichMarkdownSpellcheckAttribute(richMarkdownSpellcheckEnabled)
       },
       handleKeyDown: (_view, event) => {
@@ -291,12 +296,13 @@ export function GitHubMarkdownComposer({
       editor={editor}
       onToggleLink={openLinkEditor}
       onImagePick={openImagePicker}
+      variant={isTabbed ? 'composer-tabbed' : 'composer'}
     />
   )
 
   const imageInputRow = imageInputOpen ? (
     <form
-      className="github-markdown-composer-image-row"
+      className="flex items-center gap-1.5 border-b border-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[color-mix(in_srgb,var(--muted)_38%,var(--background))] px-2 py-1.5"
       onSubmit={(event) => {
         event.preventDefault()
         insertImageUrl()
@@ -359,7 +365,7 @@ export function GitHubMarkdownComposer({
       variant="ghost"
       size="xs"
       type="button"
-      className="github-markdown-composer-attachment focus-visible:bg-accent h-auto border-0 p-0"
+      className="text-muted-foreground enabled:hover:text-foreground focus-visible:bg-accent flex h-auto w-full items-center gap-1.5 border-0 border-t border-[color-mix(in_srgb,var(--border)_72%,transparent)] px-3 py-2 text-left text-xs enabled:hover:bg-[color-mix(in_srgb,var(--accent)_40%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
       disabled={disabled}
       onClick={openImagePicker}
     >
@@ -377,8 +383,7 @@ export function GitHubMarkdownComposer({
     <div
       ref={rootRef}
       className={cn(
-        'github-markdown-composer relative overflow-hidden border border-input bg-background',
-        isTabbed && 'github-markdown-composer-tabbed',
+        'relative overflow-hidden border border-input bg-background',
         disabled && 'opacity-60',
         className
       )}

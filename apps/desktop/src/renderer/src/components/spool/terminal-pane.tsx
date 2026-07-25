@@ -244,7 +244,7 @@ export function SpoolTerminalPane({
   ])
 
   return (
-    <div className="pane-manager-root bg-background relative min-h-0 min-w-0 flex-1 overflow-hidden">
+    <div className="pane-manager-root bg-background relative !h-full min-h-0 !w-full min-w-0 flex-1 overflow-hidden">
       <div ref={containerRef} className="xterm-container" />
       {mutationUncertain ? (
         <div

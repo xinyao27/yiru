@@ -32,11 +32,11 @@ export default function TabGroupDropOverlay({
   return (
     <div
       aria-hidden="true"
-      className="tab-drop-overlay absolute"
+      className="pointer-events-none absolute z-[9999] border-2 border-blue-500/50 bg-blue-500/20"
       style={fillContainer ? { inset: 0 } : getOverlayStyle(zone)}
     >
       {showPaneColumnLabel && zone !== 'center' ? (
-        <span className="tab-drop-overlay__label pointer-events-none absolute bottom-2 left-2 px-1.5 py-0.5 font-medium">
+        <span className="bg-chart-2/20 text-primary-foreground pointer-events-none absolute bottom-2 left-2 px-1.5 py-0.5 text-[11px] font-medium">
           {translate('auto.components.tab.group.TabGroupDropOverlay.paneColumnLabel', 'New split')}
         </span>
       ) : null}

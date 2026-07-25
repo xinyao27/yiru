@@ -26,7 +26,7 @@ export function RichMarkdownDocLinkMenu({
   const overflow = totalMatches > rows.length
   return (
     <div
-      className="rich-markdown-doc-link-menu"
+      className="bg-popover text-popover-foreground absolute z-30 flex max-h-[320px] w-[min(360px,calc(100%-24px))] flex-col overflow-y-auto border border-[color-mix(in_srgb,var(--border)_76%,transparent)]"
       style={{ left: menu.left, top: menu.top }}
       role="listbox"
       aria-label={translate(
@@ -35,7 +35,7 @@ export function RichMarkdownDocLinkMenu({
       )}
     >
       {rows.length === 0 ? (
-        <div className="rich-markdown-doc-link-item is-empty">
+        <div className="text-muted-foreground cursor-default px-3 py-2 text-sm italic">
           {translate(
             'auto.components.editor.RichMarkdownDocLinkMenu.63ced7cb9b',
             'No documents found'
@@ -51,9 +51,8 @@ export function RichMarkdownDocLinkMenu({
               key={rowKey}
               type="button"
               className={cn(
-                'p-0 h-auto border-0 focus-visible:bg-accent',
-                'rich-markdown-doc-link-item',
-                index === selectedIndex && 'is-active'
+                'h-auto w-full justify-start gap-2.5 border-0 px-3 py-2 text-left hover:bg-accent focus-visible:bg-accent',
+                index === selectedIndex && 'bg-accent'
               )}
               // Why: mousedown inside the editor-mounted popover would otherwise
               // blur the editor before click fires, losing the selection we need
@@ -76,14 +75,14 @@ export function RichMarkdownDocLinkMenu({
         })
       )}
       {overflow ? (
-        <div className="rich-markdown-doc-link-footer">
+        <div className="text-muted-foreground border-t border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-3 py-1.5 text-[11px]">
           {translate('auto.components.editor.RichMarkdownDocLinkMenu.2aaf7d9678', 'Showing')}
           {rows.length}{' '}
           {translate('auto.components.editor.RichMarkdownDocLinkMenu.90c5f0e1e4', 'of')}
           {totalMatches}
         </div>
       ) : null}
-      <div className="rich-markdown-doc-link-hint">
+      <div className="text-muted-foreground border-t border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-3 py-1.5 text-[11px] tabular-nums">
         {translate(
           'auto.components.editor.RichMarkdownDocLinkMenu.e17b987473',
           '↑↓ navigate&nbsp;&nbsp;↵ select&nbsp;&nbsp;esc dismiss'

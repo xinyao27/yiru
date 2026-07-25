@@ -1,0 +1,175 @@
+/* Why: drives the supported-agents marquee on page 1 of the agents tile.
+   Track is duplicated in the DOM so a -50% translate loops seamlessly. */
+@keyframes feature-wall-marquee-flow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.feature-wall-marquee-track {
+  animation: feature-wall-marquee-flow 36s linear infinite;
+}
+
+/* Why: orchestrator → child connector arrows. Faint dashed strokes drawn in
+   JS so endpoints follow the real card geometry as cards animate between
+   phase 1 (parent + nested child) and phase 2 (parent + spawned peer). */
+.feature-wall-orch-arrows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 280ms ease;
+}
+.feature-wall-orch-arrows[data-fading='true'] {
+  opacity: 0;
+}
+.feature-wall-orch-arrows path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--foreground) 32%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+/* Message envelope that travels along the dashed connector. Position is
+   driven by `offset-path` so the bubble visibly follows the same shape the
+   connector drew. */
+.feature-wall-bubble {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  pointer-events: none;
+  will-change: offset-distance, opacity, transform;
+  transform: translate(-12px, -12px) scale(0.7);
+}
+.feature-wall-bubble svg {
+  width: 13px;
+  height: 13px;
+}
+.feature-wall-bubble.in-flight {
+  opacity: 1;
+  offset-distance: 100%;
+  transform: translate(-12px, -12px) scale(1);
+  transition:
+    offset-distance 1600ms cubic-bezier(0.25, 0.6, 0.25, 1),
+    transform 280ms ease,
+    opacity 280ms ease;
+}
+.feature-wall-bubble.landed {
+  opacity: 0;
+  offset-distance: 100%;
+  transform: translate(-12px, -12px) scale(0.85);
+  transition: opacity 320ms ease 80ms;
+}
+
+/* When a message just lands, briefly tint the recipient line so the new
+   text reads as a fresh inbound message rather than ambient text. */
+@keyframes feature-wall-msg-pop {
+  0% {
+    color: rgb(180 83 9);
+  }
+  70% {
+    color: rgb(180 83 9);
+  }
+  100% {
+    color: var(--foreground);
+  }
+}
+.feature-wall-msg-received {
+  animation: feature-wall-msg-pop 1100ms ease-out;
+}
+
+/* Children container fades in once the orchestrator finishes creating. */
+.feature-wall-children-wrapper {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease;
+}
+.feature-wall-children-wrapper[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes feature-wall-child-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.feature-wall-child-card-shell {
+  animation: feature-wall-child-card-in 260ms ease-out both;
+}
+
+/* Each child agent row stays collapsed until *its* dispatch bubble lands on
+   it, so the child workspace visibly gains an agent as work arrives. */
+.feature-wall-spawn-row {
+  overflow: hidden;
+  opacity: 1;
+  max-height: 60px;
+  transform: none;
+  transition:
+    opacity 320ms ease 80ms,
+    transform 320ms ease 80ms,
+    max-height 320ms cubic-bezier(0.4, 0, 0.2, 1) 80ms,
+    margin 320ms cubic-bezier(0.4, 0, 0.2, 1) 80ms,
+    padding 320ms cubic-bezier(0.4, 0, 0.2, 1) 80ms;
+}
+.feature-wall-spawn-row[data-pending='true'] {
+  opacity: 0;
+  transform: translateY(2px);
+  pointer-events: none;
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    max-height 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    margin 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Brief one-shot pulse when the Codex limits popover swaps accounts and the
+   "0% used" label flashes from red to green. */
+@keyframes feature-wall-meta-pulse {
+  0% {
+    color: rgb(220 38 38);
+    transform: scale(1);
+  }
+  20% {
+    color: rgb(22 163 74);
+    transform: scale(1.08);
+  }
+  100% {
+    color: rgb(22 163 74);
+    transform: scale(1);
+  }
+}
+
+.feature-wall-meta-pulse {
+  color: rgb(22 163 74);
+  font-weight: 600;
+  animation: feature-wall-meta-pulse 1100ms ease-out 1;
+}

@@ -184,7 +184,13 @@ export function RichMarkdownEditorSurface({
   onCloseTableOfContents
 }: RichMarkdownEditorSurfaceProps): React.JSX.Element {
   return (
-    <div className="rich-markdown-editor-layout">
+    <div
+      // Why: `rich-markdown-editor-layout` stays a stable hook for the
+      // `:has(.markdown-toc-panel)` coupling in rich-markdown-content.css —
+      // the TOC panel is a sibling component with no shared JSX to carry
+      // that border color.
+      className="rich-markdown-editor-layout bg-background [container-type:inline-size] relative flex h-full min-h-0 min-w-0"
+    >
       {showTableOfContents ? (
         <MarkdownTableOfContentsPanel
           items={tableOfContentsItems}
@@ -194,8 +200,12 @@ export function RichMarkdownEditorSurface({
       ) : null}
       <div
         ref={rootRef}
+        // Why: `rich-markdown-editor-shell` and `has-rich-markdown-review-notes`
+        // stay stable hooks for the review-rail padding coupling in
+        // rich-markdown-content.css and for the mod-held-class/closest()
+        // lookups elsewhere in this feature.
         className={cn(
-          'rich-markdown-editor-shell',
+          'rich-markdown-editor-shell relative flex h-full min-h-0 min-w-0 flex-1 flex-col bg-background',
           reviewRailExpanded && 'has-rich-markdown-review-notes'
         )}
         style={{ '--editor-font-zoom-level': editorFontZoomLevel } as React.CSSProperties}

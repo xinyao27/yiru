@@ -343,7 +343,10 @@ export default function AiVaultSessionDropLayer({
       onDragLeave={handleDragLeave}
     >
       {isDragActive && target ? (
-        <div className="tab-drop-overlay absolute" style={target.overlayStyle} />
+        <div
+          className="pointer-events-none absolute z-[9999] border-2 border-blue-500/50 bg-blue-500/20"
+          style={target.overlayStyle}
+        />
       ) : null}
     </div>
   )

@@ -1,0 +1,79 @@
+import React from 'react'
+import { toast } from 'sonner'
+
+import { Textarea } from '@/components/ui/textarea'
+import { translate } from '@/i18n/i18n'
+import {
+  TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,
+  measureTextControlPasteByteLength,
+  pasteTextIntoTextControl,
+  shouldHandleTextControlPaste
+} from '@/lib/text-control-paste'
+
+type NoteFieldProps = {
+  note: string
+  onNoteChange: (value: string) => void
+}
+
+export function NoteField({ note, onNoteChange }: NoteFieldProps): React.JSX.Element {
+  const handlePaste = React.useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const text = event.clipboardData.getData('text/plain')
+    const byteLengthMeasurement = measureTextControlPasteByteLength(text, {
+      stopAfterBytes: TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES
+    })
+    if (
+      !byteLengthMeasurement.exceededLimit &&
+      !shouldHandleTextControlPaste(text, { measuredByteLength: byteLengthMeasurement.byteLength })
+    ) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    const textarea = event.currentTarget
+    // Why: large note pastes need one controlled owner so React receives a
+    // single final input event after chunked DOM insertion.
+    void pasteTextIntoTextControl(textarea, text, {
+      source: 'clipboard',
+      canContinue: (target) => target.ownerDocument.activeElement === target
+    })
+      .then((result) => {
+        if (result.status === 'rejected' && result.reason === 'too-large') {
+          toast.error(
+            translate(
+              'auto.components.NewWorkspaceComposerCard.notePasteTooLarge',
+              'Paste is too large for the note field.'
+            )
+          )
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  return (
+    <div className="space-y-1">
+      <label className="text-muted-foreground text-xs font-medium">
+        {translate('auto.components.NewWorkspaceComposerCard.f8728aa4f9', 'Note')}
+      </label>
+      <Textarea
+        value={note}
+        onChange={(event) => onNoteChange(event.target.value)}
+        onPaste={handlePaste}
+        onInput={(event) => {
+          // Why: start at one-line height, grow to fit content so a short
+          // note keeps the dialog compact while longer notes get room to
+          // breathe without a scroll bar until the max-h clamps growth.
+          const ta = event.currentTarget
+          ta.style.height = 'auto'
+          ta.style.height = `${ta.scrollHeight}px`
+        }}
+        placeholder={translate(
+          'auto.components.NewWorkspaceComposerCard.090cfedeb4',
+          'Write a note'
+        )}
+        rows={1}
+        className="border-input placeholder:text-muted-foreground focus-visible:border-ring max-h-40 w-full min-w-0 resize-none overflow-hidden border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
+      />
+    </div>
+  )
+}

@@ -58,13 +58,16 @@ function MarkdownTocRow({
 
   return (
     <>
-      <div className="markdown-toc-row" style={{ paddingLeft: rowPaddingLeft }}>
+      <div
+        className="text-foreground hover:bg-accent flex w-full min-w-0 items-center gap-1 py-1 pr-1 text-xs leading-[1.25]"
+        style={{ paddingLeft: rowPaddingLeft }}
+      >
         {hasChildren ? (
           <Button
             variant="ghost"
             size="xs"
             type="button"
-            className="markdown-toc-disclosure focus-visible:bg-accent h-auto border-0 p-0"
+            className="focus-visible:bg-accent inline-flex size-3 h-auto shrink-0 items-center justify-center border-0 p-0"
             aria-label={
               expanded
                 ? translate(
@@ -94,10 +97,12 @@ function MarkdownTocRow({
           variant="ghost"
           size="xs"
           type="button"
-          className="markdown-toc-title-button focus-visible:bg-accent h-auto justify-start border-0 p-0"
+          className="focus-visible:bg-accent h-auto min-w-0 flex-1 justify-start border-0 px-1 py-0.5"
           onClick={() => onNavigate(item.id)}
         >
-          <span className="markdown-toc-title">{item.title}</span>
+          <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+            {item.title}
+          </span>
         </Button>
       </div>
       {hasChildren && expanded
@@ -171,23 +176,23 @@ export function MarkdownTableOfContentsPanel({
   return (
     <aside
       ref={containerRef}
-      className="markdown-toc-panel"
+      className="markdown-toc-panel border-border/72 relative flex shrink-0 flex-col border-r bg-[color-mix(in_srgb,var(--background)_88%,var(--editor-surface))] @max-[560px]/markdown-preview:absolute @max-[560px]/markdown-preview:inset-y-0 @max-[560px]/markdown-preview:left-0 @max-[560px]/markdown-preview:z-30"
       aria-label={translate(
         'auto.components.editor.MarkdownTableOfContentsPanel.27d0a9c49a',
         'Table of contents'
       )}
     >
-      <div className="markdown-toc-header">
-        <ListTree className="text-muted-foreground size-3.5" />
-        <span>
+      <div className="markdown-toc-header border-border/72 text-muted-foreground flex min-h-10 min-w-0 items-center gap-2 border-b py-0 pr-2.5 pl-3 text-xs font-semibold">
+        <ListTree className="text-muted-foreground size-3.5 shrink-0" />
+        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {translate(
             'auto.components.editor.MarkdownTableOfContentsPanel.06357eea60',
             'Table of Contents'
           )}
         </span>
-        <div className="markdown-toc-header-actions">
+        <div className="ml-auto flex items-center gap-0.5">
           <div
-            className="markdown-toc-level-controls"
+            className="flex items-center gap-0.5"
             role="group"
             aria-label={translate(
               'auto.components.editor.MarkdownTableOfContentsPanel.0dc7b2f05a',
@@ -200,7 +205,7 @@ export function MarkdownTableOfContentsPanel({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="markdown-toc-level-button"
+                className="text-muted-foreground hover:text-foreground min-w-6 px-1 text-[10px] font-semibold tracking-[0.02em]"
                 aria-label={
                   level === TOC_EXPAND_ALL_LEVEL
                     ? translate(
@@ -249,7 +254,7 @@ export function MarkdownTableOfContentsPanel({
           </Button>
         </div>
       </div>
-      <div className="markdown-toc-list">
+      <div className="min-h-0 flex-1 overflow-y-auto p-2">
         {items.length > 0 ? (
           items.map((item) => (
             <MarkdownTocRow
@@ -262,7 +267,7 @@ export function MarkdownTableOfContentsPanel({
             />
           ))
         ) : (
-          <div className="markdown-toc-empty">
+          <div className="text-muted-foreground px-1.5 py-2 text-xs">
             {translate(
               'auto.components.editor.MarkdownTableOfContentsPanel.de3928b6e4',
               'No headings'
