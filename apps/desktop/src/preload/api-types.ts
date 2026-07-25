@@ -68,7 +68,7 @@ import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
 } from '../shared/folder-workspace-path-status'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/git-history'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type {
   LanguageServerDocumentUriArgs,

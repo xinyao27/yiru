@@ -1,7 +1,7 @@
 import {
   formatSubmodulePushFailureDetail,
   stripCredentialsFromMessage
-} from '../../../shared/git-remote-error'
+} from '../../../shared/git/git-remote-error'
 import {
   isPushHookFailure,
   summarizePushFailure

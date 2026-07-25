@@ -25,7 +25,7 @@ import { z } from 'zod'
 
 import { DEFAULT_REPO_BADGE_COLOR } from '../../shared/constants'
 import type { FolderWorkspacePathStatusRequest } from '../../shared/folder-workspace-path-status'
-import { getGitCloneFailureMessage } from '../../shared/git-clone-failure-message'
+import { getGitCloneFailureMessage } from '../../shared/git/git-clone-failure-message'
 import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
 import { normalizeRepoBadgeColor } from '../../shared/repo-badge-color'
 import { isFolderRepo } from '../../shared/repo-kind'

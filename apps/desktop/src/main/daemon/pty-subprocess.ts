@@ -18,7 +18,7 @@ import {
 import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
-} from '../../shared/git-credential-prompt-env'
+} from '../../shared/git/git-credential-prompt-env'
 import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
 import { isShellProcess } from '../../shared/shell-process-detection'
 import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../../shared/terminal-git-credential-guard'

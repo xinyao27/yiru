@@ -7,7 +7,7 @@ import type {
   CreateHostedReviewResult
 } from '@yiru/workbench-model/review'
 
-import { splitRemoteBranchName } from '../../shared/git-effective-upstream'
+import { splitRemoteBranchName } from '../../shared/git/git-effective-upstream'
 import { normalizeGitHubPRMergeMethodSettings } from '../../shared/github-pr-merge-methods'
 import { isGitHubWorkItemsQueryTooLarge } from '../../shared/github-work-items-query-bounds'
 import {

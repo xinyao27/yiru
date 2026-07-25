@@ -128,8 +128,8 @@ import type {
   FolderWorkspacePathStatusRequest
 } from '../../shared/folder-workspace-path-status'
 import { folderWorkspaceToWorktree } from '../../shared/folder-workspace-worktree'
-import { getGitCloneFailureMessage } from '../../shared/git-clone-failure-message'
-import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git-fetch-auto-maintenance'
+import { getGitCloneFailureMessage } from '../../shared/git/git-clone-failure-message'
+import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git/git-fetch-auto-maintenance'
 import { buildOrchestrationTaskDisplayMetadata } from '../../shared/orchestration-task-display'
 import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
 import { FIRST_PANE_ID } from '../../shared/pane-key'

@@ -57,7 +57,7 @@ import {
 } from '../shared/editor-save-events'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { AppStarSource } from '../shared/gh-star-source'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/git-history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'

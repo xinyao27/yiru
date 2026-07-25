@@ -1,4 +1,4 @@
-import { deriveGitRemoteIdentity, type GitRemoteIdentity } from '../shared/git-remote-identity'
+import { deriveGitRemoteIdentity, type GitRemoteIdentity } from '../shared/git/git-remote-identity'
 import { gitExecFileAsync } from './git/runner'
 import { getSshGitProvider } from './providers/ssh-git-dispatch'
 

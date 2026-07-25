@@ -1,4 +1,4 @@
-import { isPushHookFailure } from './source-control-push-failure'
+import { isPushHookFailure } from '../source-control-push-failure'
 
 // Why: git's stderr often embeds the full remote URL, which can include a
 // credential. Redact carefully: classic `user:password@` forms always carry

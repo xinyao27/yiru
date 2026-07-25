@@ -14,7 +14,7 @@ import { posix, win32 } from 'node:path'
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import type { BrowserWindow } from 'electron'
 
-import { assertGitPushTargetShape } from '../../shared/git-push-target-validation'
+import { assertGitPushTargetShape } from '../../shared/git/git-push-target-validation'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { TUI_AGENT_CONFIG, isTuiAgent } from '../../shared/tui-agent-config'
 import type {

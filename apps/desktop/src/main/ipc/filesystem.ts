@@ -11,9 +11,9 @@ import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 
 import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message-host-key'
-import { validateGitForkSyncExpectedUpstream } from '../../shared/git-fork-sync'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git-history'
-import { assertGitPushTargetShape } from '../../shared/git-push-target-validation'
+import { validateGitForkSyncExpectedUpstream } from '../../shared/git/git-fork-sync'
+import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/git-history'
+import { assertGitPushTargetShape } from '../../shared/git/git-push-target-validation'
 import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control-ai'
 import {
   buildRgArgs,

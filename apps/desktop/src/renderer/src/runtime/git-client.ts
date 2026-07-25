@@ -9,7 +9,7 @@ import type {
   CommitMessageModelCapability
 } from '../../../shared/commit-message-agent-spec'
 import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../shared/commit-message-host-key'
-import type { GitHistoryOptions, GitHistoryResult } from '../../../shared/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../../../shared/git/git-history'
 import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control-ai'
 /* eslint-disable max-lines -- Why: this module mirrors the git preload API with

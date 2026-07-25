@@ -1,8 +1,8 @@
 import {
   resolveEffectiveGitUpstream,
   type GitCommandRunner
-} from '../../shared/git-effective-upstream'
-import { isNoUpstreamError, stripCredentialsFromMessage } from '../../shared/git-remote-error'
+} from '../../shared/git/git-effective-upstream'
+import { isNoUpstreamError, stripCredentialsFromMessage } from '../../shared/git/git-remote-error'
 
 /**
  * Git runner so branch-rename logic works identically for local worktrees

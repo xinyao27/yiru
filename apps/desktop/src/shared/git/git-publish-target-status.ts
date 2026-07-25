@@ -1,7 +1,7 @@
 import type { GitUpstreamStatus } from '@yiru/workbench-model/review'
 
+import type { GitPushTarget } from '../types'
 import { parseGitRevListAheadBehindCounts } from './git-rev-list-output'
-import type { GitPushTarget } from './types'
 
 export type GitCommandRunner = (args: string[]) => Promise<{ stdout: string }>
 

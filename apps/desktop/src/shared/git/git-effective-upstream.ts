@@ -1,3 +1,5 @@
+import { iterateProcessOutputLines } from '../process-output-field-scanner'
+import type { GitUpstreamStatus } from '../types'
 import {
   getConfiguredBranchRemoteUpstream,
   hasConfiguredBranchPushTarget
@@ -5,8 +7,6 @@ import {
 import { splitRemoteBranchName } from './git-remote-branch-name'
 import { isNoUpstreamError } from './git-remote-error'
 import { parseGitRevListAheadBehindCounts } from './git-rev-list-output'
-import { iterateProcessOutputLines } from './process-output-field-scanner'
-import type { GitUpstreamStatus } from './types'
 
 export { gitRefTargetsBranchName, splitRemoteBranchName } from './git-remote-branch-name'
 

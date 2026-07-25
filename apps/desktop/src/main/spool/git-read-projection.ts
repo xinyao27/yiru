@@ -1,4 +1,4 @@
-import { decodeGitCQuotedPath } from '../../shared/git-cquoted-path'
+import { decodeGitCQuotedPath } from '../../shared/git/git-cquoted-path'
 import type {
   SpoolGitHistoryEntry,
   SpoolGitStatusEntry,

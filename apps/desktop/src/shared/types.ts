@@ -30,8 +30,8 @@ import type {
   FeatureInteractionTelemetryBucketState
 } from './feature-interactions'
 import type { FeatureTipId } from './feature-tips'
-import type { ForkSyncMode } from './git-fork-sync'
-import type { GitRemoteIdentity } from './git-remote-identity'
+import type { ForkSyncMode } from './git/git-fork-sync'
+import type { GitRemoteIdentity } from './git/git-remote-identity'
 import type { KeybindingOverrides, TerminalShortcutPolicy } from './keybindings'
 import type { LanguageServerSettings } from './language-server'
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
@@ -92,7 +92,11 @@ export type RepoKind = WorkbenchWorkspaceTypes.RepoKind
 
 /** Per-repo remote preference for hosted forge metadata. */
 export type ForgeRemotePreference = 'upstream' | 'origin' | 'auto'
-export type { ForkSyncMode, GitForkSyncExpectedUpstream, GitForkSyncResult } from './git-fork-sync'
+export type {
+  ForkSyncMode,
+  GitForkSyncExpectedUpstream,
+  GitForkSyncResult
+} from './git/git-fork-sync'
 export type ExternalWorktreeVisibility = 'hide' | 'show'
 
 export type ProjectProviderIdentity = {

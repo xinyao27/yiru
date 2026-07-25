@@ -155,7 +155,7 @@ Work runs on the local machine, in a WSL distro, over SSH, and through a relay. 
 Yiru shells out to **the user's** git binary, whose version differs across native, WSL, and SSH hosts. **Git 2.25** is the core-workflow baseline.
 
 - Check when every subcommand and option was introduced. Newer behavior needs a baseline-compatible fallback, or must degrade safely.
-- Route the preferred/fallback pair through `GitCapabilityCache` (`shared/git-capability-cache.ts`) with a narrow unsupported-error predicate, so a known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and `simple-git` doesn't paper over host differences.
+- Route the preferred/fallback pair through `GitCapabilityCache` (`shared/git/git-capability-cache.ts`) with a narrow unsupported-error predicate, so a known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and `simple-git` doesn't paper over host differences.
 - Preserve global options that precede the subcommand (`git -c …`), including auto-maintenance suppression on worktree-create fetches.
 - PR CI runs the compatibility test against real git 2.25.5, 2.38.1, and 2.54.0. Adopting a newer feature means adding its version boundary there so both paths get exercised.
 

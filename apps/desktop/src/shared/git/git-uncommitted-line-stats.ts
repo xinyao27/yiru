@@ -1,7 +1,7 @@
 import { lstat, readFile } from 'node:fs/promises'
 import * as path from 'node:path'
 
-import { isBinaryBuffer } from './binary-buffer'
+import { isBinaryBuffer } from '../binary-buffer'
 import { decodeGitCQuotedPath } from './git-cquoted-path'
 import { DEFAULT_GIT_STATUS_LIMIT } from './git-status-limit'
 

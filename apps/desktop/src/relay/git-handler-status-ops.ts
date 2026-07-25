@@ -8,19 +8,19 @@ import { readFile } from 'node:fs/promises'
  */
 import * as path from 'node:path'
 
-import { splitRemoteBranchName } from '../shared/git-effective-upstream'
-import { DEFAULT_GIT_STATUS_LIMIT } from '../shared/git-status-limit'
+import { splitRemoteBranchName } from '../shared/git/git-effective-upstream'
+import { DEFAULT_GIT_STATUS_LIMIT } from '../shared/git/git-status-limit'
 import {
   beginGitStatusLineStatsCacheWrite,
   clearGitStatusLineStatsCacheKey,
   reuseOrRecomputeGitStatusLineStats
-} from '../shared/git-status-line-stats-cache'
+} from '../shared/git/git-status-line-stats-cache'
 import {
   applyLineStats,
   collectUntrackedAdditions,
   parseNumstat,
   type GitLineStats
-} from '../shared/git-uncommitted-line-stats'
+} from '../shared/git/git-uncommitted-line-stats'
 import type { GitUpstreamStatus } from '../shared/types'
 import type { GitExec } from './git-handler-ops'
 import { parseUnmergedEntry } from './git-handler-output-parser'

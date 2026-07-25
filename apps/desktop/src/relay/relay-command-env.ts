@@ -1,8 +1,8 @@
 import { homedir } from 'node:os'
 import { posix, win32 } from 'node:path'
 
-import { gitCredentialPromptGuardEnv } from '../shared/git-credential-prompt-env'
-import { UNTRANSLATED_GIT_OUTPUT_ENV } from '../shared/git-output-locale'
+import { gitCredentialPromptGuardEnv } from '../shared/git/git-credential-prompt-env'
+import { UNTRANSLATED_GIT_OUTPUT_ENV } from '../shared/git/git-output-locale'
 
 const POSIX_RELAY_PATH_FALLBACKS = ['/usr/local/bin', '/opt/homebrew/bin', '/usr/bin', '/bin']
 const WINDOWS_RELAY_PATH_FALLBACKS = [

@@ -60,7 +60,7 @@ import {
   type FeatureInteractionId
 } from '../shared/feature-interactions'
 import { normalizeFolderWorkspaceName } from '../shared/folder-workspaces'
-import type { GitRemoteIdentity } from '../shared/git-remote-identity'
+import type { GitRemoteIdentity } from '../shared/git/git-remote-identity'
 import { normalizeProjectRuntimePreference } from '../shared/project-execution-runtime'
 import {
   clearMissingProjectGroupMemberships,

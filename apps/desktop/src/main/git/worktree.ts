@@ -8,14 +8,14 @@ import {
   branchHasNoUnmergedChangesOnAnyTarget,
   getBranchCleanupTargetRefs,
   refreshBranchCleanupTargetRefs
-} from '../../shared/git-branch-cleanup'
-import { decodeGitCQuotedPath } from '../../shared/git-cquoted-path'
-import { parseGitRevListAheadBehindCounts } from '../../shared/git-rev-list-output'
+} from '../../shared/git/git-branch-cleanup'
+import { decodeGitCQuotedPath } from '../../shared/git/git-cquoted-path'
+import { parseGitRevListAheadBehindCounts } from '../../shared/git/git-rev-list-output'
 import {
   hasUnsupportedRevParsePathFormatEcho,
   isUnsupportedRevParsePathFormatError,
   isUnsupportedWorktreeListZError
-} from '../../shared/git-worktree-command-capabilities'
+} from '../../shared/git/git-worktree-command-capabilities'
 import type {
   GitWorktreeInfo,
   LocalBaseRefRefreshResult,

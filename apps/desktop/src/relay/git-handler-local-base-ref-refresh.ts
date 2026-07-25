@@ -1,4 +1,4 @@
-import type { GitCapabilityCache } from '../shared/git-capability-cache'
+import type { GitCapabilityCache } from '../shared/git/git-capability-cache'
 import type { GitExec } from './git-handler-ops'
 import { areRelayWorktreePathsEqual, readRelayWorktreeList } from './git-handler-worktree-ops'
 
