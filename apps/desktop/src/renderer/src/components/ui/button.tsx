@@ -38,7 +38,7 @@ const buttonVariants = cva(
         // Why: status actions cannot reserve a border seam, so focus uses background contrast.
         'status-bar': 'border-0 font-normal hover:bg-accent/70 focus-visible:bg-accent/70',
         'status-bar-icon':
-          'border-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground aria-[current=page]:text-foreground',
+          'border-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground aria-[current=page]:text-primary',
         'status-bar-quiet':
           'border-0 font-normal text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground',
         link: 'text-primary underline-offset-4 hover:underline'
