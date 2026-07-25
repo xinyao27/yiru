@@ -11,7 +11,7 @@ type TerminalTab = MobileNativeChatTab & { id: string; terminal: string | null }
 export function getMobileTerminalActionSheetActions<Target extends { handle: string }>(args: {
   target: Target | null
   tabs: readonly TerminalTab[]
-  chatTabIds: ReadonlySet<string>
+  isTabChatView: (tabId: string) => boolean
   nativeChatTranscriptIsLocalReadable: boolean
   onDismiss: () => void
   onToggleChat: (tabId: string) => void
@@ -30,7 +30,7 @@ export function getMobileTerminalActionSheetActions<Target extends { handle: str
     ...getMobileNativeChatToggleActions({
       terminalHandle: target.handle,
       tabs: args.tabs,
-      chatTabIds: args.chatTabIds,
+      isTabChatView: args.isTabChatView,
       nativeChatTranscriptIsLocalReadable: args.nativeChatTranscriptIsLocalReadable,
       onClose: args.onDismiss,
       onToggle: args.onToggleChat

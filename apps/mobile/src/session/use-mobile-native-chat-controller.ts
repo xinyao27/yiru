@@ -1,14 +1,11 @@
 import {
   useCallback,
-  useEffect,
   useRef,
-  useState,
   type Dispatch,
   type MutableRefObject,
   type SetStateAction
 } from 'react'
 
-import { loadNativeChatTabIds, saveNativeChatTabIds } from '../storage/preferences'
 import type { RpcClient } from '../transport/rpc-client'
 import type { parseAskFromStatus } from './mobile-native-chat-ask'
 import type { AskAnswerSelection, AskPrompt } from './mobile-native-chat-ask'
@@ -29,12 +26,14 @@ import { useMobileNativeChatMessageSend } from './use-mobile-native-chat-message
 import { useMobileNativeChatPrompts } from './use-mobile-native-chat-prompts'
 import { useMobileNativeChatSession } from './use-mobile-native-chat-session'
 import { useMobileNativeChatStop } from './use-mobile-native-chat-stop'
+import { useMobileSessionViewMode } from './use-mobile-session-view-mode'
 import { useThrottledLatestValue } from './use-throttled-latest-value'
 
 const NATIVE_CHAT_STREAM_THROTTLE_MS = 50
 
 export type MobileNativeChatController = {
-  chatTabIds: Set<string>
+  /** Whether a tab's effective view is chat (per-tab override, else the default). */
+  isTabChatView: (tabId: string) => boolean
   toggleTabChatView: (tabId: string) => void
   showNativeChat: boolean
   showNativeChatRef: MutableRefObject<boolean>
@@ -88,50 +87,14 @@ export function useMobileNativeChatController(args: {
     nativeChatInputLeaseReady,
     onSendError
   } = args
-  const [chatTabIds, setChatTabIds] = useState<Set<string>>(new Set())
   const disconnectedInputHealingStateRef = useRef(createMobileNativeChatInputHealingState())
   const inputHealingState = client
     ? getMobileNativeChatInputHealingState(client)
     : disconnectedInputHealingStateRef.current
-  const chatTabIdsToggledRef = useRef(false)
-
-  useEffect(() => {
-    let active = true
-    // Re-arm per host/worktree so the fresh load can seed the new selection.
-    chatTabIdsToggledRef.current = false
-    void loadNativeChatTabIds(hostId, worktreeId).then((ids) => {
-      // Why: a toggle before this load resolves is authoritative; the load must
-      // not revert the user's in-memory choice back to the persisted state.
-      if (active && !chatTabIdsToggledRef.current) {
-        // Why: route reuse must clear the prior worktree's selection even when
-        // the newly loaded worktree has no saved chat tabs.
-        setChatTabIds(new Set(ids))
-      }
-    })
-    return () => {
-      active = false
-    }
-  }, [hostId, worktreeId])
-
-  const toggleTabChatView = useCallback(
-    (tabId: string) => {
-      chatTabIdsToggledRef.current = true
-      setChatTabIds((previous) => {
-        const next = new Set(previous)
-        if (next.has(tabId)) {
-          next.delete(tabId)
-        } else {
-          next.add(tabId)
-        }
-        void saveNativeChatTabIds(hostId, worktreeId, [...next])
-        return next
-      })
-    },
-    [hostId, worktreeId]
-  )
+  const { isTabChatView, toggleTabChatView } = useMobileSessionViewMode({ hostId, worktreeId })
 
   const activeChatResolution =
-    activeSessionTab && activeSessionTabId && chatTabIds.has(activeSessionTabId)
+    activeSessionTab && activeSessionTabId && isTabChatView(activeSessionTabId)
       ? resolveMobileNativeChat(activeSessionTab, nativeChatTranscriptIsLocalReadable)
       : null
   const showNativeChat = activeChatResolution != null
@@ -274,7 +237,7 @@ export function useMobileNativeChatController(args: {
   })
 
   return {
-    chatTabIds,
+    isTabChatView,
     toggleTabChatView,
     showNativeChat,
     showNativeChatRef,

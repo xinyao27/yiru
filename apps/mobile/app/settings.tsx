@@ -14,6 +14,7 @@ import {
   Microphone as Mic,
   Globe,
   Palette,
+  Chat as MessageSquare,
   Terminal as TerminalIcon,
   Key as KeyRound
 } from '@/components/uniwind-icons'
@@ -103,6 +104,15 @@ export default function SettingsScreen() {
           >
             <Palette size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Appearance</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </Pressable>
+          <View className={styles.separator} />
+          <Pressable
+            className={cn(styles.row, styles.rowPressedActive)}
+            onPress={() => router.push('/native-chat-settings')}
+          >
+            <MessageSquare size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Chat UI</Text>
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
           <View className={styles.separator} />
