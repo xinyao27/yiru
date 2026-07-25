@@ -1,6 +1,10 @@
 import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
+import {
+  formatWorkspaceCreateError,
+  getWorkspaceCreateErrorToastMessage
+} from '@/components/new-workspace-composer-card/workspace-create-error-format'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import {
   attachEphemeralVmRuntimeToWorkspace,
@@ -13,10 +17,6 @@ import type {
   WorktreeCreationPhase,
   WorktreeCreationRequest
 } from '@/lib/pending-worktree-creation'
-import {
-  formatWorkspaceCreateError,
-  getWorkspaceCreateErrorToastMessage
-} from '@/lib/workspace-create-error-format'
 import {
   activateAndRevealWorktree,
   ensureWorktreeHasInitialTerminal,

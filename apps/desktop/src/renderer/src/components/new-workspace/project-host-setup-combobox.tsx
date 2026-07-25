@@ -1,12 +1,12 @@
 import { Check, HardDrives as Server, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React from 'react'
 
+import type { ProjectHostSetupOption } from '@/components/new-workspace-composer-card/project-host-setup-options'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import type { ProjectHostSetupOption } from '@/lib/project-host-setup-options'
 
 type ProjectHostSetupComboboxProps = {
   options: readonly ProjectHostSetupOption[]

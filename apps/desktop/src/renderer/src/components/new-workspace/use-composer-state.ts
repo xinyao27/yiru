@@ -22,6 +22,20 @@ import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-conf
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '@/components/contextual-tours/contextual-tour-composer-events'
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import {
+  buildNewWorkspaceCreateTargetOptions,
+  getProjectGroupIdFromNewWorkspaceOptionId,
+  type NewWorkspaceProjectOption
+} from '@/components/new-workspace-composer-card/new-workspace-project-options'
+import {
+  buildProjectHostSetupOptions,
+  type ProjectHostSetupOption
+} from '@/components/new-workspace-composer-card/project-host-setup-options'
+import {
+  formatWorkspaceCreateError,
+  getWorkspaceCreateErrorToastMessage,
+  type WorkspaceCreateErrorDisplay
+} from '@/components/new-workspace-composer-card/workspace-create-error-format'
+import {
   lookupSmartGitHubSubmitItem,
   getSmartGitHubSubmitIntent,
   getSmartGitHubSubmitResolution,
@@ -79,11 +93,6 @@ import {
   getQuickComposerCreateDisabled
 } from '@/lib/new-workspace-create-gates'
 import {
-  buildNewWorkspaceCreateTargetOptions,
-  getProjectGroupIdFromNewWorkspaceOptionId,
-  type NewWorkspaceProjectOption
-} from '@/lib/new-workspace-project-options'
-import {
   canUseRepoBackedComposerSources,
   getSelectedRepoSshGate,
   isSshConnectInProgress
@@ -91,10 +100,6 @@ import {
 import { queueNewWorkspaceTerminalFocus } from '@/lib/new-workspace-terminal-focus'
 import { joinPath } from '@/lib/path'
 import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
-import {
-  buildProjectHostSetupOptions,
-  type ProjectHostSetupOption
-} from '@/lib/project-host-setup-options'
 import {
   resolveWorkspaceCreationRepoId,
   resolveWorkspaceCreationTarget
@@ -104,11 +109,6 @@ import { normalizeSparseDirectoryLines, sparseDirectoriesMatch } from '@/lib/spa
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 import { isWorkItemLookupText } from '@/lib/work-item-lookup-text'
-import {
-  formatWorkspaceCreateError,
-  getWorkspaceCreateErrorToastMessage,
-  type WorkspaceCreateErrorDisplay
-} from '@/lib/workspace-create-error-format'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { runBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'
 import { importExternalPathsToRuntime } from '@/runtime/file-client'
