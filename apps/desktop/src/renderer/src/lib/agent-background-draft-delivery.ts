@@ -1,5 +1,5 @@
+import { pasteDraftWhenAgentReady } from '@/components/native-chat/agent-paste-draft'
 import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
-import { pasteDraftWhenAgentReady } from '@/lib/agent-paste-draft'
 
 import type { TuiAgent } from '../../../shared/types'
 

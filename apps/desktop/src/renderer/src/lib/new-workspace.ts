@@ -1,11 +1,11 @@
 import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
 
-import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
-import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import {
   getSettingsForAgentTabRuntimeOwner,
   pasteDraftToAgentPtyWhenReady
-} from '@/lib/agent-paste-draft'
+} from '@/components/native-chat/agent-paste-draft'
+import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
+import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import {
   beginAgentStartupDeliveryAttempt,
   getAgentStartupTabPtyId,

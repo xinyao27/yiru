@@ -1,6 +1,6 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 
-import { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
+import { getSettingsForAgentTabRuntimeOwner } from '@/components/native-chat/agent-paste-draft'
 import { getConnectionIdFromState } from '@/lib/connection-context'
 import {
   discoverRuntimeCommitMessageModels,

@@ -7,8 +7,8 @@ import {
   createAutomationRunOutputSnapshotBuffer,
   selectAutomationRunOutputSnapshot
 } from '@/components/automations/automation-run-output-snapshot'
+import { submitPromptToAgentPty } from '@/components/native-chat/agent-paste-draft'
 import { translate } from '@/i18n/i18n'
-import { submitPromptToAgentPty } from '@/lib/agent-paste-draft'
 import { observeExistingAutomationSession } from '@/lib/automation-session-observer'
 import { findReusableAutomationSession } from '@/lib/automation-session-reuse'
 import { createBrowserUuid } from '@/lib/browser-uuid'

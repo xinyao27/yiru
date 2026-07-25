@@ -4,7 +4,7 @@ import { fileUriToFilesystemPath } from '@yiru/workbench-model/platform'
 import {
   parseExplicitFileLinkTarget,
   resolveExplicitFileLinkTarget
-} from '@/lib/explicit-file-link-target'
+} from '@/components/native-chat/explicit-file-link-target'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import type { AppState } from '@/store/types'
 

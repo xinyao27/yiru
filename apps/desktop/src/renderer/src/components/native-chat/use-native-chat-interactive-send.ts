@@ -2,7 +2,7 @@ import { shouldStepNativeChatAskAnswer } from '@yiru/workbench-model/agent'
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useLayoutEffect, useRef } from 'react'
 
-import { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
+import { getSettingsForAgentTabRuntimeOwner } from '@/components/native-chat/agent-paste-draft'
 import { sendRuntimePtyInput } from '@/runtime/terminal-inspection'
 
 import {
