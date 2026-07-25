@@ -1,4 +1,4 @@
-import { addBackgroundMountedTerminalWorktree } from './background-terminal-worktree-mount'
+import { addBackgroundMountedTerminalWorktree } from '../terminal/background-terminal-worktree-mount'
 
 export const BACKGROUND_WORKTREE_MEASURE_WINDOW_MS = 3000
 

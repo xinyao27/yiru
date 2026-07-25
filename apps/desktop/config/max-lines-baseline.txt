@@ -141,7 +141,6 @@ inline apps/desktop/src/renderer/src/components/feature-wall/editor-animated-vis
 inline apps/desktop/src/renderer/src/components/feature-wall/workbench-animated-visual.tsx
 inline apps/desktop/src/renderer/src/components/floating-terminal/floating-terminal-panel.tsx
 inline apps/desktop/src/renderer/src/components/github/state.ts
-inline apps/desktop/src/renderer/src/components/new-workspace-composer-card.tsx
 inline apps/desktop/src/renderer/src/components/new-workspace/smart-workspace-name-field.tsx
 inline apps/desktop/src/renderer/src/components/new-workspace/use-composer-state.ts
 inline apps/desktop/src/renderer/src/components/onboarding/use-onboarding-flow.ts
@@ -171,7 +170,6 @@ inline apps/desktop/src/renderer/src/components/terminal-pane/remote-runtime-pty
 inline apps/desktop/src/renderer/src/components/terminal-pane/terminal-pane.tsx
 inline apps/desktop/src/renderer/src/components/terminal-pane/use-terminal-pane-context-menu.ts
 inline apps/desktop/src/renderer/src/components/terminal-pane/use-terminal-pane-lifecycle.ts
-inline apps/desktop/src/renderer/src/components/terminal-workspace.tsx
 inline apps/desktop/src/renderer/src/components/update-card.tsx
 inline apps/desktop/src/renderer/src/components/workspace-cleanup/state.ts
 inline apps/desktop/src/renderer/src/components/workspace-cleanup/workspace-cleanup-dialog.tsx

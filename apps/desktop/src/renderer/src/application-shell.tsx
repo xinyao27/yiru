@@ -355,7 +355,7 @@ const MobilePage = lazy(() => import('./components/mobile/page'))
 const QuickOpen = lazy(() => import('./components/quick-open'))
 const WorktreeJumpPalette = lazy(() => import('./components/worktree-jump-palette/panel'))
 const WorkspaceCleanupDialog = lazy(() => import('./components/workspace-cleanup/dialog'))
-const Terminal = lazy(() => import('./components/terminal-workspace'))
+const Terminal = lazy(() => import('./components/terminal-workspace/panel'))
 const SpoolWorkspaceSurface = lazy(() => import('./components/spool/workspace-surface'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
