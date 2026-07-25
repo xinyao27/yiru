@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
+import {
+  reconcileTransientPortScanFailures,
+  type PortScanDebounceState
+} from '@/components/ports/workspace-port-scan-debounce'
 import { installWindowVisibilityInterval, isWindowVisible } from '@/lib/window-visibility-interval'
 import {
   mergeWorkspacePortScans,
@@ -7,16 +11,12 @@ import {
   scanWorkspacePortsForTarget,
   workspacePortScanKeyForTarget
 } from '@/lib/workspace-port-actions'
-import {
-  reconcileTransientPortScanFailures,
-  type PortScanDebounceState
-} from '@/lib/workspace-port-scan-debounce'
 import { getActiveRuntimeTarget, type RuntimeClientTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { getHasAnyWorktreesFromState } from '@/store/selectors'
 
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
-import type { WorkspacePortScanResult } from '../../../../shared/workspace-ports'
+import type { WorkspacePortScanResult } from '../../../../shared/workspace/workspace-ports'
 
 const WORKSPACE_PORT_SCAN_INTERVAL_MS = 30_000
 const WORKSPACE_PORT_ADVERTISED_URL_SETTLE_MS = 1_000
