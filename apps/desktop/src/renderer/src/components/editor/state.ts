@@ -16,13 +16,13 @@ import {
   showLocalPathOpenBlockedToast
 } from '@/components/editor/local-path-open-guard'
 import { resolveMarkdownLinkTarget } from '@/components/editor/markdown-internal-links'
+import { createUntitledMarkdownFileWithTemplateSelection } from '@/components/floating-terminal/create-untitled-markdown'
 import { translate } from '@/i18n/i18n'
 import {
   buildCheckRunDetailsTabId,
   getCheckRunDetailsTabLabel,
   type OpenCheckRunDetailsState
 } from '@/lib/check-run-details-tab'
-import { createUntitledMarkdownFileWithTemplateSelection } from '@/lib/create-untitled-markdown'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
@@ -74,7 +74,7 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
+import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
 import { findWorktreeById, getRepoIdFromWorktreeId } from '../../store/slices/worktree-helpers'
 import type { AppState } from '../../store/types'
