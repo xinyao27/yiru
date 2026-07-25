@@ -4,7 +4,7 @@ import type {
   WorkspaceSourceSelection
 } from '@yiru/workbench-model/workspace'
 
-import type { WorkspaceCreateGitPushTarget } from './workspace-create-params'
+import type { WorkspaceCreateGitPushTarget } from './params'
 
 export type { SmartNameMode }
 

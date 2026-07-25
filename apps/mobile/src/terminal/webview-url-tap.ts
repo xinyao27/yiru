@@ -1,4 +1,4 @@
-export { resolveTerminalFileUrlTap, resolveTerminalOscFileTap } from './terminal-file-url-tap'
+export { resolveTerminalFileUrlTap, resolveTerminalOscFileTap } from './file-url-tap'
 
 export const TERMINAL_HTTP_URL_REGEX_SOURCE = `${String.raw`\bhttps?:\/\/[^\s"'!*(){}|\\^<>`}\`${String.raw`]*[^\s"':,.!?{}|\\^~[\]`}\`${String.raw`()<>]`}`
 export const TERMINAL_FILE_URL_REGEX_SOURCE = `${String.raw`\bfile:\/\/[^\s"'!*(){}|\\^<>`}\`${String.raw`]*[^\s"',!?{}|\\^~[\]`}\`${String.raw`()<>]`}`

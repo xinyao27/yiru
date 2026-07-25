@@ -33,23 +33,6 @@ import type {
 } from '../transport/browser-screencast-protocol'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcFailure, RpcSuccess } from '../transport/types'
-import {
-  MOBILE_BROWSER_FRAME_MIN_INTERVAL_MS,
-  buildMobileBrowserScreencastRequest,
-  type MobileBrowserViewMode
-} from './browser-screencast-request'
-import {
-  clampBrowserZoomState,
-  computeBrowserFrameGeometry,
-  computeBrowserTouchClickRadiusCss,
-  mapScreenToBrowserPoint,
-  readLocalTouchPoint,
-  type BrowserFrameGeometry,
-  type BrowserPoint,
-  type BrowserTouchLayout,
-  type BrowserZoomState
-} from './browser-touch-geometry'
-import { displayBrowserUrl, normalizeBrowserUrl } from './browser-url'
 import { resolveMobileBrowserAddressSync } from './mobile-browser-address-sync'
 import { MobileBrowserKeyRow } from './mobile-browser-key-row'
 import {
@@ -62,6 +45,23 @@ import {
   saveMobileBrowserViewMode
 } from './mobile-browser-view-mode-state'
 import { MobileBrowserViewModeSwitch } from './mobile-browser-view-mode-switch'
+import {
+  MOBILE_BROWSER_FRAME_MIN_INTERVAL_MS,
+  buildMobileBrowserScreencastRequest,
+  type MobileBrowserViewMode
+} from './screencast-request'
+import {
+  clampBrowserZoomState,
+  computeBrowserFrameGeometry,
+  computeBrowserTouchClickRadiusCss,
+  mapScreenToBrowserPoint,
+  readLocalTouchPoint,
+  type BrowserFrameGeometry,
+  type BrowserPoint,
+  type BrowserTouchLayout,
+  type BrowserZoomState
+} from './touch-geometry'
+import { displayBrowserUrl, normalizeBrowserUrl } from './url'
 
 export type MobileBrowserTab = {
   type: 'browser'

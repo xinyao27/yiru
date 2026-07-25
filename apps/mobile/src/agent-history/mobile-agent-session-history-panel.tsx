@@ -23,17 +23,17 @@ import { useHostClient } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import type { Worktree } from '../worktree/workspace-list-types'
-import { shouldShowMobileCurrentWorktreeBadge } from './agent-history-current-worktree-badge'
+import { shouldShowMobileCurrentWorktreeBadge } from './current-worktree-badge'
+import { MobileAgentSessionHistoryList } from './mobile-agent-session-history-list'
 import {
   resolveMobileAiVaultSessionResumeTarget,
   type MobileAiVaultResumeFolderWorkspace,
   type MobileAiVaultResumeProjectGroup,
   type MobileAiVaultResumeRepo
-} from './agent-history-resume-target'
-import { buildMobileAgentHistorySections } from './agent-history-sections'
-import { buildMobileAgentHistoryResumeActionState } from './agent-history-session-card'
-import { styles } from './agent-history-styles'
-import { MobileAgentSessionHistoryList } from './mobile-agent-session-history-list'
+} from './resume-target'
+import { buildMobileAgentHistorySections } from './sections'
+import { buildMobileAgentHistoryResumeActionState } from './session-card'
+import { styles } from './styles'
 import { useMobileAgentHistoryState } from './use-mobile-agent-history-state'
 
 export type MobileAgentSessionHistoryPanelProps = {

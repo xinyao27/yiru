@@ -1,7 +1,7 @@
 import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
 
 import type { RpcClient } from '../transport/rpc-client'
-import { isTerminalSendRpcAccepted } from './terminal-send-rpc-response'
+import { isTerminalSendRpcAccepted } from './send-rpc-response'
 
 type TerminalSubscriptionRegistry = {
   has: (handle: string) => boolean

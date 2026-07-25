@@ -4,15 +4,15 @@ import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-r
 
 import { TERMINAL_TEXT_SCALES } from '../storage/preferences'
 import { colors } from '../theme/uniwind-theme-values'
-import { TERMINAL_PATH_TAP_JS } from './terminal-path-tap-injected'
+import { TERMINAL_PATH_TAP_JS } from './path-tap-injected'
 import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from './terminal-webview-engine.generated'
-import { TERMINAL_QUERY_REPLY_JS } from './terminal-webview-query-reply-injected'
-import { TERMINAL_REFLOW_JS } from './terminal-webview-reflow-injected'
-import { TERMINAL_SURFACE_SWAP_JS } from './terminal-webview-surface-swap-injected'
-import { TERMINAL_TAP_DISPATCH_JS } from './terminal-webview-tap-dispatch-injected'
-import { TERMINAL_WEBVIEW_THEME_JS } from './terminal-webview-theme-injected'
-import { URL_TAP_WEBVIEW_JS } from './terminal-webview-url-tap'
-import { TERMINAL_WEBGL_RECOVERY_JS } from './terminal-webview-webgl-recovery-injected'
+import { TERMINAL_QUERY_REPLY_JS } from './webview-query-reply-injected'
+import { TERMINAL_REFLOW_JS } from './webview-reflow-injected'
+import { TERMINAL_SURFACE_SWAP_JS } from './webview-surface-swap-injected'
+import { TERMINAL_TAP_DISPATCH_JS } from './webview-tap-dispatch-injected'
+import { TERMINAL_WEBVIEW_THEME_JS } from './webview-theme-injected'
+import { URL_TAP_WEBVIEW_JS } from './webview-url-tap'
+import { TERMINAL_WEBGL_RECOVERY_JS } from './webview-webgl-recovery-injected'
 
 const DEFAULT_TERMINAL_THEME: RuntimeMobileTerminalTheme['theme'] = {
   background: colors.terminalBg,

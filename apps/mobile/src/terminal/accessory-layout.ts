@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from './terminal-accessory-keys'
+import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from './accessory-keys'
 
 export const TERMINAL_ACCESSORY_LAYOUT_STORAGE_KEY = 'yiru:terminal-accessory-layout'
 

@@ -3,7 +3,7 @@ import { AppState, Platform, useWindowDimensions, type AppStateStatus } from 're
 
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
-import { shouldRecoverTerminalOnAppStateChange } from './terminal-foreground-recovery'
+import { shouldRecoverTerminalOnAppStateChange } from './foreground-recovery'
 import {
   isTerminalUpdateViewportApplied,
   isTerminalUpdateViewportUpdated,
@@ -13,8 +13,8 @@ import {
   type TerminalFrameHeightRefitEvent,
   type TerminalFrameHeightRefitState,
   type TerminalUpdateViewportCapability
-} from './terminal-viewport-refit-state'
-import type { TerminalWebViewHandle } from './terminal-webview-contract'
+} from './viewport-refit-state'
+import type { TerminalWebViewHandle } from './webview-contract'
 
 export type TerminalViewportDims = { cols: number; rows: number }
 

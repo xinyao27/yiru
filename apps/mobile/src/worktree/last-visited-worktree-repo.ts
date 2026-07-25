@@ -1,4 +1,4 @@
-import { getRepoIdFromMobileWorktreeId } from '../session/mobile-session-route-helpers'
+import { getRepoIdFromMobileWorktreeId } from '../worktree-id'
 
 export const LAST_VISITED_WORKTREE_STORAGE_KEY = 'yiru:last-visited-worktree'
 

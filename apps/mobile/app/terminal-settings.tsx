@@ -24,7 +24,7 @@ import {
   saveTerminalAutocompleteEnabled,
   saveTerminalTextScale
 } from '../src/storage/preferences'
-import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/terminal-auto-restore-fit-state'
+import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/auto-restore-fit-state'
 import { useAllHostClients } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'

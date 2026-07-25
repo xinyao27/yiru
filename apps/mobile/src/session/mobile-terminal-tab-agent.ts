@@ -4,7 +4,7 @@ import { stripLeadingAgentTitleDecorationOrEmpty } from '@yiru/workbench-model/a
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 
 import type { MobileSessionTab } from '../../app/h/[hostId]/session/mobile-session-route-types'
-import { isBlankBrowserUrl } from '../browser/browser-url'
+import { isBlankBrowserUrl } from '../browser/url'
 
 // Why: tab identity + title cleaning uses the same shared glyph/label maps as
 // desktop, so the two platforms do not drift on which titles identify agents.

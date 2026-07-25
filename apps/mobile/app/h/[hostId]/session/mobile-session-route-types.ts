@@ -9,7 +9,7 @@ import type {
   MobileSyntaxSegment
 } from '../../../../src/session/mobile-file-syntax'
 import type { TerminalRecord } from '../../../../src/session/mobile-terminal-records'
-import type { MobileTerminalTheme } from '../../../../src/terminal/terminal-webview-contract'
+import type { MobileTerminalTheme } from '../../../../src/terminal/webview-contract'
 
 export type Terminal = TerminalRecord
 

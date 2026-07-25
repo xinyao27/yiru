@@ -11,7 +11,7 @@ import { openMobilePrUrl } from '../mobile-pr-compose-sheet'
 import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { prStateBadge } from './pr-checks-presentation'
 import { prCommentComposerStyles as composerStyles } from './pr-comment-composer-styles'
-import { statusColorClasses } from './pr-sidebar-status-color'
+import { statusColorClasses } from './status-color'
 
 type Props = {
   pr: PRInfo

@@ -1,12 +1,12 @@
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcFailure, RpcSuccess } from '../transport/types'
+import { getRepoIdFromMobileWorktreeId } from '../worktree-id'
 import { isFloatingWorkspaceWorktreeId } from './floating-workspace'
 import {
   buildMobileNewTabAgentOptions,
   type MobileNewTabAgentOption,
   type MobileNewTabAgentSettings
 } from './mobile-new-tab-agent-options'
-import { getRepoIdFromMobileWorktreeId } from './mobile-session-route-helpers'
 
 type RuntimeRepoSummary = {
   id: string

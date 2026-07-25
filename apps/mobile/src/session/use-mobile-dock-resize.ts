@@ -9,7 +9,7 @@ import {
   loadHostDockWidth,
   saveHostDockWidth
 } from '../storage/preferences'
-import { SESSION_DOCK_MIN_MAIN_WIDTH } from './session-panel-host'
+import { SESSION_DOCK_MIN_MAIN_WIDTH } from './panel-host'
 
 type MobileDockResize = {
   dockWidth: number

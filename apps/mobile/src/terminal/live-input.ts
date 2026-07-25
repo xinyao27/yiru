@@ -1,4 +1,4 @@
-import { buildTerminalShortcutKey } from './terminal-accessory-keys'
+import { buildTerminalShortcutKey } from './accessory-keys'
 
 const TERMINAL_LIVE_INPUT_MAX_BYTES = 256 * 1024
 

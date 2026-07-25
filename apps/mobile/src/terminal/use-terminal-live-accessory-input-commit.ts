@@ -1,13 +1,13 @@
 import { useCallback, type RefObject } from 'react'
 import type { TextInput } from 'react-native'
 
-import type { TerminalLiveAccessoryInput } from './terminal-live-accessory-input'
-import { sendTerminalLiveControlAfterPendingFlush } from './terminal-live-control-send-order'
-import type { TerminalLiveInputSender } from './terminal-live-input-sender'
+import type { TerminalLiveAccessoryInput } from './live-accessory-input'
+import { sendTerminalLiveControlAfterPendingFlush } from './live-control-send-order'
+import type { TerminalLiveInputSender } from './live-input-sender'
 import {
   getTerminalLiveAccessoryBytesDecision,
   getTerminalLiveAccessoryLocalEditText
-} from './terminal-live-text-commit'
+} from './live-text-commit'
 
 export type TerminalLiveAccessoryInputCommitResult =
   | { readonly kind: 'allow-raw' }

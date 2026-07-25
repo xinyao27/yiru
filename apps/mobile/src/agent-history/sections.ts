@@ -2,10 +2,7 @@ import { filterAiVaultSessions, groupAiVaultSessions } from '@yiru/workbench-mod
 import { AI_VAULT_AGENTS } from '@yiru/workbench-model/agent'
 import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 
-import {
-  buildMobileAgentHistoryCard,
-  type MobileAgentHistoryCard
-} from './agent-history-session-card'
+import { buildMobileAgentHistoryCard, type MobileAgentHistoryCard } from './session-card'
 
 // Why: `data` (not `cards`) is the field name React Native's SectionList reads
 // for each section's rows — naming it anything else renders empty sections.

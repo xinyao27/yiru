@@ -7,10 +7,7 @@ import type { AnimatedRef, SharedValue } from 'react-native-reanimated'
 import { CaretRight as ChevronRight, X } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import {
-  TERMINAL_ACCESSORY_KEYS,
-  type TerminalAccessoryKey
-} from '../terminal/terminal-accessory-keys'
+import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from '../terminal/accessory-keys'
 import {
   getDefaultTerminalAccessoryLayout,
   loadTerminalAccessoryLayout,
@@ -18,7 +15,7 @@ import {
   saveTerminalAccessoryLayout,
   setTerminalAccessoryBuiltInVisible,
   type TerminalAccessoryLayout
-} from '../terminal/terminal-accessory-layout'
+} from '../terminal/accessory-layout'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
 

@@ -1,10 +1,7 @@
 import type { TuiAgent } from '@yiru/workbench-model/agent'
 
 import type { RpcClient } from '../transport/rpc-client'
-import {
-  buildMobileWorkspaceAgentLaunchFields,
-  type WorkspaceCreateSetupDecision
-} from './workspace-create-params'
+import { buildMobileWorkspaceAgentLaunchFields, type WorkspaceCreateSetupDecision } from './params'
 import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'
 
 // The blank/named create path, extracted from NewWorktreeModal so the modal keeps

@@ -1,4 +1,4 @@
-import type { TerminalWebViewCommand } from './terminal-webview-messages'
+import type { TerminalWebViewCommand } from './webview-messages'
 
 const MAX_PENDING_WEB_WRITE_BYTES = 1_000_000
 const MAX_PENDING_WEB_WRITE_MESSAGES = 4096

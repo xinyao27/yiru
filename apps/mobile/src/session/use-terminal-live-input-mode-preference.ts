@@ -9,7 +9,7 @@ import {
   defaultTerminalLiveInputHandles,
   filterTerminalLiveInputDefaultCandidates,
   pruneTerminalLiveInputHandles
-} from '../terminal/terminal-live-input'
+} from '../terminal/live-input'
 
 type UseTerminalLiveInputModePreferenceOptions = {
   readonly hostId: string

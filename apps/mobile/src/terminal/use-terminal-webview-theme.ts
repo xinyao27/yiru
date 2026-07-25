@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useUniwind } from 'uniwind'
 
 import { useThemeColors } from '../theme/uniwind-theme-values'
-import type { MobileTerminalTheme } from './terminal-webview-contract'
+import type { MobileTerminalTheme } from './webview-contract'
 
 // Why: xterm cannot consume Uniwind classes, so theme changes are translated
 // into the runtime message shape without reloading the terminal document.

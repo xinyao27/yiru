@@ -1,4 +1,5 @@
 import type { RpcClient } from '../transport/rpc-client'
+import { getRepoIdFromMobileWorktreeId } from '../worktree-id'
 import { isMobileGitUnavailable } from './mobile-git-status'
 
 type RuntimeRepoSummary = {
@@ -12,11 +13,6 @@ type RuntimeWorktreeSummary = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
-}
-
-function getRepoIdFromMobileWorktreeId(id: string): string {
-  const separatorIdx = id.indexOf('::')
-  return separatorIdx === -1 ? id : id.slice(0, separatorIdx)
 }
 
 function readRepoSummaries(value: unknown): RuntimeRepoSummary[] {

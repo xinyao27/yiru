@@ -2,7 +2,7 @@ import { Pressable, Text, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import type { MobileBrowserViewMode } from './browser-screencast-request'
+import type { MobileBrowserViewMode } from './screencast-request'
 
 type Props = {
   disabled: boolean

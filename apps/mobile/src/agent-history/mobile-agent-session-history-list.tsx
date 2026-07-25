@@ -7,9 +7,9 @@ import { Play } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/mobile-agent-icon'
-import type { MobileAgentHistorySection } from './agent-history-sections'
-import type { MobileAgentHistoryCard } from './agent-history-session-card'
-import { styles } from './agent-history-styles'
+import type { MobileAgentHistorySection } from './sections'
+import type { MobileAgentHistoryCard } from './session-card'
+import { styles } from './styles'
 
 // Lazy-render at most this many preview turns when a card is tapped — the
 // scanner already bounds preview text, but rendering them only on tap keeps the

@@ -1,4 +1,4 @@
-import { getTerminalLiveSpecialKeyBytes } from './terminal-live-input'
+import { getTerminalLiveSpecialKeyBytes } from './live-input'
 
 export type TerminalLiveSpecialKeyDecision =
   | { readonly kind: 'ignore' }

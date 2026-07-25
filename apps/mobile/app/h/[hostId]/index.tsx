@@ -79,6 +79,7 @@ import type { RpcClient } from '../../../src/transport/rpc-client'
 import type { RpcSuccess } from '../../../src/transport/types'
 import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'
 import type { RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
+import { areWorktreeListsEqual } from '../../../src/worktree/list-snapshot'
 import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/mobile-workspace-lineage'
 import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '../../../src/worktree/mobile-workspace-statuses'
 import { repoColor } from '../../../src/worktree/repo-color'
@@ -101,7 +102,6 @@ import {
   type MobileViewState,
   type WorkspaceViewSettings
 } from '../../../src/worktree/workspace-view-settings'
-import { areWorktreeListsEqual } from '../../../src/worktree/worktree-list-snapshot'
 
 function isErrorVerdict(v: ConnectionVerdict): boolean {
   return v.kind === 'warning' || v.kind === 'unreachable' || v.kind === 'auth-failed'

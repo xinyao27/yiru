@@ -19,14 +19,14 @@ import type { MobileGitStatusResult } from '../source-control/mobile-git-status'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import { prSidebarRenderBranch } from './mobile-pr-sidebar-presentation'
+import { PrSidebarCreateEmptyState } from './pr-sidebar/create-empty-state'
+import { PRSidebarHeader } from './pr-sidebar/header'
 import { mobilePrSidebarStyles as styles } from './pr-sidebar/mobile-pr-sidebar-styles'
 import { PRActionsSection } from './pr-sidebar/pr-actions-section'
 import { PRChecksSection } from './pr-sidebar/pr-checks-section'
 import { PRCommentsSection } from './pr-sidebar/pr-comments-section'
 import { PRConflictingFilesSection } from './pr-sidebar/pr-conflicting-files-section'
 import { PRReviewersSection } from './pr-sidebar/pr-reviewers-section'
-import { PrSidebarCreateEmptyState } from './pr-sidebar/pr-sidebar-create-empty-state'
-import { PRSidebarHeader } from './pr-sidebar/pr-sidebar-header'
 
 type Props = {
   state: PrSidebarState

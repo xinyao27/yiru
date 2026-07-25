@@ -12,7 +12,7 @@ import type { Worktree } from '../worktree/workspace-list-types'
 import {
   canResumeInMobileSessionWorktree,
   resolveMobileAgentHistorySessionWorktree
-} from './agent-history-session-worktree'
+} from './session-worktree'
 
 export type MobileAiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'
 

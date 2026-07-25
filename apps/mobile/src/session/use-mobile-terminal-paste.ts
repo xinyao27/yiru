@@ -3,7 +3,7 @@ import { File as FsFile, Paths } from 'expo-file-system'
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { useCallback, type RefObject } from 'react'
 
-import type { TerminalModes } from '../terminal/terminal-webview-contract'
+import type { TerminalModes } from '../terminal/webview-contract'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import {

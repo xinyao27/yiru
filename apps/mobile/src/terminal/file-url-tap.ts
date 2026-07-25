@@ -1,5 +1,5 @@
-import type { TappedFilePath } from './terminal-path-tap'
-import { parsePathWithOptionalLineColumn } from './terminal-path-tap'
+import type { TappedFilePath } from './path-tap'
+import { parsePathWithOptionalLineColumn } from './path-tap'
 
 export function resolveTerminalFileUrlTap(uri: string): TappedFilePath | null {
   let parsed: URL

@@ -50,9 +50,9 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
-import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/agent-history-capability'
-import { normalizeBrowserUrl } from '../../../../src/browser/browser-url'
+import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/capability'
 import { MobileBrowserPane } from '../../../../src/browser/mobile-browser-pane'
+import { normalizeBrowserUrl } from '../../../../src/browser/url'
 import { ActionSheetModal } from '../../../../src/components/action-sheet-modal'
 import { ConfirmModal } from '../../../../src/components/confirm-modal'
 import {
@@ -73,6 +73,7 @@ import {
   fetchDictationSetup,
   isDictationSetupRequiredError
 } from '../../../../src/dictation/mobile-dictation-setup'
+import { isFileExistsErrorMessage } from '../../../../src/files/file-exists-error'
 import { resolveMobileFileTabDoc } from '../../../../src/files/mobile-file-tab-doc'
 import { useMobileDictation } from '../../../../src/hooks/use-mobile-dictation'
 import { useResponsiveLayout } from '../../../../src/layout/responsive-layout'
@@ -83,6 +84,7 @@ import {
   triggerError,
   triggerEdgeBump
 } from '../../../../src/platform/haptics'
+import { SessionDockColumn } from '../../../../src/session/dock-column'
 import { isFloatingWorkspaceWorktreeId } from '../../../../src/session/floating-workspace'
 import { resolveMarkdownFloatingActionsBottom } from '../../../../src/session/markdown-floating-actions-layout'
 import { MobileBrowserTabActionSheet } from '../../../../src/session/mobile-browser-tab-action-sheet'
@@ -116,19 +118,6 @@ import {
 import { MobileSessionHeaderIconButton } from '../../../../src/session/mobile-session-header-icon-button'
 import { MobileSessionHeaderMoreActionsSheet } from '../../../../src/session/mobile-session-header-more-actions-sheet'
 import {
-  getRepoIdFromMobileWorktreeId,
-  getActiveTabIdForHandle,
-  isFileExistsErrorMessage,
-  isGestureMouseTrackingMode,
-  MOBILE_SESSION_STATUS_LABELS,
-  TERMINAL_GESTURE_INPUT_BUCKET_CAPACITY,
-  TERMINAL_GESTURE_INPUT_FLUSH_DELAY_MS,
-  TERMINAL_GESTURE_INPUT_MAX_PENDING_SEQUENCES,
-  TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS,
-  TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND,
-  updateTerminalCwdFromStreamEvent
-} from '../../../../src/session/mobile-session-route-helpers'
-import {
   activateMobileSessionTab,
   focusMobileTerminal
 } from '../../../../src/session/mobile-session-tab-activation'
@@ -138,11 +127,13 @@ import { openMobileTerminalFileTap } from '../../../../src/session/mobile-termin
 import { MobileTerminalInputActions } from '../../../../src/session/mobile-terminal-input-actions'
 import { MobileTerminalLiveInputStatus } from '../../../../src/session/mobile-terminal-live-input-status'
 import {
+  getActiveTabIdForHandle,
   getTerminalRecordsFromSessionTabs,
   mergeTerminalListWithKnownRecords,
   mergeTerminalRecordsByCurrentOrder,
   mobileSessionTabsEqual,
-  terminalRecordsEqual
+  terminalRecordsEqual,
+  updateTerminalCwdFromStreamEvent
 } from '../../../../src/session/mobile-terminal-records'
 import { subscribeMobileTerminalSafely } from '../../../../src/session/mobile-terminal-stream-subscribe'
 import {
@@ -150,21 +141,21 @@ import {
   resolveMobileTerminalTabAgentId
 } from '../../../../src/session/mobile-terminal-tab-agent'
 import { activateOpenedSourceControlDiffTab } from '../../../../src/session/opened-mobile-session-tab'
-import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
-import { SessionDockColumn } from '../../../../src/session/session-dock-column'
 import {
   type ActivePanel,
   canDockSessionPanel,
   resolvePanelAction,
   shouldShowSessionHeaderChecksAction,
   panelRouteDescriptor
-} from '../../../../src/session/session-panel-host'
+} from '../../../../src/session/panel-host'
+import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
+import { MOBILE_SESSION_STATUS_LABELS } from '../../../../src/session/status-labels'
 import {
   acceptSessionSnapshot,
   applyClosedTabTombstones,
   confirmsMirroredTabSelection,
   type AppliedSnapshotMarker
-} from '../../../../src/session/session-tab-snapshot-gate'
+} from '../../../../src/session/tab-snapshot-gate'
 import { resolveTabStripScrollOffset } from '../../../../src/session/tab-strip-scroll'
 import { TerminalPaneView } from '../../../../src/session/terminal-pane-view'
 import { useLiveWorktreeName } from '../../../../src/session/use-live-worktree-name'
@@ -185,51 +176,59 @@ import {
   saveTerminalTextScale,
   type MobileTerminalLinkOpenMode
 } from '../../../../src/storage/preferences'
+import {
+  getDefaultTerminalAccessoryBuiltInIds,
+  getVisibleTerminalAccessoryKeys,
+  loadTerminalAccessoryLayout
+} from '../../../../src/terminal/accessory-layout'
+import {
+  recoverActiveTerminalAfterForeground,
+  shouldRecoverTerminalOnAppStateChange
+} from '../../../../src/terminal/foreground-recovery'
+import {
+  countTerminalGestureInputSequences,
+  isGestureMouseTrackingMode,
+  TERMINAL_GESTURE_INPUT_BUCKET_CAPACITY,
+  TERMINAL_GESTURE_INPUT_FLUSH_DELAY_MS,
+  TERMINAL_GESTURE_INPUT_MAX_PENDING_SEQUENCES,
+  TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS,
+  TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
+} from '../../../../src/terminal/gesture-input'
+import { dismissTerminalKeyboard } from '../../../../src/terminal/keyboard-dismiss'
+import {
+  getTerminalCommandKeyboardType,
+  getTerminalLiveInputKeyboardType
+} from '../../../../src/terminal/keyboard-type'
+import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/live-accessory-input'
+import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/live-accessory-raw-send-target'
+import {
+  appendBufferedDictation,
+  routeDictationTranscript
+} from '../../../../src/terminal/live-dictation-routing'
+import {
+  clearTerminalLiveInputFocusTimer,
+  focusTerminalLiveInputTarget,
+  isTerminalLiveInputWithinByteLimit,
+  scheduleTerminalLiveInputFocus
+} from '../../../../src/terminal/live-input'
+import type { TerminalLiveInputSender } from '../../../../src/terminal/live-input-sender'
 import { sendMobileTerminalQueryReply } from '../../../../src/terminal/mobile-terminal-query-reply'
+import { isTerminalOscLinkRanges } from '../../../../src/terminal/osc-link-ranges'
 import {
   buildMobileQuickCommandLaunch,
   shouldShowMobileQuickCommandsAction,
   supportsMobileQuickCommands,
   type MobileQuickCommandLaunch
 } from '../../../../src/terminal/quick-commands'
-import {
-  getDefaultTerminalAccessoryBuiltInIds,
-  getVisibleTerminalAccessoryKeys,
-  loadTerminalAccessoryLayout
-} from '../../../../src/terminal/terminal-accessory-layout'
-import {
-  recoverActiveTerminalAfterForeground,
-  shouldRecoverTerminalOnAppStateChange
-} from '../../../../src/terminal/terminal-foreground-recovery'
-import { countTerminalGestureInputSequences } from '../../../../src/terminal/terminal-gesture-input'
-import { dismissTerminalKeyboard } from '../../../../src/terminal/terminal-keyboard-dismiss'
-import {
-  getTerminalCommandKeyboardType,
-  getTerminalLiveInputKeyboardType
-} from '../../../../src/terminal/terminal-keyboard-type'
-import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/terminal-live-accessory-input'
-import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/terminal-live-accessory-raw-send-target'
-import {
-  appendBufferedDictation,
-  routeDictationTranscript
-} from '../../../../src/terminal/terminal-live-dictation-routing'
-import {
-  clearTerminalLiveInputFocusTimer,
-  focusTerminalLiveInputTarget,
-  isTerminalLiveInputWithinByteLimit,
-  scheduleTerminalLiveInputFocus
-} from '../../../../src/terminal/terminal-live-input'
-import type { TerminalLiveInputSender } from '../../../../src/terminal/terminal-live-input-sender'
-import { isTerminalOscLinkRanges } from '../../../../src/terminal/terminal-osc-link-ranges'
-import { isTerminalSendRpcAccepted } from '../../../../src/terminal/terminal-send-rpc-response'
-import { normalizeTerminalTextInput } from '../../../../src/terminal/terminal-text-input-normalization'
-import { useTerminalViewportRefit } from '../../../../src/terminal/terminal-viewport-refit'
+import { isTerminalSendRpcAccepted } from '../../../../src/terminal/send-rpc-response'
+import { normalizeTerminalTextInput } from '../../../../src/terminal/text-input-normalization'
+import { useTerminalLiveInputCommit } from '../../../../src/terminal/use-terminal-live-input-commit'
+import { useTerminalViewportRefit } from '../../../../src/terminal/viewport-refit'
 import type {
   TerminalKeyboardAvoidanceMetrics,
   TerminalModes,
   TerminalWebViewHandle
-} from '../../../../src/terminal/terminal-webview-contract'
-import { useTerminalLiveInputCommit } from '../../../../src/terminal/use-terminal-live-input-commit'
+} from '../../../../src/terminal/webview-contract'
 import { spacing } from '../../../../src/theme/uniwind-theme-values'
 import { useHostClient, useForceReconnect } from '../../../../src/transport/client-context'
 import {
@@ -243,7 +242,8 @@ import {
 import { loadHosts } from '../../../../src/transport/host-store'
 import type { RpcClient } from '../../../../src/transport/rpc-client'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '../../../../src/transport/types'
-import { headlessActivationNeedsHostRenderer } from '../../../../src/worktree/worktree-activation-result'
+import { getRepoIdFromMobileWorktreeId } from '../../../../src/worktree-id'
+import { headlessActivationNeedsHostRenderer } from '../../../../src/worktree/activation-result'
 import type {
   DiffCommentActions,
   DiffNotesDelivery,

@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vite-plus/test'
 
 import type { RpcClient } from '../transport/rpc-client'
 import { createBlankWorkspace } from './blank-workspace-create'
+import { buildMobileWorkspaceAgentLaunchFields } from './params'
 import { createWorkspaceFromComposerSource } from './source-workspace-create'
-import { buildMobileWorkspaceAgentLaunchFields } from './workspace-create-params'
 
 const STARTUP_AGENT_CAPABILITY = 'workspace-create.startup-agent.v1'
 

@@ -3,13 +3,13 @@ import { View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import { TerminalWebView } from '../terminal/terminal-web-view'
+import { TerminalWebView } from '../terminal/web-view'
 import type {
   MobileTerminalTheme,
   TerminalKeyboardAvoidanceMetrics,
   TerminalModes,
   TerminalWebViewHandle
-} from '../terminal/terminal-webview-contract'
+} from '../terminal/webview-contract'
 
 type TerminalPaneViewProps = {
   handle: string

@@ -11,7 +11,7 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { statusColorClasses } from '../components/pr-sidebar/pr-sidebar-status-color'
+import { statusColorClasses } from '../components/pr-sidebar/status-color'
 import type { MobilePrChipRollup, MobilePrChipSummary } from './mobile-pr-chip-summary'
 import { hubStyles } from './mobile-source-control-hub-styles'
 

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, type RefObject } from 'react'
 import type { TextInput } from 'react-native'
 
-import type { TerminalLiveAccessoryInput } from './terminal-live-accessory-input'
-import { sendTerminalLiveControlAfterPendingFlush } from './terminal-live-control-send-order'
-import type { TerminalLiveInputSender } from './terminal-live-input-sender'
-import { getTerminalLiveSpecialKeyDecision } from './terminal-live-text-commit'
-import { normalizeTerminalTextInput } from './terminal-text-input-normalization'
+import type { TerminalLiveAccessoryInput } from './live-accessory-input'
+import { sendTerminalLiveControlAfterPendingFlush } from './live-control-send-order'
+import type { TerminalLiveInputSender } from './live-input-sender'
+import { getTerminalLiveSpecialKeyDecision } from './live-text-commit'
+import { normalizeTerminalTextInput } from './text-input-normalization'
 import {
   useTerminalLiveAccessoryInputCommit,
   type TerminalLiveAccessoryInputCommitResult

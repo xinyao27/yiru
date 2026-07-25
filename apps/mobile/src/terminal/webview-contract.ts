@@ -1,6 +1,6 @@
 import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-runtime-types'
 
-import type { TerminalOscLinkRange } from './terminal-osc-link-ranges'
+import type { TerminalOscLinkRange } from './osc-link-ranges'
 
 type TerminalMouseTrackingMode = 'none' | 'x10' | 'vt200' | 'drag' | 'any'
 

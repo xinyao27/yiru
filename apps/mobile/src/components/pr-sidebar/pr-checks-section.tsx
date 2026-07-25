@@ -27,7 +27,7 @@ import {
   summarizePRChecks
 } from './pr-checks-presentation'
 import { PRSection } from './pr-section'
-import { statusColorClasses } from './pr-sidebar-status-color'
+import { statusColorClasses } from './status-color'
 
 // Launches the "Fix checks with AI" agent. Absent for display-only usages.
 export type PrChecksTriage = {

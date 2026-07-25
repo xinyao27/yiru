@@ -9,8 +9,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHostClient, useForceReconnect } from '../transport/client-context'
 import type { RpcSuccess } from '../transport/types'
 import type { Worktree } from '../worktree/workspace-list-types'
-import { MOBILE_AI_VAULT_CAPABILITY } from './agent-history-capability'
-import { deriveMobileAiVaultScopePaths } from './agent-history-scope-paths'
+import { MOBILE_AI_VAULT_CAPABILITY } from './capability'
+import { deriveMobileAiVaultScopePaths } from './scope-paths'
 
 export { MOBILE_AI_VAULT_CAPABILITY }
 

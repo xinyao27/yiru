@@ -5,19 +5,19 @@ import type { WebView, WebViewMessageEvent } from 'react-native-webview'
 import { cn } from '@/style/class-names'
 
 import { UniwindWebView } from '../components/uniwind-web-view'
-import type { TerminalOscLinkRange } from './terminal-osc-link-ranges'
-import type { TerminalWebViewHandle, TerminalWebViewProps } from './terminal-webview-contract'
+import type { TerminalOscLinkRange } from './osc-link-ranges'
+import { useTerminalWebViewTheme } from './use-terminal-webview-theme'
+import type { TerminalWebViewHandle, TerminalWebViewProps } from './webview-contract'
 import {
   TerminalWebViewEngineErrorOverlay,
   useTerminalWebViewEngineErrorState
-} from './terminal-webview-engine-error-state'
-import { TERMINAL_WEBVIEW_FRAME_STYLES } from './terminal-webview-frame-styles'
-import { XTERM_WEBVIEW_SOURCE } from './terminal-webview-html'
-import type { TerminalWebViewCommand } from './terminal-webview-messages'
-import { createTerminalWebViewPendingMessages } from './terminal-webview-pending-messages'
-import { routeTerminalQueryReply } from './terminal-webview-query-reply-routing'
-import { useTerminalWebReadyWatchdog } from './terminal-webview-ready-watchdog'
-import { useTerminalWebViewTheme } from './use-terminal-webview-theme'
+} from './webview-engine-error-state'
+import { TERMINAL_WEBVIEW_FRAME_STYLES } from './webview-frame-styles'
+import { XTERM_WEBVIEW_SOURCE } from './webview-html'
+import type { TerminalWebViewCommand } from './webview-messages'
+import { createTerminalWebViewPendingMessages } from './webview-pending-messages'
+import { routeTerminalQueryReply } from './webview-query-reply-routing'
+import { useTerminalWebReadyWatchdog } from './webview-ready-watchdog'
 
 export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebViewProps>(
   function TerminalWebView(

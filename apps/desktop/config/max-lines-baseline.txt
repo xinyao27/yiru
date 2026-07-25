@@ -222,6 +222,6 @@ mobile-config src/browser/mobile-browser-pane.tsx
 mobile-config src/components/custom-key-modal.tsx
 mobile-config src/components/mobile-rich-markdown-editor-html.ts
 mobile-config src/components/new-worktree-modal.tsx
-mobile-config src/terminal/terminal-accessory-keys.ts
-mobile-config src/terminal/terminal-webview-html.ts
+mobile-config src/terminal/accessory-keys.ts
+mobile-config src/terminal/webview-html.ts
 mobile-config src/transport/rpc-client.ts

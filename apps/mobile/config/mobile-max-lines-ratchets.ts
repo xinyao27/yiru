@@ -12,11 +12,11 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(5_015) }
   },
   {
-    files: ['src/terminal/terminal-web-view.tsx'],
+    files: ['src/terminal/web-view.tsx'],
     rules: { 'max-lines': createMaxLinesRule(379) }
   },
   {
-    files: ['src/terminal/terminal-webview-html.ts'],
+    files: ['src/terminal/webview-html.ts'],
     rules: { 'max-lines': createMaxLinesRule(1_784) }
   },
   {
@@ -60,7 +60,7 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(514) }
   },
   {
-    files: ['src/terminal/terminal-accessory-keys.ts'],
+    files: ['src/terminal/accessory-keys.ts'],
     rules: { 'max-lines': createMaxLinesRule(388) }
   },
   {

@@ -5,13 +5,13 @@ import type {
   MobileLinkedWorkItem
 } from './mobile-composer-source-types'
 import { resolveMobileWorkspaceCreateName } from './mobile-workspace-name'
-import type { WorkspaceAgentChoice } from './workspace-agent-selection'
 import {
   buildMobileWorkspaceAgentLaunchFields,
   buildReviewWorkspaceCreateParams,
   type WorkspaceCreateSetupDecision,
   type WorkspaceCreateReviewItem
-} from './workspace-create-params'
+} from './params'
+import type { WorkspaceAgentChoice } from './workspace-agent-selection'
 import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'
 
 // Why: work-item sources seed their URL through startupDraft; branch sources

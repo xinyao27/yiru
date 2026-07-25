@@ -1,9 +1,23 @@
+import type { TerminalModes } from './webview-contract'
+
 const ESC = '\x1b'
 const MAX_TERMINAL_GESTURE_INPUT_LENGTH = 2048
 const MAX_TERMINAL_GESTURE_INPUT_SEQUENCES = 32
 const SGR_MOUSE_GESTURE_SEQUENCE_RE = new RegExp(
   `^${ESC}\\[<(0|64|65);([0-9]{1,4});([0-9]{1,4})([Mm])$`
 )
+
+export const TERMINAL_GESTURE_INPUT_BUCKET_CAPACITY = 64
+export const TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND = 120
+export const TERMINAL_GESTURE_INPUT_FLUSH_DELAY_MS = 16
+export const TERMINAL_GESTURE_INPUT_MAX_PENDING_SEQUENCES = 32
+export const TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS = 250
+
+export function isGestureMouseTrackingMode(
+  mode: TerminalModes['mouseTrackingMode'] | undefined
+): boolean {
+  return mode === 'x10' || mode === 'vt200' || mode === 'drag' || mode === 'any'
+}
 
 function isDefaultMouseGestureSequence(bytes: string, offset: number): number | null {
   if (!bytes.startsWith(`${ESC}[M`, offset) || offset + 6 > bytes.length) {

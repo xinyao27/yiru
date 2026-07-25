@@ -5,12 +5,12 @@ import {
   buildTerminalLiveMirrorPayload,
   computeTerminalLiveMirrorStep,
   TERMINAL_LIVE_HELD_SYLLABLE_COMMIT_DELAY_MS
-} from './terminal-live-hangul-mirror'
-import type { TerminalLiveInputSender } from './terminal-live-input-sender'
+} from './live-hangul-mirror'
+import type { TerminalLiveInputSender } from './live-input-sender'
 import {
   queueTerminalLiveMirrorSend,
   waitForTerminalLivePendingFlush
-} from './terminal-live-pending-flush-state'
+} from './live-pending-flush-state'
 
 type TerminalLivePendingInputFlushOptions<TTabType extends string> = {
   readonly activeHandleRef: RefObject<string | null>
