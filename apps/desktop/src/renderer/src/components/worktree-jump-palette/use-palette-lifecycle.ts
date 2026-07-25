@@ -4,7 +4,7 @@ import {
   captureCmdJActiveGroupSnapshot,
   type CmdJActiveGroupSnapshot
 } from '@/components/cmd-j/quick-action-context'
-import { createWorktreePaletteRequestGuard } from '@/lib/worktree-palette-create-action'
+import { createWorktreePaletteRequestGuard } from '@/components/worktree-jump-palette/worktree-palette-create-action'
 import { useAppStore } from '@/store'
 
 import type { PaletteStoreState } from './use-palette-store-state'

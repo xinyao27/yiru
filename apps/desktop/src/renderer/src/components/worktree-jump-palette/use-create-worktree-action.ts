@@ -2,15 +2,15 @@ import type React from 'react'
 import { useCallback, useEffect } from 'react'
 
 import { CREATE_WORKSPACE_QUICK_ACTION_ID } from '@/components/cmd-j/quick-actions'
+import {
+  CREATE_WORKTREE_ITEM_ID,
+  type WorktreePaletteRequestGuard
+} from '@/components/worktree-jump-palette/worktree-palette-create-action'
 import { parseGitHubPullRequestNumber, parseGitHubPullRequestLink } from '@/lib/github-links'
 import { lookupGitHubWorkItemForSource } from '@/lib/github-work-item-source-lookup'
 import { getLinkedWorkItemSuggestedName, getLinkedWorkItemWorkspaceName } from '@/lib/new-workspace'
 import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import {
-  CREATE_WORKTREE_ITEM_ID,
-  type WorktreePaletteRequestGuard
-} from '@/lib/worktree-palette-create-action'
 import { useAppStore } from '@/store'
 import { getRepoMapFromState } from '@/store/selectors'
 

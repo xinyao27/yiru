@@ -2,8 +2,8 @@ import type React from 'react'
 import { useCallback, useDeferredValue, useState } from 'react'
 
 import { CommandDialog, CommandInput, CommandList } from '@/components/ui/command'
+import { getNextWorktreePaletteSelection } from '@/components/worktree-jump-palette/worktree-palette-create-action'
 import { translate } from '@/i18n/i18n'
-import { getNextWorktreePaletteSelection } from '@/lib/worktree-palette-create-action'
 
 import { FooterKey } from './palette-parts'
 import { PaletteResultsList } from './rows/palette-list'

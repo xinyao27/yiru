@@ -55,6 +55,10 @@ import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspa
 import { getSuggestedCreatureName } from '@/components/sidebar/worktree-name-suggestions'
 import { runBackgroundWorktreeCreation } from '@/components/worktree-creation/flow'
 import { queueNewWorkspaceTerminalFocus } from '@/components/worktree-creation/new-workspace-terminal-focus'
+import {
+  getComposerEligibleRepos,
+  resolveComposerActiveRepoId
+} from '@/components/worktree-jump-palette/new-workspace-composer-repo'
 import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
@@ -86,10 +90,6 @@ import {
   type LinkedWorkItemSummary,
   type SetupConfig
 } from '@/lib/new-workspace'
-import {
-  getComposerEligibleRepos,
-  resolveComposerActiveRepoId
-} from '@/lib/new-workspace-composer-repo'
 import {
   getFullComposerCreateDisabled,
   getQuickComposerCreateDisabled

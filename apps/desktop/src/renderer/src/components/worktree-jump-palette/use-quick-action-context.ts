@@ -9,7 +9,7 @@ import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import {
   getComposerEligibleRepos,
   resolveComposerGitRepoId
-} from '@/lib/new-workspace-composer-repo'
+} from '@/components/worktree-jump-palette/new-workspace-composer-repo'
 import { useAppStore } from '@/store'
 
 import type { PaletteStoreState } from './use-palette-store-state'

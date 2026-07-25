@@ -6,7 +6,7 @@ import {
 
 import { projectHostSetupProjectionFromRepos } from '../../../shared/project-host-setup-projection'
 import type { Project, ProjectHostSetup, Repo } from '../../../shared/types'
-import { resolveComposerRepoId } from './new-workspace-composer-repo'
+import { resolveComposerRepoId } from '../components/worktree-jump-palette/new-workspace-composer-repo'
 
 export type WorkspaceCreationTarget = {
   projectId: string

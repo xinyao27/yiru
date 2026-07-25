@@ -6,10 +6,13 @@ import {
   isAutomationGeneratedWorkspace,
   isDefaultBranchWorkspace
 } from '@/components/sidebar/visible-worktrees'
-import { orderEmptyQueryWorktrees } from '@/lib/order-empty-query-worktrees'
+import { orderEmptyQueryWorktrees } from '@/components/worktree-jump-palette/order-empty-query-worktrees'
+import {
+  getWorktreePaletteSearchScope,
+  searchWorktrees
+} from '@/components/worktree-jump-palette/worktree-palette-search'
 import { getWorkspacePortsByWorktreeId } from '@/lib/workspace-port-groups'
 import { getLiveAgentStatusByWorktreeId, isInactiveWorkspace } from '@/lib/worktree-activity-state'
-import { getWorktreePaletteSearchScope, searchWorktrees } from '@/lib/worktree-palette-search'
 
 import type { Worktree } from '../../../../shared/types'
 import type { WorktreePaletteItem } from './types'
