@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import {
   startAgentHibernationCoordinator,
   stopAgentHibernationCoordinator
-} from '@/lib/agent-hibernation-coordinator'
+} from '@/components/agent-hibernation-coordinator'
 import { useAppStore } from '@/store'
 
 export function AgentHibernationGate(): null {
