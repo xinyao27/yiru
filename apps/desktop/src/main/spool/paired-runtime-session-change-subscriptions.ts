@@ -1,4 +1,4 @@
-import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime-client'
+import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/remote-runtime-client'
 import {
   SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema

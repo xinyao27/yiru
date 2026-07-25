@@ -21,8 +21,13 @@ import {
   generateKeyPair,
   publicKeyFromBase64,
   publicKeyToBase64
-} from './e2ee-crypto'
-import type { PairingOffer } from './pairing'
+} from '../e2ee-crypto'
+import type { PairingOffer } from '../pairing'
+import type {
+  RuntimeMethodContract,
+  RuntimeMethodParams,
+  RuntimeMethodResult
+} from '../runtime-method-contract'
 // Re-export so existing value importers of `RemoteRuntimeClientError` are
 // unaffected; the class lives in a ws-free module so type-only consumers
 // (and mobile's typecheck) don't compile this file's Node-only deps.
@@ -32,11 +37,6 @@ import {
   type RemoteRuntimeSocketLivenessMonitor,
   type RemoteRuntimeSocketLivenessOptions
 } from './remote-runtime-socket-liveness'
-import type {
-  RuntimeMethodContract,
-  RuntimeMethodParams,
-  RuntimeMethodResult
-} from './runtime-method-contract'
 
 export { RemoteRuntimeClientError } from './remote-runtime-client-error'
 

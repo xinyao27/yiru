@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { app, ipcMain } from 'electron'
 
-import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime-client'
+import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/remote-runtime-client'
 import {
   addEnvironmentFromPairingCode,
   listEnvironments,

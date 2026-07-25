@@ -3,8 +3,8 @@ import { randomUUID } from 'node:crypto'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import WebSocket from 'ws'
 
-import { decrypt, encrypt } from './e2ee-crypto'
-import type { PairingOffer } from './pairing'
+import { decrypt, encrypt } from '../e2ee-crypto'
+import type { PairingOffer } from '../pairing'
 import { RemoteRuntimeClientError } from './remote-runtime-client'
 import {
   invalidRemoteRuntimeResponseError,

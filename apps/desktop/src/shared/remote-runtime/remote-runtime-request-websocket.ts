@@ -5,8 +5,8 @@ import {
   generateKeyPair,
   publicKeyFromBase64,
   publicKeyToBase64
-} from './e2ee-crypto'
-import type { PairingOffer } from './pairing'
+} from '../e2ee-crypto'
+import type { PairingOffer } from '../pairing'
 import { RemoteRuntimeClientError } from './remote-runtime-client'
 import {
   invalidRemoteRuntimeResponseError,

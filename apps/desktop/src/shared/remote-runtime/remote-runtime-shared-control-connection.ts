@@ -1,7 +1,7 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import WebSocket from 'ws'
 
-import type { PairingOffer } from './pairing'
+import type { PairingOffer } from '../pairing'
 import type { RemoteRuntimeClientError } from './remote-runtime-client-error'
 import { RemoteRuntimeExistingRouteAccess } from './remote-runtime-existing-route-access'
 import { REMOTE_RUNTIME_CANCEL_REQUEST_METHOD } from './remote-runtime-request-cancellation'

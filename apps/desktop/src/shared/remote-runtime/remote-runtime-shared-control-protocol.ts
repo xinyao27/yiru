@@ -1,7 +1,7 @@
 import type WebSocket from 'ws'
 
-import { decrypt } from './e2ee-crypto'
-import { encrypt } from './e2ee-crypto'
+import { decrypt } from '../e2ee-crypto'
+import { encrypt } from '../e2ee-crypto'
 import { RemoteRuntimeClientError } from './remote-runtime-client'
 import {
   invalidRemoteRuntimeResponseError,

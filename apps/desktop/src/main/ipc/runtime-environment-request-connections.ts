@@ -1,13 +1,13 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 
 import type { PairingOffer } from '../../shared/pairing'
-import { RemoteRuntimeRequestConnection } from '../../shared/remote-runtime-request-connection'
-import { remoteRuntimeUnavailableError } from '../../shared/remote-runtime-request-frames'
-import { RemoteRuntimeSharedControlConnection } from '../../shared/remote-runtime-shared-control-connection'
+import { RemoteRuntimeRequestConnection } from '../../shared/remote-runtime/remote-runtime-request-connection'
+import { remoteRuntimeUnavailableError } from '../../shared/remote-runtime/remote-runtime-request-frames'
+import { RemoteRuntimeSharedControlConnection } from '../../shared/remote-runtime/remote-runtime-shared-control-connection'
 import type {
   RemoteRuntimeSharedConnectionDiagnostics,
   RemoteRuntimeSharedSubscription
-} from '../../shared/remote-runtime-shared-control-types'
+} from '../../shared/remote-runtime/remote-runtime-shared-control-types'
 
 type CachedRuntimeConnection = {
   pairingKey: string

@@ -6,7 +6,7 @@ import {
   sendRemoteRuntimeRequest,
   subscribeRemoteRuntimeRequest,
   type RemoteRuntimeSubscription
-} from '../../shared/remote-runtime-client'
+} from '../../shared/remote-runtime/remote-runtime-client'
 import { resolveEnvironment, markEnvironmentUsed } from '../../shared/runtime-environment-store'
 import {
   getPreferredPairingOffer,

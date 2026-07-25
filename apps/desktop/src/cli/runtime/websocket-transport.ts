@@ -2,7 +2,7 @@ import type { PairingOffer } from '../../shared/pairing'
 import {
   RemoteRuntimeClientError,
   sendRemoteRuntimeRequest
-} from '../../shared/remote-runtime-client'
+} from '../../shared/remote-runtime/remote-runtime-client'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
