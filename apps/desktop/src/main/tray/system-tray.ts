@@ -4,8 +4,8 @@ import menuBarIconPath from '../../../resources/tray/yiru-menu-barTemplate.png?a
 import menuBarIconRetinaPath from '../../../resources/tray/yiru-menu-barTemplate@2x.png?asset&asarUnpack'
 import { createAppIconImage } from '../app-icon'
 import { translateMain } from '../i18n/main-i18n'
-import { composeTrayAttentionIcon, tintTrayTemplateForAttention } from './tray-attention-icon'
-import { stampTrayDevBadge } from './tray-dev-badge'
+import { composeTrayAttentionIcon, tintTrayTemplateForAttention } from './attention-icon'
+import { stampTrayDevBadge } from './dev-badge'
 
 export type SystemTrayOptions = {
   /** App icon id from settings; the tray reuses the app icon image. */

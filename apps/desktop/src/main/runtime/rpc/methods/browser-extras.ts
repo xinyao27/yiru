@@ -4,8 +4,8 @@ import {
   BrowserTarget,
   OptionalFiniteNumber
 } from '../../../../shared/runtime-method-contracts/runtime-method-params'
+import { assertRpcClipboardTextWriteWithinLimit } from '../clipboard-text-validation'
 import { defineMethod, type RpcMethod } from '../core'
-import { assertRpcClipboardTextWriteWithinLimit } from '../rpc-clipboard-text-validation'
 import {
   ClipboardWrite,
   CookieDelete,

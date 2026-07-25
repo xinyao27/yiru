@@ -6,16 +6,16 @@ import {
   SpoolPairedRuntimeHistoricalSessionSchema,
   SpoolPairedRuntimeLiveSessionSchema
 } from '../../../../shared/spool/spool-paired-runtime-session-contract'
-import { SpoolExecutionError } from '../../../spool/spool-execution-error'
+import { SpoolExecutionError } from '../../../spool/execution-error'
 import {
   resolveSpoolLiveSessionIdentity,
   spoolObservedAgentProvider
-} from '../../../spool/spool-live-session-display-identity'
+} from '../../../spool/live-session-display-identity'
 import type {
   SpoolExecutionHostSessionReader,
   SpoolHistoricalSessionPurpose
-} from '../../../spool/spool-session-source'
-import type { SpoolTerminalSessionBindings } from '../../../spool/spool-terminal-session-bindings'
+} from '../../../spool/session-source'
+import type { SpoolTerminalSessionBindings } from '../../../spool/terminal-session-bindings'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 
 type SessionRuntime = Pick<YiruRuntimeService, 'listMobileSessionTabs'>

@@ -21,12 +21,12 @@ export {
   parseGlabAuthStatusHosts,
   parseGitLabProjectRef,
   resolveProjectRemote
-} from './gitlab-project-ref-resolution'
+} from './project-ref-resolution'
 export type {
   LocalGitExecOptions,
   ProjectRef,
   ResolvedProjectSource
-} from './gitlab-project-ref-resolution'
+} from './project-ref-resolution'
 export { parseGlabApiResponse, type GlabApiResponse } from './glab-api-response'
 
 const MAX_CONCURRENT = 4

@@ -11,7 +11,7 @@ export { parsePtySessionId } from '@yiru/workbench-model/workspace'
 
 /**
  * Session IDs use the format `${worktreeId}@@${shortUuid}` so that
- * DaemonPtyAdapter.reconcileOnStartup (see daemon-pty-adapter.ts) can
+ * DaemonPtyAdapter.reconcileOnStartup (see pty-adapter.ts) can
  * derive the owning worktree by splitting on the @@ separator.
  *
  * Both pty.ts (host-daemon spawn path) and DaemonPtyAdapter.doSpawn

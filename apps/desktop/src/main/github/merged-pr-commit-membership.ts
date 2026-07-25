@@ -1,6 +1,6 @@
 import { ghExecFileAsync } from './gh-utils'
-import type { OwnerRepo } from './github-repository-identity'
 import { noteRateLimitSpend, rateLimitGuard } from './rate-limit'
+import type { OwnerRepo } from './repository-identity'
 
 type GhExecOptions = Parameters<typeof ghExecFileAsync>[1]
 

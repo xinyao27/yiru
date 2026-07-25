@@ -25,7 +25,7 @@ import type {
 import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
 import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
 import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/worktree-submodule-removal'
-import { getLocalGitCapabilityCache } from './git-capability-state'
+import { getLocalGitCapabilityCache } from './capability-state'
 import { gitExecFileAsync, translateWslOutputPaths } from './runner'
 import { resolveGitDir, runWithGitReadCacheInvalidation } from './status'
 import { hasWorktreeBaseCommitRef } from './worktree-base-ref-probe'

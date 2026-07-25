@@ -2,7 +2,7 @@ import { lstat, readdir, realpath } from 'node:fs/promises'
 import { isAbsolute, join, relative, sep } from 'node:path'
 
 import type { FileUploadSession, IFilesystemProvider } from '../providers/types'
-import { assertSafeRemotePathSegment, type RemotePathFlavor } from '../ssh/ssh-remote-platform'
+import { assertSafeRemotePathSegment, type RemotePathFlavor } from '../ssh/remote-platform'
 
 export async function captureLocalUploadRoot(
   sourcePath: string,

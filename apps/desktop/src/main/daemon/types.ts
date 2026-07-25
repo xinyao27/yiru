@@ -3,12 +3,12 @@ import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-l
 import type {
   ConfirmForegroundProcessRequest,
   GetForegroundProcessRequest
-} from './daemon-foreground-process-protocol'
+} from './foreground-process-protocol'
 
 export type {
   ConfirmForegroundProcessRequest,
   GetForegroundProcessRequest
-} from './daemon-foreground-process-protocol'
+} from './foreground-process-protocol'
 
 // ─── Protocol Version ────────────────────────────────────────────────
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
@@ -73,10 +73,10 @@ export type TerminalModes = {
   kittyKeyboardFlags?: number
 }
 
-// The on-disk checkpoint.json shape lives in daemon-checkpoint-file.ts (it
+// The on-disk checkpoint.json shape lives in checkpoint-file.ts (it
 // depends only on TerminalModes here) — re-exported so existing importers of
 // `./types` keep working.
-export type { TerminalCheckpointFile } from './daemon-checkpoint-file'
+export type { TerminalCheckpointFile } from './checkpoint-file'
 
 // ─── NDJSON Protocol Messages ───────────────────────────────────────
 
@@ -403,9 +403,9 @@ export type DaemonSessionInfo = SessionInfo & {
   protocolVersion: number
 }
 
-// Stream-socket event shapes live in daemon-stream-events.ts; re-exported so
+// Stream-socket event shapes live in stream-events.ts; re-exported so
 // existing importers keep one types entry point.
-export * from './daemon-stream-events'
+export * from './stream-events'
 
 // ─── Binary Frame Protocol (Daemon ↔ PTY Subprocess) ────────────────
 //
@@ -431,9 +431,5 @@ export const NOTIFY_PREFIX = 'notify_'
 
 // ─── Error types ────────────────────────────────────────────────────
 // Re-exported so existing importers of `./types` keep working; the classes
-// live in daemon-errors.ts (this file is capped for wire-shape declarations).
-export {
-  TerminalAttachCanceledError,
-  DaemonProtocolError,
-  SessionNotFoundError
-} from './daemon-errors'
+// live in errors.ts (this file is capped for wire-shape declarations).
+export { TerminalAttachCanceledError, DaemonProtocolError, SessionNotFoundError } from './errors'

@@ -1,6 +1,6 @@
 import type { DirEntry } from '../../shared/types'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { isMethodNotFoundError } from '../ssh/ssh-filesystem-stream-reader'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type { SftpFactory } from './ssh-filesystem-file-upload'
 import { lstatViaSftp } from './ssh-filesystem-provider-sftp'
 import type { FileStat } from './types'

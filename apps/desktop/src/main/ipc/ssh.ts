@@ -24,14 +24,14 @@ import {
 import { toAppSshPtyId, toRelaySshPtyId } from '../providers/ssh-pty-id'
 import { isSshPtyNotFoundError } from '../providers/ssh-pty-provider'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { SshConnectionManager, type SshConnectionCallbacks } from '../ssh/ssh-connection'
-import { SshConnectionStore } from '../ssh/ssh-connection-store'
-import { isAuthError } from '../ssh/ssh-connection-utils'
-import { SshPortForwardManager } from '../ssh/ssh-port-forward'
-import { forceStopRelayForTarget } from '../ssh/ssh-relay-reset'
-import { SshRelaySession, type SshRelayAiVaultHostInfo } from '../ssh/ssh-relay-session'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import { SshConnectionManager, type SshConnectionCallbacks } from '../ssh/connection'
+import { SshConnectionStore } from '../ssh/connection-store'
+import { isAuthError } from '../ssh/connection-utils'
+import { SshPortForwardManager } from '../ssh/port-forward'
+import { forceStopRelayForTarget } from '../ssh/relay-reset'
+import { SshRelaySession, type SshRelayAiVaultHostInfo } from '../ssh/relay-session'
+import type { RemoteHostPlatform } from '../ssh/remote-platform'
 import {
   clearProviderPtyState,
   deletePtyOwnership,

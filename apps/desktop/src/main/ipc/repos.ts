@@ -52,8 +52,7 @@ import type {
   BaseRefDefaultResult,
   SparsePreset
 } from '../../shared/types'
-import { getSshGitCapabilityCache } from '../git/git-capability-state'
-import { getSshGitUsername, resolveLocalGitUsername } from '../git/git-username'
+import { getSshGitCapabilityCache } from '../git/capability-state'
 import {
   isGitRepo,
   getGitRepoRoot,
@@ -79,6 +78,7 @@ import {
 import type { ClaimedCloneTarget } from '../git/repo-clone-path'
 import { gitExecFileAsync, gitSpawn, nonInteractiveGitEnv } from '../git/runner'
 import { runWithGitReadCacheInvalidation } from '../git/status'
+import { getSshGitUsername, resolveLocalGitUsername } from '../git/username'
 import type { Store } from '../persistence'
 import {
   assertFolderWorkspacePathUsable,
@@ -96,7 +96,7 @@ import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identity-enrichment'
 import { enrichRepoGitUsernames } from '../repo-git-username-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
-import { joinRemotePath } from '../ssh/ssh-remote-platform'
+import { joinRemotePath } from '../ssh/remote-platform'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'

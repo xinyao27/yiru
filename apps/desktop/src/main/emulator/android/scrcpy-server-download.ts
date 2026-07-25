@@ -6,8 +6,8 @@ import { pipeline } from 'node:stream/promises'
 
 import { app } from 'electron'
 
-import { EmulatorError } from '../emulator-errors'
-import { emulatorProbe, emulatorProbeError } from '../emulator-probe'
+import { EmulatorError } from '../errors'
+import { emulatorProbe, emulatorProbeError } from '../probe'
 import { SCRCPY_SERVER_VERSION } from './scrcpy-server-deploy'
 
 // The scrcpy server jar is fetched by the client on first use (not bundled in

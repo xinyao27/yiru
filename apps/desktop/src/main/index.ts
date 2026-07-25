@@ -44,9 +44,9 @@ import { createHeadlessAutomationOutputSnapshotBuffer } from './automations/head
 import { buildHeadlessAutomationWorktreeCreateArgs } from './automations/headless-workspace-create'
 import { AutomationService } from './automations/service'
 import { AgentBrowserBridge } from './browser/agent-browser-bridge'
-import { browserCertificateTrustController, browserManager } from './browser/browser-manager'
-import { initializeBrowserSessionsForApp } from './browser/browser-session-startup'
+import { browserCertificateTrustController, browserManager } from './browser/manager'
 import { OffscreenBrowserBackend } from './browser/offscreen-browser-backend'
+import { initializeBrowserSessionsForApp } from './browser/session-startup'
 import {
   attachClaudeLivePtyPersistence,
   seedLiveClaudePtysFromPersistence
@@ -55,7 +55,7 @@ import { ClaudeRuntimeAuthService } from './claude-accounts/runtime-auth-service
 import { normalizeClaudeRuntimeSelection } from './claude-accounts/runtime-selection'
 import { ClaudeAccountService } from './claude-accounts/service'
 import { ClaudeUsageStore, initClaudeUsagePath } from './claude-usage/store'
-import { CliInstaller } from './cli/cli-installer'
+import { CliInstaller } from './cli/installer'
 import { reconcileManagedWslCliRegistrations } from './cli/wsl-cli-registration-reconciliation'
 import { CodexRuntimeHomeService } from './codex-accounts/runtime-home-service'
 import {
@@ -64,14 +64,14 @@ import {
 } from './codex-accounts/runtime-selection'
 import { CodexAccountService } from './codex-accounts/service'
 import { CodexUsageStore, initCodexUsagePath } from './codex-usage/store'
+import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
 import {
   ensureRealHomeCodexHookState,
   isRealHomeCodexHookLaneUsable
-} from './codex/codex-real-home-hook-install'
-import { startCodexSessionBackfillInBackground } from './codex/codex-session-backfill'
-import { startCodexSessionIndexHealInBackground } from './codex/codex-session-index-heal'
-import { resolveHostCodexSessionSourceHome } from './codex/codex-session-source-home'
-import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
+} from './codex/real-home-hook-install'
+import { startCodexSessionBackfillInBackground } from './codex/session-backfill'
+import { startCodexSessionIndexHealInBackground } from './codex/session-index-heal'
+import { resolveHostCodexSessionSourceHome } from './codex/session-source-home'
 import {
   recordCoalescedCrashBreadcrumb,
   recordCrashBreadcrumb
@@ -88,13 +88,13 @@ import {
   type ExpectedTeardownScope
 } from './crash-reporting/process-gone-classification'
 import { recordProcessGoneCrash as recordProcessGoneCrashEvent } from './crash-reporting/process-gone-recorder'
-import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemon/daemon-init'
+import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemon/init'
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
-import { EmulatorBridge } from './emulator/emulator-bridge'
+import { EmulatorBridge } from './emulator/bridge'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
-import { GlobalAssistantService } from './global-assistant/global-assistant-service'
+import { GlobalAssistantService } from './global-assistant/service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
 import { closeAllWatchers } from './ipc/filesystem-watcher'
 import { registerMobileHandlers } from './ipc/mobile'
@@ -117,7 +117,7 @@ import {
   registerAppMenu,
   rebuildAppMenu
 } from './menu/register-app-menu'
-import { readMiniMaxSessionCookie } from './minimax/minimax-cookie-store'
+import { readMiniMaxSessionCookie } from './minimax/cookie-store'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { initObservability, shutdownObservability } from './observability'
 import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode-usage/store'
@@ -132,9 +132,9 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
 import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
-import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
-import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
+import { YiruRuntimeRpcServer } from './runtime/rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
 import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/yiru-runtime-files'
 import {
@@ -144,8 +144,8 @@ import {
 import {
   createSpoolDesktopComposition,
   type SpoolDesktopComposition
-} from './spool/spool-desktop-composition'
-import { SpoolUnavailableDesktopService } from './spool/spool-unavailable-desktop-service'
+} from './spool/desktop-composition'
+import { SpoolUnavailableDesktopService } from './spool/unavailable-desktop-service'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -166,6 +166,11 @@ import {
   suppressDevEducationForStore
 } from './startup/dev-education-suppression'
 import { getDevInstanceIdentity } from './startup/dev-instance-identity'
+import {
+  isStartupDiagnosticsEnabled,
+  logStartupDiagnostic,
+  logStartupMilestone
+} from './startup/diagnostics'
 import { ensureVirtualDisplayForHeadlessServe } from './startup/ensure-virtual-display'
 import { startEventLoopStallProbe } from './startup/event-loop-stall-probe'
 import { startFirstWindowStartupServices } from './startup/first-window-startup-services'
@@ -186,11 +191,6 @@ import {
   shouldBypassSingleInstanceLock,
   shouldSkipSingleInstanceLock
 } from './startup/single-instance-lock'
-import {
-  isStartupDiagnosticsEnabled,
-  logStartupDiagnostic,
-  logStartupMilestone
-} from './startup/startup-diagnostics'
 import { shouldQuitWhenAllWindowsClosed } from './startup/window-all-closed-quit-policy'
 import { ensureWindowsUserDataAclGrant } from './startup/windows-user-data-acl'
 import { createWslCliReconciliationStartupBarrier } from './startup/wsl-cli-reconciliation-startup-barrier'
@@ -472,7 +472,7 @@ installUncaughtPipeErrorGuard()
 // Why: propagate the Yiru app version into `process.env` so PTY-env
 // construction in both main (local-pty-provider) and the forked daemon
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
-// electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
+// electron. The daemon inherits `process.env` via fork (daemon/init.ts:93).
 process.env.YIRU_APP_VERSION = app.getVersion()
 configureRemoteServerUpdater({
   getSnapshot: getRemoteServerUpdaterSnapshot,

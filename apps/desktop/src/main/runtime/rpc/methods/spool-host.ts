@@ -15,7 +15,7 @@ import {
   SpoolPairedRuntimeTerminalEventSchema,
   SpoolPairedRuntimeWorktreeCatalogSchema
 } from '../../../../shared/spool/spool-paired-runtime-result-contract'
-import type { SpoolHostSubscription } from '../../../spool/spool-execution-gateway'
+import type { SpoolHostSubscription } from '../../../spool/execution-gateway'
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 import { getSpoolHostChannelLifetimes } from './spool-host-channel-lifetimes'
 import { projectSpoolHostExecutionResult } from './spool-host-result-projection'

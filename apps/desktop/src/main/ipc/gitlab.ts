@@ -30,13 +30,13 @@ import {
   updateMR,
   updateMRReviewers
 } from '../gitlab/client'
+import type { ProjectRef } from '../gitlab/gl-utils'
 import {
   normalizeGitLabMRListState,
   normalizeGitLabPositiveInteger,
   normalizeGitLabSearchQuery
-} from '../gitlab/gitlab-preload-args'
-import type { LocalGitExecOptions } from '../gitlab/gitlab-project-ref-resolution'
-import type { ProjectRef } from '../gitlab/gl-utils'
+} from '../gitlab/preload-args'
+import type { LocalGitExecOptions } from '../gitlab/project-ref-resolution'
 import { getWorkItemDetails } from '../gitlab/work-item-details'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'

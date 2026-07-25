@@ -1,6 +1,6 @@
 // Diagnostic bundle collection for the user-initiated support-report flow.
 // The full redacted NDJSON stays local for preview/export; the send action
-// derives a bounded excerpt for PostHog in support-report-payload.ts.
+// derives a bounded excerpt for PostHog in support-report/payload.ts.
 //
 // Lifecycle:
 //   1. `collectBundle()` — read the last N minutes of NDJSON across the

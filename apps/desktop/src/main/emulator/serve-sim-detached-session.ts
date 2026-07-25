@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { EmulatorError } from './emulator-errors'
-import type { EmulatorSessionInfo } from './emulator-types'
+import { EmulatorError } from './errors'
+import type { EmulatorSessionInfo } from './types'
 
 function streamUrlFromServeSimUrl(url: string): string {
   return url.endsWith('/stream.mjpeg') ? url : `${url.replace(/\/$/, '')}/stream.mjpeg`

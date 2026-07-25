@@ -6,10 +6,10 @@ import {
   runPullWithDivergenceFallback
 } from '../../shared/git-remote-error'
 import type { GitPushTarget } from '../../shared/types'
-import type { GitRuntimeOptions } from './git-runtime-options'
-import { gitOptionsForWorktree } from './git-runtime-options'
 import { validateGitPushTarget } from './push-target-validation'
 import { gitExecFileAsync } from './runner'
+import type { GitRuntimeOptions } from './runtime-options'
+import { gitOptionsForWorktree } from './runtime-options'
 import { runWithGitReadCacheInvalidation } from './status'
 
 async function getConfiguredPushTarget(

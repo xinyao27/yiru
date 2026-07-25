@@ -2,12 +2,12 @@ import { createServer, type Server, type Socket } from 'node:net'
 
 import type { ClientChannel } from 'ssh2'
 
-import type { SshConnection } from './ssh-connection'
+import type { SshConnection } from './connection'
 import type {
   PortForwardStartOptions,
   SshPortForwardProvider,
   StartedPortForward
-} from './ssh-port-forward-provider'
+} from './port-forward-provider'
 
 export class Ssh2PortForwardProvider implements SshPortForwardProvider {
   canHandle(conn: SshConnection): boolean {

@@ -3,7 +3,7 @@ import {
   type SpoolExecutionOperation
 } from '../../../../shared/spool/spool-operation-contract'
 import { parseSpoolPairedRuntimeResult } from '../../../../shared/spool/spool-paired-runtime-result-contract'
-import { SpoolExecutionError } from '../../../spool/spool-execution-error'
+import { SpoolExecutionError } from '../../../spool/execution-error'
 
 export function projectSpoolHostExecutionResult(
   operation: SpoolExecutionOperation,

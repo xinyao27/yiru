@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
 
-import type { SshConnectionManager } from '../ssh/ssh-connection'
-import type { SshExecOptions } from '../ssh/ssh-connection-utils'
-import { powerShellCommand, powerShellLiteral } from '../ssh/ssh-remote-powershell'
+import type { SshConnectionManager } from '../ssh/connection'
+import type { SshExecOptions } from '../ssh/connection-utils'
+import { powerShellCommand, powerShellLiteral } from '../ssh/remote-powershell'
 
 export type RemoteDirEntry = {
   name: string

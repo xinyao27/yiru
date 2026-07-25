@@ -1,6 +1,6 @@
-import type { GitRuntimeOptions } from './git-runtime-options'
-import { gitOptionsForWorktree } from './git-runtime-options'
 import { gitExecFileAsync } from './runner'
+import type { GitRuntimeOptions } from './runtime-options'
+import { gitOptionsForWorktree } from './runtime-options'
 import { runWithGitReadCacheInvalidation } from './status'
 
 /**

@@ -1,22 +1,20 @@
 import { parseWmSize, wmSizeArgs } from '../android/adb-devices'
-import { ensureAdbOk } from '../android/android-adb-result'
-import { bootAndroidDevice } from '../android/android-avd-boot'
+import { ensureAdbOk } from '../android/adb-result'
+import { bootAndroidDevice } from '../android/avd-boot'
+import { emuKillArgs } from '../android/avd-manager'
 import {
   captureAndroidLogcat,
   dumpAndroidAccessibilityTree,
   installAndroidApk,
   launchAndroidApp,
   setAndroidPermission
-} from '../android/android-capability-operations'
-import {
-  execFileAndroidCommandRunner,
-  type AndroidCommandRunner
-} from '../android/android-command-runner'
+} from '../android/capability-operations'
+import { execFileAndroidCommandRunner, type AndroidCommandRunner } from '../android/command-runner'
 import {
   findRunningAvdSerial,
   listAndroidDevices,
   listRunningAdbDevices
-} from '../android/android-device-inventory'
+} from '../android/device-inventory'
 import {
   androidButton,
   androidExec,
@@ -24,19 +22,18 @@ import {
   androidSwipe,
   androidTap,
   androidTypeText
-} from '../android/android-input-commands'
-import type { DeviceScreenSize } from '../android/android-input-mapping'
-import type { AndroidPermissionOp } from '../android/android-permissions'
-import type { AndroidSdkPaths } from '../android/android-sdk-discovery'
-import { AndroidSdkState } from '../android/android-sdk-state'
-import { AndroidStreamController } from '../android/android-stream-controller'
-import { startAndroidStreamSession } from '../android/android-stream-session-starter'
-import { emuKillArgs } from '../android/avd-manager'
+} from '../android/input-commands'
+import type { DeviceScreenSize } from '../android/input-mapping'
+import type { AndroidPermissionOp } from '../android/permissions'
 import { ensureScrcpyServerJar } from '../android/scrcpy-server-download'
-import { EmulatorError } from '../emulator-errors'
-import type { EmulatorGesturePoint } from '../emulator-gesture-sender'
-import type { EmulatorSessionInfo } from '../emulator-types'
+import type { AndroidSdkPaths } from '../android/sdk-discovery'
+import { AndroidSdkState } from '../android/sdk-state'
+import { AndroidStreamController } from '../android/stream-controller'
+import { startAndroidStreamSession } from '../android/stream-session-starter'
+import { EmulatorError } from '../errors'
+import type { EmulatorGesturePoint } from '../gesture-sender'
 import { scrcpyVideoRegistry } from '../scrcpy-video-registry'
+import type { EmulatorSessionInfo } from '../types'
 import type {
   BackendAvailability,
   EmulatorBackend,

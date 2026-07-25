@@ -7,7 +7,7 @@ import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote-platform'
 import {
   codexRolloutHardlinkIdentity,
   dedupeCodexRolloutFileAliases,

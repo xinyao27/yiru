@@ -5,8 +5,8 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import { getDefaultPersistedState } from '../../shared/constants'
+import { decodePersistedState } from './codec'
 import { DurableStateFile } from './durable-state-file'
-import { decodePersistedState } from './persisted-state-codec'
 
 vi.mock('electron', () => ({
   safeStorage: {

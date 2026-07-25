@@ -33,7 +33,7 @@ export function getWhoamiExePath(): string {
 
 /**
  * Full path to cmd.exe, respecting the ComSpec convention used elsewhere in
- * the codebase (hooks.ts, repo.ts, ssh-connection-utils.ts).
+ * the codebase (hooks.ts, repo.ts, ssh/connection-utils.ts).
  * Falls back to SystemRoot-based path if ComSpec is unset.
  */
 export function getCmdExePath(): string {
@@ -97,7 +97,7 @@ export function isPermissionError(error: unknown): boolean {
 
 // Why: USERNAME-only identity resolution silently no-ops under services, CI,
 // and hardened envs where USERNAME is unset. Fall back to the SID via
-// `whoami /user` (same strategy as runtime-metadata.ts), which is authoritative
+// `whoami /user` (same strategy as runtime/metadata.ts), which is authoritative
 // and always available on Windows. Cached because it never changes in-process.
 let cachedIdentity: string | undefined
 let pendingIdentityResolution: Promise<string | null> | null = null

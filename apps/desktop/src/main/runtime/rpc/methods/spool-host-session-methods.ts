@@ -11,7 +11,7 @@ import {
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema,
   SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema
 } from '../../../../shared/spool/spool-paired-runtime-session-contract'
-import { SpoolExecutionError } from '../../../spool/spool-execution-error'
+import { SpoolExecutionError } from '../../../spool/execution-error'
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod } from '../core'
 import { getSpoolHostChannelLifetimes } from './spool-host-channel-lifetimes'
 import { projectSpoolHostExecutionResult } from './spool-host-result-projection'

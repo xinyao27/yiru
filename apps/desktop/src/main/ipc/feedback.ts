@@ -3,7 +3,7 @@ import { ipcMain } from 'electron'
 import {
   buildSupportReportDraft,
   type SupportReportDiagnosticInput
-} from '../support-report/support-report-payload'
+} from '../support-report/payload'
 import { submitSupportReport } from '../telemetry/client'
 
 export type FeedbackSubmissionType = 'feedback' | 'crash'

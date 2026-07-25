@@ -32,9 +32,9 @@ import {
   detectInstalledBrowsers,
   selectBrowserProfile,
   importCookiesFromBrowser
-} from '../browser/browser-cookie-import'
-import { browserCertificateTrustController, browserManager } from '../browser/browser-manager'
-import { browserSessionRegistry } from '../browser/browser-session-registry'
+} from '../browser/cookie-import'
+import { browserCertificateTrustController, browserManager } from '../browser/manager'
+import { browserSessionRegistry } from '../browser/session-registry'
 
 let trustedBrowserRendererWebContentsId: number | null = null
 let agentBrowserBridgeRef: AgentBrowserBridge | null = null

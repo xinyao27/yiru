@@ -6,7 +6,7 @@ import QRCode from 'qrcode'
 import type { RuntimeAccessGrant } from '../../shared/runtime-access-grants'
 import { isTailnetIPv4Address } from '../../shared/tailnet-address'
 import type { DeviceEntry } from '../runtime/device-registry'
-import type { YiruRuntimeRpcServer } from '../runtime/runtime-rpc'
+import type { YiruRuntimeRpcServer } from '../runtime/rpc'
 import {
   getWebSocketPort,
   inspectWindowsMobileFirewall,

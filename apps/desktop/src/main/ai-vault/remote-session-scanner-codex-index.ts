@@ -1,6 +1,6 @@
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
-import { joinRemotePath } from '../ssh/ssh-remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote-platform'
+import { joinRemotePath } from '../ssh/remote-platform'
 import { extractString, normalizeTitleText, parseJsonObject } from './session-scanner-values'
 
 const CODEX_SESSION_INDEX_FILE = 'session_index.jsonl'

@@ -6,9 +6,9 @@ import { pipeline } from 'node:stream/promises'
 
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 
-import { shellEscape, wrapRemoteCommandForPosixShell } from './ssh-connection-utils'
-import { isWindowsRemoteHost, joinRemotePath, type RemoteHostPlatform } from './ssh-remote-platform'
-import { powerShellCommand } from './ssh-remote-powershell'
+import { shellEscape, wrapRemoteCommandForPosixShell } from './connection-utils'
+import { isWindowsRemoteHost, joinRemotePath, type RemoteHostPlatform } from './remote-platform'
+import { powerShellCommand } from './remote-powershell'
 import {
   buildSshArgs,
   getSystemSshBuildArgsFromOperationOptions,

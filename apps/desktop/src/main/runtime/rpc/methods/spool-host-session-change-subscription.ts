@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import { SpoolPairedRuntimeSessionChangedEventSchema } from '../../../../shared/spool/spool-paired-runtime-session-contract'
-import type { SpoolTerminalSessionBindings } from '../../../spool/spool-terminal-session-bindings'
+import type { SpoolTerminalSessionBindings } from '../../../spool/terminal-session-bindings'
 import type { RpcContext } from '../core'
 import type { resolveIncarnationBoundActualWorktree } from './spool-host-runtime-authority'
 import { projectSpoolHostObservedProviderSessions } from './spool-host-session-change-projection'

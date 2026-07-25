@@ -1,4 +1,4 @@
-import { EmulatorError } from '../emulator-errors'
+import { EmulatorError } from '../errors'
 
 export type AndroidAxBounds = { left: number; top: number; right: number; bottom: number }
 

@@ -6,8 +6,8 @@ import {
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
 } from '../../shared/spool/spool-operation-contract'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { isMethodNotFoundError } from '../ssh/ssh-filesystem-stream-reader'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type {
   SpoolVerifiedRemoteFileRead,
   SpoolVerifiedRemoteFilesystem

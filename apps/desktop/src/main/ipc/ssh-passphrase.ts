@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { ipcMain, type BrowserWindow } from 'electron'
 
-import type { SshCredentialKind } from '../ssh/ssh-connection-utils'
+import type { SshCredentialKind } from '../ssh/connection-utils'
 
 const CREDENTIAL_TIMEOUT_MS = 120_000
 const pendingRequests = new Map<string, { resolve: (value: string | null) => void }>()

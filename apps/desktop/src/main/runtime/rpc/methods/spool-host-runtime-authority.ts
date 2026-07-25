@@ -10,17 +10,14 @@ import { getLocalProjectWorktreeGitOptions } from '../../../project-runtime-git-
 import {
   spoolActualHostScopeKey,
   spoolLocalActualHostScopeKey
-} from '../../../spool/spool-canonical-host-path'
-import {
-  SpoolExecutionError,
-  type SpoolExecutionErrorCode
-} from '../../../spool/spool-execution-error'
-import type { SpoolHostOperationContext } from '../../../spool/spool-execution-gateway'
-import { resolveSpoolRepoLocalWslDistro } from '../../../spool/spool-repo-actual-host-scope'
-import type { SpoolOwnerWorktree } from '../../../spool/spool-worktree-incarnation'
-import { SpoolActualHostWorktreeIncarnationHost } from '../../../spool/spool-worktree-incarnation-host'
-import type { SpoolPublicWorktreeInstance } from '../../../spool/spool-worktree-publication-state'
-import { createYiruSpoolHostAdapter } from '../../../spool/spool-yiru-host-adapter'
+} from '../../../spool/canonical-host-path'
+import { SpoolExecutionError, type SpoolExecutionErrorCode } from '../../../spool/execution-error'
+import type { SpoolHostOperationContext } from '../../../spool/execution-gateway'
+import { resolveSpoolRepoLocalWslDistro } from '../../../spool/repo-actual-host-scope'
+import type { SpoolOwnerWorktree } from '../../../spool/worktree-incarnation'
+import { SpoolActualHostWorktreeIncarnationHost } from '../../../spool/worktree-incarnation-host'
+import type { SpoolPublicWorktreeInstance } from '../../../spool/worktree-publication-state'
+import { createYiruSpoolHostAdapter } from '../../../spool/yiru-host-adapter'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { RpcContext } from '../core'
 

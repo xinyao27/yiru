@@ -86,8 +86,8 @@ import {
 import {
   rankRuntimeMobileFilePaths,
   RuntimeMobileFilePathSearchCache
-} from './runtime-mobile-file-path-search'
-import { joinWorktreeRelativePath, normalizeRuntimeRelativePath } from './runtime-relative-paths'
+} from './mobile-file-path-search'
+import { joinWorktreeRelativePath, normalizeRuntimeRelativePath } from './relative-paths'
 
 const MOBILE_FILE_LIST_LIMIT = 5000
 const MOBILE_FILE_PATH_SEARCH_CACHE_LIMIT = 20_000

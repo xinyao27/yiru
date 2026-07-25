@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron'
 
-import { getDaemonProvider, restartDaemon } from '../daemon/daemon-init'
-import type { DaemonPtyAdapter } from '../daemon/daemon-pty-adapter'
-import { DaemonPtyRouter } from '../daemon/daemon-pty-router'
 import { DegradedDaemonPtyProvider } from '../daemon/degraded-daemon-pty-provider'
+import { getDaemonProvider, restartDaemon } from '../daemon/init'
+import type { DaemonPtyAdapter } from '../daemon/pty-adapter'
+import { DaemonPtyRouter } from '../daemon/pty-router'
 import type { DaemonSessionInfo } from '../daemon/types'
 
 // Why: the daemon's session.kill() sends SIGTERM first and escalates to

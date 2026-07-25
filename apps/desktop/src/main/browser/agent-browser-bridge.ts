@@ -45,12 +45,12 @@ import type {
   BrowserCaptureStopResult,
   BrowserCookie
 } from '../../shared/runtime-types'
-import type { BrowserManager } from './browser-manager'
-import { iterateBrowserTextInsertionChunks } from './browser-text-insertion'
 import { BrowserError } from './cdp-bridge'
 import { captureFullPageScreenshot } from './cdp-screenshot'
 import { CdpWsProxy } from './cdp-ws-proxy'
 import { acquireElectronDebugger } from './electron-debugger-lease'
+import type { BrowserManager } from './manager'
+import { iterateBrowserTextInsertionChunks } from './text-insertion'
 
 // Why: must exceed agent-browser's internal per-command timeouts (goto defaults to 30s,
 // wait can be up to 60s). Using 90s ensures the bridge never kills a command before

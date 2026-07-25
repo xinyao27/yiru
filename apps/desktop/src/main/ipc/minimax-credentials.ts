@@ -4,7 +4,7 @@ import {
   clearMiniMaxSessionCookie,
   hasMiniMaxSessionCookie,
   saveMiniMaxSessionCookie
-} from '../minimax/minimax-cookie-store'
+} from '../minimax/cookie-store'
 import { clearMiniMaxSessionCookieJar } from '../rate-limits/minimax-request-context'
 import type { RateLimitService } from '../rate-limits/service'
 

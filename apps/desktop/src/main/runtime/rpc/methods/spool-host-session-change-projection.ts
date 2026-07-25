@@ -5,7 +5,7 @@ import {
   type SpoolPairedRuntimeObservedProviderSession
 } from '../../../../shared/spool/spool-paired-runtime-session-contract'
 import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../../../shared/spool/spool-resource-limits'
-import type { SpoolTerminalSessionBindings } from '../../../spool/spool-terminal-session-bindings'
+import type { SpoolTerminalSessionBindings } from '../../../spool/terminal-session-bindings'
 
 type SessionChangeWorktree = SpoolPairedRuntimeResolvedWorktree & {
   actualHostScope: string

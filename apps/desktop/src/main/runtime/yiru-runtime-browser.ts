@@ -54,19 +54,16 @@ import type {
 } from '../../shared/runtime-types'
 import type { BrowserCertificateProceedResult } from '../../shared/types'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
-import type { BrowserBackend } from '../browser/browser-backend'
+import type { BrowserBackend } from '../browser/backend'
+import { BrowserError } from '../browser/cdp-bridge'
 import {
   detectInstalledBrowsers,
   importCookiesFromBrowser,
   selectBrowserProfile
-} from '../browser/browser-cookie-import'
-import { browserCertificateTrustController, browserManager } from '../browser/browser-manager'
-import {
-  startBrowserScreencast,
-  type BrowserScreencastSession
-} from '../browser/browser-screencast-stream'
-import { browserSessionRegistry } from '../browser/browser-session-registry'
-import { BrowserError } from '../browser/cdp-bridge'
+} from '../browser/cookie-import'
+import { browserCertificateTrustController, browserManager } from '../browser/manager'
+import { startBrowserScreencast, type BrowserScreencastSession } from '../browser/screencast-stream'
+import { browserSessionRegistry } from '../browser/session-registry'
 import { waitForTabRegistration, waitForWorktreeTabRegistration } from '../ipc/browser'
 import {
   BrowserRemoteScreencastAuthority,

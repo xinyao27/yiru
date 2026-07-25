@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 
 import type { CliInstallStatus } from '../../shared/cli-install-types'
-import { CliInstaller } from '../cli/cli-installer'
+import { CliInstaller } from '../cli/installer'
 import { WslCliInstaller } from '../cli/wsl-cli-installer'
 import { runSerializedWslCliRegistrationOperation } from '../cli/wsl-cli-registration-operation'
 import {

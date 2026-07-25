@@ -1,7 +1,7 @@
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import { buildStartupCommandSubmission } from '../../shared/startup-command-submission'
 import { resolveProcessCwd } from '../providers/process-cwd'
-import { normalizePtySize } from './daemon-pty-size'
+import { normalizePtySize } from './pty-size'
 import { Session, type SubprocessHandle } from './session'
 import { shellPathSupportsPtyStartupBarrier } from './shell-ready'
 import type { CreateOrAttachOptions, CreateOrAttachResult } from './terminal-host-create-contract'

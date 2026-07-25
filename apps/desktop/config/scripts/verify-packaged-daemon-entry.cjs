@@ -4,7 +4,7 @@ const { join } = require('node:path')
 
 // Why: `asarUnpack` in config/electron-builder.config.cjs lists
 // out/main/daemon-entry.js on every platform, and the packaged daemon fork
-// (src/main/daemon/daemon-init.ts) resolves exactly this unpacked path. A
+// (src/main/daemon/init.ts) resolves exactly this unpacked path. A
 // missing entry means the package layout regressed, so the check throws
 // instead of skipping — a silent skip false-passed exactly the layout bug
 // this gate exists to catch.

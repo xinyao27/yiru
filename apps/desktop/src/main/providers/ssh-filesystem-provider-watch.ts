@@ -2,8 +2,8 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 
 import { PromiseSettlementWaiters } from '../../shared/promise-settlement-waiters'
 import type { FsChangeEvent } from '../../shared/types'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { isMethodNotFoundError } from '../ssh/ssh-filesystem-stream-reader'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 
 let nextRemoteWatchId = 1
 

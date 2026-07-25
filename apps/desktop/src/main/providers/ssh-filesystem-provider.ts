@@ -1,12 +1,12 @@
 import type { DirEntry, FsChangeEvent, SearchOptions, SearchResult } from '../../shared/types'
 import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace-space-types'
-import { uploadBuffer } from '../ssh/sftp-upload'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import {
   consumeSessionInventoryJsonLines,
   isMethodNotFoundError
-} from '../ssh/ssh-filesystem-stream-reader'
-import { isWindowsRemoteHost, type RemoteHostPlatform } from '../ssh/ssh-remote-platform'
+} from '../ssh/filesystem-stream-reader'
+import { isWindowsRemoteHost, type RemoteHostPlatform } from '../ssh/remote-platform'
+import { uploadBuffer } from '../ssh/sftp-upload'
 import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
 import {
   downloadFileViaSftp,

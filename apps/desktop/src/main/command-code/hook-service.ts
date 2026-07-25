@@ -21,7 +21,7 @@ import {
   writeHooksJsonRemote,
   writeManagedScriptRemote
 } from '../agent-hooks/installer-utils-remote'
-import { buildCommandCodeManagedScript } from './command-code-managed-script'
+import { buildCommandCodeManagedScript } from './managed-script'
 
 const COMMAND_CODE_EVENTS = [
   {

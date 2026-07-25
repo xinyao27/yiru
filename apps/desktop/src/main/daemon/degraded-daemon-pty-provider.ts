@@ -6,8 +6,8 @@ import type {
   PtySpawnOptions,
   PtySpawnResult
 } from '../providers/types'
-import type { DaemonPtyAdapter } from './daemon-pty-adapter'
 import { shutdownDegradedFallbackSessions } from './degraded-daemon-fallback-shutdown'
+import type { DaemonPtyAdapter } from './pty-adapter'
 
 type ManagedPtyProvider = IPtyProvider & {
   disconnectOnly?: () => Promise<void>

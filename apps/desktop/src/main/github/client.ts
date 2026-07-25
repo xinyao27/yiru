@@ -39,7 +39,7 @@ import type {
 } from '../../shared/types'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/runtime-relative-paths'
+import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {
   hasHostedReviewLocalGitOptions,
   getHostedReviewLocalGitOptions,
@@ -47,6 +47,7 @@ import {
 } from '../source-control/hosted-review-git-options'
 import { sliceCheckLogTail } from './check-job-log-tail-slice'
 import { getPRConflictSummary } from './conflict-summary'
+import { getEnterpriseGitHubRepoSlug } from './enterprise-repository'
 import {
   execFileAsync,
   ghExecFileAsync,
@@ -64,7 +65,6 @@ import {
   type LocalGitExecOptions,
   type OwnerRepo
 } from './gh-utils'
-import { getEnterpriseGitHubRepoSlug } from './github-enterprise-repository'
 import { readLocalGitConfigSignature } from './local-git-config-signature'
 import {
   isCommitPartOfMergedPR,

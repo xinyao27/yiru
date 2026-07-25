@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 
 import type { SpoolOsFamily } from '../../shared/spool/spool-wire-contract'
-import type { SpoolProbeClient } from './spool-probe-client'
+import type { SpoolProbeClient } from './probe-client'
 import type { TailnetControl, TailnetNode } from './tailnet-control'
 
 const PEER_RECONCILE_INTERVAL_MS = 5_000

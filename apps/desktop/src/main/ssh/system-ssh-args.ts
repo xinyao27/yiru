@@ -1,6 +1,6 @@
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 
-import { getControlSocketPath, type SystemSshResolvedConfig } from './ssh-control-socket'
+import { getControlSocketPath, type SystemSshResolvedConfig } from './control-socket'
 
 export type SystemSshBuildArgsOptions = {
   resolvedConfig?: SystemSshResolvedConfig | null

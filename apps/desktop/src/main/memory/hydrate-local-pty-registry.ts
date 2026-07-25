@@ -20,10 +20,10 @@
 import { parsePtySessionId } from '@yiru/workbench-model/workspace'
 import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 
-import { getDaemonProvider } from '../daemon/daemon-init'
-import type { DaemonPtyAdapter } from '../daemon/daemon-pty-adapter'
-import { DaemonPtyRouter } from '../daemon/daemon-pty-router'
 import { DegradedDaemonPtyProvider } from '../daemon/degraded-daemon-pty-provider'
+import { getDaemonProvider } from '../daemon/init'
+import type { DaemonPtyAdapter } from '../daemon/pty-adapter'
+import { DaemonPtyRouter } from '../daemon/pty-router'
 import type { SessionInfo } from '../daemon/types'
 import type { Store } from '../persistence'
 import { listRepoWorktrees } from '../repo-worktrees'

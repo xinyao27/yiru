@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { BrowserWindow, ipcMain, type WebContents } from 'electron'
 
-import { emulatorProbe } from '../emulator/emulator-probe'
+import { emulatorProbe } from '../emulator/probe'
 import { scrcpyVideoRegistry } from '../emulator/scrcpy-video-registry'
 
 // Bridges the main-process scrcpy video registry to renderer subscribers. The

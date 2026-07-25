@@ -1,5 +1,5 @@
 import type { Repo } from '../shared/types'
-import { resolveLocalGitUsernameDetailed } from './git/git-username'
+import { resolveLocalGitUsernameDetailed } from './git/username'
 
 type RepoUsernameStore = {
   getRepos(): Repo[]

@@ -10,11 +10,7 @@ import {
 } from '../shared/wsl-login-shell-command'
 import { getSshConnectionManager, getActiveSshHostPlatform } from './ipc/ssh'
 import type { LanguageServerWorkspace } from './language-server-workspace'
-import {
-  powerShellCommand,
-  powerShellLiteral,
-  powerShellNativeArg
-} from './ssh/ssh-remote-powershell'
+import { powerShellCommand, powerShellLiteral, powerShellNativeArg } from './ssh/remote-powershell'
 import { getSpawnArgsForWindows, resolveWindowsCommand } from './win32-utils'
 
 export type LanguageServerProcess = {

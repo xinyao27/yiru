@@ -38,22 +38,22 @@ import type { CodexManagedAccount } from '../../shared/types'
 import {
   prepareSystemConfigForFreshRuntimeMirror,
   syncSystemConfigIntoManagedCodexHome
-} from '../codex/codex-config-mirror'
+} from '../codex/config-mirror'
 import {
   getCodexSessionBackfillStateDirPath,
   getYiruManagedCodexHomePath,
   getSystemCodexHomePath,
   syncCodexGlobalInstructionsIntoManagedHome,
   syncSystemCodexResourcesIntoManagedHome
-} from '../codex/codex-home-paths'
-import { isCodexSystemDefaultRealHomeEnabled } from '../codex/codex-real-home-flag'
-import { hasCustomCodexHomeOverride } from '../codex/codex-real-home-path'
-import { invalidateCodexSessionBackfillMarker } from '../codex/codex-session-backfill-marker'
-import { startSystemCodexSessionBridgeInBackground } from '../codex/codex-session-bridge'
+} from '../codex/home-paths'
+import { isCodexSystemDefaultRealHomeEnabled } from '../codex/real-home-flag'
+import { hasCustomCodexHomeOverride } from '../codex/real-home-path'
+import { invalidateCodexSessionBackfillMarker } from '../codex/session-backfill-marker'
+import { startSystemCodexSessionBridgeInBackground } from '../codex/session-bridge'
 import {
   resolveHostCodexSessionSourceHome,
   resolveWslCodexSessionSourceHome
-} from '../codex/codex-session-source-home'
+} from '../codex/session-source-home'
 import { startWslCodexSessionBridgeInBackground } from '../codex/wsl-codex-session-bridge'
 import type { Store } from '../persistence'
 import { WSL_CODEX_RUNTIME_HOME_SEGMENTS } from '../pty/codex-home-wsl-env'

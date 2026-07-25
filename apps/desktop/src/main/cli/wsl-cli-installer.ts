@@ -4,7 +4,7 @@ import { execFile } from 'node:child_process'
 
 import type { CliInstallStatus } from '../../shared/cli-install-types'
 import { getDefaultWslDistro } from '../wsl'
-import { CliInstaller } from './cli-installer'
+import { CliInstaller } from './installer'
 import {
   buildRegistrationLockPrelude,
   buildSafeRemoveCommand,

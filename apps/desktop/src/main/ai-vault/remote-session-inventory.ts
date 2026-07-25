@@ -4,8 +4,8 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
-import { joinRemotePath } from '../ssh/ssh-remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote-platform'
+import { joinRemotePath } from '../ssh/remote-platform'
 import {
   consumeRemoteSessionInventoryCandidate,
   consumeRemoteSessionInventoryEntry,

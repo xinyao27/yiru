@@ -127,12 +127,12 @@ import {
   setMigrationUnsupportedPtyPersistenceListener
 } from './agent-hooks/migration-unsupported-pty-state'
 import { agentHookServer } from './agent-hooks/server'
+import { decodePersistedState } from './persisted-state/codec'
 import { DurableStateFile } from './persisted-state/durable-state-file'
 import { GitHubCacheFile } from './persisted-state/github-cache-file'
+import { PersistedStateNotifications } from './persisted-state/notifications'
 import { applyPersistedSettingsUpdate } from './persisted-state/persisted-settings-mutations'
 import { normalizePersistedSshTarget as normalizeSshTarget } from './persisted-state/persisted-ssh-codec'
-import { decodePersistedState } from './persisted-state/persisted-state-codec'
-import { PersistedStateNotifications } from './persisted-state/persisted-state-notifications'
 import {
   MAX_CLAUDE_LIVE_PTY_SESSION_IDS,
   normalizePersistedLegacyPaneKeyAliasEntries as normalizeLegacyPaneKeyAliasEntries,
@@ -149,7 +149,7 @@ import { MOBILE_PAIRING_USERDATA_FILES } from './runtime/mobile-pairing-files'
 import {
   migrateUiHostScopeSshTargetId,
   migrateWorkspaceSessionSshTargetId
-} from './ssh/ssh-target-id-migration'
+} from './ssh/target-id-migration'
 import { track } from './telemetry/client'
 import { getCohortAtEmit } from './telemetry/cohort-classifier'
 import {

@@ -1,0 +1,65 @@
+import type { WorktreeMeta } from '../../shared/types'
+import { SpoolVisibilityError } from './visibility-errors'
+import type {
+  SpoolPersistedWorktreeIdentity,
+  SpoolVisibilityStore
+} from './visibility-persistence-transitions'
+import type { SpoolOwnerWorktree } from './worktree-incarnation'
+import { haveUniqueSpoolWorktreeIdentities } from './worktree-incarnation'
+import type { SpoolWorktreePublicationState } from './worktree-publication-state'
+
+export class SpoolVisibilityTargetResolution {
+  constructor(
+    private readonly store: SpoolVisibilityStore,
+    private readonly publicationState: SpoolWorktreePublicationState
+  ) {}
+
+  requireCurrentMeta(target: SpoolOwnerWorktree): WorktreeMeta {
+    const meta = this.store.getWorktreeMeta(target.worktreeId)
+    if (!meta || meta.instanceId !== target.instanceId) {
+      const instanceIds = [target.instanceId, meta?.instanceId].filter(
+        (instanceId): instanceId is string => Boolean(instanceId)
+      )
+      this.publicationState.invalidate(instanceIds, 'incarnation-changed')
+      throw new SpoolVisibilityError('stale-worktree')
+    }
+    return meta
+  }
+
+  requireUnique(targets: readonly SpoolOwnerWorktree[]): void {
+    if (!haveUniqueSpoolWorktreeIdentities(targets)) {
+      throw new SpoolVisibilityError('stale-worktree')
+    }
+  }
+
+  requireProject(projectId: string, targets: readonly SpoolOwnerWorktree[]): void {
+    this.requireUnique(targets)
+    if (targets.some((target) => target.projectId !== projectId)) {
+      throw new SpoolVisibilityError('stale-worktree')
+    }
+  }
+
+  persisted(worktreeId: string): SpoolPersistedWorktreeIdentity | null {
+    const instanceId = this.store.getWorktreeMeta(worktreeId)?.instanceId
+    return instanceId ? { worktreeId, instanceId } : null
+  }
+
+  persistedProject(projectId: string): readonly SpoolPersistedWorktreeIdentity[] {
+    const targets: SpoolPersistedWorktreeIdentity[] = []
+    for (const [worktreeId, meta] of Object.entries(this.store.getAllWorktreeMeta())) {
+      if (meta.projectId === projectId && meta.instanceId) {
+        targets.push({ worktreeId, instanceId: meta.instanceId })
+      }
+    }
+    return targets
+  }
+
+  persistedByInstance(instanceId: string): SpoolPersistedWorktreeIdentity | null {
+    for (const [worktreeId, meta] of Object.entries(this.store.getAllWorktreeMeta())) {
+      if (meta.instanceId === instanceId) {
+        return { worktreeId, instanceId }
+      }
+    }
+    return null
+  }
+}

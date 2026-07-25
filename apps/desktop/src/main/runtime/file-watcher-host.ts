@@ -18,8 +18,8 @@ import {
   isWatcherProcessFailure,
   type WatcherProcessFailure
 } from '../ipc/parcel-watcher-process-failure'
-import { createRuntimeRootOwnershipReleaser } from './runtime-root-watch-ownership'
-import { closeRuntimeRootWatch } from './runtime-root-watch-teardown'
+import { createRuntimeRootOwnershipReleaser } from './root-watch-ownership'
+import { closeRuntimeRootWatch } from './root-watch-teardown'
 
 const RUNTIME_FILE_WATCH_IGNORE_OPTIONS = buildParcelWatcherIgnoreOptions(WATCHER_IGNORE_DIRS)
 const RUNTIME_FILE_WATCH_EVENT_LIMIT = 200

@@ -1,6 +1,6 @@
 import type { CliInstallState, CliInstallStatus } from '../../shared/cli-install-types'
 import { listWslDistrosAsync } from '../wsl'
-import { CliInstaller } from './cli-installer'
+import { CliInstaller } from './installer'
 import { WslCliInstaller } from './wsl-cli-installer'
 import { runSerializedWslCliRegistrationOperation } from './wsl-cli-registration-operation'
 import {

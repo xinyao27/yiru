@@ -22,14 +22,14 @@ import {
   describeMaxBufferOverflowError,
   isMaxBufferOverflowError
 } from '../git/max-buffer-overflow'
-import { JsonRpcErrorCode } from '../ssh/relay-protocol'
 /* eslint-disable max-lines -- Why: this provider mirrors IGitProvider one
    method per RPC call (~16 methods). Splitting it would only add
    indirection — every method is a 1:1 forwarder to a relay RPC plus a
    small amount of param plumbing. */
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { requestGitStreamable } from '../ssh/ssh-git-response-stream-reader'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import { requestGitStreamable } from '../ssh/git-response-stream-reader'
+import { JsonRpcErrorCode } from '../ssh/relay-protocol'
+import type { RemoteHostPlatform } from '../ssh/remote-platform'
 import type { RemoteCommitMessageExecResult } from '../text-generation/commit-message-text-generation'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
 import type { GitProviderMutationOptions, IGitProvider } from './types'

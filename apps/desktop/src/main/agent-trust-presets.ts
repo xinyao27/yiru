@@ -3,8 +3,8 @@ import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 
 import { writeFileAtomically } from './codex-accounts/fs-utils'
-import { getYiruManagedCodexHomePath } from './codex/codex-home-paths'
 import { upsertProjectTrustLevel } from './codex/config-toml-trust'
+import { getYiruManagedCodexHomePath } from './codex/home-paths'
 
 export type AgentTrustPreset = 'cursor' | 'copilot' | 'codex'
 

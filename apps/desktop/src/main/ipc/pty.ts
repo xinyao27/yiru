@@ -96,11 +96,11 @@ import {
 import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude-accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
-import { isCodexSystemDefaultRealHomeEnabled } from '../codex/codex-real-home-flag'
+import { isCodexSystemDefaultRealHomeEnabled } from '../codex/real-home-flag'
 import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
-import { recordDaemonStreamBacklogEvent } from '../daemon/daemon-stream-backlog-probe'
 import { addNodePtyRecoveryHint } from '../daemon/node-pty-error-hints'
 import { mintPtySessionId, isSafePtySessionId } from '../daemon/pty-session-id'
+import { recordDaemonStreamBacklogEvent } from '../daemon/stream-backlog-probe'
 import { resolveLocalProjectRuntimeForWorktreeId } from '../local-project-runtime-resolution'
 import { registerPty, unregisterPty } from '../memory/pty-registry'
 import { mimoCodeHookService } from '../mimo/hook-service'
@@ -1382,7 +1382,7 @@ let rendererDidStartLoadingHandler: (() => void) | null = null
 // against the freshly-created adapter after replaceDaemonProvider swaps the
 // module-level `localProvider` pointer. Without this, old subscribers stay
 // bound to the disposed adapter and new PTY data silently drops. Saved at
-// module scope so the restart flow (src/main/daemon/daemon-init.ts) can
+// module scope so the restart flow (src/main/daemon/init.ts) can
 // trigger a rebind without re-running the full registerPtyHandlers setup.
 let rebindProviderListeners: (() => void) | null = null
 
@@ -1773,7 +1773,7 @@ export function registerPtyHandlers(
   let deliveryResyncUnansweredWarnLogged = false
   let lastAckReceivedAtMs: number | null = null
   // Why 2ms: pairs with the daemon stream batcher (see
-  // daemon-stream-data-batcher.ts) — both hops charged an expected
+  // daemon/stream-data-batcher.ts) — both hops charged an expected
   // half-window per chunk; 2ms keeps flood coalescing at negligible IPC
   // overhead while cutting the pipeline's fixed latency tax.
   const PTY_BATCH_INTERVAL_MS = 2

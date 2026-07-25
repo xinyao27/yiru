@@ -5,9 +5,9 @@ import { basename, join, win32, posix } from 'node:path'
 import { createInterface } from 'node:readline'
 
 import type { Repo } from '../../shared/types'
-import { getCodexAccountHomeSessionDirectories } from '../codex/codex-account-home-discovery'
-import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../codex/codex-home-paths'
-import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../codex/codex-session-bridge'
+import { getCodexAccountHomeSessionDirectories } from '../codex/account-home-discovery'
+import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../codex/home-paths'
+import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../codex/session-bridge'
 import { areWorktreePathsEqual } from '../ipc/worktree-logic'
 import { canonicalizeUsageWorktreePaths } from '../usage-worktree-canonicalizer'
 import type {

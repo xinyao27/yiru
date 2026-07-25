@@ -9,7 +9,7 @@ import {
   WSL_HOOK_FS_METHODS,
   wslHookRelayEndpointFilePath
 } from '../../shared/wsl-hook-relay-contract'
-import { SshChannelMultiplexer, type MultiplexerTransport } from '../ssh/ssh-channel-multiplexer'
+import { SshChannelMultiplexer, type MultiplexerTransport } from '../ssh/channel-multiplexer'
 import { installWslGuestHooks } from './wsl-hook-fs-adapter'
 import {
   wslHookRelayDeps,

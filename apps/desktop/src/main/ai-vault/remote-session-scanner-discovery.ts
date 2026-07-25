@@ -3,7 +3,7 @@ import { extname } from 'node:path'
 import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import { joinRemotePath } from '../ssh/ssh-remote-platform'
+import { joinRemotePath } from '../ssh/remote-platform'
 import { isMissingRemoteSessionPathError, statRemoteSessionFile } from './remote-session-file-stat'
 import type {
   RemoteScannerContext,

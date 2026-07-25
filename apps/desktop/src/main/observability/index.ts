@@ -28,7 +28,7 @@
 // import isolation rule above. The cost of one duplicated array vs.
 // punching a hole in the architecture is trivially worth it.
 
-import { DAEMON_LOG_MAX_FILES } from '../daemon/daemon-file-log'
+import { DAEMON_LOG_MAX_FILES } from '../daemon/file-log'
 import {
   collectBundle as _collectBundle,
   type CollectBundleOptions,

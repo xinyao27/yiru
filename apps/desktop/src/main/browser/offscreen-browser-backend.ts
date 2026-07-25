@@ -4,9 +4,9 @@ import { BrowserWindow } from 'electron'
 
 import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser-guest-web-preferences'
 import { YIRU_BROWSER_PARTITION } from '../../shared/constants'
-import type { BrowserBackend, BrowserBackendCreateTab } from './browser-backend'
-import type { BrowserManager } from './browser-manager'
-import { browserSessionRegistry } from './browser-session-registry'
+import type { BrowserBackend, BrowserBackendCreateTab } from './backend'
+import type { BrowserManager } from './manager'
+import { browserSessionRegistry } from './session-registry'
 
 // Why: headless yiru serve has no renderer window to host a <webview>, so each
 // browser page is backed by a main-process offscreen BrowserWindow. The window

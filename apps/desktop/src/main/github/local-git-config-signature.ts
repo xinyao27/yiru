@@ -2,7 +2,7 @@ import { readFile, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 
-import type { GitHubRepoContext } from './github-repository-identity'
+import type { GitHubRepoContext } from './repository-identity'
 
 type LocalGitConfigPaths = {
   commonConfigPath: string

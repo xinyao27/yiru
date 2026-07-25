@@ -24,8 +24,8 @@ import { resolveDefaultBaseRefViaExec } from '../git/repo'
 import { gitOptionalLocksDisabledEnv } from '../git/runner'
 import { getUpstreamStatus } from '../git/upstream'
 import { isGiteaReviewCreationAuthenticated } from '../gitea/pull-request-creation'
+import { getEnterpriseGitHubRepoSlug } from '../github/enterprise-repository'
 import { acquire, ghExecFileAsync, gitExecFileAsync, release } from '../github/gh-utils'
-import { getEnterpriseGitHubRepoSlug } from '../github/github-enterprise-repository'
 import { getProjectSlug } from '../gitlab/client'
 import {
   acquire as acquireGlab,

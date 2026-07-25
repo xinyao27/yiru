@@ -339,16 +339,15 @@ import {
 import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
 import type { AutomationService } from '../automations/service'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
-import type { BrowserBackend } from '../browser/browser-backend'
+import type { BrowserBackend } from '../browser/backend'
 import type { ClaudeAccountService } from '../claude-accounts/service'
 import type { CodexAccountService } from '../codex-accounts/service'
 import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
-import type { EmulatorBridge } from '../emulator/emulator-bridge'
+import type { EmulatorBridge } from '../emulator/bridge'
+import { getSshGitCapabilityCache } from '../git/capability-state'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
-import { getSshGitCapabilityCache } from '../git/git-capability-state'
-import { resolveLocalGitUsername } from '../git/git-username'
 import {
   getBaseRefDefault,
   getDefaultRemote,
@@ -377,6 +376,7 @@ import {
 } from '../git/repo-clone-path'
 import { gitExecFileAsync, gitSpawn, nonInteractiveGitEnv } from '../git/runner'
 import { runWithGitReadCacheInvalidation } from '../git/status'
+import { resolveLocalGitUsername } from '../git/username'
 import {
   listWorktrees,
   listWorktreesStrict,
@@ -438,11 +438,8 @@ import {
   updateMR as updateGitLabMR,
   updateMRReviewers as updateGitLabMRReviewers
 } from '../gitlab/client'
-import {
-  normalizeGitLabMRListState,
-  normalizeGitLabPositiveInteger
-} from '../gitlab/gitlab-preload-args'
 import { getGlabKnownHosts } from '../gitlab/gl-utils'
+import { normalizeGitLabMRListState, normalizeGitLabPositiveInteger } from '../gitlab/preload-args'
 import { getWorkItemDetails as getGitLabWorkItemDetails } from '../gitlab/work-item-details'
 import {
   createSetupRunnerScript,
@@ -552,11 +549,8 @@ import {
   getHostedReviewCreationEligibility as getHostedReviewCreationEligibilityFromRepo
 } from '../source-control/hosted-review-creation'
 import { getCatalogModel, isLocalSpeechModel, SPEECH_MODEL_CATALOG } from '../speech/model-catalog'
-import {
-  deleteLocalSpeechModel,
-  getSpeechModelDeletionErrorCode
-} from '../speech/speech-model-deletion'
-import { getSpeechModelManager, getSpeechSttService } from '../speech/speech-runtime-service'
+import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../speech/model-deletion'
+import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
@@ -614,7 +608,7 @@ import {
 import { resolveTerminalOrchestrationCliCommand } from './orchestration/cli-command'
 import { OrchestrationDb } from './orchestration/db'
 import { formatMessagesForInjection } from './orchestration/formatter'
-import { joinWorktreeRelativePath } from './runtime-relative-paths'
+import { joinWorktreeRelativePath } from './relative-paths'
 import { MOBILE_SUBSCRIBE_SCROLLBACK_ROWS } from './scrollback-limits'
 import {
   isNativeWindowsConptyPty,

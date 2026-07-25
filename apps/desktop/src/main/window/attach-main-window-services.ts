@@ -15,13 +15,13 @@ import type {
   UpdateCheckOptions,
   WorktreeStartupLaunch
 } from '../../shared/types'
-import { browserManager } from '../browser/browser-manager'
-import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/browser-media-access'
+import { browserManager } from '../browser/manager'
+import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media-access'
 import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude-accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
-import { registerGlobalAssistantHandlers } from '../global-assistant/global-assistant-ipc'
-import type { GlobalAssistantService } from '../global-assistant/global-assistant-service'
+import { registerGlobalAssistantHandlers } from '../global-assistant/ipc'
+import type { GlobalAssistantService } from '../global-assistant/service'
 import { getLocalPtyProvider, registerPtyHandlers } from '../ipc/pty'
 import { registerDaemonManagementHandlers } from '../ipc/pty-management'
 import { registerRemoteWorkspaceHandlers } from '../ipc/remote-workspace'
@@ -37,7 +37,7 @@ import { registerWorktreeHandlers } from '../ipc/worktrees'
 import { hydrateLocalPtyRegistryAtBoot } from '../memory/hydrate-local-pty-registry'
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import { logStartupMilestone } from '../startup/startup-diagnostics'
+import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
 import {
   checkForUpdatesFromMenu,

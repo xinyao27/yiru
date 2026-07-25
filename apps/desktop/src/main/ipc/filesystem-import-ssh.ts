@@ -5,7 +5,7 @@ import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 
 import { requireSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { FileUploadSession, IFilesystemProvider } from '../providers/types'
-import { assertSafeRemotePathSegment, type RemotePathFlavor } from '../ssh/ssh-remote-platform'
+import { assertSafeRemotePathSegment, type RemotePathFlavor } from '../ssh/remote-platform'
 import { authorizeExternalPath, isENOENT } from './filesystem-auth'
 import {
   captureLocalUploadRoot,

@@ -8,10 +8,10 @@ import {
   scanForShellReady,
   type ShellReadyScanState
 } from '../shell-ready-marker-scanner'
-import { isValidPtySize, normalizePtySize } from './daemon-pty-size'
 /* oxlint-disable max-lines */
 import { HeadlessEmulator } from './headless-emulator'
 import { PostReadyFlushGate } from './post-ready-flush-gate'
+import { isValidPtySize, normalizePtySize } from './pty-size'
 import type {
   PendingOutputRecord,
   SessionState,

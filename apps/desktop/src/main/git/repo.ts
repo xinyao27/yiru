@@ -9,7 +9,7 @@ import { isForEachRefExcludeUnsupportedError } from '../../shared/git-ref-comman
 import { parseGitRevListAheadBehindCounts } from '../../shared/git-rev-list-output'
 import type { BaseRefSearchResult } from '../../shared/types'
 import { toWindowsWslPath } from '../wsl'
-import { getLocalGitCapabilityCache } from './git-capability-state'
+import { getLocalGitCapabilityCache } from './capability-state'
 import { buildHostedRemoteCommitUrl, buildHostedRemoteFileUrl } from './hosted-remote-url'
 import { gitExecFileSync, gitExecFileAsync } from './runner'
 

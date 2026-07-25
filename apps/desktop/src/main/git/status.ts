@@ -47,8 +47,6 @@ import type {
   GitUpstreamStatus
 } from '../../shared/types'
 import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
-import type { GitRuntimeOptions } from './git-runtime-options'
-import { gitOptionsForWorktree } from './git-runtime-options'
 import { describeMaxBufferOverflowError, isMaxBufferOverflowError } from './max-buffer-overflow'
 import {
   gitExecFileAsync,
@@ -56,6 +54,8 @@ import {
   gitOptionalLocksDisabledEnv,
   gitStreamStdout
 } from './runner'
+import type { GitRuntimeOptions } from './runtime-options'
+import { gitOptionsForWorktree } from './runtime-options'
 import { StatusPorcelainParser } from './status-porcelain-parser'
 import { hasWorktreeBaseCommitRef } from './worktree-base-ref-probe'
 

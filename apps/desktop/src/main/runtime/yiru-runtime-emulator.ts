@@ -1,18 +1,15 @@
 import type { BrowserWindow } from 'electron'
 
 import type { GlobalSettings } from '../../shared/types'
-import { setConfiguredAndroidSdkPath } from '../emulator/android/android-sdk-host-discovery'
+import { setConfiguredAndroidSdkPath } from '../emulator/android/sdk-host-discovery'
+import { inspectEmulatorAvailability, type EmulatorAvailability } from '../emulator/availability'
 import type { EmulatorDevice } from '../emulator/backends/emulator-backend'
-import {
-  inspectEmulatorAvailability,
-  type EmulatorAvailability
-} from '../emulator/emulator-availability'
-import type { EmulatorBridge } from '../emulator/emulator-bridge'
-import { resolveDefaultAttachDevice } from '../emulator/emulator-default-attach-device'
-import { EmulatorError } from '../emulator/emulator-errors'
-import type { EmulatorGesturePoint } from '../emulator/emulator-gesture-sender'
-import type { EmulatorSessionInfo } from '../emulator/emulator-types'
+import type { EmulatorBridge } from '../emulator/bridge'
+import { resolveDefaultAttachDevice } from '../emulator/default-attach-device'
+import { EmulatorError } from '../emulator/errors'
+import type { EmulatorGesturePoint } from '../emulator/gesture-sender'
 import type { SimulatorDevice } from '../emulator/simctl-simulator-devices'
+import type { EmulatorSessionInfo } from '../emulator/types'
 
 // Settings slice the emulator surface needs; keeps the host contract honest (no widening cast).
 type EmulatorHostSettings = Pick<

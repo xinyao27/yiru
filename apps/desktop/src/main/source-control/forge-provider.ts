@@ -23,7 +23,7 @@ import {
 } from '../gitea/client'
 import { createGiteaPullRequest } from '../gitea/pull-request-creation'
 import { createGitHubPullRequest, getPRForBranchOutcome, getRepoSlug } from '../github/client'
-import { getEnterpriseGitHubRepoSlug } from '../github/github-enterprise-repository'
+import { getEnterpriseGitHubRepoSlug } from '../github/enterprise-repository'
 import { getMergeRequest, getMergeRequestForBranch, getProjectSlug } from '../gitlab/client'
 import { createGitLabMergeRequest } from '../gitlab/merge-request-creation'
 import {

@@ -4,7 +4,7 @@ import { Duplex } from 'node:stream'
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 import type { ClientChannel } from 'ssh2'
 
-import { wrapRemoteCommandForPosixShell, type SshExecOptions } from './ssh-connection-utils'
+import { wrapRemoteCommandForPosixShell, type SshExecOptions } from './connection-utils'
 import { buildSshArgs, type SystemSshBuildArgsOptions } from './system-ssh-args'
 import { findSystemSsh } from './system-ssh-binary'
 

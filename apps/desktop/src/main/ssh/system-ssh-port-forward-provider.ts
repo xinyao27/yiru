@@ -1,9 +1,9 @@
-import type { SshConnection } from './ssh-connection'
+import type { SshConnection } from './connection'
 import type {
   PortForwardStartOptions,
   SshPortForwardProvider,
   StartedPortForward
-} from './ssh-port-forward-provider'
+} from './port-forward-provider'
 import {
   startSystemSshPortForwardProcess,
   systemSshForwardError

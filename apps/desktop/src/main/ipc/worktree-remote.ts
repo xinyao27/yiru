@@ -32,8 +32,6 @@ import type {
 } from '../../shared/types'
 import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
-import { resolveLocalGitUsername } from '../git/git-username'
-import { getSshGitUsername } from '../git/git-username'
 import { validateGitPushTarget } from '../git/push-target-validation'
 import {
   getBranchConflictKind,
@@ -41,6 +39,8 @@ import {
   resolveDefaultBaseRefWithLocalGit
 } from '../git/repo'
 import { gitExecFileAsync } from '../git/runner'
+import { resolveLocalGitUsername } from '../git/username'
+import { getSshGitUsername } from '../git/username'
 import { listWorktrees, addWorktree, addSparseWorktree } from '../git/worktree'
 import type { AddWorktreeOptions, AddWorktreeResult } from '../git/worktree'
 import { getPRForBranch } from '../github/client'
@@ -95,7 +95,7 @@ import {
   getLocalProjectWorktreeGitOptions
 } from '../project-runtime-git-options'
 import type { IFilesystemProvider } from '../providers/types'
-import { joinWorktreeRelativePath } from '../runtime/runtime-relative-paths'
+import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {
   getBranchNameOverrideCandidate,
   getWorktreeCreateCandidate,

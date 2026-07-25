@@ -1,7 +1,7 @@
 import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
 
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
-import { joinRemotePath } from '../ssh/ssh-remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote-platform'
+import { joinRemotePath } from '../ssh/remote-platform'
 import { remoteCodexIndexTitles } from './remote-session-scanner-codex-index'
 import type {
   RemoteParserOptions,

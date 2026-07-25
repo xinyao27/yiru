@@ -18,14 +18,14 @@ export {
   parseGitHubOwnerRepo,
   parseGitHubRemoteIdentity,
   resolvePRRepositoryCandidates
-} from './github-repository-identity'
+} from './repository-identity'
 export type {
   GitHubRemoteIdentity,
   GitHubRepoContext,
   LocalGitExecOptions,
   OwnerRepo,
   PRRepositoryCandidates
-} from './github-repository-identity'
+} from './repository-identity'
 
 const MAX_CONCURRENT = 4
 let running = 0

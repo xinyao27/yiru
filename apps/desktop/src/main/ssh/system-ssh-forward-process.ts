@@ -3,7 +3,7 @@ import { connect, createServer } from 'node:net'
 
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 
-import { buildSshArgs, findSystemSsh, type SystemSshBuildArgsOptions } from './ssh-system-fallback'
+import { buildSshArgs, findSystemSsh, type SystemSshBuildArgsOptions } from './system-fallback'
 
 export const SYSTEM_SSH_FORWARD_STARTUP_GRACE_MS = 750
 export const SYSTEM_SSH_FORWARD_LISTENER_PROBE_INTERVAL_MS = 50

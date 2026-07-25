@@ -40,8 +40,8 @@ import {
   type WindowShortcutAction
 } from '../../shared/window-shortcut-policy'
 import { getAppIconPath } from '../app-icon'
-import { browserManager } from '../browser/browser-manager'
-import { browserSessionRegistry } from '../browser/browser-session-registry'
+import { browserManager } from '../browser/manager'
+import { browserSessionRegistry } from '../browser/session-registry'
 import {
   DEFAULT_RENDERER_RECOVERY_MAX_RECOVERIES,
   DEFAULT_RENDERER_RECOVERY_WINDOW_MS,
@@ -50,8 +50,8 @@ import {
 import { translateMain } from '../i18n/main-i18n'
 import { clearTrustedUIRendererWebContentsId, setTrustedUIRendererWebContentsId } from '../ipc/ui'
 import type { Store } from '../persistence'
+import { resolveWindowCloseAction } from './close-decision'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
-import { resolveWindowCloseAction } from './window-close-decision'
 
 function forceRepaint(window: BrowserWindow): void {
   if (window.isDestroyed()) {

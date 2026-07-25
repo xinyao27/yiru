@@ -3,7 +3,7 @@ import { appendFile, readFile, stat } from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { checkIgnoredPaths } from './check-ignored-paths'
-import type { GitRuntimeOptions } from './git-runtime-options'
+import type { GitRuntimeOptions } from './runtime-options'
 
 // Why: the overwhelmingly common cause of a status listing big enough to hit the
 // entry limit is a dependency/build folder that should have been ignored. Offer

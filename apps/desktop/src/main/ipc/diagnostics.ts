@@ -29,7 +29,7 @@ import {
 } from '../observability'
 import type { CollectedBundle } from '../observability/bundle'
 import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
-import { buildSupportReportDraft } from '../support-report/support-report-payload'
+import { buildSupportReportDraft } from '../support-report/payload'
 import { submitSupportReport } from '../telemetry/client'
 
 export type DiagnosticsBundlePreview = Omit<CollectedBundle, 'payload'>

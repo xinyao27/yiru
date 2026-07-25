@@ -13,7 +13,7 @@ import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
 import type { IFilesystemProvider } from './providers/types'
 import { detectGitRemoteIdentity } from './repo-git-remote-identity'
 import { iconHrefCandidates } from './repo-icon-href-candidates'
-import { joinWorktreeRelativePath } from './runtime/runtime-relative-paths'
+import { joinWorktreeRelativePath } from './runtime/relative-paths'
 
 const REPO_ICON_FILE_CANDIDATES = [
   'favicon.png',

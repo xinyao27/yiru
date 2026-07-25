@@ -31,7 +31,7 @@ import {
   KIMI_HOOK_EVENTS,
   readManagedKimiHookEvents,
   removeManagedKimiHooks
-} from './kimi-hook-config-toml'
+} from './hook-config-toml'
 
 // Why: match the CLI's `KIMI_CODE_HOME ?? ~/.kimi-code` resolution (also used by
 // kimi-fetcher.ts and the AI Vault session scanner) so hooks land in the same

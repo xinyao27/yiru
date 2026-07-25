@@ -6,13 +6,13 @@ import { ipcMain, BrowserWindow, systemPreferences } from 'electron'
 
 import type { Store } from '../persistence'
 import { SPEECH_MODEL_CATALOG } from '../speech/model-catalog'
+import { deleteLocalSpeechModel } from '../speech/model-deletion'
 import {
   clearOpenAiSpeechApiKey,
   hasOpenAiSpeechApiKey,
   saveOpenAiSpeechApiKey
 } from '../speech/openai-api-key-store'
-import { deleteLocalSpeechModel } from '../speech/speech-model-deletion'
-import { getSpeechModelManager, getSpeechSttService } from '../speech/speech-runtime-service'
+import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 
 export function registerSpeechHandlers(store: Store): void {
   ipcMain.handle('speech:getCatalog', () => {

@@ -36,30 +36,7 @@ import {
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
 import { writeFileAtomically } from '../codex-accounts/fs-utils'
-import { syncSystemConfigIntoManagedCodexHome } from './codex-config-mirror'
-import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
-import {
-  CODEX_HOOK_EVENT_LABEL,
-  createCodexHookTrustEntry,
-  getCodexHookTrustSignature,
-  getCodexManagedScriptFileName
-} from './codex-hook-identity'
-import { grantManagedCodexHookTrust } from './codex-hook-trust-grant'
-import {
-  getCodexLedgerTrustedHash,
-  readCodexTrustGrantLedgerHomeForReconciliation,
-  removeCodexManagedHookTrustEntries,
-  removeStaleWslCodexManagedHookTrustEntries
-} from './codex-managed-trust-reconciliation'
-import { readCurrentCodexTrustGrantLedgerHome } from './codex-trust-grant-host'
-import type { CodexTrustGrantLedgerHome } from './codex-trust-grant-ledger'
-import { mutateRealHomeHooksPreservingUserTrust } from './codex-user-hook-trust-rebase'
-import {
-  createCodexWslRuntimeHookInstallPlan,
-  type CodexWslRuntimeHookInstallPlan,
-  type CodexWslRuntimeHookTarget,
-  type WslCanonicalPathSettlement
-} from './codex-wsl-hook-install-plan'
+import { syncSystemConfigIntoManagedCodexHome } from './config-mirror'
 import {
   codexHookSourcePathsEqual,
   computeTrustKey,
@@ -79,10 +56,33 @@ import {
   type CodexHookTrustState,
   type CodexTrustEntry
 } from './config-toml-trust'
+import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './home-paths'
+import {
+  CODEX_HOOK_EVENT_LABEL,
+  createCodexHookTrustEntry,
+  getCodexHookTrustSignature,
+  getCodexManagedScriptFileName
+} from './hook-identity'
+import { grantManagedCodexHookTrust } from './hook-trust-grant'
 import {
   promoteCodexRuntimeHookApprovalsToSystem,
   snapshotCodexRuntimeHookTrustProvenance
 } from './hook-trust-promotion'
+import {
+  getCodexLedgerTrustedHash,
+  readCodexTrustGrantLedgerHomeForReconciliation,
+  removeCodexManagedHookTrustEntries,
+  removeStaleWslCodexManagedHookTrustEntries
+} from './managed-trust-reconciliation'
+import { readCurrentCodexTrustGrantLedgerHome } from './trust-grant-host'
+import type { CodexTrustGrantLedgerHome } from './trust-grant-ledger'
+import { mutateRealHomeHooksPreservingUserTrust } from './user-hook-trust-rebase'
+import {
+  createCodexWslRuntimeHookInstallPlan,
+  type CodexWslRuntimeHookInstallPlan,
+  type CodexWslRuntimeHookTarget,
+  type WslCanonicalPathSettlement
+} from './wsl-hook-install-plan'
 
 // Why: PreToolUse/PostToolUse give the dashboard a live readout of the
 // in-flight tool (name + input preview) between UserPromptSubmit and Stop.
@@ -115,7 +115,7 @@ function getCodexConfigTomlPath(runtimeHomePath: string = getYiruManagedCodexHom
 }
 
 // Why: the managed-event subset of the shared PascalCase→label map; the
-// full mapping lives in codex-hook-identity.ts so promotion can't drift.
+// full mapping lives in hook-identity.ts so promotion can't drift.
 const CODEX_EVENT_LABEL: Record<(typeof CODEX_EVENTS)[number], CodexEventLabel> = {
   SessionStart: CODEX_HOOK_EVENT_LABEL.SessionStart!,
   UserPromptSubmit: CODEX_HOOK_EVENT_LABEL.UserPromptSubmit!,

@@ -23,8 +23,8 @@ import {
   resolveUniqueBranchName,
   type GitExec
 } from '../git/branch-rename'
-import { getSshGitUsername, resolveLocalGitUsername } from '../git/git-username'
 import { gitExecFileAsync } from '../git/runner'
+import { getSshGitUsername, resolveLocalGitUsername } from '../git/username'
 import { computeBranchName, getConfiguredBranchPrefix } from '../ipc/worktree-logic'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import type { AgentGenerationFailureOutput } from '../text-generation/agent-failure-output'

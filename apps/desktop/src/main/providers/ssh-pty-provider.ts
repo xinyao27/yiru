@@ -1,5 +1,5 @@
 import { seedPowerlevel10kWizardEnv } from '../pty/powerlevel10k-wizard-env'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { toAppSshPtyId, toRelaySshPtyId } from './ssh-pty-id'
 import type { IPtyProvider, PtyProcessInfo, PtySpawnOptions, PtySpawnResult } from './types'
 

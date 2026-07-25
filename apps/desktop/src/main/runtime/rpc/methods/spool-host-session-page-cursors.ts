@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import { SpoolExecutionError } from '../../../spool/spool-execution-error'
+import { SpoolExecutionError } from '../../../spool/execution-error'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 import {
   encodeSpoolHostSessionPageBinding,

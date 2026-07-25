@@ -41,14 +41,14 @@ import type {
   BrowserWaitResult
 } from '../../shared/runtime-types'
 import { ANTI_DETECTION_SCRIPT } from './anti-detection'
-import type { BrowserManager } from './browser-manager'
-import { insertTextThroughCdp } from './browser-text-insertion'
+import type { BrowserManager } from './manager'
 import {
   buildSnapshot,
   type CdpCommandSender,
   type RefEntry,
   type SnapshotResult
 } from './snapshot-engine'
+import { insertTextThroughCdp } from './text-insertion'
 
 const CAPTURE_LOG_LIMIT = 1000
 

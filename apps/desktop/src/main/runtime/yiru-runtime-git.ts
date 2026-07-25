@@ -31,11 +31,11 @@ import type {
 import { checkIgnoredPaths } from '../git/check-ignored-paths'
 import { checkoutBranch, listLocalBranches } from '../git/checkout'
 import { gitSyncForkDefaultBranch } from '../git/fork-sync'
-import type { GitRuntimeOptions } from '../git/git-runtime-options'
 import { getHistory as getGitHistory } from '../git/history'
 import { gitFastForward, gitFetch, gitPull, gitPullRebaseFromBase, gitPush } from '../git/remote'
 import { getRemoteCommitUrl, getRemoteFileUrl } from '../git/repo'
 import { gitExecFileAsync } from '../git/runner'
+import type { GitRuntimeOptions } from '../git/runtime-options'
 import {
   abortMerge,
   abortRebase,
@@ -82,7 +82,7 @@ import {
   type GeneratePullRequestFieldsResult
 } from '../text-generation/commit-message-text-generation'
 import { getPullRequestDraftContext } from '../text-generation/pull-request-context'
-import { normalizeRuntimeRelativePath } from './runtime-relative-paths'
+import { normalizeRuntimeRelativePath } from './relative-paths'
 
 export type ResolvedRuntimeGitWorktree = Worktree & { git: GitWorktreeInfo }
 type RuntimeCommitMessageSettingsOverride = Partial<

@@ -57,8 +57,8 @@ import { addYiruWslInteropEnv } from '../pty/wsl-yiru-env'
 import { isPwshAvailable } from '../pwsh'
 import { parseWslPath } from '../wsl'
 import { addWslEnvKeys } from '../wsl-env'
-import { isValidPtySize, normalizePtySize } from './daemon-pty-size'
 import { parsePtySessionId } from './pty-session-id'
+import { isValidPtySize, normalizePtySize } from './pty-size'
 import type { SubprocessHandle } from './session'
 import {
   getAttributionShellLaunchConfig,
@@ -592,7 +592,7 @@ export function createPtySubprocess(opts: PtySubprocessOptions): SubprocessHandl
     COLORTERM: 'truecolor',
     TERM_PROGRAM: 'Yiru',
     // Why: TUIs feature-gate on TERM_PROGRAM_VERSION. The daemon is forked
-    // by main (daemon-init.ts:93) with the parent's env, so YIRU_APP_VERSION
+    // by main (init.ts:93) with the parent's env, so YIRU_APP_VERSION
     // — set in src/main/index.ts from app.getVersion() — is inherited here.
     TERM_PROGRAM_VERSION: process.env.YIRU_APP_VERSION ?? '0.0.0-dev',
     // Why: opt tools (Claude Code, ls --hyperlink, etc.) into emitting OSC 8
