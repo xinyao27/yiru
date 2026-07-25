@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '@/components/contextual-tours/contextual-tour-composer-events'
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
@@ -38,7 +39,6 @@ import { getAgentCatalog } from '@/lib/agent-catalog'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
 import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
 import { createBrowserUuid } from '@/lib/browser-uuid'
-import { ensureHooksConfirmed } from '@/lib/ensure-hooks-confirmed'
 import { parseGitHubPullRequestLink, normalizeGitHubLinkQuery } from '@/lib/github-links'
 import { resolveGitHubPrStartPointForRepo } from '@/lib/github-pr-start-point'
 import {
@@ -121,7 +121,7 @@ import { repoIsRemote } from '../../../../shared/agent/agent-launch-remote'
 import { getDefaultRepoHookSettings } from '../../../../shared/constants'
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat-session-option-defaults'
+import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/native-chat-session-option-defaults'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
@@ -149,7 +149,7 @@ import type {
   WorkspaceCreateTelemetrySource,
   ProjectGroup
 } from '../../../../shared/types'
-import { isWorkspaceStatusId } from '../../../../shared/workspace-statuses'
+import { isWorkspaceStatusId } from '../../../../shared/workspace/workspace-statuses'
 import {
   resolveComposerBranchNameOverrideForCreate,
   resolveComposerBranchPick,

@@ -16,9 +16,9 @@ import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
+import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
 import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
-import { ensureHooksConfirmed } from '@/lib/ensure-hooks-confirmed'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { branchName } from '@/lib/git-utils'
@@ -62,12 +62,12 @@ import {
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace-scope'
+} from '../../../../shared/workspace/workspace-scope'
 import {
   classifyWorktreeForceDeleteReason,
   getLockedWorktreeRemovalReason,
   isLockedWorktreeRemovalError
-} from '../../../../shared/worktree-removal'
+} from '../../../../shared/workspace/worktree-removal'
 import {
   callRuntimeRpc,
   getActiveRuntimeTarget,
