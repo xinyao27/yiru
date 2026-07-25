@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   consumePrelaunchedSimulatorSession,
   isManualSimulatorLaunchPending
-} from '@/lib/simulator-launch-coordination'
-import { shutdownManagedSimulatorIfNoPane } from '@/lib/simulator-pane-shutdown-scheduler'
+} from '@/components/emulator-pane/simulator-launch-coordination'
+import { shutdownManagedSimulatorIfNoPane } from '@/components/emulator-pane/simulator-pane-shutdown-scheduler'
 import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 

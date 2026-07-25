@@ -15,6 +15,10 @@ import {
 import { nextEditorFontZoomLevel, computeEditorFontSize } from '@/components/editor/font-zoom'
 import { buildWorkspaceSessionPayload } from '@/components/editor/workspace-session'
 import { persistWorkspaceSessionByHost } from '@/components/editor/workspace-session-host-persistence'
+import {
+  isManualSimulatorLaunchPending,
+  rememberPrelaunchedSimulatorSession
+} from '@/components/emulator-pane/simulator-launch-coordination'
 import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/constants'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
@@ -61,10 +65,6 @@ import {
 import { setDriverForPty, hydrateDrivers } from '@/lib/pane-manager/mobile-driver-state'
 import { setFitOverride, hydrateOverrides } from '@/lib/pane-manager/mobile-fit-overrides'
 import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/lib/quick-commands-menu-events'
-import {
-  isManualSimulatorLaunchPending,
-  rememberPrelaunchedSimulatorSession
-} from '@/lib/simulator-launch-coordination'
 import { activateTabNumberShortcut } from '@/lib/tab-number-shortcuts'
 import { track } from '@/lib/telemetry'
 import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut-capture-notification'

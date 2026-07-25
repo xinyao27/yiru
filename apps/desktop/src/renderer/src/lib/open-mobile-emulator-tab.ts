@@ -5,7 +5,6 @@ import { translate } from '@/i18n/i18n'
 import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
-import { ensureSimulatorTab, getSimulatorTabForWorktree } from './ensure-simulator-tab'
 import {
   beginManualSimulatorLaunch,
   dispatchManualSimulatorLaunchFailed,
@@ -13,11 +12,12 @@ import {
   finishManualSimulatorLaunch,
   isManualSimulatorLaunchPending,
   rememberPrelaunchedSimulatorSession
-} from './simulator-launch-coordination'
+} from '../components/emulator-pane/simulator-launch-coordination'
 import {
   cancelPendingSimulatorPaneShutdown,
   shutdownManagedSimulatorIfNoPane
-} from './simulator-pane-shutdown-scheduler'
+} from '../components/emulator-pane/simulator-pane-shutdown-scheduler'
+import { ensureSimulatorTab, getSimulatorTabForWorktree } from './ensure-simulator-tab'
 
 type OpenMobileEmulatorTabOptions = {
   targetGroupId?: string

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import {
   cancelPendingSimulatorPaneShutdown,
   scheduleSimulatorPaneManagedShutdown
-} from '@/lib/simulator-pane-shutdown-scheduler'
+} from '@/components/emulator-pane/simulator-pane-shutdown-scheduler'
 
 import type { SimulatorDeviceRow } from './types'
 

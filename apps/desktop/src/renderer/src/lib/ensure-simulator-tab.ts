@@ -1,8 +1,8 @@
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
+import { cancelPendingSimulatorPaneShutdown } from '../components/emulator-pane/simulator-pane-shutdown-scheduler'
 import { findReusableRightSplitGroupId } from './emulator-right-split-target'
-import { cancelPendingSimulatorPaneShutdown } from './simulator-pane-shutdown-scheduler'
 import { shouldShutdownSimulatorForPaneUnmountFromTabs } from './simulator-tab-shutdown'
 
 export const isMacOsHost = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac')
