@@ -53,6 +53,8 @@ import {
 import { useFolderWorkspaceComposerPathStatus } from '@/components/sidebar/folder-workspace-composer-path-status'
 import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspace-composer-submit'
 import { getSuggestedCreatureName } from '@/components/sidebar/worktree-name-suggestions'
+import { runBackgroundWorktreeCreation } from '@/components/worktree-creation/flow'
+import { queueNewWorkspaceTerminalFocus } from '@/components/worktree-creation/new-workspace-terminal-focus'
 import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
@@ -97,7 +99,6 @@ import {
   getSelectedRepoSshGate,
   isSshConnectInProgress
 } from '@/lib/new-workspace-ssh-gate'
-import { queueNewWorkspaceTerminalFocus } from '@/lib/new-workspace-terminal-focus'
 import { joinPath } from '@/lib/path'
 import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
 import {
@@ -110,7 +111,6 @@ import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 import { isWorkItemLookupText } from '@/lib/work-item-lookup-text'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { runBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'
 import { importExternalPathsToRuntime } from '@/runtime/file-client'
 import { checkRuntimeHooks, type HookCheckResult } from '@/runtime/hooks-client'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'

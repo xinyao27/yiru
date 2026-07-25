@@ -8,10 +8,10 @@ import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { retryBackgroundWorktreeCreation } from '@/components/worktree-creation/flow'
 import { translate } from '@/i18n/i18n'
 import { getCreationProgressLabel } from '@/lib/pending-worktree-creation'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
-import { retryBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'
 import { useAppStore } from '@/store'
 
 /**
