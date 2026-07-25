@@ -15,7 +15,7 @@ import {
   emitNativeChatPickerItemAccepted,
   emitNativeChatPickerOpened,
   emitNativeChatSendClassified
-} from '@/lib/native-chat-telemetry'
+} from '@/components/native-chat/native-chat-telemetry'
 
 import { getNativeChatAgentProfile } from '../../../../shared/native-chat-agent-profiles'
 import type { SlashCommandSuggestion } from '../../../../shared/native-chat-slash-commands'

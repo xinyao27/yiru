@@ -5,7 +5,7 @@
 
 import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 
-import type { NativeChatLaunchPrompt } from '@/lib/native-chat-launch-prompt'
+import type { NativeChatLaunchPrompt } from '@/components/native-chat/native-chat-launch-prompt'
 
 import { setBoundedScopeCacheEntry } from './composer-scope-cache'
 import {

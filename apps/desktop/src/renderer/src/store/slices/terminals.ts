@@ -12,6 +12,7 @@ import {
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
+import type { NativeChatLaunchPrompt } from '@/components/native-chat/native-chat-launch-prompt'
 import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
 import { isClaudeAgent } from '@/lib/agent-status'
@@ -20,7 +21,6 @@ import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { getFolderWorkspaceConnectionId } from '@/lib/folder-workspace-connection'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import type { NativeChatLaunchPrompt } from '@/lib/native-chat-launch-prompt'
 import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
 import {
   normalizeTerminalLayoutSnapshot,

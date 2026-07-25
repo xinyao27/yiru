@@ -4,8 +4,8 @@
  * legacy terminal/editor/browser content slices. */
 import type { StateCreator } from 'zustand'
 
+import { emitNativeChatToggled } from '@/components/native-chat/native-chat-telemetry'
 import { createBrowserUuid } from '@/lib/browser-uuid'
-import { emitNativeChatToggled } from '@/lib/native-chat-telemetry'
 import type { TabSplitDirection } from '@/lib/tab-split-direction'
 import {
   addAdditionalValidWorkspaceKeys,

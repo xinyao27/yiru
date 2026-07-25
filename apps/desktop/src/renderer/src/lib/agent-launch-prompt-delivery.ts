@@ -1,6 +1,6 @@
+import { isNativeChatSupportedAgent } from '@/components/native-chat/native-chat-supported-agent'
 import { agentDeliversDraftViaNativePrefill } from '@/lib/agent-native-draft-prefill'
 import { pasteDraftWhenAgentReady } from '@/lib/agent-paste-draft'
-import { isNativeChatSupportedAgent } from '@/lib/native-chat-supported-agent'
 import { useAppStore } from '@/store'
 
 import type { TuiAgent } from '../../../shared/types'

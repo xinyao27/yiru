@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
+import { emitNativeChatMessageSent } from '@/components/native-chat/native-chat-telemetry'
 import { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
-import { emitNativeChatMessageSent } from '@/lib/native-chat-telemetry'
 import { sendRuntimePtyInput } from '@/runtime/terminal-inspection'
 
 import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat-agent-profiles'
