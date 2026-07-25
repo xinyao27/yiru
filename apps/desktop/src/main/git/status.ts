@@ -46,7 +46,7 @@ import type {
   GitStatusResult,
   GitUpstreamStatus
 } from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
+import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
 import { describeMaxBufferOverflowError, isMaxBufferOverflowError } from './max-buffer-overflow'
 import {
   gitExecFileAsync,

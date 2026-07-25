@@ -1,5 +1,5 @@
 import type { DirEntry, FsChangeEvent, SearchOptions, SearchResult } from '../../shared/types'
-import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace-space-types'
+import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/workspace-space-types'
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import {
   consumeSessionInventoryJsonLines,

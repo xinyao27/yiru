@@ -24,7 +24,7 @@ import {
 import type { TerminalSideEffectBatch } from '../shared/terminal/terminal-side-effect-facts'
 import { resolveTuiAgentPermissionMode } from '../shared/tui-agent-permissions'
 import type { UpdateCheckOptions } from '../shared/types'
-import { parseWorkspaceKey } from '../shared/workspace-scope'
+import { parseWorkspaceKey } from '../shared/workspace/workspace-scope'
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 import { AgentAwakeService } from './agent-awake-service'
 import { rememberBranchRenameFailureOutput } from './agent-hooks/branch-rename-failure-output'
@@ -92,25 +92,12 @@ import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemo
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/bridge'
+import { closeAllWatchers } from './filesystem/filesystem-watcher'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { GlobalAssistantService } from './global-assistant/service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
-import { closeAllWatchers } from './ipc/filesystem-watcher'
-import { registerMobileHandlers } from './ipc/mobile'
-import { triggerStartupNotificationRegistration } from './ipc/notifications'
-import { killAllPty } from './ipc/pty'
-import {
-  clearProviderPtyState,
-  getPtyIdForPaneKey,
-  registerPaneKeyTeardownListener,
-  getLocalPtyProvider,
-  getSshPtyProvider,
-  registerHeadlessPtyRuntime
-} from './ipc/pty'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
-import { registerSpoolSharingHandlers } from './ipc/spool-sharing'
-import { disposeWorktreeBaseDirectoryWatchers } from './ipc/worktree-base-directory-watcher'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
   getNextDefaultOnAppearanceSettingValue,
@@ -119,6 +106,7 @@ import {
 } from './menu/register-app-menu'
 import { readMiniMaxSessionCookie } from './minimax/cookie-store'
 import { applyElectronProxySettings } from './network/proxy-settings'
+import { triggerStartupNotificationRegistration } from './notifications/notifications'
 import { initObservability, shutdownObservability } from './observability/service'
 import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode-usage/store'
 import {
@@ -128,11 +116,21 @@ import {
   migrateMobilePairingDataToCanonicalUserDataPath
 } from './persistence'
 import { LocalPtyProvider } from './providers/local-pty-provider'
+import { killAllPty } from './pty/pty'
+import {
+  clearProviderPtyState,
+  getPtyIdForPaneKey,
+  registerPaneKeyTeardownListener,
+  getLocalPtyProvider,
+  getSshPtyProvider,
+  registerHeadlessPtyRuntime
+} from './pty/pty'
 import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit-target'
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
+import { registerMobileHandlers } from './runtime/mobile'
 import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
 import { YiruRuntimeRpcServer } from './runtime/rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
@@ -145,6 +143,7 @@ import {
   createSpoolDesktopComposition,
   type SpoolDesktopComposition
 } from './spool/desktop-composition'
+import { registerSpoolSharingHandlers } from './spool/spool-sharing'
 import { SpoolUnavailableDesktopService } from './spool/unavailable-desktop-service'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
@@ -233,6 +232,7 @@ import {
 import { createMainWindow, loadMainWindow } from './window/create-main-window'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { notifyMainWindowBecameVisible } from './window/main-window-visibility'
+import { disposeWorktreeBaseDirectoryWatchers } from './worktree/worktree-base-directory-watcher'
 import { getDefaultWslDistro } from './wsl'
 import { ensureActiveYiruProfile, initYiruProfilePaths } from './yiru-profiles/profile-index-store'
 

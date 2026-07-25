@@ -6,7 +6,7 @@ import {
 } from '@yiru/workbench-model/workspace'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import type { WorktreeRuntimeOwnerState } from '../../lib/worktree-runtime-owner'
 import {
   findIndexedFolderWorkspaceOwner,

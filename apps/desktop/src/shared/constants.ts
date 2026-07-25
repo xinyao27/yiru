@@ -31,19 +31,19 @@ import type {
 } from './types'
 import { UI_LANGUAGE_SYSTEM } from './ui-language'
 import { DEFAULT_USAGE_PERCENTAGE_DISPLAY } from './usage-percentage-display'
-import { DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS } from './workspace-panel-titlebar-pinned'
-import { cloneDefaultWorkspaceStatuses } from './workspace-statuses'
-import { DEFAULT_WORKTREE_CARD_PROPERTIES } from './worktree-card-properties'
+import { DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS } from './workspace/workspace-panel-titlebar-pinned'
+import { cloneDefaultWorkspaceStatuses } from './workspace/workspace-statuses'
+import { DEFAULT_WORKTREE_CARD_PROPERTIES } from './workspace/worktree-card-properties'
 
 export { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
 export {
   DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS,
   normalizeWorkspacePanelTitlebarPinnedIds
-} from './workspace-panel-titlebar-pinned'
+} from './workspace/workspace-panel-titlebar-pinned'
 export {
   DEFAULT_WORKTREE_CARD_PROPERTIES,
   normalizeWorktreeCardProperties
-} from './worktree-card-properties'
+} from './workspace/worktree-card-properties'
 
 export const SCHEMA_VERSION = 1
 export const DEFAULT_APP_FONT_FAMILY = 'system-ui'

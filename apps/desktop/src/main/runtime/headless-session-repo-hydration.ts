@@ -4,7 +4,7 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 
-import { parseWorkspaceKey } from '../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../shared/workspace/workspace-scope'
 
 type RepoExecutionOwner = {
   id: string

@@ -12,8 +12,8 @@ import {
   normalizeTuiAgentEnvRecord
 } from '../../../../shared/tui-agent-launch-defaults'
 import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
-import { normalizeWorkspacePanelTitlebarPinnedIds } from '../../../../shared/workspace-panel-titlebar-pinned'
-import { normalizeWorktreeCardProperties } from '../../../../shared/worktree-card-properties'
+import { normalizeWorkspacePanelTitlebarPinnedIds } from '../../../../shared/workspace/workspace-panel-titlebar-pinned'
+import { normalizeWorktreeCardProperties } from '../../../../shared/workspace/worktree-card-properties'
 const NullableString = z.string().nullable()
 const StringArray = z.array(z.string())
 const FeatureTipIds = z.array(z.custom(isFeatureTipId, { message: 'Unknown feature tip id' }))

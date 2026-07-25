@@ -23,7 +23,7 @@ import type {
   SearchOptions,
   SearchResult
 } from '../../shared/types'
-import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace-space-types'
+import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/workspace-space-types'
 import type { IGitMutationProvider } from './git-provider-mutation-contract'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
 import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'

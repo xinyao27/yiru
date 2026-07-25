@@ -1,7 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
 
 // Why: below this count plain rows keep the pre-virtualization DOM (natural
 // flow, no absolute positioning), so the common few-worktrees case is

@@ -8,7 +8,7 @@ import { platform } from 'node:process'
 
 import { isFolderRepo } from '../shared/repo-kind'
 import type { GitWorktreeInfo, Repo, Worktree } from '../shared/types'
-import { compactWorkspaceSpaceItems } from '../shared/workspace-space-compaction'
+import { compactWorkspaceSpaceItems } from '../shared/workspace/workspace-space-compaction'
 import type {
   WorkspaceSpaceAnalysis,
   WorkspaceSpaceDirectoryScanResult,
@@ -18,13 +18,13 @@ import type {
   WorkspaceSpaceScanProgress,
   WorkspaceSpaceScanStatus,
   WorkspaceSpaceWorktree
-} from '../shared/workspace-space-types'
-import { mergeWorktree } from './ipc/worktree-logic'
+} from '../shared/workspace/workspace-space-types'
 import type { Store } from './persistence'
 import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from './providers/ssh-git-dispatch'
 import type { IFilesystemProvider } from './providers/types'
 import { createFolderWorktree, listRepoWorktrees } from './repo-worktrees'
+import { mergeWorktree } from './worktree/worktree-logic'
 
 const WORKTREE_SCAN_CONCURRENCY = 3
 const LOCAL_FS_CONCURRENCY = 48

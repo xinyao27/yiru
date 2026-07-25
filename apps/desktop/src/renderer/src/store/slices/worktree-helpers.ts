@@ -28,7 +28,7 @@ import type {
   WorktreeMeta,
   WorkspaceKey
 } from '../../../../shared/types'
-import type { WorktreeForceDeleteReason } from '../../../../shared/worktree-removal'
+import type { WorktreeForceDeleteReason } from '../../../../shared/workspace/worktree-removal'
 export { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
 export type WorktreeDeleteState = {

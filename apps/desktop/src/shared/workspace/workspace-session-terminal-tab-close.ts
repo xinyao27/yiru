@@ -4,7 +4,7 @@ import type {
   TabGroupLayoutNode,
   WorkspaceSessionState,
   WorkspaceVisibleTabType
-} from './types'
+} from '../types'
 import { isWorkspacePanelTabContentType } from './workspace-panel-tab'
 
 export type WorkspaceSessionTerminalTabCloseResult = {

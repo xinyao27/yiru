@@ -58,7 +58,7 @@ import type {
   PathSource,
   ShellHydrationFailureReason
 } from './types'
-import { WORKSPACE_SOURCE_VALUES, type WorkspaceSource } from './workspace-source'
+import { WORKSPACE_SOURCE_VALUES, type WorkspaceSource } from './workspace/workspace-source'
 
 // ── Shared property enums ───────────────────────────────────────────────
 

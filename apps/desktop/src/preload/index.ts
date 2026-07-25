@@ -209,9 +209,9 @@ import {
   YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '../shared/updater-renderer-events'
-import type { WorkspaceCleanupScanProgress } from '../shared/workspace-cleanup'
-import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace-ports'
-import type { WorkspaceSpaceScanProgress } from '../shared/workspace-space-types'
+import type { WorkspaceCleanupScanProgress } from '../shared/workspace/workspace-cleanup'
+import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace/workspace-ports'
+import type { WorkspaceSpaceScanProgress } from '../shared/workspace/workspace-space-types'
 import type { PreflightRuntimeContext, RefreshAgentsResult } from './api-types'
 import type {
   NativeChatAppendedPayload,
@@ -1446,7 +1446,7 @@ const api = {
 
     // Why: the app renderer owns the work-item-details cache. Main targets this
     // bridge for non-origin mutations; origin callers already updated their
-    // cache optimistically — see src/main/ipc/github.ts.
+    // cache optimistically — see src/main/github/github.ts.
     onWorkItemMutated: (
       callback: (payload: { repoPath: string; repoId?: string; type: 'pr'; number: number }) => void
     ): (() => void) => {

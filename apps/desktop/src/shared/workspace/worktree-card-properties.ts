@@ -1,4 +1,4 @@
-import type { WorktreeCardProperty } from './types'
+import type { WorktreeCardProperty } from '../types'
 
 const FIXED_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = ['status', 'unread']
 

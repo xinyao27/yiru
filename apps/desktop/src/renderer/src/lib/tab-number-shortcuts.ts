@@ -9,7 +9,7 @@ import { dedupeTabOrder } from '@/store/slices/tab-group-state'
 import type { AppState } from '@/store/types'
 
 import type { Tab } from '../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../shared/workspace-panel-tab'
+import { isWorkspacePanelTabContentType } from '../../../shared/workspace/workspace-panel-tab'
 
 type TabNumberShortcutState = Pick<
   AppState,

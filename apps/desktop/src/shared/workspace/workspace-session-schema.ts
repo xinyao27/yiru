@@ -10,8 +10,8 @@
  */
 import { z } from 'zod'
 
-import { isValidTerminalTabId } from './terminal/terminal-tab-id'
-import { isTuiAgent } from './tui-agent-config'
+import { isValidTerminalTabId } from '../terminal/terminal-tab-id'
+import { isTuiAgent } from '../tui-agent-config'
 import type {
   BrowserWorkspace,
   TabGroupLayoutNode,
@@ -19,7 +19,7 @@ import type {
   TuiAgent,
   WorkspaceKey,
   WorkspaceSessionState
-} from './types'
+} from '../types'
 import { isWorkspaceKey } from './workspace-scope'
 import { normalizeBrowserHistoryEntries } from './workspace-session-browser-history'
 import { sleepingAgentSessionsByPaneKeySchema } from './workspace-session-sleeping-agents'

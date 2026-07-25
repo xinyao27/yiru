@@ -53,7 +53,7 @@ import {
   type WorkspaceCleanupCandidate,
   type WorkspaceCleanupScanError,
   type WorkspaceCleanupScanProgress
-} from '../../../../shared/workspace-cleanup'
+} from '../../../../shared/workspace/workspace-cleanup'
 import {
   startWorkspaceCleanupBackgroundRemoval,
   type WorkspaceCleanupRemovalProgress

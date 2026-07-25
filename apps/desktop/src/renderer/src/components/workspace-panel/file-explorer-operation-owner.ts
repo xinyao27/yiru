@@ -14,7 +14,7 @@ import { useAppStore } from '@/store'
 import { getRepoIdFromWorktreeId } from '@/store/slices/worktree-helpers'
 import type { AppState } from '@/store/types'
 
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import type { FileExplorerOperationOwner } from './file-explorer-types'
 
 export type FileExplorerOperationRoute = {

@@ -4,7 +4,7 @@ import type {
 } from '@/components/workspace-cleanup/state'
 import { translate } from '@/i18n/i18n'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
 
 export type WorkspaceCleanupRemovalSettlement =
   | { status: 'fulfilled'; result: WorkspaceCleanupRemoveResult }

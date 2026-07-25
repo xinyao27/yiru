@@ -10,7 +10,7 @@ import type {
   TerminalTab,
   WorkspaceSessionState
 } from '../../shared/types'
-import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace-scope'
+import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/workspace-scope'
 import {
   isRepoWorktreeId,
   rekeyOwnerKey,

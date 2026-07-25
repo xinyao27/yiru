@@ -36,7 +36,7 @@ import type {
   WorktreeLineage,
   WorkspaceStatusDefinition
 } from '../../../../shared/types'
-import { cloneDefaultWorkspaceStatuses } from '../../../../shared/workspace-statuses'
+import { cloneDefaultWorkspaceStatuses } from '../../../../shared/workspace/workspace-statuses'
 import { branchName } from '../../lib/git-utils'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from '../../store/slices/github-cache-key'
 import type { AppState } from '../../store/types'

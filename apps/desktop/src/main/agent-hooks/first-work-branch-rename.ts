@@ -16,7 +16,7 @@ import { parsePaneKey } from '../../shared/stable-pane-id'
 // owns the orchestration: gate on the signal, enforce the safety guardrails,
 // summarize the prompt via the configured agent, and rename.
 import type { GlobalSettings, Repo } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../shared/workspace/workspace-scope'
 import {
   probeBranchUpstream,
   renameCurrentBranch,
@@ -25,7 +25,6 @@ import {
 } from '../git/branch-rename'
 import { gitExecFileAsync } from '../git/runner'
 import { getSshGitUsername, resolveLocalGitUsername } from '../git/username'
-import { computeBranchName, getConfiguredBranchPrefix } from '../ipc/worktree-logic'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import type { AgentGenerationFailureOutput } from '../text-generation/agent-failure-output'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
@@ -33,6 +32,7 @@ import {
   generateBranchNameFromContext,
   resolveTextGenerationParams
 } from '../text-generation/commit-message-text-generation'
+import { computeBranchName, getConfiguredBranchPrefix } from '../worktree/worktree-logic'
 import { resolveGenerationTarget } from './first-work-generation-target'
 import { runFolderWorkspaceTitleAutoRename } from './first-work-workspace-title-rename'
 

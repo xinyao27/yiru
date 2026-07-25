@@ -49,12 +49,12 @@ import type {
   BrowserWorkspace,
   WorkspaceSessionState
 } from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
+import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import {
   MAX_BROWSER_HISTORY_ENTRIES,
   normalizeBrowserHistoryEntries,
   normalizeBrowserHistoryUrl
-} from '../../../../shared/workspace-session-browser-history'
+} from '../../../../shared/workspace/workspace-session-browser-history'
 import { destroyWorkspaceWebviews } from '../../store/slices/browser-webview-cleanup'
 import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
 import { pickNeighbor } from '../../store/slices/tab-group-state'

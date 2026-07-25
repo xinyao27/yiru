@@ -52,7 +52,7 @@ import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace-scope'
+} from '../../../../shared/workspace/workspace-scope'
 import { runWorktreeBatchDelete, runWorktreeDelete } from './delete-worktree-flow'
 import { ProjectGroupNameDialog } from './project-group-name-dialog'
 import { runSleepWorktrees } from './sleep-worktree-flow'

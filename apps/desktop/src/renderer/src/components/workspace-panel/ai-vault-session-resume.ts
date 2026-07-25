@@ -9,7 +9,7 @@ import {
 import type { AppState } from '@/store/types'
 
 import type { Repo, Worktree } from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import {
   canJumpToAiVaultSessionWorktree,
   type AiVaultSessionWorktreeInfo

@@ -313,22 +313,22 @@ import type {
   WorkspacePortKillResult,
   WorkspacePortProbe,
   WorkspacePortScanResult
-} from '../../shared/workspace-ports'
+} from '../../shared/workspace/workspace-ports'
 import {
   folderWorkspaceKey,
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../shared/workspace-scope'
-import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace-session-terminal-tab-close'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
-import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
+} from '../../shared/workspace/workspace-scope'
+import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace/workspace-session-terminal-tab-close'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/workspace-statuses'
+import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
 import {
   buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
   toDetectedWorktree
-} from '../../shared/worktree-ownership'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
+} from '../../shared/workspace/worktree-ownership'
+import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   markCodexProjectTrusted,
@@ -349,6 +349,17 @@ import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
 import type { EmulatorBridge } from '../emulator/bridge'
+import { isENOENT } from '../filesystem/filesystem-auth'
+import { invalidateAuthorizedRootsCache } from '../filesystem/filesystem-auth'
+import {
+  closeLocalWatcherForWorktreePath,
+  closeRemoteWatcherForWorktreePath,
+  forgetLocalWatcherRemovalSnapshot,
+  forgetRemoteWatcherRemovalSnapshot,
+  restoreLocalWatcherAfterFailedRemoval,
+  restoreRemoteWatcherAfterFailedRemoval
+} from '../filesystem/filesystem-watcher'
+import { acquireWatcherRemovalGate } from '../filesystem/watcher-removal-gate'
 import { getSshGitCapabilityCache } from '../git/capability-state'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
 import {
@@ -457,47 +468,6 @@ import {
   runHook,
   shouldRunSetupForCreate
 } from '../hooks'
-import { isENOENT } from '../ipc/filesystem-auth'
-import { invalidateAuthorizedRootsCache } from '../ipc/filesystem-auth'
-import {
-  closeLocalWatcherForWorktreePath,
-  closeRemoteWatcherForWorktreePath,
-  forgetLocalWatcherRemovalSnapshot,
-  forgetRemoteWatcherRemovalSnapshot,
-  restoreLocalWatcherAfterFailedRemoval,
-  restoreRemoteWatcherAfterFailedRemoval
-} from '../ipc/filesystem-watcher'
-import { detectInstalledAgentsWithShellPathHydration, detectRemoteAgents } from '../ipc/preflight'
-import { normalizeSparseDirectories } from '../ipc/sparse-checkout-directories'
-import { acquireWatcherRemovalGate } from '../ipc/watcher-removal-gate'
-import {
-  computeValidatedBranchName,
-  computeWorktreePath,
-  computeWorkspaceRoot,
-  ensurePathWithinWorkspace,
-  formatWorktreeRemovalError,
-  getWorktreeCreationLayout,
-  getWorktreePathSettings,
-  isOrphanCompatiblePreflightError,
-  isOrphanedWorktreeError,
-  mergeWorktree,
-  sanitizeWorktreeName,
-  shouldSetDisplayName,
-  areWorktreePathsEqual
-} from '../ipc/worktree-logic'
-import { worktreePathComparisonKey } from '../ipc/worktree-path-comparison'
-import {
-  cleanupUnusedWorktreePushTargetRemote,
-  cleanupUnusedWorktreePushTargetRemoteSsh,
-  createRemoteWorktree,
-  configureCreatedWorktreePushTarget,
-  prepareWorktreePushTarget
-} from '../ipc/worktree-remote'
-import {
-  createWorktreeLinkedPaths,
-  findExistingWorktreeSymlinkPaths,
-  removeWorktreeLinkedPaths
-} from '../ipc/worktree-symlinks'
 import { LanguageServerManager } from '../language-server-manager'
 import { resolveLocalProjectRuntimeForWorktreeId } from '../local-project-runtime-resolution'
 import {
@@ -517,6 +487,10 @@ import {
   killWorkspacePort,
   scanWorkspacePortProbes
 } from '../ports/workspace-port-ownership'
+import {
+  detectInstalledAgentsWithShellPathHydration,
+  detectRemoteAgents
+} from '../preflight/preflight'
 import {
   assertFolderWorkspacePathUsable,
   getFolderWorkspacePathStatus,
@@ -551,6 +525,7 @@ import {
   createHostedReview as createHostedReviewFromRepo,
   getHostedReviewCreationEligibility as getHostedReviewCreationEligibilityFromRepo
 } from '../source-control/hosted-review-creation'
+import { normalizeSparseDirectories } from '../sparse-checkout-directories'
 import { getCatalogModel, isLocalSpeechModel, SPEECH_MODEL_CATALOG } from '../speech/model-catalog'
 import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../speech/model-deletion'
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
@@ -584,6 +559,34 @@ import {
 } from '../worktree-removal-safety'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'
 import { persistExistingWorktreeSortOrder } from '../worktree-sort-order-persistence'
+import {
+  computeValidatedBranchName,
+  computeWorktreePath,
+  computeWorkspaceRoot,
+  ensurePathWithinWorkspace,
+  formatWorktreeRemovalError,
+  getWorktreeCreationLayout,
+  getWorktreePathSettings,
+  isOrphanCompatiblePreflightError,
+  isOrphanedWorktreeError,
+  mergeWorktree,
+  sanitizeWorktreeName,
+  shouldSetDisplayName,
+  areWorktreePathsEqual
+} from '../worktree/worktree-logic'
+import { worktreePathComparisonKey } from '../worktree/worktree-path-comparison'
+import {
+  cleanupUnusedWorktreePushTargetRemote,
+  cleanupUnusedWorktreePushTargetRemoteSsh,
+  createRemoteWorktree,
+  configureCreatedWorktreePushTarget,
+  prepareWorktreePushTarget
+} from '../worktree/worktree-remote'
+import {
+  createWorktreeLinkedPaths,
+  findExistingWorktreeSymlinkPaths,
+  removeWorktreeLinkedPaths
+} from '../worktree/worktree-symlinks'
 import { ClaudeAgentTeamsService } from './claude-agent-teams-service'
 import type {
   AgentTeamsTmuxCompatRequest,

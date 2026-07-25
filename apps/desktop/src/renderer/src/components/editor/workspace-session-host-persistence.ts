@@ -12,7 +12,7 @@ import type {
   WorkspaceSessionPatch,
   WorkspaceSessionState
 } from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import {
   mergeWorkspaceSessionsFromHosts,
   splitWorkspaceSessionByHost,

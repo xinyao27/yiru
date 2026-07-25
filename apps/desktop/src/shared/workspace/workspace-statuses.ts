@@ -1,4 +1,4 @@
-import type { Worktree, WorkspaceStatus, WorkspaceStatusDefinition } from './types'
+import type { Worktree, WorkspaceStatus, WorkspaceStatusDefinition } from '../types'
 import {
   isKnownBadPRReorderedDefaultStatusPayload,
   isLegacyDefaultWorkflowStatusPayload

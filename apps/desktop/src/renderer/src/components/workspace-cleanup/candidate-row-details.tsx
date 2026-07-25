@@ -3,7 +3,7 @@ import React from 'react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
 import { formatGitStatus } from './candidate-row-data'
 
 type CandidateRowDetailsProps = {

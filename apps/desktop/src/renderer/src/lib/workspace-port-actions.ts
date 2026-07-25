@@ -10,7 +10,7 @@ import type {
   WorkspacePort,
   WorkspacePortKillResult,
   WorkspacePortScanResult
-} from '../../../shared/workspace-ports'
+} from '../../../shared/workspace/workspace-ports'
 import { browserUrlForPort } from './workspace-port-urls'
 
 export { addressForPort } from './workspace-port-urls'

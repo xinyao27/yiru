@@ -3,7 +3,7 @@ import { translate } from '@/i18n/i18n'
 import {
   isLockedWorktreeRemovalError,
   type WorktreeForceDeleteReason
-} from '../../../../shared/worktree-removal'
+} from '../../../../shared/workspace/worktree-removal'
 export type DeleteWorktreeToastCopy = {
   title: string
   description?: string

@@ -1,4 +1,4 @@
-import type { WorkspacePanelTabContentType } from './types'
+import type { WorkspacePanelTabContentType } from '../types'
 
 const WORKSPACE_PANEL_TAB_CONTENT_TYPES = new Set<WorkspacePanelTabContentType>([
   'explorer',

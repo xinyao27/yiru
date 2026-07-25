@@ -22,7 +22,7 @@ import { cn } from '@/lib/class-names'
 import {
   canQueueWorkspaceCleanupCandidate,
   type WorkspaceCleanupCandidate
-} from '../../../../shared/workspace-cleanup'
+} from '../../../../shared/workspace/workspace-cleanup'
 import {
   formatBranchSafetyDetails,
   formatContextDetails,

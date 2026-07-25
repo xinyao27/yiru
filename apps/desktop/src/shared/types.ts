@@ -51,12 +51,12 @@ import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
 import type { TerminalCustomTheme } from './terminal/terminal-custom-themes'
 import type { UiLanguage } from './ui-language'
 import type { UsagePercentageDisplay } from './usage-percentage-display'
-import type { WorkspaceCleanupUIState } from './workspace-cleanup'
-import type { WorkspaceSource } from './workspace-source'
+import type { WorkspaceCleanupUIState } from './workspace/workspace-cleanup'
+import type { WorkspaceSource } from './workspace/workspace-source'
 
 // Re-exported for backward compat with renderer call sites that import
 // `WorkspaceCreateTelemetrySource` from '../../../shared/types'.
-export type { WorkspaceSource as WorkspaceCreateTelemetrySource } from './workspace-source'
+export type { WorkspaceSource as WorkspaceCreateTelemetrySource } from './workspace/workspace-source'
 export type {
   GitBranchChangeStatus,
   GitConflictKind,

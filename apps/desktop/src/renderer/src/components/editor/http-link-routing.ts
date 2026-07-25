@@ -4,7 +4,10 @@ import {
   type LocalhostWorktreeLabelRoute
 } from '../../../../shared/localhost-worktree-labels'
 import type { GlobalSettings } from '../../../../shared/types'
-import type { WorkspacePort, WorkspacePortScanResult } from '../../../../shared/workspace-ports'
+import type {
+  WorkspacePort,
+  WorkspacePortScanResult
+} from '../../../../shared/workspace/workspace-ports'
 
 export type OpenHttpLinkOptions = {
   worktreeId?: string | null

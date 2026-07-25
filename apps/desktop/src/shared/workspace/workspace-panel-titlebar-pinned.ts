@@ -1,7 +1,7 @@
-import type { WorkspaceTitlebarActionId } from './types'
+import type { WorkspaceTitlebarActionId } from '../types'
 import { isWorkspacePanelTabContentType } from './workspace-panel-tab'
 
-export type { WorkspaceTitlebarActionId } from './types'
+export type { WorkspaceTitlebarActionId } from '../types'
 
 export const WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID = 'open-in' as const
 export const WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID = 'commands' as const

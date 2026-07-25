@@ -37,8 +37,8 @@ import type { GitStatusResult, Repo, TerminalTab, Worktree } from '../../../../s
 import type {
   WorkspaceSpaceItem,
   WorkspaceSpaceWorktree
-} from '../../../../shared/workspace-space-types'
-import type { WorktreeForceDeleteReason } from '../../../../shared/worktree-removal'
+} from '../../../../shared/workspace/workspace-space-types'
+import type { WorktreeForceDeleteReason } from '../../../../shared/workspace/worktree-removal'
 import { useAppStore } from '../../store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '../../store/selectors'
 import { getHostedReviewCacheKey } from '../../store/slices/hosted-review'

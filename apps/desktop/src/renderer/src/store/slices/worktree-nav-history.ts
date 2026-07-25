@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import type { AppState } from '../types'
 import { findWorktreeById } from './worktree-helpers'
 

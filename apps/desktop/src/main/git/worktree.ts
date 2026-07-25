@@ -22,9 +22,9 @@ import type {
   LocalBaseRefUpdateSuggestion,
   RemoveWorktreeResult
 } from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
-import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/worktree-submodule-removal'
+import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
+import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/workspace/worktree-submodule-removal'
 import { getLocalGitCapabilityCache } from './capability-state'
 import { gitExecFileAsync, translateWslOutputPaths } from './runner'
 import { resolveGitDir, runWithGitReadCacheInvalidation } from './status'

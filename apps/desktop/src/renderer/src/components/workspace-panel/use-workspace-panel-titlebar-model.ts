@@ -22,7 +22,7 @@ import {
   WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID,
   WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID,
   type WorkspaceTitlebarActionId
-} from '../../../../shared/workspace-panel-titlebar-pinned'
+} from '../../../../shared/workspace/workspace-panel-titlebar-pinned'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import {
   itemIconWeight,

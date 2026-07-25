@@ -8,7 +8,7 @@ import {
 } from '@yiru/workbench-model/platform'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
-import { isExplicitlyImportedExternalWorktreePath } from './external-worktree-inbox'
+import { isExplicitlyImportedExternalWorktreePath } from '../external-worktree-inbox'
 import type {
   DetectedWorktree,
   ExternalWorktreeVisibility,
@@ -18,7 +18,7 @@ import type {
   Worktree,
   WorktreeMeta,
   WorktreeOwnership
-} from './types'
+} from '../types'
 
 export const EXTERNAL_WORKTREE_VISIBILITY_ROLLOUT_AT = Date.UTC(2026, 4, 23)
 
