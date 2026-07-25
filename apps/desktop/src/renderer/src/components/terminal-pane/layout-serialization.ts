@@ -1,11 +1,11 @@
-import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
-import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { isXtermInstanceDisposed } from '@/lib/pane-manager/xterm-instance-disposed'
 import {
   getLeftmostLeafId,
   normalizeTerminalLayoutSnapshot,
   resolveRootlessTerminalLayoutLeafId
-} from '@/lib/terminal-layout-leaf-ids'
+} from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
+import type { PaneManager } from '@/lib/pane-manager/pane-manager'
+import { isXtermInstanceDisposed } from '@/lib/pane-manager/xterm-instance-disposed'
 
 import { isTerminalLeafId } from '../../../../shared/stable-pane-id'
 import type {
@@ -20,7 +20,7 @@ export {
   collectLeafIdsInOrder,
   collectLeafIdsInReplayCreationOrder,
   normalizeTerminalLayoutSnapshot
-} from '@/lib/terminal-layout-leaf-ids'
+} from '@/components/terminal-pane/terminal-layout-leaf-ids'
 
 export const EMPTY_LAYOUT: TerminalLayoutSnapshot = {
   root: null,

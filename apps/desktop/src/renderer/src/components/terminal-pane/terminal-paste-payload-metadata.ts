@@ -4,7 +4,7 @@ import {
   hasPastePayloadControlSequence,
   measurePastePayloadMetadata,
   measurePastePayloadMetadataWithYield
-} from '@/lib/paste-payload-metadata'
+} from '@/components/terminal-pane/paste-payload-metadata'
 
 export const measureTerminalPastePayloadMetadata = measurePastePayloadMetadata
 export const measureTerminalPastePayloadMetadataWithYield = measurePastePayloadMetadataWithYield

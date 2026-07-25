@@ -8,10 +8,10 @@ import {
 } from '@/components/terminal-pane/layout-serialization'
 import { getEagerPtyBufferHandle } from '@/components/terminal-pane/pty-dispatcher'
 import { warnTerminalLifecycleAnomaly } from '@/components/terminal-pane/terminal-lifecycle-diagnostics'
+import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { resolveLeafIdForManager } from '@/lib/pane-manager/pane-key-resolution'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { sanitizeTerminalLayoutPaneTitles } from '@/lib/terminal-pane-title-sanitization'
 import { getSystemPrefersDark, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import type { AppState } from '@/store/types'
 

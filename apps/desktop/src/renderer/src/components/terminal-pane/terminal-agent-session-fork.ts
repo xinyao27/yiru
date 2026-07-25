@@ -2,11 +2,11 @@ import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
 import { toast } from 'sonner'
 
-import { translate } from '@/i18n/i18n'
 import {
   buildAgentSessionForkPrompt,
   buildBoundedSessionTranscript
-} from '@/lib/agent-session-fork-context'
+} from '@/components/terminal-pane/agent-session-fork-context'
+import { translate } from '@/i18n/i18n'
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'

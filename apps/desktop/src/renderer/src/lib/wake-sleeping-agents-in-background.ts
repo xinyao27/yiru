@@ -8,12 +8,12 @@ import {
 import { useAppStore } from '@/store'
 
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../../shared/stable-pane-id'
-import { resumeSleepingAgentSessionsForWorktree } from './resume-sleeping-agent-session'
 import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence,
   recordPaneIsOwnedByPreservedPane
-} from './sleeping-agent-pane-ownership'
+} from '../components/terminal-pane/sleeping-agent-pane-ownership'
+import { resumeSleepingAgentSessionsForWorktree } from './resume-sleeping-agent-session'
 
 type BackgroundSleepingAgentWakeDispatcherOptions = {
   isWorkspaceSessionReady?: () => boolean

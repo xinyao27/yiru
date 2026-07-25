@@ -1,8 +1,8 @@
 import { isFreshNonDoneAgentStatus, type AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { useCallback } from 'react'
 
-import { showBlockedNotificationFallbackToast } from '@/lib/blocked-notification-fallback'
-import { playDesktopNotificationSound } from '@/lib/desktop-notification-sound'
+import { showBlockedNotificationFallbackToast } from '@/components/terminal-pane/blocked-notification-fallback'
+import { playDesktopNotificationSound } from '@/components/terminal-pane/desktop-notification-sound'
 import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
 import { useAppStore } from '@/store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'

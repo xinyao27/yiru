@@ -6,7 +6,7 @@ import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbe
  * leave the web client in a split-brain tab state. */
 import { useEffect } from 'react'
 
-import { sanitizeTerminalLayoutPaneTitlesForLabels } from '@/lib/terminal-pane-title-sanitization'
+import { sanitizeTerminalLayoutPaneTitlesForLabels } from '@/components/terminal-pane/title-sanitization'
 import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getRuntimeSessionMirrorEnvironmentIds

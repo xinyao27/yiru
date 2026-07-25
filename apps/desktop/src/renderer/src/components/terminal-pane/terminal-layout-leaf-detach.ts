@@ -2,7 +2,7 @@ import {
   collectLeafIdsInOrder,
   normalizeTerminalLayoutSnapshot,
   resolveTerminalLayoutActiveLeafId
-} from '@/lib/terminal-layout-leaf-ids'
+} from '@/components/terminal-pane/terminal-layout-leaf-ids'
 
 import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '../../../../shared/types'
 

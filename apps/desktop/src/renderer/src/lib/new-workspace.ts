@@ -4,14 +4,14 @@ import {
   getSettingsForAgentTabRuntimeOwner,
   pasteDraftToAgentPtyWhenReady
 } from '@/components/native-chat/agent-paste-draft'
-import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
-import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import {
   beginAgentStartupDeliveryAttempt,
   getAgentStartupTabPtyId,
   queuePendingAgentStartupDelivery,
   resolveAgentStartupTabId
-} from '@/lib/agent-startup-delayed-delivery'
+} from '@/components/terminal-pane/agent-startup-delayed-delivery'
+import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
+import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
 import { useAppStore } from '@/store'

@@ -10,7 +10,7 @@ import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence,
   recordPaneIsOwnedByPreservedPane
-} from './sleeping-agent-pane-ownership'
+} from '../components/terminal-pane/sleeping-agent-pane-ownership'
 import {
   launchSleepingAgentSession,
   type ResumeSleepingAgentSessionsOptions

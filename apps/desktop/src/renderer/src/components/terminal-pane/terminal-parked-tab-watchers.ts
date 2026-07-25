@@ -1,4 +1,4 @@
-import { collectLeafIdsInOrder } from '@/lib/terminal-layout-leaf-ids'
+import { collectLeafIdsInOrder } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import { discardPreHandlerPtyState } from '@/runtime/pty-pre-handler-buffer'
 import {
   capturedPanesByTabId,

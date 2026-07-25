@@ -1,7 +1,7 @@
 import {
   measurePastePayloadMetadata,
   measurePastePayloadMetadataWithYield
-} from './paste-payload-metadata'
+} from '../components/terminal-pane/paste-payload-metadata'
 import {
   createTextControlCancelledResult,
   createTextControlPastedResult,

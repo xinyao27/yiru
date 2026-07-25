@@ -14,6 +14,11 @@ import { useShallow } from 'zustand/react/shallow'
 import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
 import { DaemonActionDialog, useDaemonActions } from '@/components/shared/use-daemon-actions'
+import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import {
+  isSyntheticSinglePaneTitle,
+  sanitizeTerminalLayoutPaneTitles
+} from '@/components/terminal-pane/title-sanitization'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog
@@ -53,11 +58,6 @@ import {
   isPrimarySelectionEnabled,
   readPrimarySelectionText
 } from '@/lib/primary-selection'
-import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
-import {
-  isSyntheticSinglePaneTitle,
-  sanitizeTerminalLayoutPaneTitles
-} from '@/lib/terminal-pane-title-sanitization'
 import {
   DEFAULT_TERMINAL_DIVIDER_DARK,
   isTerminalBackgroundLight,
@@ -96,7 +96,7 @@ import {
 import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal/terminal-session-state-save-failure'
 import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal/terminal-zero-dimensions-diagnostic'
 import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
-import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace-session-terminal-buffers'
+import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace/workspace-session-terminal-buffers'
 import { useAppStore } from '../../store'
 import { canToggleNativeChat } from '../native-chat/availability'
 import {

@@ -5,6 +5,7 @@ import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 import { useEffect, useRef } from 'react'
 
 import { resolveLocalhostHttpLinkDisplayUrl } from '@/components/editor/http-link-routing'
+import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   SPLIT_TERMINAL_PANE_EVENT,
   CLOSE_TERMINAL_PANE_EVENT,
@@ -39,7 +40,6 @@ import {
   isPrimarySelectionEnabled,
   setPrimarySelectionText
 } from '@/lib/primary-selection'
-import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import { resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'

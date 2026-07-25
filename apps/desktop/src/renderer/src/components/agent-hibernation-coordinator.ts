@@ -7,7 +7,6 @@ import type {
   RuntimeTerminalListResult,
   RuntimeTerminalSummary
 } from '../../../shared/runtime-types'
-import { getAgentHibernationOutputSignature } from '../lib/agent-hibernation-output-activity'
 import {
   getForegroundTerminalTabIds,
   getForegroundTerminalTabLastSeenAtById
@@ -23,6 +22,7 @@ import {
   type AgentHibernationCandidate,
   type AgentHibernationPlannerSnapshot
 } from './settings/agent-hibernation-planner'
+import { getAgentHibernationOutputSignature } from './terminal-pane/agent-hibernation-output-activity'
 
 export const AGENT_HIBERNATION_TICK_MS = 60 * 1000
 

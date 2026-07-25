@@ -2,7 +2,7 @@ import {
   joinAbsolutePath,
   normalizeAbsolutePath,
   resolveTildePath
-} from '../../lib/terminal-path-normalization'
+} from '../terminal-pane/terminal-path-normalization'
 
 export type ParsedExplicitFileLinkTarget = {
   pathText: string

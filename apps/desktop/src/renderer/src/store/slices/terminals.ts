@@ -14,19 +14,19 @@ import type { StateCreator } from 'zustand'
 
 import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
 import type { NativeChatLaunchPrompt } from '@/components/native-chat/native-chat-launch-prompt'
-import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
+import { forgetAgentHibernationTabOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '@/components/terminal-pane/agent-startup-delivery-guards'
+import {
+  normalizeTerminalLayoutSnapshot,
+  resolvePtyBoundActiveLeafId
+} from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
 import { isClaudeAgent } from '@/lib/agent-status'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
-import {
-  normalizeTerminalLayoutSnapshot,
-  resolvePtyBoundActiveLeafId
-} from '@/lib/terminal-layout-leaf-ids'
-import { sanitizeTerminalLayoutPaneTitles } from '@/lib/terminal-pane-title-sanitization'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
@@ -88,7 +88,7 @@ import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace-scope'
+} from '../../../../shared/workspace/workspace-scope'
 import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
 import type { AppState } from '../types'
 import {

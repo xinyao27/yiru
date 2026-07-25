@@ -15,15 +15,19 @@ import {
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
-import { dispatchTerminalCommandFinishedEvent } from '@/hooks/terminal-command-finished-event'
-import { sendAgentDraftPasteContent } from '@/lib/agent-draft-paste-content'
-import { recordAgentHibernationPaneOutput } from '@/lib/agent-hibernation-output-activity'
+import { sendAgentDraftPasteContent } from '@/components/terminal-pane/agent-draft-paste-content'
+import { recordAgentHibernationPaneOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
 import {
   beginAgentStartupDeliveryAttempt,
   releaseAgentStartupDeliveryAttempt
-} from '@/lib/agent-startup-delayed-delivery'
+} from '@/components/terminal-pane/agent-startup-delayed-delivery'
+import { resolveAgentStatusTerminalTitle } from '@/components/terminal-pane/agent-status-terminal-title'
+import {
+  getProviderSessionClaimKey,
+  isPassiveCompletedHibernationEvidence
+} from '@/components/terminal-pane/sleeping-agent-pane-ownership'
+import { dispatchTerminalCommandFinishedEvent } from '@/hooks/terminal-command-finished-event'
 import { detectAgentStatusFromTitle, agentTypeToIconAgent, isClaudeAgent } from '@/lib/agent-status'
-import { resolveAgentStatusTerminalTitle } from '@/lib/agent-status-terminal-title'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { getConnectionId } from '@/lib/connection-context'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
@@ -81,10 +85,6 @@ import {
   isLocalNativeWindowsConpty,
   resolveWindowsShellOverride
 } from '@/lib/pane-manager/windows-pty-compatibility'
-import {
-  getProviderSessionClaimKey,
-  isPassiveCompletedHibernationEvidence
-} from '@/lib/sleeping-agent-pane-ownership'
 import {
   markTerminalBracketedPasteInterrupted,
   observeTerminalBracketedPasteModeOutput
@@ -153,7 +153,7 @@ import {
   resolveTuiAgentLaunchEnv
 } from '../../../../shared/tui-agent-launch-defaults'
 import type { SetupSplitDirection, TuiAgent } from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
 import { createAgentCompletionCoordinator } from './agent-completion-coordinator'
 import type {
   AgentCompletionDispatchMeta,

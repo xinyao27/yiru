@@ -1,6 +1,6 @@
+import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { flushTerminalOutput } from '@/lib/pane-manager/pane-terminal-output-scheduler'
-import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 
 import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal/terminal-scrollback-limits'
 import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/terminal-serialize-absolute-cursor'
