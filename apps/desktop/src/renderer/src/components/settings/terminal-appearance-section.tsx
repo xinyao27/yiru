@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import { isWebClientLocation } from '@/hooks/use-settings-navigation-metadata'
 import { translate } from '@/i18n/i18n'
 
 import ghosttyIcon from '../../../../../resources/ghostty.svg'
@@ -38,6 +37,7 @@ import {
 import { TerminalThemeCatalogSection } from './terminal-theme-sections'
 import { TerminalWindowSection } from './terminal-window-section'
 import type { UseGhosttyImportReturn } from './use-ghostty-import'
+import { isWebClientLocation } from './use-navigation-metadata'
 import type { UseWarpThemeImportReturn } from './use-warp-theme-import'
 import { WarpThemeImportModal } from './warp-theme-import-modal'
 

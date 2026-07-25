@@ -2,11 +2,11 @@ import { Terminal } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { useSkillFreshness } from '@/hooks/use-skill-freshness'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import { requestSkillFreshnessUpdateDialog } from './skill-freshness-update-dialog-request'
+import { useSkillFreshness } from './use-skill-freshness'
 
 const MAX_DISMISSED_FRESHNESS_NUDGES = 512
 const NO_DISMISSED_FRESHNESS_NUDGES: string[] = []

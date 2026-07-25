@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
+import { useSkillFreshness } from '@/components/skills/use-skill-freshness'
 import { isMacUserAgent, isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
@@ -25,11 +26,6 @@ import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
 } from '@/hooks/use-installed-agent-skills'
-import {
-  isWebClientLocation,
-  useSettingsNavigationMetadata
-} from '@/hooks/use-settings-navigation-metadata'
-import { useSkillFreshness } from '@/hooks/use-skill-freshness'
 import { translate } from '@/i18n/i18n'
 import {
   COMPUTER_USE_SKILL_NAME,
@@ -114,6 +110,7 @@ import { SettingsSidebar } from './sidebar'
 import { SshPane } from './ssh-pane'
 import { TerminalPane } from './terminal-pane'
 import { useGhosttyImport } from './use-ghostty-import'
+import { isWebClientLocation, useSettingsNavigationMetadata } from './use-navigation-metadata'
 import { useWarpThemeImport } from './use-warp-theme-import'
 import { VoicePane } from './voice-pane'
 

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import AgentSettingsDialog from '@/components/agent/settings-dialog'
 import NewWorkspaceComposerCard from '@/components/new-workspace-composer-card'
+import { useComposerState } from '@/components/new-workspace/use-composer-state'
 import { getFolderWorkspacePrimaryActionLabel } from '@/components/sidebar/folder-workspace-composer-helpers'
 import {
   Dialog,
@@ -10,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useComposerState } from '@/hooks/use-composer-state'
 import { translate } from '@/i18n/i18n'
 import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
 import { shouldAllowComposerEnterSubmitTarget } from '@/lib/new-workspace-enter-guard'

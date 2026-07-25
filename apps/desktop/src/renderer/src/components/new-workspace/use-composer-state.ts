@@ -32,10 +32,6 @@ import {
 import { useFolderWorkspaceComposerPathStatus } from '@/components/sidebar/folder-workspace-composer-path-status'
 import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspace-composer-submit'
 import { getSuggestedCreatureName } from '@/components/sidebar/worktree-name-suggestions'
-import {
-  createComposerSubmissionGuard,
-  shouldPreserveComposerSubmissionOnUnmount
-} from '@/hooks/composer-submission-guard'
 import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
@@ -121,21 +117,21 @@ import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { resolveWorktreeCreateBaseBranch } from '@/runtime/worktree-create-base'
 import { useAppStore } from '@/store'
 
-import { repoIsRemote } from '../../../shared/agent-launch-remote'
-import { getDefaultRepoHookSettings } from '../../../shared/constants'
-import { buildExecutionHostRegistry } from '../../../shared/execution-host-registry'
-import { getHostDisplayLabelOverrides } from '../../../shared/host-setting-overrides'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
+import { repoIsRemote } from '../../../../shared/agent-launch-remote'
+import { getDefaultRepoHookSettings } from '../../../../shared/constants'
+import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
+import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
+import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat-session-option-defaults'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
-} from '../../../shared/project-source-context'
-import { isGitRepoKind } from '../../../shared/repo-kind'
+} from '../../../../shared/project-source-context'
+import { isGitRepoKind } from '../../../../shared/repo-kind'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
-import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
+} from '../../../../shared/tui-agent-launch-defaults'
+import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type {
   GitHubWorkItem,
   GitHubPrStartPoint,
@@ -152,8 +148,8 @@ import type {
   WorkspaceStatus,
   WorkspaceCreateTelemetrySource,
   ProjectGroup
-} from '../../../shared/types'
-import { isWorkspaceStatusId } from '../../../shared/workspace-statuses'
+} from '../../../../shared/types'
+import { isWorkspaceStatusId } from '../../../../shared/workspace-statuses'
 import {
   resolveComposerBranchNameOverrideForCreate,
   resolveComposerBranchPick,
@@ -165,6 +161,10 @@ import {
   collectComposerDropUploadResult,
   shouldReportComposerDropUploadFailure
 } from './composer-drop-upload-result'
+import {
+  createComposerSubmissionGuard,
+  shouldPreserveComposerSubmissionOnUnmount
+} from './composer-submission-guard'
 import { getForkPushWarning } from './fork-push-warning'
 
 export function canResolveFolderSmartGitHubSubmit({

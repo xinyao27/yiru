@@ -29,7 +29,6 @@ import {
 } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { createProgrammaticScrollMarks } from '@/hooks/programmatic-scroll-marks'
 import {
   useVirtualizedScrollAnchor,
   type VirtualizedScrollAnchor
@@ -43,8 +42,8 @@ import { formatDiffComments } from '@/lib/diff-comments-format'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
 import { setWithLRU } from '@/lib/scroll-cache'
-import '@/lib/monaco-setup'
 import { writeRuntimeFile } from '@/runtime/file-client'
+import '@/lib/monaco-setup'
 import {
   getRuntimeGitBranchDiff,
   getRuntimeGitCommitDiff,
@@ -92,6 +91,7 @@ import { getDiffSectionEstimatedHeight, isIntrinsicHeightImageDiff } from './dif
 import type { DiffSection } from './diff-section-types'
 import { getLargeDiffRenderLimit } from './large-diff-render-limit'
 import { getStoredTextDiffContent, getStoredTextDiffResult } from './large-diff-section-content'
+import { createProgrammaticScrollMarks } from './programmatic-scroll-marks'
 
 type CachedCombinedDiffViewState = {
   entrySignature: string

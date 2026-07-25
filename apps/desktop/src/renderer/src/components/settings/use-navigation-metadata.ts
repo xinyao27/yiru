@@ -75,8 +75,8 @@ import {
 import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
-import { getRepoKindLabel } from '../../../shared/repo-kind'
-import type { Repo } from '../../../shared/types'
+import { getRepoKindLabel } from '../../../../shared/repo-kind'
+import type { Repo } from '../../../../shared/types'
 
 export { isWebClientLocation } from '@/lib/web-client-location'
 

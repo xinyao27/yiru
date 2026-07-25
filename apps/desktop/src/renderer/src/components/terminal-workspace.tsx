@@ -62,12 +62,6 @@ import type { Tab, TabContentType, TabGroupLayoutNode, TuiAgent } from '../../..
 import { matchesRecentTabSwitcherChord } from '../../../shared/window-shortcut-policy'
 import { isWorkspacePanelTabContentType } from '../../../shared/workspace-panel-tab'
 import { folderWorkspaceKey } from '../../../shared/workspace-scope'
-import {
-  handleSwitchRecentTab,
-  handleSwitchTab,
-  handleSwitchTabAcrossAllTypes,
-  handleSwitchTerminalTab
-} from '../hooks/ipc-tab-switch'
 import { getConnectionId } from '../lib/connection-context'
 import { basename } from '../lib/path'
 import { hasRegisteredRuntimeTerminalTab } from '../runtime/sync-runtime-graph'
@@ -97,6 +91,12 @@ import {
 } from './editor/autosave'
 import EditorAutosaveController from './editor/autosave-controller-host'
 import EmulatorPaneOverlayLayer from './emulator-pane/overlay-layer'
+import {
+  handleSwitchRecentTab,
+  handleSwitchTab,
+  handleSwitchTabAcrossAllTypes,
+  handleSwitchTerminalTab
+} from './tab-bar/ipc-tab-switch'
 import TabBar from './tab-bar/tab-bar'
 import { TAB_CONTENT_SURFACE_CLASSES } from './tab-bar/tab-chrome-classes'
 import { openTabBarEntry, type TabCreateEntryArgs } from './tab-bar/tab-create-entry-action'

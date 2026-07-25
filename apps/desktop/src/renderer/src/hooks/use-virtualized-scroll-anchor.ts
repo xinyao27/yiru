@@ -8,9 +8,9 @@ import {
   type RefObject
 } from 'react'
 
+import type { ProgrammaticScrollMarks } from '@/components/editor/programmatic-scroll-marks'
 import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 
-import type { ProgrammaticScrollMarks } from './programmatic-scroll-marks'
 import { createVirtualizedScrollAnchorListener } from './virtualized-scroll-anchor-listener'
 import {
   findVirtualizedDomScrollAnchor,

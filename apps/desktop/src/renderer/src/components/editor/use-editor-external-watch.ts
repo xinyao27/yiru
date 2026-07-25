@@ -20,6 +20,10 @@ import {
   type RecentSelfWrite
 } from '@/components/editor/self-write-registry'
 import { getExternalFileChangeRelativePath } from '@/components/workspace-panel/use-file-explorer-watch'
+import {
+  YIRU_WORKTREE_FILE_CHANGE_EVENT,
+  type WorktreeFileChangeEventDetail
+} from '@/hooks/worktree-file-change-event'
 import { basename, joinPath } from '@/lib/path'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { readRuntimeFileContent, subscribeRuntimeFileChanges } from '@/runtime/file-client'
@@ -27,12 +31,8 @@ import { useAppStore, type AppState } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
-import { isGitRepoKind } from '../../../shared/repo-kind'
-import type { FsChangedPayload } from '../../../shared/types'
-import {
-  YIRU_WORKTREE_FILE_CHANGE_EVENT,
-  type WorktreeFileChangeEventDetail
-} from './worktree-file-change-event'
+import { isGitRepoKind } from '../../../../shared/repo-kind'
+import type { FsChangedPayload } from '../../../../shared/types'
 
 // Why: atomic-write patterns (Claude Code's Edit tool, editors like vim,
 // VSCode) land as a short burst of `update` events — or `delete + create` on

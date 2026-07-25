@@ -13,7 +13,7 @@ import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 
 type UseGlobalAssistantFloatingTabArgs = {
   floatingWorkspaceOpen: boolean

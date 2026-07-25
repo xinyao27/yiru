@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 
-import { useAudioCapture } from '@/hooks/use-audio-capture'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
@@ -15,6 +14,7 @@ import {
 } from './insertion-target'
 import { showDictationStartErrorToast } from './start-error-toast'
 import { recordStoppedSession, waitForStoppedSession } from './stopped-sessions'
+import { useAudioCapture } from './use-audio-capture'
 import { useHoldDictationGesture } from './use-hold-dictation-gesture'
 
 export function DictationController() {

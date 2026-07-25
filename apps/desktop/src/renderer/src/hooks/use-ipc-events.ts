@@ -16,6 +16,12 @@ import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/co
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
 import { getVisibleWorktreeIds } from '@/components/sidebar/visible-worktrees'
+import {
+  handleSwitchRecentTab,
+  handleSwitchTab,
+  handleSwitchTabAcrossAllTypes,
+  handleSwitchTerminalTab
+} from '@/components/tab-bar/ipc-tab-switch'
 import { shouldSuppressCodexAutoApprovalStatus } from '@/components/terminal-pane/codex-auto-approval-notification-suppression'
 import { collectLeafIdsInOrder } from '@/components/terminal-pane/layout-serialization'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
@@ -121,12 +127,6 @@ import {
   resetAgentHookCompletionNotificationCoordinators,
   syncAgentHookCompletionNotificationsForStoreUpdate
 } from './agent-hook-completion-notifications'
-import {
-  handleSwitchRecentTab,
-  handleSwitchTab,
-  handleSwitchTabAcrossAllTypes,
-  handleSwitchTerminalTab
-} from './ipc-tab-switch'
 import {
   hasRuntimeBackedAgentStatusAttribution,
   retryPendingAgentStatusEvents,

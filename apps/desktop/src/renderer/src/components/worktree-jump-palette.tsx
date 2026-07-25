@@ -46,6 +46,7 @@ import {
 import { buildWorktreeChecksReviewIndex } from '@/components/cmd-j/worktree-checks-review-index'
 import { selectWorktreePaletteCacheInputs } from '@/components/cmd-j/worktree-palette-cache-inputs'
 import { RepoBadgeMark } from '@/components/repo/badge-label'
+import { useSettingsNavigationMetadata } from '@/components/settings/use-navigation-metadata'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { buildSidebarHostOptions } from '@/components/sidebar/host-options'
 import { buildImportedWorktreesCardCandidates } from '@/components/sidebar/imported-worktrees-card-candidates'
@@ -62,7 +63,6 @@ import {
   CommandEmpty,
   CommandItem
 } from '@/components/ui/command'
-import { useSettingsNavigationMetadata } from '@/hooks/use-settings-navigation-metadata'
 import { translate } from '@/i18n/i18n'
 import {
   isBlankBrowserUrl,
