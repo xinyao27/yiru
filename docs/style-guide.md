@@ -1,267 +1,221 @@
-# Yiru UI Style Guide
+# Yiru Style Guide
 
-This is the **UI/visual design** doc for Yiru — how to choose components, tokens, typography, and UX behavior. It is _not_ an architecture doc. Token values live in `apps/desktop/src/renderer/src/assets/main.css` (canonical). The reusable component inventory lives in [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md).
+How Yiru looks and behaves: components, tokens, geometry, typography, interaction states. `AGENTS.md` owns code structure and quality — rules there are not repeated here.
 
-## First principle: reuse `@/components/ui`
+Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic token vocabulary.
 
-**Before writing a native control or hand-rolled class recipe, use a primitive from `apps/desktop/src/renderer/src/components/ui/`.**
-
-Import from the module (`@/components/ui/button`), not a barrel. Screens compose rendered primitives; they do not reimplement Base UI focus/keyboard behavior, and they do not import private recipe files such as `floating-surface-styles.ts` or `menu-item-styles.ts`.
-
-CI enforces the contract via `apps/desktop/config/scripts/check-ui-style-drift.mjs` (wired into `verify:repository-contracts`): no feature-TSX native `<button>`/`<input>`/`<textarea>`/`<select>` outside the documented allowlist, no dead `rounded-*`, no black/white alpha interactive washes, and no private ui style imports. Button classNames that look like the old quiet/`sidebar-accent` stacks warn today and may ratchet to errors later.
-
-### Decision fork
-
-When building UI, resolve in this order:
-
-1. **Reuse** the nearest primitive (`Button`, `Input`, `Switch`, `Select`, `Dialog`, `DropdownMenu`, `ContextMenu`, `Tabs`, `Badge`, …). Match with `variant` and `size` props.
-2. **Extend the primitive** (add a CVA `variant` or `size` in `components/ui/`) when the same exception would appear more than once at call sites.
-3. **Domain composite** in the feature folder when the control needs product data/copy (e.g. repo combobox) but still composes primitives for chrome.
-4. **Colocated CSS** only for host surfaces (Monaco, xterm, markdown), keyframes, pseudo-elements, or Electron drag chrome — never as an escape hatch for buttons and forms.
-
-### Compose, don't restyle
-
-Call sites may add **layout** classes: placement, flex behavior, `w-full`, stacking. They must not re-specify color, hover/focus, height, padding, or icon size already owned by `variant` / `size`.
-
-If you find yourself adding `bg-*`, `text-*`, `border-*`, `hover:*`, `focus-*`, `dark:*`, fixed `h-*` / `w-*` / `size-*`, or padding utilities to a primitive's `className`, stop: extend the primitive instead.
-
-## Visual identity
-
-Yiru is an Electron desktop app for orchestrating coding agents across git worktrees. The visual identity is **monochrome and quiet** — neutral grays carry the chrome; color is reserved for state (selection, destructive, git decorations). The product hosts other tools (Monaco, xterm, Markdown), so Yiru's own UI should recede and frame.
-
-After the ui-first fork, when still choosing paint:
-
-- Reach for **muted / accent / border** before color.
-- Reach for **existing shadcn roles or Tailwind palette colors** before hardcoding hex.
-
-## Source of truth
-
-| Concern | Canonical location |
+| Canonical source | File |
 | --- | --- |
-| Component primitives | `apps/desktop/src/renderer/src/components/ui/` |
-| Component catalog and ownership | [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) |
-| Color tokens | `apps/desktop/src/renderer/src/assets/main.css` (`:root`, `.dark`) |
-| Tailwind theme bindings | Same file, `@theme inline { … }` block |
-| App typography / scrollbars / titlebar chrome | Same `main.css` |
+| Tokens, base layer, global chrome | `apps/desktop/src/renderer/src/assets/main.css` |
+| Primitives | `apps/desktop/src/renderer/src/components/ui/` |
+| Primitive catalog and layering | `components/ui/README.md` |
+| Mobile token mirror (Uniwind) | `apps/mobile/global.css` |
 
-### Token budget
+---
 
-The shadcn token set is the default closed vocabulary: `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `chart`, and `sidebar`, with their foreground pairs. Reuse these before considering another variable.
+## 1. Design intent
 
-- Use Tailwind's built-in palette for ordinary state color (`green-*` for success, `amber-*` for warning). Do not create aliases such as `status-success`, `warning`, or a token for one component.
-- Do not create separate tokens for hover, selected, modal, menu, or floating borders. Those are compositions of the default roles.
-- A custom token is reserved for stable product-domain semantics that cannot be expressed by a default role, such as git decorations or an editor surface shared with embedded editors.
-- Keep custom CSS variables out of `@theme inline`. If JSX truly needs a Tailwind utility for a product-domain exception, treat that as an explicit token-budget change rather than adding it inside a feature task.
-- Before adding a custom token, check for an existing default role, a Tailwind palette color, and `color-mix`. If none works, ask rather than expanding the theme implicitly.
+Yiru hosts other tools — Monaco, xterm, Markdown, embedded browsers — so its own chrome must recede and frame, never compete. Three commitments follow, and everything below is a consequence of them:
 
-Never hardcode a hex value in TSX. Reusable product-domain colors belong in `main.css`; ordinary colors use Tailwind's built-in palette, while truly surface-local CSS stays scoped to its owning stylesheet.
+1. **Monochrome.** Neutral grays carry the chrome. Color means *state* — selection, destructive, git status, diff — never decoration.
+2. **Rectilinear.** No radius, no shadows. Surfaces separate with a hairline border and an opaque background.
+3. **Dense but breathable.** 14px body, 12px chrome, compact rows, real spacing around the primary workflow.
 
-## Color roles
+When something isn't covered here, pick the option that makes Yiru quieter.
 
-Tokens come in pairs: a **surface** and a **foreground** that meets contrast on it. Always use them together.
+---
 
-| Role | Use it for | Don't use it for |
+## 2. The decision order
+
+Stop at the first step that works.
+
+1. **Reuse a primitive** from `components/ui/` — match it with `variant` and `size`.
+2. **Extend that primitive** — add a CVA `variant`/`size` when the same exception would repeat at two or more call sites.
+3. **Build a domain composite** in the feature folder — when the control needs product data or copy (a repo picker, a branch combobox). It still composes primitives for chrome.
+4. **Write colocated CSS** — only for host surfaces (Monaco, xterm, Markdown), keyframes, pseudo-elements, or Electron drag chrome.
+
+**Compose, don't restyle.** A call site may add layout classes — placement, flex behavior, `w-full`, gap. It may not re-specify what `variant`/`size` owns. If you are adding `bg-*`, `text-*`, `border-*`, `hover:*`, `focus-*`, `dark:*`, a fixed `h-*`/`w-*`/`size-*`, or padding to a primitive's `className`, extend the primitive instead.
+
+Import primitives from their module (`@/components/ui/button`). The private style modules — `floating-surface-styles.ts`, `menu-item-styles.ts`, `popover-content-ref.ts` — belong to the primitive layer and are off-limits to feature code.
+
+---
+
+## 3. Color
+
+### The closed vocabulary
+
+The Tailwind theme exposes exactly the default shadcn roles, and `check-design-token-budget.mjs` keeps it that way:
+
+`background` · `foreground` · `card` · `popover` · `primary` · `secondary` · `muted` · `accent` · `destructive` · `border` · `input` · `ring` · `chart-1…5` · the `sidebar` family — each with its `-foreground` pair.
+
+Before reaching past it:
+
+- Ordinary state color → **Tailwind's palette** (`green-*` success, `amber-*` warning). Don't alias it into a token.
+- A tint of a role → **`color-mix`**, not a new value and not a `dark:` twin recomputing the same role: `color-mix(in srgb, var(--primary) 12%, var(--background))`.
+- Hover, selected, modal, menu, floating border → **compositions of the roles above**. None gets its own token.
+
+Never hardcode a hex value in TSX.
+
+### Role semantics
+
+| Role | Use for | Never for |
 | --- | --- | --- |
-| `background` / `foreground` | App canvas, default text | Cards, popovers, sidebar (have their own) |
-| `card` / `card-foreground` | Panels lifted off the canvas | The canvas itself |
-| `popover` / `popover-foreground` | Floating menus, dropdowns, hovercards | Inline UI |
-| `primary` / `primary-foreground` | The single affirmative action in a flow (Save, Confirm) | Decorative accents; hover states; secondary actions |
-| `secondary` / `secondary-foreground` | Lower-emphasis actions next to a primary | The affirmative action |
-| `muted` / `muted-foreground` | De-emphasized text, captions, placeholders, disabled chrome | Body copy; primary actions |
-| `accent` / `accent-foreground` | Hover/active backgrounds for ghost buttons and list rows | Solid filled buttons (use `secondary` instead) |
-| `destructive` / `destructive-foreground` | Delete, discard, irreversible-action buttons; error states | Cancel buttons (Cancel is not destructive) |
-| `border` | All hairlines: dividers, input edges, card edges | Heavy emphasis; that's `ring` |
-| `input` | Form field background only | Anywhere outside form fields |
-| `ring` | Focus-visible border color, active selection emphasis | Persistent decoration |
-| `sidebar` (+ variants) | Secondary panel chrome, including the right sidebar | Main canvas and floating surfaces |
-| `editor-surface` | Host styles inside Monaco / markdown panes; it follows the app canvas | App chrome (use `background` directly) |
+| `background` / `foreground` | App canvas, default text | Cards, popovers, sidebar — they have their own |
+| `card` | Panels lifted off the canvas | The canvas; a card inside a card |
+| `popover` | Floating menus, dropdowns, hover cards, selects | Inline UI |
+| `primary` | The single affirmative action in a flow | Decoration; hover states; secondary actions |
+| `secondary` | Lower-emphasis action beside a primary | The affirmative action |
+| `muted` | De-emphasized text, captions, placeholders, disabled chrome | Body copy; primary actions |
+| `accent` | Hover and active backgrounds for ghost buttons and list rows | Solid filled buttons — use `secondary` |
+| `destructive` | Delete, discard, irreversible; error states | Cancel, Dismiss, Close, Back |
+| `border` | Every hairline: dividers, input edges, card edges, focus | Heavy emphasis — that's `ring` |
+| `input` | Form field background | Anything outside a form field |
+| `ring` | `focus-visible` border, active selection emphasis | Persistent decoration |
+| `sidebar` family | Panel chrome, left rail, right sidebar | Main canvas; floating surfaces |
 
-The standard `sidebar` family expands into `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-primary-foreground`, `--sidebar-accent`, `--sidebar-accent-foreground`, `--sidebar-border`, and `--sidebar-ring`. The left workspace rail uses `.worktree-sidebar-theme` as the scope for user appearance overrides while consuming this same family; it does not maintain a second token family. `editor-surface` remains a host-integration alias for Monaco and markdown CSS, but it resolves to `background` so tab chrome and content form one canvas. JSX pane roots use `bg-background`; host styles may consume `var(--editor-surface)` where a CSS variable is required.
+**One interaction system.** Buttons, row hover, and nav selection all use `accent`. Sidebar tokens paint panel surfaces and borders — they are not a second hover system; `hover:bg-sidebar-accent` on a `Button` is drift.
 
-Ordinary interactive chrome (buttons, list-row hover, nav selection) uses **`accent`**, not sidebar-specific hover tokens. Sidebar tokens paint panel surfaces and borders; they are not a second interaction system.
+### Product-domain tokens
 
-### Git decoration colors
+CSS-only variables in `main.css`, deliberately outside `@theme inline`. Consume with `var(--…)`.
 
-For diff status, file-tree decorations, and the changes view, use the git decoration tokens (mirroring VS Code's palette so users transferring from VS Code aren't surprised):
+| Family | Members | Use only for |
+| --- | --- | --- |
+| Git status | `--git-decoration-{added,modified,deleted,renamed,untracked,copied,ignored}` | File trees, changes view, status labels |
+| Diff surfaces | `--editor-diff-{inserted,removed}-{line,text}-background`, `--editor-diff-{added,modified,deleted}-gutter` | Inside Monaco and Pierre diffs |
+| Git graph | `--git-graph-{ref,remote-ref,base-ref}`, `--git-graph-lane-1…5` | History graph lanes and ref chips |
+| Editor host | `--editor-surface` | Monaco/Markdown host CSS. Resolves to `background`; JSX pane roots use `bg-background` |
+| Chrome geometry | `--titlebar-height`, `--app-font-family`, `--app-font-size` | Shared header height, user font settings |
+| Misc domain | `--tab-group-split-divider{,-strong}`, `--terminal-pane-locate`, `--ai-action-accent` | Their one named purpose |
 
-| Token | State |
+Git status colors mirror VS Code; diff colors mirror Cursor. The two families are deliberately different — don't merge them or borrow either for unrelated state. A new token needs product-domain semantics no role and no palette color can express; ask first.
+
+---
+
+## 4. Geometry
+
+**Radius is zero.** `--radius: 0`, and `main.css` holds every element and pseudo-element to `border-radius: 0 !important` so legacy utilities, inline values, and third-party components comply. `rounded-*` is a no-op that signals copy-paste drift, and CI flags it.
+
+**No shadows, no outlines.** Separation is `border` plus an opaque background. No `shadow-*`, `drop-shadow-*`, `box-shadow`, `text-shadow`, or stroke-drawing outline — delete legacy declarations at the source rather than overriding them. A local `outline-none` is allowed only to suppress the UA ring on a component that supplies its own focus state.
+
+**Focus is a border:** `focus-visible:border-ring`, or `focus-visible:bg-accent` where a control has no border seam to spend (status-bar chrome).
+
+---
+
+## 5. Typography
+
+Family is the platform system UI stack via `var(--font-sans)`; mono is `var(--font-mono)` for paths, code, and terminal-adjacent UI. Never hardcode a platform font. Body sets 14px, `letter-spacing: 0.01em`, and antialiasing once on `body` — never re-declare in a component. Editors, diffs, and terminals baseline at 13px.
+
+Use these four sizes and stop:
+
+| Size | Utility | Role |
+| --- | --- | --- |
+| 14px | `text-sm` | Body copy, default button text, dialog prose |
+| 12px | `text-xs` | Dense chrome: list rows, menu items, badges, secondary text |
+| 11px | `text-[11px]` | Meta: menu labels, shortcut chips, trailing metadata, captions |
+| 10px | `text-[10px]` | Micro counters and status pips only |
+
+Sidebar section headers are 11px + `font-semibold` + `uppercase` + `tracking-[0.05em]`.
+
+---
+
+## 6. Surfaces
+
+**Floating and modal.** Recipes live in `floating-surface-styles.ts` and apply through the rendered wrappers: popovers, menus, hover cards, and selects get `bg-popover text-popover-foreground border border-border`; dialogs, command dialogs, and sheets get `bg-background text-foreground border-border` over a `bg-black/50` backdrop.
+
+Foreground floating surfaces are **opaque while visible** — no `/NN` alpha, translucent `rgba`, `color-mix(…, transparent)`, resting opacity below 1, or backdrop blur. Enter/exit opacity motion is fine. Transparency stays correct where revealing context is the point: modal backdrops, transcript fade masks, drag and selection affordances, hover tints.
+
+**Menu rows.** `menu-item-styles.ts` is the grammar for dropdown and context menus alike: 12px `font-medium` rows at `leading-5`, `data-highlighted:bg-accent`, 3.5 icons in `muted-foreground`, destructive rows in `destructive` with a 10% wash on highlight. Labels 11px `font-semibold muted-foreground`; separators `h-px bg-border/70`; shortcuts right-aligned 11px.
+
+**List rows** — the most common source of drift. Any row-shaped control (worktrees, palette items, settings nav, pickers):
+
+- Idle transparent; hover `bg-accent`.
+- Keyboard-highlighted: `data-[selected=true]:bg-accent` plus a `border-border` edge so the row stays legible while the user types. `cmdk` sets `data-selected`; Base UI menus use `data-highlighted`.
+- Persistent current row: `bg-accent` plus `data-current="true"` so it stays distinct from the keyboard highlight.
+- Computing active state yourself? Call `getSelectableControlStateClasses(isActive)` rather than retyping the stack.
+- Never `bg-[#ededed]`, `bg-black/N dark:bg-white/N`, or an invented "selected" color.
+
+**Scrollbars.** Apply one of the four global classes to every overflow container; don't write a fifth. `.scrollbar-sleek` is the default thin bar (sidebars, lists, popovers); `.scrollbar-sleek-lg` adds a larger grab target for dense tables, always alongside it; `.scrollbar-editor` covers Monaco-adjacent and terminal surfaces; `.worktree-sidebar-scrollbar` is worktree-sidebar-only and reserves no gutter, so short lists sit flush with the fixed header. `.scrollbar-sleek-parent` on an ancestor fades the thumb in on parent hover only.
+
+---
+
+## 7. Where styles live
+
+Cohesion beats indirection — a reader should see a component's appearance in the component.
+
+1. **Tailwind utilities in the JSX** — the default for everything.
+2. **A CVA variant on the primitive** — when the recipe repeats.
+3. **A colocated `.css` file in the feature folder**, imported by that feature's entry module — keyframes, host-library overrides, pseudo-elements, Electron drag chrome.
+
+`assets/main.css` is global-only: imports, `@font-face`, custom variants, `@theme inline`, `:root`/`.dark` tokens, `@layer base`, scrollbar utilities, titlebar and layout chrome. Feature CSS does not go there. The feature-wall, feature-tour, and diff-comment blocks currently sitting in it predate this rule — move them into their feature folder when you next touch them; don't add to them.
+
+Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no primitive layer; its shared components live in `apps/mobile/src/components/`.
+
+---
+
+## 8. Primitives
+
+Full inventory and layering: `components/ui/README.md`.
+
+Every primitive part carries `data-slot="<name>"` — don't strip it. Merge classes with `cn()`, user `className` last. Multiple appearances → `class-variance-authority`. Headless behavior comes from Base UI (`command` wraps `cmdk`, `sonner` wraps Sonner) — never reimplement keyboard or focus behavior, extend the wrapper. A primitive must stay useful if every Yiru domain type is deleted, which is why a searchable repo picker lives in `components/repo/`.
+
+### Buttons
+
+`Button` — never a raw `<button>` for app chrome.
+
+| Variant | Use |
 | --- | --- |
-| `--git-decoration-added` | Added / new |
-| `--git-decoration-modified` | Modified |
-| `--git-decoration-deleted` | Deleted |
-| `--git-decoration-renamed` | Renamed |
-| `--git-decoration-untracked` | Untracked |
-| `--git-decoration-copied` | Copied |
-| `--git-decoration-ignored` | Ignored by git |
+| `default` | The one affirmative action in a flow |
+| `secondary` | Lower-emphasis sibling beside a `default` |
+| `outline` | Toolbar and standalone actions where a filled button reads heavy |
+| `outline-transparent` | Titlebar controls whose vertical separators reveal host material |
+| `ghost` | Icon buttons, row triggers — anywhere chrome should disappear |
+| `quiet` | Muted icon/toolbar controls resting quieter than `ghost` |
+| `picker-row` | Command and listbox rows, including the selected-state border |
+| `popover-outline` | Inline actions floating above an editor, on opaque popover paint |
+| `status-bar` / `status-bar-icon` / `status-bar-quiet` | Full-height footer actions, icons, labels |
+| `link` | Inline text action inside a paragraph |
+| `destructive` | Delete, discard, irreversible. Never Cancel. |
 
-Use these _only_ for git status. Don't reuse them for unrelated state colors — that breaks the convention.
-
-### Editor diff colors
-
-Monaco and Pierre diffs share Cursor's diff palette through the `--editor-diff-*` variables. These are separate from git status decorations because Cursor deliberately uses different colors for resource status, gutters, full changed lines, and changed text within a line.
-
-| Token | Diff role |
-| --- | --- |
-| `--editor-diff-inserted-line-background` | Full inserted-line fill |
-| `--editor-diff-inserted-text-background` | Inserted word/character fill |
-| `--editor-diff-removed-line-background` | Full removed-line fill |
-| `--editor-diff-removed-text-background` | Removed word/character fill |
-| `--editor-diff-added-gutter` | Added gutter indicator |
-| `--editor-diff-modified-gutter` | Modified gutter indicator |
-| `--editor-diff-deleted-gutter` | Deleted gutter indicator |
-
-Use these only inside editor/diff surfaces. File status labels and trees continue to use `--git-decoration-*`.
-
-### List rows: hover, selected, current
-
-A common point of drift. Use these conventions for any list-style row (worktrees, command palette items, settings nav):
-
-- **Idle:** transparent background.
-- **Hover:** `bg-accent` (via the control's primitive, or on the row itself).
-- **Keyboard-selected (cmdk highlight):** `data-[selected=true]:bg-accent` plus a `border-border` edge so the active row stays visible while the user types. The `data-selected` attribute is set by `cmdk` automatically.
-- **Persistent "current" / "active" row** (e.g. the worktree the user is viewing): also `bg-accent`, _plus_ a `data-current="true"` attribute so CSS or future styling can distinguish it from the cmdk highlight.
-- **Don't:** hardcode `bg-[#ededed]` / `bg-[#333333]`, `bg-black/N dark:bg-white/N`, or invent a "selected" color. The accent token already adapts to light/dark and matches the rest of the app.
-
-### Color mixing
-
-When you need a tint (e.g. a 12% primary wash on hover), use `color-mix` against the existing token, not a new hex:
-
-```css
-background: color-mix(in srgb, var(--primary) 12%, var(--background));
-```
-
-This keeps light/dark parity automatic. Prefer a theme-agnostic mix over a `dark:` twin that recomputes the same role.
-
-## Typography
-
-- **Family:** The platform system UI stack is the default. Consume `var(--font-sans)` or inherit it; don't hardcode a platform font. `Geist` remains bundled for users who explicitly select it.
-- **Mono:** `var(--font-mono)` — the platform system monospace stack, used for paths, terminal-adjacent UI, code, and anywhere monospace conveys "this is literal."
-- **Rendering:** Body text defaults to 14px with `0.01em` letter-spacing and antialiased macOS font smoothing. Don't override these globally in a component.
-- **Code size:** Editors, diffs, and terminals default to 13px. Editor zoom may adjust this at runtime, but source and diff views keep the same baseline.
-- **Sizes:** Tailwind's default scale. Common sizes in this repo:
-  - 11px (uppercase meta, sidebar headers, captions) — pair with `font-weight: 600` and `text-transform: uppercase` and `letter-spacing: 0.05em` for category labels.
-  - 12px (sub-text, paths, secondary content)
-  - 13px (sidebar items, dense list rows)
-  - 14px (default body, button text in `default` size)
-
-## Radius
-
-Yiru is fully rectilinear: `--radius: 0`, and every rendered element is held to `border-radius: 0`. This global rule intentionally covers legacy `rounded-*` utilities, arbitrary and inline values, pseudo-elements, and third-party components that do not use the token. New code must not introduce corner rounding; do not add `rounded-*` to class strings — they are no-ops under the global reset and signal copy-paste drift.
-
-## Native chat geometry
-
-Native chat borrows Cursor's transcript hierarchy while remaining fully rectilinear:
-
-- Transcript, composer, question, and approval surfaces share one centered 840px maximum-width column.
-- Conversation rows use a 12px vertical gap and 14px text at 1.5 line-height.
-- Assistant prose stays unboxed. User turns and expanded tool output use `card` plus a hairline `border`.
-- The composer overlays the transcript bottom; a measured scroll inset and background fade keep the final turn readable as its editor grows from 36px up to 200px.
-- Tool activity starts as compact disclosure lines. Only output, diffs, questions, and approvals become bounded surfaces.
-- These surfaces remain square. Do not reintroduce Cursor's pills, squircles, or rounded message cards.
-
-## Elevation & shadows
-
-Yiru does not use decorative shadows or visible CSS outlines. Use `border` with
-the `border` token for surface separation and focus state, plus opaque
-backgrounds for overlays. Do not add `shadow-*`, `drop-shadow-*`, `box-shadow`,
-`text-shadow`, or outline styles that draw a stroke; remove legacy declarations
-at their source. A source-local `outline: none` / `outline-none` reset is allowed
-only to suppress the browser's native focus ring when the component supplies a
-border or background focus state. Never implement either policy as a global
-override.
-
-### Floating surfaces
-
-Floating primitives share private recipes in `components/ui/floating-surface-styles.ts`; screens import the rendered wrappers (`Popover`, `DropdownMenu`, …), not that module:
-
-- **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border`.
-- **Dialog, command dialog, sheet:** `bg-background text-foreground border` with `bg-black/50` backdrop.
-
-Foreground floating surfaces are always opaque while visible. Their base must not use `/NN` background alpha, translucent `rgba`, `color-mix(..., transparent)`, resting element opacity below 1, or backdrop blur. Enter/exit opacity motion is allowed; transparency also remains valid for modal backdrops, transcript fade masks, drag/selection affordances, and hover-state tints because those intentionally reveal context rather than carry foreground content.
-
-Keep placement and z-index in each headless wrapper. Shared color, elevation, and enter/exit recipes stay in the style module so sibling surfaces cannot drift; a wrapper keeps only motion that is genuinely different (for example, sheet direction).
-
-## Components
-
-Primitives live in `apps/desktop/src/renderer/src/components/ui/`. Full inventory: [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md).
-
-Wrapper conventions:
-
-- Shadcn-style primitive parts carry `data-slot="<name>"` for CSS targeting — do not strip it. Third-party wrappers such as Sonner keep their library-owned data attributes.
-- Use `cn()` for class merging. Pass user `className` last so callers can override _layout_, not to invent a parallel visual system.
-- Use `class-variance-authority` (CVA) for variants when there are multiple.
-- Interactive headless behavior uses Base UI; `command` wraps `cmdk`, `sonner` wraps Sonner. Never reimplement headless behavior; extend the existing wrapper.
-
-### Buttons (`button.tsx`)
-
-Do not use a raw `<button>` for app chrome. Use `Button`.
-
-Variants in priority order:
-
-| Variant | Use case |
-| --- | --- |
-| `default` | The single affirmative action in a flow. |
-| `secondary` | Lower-emphasis sibling next to a `default`. |
-| `outline` | Toolbar / standalone actions where a filled button feels heavy. |
-| `outline-transparent` | Titlebar controls with vertical separators that must reveal the host material. |
-| `ghost` | Icon buttons, list-row triggers, anywhere chrome should disappear. |
-| `quiet` | Muted icon/toolbar controls that rest quieter than `ghost` (muted foreground, accent on hover/focus). |
-| `status-bar` | Full-height footer actions with a background focus state and no border seam. |
-| `status-bar-icon` | Muted full-height footer icons with selected state from `aria-current`. |
-| `status-bar-quiet` | Muted full-height footer labels with quiet hover and focus states. |
-| `link` | Inline text actions inside paragraphs. |
-| `destructive` | Delete, discard, irreversible. Never for Cancel. |
-
-Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), content-driven `list-row`, full-height `status-bar`, plus `icon`, `icon-xs`, `icon-status-bar`, `icon-status-bar-wide`, `icon-sm`, `icon-lg`, `icon-titlebar`, `icon-titlebar-compact`, `icon-titlebar-wide`, and `icon-titlebar-extra-wide`. The status-bar sizes fill their footer row while preserving compact content widths; `icon-status-bar-wide` provides a 24px target for grouped footer navigation, while titlebar sizes fill their row at 28px, 24px, 32px, and 36px widths. Match the size to the surrounding row height — don't drop a `default` button into a 28px toolbar. Use `status-bar` / `icon-status-bar` for footer actions, `list-row` for multi-line list actions, and prefer `xs` / `icon-xs` for dense chrome instead of overriding height in `className`.
+Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `popover-hint`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
 
 ### Forms
 
-Use `Input`, `Textarea`, `Label`, `Checkbox`, `Switch`, `Select`, `Slider` — not raw `<input>` / `<textarea>` / `<select>` — unless a host editor or IME contract cannot be preserved (document that why in a short comment).
+Use `Input`, `Textarea`, `Label`, `Checkbox`, `Switch`, `Select`, `Slider`. A native form tag is allowed only where a host editor or IME contract can't otherwise be preserved — those paths are allowlisted in the drift checker and carry an in-file `// Why:`.
 
-The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-controls.tsx` is the house style for any label + control + helper text:
+`Input` sizes `default` · `lg` · `sm` · `xs` · `inline-edit`; variants `default` · `subtle` · `color` · `chrome-free`. `Textarea`: `default` · `sm` · `chrome-free` · `editor`.
 
-- **Outer stack:** `space-y-3` for full-section forms; `space-y-2` for compact single-control fields.
-- **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
-- **Control:** the shadcn primitive. Errors surface via `aria-invalid`; the renderer maps that to a destructive focus border — don't paint your own.
-- **Trailing metadata:** `text-[11px] text-muted-foreground` below the control, not next to the label.
+The house layout is `components/settings/settings-form-controls.tsx`: two-column row with a `min-w-0 flex-1` label column and `shrink-0` control column; `<Label>` plus description in `text-xs text-muted-foreground`; section stack `space-y-3`, compact control `space-y-2`, label group `space-y-1`; trailing metadata *below* the control in `text-[11px] text-muted-foreground`. Errors surface through `aria-invalid` and the primitive paints the destructive border — don't paint your own.
 
-Immediate on/off settings use `Switch`, not `Button role="switch"`. Independent booleans use `Checkbox`.
+Immediate on/off → `Switch`. Independent boolean → `Checkbox`. Never `Button role="switch"`.
 
 ### Badges
 
-Use `Badge` for compact persistent metadata. Prefer `size="xs"` for dense chips and status tones (`success`, `warning`) instead of hand-rolled pill class strings.
+`Badge` for compact persistent metadata. Variants `default` · `secondary` · `outline` · `ghost` · `dot` · `link` · `destructive` · `success` · `warning`; sizes `default` (12px) and `xs` (11px, dense chips). Use `success`/`warning` instead of hand-rolling green/amber pills.
 
 ### Picking the right primitive
 
-| You want… | Reach for | Don't use |
+| You want | Reach for | Not |
 | --- | --- | --- |
-| App action / toolbar control | `Button` | Native `<button>` with copied classes |
-| Hover-only label on an icon-only button | `Tooltip` | `HoverCard` (too heavy), title attr |
-| Hover preview of richer content (avatar + summary) | `HoverCard` | `Tooltip` (no rich content) |
-| Click-revealed menu with actions | `DropdownMenu` | `Popover` with hand-rolled list |
-| Right-click contextual actions | `ContextMenu` | Hand-rolled `role="menu"` portal |
-| Click-revealed surface with arbitrary content (form, picker) | `Popover` | `Dialog` (it traps focus and dims) |
-| Modal that demands a decision before you continue | `Dialog` | `Popover`, inline overlay |
-| Drawer / panel sliding in from an edge | `Sheet` | `Dialog` centered |
-| Peer views in one region | `Tabs` | Custom tablist + panels |
-| Single choice from a known list | `Select` | Native `<select>` / custom listbox |
-| Single choice with search / fuzzy filtering | `Command` inside `Popover` | `Select` (no search) |
-| Multi-select with search | Compose `Command` inside `Popover`; follow the nearest domain combobox | Put domain data in `components/ui/` |
-| Transient confirmation ("Saved", "Copied") | `sonner` toast | `Dialog`, inline banner |
-| Persistent inline status ("3 errors") | inline text + `Badge` | toast (toasts disappear) |
+| Name an icon-only control | `Tooltip` | `HoverCard`, `title` attribute |
+| Hover preview of rich content | `HoverCard` | `Tooltip` |
+| Click-revealed action list | `DropdownMenu` | `Popover` with a hand-rolled list |
+| Right-click actions | `ContextMenu` | A hand-rolled `role="menu"` portal |
+| Click-revealed arbitrary content | `Popover` | `Dialog` — it traps focus and dims |
+| A decision required before continuing | `Dialog` | `Popover`, inline overlay |
+| Panel sliding from an edge | `Sheet` | Centered `Dialog` |
+| One choice from a known list | `Select` | Native `<select>`, custom listbox |
+| One choice with search | `Command` inside `Popover` | `Select` |
+| Transient confirmation | `sonner` toast | `Dialog`, inline banner |
+| Persistent inline status | Inline text + `Badge` | A toast — toasts disappear |
 
-If you find yourself styling around a primitive (`<Popover>` to act like a `<Dialog>`, or vice versa), stop and reconsider — the focus-management semantics differ and a future contributor will be misled by the mismatch.
+If you're styling a `Popover` to behave like a `Dialog` or the reverse, stop: their focus semantics differ and the mismatch misleads the next reader.
 
 ### Tooltips
 
-Tooltips exist to _name_ a control whose meaning isn't obvious from its appearance. They are not the place to teach, persuade, or warn — anything users need to read while acting belongs in the visible UI.
+A tooltip **names** a control whose appearance doesn't convey its meaning — icon-only buttons, abbreviation chips, truncated paths. It never teaches, persuades, or warns; anything the user must read while acting belongs in visible UI, and critical messages go inline.
 
-- **Use a tooltip when:** an icon-only button or compact chip needs a label. Toolbar icons, badges with abbreviations, truncated paths.
-- **Don't use a tooltip when:** the control already has a visible label, the content is interactive (links, buttons), or the message is critical (errors, blocking warnings — those go inline).
-- **Mounting:** the global `<TooltipProvider delay={400}>` lives at the App root. Don't nest a second `TooltipProvider` unless you need a different delay for a tightly-scoped surface.
-- **Trigger pattern:** pass the trigger element through `<TooltipTrigger render={...} />` so Base UI merges the tooltip's accessibility props onto the button (not a wrapper span). This is required for keyboard focus to surface the tooltip.
-- **Placement:** default `side="top" sideOffset={4}` — match the toolbar pattern in `sidebar/sidebar-toolbar.tsx`. Pick a different side only when the default would clip against the viewport.
-- **Shortcut chips inside tooltips:** if the action has a keyboard shortcut, append `<ShortcutKeyCombo />` rather than baking the keys into the label string. The chips render correctly per platform; baked-in strings drift.
+Pass the trigger through `render` so Base UI merges accessibility props onto the control itself rather than a wrapper span — keyboard focus depends on it. The app root mounts one `<TooltipProvider delay={400}>`; default `side="top" sideOffset={4}` and change it only to avoid clipping.
 
 ```tsx
 <Tooltip>
@@ -273,134 +227,76 @@ Tooltips exist to _name_ a control whose meaning isn't obvious from its appearan
     }
   />
   <TooltipContent side="top" sideOffset={4}>
-    Settings
+    {t('settings.title')}
   </TooltipContent>
 </Tooltip>
 ```
 
 ### Icons
 
-Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
+Icons come from `@phosphor-icons/react`; don't add a second library.
 
-- **Default size:** `size-4` (16px). `Button` auto-applies this to any `<svg>` it contains via `[&_svg:not([class*='size-'])]:size-4`, so most call sites don't need to set a size on the icon.
-- **`size-3` / `size-3.5`:** for metadata, captions, and dense list rows where 16px is too loud.
-- **`size-7`+:** for featured/empty-state hero icons only.
-- **Weight:** the renderer-wide `IconContext.Provider` defaults Phosphor icons to `duotone`. Every Phosphor icon whose exported name contains `Arrow` or `Caret` uses `regular`, including aliased imports such as `ChevronDown`, `ExternalLink`, `RefreshCw`, and `Workflow`. Standalone `X` glyphs and close-action glyphs use `regular` as well. The explicitly quieter compact chrome also uses `regular`: the new-workspace, new-tab, and tab-strip More glyphs, terminal-tab chrome, and project headers. Scope multi-icon composites with the existing provider; outside these rules, inherit the default instead of adding one-off overrides or wrappers.
-- **Color:** inherit from surrounding text — `text-muted-foreground` for secondary, `text-destructive` for destructive, etc. Don't apply a token to the SVG directly when the parent already carries the right color.
-- **Loader:** the canonical loading icon is `<LoadingIndicator className="size-4" />` from `components/loading-indicator.tsx`. It follows the user's Appearance setting and always uses `foreground` (black in light mode, white in dark mode), so call sites set only size/layout and never a state color. Don't import a one-off generic spinner. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled loader. See _UX rule 1_.
+- **Size:** `size-4` is the default and `Button` applies it automatically to a bare `<svg>` child, so most call sites set nothing. `size-3` / `size-3.5` for metadata and dense rows; `size-7`+ for empty-state heroes only.
+- **Weight:** the renderer-wide `IconContext` defaults to `duotone`. `regular` is correct for arrows and carets (including aliases like `ChevronDown`, `ExternalLink`, `RefreshCw`), standalone `X`/close glyphs, and deliberately quiet compact chrome (new-workspace, new-tab, tab-strip overflow, terminal-tab chrome, project headers). Scope a composite with `<PhosphorIconContextProvider weight="regular">` rather than annotating each icon.
+- **Color** inherits from surrounding text — don't set a token on the SVG when the parent already carries it.
+- **Loading** is `<LoadingIndicator className="size-4" />`. It follows the user's Appearance setting and always paints `foreground`, so call sites set size and layout only. Never import a one-off spinner.
 
 ### Keyboard shortcut chips
 
-Use **`<ShortcutKeyCombo />`** from `apps/desktop/src/renderer/src/components/shortcut-key-combo.tsx`. It renders a consistent key-cap style and inserts a `+` separator on Windows/Linux (Mac shows adjacent glyphs, no separator). It does **not** transform key strings — the _caller_ picks the platform-appropriate labels and passes them in:
+`<ShortcutKeyCombo keys={[…]} />` renders the key-cap style and inserts `+` separators on Windows/Linux. It does **not** transform key names — the caller supplies platform-correct labels, and the label must match the real binding (`⌘`/`⇧` on Mac, `Ctrl`/`Shift` elsewhere). A wrong chip is worse than no chip, and a placeholder for an unimplemented shortcut must not ship.
 
 ```tsx
 const isMac = navigator.userAgent.includes('Mac')
-const mod = isMac ? '⌘' : 'Ctrl'
-const shift = isMac ? '⇧' : 'Shift'
-<ShortcutKeyCombo keys={[mod, shift, 'N']} />
+<ShortcutKeyCombo keys={[isMac ? '⌘' : 'Ctrl', isMac ? '⇧' : 'Shift', 'N']} />
 ```
 
-See `apps/desktop/src/renderer/src/components/landing-page.tsx` for the canonical pattern. Don't roll a one-off `<kbd>` — kbd chips drift in shape and color across the app fast if everyone styles their own.
+Chips appear trailing in a tooltip after the label, and in menu items via `<DropdownMenuShortcut>` — never positioned by hand. Never on Cancel, Dismiss, or `link`-variant actions.
 
-**Where shortcuts surface in the UI:**
+---
 
-- **Tooltips on icon buttons** — append the chip after the label, trailing.
-- **Dropdown / context-menu items** — use `<DropdownMenuShortcut>` (or its context-menu equivalent) for the right-aligned chip; don't position one yourself.
-- **Never on Cancel, Dismiss, or `link`-variant inline actions** — see _UX rule 3_.
+## 9. Behavior
 
-**The label MUST match the actual binding for the platform.** If the keyboard handler reads `metaKey` on Mac and `ctrlKey` elsewhere, the chip must show `⌘` on Mac and `Ctrl` elsewhere. Mismatched chips are worse than no chip.
-
-### Scrollbars
-
-Four scrollbar classes are defined globally in `main.css`:
-
-- **`.scrollbar-sleek`** — the default thin, neutral scrollbar for sidebars, lists, popovers. Pair with `.scrollbar-sleek-parent` on a hover-target ancestor if you want the thumb to fade in only on parent hover.
-- **`.scrollbar-sleek-lg`** — a larger grab target for dense tables; use only together with `.scrollbar-sleek`.
-- **`.scrollbar-editor`** — slightly heavier, used inside Monaco-adjacent surfaces.
-- **`.worktree-sidebar-scrollbar`** — no reserved gutter: paired with `overflow-y-auto`, the scrollbar (and its width) exists only while content actually overflows, so a short list stays flush with the fixed header controls and classic-scrollbar Windows shows no arrow buttons on empty lists. The thumb stays invisible until the parent (`.scrollbar-sleek-parent`) is hovered. Used only in the worktree sidebar.
-
-Apply one of these to overflow containers; don't write a fourth style.
-
-## UX rules
-
-These are the rules a contributor will most often get wrong if they're working in isolation. They apply to every UI change.
-
-**UI copy must not overclaim.** Never imply the app has taken an action, made a decision, or observed a fact unless the code has real state or result data to support it. Use neutral process language while work is pending, and reserve result verbs like "skipped", "protected", "found", "verified", or "deleted" for actual results.
-
-### Screen UX review rubric
-
-Use this rubric when reviewing any Yiru IDE screen, screenshot, or prototype. A good review should name the highest-impact friction first, then give concrete changes the implementer can make.
-
-#### Review output format
-
-1. **Top fixes:** the 3 changes that would most improve the screen.
-2. **Friction notes:** specific clutter, alignment, copy, focus, or flow issues, with the affected UI element named.
-3. **Suggested changes:** exact changes to layout, hierarchy, controls, copy, empty/error states, and disclosure.
-4. **Keyboard and speed check:** whether the primary workflow can be completed in 1-2 actions where appropriate, with good default focus and Enter/Esc behavior.
-5. **Follow-up links or states:** missing external links, acquisition actions, or persistent errors the user needs to recover.
-
-#### What to judge
-
-- **Progressive disclosure:** keep high-frequency actions visible and prominent. Move low-frequency actions out of the common pointer path into menus, overflow controls, detail drawers, or advanced sections. Do not make menus so long that the user has to scan unrelated actions; group or split them when they grow.
-- **Action hierarchy:** the primary action must be obvious through placement, size, and `default` button styling. Put high-frequency actions at the top of menus and in the most reachable toolbar positions. Secondary and rare actions should not compete with the primary action.
-- **Click count:** remove unnecessary intermediate steps. Common workflows should complete in 1-2 actions when the app already has enough information to proceed.
-- **Default focus:** dialogs, popovers, and command surfaces should focus the field or primary action the user is most likely to use. If Enter submits, focus must land where Enter triggers the intended primary action. Esc should back out without adding visual noise to Cancel/Dismiss.
-- **Keyboard navigation:** prefer searchable command surfaces for long option lists. Add search fields when users need to find repositories, branches, worktrees, agents, commands, settings, files, or providers from a list.
-- **Shortcut labels:** show shortcut chips only for shortcuts that are actually implemented and useful at that location. Labels must match the platform binding. If a shortcut strategy is undecided, do not expose a placeholder label in product UI.
-- **Alignment:** rows and columns must line up to a visible grid. Left-align text and labels for scanability; right-align numbers, counts, shortcuts, and trailing metadata when comparison matters; center-align only compact icon controls, empty states, and table cells where symmetry is the clearest read.
-- **Copy quality:** displayed text must be typo-free, concise, and specific. Prefer direct verbs and concrete nouns. Remove filler like "please", "simply", "just", "you can", and generic success language that is not backed by state.
-- **Dialogs and overlays:** choose a dialog size that matches the amount of input. Short confirmations stay compact; forms with multi-line text, path pickers, provider setup, or review content need a larger dialog or sheet. Floating surfaces must use the documented elevation and background treatment so they read as above the page.
-- **Empty and error states:** when data is missing, show a direct action to acquire or configure that data. Use toasts for transient failures or confirmations; persist errors inline when the user needs to read, retry, copy, or act on the message.
-- **External links:** add direct links when the user may need provider docs, token settings, billing/setup pages, Git provider resources, or troubleshooting context. Put links near the relevant empty state, error, helper text, or setup step instead of burying them in a generic menu.
-- **Affordance:** users should be able to discover available features without intrusive education. Use familiar Phosphor icons, visible hover/focus states, clear labels where needed, and tooltips for icon-only controls. Prefer the simple icon already used by a sibling surface over an obscure alternative.
-- **Layout density:** avoid jamming controls together. Preserve breathing room around the primary workflow, reduce competing buttons, and keep toolbar groups visually distinct. Dense screens are acceptable only when grouping, alignment, and hierarchy make scanning faster.
-- **Cards and containers:** cards must be visually distinct from their parent surface through the existing `card`/`border` treatment. Avoid nesting cards inside cards. If a section is not a repeated item, modal, or framed tool, consider an unframed layout or full-width band instead.
-- **Side-by-side layouts:** default to row-by-row layouts for complex workflows because they are easier to align and scan. Use side-by-side layouts only when space is constrained or comparison is the point, then polish column widths, baselines, and wrapping states carefully.
-- **Animation:** use subtle animation to soften expanding/collapsing content and prevent jumpy layout changes. Animation should clarify continuity, not decorate. Respect reduced-motion settings.
-- **SSH and latency:** assume actions may run remotely. Disable submit controls immediately, delay visible loading feedback when appropriate, and keep focus stable while remote data arrives.
-
-### 1. Match in-flight feedback to perceived duration
-
-The right question isn't _"should this control change while it's working?"_ — it's _"how long does the action take, and what does the user need to know during that time?"_
+### Match feedback to perceived duration
 
 | Duration | Feedback |
 | --- | --- |
 | 0–100 ms | None. Anything visible reads as a glitch. |
-| 100 ms–1 s | Disabled state only. |
-| 1 s–3 s | Disabled + spinner or label swap. |
-| 3 s+ or multi-step | Stage labels, progress, optional reassurance. |
+| 100 ms – 1 s | Disabled state only. |
+| 1–3 s | Disabled plus a spinner or label swap. |
+| 3 s+ or multi-step | Stage labels naming the step ("Cloning…" → "Installing…"), progress. |
 
-Two corollaries:
+**Pre-reserve the space you'll occupy.** If a control may swap to a longer label or gain an icon, fix its footprint with `width`, not `min-width` — a control that resizes mid-action looks broken even on success.
 
-- **Pre-reserve any space you'll later occupy.** If a control may swap to a longer label or grow an icon, fix its footprint up front (use `width`, not `min-width`). A control that resizes mid-action looks broken even when the action succeeded.
-- **Don't pick worst-case feedback for everyone.** If the action is fast locally and slow remotely (SSH), defer the visible loading state by ~200ms. Local users see nothing; remote users get appropriate feedback. Bind the _disabled_ state immediately (so double-clicks don't double-submit) and the _visible_ state on a timer.
+**Split immediate from visible.** Bind the *disabled* state instantly so double-clicks can't double-submit; defer the *visible* loading state ~200 ms. Local users see nothing, remote users get real feedback.
 
-### 2. Look for sibling components before designing in isolation
+### Copy
 
-If your component has a sibling — same domain, overlapping behavior, often visible at adjacent moments in the same flow — the two should read as one design. Same icons, same shortcut conventions, same submit semantics. A user moving between them shouldn't perceive a seam.
+Never imply the app acted, decided, or observed something without real state behind it. Use neutral process language while work is pending; reserve result verbs — "skipped", "protected", "found", "verified", "deleted" — for actual results.
 
-This is _not_ "match every existing pattern." Some repo patterns are debt and copying them spreads the debt. The narrower claim is about _adjacent_ components. Diverging from a sibling needs a reason: either the sibling is wrong (fix both) or the new component has a real difference in role (commit to it).
+Text is typo-free, concise, specific: direct verbs, concrete nouns. Cut "please", "simply", "just", "you can", and success language not backed by state.
 
-When there's no sibling, match the surrounding chrome — button sizes, icon weights, copy tone — and don't manufacture a sibling from a screen the user will never correlate with this one.
+### Don't overload the back-out path
 
-### 3. Don't overload the back-out path
+`destructive` is for actions that lose data or can't be undone. **Cancel, Dismiss, Close, and Discard are not destructive** — they stay quiet (ghost, no color, no shortcut chip, no animated affordance) so the affirmative action keeps the weight. Esc can still back out; it's the decoration that stays minimal.
 
-`destructive` is for actions that lose data or can't be undone. **Cancel, Dismiss, Close, and Discard are not destructive** — they back the user out of an in-progress action and should stay quiet (default ghost button, no color, no keyboard chip, no animated affordance). Save the visual weight for the affirmative action so the two don't compete. Keyboard handlers can still honor Esc; the visible decoration is what stays minimal.
+### Siblings and motion
 
-## Cross-platform
+If your component has a sibling — same domain, adjacent in the same flow — the two read as one design: same icons, same shortcut conventions, same submit semantics. Diverging needs a reason: either the sibling is wrong (fix both) or your component has a genuinely different role. With no sibling, match the surrounding chrome.
 
-Yiru runs on macOS, Linux, and Windows. Every UI change must hold up on all three, in both light and dark mode.
+Motion softens expanding and collapsing content and prevents jumpy layout. It clarifies continuity; it does not decorate. Respect reduced-motion settings.
 
-- **Modifier keys:** Never hardcode `e.metaKey`. Use `navigator.userAgent.includes('Mac')` to choose `metaKey` on Mac and `ctrlKey` on Linux/Windows. Electron menu accelerators should use `CmdOrCtrl`.
-- **Shortcut labels:** Display `⌘` / `⇧` on Mac; display `Ctrl+` / `Shift+` on other platforms. The label must reflect the actual binding for that platform.
-- **Window chrome:** macOS shows traffic lights; the titlebar reserves a 92px gutter (`titlebar-traffic-light-pad`) so its outer spacing stays symmetric and content cannot overlap it. Don't put hit targets in that band on Mac.
-- **SSH:** Many users run Yiru on a remote machine. Loading states, focus management, and animations must hold up under 50–200 ms of extra latency. Test under simulated latency (or actual SSH) — local-only verification isn't enough. See _UX rules → 1_.
+---
 
-## When this guide is silent
+## 10. Platform and latency in the UI
 
-If you have a UI question this doc doesn't answer:
+- **Shortcut labels** show `⌘`/`⇧` on Mac and `Ctrl+`/`Shift+` elsewhere, always matching the actual binding. (The binding itself: `AGENTS.md` §7.)
+- **macOS traffic lights** get a reserved 92px titlebar gutter so outer spacing stays symmetric — put no hit targets in that band on Mac. App-level header chrome shares `--titlebar-height`.
+- **Remote hosts** add 50–200 ms. Disable submit controls immediately, defer visible spinners, keep focus stable while remote data arrives, and verify under real or simulated latency.
 
-1. Check [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) for a primitive that already encodes the pattern.
-2. Look at adjacent code in `apps/desktop/src/renderer/src/components/` for the closest sibling, and follow its lead — as long as that sibling already uses primitives correctly.
-3. If it's a token question, stay inside the default shadcn roles or Tailwind palette; check `main.css` only for an existing product-domain exception.
-4. If none of those resolve it, ask before adding a token, inventing a visual rule, or shipping a new native control.
+Every change holds up on macOS, Linux, and Windows, in light and dark mode.
+
+---
+
+## 11. When this guide is silent
+
+Check `components/ui/README.md` for a primitive that already encodes the pattern, then the closest sibling in `components/` — provided it uses primitives correctly. For color, stay inside the shadcn roles or the Tailwind palette. If none of that resolves it, **ask** — don't add a token, invent a visual rule, or ship a native control on your own judgment.
