@@ -13,11 +13,11 @@ import {
   buildGitLsFilesArgsForQuickOpen,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../shared/quick-open-filter'
+} from '../shared/quick-open/quick-open-filter'
 import {
   expandQuickOpenGitFileListing,
   parseQuickOpenGitLsFilesEntry
-} from '../shared/quick-open-readdir-walk'
+} from '../shared/quick-open/quick-open-readdir-walk'
 import {
   buildGitGrepArgs,
   buildSubmatchRegex,

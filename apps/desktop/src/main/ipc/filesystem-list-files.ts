@@ -8,7 +8,7 @@ import {
   type RgOutputMode,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../../shared/quick-open-filter'
+} from '../../shared/quick-open/quick-open-filter'
 import { wslAwareSpawn } from '../git/runner'
 import type { Store } from '../persistence'
 import { parseWslPath, toWindowsWslPath } from '../wsl'

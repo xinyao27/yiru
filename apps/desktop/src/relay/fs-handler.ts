@@ -10,8 +10,8 @@ import {
   throwIfFileListingCancelled
 } from '../shared/file-listing-cancellation'
 import { assertNoClobberRenameDestinationAvailable } from '../shared/filesystem-rename-collision'
-import { buildExcludePathPrefixes } from '../shared/quick-open-filter'
-import { isQuickOpenReaddirBudgetError } from '../shared/quick-open-readdir-walk'
+import { buildExcludePathPrefixes } from '../shared/quick-open/quick-open-filter'
+import { isQuickOpenReaddirBudgetError } from '../shared/quick-open/quick-open-readdir-walk'
 import type { RelayContext } from './context'
 // Why: RelayContext is accepted in the constructor for protocol back-compat
 // (see docs/relay-fs-allowlist-removal.md), but no longer consulted on FS ops.

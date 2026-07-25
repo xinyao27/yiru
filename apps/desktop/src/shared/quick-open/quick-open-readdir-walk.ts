@@ -1,7 +1,7 @@
 import { lstat, readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 
-import { throwIfFileListingCancelled } from './file-listing-cancellation'
+import { throwIfFileListingCancelled } from '../file-listing-cancellation'
 import { isQuickOpenReadableDirectory } from './quick-open-directory-validation'
 import { collapseQuickOpenExpansionPaths } from './quick-open-expansion-paths'
 import {

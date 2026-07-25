@@ -23,7 +23,7 @@ import {
   normalizeQuickOpenRgLine,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../shared/quick-open-filter'
+} from '../shared/quick-open/quick-open-filter'
 
 export const LIST_FILES_TIMEOUT_MS = 25_000
 
