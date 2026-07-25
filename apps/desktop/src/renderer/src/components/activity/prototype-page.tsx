@@ -22,6 +22,11 @@ which pieces become production modules. */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
+import {
+  getActivityThreadTaskTitle,
+  getActivityThreadWorkspaceTitle,
+  resolveActivityThreadStatusPreview
+} from '@/components/activity/thread-display'
 import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
 import { RepoBadgeMark } from '@/components/repo/badge-label'
 import { Button } from '@/components/ui/button'
@@ -46,11 +51,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useSidebarResize } from '@/hooks/use-sidebar-resize'
 import { translate } from '@/i18n/i18n'
 import { activateTabAndFocusPane } from '@/lib/activate-tab-and-focus-pane'
-import {
-  getActivityThreadTaskTitle,
-  getActivityThreadWorkspaceTitle,
-  resolveActivityThreadStatusPreview
-} from '@/lib/activity-thread-display'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
 import {
