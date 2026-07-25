@@ -7,6 +7,11 @@ import {
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
+import {
+  agentPickerBlankTerminalMatches,
+  getAgentPickerCommandValue,
+  searchAgentPickerEntries
+} from '@/components/agent/picker-search'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -24,11 +29,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon, type AgentCatalogEntry } from '@/lib/agent-catalog'
-import {
-  agentPickerBlankTerminalMatches,
-  getAgentPickerCommandValue,
-  searchAgentPickerEntries
-} from '@/lib/agent-picker-search'
 import { cn } from '@/lib/class-names'
 
 import type { TuiAgent } from '../../../../shared/types'
