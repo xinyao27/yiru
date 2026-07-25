@@ -2,6 +2,7 @@ import { Copy, type Icon as PhosphorIcon, type IconProps } from '@phosphor-icons
 import { Fragment } from 'react'
 import { toast } from 'sonner'
 
+import type { OrchestrationUsageExample } from '@/components/settings/orchestration-usage-examples'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,7 +14,6 @@ import {
 } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
 import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
-import type { OrchestrationUsageExample } from '@/lib/orchestration-usage-examples'
 
 const ORCHESTRATION_SKILL_SLASH_COMMAND = `/${ORCHESTRATION_SKILL_NAME}`
 

@@ -8,6 +8,7 @@ import {
 } from '@phosphor-icons/react'
 import { useState } from 'react'
 
+import { getOrchestrationUsageExamples } from '@/components/settings/orchestration-usage-examples'
 import { Button } from '@/components/ui/button'
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
@@ -24,7 +25,6 @@ import {
   ORCHESTRATION_SKILL_INSTALL_COMMAND,
   ORCHESTRATION_SKILL_UPDATE_COMMAND
 } from '@/lib/orchestration-install-command'
-import { getOrchestrationUsageExamples } from '@/lib/orchestration-usage-examples'
 
 import { useAppStore } from '../../store'
 import { AgentSkillSetupPanel } from './agent-skill-setup-panel'

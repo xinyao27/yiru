@@ -9,13 +9,13 @@ import {
   type ProjectExecutionRuntimeResolution
 } from '../../../shared/project-execution-runtime'
 import type { Repo, Worktree } from '../../../shared/types'
+import { getRendererAppPlatform } from '../components/settings/renderer-app-platform'
 import {
   getProjectRuntimePreflightContext,
   getWslPreflightContext,
   type LocalPreflightContext
 } from './local-preflight-context-cache'
 import { getProviderRuntimeContextKey } from './provider-runtime-context'
-import { getRendererAppPlatform } from './renderer-app-platform'
 import {
   getCachedWindowsTerminalCapabilities,
   hasCachedWindowsTerminalCapabilities

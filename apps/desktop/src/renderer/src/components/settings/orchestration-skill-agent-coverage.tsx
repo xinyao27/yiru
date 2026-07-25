@@ -1,9 +1,9 @@
+import type { OrchestrationSkillAgentStatus } from '@/components/settings/orchestration-skill-coverage'
+import { getOrchestrationSkillAgentStatuses } from '@/components/settings/orchestration-skill-coverage'
 import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
-import type { OrchestrationSkillAgentStatus } from '@/lib/orchestration-skill-coverage'
-import { getOrchestrationSkillAgentStatuses } from '@/lib/orchestration-skill-coverage'
 
 import type { DiscoveredSkill } from '../../../../shared/skills'
 

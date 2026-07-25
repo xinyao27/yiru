@@ -1,10 +1,10 @@
-import { Switch } from '@/components/ui/switch'
-import { translate } from '@/i18n/i18n'
 import {
   MAX_AGENT_HIBERNATION_IDLE_MS,
   MIN_AGENT_HIBERNATION_IDLE_MS,
   getEffectiveAgentHibernationIdleMs
-} from '@/lib/agent-hibernation-planner'
+} from '@/components/settings/agent-hibernation-planner'
+import { Switch } from '@/components/ui/switch'
+import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'

@@ -1,4 +1,4 @@
-import type { AgentHibernationCandidate } from '../lib/agent-hibernation-planner'
+import type { AgentHibernationCandidate } from './settings/agent-hibernation-planner'
 
 export type AgentHibernationConfirmationState = Record<string, string>
 

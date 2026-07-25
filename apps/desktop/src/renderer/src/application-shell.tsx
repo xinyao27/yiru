@@ -27,6 +27,8 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { LinkRoutingPreferenceDialogProvider } from '@/components/link-routing-preference-dialog'
 import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
+import { getRendererAppPlatform } from '@/components/settings/renderer-app-platform'
+import { syncZoomCSSVar } from '@/components/settings/ui-zoom'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Toaster } from '@/components/ui/sonner'
@@ -53,11 +55,9 @@ import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-w
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
 import { requestScrollToCurrentWorkspaceRevealAndRename } from '@/lib/scroll-to-current-workspace-status'
 import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut-capture-notification'
 import { resolveLeftTitlebarChromeLayout } from '@/lib/titlebar-left-chrome'
-import { syncZoomCSSVar } from '@/lib/ui-zoom'
 import { shouldShowWorktreeCreationSurface } from '@/lib/worktree-creation-surface'
 import {
   canGoBackWorktreeHistory,

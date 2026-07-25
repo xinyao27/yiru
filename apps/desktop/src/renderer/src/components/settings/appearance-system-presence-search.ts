@@ -1,6 +1,6 @@
+import { getRendererAppPlatform } from '@/components/settings/renderer-app-platform'
 import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
-import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
 import { isWebClientLocation } from '@/lib/web-client-location'
 
 import type { SettingsSearchEntry } from './search'

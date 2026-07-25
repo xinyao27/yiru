@@ -20,6 +20,7 @@ import {
   rememberPrelaunchedSimulatorSession
 } from '@/components/emulator-pane/simulator-launch-coordination'
 import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/constants'
+import { applyUIZoom } from '@/components/settings/ui-zoom'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
 import { getVisibleWorktreeIds } from '@/components/sidebar/visible-worktrees'
@@ -68,7 +69,6 @@ import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/lib/quick-commands-menu-even
 import { activateTabNumberShortcut } from '@/lib/tab-number-shortcuts'
 import { track } from '@/lib/telemetry'
 import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut-capture-notification'
-import { applyUIZoom } from '@/lib/ui-zoom'
 import { createBackgroundSleepingAgentWakeDispatcher } from '@/lib/wake-sleeping-agents-in-background'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'

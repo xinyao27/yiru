@@ -9,7 +9,7 @@ import {
   DEFAULT_AGENT_HIBERNATION_IDLE_MS,
   planAgentHibernationCandidates,
   type AgentHibernationPlannerSnapshot
-} from './agent-hibernation-planner'
+} from '../components/settings/agent-hibernation-planner'
 
 const NOW = 2_000_000
 const OLD = NOW - DEFAULT_AGENT_HIBERNATION_IDLE_MS - 1

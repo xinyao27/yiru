@@ -1,8 +1,8 @@
 import { Minus, Plus, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { useEffect, useState, useCallback } from 'react'
 
+import { applyUIZoom } from '@/components/settings/ui-zoom'
 import { translate } from '@/i18n/i18n'
-import { applyUIZoom } from '@/lib/ui-zoom'
 
 import { Button } from '../ui/button'
 import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX, zoomLevelToPercent } from './constants'

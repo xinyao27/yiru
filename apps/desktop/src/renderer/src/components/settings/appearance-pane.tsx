@@ -6,9 +6,9 @@ import {
 import type React from 'react'
 import { useLayoutEffect, useState } from 'react'
 
+import { getRendererAppPlatform } from '@/components/settings/renderer-app-platform'
 import { translate } from '@/i18n/i18n'
 import { SHOW_UI_LANGUAGE_SETTING } from '@/i18n/supported-languages'
-import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
 import { isWebClientLocation } from '@/lib/web-client-location'
 
 import { normalizeAppIconId } from '../../../../shared/app-icon'
