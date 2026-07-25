@@ -2,7 +2,7 @@ import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from './constants'
-import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from './terminal-scrollback-limits'
+import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from './terminal/terminal-scrollback-limits'
 import type { Repo, WorkspaceSessionState } from './types'
 import { clampUtf8TextTail, measureUtf8ByteLength } from './utf8-byte-limits'
 

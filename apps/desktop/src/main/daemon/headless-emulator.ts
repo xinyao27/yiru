@@ -4,13 +4,13 @@ import { Unicode11Addon } from '@xterm/addon-unicode11'
 import { Terminal } from '@xterm/headless'
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 
-import { advancePartialEscapeTail } from '../../shared/terminal-partial-escape-tail'
+import { advancePartialEscapeTail } from '../../shared/terminal/terminal-partial-escape-tail'
 import {
   readSavedCursorRegister,
   serializeWithAbsoluteCursor
-} from '../../shared/terminal-serialize-absolute-cursor'
-import { activateYiruTerminalUnicodeProvider } from '../../shared/terminal-unicode-provider'
-import type { TerminalViewAttributes } from '../../shared/terminal-view-attributes'
+} from '../../shared/terminal/terminal-serialize-absolute-cursor'
+import { activateYiruTerminalUnicodeProvider } from '../../shared/terminal/terminal-unicode-provider'
+import type { TerminalViewAttributes } from '../../shared/terminal/terminal-view-attributes'
 import { collectHeadlessOscLinkRanges } from './headless-osc-link-ranges'
 import { buildRehydrateSequences } from './terminal-mode-rehydrate-sequences'
 import { TerminalMouseModeMirror } from './terminal-mouse-mode-mirror'

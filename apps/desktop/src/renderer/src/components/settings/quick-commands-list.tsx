@@ -8,7 +8,7 @@ import {
   getTerminalQuickCommandBody,
   getTerminalQuickCommandScope,
   isTerminalAgentQuickCommand
-} from '../../../../shared/terminal-quick-commands'
+} from '../../../../shared/terminal/terminal-quick-commands'
 import type {
   Repo,
   TerminalQuickCommand,

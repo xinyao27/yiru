@@ -10,11 +10,11 @@
  */
 import type { ITheme } from '@xterm/xterm'
 
-import type { TerminalColorSchemeMode } from '../../../../shared/terminal-color-scheme-protocol'
+import type { TerminalColorSchemeMode } from '../../../../shared/terminal/terminal-color-scheme-protocol'
 import type {
   TerminalViewAttributes,
   TerminalViewRgb
-} from '../../../../shared/terminal-view-attributes'
+} from '../../../../shared/terminal/terminal-view-attributes'
 import type { GlobalSettings } from '../../../../shared/types'
 
 type ParsedCssColor = {

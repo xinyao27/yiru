@@ -213,24 +213,27 @@ import type {
 } from '../../shared/spool/spool-paired-runtime-host-contract'
 import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
-import type { TerminalGitHubPRLink } from '../../shared/terminal-github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '../../shared/terminal/terminal-github-pr-link-detector'
 import {
   isTerminalInputTooLargeWithYield,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   iterateTerminalInputChunks
-} from '../../shared/terminal-input'
-import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal-kitty-keyboard-mode-tracker'
+} from '../../shared/terminal/terminal-input'
+import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
 import {
   createTerminalTitleTracker,
   stripBrailleSpinnerGlyphs,
   type TerminalTitleTracker
-} from '../../shared/terminal-output-side-effects'
+} from '../../shared/terminal/terminal-output-side-effects'
 import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
-} from '../../shared/terminal-side-effect-facts'
-import { resolveTerminalStartupCwd } from '../../shared/terminal-startup-cwd'
-import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../shared/terminal-tab-id'
+} from '../../shared/terminal/terminal-side-effect-facts'
+import { resolveTerminalStartupCwd } from '../../shared/terminal/terminal-startup-cwd'
+import {
+  isValidHostTerminalTabId,
+  isValidTerminalTabId
+} from '../../shared/terminal/terminal-tab-id'
 import {
   getTuiAgentLaunchCommand,
   isTuiAgent,

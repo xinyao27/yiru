@@ -17,7 +17,7 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { useAppStore } from '@/store'
 
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { isTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-commands'
+import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/terminal-quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import type { PtyTransport } from './pty-transport'
 import type { PaneCwdMap } from './resolve-split-cwd'

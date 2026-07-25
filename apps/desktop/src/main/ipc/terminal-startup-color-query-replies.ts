@@ -8,7 +8,7 @@ import {
   terminalOscColorQueryReply,
   type TerminalOscColorQueryReplyColors,
   type TerminalOscColorQuerySlot
-} from '../../shared/terminal-osc-color-reply'
+} from '../../shared/terminal/terminal-osc-color-reply'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 
 type StartupTerminalColorQueryProvider = {

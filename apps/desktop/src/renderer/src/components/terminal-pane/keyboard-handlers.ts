@@ -4,7 +4,7 @@ import type { IDisposable } from '@xterm/xterm'
  * split actions do not race across separate window listeners. */
 import { useEffect } from 'react'
 
-import { normalizeSelectedTextForFileSearch } from '@/lib/file-search-selection'
+import { normalizeSelectedTextForFileSearch } from '@/components/editor/file-search-selection'
 import { isFindQueryTooLarge } from '@/lib/find-query-bounds'
 import { handleEmptyFloatingWorkspacePanelCloseShortcut } from '@/lib/floating-workspace-terminal-actions'
 import {
@@ -26,7 +26,7 @@ import {
   type TerminalShortcutPolicy
 } from '../../../../shared/keybindings'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
+import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
 import { safeFind } from '../terminal-search-safe-find'
 import type { PtyTransport } from './pty-transport'
 import type { PaneCwdMap } from './resolve-split-cwd'

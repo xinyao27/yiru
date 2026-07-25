@@ -5,7 +5,7 @@
  * co-locating the global handler maps that both the transport factory
  * and the eager-buffer reconnection logic share.
  */
-import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal-scrollback-limits'
+import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal/terminal-scrollback-limits'
 import type { PtyDataMeta } from '../../runtime/pty-data-meta'
 import { clampUtf8Tail, type EagerBufferChunk } from '../../runtime/pty-eager-buffer-clamp'
 import {

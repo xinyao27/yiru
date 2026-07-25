@@ -1,4 +1,7 @@
-import { iterateTerminalInputChunks, TERMINAL_INPUT_CHUNK_MAX_BYTES } from './terminal-input'
+import {
+  iterateTerminalInputChunks,
+  TERMINAL_INPUT_CHUNK_MAX_BYTES
+} from './terminal/terminal-input'
 
 export const AGENT_PROMPT_BRACKETED_PASTE_START = '\x1b[200~'
 export const AGENT_PROMPT_BRACKETED_PASTE_END = '\x1b[201~'

@@ -26,7 +26,7 @@ import {
 } from '../../shared/agent-hook-relay'
 import type { PtyModelRestoreNeededEvent } from '../../shared/pty-model-restore-marker'
 import { isTerminalLeafId, makePaneKey } from '../../shared/stable-pane-id'
-import { isValidTerminalTabId } from '../../shared/terminal-tab-id'
+import { isValidTerminalTabId } from '../../shared/terminal/terminal-tab-id'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { installRemoteManagedAgentHooks } from '../agent-hooks/remote-managed-hook-installers'
 import { agentHookServer } from '../agent-hooks/server'

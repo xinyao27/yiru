@@ -4,6 +4,7 @@ import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: terminal pane lifecycle wiring is intentionally co-located so PTY attach, theme sync, and runtime graph publication remain consistent for live terminals. */
 import { useEffect, useRef } from 'react'
 
+import { resolveLocalhostHttpLinkDisplayUrl } from '@/components/editor/http-link-routing'
 import {
   SPLIT_TERMINAL_PANE_EVENT,
   CLOSE_TERMINAL_PANE_EVENT,
@@ -13,7 +14,6 @@ import {
   type WakeHibernatedAgentsWorktreeDetail
 } from '@/constants/terminal'
 import { getConnectionId } from '@/lib/connection-context'
-import { resolveLocalhostHttpLinkDisplayUrl } from '@/lib/http-link-routing'
 import type { EffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/detect-option-as-alt'
 import {
   PaneManager,
@@ -55,10 +55,10 @@ import type { EventProps } from '../../../../shared/telemetry-events'
 import {
   DEFAULT_TERMINAL_FONT_SIZE,
   resolveTerminalFontWeights
-} from '../../../../shared/terminal-fonts'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal-line-height-settings'
-import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal-scrollback-policy'
+} from '../../../../shared/terminal/terminal-fonts'
+import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
+import { normalizeTerminalLineHeight } from '../../../../shared/terminal/terminal-line-height-settings'
+import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/terminal-scrollback-policy'
 import type {
   GlobalSettings,
   SetupSplitDirection,

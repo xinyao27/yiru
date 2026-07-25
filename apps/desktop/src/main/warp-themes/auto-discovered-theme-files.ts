@@ -1,7 +1,7 @@
 import { realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 
-import type { WarpThemeImportSkippedFile } from '../../shared/terminal-custom-themes'
+import type { WarpThemeImportSkippedFile } from '../../shared/terminal/terminal-custom-themes'
 import { getWarpThemeDirectories, warpThemeSourceLabelForDirectory } from './discovery'
 import type { PreviewOperationBudget } from './preview-operation-budget'
 import { MAX_THEME_FILES, type ThemeFileCandidate } from './theme-file-scanner'

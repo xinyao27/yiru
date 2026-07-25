@@ -1,6 +1,6 @@
 import { createBrowserUuid } from '@/lib/browser-uuid'
 
-import { isValidTerminalTabId } from '../../../../shared/terminal-tab-id'
+import { isValidTerminalTabId } from '../../../../shared/terminal/terminal-tab-id'
 import type {
   Tab,
   TabGroup,

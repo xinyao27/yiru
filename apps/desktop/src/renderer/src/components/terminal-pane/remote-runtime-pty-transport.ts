@@ -15,7 +15,7 @@ import type {
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../../../shared/terminal-input'
+} from '../../../../shared/terminal/terminal-input'
 import {
   getRemoteRuntimeTerminalMultiplexer,
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,

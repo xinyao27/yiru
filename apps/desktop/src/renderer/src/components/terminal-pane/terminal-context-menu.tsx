@@ -37,7 +37,7 @@ import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 
 import type { KeybindingOverrides } from '../../../../shared/keybindings'
-import { isTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-commands'
+import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/terminal-quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import { isMacPlatform, nativeChatToggleShortcutLabel } from '../native-chat/shortcut'
 import { AgentSessionContinuationMenuItem } from './agent-session-continuation-menu-item'

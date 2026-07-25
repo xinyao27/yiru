@@ -5,7 +5,7 @@ import {
 } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
-import { isValidTerminalTabId } from './terminal-tab-id'
+import { isValidTerminalTabId } from './terminal/terminal-tab-id'
 
 const terminalTabIdSchema = z
   .string()

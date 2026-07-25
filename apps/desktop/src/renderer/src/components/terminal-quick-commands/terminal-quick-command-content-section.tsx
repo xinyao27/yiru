@@ -16,7 +16,7 @@ import { cn } from '@/lib/class-names'
 import {
   isTerminalAgentQuickCommand,
   supportsTerminalAgentQuickCommand
-} from '../../../../shared/terminal-quick-commands'
+} from '../../../../shared/terminal/terminal-quick-commands'
 import type { TerminalQuickCommand, TuiAgent } from '../../../../shared/types'
 import { getTerminalQuickCommandAgentOptions } from './terminal-quick-command-agent-options'
 import type { TerminalQuickCommandDialogDraftMemory } from './terminal-quick-command-dialog-draft'

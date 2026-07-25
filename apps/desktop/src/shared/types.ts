@@ -48,7 +48,7 @@ import type {
 import type { VoiceSettings } from './speech-types'
 import type { StatusBarUsageMode } from './status-bar-usage-mode'
 import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
-import type { TerminalCustomTheme } from './terminal-custom-themes'
+import type { TerminalCustomTheme } from './terminal/terminal-custom-themes'
 import type { UiLanguage } from './ui-language'
 import type { UsagePercentageDisplay } from './usage-percentage-display'
 import type { WorkspaceCleanupUIState } from './workspace-cleanup'

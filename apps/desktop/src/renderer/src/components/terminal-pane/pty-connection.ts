@@ -132,10 +132,10 @@ import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode,
   scanMode2031Sequences
-} from '../../../../shared/terminal-color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal-github-pr-link-detector'
-import { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
-import { parseTerminalOscColorQuery } from '../../../../shared/terminal-osc-color-reply'
+} from '../../../../shared/terminal/terminal-color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/terminal-github-pr-link-detector'
+import { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
+import { parseTerminalOscColorQuery } from '../../../../shared/terminal/terminal-osc-color-reply'
 import {
   HIDDEN_STARTUP_RENDERER_QUERY_PENDING_CHARS,
   containsCsiRendererQuery,
@@ -144,9 +144,9 @@ import {
   findCsiFinalByteIndex,
   isStatefulRendererReplyCsiQuery,
   isStatelessRendererReplyCsiQuery
-} from '../../../../shared/terminal-reply-query-extraction'
-import { serializeWithAbsoluteCursor } from '../../../../shared/terminal-serialize-absolute-cursor'
-import { createTerminalZeroDimensionsMessage } from '../../../../shared/terminal-zero-dimensions-diagnostic'
+} from '../../../../shared/terminal/terminal-reply-query-extraction'
+import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/terminal-serialize-absolute-cursor'
+import { createTerminalZeroDimensionsMessage } from '../../../../shared/terminal/terminal-zero-dimensions-diagnostic'
 import { isTuiAgent, TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
 import {
   resolveTuiAgentLaunchArgs,

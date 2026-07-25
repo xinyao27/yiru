@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 
 import { mergeGitConfigEnvProtocol } from '../shared/git/git-credential-prompt-env'
-import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal-git-credential-guard'
+import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/terminal-git-credential-guard'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 
 const DEFAULT_TIMEOUT_MS = 60_000

@@ -1,8 +1,8 @@
-import type { TerminalGitHubPRLink } from '../../../../shared/terminal-github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '../../../../shared/terminal/terminal-github-pr-link-detector'
 import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
-} from '../../../../shared/terminal-side-effect-facts'
+} from '../../../../shared/terminal/terminal-side-effect-facts'
 /**
  * Renderer consumer registry for the `pty:sideEffect` channel.
  *

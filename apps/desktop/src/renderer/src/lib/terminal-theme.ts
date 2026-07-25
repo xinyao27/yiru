@@ -6,7 +6,7 @@ import {
   parseCustomTerminalThemeSelection,
   terminalCustomThemeToXtermTheme,
   type TerminalCustomTheme
-} from '../../../shared/terminal-custom-themes'
+} from '../../../shared/terminal/terminal-custom-themes'
 import type { GlobalSettings } from '../../../shared/types'
 import { getTheme, getThemeNames } from './terminal-themes-data'
 

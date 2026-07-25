@@ -12,13 +12,13 @@ import {
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
+import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
 import type { NativeChatLaunchPrompt } from '@/components/native-chat/native-chat-launch-prompt'
 import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
 import { isClaudeAgent } from '@/lib/agent-status'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { getFolderWorkspaceConnectionId } from '@/lib/folder-workspace-connection'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
@@ -69,7 +69,10 @@ import {
   parseLegacyNumericPaneKey,
   parsePaneKey
 } from '../../../../shared/stable-pane-id'
-import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../../../shared/terminal-tab-id'
+import {
+  isValidHostTerminalTabId,
+  isValidTerminalTabId
+} from '../../../../shared/terminal/terminal-tab-id'
 import type {
   Repo,
   SetupSplitDirection,

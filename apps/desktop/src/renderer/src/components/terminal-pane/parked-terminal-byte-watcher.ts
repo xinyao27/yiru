@@ -22,8 +22,8 @@ import { makePaneKey } from '../../../../shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode
-} from '../../../../shared/terminal-color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal-github-pr-link-detector'
+} from '../../../../shared/terminal/terminal-color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/terminal-github-pr-link-detector'
 import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,

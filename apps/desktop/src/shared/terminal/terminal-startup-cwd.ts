@@ -1,8 +1,8 @@
 import { resolveRuntimePath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
-import { FLOATING_TERMINAL_WORKTREE_ID, GLOBAL_ASSISTANT_WORKTREE_ID } from './constants'
-import { parseWorkspaceKey } from './workspace-scope'
+import { FLOATING_TERMINAL_WORKTREE_ID, GLOBAL_ASSISTANT_WORKTREE_ID } from '../constants'
+import { parseWorkspaceKey } from '../workspace-scope'
 
 export type TerminalStartupCwdMissingDirFallback = {
   // Why: only local callers can probe the filesystem — SSH/remote worktree

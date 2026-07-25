@@ -1,4 +1,4 @@
-import { activateYiruTerminalUnicodeProvider } from '../../../../shared/terminal-unicode-provider'
+import { activateYiruTerminalUnicodeProvider } from '../../../../shared/terminal/terminal-unicode-provider'
 import { attachDomRendererFocusClassSync } from './pane-dom-focus-class-sync'
 import {
   attachPaneFitResizeObserver,

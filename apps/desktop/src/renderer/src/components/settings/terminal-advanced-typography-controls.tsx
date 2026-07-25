@@ -7,11 +7,11 @@ import {
   TERMINAL_FONT_WEIGHT_MIN,
   TERMINAL_FONT_WEIGHT_STEP,
   normalizeTerminalFontWeight
-} from '../../../../shared/terminal-fonts'
+} from '../../../../shared/terminal/terminal-fonts'
 import {
   fontFamilyHasKnownLigatures,
   resolveTerminalLigaturesEnabled
-} from '../../../../shared/terminal-ligatures'
+} from '../../../../shared/terminal/terminal-ligatures'
 import type { GlobalSettings } from '../../../../shared/types'
 import { NumberField, SettingsRow, SettingsSegmentedControl } from './form-controls'
 import { SearchableSetting } from './searchable-setting'

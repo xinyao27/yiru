@@ -25,11 +25,11 @@ import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
 } from '../../../../shared/agent-status-osc'
-import { createBellDetector } from '../../../../shared/terminal-bell-detector'
+import { createBellDetector } from '../../../../shared/terminal/terminal-bell-detector'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../../../shared/terminal-input'
+} from '../../../../shared/terminal/terminal-input'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import {
   ptyDataHandlers,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test'
 
-import { GLOBAL_ASSISTANT_WORKTREE_ID } from './constants'
+import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../constants'
 import { resolveTerminalStartupCwdForWorkspace } from './terminal-startup-cwd'
 
 describe('resolveTerminalStartupCwdForWorkspace', () => {

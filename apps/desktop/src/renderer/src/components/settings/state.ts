@@ -12,9 +12,9 @@ import {
 import { normalizeLoaderStyle } from '../../../../shared/loader-style'
 import { normalizeOpenInApplications } from '../../../../shared/open-in-applications'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import { normalizeTerminalCustomThemes } from '../../../../shared/terminal-custom-themes'
-import { normalizeTerminalQuickCommands } from '../../../../shared/terminal-quick-commands'
-import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal-scrollback-policy'
+import { normalizeTerminalCustomThemes } from '../../../../shared/terminal/terminal-custom-themes'
+import { normalizeTerminalQuickCommands } from '../../../../shared/terminal/terminal-quick-commands'
+import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/terminal-scrollback-policy'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord

@@ -7,7 +7,7 @@ import { createServer, type Server, type Socket } from 'node:net'
 import { performance } from 'node:perf_hooks'
 import { StringDecoder } from 'node:string_decoder'
 
-import { extractHiddenStartupRendererQueryData } from '../../shared/terminal-reply-query-extraction'
+import { extractHiddenStartupRendererQueryData } from '../../shared/terminal/terminal-reply-query-extraction'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import { readCurrentProcessMacSystemResolverHealth } from '../network/macos-system-resolver-health'
 import {

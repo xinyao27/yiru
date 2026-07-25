@@ -143,13 +143,13 @@ import type {
 import type {
   WarpThemeImportPreview,
   WarpThemeImportSource
-} from '../shared/terminal-custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-facts'
+} from '../shared/terminal/terminal-custom-themes'
+import type { TerminalSideEffectBatch } from '../shared/terminal/terminal-side-effect-facts'
 import type {
   TerminalTabCloseRequest,
   TerminalTabCloseResponse
-} from '../shared/terminal-tab-close'
-import type { TerminalViewAttributes } from '../shared/terminal-view-attributes'
+} from '../shared/terminal/terminal-tab-close'
+import type { TerminalViewAttributes } from '../shared/terminal/terminal-view-attributes'
 import type {
   BaseRefDefaultResult,
   BaseRefSearchResult,

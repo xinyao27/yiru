@@ -6,7 +6,7 @@ import {
   type PtyDeliveryBreadcrumb,
   createPtyDeliveryBreadcrumbRing
 } from '../../../../shared/pty-delivery-diagnostics'
-import { setTerminalWebglDiagnosticRecorder } from '../../../../shared/terminal-webgl-diagnostics'
+import { setTerminalWebglDiagnosticRecorder } from '../../../../shared/terminal/terminal-webgl-diagnostics'
 
 const rendererDeliveryBreadcrumbs = createPtyDeliveryBreadcrumbRing()
 

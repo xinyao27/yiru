@@ -21,7 +21,7 @@ import {
   shouldDriveSyntheticAgentTitleFromHook,
   type SyntheticAgentTitleProfile
 } from '../shared/synthetic-agent-title'
-import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-facts'
+import type { TerminalSideEffectBatch } from '../shared/terminal/terminal-side-effect-facts'
 import { resolveTuiAgentPermissionMode } from '../shared/tui-agent-permissions'
 import type { UpdateCheckOptions } from '../shared/types'
 import { parseWorkspaceKey } from '../shared/workspace-scope'

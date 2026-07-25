@@ -12,9 +12,9 @@ import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from './source-control-group-order
 import type { VoiceSettings } from './speech-types'
 import { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
 import { DEFAULT_STATUS_BAR_USAGE_MODE } from './status-bar-usage-mode'
-import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal-fonts'
-import { getDefaultTerminalQuickCommands } from './terminal-quick-commands'
-import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from './terminal-scrollback-policy'
+import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal/terminal-fonts'
+import { getDefaultTerminalQuickCommands } from './terminal/terminal-quick-commands'
+import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from './terminal/terminal-scrollback-policy'
 import { DEFAULT_TUI_AGENT_ARGS, DEFAULT_TUI_AGENT_ENV } from './tui-agent-launch-defaults'
 import { DEFAULT_DISABLED_TUI_AGENTS } from './tui-agent-selection'
 /* eslint-disable max-lines -- Why: default persisted settings live in one schema-shaped object so migrations and tests compare against one source of truth. */
@@ -229,7 +229,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     // Why 'auto': when the user has picked a known ligature font we want the
     // feature enabled by default, but we never force it if they pick a font
     // that lacks ligatures or if they've explicitly opted out. The resolver
-    // is in shared/terminal-ligatures.ts.
+    // is in shared/terminal/terminal-ligatures.ts.
     terminalLigatures: 'auto',
     terminalCursorStyle: 'block',
     terminalCursorStyleDefaultedToBlock: true,

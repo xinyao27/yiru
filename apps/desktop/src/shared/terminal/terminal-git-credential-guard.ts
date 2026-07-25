@@ -1,5 +1,5 @@
-import { recognizeAgentProcessFromCommandLine } from './agent-process-recognition'
-import { gitCredentialPromptGuardEnv } from './git/git-credential-prompt-env'
+import { recognizeAgentProcessFromCommandLine } from '../agent-process-recognition'
+import { gitCredentialPromptGuardEnv } from '../git/git-credential-prompt-env'
 
 const GIT_CONFIG_PROTOCOL_KEY_RE = /^GIT_CONFIG_(?:COUNT|KEY_\d+|VALUE_\d+)$/
 

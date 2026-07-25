@@ -1,4 +1,4 @@
-import type { GlobalSettings } from './types'
+import type { GlobalSettings } from '../types'
 
 export type TerminalColorSchemeMode = 'dark' | 'light'
 

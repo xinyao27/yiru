@@ -1,7 +1,7 @@
 import type { FeatureInteractionId } from '../../../shared/feature-interactions'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import { isBrowserPaneUiRuntimeRpcParams } from '../../../shared/runtime-rpc-feature-interaction-source'
-import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
+import type { TerminalStreamFrame } from '../../../shared/terminal/terminal-stream-protocol'
 import { emulatorProbe, emulatorProbeError } from '../../emulator/probe'
 import type { YiruRuntimeService } from '../yiru-runtime'
 // Why: the dispatcher is the one place that knows how to turn a validated

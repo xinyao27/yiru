@@ -18,7 +18,7 @@
 import {
   createTerminalTitleTracker,
   type TerminalTitleTracker
-} from '../../shared/terminal-output-side-effects'
+} from '../../shared/terminal/terminal-output-side-effects'
 import type { DaemonTransientFact } from './types'
 
 // Kill switch for the whole background keep-tail mechanism (thinning +

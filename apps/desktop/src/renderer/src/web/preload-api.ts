@@ -100,8 +100,8 @@ import type { RuntimeStatus, RuntimeSyncWindowGraph } from '../../../shared/runt
 import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
 import type { SkillDiscoveryResult } from '../../../shared/skills'
 import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
-import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal-cursor-style-settings'
-import { normalizeTerminalCustomThemes } from '../../../shared/terminal-custom-themes'
+import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal/terminal-cursor-style-settings'
+import { normalizeTerminalCustomThemes } from '../../../shared/terminal/terminal-custom-themes'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord

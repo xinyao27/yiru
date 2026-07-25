@@ -20,7 +20,7 @@ import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runti
 import {
   decodeTerminalStreamFrame,
   type TerminalStreamFrame
-} from '../../shared/terminal-stream-protocol'
+} from '../../shared/terminal/terminal-stream-protocol'
 import { DeviceRegistry, type DeviceScope } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
 import { writeRuntimeMetadata } from './metadata'

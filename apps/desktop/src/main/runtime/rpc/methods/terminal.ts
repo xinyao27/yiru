@@ -14,13 +14,13 @@ import {
   TERMINAL_INPUT_MAX_BYTES,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   isTerminalInputTooLargeWithYield
-} from '../../../../shared/terminal-input'
+} from '../../../../shared/terminal/terminal-input'
 import {
   EMPTY_TERMINAL_REPLY_QUERY_SCAN_STATE,
   scanTerminalReplyQuerySequences,
   type TerminalReplyQuerySequence,
   type TerminalReplyQueryScanState
-} from '../../../../shared/terminal-reply-query-scan'
+} from '../../../../shared/terminal/terminal-reply-query-scan'
 import {
   TerminalStreamOpcode,
   decodeTerminalStreamJson,
@@ -29,7 +29,7 @@ import {
   encodeTerminalStreamJson,
   encodeTerminalStreamText,
   type TerminalStreamFrame
-} from '../../../../shared/terminal-stream-protocol'
+} from '../../../../shared/terminal/terminal-stream-protocol'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import {
   MOBILE_SNAPSHOT_BYTE_BUDGET,

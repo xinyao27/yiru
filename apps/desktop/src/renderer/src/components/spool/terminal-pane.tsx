@@ -20,8 +20,8 @@ import type {
   SpoolTerminalSubscriptionEvent,
   SpoolMutationResult
 } from '../../../../shared/spool/spool-operation-contract'
-import { resolveTerminalFontWeights } from '../../../../shared/terminal-fonts'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal-line-height-settings'
+import { resolveTerminalFontWeights } from '../../../../shared/terminal/terminal-fonts'
+import { normalizeTerminalLineHeight } from '../../../../shared/terminal/terminal-line-height-settings'
 import type { GlobalSettings } from '../../../../shared/types'
 import { getSpoolRequesterTransportErrorCode } from './requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './session-route'

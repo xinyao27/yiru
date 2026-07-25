@@ -16,9 +16,9 @@ import {
   SOURCE_CONTROL_TEXT_ACTION_IDS
 } from '../../shared/source-control-ai-actions'
 import { normalizeSourceControlGroupOrder } from '../../shared/source-control-group-order'
-import { normalizeTerminalCustomThemes } from '../../shared/terminal-custom-themes'
-import { normalizeTerminalQuickCommands } from '../../shared/terminal-quick-commands'
-import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal-scrollback-policy'
+import { normalizeTerminalCustomThemes } from '../../shared/terminal/terminal-custom-themes'
+import { normalizeTerminalQuickCommands } from '../../shared/terminal/terminal-quick-commands'
+import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal/terminal-scrollback-policy'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord

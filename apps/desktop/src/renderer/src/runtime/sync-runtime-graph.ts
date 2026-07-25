@@ -27,7 +27,7 @@ import type {
 } from '../../../shared/runtime-types'
 import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
 import { resolveTerminalTabTitle } from '../../../shared/tab-title-resolution'
-import { isWebTerminalSurfaceTabId } from '../../../shared/terminal-surface-id'
+import { isWebTerminalSurfaceTabId } from '../../../shared/terminal/terminal-surface-id'
 import type {
   Tab,
   TabGroup,
