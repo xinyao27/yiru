@@ -52,7 +52,6 @@ export function WorkspacePaneFrame({
       <div
         className="bg-background relative h-[var(--titlebar-height)] shrink-0 [[data-native-sidebar-material=true]_&]:bg-transparent"
         data-tab-group-strip-id={stripId}
-        data-terminal-focus-release-surface="true"
         data-worktree-id={worktreeId}
       >
         {/* Why: inactive tabs reveal this seam while the opaque active tab covers it,
@@ -65,34 +64,26 @@ export function WorkspacePaneFrame({
         <div className="relative flex h-full items-stretch">
           {reserveCollapsedSidebarHeaderSpace && !sidebarOpen ? (
             <div
-              className="shrink-0"
-              style={
-                {
-                  width: 'var(--collapsed-sidebar-header-width)',
-                  WebkitAppRegion: 'no-drag'
-                } as React.CSSProperties
-              }
+              className="shrink-0 [-webkit-app-region:no-drag]"
+              style={{ width: 'var(--collapsed-sidebar-header-width)' }}
             />
           ) : null}
-          <div className="h-full min-w-0 flex-1">{tabBar}</div>
+          {/* Why: only the tab strip is a window-drag / terminal-focus-release
+              surface. Trailing pin/Open in/More chrome must stay no-drag so
+              pointer and HTML5 interaction are not eaten by Electron. */}
+          <div className="h-full min-w-0 flex-1" data-terminal-focus-release-surface="true">
+            {tabBar}
+          </div>
           {trailingActions ? (
-            <div
-              className="ml-1.5 flex shrink-0 items-center gap-0.5"
-              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            >
+            <div className="ml-1.5 flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
               {trailingActions}
             </div>
           ) : null}
           {reserveWindowControlsSpace ? (
             <div
-              className="shrink-0"
+              className="shrink-0 [-webkit-app-region:no-drag]"
               // Why: native controls overlay the renderer on Windows/Linux.
-              style={
-                {
-                  width: 'var(--window-controls-width, 0px)',
-                  WebkitAppRegion: 'no-drag'
-                } as React.CSSProperties
-              }
+              style={{ width: 'var(--window-controls-width, 0px)' }}
             />
           ) : null}
         </div>

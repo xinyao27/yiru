@@ -31,10 +31,15 @@ import type {
 } from './types'
 import { UI_LANGUAGE_SYSTEM } from './ui-language'
 import { DEFAULT_USAGE_PERCENTAGE_DISPLAY } from './usage-percentage-display'
+import { DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS } from './workspace-panel-titlebar-pinned'
 import { cloneDefaultWorkspaceStatuses } from './workspace-statuses'
 import { DEFAULT_WORKTREE_CARD_PROPERTIES } from './worktree-card-properties'
 
 export { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
+export {
+  DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS,
+  normalizeWorkspacePanelTitlebarPinnedIds
+} from './workspace-panel-titlebar-pinned'
 export {
   DEFAULT_WORKTREE_CARD_PROPERTIES,
   normalizeWorktreeCardProperties
@@ -490,6 +495,7 @@ export function getDefaultUIState(): PersistedUIState {
     _workspaceStatusesDefaultVisualsMigrated: true,
     statusBarItems: [...DEFAULT_STATUS_BAR_ITEMS],
     statusBarVisible: true,
+    workspacePanelTitlebarPinnedIds: [...DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS],
     usagePercentageDisplay: DEFAULT_USAGE_PERCENTAGE_DISPLAY,
     statusBarUsageMode: DEFAULT_STATUS_BAR_USAGE_MODE,
     dismissedUpdateVersion: null,

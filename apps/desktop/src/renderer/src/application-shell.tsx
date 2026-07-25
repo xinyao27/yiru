@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import { LinkRoutingPreferenceDialogProvider } from '@/components/link-routing-preference-dialog'
 import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -95,7 +96,6 @@ import {
   trackYiruCliFeatureTipShown
 } from './components/feature-tips/feature-tip-telemetry'
 import { FloatingTerminalToggleButton } from './components/floating-terminal/floating-terminal-toggle-button'
-import { LinkRoutingPreferenceDialogProvider } from './components/link-routing-preference-dialog'
 import NewWorkspaceComposerModal from './components/new-workspace-composer-modal'
 import { shouldShowOnboarding } from './components/onboarding/should-show-onboarding'
 import { onOnboardingReopened } from './components/onboarding/show-onboarding-event'
@@ -2140,7 +2140,7 @@ function App(): React.JSX.Element {
           <Button
             type="button"
             variant={titlebarControlVariant}
-            size="icon-titlebar-extra-wide"
+            size="icon-titlebar-wide"
             className={TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}
             onClick={actions.toggleSidebar}
             aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}

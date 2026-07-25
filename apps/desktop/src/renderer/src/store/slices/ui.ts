@@ -20,8 +20,10 @@ import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
   DEFAULT_SHOW_SLEEPING_WORKSPACES,
+  DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS,
   DEFAULT_WORKTREE_CARD_PROPERTIES,
   normalizeAgentActivityDisplayMode,
+  normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties
 } from '../../../../shared/constants'
 import {
@@ -61,6 +63,7 @@ import type {
   PersistedTrustedYiruHooks,
   PersistedUIState,
   StatusBarItem,
+  WorkspaceTitlebarActionId,
   TuiAgent,
   UpdateStatus,
   WorkspaceStatusDefinition,
@@ -729,6 +732,8 @@ export type UISlice = {
   toggleStatusBarItem: (item: StatusBarItem) => void
   statusBarVisible: boolean
   setStatusBarVisible: (v: boolean) => void
+  workspacePanelTitlebarPinnedIds: WorkspaceTitlebarActionId[]
+  setWorkspacePanelTitlebarPinnedIds: (ids: readonly WorkspaceTitlebarActionId[]) => void
   usagePercentageDisplay: UsagePercentageDisplay
   setUsagePercentageDisplay: (display: UsagePercentageDisplay) => void
   statusBarUsageMode: StatusBarUsageMode
@@ -1778,6 +1783,12 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     window.api.ui.set({ statusBarVisible: v }).catch(console.error)
     set({ statusBarVisible: v })
   },
+  workspacePanelTitlebarPinnedIds: [...DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS],
+  setWorkspacePanelTitlebarPinnedIds: (ids) => {
+    const normalized = normalizeWorkspacePanelTitlebarPinnedIds(ids)
+    window.api.ui.set({ workspacePanelTitlebarPinnedIds: normalized }).catch(console.error)
+    set({ workspacePanelTitlebarPinnedIds: normalized })
+  },
   usagePercentageDisplay: DEFAULT_USAGE_PERCENTAGE_DISPLAY,
   setUsagePercentageDisplay: (display) => {
     const normalized = normalizeUsagePercentageDisplay(display)
@@ -2082,6 +2093,9 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         workspaceStatuses: normalizeWorkspaceStatuses(ui.workspaceStatuses),
         statusBarItems: statusBarItemsWithPorts,
         statusBarVisible: ui.statusBarVisible ?? true,
+        workspacePanelTitlebarPinnedIds: normalizeWorkspacePanelTitlebarPinnedIds(
+          ui.workspacePanelTitlebarPinnedIds
+        ),
         usagePercentageDisplay: normalizeUsagePercentageDisplay(ui.usagePercentageDisplay),
         statusBarUsageMode: normalizeStatusBarUsageMode(ui.statusBarUsageMode),
         // Why: absent → true so existing users see the pet the first time

@@ -7,6 +7,7 @@ import { normalizeBrowserPageZoomLevel } from '../../shared/browser-page-zoom'
 import {
   getDefaultUIState,
   normalizeAgentActivityDisplayMode,
+  normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties
 } from '../../shared/constants'
 import { normalizeContextualTourIds } from '../../shared/contextual-tours'
@@ -51,6 +52,9 @@ export function readPersistedUi(value: PersistedUi): PersistedUi {
       value?.rightSidebarTab
     ),
     worktreeCardProperties: normalizeWorktreeCardProperties(value?.worktreeCardProperties),
+    workspacePanelTitlebarPinnedIds: normalizeWorkspacePanelTitlebarPinnedIds(
+      value?.workspacePanelTitlebarPinnedIds
+    ),
     agentActivityDisplayMode: normalizeAgentActivityDisplayMode(value?.agentActivityDisplayMode),
     workspaceStatuses: normalizeWorkspaceStatuses(value?.workspaceStatuses),
     usagePercentageDisplay: normalizeUsagePercentageDisplay(value?.usagePercentageDisplay),
@@ -109,6 +113,12 @@ export function applyPersistedUiUpdate(
       normalizedUpdates.worktreeCardProperties !== undefined
         ? normalizeWorktreeCardProperties(normalizedUpdates.worktreeCardProperties)
         : normalizeWorktreeCardProperties(current?.worktreeCardProperties),
+    workspacePanelTitlebarPinnedIds:
+      normalizedUpdates.workspacePanelTitlebarPinnedIds !== undefined
+        ? normalizeWorkspacePanelTitlebarPinnedIds(
+            normalizedUpdates.workspacePanelTitlebarPinnedIds
+          )
+        : normalizeWorkspacePanelTitlebarPinnedIds(current?.workspacePanelTitlebarPinnedIds),
     agentActivityDisplayMode:
       updates.agentActivityDisplayMode !== undefined
         ? normalizeAgentActivityDisplayMode(updates.agentActivityDisplayMode)

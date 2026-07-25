@@ -36,6 +36,33 @@ const PREVIEW_DEFAULT_STORAGE_KEY = `${PREVIEW_STORAGE_KEY}.default`
 const LinkRoutingPreferenceDialogContext =
   createContext<LinkRoutingPreferenceDialogContextValue | null>(null)
 
+// Why: Vite HMR (and rare dual-module graphs) can replace this file's
+// createContext identity while App still mounts the previous Provider. A
+// window-scoped bridge keeps TerminalPane from crashing the workbench when
+// React context identity drifts.
+const LINK_ROUTING_PREFERENCE_REQUEST_KEY = '__yiruLinkRoutingPreferenceRequest__'
+
+type LinkRoutingPreferenceRequestHost = typeof globalThis & {
+  [LINK_ROUTING_PREFERENCE_REQUEST_KEY]?: LinkRoutingPreferenceDialogContextValue | null
+}
+
+function registerLinkRoutingPreferenceRequest(
+  requestPreference: LinkRoutingPreferenceDialogContextValue | null
+): void {
+  ;(globalThis as LinkRoutingPreferenceRequestHost)[LINK_ROUTING_PREFERENCE_REQUEST_KEY] =
+    requestPreference
+}
+
+function getRegisteredLinkRoutingPreferenceRequest(): LinkRoutingPreferenceDialogContextValue | null {
+  return (
+    (globalThis as LinkRoutingPreferenceRequestHost)[LINK_ROUTING_PREFERENCE_REQUEST_KEY] ?? null
+  )
+}
+
+function resolveOpenLinksInAppDefault(): boolean {
+  return useAppStore.getState().settings?.openLinksInApp === true
+}
+
 function displayHostForUrl(url: string | undefined): string | null {
   if (!url) {
     return null
@@ -87,6 +114,18 @@ export function LinkRoutingPreferenceDialogProvider({
       setQueue((currentQueue) => [...currentQueue, request])
     })
   }, [])
+
+  // Why: register before children commit so first-paint consumers in a drifted
+  // context module still resolve the live dialog instead of throwing.
+  registerLinkRoutingPreferenceRequest(requestPreference)
+  useEffect(() => {
+    registerLinkRoutingPreferenceRequest(requestPreference)
+    return () => {
+      if (getRegisteredLinkRoutingPreferenceRequest() === requestPreference) {
+        registerLinkRoutingPreferenceRequest(null)
+      }
+    }
+  }, [requestPreference])
 
   useEffect(() => {
     if (!import.meta.env.DEV || typeof window === 'undefined') {
@@ -251,10 +290,14 @@ export function LinkRoutingPreferenceDialogProvider({
 
 export function useLinkRoutingPreferenceDialog(): LinkRoutingPreferenceDialogContextValue {
   const requestPreference = useContext(LinkRoutingPreferenceDialogContext)
-  if (!requestPreference) {
-    throw new Error(
-      'useLinkRoutingPreferenceDialog must be used inside LinkRoutingPreferenceDialogProvider'
-    )
+  if (requestPreference) {
+    return requestPreference
   }
-  return requestPreference
+  const registered = getRegisteredLinkRoutingPreferenceRequest()
+  if (registered) {
+    return registered
+  }
+  // Why: never take down terminal.workbench for a missing dialog host; fall
+  // back to the persisted open-links default until a provider registers again.
+  return async () => resolveOpenLinksInAppDefault()
 }

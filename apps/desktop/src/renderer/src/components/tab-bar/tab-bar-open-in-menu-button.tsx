@@ -8,8 +8,8 @@ import {
   type OpenInMenuEntry,
   WorktreeOpenInMenuContent
 } from '@/components/sidebar/worktree-open-in-menu'
+import type { DropIndicator } from '@/components/tab-bar/drop-indicator'
 import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,18 +17,33 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 import { useRepoById } from '@/store/selectors'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '../../../../shared/workspace-panel-titlebar-pinned'
+import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
+import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
+
+export type TabBarOpenInMenuButtonProps = {
+  worktreeId: string
+  /** When provided, Open in joins the titlebar pin/drag strip. */
+  titlebarModel?: WorkspacePanelTitlebarModel | null
+  titlebarIndex?: number
+  titlebarSource?: 'visible' | 'overflow'
+  dropIndicator?: DropIndicator
+}
 
 export function TabBarOpenInMenuButton({
-  worktreeId
-}: {
-  worktreeId: string
-}): React.JSX.Element | null {
+  worktreeId,
+  titlebarModel = null,
+  titlebarIndex,
+  titlebarSource = 'visible',
+  dropIndicator = null
+}: TabBarOpenInMenuButtonProps): React.JSX.Element | null {
   const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
   const repo = useRepoById(worktree?.repoId ?? null)
   const runtimeEnvironmentId = useAppStore((state) =>
@@ -71,18 +86,38 @@ export function TabBarOpenInMenuButton({
     }
   }
 
+  const pinDraggable = Boolean(titlebarModel)
+  const startPinDrag = (event: React.PointerEvent): void => {
+    if (!titlebarModel) {
+      return
+    }
+    titlebarModel.handleItemPointerDown(event, WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID, titlebarSource)
+  }
+
   return (
-    <DropdownMenu modal={false}>
-      {/* Why: the repeat action and chooser read as one control, so their shared edge is unpainted. */}
-      <ButtonGroup className="h-full shrink-0 [&>*:first-child]:border-r-0" aria-label={openLabel}>
+    // Why: Open in is two chrome buttons but one pin slot. The wrapper owns the
+    // ButtonGroup L/R seams; inner buttons stay borderless so icon + caret read
+    // as one control with no mid seam.
+    <div
+      data-workspace-titlebar-slot={titlebarIndex != null ? String(titlebarIndex) : undefined}
+      className={cn(
+        'relative flex h-full items-stretch rounded-md border border-y-0 border-border [-webkit-app-region:no-drag] dark:border-input',
+        pinDraggable && 'cursor-grab active:cursor-grabbing',
+        getDropIndicatorClasses(dropIndicator)
+      )}
+      // Why: capture so Menu/Tooltip triggers cannot stopPropagation before the
+      // pin drag session arms — otherwise Open in looks undraggable.
+      onPointerDownCapture={pinDraggable ? startPinDrag : undefined}
+    >
+      <DropdownMenu modal={false}>
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 type="button"
                 variant="outline-transparent"
-                size="icon-titlebar"
-                className="text-muted-foreground"
+                size="icon-titlebar-compact"
+                className="text-muted-foreground rounded-none border-0"
                 aria-label={openLabel}
                 onClick={() => openEntry(preferredEntry)}
               >
@@ -110,7 +145,7 @@ export function TabBarOpenInMenuButton({
                     type="button"
                     variant="outline-transparent"
                     size="icon-titlebar-compact"
-                    className="text-muted-foreground"
+                    className="text-muted-foreground rounded-none border-0"
                     aria-label={chooseLabel}
                   >
                     {/* Why: the compact chooser affordance is intentionally quieter than menu icons. */}
@@ -124,15 +159,15 @@ export function TabBarOpenInMenuButton({
             {chooseLabel}
           </TooltipContent>
         </Tooltip>
-      </ButtonGroup>
-      <DropdownMenuContent align="end" side="bottom" sideOffset={4} className="w-52">
-        <WorktreeOpenInMenuContent
-          worktreePath={worktree.path}
-          connectionId={repo?.connectionId ?? null}
-          runtimeEnvironmentId={runtimeEnvironmentId}
-          onEntryOpen={rememberEntry}
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <DropdownMenuContent align="end" side="bottom" sideOffset={4} className="w-52">
+          <WorktreeOpenInMenuContent
+            worktreePath={worktree.path}
+            connectionId={repo?.connectionId ?? null}
+            runtimeEnvironmentId={runtimeEnvironmentId}
+            onEntryOpen={rememberEntry}
+          />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }

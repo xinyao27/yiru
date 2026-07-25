@@ -38,7 +38,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
@@ -92,7 +91,6 @@ import { UsagePercentageDisplayChangeNotice } from './usage-percentage-display-c
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { getUsageProviderAccountsSectionId } from './usage-provider-settings-target'
 import { UsageRosterPanel } from './usage-roster-panel'
-import { WorkspacePanelStatusActions } from './workspace-panel-status-actions'
 
 type StatusBarProps = {
   floatingTerminalOpen: boolean
@@ -2174,69 +2172,65 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             )}
           </div>
         ) : null}
-        {showUsageGroup ? <Separator orientation="vertical" size="sm" /> : null}
-        {/* Why: system status stays icon-only beside usage, reserving the right
-        edge for workspace panel navigation. */}
-        <div className="flex h-full shrink-0 items-center gap-0.5">
-          <RemoteServerUpdateStatusSegment iconOnly />
-          <UpdateStatusSegment compact={compact} iconOnly />
-          <React.Suspense fallback={null}>
-            {petEnabled ? <PetStatusSegment /> : null}
-            {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
-            {settings?.languageServer?.enabled === true ? (
-              <LanguageServerStatusSegment iconOnly />
-            ) : null}
-            {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
-            {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
-          </React.Suspense>
-          <SpoolAvailabilityStatusSegment />
-          {showFloatingTerminalToggle && (
-            <FloatingTerminalIconContextMenu
-              currentLocation="status-bar"
-              className="relative h-full"
-            >
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    // Why: this compact status-bar control sits flush with app chrome, so it stays flat.
-                    <Button
-                      variant="secondary"
-                      size="icon-status-bar"
-                      type="button"
-                      className="border-border hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground relative border"
-                      aria-label={
-                        showFloatingWorkspaceAttentionDot
-                          ? `${floatingTerminalActionLabel}, new activity`
-                          : floatingTerminalActionLabel
-                      }
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
-                      }}
-                    >
-                      <PanelsTopLeft className="size-3.5" />
-                      {showFloatingWorkspaceAttentionDot ? (
-                        // Why: amber = Yiru's "needs attention" convention.
-                        <span
-                          aria-hidden
-                          data-floating-terminal-attention
-                          className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 bg-amber-500"
-                        />
-                      ) : null}
-                    </Button>
-                  }
-                />
-                <TooltipContent side="top" sideOffset={6}>
-                  {floatingTerminalActionLabel} ({floatingTerminalShortcut})
-                </TooltipContent>
-              </Tooltip>
-            </FloatingTerminalIconContextMenu>
-          )}
-        </div>
       </div>
 
       <div className="flex-1" />
 
-      <WorkspacePanelStatusActions />
+      {/* Why: workspace panel toggles moved to the titlebar; the trailing status
+          edge now owns system icons (resource usage, ports, floating workspace). */}
+      <div className="flex h-full shrink-0 items-center gap-0.5">
+        <RemoteServerUpdateStatusSegment iconOnly />
+        <UpdateStatusSegment compact={compact} iconOnly />
+        <React.Suspense fallback={null}>
+          {petEnabled ? <PetStatusSegment /> : null}
+          {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
+          {settings?.languageServer?.enabled === true ? (
+            <LanguageServerStatusSegment iconOnly />
+          ) : null}
+          {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
+          {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
+        </React.Suspense>
+        <SpoolAvailabilityStatusSegment />
+        {showFloatingTerminalToggle && (
+          <FloatingTerminalIconContextMenu currentLocation="status-bar" className="relative h-full">
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  // Why: match neighboring status-bar icon chrome (borderless quiet
+                  // hover) so the floating-workspace toggle doesn't read as a boxed card.
+                  <Button
+                    variant="status-bar-icon"
+                    size="icon-status-bar-wide"
+                    type="button"
+                    className="relative"
+                    aria-label={
+                      showFloatingWorkspaceAttentionDot
+                        ? `${floatingTerminalActionLabel}, new activity`
+                        : floatingTerminalActionLabel
+                    }
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
+                    }}
+                  >
+                    <PanelsTopLeft className="size-3.5" />
+                    {showFloatingWorkspaceAttentionDot ? (
+                      // Why: amber = Yiru's "needs attention" convention.
+                      <span
+                        aria-hidden
+                        data-floating-terminal-attention
+                        className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 bg-amber-500"
+                      />
+                    ) : null}
+                  </Button>
+                }
+              />
+              <TooltipContent side="top" sideOffset={6}>
+                {floatingTerminalActionLabel} ({floatingTerminalShortcut})
+              </TooltipContent>
+            </Tooltip>
+          </FloatingTerminalIconContextMenu>
+        )}
+      </div>
 
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
         <DropdownMenuTrigger

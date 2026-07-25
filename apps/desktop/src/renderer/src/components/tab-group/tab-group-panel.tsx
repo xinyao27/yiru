@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import { Suspense, useMemo } from 'react'
 
+import { ButtonGroup } from '@/components/ui/button-group'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
@@ -8,8 +9,9 @@ import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import TabBar from '../tab-bar/tab-bar'
 import { TabBarMoreButton } from '../tab-bar/tab-bar-more-button'
-import { TabBarOpenInMenuButton } from '../tab-bar/tab-bar-open-in-menu-button'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
+import { WorkspacePanelTitlebarActions } from '../workspace-panel/titlebar-actions'
+import { useWorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
 import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
 import { resolveGroupTabFromVisibleId } from './tab-group-visible-id'
 import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './use-tab-drag-split'
@@ -187,14 +189,13 @@ export default function TabGroupPanel({
     />
   )
 
+  const panelTitlebar = useWorkspacePanelTitlebarModel(worktreeId, groupId)
+
   // Why: focused-only — workspace actions and Close split pane stay with the
-  // active pane so unfocused strips stay compact; adjacent actions touch as
-  // continuous titlebar chrome instead of leaving background slivers. When
-  // More follows a button group, the group's right edge owns their shared seam.
-  // Base UI inserts focus guards beside an open menu trigger, so the general
-  // sibling selector must keep the seam collapsed across those guards.
+  // active pane so unfocused strips stay compact. One ButtonGroup owns every
+  // trailing control (panel pins, Open in, More) so they share a single seam strip.
   const focusedActionChromeClassName = cn(
-    'flex h-full shrink-0 items-center gap-0 overflow-hidden transition-[opacity] duration-150 [&>[data-slot=button-group]~button]:border-l-0',
+    'h-full shrink-0 overflow-hidden transition-[opacity] duration-150',
     isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
   )
   // Why: the split wrapper already paints edge-touching seams; duplicating them
@@ -215,16 +216,22 @@ export default function TabGroupPanel({
       stripId={groupId}
       tabBar={tabBar}
       trailingActions={
-        <div className={focusedActionChromeClassName}>
-          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
-          {isFocused ? (
+        isFocused ? (
+          <ButtonGroup
+            className={focusedActionChromeClassName}
+            data-workspace-titlebar-strip={worktreeId}
+          >
+            {panelTitlebar ? <WorkspacePanelTitlebarActions model={panelTitlebar} /> : null}
             <TabBarMoreButton
               worktreeId={worktreeId}
               groupId={groupId}
               onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
+              panelTitlebar={panelTitlebar}
             />
-          ) : null}
-        </div>
+          </ButtonGroup>
+        ) : (
+          <div className={focusedActionChromeClassName} />
+        )
       }
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}
       reserveWindowControlsSpace={reserveWindowControlsSpace}

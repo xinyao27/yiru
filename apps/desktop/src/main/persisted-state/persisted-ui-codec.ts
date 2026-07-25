@@ -1,4 +1,8 @@
-import { getDefaultUIState, normalizeWorktreeCardProperties } from '../../shared/constants'
+import {
+  getDefaultUIState,
+  normalizeWorkspacePanelTitlebarPinnedIds,
+  normalizeWorktreeCardProperties
+} from '../../shared/constants'
 import { isExistingPersistedProfile } from '../../shared/project-order-manual-default-notice'
 import type { GlobalSettings, OnboardingState, PersistedState } from '../../shared/types'
 import { resolveUsagePercentageDisplayChangeNoticeDismissed } from '../../shared/usage-percentage-display-change-notice'
@@ -122,6 +126,9 @@ export function decodePersistedUi(
       _workspaceStatusesDefaultVisualsMigrated: true,
       _sortBySmartMigrated: true,
       ...(cardProperties.properties ? { worktreeCardProperties: cardProperties.properties } : {}),
+      workspacePanelTitlebarPinnedIds: normalizeWorkspacePanelTitlebarPinnedIds(
+        value?.workspacePanelTitlebarPinnedIds
+      ),
       _inlineAgentsDefaultedForExperiment: true,
       _inlineAgentsDefaultedForAllUsers: true,
       _expandedWorktreeCardPropertiesDefaulted: true
