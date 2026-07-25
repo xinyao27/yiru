@@ -21,8 +21,8 @@
  */
 import { posix, win32 } from 'node:path'
 
+import { escapeRegex } from './escape-regex'
 import { normalizeSearchResult } from './search-match-count'
-import { escapeRegex } from './string-utils'
 import type { SearchFileResult, SearchMatch, SearchOptions, SearchResult } from './types'
 
 export type SearchAccumulator = {
