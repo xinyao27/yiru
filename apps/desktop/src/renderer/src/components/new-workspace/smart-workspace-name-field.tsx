@@ -20,6 +20,12 @@ import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { parseGitLabMergeRequestLink } from '@/components/new-workspace/gitlab-links'
+import {
+  listGitLabMRsForSource,
+  lookupGitLabWorkItemByPathForSource
+} from '@/components/new-workspace/gitlab-work-item-source-lookup'
+import { lookupSmartGitHubSubmitItem } from '@/components/new-workspace/smart-github-submit'
 import { Button } from '@/components/ui/button'
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import {
@@ -45,14 +51,8 @@ import {
   lookupGitHubWorkItemByOwnerRepoForSource,
   lookupGitHubWorkItemForSource
 } from '@/lib/github-work-item-source-lookup'
-import { parseGitLabMergeRequestLink } from '@/lib/gitlab-links'
-import {
-  listGitLabMRsForSource,
-  lookupGitLabWorkItemByPathForSource
-} from '@/lib/gitlab-work-item-source-lookup'
 import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
-import { lookupSmartGitHubSubmitItem } from '@/lib/smart-github-submit'
 import {
   getRuntimeRepoBaseRefDefault,
   searchRuntimeRepoBaseRefDetails

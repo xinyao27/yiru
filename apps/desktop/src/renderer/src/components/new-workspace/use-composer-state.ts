@@ -21,6 +21,12 @@ import { useShallow } from 'zustand/react/shallow'
 import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '@/components/contextual-tours/contextual-tour-composer-events'
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
+import {
+  lookupSmartGitHubSubmitItem,
+  getSmartGitHubSubmitIntent,
+  getSmartGitHubSubmitResolution,
+  type SmartGitHubSubmitResolution
+} from '@/components/new-workspace/smart-github-submit'
 import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
 import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
 import {
@@ -94,12 +100,6 @@ import {
   resolveWorkspaceCreationTarget
 } from '@/lib/project-host-workspace-target'
 import { getSettingsForRepoRuntimeOwner } from '@/lib/repo-runtime-owner'
-import {
-  lookupSmartGitHubSubmitItem,
-  getSmartGitHubSubmitIntent,
-  getSmartGitHubSubmitResolution,
-  type SmartGitHubSubmitResolution
-} from '@/lib/smart-github-submit'
 import { normalizeSparseDirectoryLines, sparseDirectoriesMatch } from '@/lib/sparse-paths'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '@/lib/tui-agent-startup'
