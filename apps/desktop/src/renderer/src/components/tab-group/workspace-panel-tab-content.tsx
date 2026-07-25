@@ -5,15 +5,24 @@ import { useAppStore } from '@/store'
 
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import { RightSidebarPanelContent } from '../workspace-panel/right-sidebar-panel-content'
+import { WorkspacePanelEditorEmptyState } from './workspace-panel-editor-empty-state'
 
 const EditorPanel = lazy(() => import('../editor/editor-panel'))
 
 export function WorkspacePanelTabContent({
   panel,
-  panelTabId
+  panelTabId,
+  worktreeId,
+  groupId,
+  onNewTerminalTab,
+  onNewBrowserTab
 }: {
   panel: WorkspacePanelTabContentType
   panelTabId: string
+  worktreeId: string
+  groupId: string
+  onNewTerminalTab: () => void
+  onNewBrowserTab: () => void
 }): React.JSX.Element {
   const embedsEditor = panel === 'explorer' || panel === 'source-control'
   const activeFileId = useAppStore((state) => {
@@ -40,7 +49,14 @@ export function WorkspacePanelTabContent({
                   activeViewStateId={`${panelTabId}:${activeFileId}`}
                 />
               </Suspense>
-            ) : null}
+            ) : (
+              <WorkspacePanelEditorEmptyState
+                worktreeId={worktreeId}
+                groupId={groupId}
+                onNewTerminalTab={onNewTerminalTab}
+                onNewBrowserTab={onNewBrowserTab}
+              />
+            )}
           </div>
           <div
             // Why: the former right-sidebar width remains the user's preferred

@@ -272,7 +272,14 @@ export default function TabGroupPanel({
         )}
 
       {activeWorkspacePanelType && activeTab ? (
-        <WorkspacePanelTabContent panel={activeWorkspacePanelType} panelTabId={activeTab.id} />
+        <WorkspacePanelTabContent
+          panel={activeWorkspacePanelType}
+          panelTabId={activeTab.id}
+          worktreeId={worktreeId}
+          groupId={groupId}
+          onNewTerminalTab={commands.newTerminalTab}
+          onNewBrowserTab={commands.newBrowserTab}
+        />
       ) : null}
 
       {/* Why: terminal/browser/simulator panes are rendered at the worktree level by

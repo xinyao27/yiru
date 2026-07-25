@@ -2261,7 +2261,12 @@ function App(): React.JSX.Element {
                       type="button"
                       variant={titlebarControlVariant}
                       size="icon-titlebar"
-                      className={TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}
+                      className={cn(
+                        TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME,
+                        // Why: collapsed chrome lets its container own the outer seam,
+                        // so disabled button opacity cannot make that edge look faint.
+                        leftTitlebarChromeLayout.isFloating && 'border-r-0'
+                      )}
                       onClick={() => useAppStore.getState().goForwardWorktree()}
                       disabled={!canGoForwardWorktree}
                       aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
@@ -2446,12 +2451,12 @@ function App(): React.JSX.Element {
                         >
                           <div
                             data-testid="titlebar-left"
-                            // Why: collapsed controls float over the tab strip, whose continuous bottom seam
-                            // remains visible; suppress this overlay's seam so translucent borders do not stack.
+                            // Why: collapsed controls float over the tab strip; suppress the bottom
+                            // seam while retaining the container-owned right edge.
                             className={cn(
                               TITLEBAR_LEFT_CLASS_NAME,
                               leftTitlebarChromeLayout.isFloating &&
-                                'absolute left-0 top-0 z-10 w-max border-r border-b-0 border-border bg-transparent'
+                                'absolute left-0 top-0 z-10 w-max border-b-0 bg-transparent'
                             )}
                             style={{
                               // Why: custom sidebar appearances are scoped to the sidebar
