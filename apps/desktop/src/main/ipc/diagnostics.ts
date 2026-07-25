@@ -22,13 +22,13 @@ import { join } from 'node:path'
 
 import { app, dialog, ipcMain, shell } from 'electron'
 
+import type { CollectedBundle } from '../observability/bundle'
+import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
 import {
   collectDiagnosticBundle,
   getDiagnosticsStatus,
   type DiagnosticsStatus
-} from '../observability'
-import type { CollectedBundle } from '../observability/bundle'
-import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
+} from '../observability/service'
 import { buildSupportReportDraft } from '../support-report/payload'
 import { submitSupportReport } from '../telemetry/client'
 

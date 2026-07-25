@@ -7,8 +7,8 @@ import {
   type CrashReportDiagnosticBundle
 } from '../../shared/crash-reporting'
 import type { FeedbackDiagnosticBundleAttachment, FeedbackSubmitResult } from '../ipc/feedback'
-import { collectDiagnosticBundle, getDiagnosticsStatus } from '../observability'
 import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
+import { collectDiagnosticBundle, getDiagnosticsStatus } from '../observability/service'
 
 const CRASH_REPORT_LOG_LOOKBACK_MINUTES = 3 * 24 * 60
 

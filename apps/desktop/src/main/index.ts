@@ -119,7 +119,7 @@ import {
 } from './menu/register-app-menu'
 import { readMiniMaxSessionCookie } from './minimax/cookie-store'
 import { applyElectronProxySettings } from './network/proxy-settings'
-import { initObservability, shutdownObservability } from './observability'
+import { initObservability, shutdownObservability } from './observability/service'
 import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode-usage/store'
 import {
   Store,
