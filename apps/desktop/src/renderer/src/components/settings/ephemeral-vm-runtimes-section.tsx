@@ -13,8 +13,8 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { getEphemeralVmRecipeResultProjectRoot } from '../../../../shared/ephemeral-vm-recipes'
-import type { EphemeralVmRuntimeRecord } from '../../../../shared/ephemeral-vm-runtimes'
+import { getEphemeralVmRecipeResultProjectRoot } from '../../../../shared/ephemeral-vm/ephemeral-vm-recipes'
+import type { EphemeralVmRuntimeRecord } from '../../../../shared/ephemeral-vm/ephemeral-vm-runtimes'
 import { Button } from '../ui/button'
 
 const CLEANED_STATUSES = new Set<EphemeralVmRuntimeRecord['status']>(['cleaned'])

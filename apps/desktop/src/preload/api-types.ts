@@ -60,8 +60,8 @@ import type {
 import type {
   EphemeralVmRecipeDoctorResult,
   EphemeralVmRecipeResultWarning
-} from '../shared/ephemeral-vm-recipes'
-import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm-runtimes'
+} from '../shared/ephemeral-vm/ephemeral-vm-recipes'
+import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm/ephemeral-vm-runtimes'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '../shared/feature-interactions'
 import type {
@@ -120,8 +120,8 @@ import type {
 } from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
-import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control-ai'
-import type { SourceControlAiSettings } from '../shared/source-control-ai-types'
+import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/source-control-ai'
+import type { SourceControlAiSettings } from '../shared/source-control/source-control-ai-types'
 import type {
   SpoolDecideControlArgs,
   SpoolRequestControlArgs,
@@ -404,18 +404,18 @@ import type {
   WorkspaceCleanupScanArgs,
   WorkspaceCleanupScanProgress,
   WorkspaceCleanupScanResult
-} from '../shared/workspace-cleanup'
+} from '../shared/workspace/workspace-cleanup'
 import type {
   WorkspacePortAdvertisedUrlChangedEvent,
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
   WorkspacePortScanRequest,
   WorkspacePortScanResult
-} from '../shared/workspace-ports'
+} from '../shared/workspace/workspace-ports'
 import type {
   WorkspaceSpaceAnalyzeResult,
   WorkspaceSpaceScanProgress
-} from '../shared/workspace-space-types'
+} from '../shared/workspace/workspace-space-types'
 
 type GitLabRepoSelectorArgs = {
   repoPath: string

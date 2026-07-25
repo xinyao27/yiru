@@ -2,13 +2,13 @@ import type { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { statSync } from 'node:fs'
 
+import type { YiruVmRecipe } from '../types'
 import {
   buildEphemeralVmRecipeCleanupPayload,
   buildEphemeralVmRecipeLifecyclePayload
 } from './ephemeral-vm-recipe-lifecycle-payload'
 import { runRecipeCommand } from './ephemeral-vm-recipe-process'
 import { parseEphemeralVmRecipeResult, type EphemeralVmRecipeResult } from './ephemeral-vm-recipes'
-import type { YiruVmRecipe } from './types'
 
 export {
   buildEphemeralVmRecipeCleanupCommand,

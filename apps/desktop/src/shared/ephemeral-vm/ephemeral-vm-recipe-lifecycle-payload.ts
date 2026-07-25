@@ -1,7 +1,7 @@
+import type { YiruVmRecipe } from '../types'
 import { quoteShellToken } from './ephemeral-vm-recipe-process'
 import type { EphemeralVmRecipeContext } from './ephemeral-vm-recipe-runner'
 import type { EphemeralVmRecipeResult } from './ephemeral-vm-recipes'
-import type { YiruVmRecipe } from './types'
 
 export type EphemeralVmRecipeLifecycleMode = 'suspend' | 'resume' | 'destroy'
 

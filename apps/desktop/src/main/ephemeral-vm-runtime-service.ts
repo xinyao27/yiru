@@ -1,10 +1,10 @@
-import { getEphemeralVmRecipeResultConnection } from '../shared/ephemeral-vm-recipes'
+import { getEphemeralVmRecipeResultConnection } from '../shared/ephemeral-vm/ephemeral-vm-recipes'
 import {
   listEphemeralVmRuntimes,
   updateEphemeralVmRuntimeStatus,
   upsertEphemeralVmRuntime
-} from '../shared/ephemeral-vm-runtime-store'
-import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm-runtimes'
+} from '../shared/ephemeral-vm/ephemeral-vm-runtime-store'
+import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm/ephemeral-vm-runtimes'
 import type { YiruVmRecipe } from '../shared/types'
 import {
   runEphemeralVmRecipeCleanup,

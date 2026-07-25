@@ -3,12 +3,12 @@ import { app, ipcMain } from 'electron'
 import {
   getEphemeralVmRecipeResultConnection,
   getEphemeralVmRecipeResultPairingCode
-} from '../../shared/ephemeral-vm-recipes'
+} from '../../shared/ephemeral-vm/ephemeral-vm-recipes'
 import {
   listEphemeralVmRuntimes,
   updateEphemeralVmRuntimeStatus
-} from '../../shared/ephemeral-vm-runtime-store'
-import type { EphemeralVmRuntimeRecord } from '../../shared/ephemeral-vm-runtimes'
+} from '../../shared/ephemeral-vm/ephemeral-vm-runtime-store'
+import type { EphemeralVmRuntimeRecord } from '../../shared/ephemeral-vm/ephemeral-vm-runtimes'
 import {
   removeEnvironment,
   updateEnvironmentFromPairingCode

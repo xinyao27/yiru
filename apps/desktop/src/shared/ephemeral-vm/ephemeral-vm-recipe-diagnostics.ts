@@ -1,10 +1,10 @@
+import { parsePairingCode } from '../pairing'
 import {
   getEphemeralVmRecipeResultConnection,
   type EphemeralVmRecipeConnection,
   type EphemeralVmRecipeResult,
   type JsonValue
 } from './ephemeral-vm-recipes'
-import { parsePairingCode } from './pairing'
 
 export type EphemeralVmRecipeResultWarning = {
   id: string

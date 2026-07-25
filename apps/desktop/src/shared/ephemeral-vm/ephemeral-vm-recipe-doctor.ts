@@ -1,11 +1,11 @@
 import { accessSync, constants as fsConstants, existsSync, statSync } from 'node:fs'
 import { isAbsolute, join, normalize } from 'node:path'
 
+import type { YiruVmRecipe } from '../types'
 import type {
   EphemeralVmRecipeDoctorCheck,
   EphemeralVmRecipeDoctorResult
 } from './ephemeral-vm-recipes'
-import type { YiruVmRecipe } from './types'
 
 export function doctorEphemeralVmRecipe(args: {
   repoPath: string

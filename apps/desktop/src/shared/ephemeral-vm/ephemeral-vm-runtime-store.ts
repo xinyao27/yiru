@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { hardenExistingSecureFile, writeSecureJsonFile } from '../secure-file'
 import {
   EphemeralVmRuntimeRecordSchema,
   EphemeralVmRuntimeStoreSchema,
@@ -9,7 +10,6 @@ import {
   type EphemeralVmRuntimeStatus,
   type EphemeralVmRuntimeStore
 } from './ephemeral-vm-runtimes'
-import { hardenExistingSecureFile, writeSecureJsonFile } from './secure-file'
 
 const EPHEMERAL_VM_RUNTIMES_FILE = 'yiru-ephemeral-vm-runtimes.json'
 

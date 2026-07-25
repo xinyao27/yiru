@@ -1,6 +1,6 @@
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 
-import type { EphemeralVmRecipeConnection } from '../shared/ephemeral-vm-recipes'
+import type { EphemeralVmRecipeConnection } from '../shared/ephemeral-vm/ephemeral-vm-recipes'
 import {
   connectRegisteredSshTarget,
   disconnectRegisteredSshTarget,

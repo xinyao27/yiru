@@ -7,7 +7,7 @@ import { assertRuntimeEnvironmentCapability } from '@/runtime/rpc-client'
 import {
   getEphemeralVmRecipeResultProjectRoot,
   type EphemeralVmRecipeResultWarning
-} from '../../../shared/ephemeral-vm-recipes'
+} from '../../../shared/ephemeral-vm/ephemeral-vm-recipes'
 import type {
   ProjectHostSetupExistingFolderArgs,
   ProjectHostSetupResult
