@@ -5,7 +5,6 @@
 @import './rich-markdown-editor.css';
 @import './markdown-preview.css';
 @import './terminal.css';
-@import './loading-indicator.css';
 
 @font-face {
   font-family: 'Geist';

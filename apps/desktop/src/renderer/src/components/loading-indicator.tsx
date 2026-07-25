@@ -10,6 +10,8 @@ import {
   type LoaderStyle,
   type ThinkingOrbLoaderStyle
 } from '../../../shared/loader-style'
+
+import './loading-indicator.css'
 import { ThinkingOrbLoader } from './thinking-orb-loader'
 
 const LoadingIndicatorStyleContext = createContext<LoaderStyle>(DEFAULT_LOADER_STYLE)
@@ -24,7 +26,10 @@ type LoadingIndicatorPreviewProps = LoadingIndicatorBaseProps & {
 
 function DrawingLoader(): React.JSX.Element {
   return (
-    <svg className="yiru-loader-visual yiru-loader-drawing size-full" viewBox="0 0 24 24">
+    <svg
+      className="relative block size-full overflow-visible fill-none stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]"
+      viewBox="0 0 24 24"
+    >
       <g className="yiru-loader-drawing-frame yiru-loader-drawing-pig">
         <path
           pathLength="1"
@@ -65,11 +70,22 @@ function DrawingLoader(): React.JSX.Element {
 
 function CodeLoader(): React.JSX.Element {
   return (
-    <svg className="yiru-loader-visual yiru-loader-code size-full" viewBox="0 0 24 24">
-      <text className="yiru-loader-code-brace yiru-loader-code-open" x="2" y="18">
+    <svg
+      className="relative block size-full overflow-visible fill-current font-mono text-[20px] font-bold"
+      viewBox="0 0 24 24"
+    >
+      <text
+        className="yiru-loader-code-brace yiru-loader-code-open origin-center [transform-box:fill-box]"
+        x="2"
+        y="18"
+      >
         {'{'}
       </text>
-      <text className="yiru-loader-code-brace yiru-loader-code-close" x="13" y="18">
+      <text
+        className="yiru-loader-code-brace yiru-loader-code-close origin-center [transform-box:fill-box]"
+        x="13"
+        y="18"
+      >
         {'}'}
       </text>
     </svg>
@@ -78,13 +94,13 @@ function CodeLoader(): React.JSX.Element {
 
 function MacosLoader(): React.JSX.Element {
   return (
-    <span className="yiru-loader-visual yiru-loader-macos">
+    <span className="relative block size-full overflow-visible">
       {Array.from({ length: 12 }, (_, index) => {
         const rotation = index * 30
         return (
           <span
             key={rotation}
-            className="yiru-loader-macos-blade"
+            className="yiru-loader-macos-blade absolute bottom-0 left-[46.3%] h-[27.8%] w-[7.4%] origin-[center_-80%] bg-current opacity-0"
             style={{
               animationDelay: `${index / 12}s`,
               transform: `rotate(${rotation}deg)`
@@ -98,19 +114,19 @@ function MacosLoader(): React.JSX.Element {
 
 function SquareLoader(): React.JSX.Element {
   return (
-    <span className="yiru-loader-visual yiru-loader-square">
-      <span className="yiru-loader-square-fill" />
+    <span className="yiru-loader-square relative m-[12%] box-border block h-[76%] w-[76%] overflow-visible border [border-width:max(1px,0.1em)] border-current">
+      <span className="yiru-loader-square-fill block h-0 w-full bg-current" />
     </span>
   )
 }
 
 function FlipbookLoader(): React.JSX.Element {
   return (
-    <span className="yiru-loader-visual yiru-loader-book">
+    <span className="yiru-loader-book relative top-[20%] block h-[60%] w-full overflow-visible border [border-width:max(1px,0.09em)] border-current [perspective:200px]">
       {[0, 1, 2].map((page) => (
         <span
           key={page}
-          className="yiru-loader-book-page"
+          className="yiru-loader-book-page absolute -top-px left-1/2 z-[1] box-border h-[calc(100%+2px)] w-[calc(50%+1px)] origin-[0_50%] border-t [border-top-width:max(1px,0.09em)] border-r [border-right-width:max(1px,0.09em)] border-b [border-bottom-width:max(1px,0.09em)] border-current bg-[color-mix(in_srgb,currentColor_12%,transparent)]"
           style={{ animationDelay: `${page * 0.4}s` }}
         />
       ))}
@@ -120,12 +136,23 @@ function FlipbookLoader(): React.JSX.Element {
 
 function EscaladeLoader(): React.JSX.Element {
   return (
-    <svg className="yiru-loader-visual yiru-loader-escalade size-full" viewBox="0 -25 100 150">
+    <svg
+      className="yiru-loader-escalade relative block size-full overflow-visible"
+      viewBox="0 -25 100 150"
+    >
       <g>
-        <path pathLength="1" d="M50 100A1 1 0 0 1 50 0" />
+        <path
+          className="fill-none stroke-current stroke-[20] [stroke-linecap:round]"
+          pathLength="1"
+          d="M50 100A1 1 0 0 1 50 0"
+        />
       </g>
       <g>
-        <path pathLength="1" d="M50 75A1 1 0 0 0 50-25" />
+        <path
+          className="fill-none stroke-current stroke-[20] [stroke-linecap:round]"
+          pathLength="1"
+          d="M50 75A1 1 0 0 0 50-25"
+        />
       </g>
     </svg>
   )
@@ -194,7 +221,7 @@ function LoadingIndicatorVisual({
       aria-label={ariaLabel}
       aria-hidden={ariaLabel ? undefined : (ariaHidden ?? true)}
       className={cn(
-        'inline-block size-4 shrink-0 overflow-visible align-middle',
+        'relative inline-block size-4 shrink-0 overflow-visible align-middle leading-none',
         removeLegacySpinClass(className),
         'text-foreground'
       )}
