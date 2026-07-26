@@ -7,7 +7,6 @@ import { hasFeatureInteraction } from '../../../../shared/feature-interactions'
 import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import { useAppStore } from '../../store'
 import { useAllWorktrees } from '../../store/selectors'
-import { useActivityTerminalPortals } from '../activity/terminal-portal'
 import { useContextualTour } from '../contextual-tours/use-contextual-tour'
 import EditorAutosaveController from '../editor/autosave-controller-host'
 import { TAB_CONTENT_SURFACE_CLASSES } from '../tab-bar/tab-chrome-classes'
@@ -74,27 +73,16 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
   const tabBarOrderByWorktree = useAppStore((s) => s.tabBarOrderByWorktree)
   const tabBarOrder = activeWorktreeId ? tabBarOrderByWorktree[activeWorktreeId] : undefined
 
-  // Why (anchored to selected thread, not active tab): the activity page
-  // publishes the full {target, worktreeId, tabId} descriptor sourced from
-  // its selectedThread. Deriving worktreeId/tabId from activeWorktreeId/
-  // activeTabId here used to flash the wrong terminal — selectThread updates
-  // the store in multiple steps and intermediate renders briefly pointed the
-  // portal at the new worktree's stale last-active tab.
-  const activityTerminalPortals = useActivityTerminalPortals(activeView === 'activity')
   const foregroundTerminalTabIds = useMemo(() => {
     const ids = new Set<string>()
     if (activeView === 'terminal' && activeTabType === 'terminal' && activeTabId) {
       ids.add(activeTabId)
     }
-    for (const portal of activityTerminalPortals) {
-      ids.add(portal.tabId)
-    }
     return Array.from(ids)
-  }, [activeTabId, activeTabType, activeView, activityTerminalPortals])
+  }, [activeTabId, activeTabType, activeView])
 
   useEffect(() => {
-    // Why: hibernation must treat terminals portaled into foreground surfaces
-    // as visible even when they are not the singular active terminal tab.
+    // Why: hibernation treats the visible terminal as foreground authority.
     setForegroundTerminalTabIds(foregroundTerminalTabIds)
     return () => setForegroundTerminalTabIds([])
   }, [foregroundTerminalTabIds])
@@ -173,13 +161,11 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
     backgroundMountRevision,
     anyMountedWorktreeHasLayout
   } = useTerminalWorktreeMounting({
-    workspaceSurfaces,
-    activityTerminalPortals
+    workspaceSurfaces
   })
 
   const { parkedTerminalWorktreeIds } = useTerminalColdParking({
     workspaceSurfaces,
-    activityTerminalPortals,
     mountedWorktreeIdsRef,
     measurableBackgroundWorktreeIdsRef,
     activationDeferredMountTabIdsByWorktreeRef,
@@ -390,7 +376,6 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
                   isVisible={isVisible}
                   shouldMeasureHiddenWorktree={shouldMeasureHiddenWorktree}
                   shouldColdParkTerminalPanes={shouldColdParkTerminalPanes}
-                  activityTerminalPortals={activityTerminalPortals}
                   backgroundMountTabIds={
                     backgroundMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null
                   }
@@ -410,7 +395,6 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
           measurableBackgroundWorktreeIdsRef={measurableBackgroundWorktreeIdsRef}
           parkedTerminalWorktreeIds={parkedTerminalWorktreeIds}
           backgroundMountTabIdsByWorktreeRef={backgroundMountTabIdsByWorktreeRef}
-          activityTerminalPortals={activityTerminalPortals}
           activeView={activeView}
           activeWorktreeId={activeWorktreeId}
           activeTabId={activeTabId}

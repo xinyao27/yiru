@@ -1,6 +1,5 @@
 import type { RefObject } from 'react'
 import React, { Suspense } from 'react'
-import { createPortal } from 'react-dom'
 
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -12,10 +11,6 @@ import type {
   TopLevelView,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import {
-  findActivityTerminalPortal,
-  type ActivityTerminalPortalTarget
-} from '../activity/terminal-portal'
 import BrowserPane from '../browser-pane/browser-pane'
 import CodexRestartChip from '../codex-restart-chip'
 import type { OpenFile } from '../editor/state'
@@ -32,7 +27,6 @@ type LegacyWorkspaceSurfacesProps = {
   measurableBackgroundWorktreeIdsRef: RefObject<Set<string>>
   parkedTerminalWorktreeIds: ReadonlySet<string>
   backgroundMountTabIdsByWorktreeRef: RefObject<Map<string, ReadonlySet<string>>>
-  activityTerminalPortals: ActivityTerminalPortalTarget[]
   activeView: TopLevelView
   activeWorktreeId: string | null
   activeTabId: string | null
@@ -58,7 +52,6 @@ export function LegacyWorkspaceSurfaces({
   measurableBackgroundWorktreeIdsRef,
   parkedTerminalWorktreeIds,
   backgroundMountTabIdsByWorktreeRef,
-  activityTerminalPortals,
   activeView,
   activeWorktreeId,
   activeTabId,
@@ -117,50 +110,27 @@ export function LegacyWorkspaceSurfaces({
                     )
                   )
                   .map((tab) => {
-                    const activityTerminalPortal = findActivityTerminalPortal(
-                      activityTerminalPortals,
-                      { worktreeId: workspace.id, tabId: tab.id }
-                    )
-                    const isActivityPortalTab = activityTerminalPortal !== null
                     const isActiveTerminalTab =
                       isVisible && tab.id === activeTabId && activeTabType === 'terminal'
-                    // Why: parking unmounts the view while preserving the PTY;
-                    // an Activity portal remains mounted as a visible consumer.
-                    if (shouldColdParkTerminalPanes && !isActivityPortalTab) {
+                    if (shouldColdParkTerminalPanes) {
                       return null
                     }
-                    const terminalPane = (
+                    return (
                       <TerminalPane
                         key={`${tab.id}-${tab.generation ?? 0}`}
                         tabId={tab.id}
                         worktreeId={workspace.id}
                         cwd={tab.startupCwd ?? workspace.path}
-                        isActive={isActiveTerminalTab || activityTerminalPortal?.active === true}
-                        // Why: the activity page hosts this existing pane via
-                        // portal while the workspace surface remains hidden.
-                        // Keeping `isVisible` true for the portaled tab lets
-                        // xterm fit and stream foreground output in-place.
-                        isVisible={isActiveTerminalTab || isActivityPortalTab}
+                        isActive={isActiveTerminalTab}
+                        isVisible={isActiveTerminalTab}
                         // Why: inactive tabs in the visible legacy surface
                         // are tab-hidden, not worktree-hidden, so they need
                         // the same light resume path as split-group overlays.
-                        isWorktreeActive={isVisible || isActivityPortalTab}
-                        // Why: when portaled to Activity for a specific agent
-                        // pane, isolate that leaf so split siblings stay
-                        // hidden. Workspace renders pass null → no override.
-                        isolatedPaneKey={activityTerminalPortal?.paneKey ?? null}
+                        isWorktreeActive={isVisible}
                         onPtyExit={(ptyId) => onPtyExit(tab.id, ptyId)}
                         onCloseTab={() => onCloseTab(tab.id)}
                       />
                     )
-                    if (activityTerminalPortal) {
-                      return createPortal(
-                        terminalPane,
-                        activityTerminalPortal.target,
-                        `activity-terminal-${tab.id}`
-                      )
-                    }
-                    return terminalPane
                   })}
               </div>
             )

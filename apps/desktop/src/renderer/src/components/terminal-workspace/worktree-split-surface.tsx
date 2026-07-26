@@ -4,7 +4,6 @@ import { useShallow } from 'zustand/react/shallow'
 import type { TabGroupLayoutNode } from '../../../../shared/types'
 import { useBrowserMobileDriverForAny } from '../../lib/pane-manager/browser-mobile-driver-state'
 import { useAppStore } from '../../store'
-import type { ActivityTerminalPortalTarget } from '../activity/terminal-portal'
 import { useBrowserAutomationVisibilityForAny } from '../browser-pane/browser-automation-visibility'
 import BrowserPaneOverlayLayer from '../browser-pane/overlay-layer'
 import CodexRestartChip from '../codex-restart-chip'
@@ -21,7 +20,6 @@ type WorktreeSplitSurfaceProps = {
   isVisible: boolean
   shouldMeasureHiddenWorktree: boolean
   shouldColdParkTerminalPanes: boolean
-  activityTerminalPortals: ActivityTerminalPortalTarget[]
   backgroundMountTabIds: ReadonlySet<string> | null
   activationDeferredMountTabIds: ReadonlySet<string> | null
 }
@@ -47,7 +45,6 @@ export const WorktreeSplitSurface = React.memo(function WorktreeSplitSurface({
   isVisible,
   shouldMeasureHiddenWorktree,
   shouldColdParkTerminalPanes,
-  activityTerminalPortals,
   backgroundMountTabIds,
   activationDeferredMountTabIds
 }: WorktreeSplitSurfaceProps): React.JSX.Element {
@@ -90,7 +87,6 @@ export const WorktreeSplitSurface = React.memo(function WorktreeSplitSurface({
         isWorktreeActive={isVisible}
         coldParkTerminalPanes={shouldColdParkTerminalPanes}
         shouldMeasureHiddenWorktree={shouldMeasureHiddenWorktree}
-        activityTerminalPortals={activityTerminalPortals}
         backgroundMountTabIds={backgroundMountTabIds}
         activationDeferredMountTabIds={activationDeferredMountTabIds}
       />

@@ -16,6 +16,9 @@ const requireFromProject = createRequire(join(projectDir, 'package.json'))
 const PACKAGED_RUNTIME_PACKAGE_ROOTS = [
   '@electron-toolkit/utils',
   '@parcel/watcher',
+  // Why: the plain-tsc CLI preserves these workspace imports as bare requires.
+  '@yiru/runtime-protocol',
+  '@yiru/workbench-model',
   'electron-updater',
   'i18next',
   'jsonc-parser',
@@ -197,20 +200,33 @@ function findAsarEntry(entries, expectedPath) {
   return entries.find((entry) => normalizeAsarEntryPath(entry) === expectedPath)
 }
 
-function verifyPackagedMainRuntimeDeps(resourcesDir, asar = require('@electron/asar')) {
+function verifyPackagedRuntimeDeps(resourcesDir, asar = require('@electron/asar')) {
   const asarPath = join(resourcesDir, 'app.asar')
   if (!existsSync(asarPath)) {
     return
   }
 
-  const mainFiles = ['out/main/index.js', 'out/main/agent-hooks/managed-agent-hook-controls.js']
   const entries = asar.listPackage(asarPath)
+  const runtimeFiles = new Set([
+    'out/main/index.js',
+    'out/main/agent-hooks/managed-agent-hook-controls.js'
+  ])
+  for (const entry of entries) {
+    const normalizedPath = normalizeAsarEntryPath(entry)
+    if (
+      normalizedPath.startsWith('out/cli/') &&
+      normalizedPath.endsWith('.js') &&
+      !normalizedPath.endsWith('.test.js')
+    ) {
+      runtimeFiles.add(normalizedPath)
+    }
+  }
   const missing = new Set()
 
-  for (const file of mainFiles) {
+  for (const file of runtimeFiles) {
     const entry = findAsarEntry(entries, file)
     if (!entry) {
-      throw new Error(`Packaged main file ${file} was not found in ${asarPath}`)
+      throw new Error(`Packaged runtime file ${file} was not found in ${asarPath}`)
     }
 
     // Why: @electron/asar lists entries with host separators; Windows returns
@@ -231,9 +247,9 @@ function verifyPackagedMainRuntimeDeps(resourcesDir, asar = require('@electron/a
 
   if (missing.size > 0) {
     throw new Error(
-      `Packaged main bundle has bare runtime imports without copied node_modules: ${[
-        ...missing
-      ].join(', ')}`
+      `Packaged runtime files have bare imports without copied node_modules: ${[...missing].join(
+        ', '
+      )}`
     )
   }
 }
@@ -418,5 +434,5 @@ module.exports = {
   prunePackagedSherpaOnnx,
   prunePackagedRuntimeTypeDeclarations,
   prunePackagedZodSources,
-  verifyPackagedMainRuntimeDeps
+  verifyPackagedRuntimeDeps
 }

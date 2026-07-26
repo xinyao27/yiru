@@ -1,15 +1,10 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
 
 import { SYNC_FIT_PANES_EVENT } from '@/constants/terminal'
 
 import type { Tab, TabGroup, TerminalTab } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import {
-  findActivityTerminalPortal,
-  type ActivityTerminalPortalTarget
-} from '../activity/terminal-portal'
 import { useNativeChatToggleShortcut } from '../native-chat/use-native-chat-toggle-shortcut'
 import { tabGroupBodyAnchorName } from '../tab-group/body-anchor'
 import { shouldMountBackgroundWorktreeTab } from '../terminal/background-terminal-worktree-mount'
@@ -27,7 +22,6 @@ type TerminalOverlayAssignment = {
 const EMPTY_TERMINAL_TABS: readonly TerminalTab[] = []
 const EMPTY_UNIFIED_TABS: readonly Tab[] = []
 const EMPTY_GROUPS: readonly TabGroup[] = []
-const EMPTY_ACTIVITY_PORTALS: ActivityTerminalPortalTarget[] = []
 const HAS_CSS_ANCHOR_POSITIONING =
   typeof CSS !== 'undefined' &&
   CSS.supports('position-anchor', '--yiru-terminal-overlay-probe') &&
@@ -60,7 +54,6 @@ type TerminalOverlaySlotProps = {
   isWorktreeActive: boolean
   isVisible: boolean
   isActive: boolean
-  activityTerminalPortal: ActivityTerminalPortalTarget | null
   onFocusOwningGroup: ((groupId: string) => void) | undefined
   consumeSuppressedPtyExit: (ptyId: string) => boolean
   leaveWorktreeIfEmpty: () => void
@@ -76,7 +69,6 @@ const TerminalOverlaySlot = memo(function TerminalOverlaySlot({
   isWorktreeActive,
   isVisible,
   isActive,
-  activityTerminalPortal,
   onFocusOwningGroup,
   consumeSuppressedPtyExit,
   leaveWorktreeIfEmpty
@@ -229,13 +221,12 @@ const TerminalOverlaySlot = memo(function TerminalOverlaySlot({
       tabId={terminalTabId}
       worktreeId={worktreeId}
       cwd={startupCwd ?? worktreePath}
-      isActive={isActive || activityTerminalPortal?.active === true}
+      isActive={isActive}
       // Why: split-group changes reparent TabGroupPanel subtrees. Keeping the
       // TerminalPane mounted here preserves alt-screen TUI state while this
       // flag still lets hidden tabs throttle rendering.
-      isVisible={isVisible || activityTerminalPortal !== null}
-      isWorktreeActive={isWorktreeActive || activityTerminalPortal !== null}
-      isolatedPaneKey={activityTerminalPortal?.paneKey ?? null}
+      isVisible={isVisible}
+      isWorktreeActive={isWorktreeActive}
       onPtyExit={(ptyId) => {
         if (consumeSuppressedPtyExit(ptyId)) {
           return
@@ -260,14 +251,6 @@ const TerminalOverlaySlot = memo(function TerminalOverlaySlot({
     />
   )
 
-  if (activityTerminalPortal) {
-    return createPortal(
-      terminalPane,
-      activityTerminalPortal.target,
-      `activity-terminal-${terminalTabId}`
-    )
-  }
-
   return (
     <div
       ref={overlayRef}
@@ -290,7 +273,6 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
   isWorktreeActive,
   coldParkTerminalPanes = false,
   shouldMeasureHiddenWorktree = false,
-  activityTerminalPortals = EMPTY_ACTIVITY_PORTALS,
   backgroundMountTabIds = null,
   activationDeferredMountTabIds = null
 }: {
@@ -299,7 +281,6 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
   isWorktreeActive: boolean
   coldParkTerminalPanes?: boolean
   shouldMeasureHiddenWorktree?: boolean
-  activityTerminalPortals?: ActivityTerminalPortalTarget[]
   /** Non-null for targeted background mounts: only these terminal tabs get a
    *  TerminalPane, so waking one slept agent does not connect every saved tab. */
   backgroundMountTabIds?: ReadonlySet<string> | null
@@ -373,7 +354,6 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
     isWorktreeActive,
     coldParkTerminalPanes,
     shouldMeasureHiddenWorktree,
-    activityTerminalPortals,
     activationDeferredMountTabIds
   })
 
@@ -391,10 +371,6 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
           const assignment = assignments.get(terminalTab.id)
           const isVisible = Boolean(isWorktreeActive && assignment && assignment.isActiveInGroup)
           const isActive = Boolean(isVisible && assignment && assignment.groupId === activeGroupId)
-          const activityTerminalPortal = findActivityTerminalPortal(activityTerminalPortals, {
-            worktreeId,
-            tabId: terminalTab.id
-          })
           // Why: parking unmounts only the view; the parked watcher owns exit
           // and side-effect handling until this tab is eligible to remount.
           if (parkedTerminalTabIds.has(terminalTab.id)) {
@@ -412,7 +388,6 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
               isWorktreeActive={isWorktreeActive}
               isVisible={isVisible}
               isActive={isActive}
-              activityTerminalPortal={activityTerminalPortal}
               onFocusOwningGroup={focusOwningGroup}
               consumeSuppressedPtyExit={consumeSuppressedPtyExit}
               leaveWorktreeIfEmpty={leaveWorktreeIfEmpty}

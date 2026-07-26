@@ -218,12 +218,7 @@ export function planColdActivationTabDeferral(opts: {
   return true
 }
 
-/**
- * Render-pass reveal: tabs the user can currently see (active tab, split
- * groups' active tabs, activity-portal tabs, pending spawns) mount this pass.
- * Once every tab has been revealed the restriction is removed, returning the
- * worktree to normal fully-mounted semantics.
- */
+/** Why: immediately visible or pending tabs must bypass deferred cold activation. */
 export function revealActivationDeferredTabs(opts: {
   restrictions: Map<string, ReadonlySet<string>>
   deferredMountTabIdsByWorktree: Map<string, ReadonlySet<string>>

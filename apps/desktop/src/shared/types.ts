@@ -2033,12 +2033,6 @@ export type GlobalSettings = {
   /** Legacy persisted key from before the sidekick -> pet rename. Read only
    *  during migration; new writes use experimentalPet. */
   experimentalSidekick?: boolean
-  /** Experimental: left-sidebar Agents view with a threaded feed for agent
-   *  completions, blocking states, unread state, and worktree creation events. */
-  experimentalActivity: boolean
-  /** One-shot migration guard for defaulting the Agents view off for all
-   *  users. Once set, later explicit opt-ins persist normally. */
-  experimentalActivityDefaultedOffForAllUsers?: boolean
   /** Experimental: persistent terminal pane attention ring for terminal bell
    *  and agent-completion events. Opt-in while the signal/noise balance is
    *  being tested. */
@@ -2310,14 +2304,7 @@ export type ManualRepoOrderEntry = {
 }
 
 /** The active top-level section shown in the main content area. */
-export type TopLevelView =
-  | 'terminal'
-  | 'settings'
-  | 'activity'
-  | 'automations'
-  | 'space'
-  | 'skills'
-  | 'mobile'
+export type TopLevelView = 'terminal' | 'settings' | 'automations' | 'space' | 'skills' | 'mobile'
 
 export type PersistedUIState = {
   lastActiveRepoId: string | null

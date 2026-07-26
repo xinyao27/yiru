@@ -79,7 +79,7 @@ export class RecoverableRenderErrorBoundary extends React.Component<Props, State
       <div
         className={cn(
           'flex flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground',
-          this.props.compact ? 'min-h-9 py-2' : 'h-full min-h-0 py-8',
+          this.props.compact ? 'min-h-9 py-2' : 'h-full min-h-0 w-full py-8',
           this.props.className
         )}
         role="alert"

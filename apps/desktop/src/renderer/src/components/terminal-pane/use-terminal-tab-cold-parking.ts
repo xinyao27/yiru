@@ -11,10 +11,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { TerminalTab } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import {
-  findActivityTerminalPortal,
-  type ActivityTerminalPortalTarget
-} from '../activity/terminal-portal'
-import {
   getTerminalTabColdParkRecheckDelayMs,
   selectColdParkedTerminalTabs,
   type TerminalTabColdParkCandidate
@@ -52,7 +48,6 @@ export function useTerminalTabColdParking(args: {
   /** Hidden-measuring startup probe from terminal-workspace.tsx — the panes must stay
    *  mounted for their first xterm fit, mirroring the worktree-level guard. */
   shouldMeasureHiddenWorktree: boolean
-  activityTerminalPortals: ActivityTerminalPortalTarget[]
   /** Tabs cold activation keeps unmounted — parked-equivalent for watcher
    *  purposes. Targeted background restrictions intentionally stay bounded. */
   activationDeferredMountTabIds?: ReadonlySet<string> | null
@@ -64,7 +59,6 @@ export function useTerminalTabColdParking(args: {
     isWorktreeActive,
     coldParkTerminalPanes,
     shouldMeasureHiddenWorktree,
-    activityTerminalPortals,
     activationDeferredMountTabIds
   } = args
   const pendingStartupByTabId = useAppStore((state) => state.pendingStartupByTabId)
@@ -100,11 +94,6 @@ export function useTerminalTabColdParking(args: {
 
     const nowMs = Date.now()
     const currentTerminalTabIds = new Set(terminalTabs.map((tab) => tab.id))
-    const portalTabIds = new Set(
-      activityTerminalPortals
-        .filter((portal) => portal.worktreeId === worktreeId)
-        .map((portal) => portal.tabId)
-    )
     for (const tabId of Array.from(terminalTabHiddenSinceRef.current.keys())) {
       if (!currentTerminalTabIds.has(tabId)) {
         terminalTabHiddenSinceRef.current.delete(tabId)
@@ -114,10 +103,9 @@ export function useTerminalTabColdParking(args: {
     const candidates: TerminalTabColdParkCandidate[] = terminalTabs.map((terminalTab) => {
       const assignment = assignments.get(terminalTab.id)
       const isVisible = Boolean(isWorktreeActive && assignment && assignment.isActiveInGroup)
-      const hasActivityTerminalPortal = portalTabIds.has(terminalTab.id)
       // Why: hidden-measuring counts as visibility — the startup probe needs
       // mounted panes, so the hidden clock must not run during it.
-      if (isVisible || hasActivityTerminalPortal || shouldMeasureHiddenWorktree) {
+      if (isVisible || shouldMeasureHiddenWorktree) {
         terminalTabHiddenSinceRef.current.delete(terminalTab.id)
       } else if (!terminalTabHiddenSinceRef.current.has(terminalTab.id)) {
         terminalTabHiddenSinceRef.current.set(terminalTab.id, nowMs)
@@ -127,7 +115,6 @@ export function useTerminalTabColdParking(args: {
         ptyId: terminalTab.ptyId,
         pendingActivationSpawn: terminalTab.pendingActivationSpawn,
         isVisible,
-        hasActivityTerminalPortal,
         hiddenSinceMs: terminalTabHiddenSinceRef.current.get(terminalTab.id) ?? null
       }
     })
@@ -157,11 +144,7 @@ export function useTerminalTabColdParking(args: {
     )
 
     for (const candidate of candidates) {
-      if (
-        candidate.isVisible ||
-        candidate.hasActivityTerminalPortal ||
-        nextColdParkedTerminalTabIds.has(candidate.id)
-      ) {
+      if (candidate.isVisible || nextColdParkedTerminalTabIds.has(candidate.id)) {
         continue
       }
       const delayMs = getTerminalTabColdParkRecheckDelayMs({
@@ -179,7 +162,6 @@ export function useTerminalTabColdParking(args: {
       }
     }
   }, [
-    activityTerminalPortals,
     assignments,
     isWorktreeActive,
     pendingStartupByTabId,
@@ -190,23 +172,15 @@ export function useTerminalTabColdParking(args: {
     worktreeId
   ])
 
-  // Why: the rendered park verdict — worktree-level park (prop from
-  // terminal-workspace.tsx) or per-tab cold park, never portal-hosted tabs. Render and
-  // the watcher-sync effect must share this exact set so watcher lifecycle
-  // tracks the committed unmounts.
+  // Why: render and watcher sync must share the combined worktree/per-tab park
+  // verdict so watcher lifecycle tracks committed unmounts.
   const parkedTerminalTabIds = useMemo(() => {
     const parked = new Set<string>()
     for (const terminalTab of terminalTabs) {
       const assignment = assignments.get(terminalTab.id)
       const isVisible = Boolean(isWorktreeActive && assignment && assignment.isActiveInGroup)
-      const hasActivityTerminalPortal =
-        findActivityTerminalPortal(activityTerminalPortals, {
-          worktreeId,
-          tabId: terminalTab.id
-        }) !== null
       if (
         (coldParkTerminalPanes || (!isVisible && coldParkedTerminalTabIds.has(terminalTab.id))) &&
-        !hasActivityTerminalPortal &&
         // Why: the hidden-measuring startup probe needs mounted panes; gate
         // here too so the reveal lands in the same render that starts it.
         !shouldMeasureHiddenWorktree
@@ -218,7 +192,6 @@ export function useTerminalTabColdParking(args: {
       // restrictions do not enter this set or add a new eager watcher burst.
       if (
         activationDeferredMountTabIds?.has(terminalTab.id) &&
-        !hasActivityTerminalPortal &&
         canWatcherCoverParkedTerminalTab(worktreeId, terminalTab)
       ) {
         parked.add(terminalTab.id)
@@ -226,7 +199,6 @@ export function useTerminalTabColdParking(args: {
     }
     return parked
   }, [
-    activityTerminalPortals,
     assignments,
     coldParkTerminalPanes,
     coldParkedTerminalTabIds,

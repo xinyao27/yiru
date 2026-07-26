@@ -152,7 +152,6 @@
       "d54e66004c": "terminal",
       "9f0152563e": "mobile",
       "62ca9895a7": "space",
-      "844eb0f4f4": "activity",
       "3443924e91": "automations",
       "ca6c6eece7": "skills",
       "1b9d9d065f": "settings",
@@ -2973,7 +2972,6 @@
           "0c3395fd32": "Search worktrees and browser tabs",
           "c86d83b5c3": "New",
           "1b5c41caee": "Yiru Mobile",
-          "9c95e1ce91": "Agents",
           "f323383e9a": "Automations",
           "d599269755": "Hide from sidebar"
         },
@@ -4520,9 +4518,6 @@
           "a20d5ea365": "Keeps a pane-level highlight visible after terminal bell or agent-completion events until you interact with that pane. Experimental while we tune the signal.",
           "ec897e8d89": "Terminal attention",
           "88b7613afb": "Persistent pane highlight for terminal bell and agent-completion events.",
-          "0277901cf7": "Adds an Agents entry to the left sidebar with a threaded worktree feed for completed agents, blocking questions, unread state, and worktree creation events. Experimental — the event model and UI may change.",
-          "a05bcdaf57": "Agents View",
-          "f63ea281e3": "Threaded left-sidebar feed for agent completions and blocking states.",
           "agentHibernation": {
             "copy": "Stops idle background agent terminals after the configured idle window and resumes supported sessions when you open them again. Agent sleep preserves launch options for agents started by Yiru. Manually started agents may resume with your current Yiru defaults. Experimental while we tune the safety model.",
             "description": "Stops idle background agent terminals after the configured idle window and resumes supported sessions when you open them again.",
@@ -6706,7 +6701,6 @@
             "3028f0bd3a": "link",
             "bff1ff7768": "symlinks",
             "c387565812": "symlink",
-            "10b52f79c1": "worktrees",
             "d23ae13990": "worktree",
             "0d24759f14": "experimental",
             "603d29ed74": "Automatically materialize configured files or folders into newly created worktrees using APFS clone-copy on macOS when possible, otherwise symlinks.",
@@ -6731,14 +6725,6 @@
               "terminal": "terminal",
               "title": "Agent sleep"
             },
-            "fe5688b761": "sidebar",
-            "ca5d1f3f46": "timeline",
-            "d01b3882ba": "notifications",
-            "244a0ecd3d": "activity",
-            "92a9357d1f": "agents view",
-            "fa72e71f05": "agents",
-            "4d63251595": "Threaded left-sidebar feed for agent completions and blocking states.",
-            "ccc5548ac5": "Agents View",
             "9af7a518db": "character",
             "791fefc0b0": "corner",
             "65df471ab2": "animated",
@@ -11621,40 +11607,6 @@
         "AgentSettingsDialog": {
           "50cdb57c03": "Manage AI agents, set a default, and customize commands.",
           "fc0268e4ed": "Agents"
-        }
-      },
-      "activity": {
-        "ActivityPrototypePage": {
-          "cf780197a1": "Select an agent to view its activity",
-          "e3db9892f6": "No activity yet.",
-          "1b633f5c1e": "Connecting terminal...",
-          "8de7c5beaa": "Terminal unavailable",
-          "866083500b": "Drag to resize",
-          "443690186e": "Resize activity thread list",
-          "7cd632006b": "No agent activity matches these filters.",
-          "a2b4437bfb": "{{value0}} activity",
-          "023ff75afe": "Mark all read",
-          "f70e4bec47": "Compact mode",
-          "a472a14700": "More options",
-          "db8a1878b5": "Thread list options",
-          "d1a88df9a8": "Show unread threads only",
-          "f6396e1f85": "Agent",
-          "b29191b3e0": "Worktree",
-          "8c3b621ddf": "Project",
-          "4a3986b200": "Status",
-          "770d458144": "Group agent activity by",
-          "795cbf26e2": "Filter...",
-          "4616ea39fd": "Jump to workspace",
-          "59b131fbd9": "Mark thread unread",
-          "beb2c19173": "Unread",
-          "5651b216c6": "Unknown project",
-          "22b22034bc": "Standalone terminal unavailable in Activity.",
-          "afdc2139a8": "Agent terminal closed. Open a new terminal in this workspace to continue."
-        },
-        "ActivityTitlebarControls": {
-          "f915168c8e": "unread",
-          "d6a8de3934": "agents",
-          "dc708f3eff": "Close agents"
         }
       },
       "confirmation": {

@@ -36,9 +36,6 @@ export function ExperimentalPane({
 }: ExperimentalPaneProps): React.JSX.Element {
   const searchQuery = useAppStore((s) => s.settingsSearchQuery)
   const showPet = matchesSettingsSearch(searchQuery, [getExperimentalSearchEntry().pet])
-  const showAgentsView = matchesSettingsSearch(searchQuery, [
-    getExperimentalSearchEntry().agentsView
-  ])
   const showNativeChat = matchesSettingsSearch(searchQuery, [
     getExperimentalSearchEntry().nativeChat
   ])
@@ -83,36 +80,6 @@ export function ExperimentalPane({
             <Switch
               checked={settings.experimentalPet}
               onCheckedChange={(checked) => updateSettings({ experimentalPet: checked })}
-            />
-          </div>
-        </SearchableSetting>
-      ) : null}
-
-      {showAgentsView ? (
-        <SearchableSetting
-          title={translate('auto.components.settings.ExperimentalPane.a05bcdaf57', 'Agents View')}
-          description={translate(
-            'auto.components.settings.ExperimentalPane.f63ea281e3',
-            'Threaded left-sidebar feed for agent completions and blocking states.'
-          )}
-          keywords={getExperimentalSearchEntry().agentsView.keywords}
-          className="space-y-3 py-2"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 shrink space-y-0.5">
-              <Label>
-                {translate('auto.components.settings.ExperimentalPane.a05bcdaf57', 'Agents View')}
-              </Label>
-              <p className="text-muted-foreground text-xs">
-                {translate(
-                  'auto.components.settings.ExperimentalPane.0277901cf7',
-                  'Adds an Agents entry to the left sidebar with a threaded worktree feed for completed agents, blocking questions, unread state, and worktree creation events. Experimental — the event model and UI may change.'
-                )}
-              </p>
-            </div>
-            <Switch
-              checked={settings.experimentalActivity}
-              onCheckedChange={(checked) => updateSettings({ experimentalActivity: checked })}
             />
           </div>
         </SearchableSetting>

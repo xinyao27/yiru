@@ -5361,7 +5361,6 @@ const WorktreeList = React.memo(function WorktreeList({
   const updateWorktreesMeta = useAppStore((s) => s.updateWorktreesMeta)
   const updateRepo = useAppStore((s) => s.updateRepo)
   const fetchWorktrees = useAppStore((s) => s.fetchWorktrees)
-  const activeView = useAppStore((s) => s.activeView)
   const activeModal = useAppStore((s) => s.activeModal)
   const pendingRevealWorktree = useAppStore((s) => s.pendingRevealWorktree)
   const pendingRevealSidebarRow = useAppStore((s) => s.pendingRevealSidebarRow)
@@ -6168,12 +6167,10 @@ const WorktreeList = React.memo(function WorktreeList({
     markSidebarWorktreeActiveImmediately(worktreeId, rowKey)
   }, [])
 
-  // Why: full-page navigation views are not scoped to one worktree, so no
-  // sidebar card should appear selected while one of them is active.
+  // Why: coworking routes are not scoped to one sidebar worktree, so no card
+  // should appear selected while one is active.
   const selectedSidebarWorktreeId =
-    activeView === 'activity' || coworkingSidebarProjectionInput.activeRoute !== null
-      ? null
-      : currentSidebarWorktreeId
+    coworkingSidebarProjectionInput.activeRoute !== null ? null : currentSidebarWorktreeId
 
   // Why layout effect instead of effect: the global Cmd/Ctrl+1–9 key handler
   // can fire immediately after React commits the new grouped/collapsed order.
