@@ -22,7 +22,7 @@ domain without weakening this boundary.
 
 PTY, binary terminal multiplexing, subscriptions, and event streams remain transport-owned because
 their framing, cancellation, replay, and backpressure contracts are not one-shot RPC semantics.
-The SSH Git mux and spool protocols also retain their own `git.status` schemas: those operations use
+The SSH Git mux and coworking protocols also retain their own `git.status` schemas: those operations use
 `worktreePath`/`worktreeRef`, not the runtime RPC worktree selector, so merging them would erase a
 real protocol distinction.
 

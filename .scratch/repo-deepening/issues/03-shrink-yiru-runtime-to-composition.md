@@ -14,7 +14,7 @@ After Terminal authority extraction, which remaining mutable state clusters can 
 
 `YiruRuntimeService` now exposes the existing file, Git, browser, and emulator command modules plus
 the mobile notification channel as composition dependencies. Runtime RPC receives those modules in
-its context, and spool hosts receive narrow Git command picks, so their handlers no longer use the
+its context, and coworking hosts receive narrow Git command picks, so their handlers no longer use the
 runtime as a service locator. Electron IPC retains direct access only at registration boundaries.
 
 The browser command module now composes `BrowserRemoteScreencastAuthority`, which solely owns remote

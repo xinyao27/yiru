@@ -27,7 +27,7 @@ All six architecture-review candidates and the identified low-risk cleanup are i
   one deep main-process module now owns graph, handle, PTY, driver, layout, subscription, recovery,
   presence, waiter, and exit-cleanup state; runtime and transport layers are adapters.
 - [03 — Shrink YiruRuntimeService to composition](issues/03-shrink-yiru-runtime-to-composition.md):
-  RPC and spool consume real command owners directly; browser screencast lifecycle/driver state and
+  RPC and coworking consume real command owners directly; browser screencast lifecycle/driver state and
   mobile notification live/replay sequencing now have single authorities.
 - [03a — Remove implementation-detail tests](issues/03a-remove-implementation-detail-tests.md):
   class-literal, exact-source, registry-count, and self-normalizing checks are gone; remaining tests
