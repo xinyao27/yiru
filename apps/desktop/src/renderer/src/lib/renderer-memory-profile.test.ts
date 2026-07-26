@@ -4,7 +4,7 @@ import {
   collectRendererMemoryProfileCounts,
   registerRendererMemoryProfileContributor,
   summarizeStateCollectionSizes
-} from '../../lib/renderer-memory-profile'
+} from './renderer-memory-profile'
 
 const unregisters: (() => void)[] = []
 

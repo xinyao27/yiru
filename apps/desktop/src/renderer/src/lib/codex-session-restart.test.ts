@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test'
 
-import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
-import { CODEX_ACCOUNT_RESTART_STARTUP } from '../../lib/codex-session-restart'
+import { shouldUseShellReadyStartupDelivery } from '../../../shared/codex-startup-delivery'
+import { CODEX_ACCOUNT_RESTART_STARTUP } from './codex-session-restart'
 
 describe('Codex account restart startup', () => {
   it('waits for shell readiness before relaunching Codex', () => {

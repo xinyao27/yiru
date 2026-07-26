@@ -39,11 +39,11 @@ describe('renderer crash diagnostics', () => {
       recordRendererCrashBreadcrumb: recordBreadcrumb
     }))
 
-    const profile = await import('../../lib/renderer-memory-profile')
+    const profile = await import('./renderer-memory-profile')
     const unregister = profile.registerRendererMemoryProfileContributor('store', () => ({
       worktrees: 12
     }))
-    const diagnostics = await import('../../lib/crash-diagnostics')
+    const diagnostics = await import('./crash-diagnostics')
     diagnostics.installRendererCrashDiagnostics()
 
     expect(recordBreadcrumb).toHaveBeenCalledWith(
