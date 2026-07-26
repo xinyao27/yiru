@@ -21,7 +21,6 @@ import './terminal.css'
 import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
 import { DaemonActionDialog, useDaemonActions } from '@/components/daemon-actions/use-actions'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
-import type { AgentSessionContinuationRequest } from '@/components/terminal-pane/agent-session-continuation'
 import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
@@ -112,8 +111,10 @@ import {
 } from '../native-chat/leaf-routing'
 import { shouldChatTakeOverMobileSurface } from '../native-chat/send-eligibility'
 import NativeChatView from '../native-chat/view'
+import type { AgentSessionContinuationRequest } from './agent/session-continuation'
 import CloseTerminalDialog, { type CloseTerminalDialogCopyKind } from './close-terminal-dialog'
 import { applyDesktopFitFallbackAfterReplay } from './desktop-fit-fallback'
+import { handleInternalTerminalFileDrop } from './drop/handler'
 import {
   applyExpandedLayoutTo,
   cancelPendingPaneSizeRefreshFrames,
@@ -131,8 +132,8 @@ import { MobileDriverOverlay } from './mobile-driver-overlay'
 import { shouldShowMobileDriverOverlay } from './mobile-driver-overlay-visibility'
 import { getOverrideAffectedPanes, getPanesNeedingOverrideFit } from './override-affected-panes'
 import { fitPanes, isWindowsUserAgent } from './pane-helpers'
-import { connectPanePty } from './pty-connection'
-import type { PtyTransport } from './pty-transport'
+import { connectPanePty } from './pty/connection'
+import type { PtyTransport } from './pty/transport'
 import {
   addSessionRestoredBannerPaneId,
   dismissSessionRestoredBannerPaneIds,
@@ -158,7 +159,6 @@ import {
 } from './terminal-clipboard-event-paste'
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import TerminalContextMenu from './terminal-context-menu'
-import { handleInternalTerminalFileDrop } from './terminal-drop-handler'
 import { TerminalErrorToast } from './terminal-error-toast'
 import { restoreTerminalFitToDesktop, restoreTerminalFitsToDesktop } from './terminal-fit-restore'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
@@ -198,8 +198,22 @@ import {
   applyTerminalPaneAttentionToManager,
   subscribeTerminalPaneAttention
 } from './attention-subscriptions'
+import { refreshTerminalImeInputContext } from './ime/input-context-refresh'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
 import { resolveNativeChatLeafTitleAgent } from './native-chat-leaf-title-agent'
+import {
+  executeTerminalPastePlan,
+  planTerminalPasteWithYield,
+  type TerminalPasteSource,
+  type TerminalPasteTextOptions
+} from './paste/coordinator'
+import { formatTerminalPasteExecutionError } from './paste/errors'
+import { resolveTerminalPasteRuntime } from './paste/runtime'
+import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
+import {
+  isTerminalPanePasteFocusCurrent,
+  isTerminalPanePasteTargetCurrent
+} from './paste/target-state'
 import {
   isXtermHelperTextarea,
   releaseTerminalFocusForOutsidePointerDown,
@@ -207,20 +221,6 @@ import {
   resyncTerminalFocusForWindowFocus,
   setRegularTerminalInputFocusAttribute
 } from './regular-terminal-focus-ownership'
-import { refreshTerminalImeInputContext } from './terminal-ime-input-context-refresh'
-import {
-  executeTerminalPastePlan,
-  planTerminalPasteWithYield,
-  type TerminalPasteSource,
-  type TerminalPasteTextOptions
-} from './terminal-paste-coordinator'
-import { formatTerminalPasteExecutionError } from './terminal-paste-errors'
-import { resolveTerminalPasteRuntime } from './terminal-paste-runtime'
-import { getTerminalPasteSshRemotePlatform } from './terminal-paste-ssh-platform'
-import {
-  isTerminalPanePasteFocusCurrent,
-  isTerminalPanePasteTargetCurrent
-} from './terminal-paste-target-state'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 import { getCachedTerminalTabForWorktree } from './terminal-tab-lookup'
 import {

@@ -22,7 +22,7 @@ import {
   resolveTerminalColorSchemeMode,
   scanMode2031Sequences
 } from '../../../../shared/terminal/color-scheme-protocol'
-import { subscribeToPtyData } from './pty-data-sidecar-subscriptions'
+import { subscribeToPtyData } from './pty/data-sidecar-subscriptions'
 
 export type ParkedTerminalMode2031ResponderOptions = {
   ptyId: string

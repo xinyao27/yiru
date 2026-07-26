@@ -1,9 +1,3 @@
-import { createAgentCompletionCoordinator } from '@/components/terminal-pane/agent-completion-coordinator'
-import type {
-  AgentCompletionCoordinator,
-  AgentCompletionStatusSnapshot
-} from '@/components/terminal-pane/agent-completion-coordinator-types'
-import { dispatchAgentHookTerminalLifecycle } from '@/components/terminal-pane/agent-hook-terminal-lifecycle'
 import { createCodexAutoApprovalHookCompletionSuppressor } from '@/components/terminal-pane/codex-auto-approval-notification-suppression'
 import { collectLeafIdsInOrder } from '@/components/terminal-pane/layout-serialization'
 import { dispatchTerminalNotification } from '@/components/terminal-pane/use-notification-dispatch'
@@ -11,6 +5,12 @@ import type { RuntimeTerminalProcessInspection } from '@/runtime/terminal-inspec
 import { useAppStore } from '@/store'
 
 import { parsePaneKey } from '../../../shared/stable-pane-id'
+import { createAgentCompletionCoordinator } from '../components/terminal-pane/agent/completion-coordinator'
+import type {
+  AgentCompletionCoordinator,
+  AgentCompletionStatusSnapshot
+} from '../components/terminal-pane/agent/completion-coordinator-types'
+import { dispatchAgentHookTerminalLifecycle } from '../components/terminal-pane/agent/hook-terminal-lifecycle'
 import {
   shouldSyncAgentHookCompletionForStoreUpdate,
   type AgentHookCompletionStoreSnapshot

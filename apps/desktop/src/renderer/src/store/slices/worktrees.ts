@@ -17,8 +17,6 @@ import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import type { StateCreator } from 'zustand'
 
 import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
-import { forgetAgentHibernationTabOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '@/components/terminal-pane/agent-startup-delivery-guards'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { branchName } from '@/lib/git-utils'
@@ -63,6 +61,8 @@ import {
   getLockedWorktreeRemovalReason,
   isLockedWorktreeRemovalError
 } from '../../../../shared/workspace/worktree-removal'
+import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
 import { clearSessionCommitDraftForWorktree } from '../../components/workspace-panel/source-control/commit-draft-session'
 import {
   forgetHugeRepoWarningDismissalsForWorktrees,

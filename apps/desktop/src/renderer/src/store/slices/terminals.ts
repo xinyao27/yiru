@@ -15,8 +15,6 @@ import type { StateCreator } from 'zustand'
 import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
 import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
 import { hasWorktreeSleepIntent } from '@/components/sidebar/worktree-sleep-intent'
-import { forgetAgentHibernationTabOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '@/components/terminal-pane/agent-startup-delivery-guards'
 import {
   normalizeTerminalLayoutSnapshot,
   resolvePtyBoundActiveLeafId
@@ -86,6 +84,8 @@ import {
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace/scope'
+import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
 import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
 import type { AppState } from '../types'
 import {

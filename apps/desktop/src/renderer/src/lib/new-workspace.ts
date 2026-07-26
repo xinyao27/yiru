@@ -4,12 +4,6 @@ import {
   getSettingsForAgentTabRuntimeOwner,
   pasteDraftToAgentPtyWhenReady
 } from '@/components/native-chat/agent-paste-draft'
-import {
-  beginAgentStartupDeliveryAttempt,
-  getAgentStartupTabPtyId,
-  queuePendingAgentStartupDelivery,
-  resolveAgentStartupTabId
-} from '@/components/terminal-pane/agent-startup-delayed-delivery'
 import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
 import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import { createBrowserUuid } from '@/lib/browser-uuid'
@@ -18,6 +12,12 @@ import { useAppStore } from '@/store'
 
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import type { FolderWorkspaceLinkedReview, YiruHooks } from '../../../shared/types'
+import {
+  beginAgentStartupDeliveryAttempt,
+  getAgentStartupTabPtyId,
+  queuePendingAgentStartupDelivery,
+  resolveAgentStartupTabId
+} from '../components/terminal-pane/agent/startup-delayed-delivery'
 export { getLinkedWorkItemSuggestedName } from '@yiru/workbench-model/workspace'
 export { getLinkedWorkItemWorkspaceName } from '@yiru/workbench-model/workspace'
 export { getWorkspaceIntentName } from '@yiru/workbench-model/workspace'

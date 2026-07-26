@@ -28,7 +28,7 @@ import {
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
 import { safeFind } from '../terminal-search-safe-find'
-import type { PtyTransport } from './pty-transport'
+import type { PtyTransport } from './pty/transport'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'

@@ -11,7 +11,7 @@ import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import type { AppState } from '@/store/types'
 
-import { reportTerminalDropUploadSkipsAndFailures } from '../terminal-pane/terminal-drop-upload-report'
+import { reportTerminalDropUploadSkipsAndFailures } from '../terminal-pane/drop/upload-report'
 import { findTerminalTabWorktreeId, resolveNativeChatFileLinkContext } from './file-link'
 
 export type NativeChatAttachmentOwner =

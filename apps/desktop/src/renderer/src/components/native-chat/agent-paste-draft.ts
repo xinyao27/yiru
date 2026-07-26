@@ -16,7 +16,7 @@ import type { TuiAgent } from '../../../../shared/types'
 import type { GlobalSettings } from '../../../../shared/types'
 import { agentDeliversDraftViaNativePrefill } from '../../lib/agent-native-draft-prefill'
 import { getSettingsForWorktreeRuntimeOwner } from '../../lib/worktree-runtime-owner'
-import { sendAgentDraftPasteContent } from '../terminal-pane/agent-draft-paste-content'
+import { sendAgentDraftPasteContent } from '../terminal-pane/agent/draft-paste-content'
 import { waitForAgentDraftInputReady } from './agent-draft-readiness'
 import { waitForAgentReady } from './agent-ready-wait'
 export {
@@ -26,7 +26,7 @@ export {
   chunkAgentDraftPasteContent,
   iterateAgentDraftPasteContentChunks,
   sendAgentDraftPasteContent
-} from '../terminal-pane/agent-draft-paste-content'
+} from '../terminal-pane/agent/draft-paste-content'
 
 // Why: bracketed paste markers let modern TUIs (Claude Code / Codex / Pi /
 // OpenCode / Gemini / cursor-agent / copilot) treat the inserted text as a

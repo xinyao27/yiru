@@ -1,10 +1,10 @@
-import { subscribeToPtyData } from '@/components/terminal-pane/pty-data-sidecar-subscriptions'
 import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import { subscribeToRuntimeTerminalData } from '@/runtime/terminal-stream'
 
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'
 import type { DraftPasteReadySignal } from '../../../../shared/tui-agent/config'
 import type { GlobalSettings } from '../../../../shared/types'
+import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
 
 const BRACKETED_PASTE_QUIET_MS = 1500
 

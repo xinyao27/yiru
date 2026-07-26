@@ -28,7 +28,7 @@ import {
   shouldClearLaunchAgentForClosedPane
 } from './close-identity'
 import { startParkedTerminalByteWatcher } from './parked-terminal-byte-watcher'
-import { subscribeToPtyExit } from './pty-dispatcher'
+import { subscribeToPtyExit } from './pty/dispatcher'
 import { isSnapshotBackedTerminalPty } from './terminal-hidden-view-parking'
 import { detachTerminalLayoutLeaf } from './terminal-layout-leaf-detach'
 

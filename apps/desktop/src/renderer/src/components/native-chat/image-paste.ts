@@ -6,7 +6,7 @@
 
 import type { AgentType } from '@yiru/workbench-model/agent'
 
-import { isImageDropPath } from '../terminal-pane/terminal-drop-image-path'
+import { isImageDropPath } from '../terminal-pane/drop/image-path'
 
 /** How a given agent consumes a pasted image. `attachment` = bracket-paste the
  *  image path into the hosted TUI so it becomes an image chip; `unsupported` =

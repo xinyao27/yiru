@@ -10,14 +10,14 @@ import {
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { useAppStore } from '@/store'
 
+import { handleTerminalFileDrop } from './drop/handler'
 import { handleFocusTerminalPaneDetail } from './focus-terminal-pane-event'
 import {
   releaseRendererPtyVisibilityClaim,
   setRendererPtyVisibilityClaim
-} from './pty-renderer-delivery-claims'
-import type { PtyTransport } from './pty-transport'
+} from './pty/renderer-delivery-claims'
+import type { PtyTransport } from './pty/transport'
 import { surfaceStaleAgentRow } from './stale-agent-row'
-import { handleTerminalFileDrop } from './terminal-drop-handler'
 import { handleTerminalProgrammaticTextPaste } from './terminal-programmatic-text-paste'
 import {
   hideTerminalVisibility,

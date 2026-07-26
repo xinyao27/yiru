@@ -8,7 +8,7 @@ import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 import { measureUtf8ByteLength } from '../../../../shared/utf8-byte-limits'
 import { serializeTerminalLayout } from './layout-serialization'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
-import type { PtyTransport } from './pty-transport'
+import type { PtyTransport } from './pty/transport'
 
 const MAX_BUFFER_BYTES = TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT
 

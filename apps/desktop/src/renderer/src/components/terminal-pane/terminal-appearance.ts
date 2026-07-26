@@ -22,7 +22,7 @@ import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-he
 import type { TerminalViewAttributes } from '../../../../shared/terminal/view-attributes'
 import type { GlobalSettings } from '../../../../shared/types'
 import { buildFontFamily } from './layout-serialization'
-import type { PtyTransport } from './pty-transport'
+import type { PtyTransport } from './pty/transport'
 import { maybePushMode2031Flip } from './terminal-mode-2031-replies'
 import { guardParserHandler } from './terminal-parser-handler-guard'
 import { publishTerminalViewAttributes } from './terminal-view-attributes-publisher'

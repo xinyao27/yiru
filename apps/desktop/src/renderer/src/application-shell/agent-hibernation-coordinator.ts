@@ -12,7 +12,7 @@ import {
   type AgentHibernationCandidate,
   type AgentHibernationPlannerSnapshot
 } from '../components/settings/agent/hibernation-planner'
-import { getAgentHibernationOutputSignature } from '../components/terminal-pane/agent-hibernation-output-activity'
+import { getAgentHibernationOutputSignature } from '../components/terminal-pane/agent/hibernation-output-activity'
 import {
   getForegroundTerminalTabIds,
   getForegroundTerminalTabLastSeenAtById

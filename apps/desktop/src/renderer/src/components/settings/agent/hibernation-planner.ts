@@ -13,11 +13,15 @@ import type {
 } from '../../../../../shared/types'
 import { parseRemoteRuntimePtyId } from '../../../runtime/terminal-stream'
 import { isCompletedAgentWithLiveRecoveryRecord } from '../completed-agent-live-recovery-record'
+import { getEffectiveAgentHibernationIdleMs } from './hibernation-idle-threshold'
 import { lastInputBlocksHibernation } from './hibernation-input-guard'
 
-export const DEFAULT_AGENT_HIBERNATION_IDLE_MS = 30 * 60 * 1000
-export const MIN_AGENT_HIBERNATION_IDLE_MS = 60 * 1000
-export const MAX_AGENT_HIBERNATION_IDLE_MS = 24 * 60 * 60 * 1000
+export {
+  DEFAULT_AGENT_HIBERNATION_IDLE_MS,
+  getEffectiveAgentHibernationIdleMs,
+  MAX_AGENT_HIBERNATION_IDLE_MS,
+  MIN_AGENT_HIBERNATION_IDLE_MS
+} from './hibernation-idle-threshold'
 
 export type AgentHibernationPlannerSnapshot = {
   settings: Pick<GlobalSettings, 'experimentalAgentHibernation' | 'agentHibernationIdleMs'> | null
@@ -63,15 +67,6 @@ type EligiblePane = {
 
 function toRuntimePtyId(ptyId: string): string {
   return parseRemoteRuntimePtyId(ptyId)?.handle ?? ptyId
-}
-
-export function getEffectiveAgentHibernationIdleMs(value: unknown): number {
-  return typeof value === 'number' &&
-    Number.isFinite(value) &&
-    value >= MIN_AGENT_HIBERNATION_IDLE_MS &&
-    value <= MAX_AGENT_HIBERNATION_IDLE_MS
-    ? value
-    : DEFAULT_AGENT_HIBERNATION_IDLE_MS
 }
 
 function getLivePtyIdsForTab(

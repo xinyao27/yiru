@@ -161,10 +161,10 @@ inline apps/desktop/src/renderer/src/components/status-bar/workspace-space-manag
 inline apps/desktop/src/renderer/src/components/tab-bar/tab-bar.tsx
 inline apps/desktop/src/renderer/src/components/tab-group/use-tab-drag-split.ts
 inline apps/desktop/src/renderer/src/components/tab-group/use-tab-group-workspace-model.ts
-inline apps/desktop/src/renderer/src/components/terminal-pane/agent-completion-coordinator.ts
+inline apps/desktop/src/renderer/src/components/terminal-pane/agent/completion-coordinator.ts
 inline apps/desktop/src/renderer/src/components/terminal-pane/keyboard-handlers.ts
-inline apps/desktop/src/renderer/src/components/terminal-pane/pty-connection.ts
-inline apps/desktop/src/renderer/src/components/terminal-pane/pty-transport.ts
+inline apps/desktop/src/renderer/src/components/terminal-pane/pty/connection.ts
+inline apps/desktop/src/renderer/src/components/terminal-pane/pty/transport.ts
 inline apps/desktop/src/renderer/src/components/terminal-pane/remote-runtime-pty-transport.ts
 inline apps/desktop/src/renderer/src/components/terminal-pane/terminal-pane.tsx
 inline apps/desktop/src/renderer/src/components/terminal-pane/use-terminal-pane-context-menu.ts

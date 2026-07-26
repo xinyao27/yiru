@@ -3,12 +3,12 @@ import { getConnectionId } from '@/lib/connection-context'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
 
-import type { PtyTransport } from './pty-transport'
+import { executeTerminalPastePlan, planTerminalPasteWithYield } from './paste/coordinator'
+import { resolveTerminalPasteRuntime } from './paste/runtime'
+import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
+import { isTerminalPanePasteTargetCurrent } from './paste/target-state'
+import type { PtyTransport } from './pty/transport'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
-import { executeTerminalPastePlan, planTerminalPasteWithYield } from './terminal-paste-coordinator'
-import { resolveTerminalPasteRuntime } from './terminal-paste-runtime'
-import { getTerminalPasteSshRemotePlatform } from './terminal-paste-ssh-platform'
-import { isTerminalPanePasteTargetCurrent } from './terminal-paste-target-state'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 
 type HandleTerminalProgrammaticTextPasteArgs = {

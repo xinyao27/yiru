@@ -1,11 +1,5 @@
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 
-import { subscribeToPtyData } from '@/components/terminal-pane/pty-data-sidecar-subscriptions'
-import {
-  registerEagerPtyBuffer,
-  subscribeToPtyExit,
-  type EagerPtyHandle
-} from '@/components/terminal-pane/pty-dispatcher'
 import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
@@ -31,6 +25,12 @@ import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
 } from '../../../../shared/tui-agent/launch-defaults'
+import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
+import {
+  registerEagerPtyBuffer,
+  subscribeToPtyExit,
+  type EagerPtyHandle
+} from '../terminal-pane/pty/dispatcher'
 import { scheduleAgentBackgroundDraft } from './agent-background-draft-delivery'
 import { runBestEffortAgentBackgroundCleanups } from './agent-background-session-cleanup'
 import type {

@@ -20,8 +20,8 @@ import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 import type { ManagedPane, PaneManager } from '@/lib/pane-manager/pane-manager'
 import { WORKSPACE_FILE_PATH_MIME, WORKSPACE_FILE_PATHS_MIME } from '@/lib/workspace-file-drag'
 
-import type { PtyTransport } from './pty-transport'
-import { handleInternalTerminalFileDrop } from './terminal-drop-handler'
+import { handleInternalTerminalFileDrop } from './drop/handler'
+import type { PtyTransport } from './pty/transport'
 
 export type PaneTitleOverlayRect = {
   left: number

@@ -12,8 +12,8 @@ import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/tit
 import type {
   AgentCompletionDispatchMeta,
   AgentCompletionStatusSnapshot
-} from './agent-completion-coordinator-types'
-import { isSupersededAgentCompletionSnapshot } from './agent-completion-snapshot-staleness'
+} from './agent/completion-coordinator-types'
+import { isSupersededAgentCompletionSnapshot } from './agent/completion-snapshot-staleness'
 import {
   isYiruWindowForegroundFocused,
   isVisibleForegroundPaneKey

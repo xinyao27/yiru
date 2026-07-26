@@ -28,11 +28,11 @@ import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,
   isAgentTaskCompleteTrackingEnabledFromState
-} from './agent-task-complete-policy'
+} from './agent/task-complete-policy'
 import { startParkedTerminalMode2031Responder } from './parked-terminal-mode2031-responder'
-import { subscribeToPtyData } from './pty-data-sidecar-subscriptions'
-import { acquireHiddenRendererPtyDeliveryClaim } from './pty-renderer-delivery-claims'
-import { createPtyOutputProcessor } from './pty-transport'
+import { subscribeToPtyData } from './pty/data-sidecar-subscriptions'
+import { acquireHiddenRendererPtyDeliveryClaim } from './pty/renderer-delivery-claims'
+import { createPtyOutputProcessor } from './pty/transport'
 import { isRendererHiddenPtyDeliveryGateEnabled } from './terminal-hidden-delivery-gate'
 import {
   isMainTerminalSideEffectAuthorityForPty,

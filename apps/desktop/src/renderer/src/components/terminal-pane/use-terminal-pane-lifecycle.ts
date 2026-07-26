@@ -73,6 +73,19 @@ import {
 } from './close-identity'
 import { applyExpandedLayoutTo, restoreExpandedLayoutFrom } from './expand-collapse'
 import {
+  armTerminalImePendingCandidateKeyRelease,
+  clearTerminalImePendingCandidateKeyRelease,
+  createTerminalImePendingCandidateKeyReleases,
+  shouldApplyTerminalImePendingCandidateKeyRelease
+} from './ime/candidate-key-release-guard'
+import { installTerminalImeCompositionTracker } from './ime/composition-tracker'
+import {
+  DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES,
+  getMacNativeTextInputSourceTracker
+} from './ime/input-source'
+import { installTerminalImeLinuxCandidateState } from './ime/linux-candidate-state'
+import { installTerminalImeNativeTextForwarder } from './ime/native-text-forwarder'
+import {
   buildFontFamily,
   normalizeTerminalLayoutSnapshot,
   RESET_KITTY_KEYBOARD_PROTOCOL,
@@ -84,8 +97,8 @@ import { handleOsc52ClipboardRequest } from './osc52-clipboard'
 import { showOsc52ClipboardBlockedToast } from './osc52-clipboard-blocked-toast'
 import { fitAndFocusPanes, fitPanes } from './pane-helpers'
 import { parseOsc7 } from './parse-osc7'
-import { connectPanePty } from './pty-connection'
-import type { PtyTransport } from './pty-transport'
+import { connectPanePty } from './pty/connection'
+import type { PtyTransport } from './pty/transport'
 import { isPaneReplaying, type ReplayingPanesRef } from './replay-guard'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { seedStartupSessionRestoredBanner } from './session-restored-banner-pane-state'
@@ -96,19 +109,6 @@ import {
   type ReconcilableBinding
 } from './terminal-dead-session-reconcile'
 import { createTerminalHandleLinkProvider } from './terminal-handle-links'
-import {
-  armTerminalImePendingCandidateKeyRelease,
-  clearTerminalImePendingCandidateKeyRelease,
-  createTerminalImePendingCandidateKeyReleases,
-  shouldApplyTerminalImePendingCandidateKeyRelease
-} from './terminal-ime-candidate-key-release-guard'
-import { installTerminalImeCompositionTracker } from './terminal-ime-composition-tracker'
-import {
-  DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES,
-  getMacNativeTextInputSourceTracker
-} from './terminal-ime-input-source'
-import { installTerminalImeLinuxCandidateState } from './terminal-ime-linux-candidate-state'
-import { installTerminalImeNativeTextForwarder } from './terminal-ime-native-text-forwarder'
 import { resolveTerminalJisYenInput } from './terminal-jis-yen-input'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'
 import {

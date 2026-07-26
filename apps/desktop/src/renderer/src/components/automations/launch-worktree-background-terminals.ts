@@ -1,9 +1,5 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 
-import {
-  registerEagerPtyBuffer,
-  type EagerPtyHandle
-} from '@/components/terminal-pane/pty-dispatcher'
 import { translate } from '@/i18n/i18n'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
@@ -19,6 +15,7 @@ import type {
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
 } from '../../../../shared/types'
+import { registerEagerPtyBuffer, type EagerPtyHandle } from '../terminal-pane/pty/dispatcher'
 import { retireUnownedTerminal } from './retire-unowned-background-terminal'
 
 type BackgroundPane = {

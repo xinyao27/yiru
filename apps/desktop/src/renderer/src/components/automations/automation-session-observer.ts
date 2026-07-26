@@ -1,7 +1,5 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 
-import { subscribeToPtyData } from '@/components/terminal-pane/pty-data-sidecar-subscriptions'
-import { subscribeToPtyExit } from '@/components/terminal-pane/pty-dispatcher'
 import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
 import { getRemoteRuntimeTerminalMultiplexer } from '@/runtime/remote-runtime-terminal-multiplexer'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
@@ -13,6 +11,8 @@ import {
 import { useAppStore } from '@/store'
 
 import { createAgentStatusOscProcessor } from '../../../../shared/agent/status-osc'
+import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
+import { subscribeToPtyExit } from '../terminal-pane/pty/dispatcher'
 
 export async function observeExistingAutomationSession(args: {
   ptyId: string

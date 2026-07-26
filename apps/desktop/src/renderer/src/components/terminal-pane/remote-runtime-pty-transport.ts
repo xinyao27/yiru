@@ -32,8 +32,8 @@ import {
   toRuntimeTerminalWorktreeSelector,
   toRuntimeWorktreeSelector
 } from '../../runtime/worktree-selector'
-import { createPtyOutputProcessor } from './pty-transport'
-import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty-transport-types'
+import { createPtyOutputProcessor } from './pty/transport'
+import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty/transport-types'
 import {
   createRemoteRuntimePtyTextBatcher,
   createRemoteRuntimeViewportBatcher

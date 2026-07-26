@@ -6,7 +6,6 @@ import {
   serializePaneTree,
   normalizeTerminalLayoutSnapshot
 } from '@/components/terminal-pane/layout-serialization'
-import { getEagerPtyBufferHandle } from '@/components/terminal-pane/pty-dispatcher'
 import { warnTerminalLifecycleAnomaly } from '@/components/terminal-pane/terminal-lifecycle-diagnostics'
 import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
 import { createBrowserUuid } from '@/lib/browser-uuid'
@@ -40,6 +39,7 @@ import {
   getGroupVisibleTabOrder,
   type VisibleTabRef
 } from '../components/tab-bar/group-tab-order'
+import { getEagerPtyBufferHandle } from '../components/terminal-pane/pty/dispatcher'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
 import { parseRemoteRuntimePtyId } from './terminal-stream'
 

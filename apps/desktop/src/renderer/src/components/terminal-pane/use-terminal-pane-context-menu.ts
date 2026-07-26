@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { AgentSessionContinuationRequest } from '@/components/terminal-pane/agent-session-continuation'
 import {
   REQUEST_ACTIVE_TERMINAL_PANE_SPLIT_EVENT,
   type RequestActiveTerminalPaneSplitDetail
@@ -19,7 +18,18 @@ import { useAppStore } from '@/store'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
-import type { PtyTransport } from './pty-transport'
+import type { AgentSessionContinuationRequest } from './agent/session-continuation'
+import {
+  executeTerminalPastePlan,
+  planTerminalPasteWithYield,
+  type TerminalPasteSource,
+  type TerminalPasteTextOptions
+} from './paste/coordinator'
+import { formatTerminalPasteExecutionError } from './paste/errors'
+import { resolveTerminalPasteRuntime } from './paste/runtime'
+import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
+import { isTerminalPanePasteTargetCurrent } from './paste/target-state'
+import type { PtyTransport } from './pty/transport'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'
@@ -32,16 +42,6 @@ import {
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import { copyTerminalHandleForPane } from './terminal-handle-copy'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
-import {
-  executeTerminalPastePlan,
-  planTerminalPasteWithYield,
-  type TerminalPasteSource,
-  type TerminalPasteTextOptions
-} from './terminal-paste-coordinator'
-import { formatTerminalPasteExecutionError } from './terminal-paste-errors'
-import { resolveTerminalPasteRuntime } from './terminal-paste-runtime'
-import { getTerminalPasteSshRemotePlatform } from './terminal-paste-ssh-platform'
-import { isTerminalPanePasteTargetCurrent } from './terminal-paste-target-state'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 import { sendTerminalQuickCommandToPane } from './terminal-quick-command-dispatch'
 import { scheduleImagePasteWebglAtlasRecovery } from './terminal-webgl-atlas-recovery'

@@ -12,23 +12,20 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { importExternalPathsToRuntime } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
-import type { PtyTransport } from './pty-transport'
-import { resolveNativeTerminalDropPane } from './terminal-drop-pane-resolution'
-import { writeTerminalDropPathsToCapturedTarget } from './terminal-drop-path-writer'
+import { resolveNativeTerminalDropPane } from './drop/pane-resolution'
+import { writeTerminalDropPathsToCapturedTarget } from './drop/path-writer'
 import {
   getTerminalTargetShellForWorktreePath,
   isTerminalDropWindowsPathLike,
   resolveTerminalDropTargetShell
-} from './terminal-drop-shell'
-import { captureTerminalDropTarget, getCurrentTerminalDropTransport } from './terminal-drop-target'
-import { reportTerminalDropUploadSkipsAndFailures } from './terminal-drop-upload-report'
-import {
-  joinRuntimeTerminalDropDir,
-  resolveTerminalDropWorktreePath
-} from './terminal-drop-worktree-path'
-import { showTerminalDropWriteFailure } from './terminal-drop-write-failure'
+} from './drop/shell'
+import { captureTerminalDropTarget, getCurrentTerminalDropTransport } from './drop/target'
+import { reportTerminalDropUploadSkipsAndFailures } from './drop/upload-report'
+import { joinRuntimeTerminalDropDir, resolveTerminalDropWorktreePath } from './drop/worktree-path'
+import { showTerminalDropWriteFailure } from './drop/write-failure'
+import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
+import type { PtyTransport } from './pty/transport'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
-import { getTerminalPasteSshRemotePlatform } from './terminal-paste-ssh-platform'
 
 export type NativeTerminalFileDropArgs = {
   manager: PaneManager

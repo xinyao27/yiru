@@ -40,7 +40,7 @@ import type { KeybindingOverrides } from '../../../../shared/keybindings'
 import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import { isMacPlatform, nativeChatToggleShortcutLabel } from '../native-chat/shortcut'
-import { AgentSessionContinuationMenuItem } from './agent-session-continuation-menu-item'
+import { AgentSessionContinuationMenuItem } from './agent/session-continuation-menu-item'
 import { shouldIgnoreTerminalMenuPointerDownOutside } from './terminal-context-menu-dismiss'
 import { TerminalIdMenuItems } from './terminal-id-menu-items'
 

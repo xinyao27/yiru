@@ -18,7 +18,7 @@ import {
   activateAndRevealWorktree
 } from '../../../lib/worktree-activation'
 import { findWorktreeById } from '../../../store/slices/worktree-helpers'
-import type { AgentSessionContinuationRequest } from '../../terminal-pane/agent-session-continuation'
+import type { AgentSessionContinuationRequest } from '../../terminal-pane/agent/session-continuation'
 import {
   buildAiVaultResumeCopyCommandForWorktree,
   buildAiVaultResumeStartupForWorktree,
