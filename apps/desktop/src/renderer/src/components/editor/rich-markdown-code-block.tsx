@@ -271,7 +271,7 @@ export function RichMarkdownCodeBlock({
         {copied ? (
           <>
             <Check size={14} />
-            <span className="code-block-copy-label">
+            <span className="code-block-copy-label ml-[3px] font-sans text-[11px]">
               {translate('auto.components.editor.RichMarkdownCodeBlock.232d9ed853', 'Copied')}
             </span>
           </>
