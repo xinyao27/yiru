@@ -14,8 +14,12 @@ import { dirname, join, posix as pathPosix } from 'node:path'
 import type { SFTPWrapper } from 'ssh2'
 
 import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent/hook-types'
-import { buildPosixHookPayloadCapture } from '../agent-hooks/hook-stdin-contract'
 import {
+  buildPosixHookEnvironmentGuardLines,
+  buildPosixHookPayloadCapture
+} from '../agent-hooks/hook-stdin-contract'
+import {
+  buildPosixAgentHookCurlPostCommand,
   createManagedCommandMatcher,
   getSharedManagedScriptPath,
   wrapPosixHookCommand,
@@ -66,29 +70,11 @@ function getManagedScript(): string {
     // Why: refresh PORT/TOKEN/ENV/VERSION from the current Yiru install so a PTY
     // that survived a Yiru restart still reaches the live listener. See
     // claude/hook-service.ts for the full rationale.
-    'if [ -n "$YIRU_AGENT_HOOK_ENDPOINT" ] && [ -r "$YIRU_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$YIRU_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
-    'fi',
-    'if [ -z "$YIRU_AGENT_HOOK_PORT" ] || [ -z "$YIRU_AGENT_HOOK_TOKEN" ] || [ -z "$YIRU_PANE_KEY" ]; then',
-    '  exit 0',
-    'fi',
+    ...buildPosixHookEnvironmentGuardLines(),
     // Why: worktreeId embeds a filesystem path, so hand-building JSON in POSIX
     // shell is not safe once a path contains quotes or newlines. Post the raw
     // hook payload plus metadata as form fields and let the receiver parse it.
-    // Why: pipe payload to curl's stdin (`payload@-`) instead of an inline
-    // `payload=$VALUE` arg, so tens-of-KB tool output stays off the curl
-    // command line (EDR command-line false positives). Wire body is identical.
-    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${YIRU_AGENT_HOOK_PORT}/hook/kimi" \\',
-    '  --connect-timeout 0.5 --max-time 1.5 \\',
-    '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Yiru-Agent-Hook-Token: ${YIRU_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${YIRU_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${YIRU_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${YIRU_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${YIRU_WORKTREE_ID}" \\',
-    '  --data-urlencode "env=${YIRU_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${YIRU_AGENT_HOOK_VERSION}" \\',
-    '  --data-urlencode "payload@-" >/dev/null 2>&1 || true',
+    buildPosixAgentHookCurlPostCommand('kimi'),
     'exit 0',
     ''
   ].join('\n')

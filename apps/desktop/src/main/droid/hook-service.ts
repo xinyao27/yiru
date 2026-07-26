@@ -5,12 +5,14 @@ import type { SFTPWrapper } from 'ssh2'
 
 import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent/hook-types'
 import {
+  buildPosixHookEnvironmentGuardLines,
   buildPosixHookPayloadCapture,
   buildWindowsHookEnvironmentGuardLines,
   buildWindowsHookStdinDrainEpilogue
 } from '../agent-hooks/hook-stdin-contract'
 import {
   buildManagedCommandHook,
+  buildPosixAgentHookCurlPostCommand,
   createManagedCommandMatcher,
   buildWindowsAgentHookPostCommand,
   getSharedManagedScriptPath,
@@ -95,27 +97,8 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
   return [
     '#!/bin/sh',
     ...buildPosixHookPayloadCapture(),
-    'if [ -n "$YIRU_AGENT_HOOK_ENDPOINT" ] && [ -r "$YIRU_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$YIRU_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
-    'fi',
-    'if [ -z "$YIRU_AGENT_HOOK_PORT" ] || [ -z "$YIRU_AGENT_HOOK_TOKEN" ] || [ -z "$YIRU_PANE_KEY" ]; then',
-    '  exit 0',
-    'fi',
-    // Timeout caps best-effort hook posts if the local listener stalls.
-    // Why: pipe payload to curl's stdin (`payload@-`) instead of an inline
-    // `payload=$VALUE` arg, so tens-of-KB tool output stays off the curl
-    // command line (EDR command-line false positives). Wire body is identical.
-    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${YIRU_AGENT_HOOK_PORT}/hook/droid" \\',
-    '  --connect-timeout 0.5 --max-time 1.5 \\',
-    '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Yiru-Agent-Hook-Token: ${YIRU_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${YIRU_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${YIRU_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${YIRU_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${YIRU_WORKTREE_ID}" \\',
-    '  --data-urlencode "env=${YIRU_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${YIRU_AGENT_HOOK_VERSION}" \\',
-    '  --data-urlencode "payload@-" >/dev/null 2>&1 || true',
+    ...buildPosixHookEnvironmentGuardLines(),
+    buildPosixAgentHookCurlPostCommand('droid'),
     'exit 0',
     ''
   ].join('\n')
