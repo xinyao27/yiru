@@ -28,7 +28,7 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(1_603) }
   },
   {
-    files: ['src/browser/mobile-browser-pane.tsx'],
+    files: ['src/browser/pane.tsx'],
     rules: { 'max-lines': createMaxLinesRule(1_594) }
   },
   {
@@ -44,7 +44,7 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(1_074) }
   },
   {
-    files: ['src/components/mobile-rich-markdown-editor-html.ts'],
+    files: ['src/components/rich-markdown-editor-html.ts'],
     rules: { 'max-lines': createMaxLinesRule(648) }
   },
   {

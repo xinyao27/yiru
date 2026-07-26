@@ -1,7 +1,7 @@
 import { ThinkingOrb } from 'expo-thinking-orbs'
 
-import type { MobileLoaderStyle } from '../loading/mobile-loader-style'
-import { useMobileLoaderStyle } from '../loading/mobile-loader-style-context'
+import type { MobileLoaderStyle } from '../loading/loader-style'
+import { useMobileLoaderStyle } from '../loading/loader-style-context'
 import { useThemeColors } from '../theme/uniwind-theme-values'
 
 type LoadingIndicatorProps = {

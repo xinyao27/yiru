@@ -9,7 +9,7 @@ import {
   ensureNotificationPermissions,
   getNotificationPermissionState,
   type NotificationPermissionState
-} from '../src/notifications/mobile-notifications'
+} from '../src/notifications/notifications'
 import {
   loadPushNotificationsEnabled,
   savePushNotificationsEnabled

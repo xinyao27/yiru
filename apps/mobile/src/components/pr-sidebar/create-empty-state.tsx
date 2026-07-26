@@ -8,25 +8,25 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { MobileCommitFailurePanel } from '../../source-control/mobile-commit-failure-panel'
+import { MobileCommitFailurePanel } from '../../source-control/commit-failure-panel'
 import {
   getMobileCommitFailureStagedEntries,
   type MobileCommitFailureRecovery
-} from '../../source-control/mobile-commit-failure-recovery'
-import type { MobileGitStatusResult } from '../../source-control/mobile-git-status'
-import { mobileHostedReviewCreateIntentProgressMessage } from '../../source-control/mobile-hosted-review-create-intent'
-import type { MobileHostedReviewCreateIntentProgress } from '../../source-control/mobile-hosted-review-create-intent'
+} from '../../source-control/commit-failure-recovery'
+import type { MobileGitStatusResult } from '../../source-control/git-status'
+import { mobileHostedReviewCreateIntentProgressMessage } from '../../source-control/hosted-review-create-intent'
+import type { MobileHostedReviewCreateIntentProgress } from '../../source-control/hosted-review-create-intent'
 import {
   isMobileHostedReviewCommitFailure,
   runMobileHostedReviewCreateIntent
-} from '../../source-control/mobile-hosted-review-create-intent-runner'
-import { recoverMobileHostedReviewRejectedPush } from '../../source-control/mobile-hosted-review-rejected-push-recovery'
-import { fetchWorktreeLinkedPR } from '../../source-control/mobile-pr-link'
-import { useMobileCommitFailureRecovery } from '../../source-control/use-mobile-commit-failure-recovery'
+} from '../../source-control/hosted-review-create-intent-runner'
+import { recoverMobileHostedReviewRejectedPush } from '../../source-control/hosted-review-rejected-push-recovery'
+import { fetchWorktreeLinkedPR } from '../../source-control/pr-link'
+import { useMobileCommitFailureRecovery } from '../../source-control/use-commit-failure-recovery'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { ConnectionState } from '../../transport/types'
-import { openMobilePrUrl } from '../mobile-pr-compose-sheet'
-import { MobileLinkPrForm } from './mobile-link-pr-form'
+import { openMobilePrUrl } from '../pr-compose-sheet'
+import { MobileLinkPrForm } from './link-pr-form'
 import { prCreateEmptyStateStyles as styles } from './pr-create-empty-state-styles'
 
 type Props = {

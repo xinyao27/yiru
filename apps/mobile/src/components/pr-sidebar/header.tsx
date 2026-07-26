@@ -6,12 +6,12 @@ import { ArrowRight, ArrowSquareOut as ExternalLink, Pencil } from '@/components
 import { cn } from '@/style/class-names'
 
 import { canEditPRTitle } from '../../session/pr-title-edit'
-import type { MobilePrTitleAction } from '../../session/use-mobile-pr-title-action'
-import { openMobilePrUrl } from '../mobile-pr-compose-sheet'
-import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
+import type { MobilePrTitleAction } from '../../session/use-pr-title-action'
+import { openMobilePrUrl } from '../pr-compose-sheet'
 import { prStateBadge } from './pr-checks-presentation'
 import { prCommentComposerStyles as composerStyles } from './pr-comment-composer-styles'
 import { statusColorClasses } from './status-color'
+import { mobilePrSidebarStyles as styles } from './styles'
 
 type Props = {
   pr: PRInfo

@@ -1,15 +1,15 @@
 import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 
-import { applyMobileWorkspaceLineage } from './mobile-workspace-lineage'
+import { applyMobileWorkspaceLineage } from './workspace-lineage'
+import { sortWorktrees } from './workspace-list-ordering'
+import type { FilterState, Section, Worktree } from './workspace-list-types'
+import { getPRGroupKey, PR_GROUP_LABELS, PR_GROUP_ORDER } from './workspace-pr-status-groups'
 import {
   DEFAULT_MOBILE_WORKSPACE_STATUSES,
   coerceMobileWorkspaceStatuses,
   getMobileWorkspaceStatus,
   getMobileWorkspaceStatusGroupKey
-} from './mobile-workspace-statuses'
-import { sortWorktrees } from './workspace-list-ordering'
-import type { FilterState, Section, Worktree } from './workspace-list-types'
-import { getPRGroupKey, PR_GROUP_LABELS, PR_GROUP_ORDER } from './workspace-pr-status-groups'
+} from './workspace-statuses'
 import type { MobileGroupMode, MobileSortMode } from './workspace-view-settings'
 
 export type { FilterState, Section, Worktree } from './workspace-list-types'

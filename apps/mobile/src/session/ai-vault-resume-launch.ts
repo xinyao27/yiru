@@ -18,7 +18,7 @@ import {
   readMobileReviewCreatedTerminal,
   readMobileReviewTerminalSendAccepted,
   type MobileReviewTerminalTab
-} from './mobile-diff-review-rpc'
+} from './diff-review-rpc'
 
 const NODE_PLATFORMS = new Set<NodeJS.Platform>([
   'aix',

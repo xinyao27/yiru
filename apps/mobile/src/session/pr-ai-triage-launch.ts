@@ -2,7 +2,7 @@ import type { RpcClient } from '../transport/rpc-client'
 import {
   readMobileReviewCreatedTerminal,
   readMobileReviewTerminalSendAccepted
-} from './mobile-diff-review-rpc'
+} from './diff-review-rpc'
 
 // Pure launch path for the PR triage actions ("Fix checks with AI" / "Resolve
 // conflicts with AI"). Reuses the same two RPCs the diff-review send flow uses —

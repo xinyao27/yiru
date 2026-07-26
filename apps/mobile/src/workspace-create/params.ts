@@ -7,8 +7,8 @@ import type {
   SetupDecision
 } from '@yiru/workbench-model/workspace'
 
-import { resolveMobileWorkspaceCreateName } from './mobile-workspace-name'
 import type { WorkspaceAgentChoice } from './workspace-agent-selection'
+import { resolveMobileWorkspaceCreateName } from './workspace-name'
 
 export type WorkspaceCreateSetupDecision = SetupDecision
 export type WorkspaceCreateSparseCheckout = CreateSparseCheckoutRequest

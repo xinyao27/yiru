@@ -39,12 +39,12 @@ import { ActionSheetContent } from '../../../src/components/action-sheet-modal'
 import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
-import { MobileRepoIcon } from '../../../src/components/mobile-repo-icon'
-import { MobileSearchField } from '../../../src/components/mobile-search-field'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
 import { PickerModal } from '../../../src/components/picker-modal'
 import { ProtocolBlockScreen } from '../../../src/components/protocol-block-screen'
+import { MobileRepoIcon } from '../../../src/components/repo-icon'
+import { MobileSearchField } from '../../../src/components/search-field'
 import { StatusDot } from '../../../src/components/status-dot'
 import { WorkspaceDetailPlaceholder } from '../../../src/components/workspace-detail-placeholder'
 import { WorktreeListRow } from '../../../src/components/worktree-list-row'
@@ -80,10 +80,9 @@ import type { RpcSuccess } from '../../../src/transport/types'
 import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'
 import type { RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
 import { areWorktreeListsEqual } from '../../../src/worktree/list-snapshot'
-import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/mobile-workspace-lineage'
-import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '../../../src/worktree/mobile-workspace-statuses'
 import { repoColor } from '../../../src/worktree/repo-color'
 import { useWorkspaceSections } from '../../../src/worktree/use-workspace-sections'
+import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/workspace-lineage'
 import {
   WORKSPACE_GROUP_OPTIONS as GROUP_OPTIONS,
   WORKSPACE_SORT_OPTIONS as SORT_OPTIONS
@@ -94,6 +93,7 @@ import {
   type FilterState,
   type Worktree
 } from '../../../src/worktree/workspace-list-sections'
+import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '../../../src/worktree/workspace-statuses'
 import {
   applyDesktopViewSettings,
   groupModeToDesktop,

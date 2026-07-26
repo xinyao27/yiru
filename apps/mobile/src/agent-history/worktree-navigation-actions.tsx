@@ -1,8 +1,8 @@
 import { GitMerge } from '@/components/uniwind-icons'
 
 import type { ActionSheetAction } from '../components/action-sheet-modal'
+import { MobileAgentSessionHistoryIcon } from './agent-session-history-icon'
 import { MOBILE_AI_VAULT_CAPABILITY } from './capability'
-import { MobileAgentSessionHistoryIcon } from './mobile-agent-session-history-icon'
 
 type Args = {
   hostId: string

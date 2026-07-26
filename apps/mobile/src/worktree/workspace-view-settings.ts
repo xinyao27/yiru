@@ -5,7 +5,7 @@
 
 import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 
-import { coerceMobileWorkspaceStatuses } from './mobile-workspace-statuses'
+import { coerceMobileWorkspaceStatuses } from './workspace-statuses'
 
 export type MobileGroupMode = 'none' | 'workspaceStatus' | 'repo' | 'prStatus'
 // Desktop sort adds 'manual'; mobile renders it but sorts by server order.

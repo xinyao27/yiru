@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { MrStateFilter } from './mobile-composer-source-types'
+import type { MrStateFilter } from './composer-source-types'
 import { fanOutSmartSearch, type SmartFanOutResult } from './smart-source-fan-out'
 import {
   findRepoMatchingSlugForPaste,

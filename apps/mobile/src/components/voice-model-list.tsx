@@ -3,11 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { Check, Download, Trash as Trash2 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import {
-  isModelInFlight,
-  type MobileSpeechModel,
-  type MobileSpeechSetup
-} from '../dictation/mobile-dictation-setup'
+import { isModelInFlight, type MobileSpeechModel, type MobileSpeechSetup } from '../dictation/setup'
 
 type Props = {
   setup: MobileSpeechSetup

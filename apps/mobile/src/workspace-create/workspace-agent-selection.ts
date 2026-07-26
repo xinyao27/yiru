@@ -7,7 +7,7 @@ import {
   MOBILE_TUI_AGENT_AUTO_PICK_ORDER,
   MOBILE_TUI_AGENT_LABELS,
   pickMobileTuiAgent
-} from './mobile-tui-agents'
+} from './tui-agents'
 
 export type WorkspaceAgentChoice = TuiAgent | 'blank'
 

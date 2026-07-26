@@ -3,11 +3,11 @@ import { View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import { mobilePrSidebarStyles } from '../components/pr-sidebar/mobile-pr-sidebar-styles'
-import { MobileFileExplorerPanel } from '../files/mobile-file-explorer-panel'
-import { MobileSourceControlPanel } from '../source-control/mobile-source-control-panel'
+import { mobilePrSidebarStyles } from '../components/pr-sidebar/styles'
+import { MobileFileExplorerPanel } from '../files/file-explorer-panel'
+import { MobileSourceControlPanel } from '../source-control/panel'
 import type { ActivePanel } from './panel-host'
-import { useMobileDockResize } from './use-mobile-dock-resize'
+import { useMobileDockResize } from './use-dock-resize'
 
 type Props = {
   activePanel: Exclude<ActivePanel, null>

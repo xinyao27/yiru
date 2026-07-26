@@ -4,7 +4,7 @@ import { Pressable, Switch, Text, TextInput, View } from 'react-native'
 import { CaretDown, CaretRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { MobileAgentIcon } from '../components/mobile-agent-icon'
+import { MobileAgentIcon } from '../components/agent-icon'
 import {
   getQuickCommandAgentLabel,
   MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH,

@@ -30,11 +30,11 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
-import { MobileHostCard } from '../src/components/mobile-host-card'
+import { MobileHostCard } from '../src/components/host-card'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
-import { subscribeToDesktopNotifications } from '../src/notifications/mobile-notifications'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
+import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
 import { triggerMediumImpact } from '../src/platform/haptics'
 import {
   useAllHostClients,

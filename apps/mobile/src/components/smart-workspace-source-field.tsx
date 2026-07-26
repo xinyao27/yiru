@@ -8,8 +8,8 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { SmartNameSelection } from '../workspace-create/mobile-composer-source-types'
-import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
+import type { SmartNameSelection } from '../workspace-create/composer-source-types'
+import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 
 type Props = {
   composer: MobileComposerSource

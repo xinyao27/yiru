@@ -12,9 +12,8 @@ import {
 import { cn } from '@/style/class-names'
 
 import { fetchPRCheckDetails, type GitHubPrRepoSlug } from '../../session/github-pr-rpc'
-import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
+import type { MobilePrActions } from '../../session/use-pr-actions'
 import type { RpcClient } from '../../transport/rpc-client'
-import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { PRCheckDetailView, type DetailEntry } from './pr-check-detail'
 import {
@@ -28,6 +27,7 @@ import {
 } from './pr-checks-presentation'
 import { PRSection } from './pr-section'
 import { statusColorClasses } from './status-color'
+import { mobilePrSidebarStyles as styles } from './styles'
 
 // Launches the "Fix checks with AI" agent. Absent for display-only usages.
 export type PrChecksTriage = {

@@ -7,7 +7,7 @@ import { Check } from '@/components/uniwind-icons'
 import { fetchAssignableUsers } from '../../session/github-pr-rpc'
 import type { RpcClient } from '../../transport/rpc-client'
 import { BottomDrawer } from '../bottom-drawer'
-import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
+import { mobilePrSidebarStyles as styles } from './styles'
 
 type Props = {
   visible: boolean

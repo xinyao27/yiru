@@ -6,7 +6,7 @@ import { cn } from '@/style/class-names'
 
 import { UniwindWebView } from '../components/uniwind-web-view'
 import type { TerminalOscLinkRange } from './osc-link-ranges'
-import { useTerminalWebViewTheme } from './use-terminal-webview-theme'
+import { useTerminalWebViewTheme } from './use-webview-theme'
 import type { TerminalWebViewHandle, TerminalWebViewProps } from './webview-contract'
 import {
   TerminalWebViewEngineErrorOverlay,

@@ -5,13 +5,13 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { UserPlus, X } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
-import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
+import { isPrSidebarDetailsPlaceholder } from '../../session/pr-sidebar-state'
+import type { MobilePrActions } from '../../session/use-pr-actions'
 import type { RpcClient } from '../../transport/rpc-client'
-import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { getPRReviewerRows } from './pr-checks-presentation'
 import { PRSection } from './pr-section'
 import { ReviewerPickerDrawer } from './reviewer-picker-drawer'
+import { mobilePrSidebarStyles as styles } from './styles'
 
 type Props = {
   details: GitHubWorkItemDetails | null

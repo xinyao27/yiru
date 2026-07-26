@@ -7,7 +7,7 @@ import type {
   PRInfo
 } from '@yiru/workbench-model/review'
 
-import { mobileRepoSelectorFromWorktreeId } from '../source-control/mobile-pr-create'
+import { mobileRepoSelectorFromWorktreeId } from '../source-control/pr-create'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import {
