@@ -19,9 +19,9 @@ const NATIVE_BUTTON_ALLOWLIST = new Set([
  * Each path must keep an in-file Why comment explaining the exception.
  */
 const NATIVE_FORM_ALLOWLIST = new Set([
-  'src/renderer/src/components/browser-pane/markup/markup-overlay.tsx',
+  'src/renderer/src/components/browser-pane/markup/overlay.tsx',
   'src/renderer/src/components/editor/rich-markdown-code-block.tsx',
-  'src/renderer/src/components/native-chat/native-chat-composer-field.tsx'
+  'src/renderer/src/components/native-chat/composer-field.tsx'
 ])
 
 /**
@@ -30,8 +30,8 @@ const NATIVE_FORM_ALLOWLIST = new Set([
  */
 const BLACK_WHITE_ALPHA_ALLOWLIST = new Set([
   'src/renderer/src/components/onboarding/theme-chrome-preview.tsx',
-  'src/renderer/src/components/onboarding/onboarding-flow.tsx',
-  'src/renderer/src/components/onboarding/onboarding-skip-confirmation-dialog.tsx',
+  'src/renderer/src/components/onboarding/flow.tsx',
+  'src/renderer/src/components/onboarding/skip-confirmation-dialog.tsx',
   'src/renderer/src/components/worktree-jump-palette/panel.tsx',
   'src/renderer/src/components/emulator-pane/emulator-phone-hardware-buttons.tsx',
   'src/renderer/src/components/settings/mobile-pairing-qr-section.tsx',
