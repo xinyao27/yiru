@@ -151,6 +151,17 @@ export function useSavedSourceControlAgentActionAutoStart({
 }: UseSavedSourceControlAgentActionAutoStartArgs): SavedSourceControlAgentActionAutoStartResult {
   const autoStartedOpenCycleRef = useRef(0)
   const [receiptState, setReceiptState] = useState<AutoLaunchReceiptState | null>(null)
+  // Why: adjust state during render (React's documented pattern) instead of an
+  // effect — closing the dialog clears the receipt session in the same render
+  // that flips `open`, so a stale receipt can never leak into the next open.
+  const [wasAutoStartOpen, setWasAutoStartOpen] = useState(open)
+  if (wasAutoStartOpen !== open) {
+    setWasAutoStartOpen(open)
+    if (!open) {
+      autoStartedOpenCycleRef.current = 0
+      setReceiptState(null)
+    }
+  }
 
   const savedLaunchRecipe = useMemo(
     () =>
@@ -213,8 +224,6 @@ export function useSavedSourceControlAgentActionAutoStart({
 
   useEffect(() => {
     if (!open) {
-      autoStartedOpenCycleRef.current = 0
-      setReceiptState(null)
       return
     }
     if (receiptState?.openCycle !== openCycle) {

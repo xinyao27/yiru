@@ -68,16 +68,26 @@ export function CoworkingSessionCreateMenu({
     status: 'unavailable'
   })
 
-  useEffect(() => {
+  const authorityKey = `${canControl}:${connected}:${route.connectionEpoch}:${route.desktopRef}:${route.worktreeRef}`
+  const [prevAuthorityKey, setPrevAuthorityKey] = useState(authorityKey)
+  if (authorityKey !== prevAuthorityKey) {
+    setPrevAuthorityKey(authorityKey)
+    // Why: owner agent detection and disabled-agent settings can change while
+    // one physical control grant remains active, and losing connectivity,
+    // control, or the route itself must not leave the menu open on stale
+    // launch options that a late response could still write back in.
+    launchOptionsRequestRef.current += 1
     if (!connected || !canControl) {
-      launchOptionsRequestRef.current += 1
       setLaunchOptions({ status: 'unavailable' })
       setOpen(false)
     }
+  }
+
+  useEffect(() => {
     return () => {
       launchOptionsRequestRef.current += 1
     }
-  }, [canControl, connected, route.connectionEpoch, route.desktopRef, route.worktreeRef])
+  }, [])
 
   const refreshLaunchOptions = useCallback(async (): Promise<void> => {
     const request = ++launchOptionsRequestRef.current

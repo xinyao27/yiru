@@ -243,8 +243,10 @@ export default function AiVaultSessionDropLayer({
   )
 
   useEffect(() => {
+    // Why: the caller keys this component by `enabled` (see
+    // worktree-split-surface.tsx), so a disabled instance is always a fresh
+    // mount with no drag state to clear — only wire up listeners when active.
     if (!enabled) {
-      clearDragState()
       return
     }
 
@@ -336,13 +338,16 @@ export default function AiVaultSessionDropLayer({
       data-worktree-id={worktreeId}
       className={cn(
         'absolute inset-0 z-[10000]',
-        isDragActive ? 'pointer-events-auto' : 'pointer-events-none'
+        // Why: gate on `enabled` too (not just isDragActive) so a disabled
+        // layer never intercepts pointer/drag input, even before its
+        // enabled-keyed remount finishes clearing drag state.
+        enabled && isDragActive ? 'pointer-events-auto' : 'pointer-events-none'
       )}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}
     >
-      {isDragActive && target ? (
+      {enabled && isDragActive && target ? (
         <div
           className="pointer-events-none absolute z-[9999] border-2 border-blue-500/50 bg-blue-500/20"
           style={target.overlayStyle}

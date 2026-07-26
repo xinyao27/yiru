@@ -76,9 +76,19 @@ export function UsagePercentageDisplayChangeNotice({
     activeModal
   })
 
+  // Why: reset the elapsed flag synchronously during render rather than in an
+  // effect, so an eligible → ineligible → eligible cycle starts a fresh
+  // episode and restarts the delay instead of reusing the previous episode's
+  // elapsed flag. See
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [previousEligible, setPreviousEligible] = useState(eligible)
+  if (eligible !== previousEligible) {
+    setPreviousEligible(eligible)
+    setDelayElapsed(false)
+  }
+
   useEffect(() => {
     if (!eligible) {
-      setDelayElapsed(false)
       return
     }
     const timer = window.setTimeout(() => {

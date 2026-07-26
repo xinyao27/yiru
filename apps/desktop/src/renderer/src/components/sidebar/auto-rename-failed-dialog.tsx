@@ -11,6 +11,12 @@ import {
 } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
 
+type FullOutputResult = {
+  worktreeId: string
+  error: string
+  output: string | null
+}
+
 type AutoRenameFailedDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -37,7 +43,7 @@ export function AutoRenameFailedDialog({
   error
 }: AutoRenameFailedDialogProps): React.JSX.Element {
   const [copied, setCopied] = useState(false)
-  const [fullOutput, setFullOutput] = useState<string | null>(null)
+  const [fullOutputResult, setFullOutputResult] = useState<FullOutputResult | null>(null)
   const copiedResetTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -53,17 +59,16 @@ export function AutoRenameFailedDialog({
       return
     }
     let stale = false
-    setFullOutput(null)
     window.api.worktrees
       .getBranchRenameFailureOutput({ worktreeId })
       .then((output) => {
         if (!stale) {
-          setFullOutput(output)
+          setFullOutputResult({ worktreeId, error, output })
         }
       })
       .catch(() => {
         if (!stale) {
-          setFullOutput(null)
+          setFullOutputResult({ worktreeId, error, output: null })
         }
       })
     return () => {
@@ -71,6 +76,15 @@ export function AutoRenameFailedDialog({
     }
   }, [error, open, worktreeId])
 
+  // Why: a fetch keyed to a previous (worktreeId, error) pair must never render
+  // as this failure's detail — a new failure for the same worktree carries a
+  // new persisted excerpt, so both fields identify the request.
+  const fullOutput =
+    fullOutputResult &&
+    fullOutputResult.worktreeId === worktreeId &&
+    fullOutputResult.error === error
+      ? fullOutputResult.output
+      : null
   const detailText = fullOutput ?? error
 
   const handleCopy = useCallback(async () => {

@@ -1,5 +1,5 @@
 import { Warning as AlertTriangle, Clipboard, PaperPlaneRight as Send } from '@phosphor-icons/react'
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -77,6 +77,10 @@ type CrashReportDialogSurfaceProps = {
   onReportChange: (report: CrashReportRecord | null) => void
 }
 
+// Why: tagging the fetched viewer with the request id it resolved for lets a stale or
+// superseded lookup be ignored by comparison instead of an imperative clear.
+type ViewerFetchResult = { requestId: number; viewer: GitHubViewer | null }
+
 export function CrashReportDialogSurface({
   open,
   report,
@@ -86,12 +90,19 @@ export function CrashReportDialogSurface({
 }: CrashReportDialogSurfaceProps): React.JSX.Element {
   const mountedRef = useMountedRef()
   const [notes, setNotes] = useState('')
+  // Why: per-open default. The surface fully unmounts whenever the dialog closes
+  // (see CrashReportDialog's `if (!open) return null`), so this initializer already
+  // resets the checkbox on every genuine open without an imperative effect.
   const [includeDiagnosticLogs, setIncludeDiagnosticLogs] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [viewer, setViewer] = useState<GitHubViewer | null>(null)
+  const [viewerResult, setViewerResult] = useState<ViewerFetchResult | null>(null)
   // Why: account lookup can resolve after the dialog closes or reopens.
   // Sequence the request so a stale viewer is never used for submission.
   const viewerRequestIdRef = useRef(0)
+  const viewer =
+    open && viewerResult && viewerResult.requestId === viewerRequestIdRef.current
+      ? viewerResult.viewer
+      : null
   const deferredNotes = useDeferredValue(notes)
   const diagnosticText = useMemo(
     // Why: formatting applies redaction and truncation over the full crash
@@ -101,37 +112,31 @@ export function CrashReportDialogSurface({
   )
   const copyCrashReportDetails = useCrashReportCopy(report, notes)
 
-  const clearViewer = useCallback((): void => {
+  // Why: bumping the request id invalidates any in-flight lookup so it can no longer
+  // match in the `viewer` derivation above, without needing to set state here.
+  const clearViewer = (): void => {
     viewerRequestIdRef.current += 1
-    setViewer(null)
-  }, [])
+  }
 
-  const loadViewerForOpenDialog = useCallback((): void => {
+  useEffect(() => {
+    if (!open) {
+      return
+    }
     const requestId = ++viewerRequestIdRef.current
-    setViewer(null)
     void window.api.gh
       .viewer()
       .then((nextViewer) => {
         if (mountedRef.current && requestId === viewerRequestIdRef.current) {
-          setViewer(nextViewer)
+          setViewerResult({ requestId, viewer: nextViewer })
         }
       })
       .catch((error) => {
         if (mountedRef.current && requestId === viewerRequestIdRef.current) {
-          setViewer(null)
+          setViewerResult({ requestId, viewer: null })
           console.error('Failed to load GitHub viewer for crash report:', error)
         }
       })
-  }, [mountedRef])
-
-  useEffect(() => {
-    if (!open) {
-      clearViewer()
-      return
-    }
-    setIncludeDiagnosticLogs(true)
-    loadViewerForOpenDialog()
-  }, [clearViewer, loadViewerForOpenDialog, open])
+  }, [mountedRef, open])
 
   const showSubmitFailure = (
     error: unknown,

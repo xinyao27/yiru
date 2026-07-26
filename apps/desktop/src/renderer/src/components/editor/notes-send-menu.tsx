@@ -77,6 +77,7 @@ export function NotesSendMenu<TNote>({
   const closeAgentSendPopoverTargetMode = useAppStore((s) => s.closeAgentSendPopoverTargetMode)
   const activeTargetModeId = useAppStore((s) => s.agentSendPopoverTargetMode?.id ?? null)
   const [sendMenuOpen, setSendMenuOpen] = useState(false)
+  const [menuForcedOpenNonce, setMenuForcedOpenNonce] = useState<number | null>(null)
   const targetModeId = useMemo(() => buildNotesSendTargetModeId(modeIdParts), [modeIdParts])
   const enabledScopes = useMemo(() => scopes.filter((scope) => scope.notes.length > 0), [scopes])
   const defaultScope = useMemo(() => {
@@ -148,6 +149,18 @@ export function NotesSendMenu<TNote>({
     setSendMenuOpen(false)
   }
 
+  // Why: force the menu open exactly once per open-request nonce — mirrors the
+  // stale-menu adjustment above rather than an effect setting a constant flag.
+  if (
+    openRequestNonce !== null &&
+    openRequestNonce !== menuForcedOpenNonce &&
+    hasDeliverableNotes &&
+    defaultScope
+  ) {
+    setMenuForcedOpenNonce(openRequestNonce)
+    setSendMenuOpen(true)
+  }
+
   useEffect(
     () => () => {
       closeAgentSendPopoverTargetMode(targetModeId)
@@ -161,7 +174,6 @@ export function NotesSendMenu<TNote>({
     }
     // Why: consume even an undeliverable request so remounts cannot replay it.
     if (hasDeliverableNotes && defaultScope) {
-      setSendMenuOpen(true)
       openTargetMode(defaultScope)
     }
     onOpenRequestHandled?.()

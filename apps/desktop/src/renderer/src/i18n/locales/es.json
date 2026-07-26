@@ -10245,6 +10245,11 @@
                 "stream": {
                   "f1c0179002": "La transmisión no produce fotogramas."
                 }
+              },
+              "video": {
+                "stream": {
+                  "c3fb77cb87": "This build does not support WebCodecs H.264 decoding."
+                }
               }
             },
             "mobile": {

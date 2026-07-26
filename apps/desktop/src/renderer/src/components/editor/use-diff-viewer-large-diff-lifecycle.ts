@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { monaco } from '@/components/editor/monaco-setup'
 
@@ -12,6 +12,11 @@ type DiffViewerLargeDiffLifecycleInput = {
   modelKey: string
   originalModelKey?: string
   modifiedModelKey?: string
+  // Why: the caller already knows when it enters fallback (it supplies
+  // onEnterFallback below), so it also owns the generation counter that
+  // rotates Monaco paths — this hook receives the current generation as a
+  // plain value instead of keeping its own local counter to bump.
+  fallbackGeneration: number
   onEnterFallback: () => void
 }
 
@@ -20,23 +25,23 @@ export function useDiffViewerLargeDiffLifecycle({
   modelKey,
   originalModelKey,
   modifiedModelKey,
+  fallbackGeneration,
   onEnterFallback
 }: DiffViewerLargeDiffLifecycleInput): {
   originalModelPath: string
   modifiedModelPath: string
 } {
-  const [largeDiffModelGeneration, setLargeDiffModelGeneration] = useState(0)
-  const largeDiffModelGenerationSuffix =
-    largeDiffModelGeneration === 0 ? '' : `:large-diff-generation:${largeDiffModelGeneration}`
+  const fallbackGenerationSuffix =
+    fallbackGeneration === 0 ? '' : `:large-diff-generation:${fallbackGeneration}`
   const currentDiffModelPaths = useMemo(
     () =>
       getDiffViewerMonacoModelPaths({
         modelKey,
         originalModelKey,
         modifiedModelKey,
-        generationSuffix: largeDiffModelGenerationSuffix
+        generationSuffix: fallbackGenerationSuffix
       }),
-    [modelKey, originalModelKey, modifiedModelKey, largeDiffModelGenerationSuffix]
+    [modelKey, originalModelKey, modifiedModelKey, fallbackGenerationSuffix]
   )
   const currentDiffModelPathsRef = useRef(currentDiffModelPaths)
   currentDiffModelPathsRef.current = currentDiffModelPaths
@@ -46,9 +51,9 @@ export function useDiffViewerLargeDiffLifecycle({
       return
     }
     const modelPathsToDispose = currentDiffModelPathsRef.current
-    // Why: rotate below-limit Monaco paths after a safety fallback so stale
-    // large models cannot be reused when the same diff shrinks back down.
-    setLargeDiffModelGeneration((generation) => generation + 1)
+    // Why: the caller bumps fallbackGeneration as part of entering fallback,
+    // rotating below-limit Monaco paths so stale large models cannot be
+    // reused when the same diff shrinks back down.
     onEnterFallback()
     // Why: ordinary tab switches keep models for fast return; the safety
     // fallback must instead release huge detached models after unmount cleanup.

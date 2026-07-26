@@ -81,7 +81,8 @@ export function useEmulatorControlStream(
 
   useEffect(() => {
     if (!enabled || !wsUrl) {
-      setConnected(false)
+      // Why: no reset needed here — connected already defaults to false, and
+      // any prior active effect's cleanup (below) resets it before this runs.
       return
     }
 

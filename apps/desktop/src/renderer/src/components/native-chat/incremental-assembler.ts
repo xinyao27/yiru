@@ -99,3 +99,19 @@ function isTailAppend(
   }
   return true
 }
+
+/** True when `whole`'s first `len` entries are referentially identical to
+ *  `prefix` — i.e. `whole` is `prefix` extended at the tail, so a consumer
+ *  feeding this assembler can splice just the suffix instead of resetting. */
+export function sharesPrefix(
+  whole: readonly NativeChatMessage[],
+  prefix: readonly NativeChatMessage[],
+  len: number
+): boolean {
+  for (let i = 0; i < len; i += 1) {
+    if (whole[i] !== prefix[i]) {
+      return false
+    }
+  }
+  return true
+}

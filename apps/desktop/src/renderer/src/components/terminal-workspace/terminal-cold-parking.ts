@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type RefObject
+} from 'react'
 
 import type { TabGroupLayoutNode } from '../../../../shared/types'
 import { useAppStore } from '../../store'
@@ -60,8 +67,25 @@ export function useTerminalColdParking({
   const terminalWorktreeHiddenSinceRef = useRef(new Map<string, number>())
   const terminalWorktreeParkingTimersRef = useRef(new Map<string, number>())
   const [terminalParkingRevision, setTerminalParkingRevision] = useState(0)
-  const [parkedTerminalWorktreeIds, setParkedTerminalWorktreeIds] = useState<ReadonlySet<string>>(
-    () => new Set()
+  // Why: the parked-id set is published from a timer-driven reconciliation
+  // effect, not from a prop/state change, so it is modeled as an external
+  // store instead of useState — publishing it from the effect would otherwise
+  // read as seeding state from an effect on every recheck.
+  const parkedTerminalWorktreeIdsRef = useRef<ReadonlySet<string>>(new Set())
+  const parkedTerminalWorktreeIdsListenersRef = useRef(new Set<() => void>())
+  const subscribeToParkedTerminalWorktreeIds = useCallback((listener: () => void): (() => void) => {
+    parkedTerminalWorktreeIdsListenersRef.current.add(listener)
+    return () => {
+      parkedTerminalWorktreeIdsListenersRef.current.delete(listener)
+    }
+  }, [])
+  const getParkedTerminalWorktreeIdsSnapshot = useCallback(
+    (): ReadonlySet<string> => parkedTerminalWorktreeIdsRef.current,
+    []
+  )
+  const parkedTerminalWorktreeIds = useSyncExternalStore(
+    subscribeToParkedTerminalWorktreeIds,
+    getParkedTerminalWorktreeIdsSnapshot
   )
 
   useEffect(() => {
@@ -136,11 +160,12 @@ export function useTerminalColdParking({
         nextParkedTerminalWorktreeIds.delete(worktreeId)
       }
     }
-    setParkedTerminalWorktreeIds((current) =>
-      haveSameWorktreeIds(current, nextParkedTerminalWorktreeIds)
-        ? current
-        : nextParkedTerminalWorktreeIds
-    )
+    if (!haveSameWorktreeIds(parkedTerminalWorktreeIdsRef.current, nextParkedTerminalWorktreeIds)) {
+      parkedTerminalWorktreeIdsRef.current = nextParkedTerminalWorktreeIds
+      for (const listener of parkedTerminalWorktreeIdsListenersRef.current) {
+        listener()
+      }
+    }
 
     for (const candidate of retentionCandidates) {
       if (

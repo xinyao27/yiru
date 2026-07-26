@@ -297,21 +297,19 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
   const isRemoteWorktree = useAppStore((s) => worktreeUsesRemoteConnection(s, tab.worktreeId))
   const isRemoteLike = isRemoteWorktree || hasRemoteRuntimePty
 
-  const [hasObservedAgentSignal, setHasObservedAgentSignal] = useState(false)
-  const hasObservedAgentSignalRef = useRef(false)
-  const signalGenerationRef = useRef<string | null>(null)
+  // Why: identifies the pane's current PTY/remote-mode generation so a
+  // respawn is distinguishable from the same process continuing.
+  const generation = `${ptyId ?? ''}|${String(isRemoteLike)}`
+  // Why: store WHICH generation last observed agent evidence (prop-derived),
+  // not a bare flag — comparing it against the current generation during
+  // render both derives whether THIS generation has observed a signal and
+  // naturally invalidates a stale flag the instant a pane respawns, with no
+  // separate reset branch to keep in sync.
+  const [observedSignalGeneration, setObservedSignalGeneration] = useState<string | null>(null)
+  const observedSignalGenerationRef = useRef<string | null>(null)
   const completedHookEvidence = hasCompletedHook && completedHookScopeKnown
 
   useEffect(() => {
-    // Why: reset and re-seed in one effect so a pane respawn both invalidates
-    // the previous generation's signal and immediately re-observes a still-live
-    // hook row instead of leaving the signal stuck false.
-    const generation = `${ptyId ?? ''}|${String(isRemoteLike)}`
-    if (signalGenerationRef.current !== generation) {
-      signalGenerationRef.current = generation
-      hasObservedAgentSignalRef.current = false
-      setHasObservedAgentSignal(false)
-    }
     const explicitTitleAgent = resolveExplicitTerminalTitleAgentType(tab.title)
     // Why: for launched panes, only a title naming the launched agent counts as
     // its activity — other-agent or sibling evidence must not arm exit clearing
@@ -322,12 +320,11 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
     // Why: a recognized foreground process is focused-pane ground truth, so it
     // arms exit clearing even for agents with no hook or title integration.
     if (focusedHookAgent || completedHookEvidence || processAgent || fallbackAgentSignal) {
-      hasObservedAgentSignalRef.current = true
-      setHasObservedAgentSignal(true)
+      observedSignalGenerationRef.current = generation
+      setObservedSignalGeneration(generation)
     }
   }, [
-    ptyId,
-    isRemoteLike,
+    generation,
     focusedHookAgent,
     completedHookEvidence,
     processAgent,
@@ -336,18 +333,23 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
     tab.title
   ])
 
+  const hasObservedAgentSignal = observedSignalGeneration === generation
+
   useEffect(() => {
     if (!tab.launchAgent) {
       return
     }
-    // Why: AND the state with the ref — the ref is generation-safe within this
-    // commit (the observe effect above already reset it), while the state can
-    // lag one render behind a pane focus/respawn switch.
+    // Why: compare the ref against the CURRENT generation rather than trusting
+    // the `hasObservedAgentSignal` state closed over above — the ref is
+    // generation-safe within this commit (the observe effect above already
+    // set it for this generation), while the state can lag one render behind
+    // a pane focus/respawn switch.
     const launchedAgentExited = resolveLaunchedAgentExitEvidence({
       title: tab.title,
       defaultTitle: tab.defaultTitle,
       isRemote: isRemoteLike,
-      hasObservedAgentSignal: hasObservedAgentSignal && hasObservedAgentSignalRef.current,
+      hasObservedAgentSignal:
+        hasObservedAgentSignal && observedSignalGenerationRef.current === generation,
       hookAgent: focusedHookAgent,
       siblingHookAgent,
       hasCompletedHook: completedHookEvidence,
@@ -361,6 +363,7 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
     clearTabLaunchAgent,
     completedHookEvidence,
     focusedHookAgent,
+    generation,
     siblingHookAgent,
     hasObservedAgentSignal,
     isRemoteLike,

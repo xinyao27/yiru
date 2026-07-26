@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import {
@@ -14,7 +14,9 @@ import type { TuiAgent } from '../../../../shared/types'
 import type { SourceControlAgentActionDialogProps } from './source-control-agent-action-dialog'
 import type { UseSourceControlAgentActionDialogResult } from './source-control-agent-action-dialog-result'
 import {
+  buildSourceControlAgentOpenSessionKey,
   buildSourceControlAgentSaveTargets,
+  buildSourceControlAgentScopeNote,
   buildSourceControlAgentStatusCopy,
   isSourceControlAgentDetectedAndEnabled
 } from './source-control-agent-action-dialog-support'
@@ -62,9 +64,8 @@ export function useSourceControlAgentActionDialog({
   const [selectedAgent, setSelectedAgent] = useState<TuiAgent | null>(savedAgentId ?? null)
   const [detectedAgents, setDetectedAgents] = useState<TuiAgent[]>([])
   const [detecting, setDetecting] = useState(false)
-  const openCycleRef = useRef(0)
-  const wasOpenRef = useRef(false)
   const [openCycle, setOpenCycle] = useState(0)
+  const [openSessionKey, setOpenSessionKey] = useState<string | null>(null)
   const [detectedOpenCycle, setDetectedOpenCycle] = useState<number | null>(null)
   const saveTargets = useMemo(() => buildSourceControlAgentSaveTargets(repoId), [repoId])
   const [saveLaunchRecipe, setSaveLaunchRecipe] = useState(true)
@@ -72,6 +73,36 @@ export function useSourceControlAgentActionDialog({
 
   const disabledAgents = settings?.disabledTuiAgents
   const connectionUnavailable = Boolean(worktreeId && connectionId === undefined)
+
+  // Why: adjust state during render (React's documented pattern) instead of an
+  // effect. The dialog reopening, or its target changing while it stays open,
+  // both start a fresh session: bump the cycle tag and resync the editable
+  // fields from the saved values in the same render that swaps the session
+  // key, so no effect needs a synchronous reset to a value that isn't itself
+  // prop-derived.
+  const openSessionTargetKey = buildSourceControlAgentOpenSessionKey({
+    open,
+    repoId,
+    connectionId,
+    worktreeId,
+    savedAgentId,
+    savedCommandInputTemplate,
+    savedAgentArgs,
+    defaultSaveTargetValue,
+    defaultTuiAgent: settings?.defaultTuiAgent,
+    disabledAgents
+  })
+  if (openSessionTargetKey !== openSessionKey) {
+    setOpenSessionKey(openSessionTargetKey)
+    if (openSessionTargetKey !== null) {
+      setOpenCycle((cycle) => cycle + 1)
+      setCommandTemplate(savedCommandInputTemplate ?? '{basePrompt}')
+      setAgentArgs(savedAgentArgs ?? '')
+      setSelectedAgent(savedAgentId ?? null)
+      setSaveLaunchRecipe(true)
+      setSaveTargetValue(defaultSaveTargetValue)
+    }
+  }
 
   const refreshDetectedAgents = useCallback(async (): Promise<TuiAgent[]> => {
     if (connectionUnavailable) {
@@ -92,26 +123,17 @@ export function useSourceControlAgentActionDialog({
     }
   }, [connectionId, connectionUnavailable, ensureDetectedAgents, ensureRemoteDetectedAgents])
 
+  // Why: the reopen/target resets above happen synchronously during render;
+  // this effect owns only the I/O (agent detection) that fresh session needs.
+  // The staleness guard alone is enough to drop a superseded round — React
+  // always runs this effect's cleanup before the next one starts.
   useEffect(() => {
     if (!open) {
-      wasOpenRef.current = false
       return
     }
-    const cycle = wasOpenRef.current ? openCycleRef.current : openCycleRef.current + 1
-    if (!wasOpenRef.current) {
-      openCycleRef.current = cycle
-      setOpenCycle(cycle)
-    }
-    wasOpenRef.current = true
-    setDetectedOpenCycle(null)
-    setCommandTemplate(savedCommandInputTemplate ?? '{basePrompt}')
-    setAgentArgs(savedAgentArgs ?? '')
-    setSelectedAgent(savedAgentId ?? null)
-    setSaveLaunchRecipe(true)
-    setSaveTargetValue(defaultSaveTargetValue)
     let stale = false
     void refreshDetectedAgents().then((nextAgents) => {
-      if (stale || openCycleRef.current !== cycle) {
+      if (stale) {
         return
       }
       setSelectedAgent(
@@ -124,20 +146,17 @@ export function useSourceControlAgentActionDialog({
             disabledAgents
           })
       )
-      setDetectedOpenCycle(cycle)
+      setDetectedOpenCycle(openCycle)
     })
     return () => {
       stale = true
     }
   }, [
-    defaultSaveTargetValue,
     disabledAgents,
     open,
+    openCycle,
     refreshDetectedAgents,
     savedAgentId,
-    savedAgentArgs,
-    savedCommandInputTemplate,
-    repoId,
     settings?.defaultTuiAgent
   ])
 
@@ -278,18 +297,10 @@ export function useSourceControlAgentActionDialog({
     [resetDeliveryPlan]
   )
 
-  const agentScopeNote = useMemo(() => {
-    if (!launchAgentScope.overridesGlobalAgent) {
-      return null
-    }
-    const catalog = getAgentCatalog()
-    const labelFor = (agentId: TuiAgent | null): string =>
-      catalog.find((entry) => entry.id === agentId)?.label ?? agentId ?? ''
-    return {
-      effectiveAgentLabel: labelFor(launchAgentScope.effectiveAgentId),
-      globalAgentLabel: labelFor(launchAgentScope.globalAgentId)
-    }
-  }, [launchAgentScope])
+  const agentScopeNote = useMemo(
+    () => buildSourceControlAgentScopeNote(launchAgentScope),
+    [launchAgentScope]
+  )
 
   return {
     handleOpenChange,

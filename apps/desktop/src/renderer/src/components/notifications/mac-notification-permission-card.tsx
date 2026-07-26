@@ -51,10 +51,10 @@ export function useMacNotificationPermissionState(
   useEffect(() => {
     // Why: while Yiru's own notifications setting is off, the OS permission
     // is irrelevant — a green "notifications are enabled" card next to a
-    // disabled toggle reads as a contradiction. Hide the card and skip the
-    // readout polling entirely until the setting is back on.
+    // disabled toggle reads as a contradiction. Skip the readout polling
+    // entirely until the setting is back on; the returned tuple below always
+    // derives null while disabled, so the card hides without resetting state here.
     if (!enabled) {
-      setMacPermissionState(null)
       return
     }
     let cancelled = false
@@ -114,7 +114,9 @@ export function useMacNotificationPermissionState(
     }
   }, [enabled])
 
-  return [macPermissionState, setMacPermissionState]
+  // Why: derive the hidden state from `enabled` instead of resetting it above — the card must
+  // hide immediately whenever notifications are off, regardless of what was last probed.
+  return [enabled ? macPermissionState : null, setMacPermissionState]
 }
 
 export function MacNotificationPermissionCard({

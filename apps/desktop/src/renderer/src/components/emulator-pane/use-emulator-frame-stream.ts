@@ -38,7 +38,10 @@ export function useEmulatorFrameStream(
   useEffect(() => {
     const emulatorApi = window.api?.emulator
     if (!enabled || !streamUrl || !emulatorApi?.startFrameStream) {
-      setState({ error: null, frameUrl: null, streamIdentity: null })
+      // Why: tag with the real streamIdentity (not a literal null) so the reset
+      // stays prop-derived; error/frameUrl are null either way, so the value
+      // shown below is unchanged whether or not the tag ends up matching.
+      setState({ error: null, frameUrl: null, streamIdentity })
       return
     }
 

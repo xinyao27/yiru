@@ -243,3 +243,30 @@ export function getNativeChatSessionTransport(
   }
   return localNativeChatTransport
 }
+
+let subscriptionCounter = 0
+
+/** Unique per-subscribe id for `NativeChatSessionTransport.subscribe`. */
+export function nextNativeChatSubscriptionId(): string {
+  subscriptionCounter += 1
+  return `native-chat-${subscriptionCounter}-${Date.now()}`
+}
+
+/** Resolves `subscribe`'s teardown across transports and calls it. Desktop
+ *  returns a sync unsubscribe fn; the web RPC bridge returns a Promise instead
+ *  (and can't deliver streaming callbacks). Calling a Promise as a function
+ *  crashes the whole chat view, so this resolves it first and only calls the
+ *  result when it's actually a function. */
+export function resolveNativeChatUnsubscribe(unsubscribe: unknown): void {
+  if (typeof unsubscribe === 'function') {
+    ;(unsubscribe as () => void)()
+    return
+  }
+  if (unsubscribe && typeof (unsubscribe as { then?: unknown }).then === 'function') {
+    void (unsubscribe as Promise<unknown>).then((fn) => {
+      if (typeof fn === 'function') {
+        ;(fn as () => void)()
+      }
+    })
+  }
+}

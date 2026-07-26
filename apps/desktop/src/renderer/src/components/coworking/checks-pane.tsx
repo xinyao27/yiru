@@ -63,11 +63,9 @@ export function useCoworkingChecksReadState(
 
   useEffect(() => {
     if (!enabled) {
-      // Why: a closed or disconnected remote surface must not retain an owner status indicator.
+      // Why: invalidate any in-flight request so a late response cannot write
+      // a stale result back in once this surface is re-enabled.
       requestSequence.current += 1
-      setResult(null)
-      setError(false)
-      setLoading(false)
       return
     }
     void refresh()
@@ -76,7 +74,14 @@ export function useCoworkingChecksReadState(
     }
   }, [enabled, refresh])
 
-  return { result, loading, error, refresh }
+  return {
+    // Why: a closed or disconnected remote surface must not retain an owner
+    // status indicator, so the disabled view is derived rather than reset.
+    result: enabled ? result : null,
+    loading: enabled ? loading : false,
+    error: enabled ? error : false,
+    refresh
+  }
 }
 
 export function CoworkingChecksPane({

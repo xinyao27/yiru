@@ -266,3 +266,35 @@ export function persistFloatingTerminalPanelBounds(
     // localStorage may be unavailable; the floating workspace remains session-local.
   }
 }
+
+export type FloatingTerminalPanelBoundsState = {
+  committedBounds: FloatingTerminalPanelCommittedBounds
+  renderedBounds: FloatingTerminalPanelBounds
+  source: FloatingTerminalPanelBoundsSource
+}
+
+export function readInitialPanelBounds(): FloatingTerminalPanelBoundsState {
+  const defaultCommittedBounds = getDefaultFloatingTerminalCommittedBounds()
+  const defaultRenderedBounds = getDefaultFloatingTerminalBounds()
+  const persistedBounds = readPersistedFloatingTerminalPanelBounds()
+  return persistedBounds
+    ? {
+        committedBounds: persistedBounds,
+        renderedBounds: shouldReconcileFloatingTerminalPanelBounds('user')
+          ? resolveFloatingTerminalPanelBounds(persistedBounds, 'user')
+          : resolveFloatingTerminalPanelCommittedBounds(persistedBounds),
+        source: 'user'
+      }
+    : {
+        committedBounds: defaultCommittedBounds,
+        renderedBounds: defaultRenderedBounds,
+        source: 'default'
+      }
+}
+
+export function areFloatingTerminalPanelCommittedBoundsEqual(
+  left: FloatingTerminalPanelCommittedBounds | null,
+  right: FloatingTerminalPanelCommittedBounds
+): boolean {
+  return left !== null && JSON.stringify(left) === JSON.stringify(right)
+}

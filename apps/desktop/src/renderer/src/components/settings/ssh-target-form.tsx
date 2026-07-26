@@ -1,5 +1,5 @@
 import { FileLock as FileKey } from '@phosphor-icons/react'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { translate } from '@/i18n/i18n'
 
@@ -30,18 +30,10 @@ export function SshTargetForm({
   onCancel
 }: SshTargetFormProps): React.JSX.Element {
   const hasAdvancedConnectionFields = hasAdvancedConnectionValues(form)
+  // Why: the call site keys this component on editingId, so a target switch
+  // remounts the form and these initializers alone reset the open state.
   const [advancedConnectionOpen, setAdvancedConnectionOpen] = useState(hasAdvancedConnectionFields)
   const [terminalPersistenceOpen, setTerminalPersistenceOpen] = useState(true)
-  const lastEditingIdRef = useRef(editingId)
-
-  useEffect(() => {
-    if (lastEditingIdRef.current === editingId) {
-      return
-    }
-    lastEditingIdRef.current = editingId
-    setAdvancedConnectionOpen(hasAdvancedConnectionFields)
-    setTerminalPersistenceOpen(true)
-  }, [editingId, hasAdvancedConnectionFields])
 
   return (
     <form

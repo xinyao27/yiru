@@ -218,20 +218,27 @@ function NativeChatResolvedView({
   const [commandMarkers, setCommandMarkers] = useState<NativeChatCommandMarker[]>(() =>
     readCommandMarkerCache(commandMarkerScope)
   )
-  // Reset the optimistic queue only when the pane/agent changes. A fresh launch
-  // often learns its provider session id after the first send; clearing pending
-  // on that transition briefly flashes the empty state before the transcript
-  // user turn lands.
-  useEffect(() => {
+  // Why: reset the optimistic queue only when the pane/agent identity changes,
+  // compared during render rather than in an effect. pendingScope stays the
+  // same reference when a fresh launch merely learns its provider session id
+  // after the first send, so that transition never clears pending — clearing
+  // on it would briefly flash the empty state before the transcript's user
+  // turn lands.
+  const [prevPendingScope, setPrevPendingScope] = useState(pendingScope)
+  if (prevPendingScope !== pendingScope) {
+    setPrevPendingScope(pendingScope)
     setPending(readPendingSendCache(pendingScope))
     setWorkingInterrupted(false)
-  }, [pendingScope])
+  }
   // Command markers are session-scoped because slash commands like /clear are
-  // local feedback for a specific transcript boundary.
-  useEffect(() => {
+  // local feedback for a specific transcript boundary, so — unlike pendingScope
+  // above — this also resets when only the session id changes.
+  const [prevCommandMarkerScope, setPrevCommandMarkerScope] = useState(commandMarkerScope)
+  if (prevCommandMarkerScope !== commandMarkerScope) {
+    setPrevCommandMarkerScope(commandMarkerScope)
     setCommandMarkers(readCommandMarkerCache(commandMarkerScope))
     setWorkingInterrupted(false)
-  }, [commandMarkerScope])
+  }
   // Prune echoes whose real user turn is now in the transcript.
   useEffect(() => {
     setPending((prev) => {
@@ -332,11 +339,13 @@ function NativeChatResolvedView({
   // agent is mid-turn, the merged transcript may not yet reflect the in-flight
   // turn, but the hook already says 'working' — show the indicator immediately.
   const viewWorking = viewState.kind === 'ready' && viewState.isWorking
-  useEffect(() => {
-    if (shouldClearNativeChatWorkingSuppression({ viewWorking, hookWorking })) {
-      setWorkingInterrupted(false)
-    }
-  }, [viewWorking, hookWorking])
+  // Why: release the Stop suppression once the agent has genuinely gone idle by
+  // both signals. Computed during render (guarded by the flag itself, so it
+  // fires at most once) rather than in an effect, so a later working turn is
+  // never suppressed by a stale interruption left over from a previous one.
+  if (workingInterrupted && shouldClearNativeChatWorkingSuppression({ viewWorking, hookWorking })) {
+    setWorkingInterrupted(false)
+  }
   const isWorking = shouldShowNativeChatWorking({
     isConversation,
     viewWorking,

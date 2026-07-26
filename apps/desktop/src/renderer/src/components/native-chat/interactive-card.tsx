@@ -76,14 +76,18 @@ export function NativeChatInteractiveCard({
     [canSend, cardKey, cancelPending, clearDismissTimer]
   )
 
-  // Forget the dismissal once the prompt clears so a fresh prompt can show.
-  const present = card != null
-  useEffect(() => {
-    if (!present) {
+  // Why: forget the dismissal once the prompt clears so an identical follow-up
+  // shows again — compared during render (not an effect) so the reset is never
+  // delayed a frame behind the card actually disappearing. The layout effect
+  // above already clears the dismiss timer on every cardKey change (including
+  // to null), so this only needs to handle the dismissedKey side.
+  const [prevCardKey, setPrevCardKey] = useState(cardKey)
+  if (prevCardKey !== cardKey) {
+    setPrevCardKey(cardKey)
+    if (cardKey === null && dismissedKey !== null) {
       setDismissedKey(null)
-      clearDismissTimer()
     }
-  }, [present, clearDismissTimer])
+  }
 
   // Tell the view when a question card is up so it can hide the composer (this
   // card supplies its own input). Reset on unmount so the composer comes back.

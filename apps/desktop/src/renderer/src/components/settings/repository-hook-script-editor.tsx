@@ -89,16 +89,24 @@ export function ScriptEditor({
   sectionId
 }: ScriptEditorProps): React.JSX.Element {
   const [showLocal, setShowLocal] = useState(value.length > 0)
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  // Why: these track *which value* the save indicator is currently reacting
+  // to (activeSaveValue) and which value has reached the "Saved" sub-phase
+  // (confirmedSaveValue) — saveStatus below is derived from comparing them,
+  // rather than stored as its own imperative flag.
+  const [activeSaveValue, setActiveSaveValue] = useState<string | null>(null)
+  const [confirmedSaveValue, setConfirmedSaveValue] = useState<string | null>(null)
   const lastValueRef = useRef(value)
   const savedTimerRef = useRef<number | null>(null)
+
+  const saveStatus: SaveStatus =
+    activeSaveValue === null ? 'idle' : activeSaveValue === confirmedSaveValue ? 'saved' : 'saving'
 
   useEffect(() => {
     if (value === lastValueRef.current) {
       return
     }
     lastValueRef.current = value
-    setSaveStatus('saving')
+    setActiveSaveValue(value)
     if (savedTimerRef.current !== null) {
       window.clearTimeout(savedTimerRef.current)
     }
@@ -106,9 +114,10 @@ export function ScriptEditor({
     // show "Saving..." then "Saved" so the indicator carries the auto-save trust
     // signal a Save button would (without the click).
     savedTimerRef.current = window.setTimeout(() => {
-      setSaveStatus('saved')
+      setConfirmedSaveValue(value)
       savedTimerRef.current = window.setTimeout(() => {
-        setSaveStatus('idle')
+        setActiveSaveValue(null)
+        setConfirmedSaveValue(null)
         savedTimerRef.current = null
       }, 1500)
     }, 250)

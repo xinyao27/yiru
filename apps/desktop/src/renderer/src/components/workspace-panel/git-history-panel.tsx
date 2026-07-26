@@ -98,13 +98,18 @@ export function GitHistoryPanel({
   // never refetches; an entry is cleared on error to allow a retry.
   const loadedCommitsRef = useRef<Set<string>>(new Set())
 
-  // A new history result can reorder or replace commits, so drop any expansion
-  // and cached file lists rather than risk showing stale files under a row.
-  useEffect(() => {
+  // Why: adjust state during render (React's documented pattern) instead of an
+  // effect — a new history result can reorder or replace commits, so any
+  // expansion and cached file list keyed by commit id is dropped in the same
+  // render that swaps `result`, rather than risk showing stale files under a
+  // row for one paint.
+  const [expansionForResult, setExpansionForResult] = useState(result)
+  if (expansionForResult !== result) {
+    setExpansionForResult(result)
     setExpanded(new Set())
     setFilesByCommit({})
     loadedCommitsRef.current = new Set()
-  }, [result])
+  }
 
   const handleToggleExpand = useCallback(
     (item: GitHistoryItem): void => {

@@ -66,6 +66,18 @@ import {
 import type { BaseRefSearchResult, GitHubWorkItem, GitLabWorkItem } from '../../../../shared/types'
 import { resolveSmartWorkspaceCommandValue } from './smart-workspace-command-value'
 import {
+  getGithubSearchRequest,
+  getVisibleGithubItems,
+  githubSearchRequestsEqual,
+  type SmartWorkspaceGithubSearchRequest
+} from './smart-workspace-github-search'
+import {
+  getGitlabSearchRequest,
+  getVisibleGitlabItems,
+  gitlabSearchRequestsEqual,
+  type SmartWorkspaceGitlabSearchRequest
+} from './smart-workspace-gitlab-search'
+import {
   getMrStateFilters,
   getSmartWorkspaceNameModes,
   type MrStateFilter
@@ -275,9 +287,12 @@ export default function SmartWorkspaceNameField({
     repoId: string
     query: string
   } | null>(null)
-  const [githubLoading, setGithubLoading] = useState(false)
-  const [gitlabLoading, setGitlabLoading] = useState(false)
-  const [branchesLoading, setBranchesLoading] = useState(false)
+  const [githubResultTag, setGithubResultTag] = useState<SmartWorkspaceGithubSearchRequest | null>(
+    null
+  )
+  const [gitlabResultTag, setGitlabResultTag] = useState<SmartWorkspaceGitlabSearchRequest | null>(
+    null
+  )
   const [commandValue, setCommandValue] = useState('')
   const localInputRef = useRef<HTMLInputElement | null>(null)
   const focusedSelectedSourceKeyRef = useRef<string | null>(null)
@@ -289,10 +304,22 @@ export default function SmartWorkspaceNameField({
   // user-initiated in Electron, so gate the source popover until the user
   // actually interacts with this field or tabs from another composer control.
   const deferSourcePopoverUntilInteractionRef = useRef(true)
-  const [crossRepoPrompt, setCrossRepoPrompt] = useState<{
+  const [crossRepoPromptState, setCrossRepoPromptState] = useState<{
+    query: string
     link: NonNullable<ReturnType<typeof parseGitHubPullRequestLink>>
     matchingRepo: RepoOption | null
   } | null>(null)
+  // Why: derived rather than cleared synchronously on disabled /
+  // repoBackedSourcesDisabled / a query edit — a prompt tagged to an old
+  // query simply stops matching and disappears, so nothing else needs to
+  // reach in and clear it.
+  const crossRepoPrompt =
+    crossRepoPromptState &&
+    !disabled &&
+    !repoBackedSourcesDisabled &&
+    crossRepoPromptState.query === debouncedQuery.trim()
+      ? crossRepoPromptState
+      : null
 
   useEffect(() => {
     onActiveSourceModeChange?.(mode)
@@ -329,21 +356,6 @@ export default function SmartWorkspaceNameField({
     }
     setMode(availableModes[0]?.id ?? 'text')
   }, [availableModes, mode])
-
-  useEffect(() => {
-    if (!repoBackedSourcesDisabled) {
-      return
-    }
-    setGithubItems([])
-    setGitlabItems([])
-    setBranches([])
-    setBranchDefaultBaseRef(null)
-    setGithubLoading(false)
-    setGitlabLoading(false)
-    setBranchesLoading(false)
-    setBranchResultsSource(null)
-    setCrossRepoPrompt(null)
-  }, [repoBackedSourcesDisabled])
 
   const selectedSourceFocusKey = selectedSource
     ? `${selectedSource.kind}:${selectedSource.label}:${selectedSource.url ?? ''}`
@@ -440,41 +452,15 @@ export default function SmartWorkspaceNameField({
     }
   }, [disabled, preflightStatusChecked, preflightStatusCurrent, refreshPreflightStatus, textOnly])
 
-  useEffect(() => {
-    if (textOnly) {
-      if (mode !== 'text') {
-        setMode('text')
-      }
-      setOpen(false)
-      return
-    }
-    if (mode === 'gitlab' && gitlabSourceAvailable) {
-      return
-    }
-    if (mode !== 'gitlab') {
-      return
-    }
-    setMode('smart')
-    setGitlabItems([])
-    setGitlabLoading(false)
-    setCommandValue('')
-  }, [gitlabSourceAvailable, mode, textOnly])
-
-  useEffect(() => {
-    if (!disabled) {
-      return
-    }
-    setOpen(false)
-    setGithubItems([])
-    setGitlabItems([])
-    setBranches([])
-    setBranchResultsSource(null)
-    setGithubLoading(false)
-    setGitlabLoading(false)
-    setBranchesLoading(false)
-    setCommandValue('')
-    setCrossRepoPrompt(null)
-  }, [disabled])
+  // Why: derived rather than force-closed from a passive effect on
+  // textOnly/disabled flips — those effects run after paint, so there was a
+  // one-frame flash of the popover before they fired. Folding disabled and
+  // textOnly directly into the open condition (rather than waiting on mode,
+  // which itself only clamps to 'text' via its own effect) removes the flash
+  // entirely. gitlabItems/githubItems staleness across a disabled/target
+  // change is handled by the request-tag masking below, not by this flag.
+  const isSourcePopoverOpen =
+    !disabled && !textOnly && open && mode !== 'text' && selectedSource === null && !crossRepoPrompt
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(value), SEARCH_DEBOUNCE_MS)
@@ -500,15 +486,56 @@ export default function SmartWorkspaceNameField({
     repoBackedSearchTargets.length > 0 &&
     (mode === 'smart' || mode === 'github')
 
+  const githubSearchRequest = useMemo<SmartWorkspaceGithubSearchRequest | null>(
+    () =>
+      getGithubSearchRequest({
+        disabled,
+        shouldQueryGithub,
+        query: debouncedQuery.trim(),
+        hasDirectNumber: normalizedGhQuery.directNumber !== null,
+        hasDirectLink: parsedGhLink !== null,
+        // Why: mirrors the effect's own "already resolved this link" gate
+        // below so the tag used for masking/loading never disagrees with
+        // which branch the effect actually runs.
+        crossRepoLinkAlreadyHandled: handledCrossRepoUrlRef.current === debouncedQuery.trim(),
+        crossRepoSwitchTarget,
+        selectedRepoId: selectedRepo?.id ?? null,
+        targetRepoIds: repoBackedSearchTargets.map((target) => target.repo.id)
+      }),
+    [
+      crossRepoSwitchTarget,
+      debouncedQuery,
+      disabled,
+      normalizedGhQuery,
+      parsedGhLink,
+      repoBackedSearchTargets,
+      selectedRepo,
+      shouldQueryGithub
+    ]
+  )
+  // Why: derived rather than stored — a request whose tag doesn't match the
+  // stored result's tag is masked out by getVisibleGithubItems below, so
+  // "loading" reduces to "there's a live request whose tag hasn't settled yet."
+  const githubLoading =
+    githubSearchRequest !== null && !githubSearchRequestsEqual(githubSearchRequest, githubResultTag)
+  const visibleGithubItems = getVisibleGithubItems({
+    items: githubItems,
+    currentRequest: githubSearchRequest,
+    resultRequest: githubResultTag
+  })
+
   useEffect(() => {
-    if (disabled || !shouldQueryGithub) {
-      setGithubItems([])
-      setGithubLoading(false)
+    const request = githubSearchRequest
+    if (!request) {
       return
     }
     let stale = false
-    const directNumber = normalizedGhQuery.directNumber
-    const directLink = parsedGhLink
+    const commitItems = (items: GitHubWorkItem[]): void => {
+      if (!stale) {
+        setGithubItems(items)
+        setGithubResultTag(request)
+      }
+    }
     const searchTargetForRepo = (repo: RepoOption) =>
       repoBackedSearchTargets.find((target) => target.repo.id === repo.id) ?? {
         repo,
@@ -518,8 +545,11 @@ export default function SmartWorkspaceNameField({
           repo
         })
       }
-    if (directLink !== null && handledCrossRepoUrlRef.current !== debouncedQuery.trim()) {
-      setGithubLoading(true)
+    if (request.kind === 'cross-repo-link-project' || request.kind === 'cross-repo-link-sources') {
+      const directLink = parsedGhLink
+      if (directLink === null) {
+        return
+      }
       const directLookup = async (): Promise<{
         items: GitHubWorkItem[]
         prompt: {
@@ -527,13 +557,13 @@ export default function SmartWorkspaceNameField({
           matchingRepo: RepoOption | null
         } | null
       }> => {
-        if (crossRepoSwitchTarget === 'project-source') {
+        if (request.kind === 'cross-repo-link-sources') {
           const matchingRepo = await findMatchingRepoForSlug(
             repoBackedSearchTargets.map((target) => target.repo),
             directLink.slug,
             repoSlugCacheRef.current
           )
-          handledCrossRepoUrlRef.current = debouncedQuery.trim()
+          handledCrossRepoUrlRef.current = request.query
           if (!matchingRepo) {
             return { items: [], prompt: null }
           }
@@ -557,7 +587,7 @@ export default function SmartWorkspaceNameField({
         }
         const selectedSlug = await getRepoSlugCached(selectedRepo, repoSlugCacheRef.current)
         if (!selectedSlug || sameSlug(selectedSlug, directLink.slug)) {
-          handledCrossRepoUrlRef.current = debouncedQuery.trim()
+          handledCrossRepoUrlRef.current = request.query
           const item = await lookupSmartGitHubSubmitItem({
             repoPath: selectedRepo.path,
             repoId: selectedRepo.id,
@@ -587,27 +617,26 @@ export default function SmartWorkspaceNameField({
             return
           }
           setGithubItems(result.items)
+          setGithubResultTag(request)
           if (result.prompt) {
-            setOpen(false)
-            setCrossRepoPrompt(result.prompt)
+            setCrossRepoPromptState({
+              query: request.query,
+              link: result.prompt.link,
+              matchingRepo: result.prompt.matchingRepo
+            })
           }
         })
-        .catch(() => {
-          if (!stale) {
-            setGithubItems([])
-          }
-        })
-        .finally(() => {
-          if (!stale) {
-            setGithubLoading(false)
-          }
-        })
+        .catch(() => commitItems([]))
       return () => {
         stale = true
       }
     }
-    if (directNumber !== null) {
-      setGithubLoading(true)
+    if (request.kind === 'link-lookup') {
+      const directNumber = normalizedGhQuery.directNumber
+      if (directNumber === null) {
+        return
+      }
+      const directLink = parsedGhLink
       const intent =
         directLink !== null
           ? {
@@ -618,7 +647,7 @@ export default function SmartWorkspaceNameField({
               type: directLink.type
             }
           : { kind: 'hash-number' as const, number: directNumber }
-      const request = Promise.all(
+      void Promise.all(
         repoBackedSearchTargets.map((target) =>
           lookupSmartGitHubSubmitItem({
             repoPath: target.repo.path,
@@ -629,37 +658,27 @@ export default function SmartWorkspaceNameField({
             workItemByOwnerRepo: lookupGitHubWorkItemByOwnerRepoForSource
           }).catch(() => null)
         )
-      ).then((items) =>
-        items
-          .filter((item): item is GitHubWorkItem => item !== null)
-          .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
-          .slice(0, RESULT_LIMIT)
       )
-      void request
-        .then((items) => {
-          if (!stale) {
-            setGithubItems(items)
-          }
-        })
-        .catch(() => {
-          if (!stale) {
-            setGithubItems([])
-          }
-        })
-        .finally(() => {
-          if (!stale) {
-            setGithubLoading(false)
-          }
-        })
+        .then((items) =>
+          commitItems(
+            items
+              .filter((item): item is GitHubWorkItem => item !== null)
+              .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+              .slice(0, RESULT_LIMIT)
+          )
+        )
+        .catch(() => commitItems([]))
       return () => {
         stale = true
       }
     }
-
-    const trimmed = normalizedGhQuery.query.trim()
-    const query = trimmed ? normalizedGhQuery.query : ''
-    if (repoBackedSearchTargets.length === 1) {
-      const target = repoBackedSearchTargets[0]
+    if (request.kind === 'single-repo') {
+      const target = repoBackedSearchTargets.find((entry) => entry.repo.id === request.repoId)
+      if (!target) {
+        return
+      }
+      const trimmed = normalizedGhQuery.query.trim()
+      const query = trimmed ? normalizedGhQuery.query : ''
       const cached = getCachedWorkItems(
         target.repo.id,
         RESULT_LIMIT,
@@ -668,75 +687,48 @@ export default function SmartWorkspaceNameField({
         target.githubSourceContext
       )
       if (cached) {
-        setGithubItems(cached.slice(0, RESULT_LIMIT))
-        setGithubLoading(false)
-      } else {
-        setGithubLoading(true)
+        commitItems(cached.slice(0, RESULT_LIMIT))
       }
       void fetchWorkItems(target.repo.id, target.repo.path, RESULT_LIMIT, query, {
         sourceContext: target.githubSourceContext
       })
-        .then((items) => {
-          if (!stale) {
-            setGithubItems(items.slice(0, RESULT_LIMIT))
-          }
-        })
-        .catch(() => {
-          if (!stale) {
-            setGithubItems([])
-          }
-        })
-        .finally(() => {
-          if (!stale) {
-            setGithubLoading(false)
-          }
-        })
-    } else {
-      setGithubLoading(true)
-      void fetchWorkItemsAcrossRepos(
-        repoBackedSearchTargets.map((target) => ({
-          repoId: target.repo.id,
-          path: target.repo.path,
-          executionHostId: target.repo.executionHostId,
-          sourceContext: target.githubSourceContext
-        })),
-        RESULT_LIMIT,
-        RESULT_LIMIT,
-        query
-      )
-        .then((result) => {
-          if (!stale) {
-            setGithubItems(result.items)
-          }
-        })
-        .catch(() => {
-          if (!stale) {
-            setGithubItems([])
-          }
-        })
-        .finally(() => {
-          if (!stale) {
-            setGithubLoading(false)
-          }
-        })
+        .then((items) => commitItems(items.slice(0, RESULT_LIMIT)))
+        .catch(() => commitItems([]))
+      return () => {
+        stale = true
+      }
     }
+
+    // request.kind === 'multi-repo'
+    const trimmed = normalizedGhQuery.query.trim()
+    const query = trimmed ? normalizedGhQuery.query : ''
+    void fetchWorkItemsAcrossRepos(
+      repoBackedSearchTargets.map((target) => ({
+        repoId: target.repo.id,
+        path: target.repo.path,
+        executionHostId: target.repo.executionHostId,
+        sourceContext: target.githubSourceContext
+      })),
+      RESULT_LIMIT,
+      RESULT_LIMIT,
+      query
+    )
+      .then((result) => commitItems(result.items))
+      .catch(() => commitItems([]))
     return () => {
       stale = true
     }
   }, [
-    debouncedQuery,
-    disabled,
     fetchWorkItems,
     fetchWorkItemsAcrossRepos,
     getCachedWorkItems,
+    githubSearchRequest,
+    githubSourceContext,
     normalizedGhQuery,
     parsedGhLink,
-    repos,
     repoBackedSearchTargets,
-    githubSourceContext,
-    selectedRepo,
-    crossRepoSwitchTarget,
-    shouldQueryGithub
+    repos,
+    selectedRepo
   ])
 
   const branchSearchRequest = useMemo(
@@ -761,19 +753,21 @@ export default function SmartWorkspaceNameField({
     ]
   )
 
+  // Why: derived rather than stored — getVisibleBranchResults already ignores
+  // a result whose (repoId, query) tag doesn't match the live request, so
+  // "loading" reduces to "there's an active request whose tag hasn't
+  // settled yet."
+  const branchesLoading =
+    branchSearchRequest !== null &&
+    (branchResultsSource === null ||
+      branchResultsSource.repoId !== branchSearchRequest.repoId ||
+      branchResultsSource.query !== branchSearchRequest.query)
+
   useEffect(() => {
     if (!branchSearchRequest) {
-      setBranches([])
-      setBranchDefaultBaseRef(null)
-      setBranchResultsSource(null)
-      setBranchesLoading(false)
       return
     }
     let stale = false
-    setBranches([])
-    setBranchDefaultBaseRef(null)
-    setBranchResultsSource(null)
-    setBranchesLoading(true)
     const defaultBaseRefRequest =
       branchSearchRequest.query.length === 0
         ? getRuntimeRepoBaseRefDefault(
@@ -806,12 +800,12 @@ export default function SmartWorkspaceNameField({
         if (!stale) {
           setBranches([])
           setBranchDefaultBaseRef(null)
-          setBranchResultsSource(null)
-        }
-      })
-      .finally(() => {
-        if (!stale) {
-          setBranchesLoading(false)
+          // Why: tag the failed attempt as settled too — otherwise
+          // branchesLoading (derived from this tag) stays stuck true.
+          setBranchResultsSource({
+            repoId: branchSearchRequest.repoId,
+            query: branchSearchRequest.query
+          })
         }
       })
     return () => {
@@ -835,137 +829,110 @@ export default function SmartWorkspaceNameField({
     gitlabSourceAvailable &&
     repoBackedSearchTargets.length > 0 &&
     (mode === 'smart' || mode === 'gitlab')
-  useEffect(() => {
-    if (!shouldQueryGitlab || disabled || !onGitLabItemSelect) {
-      // Why: don't clobber list-mode items here — the listMRs effect below
-      // is the sole writer when the user is in 'gitlab' mode without a URL.
-      if (!shouldQueryGitlab || (parsedGlLink === null && mode !== 'gitlab')) {
-        setGitlabItems([])
-      }
-      setGitlabLoading(false)
-      return
-    }
-    if (parsedGlLink === null) {
-      // Same reason: only clear when leaving the gitlab/smart context.
-      if (mode !== 'gitlab') {
-        setGitlabItems([])
-      }
-      setGitlabLoading(false)
-      return
-    }
-    let stale = false
-    setGitlabLoading(true)
-    void Promise.all(
-      repoBackedSearchTargets.map((target) =>
-        lookupGitLabWorkItemByPathForSource({
-          repoPath: target.repo.path,
-          repoId: target.repo.id,
-          sourceContext: target.gitlabSourceContext,
-          // Why: self-hosted GitLab URLs must resolve against their pasted
-          // hostname; gitlab.com is only one possible GitLab instance.
-          host: parsedGlLink.slug.host,
-          path: parsedGlLink.slug.path,
-          iid: parsedGlLink.number,
-          type: 'mr'
-        }).catch(() => null)
-      )
-    )
-      .then((items) => {
-        if (stale) {
-          return
-        }
-        setGitlabItems(items.filter((item): item is GitLabWorkItem => item !== null))
-      })
-      .catch(() => {
-        if (!stale) {
-          setGitlabItems([])
-        }
-      })
-      .finally(() => {
-        if (!stale) {
-          setGitlabLoading(false)
-        }
-      })
-    return () => {
-      stale = true
-    }
-  }, [disabled, mode, onGitLabItemSelect, parsedGlLink, repoBackedSearchTargets, shouldQueryGitlab])
+  const gitlabSearchRequest = useMemo<SmartWorkspaceGitlabSearchRequest | null>(
+    () =>
+      getGitlabSearchRequest({
+        shouldQueryGitlab,
+        disabled,
+        hasGitlabHandler: onGitLabItemSelect != null,
+        query: debouncedQuery.trim(),
+        targetRepoIds: repoBackedSearchTargets.map((target) => target.repo.id),
+        parsedLink: parsedGlLink,
+        mrStateFilter
+      }),
+    [
+      debouncedQuery,
+      disabled,
+      mrStateFilter,
+      onGitLabItemSelect,
+      parsedGlLink,
+      repoBackedSearchTargets,
+      shouldQueryGitlab
+    ]
+  )
+  // Why: derived the same way as githubLoading/branchesLoading above — a
+  // request whose tag doesn't match the stored result is masked out by
+  // getVisibleGitlabItems below, so loading is just "there's a live request
+  // whose tag hasn't settled yet."
+  const gitlabLoading =
+    gitlabSearchRequest !== null && !gitlabSearchRequestsEqual(gitlabSearchRequest, gitlabResultTag)
+  const visibleGitlabItems = getVisibleGitlabItems({
+    items: gitlabItems,
+    currentRequest: gitlabSearchRequest,
+    resultRequest: gitlabResultTag
+  })
 
-  // Why: when the user is on the GitLab tab (or in 'smart' mix) and
-  // hasn't pasted a URL, surface the project's MRs filtered by the
-  // current state chip. Default 'opened' matches gitlab.com's default
-  // MR list view. Smart mode includes GitLab MRs alongside GitHub
-  // items so the unified picker actually surfaces both providers.
+  // Why: paste-lookup and the project MR list used to be two effects that
+  // cleared each other's state defensively to avoid clobbering whichever one
+  // "owned" gitlabItems for the current input. Tagging collapses that into
+  // one effect — gitlabSearchRequest names exactly one shape at a time, and a
+  // stale batch is masked by getVisibleGitlabItems above rather than cleared
+  // here. Smart mode surfaces GitLab MRs alongside GitHub items so the
+  // unified picker shows both providers; default 'opened' matches
+  // gitlab.com's default merge-requests view.
   useEffect(() => {
-    if (!shouldQueryGitlab || disabled || !onGitLabItemSelect) {
-      if (!shouldQueryGitlab) {
-        setGitlabItems([])
-        setGitlabLoading(false)
-      }
-      return
-    }
-    if (repoBackedSearchTargets.length === 0) {
-      setGitlabItems([])
-      setGitlabLoading(false)
-      return
-    }
-    if (parsedGlLink !== null) {
-      // Why: paste-URL effect owns the list while a URL is in the input.
+    const request = gitlabSearchRequest
+    if (!request) {
       return
     }
     let stale = false
-    setGitlabLoading(true)
+    const commitItems = (items: GitLabWorkItem[]): void => {
+      if (!stale) {
+        setGitlabItems(items)
+        setGitlabResultTag(request)
+      }
+    }
+    if (request.kind === 'paste-lookup') {
+      void Promise.all(
+        repoBackedSearchTargets.map((target) =>
+          lookupGitLabWorkItemByPathForSource({
+            repoPath: target.repo.path,
+            repoId: target.repo.id,
+            sourceContext: target.gitlabSourceContext,
+            // Why: self-hosted GitLab URLs must resolve against their pasted
+            // hostname; gitlab.com is only one possible GitLab instance.
+            host: request.host,
+            path: request.path,
+            iid: request.iid,
+            type: 'mr'
+          }).catch(() => null)
+        )
+      )
+        .then((items) => commitItems(items.filter((item): item is GitLabWorkItem => item !== null)))
+        .catch(() => commitItems([]))
+      return () => {
+        stale = true
+      }
+    }
     // Why: thread the typed query through so the GitLab API filters MRs by
     // name/number (mirrors the GitHub effect). shouldQueryGitlab already
     // gates on sourceQueryWithinLimit, so an oversized query never reaches here.
-    const trimmedQuery = debouncedQuery.trim() || undefined
     void Promise.all(
       repoBackedSearchTargets.map((target) =>
         listGitLabMRsForSource({
           repoPath: target.repo.path,
           repoId: target.repo.id,
           sourceContext: target.gitlabSourceContext,
-          state: mrStateFilter,
+          state: request.mrStateFilter,
           page: 1,
           perPage: RESULT_LIMIT,
-          query: trimmedQuery
+          query: request.query || undefined
         }).catch(() => ({ items: [], hasMore: false }))
       )
     )
-      .then((results) => {
-        if (stale) {
-          return
-        }
-        setGitlabItems(
+      .then((results) =>
+        commitItems(
           results
             .flatMap((result) => result.items)
             .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
             .slice(0, RESULT_LIMIT)
         )
-      })
-      .catch(() => {
-        if (!stale) {
-          setGitlabItems([])
-        }
-      })
-      .finally(() => {
-        if (!stale) {
-          setGitlabLoading(false)
-        }
-      })
+      )
+      .catch(() => commitItems([]))
     return () => {
       stale = true
     }
-  }, [
-    debouncedQuery,
-    disabled,
-    mode,
-    mrStateFilter,
-    onGitLabItemSelect,
-    parsedGlLink,
-    repoBackedSearchTargets,
-    shouldQueryGitlab
-  ])
+  }, [gitlabSearchRequest, repoBackedSearchTargets])
 
   const rows = useMemo<RowEntry[]>(
     () =>
@@ -979,9 +946,9 @@ export default function SmartWorkspaceNameField({
           selectedRepoId: selectedRepo?.id ?? null,
           value
         }),
-        githubItems,
+        githubItems: visibleGithubItems,
         gitlabAvailable: gitlabSourceAvailable,
-        gitlabItems,
+        gitlabItems: visibleGitlabItems,
         mode,
         resultLimit: RESULT_LIMIT,
         value
@@ -990,9 +957,9 @@ export default function SmartWorkspaceNameField({
       branches,
       branchDefaultBaseRef,
       branchResultsSource,
-      githubItems,
+      visibleGithubItems,
       gitlabSourceAvailable,
-      gitlabItems,
+      visibleGitlabItems,
       mode,
       selectedRepo?.id,
       value
@@ -1070,32 +1037,27 @@ export default function SmartWorkspaceNameField({
         return
       }
       handledCrossRepoUrlRef.current = debouncedQuery.trim()
-      setGithubLoading(true)
-      try {
-        const sourceContext = buildProjectSourceContextFromRepo({
-          provider: 'github',
-          projectId: targetRepo.id,
-          repo: targetRepo
-        })
-        const item = await lookupGitHubWorkItemByOwnerRepoForSource({
-          repoPath: targetRepo.path,
-          repoId: targetRepo.id,
-          sourceContext,
-          owner: crossRepoPrompt.link.slug.owner,
-          repo: crossRepoPrompt.link.slug.repo,
-          number: crossRepoPrompt.link.number,
-          type: crossRepoPrompt.link.type
-        })
-        if (!item) {
-          return
-        }
-        onRepoChange(targetRepo.id)
-        onGitHubItemSelect({ ...item, repoId: targetRepo.id } as GitHubWorkItem)
-        setOpen(false)
-        setCrossRepoPrompt(null)
-      } finally {
-        setGithubLoading(false)
+      const sourceContext = buildProjectSourceContextFromRepo({
+        provider: 'github',
+        projectId: targetRepo.id,
+        repo: targetRepo
+      })
+      const item = await lookupGitHubWorkItemByOwnerRepoForSource({
+        repoPath: targetRepo.path,
+        repoId: targetRepo.id,
+        sourceContext,
+        owner: crossRepoPrompt.link.slug.owner,
+        repo: crossRepoPrompt.link.slug.repo,
+        number: crossRepoPrompt.link.number,
+        type: crossRepoPrompt.link.type
+      })
+      if (!item) {
+        return
       }
+      onRepoChange(targetRepo.id)
+      onGitHubItemSelect({ ...item, repoId: targetRepo.id } as GitHubWorkItem)
+      setOpen(false)
+      setCrossRepoPromptState(null)
     },
     [crossRepoPrompt, debouncedQuery, onGitHubItemSelect, onRepoChange]
   )
@@ -1104,7 +1066,7 @@ export default function SmartWorkspaceNameField({
     if (!selectedRepo) {
       return
     }
-    setCrossRepoPrompt(null)
+    setCrossRepoPromptState(null)
     await acceptGitHubLink(selectedRepo)
   }, [acceptGitHubLink, selectedRepo])
 
@@ -1125,7 +1087,7 @@ export default function SmartWorkspaceNameField({
 
   const dismissCrossRepoPrompt = useCallback((): void => {
     handledCrossRepoUrlRef.current = debouncedQuery.trim()
-    setCrossRepoPrompt(null)
+    setCrossRepoPromptState(null)
   }, [debouncedQuery])
 
   const smartPlaceholder = repoBackedSourcesDisabled
@@ -1254,10 +1216,7 @@ export default function SmartWorkspaceNameField({
         </div>
       )}
 
-      <Popover
-        open={!disabled && open && mode !== 'text' && selectedSource === null}
-        onOpenChange={handleSourcePopoverOpenChange}
-      >
+      <Popover open={isSourcePopoverOpen} onOpenChange={handleSourcePopoverOpenChange}>
         <Command
           value={resolvedCommandValue}
           onValueChange={setCommandValue}
@@ -1396,7 +1355,7 @@ export default function SmartWorkspaceNameField({
                         !event.ctrlKey &&
                         !event.shiftKey
                       ) {
-                        if (open && rows.length > 0) {
+                        if (isSourcePopoverOpen && rows.length > 0) {
                           const row = rows.find((entry) => entry.value === resolvedCommandValue)
                           if (row) {
                             event.preventDefault()
@@ -1411,7 +1370,7 @@ export default function SmartWorkspaceNameField({
                         }
                         onPlainEnter?.()
                       }
-                      if (event.key === 'Escape' && open) {
+                      if (event.key === 'Escape' && isSourcePopoverOpen) {
                         event.stopPropagation()
                         setOpen(false)
                       }

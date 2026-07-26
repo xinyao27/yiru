@@ -40,6 +40,9 @@ export function useCoworkingFileTreeState(operationRoute: CoworkingWorktreeRoute
   const routeKey = getCoworkingWorktreeRouteKey(operationRoute)
   const activeRouteKey = useRef(routeKey)
   activeRouteKey.current = routeKey
+  // Why: the caller keys this hook's component by route identity, so a route
+  // change unmounts this instance entirely rather than reusing it — the
+  // useState initializers above are already the reset values.
 
   const loadDirectory = useCallback(
     async (relativePath: string): Promise<void> => {
@@ -95,13 +98,6 @@ export function useCoworkingFileTreeState(operationRoute: CoworkingWorktreeRoute
 
   useEffect(() => {
     const requestSequences = requestSequenceByDirectory.current
-    // Why: remote routes may reuse relative paths while old SSH requests are still in flight.
-    requestSequences.clear()
-    setListings(new Map())
-    setExpanded(new Set())
-    setLoadingDirectories(new Set(['']))
-    setUnavailableDirectories(new Set())
-    setShowDotfiles(true)
     void loadDirectory('')
     return () => requestSequences.clear()
   }, [loadDirectory])

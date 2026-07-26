@@ -43,10 +43,7 @@ import {
   isPairedWebClientWindow,
   shouldRenderDesktopWindowChrome
 } from '@/lib/desktop-window-chrome'
-import {
-  TOGGLE_FLOATING_TERMINAL_EVENT,
-  requestFloatingTerminalOpenMaximized
-} from '@/lib/floating-terminal'
+import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
 import {
   isFloatingWorkspacePanelFocused,
   isFloatingWorkspacePanelShortcut,
@@ -455,6 +452,12 @@ function App(): React.JSX.Element {
   useWebSessionTabsSync()
   useCoworkingSharingBridge()
   const [floatingTerminalOpen, setFloatingTerminalOpen] = useState(false)
+  // Why: a plain timestamp, not a module singleton — App is the producer of
+  // the Cmd+Opt+Shift+A "open maximized" request, so it hands the panel a
+  // value to react to instead of a flag the panel must reach out and
+  // destructively claim. See FloatingTerminalPanel's openMaximizedRequestAt.
+  const [floatingTerminalOpenMaximizedRequestAt, setFloatingTerminalOpenMaximizedRequestAt] =
+    useState<number | null>(null)
   const floatingWorkspaceTourInteractionSnapshotRef = useRef<{
     wasPreviouslyInteracted?: boolean
     persisted?: Promise<void>
@@ -1812,7 +1815,7 @@ function App(): React.JSX.Element {
         floatingTerminalEnabled
       ) {
         input.preventDefault()
-        requestFloatingTerminalOpenMaximized()
+        setFloatingTerminalOpenMaximizedRequestAt(Date.now())
         setFloatingTerminalOpenWithFocus(true)
         return
       }
@@ -2624,6 +2627,7 @@ function App(): React.JSX.Element {
                   <FloatingTerminalPanel
                     open={floatingTerminalOpen}
                     onOpenChange={setFloatingTerminalOpenWithFocus}
+                    openMaximizedRequestAt={floatingTerminalOpenMaximizedRequestAt}
                     onOpenAssistant={isPairedWebClientWindow() ? undefined : openAssistant}
                     assistantPending={assistantPending}
                     assistantLoadingVisible={assistantLoadingVisible}

@@ -1,6 +1,6 @@
 import { StopCircle as CircleStop } from '@phosphor-icons/react'
 import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
-import { useEffect, useId, useState, type Dispatch, type SetStateAction } from 'react'
+import { useId, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { NestedRepoChecklist } from '@/components/repo/nested-repo-checklist'
@@ -48,12 +48,6 @@ export function AddRepoNestedImportStep({
   const showOpenAsFolderSpinner = isAdding && pendingImportMode === 'folder'
   const showSeparateSpinner = isAdding && pendingImportMode === 'separate'
   const showGroupSpinner = isAdding && pendingImportMode === 'group'
-
-  useEffect(() => {
-    if (!isAdding) {
-      setPendingImportMode(null)
-    }
-  }, [isAdding])
 
   const handleImport = (mode: 'group' | 'separate'): void => {
     setPendingImportMode(mode)

@@ -24,6 +24,23 @@ type CreateParentProvenance = {
   targetKey: string
 }
 
+// Why: tagged by request identity (targetKey) rather than a free-floating
+// status, so a stale response can never render as the currently selected host.
+type GitProbeResult = {
+  targetKey: string
+  available: boolean | null
+}
+
+// Why: shared by both parent-resolution effects and the runtime status
+// derivation so "resolved for this host" is judged identically everywhere.
+function isCreateParentResolved(
+  autoFilled: AutoFilledCreateParent | null,
+  createParent: string,
+  targetKey: string
+): boolean {
+  return autoFilled?.targetKey === targetKey && autoFilled.parent === createParent.trim()
+}
+
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   let timeout: ReturnType<typeof setTimeout> | null = null
   return new Promise<T>((resolve, reject) => {
@@ -65,10 +82,8 @@ export function useCreateProjectDefaults({
   resetCreateDefaultState: () => void
   markCreateParentTouched: (value?: string) => void
 } {
-  const [createDefaultParent, setCreateDefaultParent] = useState('')
-  const [createGitAvailability, setCreateGitAvailability] = useState<GitAvailability>('unknown')
-  const [createRuntimeParentStatus, setCreateRuntimeParentStatus] =
-    useState<CreateRuntimeParentStatus>('idle')
+  const [gitProbeResult, setGitProbeResult] = useState<GitProbeResult | null>(null)
+  const [failedRuntimeParentKey, setFailedRuntimeParentKey] = useState<string | null>(null)
   const createStepAutoFilledRef = useRef(false)
   const autoFilledCreateParentRef = useRef<AutoFilledCreateParent | null>(null)
   const createParentProvenanceRef = useRef<CreateParentProvenance | null>(null)
@@ -82,6 +97,7 @@ export function useCreateProjectDefaults({
     : activeCreateParentSshTargetId
       ? `ssh:${activeCreateParentSshTargetId}`
       : 'local'
+  const autoFilledCreateParent = autoFilledCreateParentRef.current
 
   const canReplaceCreateParentDefault = useCallback((parent: string): boolean => {
     if (createParentTouchedRef.current) {
@@ -98,9 +114,8 @@ export function useCreateProjectDefaults({
     autoFilledCreateParentRef.current = null
     createParentProvenanceRef.current = null
     createParentTouchedRef.current = false
-    setCreateDefaultParent('')
-    setCreateGitAvailability('unknown')
-    setCreateRuntimeParentStatus('idle')
+    setGitProbeResult(null)
+    setFailedRuntimeParentKey(null)
   }, [])
 
   // Why: a default must never clobber a parent the user picked themselves.
@@ -120,14 +135,46 @@ export function useCreateProjectDefaults({
     step === 'create' &&
     !createParentTouchedRef.current &&
     Boolean(createParent.trim()) &&
-    autoFilledCreateParentRef.current?.parent === createParent.trim() &&
-    autoFilledCreateParentRef.current.targetKey !== activeCreateParentTargetKey
+    autoFilledCreateParent?.parent === createParent.trim() &&
+    autoFilledCreateParent?.targetKey !== activeCreateParentTargetKey
   const createParentTargetPending =
     step === 'create' &&
     Boolean(createParent.trim()) &&
     createParentProvenanceRef.current?.parent === createParent.trim() &&
     createParentProvenanceRef.current.targetKey !== activeCreateParentTargetKey
   const createParentPending = createParentDefaultPending || createParentTargetPending
+
+  // Why: derived from the tagged resolution instead of a stored value, so a
+  // default resolved for a previous host can never render while another is active.
+  const createDefaultParent =
+    autoFilledCreateParent && autoFilledCreateParent.targetKey === activeCreateParentTargetKey
+      ? autoFilledCreateParent.parent
+      : ''
+
+  // Why: 'checking' is whatever hasn't resolved for the current host yet, not
+  // a status the effect below has to set and clear by hand.
+  const createGitAvailability: GitAvailability = activeCreateParentSshTargetId
+    ? 'unknown'
+    : gitProbeResult && gitProbeResult.targetKey === activeCreateParentTargetKey
+      ? gitProbeResult.available === null
+        ? 'unknown'
+        : gitProbeResult.available
+          ? 'available'
+          : 'unavailable'
+      : 'checking'
+
+  // Why: same derivation strategy as createGitAvailability — 'idle' covers both
+  // "not applicable" and "already resolved," 'checking' covers everything else
+  // until a probe for this host either resolves or is tagged as failed.
+  const createRuntimeParentStatus: CreateRuntimeParentStatus =
+    !activeCreateParentRuntimeEnvironmentId ||
+    activeCreateParentSshTargetId ||
+    !canReplaceCreateParentDefault(createParent) ||
+    isCreateParentResolved(autoFilledCreateParent, createParent, activeCreateParentTargetKey)
+      ? 'idle'
+      : failedRuntimeParentKey === activeCreateParentTargetKey
+        ? 'failed'
+        : 'checking'
 
   useEffect(() => {
     if (step !== 'create') {
@@ -146,17 +193,12 @@ export function useCreateProjectDefaults({
       autoFilledCreateParentRef.current?.targetKey !== 'local' &&
       autoFilledCreateParentRef.current?.parent === createParent.trim()
     ) {
-      setCreateDefaultParent('')
       setCreateParent('')
       return
     }
-    if (
-      autoFilledCreateParentRef.current?.targetKey === 'local' &&
-      autoFilledCreateParentRef.current.parent === createParent.trim()
-    ) {
+    if (isCreateParentResolved(autoFilledCreateParentRef.current, createParent, 'local')) {
       return
     }
-    setCreateDefaultParent('')
     void window.api.repos
       .getDefaultCreateProjectParent()
       .then((parent) => {
@@ -167,7 +209,6 @@ export function useCreateProjectDefaults({
         ) {
           return
         }
-        setCreateDefaultParent(parent)
         createStepAutoFilledRef.current = true
         autoFilledCreateParentRef.current = { parent, targetKey: 'local' }
         createParentProvenanceRef.current = { parent, targetKey: 'local' }
@@ -192,34 +233,25 @@ export function useCreateProjectDefaults({
     }
     const runtimeEnvironmentId = activeCreateParentRuntimeEnvironmentId
     if (!runtimeEnvironmentId || activeCreateParentSshTargetId) {
-      setCreateRuntimeParentStatus('idle')
       return
     }
     if (!canReplaceCreateParentDefault(createParent)) {
-      setCreateRuntimeParentStatus('idle')
       return
     }
+    const targetKey = `runtime:${runtimeEnvironmentId}`
     if (
       createParent.trim() &&
-      autoFilledCreateParentRef.current?.targetKey !== `runtime:${runtimeEnvironmentId}` &&
+      autoFilledCreateParentRef.current?.targetKey !== targetKey &&
       autoFilledCreateParentRef.current?.parent === createParent.trim()
     ) {
-      setCreateDefaultParent('')
-      setCreateRuntimeParentStatus('checking')
       setCreateParent('')
       return
     }
-    if (
-      autoFilledCreateParentRef.current?.targetKey === `runtime:${runtimeEnvironmentId}` &&
-      autoFilledCreateParentRef.current.parent === createParent.trim()
-    ) {
-      setCreateRuntimeParentStatus('idle')
+    if (isCreateParentResolved(autoFilledCreateParentRef.current, createParent, targetKey)) {
       return
     }
-    setCreateDefaultParent('')
 
     const gen = ++createParentDefaultGenRef.current
-    setCreateRuntimeParentStatus('checking')
     void withTimeout(
       browseRuntimeServerDirectory(runtimeEnvironmentId, '~'),
       RUNTIME_GIT_AVAILABILITY_TIMEOUT_MS
@@ -233,17 +265,16 @@ export function useCreateProjectDefaults({
         }
         const parent = getDefaultCreateProjectParent(result.resolvedPath)
         createStepAutoFilledRef.current = true
-        autoFilledCreateParentRef.current = { parent, targetKey: `runtime:${runtimeEnvironmentId}` }
-        createParentProvenanceRef.current = { parent, targetKey: `runtime:${runtimeEnvironmentId}` }
-        setCreateDefaultParent(parent)
+        autoFilledCreateParentRef.current = { parent, targetKey }
+        createParentProvenanceRef.current = { parent, targetKey }
         setCreateParent(parent)
-        setCreateRuntimeParentStatus('idle')
+        setFailedRuntimeParentKey(null)
       })
       .catch(() => {
         if (gen !== createParentDefaultGenRef.current) {
           return
         }
-        setCreateRuntimeParentStatus('failed')
+        setFailedRuntimeParentKey(targetKey)
       })
   }, [
     activeRuntimeEnvironmentId,
@@ -259,15 +290,14 @@ export function useCreateProjectDefaults({
     if (step !== 'create') {
       return
     }
-    const runtimeEnvironmentId = activeRuntimeEnvironmentId?.trim()
     const gen = ++createGitProbeGenRef.current
     if (activeCreateParentSshTargetId) {
       // Why: SSH creation happens through the relay; probing client Git would
       // make the selected host look healthier or less healthy than it is.
-      setCreateGitAvailability('unknown')
       return
     }
-    setCreateGitAvailability('checking')
+    const runtimeEnvironmentId = activeCreateParentRuntimeEnvironmentId
+    const targetKey = activeCreateParentTargetKey
     const probe = runtimeEnvironmentId
       ? callRuntimeRpc<{ available: boolean }>(
           { kind: 'environment', environmentId: runtimeEnvironmentId },
@@ -285,15 +315,20 @@ export function useCreateProjectDefaults({
         if (gen !== createGitProbeGenRef.current) {
           return
         }
-        setCreateGitAvailability(available ? 'available' : 'unavailable')
+        setGitProbeResult({ targetKey, available })
       })
       .catch(() => {
         if (gen !== createGitProbeGenRef.current) {
           return
         }
-        setCreateGitAvailability('unknown')
+        setGitProbeResult({ targetKey, available: null })
       })
-  }, [activeRuntimeEnvironmentId, activeCreateParentSshTargetId, step])
+  }, [
+    activeCreateParentRuntimeEnvironmentId,
+    activeCreateParentSshTargetId,
+    activeCreateParentTargetKey,
+    step
+  ])
 
   return {
     createDefaultParent,

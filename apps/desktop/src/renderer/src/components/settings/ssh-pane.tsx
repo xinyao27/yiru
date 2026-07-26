@@ -412,6 +412,7 @@ export function SshPane(): React.JSX.Element {
             {/* Add/Edit form */}
             {showForm ? (
               <SshTargetForm
+                key={editingId ?? 'new'}
                 editingId={editingId}
                 form={form}
                 onFormChange={setForm}

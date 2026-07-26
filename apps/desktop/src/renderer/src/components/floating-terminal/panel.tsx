@@ -80,20 +80,21 @@ import { FloatingTerminalWindowControls } from './window-controls'
 export { FloatingTerminalToggleButton } from './toggle-button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import { consumeFloatingTerminalOpenMaximizedIntent } from '@/lib/floating-terminal'
+import { OPEN_MAXIMIZED_INTENT_TTL_MS } from '@/lib/floating-terminal'
 
 import {
   anchorFloatingTerminalPanelBounds,
+  areFloatingTerminalPanelCommittedBoundsEqual,
   clampFloatingTerminalBounds,
   getDefaultFloatingTerminalCommittedBounds,
   getDefaultFloatingTerminalBounds,
   getMaximizedFloatingTerminalBounds,
   persistFloatingTerminalPanelBounds,
-  readPersistedFloatingTerminalPanelBounds,
-  resolveFloatingTerminalPanelCommittedBounds,
+  readInitialPanelBounds,
   resolveFloatingTerminalPanelBounds,
   shouldReconcileFloatingTerminalPanelBounds,
   type FloatingTerminalPanelBounds,
+  type FloatingTerminalPanelBoundsState,
   type FloatingTerminalPanelCommittedBounds,
   type FloatingTerminalPanelBoundsSource
 } from './panel-bounds'
@@ -109,6 +110,10 @@ type FloatingTerminalPanelProps = {
   assistantPending?: boolean
   assistantLoadingVisible?: boolean
   tourInteractionSnapshot?: FloatingWorkspaceTourInteractionSnapshot | null | undefined
+  // Why: a plain timestamp App sets the instant it opens a closed panel
+  // wanting it maximized — a value the panel reacts to, not a module intent
+  // it must reach out and destructively claim.
+  openMaximizedRequestAt?: number | null
 }
 
 type FloatingWorkspaceTourInteractionSnapshot = {
@@ -126,40 +131,8 @@ const FLOATING_TERMINAL_NO_DRAG_SELECTOR =
   'button,input,textarea,select,[role="menuitem"],[data-testid="sortable-tab"],[data-floating-terminal-no-drag]'
 const FLOATING_TERMINAL_SHORTCUT_SURFACE_SELECTOR = '[data-floating-terminal-shortcut-surface]'
 
-type FloatingTerminalPanelBoundsState = {
-  committedBounds: FloatingTerminalPanelCommittedBounds
-  renderedBounds: FloatingTerminalPanelBounds
-  source: FloatingTerminalPanelBoundsSource
-}
-
 function isFloatingTerminalDragTarget(target: EventTarget): boolean {
   return !(target instanceof HTMLElement && target.closest(FLOATING_TERMINAL_NO_DRAG_SELECTOR))
-}
-
-function readInitialPanelBounds(): FloatingTerminalPanelBoundsState {
-  const defaultCommittedBounds = getDefaultFloatingTerminalCommittedBounds()
-  const defaultRenderedBounds = getDefaultFloatingTerminalBounds()
-  const persistedBounds = readPersistedFloatingTerminalPanelBounds()
-  return persistedBounds
-    ? {
-        committedBounds: persistedBounds,
-        renderedBounds: shouldReconcileFloatingTerminalPanelBounds('user')
-          ? resolveFloatingTerminalPanelBounds(persistedBounds, 'user')
-          : resolveFloatingTerminalPanelCommittedBounds(persistedBounds),
-        source: 'user'
-      }
-    : {
-        committedBounds: defaultCommittedBounds,
-        renderedBounds: defaultRenderedBounds,
-        source: 'default'
-      }
-}
-
-function areFloatingTerminalPanelCommittedBoundsEqual(
-  left: FloatingTerminalPanelCommittedBounds | null,
-  right: FloatingTerminalPanelCommittedBounds
-): boolean {
-  return left !== null && JSON.stringify(left) === JSON.stringify(right)
 }
 
 function setFloatingTerminalInputFocusedInMain(focused: boolean): void {
@@ -178,7 +151,8 @@ export function FloatingTerminalPanel({
   onOpenAssistant,
   assistantPending = false,
   assistantLoadingVisible = false,
-  tourInteractionSnapshot
+  tourInteractionSnapshot,
+  openMaximizedRequestAt = null
 }: FloatingTerminalPanelProps): React.JSX.Element | null {
   const { tabs, browserTabs, groups, unifiedTabs, floatingFiles, expandedPaneByTabId } =
     useAppStore(selectFloatingTerminalPanelInputs)
@@ -972,14 +946,27 @@ export function FloatingTerminalPanel({
     setMaximized(true)
   }, [bounds, maximized])
 
-  useEffect(() => {
-    // Why: when App opens the panel via Cmd+Opt+Shift+A while it was closed,
-    // it records a one-shot intent; honor it once the panel is open so it
-    // starts maximized regardless of its last saved size.
-    if (open && consumeFloatingTerminalOpenMaximizedIntent()) {
-      maximizePanel()
-    }
-  }, [open, maximizePanel])
+  // Why: openMaximizedRequestAt is a plain value (not a harvested module
+  // intent) that changes at most once per Cmd+Opt+Shift+A press, so reading
+  // it repeatedly is harmless — comparing it against the ref below is done
+  // here, during render, instead of in an Effect keyed on the `open` prop.
+  // The ref mutation happens before maximizePanel() runs, so React calling
+  // this component body more than once for the same commit (a render-phase
+  // update re-invoking it, or Strict Mode's double-render) still applies the
+  // maximize exactly once: the second pass sees the ref already caught up
+  // and skips it. Bounding by the same TTL the request was stamped with
+  // keeps an abandoned request (prevented or interrupted before this panel
+  // noticed) from leaking into a later, unrelated open.
+  const handledOpenMaximizedRequestAtRef = useRef<number | null>(null)
+  if (
+    open &&
+    openMaximizedRequestAt != null &&
+    openMaximizedRequestAt !== handledOpenMaximizedRequestAtRef.current &&
+    Date.now() - openMaximizedRequestAt <= OPEN_MAXIMIZED_INTENT_TTL_MS
+  ) {
+    handledOpenMaximizedRequestAtRef.current = openMaximizedRequestAt
+    maximizePanel()
+  }
 
   const handleFloatingPanelShortcutAction = useCallback(
     (input: FloatingPanelShortcutInput, consume: () => void): boolean => {

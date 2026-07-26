@@ -83,7 +83,6 @@ export function useChecksPanelTerminalWorktree(args: {
 
   useEffect(() => {
     if (!shouldPollCwd || activeTerminalPtyId === null) {
-      setPolledCwd(null)
       return
     }
 
@@ -133,8 +132,11 @@ export function useChecksPanelTerminalWorktree(args: {
     }
   }, [activeTerminalPtyId, shouldPollCwd])
 
-  // Ignore a stale result captured for a previously-active PTY.
-  const terminalCwd = polledCwd?.ptyId === activeTerminalPtyId ? polledCwd.cwd : null
+  // Ignore a stale result captured for a previously-active PTY, and ignore any
+  // result once polling is gated off (panel hidden, or a non-local PTY) rather
+  // than clearing it synchronously.
+  const terminalCwd =
+    shouldPollCwd && polledCwd?.ptyId === activeTerminalPtyId ? polledCwd.cwd : null
 
   const terminalCwdWorktree = useMemo(
     () => resolveChecksPanelWorktreeFromTerminalCwd(terminalCwd, localWorktrees),

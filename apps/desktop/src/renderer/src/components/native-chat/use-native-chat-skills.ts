@@ -90,7 +90,9 @@ export function useNativeChatSkills(
   useEffect(() => {
     let cancelled = false
     if (!profile || !enabled || !context) {
-      setState(IDLE_STATE)
+      // Why: no synchronous reset needed here — `effectiveState` below already
+      // forces IDLE_STATE whenever `!profile || !enabled || !context`,
+      // regardless of what this pane's stored discovery state still holds.
       return
     }
     const paneCacheKey = context.key

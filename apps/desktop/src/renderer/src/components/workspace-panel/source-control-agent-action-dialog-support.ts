@@ -1,5 +1,6 @@
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
+import type { SourceControlLaunchAgentScope } from '@/lib/source-control-launch-agent-selection'
 
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/ai-recipe-save'
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
@@ -73,6 +74,53 @@ export function resolveSourceControlAgentSaveTarget(
     return { type: 'global' }
   }
   return null
+}
+
+// Why: identifies a dialog "session" — a reopen or a change of the target it
+// acts on (repo, connection, saved recipe, disabled agents) — so the hook can
+// resync its editable fields during render instead of resetting them from an
+// effect keyed on `open` alone.
+export function buildSourceControlAgentOpenSessionKey(args: {
+  open: boolean
+  repoId?: string | null
+  connectionId?: string | null
+  worktreeId?: string | null
+  savedAgentId?: TuiAgent | null
+  savedCommandInputTemplate?: string | null
+  savedAgentArgs?: string | null
+  defaultSaveTargetValue: string
+  defaultTuiAgent?: TuiAgent | 'blank' | null
+  disabledAgents: TuiAgent[] | undefined
+}): string | null {
+  if (!args.open) {
+    return null
+  }
+  return JSON.stringify([
+    args.repoId ?? null,
+    args.connectionId ?? null,
+    args.worktreeId ?? null,
+    args.savedAgentId ?? null,
+    args.savedCommandInputTemplate ?? null,
+    args.savedAgentArgs ?? null,
+    args.defaultSaveTargetValue,
+    args.defaultTuiAgent ?? null,
+    args.disabledAgents ?? null
+  ])
+}
+
+export function buildSourceControlAgentScopeNote(
+  scope: SourceControlLaunchAgentScope
+): { effectiveAgentLabel: string; globalAgentLabel: string } | null {
+  if (!scope.overridesGlobalAgent) {
+    return null
+  }
+  const catalog = getAgentCatalog()
+  const labelFor = (agentId: TuiAgent | null): string =>
+    catalog.find((entry) => entry.id === agentId)?.label ?? agentId ?? ''
+  return {
+    effectiveAgentLabel: labelFor(scope.effectiveAgentId),
+    globalAgentLabel: labelFor(scope.globalAgentId)
+  }
 }
 
 export function buildSourceControlAgentStatusCopy(args: {

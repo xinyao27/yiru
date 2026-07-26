@@ -10245,6 +10245,11 @@
                 "stream": {
                   "f1c0179002": "스트림이 프레임을 생성하지 않습니다."
                 }
+              },
+              "video": {
+                "stream": {
+                  "c3fb77cb87": "This build does not support WebCodecs H.264 decoding."
+                }
               }
             },
             "mobile": {

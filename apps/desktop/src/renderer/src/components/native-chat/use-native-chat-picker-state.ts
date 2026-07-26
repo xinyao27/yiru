@@ -94,11 +94,12 @@ export function useNativeChatPickerState(args: {
   )
 
   useEffect(() => {
-    // Why: suppression is per-trigger-occurrence AND per-context. The composer
-    // is reused across pane/agent switches, so a stale dismissal must clear or
-    // the picker stays closed for an in-progress token when that context returns.
+    // Why: `dismissed` is only ever read as `dismissed?.context === dismissalContext
+    // ? ... : null` (below and in handleDraftOrCaretChange), so a stale dismissal
+    // from a prior context is already inert and needs no reset here. The skill
+    // origin marker has no such context guard at its read sites, so it still
+    // needs to clear on a pane/agent switch.
     skillOriginRef.current = null
-    setDismissed(null)
   }, [dismissalContext])
 
   useEffect(() => {

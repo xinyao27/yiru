@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 
 import {
   BACKGROUND_MOUNT_TERMINAL_WORKTREE_EVENT,
@@ -76,7 +76,33 @@ export function useTerminalWorktreeMounting({
   const mountedWorktreeIdsRef = useRef(new Set<string>())
   const measurableBackgroundWorktreeIdsRef = useRef(new Set<string>())
   const measurableBackgroundWorktreeTimersRef = useRef(new Map<string, number>())
-  const [backgroundMountRevision, setBackgroundMountRevision] = useState(0)
+  // Why: the revision is bumped from a mount-time replay of already-queued
+  // background mounts, from the live DOM event listener, and from a
+  // setTimeout — none of those are prop/state-driven renders, so the counter
+  // is modeled as an external store instead of useState to avoid seeding it
+  // from a mount effect.
+  const backgroundMountRevisionRef = useRef(0)
+  const backgroundMountRevisionListenersRef = useRef(new Set<() => void>())
+  const notifyBackgroundMountRevision = useCallback((): void => {
+    backgroundMountRevisionRef.current += 1
+    for (const listener of backgroundMountRevisionListenersRef.current) {
+      listener()
+    }
+  }, [])
+  const subscribeToBackgroundMountRevision = useCallback((listener: () => void): (() => void) => {
+    backgroundMountRevisionListenersRef.current.add(listener)
+    return () => {
+      backgroundMountRevisionListenersRef.current.delete(listener)
+    }
+  }, [])
+  const getBackgroundMountRevisionSnapshot = useCallback(
+    (): number => backgroundMountRevisionRef.current,
+    []
+  )
+  const backgroundMountRevision = useSyncExternalStore(
+    subscribeToBackgroundMountRevision,
+    getBackgroundMountRevisionSnapshot
+  )
   // Why: background-mounted worktrees restricted to specific tabs (targeted
   // wake/resume) must not instantiate a TerminalPane per saved tab. A worktree
   // absent from this map mounts all of its tabs.
@@ -116,7 +142,7 @@ export function useTerminalWorktreeMounting({
         measurableBackgroundWorktreeIds: measurableBackgroundWorktreeIdsRef.current,
         timers,
         worktreeId,
-        onRevision: () => setBackgroundMountRevision((revision) => revision + 1),
+        onRevision: notifyBackgroundMountRevision,
         setTimeoutFn: window.setTimeout,
         clearTimeoutFn: window.clearTimeout
       })
@@ -149,7 +175,7 @@ export function useTerminalWorktreeMounting({
       }
       timers.clear()
     }
-  }, [])
+  }, [notifyBackgroundMountRevision])
 
   // Why: gated on workspaceSessionReady to prevent TerminalPane from mounting
   // before reconnectPersistedTerminals() has finished eagerly spawning PTYs.

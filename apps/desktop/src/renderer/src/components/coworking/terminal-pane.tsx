@@ -24,6 +24,7 @@ import type {
 } from '../../../../shared/coworking/operation-contract'
 import { getCoworkingRequesterTransportErrorCode } from './requester-error'
 import { isSameCoworkingSessionRoute, type CoworkingSessionRoute } from './session-route'
+import { useCoworkingTerminalAttachment } from './terminal-attachment'
 import { notifyCoworkingTerminalInputBacklog } from './terminal-input-backlog'
 import {
   createCoworkingTerminalMutationQueue,
@@ -67,7 +68,13 @@ export function CoworkingTerminalPane({
   const settings = useAppStore((state) => state.settings)
   const canControl = useAppStore((state) => selectCoworkingCanControl(state, route))
   const systemPrefersDark = useSystemPrefersDark()
-  const [status, setStatus] = useState<CoworkingTerminalConnectionStatus>('connecting')
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<CoworkingTerminalConnectionStatus>('connecting')
+  const { attachFailed, markAttachFailed } = useCoworkingTerminalAttachment()
+  // Why: a failed xterm attach is permanent for this mount, so it outranks the
+  // subscription's own status — which otherwise reports 'live' over it once the
+  // first terminal event lands, leaving a blank pane that still accepts input.
+  const status: CoworkingTerminalConnectionStatus = attachFailed ? 'error' : subscriptionStatus
   const [mutationUncertain, setMutationUncertain] = useState(false)
   const mutationUncertainRef = useRef(false)
   const canMutateTerminal = canControl && status === 'live' && !mutationUncertain
@@ -137,7 +144,7 @@ export function CoworkingTerminalPane({
         fitAddon.fit()
       }
     } catch {
-      setStatus('error')
+      markAttachFailed()
     }
     return () => {
       resizeObserver.disconnect()
@@ -175,7 +182,7 @@ export function CoworkingTerminalPane({
     lastSequenceRef.current = -1
     terminalRef.current?.reset()
     const settlement = createCoworkingTerminalSubscriptionSettlement({
-      setStatus,
+      setStatus: setSubscriptionStatus,
       onClosed,
       onError: onSubscriptionError
     })
@@ -189,7 +196,7 @@ export function CoworkingTerminalPane({
           if (event.value.kind === 'closed') {
             settlement.complete(event.value.canContinue === true)
           } else {
-            setStatus('live')
+            setSubscriptionStatus('live')
             onLive?.()
           }
         }

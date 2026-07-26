@@ -5,7 +5,7 @@ import {
   parseExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
@@ -60,7 +60,28 @@ export function useAddRepoHostSelection({
   const [selectedAddProjectHostId, setSelectedAddProjectHostId] =
     useState<ExecutionHostId>(LOCAL_EXECUTION_HOST_ID)
   const [hostSelectorOpen, setHostSelectorOpen] = useState(false)
-  const previousOpenRef = useRef(false)
+  const [wasDialogOpen, setWasDialogOpen] = useState(isOpen)
+
+  // Why: seed the preference to the settings-focused host on the dialog's open
+  // edge via a render-time compare (React's "adjusting state while rendering"),
+  // not an Effect — the setter here is a plain, idempotent state update, so
+  // it's safe to run during render instead of deferred a frame after commit.
+  if (isOpen !== wasDialogOpen) {
+    setWasDialogOpen(isOpen)
+    // Why: this hook outlives the dialog, so a selector the user left open must
+    // not pop back open on the next launch — including on the paths that close
+    // the dialog programmatically rather than through onOpenChange.
+    setHostSelectorOpen(false)
+    if (isOpen) {
+      const focusedHostId = getSettingsFocusedExecutionHostId(settings)
+      const nextHostId = selectableHostOptions.some(
+        (host) => host.id === focusedHostId && canSelectAddRepoHost(host)
+      )
+        ? focusedHostId
+        : LOCAL_EXECUTION_HOST_ID
+      setSelectedAddProjectHostId(nextHostId)
+    }
+  }
 
   const selectedHost =
     selectableHostOptions.find(
@@ -75,22 +96,6 @@ export function useAddRepoHostSelection({
   const selectedParsedHost = parseExecutionHostId(selectedHostId)
   const selectedSshTargetId =
     selectedParsedHost?.kind === 'ssh' ? selectedParsedHost.targetId : null
-
-  useEffect(() => {
-    if (isOpen && !previousOpenRef.current) {
-      const focusedHostId = getSettingsFocusedExecutionHostId(settings)
-      const nextHostId = selectableHostOptions.some(
-        (host) => host.id === focusedHostId && canSelectAddRepoHost(host)
-      )
-        ? focusedHostId
-        : LOCAL_EXECUTION_HOST_ID
-      setSelectedAddProjectHostId(nextHostId)
-    }
-    if (!isOpen) {
-      setHostSelectorOpen(false)
-    }
-    previousOpenRef.current = isOpen
-  }, [isOpen, selectableHostOptions, settings])
 
   const handleSelectAddProjectHost = useCallback(
     async (hostId: ExecutionHostId): Promise<void> => {

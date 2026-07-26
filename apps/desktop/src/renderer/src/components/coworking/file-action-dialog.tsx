@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -33,9 +33,14 @@ export function CoworkingFileActionDialog({
   onSubmit: (value: string) => Promise<void>
 }): React.JSX.Element {
   const [value, setValue] = useState('')
-  useEffect(() => {
+  // Why: each dialog invocation is a fresh `action` object, even when reopened
+  // for the same kind — this compares the reference during render rather than
+  // an effect, so the field resets exactly on that per-open identity change.
+  const [trackedAction, setTrackedAction] = useState(action)
+  if (action !== trackedAction) {
+    setTrackedAction(action)
     setValue(action?.kind === 'rename' ? action.entry.name : '')
-  }, [action])
+  }
 
   const needsName =
     action?.kind === 'new-file' || action?.kind === 'new-directory' || action?.kind === 'rename'

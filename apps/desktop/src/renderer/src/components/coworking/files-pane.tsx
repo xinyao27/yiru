@@ -122,11 +122,16 @@ export function CoworkingFilesPane({
     }
   }, [])
 
-  useEffect(() => {
+  const [prevCanMutate, setPrevCanMutate] = useState(canMutate)
+  if (canMutate !== prevCanMutate) {
+    setPrevCanMutate(canMutate)
     if (!canMutate) {
+      // Why: losing control or hitting an uncertain mutation outcome must
+      // close any open create/rename/delete dialog rather than leave it
+      // usable against a route that can no longer accept the mutation.
       setAction(null)
     }
-  }, [canMutate])
+  }
 
   const openEntry = (entry: CoworkingFileTreeEntry): void => {
     if (entry.kind === 'directory') {

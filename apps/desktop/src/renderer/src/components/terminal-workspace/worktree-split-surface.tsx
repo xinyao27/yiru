@@ -100,7 +100,13 @@ export const WorktreeSplitSurface = React.memo(function WorktreeSplitSurface({
           <EmulatorPaneOverlayLayer worktreeId={worktreeId} isWorktreeActive={isVisible} />
         </>
       ) : null}
-      <AiVaultSessionDropLayer worktreeId={worktreeId} enabled={isVisible} />
+      {/* Why: keyed by `enabled` so a visibility flip remounts with fresh drag
+          state instead of needing an effect to clear a stale active drag. */}
+      <AiVaultSessionDropLayer
+        key={isVisible ? 'visible' : 'hidden'}
+        worktreeId={worktreeId}
+        enabled={isVisible}
+      />
     </div>
   )
 })
