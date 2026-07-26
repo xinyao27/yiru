@@ -23,17 +23,17 @@ export function MobileBrowserPointerModifiers({
   onToggle
 }: Props): React.JSX.Element {
   return (
-    <View className={styles.modifierRow}>
+    <View className="flex-row gap-1 px-2 pt-1">
       {BROWSER_POINTER_MODIFIERS.map((modifier) => {
         const selected = selectedModifiers.includes(modifier.id)
         return (
           <Pressable
             key={modifier.id}
             className={cn(
-              styles.keyButton,
-              selected && styles.keyButtonSelected,
-              !selected && styles.keyButtonPressedActive,
-              disabled && styles.disabled
+              'min-h-[30px] min-w-[42px] items-center justify-center bg-secondary px-2',
+              selected && 'bg-accent',
+              !selected && 'active:bg-accent',
+              disabled && 'opacity-[0.35]'
             )}
             disabled={disabled}
             onPress={() => onToggle(modifier.id)}
@@ -43,9 +43,9 @@ export function MobileBrowserPointerModifiers({
           >
             <Text
               className={cn(
-                styles.keyButtonText,
-                selected && styles.keyButtonTextSelected,
-                disabled && styles.disabledText
+                'text-muted-foreground text-xs font-mono',
+                selected && 'text-accent-foreground',
+                disabled && 'text-muted-foreground/60'
               )}
             >
               {modifier.label}
@@ -56,16 +56,3 @@ export function MobileBrowserPointerModifiers({
     </View>
   )
 }
-
-const styles = {
-  modifierRow: cn('flex-row gap-1 px-2 pt-1'),
-  keyButton: cn(
-    'min-h-[30px] min-w-[42px] items-center justify-center rounded-none bg-secondary px-2'
-  ),
-  keyButtonPressedActive: cn('active:bg-border'),
-  keyButtonSelected: cn('bg-foreground'),
-  keyButtonText: cn('text-muted-foreground text-[12px] font-mono'),
-  keyButtonTextSelected: cn('text-background'),
-  disabled: cn('opacity-[0.35]'),
-  disabledText: cn('text-muted-foreground/60')
-} as const

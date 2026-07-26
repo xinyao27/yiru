@@ -45,26 +45,30 @@ export function PRSidebarHeader({
 
   const body = (
     <>
-      <View className={styles.metaRow}>
-        <View className={styles.metaLeft}>
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
           <Pressable
             onPress={openPr}
             disabled={!openPr}
             accessibilityRole="link"
             accessibilityLabel={`Open pull request #${pr.number} on the web`}
-            className={cn(styles.badge, badgeColors.border, 'active:opacity-[0.6]')}
+            className={cn(
+              'self-start px-2 py-[2px] border-hairline bg-secondary',
+              badgeColors.border,
+              'active:bg-accent'
+            )}
           >
-            <Text className={cn(styles.badgeText, badgeColors.text)}>{badge.label}</Text>
+            <Text className={cn('text-xs font-bold', badgeColors.text)}>{badge.label}</Text>
           </Pressable>
           <Text
-            className={styles.prMetaStrong}
+            className="text-foreground text-xs font-semibold"
             onPress={openPr}
             accessibilityRole="link"
             accessibilityLabel={`Open pull request #${pr.number} on the web`}
           >
             #{pr.number}
           </Text>
-          {author ? <Text className={styles.prMeta}>· {author}</Text> : null}
+          {author ? <Text className="text-muted-foreground text-xs">· {author}</Text> : null}
         </View>
         {showOpenOnWeb && openPr ? (
           <Pressable
@@ -72,7 +76,7 @@ export function PRSidebarHeader({
             hitSlop={8}
             accessibilityRole="link"
             accessibilityLabel={`Open pull request #${pr.number} in browser`}
-            className={cn(styles.iconButton, 'active:opacity-[0.6]')}
+            className={cn(styles.iconButton, 'active:bg-accent')}
           >
             <ExternalLink size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
@@ -80,7 +84,7 @@ export function PRSidebarHeader({
       </View>
       <PRTitle title={title} editable={editable} titleAction={titleAction} />
       {baseRef && headRef ? (
-        <View className={styles.branchRow}>
+        <View className="flex-row flex-wrap items-center gap-1">
           <Text className={styles.branchPill} numberOfLines={1}>
             {headRef}
           </Text>
@@ -94,7 +98,7 @@ export function PRSidebarHeader({
   )
 
   if (bare) {
-    return <View className={styles.identityBlock}>{body}</View>
+    return <View className="gap-2">{body}</View>
   }
   return (
     <View className={styles.section}>
@@ -146,7 +150,7 @@ function PRTitle({
           autoFocus
         />
         {titleAction.error ? (
-          <Text className={composerStyles.error}>{titleAction.error}</Text>
+          <Text className="text-destructive text-xs">{titleAction.error}</Text>
         ) : null}
         <View className={composerStyles.actions}>
           <Pressable
@@ -178,15 +182,15 @@ function PRTitle({
 
   return (
     <Pressable
-      className={styles.titleRow}
+      className="flex-row items-start gap-1"
       onPress={editable ? startEdit : undefined}
       disabled={!editable}
       accessibilityRole={editable ? 'button' : undefined}
       accessibilityLabel={editable ? 'Edit pull request title' : undefined}
     >
-      <Text className={styles.prTitle}>{title}</Text>
+      <Text className="text-foreground flex-1 text-sm leading-[24px] font-bold">{title}</Text>
       {editable ? (
-        <View className={styles.titleEditButton}>
+        <View className="min-h-7 min-w-7 items-center justify-center">
           <Pencil size={14} colorClassName="accent-muted-foreground" />
         </View>
       ) : null}

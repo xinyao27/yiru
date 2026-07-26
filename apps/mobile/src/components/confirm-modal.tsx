@@ -27,21 +27,23 @@ export function ConfirmModal({
 }: Props) {
   return (
     <BottomDrawer visible={visible} onClose={onCancel}>
-      <View className={styles.content}>
-        <Text className={styles.title}>{title}</Text>
-        {message ? <Text className={styles.message}>{message}</Text> : null}
+      <View className="pb-4">
+        <Text className="text-foreground text-sm font-bold">{title}</Text>
+        {message ? (
+          <Text className="text-muted-foreground mt-1 text-sm leading-[20px]">{message}</Text>
+        ) : null}
       </View>
-      <View className={styles.buttons}>
+      <View className="flex-row gap-2">
         <Pressable
-          className={cn(styles.button, styles.cancelButton, styles.pressedActive)}
+          className={cn(styles.button, 'bg-card', styles.pressedActive)}
           onPress={onCancel}
         >
-          <Text className={styles.cancelText}>{cancelLabel}</Text>
+          <Text className="text-muted-foreground text-sm font-semibold">{cancelLabel}</Text>
         </Pressable>
         <Pressable
           className={cn(
             styles.button,
-            destructive ? styles.destructiveButton : styles.confirmButton,
+            destructive ? 'bg-destructive' : 'bg-primary',
             styles.pressedActive
           )}
           onPress={() => {
@@ -49,7 +51,13 @@ export function ConfirmModal({
             onCancel()
           }}
         >
-          <Text className={cn(destructive ? styles.destructiveText : styles.confirmText)}>
+          <Text
+            className={cn(
+              destructive
+                ? 'text-sm font-semibold text-destructive-foreground'
+                : 'text-sm font-semibold text-primary-foreground'
+            )}
+          >
             {confirmLabel}
           </Text>
         </Pressable>
@@ -59,17 +67,6 @@ export function ConfirmModal({
 }
 
 const styles = {
-  content: cn('pb-4'),
-  title: cn('text-[16px] font-bold text-foreground'),
-  message: cn('text-[14px] text-muted-foreground mt-1 leading-[20px]'),
-  buttons: cn('flex-row gap-2'),
-  button: cn('flex-1 py-2.5 rounded-none items-center'),
-  cancelButton: cn('bg-card'),
-  confirmButton: cn('bg-foreground'),
-  destructiveButton: cn('bg-destructive'),
-  pressed: cn('opacity-[0.7]'),
-  pressedActive: cn('active:opacity-[0.7]'),
-  cancelText: cn('text-[14px] font-semibold text-muted-foreground'),
-  confirmText: cn('text-[14px] font-semibold text-background'),
-  destructiveText: cn('text-[14px] font-semibold text-destructive-foreground')
+  button: cn('flex-1 py-2.5 items-center'),
+  pressedActive: cn('active:bg-accent')
 } as const

@@ -3,8 +3,6 @@ import { Pressable } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import { styles } from '../../app/h/[hostId]/session/styles'
-
 type HeaderIconProps = {
   size?: number
   color?: string
@@ -26,7 +24,11 @@ export function MobileSessionHeaderIconButton({
 }: MobileSessionHeaderIconButtonProps) {
   return (
     <Pressable
-      className={cn(styles.filesButton, 'active:bg-secondary', active && styles.filesButtonActive)}
+      className={cn(
+        'w-9 h-9 items-center justify-center ml-1',
+        'active:bg-accent',
+        active && 'bg-secondary'
+      )}
       onPress={onPress}
       hitSlop={8}
       accessibilityLabel={accessibilityLabel}

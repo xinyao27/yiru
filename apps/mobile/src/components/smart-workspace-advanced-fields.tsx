@@ -49,8 +49,8 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
 
       {composer.reuseEligibleBranch ? (
         <View className={styles.field}>
-          <View className={styles.reuseRow}>
-            <Text className={styles.reuseLabel} numberOfLines={1}>
+          <View className="flex-row items-center justify-between gap-2">
+            <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
               Reuse branch “{composer.reuseEligibleBranch}”
             </Text>
             <Switch
@@ -71,10 +71,6 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
 
 const styles = {
   field: cn('mb-3'),
-  label: cn('text-[13px] font-medium text-muted-foreground mb-1'),
-  input: cn(
-    'bg-secondary text-foreground rounded-none px-3 py-2 ios:py-2.5 text-[14px] border border-border'
-  ),
-  reuseRow: cn('flex-row items-center justify-between gap-2'),
-  reuseLabel: cn('flex-1 text-[13px] text-muted-foreground')
+  label: cn('text-xs font-medium text-muted-foreground mb-1'),
+  input: cn('bg-secondary text-foreground px-3 py-2 ios:py-2.5 text-sm border border-border')
 } as const

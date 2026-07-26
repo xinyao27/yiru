@@ -17,7 +17,6 @@ import {
   GestureHandlerRootView
 } from '@/components/uniwind-native-components'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
 import { spacing } from '../theme/uniwind-theme-values'
@@ -170,20 +169,20 @@ function MountedRightDrawer({
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
-      className={styles.overlay}
+      className="absolute inset-0 z-[1000]"
       style={[{ zIndex }]}
       accessibilityViewIsModal
       aria-modal
     >
-      <GestureHandlerRootView className={styles.root}>
-        <Animated.View className={styles.backdrop} style={[backdropStyle]}>
+      <GestureHandlerRootView className="flex-1">
+        <Animated.View className="absolute inset-0 bg-black/50" style={[backdropStyle]}>
           <Pressable className="absolute inset-0" onPress={dismiss} />
         </Animated.View>
 
-        <View className={styles.anchor} pointerEvents="box-none">
+        <View className="flex-1 flex-row justify-end" pointerEvents="box-none">
           <GestureDetector gesture={panGesture}>
             <Animated.View
-              className={styles.drawer}
+              className="bg-background border-l-hairline border-l-border h-full px-3"
               style={[
                 {
                   width: panelWidth,
@@ -212,11 +211,3 @@ function MountedRightDrawer({
     </Animated.View>
   )
 }
-
-const styles = {
-  overlay: cn('absolute inset-0 z-[1000]'),
-  root: cn('flex-1'),
-  backdrop: cn('absolute inset-0 bg-black/50'),
-  anchor: cn('flex-1 flex-row justify-end'),
-  drawer: cn('h-full bg-background rounded-none px-3 border-l-hairline border-l-border')
-} as const

@@ -14,7 +14,7 @@ export function QuickCommandsTabButton({
 }) {
   return (
     <>
-      <View className={styles.tabActionDivider} />
+      <View className="w-hairline bg-border h-[18px]" />
       <Pressable
         className={cn(styles.newTerminalButton, disabled && styles.newTerminalButtonDisabled)}
         disabled={disabled}

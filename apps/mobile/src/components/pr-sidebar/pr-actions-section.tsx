@@ -111,12 +111,12 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
   const copy = confirmCopy()
 
   return (
-    <View className={styles.actionsBlock}>
+    <View className="gap-2">
       {avail.canMerge ? (
         <Pressable
           className={cn(
             styles.actionButton,
-            styles.actionButtonMerge,
+            'bg-green-600 border-green-600',
             mergeBusy && styles.actionButtonDisabled
           )}
           onPress={() => {
@@ -132,17 +132,18 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
           ) : (
             <GitMerge size={16} colorClassName="accent-white" />
           )}
-          <Text className={cn(styles.actionButtonText, styles.actionButtonTextMerge)}>
-            Merge pull request
-          </Text>
+          <Text className={cn(styles.actionButtonText, 'text-white')}>Merge pull request</Text>
         </Pressable>
       ) : null}
 
       {showAutoMerge ? (
-        <View className={styles.toggleRow}>
-          <Text className={styles.toggleLabel}>Auto-merge when ready</Text>
+        <View className="min-h-11 flex-row items-center justify-between gap-2">
+          <Text className="text-foreground shrink text-sm">Auto-merge when ready</Text>
           <Pressable
-            className={cn(styles.togglePill, autoMerge && styles.togglePillOn)}
+            className={cn(
+              'min-w-14 min-h-[30px] items-center justify-center px-2 border-hairline border-border bg-card',
+              autoMerge && 'border-muted-foreground bg-secondary'
+            )}
             onPress={() => {
               setUnlinkError(null)
               actions.setAutoMerge(!autoMerge, effectiveMethod)
@@ -155,7 +156,12 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
             {autoMergeBusy ? (
               <ActivityIndicator colorClassName="accent-muted-foreground" />
             ) : (
-              <Text className={cn(styles.togglePillText, autoMerge && styles.togglePillTextOn)}>
+              <Text
+                className={cn(
+                  'text-xs font-bold text-muted-foreground',
+                  autoMerge && 'text-foreground'
+                )}
+              >
                 {autoMerge ? 'On' : 'Off'}
               </Text>
             )}
@@ -164,7 +170,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
       ) : null}
 
       {showSecondary ? (
-        <View className={styles.secondaryRow}>
+        <View className="flex-row items-stretch gap-2">
           {avail.canClose || avail.canReopen ? (
             <Pressable
               className={cn(
@@ -181,12 +187,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
               accessibilityLabel={avail.canClose ? 'Close pull request' : 'Reopen pull request'}
             >
               {stateBusy ? <ActivityIndicator colorClassName="accent-muted-foreground" /> : null}
-              <Text
-                className={cn(
-                  styles.actionButtonText,
-                  avail.canClose && styles.actionButtonDestructiveText
-                )}
-              >
+              <Text className={cn(styles.actionButtonText, avail.canClose && 'text-destructive')}>
                 {avail.canClose ? 'Close' : 'Reopen'}
               </Text>
             </Pressable>
@@ -214,7 +215,9 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
         </View>
       ) : null}
 
-      {actionError ? <Text className={styles.actionError}>{actionError}</Text> : null}
+      {actionError ? (
+        <Text className="text-destructive text-xs leading-[18px]">{actionError}</Text>
+      ) : null}
 
       <ConfirmModal
         visible={confirm !== null}

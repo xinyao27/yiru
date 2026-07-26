@@ -125,8 +125,10 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         title="Comments"
         trailing={
           comments.length > 0 ? (
-            <View className={styles.countChip}>
-              <Text className={styles.countChipText}>{comments.length}</Text>
+            <View className="border-hairline border-border bg-secondary px-2 py-[1px]">
+              <Text className="text-muted-foreground text-[11px] font-semibold">
+                {comments.length}
+              </Text>
             </View>
           ) : undefined
         }
@@ -136,19 +138,22 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         ) : detailsFailed ? (
           <Text className={styles.empty}>Could not load comments. Tap refresh to try again.</Text>
         ) : (
-          <View className={styles.list}>
+          <View className="gap-2">
             {comments.length === 0 ? (
               <Text className={styles.empty}>No comments yet.</Text>
             ) : (
               <>
                 {isPr ? (
-                  <View className={styles.audienceTabs}>
+                  <View className="border-hairline border-border bg-background flex-row gap-[2px] p-[2px]">
                     {PR_COMMENT_AUDIENCE_FILTERS.map((tab) => {
                       const active = tab.value === filter
                       return (
                         <Pressable
                           key={tab.value}
-                          className={cn(styles.audienceTab, active && styles.audienceTabActive)}
+                          className={cn(
+                            'flex-1 min-h-8 flex-row items-center justify-center gap-1',
+                            active && 'bg-secondary'
+                          )}
                           onPress={() => selectFilter(tab.value)}
                           accessibilityRole="button"
                           accessibilityState={{ selected: active }}
@@ -187,11 +192,11 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                     ))}
                     {remaining > 0 ? (
                       <Pressable
-                        className={styles.showMore}
+                        className="border-hairline border-border bg-card min-h-10 items-center justify-center"
                         onPress={() => setLimit((l) => l + COMMENT_PAGE)}
                         accessibilityRole="button"
                       >
-                        <Text className={styles.showMoreText}>
+                        <Text className="text-muted-foreground text-xs font-semibold">
                           Show {Math.min(remaining, COMMENT_PAGE)} more
                           {remaining > COMMENT_PAGE ? ` of ${remaining}` : ''}
                         </Text>
@@ -201,9 +206,11 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                 )}
               </>
             )}
-            {actions?.error ? <Text className={styles.actionError}>{actions.error}</Text> : null}
+            {actions?.error ? (
+              <Text className="text-destructive text-xs">{actions.error}</Text>
+            ) : null}
             {canComment && actions ? (
-              <View className={styles.rootComposer}>
+              <View className="gap-2">
                 <PRCommentComposer
                   placeholder="Add a comment…"
                   submitLabel="Comment"
@@ -248,12 +255,12 @@ function CommentGroupView({
   return (
     <View className={styles.group}>
       <Pressable
-        className={styles.resolvedHeader}
+        className="border-hairline border-border bg-card flex-row items-center gap-2 px-3 py-2"
         onPress={() => setExpanded((v) => !v)}
         accessibilityRole="button"
       >
         <Chevron size={14} colorClassName="accent-muted-foreground" />
-        <Text className={styles.resolvedHeaderText} numberOfLines={1}>
+        <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
           Resolved {group.kind === 'thread' ? 'thread' : 'comment'} by {root.author}
           {count > 1 ? ` (${count})` : ''}
         </Text>

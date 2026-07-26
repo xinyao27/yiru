@@ -18,11 +18,11 @@ export function AuthFailedBanner({
   onRemove: () => void
 }) {
   return (
-    <View className={styles.banner}>
-      <Text className={styles.text}>
+    <View className="bg-card border-b-border border-b px-4 py-2">
+      <Text className="text-destructive mb-2 text-xs">
         Authentication failed — try reconnecting first; if it keeps failing, re-pair from desktop.
       </Text>
-      <View className={styles.actions}>
+      <View className="flex-row gap-4">
         {canRetry && (
           <Pressable className={styles.action} onPress={onRetry}>
             <Text className={styles.actionText}>Retry</Text>
@@ -40,9 +40,6 @@ export function AuthFailedBanner({
 }
 
 const styles = {
-  banner: cn('bg-card py-2 px-4 border-b border-b-border'),
-  text: cn('text-destructive text-[13px] mb-2'),
-  actions: cn('flex-row gap-4'),
   action: cn('py-1'),
-  actionText: cn('text-primary text-[13px] font-semibold')
+  actionText: cn('text-primary text-xs font-semibold')
 } as const

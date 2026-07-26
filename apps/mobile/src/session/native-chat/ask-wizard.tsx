@@ -100,23 +100,29 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
   const otherSelected = (selections[index] ?? []).includes(OTHER)
 
   return (
-    <View className={styles.card}>
+    <View className="bg-card border-t-hairline border-t-border max-h-[380px]">
       {total > 1 ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className={styles.tabs}
-          contentContainerClassName={styles.tabsContent}
+          className="border-b-hairline border-b-border grow-0 pt-2"
+          contentContainerClassName="px-2 gap-1 items-center"
           keyboardShouldPersistTaps="always"
         >
           {prompt.questions.map((qq, i) => (
             <Pressable
               key={i}
-              className={cn(styles.tab, i === index && styles.tabActive)}
+              className={cn(
+                'flex-row items-center gap-1 min-h-9 px-2 py-1 border-b-2 border-b-transparent',
+                i === index && 'border-b-green-500'
+              )}
               onPress={() => setIndex(i)}
             >
               <Text
-                className={cn(styles.tabText, i === index && styles.tabTextActive)}
+                className={cn(
+                  'text-muted-foreground text-xs font-semibold',
+                  i === index && 'text-foreground'
+                )}
                 numberOfLines={1}
               >
                 {qq.header || `Step ${i + 1}`}
@@ -127,8 +133,8 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
         </ScrollView>
       ) : null}
 
-      <ScrollView className={styles.scroll} keyboardShouldPersistTaps="always">
-        <Text className={styles.questionText}>{q.question}</Text>
+      <ScrollView className="px-3" keyboardShouldPersistTaps="always">
+        <Text className="text-foreground my-2 text-sm font-semibold">{q.question}</Text>
         {q.options.map((opt, optIndex) => (
           <OptionRow
             key={`${optIndex}:${opt.label}`}
@@ -147,7 +153,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
         />
         {otherSelected ? (
           <TextInput
-            className={styles.input}
+            className="bg-secondary border-border text-foreground mb-1 min-h-11 border p-2 text-sm"
             value={otherText[index]}
             onChangeText={(v) => setOther(index, v)}
             placeholder="Type your answer"
@@ -158,9 +164,9 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
         ) : null}
       </ScrollView>
 
-      <View className={styles.footer}>
+      <View className="border-t-hairline border-t-border flex-row items-center justify-between gap-2 p-3">
         <Pressable
-          className={styles.cancel}
+          className="px-2 py-2"
           onPress={async () => {
             if (!submittingRef.current && onCancel) {
               submittingRef.current = true
@@ -176,19 +182,24 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           disabled={submitting}
           hitSlop={8}
         >
-          <Text className={styles.cancelText}>Cancel</Text>
+          <Text className="text-muted-foreground text-sm font-semibold">Cancel</Text>
         </Pressable>
         {total > 1 ? (
-          <Text className={styles.progress}>
+          <Text className="text-muted-foreground/60 text-xs">
             {index + 1}/{total}
           </Text>
         ) : null}
         <Pressable
-          className={cn(styles.next, !canAdvance && styles.nextDisabled)}
+          className={cn('py-2 px-4 bg-primary', !canAdvance && 'bg-secondary')}
           onPress={advance}
           disabled={!canAdvance}
         >
-          <Text className={cn(styles.nextText, !canAdvance && styles.nextTextDisabled)}>
+          <Text
+            className={cn(
+              'text-primary-foreground text-sm font-bold',
+              !canAdvance && 'text-muted-foreground/60'
+            )}
+          >
             {isLast ? 'Send answer' : 'Next'}
           </Text>
         </Pressable>
@@ -211,21 +222,27 @@ function OptionRow({
   onPress: () => void
 }): React.JSX.Element {
   return (
-    <Pressable className={cn(styles.option, selected && styles.optionSelected)} onPress={onPress}>
+    <Pressable
+      className={cn(
+        'flex-row gap-2 p-2 bg-secondary border border-border mb-1',
+        selected && 'border-green-500'
+      )}
+      onPress={onPress}
+    >
       {/* Multi-select reads as a checkbox (square); single-select as a radio (circle). */}
       <View
         className={cn(
-          styles.check,
-          multi ? styles.checkSquare : styles.checkCircle,
-          selected && styles.checkOn
+          'w-[18px] h-[18px] border-[1.5px] border-muted-foreground/60 items-center justify-center mt-[1px]',
+          multi ? '' : '',
+          selected && 'bg-green-500 border-green-500'
         )}
       >
         {selected ? <Check size={12} colorClassName="accent-primary-foreground" /> : null}
       </View>
-      <View className={styles.optionBody}>
-        <Text className={styles.optionLabel}>{label}</Text>
+      <View className="flex-1 gap-[2px]">
+        <Text className="text-foreground text-sm font-semibold">{label}</Text>
         {description ? (
-          <Text className={styles.optionDescription} numberOfLines={3}>
+          <Text className="text-muted-foreground text-xs" numberOfLines={3}>
             {description}
           </Text>
         ) : null}
@@ -233,37 +250,3 @@ function OptionRow({
     </Pressable>
   )
 }
-
-const styles = {
-  card: cn('max-h-[380px] bg-card border-t-hairline border-t-border'),
-  tabs: cn('grow-0 pt-2 border-b-hairline border-b-border'),
-  tabsContent: cn('px-2 gap-1 items-center'),
-  tab: cn('flex-row items-center gap-1 min-h-9 px-2 py-1 border-b-2 border-b-transparent'),
-  tabActive: cn('border-b-green-500'),
-  tabText: cn('text-muted-foreground text-[12px] font-semibold'),
-  tabTextActive: cn('text-foreground'),
-  scroll: cn('px-3'),
-  questionText: cn('text-foreground text-[15px] font-semibold my-2'),
-  option: cn('flex-row gap-2 p-2 rounded-none bg-secondary border border-border mb-1'),
-  optionSelected: cn('border-green-500'),
-  check: cn(
-    'w-[18px] h-[18px] border-[1.5px] border-muted-foreground/60 items-center justify-center mt-[1px]'
-  ),
-  checkCircle: cn('rounded-none'),
-  checkSquare: cn('rounded-none'),
-  checkOn: cn('bg-green-500 border-green-500'),
-  optionBody: cn('flex-1 gap-[2px]'),
-  optionLabel: cn('text-foreground text-[14px] font-semibold'),
-  optionDescription: cn('text-muted-foreground text-[12px]'),
-  input: cn(
-    'bg-secondary border border-border rounded-none text-foreground text-[14px] p-2 min-h-11 mb-1'
-  ),
-  footer: cn('flex-row items-center justify-between p-3 gap-2 border-t-hairline border-t-border'),
-  cancel: cn('py-2 px-2'),
-  cancelText: cn('text-muted-foreground text-[14px] font-semibold'),
-  progress: cn('text-muted-foreground/60 text-[12px]'),
-  next: cn('py-2 px-4 rounded-none bg-foreground'),
-  nextDisabled: cn('bg-secondary'),
-  nextText: cn('text-background text-[14px] font-bold'),
-  nextTextDisabled: cn('text-muted-foreground/60')
-} as const

@@ -27,21 +27,26 @@ function getVersionLabel(): string {
 export default function AboutScreen() {
   const router = useRouter()
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <View className="bg-background pt-safe-offset-2 flex-1 p-4">
+      <View className="mb-6 flex-row items-center">
+        <Pressable
+          className="mr-2 h-9 w-9 items-center justify-center"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text className={styles.heading}>About</Text>
+        <Text className="text-foreground text-sm font-bold">About</Text>
       </View>
 
-      <View className={styles.brand}>
+      <View className="mb-4 items-center py-6">
         <YiruLogo size={28} />
-        <Text className={styles.brandName}>Yiru</Text>
-        <Text className={styles.brandSub}>Open-source agent IDE for 100x builders</Text>
+        <Text className="text-foreground mt-2 text-sm font-extrabold">Yiru</Text>
+        <Text className="text-muted-foreground/60 mt-1 text-xs">
+          Open-source agent IDE for 100x builders
+        </Text>
       </View>
 
-      <View className={styles.section}>
+      <View className="bg-card overflow-hidden">
         <Pressable
           className={cn(styles.row, styles.rowPressedActive)}
           onPress={() => void Linking.openURL('https://yiru.ai')}
@@ -49,7 +54,7 @@ export default function AboutScreen() {
           <Globe size={16} colorClassName="accent-muted-foreground" />
           <Text className={styles.rowValue}>yiru.ai</Text>
         </Pressable>
-        <View className={styles.separator} />
+        <View className="h-hairline bg-border mx-3" />
         <Pressable
           className={cn(styles.row, styles.rowPressedActive)}
           onPress={() => void Linking.openURL(YIRU_GITHUB_REPOSITORY_URL)}
@@ -59,24 +64,13 @@ export default function AboutScreen() {
         </Pressable>
       </View>
 
-      <Text className={styles.versionText}>{getVersionLabel()}</Text>
+      <Text className="text-muted-foreground/60 mt-4 text-center text-xs">{getVersionLabel()}</Text>
     </View>
   )
 }
 
 const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  topRow: cn('flex-row items-center mb-6'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  brand: cn('items-center py-6 mb-4'),
-  brandName: cn('text-[22px] font-extrabold text-foreground mt-2'),
-  brandSub: cn('text-[13px] text-muted-foreground/60 mt-1'),
-  section: cn('bg-card rounded-none overflow-hidden'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowLabel: cn('flex-1 text-[14px] font-medium text-foreground'),
-  rowValue: cn('flex-1 text-right text-[14px] text-muted-foreground'),
-  separator: cn('h-hairline bg-border mx-3'),
-  versionText: cn('mt-4 text-center text-[12px] text-muted-foreground/60')
+  rowPressedActive: cn('active:bg-accent'),
+  rowValue: cn('flex-1 text-right text-sm text-muted-foreground')
 } as const

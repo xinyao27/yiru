@@ -141,23 +141,23 @@ export function QuickCommandsSheet({
 
   return (
     <BottomDrawer visible={visible} onClose={onClose}>
-      <View className={styles.header}>
+      <View className="flex-row items-center pb-2">
         {view === 'list' ? (
           <View className={styles.backSpacer} />
         ) : (
           <Pressable
-            className={styles.backButton}
+            className="active:bg-accent h-[30px] w-[30px] items-center justify-center"
             onPress={() => setView(view === 'agent' ? 'editor' : 'list')}
             accessibilityLabel="Back"
           >
             <CaretLeft size={18} colorClassName="accent-muted-foreground" />
           </Pressable>
         )}
-        <Text className={styles.title}>{title}</Text>
+        <Text className="text-foreground flex-1 text-center text-sm font-bold">{title}</Text>
         <View className={styles.backSpacer} />
       </View>
       {view === 'editor' && draft ? (
-        <Text className={styles.description}>
+        <Text className="text-muted-foreground px-1 pb-2 text-xs">
           Save terminal commands or agent prompts for quick access.
         </Text>
       ) : null}
@@ -215,9 +215,5 @@ export function QuickCommandsSheet({
 }
 
 const styles = {
-  header: cn('flex-row items-center pb-2'),
-  backButton: cn('h-[30px] w-[30px] items-center justify-center active:bg-accent'),
-  backSpacer: cn('w-[30px]'),
-  title: cn('flex-1 text-center text-[16px] font-bold text-foreground'),
-  description: cn('px-1 pb-2 text-[12px] text-muted-foreground')
+  backSpacer: cn('w-[30px]')
 } as const

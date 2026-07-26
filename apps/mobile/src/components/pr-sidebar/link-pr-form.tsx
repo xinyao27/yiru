@@ -47,8 +47,8 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
 
   return (
     <View>
-      <View className={styles.headingRow}>
-        <Text className={styles.heading}>Link existing pull request</Text>
+      <View className="mb-2 flex-row items-center justify-between">
+        <Text className="text-foreground text-sm font-bold">Link existing pull request</Text>
         <Pressable
           onPress={onCancel}
           disabled={submitting}
@@ -56,12 +56,12 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
           accessibilityLabel="Cancel"
           hitSlop={8}
         >
-          <Text className={styles.cancelText}>Cancel</Text>
+          <Text className="text-muted-foreground text-xs font-semibold">Cancel</Text>
         </Pressable>
       </View>
-      <Text className={styles.label}>PR number or GitHub URL</Text>
+      <Text className="text-muted-foreground mt-2 mb-1 text-xs">PR number or GitHub URL</Text>
       <TextInput
-        className={styles.input}
+        className="bg-secondary text-foreground px-3 py-2 text-sm"
         value={input}
         onChangeText={setInput}
         placeholder="#123 or https://github.com/owner/repo/pull/123"
@@ -70,12 +70,12 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
         autoCorrect={false}
         editable={!submitting}
       />
-      {error ? <Text className={styles.error}>{error}</Text> : null}
+      {error ? <Text className="text-destructive mt-3 text-xs">{error}</Text> : null}
       <Pressable
         className={cn(
-          styles.submit,
-          (submitting || parsed === null) && styles.submitDisabled,
-          styles.submitPressedActive
+          'mt-4 min-h-[46px] bg-primary items-center justify-center',
+          (submitting || parsed === null) && 'opacity-[0.45]',
+          'active:bg-accent'
         )}
         disabled={submitting || parsed === null}
         onPress={() => void submit()}
@@ -83,7 +83,7 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
         {submitting ? (
           <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
         ) : (
-          <Text className={styles.submitText}>
+          <Text className="text-primary-foreground text-sm font-semibold">
             {parsed ? `Link #${parsed}` : 'Link pull request'}
           </Text>
         )}
@@ -91,16 +91,3 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
     </View>
   )
 }
-
-const styles = {
-  headingRow: cn('flex-row items-center justify-between mb-2'),
-  heading: cn('text-foreground text-[14px] font-bold'),
-  cancelText: cn('text-muted-foreground text-[12px] font-semibold'),
-  label: cn('text-muted-foreground text-[12px] mt-2 mb-1'),
-  input: cn('bg-secondary rounded-none px-3 py-2 text-foreground text-[14px]'),
-  error: cn('text-destructive text-[12px] mt-3'),
-  submit: cn('mt-4 min-h-[46px] rounded-none bg-foreground items-center justify-center'),
-  submitDisabled: cn('opacity-[0.45]'),
-  submitPressedActive: cn('active:opacity-[0.8]'),
-  submitText: cn('text-background text-[14px] font-semibold')
-} as const

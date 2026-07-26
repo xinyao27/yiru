@@ -162,7 +162,7 @@ export function PrSidebarCreateEmptyState({
 
   if (mode === 'link') {
     return (
-      <View className={styles.composerArea}>
+      <View className="bg-card border-b-hairline border-b-border p-3">
         <MobileLinkPrForm
           client={client}
           worktreeId={worktreeId}
@@ -177,15 +177,15 @@ export function PrSidebarCreateEmptyState({
   }
 
   return (
-    <View className={styles.section}>
-      <View className={styles.header}>
-        <View className={styles.headerTitle}>
+    <View className="bg-card border-b-hairline border-b-border overflow-hidden">
+      <View className="border-b-hairline border-b-border min-h-10 flex-row items-center justify-between gap-2 px-3 py-2">
+        <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <GitPullRequestArrow size={14} colorClassName="accent-muted-foreground" />
-          <Text className={styles.headerLabel}>Pull request</Text>
+          <Text className="text-foreground text-xs font-semibold">Pull request</Text>
         </View>
-        <View className={styles.headerActions}>
+        <View className="flex-row items-center gap-1">
           <Pressable
-            className={cn(styles.iconButton, styles.iconButtonPressedActive)}
+            className={cn('min-w-8 min-h-8 items-center justify-center', 'active:bg-accent')}
             onPress={refreshPrState}
             accessibilityRole="button"
             accessibilityLabel="Refresh pull request"
@@ -195,8 +195,8 @@ export function PrSidebarCreateEmptyState({
           </Pressable>
           <Pressable
             className={cn(
-              styles.createButton,
-              (!canCreate || loading) && styles.createButtonDisabled
+              'min-h-8 flex-row items-center justify-center gap-1 px-2 bg-primary',
+              (!canCreate || loading) && 'opacity-[0.5]'
             )}
             onPress={() => void openComposer()}
             disabled={!canCreate || loading}
@@ -208,12 +208,12 @@ export function PrSidebarCreateEmptyState({
             ) : (
               <GitPullRequestArrow size={14} colorClassName="accent-primary-foreground" />
             )}
-            <Text className={styles.createButtonText}>Create PR</Text>
+            <Text className="text-primary-foreground text-xs font-bold">Create PR</Text>
           </Pressable>
         </View>
       </View>
-      <View className={styles.body}>
-        <Text className={styles.bodyTitle}>
+      <View className="gap-2 p-3">
+        <Text className="text-foreground text-sm font-bold">
           {orphanLinkedPR ? `Linked PR #${orphanLinkedPR} unavailable` : 'No open pull request'}
         </Text>
         <Text className={styles.bodyText}>
@@ -233,9 +233,9 @@ export function PrSidebarCreateEmptyState({
         ) : null}
         <Pressable
           className={cn(
-            styles.linkButton,
-            !client && styles.linkButtonDisabled,
-            styles.linkButtonPressedActive
+            'mt-1 min-h-8 self-start flex-row items-center gap-1',
+            !client && 'opacity-[0.5]',
+            'active:bg-accent'
           )}
           onPress={() => setMode('link')}
           disabled={!client}
@@ -245,7 +245,7 @@ export function PrSidebarCreateEmptyState({
           hitSlop={6}
         >
           <Link2 size={14} colorClassName="accent-muted-foreground" />
-          <Text className={styles.linkButtonText}>Link an existing PR</Text>
+          <Text className="text-muted-foreground text-xs font-semibold">Link an existing PR</Text>
         </Pressable>
       </View>
     </View>

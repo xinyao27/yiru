@@ -292,7 +292,7 @@ export function MobileSourceControlPanel({
         <Text className={styles.stateText}>{screenState.message}</Text>
         {screenState.kind === 'error' ? (
           <Pressable
-            className={styles.retryButton}
+            className="bg-secondary mt-3 px-4 py-2"
             onPress={() => {
               // Why: retrying the request is useless while the transport's
               // reconnect loop is parked at its give-up cap — revive the
@@ -305,7 +305,7 @@ export function MobileSourceControlPanel({
               void loadStatus()
             }}
           >
-            <Text className={styles.retryText}>Retry</Text>
+            <Text className="text-foreground text-sm font-semibold">Retry</Text>
           </Pressable>
         ) : null}
       </View>
@@ -325,7 +325,7 @@ export function MobileSourceControlPanel({
   const conflictAborting = isMobileConflictAborting(busyAction, conflictOperation)
 
   return (
-    <View ref={setRootRef} className={styles.container}>
+    <View ref={setRootRef} className="bg-background flex-1">
       {embedded ? (
         <View className={styles.header}>{header}</View>
       ) : (

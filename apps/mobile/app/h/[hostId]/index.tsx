@@ -829,7 +829,7 @@ export function HostScreen({
   if (error) {
     return (
       <View className={styles.centered}>
-        <Text className={styles.errorText}>{error}</Text>
+        <Text className="text-destructive text-sm">{error}</Text>
       </View>
     )
   }
@@ -839,14 +839,14 @@ export function HostScreen({
   }
 
   return (
-    <View className={styles.container}>
+    <View className="bg-background flex-1">
       {/* Why: the safe-area inset wraps only the top chrome so the status-bar
           strip and the header share one bg-card color — previously the strip
           showed the screen's bg-background against the bg-card header. */}
-      <SafeAreaView className={styles.topChrome} edges={['top']}>
-        <View className={styles.statusBar}>
+      <SafeAreaView className="bg-card border-b-border border-b" edges={['top']}>
+        <View className="min-h-[34px] flex-row items-center justify-between px-4 pt-1">
           <Pressable
-            className={styles.backButton}
+            className="mr-1 h-8 w-8 items-center justify-center"
             onPress={leaveHost}
             accessibilityRole="button"
             accessibilityLabel="Back to hosts"
@@ -862,9 +862,9 @@ export function HostScreen({
             })
             return (
               <>
-                <View className={styles.hostIdentity}>
+                <View className="mr-3 min-w-0 flex-1 flex-row items-center">
                   <StatusDot state={connState} verdict={headerVerdict} />
-                  <Text className={styles.hostNameText} numberOfLines={1}>
+                  <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
                     {hostName || 'Host'}
                   </Text>
                 </View>
@@ -884,11 +884,11 @@ export function HostScreen({
                     }
                     return (
                       <Pressable
-                        className={styles.reconnectButton}
+                        className="bg-card border-border border px-2 py-1"
                         onPress={() => void forceReconnectHost(hostId!)}
                         hitSlop={8}
                       >
-                        <Text className={styles.reconnectButtonText}>Reconnect</Text>
+                        <Text className="text-foreground text-xs font-semibold">Reconnect</Text>
                       </Pressable>
                     )
                   })()}
@@ -898,7 +898,7 @@ export function HostScreen({
           {!embedded && floatingWorkspaceEnabled ? (
             <Pressable
               className={cn(
-                styles.toolbarIconButton,
+                'w-8 h-7 items-center justify-center',
                 connState !== 'connected' && styles.toolbarIconDisabled
               )}
               onPress={openFloatingWorkspace}
@@ -917,7 +917,7 @@ export function HostScreen({
           ) : null}
           {embedded && onHideSidebar ? (
             <Pressable
-              className={styles.sidebarCollapseButton}
+              className="ml-1 h-6 w-6 items-center justify-center"
               onPress={onHideSidebar}
               accessibilityRole="button"
               accessibilityLabel="Hide sidebar"
@@ -930,7 +930,7 @@ export function HostScreen({
 
         {/* Filter/sort/group toolbar */}
         {embedded ? (
-          <View className={styles.embeddedToolbar}>
+          <View className="border-b-border gap-1 border-b px-2 py-1.5">
             <View className={styles.embeddedToolbarRow}>
               {floatingWorkspaceEnabled ? (
                 <Pressable
@@ -950,7 +950,7 @@ export function HostScreen({
               <Pressable
                 className={cn(
                   styles.filterChip,
-                  styles.embeddedFilterChip,
+                  'flex-1 min-w-0 h-[30px] justify-center px-1 py-0',
                   activeFilterCount > 0 && styles.filterChipActive
                 )}
                 onPress={() => setShowFilterModal(true)}
@@ -1053,7 +1053,7 @@ export function HostScreen({
             </View>
           </View>
         ) : (
-          <View className={styles.toolbar}>
+          <View className="border-b-border flex-row items-center gap-2 border-b px-3 py-1.5">
             <Pressable
               className={cn(styles.filterChip, activeFilterCount > 0 && styles.filterChipActive)}
               onPress={() => setShowFilterModal(true)}
@@ -1094,7 +1094,7 @@ export function HostScreen({
               </Text>
             </Pressable>
 
-            <View className={styles.toolbarSpacer} />
+            <View className="flex-1" />
 
             <Pressable
               className={styles.searchToggle}
@@ -1127,7 +1127,7 @@ export function HostScreen({
 
       {/* Search bar */}
       {showSearch && (
-        <View className={styles.searchBar}>
+        <View className="border-b-hairline border-b-border bg-card px-3 py-2">
           <MobileSearchField
             value={search}
             onChangeText={setSearch}
@@ -1153,7 +1153,7 @@ export function HostScreen({
       {/* Empty state */}
       {connState === 'connected' && worktreesLoaded && sections.length === 0 && (
         <View className={styles.centered}>
-          <Text className={styles.emptyText}>
+          <Text className="text-muted-foreground text-sm">
             {search
               ? 'No matching worktrees'
               : activeFilterCount > 0
@@ -1177,7 +1177,7 @@ export function HostScreen({
           // while reserving insets.bottom keeps the last worktree row reachable
           // above the Samsung 3-button nav / iOS home indicator.
           contentContainerClassName={cn(
-            styles.list,
+            'pb-4',
             embedded ? 'pb-safe-offset-4' : 'pb-safe-offset-[72px]'
           )}
           contentContainerStyle={
@@ -1197,7 +1197,7 @@ export function HostScreen({
             const repoSectionIcon = groupMode === 'repo' ? repoIconsByName.get(section.title) : null
             return (
               <Pressable
-                className={styles.sectionHeader}
+                className="flex-row items-center px-4 pt-3 pb-1"
                 onPress={() => toggleCollapsed(section.key)}
               >
                 {isCollapsed ? (
@@ -1215,7 +1215,7 @@ export function HostScreen({
                   </View>
                 )}
                 {groupMode === 'repo' ? (
-                  <View className={styles.sectionRepoIcon}>
+                  <View className="mr-1">
                     <MobileRepoIcon
                       repoIcon={repoSectionIcon}
                       size={14}
@@ -1223,8 +1223,10 @@ export function HostScreen({
                     />
                   </View>
                 ) : null}
-                <Text className={styles.sectionTitle}>{section.title}</Text>
-                <Text className={styles.sectionCount}>{count}</Text>
+                <Text className="text-muted-foreground/60 text-[11px] font-semibold tracking-[0.5px] uppercase">
+                  {section.title}
+                </Text>
+                <Text className="text-muted-foreground/60 ml-1 text-[11px]">{count}</Text>
               </Pressable>
             )
           }}
@@ -1282,11 +1284,11 @@ export function HostScreen({
       />
 
       <BottomDrawer visible={showFilterModal} onClose={() => setShowFilterModal(false)}>
-        <View className={styles.filterModalHeader}>
-          <Text className={styles.filterModalTitle}>Filter</Text>
+        <View className="mb-3 flex-row items-center justify-between px-1">
+          <Text className="text-foreground text-sm font-semibold">Filter</Text>
           {activeFilterCount > 0 && (
             <Pressable onPress={clearFilters}>
-              <Text className={styles.clearFiltersText}>Clear filters</Text>
+              <Text className="text-muted-foreground text-xs">Clear filters</Text>
             </Pressable>
           )}
         </View>
@@ -1312,10 +1314,7 @@ export function HostScreen({
                 <View key={repo.id}>
                   {i > 0 && <View className={styles.filterSeparator} />}
                   <Pressable className={styles.filterRow} onPress={() => toggleRepoFilter(repo.id)}>
-                    <View
-                      className={styles.filterRepoDot}
-                      style={[{ backgroundColor: repo.color }]}
-                    />
+                    <View className="h-2 w-2" style={[{ backgroundColor: repo.color }]} />
                     <Text className={styles.filterRowText} numberOfLines={1}>
                       {repo.name}
                     </Text>
@@ -1340,29 +1339,21 @@ export function HostScreen({
       >
         {confirmDelete ? (
           <View>
-            <View className={styles.confirmContent}>
-              <Text className={styles.confirmTitle}>Delete Worktree</Text>
-              <Text className={styles.confirmMessage}>
+            <View className="pb-4">
+              <Text className="text-foreground text-sm font-bold">Delete Worktree</Text>
+              <Text className="text-muted-foreground mt-1 text-sm leading-[20px]">
                 Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
               </Text>
             </View>
-            <View className={styles.confirmButtons}>
+            <View className="flex-row gap-2">
               <Pressable
-                className={cn(
-                  styles.confirmBtn,
-                  styles.confirmBtnCancel,
-                  styles.confirmBtnPressedActive
-                )}
+                className={cn(styles.confirmBtn, 'bg-card', styles.confirmBtnPressedActive)}
                 onPress={() => setConfirmDelete(null)}
               >
-                <Text className={styles.confirmBtnCancelText}>Cancel</Text>
+                <Text className="text-muted-foreground text-sm font-semibold">Cancel</Text>
               </Pressable>
               <Pressable
-                className={cn(
-                  styles.confirmBtn,
-                  styles.confirmBtnDestructive,
-                  styles.confirmBtnPressedActive
-                )}
+                className={cn(styles.confirmBtn, 'bg-destructive', styles.confirmBtnPressedActive)}
                 onPress={() => {
                   if (confirmDelete) {
                     void handleDeleteWorktree(confirmDelete)
@@ -1371,7 +1362,7 @@ export function HostScreen({
                   setActionTarget(null)
                 }}
               >
-                <Text className={styles.confirmBtnDestructiveText}>Delete</Text>
+                <Text className="text-destructive-foreground text-sm font-semibold">Delete</Text>
               </Pressable>
             </View>
           </View>
@@ -1472,65 +1463,30 @@ export default function HostWorktreeRoute() {
 }
 
 function ListSeparator() {
-  return <View className={styles.separator} />
+  return <View className="bg-border mr-4 ml-10 h-[1px]" />
 }
 
 const styles = {
-  container: cn('flex-1 bg-background'),
-  topChrome: cn('bg-card border-b border-b-border'),
-  statusBar: cn('flex-row items-center justify-between min-h-[34px] pt-1 px-4'),
-  backButton: cn('w-8 h-8 items-center justify-center mr-1'),
-  sidebarCollapseButton: cn('w-6 h-6 items-center justify-center rounded-none ml-1'),
-  hostIdentity: cn('flex-1 flex-row items-center min-w-0 mr-3'),
-  hostNameText: cn('flex-1 text-[15px] font-semibold text-foreground'),
-  reconnectButton: cn('py-1 px-2 rounded-none bg-card border border-border'),
-  reconnectButtonText: cn('text-foreground text-[12px] font-semibold'),
-  toolbar: cn('flex-row items-center py-1.5 px-3 gap-2 border-b border-b-border'),
-  embeddedToolbar: cn('py-1.5 px-2 gap-1 border-b border-b-border'),
   embeddedToolbarRow: cn('flex-row items-center gap-2'),
-  embeddedFilterChip: cn('flex-1 min-w-0 h-[30px] justify-center px-1 py-0'),
   embeddedModeButton: cn('flex-1 min-w-0 h-[30px] justify-center px-1 py-0'),
-  filterChip: cn('flex-row items-center gap-1 px-2.5 py-1 rounded-none border border-border'),
+  filterChip: cn('flex-row items-center gap-1 px-2.5 py-1 border border-border'),
   filterChipActive: cn('border-muted-foreground bg-secondary'),
-  filterChipText: cn('text-[12px] text-muted-foreground'),
+  filterChipText: cn('text-xs text-muted-foreground'),
   filterChipTextActive: cn('text-foreground'),
   modeButton: cn('flex-row items-center shrink min-w-0 gap-1 px-2 py-1'),
-  sortLabel: cn('shrink min-w-0 text-[12px] text-muted-foreground'),
-  toolbarSpacer: cn('flex-1'),
-  toolbarIconButton: cn('w-8 h-7 items-center justify-center rounded-none'),
-  embeddedToolbarIconButton: cn('flex-1 h-7 items-center justify-center rounded-none'),
+  sortLabel: cn('shrink min-w-0 text-xs text-muted-foreground'),
+  embeddedToolbarIconButton: cn('flex-1 h-7 items-center justify-center'),
   toolbarIconDisabled: cn('opacity-[0.6]'),
   searchToggle: cn('p-1'),
-  searchBar: cn('px-3 py-2 border-b-hairline border-b-border bg-card'),
   centered: cn('flex-1 items-center justify-center'),
-  emptyText: cn('text-muted-foreground text-[14px]'),
-  errorText: cn('text-destructive text-[14px]'),
-  list: cn('pb-4'),
-  sectionHeader: cn('flex-row items-center px-4 pt-3 pb-1'),
   sectionIcon: cn('mr-1'),
-  sectionRepoIcon: cn('mr-1'),
-  sectionTitle: cn('text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px]'),
-  sectionCount: cn('text-[11px] text-muted-foreground/60 ml-1'),
-  separator: cn('h-[1px] bg-border ml-10 mr-4'),
-  filterModalHeader: cn('flex-row items-center justify-between px-1 mb-3'),
-  filterModalTitle: cn('text-[15px] font-semibold text-foreground'),
-  clearFiltersText: cn('text-[13px] text-muted-foreground'),
   filterSectionLabel: cn(
     'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px] mb-1 px-1'
   ),
-  filterGroup: cn('bg-card rounded-none overflow-hidden mb-3'),
+  filterGroup: cn('bg-card overflow-hidden mb-3'),
   filterRow: cn('flex-row items-center py-3 px-3.5 gap-2'),
-  filterRowText: cn('flex-1 text-[14px] text-foreground'),
+  filterRowText: cn('flex-1 text-sm text-foreground'),
   filterSeparator: cn('h-hairline bg-border mx-3'),
-  filterRepoDot: cn('w-2 h-2 rounded-none'),
-  confirmContent: cn('pb-4'),
-  confirmTitle: cn('text-[16px] font-bold text-foreground'),
-  confirmMessage: cn('text-[14px] text-muted-foreground mt-1 leading-[20px]'),
-  confirmButtons: cn('flex-row gap-2'),
-  confirmBtn: cn('flex-1 py-2.5 rounded-none items-center'),
-  confirmBtnCancel: cn('bg-card'),
-  confirmBtnDestructive: cn('bg-destructive'),
-  confirmBtnPressedActive: cn('active:opacity-[0.7]'),
-  confirmBtnCancelText: cn('text-[14px] font-semibold text-muted-foreground'),
-  confirmBtnDestructiveText: cn('text-[14px] font-semibold text-destructive-foreground')
+  confirmBtn: cn('flex-1 py-2.5 items-center'),
+  confirmBtnPressedActive: cn('active:bg-accent')
 } as const

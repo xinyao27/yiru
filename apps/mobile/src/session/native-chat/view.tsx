@@ -60,16 +60,10 @@ type Props = {
   onSend: (text: string) => Promise<boolean>
   /** Optimistic queued sends (owned by the route so they survive view switches). */
   pending: { id: string; text: string }[]
-  /** Controlled composer text (owned by the route so dictation can write to it). */
   composerText: string
   onComposerTextChange: (text: string) => void
   onAttachImage?: () => void
   isAttaching?: boolean
-  onMicPress?: () => void
-  micActive?: boolean
-  dictationMode?: 'toggle' | 'hold'
-  onMicPressIn?: () => void
-  onMicPressOut?: () => void
   inputLockReason?: MobileNativeChatInputLockReason | null
   filePaths?: string[]
   onNeedFiles?: (query: string) => void
@@ -110,11 +104,6 @@ export function MobileNativeChatView({
   onComposerTextChange,
   onAttachImage,
   isAttaching,
-  onMicPress,
-  micActive,
-  dictationMode,
-  onMicPressIn,
-  onMicPressOut,
   inputLockReason,
   filePaths,
   onNeedFiles,
@@ -257,20 +246,20 @@ export function MobileNativeChatView({
   const lockReason = lockHeld ? rawLockReason : null
 
   return (
-    <View className={styles.root} style={[{ paddingBottom: bottomPad }]}>
+    <View className="bg-background flex-1" style={[{ paddingBottom: bottomPad }]}>
       {showLoading ? (
         <View className={styles.center}>
           <ActivityIndicator colorClassName="accent-muted-foreground" />
         </View>
       ) : (
-        <GestureHandlerRootView className={styles.listWrap}>
+        <GestureHandlerRootView className="relative flex-1">
           <GestureDetector gesture={pinchGesture}>
             <FlatList
               ref={listRef}
               data={data}
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
-              contentContainerClassName={styles.listContent}
+              contentContainerClassName="py-2 grow"
               onScroll={onScroll}
               scrollEventThrottle={32}
               onContentSizeChange={() => {
@@ -296,14 +285,16 @@ export function MobileNativeChatView({
               ListHeaderComponent={
                 hasMore ? (
                   <Pressable
-                    className={styles.loadEarlier}
+                    className="min-h-9 items-center justify-center py-3"
                     onPress={onLoadEarlier}
                     disabled={loadingEarlier}
                   >
                     {loadingEarlier ? (
                       <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                     ) : (
-                      <Text className={styles.loadEarlierText}>Load earlier messages</Text>
+                      <Text className="text-muted-foreground/60 text-xs font-semibold">
+                        Load earlier messages
+                      </Text>
                     )}
                   </Pressable>
                 ) : null
@@ -311,8 +302,12 @@ export function MobileNativeChatView({
               ListEmptyComponent={
                 emptyState ? (
                   <View className={styles.center}>
-                    <Text className={styles.emptyTitle}>{emptyState.title}</Text>
-                    <Text className={styles.emptySubtitle}>{emptyState.subtitle}</Text>
+                    <Text className="text-muted-foreground mb-1 text-center text-sm font-semibold">
+                      {emptyState.title}
+                    </Text>
+                    <Text className="text-muted-foreground/60 text-center text-xs">
+                      {emptyState.subtitle}
+                    </Text>
                   </View>
                 ) : null
               }
@@ -323,7 +318,10 @@ export function MobileNativeChatView({
           {!atBottom ? (
             <Pressable
               accessibilityLabel="Scroll to latest"
-              className={cn(styles.fab, styles.fabBottom)}
+              className={cn(
+                'absolute right-3 w-[38px] h-[38px] items-center justify-center bg-secondary border-hairline border-border',
+                'bottom-3'
+              )}
               onPress={() => listRef.current?.scrollToEnd({ animated: true })}
             >
               <ArrowDown size={18} colorClassName="accent-foreground" />
@@ -367,11 +365,11 @@ export function MobileNativeChatView({
       ) : null}
       {/* Chrome row above the composer: the working indicator and the global
           tool-calls expand/collapse toggle on the left, Stop in the far corner. */}
-      <View className={styles.chromeRow}>
-        <View className={styles.chromeLeft}>
+      <View className="min-h-7 flex-row items-center justify-between px-3">
+        <View className="flex-1 flex-row items-center gap-2">
           {agentWorking ? <MobileAgentWorkingIndicator /> : null}
           <Pressable
-            className={cn(styles.chromeToggle, styles.pressedActive)}
+            className={cn('flex-row items-center gap-1 py-1 px-1', styles.pressedActive)}
             onPress={() => setToolsExpanded((v) => !v)}
             hitSlop={8}
           >
@@ -380,24 +378,26 @@ export function MobileNativeChatView({
             ) : (
               <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
             )}
-            <Text className={styles.chromeToggleLabel}>{toolsExpanded ? 'Collapse' : 'Tools'}</Text>
+            <Text className="text-muted-foreground/60 text-xs font-semibold">
+              {toolsExpanded ? 'Collapse' : 'Tools'}
+            </Text>
           </Pressable>
         </View>
         {agentWorking ? (
           <Pressable
-            className={cn(styles.stopButton, styles.pressedActive)}
+            className={cn('flex-row items-center gap-1', styles.pressedActive)}
             onPress={onStop}
             hitSlop={8}
             accessibilityLabel="Stop the agent"
           >
             <Square size={13} colorClassName="accent-destructive" />
-            <Text className={styles.stopLabel}>Stop</Text>
+            <Text className="text-destructive text-xs font-bold">Stop</Text>
           </Pressable>
         ) : null}
       </View>
       {sendFailed ? (
-        <View className={styles.sendError}>
-          <Text className={styles.sendErrorText}>
+        <View className="items-center px-3 pb-1">
+          <Text className="text-destructive text-xs font-semibold">
             {rawLockReason === 'disconnected'
               ? 'Message not sent — reconnecting…'
               : 'Message not sent'}
@@ -410,11 +410,6 @@ export function MobileNativeChatView({
         onSend={handleSend}
         onAttachImage={onAttachImage}
         isAttaching={isAttaching}
-        onMicPress={onMicPress}
-        micActive={micActive}
-        dictationMode={dictationMode}
-        onMicPressIn={onMicPressIn}
-        onMicPressOut={onMicPressOut}
         disabled={lockReason !== null}
         placeholder={
           lockReason === 'disconnected'

@@ -29,7 +29,7 @@ export function AgentSpinner({ status }: { status: WorktreeStatus }) {
 
   return (
     <View className={styles.wrapper}>
-      <View className={cn(styles.dot, colorClassName)} />
+      <View className={cn('w-2 h-2', colorClassName)} />
     </View>
   )
 }
@@ -39,6 +39,5 @@ const styles = {
   // desktop's `inline-flex h-3 w-3 ... items-center justify-center` shell
   // around `size-2` indicator — keeps row height/baseline alignment stable
   // across status transitions.
-  wrapper: cn('w-3 h-3 items-center justify-center'),
-  dot: cn('w-2 h-2 rounded-none')
+  wrapper: cn('w-3 h-3 items-center justify-center')
 } as const

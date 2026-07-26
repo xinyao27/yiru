@@ -11,7 +11,6 @@ import {
   Wrench,
   Shield,
   Lifebuoy as LifeBuoy,
-  Microphone as Mic,
   Globe,
   Palette,
   Chat as MessageSquare,
@@ -88,12 +87,15 @@ export default function SettingsScreen() {
   const showCredentialCleanup = pendingCredentialCount > 0 || credentialStorageUnreadable
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <View className="bg-background pt-safe-offset-2 flex-1 px-4">
+      <View className="mb-6 flex-row items-center">
+        <Pressable
+          className="mr-2 h-9 w-9 items-center justify-center"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text className={styles.heading}>Settings</Text>
+        <Text className="text-foreground text-sm font-bold">Settings</Text>
       </View>
 
       <ScrollView contentContainerClassName="pb-safe-offset-4" showsVerticalScrollIndicator={false}>
@@ -136,15 +138,6 @@ export default function SettingsScreen() {
           <View className={styles.separator} />
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
-            onPress={() => router.push('/voice-settings')}
-          >
-            <Mic size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Voice</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
-          <View className={styles.separator} />
-          <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/notifications')}
           >
             <Bell size={16} colorClassName="accent-muted-foreground" />
@@ -173,11 +166,16 @@ export default function SettingsScreen() {
 
         {showCredentialCleanup ? (
           <View className={cn(styles.section, styles.sectionSpacer)}>
-            <View className={styles.credentialCleanupRow}>
+            <View className="flex-row items-center gap-2.5 px-3.5 py-3">
               <KeyRound size={16} colorClassName="accent-amber-500" />
-              <View className={styles.credentialCleanupCopy}>
-                <Text className={styles.credentialCleanupTitle}>Pairing credential cleanup</Text>
-                <Text accessibilityLiveRegion="polite" className={styles.rowHint}>
+              <View className="flex-1 gap-1">
+                <Text className="text-foreground text-sm font-medium">
+                  Pairing credential cleanup
+                </Text>
+                <Text
+                  accessibilityLiveRegion="polite"
+                  className="text-muted-foreground text-xs leading-[17px]"
+                >
                   {credentialRetryFailed
                     ? "Cleanup still couldn't be confirmed. Try again later."
                     : pendingCredentialCount > 0
@@ -195,7 +193,7 @@ export default function SettingsScreen() {
                 disabled={retryingCredentialCleanup}
                 hitSlop={8}
                 className={cn(
-                  styles.retryButton,
+                  'w-18 h-8 bg-secondary items-center justify-center',
                   !retryingCredentialCleanup && styles.rowPressedActive
                 )}
                 onPress={() => void retryCredentialCleanup()}
@@ -203,7 +201,7 @@ export default function SettingsScreen() {
                 {retryingCredentialCleanup ? (
                   <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                 ) : (
-                  <Text className={styles.retryButtonText}>Retry</Text>
+                  <Text className="text-foreground text-xs font-semibold">Retry</Text>
                 )}
               </Pressable>
             </View>
@@ -233,20 +231,10 @@ export default function SettingsScreen() {
 }
 
 const styles = {
-  container: cn('flex-1 bg-background px-4'),
-  topRow: cn('flex-row items-center mb-6'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  section: cn('bg-card rounded-none overflow-hidden'),
+  section: cn('bg-card overflow-hidden'),
   sectionSpacer: cn('mt-3'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowLabel: cn('flex-1 text-[14px] font-medium text-foreground'),
-  credentialCleanupRow: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  credentialCleanupCopy: cn('flex-1 gap-1'),
-  credentialCleanupTitle: cn('text-[14px] font-medium text-foreground'),
-  rowHint: cn('text-[12px] text-muted-foreground leading-[17px]'),
-  retryButton: cn('w-18 h-8 rounded-none bg-secondary items-center justify-center'),
-  retryButtonText: cn('text-[12px] font-semibold text-foreground'),
+  rowPressedActive: cn('active:bg-accent'),
+  rowLabel: cn('flex-1 text-sm font-medium text-foreground'),
   separator: cn('h-hairline bg-border mx-3')
 } as const

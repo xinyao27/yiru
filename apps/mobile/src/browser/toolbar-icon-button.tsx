@@ -21,9 +21,9 @@ export function MobileBrowserToolbarIconButton({
   return (
     <Pressable
       className={cn(
-        styles.button,
-        !disabled && styles.buttonPressedActive,
-        disabled && styles.disabled
+        'w-[26px] h-[26px] items-center justify-center',
+        !disabled && 'active:bg-accent',
+        disabled && 'opacity-[0.35]'
       )}
       style={style}
       disabled={disabled}
@@ -34,9 +34,3 @@ export function MobileBrowserToolbarIconButton({
     </Pressable>
   )
 }
-
-const styles = {
-  button: cn('w-[26px] h-[26px] rounded-none items-center justify-center'),
-  buttonPressedActive: cn('active:bg-secondary'),
-  disabled: cn('opacity-[0.35]')
-} as const

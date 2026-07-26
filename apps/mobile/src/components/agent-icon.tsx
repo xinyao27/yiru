@@ -5,7 +5,6 @@ import Svg, { Defs, G, LinearGradient, Path, Stop } from 'react-native-svg'
 import { useCSSVariable } from 'uniwind'
 
 import { Terminal } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { MOBILE_AGENT_CATALOG } from '../workspace-create/agent-catalog'
 import { MOBILE_AGENT_ICON_ASSETS } from './agent-icon-assets'
@@ -70,8 +69,8 @@ function FaviconIcon({ domain, size = 16 }: { domain: string; size?: number }) {
 
 function AgentLetterIcon({ letter, size = 16 }: { letter: string; size?: number }) {
   return (
-    <View className={styles.letterIcon} style={{ width: size, height: size }}>
-      <Text className={styles.letterIconText} style={{ fontSize: size * 0.55 }}>
+    <View className="bg-muted items-center justify-center" style={{ width: size, height: size }}>
+      <Text className="text-foreground font-bold" style={{ fontSize: size * 0.55 }}>
         {letter}
       </Text>
     </View>
@@ -112,8 +111,3 @@ export function MobileAgentIcon({ agentId, size = 16 }: { agentId: string; size?
   const label = agent?.label ?? agentId
   return <AgentLetterIcon letter={label.charAt(0).toUpperCase()} size={size} />
 }
-
-const styles = {
-  letterIcon: cn('items-center justify-center bg-muted'),
-  letterIconText: cn('font-bold text-foreground')
-} as const

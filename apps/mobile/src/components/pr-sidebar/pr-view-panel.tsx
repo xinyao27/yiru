@@ -1,7 +1,6 @@
 import { View } from 'react-native'
 
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
 
 import type { MobilePrSidebarController } from '../../session/pr/use-sidebar-controller'
 import type { MobileGitStatusResult } from '../../source-control/git-status'
@@ -54,7 +53,7 @@ export function MobilePrViewPanelBody({
         : controller.prSidebarState
 
   return (
-    <View className={styles.container}>
+    <View className="bg-background flex-1">
       <MobilePRSidebar
         state={sidebarState}
         onRetry={controller.retryPRSidebar}
@@ -73,7 +72,3 @@ export function MobilePrViewPanelBody({
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background')
-} as const

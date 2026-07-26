@@ -62,17 +62,14 @@ import {
   saveCustomKeys,
   type CustomKey
 } from '../../../../src/components/custom-key-modal'
-import { MobileDictationSetupSheet } from '../../../../src/components/dictation-setup-sheet'
 import { MobileHtmlPreview } from '../../../../src/components/html-preview'
 import { PhosphorIconContextProvider } from '../../../../src/components/phosphor-icon-context-provider'
 import { MobileRichMarkdownEditor } from '../../../../src/components/rich-markdown-editor'
 import { StatusDot } from '../../../../src/components/status-dot'
 import { MobileSyntaxSegments } from '../../../../src/components/syntax-segments'
 import { TextInputModal } from '../../../../src/components/text-input-modal'
-import { fetchDictationSetup, isDictationSetupRequiredError } from '../../../../src/dictation/setup'
 import { isFileExistsErrorMessage } from '../../../../src/files/file-exists-error'
 import { resolveMobileFileTabDoc } from '../../../../src/files/file-tab-doc'
-import { useMobileDictation } from '../../../../src/hooks/use-dictation'
 import { useResponsiveLayout } from '../../../../src/layout/responsive-layout'
 import {
   triggerMediumImpact,
@@ -199,10 +196,6 @@ import {
 import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/live/accessory-input'
 import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/live/accessory-raw-send-target'
 import {
-  appendBufferedDictation,
-  routeDictationTranscript
-} from '../../../../src/terminal/live/dictation-routing'
-import {
   clearTerminalLiveInputFocusTimer,
   focusTerminalLiveInputTarget,
   isTerminalLiveInputWithinByteLimit,
@@ -301,9 +294,12 @@ function MarkdownReader({
     return (
       <View className={styles.markdownState}>
         <Text className={styles.markdownError}>{doc.message}</Text>
-        <Pressable className={styles.markdownRefreshButton} onPress={onRefresh}>
+        <Pressable
+          className="bg-secondary border-border flex-row items-center gap-1 self-start border px-3 py-1"
+          onPress={onRefresh}
+        >
           <RefreshCw size={14} colorClassName="accent-foreground" />
-          <Text className={styles.markdownRefreshText}>Retry</Text>
+          <Text className="text-foreground text-xs font-semibold">Retry</Text>
         </Pressable>
       </View>
     )
@@ -333,7 +329,7 @@ function MarkdownReader({
       {showFloatingActions ? (
         <View
           pointerEvents="box-none"
-          className={styles.markdownFloatingBar}
+          className="absolute right-3 bottom-4 left-3 items-end gap-1"
           style={[
             {
               bottom: resolveMarkdownFloatingActionsBottom({
@@ -347,7 +343,7 @@ function MarkdownReader({
           {statusText ? (
             <Text
               className={cn(
-                styles.markdownFloatingStatus,
+                'max-w-full self-end overflow-hidden text-muted-foreground bg-card border border-border px-2 py-1 text-xs',
                 doc.saveError ? styles.markdownError : null
               )}
               numberOfLines={2}
@@ -355,7 +351,7 @@ function MarkdownReader({
               {statusText}
             </Text>
           ) : null}
-          <View className={styles.markdownFloatingActions}>
+          <View className="flex-row flex-wrap justify-end gap-1">
             {showCopy ? (
               <Pressable className={styles.markdownFloatingButton} onPress={onCopy}>
                 <Text className={styles.markdownFloatingButtonText}>Copy</Text>
@@ -376,8 +372,8 @@ function MarkdownReader({
               <Pressable
                 className={cn(
                   styles.markdownFloatingButton,
-                  styles.markdownSaveButton,
-                  (!doc.editable || !doc.isDirty || doc.saving) && styles.markdownButtonDisabled
+                  'bg-secondary',
+                  (!doc.editable || !doc.isDirty || doc.saving) && 'opacity-[0.45]'
                 )}
                 disabled={!doc.editable || !doc.isDirty || doc.saving}
                 onPress={onSave}
@@ -430,25 +426,29 @@ function DiffLineRow({
   // gutter should show the same line number the note will reference.
   const gutterLineNumber = line.newLineNumber ?? line.oldLineNumber ?? ''
   return (
-    <View className={styles.diffLineBlock}>
+    <View className="mb-1">
       <View
         className={cn(
-          styles.diffLine,
-          line.kind === 'add' && styles.diffLineAdded,
-          line.kind === 'delete' && styles.diffLineDeleted
+          'flex-row items-start border-l-2 border-l-[var(--editor-surface)] pr-2',
+          line.kind === 'add' &&
+            'bg-[var(--editor-diff-inserted-line-background)] border-l-[var(--git-decoration-added)]',
+          line.kind === 'delete' &&
+            'bg-[var(--editor-diff-removed-line-background)] border-l-[var(--git-decoration-deleted)]'
         )}
       >
-        <Text className={styles.diffGutter}>{gutterLineNumber}</Text>
+        <Text className="text-muted-foreground/60 w-[42px] pr-2 text-right font-mono text-xs leading-[22px]">
+          {gutterLineNumber}
+        </Text>
         <Text
           selectable
-          className={styles.diffText}
+          className="text-foreground flex-1 font-mono text-sm leading-[22px]"
           accessibilityLabel={`${title} diff line ${index + 1}`}
         >
           <Text
             className={cn(
-              styles.diffPrefix,
-              line.kind === 'add' && styles.diffPrefixAdded,
-              line.kind === 'delete' && styles.diffPrefixDeleted
+              'text-muted-foreground/60',
+              line.kind === 'add' && 'text-[var(--git-decoration-added)]',
+              line.kind === 'delete' && 'text-[var(--git-decoration-deleted)]'
             )}
           >
             {line.kind === 'add' ? '+ ' : line.kind === 'delete' ? '- ' : '  '}
@@ -458,8 +458,8 @@ function DiffLineRow({
         {canComment ? (
           <Pressable
             className={cn(
-              styles.diffCommentAddButton,
-              'active:bg-card',
+              'w-[26px] h-[22px] items-center justify-center',
+              'active:bg-accent',
               commentsBusy && styles.diffCommentButtonDisabled
             )}
             disabled={commentsBusy}
@@ -475,14 +475,16 @@ function DiffLineRow({
         ) : null}
       </View>
       {comments.length > 0 ? (
-        <View className={styles.diffCommentList}>
+        <View className="mt-1 mr-2 ml-11 gap-1">
           {comments.map((comment) => (
-            <View key={comment.id} className={styles.diffCommentCard}>
-              <View className={styles.diffCommentHeader}>
+            <View key={comment.id} className="border-border bg-card border px-2 py-1">
+              <View className="mb-[2px] flex-row items-center gap-1">
                 <MessageSquare size={12} colorClassName="accent-muted-foreground" />
-                <Text className={styles.diffCommentMeta}>Line {comment.lineNumber}</Text>
+                <Text className="text-muted-foreground/60 flex-1 text-xs font-semibold">
+                  Line {comment.lineNumber}
+                </Text>
                 <Pressable
-                  className={styles.diffCommentDeleteButton}
+                  className="h-[22px] w-[22px] items-center justify-center"
                   disabled={commentsBusy}
                   onPress={() => onDeleteComment(comment.id)}
                   accessibilityLabel={`Delete note on line ${comment.lineNumber}`}
@@ -490,15 +492,15 @@ function DiffLineRow({
                   <X size={12} colorClassName="accent-muted-foreground" />
                 </Pressable>
               </View>
-              <Text className={styles.diffCommentBody}>{comment.body}</Text>
+              <Text className="text-foreground text-xs leading-[17px]">{comment.body}</Text>
             </View>
           ))}
         </View>
       ) : null}
       {isCommenting ? (
-        <View className={styles.diffCommentComposer}>
+        <View className="border-border bg-card mt-1 mr-2 ml-11 gap-1 border p-2">
           <TextInput
-            className={cn(styles.textInput, styles.diffCommentInput)}
+            className={cn(styles.textInput, 'min-h-[70px] h-[70px] mr-0 pt-2 pb-2')}
             value={commentDraft}
             onChangeText={onDraftChange}
             placeholder="Add review note"
@@ -508,17 +510,17 @@ function DiffLineRow({
             textAlignVertical="top"
             autoFocus
           />
-          <View className={styles.diffCommentComposerActions}>
+          <View className="flex-row justify-end gap-1">
             <Pressable
-              className={styles.diffCommentSecondaryAction}
+              className="min-h-[30px] justify-center px-3"
               disabled={commentsBusy}
               onPress={onCancelComment}
             >
-              <Text className={styles.diffCommentSecondaryText}>Cancel</Text>
+              <Text className="text-muted-foreground text-xs font-semibold">Cancel</Text>
             </Pressable>
             <Pressable
               className={cn(
-                styles.diffCommentPrimaryAction,
+                'min-h-[30px] justify-center bg-secondary px-3',
                 (!commentDraft.trim() || commentsBusy) && styles.diffCommentButtonDisabled
               )}
               disabled={!commentDraft.trim() || commentsBusy}
@@ -528,7 +530,7 @@ function DiffLineRow({
                 }
               }}
             >
-              <Text className={styles.diffCommentPrimaryText}>Save note</Text>
+              <Text className="text-foreground text-xs font-bold">Save note</Text>
             </Pressable>
           </View>
         </View>
@@ -702,16 +704,16 @@ function FileReader({
     return (
       <View className={styles.markdownEditor}>
         {diffCommentActions ? (
-          <View className={styles.diffNotesToolbar}>
-            <View className={styles.diffNotesTitleRow}>
+          <View className="border-b-hairline border-b-border bg-card flex-row items-center justify-between gap-2 px-4 py-2">
+            <View className="min-w-0 flex-1 flex-row items-center gap-1">
               <MessageSquare size={14} colorClassName="accent-muted-foreground" />
-              <Text className={styles.diffNotesTitle}>
+              <Text className="text-muted-foreground text-xs font-semibold">
                 {commentCount === 0
                   ? 'No review notes'
                   : `${commentCount} review ${commentCount === 1 ? 'note' : 'notes'}`}
               </Text>
             </View>
-            <View className={styles.diffNotesActions}>
+            <View className="flex-row items-center gap-1">
               <Pressable
                 className={cn(
                   styles.diffNotesActionButton,
@@ -759,17 +761,17 @@ function FileReader({
 
   if (doc.kind === 'image') {
     return (
-      <View className={styles.imagePreviewContainer}>
+      <View className="min-h-0 flex-1 bg-[var(--editor-surface)]">
         <ScrollView
-          className={styles.imagePreviewScroll}
-          contentContainerClassName={styles.imagePreviewContent}
+          className="flex-1"
+          contentContainerClassName="grow items-center justify-center p-4"
           maximumZoomScale={4}
           minimumZoomScale={1}
           centerContent
         >
           <Image
             source={{ uri: doc.dataUri }}
-            className={styles.imagePreview}
+            className="h-full min-h-50 w-full"
             resizeMode="contain"
             accessibilityLabel={`${title} image`}
           />
@@ -784,7 +786,11 @@ function FileReader({
         className={styles.filePreviewScroll}
         contentContainerClassName={styles.filePreviewContent}
       >
-        <Text selectable className={styles.filePreviewText} accessibilityLabel={`${title} preview`}>
+        <Text
+          selectable
+          className="text-foreground font-mono text-sm leading-[22px]"
+          accessibilityLabel={`${title} preview`}
+        >
           <MobileSyntaxSegments
             segments={
               fileSyntax?.doc === doc && fileSyntax.language === syntaxLanguage
@@ -988,10 +994,6 @@ export default function SessionScreen() {
   >(new Map())
   const [selectModeActive, setSelectModeActive] = useState(false)
   const [canPaste, setCanPaste] = useState(false)
-  const [showDictationSetup, setShowDictationSetup] = useState(false)
-  // 'hold' makes the mic press-and-hold; 'toggle' makes it tap-to-start/stop.
-  // Mirrors Settings ▸ Voice ▸ Dictation Mode so the button matches the setting.
-  const [dictationMode, setDictationMode] = useState<'toggle' | 'hold'>('toggle')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const toastOpacityRef = useRef(new Animated.Value(0))
   const toastHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -1023,10 +1025,6 @@ export default function SessionScreen() {
     typeof Keyboard.addListener
   > | null>(null)
   const sessionTabActionSheetRequestSeqRef = useRef(0)
-  const dictationRouteContextRef = useRef<{
-    readonly handle: string | null
-    readonly liveInputEnabled: boolean
-  } | null>(null)
   const terminalUnsubsRef = useRef<Map<string, () => void>>(new Map())
   const subscribingHandlesRef = useRef<Set<string>>(new Set())
   const initializedHandlesRef = useRef<Set<string>>(new Set())
@@ -1217,129 +1215,6 @@ export default function SessionScreen() {
     onSendError: showNativeChatSendError
   })
   const { toggleTabChatView, showNativeChat, showNativeChatRef } = nativeChatController
-
-  const dictation = useMobileDictation({
-    client,
-    enabled: canSend,
-    onTranscript: (text) => {
-      // Why: dictation belongs to the visible composer. Native chat consumes it
-      // locally; terminal mode retains the live-input routing and flush contract.
-      if (showNativeChatRef.current) {
-        nativeChatController.setChatComposerText((current) =>
-          appendBufferedDictation(current, text)
-        )
-        showToast('Dictation inserted')
-        return
-      }
-      // Live mode inserts the transcript straight into its originating PTY as
-      // text (no Return — the user sends it themselves), matching live keystroke
-      // semantics; buffered mode keeps appending to the command field.
-      const routeContext = dictationRouteContextRef.current
-      dictationRouteContextRef.current = null
-      const route = routeDictationTranscript(
-        text,
-        routeContext?.liveInputEnabled ?? liveInputEnabled
-      )
-      if (route.kind === 'live-insert') {
-        const insertHandle = routeContext?.handle ?? activeHandleRef.current
-        if (!insertHandle) {
-          return
-        }
-        void (async () => {
-          const flushedPendingInput = await flushPendingLiveInputBeforeExternalSend(insertHandle)
-          if (!flushedPendingInput) {
-            return
-          }
-          const sent = await sendLiveTerminalInput(insertHandle, route.text)
-          if (sent) {
-            showToast('Dictation inserted')
-          }
-        })()
-        return
-      }
-      setInput((current) => appendBufferedDictation(current, route.text))
-      showToast('Dictation inserted')
-    },
-    onError: (err) => {
-      dictationRouteContextRef.current = null
-      // Dictation isn't set up on the desktop yet → open the setup sheet so the
-      // user can download a model + enable it from here, instead of a dead-end toast.
-      if (isDictationSetupRequiredError(err.message)) {
-        setShowDictationSetup(true)
-        return
-      }
-      triggerError()
-      showToast(err.message)
-    }
-  })
-
-  const startDictation = useCallback(() => {
-    const routeContext = activeHandle
-      ? { handle: activeHandle, liveInputEnabled: liveInputTerminalHandles.has(activeHandle) }
-      : null
-    dictationRouteContextRef.current = routeContext
-    void dictation.start().catch((err) => {
-      if (dictationRouteContextRef.current === routeContext) {
-        dictationRouteContextRef.current = null
-      }
-      triggerError()
-      showToast(err instanceof Error ? err.message : String(err))
-    })
-  }, [activeHandle, dictation, liveInputTerminalHandles, showToast])
-
-  const cancelDictation = useCallback(() => {
-    dictationRouteContextRef.current = null
-    void dictation.cancel()
-  }, [dictation])
-
-  // Toggle mode: one tap starts, the next stops; long-press cancels mid-record.
-  const handleDictationToggle = useCallback(() => {
-    if (dictation.isProcessing) {
-      cancelDictation()
-    } else if (dictation.isStarting) {
-      return
-    } else if (dictation.isRecording) {
-      void dictation.stop()
-    } else {
-      startDictation()
-    }
-  }, [cancelDictation, dictation, startDictation])
-
-  // Hold mode: press starts, release stops — like a walkie-talkie.
-  const handleDictationPressIn = useCallback(() => {
-    if (!dictation.isStarting && !dictation.isRecording && !dictation.isProcessing) {
-      startDictation()
-    }
-  }, [dictation, startDictation])
-
-  const handleDictationPressOut = useCallback(() => {
-    if (dictation.isRecording) {
-      void dictation.stop()
-    } else if (dictation.isStarting) {
-      // Released before recording began: cancel so we don't leave a live mic.
-      cancelDictation()
-    }
-  }, [cancelDictation, dictation])
-
-  const refreshDictationMode = useCallback(async () => {
-    if (!client) {
-      return
-    }
-    try {
-      const setup = await fetchDictationSetup(client)
-      setDictationMode(setup.dictationMode)
-    } catch {
-      // Non-fatal: fall back to the default toggle behavior.
-    }
-  }, [client])
-
-  // Re-read on focus so a Dictation Mode change made in Settings ▸ Voice is
-  // reflected when the user returns to the session.
-  useFocusEffect(
-    useCallback(() => {
-      void refreshDictationMode()
-    }, [refreshDictationMode])
-  )
 
   useEffect(() => {
     diffCommentsRef.current = diffComments
@@ -4617,12 +4492,12 @@ export default function SessionScreen() {
   const showHeaderMoreButton = showAgentSessionHistoryAction || showChecksAction
 
   return (
-    <View ref={setMobileSessionRootRef} className={styles.container}>
-      <View className={styles.kavInner}>
-        <SafeAreaView className={styles.sessionChrome} edges={['top']}>
-          <View className={styles.sessionTopBar}>
+    <View ref={setMobileSessionRootRef} className="bg-background flex-1">
+      <View className="flex-1">
+        <SafeAreaView className="bg-card border-b-border border-b" edges={['top']}>
+          <View className="min-h-11 flex-row items-center px-2 py-1">
             <Pressable
-              className={cn(styles.backButton, 'active:bg-secondary')}
+              className={cn('w-9 h-9 items-center justify-center mr-1', 'active:bg-accent')}
               onPress={requestLeaveSession}
               hitSlop={8}
               accessibilityLabel="Back to worktrees"
@@ -4630,12 +4505,12 @@ export default function SessionScreen() {
               <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
             </Pressable>
 
-            <View className={styles.sessionTitleBlock}>
-              <Text className={styles.sessionTitle} numberOfLines={1}>
+            <View className="min-w-0 flex-1">
+              <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
                 {worktreeName || 'Terminal'}
               </Text>
               <Pressable
-                className={styles.sessionMetaRow}
+                className="mt-[2px] flex-row items-center"
                 disabled={!showConnectionRetry}
                 onPress={() => {
                   if (hostId) {
@@ -4646,7 +4521,7 @@ export default function SessionScreen() {
                 accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
               >
                 <StatusDot state={connState} />
-                <Text className={styles.sessionMetaText} numberOfLines={1}>
+                <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
                   {terminalSummary}
                 </Text>
               </Pressable>
@@ -4678,7 +4553,7 @@ export default function SessionScreen() {
           </View>
 
           {visibleTabs.length > 0 && (
-            <View className={styles.tabBar}>
+            <View className="border-t-border flex-row items-center border-t">
               {/* Why: tab taps must register on the first press while the live
                   keyboard is open instead of being eaten by keyboard dismissal
                   (#5106); leaving a non-live tab still closes the keyboard
@@ -4687,8 +4562,8 @@ export default function SessionScreen() {
                 ref={tabStripRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                className={styles.tabScroll}
-                contentContainerClassName={styles.tabContent}
+                className="max-h-9 flex-1"
+                contentContainerClassName="pl-2 pr-2"
                 keyboardShouldPersistTaps="handled"
                 scrollEventThrottle={16}
                 onScroll={(e) => {
@@ -4706,7 +4581,10 @@ export default function SessionScreen() {
                 {visibleTabs.map((t) => (
                   <Pressable
                     key={t.id}
-                    className={cn(styles.tab, t.id === activeSessionTabId && styles.tabActive)}
+                    className={cn(
+                      'w-32 max-w-32 min-h-9 items-center justify-center px-2 py-2 border-b-2 border-b-transparent',
+                      t.id === activeSessionTabId && 'border-b-muted-foreground'
+                    )}
                     onLayout={(e) => {
                       const { x, width } = e.nativeEvent.layout
                       tabLayoutsRef.current.set(t.id, { x, width })
@@ -4722,7 +4600,7 @@ export default function SessionScreen() {
                     delayLongPress={400}
                   >
                     <PhosphorIconContextProvider weight="regular">
-                      <View className={styles.tabLabelRow}>
+                      <View className="max-w-full flex-row items-center gap-1">
                         {/* Why: tab identity glyphs match desktop's compact regular-weight chrome. */}
                         {t.type === 'browser' && (
                           <Globe size={13} colorClassName="accent-muted-foreground" />
@@ -4740,8 +4618,8 @@ export default function SessionScreen() {
                           })()}
                         <Text
                           className={cn(
-                            styles.tabText,
-                            t.id === activeSessionTabId && styles.tabTextActive
+                            'shrink text-muted-foreground text-xs',
+                            t.id === activeSessionTabId && 'text-foreground'
                           )}
                           numberOfLines={1}
                         >
@@ -4757,7 +4635,7 @@ export default function SessionScreen() {
               <Pressable
                 className={cn(
                   styles.newTerminalButton,
-                  'active:bg-secondary',
+                  'active:bg-accent',
                   (creating || creatingBrowser || creatingMarkdown || connState !== 'connected') &&
                     styles.newTerminalButtonDisabled
                 )}
@@ -4794,14 +4672,16 @@ export default function SessionScreen() {
             above; on wide the post-chrome content shares this row with the docked panel.
             There is no single terminal node, so the entire conditional block is the
             flex-1 left child. On narrow the dock never renders and layout is unchanged. */}
-        <View className={styles.sessionContentRow} onLayout={handleSessionContentRowLayout}>
-          <View className={styles.sessionContentMain}>
+        <View className="flex-1 flex-row" onLayout={handleSessionContentRowLayout}>
+          <View className="min-w-0 flex-1">
             {createWarning ? (
-              <View className={styles.createWarningBanner}>
+              <View className="bg-card border-b-hairline border-b-border flex-row items-start gap-2 px-3 py-2">
                 <AlertTriangle size={16} colorClassName="accent-amber-500" />
-                <Text className={styles.createWarningText}>{createWarning}</Text>
+                <Text className="text-foreground flex-1 text-xs leading-[16px]">
+                  {createWarning}
+                </Text>
                 <Pressable
-                  className={styles.createWarningDismiss}
+                  className="mt-[-4px] h-6 w-6 items-center justify-center"
                   onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
                   accessibilityLabel="Dismiss workspace creation warning"
                   hitSlop={8}
@@ -4818,16 +4698,18 @@ export default function SessionScreen() {
             ) : showEmptyState ? (
               <View className={styles.emptyState}>
                 <Text className={styles.emptyText}>No tabs in this session</Text>
-                {createError ? <Text className={styles.createError}>{createError}</Text> : null}
-                <View className={styles.emptyActions}>
+                {createError ? (
+                  <Text className="text-destructive mb-2 text-xs">{createError}</Text>
+                ) : null}
+                <View className="flex-row flex-wrap justify-center gap-2">
                   <Pressable
                     className={cn(
-                      styles.createButton,
+                      'bg-secondary border border-border px-6 py-2.5',
                       (creating ||
                         creatingBrowser ||
                         creatingMarkdown ||
                         connState !== 'connected') &&
-                        styles.createButtonDisabled
+                        'opacity-[0.5]'
                     )}
                     disabled={
                       creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
@@ -4837,7 +4719,7 @@ export default function SessionScreen() {
                       setShowCreateTabDrawer(true)
                     }}
                   >
-                    <Text className={styles.createButtonText}>
+                    <Text className="text-foreground text-sm font-semibold">
                       {creating || creatingBrowser || creatingMarkdown
                         ? 'Creating...'
                         : 'Create Tab'}
@@ -4898,7 +4780,7 @@ export default function SessionScreen() {
                 )}
               </View>
             ) : activeBrowserTab ? (
-              <View className={styles.browserFrame}>
+              <View className="bg-background min-h-0 flex-1">
                 {/* Why: the pane owns imperative frame refs; browser tabs should
             never render a stale frame while the old stream effect cleans up. */}
                 <MobileBrowserPane
@@ -4930,7 +4812,7 @@ export default function SessionScreen() {
               </View>
             ) : (
               <View
-                className={styles.terminalFrame}
+                className="relative min-h-0 flex-1 overflow-hidden"
                 onLayout={(e) => {
                   terminalFrameHeightRef.current = e.nativeEvent.layout.height
                   // Why: notify height imperatively so dock settling re-fits the
@@ -4974,11 +4856,6 @@ export default function SessionScreen() {
                   controller={nativeChatController}
                   onAttachImage={() => void attachImage('library')}
                   isAttaching={isAttaching}
-                  onMicPress={handleDictationToggle}
-                  micActive={dictation.isRecording}
-                  dictationMode={dictationMode}
-                  onMicPressIn={handleDictationPressIn}
-                  onMicPressOut={handleDictationPressOut}
                   inputLockReason={nativeChatInputLockReason}
                   keyboardInset={keyboardLift}
                 />
@@ -4999,29 +4876,32 @@ export default function SessionScreen() {
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
               <View
-                className={styles.commandDock}
+                className="z-[20]"
                 style={[
                   { paddingBottom: insets.bottom, transform: [{ translateY: -keyboardLift }] }
                 ]}
               >
                 {/* Accessory keys */}
-                <View className={styles.accessoryBar}>
+                <View className="border-t-border bg-card flex-row items-center border-t">
                   {/* Why: a fixed, always-visible escape hatch from the open
                   keyboard. Kept outside the horizontal ScrollView so it does
                   not scroll away, and out of the terminal-byte shortcut path so
                   it cannot be hidden by user shortcut customization (#5106). */}
                   {keyboardLift > 0 && (
                     <Pressable
-                      className={cn(styles.keyboardDismissKey, 'active:bg-border')}
+                      className={cn(
+                        'items-center justify-center ml-2 my-1 bg-secondary px-2.5 py-0 min-w-9 h-7',
+                        'active:bg-accent'
+                      )}
                       onPress={dismissSoftwareKeyboard}
                       hitSlop={8}
                       accessibilityRole="button"
                       accessibilityLabel="Dismiss keyboard"
                       accessibilityHint="Hides the software keyboard and keeps the current terminal session open."
                     >
-                      <View className={styles.keyboardDismissGlyph}>
+                      <View className="relative h-[18px] w-[18px] items-center justify-start">
                         <KeyboardIcon size={15} colorClassName="accent-muted-foreground" />
-                        <View className={styles.keyboardDismissChevron}>
+                        <View className="absolute bottom-[-2px]">
                           <ChevronDown size={10} colorClassName="accent-muted-foreground" />
                         </View>
                       </View>
@@ -5031,16 +4911,16 @@ export default function SessionScreen() {
                   key dismisses the open keyboard and is swallowed, so live
                   input lost its keyboard on every Esc/Tab press (#5106). */}
                   <ScrollView
-                    className={styles.accessoryScroll}
+                    className="min-w-0 flex-1"
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerClassName={styles.accessoryContent}
+                    contentContainerClassName="px-2 py-1 gap-1"
                     keyboardShouldPersistTaps="always"
                   >
                     <Pressable
                       className={cn(
                         styles.accessoryKey,
-                        'active:bg-border',
+                        'active:bg-accent',
                         !canSend && styles.accessoryKeyDisabled
                       )}
                       disabled={!canSend}
@@ -5064,8 +4944,8 @@ export default function SessionScreen() {
                     <Pressable
                       className={cn(
                         styles.accessoryKey,
-                        liveInputEnabled && styles.accessoryKeyActive,
-                        'active:bg-border',
+                        liveInputEnabled && 'bg-accent',
+                        'active:bg-accent',
                         !canSend && styles.accessoryKeyDisabled
                       )}
                       disabled={!canSend}
@@ -5087,7 +4967,7 @@ export default function SessionScreen() {
                       <Pressable
                         className={cn(
                           styles.accessoryKey,
-                          'active:bg-border',
+                          'active:bg-accent',
                           !canSend && styles.accessoryKeyDisabled
                         )}
                         disabled={!canSend}
@@ -5109,7 +4989,7 @@ export default function SessionScreen() {
                         key={key.id}
                         className={cn(
                           styles.accessoryKey,
-                          'active:bg-border',
+                          'active:bg-accent',
                           !canSend && styles.accessoryKeyDisabled
                         )}
                         disabled={!canSend}
@@ -5149,8 +5029,8 @@ export default function SessionScreen() {
                         key={key.id}
                         className={cn(
                           styles.accessoryKey,
-                          styles.customAccessoryKey,
-                          'active:bg-border',
+                          'border border-border',
+                          'active:bg-accent',
                           !canSend && styles.accessoryKeyDisabled
                         )}
                         disabled={!canSend}
@@ -5173,7 +5053,7 @@ export default function SessionScreen() {
                       </Pressable>
                     ))}
                     <Pressable
-                      className={cn(styles.accessoryKey, 'active:bg-border')}
+                      className={cn(styles.accessoryKey, 'active:bg-accent')}
                       onPress={() => setShowCustomKeyModal(true)}
                       accessibilityLabel="Add custom shortcut"
                     >
@@ -5184,12 +5064,12 @@ export default function SessionScreen() {
 
                 {/* Input bar */}
                 {liveInputEnabled ? (
-                  <View className={cn(styles.inputBar, styles.liveInputBar)}>
+                  <View className={cn(styles.inputBar, 'gap-2')}>
                     <Pressable
                       className={cn(
-                        styles.liveInputFocusTarget,
-                        'active:bg-border',
-                        !canSend && styles.liveInputFocusTargetDisabled
+                        'flex-1 min-h-[34px] flex-row items-center gap-2 bg-secondary border border-border px-2.5',
+                        'active:bg-accent',
+                        !canSend && 'opacity-[0.45]'
                       )}
                       disabled={!canSend}
                       onPress={focusLiveInput}
@@ -5198,29 +5078,19 @@ export default function SessionScreen() {
                       accessibilityHint="Typed text is sent directly to the active terminal"
                     >
                       <KeyboardIcon size={16} colorClassName="accent-muted-foreground" />
-                      <MobileTerminalLiveInputStatus
-                        dictation={dictation}
-                        isAttaching={isAttaching}
-                      />
+                      <MobileTerminalLiveInputStatus isAttaching={isAttaching} />
                     </Pressable>
                     <MobileTerminalInputActions
                       canSend={canSend}
                       isAttaching={isAttaching}
-                      dictation={dictation}
-                      dictationMode={dictationMode}
-                      buttonClassName={styles.dictationButton}
-                      activeButtonClassName={styles.dictationButtonActive}
+                      buttonClassName={styles.inputActionButton}
                       disabledButtonClassName={styles.sendButtonDisabled}
                       onAttachImage={() => void attachImage('library')}
                       onAttachFile={() => void attachImage('files')}
-                      onDictationToggle={handleDictationToggle}
-                      onDictationPressIn={handleDictationPressIn}
-                      onDictationPressOut={handleDictationPressOut}
-                      onDictationCancel={cancelDictation}
                     />
                     <TextInput
                       ref={liveInputRef}
-                      className={styles.liveInputCapture}
+                      className="text-foreground absolute h-[1px] w-[1px] opacity-[0]"
                       value={liveInputCapture}
                       onChangeText={handleLiveInputChange}
                       onKeyPress={handleLiveInputKeyPress}
@@ -5256,8 +5126,8 @@ export default function SessionScreen() {
                       }
                       className={styles.textInput}
                       value={input}
-                      // Why: iOS kills an active dictation/IME session when JS
-                      // writes a value that differs from the native field text;
+                      // Why: iOS can reset active IME composition when JS writes a
+                      // value that differs from the native field text;
                       // store the raw field text and normalize at send time.
                       onChangeText={setInput}
                       placeholder="Type a command…"
@@ -5280,20 +5150,16 @@ export default function SessionScreen() {
                     <MobileTerminalInputActions
                       canSend={canSend}
                       isAttaching={isAttaching}
-                      dictation={dictation}
-                      dictationMode={dictationMode}
-                      buttonClassName={styles.dictationButton}
-                      activeButtonClassName={styles.dictationButtonActive}
+                      buttonClassName={styles.inputActionButton}
                       disabledButtonClassName={styles.sendButtonDisabled}
                       onAttachImage={() => void attachImage('library')}
                       onAttachFile={() => void attachImage('files')}
-                      onDictationToggle={handleDictationToggle}
-                      onDictationPressIn={handleDictationPressIn}
-                      onDictationPressOut={handleDictationPressOut}
-                      onDictationCancel={cancelDictation}
                     />
                     <Pressable
-                      className={cn(styles.sendButton, !canSend && styles.sendButtonDisabled)}
+                      className={cn(
+                        'bg-secondary w-[34px] h-[34px] items-center justify-center',
+                        !canSend && styles.sendButtonDisabled
+                      )}
                       disabled={!canSend}
                       onPress={() => void handleSend()}
                       accessibilityLabel="Send command"
@@ -5584,12 +5450,6 @@ export default function SessionScreen() {
         onClose={() => setShowCustomKeyModal(false)}
         onKeysChanged={setCustomKeys}
         onManageShortcuts={handleManageShortcuts}
-      />
-      <MobileDictationSetupSheet
-        visible={showDictationSetup}
-        client={client}
-        onClose={() => setShowDictationSetup(false)}
-        onReady={() => setShowDictationSetup(false)}
       />
       <ActionSheetModal
         visible={deleteKeyTarget != null}

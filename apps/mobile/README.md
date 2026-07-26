@@ -52,6 +52,19 @@ pnpm exec expo run:ios
 pnpm start --dev-client
 ```
 
+## UI Lab Without Pairing
+
+After installing the native dev client once, launch the development-only UI Lab with:
+
+```bash
+pnpm start:ui
+```
+
+This boots the iOS Simulator, starts Metro, skips the desktop pairing runtime, and opens a fixture
+selector. Every fixture navigates through the production session route; only its RPC responses are
+mocked. Composer sends are echoed locally and do not reach a runtime. Use `pnpm start:emulator` when
+the UI needs real host or worktree data.
+
 ## Pair With Desktop Yiru
 
 1. Open Yiru desktop.

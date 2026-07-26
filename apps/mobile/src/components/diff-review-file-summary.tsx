@@ -55,15 +55,17 @@ export function MobileDiffReviewFileSummary({
   const hunkDisabled = diffState.kind !== 'ready' || diffState.hunks.length === 0
   const badgeColorClassName = statusColorClassName(item.status)
   return (
-    <View className={styles.fileHeader}>
-      <View className={styles.fileTitleRow}>
-        <View className={cn(styles.statusBadge, badgeColorClassName)}>
-          <Text className={cn(styles.statusBadgeText, badgeColorClassName)}>
+    <View className="bg-background border-b-hairline border-b-border px-4 pt-3 pb-2">
+      <View className="flex-row items-center gap-2">
+        <View
+          className={cn('w-7 h-7 border-hairline items-center justify-center', badgeColorClassName)}
+        >
+          <Text className={cn('text-xs font-extrabold', badgeColorClassName)}>
             {MOBILE_GIT_STATUS_LABELS[item.status]}
           </Text>
         </View>
-        <View className={styles.fileTitleBlock}>
-          <Text className={styles.filePath} numberOfLines={1}>
+        <View className="min-w-0 flex-1">
+          <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
             {item.filePath}
           </Text>
           <Text className={styles.fileMeta} numberOfLines={1}>
@@ -72,12 +74,16 @@ export function MobileDiffReviewFileSummary({
           </Text>
         </View>
       </View>
-      <View className={styles.fileMetaRow}>
+      <View className="mt-2 flex-row flex-wrap items-center gap-2">
         <Text className={styles.fileMeta}>
           {currentIndex + 1}/{filteredCount}
         </Text>
-        {item.isReviewed ? <Text className={styles.reviewedPill}>Reviewed</Text> : null}
-        {item.changedSinceReview ? <Text className={styles.stalePill}>Changed</Text> : null}
+        {item.isReviewed ? (
+          <Text className="text-xs font-bold text-green-500">Reviewed</Text>
+        ) : null}
+        {item.changedSinceReview ? (
+          <Text className="text-xs font-bold text-amber-500">Changed</Text>
+        ) : null}
         {item.noteCount > 0 ? (
           <Text className={styles.fileMeta}>
             {mobileReviewCountLabel(item.noteCount, 'note', 'notes')}
@@ -88,16 +94,19 @@ export function MobileDiffReviewFileSummary({
         ) : null}
       </View>
       {fileNotes.length > 0 ? (
-        <View className={styles.fileNotes}>
+        <View className="mt-2 gap-1">
           {fileNotes.map((note) => (
             <Pressable
               key={note.id}
-              className={cn(styles.fileNote, 'active:bg-secondary')}
+              className={cn(
+                'min-h-11 p-2 bg-card border-hairline border-border',
+                'active:bg-accent'
+              )}
               onPress={() => onEditNote(note)}
               accessibilityRole="button"
               accessibilityLabel="Edit file note"
             >
-              <Text className={styles.fileNoteText} numberOfLines={2}>
+              <Text className="text-muted-foreground text-xs leading-[17px]" numberOfLines={2}>
                 {note.body}
               </Text>
               {staleCommentIds.has(note.id) ? (
@@ -107,9 +116,9 @@ export function MobileDiffReviewFileSummary({
           ))}
         </View>
       ) : null}
-      <View className={styles.hunkRow}>
+      <View className="mt-2 flex-row gap-2">
         <Pressable
-          className={cn(styles.hunkButton, 'active:bg-secondary')}
+          className={cn(styles.hunkButton, 'active:bg-accent')}
           disabled={hunkDisabled}
           onPress={() => onJumpHunk('previous')}
           accessibilityRole="button"
@@ -119,7 +128,7 @@ export function MobileDiffReviewFileSummary({
           <Text className={styles.hunkButtonText}>Hunk</Text>
         </Pressable>
         <Pressable
-          className={cn(styles.hunkButton, 'active:bg-secondary')}
+          className={cn(styles.hunkButton, 'active:bg-accent')}
           disabled={hunkDisabled}
           onPress={() => onJumpHunk('next')}
           accessibilityRole="button"

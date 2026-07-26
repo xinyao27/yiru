@@ -238,27 +238,27 @@ export function MobileAgentSessionHistoryPanel({
   )
 
   return (
-    <View className={styles.container}>
-      <SafeAreaView className={styles.header} edges={['top']}>
-        <View className={styles.topBar}>
+    <View className="bg-background flex-1">
+      <SafeAreaView className="bg-background" edges={['top']}>
+        <View className="border-b-border flex-row items-center border-b px-2 py-2">
           <Pressable
-            className={cn(styles.backButton, styles.backButtonPressedActive)}
+            className={cn('p-1', 'active:bg-accent')}
             onPress={() => router.back()}
             hitSlop={8}
             accessibilityLabel="Back"
           >
             <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View className={styles.titleBlock}>
-            <Text className={styles.title} numberOfLines={1}>
+          <View className="mx-2 flex-1">
+            <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
               Agent Session History
             </Text>
-            <Text className={styles.meta} numberOfLines={1}>
+            <Text className="text-muted-foreground text-xs" numberOfLines={1}>
               {worktreeLabel}
             </Text>
           </View>
           <Pressable
-            className={cn(styles.refreshButton, styles.refreshButtonPressedActive)}
+            className={cn('p-1', 'active:bg-accent')}
             onPress={() => void onRefresh()}
             hitSlop={8}
             accessibilityLabel="Refresh agent sessions"
@@ -283,31 +283,36 @@ export function MobileAgentSessionHistoryPanel({
         <View className={styles.state}>
           <Text className={styles.stateTitle}>Unable to Load</Text>
           <Text className={styles.stateText}>{screenState.message}</Text>
-          <Pressable className={styles.retryButton} onPress={retry}>
-            <Text className={styles.retryText}>Retry</Text>
+          <Pressable className="bg-secondary mt-2 px-4 py-2" onPress={retry}>
+            <Text className="text-foreground text-sm font-semibold">Retry</Text>
           </Pressable>
         </View>
       ) : (
         <>
-          <View className={styles.scopeTabs}>
+          <View className="flex-row gap-1 px-3 pt-2">
             {SCOPE_TABS.map((tab) => {
               const active = scope === tab.scope
               return (
                 <Pressable
                   key={tab.scope}
-                  className={cn(styles.scopeTab, active && styles.scopeTabActive)}
+                  className={cn('flex-1 items-center py-2 bg-card', active && 'bg-secondary')}
                   onPress={() => onSelectScope(tab.scope)}
                 >
-                  <Text className={cn(styles.scopeTabText, active && styles.scopeTabTextActive)}>
+                  <Text
+                    className={cn(
+                      'text-muted-foreground text-sm',
+                      active && 'text-foreground font-semibold'
+                    )}
+                  >
                     {tab.label}
                   </Text>
                 </Pressable>
               )
             })}
           </View>
-          <View className={styles.searchRow}>
+          <View className="px-3 pt-2">
             <TextInput
-              className={styles.searchInput}
+              className="bg-card text-foreground px-3 py-2 text-sm"
               value={query}
               onChangeText={setQuery}
               placeholder="Search sessions, repo:, path:"
@@ -317,15 +322,15 @@ export function MobileAgentSessionHistoryPanel({
             />
           </View>
           {issues.length > 0 ? (
-            <View className={styles.noticeBanner}>
-              <Text className={styles.noticeText}>
+            <View className="bg-card mx-3 mt-2 p-2">
+              <Text className="text-xs text-amber-500">
                 {issues.length} {issues.length === 1 ? 'transcript' : 'transcripts'} skipped
               </Text>
             </View>
           ) : null}
           {resumeMessage ? (
-            <View className={styles.resumeBanner}>
-              <Text className={styles.resumeBannerText}>{resumeMessage}</Text>
+            <View className="bg-card mx-3 mt-2 p-2">
+              <Text className="text-muted-foreground text-xs">{resumeMessage}</Text>
             </View>
           ) : null}
           {sections.length === 0 ? (

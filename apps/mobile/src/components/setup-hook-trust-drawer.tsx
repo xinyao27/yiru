@@ -39,26 +39,26 @@ export function SetupHookTrustDrawer({
     <BottomDrawer visible={visible && prompt != null} onClose={onClose}>
       {prompt ? (
         <View>
-          <View className={styles.trustHeader}>
-            <Text className={styles.title}>
+          <View className="mb-3 px-1">
+            <Text className="text-foreground text-sm font-semibold">
               {prompt.previouslyApproved
                 ? `${prompt.repoName}'s setup script changed`
                 : `Run setup from ${prompt.repoName}?`}
             </Text>
-            <Text className={styles.subtitle}>
+            <Text className="text-muted-foreground/60 mt-[2px] text-xs">
               This repository's yiru.yaml runs before the workspace starts. Only run it if you trust
               this repository.
             </Text>
           </View>
 
-          <View className={styles.trustScriptBox}>
-            <Text className={styles.trustScriptLabel}>
+          <View className="bg-secondary border-border mb-3 border p-3">
+            <Text className="text-muted-foreground mb-2 text-xs font-semibold">
               {prompt.previouslyApproved ? 'New setup script' : 'Setup script'}
             </Text>
-            <Text className={styles.trustScriptText}>{prompt.scriptContent}</Text>
+            <Text className="text-foreground font-mono text-xs">{prompt.scriptContent}</Text>
           </View>
 
-          <View className={styles.trustActionGroup}>
+          <View className="bg-card overflow-hidden">
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
               <Check size={16} colorClassName="accent-foreground" />
               <Text className={styles.trustActionText}>Run hooks</Text>
@@ -80,14 +80,7 @@ export function SetupHookTrustDrawer({
 }
 
 const styles = {
-  title: cn('text-[15px] font-semibold text-foreground'),
-  subtitle: cn('text-[13px] text-muted-foreground/60 mt-[2px]'),
-  trustHeader: cn('px-1 mb-3'),
-  trustScriptBox: cn('bg-secondary rounded-none border border-border p-3 mb-3'),
-  trustScriptLabel: cn('text-[12px] font-semibold text-muted-foreground mb-2'),
-  trustScriptText: cn('text-[13px] font-mono text-foreground'),
-  trustActionGroup: cn('bg-card rounded-none overflow-hidden'),
   trustActionRow: cn('flex-row items-center gap-2 py-3 px-3'),
-  trustActionText: cn('flex-1 text-[14px] text-foreground font-medium'),
+  trustActionText: cn('flex-1 text-sm text-foreground font-medium'),
   trustActionSeparator: cn('h-hairline bg-border mx-3')
 } as const

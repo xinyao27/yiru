@@ -21,9 +21,9 @@ export function PRSection({ title, trailing, children }: Props) {
   return (
     <View className={styles.section}>
       {showHeader ? (
-        <View className={styles.sectionHeader}>
-          {title ? <Text className={styles.sectionLabel}>{title}</Text> : null}
-          {trailing ? <View className={styles.sectionHeaderTrailing}>{trailing}</View> : null}
+        <View className="border-b-hairline border-b-border min-h-10 flex-row items-center justify-between gap-2 px-3 py-2">
+          {title ? <Text className="text-foreground text-xs font-semibold">{title}</Text> : null}
+          {trailing ? <View className="flex-row items-center gap-2">{trailing}</View> : null}
         </View>
       ) : null}
       <View className={styles.sectionBody}>{children}</View>

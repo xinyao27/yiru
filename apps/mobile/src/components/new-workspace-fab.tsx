@@ -14,10 +14,10 @@ export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): Re
   return (
     <Pressable
       className={cn(
-        styles.fab,
-        styles.fabPressedActive,
+        'absolute right-4 w-12 h-12 items-center justify-center bg-primary',
+        'active:bg-accent',
         'bottom-safe-offset-6',
-        disabled && styles.fabDisabled
+        disabled && 'opacity-[0.5]'
       )}
       onPress={onPress}
       disabled={disabled}
@@ -29,9 +29,3 @@ export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): Re
     </Pressable>
   )
 }
-
-const styles = {
-  fab: cn('absolute right-4 w-12 h-12 rounded-none items-center justify-center bg-primary'),
-  fabPressedActive: cn('active:bg-foreground'),
-  fabDisabled: cn('opacity-[0.5]')
-} as const

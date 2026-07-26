@@ -1,6 +1,5 @@
 import { View } from 'react-native'
 
-import { cn } from '../../style/class-names'
 import type { MobileNativeChatController } from './use-controller'
 import { MobileNativeChatView, type MobileNativeChatInputLockReason } from './view'
 
@@ -8,11 +7,6 @@ type Props = {
   controller: MobileNativeChatController
   onAttachImage: () => void
   isAttaching: boolean
-  onMicPress: () => void
-  micActive: boolean
-  dictationMode: 'toggle' | 'hold'
-  onMicPressIn: () => void
-  onMicPressOut: () => void
   inputLockReason: MobileNativeChatInputLockReason | null
   keyboardInset: number
 }
@@ -23,11 +17,6 @@ export function MobileNativeChatOverlay({
   controller,
   onAttachImage,
   isAttaching,
-  onMicPress,
-  micActive,
-  dictationMode,
-  onMicPressIn,
-  onMicPressOut,
   inputLockReason,
   keyboardInset
 }: Props): React.JSX.Element | null {
@@ -36,7 +25,7 @@ export function MobileNativeChatOverlay({
   }
   const session = controller.nativeChatSession
   return (
-    <View className={styles.overlay}>
+    <View className="absolute inset-0">
       <MobileNativeChatView
         messages={session.messages}
         status={session.status}
@@ -62,11 +51,6 @@ export function MobileNativeChatOverlay({
         onComposerTextChange={controller.setChatComposerText}
         onAttachImage={onAttachImage}
         isAttaching={isAttaching}
-        onMicPress={onMicPress}
-        micActive={micActive}
-        dictationMode={dictationMode}
-        onMicPressIn={onMicPressIn}
-        onMicPressOut={onMicPressOut}
         inputLockReason={inputLockReason}
         filePaths={controller.nativeChatFilePaths}
         onNeedFiles={controller.loadNativeChatFiles}
@@ -75,7 +59,3 @@ export function MobileNativeChatOverlay({
     </View>
   )
 }
-
-const styles = {
-  overlay: cn('absolute inset-0')
-} as const

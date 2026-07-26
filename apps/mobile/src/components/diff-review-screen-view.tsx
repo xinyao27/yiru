@@ -10,7 +10,6 @@ import { MobileDiffReviewDrawers } from './diff-review-drawers'
 import { MobileDiffReviewFileSummary } from './diff-review-file-summary'
 import { MobileDiffReviewFooter } from './diff-review-footer'
 import { MobileDiffReviewHeader } from './diff-review-header'
-import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 import { MobilePRSidebar } from './pr-sidebar'
 import { canDockPrSidebar, resolvePresentationMode } from './pr-sidebar-presentation'
 import { mobilePrSidebarStyles, PR_SIDEBAR_DOCK_WIDTH } from './pr-sidebar/styles'
@@ -52,7 +51,7 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
   }, [])
 
   return (
-    <SafeAreaView className={styles.safeArea} edges={['top']}>
+    <SafeAreaView className="bg-background flex-1" edges={['top']}>
       <MobileDiffReviewHeader
         filter={controller.filter}
         isWideLayout={isWideLayout}
@@ -84,8 +83,8 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
             />
           ) : null}
           {controller.actionError ? (
-            <View className={styles.actionError}>
-              <Text className={styles.actionErrorText}>{controller.actionError}</Text>
+            <View className="bg-secondary border-hairline mx-4 mt-2 border-amber-500 px-3 py-2">
+              <Text className="text-foreground text-xs">{controller.actionError}</Text>
             </View>
           ) : null}
           <MobileDiffReviewBody

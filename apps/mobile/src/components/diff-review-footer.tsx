@@ -35,11 +35,16 @@ export function MobileDiffReviewFooter({
   onMoveFile
 }: Props) {
   return (
-    <View className={cn(styles.footer, 'pb-safe-offset-2')}>
-      <View className={styles.fileActionRow}>
+    <View
+      className={cn(
+        'absolute left-0 right-0 bottom-0 px-4 pt-2 gap-2 bg-background border-t-hairline border-t-border',
+        'pb-safe-offset-2'
+      )}
+    >
+      <View className="flex-row gap-2">
         {item.canStage ? (
           <Pressable
-            className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
+            className={cn(styles.secondaryButton, 'active:bg-accent')}
             disabled={busyAction !== null}
             onPress={() => onGitMutation('git.stage', item)}
             accessibilityRole="button"
@@ -51,7 +56,7 @@ export function MobileDiffReviewFooter({
         ) : null}
         {item.canUnstage ? (
           <Pressable
-            className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
+            className={cn(styles.secondaryButton, 'active:bg-accent')}
             disabled={busyAction !== null}
             onPress={() => onGitMutation('git.unstage', item)}
             accessibilityRole="button"
@@ -63,7 +68,7 @@ export function MobileDiffReviewFooter({
         ) : null}
         {item.canDiscard ? (
           <Pressable
-            className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
+            className={cn(styles.secondaryButton, 'active:bg-accent')}
             disabled={busyAction !== null}
             onPress={() => onDiscard(item)}
             accessibilityRole="button"
@@ -74,9 +79,9 @@ export function MobileDiffReviewFooter({
           </Pressable>
         ) : null}
       </View>
-      <View className={styles.footerRow}>
+      <View className="flex-row items-center gap-2">
         <Pressable
-          className={cn(styles.navButton, 'active:opacity-[0.76]')}
+          className={cn(styles.navButton, 'active:bg-accent')}
           onPress={() => onMoveFile('previous')}
           accessibilityRole="button"
           accessibilityLabel="Previous file"
@@ -84,19 +89,22 @@ export function MobileDiffReviewFooter({
           <ChevronLeft size={17} colorClassName="accent-foreground" />
         </Pressable>
         <Pressable
-          className={cn(styles.footerButton, 'active:opacity-[0.76]')}
+          className={cn(
+            'min-h-11 flex-row items-center justify-center gap-1 px-3 bg-secondary',
+            'active:bg-accent'
+          )}
           onPress={onAddFileNote}
           accessibilityRole="button"
           accessibilityLabel="Add file note"
         >
           <FileText size={14} colorClassName="accent-muted-foreground" />
-          <Text className={styles.footerButtonText}>Note</Text>
+          <Text className="text-muted-foreground text-sm font-bold">Note</Text>
         </Pressable>
         <Pressable
           className={cn(
             styles.primaryButton,
-            item.isReviewed && styles.primaryButtonDone,
-            'active:opacity-[0.76]'
+            item.isReviewed && 'bg-green-500',
+            'active:bg-accent'
           )}
           onPress={onMarkReviewed}
           accessibilityRole="button"
@@ -108,7 +116,7 @@ export function MobileDiffReviewFooter({
           </Text>
         </Pressable>
         <Pressable
-          className={cn(styles.navButton, 'active:opacity-[0.76]')}
+          className={cn(styles.navButton, 'active:bg-accent')}
           onPress={() => onMoveFile('next')}
           accessibilityRole="button"
           accessibilityLabel="Next file"

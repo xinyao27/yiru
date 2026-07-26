@@ -11,7 +11,6 @@ import {
   TerminalWebViewEngineErrorOverlay,
   useTerminalWebViewEngineErrorState
 } from './webview/engine-error-state'
-import { TERMINAL_WEBVIEW_FRAME_STYLES } from './webview/frame-styles'
 import { XTERM_WEBVIEW_SOURCE } from './webview/html'
 import type { TerminalWebViewCommand } from './webview/messages'
 import { createTerminalWebViewPendingMessages } from './webview/pending-messages'
@@ -401,11 +400,11 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
     )
 
     return (
-      <View className={cn(TERMINAL_WEBVIEW_FRAME_STYLES.container, className)}>
+      <View className={cn('flex-1 bg-[var(--terminal-background)]', className)}>
         <UniwindWebView
           ref={webViewRef}
           source={XTERM_WEBVIEW_SOURCE}
-          className={TERMINAL_WEBVIEW_FRAME_STYLES.webview}
+          className="flex-1 bg-[var(--terminal-background)]"
           originWhitelist={['*']}
           scrollEnabled={false}
           // Why: Android parent gesture containers can intercept vertical drags

@@ -296,22 +296,22 @@ function MountedBottomDrawer({
   const overlay = (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
-      className={styles.overlay}
+      className="absolute inset-0 z-[1000]"
       style={[{ zIndex }]}
       accessibilityViewIsModal
       aria-modal
     >
-      <GestureHandlerRootView className={styles.root}>
-        <Animated.View className={styles.backdrop} style={[backdropStyle]}>
+      <GestureHandlerRootView className="flex-1">
+        <Animated.View className="absolute inset-0 bg-black/50" style={[backdropStyle]}>
           <Pressable className="absolute inset-0" onPress={dismiss} />
         </Animated.View>
 
         <View
-          className={cn(styles.anchor, isWideLayout && styles.anchorWide)}
+          className={cn('flex-1 justify-end', isWideLayout && 'items-center')}
           pointerEvents="box-none"
         >
           <Animated.View
-            className={styles.drawer}
+            className="bg-background px-3"
             style={[
               {
                 width: '100%',
@@ -333,7 +333,7 @@ function MountedBottomDrawer({
                     <View className={styles.handle} />
                   </Animated.View>
                 </GestureDetector>
-                <View className={styles.staticContent}>{children}</View>
+                <View className="min-h-0">{children}</View>
               </>
             ) : dragContentToDismiss ? (
               <>
@@ -382,7 +382,7 @@ function MountedBottomDrawer({
                 </ScrollView>
               </>
             )}
-            <View className={styles.bottomExtension} />
+            <View className="bg-background absolute right-0 bottom-[-500px] left-0 h-[500px]" />
           </Animated.View>
         </View>
       </GestureHandlerRootView>
@@ -404,14 +404,6 @@ function MountedBottomDrawer({
 }
 
 const styles = {
-  overlay: cn('absolute inset-0 z-[1000]'),
-  root: cn('flex-1'),
-  backdrop: cn('absolute inset-0 bg-black/50'),
-  anchor: cn('flex-1 justify-end'),
-  anchorWide: cn('items-center'),
-  drawer: cn('bg-background rounded-none px-3'),
-  handle: cn('self-center w-9 h-1 rounded-none bg-muted-foreground/60 opacity-[0.4]'),
-  handleHitArea: cn('items-center pt-2 pb-3'),
-  staticContent: cn('min-h-0'),
-  bottomExtension: cn('absolute bottom-[-500px] left-0 right-0 h-[500px] bg-background')
+  handle: cn('self-center w-9 h-1 bg-muted-foreground/60 opacity-[0.4]'),
+  handleHitArea: cn('items-center pt-2 pb-3')
 } as const

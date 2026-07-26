@@ -42,11 +42,14 @@ function Reactions({ reactions }: { reactions?: GitHubReaction[] }) {
     return null
   }
   return (
-    <View className={styles.reactionsRow}>
+    <View className="mt-1 flex-row flex-wrap gap-1">
       {visible.map((r) => (
-        <View key={r.content} className={styles.reactionChip}>
+        <View
+          key={r.content}
+          className="border-hairline border-border bg-secondary h-6 flex-row items-center gap-1 px-2"
+        >
           <Text>{REACTION_EMOJI[r.content]}</Text>
-          <Text className={styles.reactionText}>{r.count}</Text>
+          <Text className="text-foreground text-xs">{r.count}</Text>
         </View>
       ))}
     </View>
@@ -88,39 +91,42 @@ export const PRCommentCard = memo(function PRCommentCard({
   return (
     <View
       className={cn(
-        styles.card,
-        isReply && styles.reply,
-        comment.isResolved && styles.cardResolved
+        'border-hairline border-border bg-card overflow-hidden',
+        isReply && 'ml-4',
+        comment.isResolved && 'opacity-[0.6]'
       )}
     >
-      <View className={styles.header}>
+      <View className="border-b-hairline border-b-border flex-row items-center gap-2 px-3 py-2">
         {comment.authorAvatarUrl ? (
           <Image source={{ uri: comment.authorAvatarUrl }} className={styles.avatar} />
         ) : (
           <View className={styles.avatar} />
         )}
         <Text
-          className={cn(styles.author, comment.isResolved && styles.authorResolved)}
+          className={cn(
+            'text-foreground text-xs font-semibold shrink',
+            comment.isResolved && 'text-muted-foreground'
+          )}
           numberOfLines={1}
         >
           {comment.author}
         </Text>
-        <Text className={styles.time}>
+        <Text className="text-muted-foreground text-xs">
           · {formatPrCommentRelativeTime(comment.createdAt, Date.now())}
         </Text>
         {fileLabel ? (
-          <Text className={styles.path} numberOfLines={1}>
+          <Text className="text-muted-foreground/60 shrink font-mono text-[11px]" numberOfLines={1}>
             {fileLabel}
           </Text>
         ) : null}
         {comment.isResolved ? (
-          <View className={styles.resolvedChip}>
-            <Text className={styles.resolvedChipText}>resolved</Text>
+          <View className="border-hairline border-border bg-secondary px-2 py-[1px]">
+            <Text className="text-muted-foreground text-[11px]">resolved</Text>
           </View>
         ) : null}
         {comment.url ? (
           <Pressable
-            className={styles.openButton}
+            className="ml-auto h-7 w-7 items-center justify-center"
             onPress={() => void Linking.openURL(comment.url).catch(() => {})}
             hitSlop={8}
             accessibilityRole="button"
@@ -130,12 +136,12 @@ export const PRCommentCard = memo(function PRCommentCard({
           </Pressable>
         ) : null}
       </View>
-      <View className={styles.body}>
+      <View className="px-3 py-2">
         <CommentMarkdown content={comment.body} />
         <Reactions reactions={comment.reactions} />
       </View>
       {actions ? (
-        <View className={styles.actionsRow}>
+        <View className="flex-row gap-2 px-3 pt-1 pb-2">
           <Pressable
             className={cn(styles.actionButton, styles.actionButtonPressedActive)}
             onPress={() => setReplyOpen((v) => !v)}
@@ -169,7 +175,7 @@ export const PRCommentCard = memo(function PRCommentCard({
         </View>
       ) : null}
       {replyOpen && actions ? (
-        <View className={styles.composer}>
+        <View className="px-3 pb-3">
           <PRCommentComposer
             placeholder="Write a reply…"
             submitLabel="Reply"

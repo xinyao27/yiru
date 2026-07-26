@@ -35,7 +35,7 @@ export function MermaidDiagram({ source, base }: Props) {
         <Text className={styles.labelText}>mermaid</Text>
       </View>
       <UniwindWebView
-        className={styles.webview}
+        className="bg-secondary"
         style={[{ height: height || 120 }]}
         originWhitelist={['*']}
         source={{ html }}
@@ -74,12 +74,8 @@ function MermaidFallback({ source, base }: Props) {
       <View className={styles.label}>
         <Text className={styles.labelText}>mermaid</Text>
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className={styles.fallbackScroll}
-      >
-        <Text className={styles.fallbackText} style={[{ fontSize: base - 1 }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="p-2">
+        <Text className="text-foreground font-mono" style={[{ fontSize: base - 1 }]}>
           {source}
         </Text>
       </ScrollView>
@@ -139,10 +135,7 @@ function buildHtml(source: string, colors: ThemeColors, colorScheme: 'light' | '
 }
 
 const styles = {
-  frame: cn('border-hairline border-border rounded-none mb-2 overflow-hidden bg-secondary'),
+  frame: cn('border-hairline border-border mb-2 overflow-hidden bg-secondary'),
   label: cn('px-2 py-[2px] border-b-hairline border-b-border bg-card'),
-  labelText: cn('text-muted-foreground text-[11px] font-mono'),
-  webview: cn('bg-secondary'),
-  fallbackScroll: cn('p-2'),
-  fallbackText: cn('text-foreground font-mono')
+  labelText: cn('text-muted-foreground text-[11px] font-mono')
 } as const

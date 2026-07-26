@@ -43,36 +43,36 @@ export function MobileSourceControlBranchCard({
 }: Props) {
   const showConflict = conflictOperation !== null && conflictOperation !== 'unknown'
   return (
-    <View className={styles.summaryCard}>
-      <View className={styles.summaryHeader}>
-        <View className={styles.branchLine}>
+    <View className="bg-card border-hairline border-border m-4 mb-2 p-3">
+      <View className="flex-row items-center justify-between gap-3">
+        <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <GitMerge size={15} colorClassName="accent-muted-foreground" />
-          <Text className={styles.branchText} numberOfLines={1}>
+          <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
             {branchLabel}
           </Text>
         </View>
-        {syncLabel ? <Text className={styles.syncText}>{syncLabel}</Text> : null}
+        {syncLabel ? <Text className="text-muted-foreground text-xs">{syncLabel}</Text> : null}
       </View>
-      <View className={styles.countRow}>
+      <View className="mt-2 flex-row flex-wrap gap-3">
         <Text className={styles.countText}>{unstagedCount} changed</Text>
         <Text className={styles.countText}>{stagedCount} staged</Text>
         {branchCount > 0 ? <Text className={styles.countText}>{branchCount} on branch</Text> : null}
       </View>
       {/* Own row so Abort never overflows past the card when counts are long. */}
       {showConflict ? (
-        <View className={styles.conflictRow}>
-          <Text className={styles.conflictText}>{conflictOperation}</Text>
+        <View className="mt-2 max-w-full flex-row flex-wrap items-center gap-2 self-start">
+          <Text className="text-xs text-amber-500 capitalize">{conflictOperation}</Text>
           {conflictOperation === 'merge' || conflictOperation === 'rebase' ? (
             <Pressable
               className={cn(
-                styles.abortButton,
-                conflictBusy && styles.abortButtonDisabled,
-                !conflictBusy && 'active:opacity-[0.75]'
+                'min-h-8 px-3 py-1 border border-amber-500 bg-secondary items-center justify-center shrink-0',
+                conflictBusy && 'opacity-[0.45]',
+                !conflictBusy && 'active:bg-accent'
               )}
               disabled={conflictBusy}
               onPress={() => onAbortConflict(conflictOperation)}
             >
-              <Text className={styles.abortText}>
+              <Text className="text-sm font-semibold text-amber-500 capitalize">
                 {mobileConflictAbortLabel(conflictOperation, conflictAborting)}
               </Text>
             </Pressable>

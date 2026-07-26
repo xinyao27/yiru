@@ -92,9 +92,9 @@ export function ReviewerPickerDrawer({
 
   return (
     <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
-      <Text className={styles.pickerTitle}>Reviewers</Text>
+      <Text className="text-foreground mb-2 text-sm font-bold">Reviewers</Text>
       <TextInput
-        className={styles.pickerSearch}
+        className="border-hairline border-border bg-card text-foreground mb-2 min-h-10 px-3 text-sm"
         value={query}
         onChangeText={setQuery}
         placeholder="Search people"
@@ -115,13 +115,13 @@ export function ReviewerPickerDrawer({
           <Text className={styles.emptyText}>No matching people</Text>
         </View>
       ) : (
-        <View className={styles.pickerList}>
+        <View className="gap-0">
           {ordered.map((item) => {
             const requested = isRequested(item.login)
             return (
               <Pressable
                 key={item.login}
-                className={styles.pickerRow}
+                className="min-h-11 flex-row items-center gap-2 py-1"
                 onPress={() => onToggle(item.login)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: requested }}
@@ -130,7 +130,7 @@ export function ReviewerPickerDrawer({
                 <View className={styles.rowTrailing}>
                   {requested ? <Check size={16} colorClassName="accent-foreground" /> : null}
                 </View>
-                <View className={styles.pickerRowMain}>
+                <View className="min-w-0 flex-1">
                   <Text className={styles.rowTitle} numberOfLines={1}>
                     {item.name ? `${item.name} (${item.login})` : item.login}
                   </Text>

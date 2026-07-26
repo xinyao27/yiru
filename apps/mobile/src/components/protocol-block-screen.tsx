@@ -28,46 +28,38 @@ export function ProtocolBlockScreen({ verdict }: Props) {
     'Already updated? Go back to Hosts and refresh the connection. If this message stays, remove this host and pair it again.'
 
   return (
-    <View className={styles.container}>
-      <View className={styles.card}>
-        <Text className={styles.title}>{title}</Text>
-        <Text className={styles.body}>{body}</Text>
+    <View className="bg-background flex-1 justify-center px-4">
+      <View className="bg-card border-border border p-4">
+        <Text className="text-foreground mb-2 text-sm font-bold">{title}</Text>
+        <Text className="text-muted-foreground mb-4 text-sm leading-[20px]">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
             updates continue to use the repository release page. */}
         <Pressable
-          className={cn(styles.primaryButton, styles.pressedActive)}
+          className={cn('bg-primary py-2.5 items-center mb-2', styles.pressedActive)}
           onPress={() => {
             void Linking.openURL(primaryAction.url)
           }}
         >
-          <Text className={styles.primaryButtonText}>{primaryAction.label}</Text>
+          <Text className="text-primary-foreground text-sm font-semibold">
+            {primaryAction.label}
+          </Text>
         </Pressable>
         <Pressable
-          className={cn(styles.secondaryButton, styles.pressedActive)}
+          className={cn('bg-secondary py-2.5 items-center', styles.pressedActive)}
           onPress={() => {
             // Why: route back to the host list so the user can pair a
             // different host instead of getting trapped on this screen.
             router.replace('/')
           }}
         >
-          <Text className={styles.secondaryButtonText}>Back to hosts</Text>
+          <Text className="text-foreground text-sm font-semibold">Back to hosts</Text>
         </Pressable>
-        <Text className={styles.recoveryNote}>{recoveryNote}</Text>
+        <Text className="text-muted-foreground/60 mt-3 text-xs leading-[17px]">{recoveryNote}</Text>
       </View>
     </View>
   )
 }
 
 const styles = {
-  container: cn('flex-1 bg-background justify-center px-4'),
-  card: cn('bg-card rounded-none p-4 border border-border'),
-  title: cn('text-[18px] font-bold text-foreground mb-2'),
-  body: cn('text-[14px] text-muted-foreground leading-[20px] mb-4'),
-  primaryButton: cn('bg-foreground py-2.5 rounded-none items-center mb-2'),
-  primaryButtonText: cn('text-[14px] font-semibold text-background'),
-  secondaryButton: cn('bg-secondary py-2.5 rounded-none items-center'),
-  secondaryButtonText: cn('text-[14px] font-semibold text-foreground'),
-  recoveryNote: cn('text-[12px] text-muted-foreground/60 leading-[17px] mt-3'),
-  pressed: cn('opacity-[0.7]'),
-  pressedActive: cn('active:opacity-[0.7]')
+  pressedActive: cn('active:bg-accent')
 } as const

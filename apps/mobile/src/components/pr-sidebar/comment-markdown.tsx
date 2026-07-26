@@ -64,19 +64,19 @@ function DetailsBlock({
   const [open, setOpen] = useState(false)
   const Chevron = open ? ChevronDown : ChevronRight
   return (
-    <View className={styles.details}>
+    <View className="border-hairline border-border mb-2 overflow-hidden">
       <Pressable
-        className={styles.detailsSummary}
+        className="bg-secondary flex-row items-center gap-1 px-2 py-1"
         onPress={() => setOpen((v) => !v)}
         accessibilityRole="button"
       >
         <Chevron size={14} colorClassName="accent-muted-foreground" />
-        <Text className={styles.detailsSummaryText} style={[{ fontSize: base }]}>
+        <Text className="text-foreground shrink font-semibold" style={[{ fontSize: base }]}>
           {summary}
         </Text>
       </Pressable>
       {open ? (
-        <View className={styles.detailsBody}>
+        <View className="px-2 pt-1">
           {body.map((b, i) => (
             <BlockView key={i} block={b} base={base} />
           ))}
@@ -93,7 +93,7 @@ function BlockView({ block, base }: { block: MarkdownBlock; base: number }) {
     case 'heading':
       return (
         <Text
-          className={styles.heading}
+          className="text-foreground mb-1 font-bold"
           style={[{ fontSize: base + Math.max(0, 4 - block.level) }]}
         >
           <Inline text={block.text} base={base} />
@@ -105,8 +105,8 @@ function BlockView({ block, base }: { block: MarkdownBlock; base: number }) {
         return <MermaidDiagram source={block.text} base={base} />
       }
       return (
-        <View className={styles.codeBlock}>
-          <Text className={styles.codeText} style={[{ fontSize: base - 1 }]}>
+        <View className="bg-secondary border-hairline border-border mb-2 p-2">
+          <Text className="text-foreground font-mono" style={[{ fontSize: base - 1 }]}>
             {block.text}
           </Text>
         </View>
@@ -115,24 +115,24 @@ function BlockView({ block, base }: { block: MarkdownBlock; base: number }) {
       return <TableBlock block={block} base={base} />
     case 'quote':
       return (
-        <View className={styles.quote}>
+        <View className="border-l-border bg-secondary mb-2 border-l-[3px] px-2 py-1">
           <Text className={styles.paragraph} style={[{ fontSize: base, lineHeight: base + 7 }]}>
             <Inline text={block.text} base={base} />
           </Text>
         </View>
       )
     case 'hr':
-      return <View className={styles.hr} />
+      return <View className="bg-border my-2 h-[1px]" />
     case 'list':
       return (
-        <View className={styles.list}>
+        <View className="mb-2">
           {block.items.map((item, i) => (
-            <View key={i} className={styles.listItem}>
-              <Text className={styles.bullet} style={[{ fontSize: base }]}>
+            <View key={i} className="flex-row gap-1">
+              <Text className="text-muted-foreground" style={[{ fontSize: base }]}>
                 {block.ordered ? `${i + 1}.` : '•'}
               </Text>
               <Text
-                className={cn(styles.paragraph, styles.listItemText)}
+                className={cn(styles.paragraph, 'flex-1 mb-[2px]')}
                 style={[{ fontSize: base, lineHeight: base + 7 }]}
               >
                 <Inline text={item} base={base} />
@@ -182,18 +182,18 @@ function TableBlock({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className={styles.tableScroll}
-      contentContainerClassName={styles.table}
+      className="mb-2"
+      contentContainerClassName="border-hairline border-border overflow-hidden"
     >
       <View>
-        <View className={cn(styles.tableRow, styles.tableHeaderRow)}>
+        <View className={cn(styles.tableRow, 'border-t-0 bg-secondary')}>
           {columns.map((c) => (
             <View
               key={c}
               className={styles.tableCell}
               style={[{ alignItems: alignToFlex(block.align[c]) }]}
             >
-              <Text className={styles.tableHeaderText} style={[{ fontSize: base - 1 }]}>
+              <Text className="text-foreground font-bold" style={[{ fontSize: base - 1 }]}>
                 <Inline text={block.headers[c] ?? ''} base={base} />
               </Text>
             </View>
@@ -207,7 +207,7 @@ function TableBlock({
                 className={styles.tableCell}
                 style={[{ alignItems: alignToFlex(block.align[c]) }]}
               >
-                <Text className={styles.tableCellText} style={[{ fontSize: base - 1 }]}>
+                <Text className="text-foreground" style={[{ fontSize: base - 1 }]}>
                   <Inline text={row[c] ?? ''} base={base} />
                 </Text>
               </View>
@@ -232,28 +232,36 @@ function Inline({ text, base }: { text: string; base: number }) {
       {tokens.map((token, i) => {
         if (token.kind === 'bold') {
           return (
-            <Text key={i} className={styles.bold}>
+            <Text key={i} className="font-bold">
               {token.text}
             </Text>
           )
         }
         if (token.kind === 'italic') {
           return (
-            <Text key={i} className={styles.italic}>
+            <Text key={i} className="italic">
               {token.text}
             </Text>
           )
         }
         if (token.kind === 'code') {
           return (
-            <Text key={i} className={styles.codeInline} style={[{ fontSize: base - 1 }]}>
+            <Text
+              key={i}
+              className="text-foreground bg-secondary font-mono"
+              style={[{ fontSize: base - 1 }]}
+            >
               {token.text}
             </Text>
           )
         }
         if (token.kind === 'link') {
           return (
-            <Text key={i} className={styles.link} onPress={() => openMarkdownLink(token.url)}>
+            <Text
+              key={i}
+              className="text-foreground underline"
+              onPress={() => openMarkdownLink(token.url)}
+            >
               {token.text}
             </Text>
           )
@@ -266,28 +274,6 @@ function Inline({ text, base }: { text: string; base: number }) {
 
 const styles = {
   paragraph: cn('text-foreground mb-2'),
-  heading: cn('text-foreground font-bold mb-1'),
-  bold: cn('font-bold'),
-  italic: cn('italic'),
-  link: cn('text-foreground underline'),
-  codeInline: cn('text-foreground font-mono bg-secondary'),
-  codeBlock: cn('bg-secondary border-hairline border-border rounded-none p-2 mb-2'),
-  codeText: cn('text-foreground font-mono'),
-  quote: cn('border-l-[3px] border-l-border bg-secondary px-2 py-1 mb-2'),
-  hr: cn('h-[1px] bg-border my-2'),
-  list: cn('mb-2'),
-  listItem: cn('flex-row gap-1'),
-  listItemText: cn('flex-1 mb-[2px]'),
-  bullet: cn('text-muted-foreground'),
-  details: cn('border-hairline border-border rounded-none mb-2 overflow-hidden'),
-  detailsSummary: cn('flex-row items-center gap-1 px-2 py-1 bg-secondary'),
-  detailsSummaryText: cn('text-foreground font-semibold shrink'),
-  detailsBody: cn('px-2 pt-1'),
-  tableScroll: cn('mb-2'),
-  table: cn('border-hairline border-border rounded-none overflow-hidden'),
   tableRow: cn('flex-row border-t-hairline border-t-border'),
-  tableHeaderRow: cn('border-t-0 bg-secondary'),
-  tableCell: cn('min-w-24 px-2 py-1 border-l-hairline border-l-border'),
-  tableHeaderText: cn('text-foreground font-bold'),
-  tableCellText: cn('text-foreground')
+  tableCell: cn('min-w-24 px-2 py-1 border-l-hairline border-l-border')
 } as const

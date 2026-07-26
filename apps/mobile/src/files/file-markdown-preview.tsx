@@ -40,8 +40,8 @@ export function MobileFileMarkdownPreview({
   const sourceSelected = mode === 'source'
 
   return (
-    <View className={styles.modeContainer}>
-      <View className={styles.modeToolbar}>
+    <View className="flex-1 bg-[var(--editor-surface)]">
+      <View className="border-hairline border-border bg-card mx-3 my-2 flex-row self-start p-[1px]">
         <Pressable
           className={cn(styles.modeToggle, sourceSelected && styles.modeToggleActive)}
           onPress={() => setMode('source')}
@@ -68,7 +68,7 @@ export function MobileFileMarkdownPreview({
         </Pressable>
       </View>
       {mode === 'preview' ? (
-        <ScrollView className={styles.scroll} contentContainerClassName={styles.markdownContent}>
+        <ScrollView className={styles.scroll} contentContainerClassName="p-3 pb-6">
           {truncated ? <MobileFilePreviewTruncatedNote byteLength={byteLength} /> : null}
           <MobileMarkdown content={content} />
         </ScrollView>

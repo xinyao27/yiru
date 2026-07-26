@@ -3,7 +3,6 @@ import { Text, TextInput, View } from 'react-native'
 
 import type { MobileFilePreviewLineColumn } from './file-preview-line-column'
 import { textOffsetForLineColumn } from './file-preview-line-column'
-import { filePreviewStyles as styles } from './file-preview-styles'
 
 type Props = {
   title: string
@@ -38,10 +37,10 @@ export function MobileFilePreviewEditableSource({
   }, [draftContent, lineColumn, revealedTargetKey, selectionTargetKey])
 
   return (
-    <View className={styles.editContainer}>
-      {saveError ? <Text className={styles.saveErrorText}>{saveError}</Text> : null}
+    <View className="flex-1 bg-[var(--editor-surface)] p-3">
+      {saveError ? <Text className="text-destructive mb-2 text-xs">{saveError}</Text> : null}
       <TextInput
-        className={styles.editInput}
+        className="text-foreground flex-1 p-0 font-mono text-[13px] leading-[19px]"
         value={draftContent}
         onChangeText={onDraftChange}
         multiline

@@ -2,8 +2,6 @@ import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runt
 import { useMemo } from 'react'
 import { View } from 'react-native'
 
-import { cn } from '@/style/class-names'
-
 import { flattenAgentRowLineage } from '../worktree/agent-row-lineage'
 import { WorktreeAgentRow } from './worktree-agent-row'
 
@@ -21,7 +19,7 @@ export function WorktreeAgentList({ agents, now, unvisited }: Props) {
   // re-render (the shared useNow tick re-renders this list every 30s).
   const nodes = useMemo(() => flattenAgentRowLineage(agents), [agents])
   return (
-    <View className={styles.list}>
+    <View className="mt-[3px]">
       {nodes.map((node) => (
         <WorktreeAgentRow
           key={node.row.paneKey}
@@ -34,7 +32,3 @@ export function WorktreeAgentList({ agents, now, unvisited }: Props) {
     </View>
   )
 }
-
-const styles = {
-  list: cn('mt-[3px]')
-} as const

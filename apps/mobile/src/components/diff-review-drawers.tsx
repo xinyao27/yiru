@@ -175,7 +175,7 @@ function NoteComposerDrawer({ controller }: Props) {
   return (
     <BottomDrawer visible={composer !== null} onClose={controller.closeComposer}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View className={styles.composerHeader}>
+        <View className="mb-3 flex-row items-center justify-between gap-3">
           <View>
             <Text className={styles.drawerTitle}>
               {composer?.mode === 'edit' ? 'Edit Note' : 'Add Note'}
@@ -187,7 +187,7 @@ function NoteComposerDrawer({ controller }: Props) {
             </Text>
           </View>
           <Pressable
-            className={cn(styles.iconButton, 'active:bg-secondary')}
+            className={cn(styles.iconButton, 'active:bg-accent')}
             onPress={controller.closeComposer}
             accessibilityRole="button"
             accessibilityLabel="Cancel note"
@@ -196,7 +196,7 @@ function NoteComposerDrawer({ controller }: Props) {
           </Pressable>
         </View>
         <TextInput
-          className={styles.composerInput}
+          className="border-hairline border-border bg-card text-foreground min-h-28 p-3 text-sm leading-[20px]"
           style={{ textAlignVertical: 'top' }}
           value={controller.composerBody}
           onChangeText={controller.setComposerBody}
@@ -228,7 +228,7 @@ function composerLabel(
 function DeleteNoteButton({ onPress }: { onPress: () => Promise<void> }) {
   return (
     <Pressable
-      className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
+      className={cn(styles.secondaryButton, 'active:bg-accent')}
       onPress={() => void onPress()}
       accessibilityRole="button"
       accessibilityLabel="Delete note"
@@ -249,11 +249,7 @@ function SaveNoteButton({
   const disabled = controller.composerBody.trim().length === 0
   return (
     <Pressable
-      className={cn(
-        styles.primaryButton,
-        disabled && styles.buttonDisabled,
-        'active:opacity-[0.76]'
-      )}
+      className={cn(styles.primaryButton, disabled && 'opacity-[0.45]', 'active:bg-accent')}
       disabled={disabled}
       onPress={() => void controller.saveComposer()}
       accessibilityRole="button"
@@ -280,7 +276,7 @@ function CompletionDrawer({ controller }: Props) {
       </Text>
       <View className={styles.drawerButtonRow}>
         <Pressable
-          className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
+          className={cn(styles.secondaryButton, 'active:bg-accent')}
           disabled={controller.reviewedUnstagedCount === 0}
           onPress={() => void controller.stageReviewedFiles()}
           accessibilityRole="button"
@@ -290,7 +286,7 @@ function CompletionDrawer({ controller }: Props) {
           <Text className={styles.secondaryButtonText}>Stage Reviewed</Text>
         </Pressable>
         <Pressable
-          className={cn(styles.primaryButton, 'active:opacity-[0.76]')}
+          className={cn(styles.primaryButton, 'active:bg-accent')}
           disabled={controller.unsentComments.length === 0}
           onPress={() => void controller.openSendSheet()}
           accessibilityRole="button"

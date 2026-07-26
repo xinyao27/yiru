@@ -27,12 +27,15 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
   const stateColors = summary.kind === 'ready' ? statusColorClasses(summary.stateToken) : null
   return (
     <Pressable
-      className={cn(hubStyles.chip, hubStyles.chipPressedActive)}
+      className={cn(
+        'flex-row items-center gap-2 mt-3 pt-3 border-t-hairline border-t-border',
+        'active:bg-accent'
+      )}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={chipAccessibilityLabel(summary)}
     >
-      <View className={hubStyles.chipIcon}>
+      <View className="w-[18px] items-center">
         <GitPullRequest size={15} colorClassName="accent-muted-foreground" />
       </View>
       {summary.kind === 'loading' ? (
@@ -44,7 +47,7 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
         </>
       ) : summary.kind === 'none' ? (
         <>
-          <Text className={hubStyles.chipCreateText}>Create pull request</Text>
+          <Text className="text-primary text-sm font-semibold">Create pull request</Text>
           <View className={hubStyles.chipSpacer} />
           <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </>
@@ -57,17 +60,17 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
         </>
       ) : (
         <>
-          <Text className={hubStyles.chipNumber}>#{summary.number}</Text>
-          <View className={cn(hubStyles.statePill, stateColors?.border)}>
-            <Text className={cn(hubStyles.statePillText, stateColors?.text)}>
-              {summary.stateLabel}
-            </Text>
+          <Text className="text-foreground text-sm font-bold">#{summary.number}</Text>
+          <View className={cn('px-2 py-[1px] border-hairline', stateColors?.border)}>
+            <Text className={cn('text-xs font-bold', stateColors?.text)}>{summary.stateLabel}</Text>
           </View>
           <ChipRollup rollup={summary.rollup} />
           {summary.commentCount != null && summary.commentCount > 0 ? (
-            <View className={hubStyles.comment}>
+            <View className="flex-row items-center gap-1">
               <MessageSquare size={13} colorClassName="accent-muted-foreground" />
-              <Text className={hubStyles.commentText}>{summary.commentCount}</Text>
+              <Text className="text-muted-foreground text-xs font-semibold">
+                {summary.commentCount}
+              </Text>
             </View>
           ) : null}
           <View className={hubStyles.chipSpacer} />
@@ -81,9 +84,9 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
 function ChipRollup({ rollup }: { rollup: MobilePrChipRollup }) {
   const colors = statusColorClasses(rollup.token)
   return (
-    <View className={hubStyles.rollup}>
+    <View className="flex-row items-center gap-1">
       <RollupIcon kind={rollup.kind} colorClassName={colors.accent} />
-      <Text className={cn(hubStyles.rollupText, colors.text)}>{rollup.text}</Text>
+      <Text className={cn('text-xs font-semibold', colors.text)}>{rollup.text}</Text>
     </View>
   )
 }

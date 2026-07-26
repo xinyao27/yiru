@@ -17,6 +17,9 @@ import { getNotificationNavigationPath } from '../src/notifications/notification
 import { RpcClientProvider } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
 import { extractPairingCodeFromUrl } from '../src/transport/pairing'
+import { createMobileUiLabRpcClient } from '../src/ui-lab/rpc-client'
+
+const IS_UI_LAB = __DEV__ && process.env.EXPO_PUBLIC_YIRU_UI_LAB === '1'
 
 // Why: keeps the native splash screen visible until the React tree is mounted
 // and ready to render. Without this the user sees a blank white/black frame
@@ -47,11 +50,18 @@ export default function RootLayout() {
     [foreground]
   )
   const headerStyle = useResolveClassNames('bg-card') as { backgroundColor?: string }
-  const headerTitleStyle = useResolveClassNames('text-[16px] font-semibold') as Pick<
+  const headerTitleStyle = useResolveClassNames('text-sm font-semibold') as Pick<
     TextStyle,
     'fontFamily' | 'fontSize' | 'fontWeight'
   > & { color?: string }
   const contentStyle = useResolveClassNames('bg-background') as ViewStyle
+
+  // Why: startup routing avoids iOS's custom-scheme confirmation, keeping UI Lab one command.
+  useEffect(() => {
+    if (IS_UI_LAB) {
+      router.replace('/ui-lab')
+    }
+  }, [router])
 
   // Why: route `yiru://pair?...` deep links to the confirm screen so
   // the same pairing flow runs whether the link arrived via QR scan,
@@ -171,7 +181,9 @@ export default function RootLayout() {
       >
         <IconContext.Provider value={iconContextValue}>
           <MobileLoaderStyleProvider>
-            <RpcClientProvider>
+            <RpcClientProvider
+              createClientOverride={IS_UI_LAB ? createMobileUiLabRpcClient : undefined}
+            >
               <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
                 <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
                 <Stack
@@ -207,11 +219,11 @@ export default function RootLayout() {
                   <Stack.Screen name="native-chat-settings" options={{ headerShown: false }} />
                   <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
                   <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
-                  <Stack.Screen name="voice-settings" options={{ headerShown: false }} />
                   <Stack.Screen name="notifications" options={{ headerShown: false }} />
                   <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
                   <Stack.Screen name="connection-log" options={{ headerShown: false }} />
                   <Stack.Screen name="about" options={{ headerShown: false }} />
+                  <Stack.Screen name="ui-lab" options={{ headerShown: false }} />
                   <Stack.Screen name="h" options={{ headerShown: false }} />
                 </Stack>
               </View>

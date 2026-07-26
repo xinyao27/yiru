@@ -21,7 +21,7 @@ export function MobileBrowserViewModeSwitch({
   onChange
 }: Props): React.JSX.Element {
   return (
-    <View className={styles.switch}>
+    <View className="bg-secondary min-h-7 flex-row items-center p-[2px]">
       {VIEW_MODES.map((mode) => (
         <ViewModeButton
           key={mode.id}
@@ -49,10 +49,10 @@ function ViewModeButton({
   return (
     <Pressable
       className={cn(
-        styles.button,
-        selected && styles.buttonSelected,
-        !disabled && !selected && styles.buttonPressedActive,
-        disabled && styles.disabled
+        'min-h-6 min-w-[52px] items-center justify-center px-2',
+        selected && 'bg-accent',
+        !disabled && !selected && 'active:bg-accent',
+        disabled && 'opacity-[0.35]'
       )}
       disabled={disabled}
       onPress={onPress}
@@ -60,17 +60,14 @@ function ViewModeButton({
       accessibilityState={{ selected, disabled }}
       accessibilityLabel={`Show ${label.toLowerCase()} website view`}
     >
-      <Text className={cn(styles.buttonText, selected && styles.buttonTextSelected)}>{label}</Text>
+      <Text
+        className={cn(
+          'text-muted-foreground text-xs font-semibold',
+          selected && 'text-accent-foreground'
+        )}
+      >
+        {label}
+      </Text>
     </Pressable>
   )
 }
-
-const styles = {
-  switch: cn('min-h-7 flex-row items-center rounded-none bg-secondary p-[2px]'),
-  button: cn('min-h-6 min-w-[52px] items-center justify-center rounded-none px-2'),
-  buttonPressedActive: cn('active:bg-border'),
-  buttonSelected: cn('bg-foreground'),
-  buttonText: cn('text-muted-foreground text-[12px] font-semibold'),
-  buttonTextSelected: cn('text-background'),
-  disabled: cn('opacity-[0.35]')
-} as const

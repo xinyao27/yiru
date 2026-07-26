@@ -7,7 +7,6 @@ import {
   CaretRight as ChevronRight,
   Globe
 } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
@@ -51,31 +50,35 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
   }, [])
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <View className="bg-background pt-safe-offset-2 flex-1 px-4 pt-0">
+      <View className="mt-2 mb-4 flex-row items-center">
+        <Pressable
+          className="mr-2 h-9 w-9 items-center justify-center"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text className={styles.heading}>Browser</Text>
+        <Text className="text-foreground text-sm font-bold">Browser</Text>
       </View>
 
-      <ScrollView
-        contentContainerClassName={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text className={styles.groupHeading}>LINKS</Text>
-        <Text className={styles.groupDescription}>
+      <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
+        <Text className="text-muted-foreground/60 mb-1 px-1 text-[11px] font-semibold tracking-[0.5px]">
+          LINKS
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-[20px]">
           Choose where HTTP(S) links tapped in terminal output open.
         </Text>
-        <View className={cn(styles.section, styles.sectionTopGap)}>
+        <View className="bg-card mt-2 overflow-hidden">
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
             onPress={() => setPickerOpen(true)}
           >
             <Globe size={16} colorClassName="accent-muted-foreground" />
-            <View className={styles.rowContent}>
-              <Text className={styles.rowLabel}>Open terminal links</Text>
-              <Text className={styles.rowSublabel}>{linkModeLabel(linkMode)}</Text>
+            <View className="flex-1">
+              <Text className="text-foreground text-sm font-medium">Open terminal links</Text>
+              <Text className="text-muted-foreground mt-[2px] text-xs">
+                {linkModeLabel(linkMode)}
+              </Text>
             </View>
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
@@ -93,20 +96,3 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background px-4 pt-0'),
-  topRow: cn('flex-row items-center mt-2 mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  scrollContent: cn('pb-6'),
-  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
-  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
-  section: cn('bg-card rounded-none overflow-hidden'),
-  sectionTopGap: cn('mt-2'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowContent: cn('flex-1'),
-  rowLabel: cn('text-[14px] font-medium text-foreground'),
-  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]')
-} as const

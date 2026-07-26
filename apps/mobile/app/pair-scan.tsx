@@ -40,11 +40,11 @@ const SCAN_RETICLE_MAX_SIZE = 360
 
 function Step({ number, text }: { number: number; text: string }) {
   return (
-    <View className={styles.step}>
-      <View className={styles.stepBadge}>
-        <Text className={styles.stepNumber}>{number}</Text>
+    <View className="flex-row items-center gap-2">
+      <View className="bg-secondary h-[22px] w-[22px] items-center justify-center">
+        <Text className="text-muted-foreground text-xs font-bold">{number}</Text>
       </View>
-      <Text className={styles.stepText}>{text}</Text>
+      <Text className="text-muted-foreground text-sm">{text}</Text>
     </View>
   )
 }
@@ -232,10 +232,10 @@ export default function PairScanScreen() {
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
         <View className={styles.centered}>
-          <Text className={styles.title}>
+          <Text className="text-foreground mb-2 text-sm font-semibold">
             {canAskAgain ? 'Pair with desktop' : 'Camera Access Disabled'}
           </Text>
-          <Text className={styles.subtitle}>
+          <Text className="text-muted-foreground mb-6 max-w-[310px] text-center text-sm leading-[20px]">
             {canAskAgain
               ? 'Scan the QR code from Yiru on your desktop, or paste the pairing code instead.'
               : 'Enable camera access in Settings, or paste the pairing code instead.'}
@@ -275,7 +275,7 @@ export default function PairScanScreen() {
         <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
       </Pressable>
 
-      <View className={styles.steps}>
+      <View className="mb-4 ml-[7px] gap-2">
         <Step number={1} text="Open Yiru on your computer" />
         <Step number={2} text="Go to Settings → Mobile" />
         <Step number={3} text="Scan the QR code" />
@@ -289,27 +289,39 @@ export default function PairScanScreen() {
               they cancel the sheet and the QR was scanned silently in
               the meantime. */}
           {!pasteVisible && (
-            <View className={styles.cameraWrap} onLayout={handleCameraLayout}>
+            <View className="flex-1 overflow-hidden" onLayout={handleCameraLayout}>
               <UniwindCameraView
-                className={styles.camera}
+                className="absolute inset-0"
                 facing="back"
                 barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
                 onBarcodeScanned={handleBarCodeScanned}
               />
-              <View className={styles.reticle} pointerEvents="none">
-                <View
-                  className={styles.reticleFrame}
-                  style={[{ width: reticleSize, height: reticleSize }]}
-                >
-                  <View className={cn(styles.corner, styles.cornerTL)} />
-                  <View className={cn(styles.corner, styles.cornerTR)} />
-                  <View className={cn(styles.corner, styles.cornerBL)} />
-                  <View className={cn(styles.corner, styles.cornerBR)} />
+              <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
+                <View className="relative" style={[{ width: reticleSize, height: reticleSize }]}>
+                  <View
+                    className={cn(styles.corner, 'top-0 left-0 border-t-[2.5px] border-l-[2.5px]')}
+                  />
+                  <View
+                    className={cn(styles.corner, 'top-0 right-0 border-t-[2.5px] border-r-[2.5px]')}
+                  />
+                  <View
+                    className={cn(
+                      styles.corner,
+                      'bottom-0 left-0 border-b-[2.5px] border-l-[2.5px]'
+                    )}
+                  />
+                  <View
+                    className={cn(
+                      styles.corner,
+                      'bottom-0 right-0 border-b-[2.5px] border-r-[2.5px]'
+                    )}
+                  />
                 </View>
               </View>
             </View>
           )}
-          {pasteVisible && <View className={styles.cameraPlaceholder} />}
+          {/* Why: preserve the camera's layout slot while the paste sheet is open. */}
+          {pasteVisible && <View className="bg-card flex-1" />}
           <Pressable
             className={cn(styles.pasteButton, styles.pasteButtonPressedActive)}
             onPress={() => setPasteVisible(true)}
@@ -323,7 +335,7 @@ export default function PairScanScreen() {
       {status === 'connecting' && (
         <View className={styles.centered}>
           <ActivityIndicator size="large" colorClassName="accent-muted-foreground" />
-          <Text className={styles.connectingText}>Connecting…</Text>
+          <Text className="text-muted-foreground mt-4 text-sm">Connecting…</Text>
           <View className={styles.logSlot}>
             <ConnectionLog entries={logs} title="Pairing log" />
           </View>
@@ -332,24 +344,26 @@ export default function PairScanScreen() {
 
       {status === 'error' && (
         <View className={styles.centered}>
-          <Text className={styles.errorText}>{errorMessage}</Text>
+          <Text className="text-destructive mb-6 text-center text-sm leading-[20px]">
+            {errorMessage}
+          </Text>
           {logs.length > 0 && (
             <View className={styles.logSlot}>
               <ConnectionLog entries={logs} title="Pairing log" />
             </View>
           )}
-          <View className={styles.errorActions}>
+          <View className="items-center gap-2">
             <Pressable className={styles.primaryButton} onPress={retry}>
               <Text className={styles.primaryButtonText}>Try Again</Text>
             </Pressable>
             <Pressable
-              className={cn(styles.secondaryButton, styles.pasteButtonPressedActive)}
+              className={cn('px-6 py-2', styles.pasteButtonPressedActive)}
               onPress={() => {
                 retry()
                 setPasteVisible(true)
               }}
             >
-              <Text className={styles.secondaryButtonText}>Paste code instead</Text>
+              <Text className="text-muted-foreground text-sm font-medium">Paste code instead</Text>
             </Pressable>
           </View>
         </View>
@@ -369,39 +383,13 @@ export default function PairScanScreen() {
 
 const styles = {
   container: cn('flex-1 bg-background p-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mb-2'),
-  steps: cn('gap-2 mb-4 ml-[7px]'),
-  step: cn('flex-row items-center gap-2'),
-  stepBadge: cn('w-[22px] h-[22px] rounded-none bg-secondary items-center justify-center'),
-  stepNumber: cn('text-[12px] font-bold text-muted-foreground'),
-  stepText: cn('text-[14px] text-muted-foreground'),
-  cameraWrap: cn('flex-1 rounded-none overflow-hidden'),
-  // Why: holds the layout slot while the camera is unmounted during
-  // paste, so the bottom action button doesn't snap up to fill the
-  // empty space.
-  cameraPlaceholder: cn('flex-1 bg-card rounded-none'),
-  camera: cn('absolute inset-0'),
-  reticle: cn('absolute inset-0 items-center justify-center'),
-  reticleFrame: cn('relative'),
+  backButton: cn('w-9 h-9 items-center justify-center mb-2'),
   corner: cn('absolute w-7 h-7 border-white/70'),
-  cornerTL: cn('top-0 left-0 border-t-[2.5px] border-l-[2.5px] rounded-none'),
-  cornerTR: cn('top-0 right-0 border-t-[2.5px] border-r-[2.5px] rounded-none'),
-  cornerBL: cn('bottom-0 left-0 border-b-[2.5px] border-l-[2.5px] rounded-none'),
-  cornerBR: cn('bottom-0 right-0 border-b-[2.5px] border-r-[2.5px] rounded-none'),
   centered: cn('flex-1 items-center justify-center'),
-  title: cn('text-[18px] font-semibold text-foreground mb-2'),
-  subtitle: cn('max-w-[310px] text-[14px] text-muted-foreground text-center mb-6 leading-[20px]'),
-  connectingText: cn('text-muted-foreground text-[14px] mt-4'),
   logSlot: cn('w-full mt-4 px-2'),
-  errorText: cn('text-destructive text-[14px] text-center mb-6 leading-[20px]'),
-  primaryButton: cn(
-    'flex-row items-center justify-center gap-1 bg-foreground px-6 py-2.5 rounded-none'
-  ),
-  primaryButtonText: cn('text-background text-[14px] font-semibold'),
-  pasteButton: cn('flex-row items-center justify-center gap-1 mt-3 py-2 rounded-none'),
-  pasteButtonPressedActive: cn('active:opacity-[0.6]'),
-  pasteButtonText: cn('text-muted-foreground text-[14px] font-medium'),
-  errorActions: cn('items-center gap-2'),
-  secondaryButton: cn('px-6 py-2 rounded-none'),
-  secondaryButtonText: cn('text-muted-foreground text-[14px] font-medium')
+  primaryButton: cn('flex-row items-center justify-center gap-1 bg-primary px-6 py-2.5'),
+  primaryButtonText: cn('text-primary-foreground text-sm font-semibold'),
+  pasteButton: cn('flex-row items-center justify-center gap-1 mt-3 py-2'),
+  pasteButtonPressedActive: cn('active:bg-accent'),
+  pasteButtonText: cn('text-muted-foreground text-sm font-medium')
 } as const

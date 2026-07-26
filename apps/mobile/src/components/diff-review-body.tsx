@@ -12,7 +12,6 @@ import type {
   ReviewScreenState
 } from '../session/diff/review-screen-model'
 import { MobileDiffReviewLine } from './diff-review-line'
-import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 
 type Props = {
   activeHunkIndex: number | null
@@ -84,7 +83,7 @@ export function MobileDiffReviewBody({
           />
         )
       }}
-      contentContainerClassName={styles.diffList}
+      contentContainerClassName="pb-[140px] bg-[var(--editor-surface)]"
       onScrollToIndexFailed={(info) => {
         listRef.current?.scrollToOffset({
           offset: Math.max(0, info.averageItemLength * info.index),
@@ -93,7 +92,9 @@ export function MobileDiffReviewBody({
       }}
       ListFooterComponent={
         diffState.truncated ? (
-          <Text className={styles.truncatedText}>Diff truncated for mobile preview.</Text>
+          <Text className="text-muted-foreground/60 p-3 text-center text-xs">
+            Diff truncated for mobile preview.
+          </Text>
         ) : null
       }
     />
@@ -142,23 +143,28 @@ function CenteredState({
   onRetry?: () => void
 }) {
   return (
-    <View className={styles.state}>
+    <View className="flex-1 items-center justify-center gap-3 p-6">
       {busy ? (
         <ActivityIndicator
           colorClassName={muted ? 'accent-muted-foreground' : 'accent-foreground'}
         />
       ) : null}
-      {title ? <Text className={styles.stateTitle}>{title}</Text> : null}
-      <Text className={styles.stateText}>{text}</Text>
+      {title ? (
+        <Text className="text-foreground text-center text-sm font-bold">{title}</Text>
+      ) : null}
+      <Text className="text-muted-foreground text-center text-sm leading-[20px]">{text}</Text>
       {onRetry ? (
         <Pressable
-          className={cn(styles.retryButton, 'active:opacity-[0.76]')}
+          className={cn(
+            'min-h-11 flex-row items-center gap-1 px-3 bg-secondary',
+            'active:bg-accent'
+          )}
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel="Retry loading review"
         >
           <RefreshCw size={14} colorClassName="accent-foreground" />
-          <Text className={styles.retryText}>Retry</Text>
+          <Text className="text-foreground text-sm font-bold">Retry</Text>
         </Pressable>
       ) : null}
     </View>

@@ -154,12 +154,14 @@ export default function AccountsScreen() {
     const activeWeeklyBar = getUsageBarState(activeUsage, 'weekly')
     const Icon = provider === 'claude' ? ClaudeIcon : OpenAIIcon
     return (
-      <View className={styles.section}>
-        <View className={styles.sectionHeader}>
+      <View className="mb-6">
+        <View className="mb-2 flex-row items-center gap-2">
           <Icon size={14} />
-          <Text className={styles.sectionHeading}>{title}</Text>
+          <Text className="text-muted-foreground text-xs font-semibold tracking-[0.5px] uppercase">
+            {title}
+          </Text>
         </View>
-        <View className={styles.card}>
+        <View className="bg-card overflow-hidden">
           {/* System default row */}
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
@@ -168,7 +170,7 @@ export default function AccountsScreen() {
           >
             <View className={styles.rowMain}>
               <Text className={styles.rowTitle}>System default</Text>
-              <Text className={styles.rowSubtitle}>Use the agent's own login</Text>
+              <Text className="text-muted-foreground text-xs">Use the agent's own login</Text>
               {/* Why: when system default is the active selection, activeUsage
                   holds the system-default login's rate limits — surface them
                   here so non-managed users still see their usage. */}
@@ -213,7 +215,7 @@ export default function AccountsScreen() {
             const weeklyBar = getUsageBarState(usage, 'weekly', isFetching)
             return (
               <View key={account.id}>
-                <View className={styles.separator} />
+                <View className="h-hairline bg-border mx-3" />
                 <Pressable
                   className={cn(styles.row, styles.rowPressedActive)}
                   onPress={() => selectAccount(provider, account.id)}
@@ -262,21 +264,21 @@ export default function AccountsScreen() {
   }
 
   return (
-    <SafeAreaView className={styles.container} edges={['top']}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <SafeAreaView className="bg-background flex-1" edges={['top']}>
+      <View className="flex-row items-center gap-2 px-3 pt-2 pb-2">
+        <Pressable className="h-9 w-9 items-center justify-center" onPress={() => router.back()}>
           <ChevronLeft size={22} colorClassName="accent-foreground" />
         </Pressable>
-        <View className={styles.titleWrap}>
-          <Text className={styles.heading}>Accounts</Text>
+        <View className="flex-1">
+          <Text className="text-foreground text-sm font-bold">Accounts</Text>
           {hostName ? (
-            <Text className={styles.subheading} numberOfLines={1}>
+            <Text className="text-muted-foreground mt-[1px] text-xs" numberOfLines={1}>
               {hostName}
             </Text>
           ) : null}
         </View>
         <Pressable
-          className={styles.iconButton}
+          className="h-9 w-9 items-center justify-center"
           onPress={refresh}
           disabled={!client || refreshing || connState !== 'connected'}
         >
@@ -289,7 +291,7 @@ export default function AccountsScreen() {
       </View>
 
       <ScrollView
-        contentContainerClassName={cn(styles.scroll, 'pb-safe-offset-6')}
+        contentContainerClassName={cn('px-4 pt-2', 'pb-safe-offset-6')}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -316,9 +318,9 @@ export default function AccountsScreen() {
           <>
             {renderProviderSection('claude', 'Claude')}
             {renderProviderSection('codex', 'Codex')}
-            <View className={styles.footerHint}>
+            <View className="flex-row items-start gap-2 px-2 pt-2">
               <User size={14} colorClassName="accent-muted-foreground" />
-              <Text className={styles.footerHintText}>
+              <Text className="text-muted-foreground/60 flex-1 text-xs leading-[18px]">
                 Add or re-authenticate accounts from desktop Settings → Accounts.
               </Text>
             </View>

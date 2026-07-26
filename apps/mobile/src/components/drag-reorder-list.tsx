@@ -14,7 +14,6 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { DotsSixVertical as GripVertical } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { triggerMediumImpact, triggerSelection } from '../platform/haptics'
 import { useThemeColors } from '../theme/uniwind-theme-values'
@@ -289,11 +288,14 @@ function DragReorderRow({
   }, [colors.bgPanel, colors.bgRaised])
 
   return (
-    <Animated.View className={styles.row} style={[{ height: rowHeight }, rowStyle]}>
-      <View className={styles.rowContent}>{children}</View>
+    <Animated.View
+      className="absolute right-0 left-0 flex-row items-center"
+      style={[{ height: rowHeight }, rowStyle]}
+    >
+      <View className="flex-1">{children}</View>
       <GestureDetector gesture={pan}>
         <Animated.View
-          className={styles.handle}
+          className="justify-center self-stretch px-3"
           accessible
           accessibilityRole="button"
           accessibilityLabel="Drag to reorder"
@@ -314,14 +316,7 @@ function DragReorderRow({
           <GripVertical size={18} colorClassName="accent-muted-foreground" />
         </Animated.View>
       </GestureDetector>
-      <View className={styles.rowSeparator} />
+      <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
     </Animated.View>
   )
 }
-
-const styles = {
-  row: cn('absolute left-0 right-0 flex-row items-center'),
-  rowContent: cn('flex-1'),
-  handle: cn('self-stretch justify-center px-3'),
-  rowSeparator: cn('absolute bottom-0 left-3 right-3 h-hairline bg-border')
-} as const

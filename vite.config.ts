@@ -263,8 +263,7 @@ const yiruRootToolingConfig = defineConfig({
   resolve: {
     alias: {
       '@renderer': resolve(desktopRoot, 'src/renderer/src'),
-      '@': resolve(desktopRoot, 'src/renderer/src'),
-      '@yiru/expo-two-way-audio': resolve(import.meta.dirname, 'packages/expo-two-way-audio/src')
+      '@': resolve(desktopRoot, 'src/renderer/src')
     }
   },
   test: {

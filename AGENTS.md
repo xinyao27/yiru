@@ -41,7 +41,7 @@ apps/desktop/src/
   cli/        the `yiru` CLI
 apps/mobile/  Expo app: app/ = routes, src/ = features
 packages/     cross-client contracts: workbench-model, runtime-protocol,
-              mobile-relay-protocol, expo-two-way-audio
+              mobile-relay-protocol
 ```
 
 **Import direction is one-way.** `renderer` never imports `main`. `shared` never imports `main`, `renderer`, or `electron` — Node built-ins are fine. `relay` and `cli` may reuse `main` modules. The renderer reaches the main process only through the preload contract. A type used only inside `apps/desktop` belongs in `src/shared/`, not in a package.

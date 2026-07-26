@@ -32,9 +32,5 @@ export function StatusDot({
       : verdict?.kind === 'warning'
         ? 'bg-amber-500'
         : (stateColorClasses[state] ?? 'bg-neutral-500/40')
-  return <View className={cn(styles.dot, colorClassName)} />
+  return <View className={cn('w-2 h-2 mr-2', colorClassName)} />
 }
-
-const styles = {
-  dot: cn('w-2 h-2 rounded-none mr-2')
-} as const

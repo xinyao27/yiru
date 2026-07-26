@@ -76,7 +76,7 @@ export function PRCommentComposer({
           </Pressable>
         ) : null}
         <Pressable
-          className={cn(styles.submit, !canSubmit && styles.submitDisabled, styles.pressedActive)}
+          className={cn(styles.submit, !canSubmit && 'opacity-[0.45]', styles.pressedActive)}
           onPress={() => void submit()}
           disabled={!canSubmit}
           accessibilityRole="button"

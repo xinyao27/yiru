@@ -28,15 +28,17 @@ const MAX_TOOL_RUN_DIFF_ROWS = 240
 
 function DiffView({ lines }: { lines: DiffLine[] }): React.JSX.Element {
   return (
-    <View className={styles.diff}>
+    <View className="bg-card overflow-hidden py-1">
       {lines.map((line, i) => (
         <Text
           key={i}
           className={cn(
-            styles.diffLine,
-            line.kind === 'add' && styles.diffAdd,
-            line.kind === 'del' && styles.diffDel,
-            line.kind === 'meta' && styles.diffMeta
+            'text-muted-foreground font-mono text-xs leading-[17px] px-2',
+            line.kind === 'add' &&
+              'text-[var(--git-decoration-added)] bg-[var(--editor-diff-inserted-line-background)]',
+            line.kind === 'del' &&
+              'text-[var(--git-decoration-deleted)] bg-[var(--editor-diff-removed-line-background)]',
+            line.kind === 'meta' && 'text-muted-foreground/60'
           )}
         >
           {line.kind === 'add' ? '+' : line.kind === 'del' ? '-' : ' '}
@@ -63,7 +65,9 @@ function ResultBody({
     return <DiffView lines={diff} />
   }
   return (
-    <View className={cn(styles.toolResult, isError && styles.toolResultError)}>
+    <View
+      className={cn('bg-card p-3', isError && 'bg-[var(--editor-diff-removed-line-background)]')}
+    >
       <Text className={styles.mono}>
         {output.length > MAX_TOOL_RESULT_CHARS
           ? `${output.slice(0, MAX_TOOL_RESULT_CHARS)}…`
@@ -104,7 +108,7 @@ function ToolLine({
   return (
     <View>
       <Pressable
-        className={styles.toolLine}
+        className="flex-row items-center gap-2 py-[3px]"
         onPress={() => hasDetail && setExpanded((v) => !v)}
         hitSlop={6}
       >
@@ -113,10 +117,10 @@ function ToolLine({
         ) : (
           <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
         )}
-        <Text className={styles.toolName}>{name}</Text>
+        <Text className="text-foreground font-mono text-xs font-semibold">{name}</Text>
         {preview ? (
           <Text
-            className={cn(styles.toolPreview, openable && styles.toolPreviewLink)}
+            className={cn(styles.toolPreview, openable && 'text-primary underline')}
             numberOfLines={1}
             onPress={openable ? () => onOpenFile!(filePath!) : undefined}
             suppressHighlighting={!openable}
@@ -126,7 +130,7 @@ function ToolLine({
         ) : null}
       </Pressable>
       {expanded ? (
-        <View className={styles.toolDetail}>
+        <View className="gap-1 pb-1 pl-4">
           {callDiff ? <DiffView lines={callDiff} /> : null}
           {!callDiff && call && preview ? <Text className={styles.mono}>{preview}</Text> : null}
           {result ? (
@@ -154,7 +158,10 @@ function Prose({
     // markdown renderer's light-on-dark palette.
     if (invert) {
       return (
-        <Text className={styles.userText} style={[{ fontSize: TEXT_SIZE * fontScale }]}>
+        <Text
+          className="text-primary-foreground text-sm leading-[23px] font-medium"
+          style={[{ fontSize: TEXT_SIZE * fontScale }]}
+        >
           {block.text}
         </Text>
       )
@@ -165,7 +172,7 @@ function Prose({
   }
   if (isImageRefBlock(block)) {
     return (
-      <Text className={styles.imageRef} style={[{ fontSize: TEXT_SIZE * fontScale }]}>
+      <Text className="text-muted-foreground text-sm" style={[{ fontSize: TEXT_SIZE * fontScale }]}>
         🖼 {block.alt ?? block.path ?? block.url ?? 'image'}
       </Text>
     )
@@ -199,23 +206,27 @@ function ToolRun({
   callCount ||= pairs.length
   const summary = summarizeToolRun(blocks)
   return (
-    <View className={styles.toolRun}>
-      <View className={styles.toolRunHeader}>
-        <Pressable className={styles.toolRunToggle} onPress={() => setOpen((v) => !v)} hitSlop={6}>
+    <View className="mt-1">
+      <View className="flex-row items-center gap-2">
+        <Pressable
+          className="flex-1 flex-row items-center gap-2 py-[3px]"
+          onPress={() => setOpen((v) => !v)}
+          hitSlop={6}
+        >
           {open ? (
             <ChevronDown size={15} colorClassName="accent-muted-foreground" />
           ) : (
             <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
           )}
-          <Text className={styles.toolRunCount}>{callCount}×</Text>
-          <Text className={styles.toolRunLabel} numberOfLines={1}>
+          <Text className="font-mono text-xs font-bold text-green-500">{callCount}×</Text>
+          <Text className="text-muted-foreground/60 flex-1 font-mono text-xs" numberOfLines={1}>
             {summary || `${callCount} tool ${callCount === 1 ? 'call' : 'calls'}`}
           </Text>
         </Pressable>
         {trailing}
       </View>
       {open ? (
-        <View className={styles.toolRunBody}>
+        <View className="border-l-border mt-1 border-l-2 pl-2">
           {pairs.map((pair, i) => (
             <ToolLine
               key={i}
@@ -244,7 +255,7 @@ function AgentControls({
   onScrollToTop?: () => void
 }): React.JSX.Element {
   return (
-    <View className={styles.controls}>
+    <View className="mb-[2px] flex-row justify-end gap-1 opacity-[0.7]">
       <Pressable
         className={cn(styles.controlButton, styles.controlPressedActive)}
         onPress={onCopy}
@@ -334,15 +345,17 @@ function MobileNativeChatMessageImpl({
     ) : null
 
   return (
-    <View className={cn(styles.row, isUser && styles.rowUser)}>
-      {isUser && queued ? <Text className={styles.queuedTag}>Queued</Text> : null}
+    <View className={cn('px-4 py-2', isUser && 'items-end')}>
+      {isUser && queued ? (
+        <Text className="text-muted-foreground/60 mb-[2px] text-[11px] font-semibold">Queued</Text>
+      ) : null}
       <View
         className={cn(
-          styles.content,
-          isUser && styles.userBubble,
-          isReasoning && styles.reasoning,
-          queued && styles.queued,
-          copied && styles.copied
+          'max-w-full gap-2',
+          isUser && 'max-w-[88%] bg-primary px-3 py-2',
+          isReasoning && 'opacity-[0.7]',
+          queued && 'opacity-[0.55]',
+          copied && 'bg-[var(--editor-diff-inserted-line-background)]'
         )}
       >
         {prose.map((block, index) => (
@@ -365,7 +378,7 @@ function MobileNativeChatMessageImpl({
             onOpenFile={onOpenFile}
           />
         ) : controls ? (
-          <View className={styles.controlsRow}>{controls}</View>
+          <View className="flex-row justify-end">{controls}</View>
         ) : null}
       </View>
     </View>

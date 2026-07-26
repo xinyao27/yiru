@@ -42,8 +42,8 @@ export function PickerModal<T extends string = string>({
 }: Props<T>) {
   return (
     <BottomDrawer visible={visible} onClose={onClose} zIndex={zIndex}>
-      <View className={styles.header}>
-        <Text className={styles.title}>{title}</Text>
+      <View className="px-1 pb-2">
+        <Text className="text-muted-foreground/60 text-xs font-medium">{title}</Text>
       </View>
 
       <PickerModalContent
@@ -67,18 +67,18 @@ function PickerModalContent<T extends string = string>({
   // Why: closed BottomDrawer instances return null, so keeping option rows in
   // this child avoids rebuilding hidden picker contents on every parent render.
   return (
-    <View className={styles.group}>
+    <View className="bg-card overflow-hidden">
       {options.map((opt, i) => {
         const isSelected = opt.value === selected
         return (
           <View key={opt.value}>
-            {i > 0 && <View className={styles.separator} />}
+            {i > 0 && <View className="h-hairline bg-border mx-3" />}
             <Pressable
               disabled={opt.disabled}
               className={cn(
-                styles.row,
-                !opt.disabled && styles.rowPressedActive,
-                opt.disabled && styles.rowDisabled
+                'flex-row items-center py-3 px-3.5',
+                !opt.disabled && 'active:bg-accent',
+                opt.disabled && 'opacity-[0.45]'
               )}
               onPress={() => {
                 if (opt.disabled) {
@@ -100,13 +100,17 @@ function PickerModalContent<T extends string = string>({
               }
             >
               {opt.renderIcon ? (
-                <View className={styles.rowIcon}>{opt.renderIcon(isSelected)}</View>
+                <View className="mr-2 w-[22px] items-center">{opt.renderIcon(isSelected)}</View>
               ) : null}
-              <View className={styles.rowContent}>
-                <Text className={cn(styles.rowLabel, isSelected && styles.rowLabelSelected)}>
+              <View className="min-w-0 flex-1">
+                <Text className={cn('text-sm text-foreground', isSelected && 'font-semibold')}>
                   {opt.label}
                 </Text>
-                {opt.subtitle ? <Text className={styles.rowSubtitle}>{opt.subtitle}</Text> : null}
+                {opt.subtitle ? (
+                  <Text className="text-muted-foreground/60 mt-[1px] text-[11px]">
+                    {opt.subtitle}
+                  </Text>
+                ) : null}
               </View>
               {isSelected && <Check size={16} colorClassName="accent-foreground" />}
             </Pressable>
@@ -116,18 +120,3 @@ function PickerModalContent<T extends string = string>({
     </View>
   )
 }
-
-const styles = {
-  header: cn('px-1 pb-2'),
-  title: cn('text-[13px] font-medium text-muted-foreground/60'),
-  group: cn('bg-card rounded-none overflow-hidden'),
-  separator: cn('h-hairline bg-border mx-3'),
-  row: cn('flex-row items-center py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowDisabled: cn('opacity-[0.45]'),
-  rowContent: cn('flex-1 min-w-0'),
-  rowIcon: cn('w-[22px] items-center mr-2'),
-  rowLabel: cn('text-[14px] text-foreground'),
-  rowLabelSelected: cn('font-semibold'),
-  rowSubtitle: cn('text-[11px] text-muted-foreground/60 mt-[1px]')
-} as const

@@ -36,12 +36,8 @@ import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
 import { triggerMediumImpact } from '../src/platform/haptics'
-import {
-  useAllHostClients,
-  useCloseHost,
-  useForceReconnect,
-  usePrimeHosts
-} from '../src/transport/client-context'
+import { useAllHostClients } from '../src/transport/all-host-clients'
+import { useCloseHost, useForceReconnect, usePrimeHosts } from '../src/transport/client-context'
 import { classifyConnection } from '../src/transport/connection-health'
 import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycle'
 import { loadHosts } from '../src/transport/host-store'
@@ -589,17 +585,17 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className={styles.container} edges={['top']}>
+    <SafeAreaView className="bg-background flex-1" edges={['top']}>
       {/* ─── Top bar ─── */}
-      <View className={styles.topBar}>
-        <View className={styles.brandLockup}>
-          <View className={styles.logoMark}>
+      <View className="flex-row items-center justify-between px-4 pt-2 pb-3">
+        <View className="min-w-0 flex-row items-center">
+          <View className="mr-2">
             <YiruLogo size={18} />
           </View>
-          <Text className={styles.brandName}>Yiru</Text>
+          <Text className="text-foreground text-sm font-bold">Yiru</Text>
         </View>
         <Pressable
-          className={cn(styles.iconButton, styles.iconButtonPressedActive)}
+          className="active:bg-accent h-9 w-9 items-center justify-center"
           onPress={() => router.push('/settings')}
         >
           <Settings size={18} colorClassName="accent-muted-foreground" />
@@ -609,35 +605,50 @@ export default function HomeScreen() {
       {hosts.length === 0 ? (
         /* ─── Empty state: onboarding ─── */
         <View
-          className={cn(styles.emptyContainer, 'pb-safe')}
+          className="pb-safe flex-1"
           style={
             isWideLayout
               ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
               : undefined
           }
         >
-          <View className={styles.emptyHero}>
-            <Text className={styles.emptyTitle}>Connect your desktop</Text>
-            <Text className={styles.emptyBody}>
+          <View className="flex-1 items-center justify-center px-8 pb-10">
+            <Text className="text-foreground mb-2.5 text-center text-sm font-bold">
+              Connect your desktop
+            </Text>
+            <Text className="text-muted-foreground mb-8 text-center text-sm leading-[22px]">
               Pair with Yiru on your computer to check on your agents, jump into any terminal, and
               drive work from your phone.
             </Text>
-            <Pressable className={styles.primaryButton} onPress={() => router.push('/pair-scan')}>
+            <Pressable
+              className="bg-primary flex-row items-center gap-2.5 px-7 py-3.5"
+              onPress={() => router.push('/pair-scan')}
+            >
               <QrCode size={17} colorClassName="accent-primary-foreground" />
-              <Text className={styles.primaryButtonText}>Pair Desktop</Text>
+              <Text className="text-primary-foreground text-sm font-bold">Pair Desktop</Text>
             </Pressable>
           </View>
 
-          <View className={styles.stepsSection}>
+          <View className="px-6">
             <Text className={styles.sectionHeading}>How it works</Text>
             {ONBOARDING_STEPS.map((step, i) => (
-              <View key={step.title} className={cn(styles.stepRow, i > 0 && styles.stepRowBorder)}>
-                <View className={styles.stepNum}>
-                  <Text className={styles.stepNumText}>{i + 1}</Text>
+              <View
+                key={step.title}
+                className={cn(
+                  'flex-row items-start gap-3.5 py-4',
+                  i > 0 && 'border-t border-t-border'
+                )}
+              >
+                <View className="border-border bg-secondary mt-[1px] h-7 w-7 items-center justify-center border">
+                  <Text className="text-muted-foreground text-xs font-bold">{i + 1}</Text>
                 </View>
-                <View className={styles.stepText}>
-                  <Text className={styles.stepTitle}>{step.title}</Text>
-                  <Text className={styles.stepDesc}>{step.desc}</Text>
+                <View className="flex-1">
+                  <Text className="text-foreground mb-[3px] text-sm font-semibold">
+                    {step.title}
+                  </Text>
+                  <Text className="text-muted-foreground/60 text-xs leading-[17px]">
+                    {step.desc}
+                  </Text>
                 </View>
               </View>
             ))}
@@ -651,7 +662,7 @@ export default function HomeScreen() {
           // Why: edge-to-edge — let the list scroll under the system nav bar
           // but reserve insets.bottom so the last row stays reachable above
           // the Samsung 3-button nav / iOS home indicator.
-          contentContainerClassName={cn(styles.list, 'pb-safe-offset-6')}
+          contentContainerClassName="px-4 pb-6 pb-safe-offset-6"
           contentContainerStyle={
             isWideLayout
               ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
@@ -659,12 +670,14 @@ export default function HomeScreen() {
           }
           ListHeaderComponent={
             <View>
-              <View className={styles.hero}>
-                <Text className={styles.heroTitle}>Welcome back</Text>
+              <View className="pt-1 pb-3">
+                <Text className="text-foreground text-sm font-extrabold tracking-[-0.3px]">
+                  Welcome back
+                </Text>
               </View>
 
               {stats && (
-                <View className={styles.statsRow}>
+                <View className="mb-4 flex-row gap-2.5">
                   <View className={styles.statCard}>
                     <Text className={styles.statValue}>
                       {stats.totalAgentsSpawned.toLocaleString()}
@@ -723,30 +736,31 @@ export default function HomeScreen() {
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
                 <>
-                  <Text className={cn(styles.sectionHeading, styles.sectionHeadingTightTop)}>
-                    Resume
-                  </Text>
+                  <Text className={cn(styles.sectionHeading, 'mt-4')}>Resume</Text>
                   <Pressable
-                    className={cn(styles.resumeCard, styles.hostCardPressedActive)}
+                    className={cn(
+                      'flex-row items-center bg-card border border-border pl-3 pr-3 py-3',
+                      styles.hostCardPressedActive
+                    )}
                     onPress={() =>
                       router.push(
                         `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
                       )
                     }
                   >
-                    <View className={styles.resumeIcon}>
+                    <View className="bg-secondary mr-3.5 h-[46px] w-[46px] items-center justify-center">
                       <Terminal size={18} colorClassName="accent-muted-foreground" />
                     </View>
-                    <View className={styles.resumeMain}>
-                      <Text className={styles.resumeTitle} numberOfLines={1}>
+                    <View className="min-w-0 flex-1">
+                      <Text className="text-foreground text-xs font-semibold" numberOfLines={1}>
                         {resumeWorktree.worktree.displayName}
                       </Text>
-                      <View className={styles.resumeSub}>
+                      <View className="mt-[3px] flex-row items-center gap-1.5">
                         <View
-                          className={styles.repoDot}
+                          className="h-[7px] w-[7px]"
                           style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
                         />
-                        <Text className={styles.resumeSubText} numberOfLines={1}>
+                        <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
                           {resumeWorktree.worktree.repo}
                           {'  ·  '}
                           {resumeWorktree.worktree.branch}
@@ -760,7 +774,7 @@ export default function HomeScreen() {
 
               {/* ─── Quick actions ─── */}
               <Text className={cn(styles.sectionHeading, 'mt-6')}>Quick Actions</Text>
-              <View className={styles.quickActions}>
+              <View className="flex-row gap-2">
                 <Pressable
                   className={cn(styles.quickAction, styles.hostCardPressedActive)}
                   onPress={() => router.push('/pair-scan')}
@@ -774,7 +788,7 @@ export default function HomeScreen() {
                   disabled={!primaryConnectedHost}
                   className={cn(
                     styles.quickAction,
-                    !primaryConnectedHost && styles.quickActionDisabled,
+                    !primaryConnectedHost && 'opacity-[0.45]',
                     styles.hostCardPressedActive
                   )}
                   onPress={() => {
@@ -805,11 +819,17 @@ export default function HomeScreen() {
                     return (
                       <Pressable
                         key={host.id}
-                        className={cn(styles.accountsCard, styles.hostCardPressedActive)}
+                        className={cn(
+                          'bg-card border border-border px-3 py-2.5 gap-2 mb-2',
+                          styles.hostCardPressedActive
+                        )}
                         onPress={() => router.push(`/h/${host.id}/accounts`)}
                       >
                         {showHostName ? (
-                          <Text className={styles.accountsHostLabel} numberOfLines={1}>
+                          <Text
+                            className="text-muted-foreground/60 text-[11px] font-medium tracking-[0.4px] uppercase"
+                            numberOfLines={1}
+                          >
                             {host.name}
                           </Text>
                         ) : null}
@@ -830,19 +850,22 @@ export default function HomeScreen() {
                           const sessionBar = getUsageBarState(limits, 'session')
                           const weeklyBar = getUsageBarState(limits, 'weekly')
                           return (
-                            <View key={provider} className={styles.accountsRow}>
-                              <View className={styles.accountsIcon}>
+                            <View key={provider} className="flex-row items-center gap-2.5">
+                              <View className="bg-secondary h-8 w-8 items-center justify-center">
                                 {provider === 'claude' ? (
                                   <ClaudeIcon size={18} />
                                 ) : (
                                   <OpenAIIcon size={18} colorClassName="accent-foreground" />
                                 )}
                               </View>
-                              <View className={styles.accountsInfo}>
-                                <Text className={styles.accountsEmail} numberOfLines={1}>
+                              <View className="min-w-0 flex-1 gap-[2px]">
+                                <Text
+                                  className="text-foreground text-xs font-semibold"
+                                  numberOfLines={1}
+                                >
                                   {active?.email ?? 'System default'}
                                 </Text>
-                                <View className={styles.accountsBars}>
+                                <View className="mt-1 flex-row gap-3">
                                   <UsageBar
                                     label="5h"
                                     usedPercent={sessionBar.usedPercent}
@@ -947,7 +970,7 @@ export default function HomeScreen() {
 }
 
 function CardGap() {
-  return <View className={styles.cardGap} />
+  return <View className="h-2" />
 }
 
 const ONBOARDING_STEPS = [
@@ -966,75 +989,16 @@ const ONBOARDING_STEPS = [
 ]
 
 const styles = {
-  container: cn('flex-1 bg-background'),
-  /* ─── Top bar ─── */
-  topBar: cn('flex-row items-center justify-between px-4 pt-2 pb-3'),
-  brandLockup: cn('flex-row items-center min-w-0'),
-  logoMark: cn('mr-2'),
-  brandName: cn('text-foreground text-[17px] font-bold'),
-  iconButton: cn('w-9 h-9 rounded-none items-center justify-center'),
-  iconButtonPressedActive: cn('active:bg-secondary'),
-  /* ─── Hero / greeting ─── */
-  hero: cn('pt-1 pb-3'),
-  heroTitle: cn('text-foreground text-[24px] font-extrabold tracking-[-0.3px]'),
-  /* ─── Stat cards ─── */
-  statsRow: cn('flex-row gap-2.5 mb-4'),
-  statCard: cn('flex-1 bg-card/60 border border-border rounded-none py-2 px-3'),
-  statValue: cn('text-foreground text-[18px] font-bold tracking-[-0.3px]'),
+  statCard: cn('flex-1 bg-card border border-border py-2 px-3'),
+  statValue: cn('text-foreground text-sm font-bold tracking-[-0.3px]'),
   statLabel: cn('text-muted-foreground/60 text-[11px] font-medium mt-[2px]'),
   /* ─── Section heading ─── */
   sectionHeading: cn(
     'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.6px] mb-2 px-1'
   ),
-  sectionHeadingTightTop: cn('mt-4'),
-  /* ─── List ─── */
-  list: cn('px-4 pb-6'),
-  cardGap: cn('h-2'),
   /* ─── Host cards ─── */
-  hostCardPressedActive: cn('active:bg-secondary'),
-  /* ─── Resume card ─── */
-  resumeCard: cn('flex-row items-center bg-card border border-border rounded-none pl-3 pr-3 py-3'),
-  resumeIcon: cn('w-[46px] h-[46px] rounded-none bg-secondary items-center justify-center mr-3.5'),
-  resumeMain: cn('flex-1 min-w-0'),
-  resumeTitle: cn('text-[13px] font-semibold text-foreground'),
-  resumeSub: cn('flex-row items-center gap-1.5 mt-[3px]'),
-  repoDot: cn('w-[7px] h-[7px] rounded-none'),
-  resumeSubText: cn('text-[12px] text-muted-foreground flex-1'),
-  /* ─── Account usage ─── */
-  accountsCard: cn('bg-card border border-border rounded-none px-3 py-2.5 gap-2 mb-2'),
-  accountsHostLabel: cn(
-    'text-[11px] text-muted-foreground/60 font-medium uppercase tracking-[0.4px]'
-  ),
-  accountsRow: cn('flex-row items-center gap-2.5'),
-  accountsIcon: cn('w-8 h-8 rounded-none bg-secondary items-center justify-center'),
-  accountsInfo: cn('flex-1 min-w-0 gap-[2px]'),
-  accountsEmail: cn('text-[13px] font-semibold text-foreground'),
-  accountsBars: cn('flex-row gap-3 mt-1'),
-  /* ─── Quick actions ─── */
-  quickActions: cn('flex-row gap-2'),
-  quickAction: cn(
-    'flex-1 flex-row bg-card border border-border rounded-none py-2.5 px-3 items-center gap-2.5'
-  ),
-  quickActionDisabled: cn('opacity-[0.45]'),
-  quickActionIcon: cn('w-7 h-7 rounded-none bg-white/[0.04] items-center justify-center'),
-  quickActionLabel: cn('text-[12px] font-semibold text-muted-foreground'),
-  /* ─── Empty state ─── */
-  emptyContainer: cn('flex-1'),
-  emptyGreeting: cn('px-4 pt-3 pb-2'),
-  emptyHero: cn('flex-1 items-center justify-center px-8 pb-10'),
-  emptyTitle: cn('text-[22px] font-bold text-foreground text-center mb-2.5'),
-  emptyBody: cn('text-[15px] text-muted-foreground text-center leading-[22px] mb-8'),
-  primaryButton: cn('flex-row items-center gap-2.5 bg-foreground px-7 py-3.5 rounded-none'),
-  primaryButtonText: cn('text-background text-[15px] font-bold'),
-  /* ─── Onboarding steps ─── */
-  stepsSection: cn('px-6'),
-  stepRow: cn('flex-row items-start gap-3.5 py-4'),
-  stepRowBorder: cn('border-t border-t-border'),
-  stepNum: cn(
-    'w-7 h-7 rounded-none bg-white/[0.04] border border-border items-center justify-center mt-[1px]'
-  ),
-  stepNumText: cn('text-[12px] font-bold text-muted-foreground'),
-  stepText: cn('flex-1'),
-  stepTitle: cn('text-[14px] font-semibold text-foreground mb-[3px]'),
-  stepDesc: cn('text-[12px] text-muted-foreground/60 leading-[17px]')
+  hostCardPressedActive: cn('active:bg-accent'),
+  quickAction: cn('flex-1 flex-row bg-card border border-border py-2.5 px-3 items-center gap-2.5'),
+  quickActionIcon: cn('bg-secondary h-7 w-7 items-center justify-center'),
+  quickActionLabel: cn('text-xs font-semibold text-muted-foreground')
 } as const

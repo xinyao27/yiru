@@ -101,7 +101,7 @@ export function MobilePRSidebar({
   return (
     <ScrollView
       className="flex-1"
-      contentContainerClassName={styles.scrollContent}
+      contentContainerClassName="pb-4"
       contentContainerStyle={{ paddingBottom: bottomInset }}
       keyboardShouldPersistTaps="handled"
       // Why: root-comment / reply composers sit at the bottom of this scroll
@@ -180,13 +180,13 @@ function PrSidebarContent({
       <View className={styles.stateArea}>
         <Text className={styles.stateText}>{message}</Text>
         <Pressable
-          className={styles.retryButton}
+          className="bg-secondary min-h-11 flex-row items-center gap-1 px-3"
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel="Retry loading pull request"
         >
           <RotateCw size={14} colorClassName="accent-foreground" />
-          <Text className={styles.retryText}>Retry</Text>
+          <Text className="text-foreground text-sm font-bold">Retry</Text>
         </Pressable>
       </View>
     )
@@ -201,7 +201,7 @@ function PrSidebarContent({
         : 'Not permitted — your GitHub account is not connected.')
     return (
       <View className={styles.stateArea}>
-        <Text className={styles.blockedText}>{message}</Text>
+        <Text className="text-muted-foreground text-center text-sm leading-[20px]">{message}</Text>
       </View>
     )
   }

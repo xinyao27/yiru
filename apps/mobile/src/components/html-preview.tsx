@@ -19,8 +19,8 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
   const [mode, setMode] = useState<'preview' | 'source'>('preview')
 
   return (
-    <View className={styles.container}>
-      <View className={styles.toolbar}>
+    <View className="flex-1">
+      <View className="border-b-border flex-row gap-2 border-b px-3 py-2">
         <Pressable
           className={cn(styles.toggle, mode === 'preview' && styles.toggleActive)}
           onPress={() => setMode('preview')}
@@ -40,7 +40,7 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
       </View>
       {mode === 'preview' ? (
         <UniwindWebView
-          className={styles.webview}
+          className="flex-1 bg-white"
           originWhitelist={['*']}
           source={{ html }}
           javaScriptEnabled
@@ -63,10 +63,7 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
 }
 
 const styles = {
-  container: cn('flex-1'),
-  toolbar: cn('flex-row gap-2 px-3 py-2 border-b border-b-border'),
-  toggle: cn('flex-row items-center gap-[5px] px-2 py-1 rounded-none bg-secondary'),
+  toggle: cn('flex-row items-center gap-[5px] px-2 py-1 bg-secondary'),
   toggleActive: cn('bg-card border border-border'),
-  toggleText: cn('text-muted-foreground text-[12px]'),
-  webview: cn('flex-1 bg-white')
+  toggleText: cn('text-muted-foreground text-xs')
 } as const

@@ -59,9 +59,7 @@ type Props = {
   color?: string
 }
 
-// Renders a repo/project icon matching the desktop sidebar: a custom image
-// (favicon/avatar/upload), an emoji, or a Phosphor glyph. Falls back to Folder,
-// the desktop default, so a project always shows an icon rather than a dot.
+// Why: matching the desktop fallback keeps unidentified repos recognizable across clients.
 export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
   const colors = useThemeColors()
   const resolvedColor = color ?? colors.textSecondary
@@ -70,7 +68,6 @@ export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
       <View className={styles.iconBox} style={{ width: size, height: size }}>
         <Image
           source={{ uri: repoIcon.src }}
-          className="rounded-none"
           style={{ width: size, height: size }}
           accessibilityLabel={repoIcon.label}
         />
@@ -80,7 +77,7 @@ export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
   if (repoIcon?.type === 'emoji') {
     return (
       <View className={styles.iconBox} style={{ width: size, height: size }}>
-        <Text className={styles.emoji} style={{ fontSize: size, lineHeight: size }}>
+        <Text className="text-center" style={{ fontSize: size, lineHeight: size }}>
           {repoIcon.emoji}
         </Text>
       </View>
@@ -96,7 +93,6 @@ export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
 }
 
 const styles = {
-  emoji: cn('text-center'),
   // Why: image, emoji, and vector glyphs have different native line boxes;
   // one fixed box gives every section title the same visual center.
   iconBox: cn('items-center justify-center')

@@ -289,7 +289,7 @@ export function MobileFileExplorerPanel(props: {
   }
 
   const headerBar = (
-    <View className={styles.topBar}>
+    <View className="min-h-[58px] flex-row items-center gap-3 px-3">
       {embedded ? (
         <Pressable
           className={cn(styles.backButton, styles.backButtonPressedActive)}
@@ -309,11 +309,11 @@ export function MobileFileExplorerPanel(props: {
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
       )}
-      <View className={styles.titleBlock}>
-        <Text className={styles.title} numberOfLines={1}>
+      <View className="min-w-0 flex-1">
+        <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Files
         </Text>
-        <Text className={styles.meta} numberOfLines={1}>
+        <Text className="text-muted-foreground mt-[2px] text-xs" numberOfLines={1}>
           {worktreeLabel}
           {legacyListTruncated ? ' - Showing first 5000' : ''}
         </Text>
@@ -327,37 +327,37 @@ export function MobileFileExplorerPanel(props: {
     </View>
   ) : error ? (
     <View className={styles.state}>
-      <Text className={styles.errorText}>{error}</Text>
+      <Text className="text-destructive text-center text-sm">{error}</Text>
       {/* Why: while disconnected, re-sending the request is useless — revive
           the parked transport instead (issue #5049); loadDirectory re-runs via
           its effect once the new client connects. */}
       <Pressable
-        className={styles.retryButton}
+        className="border-hairline border-border min-h-9 items-center justify-center px-4"
         onPress={() =>
           connState !== 'connected' && hostId ? void forceReconnect(hostId) : void loadDirectory('')
         }
       >
-        <Text className={styles.retryText}>Retry</Text>
+        <Text className="text-foreground text-sm font-semibold">Retry</Text>
       </Pressable>
     </View>
   ) : rows.length === 0 ? (
     <View className={styles.state}>
-      <Text className={styles.emptyText}>No files found</Text>
+      <Text className="text-muted-foreground text-sm">No files found</Text>
     </View>
   ) : (
     <FlatList
       data={rows}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      contentContainerClassName={styles.listContent}
-      className={styles.list}
+      contentContainerClassName="py-2"
+      className="flex-1"
     />
   )
 
   // Embedded: the dock column owns safe-area/layout, so render a plain View and
   // a non-inset header. Full-screen: keep the SafeAreaView top inset + chrome.
   return (
-    <View className={styles.container}>
+    <View className="bg-background flex-1">
       {embedded ? (
         <View className={styles.header}>{headerBar}</View>
       ) : (

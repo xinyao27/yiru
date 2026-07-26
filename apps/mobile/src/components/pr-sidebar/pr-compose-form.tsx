@@ -164,15 +164,18 @@ export function MobilePrComposeForm({
   ])
 
   return (
-    <View className={styles.root}>
-      <View className={styles.headingRow}>
-        <View className={styles.headingTitle}>
+    <View className="gap-2">
+      <View className="mb-1 flex-row items-center justify-between gap-2">
+        <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <ReviewIcon size={14} colorClassName="accent-muted-foreground" />
-          <Text className={styles.heading}>New {copy.reviewLabel}</Text>
+          <Text className="text-foreground text-sm font-bold">New {copy.reviewLabel}</Text>
         </View>
-        <View className={styles.headingActions}>
+        <View className="flex-row items-center gap-1">
           <Pressable
-            className={cn(styles.genButton, styles.genButtonPressedActive)}
+            className={cn(
+              'min-h-8 flex-row items-center justify-center gap-1 px-2 border-hairline border-border bg-card',
+              'active:bg-accent'
+            )}
             disabled={generating || submitting}
             onPress={() => void generate()}
             accessibilityRole="button"
@@ -183,10 +186,12 @@ export function MobilePrComposeForm({
             ) : (
               <Sparkles size={13} colorClassName="accent-muted-foreground" />
             )}
-            <Text className={styles.genButtonText}>{generating ? 'Generating…' : 'Generate'}</Text>
+            <Text className="text-muted-foreground text-xs font-bold">
+              {generating ? 'Generating…' : 'Generate'}
+            </Text>
           </Pressable>
           <Pressable
-            className={styles.iconButton}
+            className="min-h-8 min-w-8 items-center justify-center"
             onPress={onCancel}
             disabled={submitting}
             accessibilityRole="button"
@@ -199,13 +204,13 @@ export function MobilePrComposeForm({
       </View>
 
       {head ? (
-        <View className={styles.branchFlow}>
+        <View className="min-h-7 flex-row items-center gap-1">
           <Text className={styles.branchToken} numberOfLines={1}>
             {head}
           </Text>
           <ArrowRight size={12} colorClassName="accent-muted-foreground" />
           <Text
-            className={cn(styles.branchToken, baseConflict && styles.branchTokenError)}
+            className={cn(styles.branchToken, baseConflict && 'text-destructive')}
             numberOfLines={1}
           >
             {base || 'base'}
@@ -213,9 +218,9 @@ export function MobilePrComposeForm({
         </View>
       ) : null}
 
-      <View className={styles.fieldStack}>
+      <View className="gap-2">
         <TextInput
-          className={styles.titleInput}
+          className="bg-secondary text-foreground min-h-10 px-3 py-2 text-sm font-semibold"
           value={title}
           onChangeText={setTitle}
           placeholder="Title"
@@ -224,7 +229,7 @@ export function MobilePrComposeForm({
           accessibilityLabel={`${copy.titleLabel} title`}
         />
         <TextInput
-          className={styles.bodyInput}
+          className="bg-secondary text-foreground min-h-[120px] px-3 py-2 text-sm"
           style={{ textAlignVertical: 'top' }}
           value={body}
           onChangeText={setBody}
@@ -243,9 +248,9 @@ export function MobilePrComposeForm({
         </View>
       ) : null}
 
-      <View className={styles.baseRow}>
-        <Text className={styles.baseLabel}>Base</Text>
-        <View className={styles.baseControl}>
+      <View className="min-h-10 flex-row items-center gap-2">
+        <Text className="text-muted-foreground w-9 text-xs">Base</Text>
+        <View className="min-w-0 flex-1">
           <MobilePrBasePicker
             client={client}
             worktreeId={worktreeId}
@@ -256,8 +261,8 @@ export function MobilePrComposeForm({
         </View>
       </View>
 
-      <View className={styles.draftRow}>
-        <Text className={styles.draftText}>Create as draft</Text>
+      <View className="border-hairline border-border bg-card min-h-9 flex-row items-center justify-between gap-2 px-2">
+        <Text className="text-foreground text-xs font-bold">Create as draft</Text>
         <Switch
           value={draft}
           onValueChange={setDraft}
@@ -271,16 +276,16 @@ export function MobilePrComposeForm({
       {error || submitDisabledReason ? (
         <View className={styles.notice}>
           <TriangleAlert size={13} colorClassName="accent-destructive" />
-          <Text className={cn(styles.noticeText, styles.errorText)}>
+          <Text className={cn(styles.noticeText, 'text-destructive')}>
             {error ?? submitDisabledReason}
           </Text>
         </View>
       ) : null}
       <Pressable
         className={cn(
-          styles.submit,
-          (submitting || !canSubmit) && styles.submitDisabled,
-          styles.submitPressedActive
+          'mt-1 min-h-11 bg-primary flex-row items-center justify-center gap-1',
+          (submitting || !canSubmit) && 'opacity-[0.45]',
+          'active:bg-accent'
         )}
         disabled={submitting || !canSubmit}
         onPress={() => void submit()}
@@ -291,7 +296,7 @@ export function MobilePrComposeForm({
         ) : (
           <ReviewIcon size={14} colorClassName="accent-primary-foreground" />
         )}
-        <Text className={styles.submitText}>
+        <Text className="text-primary-foreground text-sm font-bold">
           {pushBeforeCreate
             ? draft
               ? `Push & create draft ${copy.shortLabel}`

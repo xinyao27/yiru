@@ -36,6 +36,11 @@ type StoreEntry = {
   unsubState: () => void
 }
 
+type RpcClientProviderProps = {
+  children: ReactNode
+  createClientOverride?: (hostId: string) => RpcClient | null
+}
+
 export type RpcClientContextValue = {
   acquire: (hostId: string, host?: HostProfile) => RpcClient | null
   release: (hostId: string) => void
@@ -60,7 +65,10 @@ export type RpcClientContextValue = {
 
 const Ctx = createContext<RpcClientContextValue | null>(null)
 
-export function RpcClientProvider({ children }: { children: ReactNode }) {
+export function RpcClientProvider({
+  children,
+  createClientOverride
+}: RpcClientProviderProps): React.JSX.Element {
   // Why: entries live in a ref so updates don't force re-renders of the
   // entire tree on every connection state change. State propagation goes
   // through per-host listener Sets instead.
@@ -106,91 +114,109 @@ export function RpcClientProvider({ children }: { children: ReactNode }) {
     notifyAllHosts()
   }, [])
 
-  const openEntry = useCallback(async (hostId: string): Promise<StoreEntry | null> => {
-    const existing = pendingOpensRef.current.getActivePromise(hostId)
-    if (existing) {
-      await existing
-      return storeRef.current.get(hostId) ?? null
-    }
-    let resolve: () => void = () => {}
-    const promise = new Promise<void>((res) => {
-      resolve = res
-    })
-    const pendingOpen = pendingOpensRef.current.register(hostId, promise)
-
-    try {
-      // Why: prefer the primed cache (populated by primeHosts when the
-      // screen already ran loadHosts) so we don't serialize a second
-      // Keychain pass behind the first one on cold start.
-      let host = primedHostsRef.current.get(hostId)
-      if (!host) {
-        try {
-          const hosts = await loadHosts()
-          host = hosts.find((h) => h.id === hostId)
-        } catch {
-          // Why: a Keychain failure on cold start (rare but observed —
-          // happens when iOS Keychain is mid-unlock or Android Keystore
-          // races the JS bridge). Surface it as 'disconnected' so the
-          // home card flips off the perma-spinner and the user can hit
-          // Reconnect from the action sheet to retry.
-          notifyHostState(hostId, 'disconnected')
-          notifyAllHosts()
-          return null
-        }
-        if (!host) {
-          // Why: returning silently leaves mounted screens on a permanent
-          // spinner (STA-1511) — surface 'disconnected' so they can render
-          // their waiting/retry affordance instead.
-          notifyHostState(hostId, 'disconnected')
-          notifyAllHosts()
-          return null
-        }
+  const openEntry = useCallback(
+    async (hostId: string): Promise<StoreEntry | null> => {
+      const existing = pendingOpensRef.current.getActivePromise(hostId)
+      if (existing) {
+        await existing
+        return storeRef.current.get(hostId) ?? null
       }
-
-      if (pendingOpen.cancelled) {
-        return null
-      }
-
-      // Re-check after any await — another acquire() may have completed.
-      const after = storeRef.current.get(hostId)
-      if (after) {
-        return after
-      }
-
-      let client: RpcClient
-      try {
-        client = openHostLogicalClient(host, (entry) => connectionLogStore.append(hostId, entry))
-      } catch {
-        // Why: connect() can throw synchronously if the public key is
-        // malformed or the endpoint URL is invalid. Notify so the UI
-        // doesn't sit on a stale 'connecting' label forever.
-        notifyHostState(hostId, 'disconnected')
-        notifyAllHosts()
-        return null
-      }
-      const unsubState = client.onStateChange((state) => {
-        const cur = storeRef.current.get(hostId)
-        if (!cur) {
-          return
-        }
-        cur.state = state
-        notifyHostState(hostId, state)
+      let resolve: () => void = () => {}
+      const promise = new Promise<void>((res) => {
+        resolve = res
       })
-      const entry: StoreEntry = {
-        client,
-        state: client.getState(),
-        refCount: 0,
-        unsubState
+      const pendingOpen = pendingOpensRef.current.register(hostId, promise)
+
+      try {
+        let client = createClientOverride?.(hostId) ?? null
+        let host: HostProfile | undefined
+        if (client) {
+          // Why: real clients open after an async host lookup. Preserve that lifecycle for injected
+          // clients so acquire() installs its initial null before the connected notification arrives.
+          await Promise.resolve()
+        }
+        if (!client) {
+          // Why: prefer the primed cache (populated by primeHosts when the
+          // screen already ran loadHosts) so we don't serialize a second
+          // Keychain pass behind the first one on cold start.
+          host = primedHostsRef.current.get(hostId)
+          if (!host) {
+            try {
+              const hosts = await loadHosts()
+              host = hosts.find((candidate) => candidate.id === hostId)
+            } catch {
+              // Why: a Keychain failure on cold start (rare but observed —
+              // happens when iOS Keychain is mid-unlock or Android Keystore
+              // races the JS bridge). Surface it as 'disconnected' so the
+              // home card flips off the perma-spinner and the user can hit
+              // Reconnect from the action sheet to retry.
+              notifyHostState(hostId, 'disconnected')
+              notifyAllHosts()
+              return null
+            }
+            if (!host) {
+              // Why: returning silently leaves mounted screens on a permanent
+              // spinner (STA-1511) — surface 'disconnected' so they can render
+              // their waiting/retry affordance instead.
+              notifyHostState(hostId, 'disconnected')
+              notifyAllHosts()
+              return null
+            }
+          }
+        }
+
+        if (pendingOpen.cancelled) {
+          return null
+        }
+
+        // Why: another acquire() may have completed while this one was awaiting a client.
+        const after = storeRef.current.get(hostId)
+        if (after) {
+          return after
+        }
+
+        if (!client) {
+          if (!host) {
+            return null
+          }
+          try {
+            client = openHostLogicalClient(host, (entry) =>
+              connectionLogStore.append(hostId, entry)
+            )
+          } catch {
+            // Why: connect() can throw synchronously if the public key is
+            // malformed or the endpoint URL is invalid. Notify so the UI
+            // doesn't sit on a stale 'connecting' label forever.
+            notifyHostState(hostId, 'disconnected')
+            notifyAllHosts()
+            return null
+          }
+        }
+        const unsubState = client.onStateChange((state) => {
+          const cur = storeRef.current.get(hostId)
+          if (!cur) {
+            return
+          }
+          cur.state = state
+          notifyHostState(hostId, state)
+        })
+        const entry: StoreEntry = {
+          client,
+          state: client.getState(),
+          refCount: 0,
+          unsubState
+        }
+        storeRef.current.set(hostId, entry)
+        notifyHostState(hostId, entry.state)
+        notifyAllHosts()
+        return entry
+      } finally {
+        pendingOpensRef.current.deleteIfCurrent(hostId, pendingOpen)
+        resolve()
       }
-      storeRef.current.set(hostId, entry)
-      notifyHostState(hostId, entry.state)
-      notifyAllHosts()
-      return entry
-    } finally {
-      pendingOpensRef.current.deleteIfCurrent(hostId, pendingOpen)
-      resolve()
-    }
-  }, [])
+    },
+    [createClientOverride]
+  )
 
   // Why: `acquire` is the synchronous get-or-open. If the entry already
   // exists, return its client immediately and bump the refcount. If not,
@@ -448,66 +474,6 @@ export function useHostClient(hostId: string | undefined): {
   const current = clientRef.current
   const client = current && current.hostId === hostId ? current.client : null
   return { client, state: client ? state : hostId ? ctx.getState(hostId) : 'disconnected' }
-}
-
-// Why: home screen renders all paired hosts at once. Acquires each on
-// mount, releases on unmount. The provider's refcounting ensures we
-// don't double-open if a host-detail screen is also open.
-export function useAllHostClients(hostIds: string[]): {
-  hostId: string
-  client: RpcClient
-  state: ConnectionState
-  path: MobileConnectionPath
-}[] {
-  const ctx = useRpcClientContext()
-  // Stable key so we don't tear down on every render of the array.
-  const key = useMemo(() => [...hostIds].sort().join(','), [hostIds])
-  const [tick, setTick] = useState(0)
-
-  useEffect(() => {
-    if (hostIds.length === 0) {
-      return
-    }
-    for (const id of hostIds) {
-      ctx.acquire(id)
-    }
-    const unsubs: (() => void)[] = []
-    for (const id of hostIds) {
-      unsubs.push(ctx.subscribeHostState(id, () => setTick((n) => n + 1)))
-    }
-    unsubs.push(ctx.subscribeAllHosts(() => setTick((n) => n + 1)))
-    return () => {
-      for (const u of unsubs) {
-        u()
-      }
-      for (const id of hostIds) {
-        ctx.release(id)
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key])
-
-  return useMemo(() => {
-    const out: {
-      hostId: string
-      client: RpcClient
-      state: ConnectionState
-      path: MobileConnectionPath
-    }[] = []
-    for (const id of hostIds) {
-      const all = ctx.getAllClients().find((entry) => entry.hostId === id)
-      if (all) {
-        out.push({
-          hostId: id,
-          client: all.client,
-          state: ctx.getState(id),
-          path: ctx.getActivePath(id)
-        })
-      }
-    }
-    return out
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, tick])
 }
 
 // Why: removeHost() in host-store.ts must close the live client, but

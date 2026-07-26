@@ -2,7 +2,6 @@ import { Pressable, Text, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import { hubStyles } from './hub-styles'
 import {
   SOURCE_CONTROL_HUB_TABS,
   SOURCE_CONTROL_HUB_TAB_LABELS,
@@ -18,16 +17,19 @@ type Props = {
 // scroll position and the shared branch card persist across Changes/PR/History.
 export function MobileSourceControlSegments({ active, onSelect }: Props) {
   return (
-    <View className={hubStyles.segments} accessibilityRole="tablist">
+    <View
+      className="bg-card border-b-hairline border-b-border w-full flex-row items-stretch"
+      accessibilityRole="tablist"
+    >
       {SOURCE_CONTROL_HUB_TABS.map((tab) => {
         const isActive = tab === active
         return (
           <Pressable
             key={tab}
             className={cn(
-              hubStyles.segment,
-              isActive && hubStyles.segmentActive,
-              !isActive && hubStyles.segmentPressedActive
+              'flex-1 min-h-10 items-center justify-center px-1 border-b-2 border-b-transparent',
+              isActive && 'border-b-foreground',
+              !isActive && 'active:bg-accent'
             )}
             onPress={() => onSelect(tab)}
             accessibilityRole="tab"
@@ -35,7 +37,10 @@ export function MobileSourceControlSegments({ active, onSelect }: Props) {
             accessibilityLabel={SOURCE_CONTROL_HUB_TAB_LABELS[tab]}
           >
             <Text
-              className={cn(hubStyles.segmentText, isActive && hubStyles.segmentTextActive)}
+              className={cn(
+                'text-muted-foreground text-sm font-semibold',
+                isActive && 'text-foreground'
+              )}
               numberOfLines={1}
             >
               {SOURCE_CONTROL_HUB_TAB_LABELS[tab]}

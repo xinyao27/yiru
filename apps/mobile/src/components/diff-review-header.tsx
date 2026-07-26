@@ -49,27 +49,27 @@ export function MobileDiffReviewHeader({
     canDock: prSidebarCanDock
   })
   return (
-    <View className={styles.header}>
-      <View className={styles.topBar}>
+    <View className="border-b-hairline border-b-border px-4 pb-2">
+      <View className="min-h-[50px] flex-row items-center gap-2">
         <Pressable
-          className={cn(styles.iconButton, 'active:bg-secondary')}
+          className={cn(styles.iconButton, 'active:bg-accent')}
           onPress={onBack}
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
           <ChevronLeft size={19} colorClassName="accent-foreground" />
         </Pressable>
-        <View className={styles.titleBlock}>
-          <Text className={styles.title} numberOfLines={1}>
+        <View className="min-w-0 flex-1">
+          <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
             Changes
           </Text>
-          <Text className={styles.subtitle} numberOfLines={1}>
+          <Text className="text-muted-foreground/60 mt-[2px] text-xs" numberOfLines={1}>
             {worktreeLabel}
           </Text>
         </View>
         {showPRTrigger ? (
           <Pressable
-            className={cn(styles.iconButton, 'active:bg-secondary')}
+            className={cn(styles.iconButton, 'active:bg-accent')}
             onPress={onOpenPRSidebar}
             accessibilityRole="button"
             accessibilityLabel="Open pull request sidebar"
@@ -78,7 +78,7 @@ export function MobileDiffReviewHeader({
           </Pressable>
         ) : null}
         <Pressable
-          className={cn(styles.iconButton, 'active:bg-secondary')}
+          className={cn(styles.iconButton, 'active:bg-accent')}
           onPress={onOpenActions}
           accessibilityRole="button"
           accessibilityLabel="Open review actions"
@@ -86,7 +86,7 @@ export function MobileDiffReviewHeader({
           <MoreHorizontal size={19} colorClassName="accent-foreground" />
         </Pressable>
       </View>
-      <View className={styles.progressRow}>
+      <View className="flex-row justify-between gap-3">
         <Text className={styles.progressText}>
           {reviewedCount}/{queueLength} reviewed
         </Text>
@@ -99,20 +99,25 @@ export function MobileDiffReviewHeader({
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item}
-        contentContainerClassName={styles.filterRow}
+        contentContainerClassName="gap-2 pt-3 pb-1"
         renderItem={({ item }) => (
           <Pressable
             className={cn(
-              styles.filterChip,
-              filter === item && styles.filterChipActive,
-              'active:opacity-[0.78]'
+              'min-h-[34px] px-3 items-center justify-center bg-card border-hairline border-border',
+              filter === item && 'border-border bg-accent',
+              'active:bg-accent'
             )}
             onPress={() => onSelectFilter(item)}
             accessibilityRole="button"
             accessibilityState={{ selected: filter === item }}
             accessibilityLabel={`Show ${item} review files`}
           >
-            <Text className={cn(styles.filterText, filter === item && styles.filterTextActive)}>
+            <Text
+              className={cn(
+                'text-muted-foreground text-xs font-bold',
+                filter === item && 'text-accent-foreground'
+              )}
+            >
               {item === 'all' ? 'All' : item[0]?.toUpperCase() + item.slice(1)}
             </Text>
           </Pressable>

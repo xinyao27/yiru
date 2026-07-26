@@ -30,28 +30,35 @@ function MobileNativeChatPermissionImpl({
     }
   }
   return (
-    <View className={styles.card}>
-      <View className={styles.header}>
+    <View className="border-hairline border-border bg-card mx-4 my-2 gap-2 p-3">
+      <View className="flex-row items-center gap-2">
         <ShieldQuestion size={16} colorClassName="accent-primary" />
-        <Text className={styles.title}>{permission.title}</Text>
+        <Text className="text-foreground text-sm font-semibold">{permission.title}</Text>
       </View>
-      {permission.detail ? <Text className={styles.detail}>{permission.detail}</Text> : null}
-      <View className={styles.options}>
+      {permission.detail ? (
+        <Text className="text-muted-foreground text-xs leading-[17px]">{permission.detail}</Text>
+      ) : null}
+      <View className="flex-row flex-wrap gap-2">
         {permission.options.map((option, index) => {
           const isPrimary = index === 0
           return (
             <Pressable
               key={`${option.send}:${option.label}`}
               className={cn(
-                styles.option,
-                isPrimary ? styles.optionPrimary : styles.optionSecondary,
-                !submitting && styles.optionPressedActive
+                'min-h-11 justify-center px-3 py-2',
+                isPrimary ? 'bg-primary' : 'bg-secondary border-hairline border-border',
+                !submitting && 'active:bg-accent'
               )}
               hitSlop={6}
               onPress={() => respond(option.send)}
               disabled={submitting}
             >
-              <Text className={cn(styles.optionText, isPrimary && styles.optionTextPrimary)}>
+              <Text
+                className={cn(
+                  'text-foreground text-sm font-semibold',
+                  isPrimary && 'text-primary-foreground'
+                )}
+              >
                 {option.label}
               </Text>
             </Pressable>
@@ -63,17 +70,3 @@ function MobileNativeChatPermissionImpl({
 }
 
 export const MobileNativeChatPermission = memo(MobileNativeChatPermissionImpl)
-
-const styles = {
-  card: cn('mx-4 my-2 p-3 gap-2 rounded-none border-hairline border-border bg-card'),
-  header: cn('flex-row items-center gap-2'),
-  title: cn('text-foreground text-[14px] font-semibold'),
-  detail: cn('text-muted-foreground text-[12px] leading-[17px]'),
-  options: cn('flex-row flex-wrap gap-2'),
-  option: cn('min-h-11 justify-center px-3 py-2 rounded-none'),
-  optionPrimary: cn('bg-primary'),
-  optionSecondary: cn('bg-secondary border-hairline border-border'),
-  optionPressedActive: cn('active:opacity-[0.7]'),
-  optionText: cn('text-foreground text-[14px] font-semibold'),
-  optionTextPrimary: cn('text-primary-foreground')
-} as const

@@ -68,7 +68,7 @@ export function MobileAgentSessionHistoryList({
       sections={sections}
       keyExtractor={(card) => card.id}
       stickySectionHeadersEnabled={false}
-      contentContainerClassName={styles.list}
+      contentContainerClassName="px-3 pt-2 pb-6"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -77,11 +77,11 @@ export function MobileAgentSessionHistoryList({
         />
       }
       renderSectionHeader={({ section }) => (
-        <View className={styles.groupHeader}>
-          <Text className={styles.groupHeaderText} numberOfLines={1}>
+        <View className="flex-row items-center gap-2 py-2">
+          <Text className="text-muted-foreground text-xs font-semibold uppercase" numberOfLines={1}>
             {section.label}
           </Text>
-          <Text className={styles.groupHeaderCount}>{section.data.length}</Text>
+          <Text className="text-muted-foreground/60 text-xs">{section.data.length}</Text>
         </View>
       )}
       renderItem={renderItem}
@@ -112,35 +112,40 @@ function AgentHistoryCardRow({
   )
 
   return (
-    <Pressable className={cn(styles.card, styles.cardPressedActive)} onPress={onPress}>
-      <View className={styles.cardTopRow}>
+    <Pressable className={cn('bg-card p-3 mb-2', 'active:bg-accent')} onPress={onPress}>
+      <View className="flex-row items-center gap-2">
         <MobileAgentIcon agentId={card.agent} size={16} />
-        <Text className={styles.cardTitle} numberOfLines={1}>
+        <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
           {card.title}
         </Text>
-        {card.timeAgo ? <Text className={styles.cardTimeAgo}>{card.timeAgo}</Text> : null}
+        {card.timeAgo ? (
+          <Text className="text-muted-foreground/60 text-xs">{card.timeAgo}</Text>
+        ) : null}
       </View>
       {card.lastMessage ? (
-        <Text className={styles.cardLastMessage} numberOfLines={expanded ? undefined : 2}>
+        <Text
+          className="text-muted-foreground mt-1 text-xs"
+          numberOfLines={expanded ? undefined : 2}
+        >
           {card.lastMessage}
         </Text>
       ) : null}
-      <View className={styles.cardMetaRow}>
+      <View className="mt-1 flex-row flex-wrap items-center gap-2">
         <Text className={styles.cardMetaText}>{card.agentLabel}</Text>
         <Text className={styles.cardMetaText}>
           {card.messageCount} {card.messageCount === 1 ? 'message' : 'messages'}
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
-          <View className={styles.currentBadge}>
-            <Text className={styles.currentBadgeText}>current worktree</Text>
+          <View className="bg-secondary px-2 py-[2px]">
+            <Text className="text-primary text-xs font-semibold">current worktree</Text>
           </View>
         ) : null}
         {session && onResume ? (
           <Pressable
             className={cn(
-              styles.resumeButton,
-              resumeActionState?.disabled && styles.resumeButtonDisabled,
-              !resumeActionState?.disabled && styles.resumeButtonPressedActive
+              'min-h-7 min-w-7 items-center justify-center ml-auto px-1 py-1',
+              resumeActionState?.disabled && 'opacity-[0.45]',
+              !resumeActionState?.disabled && 'active:bg-accent'
             )}
             onPress={(event) => {
               event.stopPropagation()
@@ -162,11 +167,13 @@ function AgentHistoryCardRow({
         ) : null}
       </View>
       {expanded && previewTurns.length > 0 ? (
-        <View className={styles.preview}>
+        <View className="border-t-border mt-2 gap-2 border-t pt-2">
           {previewTurns.map((turn, index) => (
-            <View key={`${card.id}-turn-${index}`} className={styles.previewTurn}>
-              <Text className={styles.previewRole}>{turn.role}</Text>
-              <Text className={styles.previewText}>{turn.text}</Text>
+            <View key={`${card.id}-turn-${index}`} className="gap-[2px]">
+              <Text className="text-muted-foreground/60 text-xs font-semibold uppercase">
+                {turn.role}
+              </Text>
+              <Text className="text-muted-foreground text-xs">{turn.text}</Text>
             </View>
           ))}
         </View>

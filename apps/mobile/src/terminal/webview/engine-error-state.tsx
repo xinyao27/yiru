@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 
 import { ArrowClockwise as RefreshCw } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
 
 export type NativeWebViewEngineEvent = {
   readonly nativeEvent?: object
@@ -80,25 +79,19 @@ export function TerminalWebViewEngineErrorOverlay({
   onReload
 }: TerminalWebViewEngineErrorOverlayProps) {
   return (
-    <View className={styles.errorOverlay}>
-      <Text className={styles.errorTitle}>Terminal failed to load</Text>
-      <Text className={styles.errorDetail} numberOfLines={4}>
+    <View className="absolute inset-0 items-center justify-center gap-3 bg-[var(--terminal-background)] p-6">
+      <Text className="text-foreground text-center text-sm font-bold">Terminal failed to load</Text>
+      <Text className="text-muted-foreground text-center text-xs leading-[18px]" numberOfLines={4}>
         {message}
       </Text>
-      <Pressable accessibilityRole="button" className={styles.reloadButton} onPress={onReload}>
+      <Pressable
+        accessibilityRole="button"
+        className="bg-primary min-h-9 flex-row items-center gap-2 px-3.5"
+        onPress={onReload}
+      >
         <RefreshCw size={16} colorClassName="accent-primary-foreground" />
-        <Text className={styles.reloadButtonText}>Reload</Text>
+        <Text className="text-primary-foreground text-sm font-bold">Reload</Text>
       </Pressable>
     </View>
   )
 }
-
-const styles = {
-  errorOverlay: cn(
-    'absolute inset-0 items-center justify-center gap-3 p-6 bg-[var(--terminal-background)]'
-  ),
-  errorTitle: cn('text-foreground text-[16px] font-bold text-center'),
-  errorDetail: cn('text-muted-foreground text-[13px] leading-[18px] text-center'),
-  reloadButton: cn('flex-row items-center gap-2 min-h-9 px-3.5 rounded-none bg-primary'),
-  reloadButtonText: cn('text-primary-foreground text-[14px] font-bold')
-} as const

@@ -34,7 +34,8 @@
     "test": "vp test",
     "up": "taze major -Ir",
     "format:check": "pnpm --workspace-root exec vp fmt apps/mobile --check",
-    "start:emulator": "node scripts/start-emulator.mjs"
+    "start:emulator": "node scripts/start-emulator.mjs",
+    "start:ui": "node scripts/start-emulator.mjs --ui-lab"
   },
   "dependencies": {
     "@noble/hashes": "catalog:mobile",
@@ -43,7 +44,6 @@
     "@xterm/addon-unicode11": "catalog:mobile",
     "@xterm/addon-webgl": "catalog:mobile",
     "@xterm/xterm": "catalog:mobile",
-    "@yiru/expo-two-way-audio": "catalog:mobile",
     "@yiru/mobile-relay-protocol": "catalog:",
     "@yiru/runtime-protocol": "catalog:",
     "@yiru/workbench-model": "catalog:",

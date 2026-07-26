@@ -47,7 +47,7 @@ export function makeRenderFileRow(
       <Pressable
         className={cn(
           styles.fileRow,
-          item.canOpen && 'active:bg-card',
+          item.canOpen && 'active:bg-accent',
           rowDisabled && styles.fileRowDisabled,
           !item.canOpen && styles.fileRowUnavailable
         )}
@@ -85,7 +85,7 @@ export function makeRenderFileRow(
             className={cn(
               styles.iconButton,
               ioBusy && styles.iconButtonDisabled,
-              'active:bg-secondary'
+              'active:bg-accent'
             )}
             disabled={ioBusy}
             onPress={() =>
@@ -97,13 +97,13 @@ export function makeRenderFileRow(
             <Minus size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
         ) : item.canStage || item.canDiscard ? (
-          <View className={styles.rowActions}>
+          <View className="flex-row items-center gap-1">
             {item.canStage ? (
               <Pressable
                 className={cn(
                   styles.iconButton,
                   ioBusy && styles.iconButtonDisabled,
-                  'active:bg-secondary'
+                  'active:bg-accent'
                 )}
                 disabled={ioBusy}
                 onPress={() =>
@@ -120,7 +120,7 @@ export function makeRenderFileRow(
                 className={cn(
                   styles.iconButton,
                   ioBusy && styles.iconButtonDisabled,
-                  'active:bg-secondary'
+                  'active:bg-accent'
                 )}
                 disabled={ioBusy}
                 onPress={() => setDiscardTarget(item)}
@@ -170,12 +170,12 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
   }
 
   return (
-    <View className={styles.branchCompareBlock}>
+    <View className="pb-2">
       <View className={styles.sectionHeader}>
-        <View className={styles.branchSectionTitleBlock}>
+        <View className="min-w-0 flex-1">
           <Text className={styles.sectionTitle}>Committed on Branch</Text>
           {branchCompareSummaryText ? (
-            <Text className={styles.branchSectionSubtitle} numberOfLines={1}>
+            <Text className="text-muted-foreground/60 mt-[2px] text-xs" numberOfLines={1}>
               {branchCompareSummaryText}
             </Text>
           ) : null}
@@ -211,7 +211,7 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
               key={`${entry.path}:${entry.oldPath ?? ''}`}
               className={cn(
                 styles.fileRow,
-                entry.canOpen && 'active:bg-card',
+                entry.canOpen && 'active:bg-accent',
                 rowDisabled && styles.fileRowDisabled,
                 !entry.canOpen && styles.fileRowUnavailable
               )}

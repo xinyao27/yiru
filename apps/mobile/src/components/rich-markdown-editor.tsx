@@ -241,12 +241,12 @@ function MobileRichMarkdownEditorInner({
   )
 
   return (
-    <View className={styles.container}>
-      <View className={styles.toolbar}>
+    <View className="bg-background min-h-0 flex-1">
+      <View className="border-b-hairline border-b-border bg-card min-h-[42px]">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName={styles.toolbarContent}
+          contentContainerClassName="items-center gap-1.5 px-2 py-1.5"
           keyboardShouldPersistTaps="handled"
         >
           {TOOLBAR_ITEMS.map((item) => {
@@ -259,9 +259,9 @@ function MobileRichMarkdownEditorInner({
                 accessibilityLabel={item.label}
                 onPress={() => runCommand(item.command)}
                 className={cn(
-                  styles.toolbarButton,
-                  editable && styles.toolbarButtonPressedActive,
-                  !editable ? styles.toolbarButtonDisabled : null
+                  'min-w-[30px] h-[30px] items-center justify-center px-1',
+                  editable && 'active:bg-accent',
+                  !editable ? 'opacity-[0.55]' : null
                 )}
               >
                 <Icon
@@ -283,7 +283,7 @@ function MobileRichMarkdownEditorInner({
         keyboardDisplayRequiresUserAction={false}
         onMessage={handleMessage}
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
-        className={styles.webView}
+        className="bg-background min-h-0 flex-1"
         scrollEnabled
         bounces={false}
         nestedScrollEnabled
@@ -295,13 +295,3 @@ function MobileRichMarkdownEditorInner({
 }
 
 export const MobileRichMarkdownEditor = memo(MobileRichMarkdownEditorInner)
-
-const styles = {
-  container: cn('flex-1 min-h-0 bg-background'),
-  toolbar: cn('min-h-[42px] border-b-hairline border-b-border bg-card'),
-  toolbarContent: cn('items-center gap-1.5 px-2 py-1.5'),
-  toolbarButton: cn('min-w-[30px] h-[30px] items-center justify-center rounded-none px-1'),
-  toolbarButtonPressedActive: cn('active:bg-secondary'),
-  toolbarButtonDisabled: cn('opacity-[0.55]'),
-  webView: cn('flex-1 min-h-0 bg-background')
-} as const

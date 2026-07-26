@@ -168,24 +168,27 @@ export default function TroubleshootScreen() {
   }, [])
 
   return (
-    <View ref={setTroubleshootRootRef} className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <View ref={setTroubleshootRootRef} className="bg-background pt-safe-offset-2 flex-1 p-4">
+      <View className="mb-4 flex-row items-center">
+        <Pressable
+          className="mr-2 h-9 w-9 items-center justify-center"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text className={styles.heading}>Troubleshooting</Text>
+        <Text className="text-foreground text-sm font-bold">Troubleshooting</Text>
       </View>
 
       <ScrollView
-        className={styles.scroll}
-        contentContainerClassName={styles.scrollContent}
+        className="flex-1"
+        contentContainerClassName="pb-6"
         showsVerticalScrollIndicator={false}
       >
         <Pressable
           className={cn(
             styles.diagnosticButton,
             styles.diagnosticButtonPressedActive,
-            diagnosticStatus === 'running' && styles.diagnosticButtonDisabled
+            diagnosticStatus === 'running' && 'opacity-[0.5]'
           )}
           onPress={runDiagnostics}
           disabled={diagnosticStatus === 'running'}
@@ -217,13 +220,13 @@ export default function TroubleshootScreen() {
             {checks.map((check, i) => (
               <View key={i}>
                 {i > 0 && <View className={styles.separator} />}
-                <View className={styles.checkRow}>
+                <View className="flex-row items-center gap-2 px-3.5 py-2.5">
                   <StatusIcon status={check.status} />
-                  <Text className={styles.checkLabel}>{check.label}</Text>
+                  <Text className="text-foreground text-sm font-medium">{check.label}</Text>
                   <Text
                     className={cn(
-                      styles.checkDetail,
-                      check.status === 'fail' && styles.checkDetailFail
+                      'flex-1 text-right text-xs text-muted-foreground/60',
+                      check.status === 'fail' && 'text-destructive'
                     )}
                   >
                     {check.detail}
@@ -234,18 +237,20 @@ export default function TroubleshootScreen() {
           </View>
         )}
 
-        <Text className={styles.sectionHeading}>Common issues</Text>
+        <Text className="text-muted-foreground/60 mt-2 mb-2 px-1 text-xs font-semibold tracking-[0.5px] uppercase">
+          Common issues
+        </Text>
 
         <View className={styles.section}>
           {troubleshootCommonIssues.map((section, i) => (
             <View key={section.id}>
               {i > 0 && <View className={styles.separator} />}
               <Pressable
-                className={cn(styles.accordionHeader, styles.rowPressedActive)}
+                className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
                 onPress={() => toggleSection(section.id)}
               >
                 {section.icon}
-                <Text className={styles.accordionTitle}>{section.title}</Text>
+                <Text className="text-foreground flex-1 text-sm font-medium">{section.title}</Text>
                 {expandedId === section.id ? (
                   <ChevronUp size={16} colorClassName="accent-muted-foreground" />
                 ) : (
@@ -253,11 +258,13 @@ export default function TroubleshootScreen() {
                 )}
               </Pressable>
               {expandedId === section.id && (
-                <View className={styles.accordionBody}>
+                <View className="gap-1.5 px-3.5 pb-3">
                   {section.steps.map((step, j) => (
-                    <View key={j} className={styles.stepRow}>
-                      <Text className={styles.bullet}>•</Text>
-                      <Text className={styles.stepText}>{step}</Text>
+                    <View key={j} className="flex-row gap-2">
+                      <Text className="text-muted-foreground/60 text-xs leading-[18px]">•</Text>
+                      <Text className="text-muted-foreground/60 flex-1 text-xs leading-[18px]">
+                        {step}
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -273,32 +280,9 @@ export default function TroubleshootScreen() {
 }
 
 const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  topRow: cn('flex-row items-center mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  scroll: cn('flex-1'),
-  scrollContent: cn('pb-6'),
-  diagnosticButton: cn(
-    'flex-row items-center justify-center gap-2 bg-secondary rounded-none py-3 px-4 mb-4'
-  ),
-  diagnosticButtonPressedActive: cn('active:opacity-[0.7]'),
-  diagnosticButtonDisabled: cn('opacity-[0.5]'),
-  diagnosticButtonLabel: cn('text-[14px] font-semibold text-foreground'),
-  checkRow: cn('flex-row items-center gap-2 py-2.5 px-3.5'),
-  checkLabel: cn('text-[14px] font-medium text-foreground'),
-  checkDetail: cn('flex-1 text-right text-[12px] text-muted-foreground/60'),
-  checkDetailFail: cn('text-destructive'),
-  sectionHeading: cn(
-    'text-[12px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px] mb-2 mt-2 px-1'
-  ),
-  section: cn('bg-card rounded-none overflow-hidden mb-4'),
-  separator: cn('h-hairline bg-border mx-3'),
-  rowPressedActive: cn('active:bg-secondary'),
-  accordionHeader: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  accordionTitle: cn('flex-1 text-[14px] font-medium text-foreground'),
-  accordionBody: cn('px-3.5 pb-3 gap-1.5'),
-  stepRow: cn('flex-row gap-2'),
-  bullet: cn('text-[12px] text-muted-foreground/60 leading-[18px]'),
-  stepText: cn('flex-1 text-[12px] text-muted-foreground/60 leading-[18px]')
+  diagnosticButton: cn('flex-row items-center justify-center gap-2 bg-secondary py-3 px-4 mb-4'),
+  diagnosticButtonPressedActive: cn('active:bg-accent'),
+  diagnosticButtonLabel: cn('text-sm font-semibold text-foreground'),
+  section: cn('bg-card overflow-hidden mb-4'),
+  separator: cn('h-hairline bg-border mx-3')
 } as const

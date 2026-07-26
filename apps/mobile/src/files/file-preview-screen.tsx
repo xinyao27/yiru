@@ -25,7 +25,6 @@ import {
 } from './file-preview-request'
 import { displayNameFromPreviewPath, type MobileFilePreviewRouteState } from './file-preview-route'
 import { previewSourceFromRoute, sourceKeyForPreview } from './file-preview-source'
-import { filePreviewStyles as styles } from './file-preview-styles'
 
 type Props = {
   route: MobileFilePreviewRouteState
@@ -236,30 +235,30 @@ export function MobileFilePreviewScreen({ route }: Props) {
   }, [requestBack])
 
   return (
-    <View className={styles.container}>
-      <SafeAreaView className={styles.header} edges={['top']}>
-        <View className={styles.topBar}>
+    <View className="bg-background flex-1">
+      <SafeAreaView className="bg-card border-b-hairline border-b-border" edges={['top']}>
+        <View className="min-h-[58px] flex-row items-center gap-3 px-3">
           <Pressable
-            className={cn(styles.backButton, styles.backButtonPressedActive)}
+            className={cn('w-9 h-9 items-center justify-center', 'active:bg-accent')}
             onPress={requestBack}
             hitSlop={8}
             accessibilityLabel="Back to files"
           >
             <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View className={styles.titleBlock}>
-            <Text className={styles.title} numberOfLines={1}>
+          <View className="min-w-0 flex-1">
+            <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
               {title || 'Preview'}
             </Text>
-            <Text className={styles.meta} numberOfLines={1}>
+            <Text className="text-muted-foreground mt-[2px] text-xs" numberOfLines={1}>
               {meta}
             </Text>
           </View>
           {isEditableTerminalArtifact ? (
             <Pressable
               className={cn(
-                styles.saveButton,
-                (!canSaveArtifact || saving) && styles.saveButtonDisabled
+                'w-9 h-9 items-center justify-center bg-secondary',
+                (!canSaveArtifact || saving) && 'opacity-[0.42]'
               )}
               onPress={() => void saveArtifact()}
               disabled={!canSaveArtifact || saving}

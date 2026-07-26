@@ -3,8 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { View, PanResponder, type ViewStyle } from 'react-native'
 import { useResolveClassNames } from 'uniwind'
 
-import { cn } from '@/style/class-names'
-
 import { useResponsiveLayout } from '../../src/layout/responsive-layout'
 import {
   HOST_SIDEBAR_DEFAULT_WIDTH,
@@ -140,35 +138,27 @@ export default function HostGroupLayout() {
   // changes so a fold/rotation doesn't remount the navigator and reset the
   // navigation stack — only the sidebar pane toggles in and out.
   return (
-    <View className={styles.row}>
+    <View className="bg-background flex-1 flex-row">
       {showSidebar && sidebarOpen ? (
-        <View className={styles.sidebar} style={[{ width: sidebarWidth }]}>
+        <View className="border-r-border border-r" style={[{ width: sidebarWidth }]}>
           <HostScreen
             embedded
             hostId={hostId}
             action={action}
             onHideSidebar={canCollapseSidebar ? hideSidebar : undefined}
           />
-          {/* Dedicated drag handle straddling the right border — see resizer note. */}
+          {/* Why: the invisible, elevated strip straddles the border so it owns
+              the drag above the worktree list on Android. */}
           <View
-            className={styles.resizeHandle}
+            className="absolute top-0 right-0 bottom-0 z-[20] w-6"
             style={{ elevation: 20 }}
             {...resizer.panHandlers}
           />
         </View>
       ) : null}
-      <View className={styles.detail}>
+      <View className="min-w-0 flex-1">
         <HostStack animation={showSidebar ? 'none' : 'default'} />
       </View>
     </View>
   )
 }
-
-const styles = {
-  row: cn('flex-1 flex-row bg-background'),
-  sidebar: cn('border-r border-r-border'),
-  // Invisible grab strip over the sidebar's right edge. Absolute + elevated so it
-  // sits above the worktree list and reliably owns the drag on Android.
-  resizeHandle: cn('absolute top-0 bottom-0 right-0 w-6 z-[20]'),
-  detail: cn('flex-1 min-w-0')
-} as const

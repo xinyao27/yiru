@@ -88,31 +88,31 @@ export function MobileSourceControlContent({ state }: Props) {
         // Why: once data has loaded the screen looks alive even when the
         // desktop link is down, so taps appear to do nothing (STA-1511).
         // Surface the reconnect state where the user is looking.
-        <View className={styles.reconnectBanner}>
+        <View className="bg-secondary border-hairline mx-4 mt-4 mb-[-8px] flex-row items-center gap-2 border-amber-500 px-3 py-2">
           <ActivityIndicator size="small" colorClassName="accent-amber-500" />
-          <Text className={styles.reconnectBannerText}>Reconnecting to desktop...</Text>
+          <Text className="text-foreground text-xs">Reconnecting to desktop...</Text>
         </View>
       ) : null}
-      <View className={hubStyles.changesControls}>
+      <View className="mt-1 px-4">
         {commitFailureRecovery ? (
           <MobileCommitFailurePanel
             failure={commitFailureRecovery}
             action={commitFailureRecoveryAction}
           />
         ) : actionError ? (
-          <View className={styles.actionError}>
-            <Text className={styles.actionErrorText} numberOfLines={2}>
+          <View className="bg-secondary border-hairline border-destructive mt-2 px-3 py-2">
+            <Text className="text-foreground text-xs leading-[16px]" numberOfLines={2}>
               {actionError}
             </Text>
           </View>
         ) : null}
         <MobileSourceControlCreatePrEntry action={createPrAction} />
-        <View className={styles.bulkRow}>
+        <View className="mt-3 flex-row gap-2">
           <Pressable
             className={cn(
               styles.bulkButton,
               (stageablePaths.length === 0 || ioBusy) && styles.bulkButtonDisabled,
-              'active:opacity-[0.75]'
+              'active:bg-accent'
             )}
             onPress={() => void stageAll()}
             disabled={ioBusy || stageablePaths.length === 0}
@@ -128,7 +128,7 @@ export function MobileSourceControlContent({ state }: Props) {
             className={cn(
               styles.bulkButton,
               (unstageablePaths.length === 0 || ioBusy) && styles.bulkButtonDisabled,
-              'active:opacity-[0.75]'
+              'active:bg-accent'
             )}
             onPress={() => void unstageAll()}
             disabled={ioBusy || unstageablePaths.length === 0}
@@ -142,8 +142,8 @@ export function MobileSourceControlContent({ state }: Props) {
           </Pressable>
           <Pressable
             className={cn(
-              styles.bulkMenuButton,
-              'active:opacity-[0.75]',
+              'w-[42px] min-h-9 bg-secondary items-center justify-center',
+              'active:bg-accent',
               ioBusy && styles.bulkButtonDisabled
             )}
             onPress={() => setShowActionSheet(true)}
@@ -193,7 +193,7 @@ export function MobileSourceControlContent({ state }: Props) {
       )}
 
       <View
-        className={styles.commitBar}
+        className="bg-card border-t-hairline border-t-border absolute right-0 left-0 gap-1 p-4 pt-3"
         style={[
           {
             bottom: keyboardLift > 0 ? keyboardLift + KEYBOARD_COMMIT_BAR_CLEARANCE : keyboardLift,
@@ -201,15 +201,20 @@ export function MobileSourceControlContent({ state }: Props) {
           }
         ]}
       >
-        <View className={styles.commitRow}>
+        <View className="flex-row gap-2">
           {stagedCount === 0 ? (
             <View
-              className={cn(styles.commitInput, styles.commitInputDisabled)}
+              className={cn(
+                styles.commitInput,
+                'bg-card border-border border-dashed items-center justify-center'
+              )}
               accessibilityRole="text"
               accessibilityState={{ disabled: true }}
               accessibilityLabel="Commit message disabled. No staged files."
             >
-              <Text className={styles.commitInputDisabledText}>No staged files</Text>
+              <Text className="text-muted-foreground/60 text-sm font-semibold">
+                No staged files
+              </Text>
             </View>
           ) : (
             <TextInput
@@ -226,9 +231,9 @@ export function MobileSourceControlContent({ state }: Props) {
           {shouldShowGenerateButton ? (
             <Pressable
               className={cn(
-                styles.generateButton,
+                'w-[42px] min-h-[42px] bg-secondary items-center justify-center',
                 busyAction !== null && styles.commitButtonDisabled,
-                'active:opacity-[0.75]'
+                'active:bg-accent'
               )}
               // Why: commit-message AI belongs to the commit path; hiding it
               // during Stage All keeps the quick action visually unambiguous.
@@ -251,10 +256,10 @@ export function MobileSourceControlContent({ state }: Props) {
           ) : null}
           <Pressable
             className={cn(
-              styles.commitButton,
-              createPrHeroActive && styles.commitButtonSecondary,
+              'min-w-[88px] min-h-[42px] bg-primary items-center justify-center px-3',
+              createPrHeroActive && 'bg-transparent border-hairline border-border',
               primaryAction.disabled && styles.commitButtonDisabled,
-              'active:opacity-[0.75]'
+              'active:bg-accent'
             )}
             onPress={primaryAction.onPress}
             disabled={primaryAction.disabled}
@@ -271,8 +276,8 @@ export function MobileSourceControlContent({ state }: Props) {
             ) : (
               <Text
                 className={cn(
-                  styles.commitButtonText,
-                  createPrHeroActive && styles.commitButtonSecondaryText
+                  'text-primary-foreground text-sm font-bold',
+                  createPrHeroActive && 'text-foreground'
                 )}
               >
                 {primaryAction.label}

@@ -26,35 +26,47 @@ export function MobileHostCard(props: {
     : null
   return (
     <Pressable
-      className={cn(styles.card, styles.cardPressedActive)}
+      className="bg-card border-border active:bg-accent flex-row items-center border px-3 py-3"
       onPress={props.onPress}
       onLongPress={props.onLongPress}
       delayLongPress={400}
     >
-      <View className={styles.icon}>
+      <View className="bg-secondary mr-3.5 h-[46px] w-[46px] items-center justify-center">
         <Monitor
           size={20}
           colorClassName={connected ? 'accent-foreground' : 'accent-muted-foreground'}
         />
       </View>
-      <View className={styles.main}>
-        <Text className={cn(styles.name, !connected && 'text-muted-foreground')} numberOfLines={1}>
+      <View className="mr-2 min-w-0 flex-1">
+        <Text
+          className={cn(
+            'text-foreground text-sm font-semibold leading-[20px]',
+            !connected && 'text-muted-foreground'
+          )}
+          numberOfLines={1}
+        >
           {props.host.name}
         </Text>
-        <View className={styles.meta}>
+        <View className="mt-[3px] min-w-0 flex-row items-center gap-1.5">
           <StatusDot state={props.state} verdict={props.verdict} />
-          <Text className={cn(styles.metaText, isError && 'text-destructive')} numberOfLines={1}>
+          <Text
+            className={cn('flex-1 text-xs text-muted-foreground', isError && 'text-destructive')}
+            numberOfLines={1}
+          >
             {verdictDisplayLabel(props.verdict)}
             {connected ? ` · ${mobileConnectionPathLabel(props.path)}` : ''}
           </Text>
         </View>
         {connected && worktreeSummary ? (
-          <Text className={styles.worktreeMetaText} numberOfLines={1}>
+          <Text className="text-muted-foreground/60 mt-[2px] ml-6 text-xs" numberOfLines={1}>
             {worktreeSummary}
           </Text>
         ) : null}
         {props.verdict.kind === 'unreachable' ? (
-          <Text className={styles.discoveryHint} numberOfLines={2}>
+          <Text
+            className="text-muted-foreground/60 mt-1 text-[11px] leading-[15px]"
+            numberOfLines={2}
+          >
             Check that this phone can reach the selected LAN or private-network address
           </Text>
         ) : null}
@@ -63,15 +75,3 @@ export function MobileHostCard(props: {
     </Pressable>
   )
 }
-
-const styles = {
-  card: cn('flex-row items-center px-3 py-3 rounded-none bg-card border border-border'),
-  cardPressedActive: cn('active:bg-secondary'),
-  icon: cn('w-[46px] h-[46px] rounded-none items-center justify-center bg-secondary mr-3.5'),
-  main: cn('flex-1 min-w-0 mr-2'),
-  name: cn('text-foreground text-[15px] font-semibold leading-[20px]'),
-  meta: cn('flex-row items-center gap-1.5 mt-[3px] min-w-0'),
-  metaText: cn('flex-1 text-[12px] text-muted-foreground'),
-  worktreeMetaText: cn('mt-[2px] ml-6 text-[12px] text-muted-foreground/60'),
-  discoveryHint: cn('mt-1 text-[11px] leading-[15px] text-muted-foreground/60')
-} as const

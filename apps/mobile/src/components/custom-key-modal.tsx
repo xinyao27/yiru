@@ -187,10 +187,10 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
   return (
     <BottomDrawer visible={visible} onClose={onClose}>
-      <View className={styles.header}>
+      <View className="flex-row items-center pb-2">
         {showBack ? (
           <Pressable
-            className={cn(styles.backButton, styles.backButtonPressedActive)}
+            className="active:bg-accent h-[30px] w-[30px] items-center justify-center"
             onPress={onBack}
             accessibilityLabel="Back"
           >
@@ -199,7 +199,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
         ) : (
           <View className={styles.backSpacer} />
         )}
-        <Text className={styles.title}>
+        <Text className="text-foreground flex-1 text-center text-sm font-semibold">
           {step === 'choose-type' && 'Add Shortcut'}
           {step === 'shortcut-combo' && 'Shortcut Combo'}
           {step === 'special-keys' && 'Pick a key'}
@@ -241,21 +241,28 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'shortcut-combo' && (
-        <View className={styles.shortcutForm}>
-          <View className={styles.preview}>
+        <View className="pt-2">
+          <View className="flex-row flex-wrap items-center justify-center gap-2 py-5">
             {orderedActiveModifiers.map((modifier, index) => (
-              <View key={modifier.id} className={styles.previewKeycapRow}>
+              <View key={modifier.id} className="flex-row items-center gap-2">
                 {index > 0 ? <Text className={styles.previewPlus}>+</Text> : null}
-                <View className={cn(styles.keycap, styles.keycapModifier)}>
-                  <Text className={styles.keycapModifierText}>{modifier.label}</Text>
+                <View className={cn(styles.keycap, 'min-w-0')}>
+                  <Text className="text-muted-foreground font-mono text-sm font-semibold">
+                    {modifier.label}
+                  </Text>
                 </View>
               </View>
             ))}
             {orderedActiveModifiers.length > 0 ? (
               <Text className={styles.previewPlus}>+</Text>
             ) : null}
-            <View className={cn(styles.keycap, !shortcutPreview && styles.keycapWarn)}>
-              <Text className={cn(styles.keycapText, !shortcutPreview && styles.keycapTextWarn)}>
+            <View className={cn(styles.keycap, !shortcutPreview && 'border-amber-500')}>
+              <Text
+                className={cn(
+                  'text-foreground font-mono text-sm font-semibold',
+                  !shortcutPreview && 'text-amber-500'
+                )}
+              >
                 {previewKeyLabel}
               </Text>
             </View>
@@ -263,26 +270,36 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
           <View className={styles.section}>
             <Text className={styles.sectionLabel}>Modifiers</Text>
-            <View className={styles.mods}>
+            <View className="flex-row gap-2">
               {SHORTCUT_MODIFIERS.map((modifier) => {
                 const selected = shortcutModifiers.includes(modifier.id)
                 return (
                   <Pressable
                     key={modifier.id}
                     className={cn(
-                      styles.chip,
-                      selected && styles.chipSelected,
-                      !selected && styles.chipPressedActive
+                      'flex-1 h-10 bg-card flex-row items-center justify-center gap-1',
+                      selected && 'bg-accent',
+                      !selected && 'active:bg-accent'
                     )}
                     onPress={() => toggleShortcutModifier(modifier.id)}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                   >
-                    <Text className={cn(styles.chipText, selected && styles.chipTextSelected)}>
+                    <Text
+                      className={cn(
+                        'text-muted-foreground text-sm font-medium',
+                        selected && 'text-accent-foreground'
+                      )}
+                    >
                       {modifier.label}
                     </Text>
                     {modifier.glyph ? (
-                      <Text className={cn(styles.chipGlyph, selected && styles.chipGlyphSelected)}>
+                      <Text
+                        className={cn(
+                          'text-muted-foreground/60 text-xs font-mono',
+                          selected && 'text-muted-foreground'
+                        )}
+                      >
                         {modifier.glyph}
                       </Text>
                     ) : null}
@@ -295,7 +312,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           <View className={styles.section}>
             <Text className={styles.sectionLabel}>Key</Text>
             <TextInput
-              className={styles.keyInput}
+              className="bg-card border-border text-foreground h-14 w-full border text-center font-mono text-sm font-semibold"
               value={shortcutKey.length === 1 ? shortcutKey.toUpperCase() : ''}
               onChangeText={handleShortcutKeyInput}
               placeholder={SPECIAL_KEY_BY_ID[shortcutKey]?.label ?? 'C'}
@@ -305,10 +322,12 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
               maxLength={1}
             />
             <Pressable
-              className={cn(styles.moreLink, styles.moreLinkPressedActive)}
+              className="active:bg-accent items-center py-2"
               onPress={() => setStep('special-keys')}
             >
-              <Text className={styles.moreLinkText}>More keys — Tab, arrows, F1–F12…</Text>
+              <Text className="text-muted-foreground text-xs underline">
+                More keys — Tab, arrows, F1–F12…
+              </Text>
             </Pressable>
           </View>
 
@@ -330,11 +349,13 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'special-keys' && (
-        <View className={styles.specialKeysForm}>
+        <View className="gap-3 pt-1 pb-3">
           {SPECIAL_KEY_GROUPS.map((group) => (
-            <View key={group.title} className={styles.specialGroup}>
-              <Text className={styles.specialGroupTitle}>{group.title}</Text>
-              <View className={styles.keyGrid}>
+            <View key={group.title} className="gap-1">
+              <Text className="text-muted-foreground/60 mb-1 pl-[2px] text-[11px] tracking-[0.8px] uppercase">
+                {group.title}
+              </Text>
+              <View className="mx-[-2px] flex-row flex-wrap">
                 {group.ids.map((id) => {
                   const key = SPECIAL_KEY_BY_ID[id]
                   if (!key) {
@@ -343,19 +364,22 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   const selected = shortcutKey === id
                   const flexBasis = `${100 / group.columns}%` as const
                   return (
-                    <View key={id} className={styles.keyCellWrap} style={[{ flexBasis }]}>
+                    <View key={id} className="px-[2px] py-[2px]" style={[{ flexBasis }]}>
                       <Pressable
                         className={cn(
-                          styles.keyCell,
-                          selected && styles.keyCellSelected,
-                          !selected && styles.keyCellPressedActive
+                          'h-10 bg-card items-center justify-center',
+                          selected && 'bg-accent',
+                          !selected && 'active:bg-accent'
                         )}
                         onPress={() => handleSpecialKeyPick(id)}
                         accessibilityLabel={key.accessibilityLabel}
                         accessibilityState={{ selected }}
                       >
                         <Text
-                          className={cn(styles.keyCellText, selected && styles.keyCellTextSelected)}
+                          className={cn(
+                            'text-xs font-semibold text-foreground font-mono',
+                            selected && 'text-accent-foreground'
+                          )}
                         >
                           {key.label}
                         </Text>
@@ -371,7 +395,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
       {step === 'text-macro' && (
         <View className={styles.group}>
-          <View className={styles.macroForm}>
+          <View className="gap-2 p-3">
             <Text className={styles.fieldLabel}>Label</Text>
             <TextInput
               className={styles.fieldInput}
@@ -392,8 +416,8 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <View className={styles.switchRow}>
-              <Text className={styles.switchLabel}>Press Enter</Text>
+            <View className="flex-row items-center justify-between py-1">
+              <Text className="text-foreground text-sm">Press Enter</Text>
               <Switch
                 value={macroEnter}
                 onValueChange={setMacroEnter}
@@ -425,66 +449,21 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 }
 
 const styles = {
-  header: cn('flex-row items-center pb-2'),
-  backButton: cn('w-[30px] h-[30px] rounded-none items-center justify-center'),
-  backButtonPressedActive: cn('active:bg-secondary'),
   backSpacer: cn('w-[30px]'),
-  title: cn('flex-1 text-[15px] font-semibold text-foreground text-center'),
-  group: cn('bg-card rounded-none overflow-hidden'),
+  group: cn('bg-card overflow-hidden'),
   separator: cn('h-hairline bg-border mx-3'),
   row: cn('py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowLabel: cn('text-[14px] font-medium text-foreground mb-[1px]'),
-  rowHint: cn('text-[12px] text-muted-foreground/60'),
-  shortcutForm: cn('pt-2'),
-  preview: cn('flex-row items-center justify-center gap-2 py-5 flex-wrap'),
-  previewKeycapRow: cn('flex-row items-center gap-2'),
-  previewPlus: cn('text-muted-foreground/60 text-[16px]'),
-  keycap: cn(
-    'min-w-12 h-12 px-3 rounded-none bg-card border border-border items-center justify-center'
-  ),
-  keycapModifier: cn('min-w-0'),
-  keycapWarn: cn('border-amber-500'),
-  keycapText: cn('text-foreground font-mono text-[17px] font-semibold'),
-  keycapTextWarn: cn('text-amber-500'),
-  keycapModifierText: cn('text-muted-foreground font-mono text-[14px] font-semibold'),
+  rowPressedActive: cn('active:bg-accent'),
+  rowLabel: cn('text-sm font-medium text-foreground mb-[1px]'),
+  rowHint: cn('text-xs text-muted-foreground/60'),
+  previewPlus: cn('text-muted-foreground/60 text-sm'),
+  keycap: cn('min-w-12 h-12 px-3 bg-card border border-border items-center justify-center'),
   section: cn('mt-3'),
   sectionLabel: cn('text-[11px] text-muted-foreground/60 uppercase tracking-[0.8px] mb-2 pl-[2px]'),
-  mods: cn('flex-row gap-2'),
-  chip: cn('flex-1 h-10 rounded-none bg-card flex-row items-center justify-center gap-1'),
-  chipSelected: cn('bg-foreground'),
-  chipPressedActive: cn('active:bg-secondary'),
-  chipText: cn('text-muted-foreground text-[14px] font-medium'),
-  chipTextSelected: cn('text-background'),
-  chipGlyph: cn('text-muted-foreground/60 text-[13px] font-mono'),
-  chipGlyphSelected: cn('text-black/50'),
-  keyInput: cn(
-    'w-full h-14 rounded-none bg-card border border-border text-foreground font-mono text-[22px] font-semibold text-center'
-  ),
-  moreLink: cn('py-2 items-center'),
-  moreLinkPressedActive: cn('active:opacity-[0.6]'),
-  moreLinkText: cn('text-muted-foreground text-[13px] underline'),
-  specialKeysForm: cn('pt-1 pb-3 gap-3'),
-  specialGroup: cn('gap-1'),
-  specialGroupTitle: cn(
-    'text-[11px] text-muted-foreground/60 uppercase tracking-[0.8px] pl-[2px] mb-1'
-  ),
-  keyGrid: cn('flex-row flex-wrap mx-[-2px]'),
-  keyCellWrap: cn('px-[2px] py-[2px]'),
-  keyCell: cn('h-10 rounded-none bg-card items-center justify-center'),
-  keyCellPressedActive: cn('active:bg-secondary'),
-  keyCellSelected: cn('bg-foreground'),
-  keyCellText: cn('text-[13px] font-semibold text-foreground font-mono'),
-  keyCellTextSelected: cn('text-background'),
-  macroForm: cn('p-3 gap-2'),
-  fieldLabel: cn('text-[13px] font-medium text-muted-foreground'),
-  fieldInput: cn(
-    'bg-background text-foreground rounded-none px-3 py-2 text-[14px] font-mono border border-border'
-  ),
-  switchRow: cn('flex-row items-center justify-between py-1'),
-  switchLabel: cn('text-[14px] text-foreground'),
-  saveButton: cn('mt-3 bg-foreground py-3 rounded-none items-center'),
+  fieldLabel: cn('text-xs font-medium text-muted-foreground'),
+  fieldInput: cn('bg-background text-foreground px-3 py-2 text-sm font-mono border border-border'),
+  saveButton: cn('mt-3 bg-primary py-3 items-center'),
   saveButtonDisabled: cn('bg-secondary'),
-  saveButtonText: cn('text-background text-[15px] font-semibold'),
+  saveButtonText: cn('text-primary-foreground text-sm font-semibold'),
   saveButtonTextDisabled: cn('text-muted-foreground/60')
 } as const

@@ -51,12 +51,12 @@ export function UsageBar({
           ? 'bg-amber-500'
           : 'bg-green-500'
   return (
-    <View className={styles.usageBarColumn}>
-      <View className={styles.usageBar}>
-        <Text className={styles.usageLabel}>{label}</Text>
-        <View className={styles.usageTrack}>
+    <View className="flex-1 gap-[2px]">
+      <View className="flex-row items-center gap-1">
+        <Text className="text-muted-foreground/60 w-[22px] text-xs">{label}</Text>
+        <View className="bg-secondary h-1.5 flex-1 overflow-hidden">
           <View
-            className={cn(styles.usageFill, unavailable ? 'bg-neutral-500/40' : barColorClassName)}
+            className={cn('h-full', unavailable ? 'bg-neutral-500/40' : barColorClassName)}
             style={{ width: `${used ?? 0}%` }}
           />
         </View>
@@ -64,32 +64,20 @@ export function UsageBar({
           <ActivityIndicator
             size="small"
             colorClassName="accent-muted-foreground"
-            className={styles.usageSpinner}
+            className="w-9"
           />
         ) : (
-          <Text className={styles.usageValue}>
+          <Text className="text-muted-foreground w-9 text-right text-xs">
             {unavailable || used == null ? '—' : `${used}%`}
           </Text>
         )}
       </View>
       {resetText ? (
-        <Text className={styles.usageResetText} numberOfLines={1}>
+        // Why: the indent aligns the countdown with the usage track above it.
+        <Text className="text-muted-foreground/60 ml-[26px] text-xs" numberOfLines={1}>
           {resetText}
         </Text>
       ) : null}
     </View>
   )
 }
-
-const styles = {
-  usageBarColumn: cn('flex-1 gap-[2px]'),
-  usageBar: cn('flex-row items-center gap-1'),
-  usageLabel: cn('text-[12px] text-muted-foreground/60 w-[22px]'),
-  usageTrack: cn('flex-1 h-1.5 rounded-none bg-secondary overflow-hidden'),
-  usageFill: cn('h-full rounded-none'),
-  usageValue: cn('text-[12px] text-muted-foreground w-9 text-right'),
-  usageSpinner: cn('w-9'),
-  // Why: indented past the window label so the countdown aligns with the
-  // start of the track above it.
-  usageResetText: cn('text-[12px] text-muted-foreground/60 ml-[26px]')
-} as const

@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
-import {
-  ArrowUp,
-  ImageSquare as ImagePlus,
-  Microphone as Mic,
-  Square
-} from '../../components/uniwind-icons'
+import { ArrowUp, ImageSquare as ImagePlus } from '../../components/uniwind-icons'
 import { cn } from '../../style/class-names'
 import { applyAutocomplete, detectAutocompleteTrigger, rankSuggestions } from './autocomplete'
 
@@ -26,18 +21,11 @@ const SLASH_COMMANDS = [
 const NO_FILE_PATHS: string[] = []
 
 type Props = {
-  /** Controlled composer text — owned by the parent so dictation can write to it. */
   value: string
   onChangeText: (text: string) => void
   onSend: (text: string) => Promise<boolean>
   onAttachImage?: () => void
   isAttaching?: boolean
-  onMicPress?: () => void
-  micActive?: boolean
-  /** Dictation trigger style — 'hold' uses press-in/out, 'toggle' uses tap. */
-  dictationMode?: 'toggle' | 'hold'
-  onMicPressIn?: () => void
-  onMicPressOut?: () => void
   disabled?: boolean
   placeholder?: string
   filePaths?: string[]
@@ -50,11 +38,6 @@ export function MobileNativeChatComposer({
   onSend,
   onAttachImage,
   isAttaching = false,
-  onMicPress,
-  micActive = false,
-  dictationMode = 'toggle',
-  onMicPressIn,
-  onMicPressOut,
   disabled = false,
   placeholder = 'Message, @files, /commands',
   filePaths = NO_FILE_PATHS,
@@ -123,15 +106,15 @@ export function MobileNativeChatComposer({
   return (
     <View>
       {suggestions.length > 0 ? (
-        <View className={styles.suggestions}>
-          <ScrollView keyboardShouldPersistTaps="always" className={styles.suggestionScroll}>
+        <View className="border-t-hairline border-t-border bg-card">
+          <ScrollView keyboardShouldPersistTaps="always" className="max-h-[180px]">
             {suggestions.map((s) => (
               <Pressable
                 key={s}
-                className={cn(styles.suggestion, styles.suggestionPressedActive)}
+                className="border-b-hairline border-b-border active:bg-accent px-3 py-2"
                 onPress={() => pickSuggestion(s)}
               >
-                <Text className={styles.suggestionText} numberOfLines={1}>
+                <Text className="text-foreground font-mono text-xs" numberOfLines={1}>
                   {s}
                 </Text>
               </Pressable>
@@ -139,11 +122,11 @@ export function MobileNativeChatComposer({
           </ScrollView>
         </View>
       ) : null}
-      <View className={styles.bar}>
+      <View className="border-t-hairline border-t-border bg-card flex-row items-end gap-2 px-3 py-2">
         {onAttachImage ? (
           <Pressable
             accessibilityLabel="Attach image"
-            className={cn(styles.iconButton, styles.pressedActive)}
+            className={cn('h-10 w-10 items-center justify-center', styles.pressedActive)}
             onPress={onAttachImage}
             disabled={isAttaching || disabled}
           >
@@ -155,7 +138,7 @@ export function MobileNativeChatComposer({
           </Pressable>
         ) : null}
         <TextInput
-          className={styles.input}
+          className="text-foreground bg-secondary max-h-[140px] min-h-10 flex-1 px-3 py-2.5 text-sm leading-5"
           value={value}
           onChangeText={handleChange}
           // Controlled only transiently right after an autocomplete insert.
@@ -169,30 +152,14 @@ export function MobileNativeChatComposer({
           selectionColorClassName="accent-primary"
           multiline
           editable={!disabled}
-          textAlignVertical="top"
+          textAlignVertical="center"
         />
-        {onMicPress ? (
-          <Pressable
-            accessibilityLabel={micActive ? 'Stop dictation' : 'Dictate'}
-            className={cn(styles.iconButton, styles.pressedActive)}
-            // Hold mode is walkie-talkie (press-in/out); toggle mode taps.
-            onPress={dictationMode === 'hold' ? undefined : onMicPress}
-            onPressIn={dictationMode === 'hold' ? onMicPressIn : undefined}
-            onPressOut={dictationMode === 'hold' ? onMicPressOut : undefined}
-            disabled={disabled}
-          >
-            {micActive ? (
-              <Square size={18} colorClassName="accent-destructive" />
-            ) : (
-              <Mic size={20} colorClassName="accent-muted-foreground" />
-            )}
-          </Pressable>
-        ) : null}
+        {/* Why: the light send surface keeps its dark arrow distinct from muted controls. */}
         <Pressable
           accessibilityLabel="Send message"
           className={cn(
-            styles.sendButton,
-            !canSend && styles.sendButtonDisabled,
+            'w-10 h-10 items-center justify-center bg-primary',
+            !canSend && 'bg-secondary',
             canSend && styles.pressedActive
           )}
           onPress={handleSend}
@@ -209,19 +176,5 @@ export function MobileNativeChatComposer({
 }
 
 const styles = {
-  suggestions: cn('border-t-hairline border-t-border bg-card'),
-  suggestionScroll: cn('max-h-[180px]'),
-  suggestion: cn('px-3 py-2 border-b-hairline border-b-border'),
-  suggestionPressedActive: cn('active:bg-secondary'),
-  suggestionText: cn('text-foreground font-mono text-[12px]'),
-  bar: cn('flex-row items-end gap-2 px-3 py-2 border-t-hairline border-t-border bg-card'),
-  input: cn(
-    'flex-1 max-h-[140px] min-h-10 text-foreground text-[15px] bg-secondary rounded-none px-3 pt-2 pb-2'
-  ),
-  iconButton: cn('w-10 h-10 items-center justify-center'),
-  // White send affordance per design — dark arrow on a light circle.
-  sendButton: cn('w-10 h-10 rounded-none items-center justify-center bg-foreground'),
-  sendButtonDisabled: cn('bg-secondary'),
-  pressed: cn('opacity-[0.7]'),
-  pressedActive: cn('active:opacity-[0.7]')
+  pressedActive: cn('active:bg-accent')
 } as const

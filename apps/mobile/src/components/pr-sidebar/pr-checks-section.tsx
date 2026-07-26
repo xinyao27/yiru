@@ -145,7 +145,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
       title="Checks"
       trailing={
         <>
-          <Text className={cn(styles.summaryLabel, summaryColors.text)}>{summary.label}</Text>
+          <Text className={cn('text-sm font-bold', summaryColors.text)}>{summary.label}</Text>
           {/* Rerun is offered only when something failed; spinner-in-place while in-flight. */}
           {actions && summary.failed > 0 ? (
             <Pressable
@@ -168,17 +168,20 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
       {/* Triage strip at the top of the section (desktop PRTriageStrip): a failing
           summary + a Fix action, so the most actionable state leads the list. */}
       {triage && summary.failed > 0 ? (
-        <View className={triageStyles.triageStrip}>
-          <View className={triageStyles.triageStripText}>
-            <Text className={triageStyles.triageStripTitle} numberOfLines={1}>
+        <View className="border-hairline border-destructive flex-row items-center gap-2 bg-[var(--editor-diff-removed-line-background)] p-2">
+          <View className="min-w-0 flex-1">
+            <Text className="text-foreground text-xs font-bold" numberOfLines={1}>
               {summary.failed} failing check{summary.failed === 1 ? '' : 's'}
             </Text>
-            <Text className={triageStyles.triageStripSubtitle} numberOfLines={1}>
+            <Text className="text-muted-foreground text-xs" numberOfLines={1}>
               Inspect details or start an AI fix pass.
             </Text>
           </View>
           <Pressable
-            className={cn(triageStyles.triageStripButton, 'active:opacity-[0.7]')}
+            className={cn(
+              'min-h-8 flex-row items-center gap-1 px-2 border-hairline border-border bg-secondary',
+              'active:bg-accent'
+            )}
             onPress={triage.fixChecks}
             disabled={triage.isBusy}
             accessibilityRole="button"
@@ -189,7 +192,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
             ) : (
               <Sparkles size={13} colorClassName="accent-muted-foreground" />
             )}
-            <Text className={triageStyles.triageStripButtonText}>Fix</Text>
+            <Text className="text-muted-foreground text-xs font-bold">Fix</Text>
           </Pressable>
         </View>
       ) : null}
@@ -210,7 +213,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
               accessibilityLabel={`${check.name} check details`}
             >
               <Chevron size={14} colorClassName="accent-muted-foreground" />
-              <View className={cn(styles.statusDot, statusColors.background)} />
+              <View className={cn('w-2 h-2', statusColors.background)} />
               <View className={styles.rowMain}>
                 <Text className={styles.rowTitle} numberOfLines={1}>
                   {check.name}

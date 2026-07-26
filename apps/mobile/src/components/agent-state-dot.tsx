@@ -27,12 +27,11 @@ export function AgentStateDot({ state }: { state: AgentDotState }) {
 
   return (
     <View className={styles.wrapper}>
-      <View className={cn(styles.dot, DOT_COLOR_CLASSES[state])} />
+      <View className={cn('w-1.5 h-1.5', DOT_COLOR_CLASSES[state])} />
     </View>
   )
 }
 
 const styles = {
-  wrapper: cn('w-2.5 h-2.5 items-center justify-center'),
-  dot: cn('w-1.5 h-1.5 rounded-none')
+  wrapper: cn('w-2.5 h-2.5 items-center justify-center')
 } as const

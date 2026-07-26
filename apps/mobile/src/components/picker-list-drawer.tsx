@@ -68,14 +68,14 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
       dragContentToDismiss={false}
       contentScrollable={false}
     >
-      <View className={styles.header}>
-        <Text className={styles.title}>{title}</Text>
+      <View className="px-1 pb-2">
+        <Text className="text-muted-foreground/60 text-xs font-medium">{title}</Text>
       </View>
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        className={styles.group}
-        contentContainerClassName={cn(items.length === 0 ? styles.emptyContent : undefined)}
+        className="bg-card max-h-[420px] grow-0 overflow-hidden"
+        contentContainerClassName={cn(items.length === 0 ? 'min-h-6' : undefined)}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled
         ItemSeparatorComponent={PickerSeparator}
@@ -83,12 +83,12 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
           const selected = item.id === selectedId
           return (
             <Pressable
-              className={cn(styles.item, styles.itemPressedActive)}
+              className="active:bg-accent flex-row items-center gap-2 px-3.5 py-3"
               onPress={() => closeThenSelect(item)}
             >
               {renderIcon?.(item)}
               <Text
-                className={cn(styles.itemText, selected && styles.itemTextSelected)}
+                className={cn('flex-1 text-sm text-foreground', selected && 'font-semibold')}
                 numberOfLines={1}
               >
                 {item.label}
@@ -103,17 +103,5 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
 }
 
 function PickerSeparator() {
-  return <View className={styles.separator} />
+  return <View className="h-hairline bg-border mx-3" />
 }
-
-const styles = {
-  header: cn('px-1 pb-2'),
-  title: cn('text-[13px] font-medium text-muted-foreground/60'),
-  group: cn('bg-card rounded-none overflow-hidden max-h-[420px] grow-0'),
-  emptyContent: cn('min-h-6'),
-  separator: cn('h-hairline bg-border mx-3'),
-  item: cn('flex-row items-center gap-2 py-3 px-3.5'),
-  itemPressedActive: cn('active:bg-secondary'),
-  itemText: cn('flex-1 text-[14px] text-foreground'),
-  itemTextSelected: cn('font-semibold')
-} as const

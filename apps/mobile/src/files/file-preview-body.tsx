@@ -34,9 +34,12 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
   if (preview.status === 'error' || preview.status === 'waiting') {
     return (
       <View className={styles.state}>
-        <Text className={styles.errorText}>{preview.message}</Text>
-        <Pressable className={styles.retryButton} onPress={options.onRetry}>
-          <Text className={styles.retryText}>Retry</Text>
+        <Text className="text-destructive text-center text-sm">{preview.message}</Text>
+        <Pressable
+          className="border-hairline border-border min-h-9 items-center justify-center px-4"
+          onPress={options.onRetry}
+        >
+          <Text className="text-foreground text-sm font-semibold">Retry</Text>
         </Pressable>
       </View>
     )
@@ -52,17 +55,17 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
   }
   if (preview.kind === 'image') {
     return (
-      <View className={styles.imageContainer}>
+      <View className="flex-1 bg-[var(--editor-surface)]">
         <ScrollView
           className={styles.scroll}
-          contentContainerClassName={styles.imageScrollContent}
+          contentContainerClassName="grow items-center justify-center p-3"
           maximumZoomScale={4}
           minimumZoomScale={1}
           centerContent
         >
           <Image
             source={{ uri: preview.dataUri }}
-            className={styles.image}
+            className="bg-[var(--editor-surface)]"
             style={[{ width: options.imageWidth, height: options.imageHeight }]}
             resizeMode="contain"
             onError={options.onImageError}

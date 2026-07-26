@@ -4,7 +4,6 @@ import { GitPullRequest as GitPullRequestArrow } from '@/components/uniwind-icon
 import { cn } from '@/style/class-names'
 
 import type { MobileCreatePrAction } from './create-pr-action'
-import { styles } from './styles'
 
 type Props = {
   action: MobileCreatePrAction
@@ -16,12 +15,12 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
   }
   const enabled = !action.disabled
   return (
-    <View className={styles.createPrBlock}>
+    <View className="mt-3 gap-1">
       <Pressable
         className={cn(
-          styles.createPrButton,
-          !enabled && styles.createPrButtonDisabled,
-          enabled && 'active:opacity-[0.78]'
+          'min-h-[42px] bg-primary items-center justify-center flex-row gap-1 px-3',
+          !enabled && 'bg-secondary border-hairline border-border',
+          enabled && 'active:bg-accent'
         )}
         disabled={action.disabled}
         onPress={action.onPress}
@@ -41,13 +40,16 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
           />
         )}
         <Text
-          className={cn(styles.createPrButtonText, !enabled && styles.createPrButtonTextDisabled)}
+          className={cn(
+            'text-primary-foreground text-sm font-bold',
+            !enabled && 'text-muted-foreground'
+          )}
         >
           {action.label}
         </Text>
       </Pressable>
       {action.hint ? (
-        <Text className={styles.createPrHint} numberOfLines={2}>
+        <Text className="text-muted-foreground/60 text-xs leading-[16px]" numberOfLines={2}>
           {action.hint}
         </Text>
       ) : null}

@@ -8,7 +8,6 @@ import { cn } from '@/style/class-names'
 
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { resolveConflictDisplay } from './pr-conflict-presentation'
-import { prConflictStyles as styles } from './pr-conflict-styles'
 import { PRSection } from './pr-section'
 
 // Launches the "Resolve conflicts with AI" agent. Absent for display-only usages.
@@ -76,24 +75,31 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
   return (
     <PRSection title="Conflicts">
       {conflict.commitsBehind !== null && conflict.baseCommit !== null ? (
-        <Text className={styles.meta}>
+        <Text className="text-muted-foreground text-[11px]">
           {conflict.commitsBehind} commit{conflict.commitsBehind === 1 ? '' : 's'} behind (base
-          commit: <Text className={styles.metaMono}>{conflict.baseCommit}</Text>)
+          commit:{' '}
+          <Text className="text-muted-foreground font-mono text-[11px]">{conflict.baseCommit}</Text>
+          )
         </Text>
       ) : null}
 
       {conflict.fileDetailsUnavailable ? (
         <View>
-          <Text className={styles.noticeTitle}>
+          <Text className="text-foreground text-[11px] font-semibold">
             This branch has conflicts that must be resolved
           </Text>
-          <Text className={styles.noticeBody}>{noticeBody}</Text>
+          <Text className="text-muted-foreground mt-1 text-[11px]">{noticeBody}</Text>
           {conflict.mergeabilityRefreshCommands ? (
-            <View className={styles.commandBox}>
-              <View className={styles.commandHeader}>
-                <Text className={styles.commandLabel}>Run from this worktree</Text>
+            <View className="border-hairline border-border bg-secondary mt-2 p-2">
+              <View className="flex-row items-center justify-between gap-2">
+                <Text className="text-muted-foreground text-[10px] font-semibold">
+                  Run from this worktree
+                </Text>
                 <Pressable
-                  className={cn(styles.copyCommandButton, styles.copyCommandButtonPressedActive)}
+                  className={cn(
+                    'flex-row items-center gap-1 border-hairline border-border px-2 py-1',
+                    'active:bg-accent'
+                  )}
                   onPress={() => void copyRefreshCommands()}
                   accessibilityRole="button"
                   accessibilityLabel="Copy mergeability refresh commands"
@@ -103,12 +109,15 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
                   ) : (
                     <Copy size={13} colorClassName="accent-foreground" />
                   )}
-                  <Text className={styles.copyCommandText}>
+                  <Text className="text-foreground text-[11px] font-semibold">
                     {commandsCopied ? 'Copied' : 'Copy commands'}
                   </Text>
                 </Pressable>
               </View>
-              <Text selectable className={styles.commandText}>
+              <Text
+                selectable
+                className="text-foreground mt-2 font-mono text-[10px] leading-[15px]"
+              >
                 {conflict.mergeabilityRefreshCommands}
               </Text>
             </View>
@@ -116,19 +125,19 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
         </View>
       ) : (
         <View>
-          <View className={styles.filesHeader}>
+          <View className="mt-2 flex-row items-center gap-2">
             <FileWarning size={14} colorClassName="accent-muted-foreground" />
-            <Text className={styles.filesHeaderText}>Conflicting files</Text>
+            <Text className="text-muted-foreground text-[11px]">Conflicting files</Text>
           </View>
           <ScrollView
-            className={styles.fileList}
-            contentContainerClassName={styles.fileListContent}
+            className="mt-2 max-h-[180px]"
+            contentContainerClassName="gap-1"
             nestedScrollEnabled
             showsVerticalScrollIndicator={false}
           >
             {conflict.files.map((filePath) => (
-              <View key={filePath} className={styles.fileRow}>
-                <Text className={styles.filePath}>{filePath}</Text>
+              <View key={filePath} className="border-hairline border-border bg-secondary px-2 py-1">
+                <Text className="text-foreground font-mono text-[11px]">{filePath}</Text>
               </View>
             ))}
           </ScrollView>
@@ -138,9 +147,12 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
       {/* "Resolve conflicts with AI" — mirrors desktop's PRTriageStrip. Launches an
           agent that brings the base branch in and completes the merge. */}
       {triage ? (
-        <View className={triageStyles.triageArea}>
+        <View className="gap-1">
           <Pressable
-            className={cn(triageStyles.triageButton, triageStyles.triageButtonPressedActive)}
+            className={cn(
+              'min-h-9 flex-row items-center justify-center gap-1 px-3 border-hairline border-border bg-secondary',
+              'active:bg-accent'
+            )}
             onPress={triage.resolveConflicts}
             disabled={triage.isBusy}
             accessibilityRole="button"
@@ -151,7 +163,9 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
             ) : (
               <Sparkles size={14} colorClassName="accent-muted-foreground" />
             )}
-            <Text className={triageStyles.triageButtonText}>Resolve conflicts with AI</Text>
+            <Text className="text-muted-foreground text-sm font-semibold">
+              Resolve conflicts with AI
+            </Text>
           </Pressable>
           {triage.error ? <Text className={triageStyles.triageError}>{triage.error}</Text> : null}
         </View>

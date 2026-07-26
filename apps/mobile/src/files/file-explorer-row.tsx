@@ -35,7 +35,7 @@ export function MobileFileExplorerRow(props: Props) {
       >
         <View className={styles.chevronSpacer} />
         <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-        <Text className={styles.inlineStatusText}>Loading...</Text>
+        <Text className="text-muted-foreground text-xs">Loading...</Text>
       </View>
     )
   }
@@ -47,18 +47,21 @@ export function MobileFileExplorerRow(props: Props) {
         style={[{ paddingLeft: spacing.lg + item.depth * 18 }]}
       >
         <View className={styles.chevronSpacer} />
-        <Text className={styles.inlineErrorText} numberOfLines={1}>
+        <Text className="text-destructive min-w-0 flex-1 text-xs" numberOfLines={1}>
           {item.message || 'Unable to load folder'}
         </Text>
         <Pressable
-          className={cn(styles.inlineRetryButton, styles.rowPressedActive)}
+          className={cn(
+            'min-h-7 items-center justify-center border-hairline border-border px-3',
+            styles.rowPressedActive
+          )}
           onPress={() => {
             triggerSelection()
             onRetryDirectory(item.relativePath)
           }}
           accessibilityLabel={`Retry loading ${item.relativePath}`}
         >
-          <Text className={styles.inlineRetryText}>Retry</Text>
+          <Text className="text-foreground text-xs font-semibold">Retry</Text>
         </Pressable>
       </View>
     )
@@ -103,9 +106,9 @@ function TreeRow(props: {
   return (
     <Pressable
       className={cn(
-        styles.row,
+        'min-h-11 flex-row items-center gap-2 pr-3',
         !disabled && styles.rowPressedActive,
-        disabled && styles.rowDisabled
+        disabled && 'opacity-[0.58]'
       )}
       style={{ paddingLeft: spacing.lg + item.depth * 18 }}
       disabled={disabled}
@@ -143,14 +146,18 @@ function TreeRow(props: {
       ) : (
         <File size={17} colorClassName="accent-muted-foreground" />
       )}
-      <View className={styles.rowTextBlock}>
+      <View className="min-w-0 flex-1">
         <Text
-          className={cn(styles.rowTitle, disabled && styles.rowTitleDisabled)}
+          className={cn('text-foreground text-sm', disabled && 'text-muted-foreground/60')}
           numberOfLines={1}
         >
           {item.name}
         </Text>
-        {disabled ? <Text className={styles.rowMeta}>Unavailable on mobile</Text> : null}
+        {disabled ? (
+          <Text className="text-muted-foreground/60 mt-[1px] text-[11px]">
+            Unavailable on mobile
+          </Text>
+        ) : null}
       </View>
     </Pressable>
   )

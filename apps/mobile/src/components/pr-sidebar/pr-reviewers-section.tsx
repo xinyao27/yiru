@@ -72,7 +72,7 @@ export function PRReviewersSection({ details, actions, client, worktreeId }: Pro
   return (
     <PRSection title="Reviewers" trailing={addButton}>
       {loadingDetails ? (
-        <View className={styles.reviewersStatus}>
+        <View className="min-h-11 flex-row items-center gap-2">
           <ActivityIndicator colorClassName="accent-muted-foreground" />
           <Text className={styles.emptyText}>Loading reviewers…</Text>
         </View>

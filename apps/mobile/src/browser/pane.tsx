@@ -1058,8 +1058,8 @@ export function MobileBrowserPane({
     frameUriRef.current || frameUri ? { uri: frameUriRef.current ?? frameUri! } : null
   const frameLayerClassName = useCallback((layer: FrameLayer) => {
     return cn(
-      styles.browserImageLayer,
-      visibleFrameLayerRef.current !== layer && styles.browserImageLayerHidden
+      'absolute inset-0 items-center justify-center',
+      visibleFrameLayerRef.current !== layer && 'opacity-[0]'
     )
   }, [])
   const browserLayerRef = useCallback(
@@ -1082,8 +1082,8 @@ export function MobileBrowserPane({
   )
 
   return (
-    <View ref={setRootViewRef} className={styles.root}>
-      <View className={styles.toolbar}>
+    <View ref={setRootViewRef} className="bg-background min-h-0 flex-1">
+      <View className="border-b-border bg-card min-h-8 flex-row items-center gap-1 border-b px-2 py-[2px]">
         <MobileBrowserToolbarIconButton
           disabled={controlsDisabled || !tab.canGoBack}
           label="Back"
@@ -1106,7 +1106,7 @@ export function MobileBrowserPane({
           <RefreshCw size={15} colorClassName="accent-muted-foreground" />
         </MobileBrowserToolbarIconButton>
         <TextInput
-          className={styles.addressInput}
+          className="bg-secondary text-foreground h-7 min-w-0 flex-1 px-2 py-0 font-mono text-xs leading-[16px]"
           style={{ includeFontPadding: false, textAlignVertical: 'center' }}
           value={addressValue}
           onChangeText={setAddressValue}
@@ -1132,7 +1132,7 @@ export function MobileBrowserPane({
       </View>
 
       <View
-        className={styles.viewport}
+        className="bg-background min-h-0 flex-1 overflow-hidden"
         onLayout={(event) => {
           const next = {
             width: event.nativeEvent.layout.width,
@@ -1148,11 +1148,11 @@ export function MobileBrowserPane({
         {...panResponder.panHandlers}
       >
         {renderedFrameSource ? (
-          <View className={styles.browserImageHost}>
+          <View className="absolute inset-0 items-center justify-center overflow-hidden">
             {frameGeometry ? (
               <View
                 pointerEvents="none"
-                className={styles.browserZoomOffset}
+                className="items-center justify-center"
                 style={[
                   {
                     width: frameGeometry.renderedWidth,
@@ -1162,7 +1162,7 @@ export function MobileBrowserPane({
                 ]}
               >
                 <View
-                  className={styles.browserFrameBox}
+                  className="items-center justify-center overflow-hidden"
                   style={[
                     {
                       width: frameGeometry.renderedWidth,
@@ -1185,7 +1185,7 @@ export function MobileBrowserPane({
                         fadeDuration={0}
                         onLoad={frameLayerLoadHandler(layer)}
                         onError={frameLayerErrorHandler(layer)}
-                        className={styles.browserImage}
+                        className="bg-background"
                         style={[
                           {
                             width: frameGeometry.renderedWidth,
@@ -1212,7 +1212,7 @@ export function MobileBrowserPane({
                     fadeDuration={0}
                     onLoad={frameLayerLoadHandler(layer)}
                     onError={frameLayerErrorHandler(layer)}
-                    className={styles.browserImageFill}
+                    className="h-full w-full"
                   />
                 </View>
               ))
@@ -1220,19 +1220,28 @@ export function MobileBrowserPane({
           </View>
         ) : null}
         {!renderedFrameSource || busy || error ? (
-          <View pointerEvents="none" className={styles.overlay}>
+          <View
+            pointerEvents="none"
+            className="absolute inset-0 items-center justify-center gap-2 bg-black/20 p-6"
+          >
             {busy || (!ready && !error) ? (
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
-            {error ? <Text className={styles.errorText}>{error}</Text> : null}
+            {error ? (
+              <Text className="text-foreground bg-card border-border overflow-hidden border px-3 py-2 text-center text-xs">
+                {error}
+              </Text>
+            ) : null}
           </View>
         ) : null}
         {dialog ? (
-          <View className={styles.dialogOverlay}>
-            <View className={styles.dialogCard}>
-              <Text className={styles.dialogTitle}>Browser Dialog</Text>
-              <Text className={styles.dialogMessage}>{dialog.message}</Text>
-              <View className={styles.dialogActions}>
+          <View className="absolute inset-0 z-[30] items-center justify-center bg-black/50 p-6">
+            <View className="border-border bg-background w-full max-w-[360px] border p-4">
+              <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
+              <Text className="text-muted-foreground mt-2 text-sm leading-[20px]">
+                {dialog.message}
+              </Text>
+              <View className="mt-4 flex-row justify-end gap-2">
                 {dialog.dialogType !== 'alert' ? (
                   <Pressable
                     className={cn(styles.dialogButton, styles.dialogButtonPressedActive)}
@@ -1244,14 +1253,12 @@ export function MobileBrowserPane({
                 <Pressable
                   className={cn(
                     styles.dialogButton,
-                    styles.dialogButtonPrimary,
+                    'bg-primary',
                     styles.dialogButtonPressedActive
                   )}
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
                 >
-                  <Text className={cn(styles.dialogButtonText, styles.dialogButtonPrimaryText)}>
-                    OK
-                  </Text>
+                  <Text className={cn(styles.dialogButtonText, 'text-primary-foreground')}>OK</Text>
                 </Pressable>
               </View>
             </View>
@@ -1260,7 +1267,7 @@ export function MobileBrowserPane({
       </View>
 
       <View
-        className={styles.keyboardDock}
+        className="border-t-border bg-card z-[20] border-t"
         style={[{ paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }]}
       >
         <MobileBrowserPointerModifiers
@@ -1272,9 +1279,9 @@ export function MobileBrowserPane({
           disabled={controlsDisabled}
           onKeypress={(key) => void sendKeypress(key)}
         />
-        <View className={styles.inputRow}>
+        <View className="flex-row items-center px-3 pt-1 pb-1.5">
           <TextInput
-            className={styles.keyboardInput}
+            className="bg-secondary text-foreground mr-2 h-[34px] flex-1 px-3 font-mono text-sm"
             value={keyboardValue}
             onChangeText={setKeyboardValue}
             placeholder="Type on page…"
@@ -1286,8 +1293,8 @@ export function MobileBrowserPane({
           />
           <Pressable
             className={cn(
-              styles.sendButton,
-              (controlsDisabled || !keyboardValue) && styles.disabled
+              'w-[34px] h-[34px] items-center justify-center bg-secondary',
+              (controlsDisabled || !keyboardValue) && 'opacity-[0.35]'
             )}
             disabled={controlsDisabled || !keyboardValue}
             onPress={() => void sendKeyboardText()}
@@ -1476,39 +1483,7 @@ function updatePinchZoom(
 }
 
 const styles = {
-  root: cn('flex-1 min-h-0 bg-background'),
-  toolbar: cn('min-h-8 flex-row items-center gap-1 px-2 py-[2px] border-b border-b-border bg-card'),
-  addressInput: cn(
-    'flex-1 min-w-0 h-7 rounded-none bg-secondary text-foreground px-2 py-0 text-[12px] leading-[16px] font-mono'
-  ),
-  viewport: cn('flex-1 min-h-0 overflow-hidden bg-background'),
-  browserImageHost: cn('absolute inset-0 items-center justify-center overflow-hidden'),
-  browserImageFill: cn('w-full h-full'),
-  browserImageLayer: cn('absolute inset-0 items-center justify-center'),
-  browserImageLayerHidden: cn('opacity-[0]'),
-  browserZoomOffset: cn('items-center justify-center'),
-  browserFrameBox: cn('items-center justify-center overflow-hidden'),
-  browserImage: cn('bg-background'),
-  overlay: cn('absolute inset-0 items-center justify-center p-6 gap-2 bg-black/20'),
-  errorText: cn(
-    'text-foreground bg-card border border-border rounded-none px-3 py-2 text-[13px] text-center overflow-hidden'
-  ),
-  dialogOverlay: cn('absolute inset-0 z-[30] items-center justify-center p-6 bg-black/50'),
-  dialogCard: cn('w-full max-w-[360px] rounded-none border border-border bg-card p-4'),
-  dialogTitle: cn('text-foreground text-[16px] font-semibold'),
-  dialogMessage: cn('text-muted-foreground text-[14px] leading-[20px] mt-2'),
-  dialogActions: cn('flex-row justify-end gap-2 mt-4'),
-  dialogButton: cn('min-h-[34px] rounded-none bg-secondary px-3 items-center justify-center'),
-  dialogButtonPrimary: cn('bg-foreground'),
-  dialogButtonPressedActive: cn('active:opacity-[0.75]'),
-  dialogButtonText: cn('text-muted-foreground text-[14px] font-semibold'),
-  dialogButtonPrimaryText: cn('text-background'),
-  keyboardDock: cn('z-[20] border-t border-t-border bg-card'),
-  inputRow: cn('flex-row items-center px-3 pt-1 pb-1.5'),
-  keyboardInput: cn(
-    'flex-1 h-[34px] bg-secondary text-foreground rounded-none px-3 text-[14px] font-mono mr-2'
-  ),
-  sendButton: cn('w-[34px] h-[34px] rounded-none items-center justify-center bg-secondary'),
-  disabled: cn('opacity-[0.35]'),
-  disabledText: cn('text-muted-foreground/60')
+  dialogButton: cn('min-h-[34px] bg-secondary px-3 items-center justify-center'),
+  dialogButtonPressedActive: cn('active:bg-accent'),
+  dialogButtonText: cn('text-muted-foreground text-sm font-semibold')
 } as const

@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect } from 'react'
 import { AppState, Linking, View, Text, Pressable, Switch } from 'react-native'
 
 import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import {
   ensureNotificationPermissions,
@@ -74,17 +73,20 @@ export default function NotificationsScreen() {
     : 'Get notified on this device when an agent needs your input or finishes a task.'
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <View className="bg-background pt-safe-offset-2 flex-1 p-4">
+      <View className="mb-6 flex-row items-center">
+        <Pressable
+          className="mr-2 h-9 w-9 items-center justify-center"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text className={styles.heading}>Notifications</Text>
+        <Text className="text-foreground text-sm font-bold">Notifications</Text>
       </View>
 
-      <View className={styles.section}>
-        <View className={styles.row}>
-          <Text className={styles.rowLabel}>Agent notifications</Text>
+      <View className="bg-card overflow-hidden">
+        <View className="flex-row items-center gap-2.5 px-3.5 py-3">
+          <Text className="text-foreground flex-1 text-sm font-medium">Agent notifications</Text>
           <Switch
             value={switchEnabled}
             disabled={notificationsBlocked}
@@ -95,30 +97,16 @@ export default function NotificationsScreen() {
             ios_backgroundColorClassName="accent-secondary"
           />
         </View>
-        <Text className={styles.hint}>{hint}</Text>
+        <Text className="text-muted-foreground/60 px-3.5 pb-3 text-xs leading-[18px]">{hint}</Text>
         {notificationsBlocked && (
           <Pressable
-            className={cn(styles.settingsButton, styles.settingsButtonPressedActive)}
+            className="bg-secondary active:bg-accent mx-3.5 mb-3 self-start px-2 py-1"
             onPress={() => void Linking.openSettings()}
           >
-            <Text className={styles.settingsButtonText}>Open Settings</Text>
+            <Text className="text-foreground text-xs font-semibold">Open Settings</Text>
           </Pressable>
         )}
       </View>
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  topRow: cn('flex-row items-center mb-6'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  section: cn('bg-card rounded-none overflow-hidden'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowLabel: cn('flex-1 text-[14px] font-medium text-foreground'),
-  hint: cn('text-[12px] text-muted-foreground/60 leading-[18px] px-3.5 pb-3'),
-  settingsButton: cn('self-start mx-3.5 mb-3 py-1 px-2 rounded-none bg-secondary'),
-  settingsButtonPressedActive: cn('active:opacity-[0.6]'),
-  settingsButtonText: cn('text-foreground text-[12px] font-semibold')
-} as const

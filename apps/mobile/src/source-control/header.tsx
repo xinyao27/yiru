@@ -32,9 +32,9 @@ export function MobileSourceControlHeader({
   prNumber = null
 }: Props) {
   return (
-    <View className={styles.topBar}>
+    <View className="min-h-[58px] flex-row items-center px-2">
       <Pressable
-        className={cn(styles.backButton, 'active:bg-secondary')}
+        className={cn('w-9 h-9 items-center justify-center mr-1', 'active:bg-accent')}
         onPress={onBack}
         hitSlop={8}
         accessibilityLabel={embedded ? 'Close source control' : 'Back to session'}
@@ -45,17 +45,17 @@ export function MobileSourceControlHeader({
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         )}
       </Pressable>
-      <View className={styles.titleBlock}>
-        <Text className={styles.title} numberOfLines={1}>
+      <View className="min-w-0 flex-1">
+        <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
           Source Control
         </Text>
-        <Text className={styles.meta} numberOfLines={1}>
+        <Text className="text-muted-foreground mt-[2px] text-xs" numberOfLines={1}>
           {worktreeLabel}
         </Text>
       </View>
       {onOpenPrWeb ? (
         <Pressable
-          className={cn(styles.refreshButton, 'active:bg-secondary')}
+          className={cn(styles.refreshButton, 'active:bg-accent')}
           onPress={onOpenPrWeb}
           hitSlop={8}
           accessibilityRole="link"
@@ -69,11 +69,7 @@ export function MobileSourceControlHeader({
         </Pressable>
       ) : null}
       <Pressable
-        className={cn(
-          styles.refreshButton,
-          ioBusy && styles.refreshButtonDisabled,
-          'active:bg-secondary'
-        )}
+        className={cn(styles.refreshButton, ioBusy && 'opacity-[0.45]', 'active:bg-accent')}
         onPress={onRefresh}
         disabled={ioBusy}
         hitSlop={8}

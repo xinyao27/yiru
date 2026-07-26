@@ -9,7 +9,6 @@ import {
 import { cn } from '@/style/class-names'
 
 import type { MobileCommitFailureRecovery } from './commit-failure-recovery'
-import { styles } from './styles'
 import type { MobileCommitFailureRecoveryAction } from './use-commit-failure-recovery'
 
 type Props = {
@@ -23,19 +22,19 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
   const detailsText = failure.error.trim()
 
   return (
-    <View className={styles.commitFailurePanel}>
-      <View className={styles.commitFailureHeader}>
-        <View className={styles.commitFailureTextBlock}>
-          <Text className={styles.commitFailureTitle}>Commit failed</Text>
-          <Text className={styles.commitFailureSummary} numberOfLines={2}>
+    <View className="bg-secondary border-hairline border-destructive mt-2 gap-2 p-2">
+      <View className="flex-row items-center gap-2">
+        <View className="min-w-0 flex-1">
+          <Text className="text-foreground text-sm font-bold">Commit failed</Text>
+          <Text className="text-muted-foreground mt-[2px] text-xs leading-[16px]" numberOfLines={2}>
             {action.summary ?? 'Commit failed.'}
           </Text>
         </View>
         <Pressable
           className={cn(
-            styles.commitFailureFixButton,
-            action.launching && styles.commitFailureFixButtonDisabled,
-            'active:opacity-[0.75]'
+            'min-h-9 px-3 bg-primary flex-row items-center justify-center gap-1',
+            action.launching && 'opacity-[0.45]',
+            'active:bg-accent'
           )}
           onPress={() => void action.launch()}
           disabled={action.launching}
@@ -47,13 +46,13 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
           ) : (
             <Sparkles size={14} colorClassName="accent-primary-foreground" />
           )}
-          <Text className={styles.commitFailureFixButtonText}>Fix</Text>
+          <Text className="text-primary-foreground text-xs font-bold">Fix</Text>
         </Pressable>
       </View>
       {action.hasDetails && detailsText ? (
         <>
           <Pressable
-            className={cn(styles.commitFailureDetailsButton, 'active:opacity-[0.75]')}
+            className={cn('min-h-8 flex-row items-center gap-1', 'active:bg-accent')}
             onPress={() => setExpanded((current) => !current)}
             accessibilityRole="button"
             accessibilityLabel={
@@ -61,15 +60,19 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
             }
           >
             <Chevron size={14} colorClassName="accent-muted-foreground" />
-            <Text className={styles.commitFailureDetailsButtonText}>
+            <Text className="text-muted-foreground text-xs font-semibold">
               {expanded ? 'Hide details' : 'Show details'}
             </Text>
           </Pressable>
-          {expanded ? <Text className={styles.commitFailureDetailsText}>{detailsText}</Text> : null}
+          {expanded ? (
+            <Text className="text-muted-foreground font-mono text-xs leading-[17px]">
+              {detailsText}
+            </Text>
+          ) : null}
         </>
       ) : null}
       {action.launchError ? (
-        <Text className={styles.commitFailureLaunchError}>{action.launchError}</Text>
+        <Text className="text-destructive text-xs leading-[16px]">{action.launchError}</Text>
       ) : null}
     </View>
   )

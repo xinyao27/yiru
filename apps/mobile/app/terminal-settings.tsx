@@ -25,7 +25,7 @@ import {
   saveTerminalTextScale
 } from '../src/storage/preferences'
 import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/auto-restore-fit-state'
-import { useAllHostClients } from '../src/transport/client-context'
+import { useAllHostClients } from '../src/transport/all-host-clients'
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'
 import type { HostProfile } from '../src/transport/types'
@@ -260,17 +260,20 @@ export default function TerminalSettingsScreen() {
   )
 
   return (
-    <GestureHandlerRootView className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
+    <GestureHandlerRootView className="bg-background pt-safe-offset-2 flex-1 px-4 pt-0">
+      <View className="mt-2 mb-4 flex-row items-center">
+        <Pressable
+          className="mr-2 h-9 w-9 items-center justify-center"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text className={styles.heading}>Terminal</Text>
+        <Text className="text-foreground text-sm font-bold">Terminal</Text>
       </View>
 
       <Animated.ScrollView
         ref={scrollRef}
-        contentContainerClassName={styles.scrollContent}
+        contentContainerClassName="pb-6"
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
@@ -288,7 +291,7 @@ export default function TerminalSettingsScreen() {
 
         {hosts.length === 0 ? (
           <View className={cn(styles.section, styles.sectionTopGap)}>
-            <Text className={styles.emptyText}>
+            <Text className="text-muted-foreground p-3 text-sm">
               No paired desktops yet. Pair one to control terminal behavior.
             </Text>
           </View>
@@ -298,7 +301,7 @@ export default function TerminalSettingsScreen() {
               const client = hostClientsById.get(host.id) ?? null
               return (
                 <View key={host.id}>
-                  {idx > 0 && <View className={styles.separator} />}
+                  {idx > 0 && <View className="h-hairline bg-border mx-3" />}
                   <HostFitRow
                     client={client}
                     hostName={host.name}
@@ -390,21 +393,14 @@ export default function TerminalSettingsScreen() {
 }
 
 const styles = {
-  container: cn('flex-1 bg-background px-4 pt-0'),
-  topRow: cn('flex-row items-center mt-2 mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  scrollContent: cn('pb-6'),
   groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
-  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
-  section: cn('bg-card rounded-none overflow-hidden'),
+  groupDescription: cn('text-xs text-muted-foreground leading-[20px] px-1'),
+  section: cn('bg-card overflow-hidden'),
   sectionTopGap: cn('mt-2'),
   inputGroupGap: cn('mt-6'),
-  emptyText: cn('text-[14px] text-muted-foreground p-3'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
+  rowPressedActive: cn('active:bg-accent'),
   rowContent: cn('flex-1'),
-  rowLabel: cn('text-[14px] font-medium text-foreground'),
-  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]'),
-  separator: cn('h-hairline bg-border mx-3')
+  rowLabel: cn('text-sm font-medium text-foreground'),
+  rowSublabel: cn('text-xs text-muted-foreground mt-[2px]')
 } as const

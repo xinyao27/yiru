@@ -146,15 +146,15 @@ export function SmartWorkspaceSourceDrawer({
       dragContentToDismiss={false}
       contentScrollable={false}
     >
-      <View className={styles.header}>
-        <Text className={styles.title}>Name or 'Create From'</Text>
+      <View className="flex-row items-center justify-between px-1 pb-2">
+        <Text className="text-foreground text-sm font-semibold">Name or 'Create From'</Text>
         <Pressable onPress={closeSoon} hitSlop={8}>
-          <Text className={styles.done}>Done</Text>
+          <Text className="text-primary text-sm font-semibold">Done</Text>
         </Pressable>
       </View>
 
       <TextInput
-        className={styles.search}
+        className="bg-secondary text-foreground border-border mb-2 border px-3 py-2 text-sm"
         value={composer.name}
         onChangeText={composer.setName}
         placeholder="Type a name or search a source"
@@ -164,7 +164,7 @@ export function SmartWorkspaceSourceDrawer({
         autoFocus
       />
 
-      <View className={styles.tabRow}>
+      <View className="mb-2 flex-row flex-wrap gap-1">
         {SMART_MODE_OPTIONS.filter((option: SmartModeOption) =>
           availableModes.includes(option.id)
         ).map((option) => {
@@ -172,14 +172,22 @@ export function SmartWorkspaceSourceDrawer({
           return (
             <Pressable
               key={option.id}
-              className={cn(styles.tab, selected && styles.tabSelected)}
+              className={cn(
+                'flex-row items-center gap-1 px-2.5 py-1.5 border border-border',
+                selected && 'bg-card border-muted-foreground'
+              )}
               onPress={() => setMode(option.id)}
             >
               <SmartSourceModeIcon
                 icon={option.icon}
                 colorClassName={selected ? 'accent-foreground' : 'accent-muted-foreground'}
               />
-              <Text className={cn(styles.tabText, selected && styles.tabTextSelected)}>
+              <Text
+                className={cn(
+                  'text-xs text-muted-foreground',
+                  selected && 'text-foreground font-semibold'
+                )}
+              >
                 {option.label}
               </Text>
             </Pressable>
@@ -188,16 +196,24 @@ export function SmartWorkspaceSourceDrawer({
       </View>
 
       {effectiveMode === 'gitlab' ? (
-        <View className={styles.chipRow}>
+        <View className="mb-2 flex-row gap-1">
           {MR_STATE_FILTER_OPTIONS.map((option) => {
             const selected = option.id === mrStateFilter
             return (
               <Pressable
                 key={option.id}
-                className={cn(styles.chip, selected && styles.chipSelected)}
+                className={cn(
+                  'px-3 py-1 border border-border',
+                  selected && 'bg-card border-muted-foreground'
+                )}
                 onPress={() => setMrStateFilter(option.id)}
               >
-                <Text className={cn(styles.chipText, selected && styles.chipTextSelected)}>
+                <Text
+                  className={cn(
+                    'text-xs text-muted-foreground',
+                    selected && 'text-foreground font-semibold'
+                  )}
+                >
                   {option.label}
                 </Text>
               </Pressable>
@@ -207,19 +223,22 @@ export function SmartWorkspaceSourceDrawer({
       ) : null}
 
       {crossRepoPrompt ? (
-        <View className={styles.crossRepo}>
-          <Text className={styles.crossRepoText}>
+        <View className="bg-secondary border-border mb-2 gap-2 border p-3">
+          <Text className="text-muted-foreground text-xs">
             This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
           </Text>
-          <View className={styles.crossRepoActions}>
-            <Pressable className={styles.crossRepoDismiss} onPress={dismissCrossRepoPrompt}>
-              <Text className={styles.crossRepoDismissText}>Cancel</Text>
+          <View className="flex-row justify-end gap-2">
+            <Pressable
+              className="border-border border px-3 py-1.5"
+              onPress={dismissCrossRepoPrompt}
+            >
+              <Text className="text-muted-foreground text-xs">Cancel</Text>
             </Pressable>
             <Pressable
-              className={styles.crossRepoSwitch}
+              className="bg-card border-muted-foreground border px-3 py-1.5"
               onPress={() => void handleAcceptCrossRepo()}
             >
-              <Text className={styles.crossRepoSwitchText}>
+              <Text className="text-foreground text-xs font-semibold">
                 Switch to {crossRepoPrompt.matchingRepo.displayName}
               </Text>
             </Pressable>
@@ -234,22 +253,24 @@ export function SmartWorkspaceSourceDrawer({
           This SSH repo needs a GitHub remote to list pull requests.
         </Text>
       ) : error ? (
-        <Text className={styles.errorNotice}>{error}</Text>
+        <Text className="text-destructive px-1 pb-2 text-xs">{error}</Text>
       ) : null}
 
       <FlatList
         data={rows}
         keyExtractor={(row) => row.value}
-        className={styles.list}
+        className="bg-card max-h-[420px] grow-0 overflow-hidden"
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled
         ListFooterComponent={
           loading ? (
-            <View className={styles.loading}>
+            <View className="items-center py-4">
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             </View>
           ) : showEmpty ? (
-            <Text className={styles.empty}>{emptyHint || 'No results found.'}</Text>
+            <Text className="text-muted-foreground/60 py-4 text-center text-xs">
+              {emptyHint || 'No results found.'}
+            </Text>
           ) : null
         }
         renderItem={({ item }) => (
@@ -261,32 +282,5 @@ export function SmartWorkspaceSourceDrawer({
 }
 
 const styles = {
-  header: cn('flex-row items-center justify-between px-1 pb-2'),
-  title: cn('text-[15px] font-semibold text-foreground'),
-  done: cn('text-[14px] font-semibold text-primary'),
-  search: cn(
-    'bg-secondary text-foreground rounded-none px-3 py-2 text-[14px] border border-border mb-2'
-  ),
-  tabRow: cn('flex-row flex-wrap gap-1 mb-2'),
-  tab: cn('flex-row items-center gap-1 px-2.5 py-1.5 rounded-none border border-border'),
-  tabSelected: cn('bg-card border-muted-foreground'),
-  tabText: cn('text-[13px] text-muted-foreground'),
-  tabTextSelected: cn('text-foreground font-semibold'),
-  chipRow: cn('flex-row gap-1 mb-2'),
-  chip: cn('px-3 py-1 rounded-none border border-border'),
-  chipSelected: cn('bg-card border-muted-foreground'),
-  chipText: cn('text-[12px] text-muted-foreground'),
-  chipTextSelected: cn('text-foreground font-semibold'),
-  crossRepo: cn('bg-secondary rounded-none border border-border p-3 mb-2 gap-2'),
-  crossRepoText: cn('text-[13px] text-muted-foreground'),
-  crossRepoActions: cn('flex-row justify-end gap-2'),
-  crossRepoDismiss: cn('px-3 py-1.5 rounded-none border border-border'),
-  crossRepoDismissText: cn('text-[13px] text-muted-foreground'),
-  crossRepoSwitch: cn('px-3 py-1.5 rounded-none bg-card border border-muted-foreground'),
-  crossRepoSwitchText: cn('text-[13px] font-semibold text-foreground'),
-  notice: cn('text-[12px] text-muted-foreground/60 px-1 pb-2'),
-  errorNotice: cn('text-[12px] text-destructive px-1 pb-2'),
-  list: cn('bg-card rounded-none overflow-hidden max-h-[420px] grow-0'),
-  loading: cn('py-4 items-center'),
-  empty: cn('py-4 text-center text-muted-foreground/60 text-[13px]')
+  notice: cn('text-xs text-muted-foreground/60 px-1 pb-2')
 } as const
