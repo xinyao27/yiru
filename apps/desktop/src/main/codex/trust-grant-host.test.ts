@@ -1,7 +1,7 @@
 // @ts-nocheck -- Vite Plus injects the vitest API at test time; production tsconfig intentionally omits that package.
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
-import { buildWslCodexIdentityArgs } from '../codex-accounts/wsl-codex-command'
+import { buildWslCodexIdentityArgs } from './accounts/wsl-codex-command'
 
 const { execFileSyncMock, resolveCodexCommandMock } = vi.hoisted(() => ({
   execFileSyncMock: vi.fn(),

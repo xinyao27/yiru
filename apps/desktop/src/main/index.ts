@@ -50,20 +50,19 @@ import { initializeBrowserSessionsForApp } from './browser/session-startup'
 import {
   attachClaudeLivePtyPersistence,
   seedLiveClaudePtysFromPersistence
-} from './claude-accounts/live-pty-gate'
-import { ClaudeRuntimeAuthService } from './claude-accounts/runtime-auth-service'
-import { normalizeClaudeRuntimeSelection } from './claude-accounts/runtime-selection'
-import { ClaudeAccountService } from './claude-accounts/service'
-import { ClaudeUsageStore, initClaudeUsagePath } from './claude-usage/store'
+} from './claude/accounts/live-pty-gate'
+import { ClaudeRuntimeAuthService } from './claude/accounts/runtime-auth-service'
+import { normalizeClaudeRuntimeSelection } from './claude/accounts/runtime-selection'
+import { ClaudeAccountService } from './claude/accounts/service'
+import { ClaudeUsageStore, initClaudeUsagePath } from './claude/usage/store'
 import { CliInstaller } from './cli/installer'
 import { reconcileManagedWslCliRegistrations } from './cli/wsl-cli-registration-reconciliation'
-import { CodexRuntimeHomeService } from './codex-accounts/runtime-home-service'
+import { CodexRuntimeHomeService } from './codex/accounts/runtime-home-service'
 import {
   normalizeCodexRuntimeSelection,
   type CodexAccountSelectionTarget
-} from './codex-accounts/runtime-selection'
-import { CodexAccountService } from './codex-accounts/service'
-import { CodexUsageStore, initCodexUsagePath } from './codex-usage/store'
+} from './codex/accounts/runtime-selection'
+import { CodexAccountService } from './codex/accounts/service'
 import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
 import {
   ensureRealHomeCodexHookState,
@@ -72,6 +71,7 @@ import {
 import { startCodexSessionBackfillInBackground } from './codex/session-backfill'
 import { startCodexSessionIndexHealInBackground } from './codex/session-index-heal'
 import { resolveHostCodexSessionSourceHome } from './codex/session-source-home'
+import { CodexUsageStore, initCodexUsagePath } from './codex/usage/store'
 import {
   createCoworkingOwnerComposition,
   type CoworkingOwnerComposition
@@ -114,7 +114,7 @@ import { readMiniMaxSessionCookie } from './minimax/cookie-store'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
 import { initObservability, shutdownObservability } from './observability/service'
-import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode-usage/store'
+import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode/usage/store'
 import {
   Store,
   initDataPath,

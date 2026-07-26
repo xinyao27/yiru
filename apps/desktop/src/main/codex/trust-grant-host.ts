@@ -1,13 +1,13 @@
 import { execFileSync } from 'node:child_process'
 
+import { getSpawnArgsForWindows } from '../win32-utils'
 import {
   buildWslCodexAppServerArgs,
   buildWslCodexIdentityArgs,
   WSL_CODEX_AVAILABILITY_TIMEOUT_MS
-} from '../codex-accounts/wsl-codex-command'
-import { resolveCodexCommand } from '../codex-cli/command'
-import { getSpawnArgsForWindows } from '../win32-utils'
+} from './accounts/wsl-codex-command'
 import type { CodexHookTrustGrantRequest } from './app-server-client'
+import { resolveCodexCommand } from './cli/command'
 import {
   binaryStampsMatch,
   buildNativeCodexBinaryStamp,

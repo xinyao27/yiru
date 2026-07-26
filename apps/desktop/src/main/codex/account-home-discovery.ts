@@ -1,7 +1,7 @@
 import { lstatSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { assertOwnedHostCodexManagedHomePath } from '../codex-accounts/host-codex-managed-home-ownership'
+import { assertOwnedHostCodexManagedHomePath } from './accounts/host-codex-managed-home-ownership'
 import { getSystemCodexHomePath, getYiruUserDataPath } from './home-paths'
 
 /**

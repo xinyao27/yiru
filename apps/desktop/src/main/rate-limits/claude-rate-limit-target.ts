@@ -3,7 +3,7 @@ import {
   getClaudeWslSelectionKey,
   normalizeClaudeRuntimeSelection,
   type ClaudeAccountSelectionTarget
-} from '../claude-accounts/runtime-selection'
+} from '../claude/accounts/runtime-selection'
 import {
   getProjectRuntimeRateLimitTarget,
   normalizeOptionalDistro

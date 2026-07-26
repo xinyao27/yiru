@@ -3,9 +3,9 @@ import { buildConfiguredProxyEnv, type NetworkProxySettings } from '../../shared
 driving, parser, timers, and teardown in one state machine; splitting it would
 make the lifecycle harder to audit. */
 import type { ProviderRateLimits, RateLimitWindow } from '../../shared/rate-limit-types'
-import { applyClaudeEnvPatch } from '../claude-accounts/environment'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
-import { resolveClaudeCommand } from '../codex-cli/command'
+import { applyClaudeEnvPatch } from '../claude/accounts/environment'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
+import { resolveClaudeCommand } from '../codex/cli/command'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import { extractClaudePtyResetMetadata } from './claude-pty-reset-parser'
 import { cleanupHiddenRateLimitPty, registerHiddenRateLimitPty } from './hidden-pty-cleanup'

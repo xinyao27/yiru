@@ -4,8 +4,8 @@ import { join } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 
-import { getCodexSessionDirectories } from '../codex-usage/scanner'
 import { getCodexAccountHomeSessionDirectories } from './account-home-discovery'
+import { getCodexSessionDirectories } from './usage/scanner'
 
 describe('getCodexAccountHomeSessionDirectories', () => {
   let rootDir: string

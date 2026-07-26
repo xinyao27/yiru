@@ -87,15 +87,15 @@ import {
   applyTerminalAttributionEnv,
   resolveAttributionShellFamily
 } from '../attribution/terminal-attribution'
-import { CLAUDE_AUTH_ENV_VARS, hasClaudeAuthEnvConflict } from '../claude-accounts/environment'
+import { CLAUDE_AUTH_ENV_VARS, hasClaudeAuthEnvConflict } from '../claude/accounts/environment'
 import {
   isClaudeAuthSwitchInProgress,
   markClaudePtyExited,
   markClaudePtySpawned
-} from '../claude-accounts/live-pty-gate'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
-import type { ClaudeAccountSelectionTarget } from '../claude-accounts/runtime-selection'
-import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
+} from '../claude/accounts/live-pty-gate'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
+import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
+import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
 import { isCodexSystemDefaultRealHomeEnabled } from '../codex/real-home-flag'
 import { recordCrashBreadcrumb } from '../crash-reporting/crash-breadcrumb-store'
 import { addNodePtyRecoveryHint } from '../daemon/node-pty-error-hints'

@@ -12,7 +12,7 @@ import { dirname, join, resolve } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
-import { writeFileAtomically } from '../codex-accounts/fs-utils'
+import { writeFileAtomically } from './accounts/fs-utils'
 import {
   createTomlLineScanState,
   getTomlTableHeader,

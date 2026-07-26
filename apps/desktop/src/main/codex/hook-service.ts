@@ -35,7 +35,7 @@ import {
   writeManagedScriptRemote,
   writeTextFileRemoteAtomic
 } from '../agent-hooks/installer-utils-remote'
-import { writeFileAtomically } from '../codex-accounts/fs-utils'
+import { writeFileAtomically } from './accounts/fs-utils'
 import { syncSystemConfigIntoManagedCodexHome } from './config-mirror'
 import {
   codexHookSourcePathsEqual,

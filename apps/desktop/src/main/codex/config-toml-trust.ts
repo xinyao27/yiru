@@ -14,8 +14,8 @@ import { basename, dirname, join, posix as pathPosix, win32 as pathWin32 } from 
 
 import { foldWslUncPathCaseInsensitiveParts } from '@yiru/workbench-model/platform'
 
-import { renameFileWithWindowsRetry } from '../codex-accounts/fs-utils'
 import { writeRollingFileBackup } from '../rolling-file-backup'
+import { renameFileWithWindowsRetry } from './accounts/fs-utils'
 import {
   createTomlLineScanState,
   isTomlStructuralLine,

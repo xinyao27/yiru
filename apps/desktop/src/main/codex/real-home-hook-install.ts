@@ -13,7 +13,7 @@ import {
   type HookDefinition,
   type HooksConfig
 } from '../agent-hooks/installer-utils'
-import { writeFileAtomically } from '../codex-accounts/fs-utils'
+import { writeFileAtomically } from './accounts/fs-utils'
 import type { CodexTrustEntry } from './config-toml-trust'
 import { getSystemCodexHomePath } from './home-paths'
 import { getCodexManagedScriptFileName } from './hook-identity'

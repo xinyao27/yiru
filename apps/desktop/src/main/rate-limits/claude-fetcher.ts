@@ -23,18 +23,18 @@ import {
   readActiveClaudeKeychainCredentialsStrict,
   readManagedClaudeKeychainCredentials,
   writeActiveClaudeKeychainCredentials
-} from '../claude-accounts/keychain'
-import { writeManagedClaudeKeychainCredentials } from '../claude-accounts/keychain'
+} from '../claude/accounts/keychain'
+import { writeManagedClaudeKeychainCredentials } from '../claude/accounts/keychain'
 import {
   readClaudeManagedAuthFile,
   resolveOwnedClaudeManagedAuthPath,
   writeClaudeManagedAuthFile
-} from '../claude-accounts/managed-auth-path'
+} from '../claude/accounts/managed-auth-path'
 import {
   isOauthTokenExpiring,
   refreshClaudeOauthCredentials
-} from '../claude-accounts/oauth-refresh'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
+} from '../claude/accounts/oauth-refresh'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import { ensureElectronProxyFromEnvironment } from '../network/proxy-settings'
 import { createOAuthUsageError, OAuthUsageError } from './claude-oauth-usage-error'

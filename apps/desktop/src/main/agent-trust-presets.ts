@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 
-import { writeFileAtomically } from './codex-accounts/fs-utils'
+import { writeFileAtomically } from './codex/accounts/fs-utils'
 import { upsertProjectTrustLevel } from './codex/config-toml-trust'
 import { getYiruManagedCodexHomePath } from './codex/home-paths'
 

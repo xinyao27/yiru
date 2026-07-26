@@ -1,7 +1,7 @@
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
-import { applyClaudeEnvPatch } from '../claude-accounts/environment'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
+import { applyClaudeEnvPatch } from '../claude/accounts/environment'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import { readShellStartupEnvVar } from '../pty/shell-startup-env'
 
 export type CommitMessageAgentEnvironmentResolvers = {

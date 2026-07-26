@@ -16,7 +16,7 @@ import { app } from 'electron'
 import {
   confirmSeededClaudeLivePtys,
   hasSeededUnconfirmedClaudePtys
-} from '../claude-accounts/live-pty-gate'
+} from '../claude/accounts/live-pty-gate'
 import { getDaemonLogFilePath } from '../observability/logs-directory'
 import {
   getLocalPtyProvider,

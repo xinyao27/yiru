@@ -13,7 +13,7 @@ import {
 } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
-import { renameFileWithWindowsRetry } from '../codex-accounts/fs-utils'
+import { renameFileWithWindowsRetry } from './accounts/fs-utils'
 
 export type CodexTrustConfigSnapshot =
   | { existed: false; restorePath?: string }
