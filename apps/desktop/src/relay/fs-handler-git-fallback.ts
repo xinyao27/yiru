@@ -13,11 +13,11 @@ import {
   buildGitLsFilesArgsForQuickOpen,
   shouldExcludeQuickOpenRelPath,
   shouldIncludeQuickOpenPath
-} from '../shared/quick-open/quick-open-filter'
+} from '../shared/quick-open/filter'
 import {
   expandQuickOpenGitFileListing,
   parseQuickOpenGitLsFilesEntry
-} from '../shared/quick-open/quick-open-readdir-walk'
+} from '../shared/quick-open/readdir-walk'
 import {
   buildGitGrepArgs,
   buildSubmatchRegex,
@@ -26,8 +26,8 @@ import {
   ingestGitGrepLine,
   SEARCH_TIMEOUT_MS
 } from '../shared/text-search'
+import { buildRelayGitEnv } from './command-env'
 import type { SearchOptions, SearchResult } from './fs-handler-text-search'
-import { buildRelayGitEnv } from './relay-command-env'
 
 /**
  * List files using `git ls-files`. Fallback when rg is not installed.

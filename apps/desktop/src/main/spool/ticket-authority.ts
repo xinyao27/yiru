@@ -1,8 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto'
 
-import type { SpoolTicket, SpoolTicketBinding } from '../../shared/spool/spool-access-contract'
-import type { AuthenticatedSpoolPrincipal } from '../../shared/spool/spool-wire-contract'
-import { SPOOL_TICKET_TTL_MS } from '../../shared/spool/spool-wire-contract'
+import type { SpoolTicket, SpoolTicketBinding } from '../../shared/spool/access-contract'
+import type { AuthenticatedSpoolPrincipal } from '../../shared/spool/wire-contract'
+import { SPOOL_TICKET_TTL_MS } from '../../shared/spool/wire-contract'
 
 const MAX_OUTSTANDING_SPOOL_TICKETS = 2_048
 

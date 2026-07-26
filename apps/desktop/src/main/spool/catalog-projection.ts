@@ -1,8 +1,8 @@
 import type {
   SpoolDesktopCatalog,
   SpoolSessionCatalogPage
-} from '../../shared/spool/spool-catalog-contract'
-import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/catalog-contract'
+import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/wire-contract'
 import { SpoolCatalogDescriptionReader } from './catalog-description-reader'
 import { spoolCatalogFingerprint } from './catalog-fingerprint'
 import {

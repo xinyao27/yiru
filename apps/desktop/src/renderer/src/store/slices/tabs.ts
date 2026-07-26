@@ -4,7 +4,7 @@
  * legacy terminal/editor/browser content slices. */
 import type { StateCreator } from 'zustand'
 
-import { emitNativeChatToggled } from '@/components/native-chat/native-chat-telemetry'
+import { emitNativeChatToggled } from '@/components/native-chat/telemetry'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import type { TabSplitDirection } from '@/lib/tab-split-direction'
 import {
@@ -25,8 +25,8 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/workspace-panel-tab'
-import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
+import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import type { AppState } from '../types'
 import { isPaneColumnSplitDropNoOp } from './pane-column-split-drop-no-op'
 import {

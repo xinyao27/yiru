@@ -1,5 +1,5 @@
-import { SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../shared/spool/spool-catalog-contract'
-import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../shared/spool/spool-resource-limits'
+import { SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../shared/spool/catalog-contract'
+import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../shared/spool/resource-limits'
 import { waitForSessionInventoryAbort } from '../ai-vault/session-inventory-abort'
 import { SpoolExecutionError } from './execution-error'
 import { readSpoolHistoricalSessionPages } from './historical-session-pages'

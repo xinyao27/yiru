@@ -10,7 +10,7 @@ import { cn } from '@/lib/class-names'
 import type {
   SpoolChecksReadResult,
   SpoolChecksReview
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 
 export function SpoolChecksResult({
   result

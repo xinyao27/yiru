@@ -6,7 +6,7 @@ import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 import { getIndexedWorktreeById } from '@/store/worktree-repo-index'
 
-import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { createRichMarkdownHtmlSuperscriptLinkContext } from './rich-markdown-html-superscript-link-context'
 import { createRichMarkdownEditorCodec } from './rich-markdown-source-transport'
 

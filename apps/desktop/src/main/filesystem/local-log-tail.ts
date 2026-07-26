@@ -10,7 +10,7 @@ import type {
 } from '../../shared/local-log-tail-types'
 import { readLocalLogTailRange } from '../ai-vault/local-log-tail-reader'
 import type { Store } from '../persistence'
-import { resolveAuthorizedPath } from './filesystem-auth'
+import { resolveAuthorizedPath } from './auth'
 
 type TailWatch = {
   senderId: number

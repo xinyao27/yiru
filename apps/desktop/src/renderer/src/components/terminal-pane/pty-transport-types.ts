@@ -6,7 +6,7 @@ import type { PtyDataMeta } from '@/runtime/pty-data-meta'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import type { EventProps } from '../../../../shared/telemetry-events'
-import type { TerminalOscColorQueryReplyColors } from '../../../../shared/terminal/terminal-osc-color-reply'
+import type { TerminalOscColorQueryReplyColors } from '../../../../shared/terminal/osc-color-reply'
 import type { TuiAgent } from '../../../../shared/types'
 
 export type PtyBufferSnapshot = {

@@ -1,7 +1,7 @@
 import { resolveSpoolWorkspaceRoute, selectSpoolCanControl } from '@/components/spool/selectors'
 import { useAppStore } from '@/store'
 
-import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/ipc-contract'
 import { getSpoolRequesterTransportErrorCode } from './requester-error'
 import type { SpoolWorktreeRoute } from './worktree-route'
 

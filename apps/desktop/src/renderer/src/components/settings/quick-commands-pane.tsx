@@ -8,7 +8,7 @@ import {
 } from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
 import { translate } from '@/i18n/i18n'
 
-import { getTerminalQuickCommandScope } from '../../../../shared/terminal/terminal-quick-commands'
+import { getTerminalQuickCommandScope } from '../../../../shared/terminal/quick-commands'
 import type { GlobalSettings, TerminalQuickCommand } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'

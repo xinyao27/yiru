@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
-import { parseSpoolExecutionResult } from '../../shared/spool/spool-execution-result-schema'
+import { parseSpoolExecutionResult } from '../../shared/spool/execution-result-schema'
 import {
   isSpoolMutationKind,
   type SpoolExecutionOperation
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import type { SpoolAccessAuthority } from './access-authority'
 import type { SpoolExecutionGateway } from './execution-gateway'
 import { createSpoolCatalogRpcMethods } from './rpc-catalog-registry'

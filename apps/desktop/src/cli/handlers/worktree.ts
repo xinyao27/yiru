@@ -7,7 +7,7 @@ import {
 import type { RuntimeWorktreePsResult, RuntimeWorktreeRecord } from '../../shared/runtime-types'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import type { TuiAgent } from '../../shared/types'
-import { isWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/workspace-scope'
+import { isWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/scope'
 import type { CommandHandler } from '../dispatch'
 import {
   getOptionalPositiveIntegerFlag,

@@ -1,4 +1,4 @@
-import type { WarpThemeImportSource } from '../../shared/terminal/terminal-custom-themes'
+import type { WarpThemeImportSource } from '../../shared/terminal/custom-themes'
 
 const VALID_SOURCE_KINDS = new Set(['auto', 'chooseFile', 'chooseFolder'])
 

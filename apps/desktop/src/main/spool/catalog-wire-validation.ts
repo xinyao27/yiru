@@ -1,4 +1,4 @@
-import { isSpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
+import { isSpoolAgentLaunchId } from '../../shared/spool/agent-launch-contract'
 import type {
   SpoolDesktopCatalog,
   SpoolProjectCatalogEntry,
@@ -7,14 +7,14 @@ import type {
   SpoolSessionCatalogPage,
   SpoolSessionCatalogPageState,
   SpoolWorktreeCatalogEntry
-} from '../../shared/spool/spool-catalog-contract'
+} from '../../shared/spool/catalog-contract'
 import {
   SPOOL_CATALOG_MAX_PROJECTS,
   SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE,
   SPOOL_CATALOG_MAX_WORKTREES
-} from '../../shared/spool/spool-catalog-contract'
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
-import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/catalog-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
+import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/wire-contract'
 
 type CatalogCounts = { worktrees: number }
 

@@ -4,7 +4,7 @@ import { cn } from '@/lib/class-names'
 import { setForegroundTerminalTabIds } from '@/lib/foreground-terminal-tabs'
 
 import { hasFeatureInteraction } from '../../../../shared/feature-interactions'
-import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import { useAppStore } from '../../store'
 import { useAllWorktrees } from '../../store/selectors'
 import { useActivityTerminalPortals } from '../activity/terminal-portal'

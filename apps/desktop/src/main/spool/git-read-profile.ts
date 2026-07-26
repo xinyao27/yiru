@@ -4,12 +4,12 @@ import type {
   SpoolGitHistoryOperation,
   SpoolGitHistoryResult,
   SpoolGitStatusResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import {
   SPOOL_GIT_DIFF_MAX_BYTES,
   SPOOL_GIT_HISTORY_DEFAULT_LIMIT,
   SPOOL_GIT_HISTORY_MAX_LIMIT
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolGitCommitReferences } from './git-commit-references'
 import {

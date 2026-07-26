@@ -3,8 +3,8 @@ import type {
   SpoolRpcFailure,
   SpoolRpcRequest,
   SpoolRpcResponse
-} from '../../shared/spool/spool-wire-contract'
-import { SPOOL_MAX_RPC_PLAINTEXT_BYTES } from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/wire-contract'
+import { SPOOL_MAX_RPC_PLAINTEXT_BYTES } from '../../shared/spool/wire-contract'
 import { SPOOL_CANCEL_REQUEST_METHOD, SPOOL_CANCEL_SUBSCRIPTION_METHOD } from './rpc-cancellation'
 import { projectSpoolRpcErrorCode, projectSpoolRpcErrorMessage } from './rpc-error'
 import type {

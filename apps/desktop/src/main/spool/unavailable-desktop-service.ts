@@ -7,13 +7,13 @@ import type {
   SpoolSetProjectVisibilityArgs,
   SpoolSetWorktreeVisibilityArgs,
   SpoolSharingSnapshot
-} from '../../shared/spool/spool-ipc-contract'
+} from '../../shared/spool/ipc-contract'
 import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
-} from '../../shared/spool/spool-windows-firewall-contract'
-import type { SpoolSharingIpcSubscriptionSink } from './spool-requester-subscriptions'
-import type { SpoolSharingIpcController } from './spool-sharing'
+} from '../../shared/spool/windows-firewall-contract'
+import type { SpoolSharingIpcSubscriptionSink } from './requester-subscriptions'
+import type { SpoolSharingIpcController } from './sharing'
 
 const UNAVAILABLE_SNAPSHOT: SpoolSharingSnapshot = {
   status: 'unavailable',

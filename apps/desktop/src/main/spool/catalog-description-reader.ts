@@ -1,4 +1,4 @@
-import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/spool-catalog-contract'
+import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/catalog-contract'
 import { SpoolCatalogDescriptionCache } from './catalog-description-cache'
 import { sanitizeCatalogWorktreeDescription } from './catalog-projection-model'
 import type { ResolvedSpoolCatalogWorktree } from './catalog-projection-model'

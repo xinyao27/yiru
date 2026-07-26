@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import type { SpoolWindowsFirewallStatus } from '../../../../shared/spool/spool-windows-firewall-contract'
-import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'
+import type { SpoolWindowsFirewallStatus } from '../../../../shared/spool/windows-firewall-contract'
+import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/wire-contract'
 
 export function SpoolWindowsFirewallNotice(): React.JSX.Element {
   const [status, setStatus] = useState<SpoolWindowsFirewallStatus | null>(null)

@@ -3,13 +3,13 @@ import { mkdir, opendir, rename, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 import { assertNoClobberRenameDestinationAvailable } from '../shared/filesystem-rename-collision'
-import { hasExactSpoolWireKeys } from '../shared/spool/spool-exact-wire-record'
+import { hasExactSpoolWireKeys } from '../shared/spool/exact-wire-record'
 import {
   SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
   SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT,
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
-} from '../shared/spool/spool-operation-contract'
+} from '../shared/spool/operation-contract'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { registerSpoolIncarnationMarkerHandler } from './fs-handler-spool-incarnation-marker'
 import {

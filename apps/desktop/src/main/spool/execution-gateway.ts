@@ -4,8 +4,8 @@ import type {
   SpoolSubscriptionEvent,
   SpoolSubscriptionOperation,
   SpoolTerminalCreateHostResult
-} from '../../shared/spool/spool-operation-contract'
-import { isSpoolMutationOperation } from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
+import { isSpoolMutationOperation } from '../../shared/spool/operation-contract'
 import type {
   BoundWorktreeTarget,
   ExecutionAdmissionGuard,

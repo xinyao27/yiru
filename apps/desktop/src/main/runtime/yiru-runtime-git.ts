@@ -3,13 +3,13 @@ import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
 import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
 import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message-host-key'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
 import type { RuntimeGitCheckoutResult } from '../../shared/runtime-types'
 import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   type ResolvedSourceControlAiGenerationParams
-} from '../../shared/source-control/source-control-ai'
-import type { SourceControlAiOperation } from '../../shared/source-control/source-control-ai-types'
+} from '../../shared/source-control/ai'
+import type { SourceControlAiOperation } from '../../shared/source-control/ai-types'
 /* eslint-disable max-lines -- Why: runtime git dispatch stays in one boundary so local, SSH, and runtime-environment behavior remains comparable. */
 import type {
   GitBranchCompareResult,

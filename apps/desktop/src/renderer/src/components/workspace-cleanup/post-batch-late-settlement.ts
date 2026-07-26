@@ -4,7 +4,7 @@ import type {
   WorkspaceCleanupRemoveResult
 } from '@/components/workspace-cleanup/state'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
 import {
   getSkippedAncestorMessage,
   isStrictWorkspaceCleanupDescendant,

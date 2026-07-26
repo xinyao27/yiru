@@ -10,13 +10,15 @@ import {
   throwIfFileListingCancelled
 } from '../shared/file-listing-cancellation'
 import { assertNoClobberRenameDestinationAvailable } from '../shared/filesystem-rename-collision'
-import { buildExcludePathPrefixes } from '../shared/quick-open/quick-open-filter'
-import { isQuickOpenReaddirBudgetError } from '../shared/quick-open/quick-open-readdir-walk'
+import { buildExcludePathPrefixes } from '../shared/quick-open/filter'
+import { isQuickOpenReaddirBudgetError } from '../shared/quick-open/readdir-walk'
+import { buildRelayCommandEnv } from './command-env'
 import type { RelayContext } from './context'
 // Why: RelayContext is accepted in the constructor for protocol back-compat
 // (see docs/relay-fs-allowlist-removal.md), but no longer consulted on FS ops.
 import { expandTilde } from './context'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
+import { RelayFilesystemWatchRegistry } from './filesystem-watch-registry'
 import { readRelayFileContent } from './fs-handler-file-content'
 import { startRelayFileStream } from './fs-handler-file-stream-request'
 import { listFilesWithGit, searchWithGitGrep } from './fs-handler-git-fallback'
@@ -35,9 +37,7 @@ import {
 } from './fs-handler-text-search'
 import { ListFilesScanCoordinator } from './fs-list-files-scan-coordinator'
 import { RelayStreamRegistry } from './fs-stream-registry'
-import { buildRelayCommandEnv } from './relay-command-env'
-import { RelayFilesystemWatchRegistry } from './relay-filesystem-watch-registry'
-import type { RelayWatcherProcessPool } from './relay-watcher-process-pool'
+import type { RelayWatcherProcessPool } from './watcher-process-pool'
 import { scanWorkspaceSpaceDirectory } from './workspace-space-scan'
 
 const MAX_READ_DIRECTORY_LIMIT = 100_001

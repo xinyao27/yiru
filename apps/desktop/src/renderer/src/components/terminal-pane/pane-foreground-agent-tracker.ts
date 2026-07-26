@@ -3,7 +3,7 @@ import type { PaneForegroundAgentEntry } from '@/components/terminal-pane/pane-f
 import {
   isAgentForegroundWrapperProcess,
   recognizeAgentProcess
-} from '../../../../shared/agent/agent-process-recognition'
+} from '../../../../shared/agent/process-recognition'
 import { isShellProcess } from '../../../../shared/shell-process-detection'
 import type { TuiAgent } from '../../../../shared/types'
 

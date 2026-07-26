@@ -1,4 +1,4 @@
-import type { SpoolFileTreeEntry } from '../../shared/spool/spool-operation-contract'
+import type { SpoolFileTreeEntry } from '../../shared/spool/operation-contract'
 import type { SpoolFileHostEntry } from './file-operation-host'
 import { normalizeSpoolRelativePath } from './worktree-containment'
 

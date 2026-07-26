@@ -29,9 +29,9 @@ import {
   isCustomAgentId,
   listCommitMessageAgentCapabilities
 } from '../../../../shared/commit-message-agent-spec'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control/source-control-ai'
-import type { SourceControlTextActionId } from '../../../../shared/source-control/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control/ai'
+import type { SourceControlTextActionId } from '../../../../shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/ai-recipe-save'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
 import { SourceControlActionVariableChips } from '../source-control/action-variable-chips'
 import { sourceControlTextGenerationDefaultsMatchTarget } from './source-control-text-generation-defaults'

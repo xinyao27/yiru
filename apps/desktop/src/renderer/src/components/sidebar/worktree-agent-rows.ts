@@ -10,7 +10,7 @@ import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
 import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 
-import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/agent-title-owner'
+import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/title-owner'
 import {
   makePaneKey,
   parseLegacyNumericPaneKey,

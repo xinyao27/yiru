@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { SpoolSessionCatalogIdentity } from '../../shared/spool/spool-catalog-contract'
+import type { SpoolSessionCatalogIdentity } from '../../shared/spool/catalog-contract'
 import type { SpoolLiveSessionIdentity } from './live-session-display-identity'
 import type { SpoolProvenanceProvider } from './session-provenance-index'
 import type {

@@ -3,7 +3,7 @@ import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
 import {
   TERMINAL_OUTPUT_BACKLOG_MIN_CAP_CHARS,
   terminalOutputBacklogCapChars
-} from '../../../../shared/terminal/terminal-scrollback-policy'
+} from '../../../../shared/terminal/scrollback-policy'
 /* oxlint-disable max-lines -- Why: output ordering, foreground settle, queue
 state, and recovery diagnostics share one state machine; splitting it would make
 backlog/resume guarantees harder to audit. */

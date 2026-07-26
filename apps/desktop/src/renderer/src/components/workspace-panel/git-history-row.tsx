@@ -6,9 +6,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { GitHistoryItem, GitHistoryItemRef } from '../../../../shared/git/git-history'
-import type { GitHistoryItemViewModel } from '../../../../shared/git/git-history-graph'
-import { dedupeRemoteTrackingRefs } from '../../../../shared/git/git-history-ref-display'
+import type { GitHistoryItem, GitHistoryItemRef } from '../../../../shared/git/history'
+import type { GitHistoryItemViewModel } from '../../../../shared/git/history-graph'
+import { dedupeRemoteTrackingRefs } from '../../../../shared/git/history-ref-display'
 import { GitHistoryGraphSvg, graphColor } from './git-history-graph-svg'
 
 function GitHistoryRefBadge({ itemRef }: { itemRef: GitHistoryItemRef }): React.JSX.Element {

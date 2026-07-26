@@ -13,7 +13,7 @@ import {
 } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
-import type { GitHistoryItem } from '../../../../shared/git/git-history'
+import type { GitHistoryItem } from '../../../../shared/git/history'
 import type { GitBranchChangeEntry, GitCommitCompareResult } from '../../../../shared/types'
 import type { GitHistoryCommitAction } from './git-history-commit-context-menu'
 import {

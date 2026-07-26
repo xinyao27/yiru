@@ -5,8 +5,8 @@ import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/native-chat-session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat/native-chat-session-options'
+import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv

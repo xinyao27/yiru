@@ -1,4 +1,4 @@
-import { SPOOL_MAX_TERMINAL_SUBSCRIPTIONS_PER_CONNECTION_WORKTREE } from '../../shared/spool/spool-resource-limits'
+import { SPOOL_MAX_TERMINAL_SUBSCRIPTIONS_PER_CONNECTION_WORKTREE } from '../../shared/spool/resource-limits'
 import { SpoolExecutionError } from './execution-error'
 
 export type SpoolHostSubscription = {

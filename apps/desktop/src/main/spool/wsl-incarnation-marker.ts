@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
-import { isSpoolIncarnationMarkerId } from '../../shared/spool/spool-incarnation-marker-id'
+import { isSpoolIncarnationMarkerId } from '../../shared/spool/incarnation-marker-id'
 import { SpoolWorktreeIncarnationHostError } from './worktree-incarnation'
 
 const MARKER_RESULT_PREFIX = '__YIRU_SPOOL_MARKER_ID__'

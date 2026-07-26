@@ -1,4 +1,4 @@
-import type { SpoolChecksReadResult } from '../../shared/spool/spool-operation-contract'
+import type { SpoolChecksReadResult } from '../../shared/spool/operation-contract'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolPublicWorktreeInstance } from './worktree-publication-state'
 

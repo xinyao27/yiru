@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPageState
-} from '../../../../shared/spool/spool-catalog-contract'
+} from '../../../../shared/spool/catalog-contract'
 
 const MAX_VOLATILE_CREATED_SESSIONS = 64
 

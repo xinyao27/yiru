@@ -1,9 +1,9 @@
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
 import {
   SPOOL_RPC_ERROR_CODES,
   type SpoolRpcFailure,
   type SpoolRpcResponse
-} from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/wire-contract'
 import type { SpoolSink } from './peer-connection-contract'
 
 export type SpoolPendingPeerRequest = {

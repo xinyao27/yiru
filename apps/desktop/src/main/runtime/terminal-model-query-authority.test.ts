@@ -4,7 +4,7 @@ import {
   clearHiddenRendererPtyDeliveryState,
   markHiddenRendererPty,
   setRendererPtyDeliveryInterest
-} from '../pty/pty-hidden-delivery-gate'
+} from '../pty/hidden-delivery-gate'
 import { resolveTerminalQueryReplyOwner } from './terminal-model-query-authority'
 
 const PTY_ID = 'query-authority-test'

@@ -74,7 +74,7 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import { pushRecentlyClosedTabKind } from '../../store/slices/recently-closed-tabs'
 import { findWorktreeById, getRepoIdFromWorktreeId } from '../../store/slices/worktree-helpers'
 import type { AppState } from '../../store/types'

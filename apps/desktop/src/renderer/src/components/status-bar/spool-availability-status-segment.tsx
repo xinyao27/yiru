@@ -12,7 +12,7 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'
+import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/wire-contract'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 
 export function SpoolAvailabilityStatusSegment(): React.JSX.Element | null {

@@ -1,6 +1,6 @@
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 
-import { recognizeAgentProcessFromCommandLine } from '../../shared/agent/agent-process-recognition'
+import { recognizeAgentProcessFromCommandLine } from '../../shared/agent/process-recognition'
 import { agentKindSchema } from '../../shared/telemetry-events'
 import {
   parseTerminalOscColorQuery,
@@ -8,7 +8,7 @@ import {
   terminalOscColorQueryReply,
   type TerminalOscColorQueryReplyColors,
   type TerminalOscColorQuerySlot
-} from '../../shared/terminal/terminal-osc-color-reply'
+} from '../../shared/terminal/osc-color-reply'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 
 type StartupTerminalColorQueryProvider = {

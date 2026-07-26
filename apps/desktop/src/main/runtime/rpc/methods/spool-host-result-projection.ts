@@ -1,8 +1,8 @@
 import {
   isSpoolMutationOperation,
   type SpoolExecutionOperation
-} from '../../../../shared/spool/spool-operation-contract'
-import { parseSpoolPairedRuntimeResult } from '../../../../shared/spool/spool-paired-runtime-result-contract'
+} from '../../../../shared/spool/operation-contract'
+import { parseSpoolPairedRuntimeResult } from '../../../../shared/spool/paired-runtime-result-contract'
 import { SpoolExecutionError } from '../../../spool/execution-error'
 
 export function projectSpoolHostExecutionResult(

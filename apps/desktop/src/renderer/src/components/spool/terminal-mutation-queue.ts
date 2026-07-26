@@ -3,7 +3,7 @@ import {
   getTerminalInputByteLength,
   isTerminalInputTooLarge,
   iterateTerminalInputChunks
-} from '../../../../shared/terminal/terminal-input'
+} from '../../../../shared/terminal/input'
 
 export type SpoolTerminalMutation =
   | { method: 'terminal.input'; data: string }

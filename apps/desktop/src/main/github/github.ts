@@ -55,7 +55,6 @@ import {
   starYiru
 } from './client'
 import type { GitHubPRBranchLookupOptions } from './client'
-import { dispatchWorkItem, type WorkItemArgs } from './github-work-item-args'
 import {
   clearVisiblePRRefreshWindow,
   enqueuePRRefresh,
@@ -68,6 +67,7 @@ import {
   type PRRefreshValidationDenialReason
 } from './pr-refresh-validation-backoff'
 import { getRateLimit } from './rate-limit'
+import { dispatchWorkItem, type WorkItemArgs } from './work-item-args'
 import { getWorkItemDetails, getPRFileContents } from './work-item-details'
 
 const prRefreshVisibilityCleanupRegistered = new Set<number>()

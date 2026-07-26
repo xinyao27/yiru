@@ -5,7 +5,7 @@ import { StringDecoder } from 'node:string_decoder'
 import {
   getEphemeralVmRecipeResultConnection,
   parseEphemeralVmRecipeResult
-} from '../../shared/ephemeral-vm/ephemeral-vm-recipes'
+} from '../../shared/ephemeral-vm/recipes'
 import { getMacAppBundlePath } from './mac-app-update-bundle'
 import { getDefaultUserDataPath } from './metadata'
 import {

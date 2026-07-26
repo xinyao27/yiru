@@ -1,7 +1,7 @@
 import type {
   SpoolTerminalCreateHostResult,
   SpoolTerminalCreateOperation
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { SpoolExecutionError } from './execution-error'
 
 const MAX_INFLIGHT_PER_CONNECTION_WORKTREE = 4

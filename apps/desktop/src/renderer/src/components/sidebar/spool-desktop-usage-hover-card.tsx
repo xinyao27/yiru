@@ -9,7 +9,7 @@ import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rat
 import type {
   SpoolProviderQuota,
   SpoolProviderQuotaWindow
-} from '../../../../shared/spool/spool-catalog-contract'
+} from '../../../../shared/spool/catalog-contract'
 import { normalizeUsagePercentageDisplay } from '../../../../shared/usage-percentage-display'
 import type { SpoolRemoteDesktopSidebarContext } from './spool-sidebar-rows'
 

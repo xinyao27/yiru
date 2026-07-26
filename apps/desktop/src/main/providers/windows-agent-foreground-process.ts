@@ -2,7 +2,7 @@ import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../shared/agent/agent-process-recognition'
+} from '../../shared/agent/process-recognition'
 import { isShellProcess } from '../../shared/shell-process-detection'
 import {
   queryWindowsProcessDescendants,

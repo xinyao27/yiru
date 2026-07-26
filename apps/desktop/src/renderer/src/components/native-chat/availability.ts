@@ -1,6 +1,6 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 
-import { isNativeChatSupportedAgent } from '@/components/native-chat/native-chat-supported-agent'
+import { isNativeChatSupportedAgent } from '@/components/native-chat/supported-agent'
 
 import type { Tab, TuiAgent } from '../../../../shared/types'
 

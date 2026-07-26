@@ -6,9 +6,9 @@ import {
   SpoolPairedRuntimeListLiveSessionsParamsSchema,
   SpoolPairedRuntimeLiveSessionsResponseSchema,
   SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema
-} from '../../shared/spool/spool-paired-runtime-session-contract'
-import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/spool-resource-limits'
-import { callRuntimeEnvironmentExistingRoute } from '../runtime/runtime-environment-existing-route'
+} from '../../shared/spool/paired-runtime-session-contract'
+import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/resource-limits'
+import { callRuntimeEnvironmentExistingRoute } from '../runtime/environment-existing-route'
 import { SpoolExecutionError } from './execution-error'
 import {
   pairedRuntimeSessionTarget,

@@ -50,8 +50,7 @@ describe('agent session continuation', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('continues Claude context in a new Codex session', async () => {
-    const { buildAgentSessionContinuationPrompt } =
-      await import('../../lib/agent-session-continuation')
+    const { buildAgentSessionContinuationPrompt } = await import('./agent-session-continuation')
     const { launchAgentSessionContinuation } =
       await import('../agent-session-continuation/launch-agent-session-continuation')
     const prompt = buildAgentSessionContinuationPrompt(

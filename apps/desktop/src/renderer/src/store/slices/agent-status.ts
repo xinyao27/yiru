@@ -33,7 +33,7 @@ import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
-} from '../../../../shared/agent/agent-status-identity'
+} from '../../../../shared/agent/status-identity'
 import { isCommandCodeNewTurnWhileWorking } from '../../../../shared/command-code-turn-boundary'
 import type { TerminalTab } from '../../../../shared/types'
 import type { AppState } from '../types'

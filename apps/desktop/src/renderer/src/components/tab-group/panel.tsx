@@ -6,7 +6,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/workspace-panel-tab'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
 import { TabBarMoreButton } from '../tab-bar/more-button'
 import TabBar from '../tab-bar/tab-bar'
 import { closeTerminalTab } from '../terminal/tab-actions'

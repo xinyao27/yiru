@@ -24,7 +24,7 @@ import { translate } from '@/i18n/i18n'
 import type {
   SpoolFileListResult,
   SpoolFileTreeEntry
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 import { SpoolTooltipIconButton } from './tooltip-icon-button'
 
 type SpoolFileTreeRow =

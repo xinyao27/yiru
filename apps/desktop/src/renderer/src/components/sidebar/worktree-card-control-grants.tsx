@@ -3,7 +3,7 @@ import type React from 'react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
-import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/ipc-contract'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 
 type WorktreeCardControlGrantsProps = {

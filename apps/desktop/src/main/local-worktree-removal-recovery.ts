@@ -3,7 +3,7 @@ import { assertWorktreeUnlockedForRemoval } from '../shared/workspace/worktree-r
 import { gitExecFileAsync } from './git/runner'
 import { listWorktreesStrict, type GitWorktreeExecOptions } from './git/worktree'
 import { removeLocalWorktreePath } from './local-worktree-filesystem'
-import { areWorktreePathsEqual, formatWorktreeRemovalError } from './worktree/worktree-logic'
+import { areWorktreePathsEqual, formatWorktreeRemovalError } from './worktree/logic'
 
 type LocalWindowsRemovalRecoveryArgs = {
   error: unknown

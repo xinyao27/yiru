@@ -4,10 +4,7 @@ import { join, win32 as pathWin32 } from 'node:path'
 
 import type { SFTPWrapper } from 'ssh2'
 
-import type {
-  AgentHookInstallState,
-  AgentHookInstallStatus
-} from '../../shared/agent/agent-hook-types'
+import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent/hook-types'
 import { resolveHooksJsonWritePath } from '../agent-hooks/hook-config-write-path'
 import {
   buildPosixHookPayloadCapture,

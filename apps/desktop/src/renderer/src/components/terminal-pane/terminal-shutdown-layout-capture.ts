@@ -2,8 +2,8 @@ import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/te
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { flushTerminalOutput } from '@/lib/pane-manager/pane-terminal-output-scheduler'
 
-import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal/terminal-scrollback-limits'
-import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/terminal-serialize-absolute-cursor'
+import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal/scrollback-limits'
+import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/serialize-absolute-cursor'
 import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 import { measureUtf8ByteLength } from '../../../../shared/utf8-byte-limits'
 import { serializeTerminalLayout } from './layout-serialization'

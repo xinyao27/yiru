@@ -1,8 +1,5 @@
-import type {
-  SpoolDesktopCatalog,
-  SpoolRemoteDesktop
-} from '../../shared/spool/spool-catalog-contract'
-import type { SpoolRequesterControlView } from '../../shared/spool/spool-ipc-contract'
+import type { SpoolDesktopCatalog, SpoolRemoteDesktop } from '../../shared/spool/catalog-contract'
+import type { SpoolRequesterControlView } from '../../shared/spool/ipc-contract'
 import type { SpoolPeerConnection } from './peer-connection'
 import type { SpoolSubscription } from './peer-connection-contract'
 import type { DiscoveredSpoolDesktop } from './tailnet-peer-directory'

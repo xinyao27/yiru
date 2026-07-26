@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 
-import type { SpoolFileTreeEntry } from '../../../../shared/spool/spool-operation-contract'
+import type { SpoolFileTreeEntry } from '../../../../shared/spool/operation-contract'
 
 export type SpoolFileAction =
   | { kind: 'new-file' }

@@ -10,7 +10,7 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '../../../shared/runtime-method-contract'
-import type { TerminalStreamFrame } from '../../../shared/terminal/terminal-stream-protocol'
+import type { TerminalStreamFrame } from '../../../shared/terminal/stream-protocol'
 import type { MobileNotificationChannel } from '../mobile-notification-channel'
 import type { YiruRuntimeService } from '../yiru-runtime'
 import type { RuntimeBrowserCommands } from '../yiru-runtime-browser'

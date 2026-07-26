@@ -2,8 +2,8 @@ import {
   branchHasNoUnmergedChangesOnAnyTarget,
   getBranchCleanupTargetRefs,
   refreshBranchCleanupTargetRefs
-} from '../shared/git/git-branch-cleanup'
-import type { GitCapabilityCache } from '../shared/git/git-capability-cache'
+} from '../shared/git/branch-cleanup'
+import type { GitCapabilityCache } from '../shared/git/capability-cache'
 import type { GitExec } from './git-handler-ops'
 import { parseWorktreeList } from './git-handler-output-parser'
 

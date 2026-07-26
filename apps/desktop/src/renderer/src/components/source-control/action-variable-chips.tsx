@@ -7,7 +7,7 @@ import {
   SOURCE_CONTROL_ACTION_VARIABLE_INFO,
   SOURCE_CONTROL_ACTION_VARIABLES,
   type SourceControlActionId
-} from '../../../../shared/source-control/source-control-ai-actions'
+} from '../../../../shared/source-control/ai-actions'
 import { Button } from '../ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 

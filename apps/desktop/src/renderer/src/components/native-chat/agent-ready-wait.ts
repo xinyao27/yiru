@@ -2,7 +2,7 @@ import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
 import { inspectRuntimeTerminalProcess } from '@/runtime/terminal-inspection'
 import { useAppStore } from '@/store'
 
-import { isExpectedAgentProcess } from '../../../../shared/agent/agent-process-recognition'
+import { isExpectedAgentProcess } from '../../../../shared/agent/process-recognition'
 import { isShellProcess } from '../../lib/tui-agent-startup'
 
 // Why: agent CLIs vary widely in how they signal readiness. Title-based

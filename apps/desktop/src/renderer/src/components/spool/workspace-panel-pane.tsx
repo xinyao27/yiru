@@ -6,7 +6,7 @@ import { RightSidebarPanelContent } from '@/components/workspace-panel/right-sid
 import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPageState
-} from '../../../../shared/spool/spool-catalog-contract'
+} from '../../../../shared/spool/catalog-contract'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import type { SpoolChecksReadState } from './checks-pane'
 

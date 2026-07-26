@@ -1,9 +1,9 @@
-import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/remote-runtime-client'
+import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/client'
 import {
   SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema
-} from '../../shared/spool/spool-paired-runtime-session-contract'
-import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '../runtime/runtime-environment-existing-route'
+} from '../../shared/spool/paired-runtime-session-contract'
+import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '../runtime/environment-existing-route'
 import type {
   SpoolExecutionHostSessionReadRequest,
   SpoolMobileSessionTabsResult,

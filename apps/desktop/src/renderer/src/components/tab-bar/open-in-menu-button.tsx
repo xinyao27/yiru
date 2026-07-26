@@ -24,7 +24,7 @@ import { useAppStore } from '@/store'
 import { useRepoById } from '@/store/selectors'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
-import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '../../../../shared/workspace/workspace-panel-titlebar-pinned'
+import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '../../../../shared/workspace/panel-titlebar-pinned'
 import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
 import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
 

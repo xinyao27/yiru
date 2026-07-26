@@ -1,6 +1,6 @@
-import { createGitConfigSnapshotRunner } from '../shared/git/git-config-snapshot-runner'
-import { getEffectiveGitUpstreamStatus } from '../shared/git/git-effective-upstream'
-import type { GitCommandRunner } from '../shared/git/git-effective-upstream'
+import { createGitConfigSnapshotRunner } from '../shared/git/config-snapshot-runner'
+import { getEffectiveGitUpstreamStatus } from '../shared/git/effective-upstream'
+import type { GitCommandRunner } from '../shared/git/effective-upstream'
 import type { GitUpstreamStatus } from '../shared/types'
 
 const NO_EFFECTIVE_UPSTREAM_CACHE_TTL_MS = 5 * 60_000

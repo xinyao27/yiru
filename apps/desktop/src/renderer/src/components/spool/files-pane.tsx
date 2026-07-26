@@ -13,7 +13,7 @@ import {
   type SpoolFileDiffResult,
   type SpoolFileReadResult,
   type SpoolFileTreeEntry
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 import { SpoolFileActionDialog, type SpoolFileAction } from './file-action-dialog'
 import {
   executeSpoolFileAction,

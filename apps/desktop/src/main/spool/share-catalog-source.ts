@@ -1,5 +1,5 @@
-import type { SpoolSessionCatalogIdentity } from '../../shared/spool/spool-catalog-contract'
-import type { SpoolWorktreeKind } from '../../shared/spool/spool-worktree-kind'
+import type { SpoolSessionCatalogIdentity } from '../../shared/spool/catalog-contract'
+import type { SpoolWorktreeKind } from '../../shared/spool/worktree-kind'
 import type { SpoolPublicWorktreeInstance } from './worktree-visibility'
 
 export type SpoolCatalogSessionDescription = {

@@ -7,7 +7,7 @@ import type {
 } from '@/runtime/git-client'
 import type { AppState } from '@/store'
 
-import type { SourceControlAiPrCreationDefaults } from '../../../../shared/source-control/source-control-ai-types'
+import type { SourceControlAiPrCreationDefaults } from '../../../../shared/source-control/ai-types'
 import type { Repo } from '../../../../shared/types'
 
 export type PullRequestDraftFields = {

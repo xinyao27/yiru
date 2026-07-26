@@ -1,7 +1,7 @@
 import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
-} from '../../shared/spool/spool-windows-firewall-contract'
+} from '../../shared/spool/windows-firewall-contract'
 
 export type SpoolWindowsFirewallOperations = {
   inspect: () => Promise<SpoolWindowsFirewallStatus>

@@ -7,7 +7,7 @@ import {
   type NativeChatSessionStatus
 } from '@yiru/workbench-model/agent'
 
-import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat/native-chat-streaming'
+import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat/streaming'
 import { isNativeChatActivePromptMessageId } from './active-prompt'
 import { normalizeImageTranscriptMessages } from './image-transcript-markers'
 import { isLaunchPromptMessageId, isPendingMessageId } from './pending'

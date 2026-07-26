@@ -4,7 +4,7 @@ import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPageState
-} from '../../../../shared/spool/spool-catalog-contract'
+} from '../../../../shared/spool/catalog-contract'
 
 export type RightSidebarPanelSource =
   | { kind: 'local' }

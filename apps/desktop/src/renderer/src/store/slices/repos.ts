@@ -66,7 +66,7 @@ import type {
   ProjectHostSetupUpdateArgs,
   ProjectHostSetupUpdateResult
 } from '../../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { formatFolderWorkspaceCreateError } from '../../components/sidebar/folder-workspace-path-status'
 import { syncRuntimeGitForkDefaultBranch } from '../../runtime/git-client'
 import {

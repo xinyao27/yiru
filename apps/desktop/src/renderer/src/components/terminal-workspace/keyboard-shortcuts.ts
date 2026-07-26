@@ -15,7 +15,7 @@ import {
 import { keybindingMatchesAction, type KeybindingActionId } from '../../../../shared/keybindings'
 import type { TuiAgent } from '../../../../shared/types'
 import { matchesRecentTabSwitcherChord } from '../../../../shared/window-shortcut-policy'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/workspace-panel-tab'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
 import { useAppStore } from '../../store'
 import { YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from '../editor/autosave'
 import {

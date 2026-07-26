@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
-import { SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../shared/spool/spool-catalog-contract'
-import type { SpoolSessionCatalogPage } from '../../shared/spool/spool-catalog-contract'
+import { SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../shared/spool/catalog-contract'
+import type { SpoolSessionCatalogPage } from '../../shared/spool/catalog-contract'
 import { createSessionInventoryAbortController } from '../ai-vault/session-inventory-abort'
 import {
   buildCatalogSessionPageBindings,

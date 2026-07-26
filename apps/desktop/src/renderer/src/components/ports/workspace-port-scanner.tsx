@@ -16,7 +16,7 @@ import { useAppStore } from '@/store'
 import { getHasAnyWorktreesFromState } from '@/store/selectors'
 
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
-import type { WorkspacePortScanResult } from '../../../../shared/workspace/workspace-ports'
+import type { WorkspacePortScanResult } from '../../../../shared/workspace/ports'
 
 const WORKSPACE_PORT_SCAN_INTERVAL_MS = 30_000
 const WORKSPACE_PORT_ADVERTISED_URL_SETTLE_MS = 1_000

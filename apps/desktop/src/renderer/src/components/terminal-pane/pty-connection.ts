@@ -111,15 +111,15 @@ import { getWorktreeMapFromState } from '@/store/selectors'
 import {
   AGENT_INTERRUPT_SETTLE_MS,
   type AgentInterruptInputIntent
-} from '../../../../shared/agent/agent-interrupt-intent'
+} from '../../../../shared/agent/interrupt-intent'
 import {
   isExpectedAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../../../shared/agent/agent-process-recognition'
+} from '../../../../shared/agent/process-recognition'
 import {
   normalizeCompatibleAgentTitleForOwner,
   resolveCompatibleAgentTypeForOwner
-} from '../../../../shared/agent/agent-title-owner'
+} from '../../../../shared/agent/title-owner'
 import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
 import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'
@@ -132,10 +132,10 @@ import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode,
   scanMode2031Sequences
-} from '../../../../shared/terminal/terminal-color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/terminal-github-pr-link-detector'
-import { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
-import { parseTerminalOscColorQuery } from '../../../../shared/terminal/terminal-osc-color-reply'
+} from '../../../../shared/terminal/color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/github-pr-link-detector'
+import { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
+import { parseTerminalOscColorQuery } from '../../../../shared/terminal/osc-color-reply'
 import {
   HIDDEN_STARTUP_RENDERER_QUERY_PENDING_CHARS,
   containsCsiRendererQuery,
@@ -144,16 +144,16 @@ import {
   findCsiFinalByteIndex,
   isStatefulRendererReplyCsiQuery,
   isStatelessRendererReplyCsiQuery
-} from '../../../../shared/terminal/terminal-reply-query-extraction'
-import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/terminal-serialize-absolute-cursor'
-import { createTerminalZeroDimensionsMessage } from '../../../../shared/terminal/terminal-zero-dimensions-diagnostic'
+} from '../../../../shared/terminal/reply-query-extraction'
+import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/serialize-absolute-cursor'
+import { createTerminalZeroDimensionsMessage } from '../../../../shared/terminal/zero-dimensions-diagnostic'
 import { isTuiAgent, TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
 } from '../../../../shared/tui-agent-launch-defaults'
 import type { SetupSplitDirection, TuiAgent } from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { createAgentCompletionCoordinator } from './agent-completion-coordinator'
 import type {
   AgentCompletionDispatchMeta,

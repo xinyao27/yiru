@@ -5,7 +5,7 @@ import {
 } from '@yiru/workbench-model/workspace'
 
 import type { WorkspaceSessionState } from '../../shared/types'
-import { parseWorkspaceSession } from '../../shared/workspace/workspace-session-schema'
+import { parseWorkspaceSession } from '../../shared/workspace/session-schema'
 
 export type PersistedStateCodecWarning = {
   code: 'corrupt-workspace-session' | 'corrupt-host-workspace-session'

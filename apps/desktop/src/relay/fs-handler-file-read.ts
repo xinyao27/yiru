@@ -4,7 +4,7 @@ import { extname } from 'node:path'
 import {
   SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
   SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
-} from '../shared/spool/spool-resource-limits'
+} from '../shared/spool/resource-limits'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import {
   IMAGE_MIME_TYPES,

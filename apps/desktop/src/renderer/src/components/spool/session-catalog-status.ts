@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
 
-import type { SpoolSessionCatalogPageState } from '../../../../shared/spool/spool-catalog-contract'
+import type { SpoolSessionCatalogPageState } from '../../../../shared/spool/catalog-contract'
 
 export function getSpoolSessionCatalogStatusLabel(
   status: SpoolSessionCatalogPageState['status']

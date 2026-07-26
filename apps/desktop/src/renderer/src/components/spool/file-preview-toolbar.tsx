@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { SpoolFileReadResult } from '../../../../shared/spool/spool-operation-contract'
+import type { SpoolFileReadResult } from '../../../../shared/spool/operation-contract'
 import { SpoolTooltipIconButton } from './tooltip-icon-button'
 import { SpoolTruncatedPathLabel } from './truncated-path-label'
 

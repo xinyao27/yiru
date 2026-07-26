@@ -1,4 +1,4 @@
-import { assertGitPushTargetShape } from '../../shared/git/git-push-target-validation'
+import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
 import type { GitPushTarget } from '../../shared/types'
 import { gitExecFileAsync } from './runner'
 

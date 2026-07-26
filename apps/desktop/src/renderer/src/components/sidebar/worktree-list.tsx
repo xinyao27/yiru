@@ -94,7 +94,7 @@ import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-w
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/ipc-contract'
 import type {
   Worktree,
   Repo,
@@ -107,10 +107,7 @@ import type {
   WorkspaceStatus,
   WorkspaceStatusDefinition
 } from '../../../../shared/types'
-import {
-  folderWorkspaceKey,
-  getActiveSidebarWorkspaceId
-} from '../../../../shared/workspace/workspace-scope'
+import { folderWorkspaceKey, getActiveSidebarWorkspaceId } from '../../../../shared/workspace/scope'
 import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility

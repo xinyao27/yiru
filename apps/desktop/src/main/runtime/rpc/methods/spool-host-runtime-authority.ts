@@ -4,8 +4,8 @@ import type {
   SpoolPairedRuntimeBoundWorktree,
   SpoolPairedRuntimeResolvedWorktree,
   SpoolPairedRuntimeWorktreeSelector
-} from '../../../../shared/spool/spool-paired-runtime-host-contract'
-import type { SpoolPairedRuntimeSessionWorktree } from '../../../../shared/spool/spool-paired-runtime-session-contract'
+} from '../../../../shared/spool/paired-runtime-host-contract'
+import type { SpoolPairedRuntimeSessionWorktree } from '../../../../shared/spool/paired-runtime-session-contract'
 import { getLocalProjectWorktreeGitOptions } from '../../../project-runtime-git-options'
 import {
   spoolActualHostScopeKey,

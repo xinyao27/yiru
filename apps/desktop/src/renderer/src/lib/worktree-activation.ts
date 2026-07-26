@@ -35,11 +35,11 @@ import {
   setWorktreeNavViewActivator
 } from '@/store/slices/worktree-nav-history'
 
-import { agentKindToTuiAgent } from '../../../shared/agent/agent-kind'
-import { repoIsRemote } from '../../../shared/agent/agent-launch-remote'
+import { agentKindToTuiAgent } from '../../../shared/agent/kind'
+import { repoIsRemote } from '../../../shared/agent/launch-remote'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/native-chat-session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat/native-chat-session-options'
+import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
 import { createSequencedSetupAgentCommands } from '../../../shared/setup-agent-sequencing'
 import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup-runner-command'
 import { isTuiAgent } from '../../../shared/tui-agent-config'
@@ -58,7 +58,7 @@ import type {
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
 } from '../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/workspace-scope'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/scope'
 import {
   folderWorkspaceActivationBlocked,
   getFolderWorkspacePathStatusDescription,

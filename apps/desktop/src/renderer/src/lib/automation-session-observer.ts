@@ -12,7 +12,7 @@ import {
 } from '@/runtime/terminal-stream'
 import { useAppStore } from '@/store'
 
-import { createAgentStatusOscProcessor } from '../../../shared/agent/agent-status-osc'
+import { createAgentStatusOscProcessor } from '../../../shared/agent/status-osc'
 
 export async function observeExistingAutomationSession(args: {
   ptyId: string

@@ -242,7 +242,7 @@ const yiruRootToolingConfig = defineConfig({
               '**/build',
               '**/dist',
               '**/out',
-              'apps/mobile/src/terminal/terminal-webview-engine.generated.ts'
+              'apps/mobile/src/terminal/webview-engine.generated.ts'
             ],
             options: {
               // Why: Yiru type-checks three explicit tsc projects and enables only the

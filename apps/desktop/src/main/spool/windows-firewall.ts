@@ -4,7 +4,7 @@ import { win32 } from 'node:path'
 import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
-} from '../../shared/spool/spool-windows-firewall-contract'
+} from '../../shared/spool/windows-firewall-contract'
 
 export const SPOOL_WINDOWS_FIREWALL_RULE_NAME = 'Yiru.Spool'
 

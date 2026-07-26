@@ -5,7 +5,7 @@ import type {
   WorktreeCreationPhase
 } from '@/lib/pending-worktree-creation'
 
-import type { TerminalGitHubPRLink } from '../../../../shared/terminal/terminal-github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '../../../../shared/terminal/github-pr-link-detector'
 import type {
   CreateWorktreeResult,
   CreateWorktreeArgs,

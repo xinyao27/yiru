@@ -3,7 +3,7 @@
 // spawn, forwarding envelopes into ingestRemote and installing guest hooks.
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 
-import { AGENT_HOOK_REQUEST_REPLAY_METHOD } from '../../shared/agent/agent-hook-relay'
+import { AGENT_HOOK_REQUEST_REPLAY_METHOD } from '../../shared/agent/hook-relay'
 import {
   sanitizeWslHookInstanceKey,
   WSL_HOOK_FS_METHODS,

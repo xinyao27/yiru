@@ -8,25 +8,25 @@ import { clearKnownHostsCache } from '../gitlab/gl-utils'
 import { getActiveMultiplexer } from '../ssh/ssh'
 import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-path'
 import { hydrateShellPathForAgentDetection } from './agent-detection-shell-path'
-import { detectCommandsInInstallDirs } from './local-agent-install-dir-detection'
 import {
   execCommandInWsl,
   execLocalPreflightCommand,
   isCommandAvailable,
   isCommandOnPath,
   shellQuote
-} from './preflight-command-exec'
+} from './command-exec'
+import { detectCommandsInInstallDirs } from './local-agent-install-dir-detection'
 import {
   detectRemoteWindowsTerminalCapabilities,
   type RemoteWindowsTerminalCapabilities
-} from './preflight-remote-windows-terminal-capabilities'
-import { getPreflightWslTarget, type PreflightRuntimeContext } from './preflight-runtime-target'
-import { detectWslCommandsOnPath, type WslPreflightTarget } from './preflight-wsl-agent-detection'
+} from './remote-windows-terminal-capabilities'
+import { getPreflightWslTarget, type PreflightRuntimeContext } from './runtime-target'
 import {
   getTuiAgentDetectionProbeCommands,
   KNOWN_TUI_AGENT_DETECTION_COMMANDS,
   resolveDetectedTuiAgentIds
 } from './tui-agent-detection-commands'
+import { detectWslCommandsOnPath, type WslPreflightTarget } from './wsl-agent-detection'
 
 export type PreflightStatus = {
   git: { installed: boolean }

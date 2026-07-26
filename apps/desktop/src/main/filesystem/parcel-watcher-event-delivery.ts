@@ -2,11 +2,11 @@ import { stat } from 'node:fs/promises'
 
 import type { Event as ParcelWatcherEvent } from '@parcel/watcher'
 
-import { MAX_BATCHED_WATCHER_EVENTS } from './filesystem-watcher-event-batch'
 import type {
   WatcherProcessDeliveryOptions,
   WatcherProcessEvent
 } from './parcel-watcher-process-protocol'
+import { MAX_BATCHED_WATCHER_EVENTS } from './watcher-event-batch'
 
 const DIRECTORY_STAT_CONCURRENCY = 8
 let activeDirectoryStats = 0

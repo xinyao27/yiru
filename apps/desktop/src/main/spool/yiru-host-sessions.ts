@@ -3,7 +3,7 @@ import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import type {
   SpoolExecutionOperation,
   SpoolSessionContinueHostResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolHostOperationContext } from './execution-gateway'

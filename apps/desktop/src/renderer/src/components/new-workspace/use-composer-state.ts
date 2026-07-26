@@ -117,11 +117,11 @@ import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { resolveWorktreeCreateBaseBranch } from '@/runtime/worktree-create-base'
 import { useAppStore } from '@/store'
 
-import { repoIsRemote } from '../../../../shared/agent/agent-launch-remote'
+import { repoIsRemote } from '../../../../shared/agent/launch-remote'
 import { getDefaultRepoHookSettings } from '../../../../shared/constants'
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/native-chat-session-option-defaults'
+import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/session-option-defaults'
 import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
@@ -149,7 +149,7 @@ import type {
   WorkspaceCreateTelemetrySource,
   ProjectGroup
 } from '../../../../shared/types'
-import { isWorkspaceStatusId } from '../../../../shared/workspace/workspace-statuses'
+import { isWorkspaceStatusId } from '../../../../shared/workspace/statuses'
 import {
   resolveComposerBranchNameOverrideForCreate,
   resolveComposerBranchPick,

@@ -8,7 +8,7 @@ import type {
 import { ipcMain } from 'electron'
 
 import type { Repo } from '../../shared/types'
-import { resolveRegisteredWorktreePath } from '../filesystem/filesystem-auth'
+import { resolveRegisteredWorktreePath } from '../filesystem/auth'
 import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import { listRepoWorktrees } from '../repo-worktrees'

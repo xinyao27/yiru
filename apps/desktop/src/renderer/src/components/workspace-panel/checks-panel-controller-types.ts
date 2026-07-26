@@ -2,7 +2,7 @@ import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/revi
 
 import type { PRCommentGroup } from '@/lib/pr-comment-groups'
 
-import type { SourceControlLaunchActionId } from '../../../../shared/source-control/source-control-ai-actions'
+import type { SourceControlLaunchActionId } from '../../../../shared/source-control/ai-actions'
 import type { ChecksPanelReview } from './checks-panel-review'
 
 export const RUNTIME_SSH_STATUS_REFRESH_MS = 3000

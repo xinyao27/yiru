@@ -25,11 +25,11 @@ import { z } from 'zod'
 
 import { DEFAULT_REPO_BADGE_COLOR } from '../../shared/constants'
 import type { FolderWorkspacePathStatusRequest } from '../../shared/folder-workspace-path-status'
-import { getGitCloneFailureMessage } from '../../shared/git/git-clone-failure-message'
+import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
 import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
 import { normalizeRepoBadgeColor } from '../../shared/repo-badge-color'
 import { isFolderRepo } from '../../shared/repo-kind'
-import { normalizeRepoSourceControlAiOverrides } from '../../shared/source-control/source-control-ai'
+import { normalizeRepoSourceControlAiOverrides } from '../../shared/source-control/ai'
 import type { RepoMethod } from '../../shared/telemetry-events'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import type {
@@ -52,7 +52,7 @@ import type {
   BaseRefDefaultResult,
   SparsePreset
 } from '../../shared/types'
-import { invalidateAuthorizedRootsCache } from '../filesystem/filesystem-auth'
+import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
 import { getSshGitCapabilityCache } from '../git/capability-state'
 import {
   isGitRepo,
@@ -92,7 +92,7 @@ import { getActiveMultiplexer } from '../ssh/ssh'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'
-import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from '../worktree/worktree-base-directory-watcher'
+import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from '../worktree/base-directory-watcher'
 import {
   assertFolderWorkspacePathUsable,
   getFolderWorkspacePathStatus,

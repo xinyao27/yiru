@@ -16,7 +16,7 @@ import type {
   SpoolGitHistoryResult,
   SpoolGitStatusEntry,
   SpoolGitStatusResult
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 import { SpoolGitChangesList } from './git-changes-list'
 
 export type SpoolGitSidebarMode = 'changes' | 'history'

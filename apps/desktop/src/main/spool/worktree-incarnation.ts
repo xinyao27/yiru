@@ -1,6 +1,6 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { SpoolWorktreeKind } from '../../shared/spool/spool-worktree-kind'
+import type { SpoolWorktreeKind } from '../../shared/spool/worktree-kind'
 
 export type SpoolOwnerWorktree = {
   kind: SpoolWorktreeKind

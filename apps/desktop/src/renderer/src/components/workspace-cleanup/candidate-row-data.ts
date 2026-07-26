@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
 import {
   formatUnpushedCommitCount,
   formatWorkspaceCleanupContextCount,

@@ -29,7 +29,7 @@ import { useAppStore } from '@/store'
 import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPageState
-} from '../../../../shared/spool/spool-catalog-contract'
+} from '../../../../shared/spool/catalog-contract'
 import { getSpoolSessionCatalogStatusLabel } from './session-catalog-status'
 import { SpoolSessionCreateMenu } from './session-create-menu'
 import { SpoolSessionPane } from './session-pane'

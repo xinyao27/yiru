@@ -1,5 +1,5 @@
-import type { SpoolRequesterControlState } from '../../shared/spool/spool-access-contract'
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
+import type { SpoolRequesterControlState } from '../../shared/spool/access-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
 
 export function readRequesterControlState(
   value: unknown,

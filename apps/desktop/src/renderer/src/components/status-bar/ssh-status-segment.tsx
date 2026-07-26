@@ -15,7 +15,7 @@ import {
 import { translate } from '@/i18n/i18n'
 
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import type { RemoteRuntimeSharedConnectionDiagnostics } from '../../../../shared/remote-runtime/remote-runtime-shared-control-types'
+import type { RemoteRuntimeSharedConnectionDiagnostics } from '../../../../shared/remote-runtime/shared-control-types'
 import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-environments'
 import { useAppStore } from '../../store'
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './runtime-host-status-row'

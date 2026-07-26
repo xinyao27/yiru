@@ -1,7 +1,7 @@
 import type {
   SpoolExecutionOperation,
   SpoolSubscriptionOperation
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import {
   SpoolPairedRuntimeCanonicalizeParamsSchema,
   SpoolPairedRuntimeInspectParamsSchema,
@@ -10,15 +10,15 @@ import {
   SpoolPairedRuntimeRevokeWorktreeParamsSchema,
   SpoolPairedRuntimeSubscribeParamsSchema,
   parseSpoolPairedRuntimeOperation
-} from '../../shared/spool/spool-paired-runtime-host-contract'
+} from '../../shared/spool/paired-runtime-host-contract'
 import {
   SpoolPairedRuntimeCanonicalizeResultSchema,
   SpoolPairedRuntimeInspectionSchema
-} from '../../shared/spool/spool-paired-runtime-result-contract'
+} from '../../shared/spool/paired-runtime-result-contract'
 import {
   callRuntimeEnvironmentExistingRoute,
   subscribeRuntimeEnvironmentExistingRoute
-} from '../runtime/runtime-environment-existing-route'
+} from '../runtime/environment-existing-route'
 import type {
   SpoolCanonicalHostPathResult,
   SpoolPairedRuntimeWorktreeHostAdapter

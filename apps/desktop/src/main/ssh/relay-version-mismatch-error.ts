@@ -30,5 +30,5 @@ export function isRelayVersionMismatchError(err: unknown): err is RelayVersionMi
 
 // Why: the remote --connect process uses this exit code to signal the wire
 // handshake failed because of a version mismatch. The mapping daemon ⇄ exit
-// code 42 lives in src/relay/relay-handshake.ts (EXIT_CODE_VERSION_MISMATCH).
+// code 42 lives in src/relay/handshake.ts (EXIT_CODE_VERSION_MISMATCH).
 export const RELAY_EXIT_CODE_VERSION_MISMATCH = 42

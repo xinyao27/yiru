@@ -1,4 +1,4 @@
-import { SPOOL_SESSION_INVENTORY_STREAM_PROFILE } from '../shared/spool/spool-resource-limits'
+import { SPOOL_SESSION_INVENTORY_STREAM_PROFILE } from '../shared/spool/resource-limits'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { parseRelayFileStreamProfile, readRelayFileStreamMetadata } from './fs-handler-file-read'
 import type { RelayStreamRegistry } from './fs-stream-registry'

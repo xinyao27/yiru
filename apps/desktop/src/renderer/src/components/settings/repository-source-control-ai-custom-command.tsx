@@ -2,7 +2,7 @@ import type React from 'react'
 
 import { translate } from '@/i18n/i18n'
 
-import type { SourceControlAiSettings } from '../../../../shared/source-control/source-control-ai-types'
+import type { SourceControlAiSettings } from '../../../../shared/source-control/ai-types'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'

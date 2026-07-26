@@ -1,4 +1,4 @@
-import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/spool-catalog-contract'
+import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/catalog-contract'
 import { SpoolPublicationValidationError } from './publication-errors'
 import { SPOOL_PUBLICATION_MAX_REGISTERED_WORKTREES } from './publication-inventory-limits'
 import {

@@ -62,7 +62,7 @@ import {
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace/workspace-scope'
+} from '../../../../shared/workspace/scope'
 import {
   classifyWorktreeForceDeleteReason,
   getLockedWorktreeRemovalReason,

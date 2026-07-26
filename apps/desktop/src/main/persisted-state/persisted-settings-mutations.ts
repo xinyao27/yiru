@@ -10,15 +10,15 @@ import {
   mergeLegacyCommitMessageAiIntoSourceControlAi,
   normalizeSourceControlAiSettings,
   projectSourceControlAiToLegacyCommitMessageAi
-} from '../../shared/source-control/source-control-ai'
+} from '../../shared/source-control/ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   SOURCE_CONTROL_TEXT_ACTION_IDS
-} from '../../shared/source-control/source-control-ai-actions'
-import { normalizeSourceControlGroupOrder } from '../../shared/source-control/source-control-group-order'
-import { normalizeTerminalCustomThemes } from '../../shared/terminal/terminal-custom-themes'
-import { normalizeTerminalQuickCommands } from '../../shared/terminal/terminal-quick-commands'
-import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal/terminal-scrollback-policy'
+} from '../../shared/source-control/ai-actions'
+import { normalizeSourceControlGroupOrder } from '../../shared/source-control/group-order'
+import { normalizeTerminalCustomThemes } from '../../shared/terminal/custom-themes'
+import { normalizeTerminalQuickCommands } from '../../shared/terminal/quick-commands'
+import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal/scrollback-policy'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord

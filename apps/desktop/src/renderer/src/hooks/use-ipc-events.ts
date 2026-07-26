@@ -93,11 +93,11 @@ import { getWorktreeMapFromState, getRepoMapFromState } from '@/store/selectors'
 import { resolveAgentPaneAuthorityKey } from '@/store/slices/agent-pane-authority'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 
-import { titleHasAgentName } from '../../../shared/agent/agent-detection'
+import { titleHasAgentName } from '../../../shared/agent/detection'
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
-} from '../../../shared/agent/agent-status-identity'
+} from '../../../shared/agent/status-identity'
 import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../../shared/constants'
 import type { RateLimitState } from '../../../shared/rate-limit-types'
 import { importRemoteWorkspaceSession } from '../../../shared/remote-workspace-session-projection'

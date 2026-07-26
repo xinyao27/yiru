@@ -3,7 +3,7 @@ import type {
   SpoolControlRequest,
   SpoolRequesterControlRequestResult,
   SpoolRequesterControlState
-} from '../../shared/spool/spool-access-contract'
+} from '../../shared/spool/access-contract'
 import type { SpoolAccessAuthority } from './access-authority'
 import { SpoolAccessError } from './access-authority'
 import { SpoolRpcError, type SpoolRpcInvocationContext } from './rpc-gateway'

@@ -1,11 +1,11 @@
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { RuntimeMobileSessionTerminalClientTab } from '../../../../shared/runtime-types'
-import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
+import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/paired-runtime-host-contract'
 import {
   SpoolPairedRuntimeHistoricalSessionSchema,
   SpoolPairedRuntimeLiveSessionSchema
-} from '../../../../shared/spool/spool-paired-runtime-session-contract'
+} from '../../../../shared/spool/paired-runtime-session-contract'
 import { SpoolExecutionError } from '../../../spool/execution-error'
 import {
   resolveSpoolLiveSessionIdentity,

@@ -4,7 +4,7 @@ import {
   isPushHookFailure,
   sanitizePushFailureDetails,
   summarizePushFailure
-} from '../../../../shared/source-control/source-control-push-failure'
+} from '../../../../shared/source-control/push-failure'
 import type { SourceControlActionError } from './source-control-action-error'
 
 export type SourceControlPushRecovery = {

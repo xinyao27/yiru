@@ -6,11 +6,11 @@
     "../src/renderer/src/**/*.tsx",
     "../src/preload/api-types.ts",
     "../src/shared/**/*",
-    "../src/main/worktree/worktree-branch-name.ts",
-    "../src/main/worktree/worktree-logic.ts",
-    "../src/main/worktree/worktree-linked-review-metadata.ts",
-    "../src/main/worktree/worktree-metadata-merge.ts",
-    "../src/main/worktree/worktree-path-comparison.ts",
+    "../src/main/worktree/branch-name.ts",
+    "../src/main/worktree/logic.ts",
+    "../src/main/worktree/linked-review-metadata.ts",
+    "../src/main/worktree/metadata-merge.ts",
+    "../src/main/worktree/path-comparison.ts",
     "../src/main/wsl.ts"
   ],
   "compilerOptions": {

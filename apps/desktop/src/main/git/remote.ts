@@ -1,10 +1,10 @@
-import { resolveEffectiveGitUpstream } from '../../shared/git/git-effective-upstream'
-import { resolveGitRemoteRebaseSource } from '../../shared/git/git-rebase-source'
-import { gitRefTargetsBranchOnRemote } from '../../shared/git/git-remote-branch-name'
+import { resolveEffectiveGitUpstream } from '../../shared/git/effective-upstream'
+import { resolveGitRemoteRebaseSource } from '../../shared/git/rebase-source'
+import { gitRefTargetsBranchOnRemote } from '../../shared/git/remote-branch-name'
 import {
   normalizeGitErrorMessage,
   runPullWithDivergenceFallback
-} from '../../shared/git/git-remote-error'
+} from '../../shared/git/remote-error'
 import type { GitPushTarget } from '../../shared/types'
 import { validateGitPushTarget } from './push-target-validation'
 import { gitExecFileAsync } from './runner'

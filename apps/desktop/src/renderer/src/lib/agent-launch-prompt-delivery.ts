@@ -1,5 +1,5 @@
 import { pasteDraftWhenAgentReady } from '@/components/native-chat/agent-paste-draft'
-import { isNativeChatSupportedAgent } from '@/components/native-chat/native-chat-supported-agent'
+import { isNativeChatSupportedAgent } from '@/components/native-chat/supported-agent'
 import { agentDeliversDraftViaNativePrefill } from '@/lib/agent-native-draft-prefill'
 import { useAppStore } from '@/store'
 

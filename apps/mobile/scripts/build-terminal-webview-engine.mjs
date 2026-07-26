@@ -7,7 +7,7 @@ import { rolldown } from 'rolldown'
 const require = createRequire(import.meta.url)
 const scriptDir = import.meta.dirname
 const mobileRoot = path.resolve(scriptDir, '..')
-const outputPath = path.join(mobileRoot, 'src', 'terminal', 'terminal-webview-engine.generated.ts')
+const outputPath = path.join(mobileRoot, 'src', 'terminal', 'webview-engine.generated.ts')
 const target = 'chrome74'
 const virtualEntryId = path.join(mobileRoot, 'terminal-webview-engine-entry.js')
 

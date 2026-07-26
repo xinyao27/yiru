@@ -4,47 +4,43 @@ import { execFile, spawn, type ExecFileOptions } from 'node:child_process'
 import * as path from 'node:path'
 import { promisify } from 'node:util'
 
-import { GitCapabilityCache } from '../shared/git/git-capability-cache'
-import { upstreamOnlyCommitsArePatchEquivalent } from '../shared/git/git-cherry-patch-equivalence'
-import { getGitCloneFailureMessage } from '../shared/git/git-clone-failure-message'
+import { GitCapabilityCache } from '../shared/git/capability-cache'
+import { upstreamOnlyCommitsArePatchEquivalent } from '../shared/git/cherry-patch-equivalence'
+import { getGitCloneFailureMessage } from '../shared/git/clone-failure-message'
 import {
   removeSafeUntrackedDiscardTarget,
   removeSafeUntrackedDiscardTargets
-} from '../shared/git/git-discard-path-safety'
+} from '../shared/git/discard-path-safety'
 import {
   getEffectiveGitUpstreamStatus,
   resolveEffectiveGitUpstream
-} from '../shared/git/git-effective-upstream'
-import { gitExecMutatesRepository } from '../shared/git/git-exec-mutation'
-import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../shared/git/git-fetch-auto-maintenance'
-import {
-  syncForkDefaultBranch,
-  validateGitForkSyncExpectedUpstream
-} from '../shared/git/git-fork-sync'
-import { loadGitHistoryFromExecutor } from '../shared/git/git-history'
-import {
-  getPublishTargetStatus,
-  type GitCommandRunner
-} from '../shared/git/git-publish-target-status'
-import { assertGitPushTargetShape } from '../shared/git/git-push-target-validation'
-import { resolveGitRemoteRebaseSource } from '../shared/git/git-rebase-source'
+} from '../shared/git/effective-upstream'
+import { gitExecMutatesRepository } from '../shared/git/exec-mutation'
+import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../shared/git/fetch-auto-maintenance'
+import { syncForkDefaultBranch, validateGitForkSyncExpectedUpstream } from '../shared/git/fork-sync'
+import { loadGitHistoryFromExecutor } from '../shared/git/history'
+import { getPublishTargetStatus, type GitCommandRunner } from '../shared/git/publish-target-status'
+import { assertGitPushTargetShape } from '../shared/git/push-target-validation'
+import { resolveGitRemoteRebaseSource } from '../shared/git/rebase-source'
 import {
   isNoUpstreamError,
   normalizeGitErrorMessage,
   runPullWithDivergenceFallback
-} from '../shared/git/git-remote-error'
-import { clearGitStatusLineStatsCache } from '../shared/git/git-status-line-stats-cache'
-import { parseNumstat } from '../shared/git/git-uncommitted-line-stats'
+} from '../shared/git/remote-error'
+import { clearGitStatusLineStatsCache } from '../shared/git/status-line-stats-cache'
+import { parseNumstat } from '../shared/git/uncommitted-line-stats'
 import {
   hasUnsupportedRevParsePathFormatEcho,
   isUnsupportedRevParsePathFormatError
-} from '../shared/git/git-worktree-command-capabilities'
+} from '../shared/git/worktree-command-capabilities'
 import { InFlightPromiseDedupe, stableInFlightKey } from '../shared/in-flight-promise-dedupe'
 import { endSubprocessStdin } from '../shared/subprocess-stdin-write'
 import type { GitPushTarget } from '../shared/types'
+import { buildRelayGitEnv, buildRelayUnattendedGitEnv } from './command-env'
 import type { RelayContext } from './context'
 import { expandTilde } from './context'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
+import type { RelayFilesystemWatchRegistry } from './filesystem-watch-registry'
 import { forceDeletePreservedRelayBranch } from './git-handler-branch-cleanup'
 import { checkIgnoredPathsOp } from './git-handler-check-ignore'
 import { commitCompare as commitCompareOp, commitDiffEntry } from './git-handler-commit-diff-ops'
@@ -84,8 +80,6 @@ import {
 } from './git-handler-worktree-ops'
 import { GitResponseStreamRegistry } from './git-response-stream'
 import { GIT_RESPONSE_STREAM_THRESHOLD } from './protocol'
-import { buildRelayGitEnv, buildRelayUnattendedGitEnv } from './relay-command-env'
-import type { RelayFilesystemWatchRegistry } from './relay-filesystem-watch-registry'
 
 const execFileAsync = promisify(execFile)
 const MAX_GIT_BUFFER = 10 * 1024 * 1024

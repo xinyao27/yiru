@@ -1,9 +1,9 @@
-import { decodeGitCQuotedPath } from '../../shared/git/git-cquoted-path'
+import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
 import type {
   SpoolGitHistoryEntry,
   SpoolGitStatusEntry,
   SpoolGitStatusResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { StatusPorcelainParser } from '../git/status-porcelain-parser'
 import { normalizeSpoolRelativePath } from './worktree-containment'
 

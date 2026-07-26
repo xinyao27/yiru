@@ -7,7 +7,7 @@ import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 import type { AppState } from '@/store/types'
 
-import { folderWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import { canOpenAiVaultSessionLogInYiru } from './ai-vault-session-path-actions'
 
 type AiVaultLogSession = Pick<AiVaultSession, 'filePath' | 'executionHostId'>

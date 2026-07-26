@@ -1,4 +1,4 @@
-import type { SpoolConnectionState } from '../../shared/spool/spool-wire-contract'
+import type { SpoolConnectionState } from '../../shared/spool/wire-contract'
 
 export class SpoolPeerStatePublisher {
   private readonly listeners = new Set<(state: SpoolConnectionState) => void>()

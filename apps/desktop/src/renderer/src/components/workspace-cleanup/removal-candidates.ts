@@ -1,6 +1,6 @@
 import type { WorktreeDeleteState } from '@/store/slices/worktrees'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
 
 type DeletionFlagState = Pick<WorktreeDeleteState, 'isDeleting'>
 

@@ -24,11 +24,11 @@ import { shouldUseShellReadyStartupDelivery } from '../shared/codex-startup-deli
 import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
-} from '../shared/git/git-credential-prompt-env'
+} from '../shared/git/credential-prompt-env'
 import { PhysicalExitTracker } from '../shared/physical-exit-tracker'
 import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
 import { buildStartupCommandSubmission } from '../shared/startup-command-submission'
-import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/terminal-git-credential-guard'
+import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/git-credential-guard'
 import { isTuiAgent } from '../shared/tui-agent-config'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import {

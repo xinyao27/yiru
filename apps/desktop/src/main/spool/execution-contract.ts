@@ -1,7 +1,7 @@
 import type {
   SpoolExecutionOperation,
   SpoolSubscriptionOperation
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import type { SpoolHostSubscription } from './terminal-subscription-capacity'
 import type { SpoolPublicWorktreeInstance } from './worktree-publication-state'
 

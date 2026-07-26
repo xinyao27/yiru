@@ -13,7 +13,7 @@ import {
   type HostedReviewCreationProvider
 } from '@yiru/workbench-model/review'
 
-import { isNoUpstreamError, normalizeGitErrorMessage } from '../../shared/git/git-remote-error'
+import { isNoUpstreamError, normalizeGitErrorMessage } from '../../shared/git/remote-error'
 import {
   normalizeHostedReviewBaseRef,
   normalizeHostedReviewHeadRef

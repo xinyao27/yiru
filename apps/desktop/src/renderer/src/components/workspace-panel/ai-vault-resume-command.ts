@@ -20,7 +20,7 @@ import {
   resolveTuiAgentLaunchEnv
 } from '../../../../shared/tui-agent-launch-defaults'
 import type { AgentStartupShell } from '../../../../shared/tui-agent-startup-shell'
-import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 
 type AiVaultResumeCommandSession = Pick<
   AiVaultSession,

@@ -2,8 +2,8 @@ import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-l
 
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/git-history'
-import type { TerminalGitHubPRLink } from '../../shared/terminal/terminal-github-pr-link-detector'
+import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
 import type {
   DirEntry,
   FsChangeEvent,
@@ -23,7 +23,7 @@ import type {
   SearchOptions,
   SearchResult
 } from '../../shared/types'
-import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/workspace-space-types'
+import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/space-types'
 import type { IGitMutationProvider } from './git-provider-mutation-contract'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
 import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'

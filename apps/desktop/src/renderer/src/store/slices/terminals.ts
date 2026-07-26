@@ -13,7 +13,7 @@ import {
 import type { StateCreator } from 'zustand'
 
 import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
-import type { NativeChatLaunchPrompt } from '@/components/native-chat/native-chat-launch-prompt'
+import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
 import { hasWorktreeSleepIntent } from '@/components/sidebar/worktree-sleep-intent'
 import { forgetAgentHibernationTabOutput } from '@/components/terminal-pane/agent-hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '@/components/terminal-pane/agent-startup-delivery-guards'
@@ -55,8 +55,8 @@ import {
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
 import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
-import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent/agent-decorative-title-signature'
-import { deriveGeneratedTabTitle } from '../../../../shared/agent/agent-tab-title'
+import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent/decorative-title-signature'
+import { deriveGeneratedTabTitle } from '../../../../shared/agent/tab-title'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import {
   DEFAULT_REPO_BADGE_COLOR,
@@ -69,10 +69,7 @@ import {
   parseLegacyNumericPaneKey,
   parsePaneKey
 } from '../../../../shared/stable-pane-id'
-import {
-  isValidHostTerminalTabId,
-  isValidTerminalTabId
-} from '../../../../shared/terminal/terminal-tab-id'
+import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../../../shared/terminal/tab-id'
 import type {
   Repo,
   SetupSplitDirection,
@@ -88,7 +85,7 @@ import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace/workspace-scope'
+} from '../../../../shared/workspace/scope'
 import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
 import type { AppState } from '../types'
 import {

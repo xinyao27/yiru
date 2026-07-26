@@ -22,7 +22,7 @@ import type {
   TabGroup,
   TerminalTab
 } from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/workspace-panel-tab'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
 import { focusTerminalTabSurface } from '../../lib/focus-terminal-tab-surface'
 import {
   activateWebRuntimeSessionTab,

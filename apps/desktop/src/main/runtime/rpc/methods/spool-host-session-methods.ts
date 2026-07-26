@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import type { SpoolExecutionOperation } from '../../../../shared/spool/spool-operation-contract'
+import type { SpoolExecutionOperation } from '../../../../shared/spool/operation-contract'
 import {
   SpoolPairedRuntimeHistoricalSessionPageResponseSchema,
   SpoolPairedRuntimeListHistoricalSessionPageParamsSchema,
@@ -10,7 +10,7 @@ import {
   SpoolPairedRuntimeSessionInvokeParamsSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema,
   SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema
-} from '../../../../shared/spool/spool-paired-runtime-session-contract'
+} from '../../../../shared/spool/paired-runtime-session-contract'
 import { SpoolExecutionError } from '../../../spool/execution-error'
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod } from '../core'
 import { getSpoolHostChannelLifetimes } from './spool-host-channel-lifetimes'

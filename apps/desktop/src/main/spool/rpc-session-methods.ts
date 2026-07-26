@@ -3,9 +3,9 @@ import { z } from 'zod'
 import {
   SpoolMutationResultSchema,
   SpoolTerminalSubscriptionEventSchema
-} from '../../shared/spool/spool-execution-result-schema'
-import type { SpoolExecutionOperation } from '../../shared/spool/spool-operation-contract'
-import { TERMINAL_INPUT_MAX_BYTES } from '../../shared/terminal/terminal-input'
+} from '../../shared/spool/execution-result-schema'
+import type { SpoolExecutionOperation } from '../../shared/spool/operation-contract'
+import { TERMINAL_INPUT_MAX_BYTES } from '../../shared/terminal/input'
 import type { SpoolExecutionGateway } from './execution-gateway'
 import { SpoolRpcError, type SpoolRpcMethodSpec } from './rpc-gateway'
 import {

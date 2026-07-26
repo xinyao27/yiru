@@ -47,7 +47,7 @@ import type {
   WorkspacePanelTabContentType,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/workspace-panel-tab'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace/panel-tab'
 import { useAppStore } from '../../store'
 import type { OpenFile } from '../editor/state'
 import { MobileEmulatorTabIntroCallout } from '../emulator-pane/mobile-emulator-tab-intro-callout'

@@ -4,4 +4,4 @@ export {
   toHostSessionTabId,
   toWebTerminalSurfaceTabId,
   WEB_TERMINAL_SURFACE_TAB_PREFIX
-} from '../../../shared/terminal/terminal-surface-id'
+} from '../../../shared/terminal/surface-id'

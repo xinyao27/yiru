@@ -5,10 +5,6 @@ import {
 } from '../../shared/runtime-file-watch-limits'
 import type { FsChangeEvent } from '../../shared/types'
 import {
-  WATCHER_IGNORE_DIRS,
-  buildParcelWatcherIgnoreOptions
-} from '../filesystem/filesystem-watcher-ignore'
-import {
   forgetRuntimeWatcherProcessRoot,
   subscribeViaRuntimeWatcherProcess,
   type WatcherProcessEvent,
@@ -18,6 +14,7 @@ import {
   isWatcherProcessFailure,
   type WatcherProcessFailure
 } from '../filesystem/parcel-watcher-process-failure'
+import { WATCHER_IGNORE_DIRS, buildParcelWatcherIgnoreOptions } from '../filesystem/watcher-ignore'
 import { createRuntimeRootOwnershipReleaser } from './root-watch-ownership'
 import { closeRuntimeRootWatch } from './root-watch-teardown'
 

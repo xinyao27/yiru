@@ -1,4 +1,4 @@
-import type { SpoolRpcFailure } from '../../shared/spool/spool-wire-contract'
+import type { SpoolRpcFailure } from '../../shared/spool/wire-contract'
 
 export type SpoolExecutionErrorCode = SpoolRpcFailure['error']['code']
 export type SpoolExecutionErrorDiagnostic =

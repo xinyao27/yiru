@@ -1,5 +1,5 @@
-import { extractLastOscTitle, detectAgentStatusFromTitle } from '../../shared/agent/agent-detection'
-import type { AgentStatus } from '../../shared/agent/agent-detection'
+import { extractLastOscTitle, detectAgentStatusFromTitle } from '../../shared/agent/detection'
+import type { AgentStatus } from '../../shared/agent/detection'
 import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
 import type { StatsCollector } from './collector'
 

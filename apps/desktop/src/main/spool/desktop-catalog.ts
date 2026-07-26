@@ -1,9 +1,9 @@
-import type { SpoolRemoteDesktop } from '../../shared/spool/spool-catalog-contract'
+import type { SpoolRemoteDesktop } from '../../shared/spool/catalog-contract'
 import type {
   SpoolRequesterControlView,
   SpoolRequesterInvokeArgs,
   SpoolRequesterSubscriptionArgs
-} from '../../shared/spool/spool-ipc-contract'
+} from '../../shared/spool/ipc-contract'
 import {
   cancelSpoolCatalogSessionLoad,
   reconcileSpoolCatalogSessionLoad

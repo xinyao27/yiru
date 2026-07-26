@@ -7,7 +7,7 @@ import { WorkspaceTabStripViewport } from '@/components/tab-bar/workspace-tab-st
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 
-import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
+import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/catalog-contract'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import type { ActivityBarItem } from '../workspace-panel/activity-bar-buttons'
 import { getSpoolWorkspacePanelTabId, SpoolWorkspacePanelTab } from './workspace-panel-tab'

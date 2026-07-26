@@ -6,7 +6,7 @@ import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 import type { AppState } from '@/store/types'
 
 import type { Repo, Worktree } from '../../../../shared/types'
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
 
 export type WorkspaceCleanupSortKey = 'activity' | 'name' | 'repo' | 'review' | 'git'
 export type WorkspaceCleanupSortDirection = 'asc' | 'desc'

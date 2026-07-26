@@ -16,11 +16,11 @@ import { planAgentCliArgsSuffix } from '@/lib/tui-agent-startup'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { useAppStore } from '@/store'
 
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/source-control-ai'
+import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/ai'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   renderSourceControlActionCommandTemplate
-} from '../../../../shared/source-control/source-control-ai-actions'
+} from '../../../../shared/source-control/ai-actions'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type {

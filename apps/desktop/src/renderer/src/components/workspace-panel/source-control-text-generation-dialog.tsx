@@ -16,9 +16,9 @@ import { buildPullRequestFieldsPrompt } from '../../../../shared/pull-request-ge
 import {
   resolveSourceControlAiForOperation,
   type ResolvedSourceControlAiGenerationParams
-} from '../../../../shared/source-control/source-control-ai'
-import type { SourceControlTextActionId } from '../../../../shared/source-control/source-control-ai-actions'
-import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/source-control-ai-recipe-save'
+} from '../../../../shared/source-control/ai'
+import type { SourceControlTextActionId } from '../../../../shared/source-control/ai-actions'
+import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/ai-recipe-save'
 import type { GlobalSettings, Repo } from '../../../../shared/types'
 import {
   SourceControlTextGenerationDialogForm,

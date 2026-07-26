@@ -6,7 +6,7 @@ import { app } from 'electron'
 
 import type { GlobalSettings, FloatingTerminalCwdRequest } from '../../shared/types'
 import type { Store } from '../persistence'
-import { authorizeExternalPath } from './filesystem-auth'
+import { authorizeExternalPath } from './auth'
 
 const FLOATING_WORKSPACE_DIRNAME = 'floating-workspace'
 

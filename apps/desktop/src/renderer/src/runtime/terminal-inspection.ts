@@ -1,6 +1,6 @@
 import type { RuntimeTerminalSend } from '../../../shared/runtime-types'
 import { makePaneKey } from '../../../shared/stable-pane-id'
-import { isTerminalInputTooLargeWithDeferredMeasurement } from '../../../shared/terminal/terminal-input'
+import { isTerminalInputTooLargeWithDeferredMeasurement } from '../../../shared/terminal/input'
 import type { GlobalSettings } from '../../../shared/types'
 import { useAppStore } from '../store'
 import { RuntimeRpcCallError, callRuntimeRpc, getActiveRuntimeTarget } from './rpc-client'

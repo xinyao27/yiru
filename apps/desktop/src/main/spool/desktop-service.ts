@@ -1,7 +1,4 @@
-import type {
-  SpoolControlGrant,
-  SpoolControlRequest
-} from '../../shared/spool/spool-access-contract'
+import type { SpoolControlGrant, SpoolControlRequest } from '../../shared/spool/access-contract'
 import type {
   SpoolDecideControlArgs,
   SpoolOwnerControlGrantView,
@@ -14,18 +11,18 @@ import type {
   SpoolSetProjectVisibilityArgs,
   SpoolSetWorktreeVisibilityArgs,
   SpoolSharingSnapshot
-} from '../../shared/spool/spool-ipc-contract'
+} from '../../shared/spool/ipc-contract'
 import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
-} from '../../shared/spool/spool-windows-firewall-contract'
+} from '../../shared/spool/windows-firewall-contract'
 import type { SpoolDesktopCatalogSnapshot, SpoolRequesterSubscriptionSink } from './desktop-catalog'
 import type {
   SpoolDesktopServiceOptions,
   SpoolOwnerWorktreeDescriptor
 } from './desktop-service-options'
 import { SpoolDesktopStartRecovery } from './desktop-start-recovery'
-import type { SpoolSharingIpcController } from './spool-sharing'
+import type { SpoolSharingIpcController } from './sharing'
 import { SpoolWindowsFirewallRecovery } from './windows-firewall-recovery'
 
 export class SpoolDesktopService implements SpoolSharingIpcController {

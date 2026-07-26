@@ -9,7 +9,7 @@ import {
   SPOOL_INGRESS_PORT,
   SPOOL_MAX_ENCRYPTED_FRAME_BYTES,
   SPOOL_PROBE_PATH
-} from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/wire-contract'
 import type { SpoolE2EEKeypair } from './e2ee-keypair'
 import { openSpoolEncryptedConnection } from './ingress-encrypted-connection'
 import type { SpoolProbeService } from './ingress-probe'

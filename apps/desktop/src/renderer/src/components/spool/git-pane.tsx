@@ -13,7 +13,7 @@ import type {
   SpoolGitHistoryResult,
   SpoolGitStatusEntry,
   SpoolGitStatusResult
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 import { getSpoolGitStatusEntryKey } from './git-changes-list'
 import { SpoolGitDiffPane } from './git-diff-pane'
 import { SpoolGitSidebar, type SpoolGitSidebarMode } from './git-sidebar'

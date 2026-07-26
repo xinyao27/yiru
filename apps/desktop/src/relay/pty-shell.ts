@@ -13,7 +13,7 @@ import {
   isExpectedAgentProcess,
   recognizeAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../shared/agent/agent-process-recognition'
+} from '../shared/agent/process-recognition'
 import { getFirstCommandToken } from '../shared/command-token-scanner'
 import { getProcessTableSnapshot, type ProcessTableRow } from '../shared/process-table-snapshot'
 import { isShellProcess } from '../shared/shell-process-detection'

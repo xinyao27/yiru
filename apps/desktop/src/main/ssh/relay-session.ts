@@ -23,10 +23,10 @@ import {
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD,
   isRemoteAgentHooksEnabled
-} from '../../shared/agent/agent-hook-relay'
+} from '../../shared/agent/hook-relay'
 import type { PtyModelRestoreNeededEvent } from '../../shared/pty-model-restore-marker'
 import { isTerminalLeafId, makePaneKey } from '../../shared/stable-pane-id'
-import { isValidTerminalTabId } from '../../shared/terminal/terminal-tab-id'
+import { isValidTerminalTabId } from '../../shared/terminal/tab-id'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { installRemoteManagedAgentHooks } from '../agent-hooks/remote-managed-hook-installers'
 import { agentHookServer } from '../agent-hooks/server'
@@ -48,6 +48,10 @@ import {
   isSshPtyNotFoundError
 } from '../providers/ssh-pty-provider'
 import {
+  recordHiddenRendererPtyDataDrop,
+  shouldDropHiddenRendererPtyData
+} from '../pty/hidden-delivery-gate'
+import {
   registerSshPtyProvider,
   unregisterSshPtyProvider,
   getSshPtyProvider,
@@ -57,10 +61,6 @@ import {
   deletePtyOwnership,
   setPtyOwnership
 } from '../pty/pty'
-import {
-  recordHiddenRendererPtyDataDrop,
-  shouldDropHiddenRendererPtyData
-} from '../pty/pty-hidden-delivery-gate'
 import { answerStartupTerminalColorQueries } from '../pty/terminal-startup-color-query-replies'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { isMainWindowVisible, onMainWindowBecameVisible } from '../window/main-window-visibility'
@@ -952,7 +952,7 @@ export class SshRelaySession {
       // dev-vs-prod diagnostics fire on remote events the same as on local
       // ones — see docs/design/agent-status-over-ssh.md §3 ("Replay /
       // version mismatch") and the relay's wire envelope at
-      // src/shared/agent-hook-relay.ts.
+      // src/shared/agent/hook-relay.ts.
       agentHookServer.ingestRemote(
         {
           paneKey: envelope.paneKey,

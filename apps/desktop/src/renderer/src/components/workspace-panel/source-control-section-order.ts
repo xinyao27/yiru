@@ -1,4 +1,4 @@
-import { normalizeSourceControlGroupOrder } from '../../../../shared/source-control/source-control-group-order'
+import { normalizeSourceControlGroupOrder } from '../../../../shared/source-control/group-order'
 import type { GitStatusEntry, SourceControlGroupOrder } from '../../../../shared/types'
 
 export const SOURCE_CONTROL_AREAS = ['unstaged', 'staged', 'untracked'] as const

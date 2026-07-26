@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 
-import type { SpoolFileListResult } from '../../../../shared/spool/spool-operation-contract'
+import type { SpoolFileListResult } from '../../../../shared/spool/operation-contract'
 import { parseSpoolFileListResult } from './owner-result-validation'
 import { invokeSpoolWorkspaceRead, SpoolWorkspaceOperationError } from './workspace-operation'
 import { getSpoolWorktreeRouteKey, type SpoolWorktreeRoute } from './worktree-route'

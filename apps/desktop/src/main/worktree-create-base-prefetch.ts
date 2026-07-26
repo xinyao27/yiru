@@ -6,7 +6,7 @@ import { getBaseRefDefault } from './git/repo'
 import { hasWorktreeBaseCommitRef } from './git/worktree-base-ref-probe'
 import { getSshGitProvider } from './providers/ssh-git-dispatch'
 import { resolveWorktreeCreateBase } from './worktree-create-base'
-import { prefetchRemoteWorktreeCreateBase } from './worktree/worktree-remote'
+import { prefetchRemoteWorktreeCreateBase } from './worktree/remote'
 
 type RemoteTrackingBaseForPrefetch = {
   remote: string

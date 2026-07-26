@@ -1,8 +1,8 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 
-import { updateNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/native-chat-session-option-defaults'
-import type { SessionOptionDescriptor } from '../../../../shared/native-chat/native-chat-session-options'
+import { updateNativeChatSessionOptionDefaults } from '../../../../shared/native-chat/session-option-defaults'
+import type { SessionOptionDescriptor } from '../../../../shared/native-chat/session-options'
 import { useAppStore } from '../../store'
 import { readClaudeSessionOptionsFromTerminalScreen } from './claude-terminal-session-options'
 import {

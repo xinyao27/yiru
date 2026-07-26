@@ -2,13 +2,13 @@ import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { AgentSessionContinuationRequest } from '@/components/terminal-pane/agent-session-continuation'
 import {
   buildAiVaultResumeCopyCommandForWorktree,
   buildAiVaultResumeStartupForWorktree,
   type AiVaultResumeStartup
 } from '@/components/workspace-panel/ai-vault-resume-command'
 import { translate } from '@/i18n/i18n'
-import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import {
   canResumeAiVaultSessionOnTarget,
   getAiVaultResumeWorkspaceExecutionHostId,
@@ -23,7 +23,7 @@ import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
 import type { Worktree } from '../../../../shared/types'
-import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { prepareAiVaultSessionContinuation } from './ai-vault-session-continuation'
 import { agentLabel } from './ai-vault-session-filters'
 import {

@@ -3,7 +3,7 @@ import { join } from 'node:path'
 
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
-import { SPOOL_INGRESS_PORT, type SpoolOsFamily } from '../../shared/spool/spool-wire-contract'
+import { SPOOL_INGRESS_PORT, type SpoolOsFamily } from '../../shared/spool/wire-contract'
 import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'

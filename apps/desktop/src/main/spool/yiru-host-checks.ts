@@ -1,11 +1,11 @@
 import {
   normalizeSpoolChecksHttpUrl,
   SpoolChecksReadResultSchema
-} from '../../shared/spool/spool-checks-result-schema'
+} from '../../shared/spool/checks-result-schema'
 import type {
   SpoolChecksReadOperation,
   SpoolChecksReadResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import type { Store } from '../persistence'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type { RuntimeGitCommands } from '../runtime/yiru-runtime-git'

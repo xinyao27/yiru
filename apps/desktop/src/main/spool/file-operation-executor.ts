@@ -3,13 +3,13 @@ import type {
   SpoolFileListResult,
   SpoolFileReadResult,
   SpoolMutationResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import {
   SPOOL_FILE_LIST_DEFAULT_LIMIT,
   SPOOL_FILE_LIST_MAX_LIMIT,
   SPOOL_FILE_READ_DEFAULT_BYTES,
   SPOOL_FILE_READ_MAX_BYTES
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { asSpoolExecutionError, SpoolExecutionError } from './execution-error'
 import type { ExecutionAdmissionGuard } from './execution-gateway'
 import { decodeSpoolFileBytes, decodeSpoolFileWriteContent } from './file-content-codec'

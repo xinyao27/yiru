@@ -1,4 +1,4 @@
-import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/ipc-contract'
 import type { SpoolTerminalConnectionStatus } from './terminal-status-label'
 
 type SpoolTerminalSubscriptionSettlementOptions = {

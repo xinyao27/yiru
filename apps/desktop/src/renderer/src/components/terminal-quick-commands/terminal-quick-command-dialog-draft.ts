@@ -1,7 +1,7 @@
 import {
   getTerminalQuickCommandScope,
   isTerminalAgentQuickCommand
-} from '../../../../shared/terminal/terminal-quick-commands'
+} from '../../../../shared/terminal/quick-commands'
 import type { TerminalQuickCommand, TuiAgent } from '../../../../shared/types'
 
 export type TerminalQuickCommandDialogAction = 'terminal-command' | 'agent-prompt'

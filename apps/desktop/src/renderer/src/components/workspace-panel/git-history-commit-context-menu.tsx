@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/context-menu'
 import { translate } from '@/i18n/i18n'
 
-import type { GitHistoryItem } from '../../../../shared/git/git-history'
+import type { GitHistoryItem } from '../../../../shared/git/history'
 
 export type GitHistoryCommitAction = 'open-remote' | 'copy-hash' | 'copy-message' | 'explain'
 

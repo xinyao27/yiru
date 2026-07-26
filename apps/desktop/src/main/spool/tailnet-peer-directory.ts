@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 
-import type { SpoolOsFamily } from '../../shared/spool/spool-wire-contract'
+import type { SpoolOsFamily } from '../../shared/spool/wire-contract'
 import type { SpoolProbeClient } from './probe-client'
 import type { TailnetControl, TailnetNode } from './tailnet-control'
 

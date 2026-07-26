@@ -8,7 +8,7 @@ import {
 import type { RuntimeClientTarget } from '@/runtime/rpc-client'
 
 import type { SkillDiscoveryTarget } from '../../../../shared/skills'
-import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import type { AppState } from '../../store/types'
 
 export type NativeChatSkillStateInputs = Pick<

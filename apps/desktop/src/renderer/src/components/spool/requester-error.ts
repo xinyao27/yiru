@@ -1,7 +1,7 @@
 import {
   isSpoolRequesterTransportErrorCode,
   type SpoolRequesterTransportErrorCode
-} from '../../../../shared/spool/spool-ipc-contract'
+} from '../../../../shared/spool/ipc-contract'
 
 const ELECTRON_INVOKE_ERROR_PATTERN =
   /^(?:Error:\s*)?(?:Error invoking remote method '[^']+':\s*)?(?:Error:\s*)*([a-z_]+)$/

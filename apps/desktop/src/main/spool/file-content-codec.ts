@@ -1,4 +1,4 @@
-import { SPOOL_FILE_WRITE_MAX_BYTES } from '../../shared/spool/spool-operation-contract'
+import { SPOOL_FILE_WRITE_MAX_BYTES } from '../../shared/spool/operation-contract'
 import { SpoolExecutionError } from './execution-error'
 
 export function decodeSpoolFileBytes(bytes: Uint8Array<ArrayBufferLike>): string | null {

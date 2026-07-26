@@ -1,5 +1,5 @@
 // Why: both the server reply path (e2ee-channel) and the client send path
-// (remote-runtime-client) write to a ws with no backpressure handling. A fast
+// (remote-runtime/client) write to a ws with no backpressure handling. A fast
 // producer over a slow link balloons ws.bufferedAmount / RSS without bound, or
 // (binary path) silently drops frames. This queue holds outbound frames in
 // order while bufferedAmount is over a soft cap and flushes as it drains, so no

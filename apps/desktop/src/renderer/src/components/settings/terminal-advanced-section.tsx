@@ -6,7 +6,7 @@ import {
   DESKTOP_TERMINAL_SCROLLBACK_ROWS_MAX,
   DESKTOP_TERMINAL_SCROLLBACK_ROWS_MIN,
   normalizeDesktopTerminalScrollbackRows
-} from '../../../../shared/terminal/terminal-scrollback-policy'
+} from '../../../../shared/terminal/scrollback-policy'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Input } from '../ui/input'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'

@@ -17,13 +17,13 @@ import { useAppStore } from '@/store'
  * moves to main. See docs/reference/terminal-hidden-view-parking.md and
  * docs/reference/terminal-side-effect-authority.md.
  */
-import { isClaudeAgent } from '../../../../shared/agent/agent-detection'
+import { isClaudeAgent } from '../../../../shared/agent/detection'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode
-} from '../../../../shared/terminal/terminal-color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/terminal-github-pr-link-detector'
+} from '../../../../shared/terminal/color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/github-pr-link-detector'
 import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,

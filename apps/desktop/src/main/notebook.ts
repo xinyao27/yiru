@@ -4,7 +4,7 @@ import { dirname } from 'node:path'
 
 import { ipcMain } from 'electron'
 
-import { resolveAuthorizedPath } from './filesystem/filesystem-auth'
+import { resolveAuthorizedPath } from './filesystem/auth'
 import type { Store } from './persistence'
 
 export type NotebookRunResult = {

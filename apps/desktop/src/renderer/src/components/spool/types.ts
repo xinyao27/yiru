@@ -1,11 +1,11 @@
-import type { SpoolRemoteDesktop } from '../../../../shared/spool/spool-catalog-contract'
+import type { SpoolRemoteDesktop } from '../../../../shared/spool/catalog-contract'
 import type {
   SpoolOwnerControlGrantView,
   SpoolOwnerControlRequestView,
   SpoolOwnerWorktreeSharing,
   SpoolRequesterControlView,
   SpoolSharingSnapshot
-} from '../../../../shared/spool/spool-ipc-contract'
+} from '../../../../shared/spool/ipc-contract'
 
 export type SpoolWorkspaceRoute = {
   desktopRef: string

@@ -12,11 +12,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { GitHistoryItem, GitHistoryResult } from '../../../../shared/git/git-history'
+import type { GitHistoryItem, GitHistoryResult } from '../../../../shared/git/history'
 import {
   buildDefaultGitHistoryColorMap,
   buildGitHistoryViewModels
-} from '../../../../shared/git/git-history-graph'
+} from '../../../../shared/git/history-graph'
 import type { GitBranchChangeEntry } from '../../../../shared/types'
 import {
   GitHistoryCommitContextMenu,

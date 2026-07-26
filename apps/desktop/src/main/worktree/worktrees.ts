@@ -30,7 +30,7 @@ import {
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../shared/workspace/workspace-scope'
+} from '../../shared/workspace/scope'
 import {
   buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
@@ -47,7 +47,7 @@ import {
   invalidateAuthorizedRootsCache,
   isENOENT,
   registerWorktreeRootsForRepo
-} from '../filesystem/filesystem-auth'
+} from '../filesystem/auth'
 import { getDefaultRemote } from '../git/repo'
 import { gitExecFileAsync } from '../git/runner'
 import {
@@ -83,7 +83,7 @@ import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import { persistExistingWorktreeSortOrder } from '../worktree-sort-order-persistence'
 import { shouldEmitBoundedWarning } from './bounded-warning-dedupe'
-import { registerWorktreeChangeInvalidator } from './worktree-change-invalidators'
+import { registerWorktreeChangeInvalidator } from './change-invalidators'
 import {
   mergeWorktree,
   parseWorktreeId,
@@ -91,16 +91,16 @@ import {
   formatWorktreeRemovalError,
   isOrphanCompatiblePreflightError,
   isOrphanedWorktreeError
-} from './worktree-logic'
-import { dedupeWorktreesByPath } from './worktree-path-comparison'
+} from './logic'
+import { dedupeWorktreesByPath } from './path-comparison'
 import {
   createLocalWorktree,
   createRemoteWorktree,
   cleanupUnusedWorktreePushTargetRemote,
   cleanupUnusedWorktreePushTargetRemoteSsh,
   notifyWorktreesChanged
-} from './worktree-remote'
-import { findExistingWorktreeSymlinkPaths, removeWorktreeLinkedPaths } from './worktree-symlinks'
+} from './remote'
+import { findExistingWorktreeSymlinkPaths, removeWorktreeLinkedPaths } from './symlinks'
 
 type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
   automationProvenance?: AutomationWorkspaceProvenance
@@ -165,7 +165,7 @@ import {
   getRepoIdFromWorktreeId
 } from '@yiru/workbench-model/workspace'
 
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/workspace-statuses'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/statuses'
 import {
   getLocalWorktreePathAccess,
   removeLocalWorktreePath,

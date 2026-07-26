@@ -5,7 +5,7 @@ import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-r
 import { TERMINAL_TEXT_SCALES } from '../storage/preferences'
 import { colors } from '../theme/uniwind-theme-values'
 import { TERMINAL_PATH_TAP_JS } from './path-tap-injected'
-import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from './terminal-webview-engine.generated'
+import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from './webview-engine.generated'
 import { TERMINAL_QUERY_REPLY_JS } from './webview-query-reply-injected'
 import { TERMINAL_REFLOW_JS } from './webview-reflow-injected'
 import { TERMINAL_SURFACE_SWAP_JS } from './webview-surface-swap-injected'

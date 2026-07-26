@@ -1,6 +1,6 @@
-import type { TailnetPrincipal } from '../../shared/spool/spool-wire-contract'
+import type { TailnetPrincipal } from '../../shared/spool/wire-contract'
 
-export type { TailnetPrincipal } from '../../shared/spool/spool-wire-contract'
+export type { TailnetPrincipal } from '../../shared/spool/wire-contract'
 
 export type TailnetNode = {
   nodeId: string

@@ -1,5 +1,5 @@
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
-import type { SpoolRpcRequest } from '../../shared/spool/spool-wire-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
+import type { SpoolRpcRequest } from '../../shared/spool/wire-contract'
 
 export function parseSpoolRpcRequest(frame: string): SpoolRpcRequest | null {
   let value: unknown

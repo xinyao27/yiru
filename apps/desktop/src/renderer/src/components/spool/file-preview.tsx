@@ -11,7 +11,7 @@ import type {
   SpoolFileDiffResult,
   SpoolFileReadResult,
   SpoolFileTreeEntry
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 import { SpoolFilePreviewToolbar, type SpoolFilePreviewMode } from './file-preview-toolbar'
 
 export function SpoolFilePreview({

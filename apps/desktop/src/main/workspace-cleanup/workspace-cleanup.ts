@@ -7,13 +7,13 @@ import {
   type WorkspaceCleanupLocalProcessResult,
   type WorkspaceCleanupScanArgs,
   type WorkspaceCleanupScanResult
-} from '../../shared/workspace/workspace-cleanup'
+} from '../../shared/workspace/cleanup'
 import { listRegisteredPtys } from '../memory/pty-registry'
 import type { Store } from '../persistence'
 import type { IPtyProvider } from '../providers/types'
 import { getSshPtyProvider } from '../pty/pty'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import { scanWorkspaceCleanup } from './workspace-cleanup-scan'
+import { scanWorkspaceCleanup } from './scan'
 
 export { scanWorkspaceCleanup }
 

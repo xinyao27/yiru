@@ -1,4 +1,4 @@
-import type { SpoolRpcFailure } from '../../shared/spool/spool-wire-contract'
+import type { SpoolRpcFailure } from '../../shared/spool/wire-contract'
 import { SpoolExecutionError } from './execution-error'
 
 export class SpoolRpcError extends Error {

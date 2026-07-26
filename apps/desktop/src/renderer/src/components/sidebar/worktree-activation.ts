@@ -6,7 +6,7 @@ import {
   activateAndRevealWorktree
 } from '@/lib/worktree-activation'
 
-import { parseWorkspaceKey } from '../../../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 
 export async function activateWorktreeFromSidebar(worktreeId: string): Promise<void> {
   const workspaceScope = parseWorkspaceKey(worktreeId)

@@ -13,7 +13,7 @@ import {
 // best-effort and local-only — remote/Windows/locked/dest-taken all degrade to
 // "folder kept" without disturbing the rename that already succeeded.
 import type { GlobalSettings, Repo } from '../../shared/types'
-import { planWorktreeFolderRename } from '../worktree/worktree-folder-rename-target'
+import { planWorktreeFolderRename } from '../worktree/folder-rename-target'
 
 export type FirstWorkFolderRenameDeps = {
   getRepo: (repoId: string) => Repo | undefined

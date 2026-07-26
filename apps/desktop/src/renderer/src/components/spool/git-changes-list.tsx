@@ -7,7 +7,7 @@ import { SourceControlVirtualFileList } from '@/components/workspace-panel/sourc
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { SpoolGitStatusEntry } from '../../../../shared/spool/spool-operation-contract'
+import type { SpoolGitStatusEntry } from '../../../../shared/spool/operation-contract'
 import { SpoolTruncatedPathLabel } from './truncated-path-label'
 
 export function SpoolGitChangesList({

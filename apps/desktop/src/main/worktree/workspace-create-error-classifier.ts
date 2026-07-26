@@ -2,7 +2,7 @@
 // the `workspace_create_failed` event's `error_class` enum.
 //
 // Why: the throw sites are bare `throw new Error('...')` calls in
-// worktree-remote.ts, some of which interpolate user-controlled content
+// remote.ts, some of which interpolate user-controlled content
 // (branch names, paths). The classifier reads `error.message` to bucket, but
 // the matched strings never cross the wire — only the enum value does. The
 // schema discipline at telemetry-events.ts §"Properties to keep off these
@@ -35,7 +35,7 @@ export function classifyWorkspaceCreateError(error: unknown): WorkspaceCreateErr
     return 'permission_denied'
   }
   // Why: anchors are intentionally specific to true git failures from
-  // worktree-remote.ts. Bare 'git ' / 'worktree' would mis-bucket SSH-relay
+  // remote.ts. Bare 'git ' / 'worktree' would mis-bucket SSH-relay
   // and sparse-checkout validation errors (which the design doc routes to
   // 'unknown'); 'created but not found in listing' covers the formerly
   // miscased 'Worktree created but not found in listing' throw.

@@ -14,7 +14,7 @@ import {
   readWebpDimensionsFromBuffer,
   type PetManifestLike,
   type ResolvedPetManifest
-} from './pet-bundle'
+} from './bundle'
 
 // Why: image-only pet uploads. Static + animated variants render natively
 // via <img>, so no 3D engine is needed. Main owns the accepted-format table as

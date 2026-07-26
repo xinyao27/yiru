@@ -55,10 +55,10 @@ import type { EventProps } from '../../../../shared/telemetry-events'
 import {
   DEFAULT_TERMINAL_FONT_SIZE,
   resolveTerminalFontWeights
-} from '../../../../shared/terminal/terminal-fonts'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal/terminal-line-height-settings'
-import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/terminal-scrollback-policy'
+} from '../../../../shared/terminal/fonts'
+import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
+import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
+import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/scrollback-policy'
 import type {
   GlobalSettings,
   SetupSplitDirection,

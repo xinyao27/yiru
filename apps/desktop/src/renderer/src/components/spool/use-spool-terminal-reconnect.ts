@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/ipc-contract'
 
 const TERMINAL_RECONNECT_DELAYS_MS = [500, 1_000, 2_000, 4_000, 8_000] as const
 const RECOVERABLE_TERMINAL_ERRORS: ReadonlySet<SpoolRequesterTransportErrorCode> = new Set([

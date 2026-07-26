@@ -7,7 +7,7 @@ import { resolveSpoolWorkspaceRoute, selectSpoolCanControl } from '@/components/
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/ipc-contract'
 import { getSpoolRequesterTransportErrorCode } from './requester-error'
 import {
   SpoolSessionContinuationNotice,

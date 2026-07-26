@@ -5,7 +5,7 @@ import {
   emitNativeChatMessageSent,
   emitNativeChatPickerItemAccepted,
   emitNativeChatSendClassified
-} from '@/components/native-chat/native-chat-telemetry'
+} from '@/components/native-chat/telemetry'
 
 import { pushHistory, type HistoryState, type NativeChatPickerItem } from './composer-state'
 import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer-target'

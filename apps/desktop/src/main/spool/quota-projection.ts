@@ -6,7 +6,7 @@ import type {
 import type {
   SpoolProviderQuota,
   SpoolProviderQuotaWindow
-} from '../../shared/spool/spool-catalog-contract'
+} from '../../shared/spool/catalog-contract'
 
 export type SpoolCachedQuotaState = Pick<RateLimitState, 'claude' | 'codex'>
 

@@ -21,7 +21,7 @@ import {
   type WorkspaceCleanupScanArgs,
   type WorkspaceCleanupScanProgress,
   type WorkspaceCleanupScanResult
-} from '../../../../shared/workspace/workspace-cleanup'
+} from '../../../../shared/workspace/cleanup'
 import type { AppState } from '../../store/types'
 
 export type WorkspaceCleanupFailure = {

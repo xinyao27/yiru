@@ -1,5 +1,5 @@
 import { DEFAULT_APP_FONT_FAMILY, getDefaultRepoHookSettings } from '../../../../shared/constants'
-import { DESKTOP_TERMINAL_SCROLLBACK_ROW_PRESETS } from '../../../../shared/terminal/terminal-scrollback-policy'
+import { DESKTOP_TERMINAL_SCROLLBACK_ROW_PRESETS } from '../../../../shared/terminal/scrollback-policy'
 import type { YiruHooks } from '../../../../shared/types'
 
 export type HookName = keyof YiruHooks['scripts']

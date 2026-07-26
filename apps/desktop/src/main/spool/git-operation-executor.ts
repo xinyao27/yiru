@@ -5,7 +5,7 @@ import type {
   SpoolGitHistoryResult,
   SpoolGitStatusResult,
   SpoolMutationResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { asSpoolExecutionError, SpoolExecutionError } from './execution-error'
 import type { ExecutionAdmissionGuard } from './execution-gateway'
 import type { SpoolGitReadProfile } from './git-read-profile'

@@ -30,13 +30,13 @@ import type {
   FeatureInteractionTelemetryBucketState
 } from './feature-interactions'
 import type { FeatureTipId } from './feature-tips'
-import type { ForkSyncMode } from './git/git-fork-sync'
-import type { GitRemoteIdentity } from './git/git-remote-identity'
+import type { ForkSyncMode } from './git/fork-sync'
+import type { GitRemoteIdentity } from './git/remote-identity'
 import type { KeybindingOverrides, TerminalShortcutPolicy } from './keybindings'
 import type { LanguageServerSettings } from './language-server'
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
 import type { LoaderStyle } from './loader-style'
-import type { PersistedNativeChatSessionOptions } from './native-chat/native-chat-session-options'
+import type { PersistedNativeChatSessionOptions } from './native-chat/session-options'
 import type {
   GlobalWindowsRuntimeDefault,
   LocalWindowsRuntimePreference
@@ -44,19 +44,19 @@ import type {
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from './source-control/source-control-ai-types'
+} from './source-control/ai-types'
 import type { VoiceSettings } from './speech-types'
 import type { StatusBarUsageMode } from './status-bar-usage-mode'
 import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
-import type { TerminalCustomTheme } from './terminal/terminal-custom-themes'
+import type { TerminalCustomTheme } from './terminal/custom-themes'
 import type { UiLanguage } from './ui-language'
 import type { UsagePercentageDisplay } from './usage-percentage-display'
-import type { WorkspaceCleanupUIState } from './workspace/workspace-cleanup'
-import type { WorkspaceSource } from './workspace/workspace-source'
+import type { WorkspaceCleanupUIState } from './workspace/cleanup'
+import type { WorkspaceSource } from './workspace/source'
 
 // Re-exported for backward compat with renderer call sites that import
 // `WorkspaceCreateTelemetrySource` from '../../../shared/types'.
-export type { WorkspaceSource as WorkspaceCreateTelemetrySource } from './workspace/workspace-source'
+export type { WorkspaceSource as WorkspaceCreateTelemetrySource } from './workspace/source'
 export type {
   GitBranchChangeStatus,
   GitConflictKind,
@@ -92,11 +92,7 @@ export type RepoKind = WorkbenchWorkspaceTypes.RepoKind
 
 /** Per-repo remote preference for hosted forge metadata. */
 export type ForgeRemotePreference = 'upstream' | 'origin' | 'auto'
-export type {
-  ForkSyncMode,
-  GitForkSyncExpectedUpstream,
-  GitForkSyncResult
-} from './git/git-fork-sync'
+export type { ForkSyncMode, GitForkSyncExpectedUpstream, GitForkSyncResult } from './git/fork-sync'
 export type ExternalWorktreeVisibility = 'hide' | 'show'
 
 export type ProjectProviderIdentity = {

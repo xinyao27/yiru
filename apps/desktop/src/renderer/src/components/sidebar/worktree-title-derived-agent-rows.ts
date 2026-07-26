@@ -12,8 +12,8 @@ import {
 import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 
-import { isClaudeManagementTitle } from '../../../../shared/agent/agent-detection'
-import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent/agent-title-owner'
+import { isClaudeManagementTitle } from '../../../../shared/agent/detection'
+import { normalizeCompatibleAgentTitleForOwner } from '../../../../shared/agent/title-owner'
 import { isTerminalLeafId, makePaneKey } from '../../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,

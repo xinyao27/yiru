@@ -1,6 +1,6 @@
 import { WebglAddon } from '@xterm/addon-webgl'
 
-import { recordTerminalWebglDiagnostic } from '../../../../shared/terminal/terminal-webgl-diagnostics'
+import { recordTerminalWebglDiagnostic } from '../../../../shared/terminal/webgl-diagnostics'
 import { safeFitAndThen } from './pane-fit'
 import { forceRepaintThroughRenderPause } from './terminal-render-pause-release'
 import {

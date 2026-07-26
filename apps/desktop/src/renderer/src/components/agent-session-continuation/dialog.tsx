@@ -7,6 +7,12 @@ import {
 } from '@/components/agent-session-continuation/launch-agent-session-continuation'
 import AgentCombobox from '@/components/agent/combobox'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  buildAgentSessionContinuationPrompt,
+  hasFullAgentSessionContext,
+  type AgentSessionContinuationContextMode,
+  type AgentSessionContinuationRequest
+} from '@/components/terminal-pane/agent-session-continuation'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -26,12 +32,6 @@ import {
 } from '@/components/ui/select'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog, getAgentLabel } from '@/lib/agent-catalog'
-import {
-  buildAgentSessionContinuationPrompt,
-  hasFullAgentSessionContext,
-  type AgentSessionContinuationContextMode,
-  type AgentSessionContinuationRequest
-} from '@/lib/agent-session-continuation'
 import { useAppStore } from '@/store'
 
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'

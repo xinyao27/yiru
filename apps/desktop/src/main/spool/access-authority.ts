@@ -5,8 +5,8 @@ import type {
   SpoolControlGrant,
   SpoolControlRequest,
   SpoolOwnerDecision
-} from '../../shared/spool/spool-access-contract'
-import type { AuthenticatedSpoolPrincipal } from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/access-contract'
+import type { AuthenticatedSpoolPrincipal } from '../../shared/spool/wire-contract'
 
 const MAX_PENDING_REQUESTS_PER_CONNECTION = 4
 const DENIED_REQUEST_COOLDOWN_MS = 3_000

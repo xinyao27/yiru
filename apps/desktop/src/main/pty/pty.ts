@@ -22,7 +22,7 @@ import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platfor
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
-import { isRemoteAgentHooksEnabled } from '../../shared/agent/agent-hook-relay'
+import { isRemoteAgentHooksEnabled } from '../../shared/agent/hook-relay'
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import {
   getCommandTokenPathBasename,
@@ -63,19 +63,19 @@ import {
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../shared/terminal/terminal-input'
-import { extractHiddenStartupRendererQueryData } from '../../shared/terminal/terminal-reply-query-extraction'
-import { terminalOutputBacklogCapChars } from '../../shared/terminal/terminal-scrollback-policy'
-import { createTerminalSessionStateSaveFailureMessage } from '../../shared/terminal/terminal-session-state-save-failure'
+} from '../../shared/terminal/input'
+import { extractHiddenStartupRendererQueryData } from '../../shared/terminal/reply-query-extraction'
+import { terminalOutputBacklogCapChars } from '../../shared/terminal/scrollback-policy'
+import { createTerminalSessionStateSaveFailureMessage } from '../../shared/terminal/session-state-save-failure'
 import {
   resolveTerminalStartupCwdForWorkspace,
   type TerminalStartupCwdMissingDirFallback
-} from '../../shared/terminal/terminal-startup-cwd'
-import { isValidTerminalTabId } from '../../shared/terminal/terminal-tab-id'
-import { validateTerminalViewAttributes } from '../../shared/terminal/terminal-view-attributes'
+} from '../../shared/terminal/startup-cwd'
+import { isValidTerminalTabId } from '../../shared/terminal/tab-id'
+import { validateTerminalViewAttributes } from '../../shared/terminal/view-attributes'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import type { GlobalSettings, TuiAgent } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../shared/workspace/scope'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   clearMigrationUnsupportedPty,
@@ -147,11 +147,11 @@ import {
   setRendererPtyDeliveryInterest,
   shouldDropHiddenRendererPtyData,
   unmarkHiddenRendererPty
-} from './pty-hidden-delivery-gate'
-import { PtyProducerFlowController } from './pty-producer-flow-control'
-import { createPtySpawnTiming } from './pty-spawn-timing'
+} from './hidden-delivery-gate'
+import { PtyProducerFlowController } from './producer-flow-control'
 import { RendererTerminalSerializerReadiness } from './renderer-terminal-serializer-readiness'
 import { readShellStartupEnvVar } from './shell-startup-env'
+import { createPtySpawnTiming } from './spawn-timing'
 import { applyTerminalGitCredentialPromptGuard } from './terminal-git-credential-guard'
 import {
   answerStartupTerminalColorQueries,

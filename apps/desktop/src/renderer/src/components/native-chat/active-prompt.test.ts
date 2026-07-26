@@ -1,7 +1,7 @@
 import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import { describe, expect, it } from 'vite-plus/test'
 
-import { nativeChatStreamingMessage } from '../../../../shared/native-chat/native-chat-streaming'
+import { nativeChatStreamingMessage } from '../../../../shared/native-chat/streaming'
 import { deriveNativeChatActivePrompt, pruneConfirmedNativeChatActivePrompt } from './active-prompt'
 import { orderNativeChatMessages } from './message-grouping'
 import { pendingSendsAsMessages, type NativeChatPendingSend } from './pending'

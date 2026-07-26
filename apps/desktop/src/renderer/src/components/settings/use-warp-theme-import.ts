@@ -9,7 +9,7 @@ import {
   type TerminalCustomTheme,
   type WarpThemeImportPreview,
   type WarpThemeImportSource
-} from '../../../../shared/terminal/terminal-custom-themes'
+} from '../../../../shared/terminal/custom-themes'
 import type { GlobalSettings } from '../../../../shared/types'
 import { useMountedRef } from '../../hooks/use-mounted-ref'
 

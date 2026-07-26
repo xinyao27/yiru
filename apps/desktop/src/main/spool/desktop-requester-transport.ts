@@ -5,7 +5,7 @@ import {
   type SpoolRequesterInvokeArgs,
   type SpoolRequesterRoute,
   type SpoolRequesterSubscriptionArgs
-} from '../../shared/spool/spool-ipc-contract'
+} from '../../shared/spool/ipc-contract'
 import type { SpoolDesktopRecord } from './desktop-record'
 import type { SpoolPeerConnection } from './peer-connection'
 import type { SpoolSubscription } from './peer-connection-contract'

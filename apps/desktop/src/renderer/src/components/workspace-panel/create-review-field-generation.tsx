@@ -8,8 +8,8 @@ import {
 } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
-import type { resolveSourceControlAiForOperation } from '../../../../shared/source-control/source-control-ai'
-import type { SourceControlAiPrCreationDefaults } from '../../../../shared/source-control/source-control-ai-types'
+import type { resolveSourceControlAiForOperation } from '../../../../shared/source-control/ai'
+import type { SourceControlAiPrCreationDefaults } from '../../../../shared/source-control/ai-types'
 import { stripBaseRef } from './create-review-base-ref'
 import type { CreateReviewDialogFieldState } from './create-review-dialog-field-state'
 import type { UseCreatePullRequestDialogFieldsOptions } from './create-review-dialog-field-types'

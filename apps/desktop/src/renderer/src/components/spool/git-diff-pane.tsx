@@ -8,7 +8,7 @@ import type {
   SpoolGitDiffResult,
   SpoolGitHistoryEntry,
   SpoolGitStatusEntry
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 
 export function SpoolGitDiffPane({
   diff,

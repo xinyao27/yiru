@@ -1,7 +1,7 @@
 import {
   isSpoolAgentLaunchId,
   type SpoolAgentLaunchId
-} from '../../shared/spool/spool-agent-launch-contract'
+} from '../../shared/spool/agent-launch-contract'
 
 export type SpoolLiveSessionDisplayIdentity =
   | { sessionKind: 'terminal'; agent: null }

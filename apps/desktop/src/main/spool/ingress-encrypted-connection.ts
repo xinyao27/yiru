@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 import type { WebSocket } from 'ws'
 
-import { SPOOL_MAX_STREAM_QUEUED_BYTES } from '../../shared/spool/spool-resource-limits'
-import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
+import { SPOOL_MAX_STREAM_QUEUED_BYTES } from '../../shared/spool/resource-limits'
+import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/wire-contract'
 import { E2EEChannel } from '../runtime/rpc/e2ee-channel'
 import type { SpoolE2EEKeypair } from './e2ee-keypair'
 import type { SpoolRpcGateway, SpoolServerConnection } from './rpc-gateway'

@@ -11,10 +11,10 @@ import { splitWorktreeId } from '@yiru/workbench-model/workspace'
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 
 import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message-host-key'
-import { validateGitForkSyncExpectedUpstream } from '../../shared/git/git-fork-sync'
-import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/git-history'
-import { assertGitPushTargetShape } from '../../shared/git/git-push-target-validation'
-import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control/source-control-ai'
+import { validateGitForkSyncExpectedUpstream } from '../../shared/git/fork-sync'
+import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
+import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
+import type { ResolvedSourceControlAiGenerationParams } from '../../shared/source-control/ai'
 import {
   buildRgArgs,
   createAccumulator,
@@ -116,16 +116,16 @@ import {
   validateGitRelativeFilePath,
   isENOENT,
   authorizeExternalPath
-} from './filesystem-auth'
-import { registerFilesystemDownloadFolderHandlers } from './filesystem-download-folder'
-import { listQuickOpenFiles } from './filesystem-list-files'
-import { registerFilesystemMutationHandlers } from './filesystem-mutations'
-import { searchWithGitGrep } from './filesystem-search-git'
+} from './auth'
+import { registerFilesystemDownloadFolderHandlers } from './download-folder'
+import { listQuickOpenFiles } from './list-files'
 import { registerLocalLogTailHandlers } from './local-log-tail'
 import { getLocalGitOptionsForRegisteredWorktree } from './local-worktree-runtime-options'
 import { listMarkdownDocuments, markdownDocumentsFromRelativePaths } from './markdown-documents'
+import { registerFilesystemMutationHandlers } from './mutations'
 import { buildReadDirErrorBreadcrumb, type ReadDirThrowSite } from './readdir-error-diagnostics'
 import { checkRgAvailable } from './rg-availability'
+import { searchWithGitGrep } from './search-git'
 import { createSenderScopedRequestCancellations } from './sender-scoped-request-cancellation'
 
 // Why: Monaco has large-file optimizations like VS Code; blocking at 5MB makes

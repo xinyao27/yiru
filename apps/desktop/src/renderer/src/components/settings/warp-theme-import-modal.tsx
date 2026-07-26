@@ -4,7 +4,7 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import type { WarpThemeImportPreviewTheme } from '../../../../shared/terminal/terminal-custom-themes'
+import type { WarpThemeImportPreviewTheme } from '../../../../shared/terminal/custom-themes'
 import { Button } from '../ui/button'
 import {
   Dialog,

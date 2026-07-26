@@ -20,14 +20,14 @@ import { buildDefaultTerminalOptions } from '@/lib/pane-manager/pane-terminal-op
 import { getBuiltinTheme, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { useAppStore } from '@/store'
 
-import type { SpoolRequesterSubscriptionEvent } from '../../../../shared/spool/spool-ipc-contract'
-import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterSubscriptionEvent } from '../../../../shared/spool/ipc-contract'
+import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/ipc-contract'
 import type {
   SpoolTerminalSubscriptionEvent,
   SpoolMutationResult
-} from '../../../../shared/spool/spool-operation-contract'
-import { resolveTerminalFontWeights } from '../../../../shared/terminal/terminal-fonts'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal/terminal-line-height-settings'
+} from '../../../../shared/spool/operation-contract'
+import { resolveTerminalFontWeights } from '../../../../shared/terminal/fonts'
+import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
 import type { GlobalSettings } from '../../../../shared/types'
 import { getSpoolRequesterTransportErrorCode } from './requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './session-route'

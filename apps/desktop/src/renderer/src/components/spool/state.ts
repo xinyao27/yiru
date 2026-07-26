@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 
-import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterControlView } from '../../../../shared/spool/ipc-contract'
 import type { AppState } from '../../store/types'
 import {
   getSpoolWorktreeBindingKey,

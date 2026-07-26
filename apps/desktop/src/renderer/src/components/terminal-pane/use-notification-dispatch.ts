@@ -7,8 +7,8 @@ import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
 import { useAppStore } from '@/store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '@/store/selectors'
 
-import { buildAgentNotificationId } from '../../../../shared/agent/agent-notification-id'
-import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/agent-title-owner'
+import { buildAgentNotificationId } from '../../../../shared/agent/notification-id'
+import { resolveCompatibleAgentTypeForOwner } from '../../../../shared/agent/title-owner'
 import type {
   AgentCompletionDispatchMeta,
   AgentCompletionStatusSnapshot

@@ -1,9 +1,9 @@
-import type { SpoolExecutionOperation } from '../../shared/spool/spool-operation-contract'
+import type { SpoolExecutionOperation } from '../../shared/spool/operation-contract'
 import {
   SpoolPairedRuntimeSessionInvokeParamsSchema,
   type SpoolPairedRuntimeSessionRecord
-} from '../../shared/spool/spool-paired-runtime-session-contract'
-import { callRuntimeEnvironmentExistingRoute } from '../runtime/runtime-environment-existing-route'
+} from '../../shared/spool/paired-runtime-session-contract'
+import { callRuntimeEnvironmentExistingRoute } from '../runtime/environment-existing-route'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolHostOperationContext } from './execution-gateway'
 import { invokeAdmittedPairedRuntimeOperation } from './paired-runtime-admitted-invocation'

@@ -10,7 +10,7 @@ import {
   isAgentForegroundWrapperProcess,
   recognizeAgentProcess,
   recognizeAgentProcessFromCommandLine
-} from '../../shared/agent/agent-process-recognition'
+} from '../../shared/agent/process-recognition'
 import {
   shouldUseShellReadyStartupDelivery,
   type StartupCommandDelivery
@@ -18,10 +18,10 @@ import {
 import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
-} from '../../shared/git/git-credential-prompt-env'
+} from '../../shared/git/credential-prompt-env'
 import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
 import { isShellProcess } from '../../shared/shell-process-detection'
-import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../../shared/terminal/terminal-git-credential-guard'
+import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../../shared/terminal/git-credential-guard'
 import type { TuiAgent } from '../../shared/types'
 import { isWindowsGitBashShellPath, resolveWindowsGitBashShellPath } from '../git-bash'
 import { getAgentForegroundContextPaths } from '../providers/agent-foreground-context-paths'

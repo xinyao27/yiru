@@ -5,8 +5,8 @@ import type { FileHandle } from 'node:fs/promises'
 import { link, lstat, open, opendir, realpath, rm, stat } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 
-import { hasExactSpoolWireKeys } from '../shared/spool/spool-exact-wire-record'
-import { isSpoolIncarnationMarkerId } from '../shared/spool/spool-incarnation-marker-id'
+import { hasExactSpoolWireKeys } from '../shared/spool/exact-wire-record'
+import { isSpoolIncarnationMarkerId } from '../shared/spool/incarnation-marker-id'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import {
   openRelaySpoolExclusiveFile,

@@ -16,7 +16,7 @@ import { useAppStore } from '@/store'
 import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPageState
-} from '../../../../shared/spool/spool-catalog-contract'
+} from '../../../../shared/spool/catalog-contract'
 import { getSpoolSessionCatalogStatusLabel } from './session-catalog-status'
 
 const AGENT_ROW_ESTIMATED_HEIGHT = 53

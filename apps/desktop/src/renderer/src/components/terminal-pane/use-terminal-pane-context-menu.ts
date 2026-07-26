@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { AgentSessionContinuationRequest } from '@/components/terminal-pane/agent-session-continuation'
 import {
   REQUEST_ACTIVE_TERMINAL_PANE_SPLIT_EVENT,
   type RequestActiveTerminalPaneSplitDetail
 } from '@/constants/terminal'
 import { translate } from '@/i18n/i18n'
-import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import { getConnectionId } from '@/lib/connection-context'
 import type { ManagedPane, PaneManager } from '@/lib/pane-manager/pane-manager'
 import { runQuickCommandInNewTab } from '@/lib/run-quick-command-in-new-tab'
@@ -17,7 +17,7 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { useAppStore } from '@/store'
 
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/terminal-quick-commands'
+import { isTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import type { PtyTransport } from './pty-transport'
 import type { PaneCwdMap } from './resolve-split-cwd'

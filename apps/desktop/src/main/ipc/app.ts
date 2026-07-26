@@ -9,7 +9,7 @@ import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'el
 import type { AppIdentity } from '../../shared/app-identity'
 import type { FloatingTerminalCwdRequest, MarkdownDocument } from '../../shared/types'
 import { setUnreadDockBadgeCount } from '../dock/unread-badge'
-import { authorizeExternalPath } from '../filesystem/filesystem-auth'
+import { authorizeExternalPath } from '../filesystem/auth'
 import {
   ensureDefaultFloatingWorkspacePath,
   grantFloatingWorkspaceDirectory,

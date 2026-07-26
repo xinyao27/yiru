@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 import type { SpoolWorkspaceRoute } from '@/components/spool/types'
 
-import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
+import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/catalog-contract'
 
 export function useSpoolDefaultSessionRoute(args: {
   route: SpoolWorkspaceRoute

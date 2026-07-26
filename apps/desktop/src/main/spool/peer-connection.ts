@@ -3,12 +3,12 @@ import { randomUUID } from 'node:crypto'
 import WebSocket from 'ws'
 
 import { decrypt, deriveSharedKey, encrypt, publicKeyFromBase64 } from '../../shared/e2ee-crypto'
-import type { SpoolConnectionState } from '../../shared/spool/spool-wire-contract'
+import type { SpoolConnectionState } from '../../shared/spool/wire-contract'
 import {
   SPOOL_CONNECT_PATH,
   SPOOL_INGRESS_PORT,
   SPOOL_MAX_ENCRYPTED_FRAME_BYTES
-} from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/wire-contract'
 import {
   SpoolPeerConnectionError,
   type SpoolSink,

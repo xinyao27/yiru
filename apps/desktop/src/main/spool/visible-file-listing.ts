@@ -1,12 +1,9 @@
 import { mapWithConcurrency } from '../../shared/map-with-concurrency'
-import type {
-  SpoolFileListResult,
-  SpoolFileTreeEntry
-} from '../../shared/spool/spool-operation-contract'
+import type { SpoolFileListResult, SpoolFileTreeEntry } from '../../shared/spool/operation-contract'
 import {
   SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
   SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolFileOperationHost } from './file-operation-host'
 import { projectSpoolFileTreeEntry } from './file-tree-projection'

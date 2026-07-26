@@ -2,8 +2,8 @@ import type {
   SpoolDesktopCatalog,
   SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
-} from '../../shared/spool/spool-catalog-contract'
-import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/spool-resource-limits'
+} from '../../shared/spool/catalog-contract'
+import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/resource-limits'
 import { SpoolCatalogSessionBudget, spoolCatalogSessionBytes } from './catalog-session-budget'
 import { isSpoolSessionCatalogPage } from './catalog-wire-validation'
 import type { SpoolPeerConnection } from './peer-connection'

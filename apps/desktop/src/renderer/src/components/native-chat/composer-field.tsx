@@ -9,7 +9,7 @@ import { basename } from '@/lib/path'
 import type {
   SessionOptionDescriptor,
   SessionOptionsSurface
-} from '../../../../shared/native-chat/native-chat-session-options'
+} from '../../../../shared/native-chat/session-options'
 import { NATIVE_FILE_DROP_TARGET } from '../../../../shared/native-file-drop'
 import { NativeChatMentionHint, NativeChatPickerMenu } from './autocomplete-menus'
 import { NativeChatComposerActions } from './composer-actions'

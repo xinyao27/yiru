@@ -1,12 +1,12 @@
 import { z } from 'zod'
 
-import { SpoolAgentLaunchIdSchema } from '../../shared/spool/spool-agent-launch-contract'
+import { SpoolAgentLaunchIdSchema } from '../../shared/spool/agent-launch-contract'
 import {
   SpoolTerminalCreateHostResultSchema,
   SpoolTerminalCreateRequesterResultSchema,
   SpoolTerminalLaunchOptionsResultSchema
-} from '../../shared/spool/spool-execution-result-schema'
-import type { SpoolExecutionOperation } from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/execution-result-schema'
+import type { SpoolExecutionOperation } from '../../shared/spool/operation-contract'
 import type { SpoolAccessAuthority } from './access-authority'
 import type { SpoolExecutionGateway } from './execution-gateway'
 import type { SpoolLiveSessionDisplayIdentity } from './live-session-display-identity'

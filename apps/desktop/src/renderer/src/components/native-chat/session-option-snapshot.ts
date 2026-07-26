@@ -6,12 +6,12 @@ import {
   type CatalogMidSessionApply,
   type CatalogModel,
   type CatalogOption
-} from '../../../../shared/agent/agent-session-option-catalog'
+} from '../../../../shared/agent/session-option-catalog'
 import type {
   SessionOptionDescriptor,
   SessionOptionSelectChoice,
   SessionOptionValue
-} from '../../../../shared/native-chat/native-chat-session-options'
+} from '../../../../shared/native-chat/session-options'
 import type {
   NativeChatSessionOptionRecord,
   TrackedNativeChatSessionOption

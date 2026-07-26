@@ -1,4 +1,4 @@
-import type { SpoolDesktopCatalog } from '../../shared/spool/spool-catalog-contract'
+import type { SpoolDesktopCatalog } from '../../shared/spool/catalog-contract'
 import {
   markSpoolCatalogSessionLoadError,
   materializeSpoolCatalogSessions

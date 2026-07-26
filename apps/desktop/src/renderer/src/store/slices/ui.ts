@@ -10,7 +10,7 @@ import type { StateCreator } from 'zustand'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
-import { buildAgentNotificationId } from '../../../../shared/agent/agent-notification-id'
+import { buildAgentNotificationId } from '../../../../shared/agent/notification-id'
 import {
   DEFAULT_BROWSER_PAGE_ZOOM_LEVEL,
   normalizeBrowserPageZoomLevel
@@ -84,12 +84,12 @@ import {
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
   type WorkspaceCleanupDismissal
-} from '../../../../shared/workspace/workspace-cleanup'
-import type { WorkspacePortScanResult } from '../../../../shared/workspace/workspace-ports'
+} from '../../../../shared/workspace/cleanup'
+import type { WorkspacePortScanResult } from '../../../../shared/workspace/ports'
 import {
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
-} from '../../../../shared/workspace/workspace-statuses'
+} from '../../../../shared/workspace/statuses'
 import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/id'
 import {
   deriveRunningAgentSendTargets,

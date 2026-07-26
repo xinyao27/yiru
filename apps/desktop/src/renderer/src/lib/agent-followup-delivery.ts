@@ -6,7 +6,7 @@ import {
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess
-} from '../../../shared/agent/agent-process-recognition'
+} from '../../../shared/agent/process-recognition'
 import { isShellProcess } from '../../../shared/shell-process-detection'
 import type { GlobalSettings } from '../../../shared/types'
 

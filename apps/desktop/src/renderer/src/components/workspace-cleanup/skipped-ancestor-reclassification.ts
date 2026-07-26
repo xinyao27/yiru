@@ -1,6 +1,6 @@
 import type { WorkspaceCleanupFailure } from '@/components/workspace-cleanup/state'
 
-import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/workspace-cleanup'
+import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace/cleanup'
 import { getSkippedAncestorMessage, type SkippedWorkspaceCleanupAncestor } from './ancestor-skips'
 
 export type SkippedAncestorReclassification = {

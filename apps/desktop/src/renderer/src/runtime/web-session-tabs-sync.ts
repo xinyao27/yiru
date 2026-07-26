@@ -15,7 +15,7 @@ import {
 import {
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../../shared/agent/agent-title-owner'
+} from '../../../shared/agent/title-owner'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import { resolvePaneAgentOwner } from '../../../shared/pane-agent-owner'
 import type {

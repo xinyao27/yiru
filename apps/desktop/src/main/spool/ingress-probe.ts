@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
-import type { SpoolOsFamily, SpoolProbeRequest } from '../../shared/spool/spool-wire-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
+import type { SpoolOsFamily, SpoolProbeRequest } from '../../shared/spool/wire-contract'
 import {
   SPOOL_PROTOCOL_VERSION,
   SPOOL_SUPPORTED_PROTOCOL_VERSIONS
-} from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/wire-contract'
 import type { SpoolE2EEKeypair } from './e2ee-keypair'
 import type { TailnetControl } from './tailnet-control'
 import { normalizeTailnetIp } from './tailscale-json-projection'

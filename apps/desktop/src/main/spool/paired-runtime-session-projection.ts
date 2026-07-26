@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 
-import type { SpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
+import type { SpoolAgentLaunchId } from '../../shared/spool/agent-launch-contract'
 import type { SpoolLiveSessionIdentity } from './live-session-display-identity'
 import type { SpoolExecutionHostSessionReadRequest, SpoolSessionClientTab } from './session-source'
 

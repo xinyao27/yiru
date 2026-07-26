@@ -1,10 +1,10 @@
 import { toast } from 'sonner'
 
-import { translate } from '@/i18n/i18n'
 import {
   buildAgentSessionContinuationPrompt,
   type AgentSessionContinuationRequest
-} from '@/lib/agent-session-continuation'
+} from '@/components/terminal-pane/agent-session-continuation'
+import { translate } from '@/i18n/i18n'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { useAppStore } from '@/store'
 

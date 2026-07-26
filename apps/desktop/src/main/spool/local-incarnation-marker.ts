@@ -3,7 +3,7 @@ import { constants } from 'node:fs'
 import { link, lstat, open, opendir, realpath, rm, stat } from 'node:fs/promises'
 import { basename, dirname } from 'node:path'
 
-import { isSpoolIncarnationMarkerId } from '../../shared/spool/spool-incarnation-marker-id'
+import { isSpoolIncarnationMarkerId } from '../../shared/spool/incarnation-marker-id'
 import {
   isExistingSpoolFilesystemError,
   isMissingSpoolFilesystemError,

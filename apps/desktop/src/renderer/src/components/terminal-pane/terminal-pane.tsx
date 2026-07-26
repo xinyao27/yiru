@@ -21,6 +21,7 @@ import './terminal.css'
 import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
 import { DaemonActionDialog, useDaemonActions } from '@/components/shared/use-daemon-actions'
+import type { AgentSessionContinuationRequest } from '@/components/terminal-pane/agent-session-continuation'
 import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
@@ -31,7 +32,6 @@ import {
   TerminalQuickCommandDialog
 } from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
 import TerminalSearch from '@/components/terminal-search'
-import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '@/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
@@ -94,16 +94,16 @@ import {
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
+import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
 import {
   getTerminalQuickCommandScope,
   isTerminalQuickCommandComplete,
   terminalQuickCommandMatchesRepo
-} from '../../../../shared/terminal/terminal-quick-commands'
-import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal/terminal-session-state-save-failure'
-import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal/terminal-zero-dimensions-diagnostic'
+} from '../../../../shared/terminal/quick-commands'
+import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal/session-state-save-failure'
+import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal/zero-dimensions-diagnostic'
 import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
-import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace/workspace-session-terminal-buffers'
+import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace/session-terminal-buffers'
 import { useAppStore } from '../../store'
 import { canToggleNativeChat } from '../native-chat/availability'
 import {

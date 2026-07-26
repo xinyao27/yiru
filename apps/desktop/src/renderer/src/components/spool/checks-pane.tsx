@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 
-import type { SpoolChecksReadResult } from '../../../../shared/spool/spool-operation-contract'
+import type { SpoolChecksReadResult } from '../../../../shared/spool/operation-contract'
 import { SpoolChecksResult } from './checks-result'
 import { parseSpoolChecksReadResult } from './owner-result-validation'
 import { invokeSpoolWorkspaceRead, SpoolWorkspaceOperationError } from './workspace-operation'

@@ -10,7 +10,7 @@ import {
   type ReadPath,
   type StatPath
 } from './worktree-orphan-gitdir-proof'
-import { areWorktreePathsEqual } from './worktree/worktree-logic'
+import { areWorktreePathsEqual } from './worktree/logic'
 
 type PathOps = typeof posix
 

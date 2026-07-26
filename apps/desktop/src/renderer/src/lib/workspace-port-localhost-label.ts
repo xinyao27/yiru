@@ -1,6 +1,6 @@
 import type { LocalhostWorktreeLabelRoute } from '../../../shared/localhost-worktree-labels'
 import type { GlobalSettings, Project, Repo } from '../../../shared/types'
-import type { WorkspacePort } from '../../../shared/workspace/workspace-ports'
+import type { WorkspacePort } from '../../../shared/workspace/ports'
 import { browserUrlForPort } from './workspace-port-urls'
 
 export function localhostWorktreeLabelRouteForPort({

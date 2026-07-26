@@ -1,11 +1,11 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import { isSpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
+import { isSpoolAgentLaunchId } from '../../shared/spool/agent-launch-contract'
 import type {
   SpoolExecutionOperation,
   SpoolTerminalCreateHostResult,
   SpoolTerminalLaunchOptionsResult
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { isTuiAgent } from '../../shared/tui-agent-config'
 import { TUI_AGENT_DISPLAY_NAMES } from '../../shared/tui-agent-display-names'
 import {

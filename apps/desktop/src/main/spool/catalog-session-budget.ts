@@ -1,4 +1,4 @@
-import type { SpoolSessionCatalogEntry } from '../../shared/spool/spool-catalog-contract'
+import type { SpoolSessionCatalogEntry } from '../../shared/spool/catalog-contract'
 
 const MAX_MATERIALIZED_SESSIONS_PER_DESKTOP = 55_000
 const MAX_MATERIALIZED_SESSION_BYTES_PER_DESKTOP = 64 * 1024 * 1024

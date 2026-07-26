@@ -23,8 +23,8 @@ renderer and Electron. Keeping the IPC surface co-located in one file makes secu
 review and type drift checks easier than scattering these bindings across modules. */
 import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
 
-import type { AgentHookInstallStatus } from '../shared/agent/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type {
   Automation,
@@ -57,7 +57,7 @@ import {
 } from '../shared/editor-save-events'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { AppStarSource } from '../shared/gh-star-source'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
@@ -149,19 +149,19 @@ import type {
   SpoolSetProjectVisibilityArgs,
   SpoolSetWorktreeVisibilityArgs,
   SpoolSharingSnapshot
-} from '../shared/spool/spool-ipc-contract'
+} from '../shared/spool/ipc-contract'
 import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
-} from '../shared/spool/spool-windows-firewall-contract'
+} from '../shared/spool/windows-firewall-contract'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {
   WarpThemeImportPreview,
   WarpThemeImportSource
-} from '../shared/terminal/terminal-custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal/terminal-side-effect-facts'
-import type { TerminalViewAttributes } from '../shared/terminal/terminal-view-attributes'
+} from '../shared/terminal/custom-themes'
+import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
+import type { TerminalViewAttributes } from '../shared/terminal/view-attributes'
 import type {
   BaseRefSearchResult,
   BaseRefDefaultResult,
@@ -209,9 +209,9 @@ import {
   YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '../shared/updater-renderer-events'
-import type { WorkspaceCleanupScanProgress } from '../shared/workspace/workspace-cleanup'
-import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace/workspace-ports'
-import type { WorkspaceSpaceScanProgress } from '../shared/workspace/workspace-space-types'
+import type { WorkspaceCleanupScanProgress } from '../shared/workspace/cleanup'
+import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace/ports'
+import type { WorkspaceSpaceScanProgress } from '../shared/workspace/space-types'
 import type { PreflightRuntimeContext, RefreshAgentsResult } from './api-types'
 import type {
   NativeChatAppendedPayload,

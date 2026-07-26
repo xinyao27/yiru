@@ -16,7 +16,7 @@ import { parsePaneKey } from '../../shared/stable-pane-id'
 // owns the orchestration: gate on the signal, enforce the safety guardrails,
 // summarize the prompt via the configured agent, and rename.
 import type { GlobalSettings, Repo } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace/workspace-scope'
+import { parseWorkspaceKey } from '../../shared/workspace/scope'
 import {
   probeBranchUpstream,
   renameCurrentBranch,
@@ -32,7 +32,7 @@ import {
   generateBranchNameFromContext,
   resolveTextGenerationParams
 } from '../text-generation/commit-message-text-generation'
-import { computeBranchName, getConfiguredBranchPrefix } from '../worktree/worktree-logic'
+import { computeBranchName, getConfiguredBranchPrefix } from '../worktree/logic'
 import { resolveGenerationTarget } from './first-work-generation-target'
 import { runFolderWorkspaceTitleAutoRename } from './first-work-workspace-title-rename'
 

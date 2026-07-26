@@ -3,7 +3,7 @@ import type { StateCreator } from 'zustand'
 import type {
   WorkspaceSpaceAnalysis,
   WorkspaceSpaceScanProgress
-} from '../../../../shared/workspace/workspace-space-types'
+} from '../../../../shared/workspace/space-types'
 import type { AppState } from '../../store/types'
 
 let inFlightScan: Promise<WorkspaceSpaceAnalysis> | null = null

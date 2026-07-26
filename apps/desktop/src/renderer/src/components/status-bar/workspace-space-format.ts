@@ -2,7 +2,7 @@ import type {
   WorkspaceSpaceScanProgress,
   WorkspaceSpaceScanStatus,
   WorkspaceSpaceWorktree
-} from '../../../../shared/workspace/workspace-space-types'
+} from '../../../../shared/workspace/space-types'
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'] as const
 const relativeTimeFormatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })

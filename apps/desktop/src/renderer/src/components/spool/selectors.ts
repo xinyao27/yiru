@@ -3,8 +3,8 @@ import type {
   SpoolRemoteDesktop,
   SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
-} from '../../../../shared/spool/spool-catalog-contract'
-import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
+} from '../../../../shared/spool/catalog-contract'
+import type { SpoolRequesterControlView } from '../../../../shared/spool/ipc-contract'
 import type { SpoolExpandedRefsByDesktop, SpoolSharingState, SpoolWorkspaceRoute } from './types'
 
 type SpoolDesktopState = Pick<SpoolSharingState, 'spoolRemoteDesktops'>

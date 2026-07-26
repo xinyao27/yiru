@@ -24,7 +24,7 @@ import { cn } from '@/lib/class-names'
 import { getPortOpenBrowserTooltipLabel } from '@/lib/workspace-port-actions'
 import { addressForPort } from '@/lib/workspace-port-urls'
 
-import type { WorkspacePort } from '../../../../shared/workspace/workspace-ports'
+import type { WorkspacePort } from '../../../../shared/workspace/ports'
 
 const MENU_CONTENT_CLASS =
   '!border-border/60 !bg-popover !text-popover-foreground !backdrop-blur-none'

@@ -57,9 +57,8 @@ import type {
   SearchResult,
   Worktree
 } from '../../shared/types'
-import { isENOENT, resolveAuthorizedPath } from '../filesystem/filesystem-auth'
-import { listQuickOpenFiles } from '../filesystem/filesystem-list-files'
-import { searchWithGitGrep } from '../filesystem/filesystem-search-git'
+import { isENOENT, resolveAuthorizedPath } from '../filesystem/auth'
+import { listQuickOpenFiles } from '../filesystem/list-files'
 import { getLocalGitOptionsForRegisteredWorktree } from '../filesystem/local-worktree-runtime-options'
 import {
   listMarkdownDocuments,
@@ -70,6 +69,7 @@ import {
   WatcherProcessFailure
 } from '../filesystem/parcel-watcher-process-failure'
 import { checkRgAvailable } from '../filesystem/rg-availability'
+import { searchWithGitGrep } from '../filesystem/search-git'
 import { beginWatcherInstall } from '../filesystem/watcher-removal-gate'
 import { wslAwareSpawn } from '../git/runner'
 import type { Store } from '../persistence'

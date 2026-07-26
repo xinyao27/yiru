@@ -1,7 +1,7 @@
 import type {
   SpoolExecutionOperation,
   SpoolSubscriptionOperation
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import { SpoolExecutionError } from './execution-error'
 import type {
   SpoolHostAdapter,

@@ -1,6 +1,6 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 
-import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
+import type { AgentSessionContinuationRequest } from '@/components/terminal-pane/agent-session-continuation'
 
 export function canContinueAiVaultSessionInNewSession(
   session: AiVaultSession,

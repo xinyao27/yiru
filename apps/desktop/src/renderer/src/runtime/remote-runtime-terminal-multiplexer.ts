@@ -9,7 +9,7 @@ import {
   encodeTerminalStreamFrame,
   encodeTerminalStreamJson,
   encodeTerminalStreamText
-} from '../../../shared/terminal/terminal-stream-protocol'
+} from '../../../shared/terminal/stream-protocol'
 import { unwrapRuntimeRpcResult } from './rpc-client'
 
 type RuntimeEnvironmentSubscriptionHandle = {

@@ -5,7 +5,7 @@ import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
 
 import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
 import { shouldWaitForSetupBeforeAgentStartup } from '../shared/setup-agent-startup-policy'
-import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../shared/terminal/terminal-git-credential-guard'
+import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../shared/terminal/git-credential-guard'
 import type { Repo, WorktreeSetupLaunch } from '../shared/types'
 import { gitExecFileSync } from './git/runner'
 import { isWslPath, parseWslPath, toLinuxPath, toWindowsWslPath } from './wsl'

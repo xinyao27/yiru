@@ -2,13 +2,13 @@ import { createHash } from 'node:crypto'
 import { request } from 'node:http'
 
 import { generateKeyPair, publicKeyFromBase64, publicKeyToBase64 } from '../../shared/e2ee-crypto'
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
-import type { SpoolProbeResponse } from '../../shared/spool/spool-wire-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
+import type { SpoolProbeResponse } from '../../shared/spool/wire-contract'
 import {
   SPOOL_INGRESS_PORT,
   SPOOL_PROBE_PATH,
   SPOOL_SUPPORTED_PROTOCOL_VERSIONS
-} from '../../shared/spool/spool-wire-contract'
+} from '../../shared/spool/wire-contract'
 
 const PROBE_TIMEOUT_MS = 3_000
 const MAX_PROBE_RESPONSE_BYTES = 16 * 1024

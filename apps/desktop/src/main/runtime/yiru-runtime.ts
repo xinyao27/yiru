@@ -76,29 +76,29 @@ import {
   isCursorNativeAgentTitle,
   isShellProcess,
   normalizeTerminalTitle
-} from '../../shared/agent/agent-detection'
-import type { AgentStatus } from '../../shared/agent/agent-detection'
-import { repoIsRemote } from '../../shared/agent/agent-launch-remote'
+} from '../../shared/agent/detection'
+import type { AgentStatus } from '../../shared/agent/detection'
+import { repoIsRemote } from '../../shared/agent/launch-remote'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
   recognizeAgentProcess
-} from '../../shared/agent/agent-process-recognition'
+} from '../../shared/agent/process-recognition'
 import {
   AGENT_PROMPT_BRACKETED_PASTE_END,
   AGENT_PROMPT_SUBMIT,
   AGENT_PROMPT_SUBMIT_DELAY_MS,
   buildAgentPromptPasteBytes
-} from '../../shared/agent/agent-prompt-injection'
+} from '../../shared/agent/prompt-injection'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
-} from '../../shared/agent/agent-status-osc'
+} from '../../shared/agent/status-osc'
 import {
   hasCompatibleAgentTitleIdentity,
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../shared/agent/agent-title-owner'
+} from '../../shared/agent/title-owner'
 import type {
   Automation,
   AutomationCreateInput,
@@ -128,8 +128,8 @@ import type {
   FolderWorkspacePathStatusRequest
 } from '../../shared/folder-workspace-path-status'
 import { folderWorkspaceToWorktree } from '../../shared/folder-workspace-worktree'
-import { getGitCloneFailureMessage } from '../../shared/git/git-clone-failure-message'
-import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git/git-fetch-auto-maintenance'
+import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
+import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git/fetch-auto-maintenance'
 import { buildOrchestrationTaskDisplayMetadata } from '../../shared/orchestration-task-display'
 import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
 import { FIRST_PANE_ID } from '../../shared/pane-key'
@@ -210,30 +210,27 @@ import type { VoiceSettings } from '../../shared/speech-types'
 import type {
   SpoolPairedRuntimeResolvedWorktree,
   SpoolPairedRuntimeWorktreeSelector
-} from '../../shared/spool/spool-paired-runtime-host-contract'
+} from '../../shared/spool/paired-runtime-host-contract'
 import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
-import type { TerminalGitHubPRLink } from '../../shared/terminal/terminal-github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
 import {
   isTerminalInputTooLargeWithYield,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   iterateTerminalInputChunks
-} from '../../shared/terminal/terminal-input'
-import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal/terminal-kitty-keyboard-mode-tracker'
+} from '../../shared/terminal/input'
+import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal/kitty-keyboard-mode-tracker'
 import {
   createTerminalTitleTracker,
   stripBrailleSpinnerGlyphs,
   type TerminalTitleTracker
-} from '../../shared/terminal/terminal-output-side-effects'
+} from '../../shared/terminal/output-side-effects'
 import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
-} from '../../shared/terminal/terminal-side-effect-facts'
-import { resolveTerminalStartupCwd } from '../../shared/terminal/terminal-startup-cwd'
-import {
-  isValidHostTerminalTabId,
-  isValidTerminalTabId
-} from '../../shared/terminal/terminal-tab-id'
+} from '../../shared/terminal/side-effect-facts'
+import { resolveTerminalStartupCwd } from '../../shared/terminal/startup-cwd'
+import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../shared/terminal/tab-id'
 import {
   getTuiAgentLaunchCommand,
   isTuiAgent,
@@ -313,15 +310,15 @@ import type {
   WorkspacePortKillResult,
   WorkspacePortProbe,
   WorkspacePortScanResult
-} from '../../shared/workspace/workspace-ports'
+} from '../../shared/workspace/ports'
 import {
   folderWorkspaceKey,
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../shared/workspace/workspace-scope'
-import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace/workspace-session-terminal-tab-close'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/workspace-statuses'
+} from '../../shared/workspace/scope'
+import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace/session-terminal-tab-close'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/statuses'
 import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
 import {
   buildKnownYiruWorkspaceLayouts,
@@ -349,8 +346,8 @@ import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
 import type { EmulatorBridge } from '../emulator/bridge'
-import { isENOENT } from '../filesystem/filesystem-auth'
-import { invalidateAuthorizedRootsCache } from '../filesystem/filesystem-auth'
+import { isENOENT } from '../filesystem/auth'
+import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
 import {
   closeLocalWatcherForWorktreePath,
   closeRemoteWatcherForWorktreePath,
@@ -358,7 +355,7 @@ import {
   forgetRemoteWatcherRemovalSnapshot,
   restoreLocalWatcherAfterFailedRemoval,
   restoreRemoteWatcherAfterFailedRemoval
-} from '../filesystem/filesystem-watcher'
+} from '../filesystem/watcher'
 import { acquireWatcherRemovalGate } from '../filesystem/watcher-removal-gate'
 import { getSshGitCapabilityCache } from '../git/capability-state'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
@@ -573,20 +570,20 @@ import {
   sanitizeWorktreeName,
   shouldSetDisplayName,
   areWorktreePathsEqual
-} from '../worktree/worktree-logic'
-import { worktreePathComparisonKey } from '../worktree/worktree-path-comparison'
+} from '../worktree/logic'
+import { worktreePathComparisonKey } from '../worktree/path-comparison'
 import {
   cleanupUnusedWorktreePushTargetRemote,
   cleanupUnusedWorktreePushTargetRemoteSsh,
   createRemoteWorktree,
   configureCreatedWorktreePushTarget,
   prepareWorktreePushTarget
-} from '../worktree/worktree-remote'
+} from '../worktree/remote'
 import {
   createWorktreeLinkedPaths,
   findExistingWorktreeSymlinkPaths,
   removeWorktreeLinkedPaths
-} from '../worktree/worktree-symlinks'
+} from '../worktree/symlinks'
 import { ClaudeAgentTeamsService } from './claude-agent-teams-service'
 import type {
   AgentTeamsTmuxCompatRequest,

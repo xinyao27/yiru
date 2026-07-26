@@ -1,4 +1,4 @@
-import { isSpoolMutationOperation } from '../../../../shared/spool/spool-operation-contract'
+import { isSpoolMutationOperation } from '../../../../shared/spool/operation-contract'
 import {
   SpoolPairedRuntimeCanonicalizeParamsSchema,
   SpoolPairedRuntimeInspectParamsSchema,
@@ -8,13 +8,13 @@ import {
   SpoolPairedRuntimeSubscribeParamsSchema,
   SpoolPairedRuntimeWorktreeCatalogParamsSchema,
   parseSpoolPairedRuntimeOperation
-} from '../../../../shared/spool/spool-paired-runtime-host-contract'
+} from '../../../../shared/spool/paired-runtime-host-contract'
 import {
   SpoolPairedRuntimeCanonicalizeResultSchema,
   SpoolPairedRuntimeInspectionSchema,
   SpoolPairedRuntimeTerminalEventSchema,
   SpoolPairedRuntimeWorktreeCatalogSchema
-} from '../../../../shared/spool/spool-paired-runtime-result-contract'
+} from '../../../../shared/spool/paired-runtime-result-contract'
 import type { SpoolHostSubscription } from '../../../spool/execution-gateway'
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 import { getSpoolHostChannelLifetimes } from './spool-host-channel-lifetimes'

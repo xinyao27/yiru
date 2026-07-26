@@ -9,9 +9,9 @@ import { existsSync } from 'node:fs'
 import * as path from 'node:path'
 
 import { isBinaryBuffer } from '../shared/binary-buffer'
-import { decodeGitCQuotedPath } from '../shared/git/git-cquoted-path'
-import type { GitLineStats } from '../shared/git/git-uncommitted-line-stats'
-export { isUnsupportedWorktreeListZError } from '../shared/git/git-worktree-command-capabilities'
+import { decodeGitCQuotedPath } from '../shared/git/cquoted-path'
+import type { GitLineStats } from '../shared/git/uncommitted-line-stats'
+export { isUnsupportedWorktreeListZError } from '../shared/git/worktree-command-capabilities'
 
 export function parseBranchStatusChar(char: string): string {
   switch (char) {

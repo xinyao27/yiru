@@ -3,8 +3,8 @@ import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPage,
   SpoolWorktreeCatalogEntry
-} from '../../shared/spool/spool-catalog-contract'
-import { isSpoolProjectIdentityKey } from '../../shared/spool/spool-catalog-contract'
+} from '../../shared/spool/catalog-contract'
+import { isSpoolProjectIdentityKey } from '../../shared/spool/catalog-contract'
 import type {
   SpoolCatalogReferenceBinding,
   SpoolCatalogReferenceTable

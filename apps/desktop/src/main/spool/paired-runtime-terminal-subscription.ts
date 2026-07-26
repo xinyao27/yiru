@@ -1,5 +1,5 @@
-import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/remote-runtime-client'
-import { SpoolPairedRuntimeTerminalEventSchema } from '../../shared/spool/spool-paired-runtime-result-contract'
+import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime/client'
+import { SpoolPairedRuntimeTerminalEventSchema } from '../../shared/spool/paired-runtime-result-contract'
 import type { SpoolHostSubscription } from './execution-gateway'
 
 type PairedRuntimeTerminalSubscriptionOptions = {

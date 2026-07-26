@@ -1,10 +1,10 @@
 import type { RuntimeMobileSessionTabsResult } from '../../../../shared/runtime-types'
-import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
+import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/paired-runtime-host-contract'
 import {
   SpoolPairedRuntimeObservedProviderSessionSchema,
   type SpoolPairedRuntimeObservedProviderSession
-} from '../../../../shared/spool/spool-paired-runtime-session-contract'
-import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../../../shared/spool/spool-resource-limits'
+} from '../../../../shared/spool/paired-runtime-session-contract'
+import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../../../shared/spool/resource-limits'
 import type { SpoolTerminalSessionBindings } from '../../../spool/terminal-session-bindings'
 
 type SessionChangeWorktree = SpoolPairedRuntimeResolvedWorktree & {

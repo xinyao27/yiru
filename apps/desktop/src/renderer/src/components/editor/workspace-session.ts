@@ -5,8 +5,8 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
-import { normalizeBrowserHistoryEntries } from '../../../../shared/workspace/workspace-session-browser-history'
-import { pruneLocalTerminalScrollbackBuffers } from '../../../../shared/workspace/workspace-session-terminal-buffers'
+import { normalizeBrowserHistoryEntries } from '../../../../shared/workspace/session-browser-history'
+import { pruneLocalTerminalScrollbackBuffers } from '../../../../shared/workspace/session-terminal-buffers'
 import type { AppState } from '../../store'
 import type { OpenFile } from './state'
 import { buildLastVisitedAtByWorktreeId } from './workspace-session-focus-recency'

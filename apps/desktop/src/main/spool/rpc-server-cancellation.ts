@@ -1,4 +1,4 @@
-import type { SpoolRpcRequest } from '../../shared/spool/spool-wire-contract'
+import type { SpoolRpcRequest } from '../../shared/spool/wire-contract'
 import { readSpoolCancellationRequestId } from './rpc-request-validation'
 
 /** Validates a same-connection cancellation before touching its target request. */

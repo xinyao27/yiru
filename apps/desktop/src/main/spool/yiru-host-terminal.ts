@@ -2,7 +2,7 @@ import type {
   SpoolExecutionOperation,
   SpoolSubscriptionOperation,
   SpoolTerminalSubscriptionEvent
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { SpoolExecutionError } from './execution-error'
 import type { SpoolHostOperationContext, SpoolHostSubscription } from './execution-gateway'

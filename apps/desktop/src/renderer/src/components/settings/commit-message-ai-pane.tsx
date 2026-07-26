@@ -14,12 +14,12 @@ import {
   normalizeSourceControlAiSettings,
   readSourceControlAiModelChoiceForHost,
   selectSourceControlAiModelChoiceForHost
-} from '../../../../shared/source-control/source-control-ai'
-import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '../../../../shared/source-control/source-control-ai-actions'
+} from '../../../../shared/source-control/ai'
+import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '../../../../shared/source-control/ai-actions'
 import type {
   SourceControlAiSettingsPatch,
   SourceControlAiSettings
-} from '../../../../shared/source-control/source-control-ai-types'
+} from '../../../../shared/source-control/ai-types'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { getRuntimeGitScope } from '../../runtime/git-client'
 import { useAppStore } from '../../store'

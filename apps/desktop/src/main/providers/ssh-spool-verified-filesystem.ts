@@ -1,11 +1,11 @@
-import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
-import { isSpoolIncarnationMarkerId } from '../../shared/spool/spool-incarnation-marker-id'
+import { hasExactSpoolWireKeys } from '../../shared/spool/exact-wire-record'
+import { isSpoolIncarnationMarkerId } from '../../shared/spool/incarnation-marker-id'
 import {
   SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
   SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT,
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
-} from '../../shared/spool/spool-operation-contract'
+} from '../../shared/spool/operation-contract'
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { isMethodNotFoundError } from '../ssh/filesystem-stream-reader'
 import type {

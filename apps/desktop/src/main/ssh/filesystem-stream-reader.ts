@@ -4,7 +4,7 @@ import {
   SPOOL_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
   SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
   SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
-} from '../../shared/spool/spool-resource-limits'
+} from '../../shared/spool/resource-limits'
 import type { FileReadResult } from '../providers/types'
 import type { SshChannelMultiplexer } from './channel-multiplexer'
 import {

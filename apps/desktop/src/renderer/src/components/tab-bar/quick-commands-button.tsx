@@ -28,9 +28,9 @@ import {
   getTerminalQuickCommandBody,
   getTerminalQuickCommandScope,
   isTerminalQuickCommandComplete
-} from '../../../../shared/terminal/terminal-quick-commands'
+} from '../../../../shared/terminal/quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'
-import { WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID } from '../../../../shared/workspace/workspace-panel-titlebar-pinned'
+import { WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID } from '../../../../shared/workspace/panel-titlebar-pinned'
 import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
 import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
 import type { DropIndicator } from './drop-indicator'

@@ -18,8 +18,8 @@ import type {
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { AgentHookInstallStatus } from '../shared/agent/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser-annotation-viewport-bridge'
 import type {
@@ -60,15 +60,15 @@ import type {
 import type {
   EphemeralVmRecipeDoctorResult,
   EphemeralVmRecipeResultWarning
-} from '../shared/ephemeral-vm/ephemeral-vm-recipes'
-import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm/ephemeral-vm-runtimes'
+} from '../shared/ephemeral-vm/recipes'
+import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm/runtimes'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '../shared/feature-interactions'
 import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
 } from '../shared/folder-workspace-path-status'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type {
   LanguageServerDocumentUriArgs,
@@ -120,8 +120,8 @@ import type {
 } from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
-import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/source-control-ai'
-import type { SourceControlAiSettings } from '../shared/source-control/source-control-ai-types'
+import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/ai'
+import type { SourceControlAiSettings } from '../shared/source-control/ai-types'
 import type {
   SpoolDecideControlArgs,
   SpoolRequestControlArgs,
@@ -135,21 +135,21 @@ import type {
   SpoolSetProjectVisibilityArgs,
   SpoolSetWorktreeVisibilityArgs,
   SpoolSharingSnapshot
-} from '../shared/spool/spool-ipc-contract'
+} from '../shared/spool/ipc-contract'
 import type {
   SpoolWindowsFirewallRepairResult,
   SpoolWindowsFirewallStatus
-} from '../shared/spool/spool-windows-firewall-contract'
+} from '../shared/spool/windows-firewall-contract'
 import type {
   WarpThemeImportPreview,
   WarpThemeImportSource
-} from '../shared/terminal/terminal-custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal/terminal-side-effect-facts'
+} from '../shared/terminal/custom-themes'
+import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
 import type {
   TerminalTabCloseRequest,
   TerminalTabCloseResponse
-} from '../shared/terminal/terminal-tab-close'
-import type { TerminalViewAttributes } from '../shared/terminal/terminal-view-attributes'
+} from '../shared/terminal/tab-close'
+import type { TerminalViewAttributes } from '../shared/terminal/view-attributes'
 import type {
   BaseRefDefaultResult,
   BaseRefSearchResult,
@@ -404,18 +404,18 @@ import type {
   WorkspaceCleanupScanArgs,
   WorkspaceCleanupScanProgress,
   WorkspaceCleanupScanResult
-} from '../shared/workspace/workspace-cleanup'
+} from '../shared/workspace/cleanup'
 import type {
   WorkspacePortAdvertisedUrlChangedEvent,
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
   WorkspacePortScanRequest,
   WorkspacePortScanResult
-} from '../shared/workspace/workspace-ports'
+} from '../shared/workspace/ports'
 import type {
   WorkspaceSpaceAnalyzeResult,
   WorkspaceSpaceScanProgress
-} from '../shared/workspace/workspace-space-types'
+} from '../shared/workspace/space-types'
 
 type GitLabRepoSelectorArgs = {
   repoPath: string

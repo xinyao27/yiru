@@ -1,4 +1,4 @@
-import { SpoolChecksReadResultSchema } from '../../../../shared/spool/spool-checks-result-schema'
+import { SpoolChecksReadResultSchema } from '../../../../shared/spool/checks-result-schema'
 import {
   SpoolFileDiffResultSchema,
   SpoolFileListResultSchema,
@@ -10,7 +10,7 @@ import {
   SpoolTerminalCreateRequesterResultSchema,
   SpoolTerminalLaunchOptionsResultSchema,
   type SpoolTerminalCreateRequesterResult
-} from '../../../../shared/spool/spool-execution-result-schema'
+} from '../../../../shared/spool/execution-result-schema'
 import type {
   SpoolChecksReadResult,
   SpoolFileDiffResult,
@@ -21,7 +21,7 @@ import type {
   SpoolGitStatusResult,
   SpoolMutationResult,
   SpoolTerminalLaunchOptionsResult
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 
 export type SpoolTerminalCreateResult = SpoolTerminalCreateRequesterResult
 

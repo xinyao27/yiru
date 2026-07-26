@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'
 import { readSourceControlLaunchRecipeAgentId } from '@/lib/source-control-launch-agent-selection'
 
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/source-control-ai'
+import { resolveSourceControlActionRecipe } from '../../../../shared/source-control/ai'
 import { getBrokenChecks } from '../pr-checks-fix-prompt'
 import {
   ConflictingFilesSection,

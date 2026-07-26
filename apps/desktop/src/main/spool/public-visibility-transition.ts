@@ -1,4 +1,4 @@
-import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/spool-catalog-contract'
+import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/catalog-contract'
 import type { WorktreeMeta } from '../../shared/types'
 import { revalidateSpoolPublicationSnapshot } from './publication-final-guard'
 import { SpoolVisibilityError, rethrowPublicationResourceLimit } from './visibility-errors'

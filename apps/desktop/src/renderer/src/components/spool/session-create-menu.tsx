@@ -21,11 +21,11 @@ import {
 import { translate } from '@/i18n/i18n'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 
-import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
+import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/catalog-contract'
 import type {
   SpoolTerminalCreateOperation,
   SpoolTerminalLaunchOptionsResult
-} from '../../../../shared/spool/spool-operation-contract'
+} from '../../../../shared/spool/operation-contract'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
 import type { ActivityBarItem } from '../workspace-panel/activity-bar-buttons'
 import {
