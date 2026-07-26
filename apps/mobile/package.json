@@ -39,6 +39,7 @@
   "dependencies": {
     "@noble/hashes": "catalog:mobile",
     "@react-native-async-storage/async-storage": "catalog:mobile",
+    "@shopify/react-native-skia": "catalog:mobile",
     "@xterm/addon-unicode11": "catalog:mobile",
     "@xterm/addon-webgl": "catalog:mobile",
     "@xterm/xterm": "catalog:mobile",
@@ -69,6 +70,7 @@
     "expo-secure-store": "catalog:mobile",
     "expo-splash-screen": "catalog:mobile",
     "expo-status-bar": "catalog:mobile",
+    "expo-thinking-orbs": "catalog:mobile",
     "lowlight": "catalog:mobile",
     "phosphor-react-native": "catalog:mobile",
     "react": "catalog:mobile",

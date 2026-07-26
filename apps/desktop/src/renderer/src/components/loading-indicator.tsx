@@ -1,17 +1,13 @@
 import { createContext, useContext } from 'react'
 import type React from 'react'
-import type { OrbState } from 'thinking-orbs'
 
 import { cn } from '@/lib/class-names'
 
 import {
   DEFAULT_LOADER_STYLE,
   normalizeLoaderStyle,
-  type LoaderStyle,
-  type ThinkingOrbLoaderStyle
+  type LoaderStyle
 } from '../../../shared/loader-style'
-
-import './loading-indicator.css'
 import { ThinkingOrbLoader } from './thinking-orb-loader'
 
 const LoadingIndicatorStyleContext = createContext<LoaderStyle>(DEFAULT_LOADER_STYLE)
@@ -24,176 +20,8 @@ type LoadingIndicatorPreviewProps = LoadingIndicatorBaseProps & {
   loaderStyle: LoaderStyle
 }
 
-function DrawingLoader(): React.JSX.Element {
-  return (
-    <svg
-      className="relative block size-full overflow-visible fill-none stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]"
-      viewBox="0 0 24 24"
-    >
-      <g className="yiru-loader-drawing-frame yiru-loader-drawing-pig">
-        <path
-          pathLength="1"
-          d="M4 12c0-3.4 3-6 7-6h3.1c1.4 0 2.7.4 3.7 1.2L21 6.3v5.2c0 1.4-.8 2.7-2.1 3.3L18 18h-3v-2H9v2H6v-3c-1.2-.7-2-1.7-2-3Z"
-        />
-        <path
-          pathLength="1"
-          d="M15.5 6.2c.7-1.4 2.1-2 3.2-1.7L18 7.8M9 9h5M17.4 10.4h.1M4.2 10.4c-1.7.2-2.4-.5-2.2-1.5"
-        />
-      </g>
-      <g className="yiru-loader-drawing-frame yiru-loader-drawing-calculator">
-        <path
-          pathLength="1"
-          d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
-        />
-        <path pathLength="1" d="M8 6h8v4H8V6Zm0 7h1m3 0h1m3 0h1M8 17h1m3 0h1m3 0h1" />
-      </g>
-      <g className="yiru-loader-drawing-frame yiru-loader-drawing-wallet">
-        <path
-          pathLength="1"
-          d="M5 5h12a2 2 0 0 1 2 2v2h1a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
-        />
-        <path pathLength="1" d="M3 8h16m-2 2h4v6h-4a3 3 0 0 1 0-6Zm0 3h.1" />
-      </g>
-      <g className="yiru-loader-drawing-frame yiru-loader-drawing-kitten">
-        <path
-          pathLength="1"
-          d="M6.5 8 5 3.5l4 2.2a8.5 8.5 0 0 1 6 0l4-2.2L17.5 8c1 1.2 1.5 2.7 1.5 4.3 0 4-3.1 7.2-7 7.2s-7-3.2-7-7.2C5 10.7 5.5 9.2 6.5 8Z"
-        />
-        <path
-          pathLength="1"
-          d="M8.5 11h.1m6.8 0h.1M10 14c1.3 1.2 2.7 1.2 4 0m-2-1v2m-3.5-1.8-4-.8m4 2.2-3.7 1.2m10.7-2.6 4-.8m-4 2.2 3.7 1.2"
-        />
-      </g>
-    </svg>
-  )
-}
-
-function CodeLoader(): React.JSX.Element {
-  return (
-    <svg
-      className="relative block size-full overflow-visible fill-current font-mono text-[20px] font-bold"
-      viewBox="0 0 24 24"
-    >
-      <text
-        className="yiru-loader-code-brace yiru-loader-code-open origin-center [transform-box:fill-box]"
-        x="2"
-        y="18"
-      >
-        {'{'}
-      </text>
-      <text
-        className="yiru-loader-code-brace yiru-loader-code-close origin-center [transform-box:fill-box]"
-        x="13"
-        y="18"
-      >
-        {'}'}
-      </text>
-    </svg>
-  )
-}
-
-function MacosLoader(): React.JSX.Element {
-  return (
-    <span className="relative block size-full overflow-visible">
-      {Array.from({ length: 12 }, (_, index) => {
-        const rotation = index * 30
-        return (
-          <span
-            key={rotation}
-            className="yiru-loader-macos-blade absolute bottom-0 left-[46.3%] h-[27.8%] w-[7.4%] origin-[center_-80%] bg-current opacity-0"
-            style={{
-              animationDelay: `${index / 12}s`,
-              transform: `rotate(${rotation}deg)`
-            }}
-          />
-        )
-      })}
-    </span>
-  )
-}
-
-function SquareLoader(): React.JSX.Element {
-  return (
-    <span className="yiru-loader-square relative m-[12%] box-border block h-[76%] w-[76%] overflow-visible border [border-width:max(1px,0.1em)] border-current">
-      <span className="yiru-loader-square-fill block h-0 w-full bg-current" />
-    </span>
-  )
-}
-
-function FlipbookLoader(): React.JSX.Element {
-  return (
-    <span className="yiru-loader-book relative top-[20%] block h-[60%] w-full overflow-visible border [border-width:max(1px,0.09em)] border-current [perspective:200px]">
-      {[0, 1, 2].map((page) => (
-        <span
-          key={page}
-          className="yiru-loader-book-page absolute -top-px left-1/2 z-[1] box-border h-[calc(100%+2px)] w-[calc(50%+1px)] origin-[0_50%] border-t [border-top-width:max(1px,0.09em)] border-r [border-right-width:max(1px,0.09em)] border-b [border-bottom-width:max(1px,0.09em)] border-current bg-[color-mix(in_srgb,currentColor_12%,transparent)]"
-          style={{ animationDelay: `${page * 0.4}s` }}
-        />
-      ))}
-    </span>
-  )
-}
-
-function EscaladeLoader(): React.JSX.Element {
-  return (
-    <svg
-      className="yiru-loader-escalade relative block size-full overflow-visible"
-      viewBox="0 -25 100 150"
-    >
-      <g>
-        <path
-          className="fill-none stroke-current stroke-[20] [stroke-linecap:round]"
-          pathLength="1"
-          d="M50 100A1 1 0 0 1 50 0"
-        />
-      </g>
-      <g>
-        <path
-          className="fill-none stroke-current stroke-[20] [stroke-linecap:round]"
-          pathLength="1"
-          d="M50 75A1 1 0 0 0 50-25"
-        />
-      </g>
-    </svg>
-  )
-}
-
-const THINKING_ORB_STATE_BY_LOADER_STYLE = {
-  'thinking-orb-working': 'working',
-  'thinking-orb-searching': 'searching',
-  'thinking-orb-solving': 'solving',
-  'thinking-orb-listening': 'listening',
-  'thinking-orb-composing': 'composing',
-  'thinking-orb-shaping': 'shaping'
-} satisfies Record<ThinkingOrbLoaderStyle, OrbState>
-
-function isThinkingOrbLoaderStyle(loaderStyle: LoaderStyle): loaderStyle is ThinkingOrbLoaderStyle {
-  return loaderStyle in THINKING_ORB_STATE_BY_LOADER_STYLE
-}
-
-function LoaderVisual({ loaderStyle }: { loaderStyle: LoaderStyle }): React.JSX.Element {
-  if (isThinkingOrbLoaderStyle(loaderStyle)) {
-    return <ThinkingOrbLoader state={THINKING_ORB_STATE_BY_LOADER_STYLE[loaderStyle]} />
-  }
-
-  switch (loaderStyle) {
-    case 'drawing':
-      return <DrawingLoader />
-    case 'code':
-      return <CodeLoader />
-    case 'macos':
-      return <MacosLoader />
-    case 'square':
-      return <SquareLoader />
-    case 'flipbook':
-      return <FlipbookLoader />
-    case 'escalade':
-      return <EscaladeLoader />
-  }
-}
-
 function removeLegacySpinClass(className: string | undefined): string | undefined {
-  // Why: nested variants own their motion; a leftover icon class would rotate the whole drawing.
+  // Why: the orb owns its motion; a leftover icon class would rotate the whole canvas.
   return className
     ?.split(/\s+/)
     .filter((token) => token && token !== 'animate-spin')
@@ -230,7 +58,7 @@ function LoadingIndicatorVisual({
         ...(dimension ? { width: dimension, height: dimension } : {})
       }}
     >
-      <LoaderVisual loaderStyle={loaderStyle} />
+      <ThinkingOrbLoader state={loaderStyle} />
     </span>
   )
 }
