@@ -4,6 +4,7 @@ export const UI_LAB_HOST_PREFIX = 'ui-lab-'
 export const UI_LAB_TERMINAL_TAB_ID = 'ui-lab-terminal-tab'
 export const UI_LAB_TERMINAL_HANDLE = 'ui-lab-terminal'
 export const UI_LAB_SESSION_ID = 'ui-lab-session'
+export const UI_LAB_WORKTREE_ID = 'ui-lab-worktree'
 
 const UI_LAB_SCENARIO_IDS = ['chat', 'working', 'permission', 'empty', 'error', 'markdown'] as const
 export type MobileUiLabScenarioId = (typeof UI_LAB_SCENARIO_IDS)[number]

@@ -377,6 +377,9 @@ catalogs:
     '@react-native-async-storage/async-storage':
       specifier: 2.2.0
       version: 2.2.0
+    '@react-navigation/native':
+      specifier: 7.3.8
+      version: 7.3.8
     '@shopify/react-native-skia':
       specifier: 2.10.0
       version: 2.10.0
@@ -428,6 +431,9 @@ catalogs:
     expo-file-system:
       specifier: 55.0.19
       version: 55.0.19
+    expo-glass-effect:
+      specifier: 55.0.11
+      version: 55.0.11
     expo-haptics:
       specifier: 55.0.14
       version: 55.0.14
@@ -953,6 +959,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: catalog:mobile
         version: 2.2.0(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))
+      '@react-navigation/native':
+        specifier: catalog:mobile
+        version: 7.3.8(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6)
       '@shopify/react-native-skia':
         specifier: catalog:mobile
         version: 2.10.0(3319c59794a8b2ba91859535652d9302)
@@ -1007,6 +1016,9 @@ importers:
       expo-file-system:
         specifier: catalog:mobile
         version: 55.0.19(expo@55.0.27)(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))
+      expo-glass-effect:
+        specifier: catalog:mobile
+        version: 55.0.11(expo@55.0.27)(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6)
       expo-haptics:
         specifier: catalog:mobile
         version: 55.0.14(expo@55.0.27)

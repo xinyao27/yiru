@@ -5,7 +5,7 @@ import { ArrowUp, Check, Question as CircleHelp } from '../../components/uniwind
 import { cn } from '../../style/class-names'
 import { formatQuestionAnswer, type MobileChatQuestion } from './question'
 
-type Props = {
+type MobileNativeChatQuestionProps = {
   question: MobileChatQuestion
   onAnswer: (text: string) => Promise<boolean>
 }
@@ -14,7 +14,10 @@ type Props = {
  *  on tap; multi-select toggles then Submits; an always-present text entry lets
  *  the user answer freely (the escape hatch) when the heuristic misreads the
  *  options or none apply. */
-export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.JSX.Element {
+export function MobileNativeChatQuestion({
+  question,
+  onAnswer
+}: MobileNativeChatQuestionProps): React.JSX.Element {
   const [selected, setSelected] = useState<string[]>([])
   const [freeText, setFreeText] = useState('')
   const [sending, setSending] = useState(false)
@@ -74,7 +77,7 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
   )
 
   return (
-    <View className="bg-card border-hairline border-border mx-4 my-2 gap-2 p-3">
+    <View className="bg-card border-hairline border-border mx-4 my-2 gap-2 rounded-2xl p-3">
       <View className="flex-row items-center gap-2">
         <CircleHelp size={15} colorClassName="accent-primary" />
         <Text className="text-foreground flex-1 text-sm leading-[21px] font-semibold">
@@ -92,7 +95,7 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
                 accessibilityRole={question.multiSelect ? 'checkbox' : 'button'}
                 accessibilityState={question.multiSelect ? { checked: isSelected } : undefined}
                 className={cn(
-                  'flex-row items-center gap-2 min-h-11 px-3 py-2 bg-secondary border-hairline border-border',
+                  'flex-row items-center gap-2 min-h-11 rounded-xl px-3 py-2 bg-secondary border-hairline border-border',
                   isSelected && 'border-primary',
                   styles.pressedActive
                 )}
@@ -101,7 +104,7 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
                 {question.multiSelect ? (
                   <View
                     className={cn(
-                      'w-5 h-5 border-[1.5px] border-muted-foreground/60 items-center justify-center',
+                      'w-5 h-5 rounded-md border-[1.5px] border-muted-foreground/60 items-center justify-center',
                       isSelected && 'bg-primary border-primary'
                     )}
                   >
@@ -121,7 +124,7 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
         <Pressable
           accessibilityLabel="Submit selected options"
           className={cn(
-            'min-h-11 items-center justify-center bg-primary',
+            'min-h-11 items-center justify-center rounded-xl bg-primary',
             !canSubmitMulti && 'bg-secondary',
             canSubmitMulti && styles.pressedActive
           )}
@@ -141,7 +144,7 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
 
       <View className="flex-row items-end gap-2">
         <TextInput
-          className="text-foreground bg-secondary max-h-[120px] min-h-10 flex-1 px-3 pt-2 pb-2 text-sm"
+          className="text-foreground bg-secondary max-h-[120px] min-h-10 flex-1 rounded-xl px-3 pt-2 pb-2 text-sm"
           value={freeText}
           onChangeText={setFreeText}
           placeholder={hasOptions ? 'Or type a reply…' : 'Type your reply…'}
@@ -154,7 +157,7 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
         <Pressable
           accessibilityLabel="Send reply"
           className={cn(
-            'w-10 h-10 items-center justify-center bg-primary',
+            'w-10 h-10 items-center justify-center rounded-full bg-primary',
             !canSendFreeText && 'bg-secondary',
             canSendFreeText && styles.pressedActive
           )}

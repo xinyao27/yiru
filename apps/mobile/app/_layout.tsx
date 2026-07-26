@@ -1,4 +1,5 @@
 import '../global.css'
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { Stack, useRouter } from 'expo-router'
@@ -11,6 +12,7 @@ import { Uniwind, useCSSVariable, useResolveClassNames, useUniwind } from 'uniwi
 import { IconContext } from '@/components/uniwind-icons'
 import { SafeAreaListener, SafeAreaProvider } from '@/components/uniwind-native-components'
 
+import { MobileGlassAvailabilityProvider } from '../src/components/glass/availability'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { MobileLoaderStyleProvider } from '../src/loading/loader-style-context'
 import { getNotificationNavigationPath } from '../src/notifications/notification-routing'
@@ -20,6 +22,10 @@ import { extractPairingCodeFromUrl } from '../src/transport/pairing'
 import { createMobileUiLabRpcClient } from '../src/ui-lab/rpc-client'
 
 const IS_UI_LAB = __DEV__ && process.env.EXPO_PUBLIC_YIRU_UI_LAB === '1'
+
+function resolveCssColor(value: string | number | undefined, fallback: string): string {
+  return typeof value === 'string' ? value : fallback
+}
 
 // Why: keeps the native splash screen visible until the React tree is mounted
 // and ready to render. Without this the user sees a blank white/black frame
@@ -44,10 +50,46 @@ export default function RootLayout() {
   const router = useRouter()
   const handledNotificationIdsRef = useRef<Set<string>>(new Set())
   const { theme } = useUniwind()
-  const foreground = useCSSVariable('--color-foreground') as string
+  const baseNavigationTheme = theme === 'dark' ? DarkTheme : DefaultTheme
+  const foreground = resolveCssColor(
+    useCSSVariable('--color-foreground'),
+    baseNavigationTheme.colors.text
+  )
+  const background = resolveCssColor(
+    useCSSVariable('--color-background'),
+    baseNavigationTheme.colors.background
+  )
+  const card = resolveCssColor(useCSSVariable('--color-card'), baseNavigationTheme.colors.card)
+  const border = resolveCssColor(
+    useCSSVariable('--color-border'),
+    baseNavigationTheme.colors.border
+  )
+  const primary = resolveCssColor(
+    useCSSVariable('--color-primary'),
+    baseNavigationTheme.colors.primary
+  )
+  const notification = resolveCssColor(
+    useCSSVariable('--color-destructive'),
+    baseNavigationTheme.colors.notification
+  )
   const iconContextValue = useMemo(
     () => ({ color: foreground, weight: 'duotone' as const }),
     [foreground]
+  )
+  const navigationTheme = useMemo(
+    () => ({
+      ...baseNavigationTheme,
+      colors: {
+        ...baseNavigationTheme.colors,
+        background,
+        border,
+        card,
+        notification,
+        primary,
+        text: foreground
+      }
+    }),
+    [background, baseNavigationTheme, border, card, foreground, notification, primary]
   )
   const headerStyle = useResolveClassNames('bg-card') as { backgroundColor?: string }
   const headerTitleStyle = useResolveClassNames('text-sm font-semibold') as Pick<
@@ -186,46 +228,54 @@ export default function RootLayout() {
             >
               <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
                 <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-                <Stack
-                  screenOptions={{
-                    headerStyle,
-                    headerTintColor: foreground,
-                    headerTitleStyle,
-                    contentStyle,
-                    headerShadowVisible: false
-                    // Why: deliberately no `orientation` screenOption. react-native-screens
-                    // has no value that respects the device rotation lock — even 'default'
-                    // calls setRequestedOrientation(UNSPECIFIED) at runtime, overriding the
-                    // manifest. Leaving it unset lets the manifest's "fullUser" (set by the
-                    // android-respect-rotation-lock config plugin) honor the auto-rotate lock.
-                  }}
-                >
-                  <Stack.Screen
-                    name="index"
-                    options={{
-                      headerShown: false,
-                      headerTitle: () => <YiruLogo size={22} />
-                    }}
-                  />
-                  <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
-                  <Stack.Screen name="pair" options={{ headerShown: false }} />
-                  <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
-                  <Stack.Screen
-                    name="notification-opt-in"
-                    options={{ headerShown: false, presentation: 'modal', gestureEnabled: false }}
-                  />
-                  <Stack.Screen name="settings" options={{ headerShown: false }} />
-                  <Stack.Screen name="appearance-settings" options={{ headerShown: false }} />
-                  <Stack.Screen name="native-chat-settings" options={{ headerShown: false }} />
-                  <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
-                  <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
-                  <Stack.Screen name="notifications" options={{ headerShown: false }} />
-                  <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
-                  <Stack.Screen name="connection-log" options={{ headerShown: false }} />
-                  <Stack.Screen name="about" options={{ headerShown: false }} />
-                  <Stack.Screen name="ui-lab" options={{ headerShown: false }} />
-                  <Stack.Screen name="h" options={{ headerShown: false }} />
-                </Stack>
+                <MobileGlassAvailabilityProvider>
+                  <ThemeProvider value={navigationTheme}>
+                    <Stack
+                      screenOptions={{
+                        headerStyle,
+                        headerTintColor: foreground,
+                        headerTitleStyle,
+                        contentStyle,
+                        headerShadowVisible: false
+                        // Why: deliberately no `orientation` screenOption. react-native-screens
+                        // has no value that respects the device rotation lock — even 'default'
+                        // calls setRequestedOrientation(UNSPECIFIED) at runtime, overriding the
+                        // manifest. Leaving it unset lets the manifest's "fullUser" (set by the
+                        // android-respect-rotation-lock config plugin) honor the auto-rotate lock.
+                      }}
+                    >
+                      <Stack.Screen
+                        name="index"
+                        options={{
+                          headerShown: false,
+                          headerTitle: () => <YiruLogo size={22} />
+                        }}
+                      />
+                      <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
+                      <Stack.Screen name="pair" options={{ headerShown: false }} />
+                      <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
+                      <Stack.Screen
+                        name="notification-opt-in"
+                        options={{
+                          headerShown: false,
+                          presentation: 'modal',
+                          gestureEnabled: false
+                        }}
+                      />
+                      <Stack.Screen name="settings" options={{ headerShown: false }} />
+                      <Stack.Screen name="appearance-settings" options={{ headerShown: false }} />
+                      <Stack.Screen name="native-chat-settings" options={{ headerShown: false }} />
+                      <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
+                      <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
+                      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                      <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
+                      <Stack.Screen name="connection-log" options={{ headerShown: false }} />
+                      <Stack.Screen name="about" options={{ headerShown: false }} />
+                      <Stack.Screen name="ui-lab" options={{ headerShown: false }} />
+                      <Stack.Screen name="h" options={{ headerShown: false }} />
+                    </Stack>
+                  </ThemeProvider>
+                </MobileGlassAvailabilityProvider>
               </View>
             </RpcClientProvider>
           </MobileLoaderStyleProvider>

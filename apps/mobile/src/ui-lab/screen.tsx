@@ -3,14 +3,15 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '../components/uniwind-icons'
 import { SafeAreaView } from '../components/uniwind-native-components'
-import { FLOATING_WORKSPACE_WORKTREE_ID } from '../session/floating-workspace'
 import { updateSessionViewOverride } from '../storage/session-view-preferences'
 import {
   mobileUiLabHostId,
   UI_LAB_SCENARIOS,
   UI_LAB_TERMINAL_TAB_ID,
+  UI_LAB_WORKTREE_ID,
   type MobileUiLabScenario
 } from './fixtures'
+import { MobileUiLabGlassCatalog } from './glass-catalog'
 
 export function MobileUiLabScreen(): React.JSX.Element {
   const router = useRouter()
@@ -30,16 +31,9 @@ export function MobileUiLabScreen(): React.JSX.Element {
   const openScenario = async (scenario: MobileUiLabScenario): Promise<void> => {
     const hostId = mobileUiLabHostId(scenario.id)
     if (scenario.surface === 'chat') {
-      await updateSessionViewOverride(
-        hostId,
-        FLOATING_WORKSPACE_WORKTREE_ID,
-        UI_LAB_TERMINAL_TAB_ID,
-        'chat'
-      )
+      await updateSessionViewOverride(hostId, UI_LAB_WORKTREE_ID, UI_LAB_TERMINAL_TAB_ID, 'chat')
     }
-    router.push(
-      `/h/${hostId}/session/${FLOATING_WORKSPACE_WORKTREE_ID}?name=${encodeURIComponent('UI Lab')}`
-    )
+    router.push(`/h/${hostId}/session/${UI_LAB_WORKTREE_ID}?name=${encodeURIComponent('UI Lab')}`)
   }
 
   return (
@@ -69,6 +63,7 @@ export function MobileUiLabScreen(): React.JSX.Element {
         <Text className="text-muted-foreground mt-1 text-xs leading-5">
           Each fixture opens the real mobile session route. Only its runtime responses are mocked.
         </Text>
+        <MobileUiLabGlassCatalog />
         <View className="border-t-hairline border-border mt-4">
           {UI_LAB_SCENARIOS.map((scenario) => (
             <Pressable

@@ -166,6 +166,7 @@ catalogs:
   mobile:
     '@noble/hashes': 1.8.0
     '@react-native-async-storage/async-storage': 2.2.0
+    '@react-navigation/native': 7.3.8
     '@shopify/react-native-skia': 2.10.0
     '@types/react': 19.2.14
     '@types/ws': 8.18.1
@@ -183,6 +184,7 @@ catalogs:
     expo-dev-client: 55.0.35
     expo-document-picker: 55.0.13
     expo-file-system: 55.0.19
+    expo-glass-effect: 55.0.11
     expo-haptics: 55.0.14
     expo-image-manipulator: 55.0.17
     expo-image-picker: 55.0.20

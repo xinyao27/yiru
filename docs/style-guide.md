@@ -18,7 +18,7 @@ Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic
 Yiru hosts other tools — Monaco, xterm, Markdown, embedded browsers — so its own chrome must recede and frame, never compete. Three commitments follow, and everything below is a consequence of them:
 
 1. **Monochrome.** Neutral grays carry the chrome. Color means *state* — selection, destructive, git status, diff — never decoration.
-2. **Rectilinear.** No radius, no shadows. Surfaces separate with a hairline border and an opaque background.
+2. **Platform-native geometry.** Desktop stays rectilinear. Mobile follows the system's concentric rounded geometry, grouped surfaces, and Liquid Glass materials.
 3. **Dense but breathable.** 14px body, 12px chrome, compact rows, real spacing around the primary workflow.
 
 When something isn't covered here, pick the option that makes Yiru quieter.
@@ -94,7 +94,9 @@ Git status colors mirror VS Code; diff colors mirror Cursor. The two families ar
 
 ## 4. Geometry
 
-**Radius is zero.** `--radius: 0`, and `main.css` holds every element and pseudo-element to `border-radius: 0 !important` so legacy utilities, inline values, and third-party components comply. `rounded-*` is a no-op that signals copy-paste drift, and CI flags it.
+**Desktop radius is zero.** `--radius: 0`, and `main.css` holds every desktop element and pseudo-element to `border-radius: 0 !important` so legacy utilities, inline values, and third-party components comply. Desktop `rounded-*` is a no-op that signals copy-paste drift, and CI flags it.
+
+**Mobile follows the device.** Mobile does not inherit desktop's zero-radius rule. Navigation bars, grouped controls, message bubbles, form sections, floating composers, sheets, and floating actions use concentric system geometry. Terminals, editors, and diff bodies may stay rectangular when rounding would clip or waste working content. Prefer the shared mobile Glass components so material availability and the opaque fallback stay one decision; features keep their role-specific geometry beside the markup.
 
 **No shadows, no outlines.** Separation is `border` plus an opaque background. No `shadow-*`, `drop-shadow-*`, `box-shadow`, `text-shadow`, or stroke-drawing outline — delete legacy declarations at the source rather than overriding them. A local `outline-none` is allowed only to suppress the UA ring on a component that supplies its own focus state.
 
@@ -123,7 +125,9 @@ Sidebar section headers are 11px + `font-semibold` + `uppercase` + `tracking-[0.
 
 **Floating and modal.** Recipes live in `floating-surface-styles.ts` and apply through the rendered wrappers: popovers, menus, hover cards, and selects get `bg-popover text-popover-foreground border border-border`; dialogs, command dialogs, and sheets get `bg-background text-foreground border-border` over a `bg-black/50` backdrop.
 
-Foreground floating surfaces are **opaque while visible** — no `/NN` alpha, translucent `rgba`, `color-mix(…, transparent)`, resting opacity below 1, or backdrop blur. Enter/exit opacity motion is fine. Transparency stays correct where revealing context is the point: modal backdrops, transcript fade masks, drag and selection affordances, hover tints.
+Desktop foreground floating surfaces are **opaque while visible** — no `/NN` alpha, translucent `rgba`, `color-mix(…, transparent)`, resting opacity below 1, or backdrop blur. Enter/exit opacity motion is fine. Transparency stays correct where revealing context is the point: modal backdrops, transcript fade masks, drag and selection affordances, hover tints.
+
+On mobile, native Liquid Glass is a functional layer for navigation and controls, not a card treatment. Use it only above content: headers, tab rails, toolbars, composers, and related control groups. Never apply it to scrolling rows, messages, terminal/editor surfaces, diffs, or error content. Unsupported platforms and Reduce Transparency render the same geometry with an opaque semantic background and border.
 
 **Menu rows.** `menu-item-styles.ts` is the grammar for dropdown and context menus alike: 12px `font-medium` rows at `leading-5`, `data-highlighted:bg-accent`, 3.5 icons in `muted-foreground`, destructive rows in `destructive` with a 10% wash on highlight. Labels 11px `font-semibold muted-foreground`; separators `h-px bg-border/70`; shortcuts right-aligned 11px.
 
@@ -149,7 +153,7 @@ Cohesion beats indirection — a reader should see a component's appearance in t
 
 `assets/main.css` is global-only: imports, `@font-face`, custom variants, `@theme inline`, `:root`/`.dark` tokens, `@layer base`, scrollbar utilities, titlebar and layout chrome. Feature CSS does not go there. The feature-wall, feature-tour, and diff-comment blocks currently sitting in it predate this rule — move them into their feature folder when you next touch them; don't add to them.
 
-Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no primitive layer; its shared components live in `apps/mobile/src/components/`.
+Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no desktop-style primitive layer; its shared components live in `apps/mobile/src/components/`. Native Glass imports stay inside `apps/mobile/src/components/glass/`, whose components own availability checks, grouping, interaction, and fallback paint. Business features consume those wrappers and keep layout classes at the TSX call site.
 
 ---
 

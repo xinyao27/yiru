@@ -352,7 +352,7 @@ function MobileNativeChatMessageImpl({
       <View
         className={cn(
           'max-w-full gap-2',
-          isUser && 'max-w-[88%] bg-primary px-3 py-2',
+          isUser && 'max-w-[88%] rounded-2xl bg-primary px-3 py-2',
           isReasoning && 'opacity-[0.7]',
           queued && 'opacity-[0.55]',
           copied && 'bg-[var(--editor-diff-inserted-line-background)]'

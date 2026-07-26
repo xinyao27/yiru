@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -10,16 +11,10 @@ import {
   View
 } from 'react-native'
 
-import {
-  ArrowDown,
-  ArrowsInLineVertical as ChevronsDownUp,
-  ArrowsOutLineVertical as ChevronsUpDown,
-  Square
-} from '../../components/uniwind-icons'
+import { MobileGlassSurface } from '../../components/glass/surface'
+import { ArrowDown } from '../../components/uniwind-icons'
 import { GestureDetector, GestureHandlerRootView } from '../../components/uniwind-native-components'
 import { useSafeAreaInsets } from '../../components/uniwind-native-components'
-import { cn } from '../../style/class-names'
-import { MobileAgentWorkingIndicator } from '../agent-working-indicator'
 import type { AskAnswerSelection, AskPrompt } from './ask'
 import { MobileNativeChatAsk } from './ask-wizard'
 import { MobileNativeChatComposer } from './composer'
@@ -36,13 +31,12 @@ import {
 import { useMobileNativeChatAskDismiss } from './use-ask-dismiss'
 import { useMobileNativeChatPinchGesture } from './use-pinch-gesture'
 import type { MobileNativeChatStatus } from './use-session'
-import { styles } from './view-styles'
 
 /** Why the composer input is locked: the transport is disconnected, or the
  *  terminal subscription has not acknowledged its input lease yet. */
 export type MobileNativeChatInputLockReason = 'disconnected' | 'waiting'
 
-type Props = {
+type MobileNativeChatViewProps = {
   messages: NativeChatMessage[]
   status: MobileNativeChatStatus
   error?: string
@@ -116,7 +110,7 @@ export function MobileNativeChatView({
   onRespondPermission,
   onOpenFile,
   keyboardInset = 0
-}: Props): React.JSX.Element {
+}: MobileNativeChatViewProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
   const listRef = useRef<FlatList<NativeChatMessage>>(null)
   const [toolsExpanded, setToolsExpanded] = useState(false)
@@ -127,6 +121,7 @@ export function MobileNativeChatView({
   // Lift the composer clear of the keyboard, plus the bottom safe-area so it
   // never sits under the home indicator / nav bar (mirrors the terminal dock).
   const bottomPad = keyboardInset > 0 ? keyboardInset + insets.bottom : insets.bottom
+  const [bottomChromeHeight, setBottomChromeHeight] = useState(88)
   const [atBottom, setAtBottom] = useState(true)
   const sendScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { fontScale, pinchGesture } = useMobileNativeChatPinchGesture()
@@ -244,11 +239,24 @@ export function MobileNativeChatView({
     return () => clearTimeout(timer)
   }, [rawLockReason])
   const lockReason = lockHeld ? rawLockReason : null
+  const transcriptContentStyle = useMemo(
+    () => ({ paddingBottom: bottomChromeHeight + bottomPad + 8 }),
+    [bottomChromeHeight, bottomPad]
+  )
+  const bottomChromeStyle = useMemo(() => ({ bottom: bottomPad }), [bottomPad])
+  const jumpToLatestStyle = useMemo(
+    () => ({ bottom: bottomChromeHeight + bottomPad + 8 }),
+    [bottomChromeHeight, bottomPad]
+  )
+  const handleBottomChromeLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = Math.ceil(event.nativeEvent.layout.height)
+    setBottomChromeHeight((height) => (height === nextHeight ? height : nextHeight))
+  }, [])
 
   return (
-    <View className="bg-background flex-1" style={[{ paddingBottom: bottomPad }]}>
+    <View className="bg-background relative flex-1">
       {showLoading ? (
-        <View className={styles.center}>
+        <View className="flex-1 items-center justify-center p-6">
           <ActivityIndicator colorClassName="accent-muted-foreground" />
         </View>
       ) : (
@@ -259,7 +267,8 @@ export function MobileNativeChatView({
               data={data}
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
-              contentContainerClassName="py-2 grow"
+              contentContainerClassName="grow pt-2"
+              contentContainerStyle={transcriptContentStyle}
               onScroll={onScroll}
               scrollEventThrottle={32}
               onContentSizeChange={() => {
@@ -301,7 +310,7 @@ export function MobileNativeChatView({
               }
               ListEmptyComponent={
                 emptyState ? (
-                  <View className={styles.center}>
+                  <View className="flex-1 items-center justify-center p-6">
                     <Text className="text-muted-foreground mb-1 text-center text-sm font-semibold">
                       {emptyState.title}
                     </Text>
@@ -316,111 +325,90 @@ export function MobileNativeChatView({
           {/* Jump-to-latest control. The scroll-to-top affordance now lives
               per-message (the up-arrow in each agent message's controls). */}
           {!atBottom ? (
-            <Pressable
-              accessibilityLabel="Scroll to latest"
-              className={cn(
-                'absolute right-3 w-[38px] h-[38px] items-center justify-center bg-secondary border-hairline border-border',
-                'bottom-3'
-              )}
-              onPress={() => listRef.current?.scrollToEnd({ animated: true })}
+            <MobileGlassSurface
+              className="absolute right-3 h-10 w-10 overflow-hidden rounded-full"
+              isInteractive
+              style={jumpToLatestStyle}
             >
-              <ArrowDown size={18} colorClassName="accent-foreground" />
-            </Pressable>
+              <Pressable
+                accessibilityLabel="Scroll to latest"
+                className="active:bg-accent h-10 w-10 items-center justify-center rounded-full"
+                onPress={() => listRef.current?.scrollToEnd({ animated: true })}
+              >
+                <ArrowDown size={18} colorClassName="accent-foreground" />
+              </Pressable>
+            </MobileGlassSurface>
           ) : null}
         </GestureHandlerRootView>
       )}
-      {/* Pending agent prompt: a structured AskUserQuestion wins, then a
-          heuristic permission, then a heuristic question. */}
-      {showAsk && ask ? (
-        <MobileNativeChatAsk
-          key={askKey ?? 'ask'}
-          prompt={ask}
-          onAnswer={async (selections) => {
-            const accepted = (await onAnswerAsk?.(ask, selections)) ?? false
-            if (accepted) {
-              dismissAsk()
-            }
-            return accepted
-          }}
-          onCancel={async () => {
-            const accepted = (await onCancelAsk?.()) ?? false
-            if (accepted) {
-              dismissAsk()
-            }
-            return accepted
-          }}
-        />
-      ) : permission ? (
-        <MobileNativeChatPermission
-          key={JSON.stringify(permission)}
-          permission={permission}
-          onRespond={async (send) => (await onRespondPermission?.(send)) ?? false}
-        />
-      ) : question ? (
-        <MobileNativeChatQuestion
-          key={mobileChatQuestionKey(question)}
-          question={question}
-          onAnswer={async (text) => (await onAnswerQuestion?.(text)) ?? false}
-        />
-      ) : null}
-      {/* Chrome row above the composer: the working indicator and the global
-          tool-calls expand/collapse toggle on the left, Stop in the far corner. */}
-      <View className="min-h-7 flex-row items-center justify-between px-3">
-        <View className="flex-1 flex-row items-center gap-2">
-          {agentWorking ? <MobileAgentWorkingIndicator /> : null}
-          <Pressable
-            className={cn('flex-row items-center gap-1 py-1 px-1', styles.pressedActive)}
-            onPress={() => setToolsExpanded((v) => !v)}
-            hitSlop={8}
-          >
-            {toolsExpanded ? (
-              <ChevronsDownUp size={14} colorClassName="accent-muted-foreground" />
-            ) : (
-              <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
-            )}
-            <Text className="text-muted-foreground/60 text-xs font-semibold">
-              {toolsExpanded ? 'Collapse' : 'Tools'}
-            </Text>
-          </Pressable>
-        </View>
-        {agentWorking ? (
-          <Pressable
-            className={cn('flex-row items-center gap-1', styles.pressedActive)}
-            onPress={onStop}
-            hitSlop={8}
-            accessibilityLabel="Stop the agent"
-          >
-            <Square size={13} colorClassName="accent-destructive" />
-            <Text className="text-destructive text-xs font-bold">Stop</Text>
-          </Pressable>
+      <View
+        className="absolute right-0 left-0"
+        onLayout={handleBottomChromeLayout}
+        style={bottomChromeStyle}
+      >
+        {/* Pending agent prompt: a structured AskUserQuestion wins, then a
+            heuristic permission, then a heuristic question. */}
+        {showAsk && ask ? (
+          <MobileNativeChatAsk
+            key={askKey ?? 'ask'}
+            prompt={ask}
+            onAnswer={async (selections) => {
+              const accepted = (await onAnswerAsk?.(ask, selections)) ?? false
+              if (accepted) {
+                dismissAsk()
+              }
+              return accepted
+            }}
+            onCancel={async () => {
+              const accepted = (await onCancelAsk?.()) ?? false
+              if (accepted) {
+                dismissAsk()
+              }
+              return accepted
+            }}
+          />
+        ) : permission ? (
+          <MobileNativeChatPermission
+            key={JSON.stringify(permission)}
+            permission={permission}
+            onRespond={async (send) => (await onRespondPermission?.(send)) ?? false}
+          />
+        ) : question ? (
+          <MobileNativeChatQuestion
+            key={mobileChatQuestionKey(question)}
+            question={question}
+            onAnswer={async (text) => (await onAnswerQuestion?.(text)) ?? false}
+          />
         ) : null}
+        <MobileNativeChatComposer
+          value={composerText}
+          onChangeText={onComposerTextChange}
+          onSend={handleSend}
+          onAttachImage={onAttachImage}
+          isAttaching={isAttaching}
+          disabled={lockReason !== null}
+          placeholder={
+            lockReason === 'disconnected'
+              ? 'Reconnecting…'
+              : lockReason === 'waiting'
+                ? 'Waiting for terminal…'
+                : 'Message, @files, /commands'
+          }
+          filePaths={filePaths}
+          onNeedFiles={onNeedFiles}
+          agentWorking={agentWorking}
+          onStop={onStop}
+          toolsExpanded={toolsExpanded}
+          onToggleToolsExpanded={() => setToolsExpanded((expanded) => !expanded)}
+          sendFailureMessage={
+            sendFailed
+              ? rawLockReason === 'disconnected'
+                ? 'Message not sent — reconnecting…'
+                : 'Message not sent'
+              : null
+          }
+        />
       </View>
-      {sendFailed ? (
-        <View className="items-center px-3 pb-1">
-          <Text className="text-destructive text-xs font-semibold">
-            {rawLockReason === 'disconnected'
-              ? 'Message not sent — reconnecting…'
-              : 'Message not sent'}
-          </Text>
-        </View>
-      ) : null}
-      <MobileNativeChatComposer
-        value={composerText}
-        onChangeText={onComposerTextChange}
-        onSend={handleSend}
-        onAttachImage={onAttachImage}
-        isAttaching={isAttaching}
-        disabled={lockReason !== null}
-        placeholder={
-          lockReason === 'disconnected'
-            ? 'Reconnecting…'
-            : lockReason === 'waiting'
-              ? 'Waiting for terminal…'
-              : 'Message, @files, /commands'
-        }
-        filePaths={filePaths}
-        onNeedFiles={onNeedFiles}
-      />
     </View>
   )
 }

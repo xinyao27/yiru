@@ -3,7 +3,7 @@ import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '@yiru/runtime-pro
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import * as Clipboard from 'expo-clipboard'
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Animated, AppState, Linking, type AppStateStatus } from 'react-native'
 import {
@@ -62,6 +62,7 @@ import {
   saveCustomKeys,
   type CustomKey
 } from '../../../../src/components/custom-key-modal'
+import { MobileGlassSurface } from '../../../../src/components/glass/surface'
 import { MobileHtmlPreview } from '../../../../src/components/html-preview'
 import { PhosphorIconContextProvider } from '../../../../src/components/phosphor-icon-context-provider'
 import { MobileRichMarkdownEditor } from '../../../../src/components/rich-markdown-editor'
@@ -101,6 +102,7 @@ import {
 } from '../../../../src/session/file-syntax'
 import { isFloatingWorkspaceWorktreeId } from '../../../../src/session/floating-workspace'
 import { MobileSessionHeaderIconButton } from '../../../../src/session/header-icon-button'
+import { shouldUseNativeSessionHeader } from '../../../../src/session/header-mode'
 import { MobileSessionHeaderMoreActionsSheet } from '../../../../src/session/header-more-actions-sheet'
 import {
   buildMarkdownDiskFallbackDoc,
@@ -4490,70 +4492,153 @@ export default function SessionScreen() {
     hostedChecksSupported: prIsGithubRepo
   })
   const showHeaderMoreButton = showAgentSessionHistoryAction || showChecksAction
+  const useNativeSessionHeader = shouldUseNativeSessionHeader(isWideLayout)
+  const hasDirtyMarkdownDrafts = getDirtyMarkdownDrafts().length > 0
+  const nativeHeaderOptions = useMemo(
+    () => ({
+      gestureEnabled: !hasDirtyMarkdownDrafts,
+      headerBackVisible: false,
+      headerShadowVisible: false,
+      title: worktreeName || 'Terminal'
+    }),
+    [hasDirtyMarkdownDrafts, worktreeName]
+  )
 
   return (
     <View ref={setMobileSessionRootRef} className="bg-background flex-1">
-      <View className="flex-1">
-        <SafeAreaView className="bg-card border-b-border border-b" edges={['top']}>
-          <View className="min-h-11 flex-row items-center px-2 py-1">
-            <Pressable
-              className={cn('w-9 h-9 items-center justify-center mr-1', 'active:bg-accent')}
-              onPress={requestLeaveSession}
-              hitSlop={8}
+      <Stack.Screen options={nativeHeaderOptions} />
+      {useNativeSessionHeader ? (
+        <>
+          <Stack.Toolbar placement="left">
+            <Stack.Toolbar.Button
               accessibilityLabel="Back to worktrees"
+              icon="chevron.left"
+              onPress={requestLeaveSession}
+            />
+          </Stack.Toolbar>
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button
+              accessibilityLabel="Open file explorer"
+              hidden={isFloatingWorkspaceRoute}
+              icon="folder"
+              onPress={() => handlePanelTap('files')}
+              selected={activePanel === 'files'}
+            />
+            <Stack.Toolbar.Button
+              accessibilityLabel="Open source control"
+              hidden={isFolderWorkspaceRoute || isFloatingWorkspaceRoute}
+              icon="arrow.triangle.branch"
+              onPress={() => handlePanelTap('sourceControl')}
+              selected={activePanel === 'sourceControl'}
+            />
+            <Stack.Toolbar.Menu
+              accessibilityLabel="More session actions"
+              hidden={!showHeaderMoreButton}
+              icon="ellipsis"
+              separateBackground
             >
-              <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-            </Pressable>
-
-            <View className="min-w-0 flex-1">
-              <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
-                {worktreeName || 'Terminal'}
-              </Text>
-              <Pressable
-                className="mt-[2px] flex-row items-center"
-                disabled={!showConnectionRetry}
-                onPress={() => {
-                  if (hostId) {
-                    void forceReconnectHost(hostId)
-                  }
-                }}
-                accessibilityRole={showConnectionRetry ? 'button' : undefined}
-                accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+              <Stack.Toolbar.MenuAction
+                hidden={!showAgentSessionHistoryAction}
+                icon="clock.arrow.circlepath"
+                onPress={openAgentSessionHistory}
               >
-                <StatusDot state={connState} />
-                <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
-                  {terminalSummary}
-                </Text>
+                Agent History
+              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction
+                hidden={!showChecksAction}
+                icon="checkmark.circle"
+                onPress={() => handlePanelTap('pr')}
+              >
+                Checks
+              </Stack.Toolbar.MenuAction>
+            </Stack.Toolbar.Menu>
+          </Stack.Toolbar>
+        </>
+      ) : null}
+      <View className="flex-1">
+        {!useNativeSessionHeader ? (
+          <SafeAreaView className="bg-card border-b-border border-b" edges={['top']}>
+            <View className="min-h-11 flex-row items-center px-2 py-1">
+              <Pressable
+                className="active:bg-accent mr-1 h-9 w-9 items-center justify-center"
+                onPress={requestLeaveSession}
+                hitSlop={8}
+                accessibilityLabel="Back to worktrees"
+              >
+                <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
               </Pressable>
-            </View>
-            {!isFloatingWorkspaceRoute ? (
-              <MobileSessionHeaderIconButton
-                active={activePanel === 'files'}
-                accessibilityLabel="Open file explorer"
-                icon={Folder}
-                onPress={() => handlePanelTap('files')}
-              />
-            ) : null}
-            {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
-              <MobileSessionHeaderIconButton
-                active={activePanel === 'sourceControl'}
-                accessibilityLabel="Open source control"
-                icon={GitMerge}
-                onPress={() => handlePanelTap('sourceControl')}
-              />
-            )}
-            {showHeaderMoreButton ? (
-              <MobileSessionHeaderIconButton
-                active={activePanel === 'pr'}
-                accessibilityLabel="More session actions"
-                icon={MoreHorizontal}
-                onPress={() => setShowHeaderMoreActions(true)}
-              />
-            ) : null}
-          </View>
 
-          {visibleTabs.length > 0 && (
-            <View className="border-t-border flex-row items-center border-t">
+              <View className="min-w-0 flex-1">
+                <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
+                  {worktreeName || 'Terminal'}
+                </Text>
+                <Pressable
+                  className="mt-[2px] flex-row items-center"
+                  disabled={!showConnectionRetry}
+                  onPress={() => {
+                    if (hostId) {
+                      void forceReconnectHost(hostId)
+                    }
+                  }}
+                  accessibilityRole={showConnectionRetry ? 'button' : undefined}
+                  accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+                >
+                  <StatusDot state={connState} />
+                  <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
+                    {terminalSummary}
+                  </Text>
+                </Pressable>
+              </View>
+              {!isFloatingWorkspaceRoute ? (
+                <MobileSessionHeaderIconButton
+                  active={activePanel === 'files'}
+                  accessibilityLabel="Open file explorer"
+                  icon={Folder}
+                  onPress={() => handlePanelTap('files')}
+                />
+              ) : null}
+              {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
+                <MobileSessionHeaderIconButton
+                  active={activePanel === 'sourceControl'}
+                  accessibilityLabel="Open source control"
+                  icon={GitMerge}
+                  onPress={() => handlePanelTap('sourceControl')}
+                />
+              )}
+              {showHeaderMoreButton ? (
+                <MobileSessionHeaderIconButton
+                  active={activePanel === 'pr'}
+                  accessibilityLabel="More session actions"
+                  icon={MoreHorizontal}
+                  onPress={() => setShowHeaderMoreActions(true)}
+                />
+              ) : null}
+            </View>
+          </SafeAreaView>
+        ) : null}
+
+        {useNativeSessionHeader && connState !== 'connected' ? (
+          <Pressable
+            className="border-border bg-secondary active:bg-accent mx-3 mt-2 flex-row items-center gap-2 rounded-xl border px-3 py-2"
+            disabled={!showConnectionRetry}
+            onPress={() => {
+              if (hostId) {
+                void forceReconnectHost(hostId)
+              }
+            }}
+            accessibilityRole={showConnectionRetry ? 'button' : undefined}
+            accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+          >
+            <StatusDot state={connState} />
+            <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
+              {terminalSummary}
+            </Text>
+          </Pressable>
+        ) : null}
+
+        {visibleTabs.length > 0 ? (
+          <MobileGlassSurface className="mx-2 mt-2 mb-1 overflow-hidden rounded-2xl">
+            <View className="flex-row items-center">
               {/* Why: tab taps must register on the first press while the live
                   keyboard is open instead of being eaten by keyboard dismissal
                   (#5106); leaving a non-live tab still closes the keyboard
@@ -4562,8 +4647,8 @@ export default function SessionScreen() {
                 ref={tabStripRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                className="max-h-9 flex-1"
-                contentContainerClassName="pl-2 pr-2"
+                className="max-h-10 flex-1"
+                contentContainerClassName="px-1"
                 keyboardShouldPersistTaps="handled"
                 scrollEventThrottle={16}
                 onScroll={(e) => {
@@ -4582,8 +4667,8 @@ export default function SessionScreen() {
                   <Pressable
                     key={t.id}
                     className={cn(
-                      'w-32 max-w-32 min-h-9 items-center justify-center px-2 py-2 border-b-2 border-b-transparent',
-                      t.id === activeSessionTabId && 'border-b-muted-foreground'
+                      'min-h-10 min-w-24 max-w-40 items-center justify-center rounded-xl px-3 py-2 active:bg-accent',
+                      t.id === activeSessionTabId && 'bg-accent'
                     )}
                     onLayout={(e) => {
                       const { x, width } = e.nativeEvent.layout
@@ -4665,8 +4750,8 @@ export default function SessionScreen() {
                 />
               ) : null}
             </View>
-          )}
-        </SafeAreaView>
+          </MobileGlassSurface>
+        ) : null}
 
         {/* Content-row host (KTD2): the header/tab chrome stays a full-width sibling
             above; on wide the post-chrome content shares this row with the docked panel.
@@ -5187,7 +5272,7 @@ export default function SessionScreen() {
       </View>
 
       <MobileSessionHeaderMoreActionsSheet
-        visible={showHeaderMoreActions}
+        visible={!useNativeSessionHeader && showHeaderMoreActions}
         showAgentSessionHistory={showAgentSessionHistoryAction}
         showChecks={showChecksAction}
         onOpenAgentSessionHistory={openAgentSessionHistory}

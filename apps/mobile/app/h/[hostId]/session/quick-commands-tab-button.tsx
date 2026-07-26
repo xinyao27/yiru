@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native'
+import { Pressable } from 'react-native'
 
 import { ArrowSquareRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
@@ -13,16 +13,17 @@ export function QuickCommandsTabButton({
   onPress: () => void
 }) {
   return (
-    <>
-      <View className="w-hairline bg-border h-[18px]" />
-      <Pressable
-        className={cn(styles.newTerminalButton, disabled && styles.newTerminalButtonDisabled)}
-        disabled={disabled}
-        onPress={onPress}
-        accessibilityLabel="Quick commands"
-      >
-        <ArrowSquareRight size={16} colorClassName="accent-muted-foreground" />
-      </Pressable>
-    </>
+    <Pressable
+      className={cn(
+        styles.newTerminalButton,
+        'active:bg-accent',
+        disabled && styles.newTerminalButtonDisabled
+      )}
+      disabled={disabled}
+      onPress={onPress}
+      accessibilityLabel="Quick commands"
+    >
+      <ArrowSquareRight size={16} colorClassName="accent-muted-foreground" />
+    </Pressable>
   )
 }

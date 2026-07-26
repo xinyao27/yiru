@@ -40,6 +40,7 @@
   "dependencies": {
     "@noble/hashes": "catalog:mobile",
     "@react-native-async-storage/async-storage": "catalog:mobile",
+    "@react-navigation/native": "catalog:mobile",
     "@shopify/react-native-skia": "catalog:mobile",
     "@xterm/addon-unicode11": "catalog:mobile",
     "@xterm/addon-webgl": "catalog:mobile",
@@ -58,6 +59,7 @@
     "expo-dev-client": "catalog:mobile",
     "expo-document-picker": "catalog:mobile",
     "expo-file-system": "catalog:mobile",
+    "expo-glass-effect": "catalog:mobile",
     "expo-haptics": "catalog:mobile",
     "expo-image-manipulator": "catalog:mobile",
     "expo-image-picker": "catalog:mobile",

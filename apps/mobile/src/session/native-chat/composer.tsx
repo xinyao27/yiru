@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
-import { ArrowUp, ImageSquare as ImagePlus } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
+import { MobileGlassSurface } from '../../components/glass/surface'
+import {
+  ArrowUp,
+  ArrowsInLineVertical as ChevronsDownUp,
+  ArrowsOutLineVertical as ChevronsUpDown,
+  ImageSquare as ImagePlus,
+  Square
+} from '../../components/uniwind-icons'
+import { MobileAgentWorkingIndicator } from '../agent-working-indicator'
 import { applyAutocomplete, detectAutocompleteTrigger, rankSuggestions } from './autocomplete'
 
 // Common agent slash commands offered as autocomplete; sending them is just text
@@ -20,7 +27,7 @@ const SLASH_COMMANDS = [
 
 const NO_FILE_PATHS: string[] = []
 
-type Props = {
+type MobileNativeChatComposerProps = {
   value: string
   onChangeText: (text: string) => void
   onSend: (text: string) => Promise<boolean>
@@ -30,6 +37,11 @@ type Props = {
   placeholder?: string
   filePaths?: string[]
   onNeedFiles?: (query: string) => void
+  agentWorking?: boolean
+  onStop?: () => void
+  toolsExpanded: boolean
+  onToggleToolsExpanded: () => void
+  sendFailureMessage?: string | null
 }
 
 export function MobileNativeChatComposer({
@@ -41,8 +53,13 @@ export function MobileNativeChatComposer({
   disabled = false,
   placeholder = 'Message, @files, /commands',
   filePaths = NO_FILE_PATHS,
-  onNeedFiles
-}: Props): React.JSX.Element {
+  onNeedFiles,
+  agentWorking = false,
+  onStop,
+  toolsExpanded,
+  onToggleToolsExpanded,
+  sendFailureMessage
+}: MobileNativeChatComposerProps): React.JSX.Element {
   const [cursor, setCursor] = useState(0)
   // Transiently drives the native caret after a mid-text autocomplete insert,
   // then released on the next selection change so manual caret placement still
@@ -104,9 +121,9 @@ export function MobileNativeChatComposer({
   }
 
   return (
-    <View>
+    <View className="px-2 pb-2">
       {suggestions.length > 0 ? (
-        <View className="border-t-hairline border-t-border bg-card">
+        <View className="border-border bg-popover mb-2 max-h-[180px] overflow-hidden rounded-2xl border">
           <ScrollView keyboardShouldPersistTaps="always" className="max-h-[180px]">
             {suggestions.map((s) => (
               <Pressable
@@ -122,59 +139,93 @@ export function MobileNativeChatComposer({
           </ScrollView>
         </View>
       ) : null}
-      <View className="border-t-hairline border-t-border bg-card flex-row items-end gap-2 px-3 py-2">
-        {onAttachImage ? (
-          <Pressable
-            accessibilityLabel="Attach image"
-            className={cn('h-10 w-10 items-center justify-center', styles.pressedActive)}
-            onPress={onAttachImage}
-            disabled={isAttaching || disabled}
-          >
-            {isAttaching ? (
-              <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-            ) : (
-              <ImagePlus size={20} colorClassName="accent-muted-foreground" />
-            )}
-          </Pressable>
+      {/* Why: Expo Glass can disappear during navigation (expo/expo#41024), exposing
+          transcript text; this dense control keeps the geometry with an opaque fallback. */}
+      <MobileGlassSurface className="overflow-hidden rounded-3xl" forceFallback>
+        <View className="min-h-7 flex-row items-center justify-between px-3 pt-1">
+          <View className="flex-1 flex-row items-center gap-2">
+            {agentWorking ? <MobileAgentWorkingIndicator /> : null}
+            <Pressable
+              className="active:bg-accent flex-row items-center gap-1 px-1 py-1"
+              onPress={onToggleToolsExpanded}
+              hitSlop={8}
+            >
+              {toolsExpanded ? (
+                <ChevronsDownUp size={14} colorClassName="accent-muted-foreground" />
+              ) : (
+                <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
+              )}
+              <Text className="text-muted-foreground/60 text-xs font-semibold">
+                {toolsExpanded ? 'Collapse' : 'Tools'}
+              </Text>
+            </Pressable>
+          </View>
+          {agentWorking ? (
+            <Pressable
+              className="active:bg-accent flex-row items-center gap-1"
+              onPress={onStop}
+              hitSlop={8}
+              accessibilityLabel="Stop the agent"
+            >
+              <Square size={13} colorClassName="accent-destructive" />
+              <Text className="text-destructive text-xs font-bold">Stop</Text>
+            </Pressable>
+          ) : null}
+        </View>
+        {sendFailureMessage ? (
+          <View className="items-center px-3 pb-1">
+            <Text className="text-destructive text-xs font-semibold">{sendFailureMessage}</Text>
+          </View>
         ) : null}
-        <TextInput
-          className="text-foreground bg-secondary max-h-[140px] min-h-10 flex-1 px-3 py-2.5 text-sm leading-5"
-          value={value}
-          onChangeText={handleChange}
-          // Controlled only transiently right after an autocomplete insert.
-          selection={pendingSelection ?? undefined}
-          onSelectionChange={(e) => {
-            setCursor(e.nativeEvent.selection.end)
-            setPendingSelection(null)
-          }}
-          placeholder={placeholder}
-          placeholderTextColorClassName="accent-muted-foreground"
-          selectionColorClassName="accent-primary"
-          multiline
-          editable={!disabled}
-          textAlignVertical="center"
-        />
-        {/* Why: the light send surface keeps its dark arrow distinct from muted controls. */}
-        <Pressable
-          accessibilityLabel="Send message"
-          className={cn(
-            'w-10 h-10 items-center justify-center bg-primary',
-            !canSend && 'bg-secondary',
-            canSend && styles.pressedActive
-          )}
-          onPress={handleSend}
-          disabled={!canSend}
-        >
-          <ArrowUp
-            size={20}
-            colorClassName={canSend ? 'accent-primary-foreground' : 'accent-muted-foreground'}
+        <View className="flex-row items-end gap-1.5 p-1.5">
+          {onAttachImage ? (
+            <Pressable
+              accessibilityLabel="Attach image"
+              className="active:bg-accent h-11 w-11 items-center justify-center rounded-full"
+              onPress={onAttachImage}
+              disabled={isAttaching || disabled}
+            >
+              {isAttaching ? (
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+              ) : (
+                <ImagePlus size={20} colorClassName="accent-muted-foreground" />
+              )}
+            </Pressable>
+          ) : null}
+          <TextInput
+            className="text-foreground max-h-[140px] min-h-11 flex-1 rounded-2xl px-2.5 py-3 text-sm leading-5"
+            value={value}
+            onChangeText={handleChange}
+            // Controlled only transiently right after an autocomplete insert.
+            selection={pendingSelection ?? undefined}
+            onSelectionChange={(e) => {
+              setCursor(e.nativeEvent.selection.end)
+              setPendingSelection(null)
+            }}
+            placeholder={placeholder}
+            placeholderTextColorClassName="accent-muted-foreground"
+            selectionColorClassName="accent-primary"
+            multiline
+            editable={!disabled}
+            textAlignVertical="center"
           />
-        </Pressable>
-      </View>
+          <Pressable
+            accessibilityLabel="Send message"
+            className={
+              canSend
+                ? 'bg-primary active:bg-accent h-11 w-11 items-center justify-center rounded-full'
+                : 'bg-secondary h-11 w-11 items-center justify-center rounded-full'
+            }
+            onPress={handleSend}
+            disabled={!canSend}
+          >
+            <ArrowUp
+              size={20}
+              colorClassName={canSend ? 'accent-primary-foreground' : 'accent-muted-foreground'}
+            />
+          </Pressable>
+        </View>
+      </MobileGlassSurface>
     </View>
   )
 }
-
-const styles = {
-  pressedActive: cn('active:bg-accent')
-} as const

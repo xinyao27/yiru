@@ -1,6 +1,5 @@
 import type { AgentStatusEntry, NativeChatMessage } from '@yiru/workbench-model/agent'
 
-import { FLOATING_WORKSPACE_WORKTREE_ID } from '../session/floating-workspace'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcFailure, RpcResponse, RpcSuccess } from '../transport/types'
 import {
@@ -11,6 +10,7 @@ import {
   UI_LAB_SESSION_ID,
   UI_LAB_TERMINAL_HANDLE,
   UI_LAB_TERMINAL_TAB_ID,
+  UI_LAB_WORKTREE_ID,
   type MobileUiLabScenarioId
 } from './fixtures'
 
@@ -44,7 +44,7 @@ function agentStatus(scenario: MobileUiLabScenarioId): AgentStatusEntry {
     agentType: 'codex',
     paneKey: 'ui-lab-tab:ui-lab-leaf',
     terminalHandle: UI_LAB_TERMINAL_HANDLE,
-    worktreeId: FLOATING_WORKSPACE_WORKTREE_ID,
+    worktreeId: UI_LAB_WORKTREE_ID,
     tabId: UI_LAB_TERMINAL_TAB_ID,
     stateHistory: [],
     providerSession: { key: 'session_id', id: UI_LAB_SESSION_ID },
@@ -72,7 +72,7 @@ function agentStatus(scenario: MobileUiLabScenarioId): AgentStatusEntry {
 function sessionTabs(scenario: MobileUiLabScenarioId) {
   const markdownActive = scenario === 'markdown'
   return {
-    worktree: FLOATING_WORKSPACE_WORKTREE_ID,
+    worktree: UI_LAB_WORKTREE_ID,
     publicationEpoch: 'ui-lab',
     snapshotVersion: 1,
     tabs: [
@@ -178,6 +178,8 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
       }
       case 'worktree.activate':
       case 'worktree.set':
+      case 'session.tabs.activate':
+      case 'terminal.focus':
       case 'terminal.setDisplayMode':
       case 'terminal.clearBuffer':
         return success({})

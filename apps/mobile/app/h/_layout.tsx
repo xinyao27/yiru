@@ -4,6 +4,7 @@ import { View, PanResponder, type ViewStyle } from 'react-native'
 import { useResolveClassNames } from 'uniwind'
 
 import { useResponsiveLayout } from '../../src/layout/responsive-layout'
+import { shouldUseNativeSessionHeader } from '../../src/session/header-mode'
 import {
   HOST_SIDEBAR_DEFAULT_WIDTH,
   HOST_SIDEBAR_MAX_WIDTH,
@@ -26,7 +27,12 @@ function clampSidebarToWindow(width: number, windowWidth: number): number {
   return Math.min(hardMax, Math.max(HOST_SIDEBAR_MIN_WIDTH, Math.round(width)))
 }
 
-function HostStack({ animation }: { animation: 'none' | 'default' }) {
+type HostStackProps = {
+  animation: 'none' | 'default'
+  showSessionHeader: boolean
+}
+
+function HostStack({ animation, showSessionHeader }: HostStackProps): React.JSX.Element {
   const contentStyle = useResolveClassNames('bg-background') as ViewStyle
   return (
     <Stack
@@ -42,7 +48,10 @@ function HostStack({ animation }: { animation: 'none' | 'default' }) {
       <Stack.Screen name="[hostId]/index" options={{ title: 'Host' }} />
       <Stack.Screen name="[hostId]/edit" options={{ title: 'Edit host' }} />
       <Stack.Screen name="[hostId]/accounts" options={{ title: 'Accounts' }} />
-      <Stack.Screen name="[hostId]/session/[worktreeId]" options={{ title: 'Terminal' }} />
+      <Stack.Screen
+        name="[hostId]/session/[worktreeId]"
+        options={{ headerShown: showSessionHeader, title: 'Terminal' }}
+      />
       <Stack.Screen
         name="[hostId]/source-control/[worktreeId]"
         options={{ title: 'Source Control' }}
@@ -157,7 +166,10 @@ export default function HostGroupLayout() {
         </View>
       ) : null}
       <View className="min-w-0 flex-1">
-        <HostStack animation={showSidebar ? 'none' : 'default'} />
+        <HostStack
+          animation={showSidebar ? 'none' : 'default'}
+          showSessionHeader={shouldUseNativeSessionHeader(isWideLayout)}
+        />
       </View>
     </View>
   )
