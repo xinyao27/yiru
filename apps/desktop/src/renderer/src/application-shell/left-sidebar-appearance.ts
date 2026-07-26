@@ -4,7 +4,7 @@ import {
   normalizeLeftSidebarTintOpacity
 } from '../../../shared/left-sidebar-appearance'
 import type { GlobalSettings } from '../../../shared/types'
-import { resolveEffectiveTerminalAppearance } from './terminal-theme'
+import { resolveEffectiveTerminalAppearance } from '../lib/terminal-theme'
 
 type LeftSidebarAppearanceSettings = Pick<
   GlobalSettings,

@@ -2,8 +2,8 @@ import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
 
-import type { LaunchSource } from '../../../shared/telemetry-events'
-import type { TuiAgent } from '../../../shared/types'
+import type { LaunchSource } from '../../../../shared/telemetry-events'
+import type { TuiAgent } from '../../../../shared/types'
 
 export type LaunchAgentBackgroundSessionArgs = {
   agent: TuiAgent

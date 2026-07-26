@@ -6,20 +6,20 @@ import {
 } from '@/components/terminal-pane/pty-dispatcher'
 import { translate } from '@/i18n/i18n'
 import { createBrowserUuid } from '@/lib/browser-uuid'
-import { retireUnownedTerminal } from '@/lib/retire-unowned-background-terminal'
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
 import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 
-import { buildSetupRunnerCommand } from '../../../shared/setup-runner-command'
-import { makePaneKey } from '../../../shared/stable-pane-id'
+import { buildSetupRunnerCommand } from '../../../../shared/setup-runner-command'
+import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,
   Worktree,
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
-} from '../../../shared/types'
+} from '../../../../shared/types'
+import { retireUnownedTerminal } from './retire-unowned-background-terminal'
 
 type BackgroundPane = {
   leafId: string

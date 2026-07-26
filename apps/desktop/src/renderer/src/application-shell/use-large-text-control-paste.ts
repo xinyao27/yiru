@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
-import { addLargeTextControlPasteListener } from '@/lib/large-text-control-paste'
+
+import { addLargeTextControlPasteListener } from './large-text-control-paste'
 
 export function useLargeTextControlPaste(): void {
   useEffect(

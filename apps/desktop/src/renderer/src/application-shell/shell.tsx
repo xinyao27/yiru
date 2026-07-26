@@ -37,7 +37,6 @@ import { Toaster } from '@/components/ui/sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { SYNC_FIT_PANES_EVENT, TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
 import { translate } from '@/i18n/i18n'
-import { buildAppFontFamily } from '@/lib/app-font-family'
 import { cn } from '@/lib/class-names'
 import {
   isPairedWebClientWindow,
@@ -50,119 +49,96 @@ import {
   isFloatingWorkspaceTerminalInputTarget,
   shouldMinimizeFloatingWorkspacePanelOnCloseShortcut
 } from '@/lib/floating-workspace-terminal-actions'
-import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-workspace-tour-interaction-snapshot'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { resolveLeftTitlebarChromeLayout } from '@/lib/titlebar-left-chrome'
-import { shouldShowWorktreeCreationSurface } from '@/lib/worktree-creation-surface'
 import {
   canGoBackWorktreeHistory,
   canGoForwardWorktreeHistory
 } from '@/store/slices/worktree-nav-history'
 
-import logo from '../../../resources/logo.svg'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../shared/constants'
+import logo from '../../../../resources/logo.svg'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import {
   keybindingMatchesAction,
   type KeybindingActionId,
   type KeybindingContext,
   type PhysicalModifierToken
-} from '../../shared/keybindings'
+} from '../../../shared/keybindings'
 import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
-} from '../../shared/modifier-double-tap-detector'
-import { supportsNativeSidebarMaterial } from '../../shared/native-sidebar-material-support'
-import type { RemoteWorkspacePatchResult } from '../../shared/remote-workspace-types'
-import type { OnboardingState, UpdateStatus } from '../../shared/types'
-import { ActivityTitlebarControls } from './components/activity/titlebar-controls'
-import { AgentHibernationGate } from './components/agent-hibernation-gate'
-import { useAutomationDispatchEvents } from './components/automations/use-automation-dispatch-events'
-import { ConfirmationDialogProvider } from './components/confirmation-dialog'
-import { CoworkingControlRequestDialog } from './components/coworking/control-request-dialog'
-import { useCoworkingSharingBridge } from './components/coworking/use-sharing-bridge'
-import { CrashReportDialog } from './components/crash-report/dialog'
-import RetainedAgentsSyncGate from './components/dashboard/retained-agents-sync-gate'
-import { applyDocumentTheme } from './components/editor/document-theme'
-import { getSelectedTextForFileSearch } from './components/editor/file-search-selection'
-import { LanguageServerWorkspaceEditDialog } from './components/editor/language-server-workspace-edit-dialog'
-import { MarkdownTemplatePicker } from './components/editor/markdown-template-picker'
-import { useEditorExternalWatch } from './components/editor/use-editor-external-watch'
+} from '../../../shared/modifier-double-tap-detector'
+import { supportsNativeSidebarMaterial } from '../../../shared/native-sidebar-material-support'
+import type { RemoteWorkspacePatchResult } from '../../../shared/remote-workspace-types'
+import type { OnboardingState, UpdateStatus } from '../../../shared/types'
+import { ActivityTitlebarControls } from '../components/activity/titlebar-controls'
+import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
+import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
+import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'
+import { useCoworkingSharingBridge } from '../components/coworking/use-sharing-bridge'
+import { CrashReportDialog } from '../components/crash-report/dialog'
+import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
+import { applyDocumentTheme } from '../components/editor/document-theme'
+import { getSelectedTextForFileSearch } from '../components/editor/file-search-selection'
+import { LanguageServerWorkspaceEditDialog } from '../components/editor/language-server-workspace-edit-dialog'
+import { MarkdownTemplatePicker } from '../components/editor/markdown-template-picker'
+import { useEditorExternalWatch } from '../components/editor/use-editor-external-watch'
 import {
   buildWorkspaceSessionPayload,
   shouldPersistWorkspaceSession
-} from './components/editor/workspace-session'
+} from '../components/editor/workspace-session'
 import {
   fetchWorkspaceSessionWithRuntimeHostOwners,
   patchWorkspaceSessionByHost,
   persistWorkspaceSessionByHostSync
-} from './components/editor/workspace-session-host-persistence'
-import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
+} from '../components/editor/workspace-session-host-persistence'
+import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import {
   getFeatureTipsAppOpenDecision,
   isCliFeatureTipCompleted
-} from './components/feature-tips/feature-tip-startup-gate'
+} from '../components/feature-tips/feature-tip-startup-gate'
 import {
   trackCmdJPaletteFeatureTipShown,
   trackYiruCliFeatureTipShown
-} from './components/feature-tips/feature-tip-telemetry'
-import { FloatingTerminalToggleButton } from './components/floating-terminal/toggle-button'
-import { useGlobalAssistantFloatingTab } from './components/floating-terminal/use-global-assistant-floating-tab'
-import NewWorkspaceComposerModal from './components/new-workspace-composer-modal'
-import { shouldShowOnboarding } from './components/onboarding/should-show-onboarding'
-import { onOnboardingReopened } from './components/onboarding/show-onboarding-event'
-import { shouldRenderPetOverlay } from './components/pet/overlay-visibility'
-import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
-import { WorkspacePortScanner } from './components/ports/workspace-port-scanner'
-import { installRendererCommandToasts } from './components/renderer-command-toasts'
-import Sidebar from './components/sidebar/panel'
-import { SidebarWorkspaceSearchButton } from './components/sidebar/workspace-search-button'
-import { SkillFreshnessNudge } from './components/skills/skill-freshness-nudge'
-import { StarNagCard } from './components/star-nag-card'
-import { StarNagAgentValueMomentObserver } from './components/star-nag/agent-value-moment-observer'
-import { StarNagToastHost } from './components/star-nag/toast-host'
-import RecentTabSwitcher from './components/tab-bar/recent-tab-switcher'
-import { TelemetryFirstLaunchSurface } from './components/telemetry-first-launch-surface'
-import PinnedTabCloseDialog from './components/terminal-pane/pinned-tab-close-dialog'
-import { publishTerminalViewAttributesAtAppStart } from './components/terminal-pane/terminal-appearance'
+} from '../components/feature-tips/feature-tip-telemetry'
+import { FloatingTerminalToggleButton } from '../components/floating-terminal/toggle-button'
+import { useGlobalAssistantFloatingTab } from '../components/floating-terminal/use-global-assistant-floating-tab'
+import { shouldShowOnboarding } from '../components/onboarding/should-show-onboarding'
+import { onOnboardingReopened } from '../components/onboarding/show-onboarding-event'
+import { shouldRenderPetOverlay } from '../components/pet/overlay-visibility'
+import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
+import { WorkspacePortScanner } from '../components/ports/workspace-port-scanner'
+import { installRendererCommandToasts } from '../components/renderer-command-toasts'
+import Sidebar from '../components/sidebar/panel'
+import { SidebarWorkspaceSearchButton } from '../components/sidebar/workspace-search-button'
+import { SkillFreshnessNudge } from '../components/skills/skill-freshness-nudge'
+import { StarNagCard } from '../components/star-nag-card'
+import { StarNagAgentValueMomentObserver } from '../components/star-nag/agent-value-moment-observer'
+import { StarNagToastHost } from '../components/star-nag/toast-host'
+import RecentTabSwitcher from '../components/tab-bar/recent-tab-switcher'
+import PinnedTabCloseDialog from '../components/terminal-pane/pinned-tab-close-dialog'
+import { publishTerminalViewAttributesAtAppStart } from '../components/terminal-pane/terminal-appearance'
 import {
   getSystemPrefersDarkSnapshot,
   useSystemPrefersDark
-} from './components/terminal-pane/use-system-prefers-dark'
+} from '../components/terminal-pane/use-system-prefers-dark'
 import {
   hasRequestedBackgroundTerminalWorktreeMount,
   subscribeBackgroundTerminalWorktreeMountRequests
-} from './components/terminal/background-terminal-worktree-mount'
-import { dispatchWindowCloseRequest } from './components/window-close-request-coordinator'
+} from '../components/terminal/background-terminal-worktree-mount'
+import { dispatchWindowCloseRequest } from '../components/window-close-request-coordinator'
 import {
   folderRelativePathToIncludeGlob,
   selectedExplorerFolderRelativePath
-} from './components/workspace-panel/file-search-include-pattern'
-import { useGitStatusPolling } from './components/workspace-panel/use-git-status-polling'
-import { YiruProfileSwitcher } from './components/yiru-profiles/yiru-profile-switcher'
-import { ZoomOverlay } from './components/zoom-overlay'
-import { useAppMenuPaste } from './hooks/use-app-menu-paste'
-import { useAutoAckViewedAgent } from './hooks/use-auto-ack-viewed-agent'
-import { useGlobalFileDrop } from './hooks/use-global-file-drop'
-import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './hooks/use-ipc-events'
-import { useLargeTextControlPaste } from './hooks/use-large-text-control-paste'
-import { usePrimarySelectionPaste } from './hooks/use-primary-selection-paste'
-import { useRadixBodyPointerEventsRecovery } from './hooks/use-radix-body-pointer-events-recovery'
-import { useShortcutLabel } from './hooks/use-shortcut-label'
-import { useUnreadDockBadge } from './hooks/use-unread-dock-badge'
-import type { VirtualizedScrollAnchor } from './hooks/use-virtualized-scroll-anchor'
-import { resolveMountedLazyModalIds, type LazyModalId } from './lazy-modal-mount-state'
-import { isEditableTarget } from './lib/editable-target'
-import { createSessionWriteSubscriber } from './lib/session-write-subscriber'
-import {
-  getStartupErrorFallbackUI,
-  hydratePersistedUIAfterStartupRead
-} from './lib/startup-ui-hydration'
-import { getSystemPrefersDark } from './lib/terminal-theme'
-import { shouldShowWorktreeHistoryControls } from './lib/titlebar-worktree-history-controls'
-import { registerUpdaterBeforeUnloadBypass } from './lib/updater-beforeunload'
-import { collectFolderWorkspaceKeysFromSession } from './lib/workspace-session-hydration-keys'
+} from '../components/workspace-panel/file-search-include-pattern'
+import { useGitStatusPolling } from '../components/workspace-panel/use-git-status-polling'
+import { YiruProfileSwitcher } from '../components/yiru-profiles/yiru-profile-switcher'
+import { useShortcutLabel } from '../hooks/use-shortcut-label'
+import type { VirtualizedScrollAnchor } from '../hooks/use-virtualized-scroll-anchor'
+import { isEditableTarget } from '../lib/editable-target'
+import { getSystemPrefersDark } from '../lib/terminal-theme'
+import { registerUpdaterBeforeUnloadBypass } from '../lib/updater-beforeunload'
+import { collectFolderWorkspaceKeysFromSession } from '../lib/workspace-session-hydration-keys'
 import {
   canSkipRuntimeMobileSessionSyncKeyBuild,
   getRuntimeMobileSessionSyncKey,
@@ -170,18 +146,42 @@ import {
   scheduleRuntimeGraphSync,
   setRuntimeGraphStoreStateGetter,
   setRuntimeGraphSyncEnabled
-} from './runtime/sync-runtime-graph'
-import { shutdownBufferCaptures } from './runtime/terminal-shutdown-buffer-captures'
-import { useWebSessionTabsSync } from './runtime/web-session-tabs-sync'
+} from '../runtime/sync-runtime-graph'
+import { shutdownBufferCaptures } from '../runtime/terminal-shutdown-buffer-captures'
+import { useWebSessionTabsSync } from '../runtime/web-session-tabs-sync'
 import {
   logRendererStartupDiagnostic,
   timeRendererStartupStep,
   timeRendererStartupSyncStep
-} from './startup/diagnostics'
-import { reconnectSshTargetForRendererStartup } from './startup/ssh-startup-reconnect'
-import { useAppStore } from './store'
-import { selectActiveTerminalChromeState } from './store/active-terminal-chrome-selector'
-import { selectFloatingVisibleTabCount } from './store/selectors'
+} from '../startup/diagnostics'
+import { reconnectSshTargetForRendererStartup } from '../startup/ssh-startup-reconnect'
+import { useAppStore } from '../store'
+import { selectActiveTerminalChromeState } from '../store/active-terminal-chrome-selector'
+import { selectFloatingVisibleTabCount } from '../store/selectors'
+import { AgentHibernationGate } from './agent-hibernation-gate'
+import { buildAppFontFamily } from './app-font-family'
+import { createFloatingWorkspaceTourInteractionSnapshot } from './floating-workspace-tour-interaction-snapshot'
+import { resolveMountedLazyModalIds, type LazyModalId } from './lazy-modal-mount-state'
+import { resolveLeftSidebarStyleVariables } from './left-sidebar-appearance'
+import NewWorkspaceComposerModal from './new-workspace-composer-modal'
+import { createSessionWriteSubscriber } from './session-write-subscriber'
+import {
+  getStartupErrorFallbackUI,
+  hydratePersistedUIAfterStartupRead
+} from './startup-ui-hydration'
+import { TelemetryFirstLaunchSurface } from './telemetry-first-launch-surface'
+import { resolveLeftTitlebarChromeLayout } from './titlebar-left-chrome'
+import { shouldShowWorktreeHistoryControls } from './titlebar-worktree-history-controls'
+import { useAppMenuPaste } from './use-app-menu-paste'
+import { useAutoAckViewedAgent } from './use-auto-ack-viewed-agent'
+import { useGlobalFileDrop } from './use-global-file-drop'
+import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './use-ipc-events'
+import { useLargeTextControlPaste } from './use-large-text-control-paste'
+import { usePrimarySelectionPaste } from './use-primary-selection-paste'
+import { useRadixBodyPointerEventsRecovery } from './use-radix-body-pointer-events-recovery'
+import { useUnreadDockBadge } from './use-unread-dock-badge'
+import { shouldShowWorktreeCreationSurface } from './worktree-creation-surface'
+import { ZoomOverlay } from './zoom-overlay'
 
 // Why: presentation must exist before any bootstrap action can publish a result,
 // and it must not disappear during React remounts.
@@ -340,78 +340,78 @@ function WindowControls(): React.JSX.Element {
   )
 }
 
-const Landing = lazy(() => import('./components/landing-page'))
-const WorktreeCreationPanel = lazy(() => import('./components/worktree-creation/panel'))
-const AutomationsPage = lazy(() => import('./components/automations/page'))
-const ActivityPrototypePage = lazy(() => import('./components/activity/prototype-page'))
-const Settings = lazy(() => import('./components/settings/page'))
-const SkillsPage = lazy(() => import('./components/skills/page'))
-const WorkspaceSpacePage = lazy(() => import('./components/workspace-space/page'))
-const MobilePage = lazy(() => import('./components/mobile/page'))
-const QuickOpen = lazy(() => import('./components/quick-open'))
-const WorktreeJumpPalette = lazy(() => import('./components/worktree-jump-palette/panel'))
-const WorkspaceCleanupDialog = lazy(() => import('./components/workspace-cleanup/dialog'))
-const Terminal = lazy(() => import('./components/terminal-workspace/panel'))
-const CoworkingWorkspaceSurface = lazy(() => import('./components/coworking/workspace-surface'))
+const Landing = lazy(() => import('./landing-page'))
+const WorktreeCreationPanel = lazy(() => import('../components/worktree-creation/panel'))
+const AutomationsPage = lazy(() => import('../components/automations/page'))
+const ActivityPrototypePage = lazy(() => import('../components/activity/prototype-page'))
+const Settings = lazy(() => import('../components/settings/page'))
+const SkillsPage = lazy(() => import('../components/skills/page'))
+const WorkspaceSpacePage = lazy(() => import('../components/workspace-space/page'))
+const MobilePage = lazy(() => import('../components/mobile/page'))
+const QuickOpen = lazy(() => import('../components/quick-open'))
+const WorktreeJumpPalette = lazy(() => import('../components/worktree-jump-palette/panel'))
+const WorkspaceCleanupDialog = lazy(() => import('../components/workspace-cleanup/dialog'))
+const Terminal = lazy(() => import('../components/terminal-workspace/panel'))
+const CoworkingWorkspaceSurface = lazy(() => import('../components/coworking/workspace-surface'))
 const StatusBar = lazy(() =>
-  import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
+  import('../components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
-const SetupGuideModal = lazy(() => import('./components/setup-guide/modal'))
-const FeatureWallModal = lazy(() => import('./components/feature-wall/modal'))
-const FeatureTipsModal = lazy(() => import('./components/feature-tips/modal'))
-const AddRepoDialog = lazy(() => import('./components/sidebar/add-repo-dialog'))
-const NonGitFolderDialog = lazy(() => import('./components/sidebar/non-git-folder-dialog'))
+const SetupGuideModal = lazy(() => import('../components/setup-guide/modal'))
+const FeatureWallModal = lazy(() => import('../components/feature-wall/modal'))
+const FeatureTipsModal = lazy(() => import('../components/feature-tips/modal'))
+const AddRepoDialog = lazy(() => import('../components/sidebar/add-repo-dialog'))
+const NonGitFolderDialog = lazy(() => import('../components/sidebar/non-git-folder-dialog'))
 const AddProjectFromFolderDialog = lazy(
-  () => import('./components/sidebar/add-project-from-folder-dialog')
+  () => import('../components/sidebar/add-project-from-folder-dialog')
 )
-const ProjectAddedDialog = lazy(() => import('./components/sidebar/project-added-dialog'))
-const DeleteWorktreeDialog = lazy(() => import('./components/sidebar/delete-worktree-dialog'))
+const ProjectAddedDialog = lazy(() => import('../components/sidebar/project-added-dialog'))
+const DeleteWorktreeDialog = lazy(() => import('../components/sidebar/delete-worktree-dialog'))
 const DictationController = lazy(() =>
-  import('./components/dictation/controller').then((module) => ({
+  import('../components/dictation/controller').then((module) => ({
     default: module.DictationController
   }))
 )
 const SshPassphraseDialog = lazy(() =>
-  import('./components/settings/ssh-passphrase-dialog').then((module) => ({
+  import('../components/settings/ssh-passphrase-dialog').then((module) => ({
     default: module.SshPassphraseDialog
   }))
 )
 const UpdateCard = lazy(() =>
-  import('./components/update-card').then((module) => ({ default: module.UpdateCard }))
+  import('./update-card').then((module) => ({ default: module.UpdateCard }))
 )
 const RemoteServerUpdateDialog = lazy(
-  () => import('./components/settings/remote-server-update-dialog')
+  () => import('../components/settings/remote-server-update-dialog')
 )
 // Why: this dialog embeds a live terminal pane, so importing it eagerly drags
 // xterm and the whole pane-manager engine into the entry chunk — about 2.3MB
 // for a surface that only appears when a skill needs updating.
 const SkillFreshnessUpdateDialog = lazy(() =>
-  import('./components/skills/skill-freshness-update-dialog').then((module) => ({
+  import('../components/skills/skill-freshness-update-dialog').then((module) => ({
     default: module.SkillFreshnessUpdateDialog
   }))
 )
 const ContextualTourOverlay = lazy(() =>
-  import('./components/contextual-tours/contextual-tour-overlay').then((module) => ({
+  import('../components/contextual-tours/contextual-tour-overlay').then((module) => ({
     default: module.ContextualTourOverlay
   }))
 )
 const SetupGuideTelemetryObserver = lazy(() =>
-  import('./components/setup-guide/telemetry-observer').then((module) => ({
+  import('../components/setup-guide/telemetry-observer').then((module) => ({
     default: module.SetupGuideTelemetryObserver
   }))
 )
 const FloatingTerminalPanel = lazy(() =>
-  import('./components/floating-terminal/panel').then((module) => ({
+  import('../components/floating-terminal/panel').then((module) => ({
     default: module.FloatingTerminalPanel
   }))
 )
 // Why: lazy-loaded so the WebP asset + overlay module aren't fetched unless
 // the user opts into the experimental flag.
-const PetOverlay = lazy(() => import('./components/pet/overlay'))
+const PetOverlay = lazy(() => import('../components/pet/overlay'))
 // Why: lazy so onboarding's step modules + assets aren't fetched for users
 // past first-launch. The gate `shouldShowOnboarding` lives in its own tiny
 // module so no eager import path pulls OnboardingFlow into the main chunk.
-const OnboardingFlow = lazy(() => import('./components/onboarding/flow'))
+const OnboardingFlow = lazy(() => import('../components/onboarding/flow'))
 
 function applyRemoteWorkspacePatchStatus(
   targetId: string,

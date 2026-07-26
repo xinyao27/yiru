@@ -17,6 +17,7 @@ import { translate } from '@/i18n/i18n'
 import logo from '../../../../resources/logo.svg'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'
+import { ShortcutKeyCombo } from '../components/shortcut-key-combo'
 import { cn } from '../lib/class-names'
 import { useAppStore } from '../store'
 import {
@@ -29,7 +30,6 @@ import {
   hasGitHubBackedProject,
   type PreflightIssue
 } from './landing-preflight-issues'
-import { ShortcutKeyCombo } from './shortcut-key-combo'
 
 type ShortcutItem = {
   id: string

@@ -1,4 +1,4 @@
-import { isPrimarySelectionTextControl } from './primary-selection-capture'
+import { isPrimarySelectionTextControl } from '../lib/primary-selection-capture'
 import {
   TEXT_CONTROL_PASTE_CHUNK_MAX_BYTES,
   TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,
@@ -6,7 +6,7 @@ import {
   measureTextControlPasteByteLength,
   measureTextControlPasteByteLengthWithYield,
   pasteTextIntoTextControl
-} from './text-control-paste'
+} from '../lib/text-control-paste'
 
 export type EditablePrimarySelectionPasteTarget =
   | HTMLInputElement

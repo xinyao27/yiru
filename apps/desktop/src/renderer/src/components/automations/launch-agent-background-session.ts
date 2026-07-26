@@ -8,18 +8,10 @@ import {
 } from '@/components/terminal-pane/pty-dispatcher'
 import { isMainTerminalSideEffectAuthorityForPty } from '@/components/terminal-pane/terminal-side-effect-facts-handler'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
-import { scheduleAgentBackgroundDraft } from '@/lib/agent-background-draft-delivery'
-import { runBestEffortAgentBackgroundCleanups } from '@/lib/agent-background-session-cleanup'
-import type {
-  LaunchAgentBackgroundSessionArgs,
-  LaunchAgentBackgroundSessionResult
-} from '@/lib/agent-background-session-contract'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
-import { retireProvider, retireUnownedTerminal } from '@/lib/retire-unowned-background-terminal'
-import { createSshBackgroundStartupDelivery } from '@/lib/ssh-background-startup-delivery'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 import { getSettingsForWorktreeRuntimeOwner } from '@/lib/worktree-runtime-owner'
@@ -29,16 +21,24 @@ import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import { useAppStore } from '@/store'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 
-import { repoIsRemote } from '../../../shared/agent/launch-remote'
-import { createAgentStatusOscProcessor } from '../../../shared/agent/status-osc'
-import { shouldUseShellReadyStartupDelivery } from '../../../shared/codex-startup-delivery'
-import type { RuntimeTerminalCreate } from '../../../shared/runtime-types'
-import { makePaneKey } from '../../../shared/stable-pane-id'
-import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
+import { repoIsRemote } from '../../../../shared/agent/launch-remote'
+import { createAgentStatusOscProcessor } from '../../../../shared/agent/status-osc'
+import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
+import type { RuntimeTerminalCreate } from '../../../../shared/runtime-types'
+import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
+} from '../../../../shared/tui-agent-launch-defaults'
+import { scheduleAgentBackgroundDraft } from './agent-background-draft-delivery'
+import { runBestEffortAgentBackgroundCleanups } from './agent-background-session-cleanup'
+import type {
+  LaunchAgentBackgroundSessionArgs,
+  LaunchAgentBackgroundSessionResult
+} from './agent-background-session-contract'
+import { retireProvider, retireUnownedTerminal } from './retire-unowned-background-terminal'
+import { createSshBackgroundStartupDelivery } from './ssh-background-startup-delivery'
 
 export async function launchAgentBackgroundSession(
   args: LaunchAgentBackgroundSessionArgs

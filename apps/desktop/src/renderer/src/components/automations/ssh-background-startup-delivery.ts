@@ -3,7 +3,7 @@ import {
   scanForShellReadyMarker
 } from '@/components/terminal-pane/shell-ready-marker-scan'
 
-import { buildStartupCommandSubmission } from '../../../shared/startup-command-submission'
+import { buildStartupCommandSubmission } from '../../../../shared/startup-command-submission'
 
 const SSH_SHELL_READY_STARTUP_FALLBACK_MS = 1500
 

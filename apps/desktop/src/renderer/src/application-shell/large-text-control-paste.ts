@@ -3,12 +3,12 @@ import {
   pasteTextIntoTextControl,
   type TextControlPasteOptions,
   type TextControlPasteResult
-} from './text-control-paste'
-import { createTextControlRejectedResult } from './text-control-paste-diagnostics'
+} from '../lib/text-control-paste'
+import { createTextControlRejectedResult } from '../lib/text-control-paste-diagnostics'
 import {
   classifyTextControlPastePayloadOwnership,
   findOwnedPasteEventTextControlTarget
-} from './text-control-paste-ownership'
+} from '../lib/text-control-paste-ownership'
 
 export type LargeTextControlPasteResult =
   | { status: 'ignored'; reason: 'not-text-control' | 'empty' | 'small' | 'already-handled' }

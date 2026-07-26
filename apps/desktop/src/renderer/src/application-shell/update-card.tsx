@@ -19,10 +19,10 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { ChangelogData } from '../../../shared/types'
+import { Button } from '../components/ui/button'
+import { Card } from '../components/ui/card'
+import { Progress } from '../components/ui/progress'
 import { useAppStore } from '../store'
-import { Button } from './ui/button'
-import { Card } from './ui/card'
-import { Progress } from './ui/progress'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 

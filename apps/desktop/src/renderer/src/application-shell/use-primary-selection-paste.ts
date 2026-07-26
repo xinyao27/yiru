@@ -7,11 +7,12 @@ import {
   shouldSuppressPrimarySelectionNativePaste
 } from '@/lib/primary-selection'
 import { readCurrentPrimarySelectionText } from '@/lib/primary-selection-capture'
+
 import {
   findEditablePrimarySelectionPasteTarget,
   pastePrimarySelectionTextIntoTarget,
   type EditablePrimarySelectionPasteTarget
-} from '@/lib/primary-selection-paste'
+} from './primary-selection-paste'
 
 const PRIMARY_SELECTION_PENDING_TARGET_TTL_MS = 750
 

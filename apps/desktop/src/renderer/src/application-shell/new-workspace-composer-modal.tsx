@@ -2,12 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import AgentSettingsDialog from '@/components/agent/settings-dialog'
 import { NewWorkspaceComposerCard } from '@/components/new-workspace-composer-card/card'
-import { shouldAllowComposerEnterSubmitTarget } from '@/components/new-workspace-enter-guard'
 import { useComposerState } from '@/components/new-workspace/use-composer-state'
-import {
-  pickQuickWorkspaceAgent,
-  resolveQuickWorkspaceAgentSelection
-} from '@/components/quick-workspace-agent-selection'
 import { getFolderWorkspacePrimaryActionLabel } from '@/components/sidebar/folder-workspace-composer-helpers'
 import {
   Dialog,
@@ -16,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { getWorkspaceComposerInitialFocusTarget } from '@/components/workspace-composer-initial-focus'
 import { translate } from '@/i18n/i18n'
 import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
 import { isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
@@ -28,6 +22,12 @@ import type {
   WorkspaceCreateTelemetrySource,
   WorkspaceStatus
 } from '../../../shared/types'
+import { shouldAllowComposerEnterSubmitTarget } from './new-workspace-enter-guard'
+import {
+  pickQuickWorkspaceAgent,
+  resolveQuickWorkspaceAgentSelection
+} from './quick-workspace-agent-selection'
+import { getWorkspaceComposerInitialFocusTarget } from './workspace-composer-initial-focus'
 
 type ComposerModalData = {
   prefilledName?: string

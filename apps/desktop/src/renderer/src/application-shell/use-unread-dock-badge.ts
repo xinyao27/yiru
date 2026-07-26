@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 
-import { getUnreadBadgeCount } from '@/lib/unread-badge-count'
 import { useAppStore } from '@/store'
+
+import { getUnreadBadgeCount } from './unread-badge-count'
 
 function setUnreadDockBadgeCountBestEffort(count: number): void {
   void window.api.app.setUnreadDockBadgeCount(count).catch(() => {

@@ -39,8 +39,8 @@ import { Button as UiButton } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
+import { Button } from '../components/ui/button'
 import { acknowledgeBanner, PRIVACY_URL, setOptIn as telemetrySetOptIn } from '../lib/telemetry'
-import { Button } from './ui/button'
 
 type FirstLaunchBannerProps = {
   onResolve: () => void

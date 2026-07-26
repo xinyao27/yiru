@@ -9,11 +9,7 @@ import {
 } from '@/components/automations/automation-run-output-snapshot'
 import { submitPromptToAgentPty } from '@/components/native-chat/agent-paste-draft'
 import { translate } from '@/i18n/i18n'
-import { observeExistingAutomationSession } from '@/lib/automation-session-observer'
-import { findReusableAutomationSession } from '@/lib/automation-session-reuse'
 import { createBrowserUuid } from '@/lib/browser-uuid'
-import { launchAgentBackgroundSession } from '@/lib/launch-agent-background-session'
-import { launchWorktreeBackgroundTerminals } from '@/lib/launch-worktree-background-terminals'
 import { useAppStore } from '@/store'
 
 import {
@@ -25,6 +21,10 @@ import type {
   AutomationDispatchResult,
   AutomationPrecheckResult
 } from '../../../../shared/automations-types'
+import { observeExistingAutomationSession } from './automation-session-observer'
+import { findReusableAutomationSession } from './automation-session-reuse'
+import { launchAgentBackgroundSession } from './launch-agent-background-session'
+import { launchWorktreeBackgroundTerminals } from './launch-worktree-background-terminals'
 
 const AUTOMATIONS_CHANGED_EVENT = 'yiru:automations-changed'
 const activeReuseDispatchTabIds = new Set<string>()

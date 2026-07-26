@@ -2,7 +2,7 @@ import {
   getTerminalPtyOwnershipIdentity,
   type TerminalTabRetirementPlan,
   type TerminalTabRetirementState
-} from './terminal-tab-retirement'
+} from '../../store/slices/terminal-tab-retirement'
 
 export function reserveTerminalRetirementTeardowns(
   state: TerminalTabRetirementState,

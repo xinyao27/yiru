@@ -2,9 +2,9 @@ import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 
 import type { AppState } from '@/store/types'
 
-import type { AutomationRun } from '../../../shared/automations-types'
-import { parsePaneKey } from '../../../shared/stable-pane-id'
-import type { TuiAgent } from '../../../shared/types'
+import type { AutomationRun } from '../../../../shared/automations-types'
+import { parsePaneKey } from '../../../../shared/stable-pane-id'
+import type { TuiAgent } from '../../../../shared/types'
 
 export type ReusableAutomationSession = {
   tabId: string

@@ -8,6 +8,12 @@ import type {
   RuntimeTerminalSummary
 } from '../../../shared/runtime-types'
 import {
+  planAgentHibernationCandidates,
+  type AgentHibernationCandidate,
+  type AgentHibernationPlannerSnapshot
+} from '../components/settings/agent-hibernation-planner'
+import { getAgentHibernationOutputSignature } from '../components/terminal-pane/agent-hibernation-output-activity'
+import {
   getForegroundTerminalTabIds,
   getForegroundTerminalTabLastSeenAtById
 } from '../lib/foreground-terminal-tabs'
@@ -17,12 +23,6 @@ import {
   confirmAgentHibernationCandidates,
   type AgentHibernationConfirmationState
 } from './agent-hibernation-confirmation'
-import {
-  planAgentHibernationCandidates,
-  type AgentHibernationCandidate,
-  type AgentHibernationPlannerSnapshot
-} from './settings/agent-hibernation-planner'
-import { getAgentHibernationOutputSignature } from './terminal-pane/agent-hibernation-output-activity'
 
 export const AGENT_HIBERNATION_TICK_MS = 60 * 1000
 

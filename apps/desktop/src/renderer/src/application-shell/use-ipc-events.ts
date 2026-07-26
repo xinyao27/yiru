@@ -56,7 +56,6 @@ import {
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { requestGlobalAssistant } from '@/lib/global-assistant'
 import { detectLanguage } from '@/lib/language-detect'
-import { planMobileTerminalTabMount } from '@/lib/mobile-terminal-tab-mount'
 import { initialAgentTabViewModeProps } from '@/lib/native-chat-initial-view-mode'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
 import { openMobileEmulatorTab } from '@/lib/open-mobile-emulator-tab'
@@ -67,9 +66,7 @@ import {
 } from '@/lib/pane-manager/browser-mobile-driver-state'
 import { setDriverForPty, hydrateDrivers } from '@/lib/pane-manager/mobile-driver-state'
 import { setFitOverride, hydrateOverrides } from '@/lib/pane-manager/mobile-fit-overrides'
-import { activateTabNumberShortcut } from '@/lib/tab-number-shortcuts'
 import { track } from '@/lib/telemetry'
-import { createBackgroundSleepingAgentWakeDispatcher } from '@/lib/wake-sleeping-agents-in-background'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
@@ -127,6 +124,7 @@ import {
   resetAgentHookCompletionNotificationCoordinators,
   syncAgentHookCompletionNotificationsForStoreUpdate
 } from './agent-hook-completion-notifications'
+import { planMobileTerminalTabMount } from './mobile-terminal-tab-mount'
 import {
   hasRuntimeBackedAgentStatusAttribution,
   retryPendingAgentStatusEvents,
@@ -136,6 +134,8 @@ import { resolveZoomTarget } from './resolve-zoom-target'
 import { createRuntimeClientEventsSync } from './runtime-client-events-sync'
 import { createRuntimeProjectRefreshScheduler } from './runtime-project-refresh-scheduler'
 import { shouldRetryPaneSpawnOnSshReconnect } from './ssh-reconnect-pane-retry'
+import { activateTabNumberShortcut } from './tab-number-shortcuts'
+import { createBackgroundSleepingAgentWakeDispatcher } from './wake-sleeping-agents-in-background'
 import { createWorktreeChangeRefreshQueue } from './worktree-change-refresh-queue'
 import { applyWorktreeHeadIdentities } from './worktree-head-identity-apply'
 

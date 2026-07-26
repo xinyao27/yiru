@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
 
+import { useAppStore } from '@/store'
+
 import {
   startAgentHibernationCoordinator,
   stopAgentHibernationCoordinator
-} from '@/components/agent-hibernation-coordinator'
-import { useAppStore } from '@/store'
+} from './agent-hibernation-coordinator'
 
 export function AgentHibernationGate(): null {
   const enabled = useAppStore((state) => state.settings?.experimentalAgentHibernation === true)

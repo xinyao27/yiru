@@ -76,7 +76,6 @@ import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
 import type { AgentStartedTelemetry } from '@/lib/agent-started-telemetry'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { parseGitHubPullRequestLink, normalizeGitHubLinkQuery } from '@/lib/github-links'
-import { resolveGitHubPrStartPointForRepo } from '@/lib/github-pr-start-point'
 import {
   lookupGitHubWorkItemByOwnerRepoForSource,
   lookupGitHubWorkItemForSource
@@ -96,16 +95,8 @@ import {
   type LinkedWorkItemSummary,
   type SetupConfig
 } from '@/lib/new-workspace'
-import {
-  getFullComposerCreateDisabled,
-  getQuickComposerCreateDisabled
-} from '@/lib/new-workspace-create-gates'
 import { joinPath } from '@/lib/path'
 import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
-import {
-  resolveWorkspaceCreationRepoId,
-  resolveWorkspaceCreationTarget
-} from '@/lib/project-host-workspace-target'
 import { getSettingsForRepoRuntimeOwner } from '@/lib/repo-runtime-owner'
 import { normalizeSparseDirectoryLines, sparseDirectoriesMatch } from '@/lib/sparse-paths'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
@@ -166,6 +157,15 @@ import {
   shouldPreserveComposerSubmissionOnUnmount
 } from './composer-submission-guard'
 import { getForkPushWarning } from './fork-push-warning'
+import { resolveGitHubPrStartPointForRepo } from './github-pr-start-point'
+import {
+  getFullComposerCreateDisabled,
+  getQuickComposerCreateDisabled
+} from './new-workspace-create-gates'
+import {
+  resolveWorkspaceCreationRepoId,
+  resolveWorkspaceCreationTarget
+} from './project-host-workspace-target'
 
 export function canResolveFolderSmartGitHubSubmit({
   hasFolderSourceRepos

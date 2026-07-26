@@ -1,5 +1,4 @@
 import { useAppStore, type AppState } from '@/store'
-import { reserveTerminalRetirementTeardowns } from '@/store/slices/terminal-retirement-teardown-reservation'
 import {
   buildTerminalTabRetirementPlans,
   type TerminalTabRetirementPlan,
@@ -7,6 +6,7 @@ import {
 } from '@/store/slices/terminal-tab-retirement'
 
 import { closeTerminalTab, type PrecomputedTerminalCloseState } from '../terminal/tab-actions'
+import { reserveTerminalRetirementTeardowns } from './terminal-retirement-teardown-reservation'
 
 const CLOSE_BATCH_SIZE = 2
 

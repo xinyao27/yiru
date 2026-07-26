@@ -22,7 +22,7 @@ import {
   saveStoredWebRuntimeEnvironment
 } from './runtime-environment'
 
-const App = lazy(() => import('../application-shell'))
+const App = lazy(() => import('../application-shell/shell'))
 
 function WebRoot(): React.JSX.Element {
   const initialPairingInput = useMemo(() => readPairingInputFromLocation(window.location), [])
