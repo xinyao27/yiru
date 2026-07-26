@@ -16,7 +16,7 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(379) }
   },
   {
-    files: ['src/terminal/webview-html.ts'],
+    files: ['src/terminal/webview/html.ts'],
     rules: { 'max-lines': createMaxLinesRule(1_784) }
   },
   {

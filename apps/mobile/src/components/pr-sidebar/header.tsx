@@ -5,8 +5,8 @@ import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-nativ
 import { ArrowRight, ArrowSquareOut as ExternalLink, Pencil } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { canEditPRTitle } from '../../session/pr-title-edit'
-import type { MobilePrTitleAction } from '../../session/use-pr-title-action'
+import { canEditPRTitle } from '../../session/pr/title-edit'
+import type { MobilePrTitleAction } from '../../session/pr/use-title-action'
 import { openMobilePrUrl } from '../pr-compose-sheet'
 import { prStateBadge } from './pr-checks-presentation'
 import { prCommentComposerStyles as composerStyles } from './pr-comment-composer-styles'

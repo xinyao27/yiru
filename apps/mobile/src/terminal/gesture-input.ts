@@ -1,4 +1,4 @@
-import type { TerminalModes } from './webview-contract'
+import type { TerminalModes } from './webview/contract'
 
 const ESC = '\x1b'
 const MAX_TERMINAL_GESTURE_INPUT_LENGTH = 2048

@@ -11,7 +11,7 @@ import {
   type Icon
 } from '@/components/uniwind-icons'
 
-import type { MobileDiffLine } from '../session/diff-lines'
+import type { MobileDiffLine } from '../session/diff/lines'
 import type { MobileHighlightedDiffLine } from '../session/file-syntax'
 import type { MobileSourceControlActionIcon } from './actions'
 import type {

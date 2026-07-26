@@ -5,11 +5,11 @@ import {
   healMobileNativeChatInput,
   recordMobileNativeChatSendOutcome,
   type MobileNativeChatInputHealingState
-} from './native-chat-input-healing'
+} from './native-chat/input-healing'
 import {
   sendMobileNativeChatMessageWithOutcome,
   type MobileNativeChatSendOutcome
-} from './native-chat-send'
+} from './native-chat/send'
 
 type MobileTerminalClient = { id: string; type: 'mobile' }
 

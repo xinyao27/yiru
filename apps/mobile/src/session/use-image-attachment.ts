@@ -12,7 +12,7 @@ import {
   getMobileNativeChatInputHealingState,
   healMobileNativeChatInput,
   recordMobileNativeChatImagePasteOutcome
-} from './native-chat-input-healing'
+} from './native-chat/input-healing'
 
 type CurrentRef<T> = {
   readonly current: T

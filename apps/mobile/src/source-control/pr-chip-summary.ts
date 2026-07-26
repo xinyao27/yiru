@@ -5,7 +5,7 @@ import {
   summarizePRChecks,
   type MobileStatusToken
 } from '../components/pr-sidebar/pr-checks-presentation'
-import type { PrSidebarState } from '../session/pr-sidebar-state'
+import type { PrSidebarState } from '../session/pr/sidebar-state'
 
 // Pure derivation of the branch-card PR chip from the shared PR sidebar state.
 // No React/native imports so the rollup precedence is unit-testable (KTD5). The

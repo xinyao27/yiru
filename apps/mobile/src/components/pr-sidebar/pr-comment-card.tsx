@@ -10,7 +10,7 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { isResolvableComment } from '../../session/pr-comment-actions'
+import { isResolvableComment } from '../../session/pr/comment-actions'
 import { CommentMarkdown } from './comment-markdown'
 import { PRCommentComposer } from './pr-comment-composer'
 import { formatPrCommentRelativeTime } from './pr-comment-time'

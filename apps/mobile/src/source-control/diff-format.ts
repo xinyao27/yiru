@@ -1,4 +1,4 @@
-import type { MobileDiffLine } from '../session/diff-lines'
+import type { MobileDiffLine } from '../session/diff/lines'
 
 export function mobileDiffLinePrefix(kind: MobileDiffLine['kind']): string {
   if (kind === 'add') {

@@ -3,13 +3,13 @@ import type { TuiAgent } from '@yiru/workbench-model/agent'
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 
 import type { MobileBrowserTab } from '../../../../src/browser/pane'
-import type { MobileDiffLine } from '../../../../src/session/diff-lines'
+import type { MobileDiffLine } from '../../../../src/session/diff/lines'
 import type {
   MobileHighlightedDiffLine,
   MobileSyntaxSegment
 } from '../../../../src/session/file-syntax'
-import type { TerminalRecord } from '../../../../src/session/terminal-records'
-import type { MobileTerminalTheme } from '../../../../src/terminal/webview-contract'
+import type { TerminalRecord } from '../../../../src/session/terminal/records'
+import type { MobileTerminalTheme } from '../../../../src/terminal/webview/contract'
 
 export type Terminal = TerminalRecord
 

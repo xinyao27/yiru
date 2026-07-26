@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { GitMerge, LinkBreak as Link2Off } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { MobilePrActions } from '../../session/use-pr-actions'
+import type { MobilePrActions } from '../../session/pr/use-actions'
 import { unlinkMobilePr } from '../../source-control/pr-link'
 import type { RpcClient } from '../../transport/rpc-client'
 import { ConfirmModal } from '../confirm-modal'

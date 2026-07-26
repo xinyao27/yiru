@@ -5,7 +5,7 @@ import {
   getMobileTerminalDiagnosticErrorName,
   logMobileTerminalDiagnostic,
   shortenMobileTerminalDiagnosticId
-} from './terminal-diagnostics'
+} from './terminal/diagnostics'
 
 type ActivationClient = Pick<RpcClient, 'sendRequest'>
 

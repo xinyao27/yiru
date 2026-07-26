@@ -6,18 +6,18 @@ import { cn } from '@/style/class-names'
 
 import { UniwindWebView } from '../components/uniwind-web-view'
 import type { TerminalOscLinkRange } from './osc-link-ranges'
-import { useTerminalWebViewTheme } from './use-webview-theme'
-import type { TerminalWebViewHandle, TerminalWebViewProps } from './webview-contract'
+import type { TerminalWebViewHandle, TerminalWebViewProps } from './webview/contract'
 import {
   TerminalWebViewEngineErrorOverlay,
   useTerminalWebViewEngineErrorState
-} from './webview-engine-error-state'
-import { TERMINAL_WEBVIEW_FRAME_STYLES } from './webview-frame-styles'
-import { XTERM_WEBVIEW_SOURCE } from './webview-html'
-import type { TerminalWebViewCommand } from './webview-messages'
-import { createTerminalWebViewPendingMessages } from './webview-pending-messages'
-import { routeTerminalQueryReply } from './webview-query-reply-routing'
-import { useTerminalWebReadyWatchdog } from './webview-ready-watchdog'
+} from './webview/engine-error-state'
+import { TERMINAL_WEBVIEW_FRAME_STYLES } from './webview/frame-styles'
+import { XTERM_WEBVIEW_SOURCE } from './webview/html'
+import type { TerminalWebViewCommand } from './webview/messages'
+import { createTerminalWebViewPendingMessages } from './webview/pending-messages'
+import { routeTerminalQueryReply } from './webview/query-reply-routing'
+import { useTerminalWebReadyWatchdog } from './webview/ready-watchdog'
+import { useTerminalWebViewTheme } from './webview/use-theme'
 
 export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebViewProps>(
   function TerminalWebView(

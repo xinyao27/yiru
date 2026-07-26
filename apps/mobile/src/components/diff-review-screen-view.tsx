@@ -4,7 +4,7 @@ import { Text, View, type LayoutChangeEvent } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
-import type { useMobileDiffReviewController } from '../session/use-diff-review-controller'
+import type { useMobileDiffReviewController } from '../session/diff/use-review-controller'
 import { MobileDiffReviewBody } from './diff-review-body'
 import { MobileDiffReviewDrawers } from './diff-review-drawers'
 import { MobileDiffReviewFileSummary } from './diff-review-file-summary'

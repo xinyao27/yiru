@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { triggerError, triggerSuccess } from '../platform/haptics'
-import { createTerminalAndSendPrompt } from '../session/pr-ai-triage-launch'
+import { createTerminalAndSendPrompt } from '../session/pr/ai-triage-launch'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import {

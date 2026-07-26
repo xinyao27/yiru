@@ -1,4 +1,4 @@
-import type { PrSidebarState } from '../session/pr-sidebar-state'
+import type { PrSidebarState } from '../session/pr/sidebar-state'
 
 // Pure presentation helpers for the mobile PR sidebar's responsive branches.
 

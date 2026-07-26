@@ -94,7 +94,7 @@ import {
   normalizeMobileDiffComments,
   removeDeliveredMobileDiffComments,
   removeMobileDiffComments
-} from '../../../../src/session/diff-comments'
+} from '../../../../src/session/diff/comments'
 import { SessionDockColumn } from '../../../../src/session/dock-column'
 import {
   buildPlainMobileDiffSyntaxLines,
@@ -110,8 +110,12 @@ import {
   shouldReadMarkdownFromDiskAfterReadTabFailure
 } from '../../../../src/session/markdown-disk-fallback'
 import { resolveMarkdownFloatingActionsBottom } from '../../../../src/session/markdown-floating-actions-layout'
-import { MobileNativeChatOverlay } from '../../../../src/session/native-chat-overlay'
-import * as nativeChatTerminalStream from '../../../../src/session/native-chat-terminal-stream'
+import { MobileNativeChatOverlay } from '../../../../src/session/native-chat/overlay'
+import * as nativeChatTerminalStream from '../../../../src/session/native-chat/terminal-stream'
+import { useMobileNativeChatController } from '../../../../src/session/native-chat/use-controller'
+import { useMobileNativeChatInputLease } from '../../../../src/session/native-chat/use-input-lease'
+import { useMobileNativeChatReadability } from '../../../../src/session/native-chat/use-readability'
+import { useMobileNativeChatTerminalStream } from '../../../../src/session/native-chat/use-terminal-stream'
 import { loadMobileNewTabAgentOptions } from '../../../../src/session/new-tab-agent-loader'
 import type { MobileNewTabAgentOption } from '../../../../src/session/new-tab-agent-options'
 import { activateOpenedSourceControlDiffTab } from '../../../../src/session/opened-mobile-session-tab'
@@ -122,6 +126,7 @@ import {
   shouldShowSessionHeaderChecksAction,
   panelRouteDescriptor
 } from '../../../../src/session/panel-host'
+import { useMobilePrBranchContext } from '../../../../src/session/pr/use-branch-context'
 import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
 import { MOBILE_SESSION_STATUS_LABELS } from '../../../../src/session/status-labels'
 import {
@@ -135,12 +140,12 @@ import {
   type AppliedSnapshotMarker
 } from '../../../../src/session/tab-snapshot-gate'
 import { resolveTabStripScrollOffset } from '../../../../src/session/tab-strip-scroll'
-import { getMobileTerminalActionSheetActions } from '../../../../src/session/terminal-action-sheet-actions'
-import { MobileTerminalDiagnostics } from '../../../../src/session/terminal-diagnostics'
-import { openMobileTerminalFileTap } from '../../../../src/session/terminal-file-tap-open'
-import { MobileTerminalInputActions } from '../../../../src/session/terminal-input-actions'
-import { MobileTerminalLiveInputStatus } from '../../../../src/session/terminal-live-input-status'
-import { TerminalPaneView } from '../../../../src/session/terminal-pane-view'
+import { getMobileTerminalActionSheetActions } from '../../../../src/session/terminal/action-sheet-actions'
+import { MobileTerminalDiagnostics } from '../../../../src/session/terminal/diagnostics'
+import { openMobileTerminalFileTap } from '../../../../src/session/terminal/file-tap-open'
+import { MobileTerminalInputActions } from '../../../../src/session/terminal/input-actions'
+import { MobileTerminalLiveInputStatus } from '../../../../src/session/terminal/live-input-status'
+import { TerminalPaneView } from '../../../../src/session/terminal/pane-view'
 import {
   getActiveTabIdForHandle,
   getTerminalRecordsFromSessionTabs,
@@ -149,22 +154,17 @@ import {
   mobileSessionTabsEqual,
   terminalRecordsEqual,
   updateTerminalCwdFromStreamEvent
-} from '../../../../src/session/terminal-records'
-import { subscribeMobileTerminalSafely } from '../../../../src/session/terminal-stream-subscribe'
+} from '../../../../src/session/terminal/records'
+import { subscribeMobileTerminalSafely } from '../../../../src/session/terminal/stream-subscribe'
 import {
   getMobileSessionTabTitle,
   resolveMobileTerminalTabAgentId
-} from '../../../../src/session/terminal-tab-agent'
+} from '../../../../src/session/terminal/tab-agent'
+import { useTerminalLiveInputModePreference } from '../../../../src/session/terminal/use-live-input-mode-preference'
+import { useMobileTerminalPaste } from '../../../../src/session/terminal/use-paste'
 import { useMobileAttachmentInputLeaseGate } from '../../../../src/session/use-attachment-input-lease-gate'
 import { useMobileImageAttachment } from '../../../../src/session/use-image-attachment'
 import { useLiveWorktreeName } from '../../../../src/session/use-live-worktree-name'
-import { useMobileNativeChatController } from '../../../../src/session/use-native-chat-controller'
-import { useMobileNativeChatInputLease } from '../../../../src/session/use-native-chat-input-lease'
-import { useMobileNativeChatReadability } from '../../../../src/session/use-native-chat-readability'
-import { useMobileNativeChatTerminalStream } from '../../../../src/session/use-native-chat-terminal-stream'
-import { useMobilePrBranchContext } from '../../../../src/session/use-pr-branch-context'
-import { useTerminalLiveInputModePreference } from '../../../../src/session/use-terminal-live-input-mode-preference'
-import { useMobileTerminalPaste } from '../../../../src/session/use-terminal-paste'
 import {
   loadTerminalAutocompleteEnabled,
   loadTerminalLinkOpenMode,
@@ -196,19 +196,20 @@ import {
   getTerminalCommandKeyboardType,
   getTerminalLiveInputKeyboardType
 } from '../../../../src/terminal/keyboard-type'
-import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/live-accessory-input'
-import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/live-accessory-raw-send-target'
+import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/live/accessory-input'
+import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/live/accessory-raw-send-target'
 import {
   appendBufferedDictation,
   routeDictationTranscript
-} from '../../../../src/terminal/live-dictation-routing'
+} from '../../../../src/terminal/live/dictation-routing'
 import {
   clearTerminalLiveInputFocusTimer,
   focusTerminalLiveInputTarget,
   isTerminalLiveInputWithinByteLimit,
   scheduleTerminalLiveInputFocus
-} from '../../../../src/terminal/live-input'
-import type { TerminalLiveInputSender } from '../../../../src/terminal/live-input-sender'
+} from '../../../../src/terminal/live/input'
+import type { TerminalLiveInputSender } from '../../../../src/terminal/live/input-sender'
+import { useTerminalLiveInputCommit } from '../../../../src/terminal/live/use-input-commit'
 import { isTerminalOscLinkRanges } from '../../../../src/terminal/osc-link-ranges'
 import { sendMobileTerminalQueryReply } from '../../../../src/terminal/query-reply'
 import {
@@ -219,13 +220,12 @@ import {
 } from '../../../../src/terminal/quick-commands'
 import { isTerminalSendRpcAccepted } from '../../../../src/terminal/send-rpc-response'
 import { normalizeTerminalTextInput } from '../../../../src/terminal/text-input-normalization'
-import { useTerminalLiveInputCommit } from '../../../../src/terminal/use-live-input-commit'
 import { useTerminalViewportRefit } from '../../../../src/terminal/viewport-refit'
 import type {
   TerminalKeyboardAvoidanceMetrics,
   TerminalModes,
   TerminalWebViewHandle
-} from '../../../../src/terminal/webview-contract'
+} from '../../../../src/terminal/webview/contract'
 import { spacing } from '../../../../src/theme/uniwind-theme-values'
 import { useHostClient, useForceReconnect } from '../../../../src/transport/client-context'
 import {

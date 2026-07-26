@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native'
 import { Chat as MessageSquare } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { MobileDiffLine } from '../session/diff-lines'
+import type { MobileDiffLine } from '../session/diff/lines'
 import type { MobileHighlightedDiffLine } from '../session/file-syntax'
 import { mobileDiffLineNumber, mobileDiffLinePrefix } from '../source-control/diff-format'
 import { MobileSyntaxSegments } from './syntax-segments'

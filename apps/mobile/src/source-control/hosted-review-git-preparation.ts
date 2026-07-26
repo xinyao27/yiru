@@ -1,4 +1,4 @@
-import { readMobileGitStatusResult } from '../session/diff-review-rpc'
+import { readMobileGitStatusResult } from '../session/diff/review-rpc'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
 import type { MobileGitStatusResult } from './git-status'

@@ -5,12 +5,12 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import { ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { MobileDiffReviewQueueItem } from '../session/diff-review-queue'
+import type { MobileDiffReviewQueueItem } from '../session/diff/review-queue'
 import type {
   ReviewDiffLine,
   ReviewDiffState,
   ReviewScreenState
-} from '../session/diff-review-screen-model'
+} from '../session/diff/review-screen-model'
 import { MobileDiffReviewLine } from './diff-review-line'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 

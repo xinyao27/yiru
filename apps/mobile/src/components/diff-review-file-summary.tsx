@@ -4,12 +4,12 @@ import { Pressable, Text, View } from 'react-native'
 import { ArrowDown, ArrowUp } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { MobileDiffReviewQueueItem } from '../session/diff-review-queue'
+import type { MobileDiffReviewQueueItem } from '../session/diff/review-queue'
 import {
   mobileReviewCountLabel,
   mobileReviewScopeLabel,
   type ReviewDiffState
-} from '../session/diff-review-screen-model'
+} from '../session/diff/review-screen-model'
 import { MOBILE_GIT_STATUS_LABELS } from '../source-control/git-status'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 

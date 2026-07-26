@@ -7,8 +7,8 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { MobileDiffReviewQueueFilter } from '../session/diff-review-queue'
-import { REVIEW_FILTERS, mobileReviewCountLabel } from '../session/diff-review-screen-model'
+import type { MobileDiffReviewQueueFilter } from '../session/diff/review-queue'
+import { REVIEW_FILTERS, mobileReviewCountLabel } from '../session/diff/review-screen-model'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 import { shouldShowTrigger } from './pr-sidebar-presentation'
 

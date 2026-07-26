@@ -6,7 +6,7 @@ import {
 
 import type { MobileSessionTab } from '../../app/h/[hostId]/session/mobile-session-route-types'
 import { ActionSheetModal } from '../components/action-sheet-modal'
-import { getMobileSessionTabTitle } from './terminal-tab-agent'
+import { getMobileSessionTabTitle } from './terminal/tab-agent'
 
 type BrowserTab = Extract<MobileSessionTab, { type: 'browser' }>
 export type MobileBrowserNavigationMethod = 'browser.back' | 'browser.forward' | 'browser.reload'

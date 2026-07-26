@@ -13,8 +13,8 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { mobileReviewCountLabel } from '../session/diff-review-screen-model'
-import type { useMobileDiffReviewController } from '../session/use-diff-review-controller'
+import { mobileReviewCountLabel } from '../session/diff/review-screen-model'
+import type { useMobileDiffReviewController } from '../session/diff/use-review-controller'
 import type { ActionSheetAction } from './action-sheet-modal'
 import { ActionSheetModal } from './action-sheet-modal'
 import { BottomDrawer } from './bottom-drawer'

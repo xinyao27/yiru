@@ -4,7 +4,7 @@ import type { MobileImageSource, PickedMobileImage } from './image-source-picker
 import {
   sendMobileNativeChatMessageWithOutcome,
   type MobileNativeChatSendOutcome
-} from './native-chat-send'
+} from './native-chat/send'
 
 export type AttachMobileImageDeps = {
   readonly client: Pick<RpcClient, 'sendRequest'>

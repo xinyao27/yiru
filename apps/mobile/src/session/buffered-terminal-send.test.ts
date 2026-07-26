@@ -6,7 +6,7 @@ import { sendMobileBufferedTerminalInput } from './buffered-terminal-send'
 import {
   createMobileNativeChatInputHealingState,
   recordMobileNativeChatImagePasteOutcome
-} from './native-chat-input-healing'
+} from './native-chat/input-healing'
 
 function acceptedResponse(id: string) {
   return {

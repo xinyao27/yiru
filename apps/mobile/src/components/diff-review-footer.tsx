@@ -11,8 +11,8 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import type { MobileDiffReviewQueueItem } from '../session/diff-review-queue'
-import type { GitMutationMethod } from '../session/diff-review-screen-model'
+import type { MobileDiffReviewQueueItem } from '../session/diff/review-queue'
+import type { GitMutationMethod } from '../session/diff/review-screen-model'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 
 type Props = {

@@ -12,7 +12,7 @@ import {
 import { cn } from '@/style/class-names'
 
 import { fetchPRCheckDetails, type GitHubPrRepoSlug } from '../../session/github-pr-rpc'
-import type { MobilePrActions } from '../../session/use-pr-actions'
+import type { MobilePrActions } from '../../session/pr/use-actions'
 import type { RpcClient } from '../../transport/rpc-client'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { PRCheckDetailView, type DetailEntry } from './pr-check-detail'

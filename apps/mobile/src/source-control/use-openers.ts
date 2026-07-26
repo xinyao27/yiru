@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router'
 import { useCallback, useRef, useState, type MutableRefObject } from 'react'
 
 import { triggerError, triggerSelection } from '../platform/haptics'
-import { buildMobileDiffLines } from '../session/diff-lines'
+import { buildMobileDiffLines } from '../session/diff/lines'
 import { highlightMobileDiffLines, resolveMobileSyntaxLanguage } from '../session/file-syntax'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState, RpcSuccess } from '../transport/types'

@@ -1,7 +1,7 @@
 import { buildImageDataUri } from '@yiru/workbench-model/ui'
 
 import { classifyMobileArtifact } from '../session/artifact-kind'
-import { buildMobileDiffLines, type MobileDiffLine } from '../session/diff-lines'
+import { buildMobileDiffLines, type MobileDiffLine } from '../session/diff/lines'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcFailure, RpcSuccess } from '../transport/types'
 import { mobileDiffImageDataUri, type MobileBinaryDiffResult } from './diff-image-preview'

@@ -2,16 +2,16 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 
 import { ArrowsClockwise as RotateCw } from '@/components/uniwind-icons'
 
-import { buildFixChecksPrompt, buildResolveConflictsPrompt } from '../session/pr-ai-triage-prompt'
-import type { PrSidebarState } from '../session/pr-sidebar-state'
-import { useMobilePrActions, type MobilePrActions } from '../session/use-pr-actions'
-import { useMobilePrAiTriage, type MobilePrAiTriage } from '../session/use-pr-ai-triage'
-import { usePRBotAuthorOverrides } from '../session/use-pr-bot-author-overrides'
+import { buildFixChecksPrompt, buildResolveConflictsPrompt } from '../session/pr/ai-triage-prompt'
+import type { PrSidebarState } from '../session/pr/sidebar-state'
+import { useMobilePrActions, type MobilePrActions } from '../session/pr/use-actions'
+import { useMobilePrAiTriage, type MobilePrAiTriage } from '../session/pr/use-ai-triage'
+import { usePRBotAuthorOverrides } from '../session/pr/use-bot-author-overrides'
 import {
   useMobilePrCommentActions,
   type MobilePrCommentActions
-} from '../session/use-pr-comment-actions'
-import { useMobilePrTitleAction, type MobilePrTitleAction } from '../session/use-pr-title-action'
+} from '../session/pr/use-comment-actions'
+import { useMobilePrTitleAction, type MobilePrTitleAction } from '../session/pr/use-title-action'
 import type { MobileGitStatusResult } from '../source-control/git-status'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'

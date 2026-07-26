@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-nativ
 
 import { cn } from '@/style/class-names'
 
-import { isSubmittableCommentBody } from '../../session/pr-comment-actions'
+import { isSubmittableCommentBody } from '../../session/pr/comment-actions'
 import { prCommentComposerStyles as styles } from './pr-comment-composer-styles'
 
 type Props = {

@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 
 import type { ConnectionState } from '../transport/types'
-import type { TerminalWebViewHandle } from './webview-contract'
+import type { TerminalWebViewHandle } from './webview/contract'
 
 export const TERMINAL_FOREGROUND_RECOVERY_DELAY_MS = 120
 

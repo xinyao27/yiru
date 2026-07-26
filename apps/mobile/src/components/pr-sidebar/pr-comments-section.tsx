@@ -5,9 +5,9 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { canAddRootComment } from '../../session/pr-comment-actions'
-import { isPrSidebarDetailsPlaceholder } from '../../session/pr-sidebar-state'
-import type { MobilePrCommentActions } from '../../session/use-pr-comment-actions'
+import { canAddRootComment } from '../../session/pr/comment-actions'
+import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
+import type { MobilePrCommentActions } from '../../session/pr/use-comment-actions'
 import { CommentMarkdown } from './comment-markdown'
 import {
   PR_COMMENT_AUDIENCE_FILTERS,

@@ -2,12 +2,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 
 import { MobileDiffReviewScreenView } from '../../../../src/components/diff-review-screen-view'
-import { normalizeReviewAreaParam } from '../../../../src/session/diff-review-positioning'
+import { normalizeReviewAreaParam } from '../../../../src/session/diff/review-positioning'
 import {
   firstReviewParam,
   normalizeReviewFilterParam
-} from '../../../../src/session/diff-review-screen-model'
-import { useMobileDiffReviewController } from '../../../../src/session/use-diff-review-controller'
+} from '../../../../src/session/diff/review-screen-model'
+import { useMobileDiffReviewController } from '../../../../src/session/diff/use-review-controller'
 import { useForceReconnect, useHostClient } from '../../../../src/transport/client-context'
 
 export default function MobileDiffReviewScreen() {
