@@ -24,7 +24,7 @@ import process from 'node:process'
 import readline from 'node:readline'
 import { promisify } from 'node:util'
 
-import { ensureMobileExpoCli, getMobileExpoExecutablePath } from './mobile-expo-cli.mjs'
+import { ensureMobileExpoCli, getMobileExpoExecutablePath } from './expo-cli.mjs'
 import {
   registerWorktreeForPairingRuntime,
   startHeadlessPairingRuntime

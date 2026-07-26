@@ -3,7 +3,7 @@ import { Pressable } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import { styles } from '../../app/h/[hostId]/session/mobile-session-styles'
+import { styles } from '../../app/h/[hostId]/session/styles'
 
 type HeaderIconProps = {
   size?: number

@@ -241,6 +241,7 @@ import type { RpcClient } from '../../../../src/transport/rpc-client'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '../../../../src/transport/types'
 import { getRepoIdFromMobileWorktreeId } from '../../../../src/worktree-id'
 import { headlessActivationNeedsHostRenderer } from '../../../../src/worktree/activation-result'
+import { QuickCommandsTabButton } from './quick-commands-tab-button'
 import type {
   DiffCommentActions,
   DiffNotesDelivery,
@@ -261,9 +262,8 @@ import type {
   TerminalCreateResult,
   TerminalGestureInputBucket,
   TerminalGestureInputQueue
-} from './mobile-session-route-types'
-import { styles } from './mobile-session-styles'
-import { QuickCommandsTabButton } from './quick-commands-tab-button'
+} from './route-types'
+import { styles } from './styles'
 
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 
