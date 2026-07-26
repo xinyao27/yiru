@@ -6,7 +6,7 @@ import {
   ArrowUp,
   ArrowsInLineVertical as ChevronsDownUp,
   ArrowsOutLineVertical as ChevronsUpDown,
-  ImageSquare as ImagePlus,
+  Plus,
   Square
 } from '../../components/uniwind-icons'
 import { MobileAgentWorkingIndicator } from '../agent-working-indicator'
@@ -51,7 +51,7 @@ export function MobileNativeChatComposer({
   onAttachImage,
   isAttaching = false,
   disabled = false,
-  placeholder = 'Message, @files, /commands',
+  placeholder = 'Message',
   filePaths = NO_FILE_PATHS,
   onNeedFiles,
   agentWorking = false,
@@ -70,6 +70,7 @@ export function MobileNativeChatComposer({
   const sendingRef = useRef(false)
   const [sending, setSending] = useState(false)
   const trimmed = value.trim()
+  const hasMessage = trimmed.length > 0 || sending
   const canSend = trimmed.length > 0 && !disabled && !sending && !isAttaching
 
   const trigger = useMemo(() => detectAutocompleteTrigger(value, cursor), [value, cursor])
@@ -139,93 +140,108 @@ export function MobileNativeChatComposer({
           </ScrollView>
         </View>
       ) : null}
-      {/* Why: Expo Glass can disappear during navigation (expo/expo#41024), exposing
-          transcript text; this dense control keeps the geometry with an opaque fallback. */}
-      <MobileGlassSurface className="overflow-hidden rounded-3xl" forceFallback>
-        <View className="min-h-7 flex-row items-center justify-between px-3 pt-1">
-          <View className="flex-1 flex-row items-center gap-2">
-            {agentWorking ? <MobileAgentWorkingIndicator /> : null}
-            <Pressable
-              className="active:bg-accent flex-row items-center gap-1 px-1 py-1"
-              onPress={onToggleToolsExpanded}
-              hitSlop={8}
-            >
-              {toolsExpanded ? (
-                <ChevronsDownUp size={14} colorClassName="accent-muted-foreground" />
-              ) : (
-                <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
-              )}
-              <Text className="text-muted-foreground text-xs font-semibold">
-                {toolsExpanded ? 'Collapse' : 'Tools'}
-              </Text>
-            </Pressable>
-          </View>
-          {agentWorking ? (
-            <Pressable
-              className="active:bg-accent flex-row items-center gap-1"
-              onPress={onStop}
-              hitSlop={8}
-              accessibilityLabel="Stop the agent"
-            >
-              <Square size={13} colorClassName="accent-destructive" />
-              <Text className="text-destructive text-xs font-bold">Stop</Text>
-            </Pressable>
-          ) : null}
+      <MobileGlassSurface
+        className="mb-1 min-h-8 flex-row items-center justify-between overflow-hidden rounded-2xl px-1"
+        forceFallback
+      >
+        <View className="min-w-0 flex-1 flex-row items-center gap-1">
+          {agentWorking ? <MobileAgentWorkingIndicator /> : null}
+          <Pressable
+            className="active:bg-accent h-8 flex-row items-center gap-1 rounded-full px-2"
+            onPress={onToggleToolsExpanded}
+            hitSlop={8}
+          >
+            {toolsExpanded ? (
+              <ChevronsDownUp size={14} colorClassName="accent-muted-foreground" />
+            ) : (
+              <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
+            )}
+            <Text className="text-muted-foreground text-xs font-semibold">
+              {toolsExpanded ? 'Collapse' : 'Tools'}
+            </Text>
+          </Pressable>
         </View>
-        {sendFailureMessage ? (
-          <View className="items-center px-3 pb-1">
-            <Text className="text-destructive text-xs font-semibold">{sendFailureMessage}</Text>
-          </View>
+        {agentWorking ? (
+          <Pressable
+            className="active:bg-accent h-8 flex-row items-center gap-1 rounded-full px-2"
+            onPress={onStop}
+            hitSlop={8}
+            accessibilityLabel="Stop the agent"
+          >
+            <Square size={13} colorClassName="accent-destructive" />
+            <Text className="text-destructive text-xs font-bold">Stop</Text>
+          </Pressable>
         ) : null}
-        <View className="flex-row items-end gap-1.5 p-1.5">
-          {onAttachImage ? (
+      </MobileGlassSurface>
+      {sendFailureMessage ? (
+        <Text className="text-destructive mb-1 px-3 text-center text-xs font-semibold">
+          {sendFailureMessage}
+        </Text>
+      ) : null}
+      {/* Why: Expo Glass can disappear after route navigation (expo/expo#41024).
+          Keep iMessage geometry while the opaque semantic fallback prevents transcript bleed. */}
+      <View className="flex-row items-end gap-2">
+        {onAttachImage ? (
+          <MobileGlassSurface className="h-11 w-11 overflow-hidden rounded-full" forceFallback>
             <Pressable
               accessibilityLabel="Attach image"
-              className="active:bg-accent h-11 w-11 items-center justify-center rounded-full"
+              className="active:bg-accent h-full w-full items-center justify-center rounded-full"
               onPress={onAttachImage}
               disabled={isAttaching || disabled}
             >
               {isAttaching ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : (
-                <ImagePlus size={20} colorClassName="accent-muted-foreground" />
+                <Plus size={22} colorClassName="accent-foreground" />
               )}
             </Pressable>
-          ) : null}
-          <TextInput
-            className="text-foreground max-h-36 min-h-11 flex-1 rounded-2xl px-2.5 py-3 text-sm leading-5"
-            value={value}
-            onChangeText={handleChange}
-            // Controlled only transiently right after an autocomplete insert.
-            selection={pendingSelection ?? undefined}
-            onSelectionChange={(e) => {
-              setCursor(e.nativeEvent.selection.end)
-              setPendingSelection(null)
-            }}
-            placeholder={placeholder}
-            placeholderTextColorClassName="accent-muted-foreground"
-            selectionColorClassName="accent-primary"
-            multiline
-            editable={!disabled}
-            textAlignVertical="center"
-          />
-          <Pressable
-            accessibilityLabel="Send message"
-            className={
-              canSend
-                ? 'bg-primary active:bg-accent h-11 w-11 items-center justify-center rounded-full'
-                : 'bg-secondary h-11 w-11 items-center justify-center rounded-full'
-            }
-            onPress={handleSend}
-            disabled={!canSend}
-          >
-            <ArrowUp
-              size={20}
-              colorClassName={canSend ? 'accent-primary-foreground' : 'accent-muted-foreground'}
+          </MobileGlassSurface>
+        ) : null}
+        <MobileGlassSurface className="min-h-11 flex-1 overflow-hidden rounded-3xl" forceFallback>
+          <View className="min-h-11 flex-row items-end">
+            <TextInput
+              className="text-foreground max-h-32 min-h-11 flex-1 px-3 py-2.5 text-base"
+              value={value}
+              onChangeText={handleChange}
+              // Controlled only transiently right after an autocomplete insert.
+              selection={pendingSelection ?? undefined}
+              onSelectionChange={(e) => {
+                setCursor(e.nativeEvent.selection.end)
+                setPendingSelection(null)
+              }}
+              placeholder={placeholder}
+              placeholderTextColorClassName="accent-muted-foreground"
+              selectionColorClassName="accent-primary"
+              multiline
+              editable={!disabled}
+              scrollEnabled
+              submitBehavior="newline"
+              textAlignVertical="top"
             />
-          </Pressable>
-        </View>
-      </MobileGlassSurface>
+            <View className="m-1 h-9 w-9 shrink-0">
+              {hasMessage ? (
+                <Pressable
+                  accessibilityLabel="Send message"
+                  className={
+                    canSend
+                      ? 'bg-primary active:bg-accent h-full w-full items-center justify-center rounded-full'
+                      : 'bg-secondary h-full w-full items-center justify-center rounded-full'
+                  }
+                  onPress={handleSend}
+                  disabled={!canSend}
+                >
+                  <ArrowUp
+                    size={20}
+                    colorClassName={
+                      canSend ? 'accent-primary-foreground' : 'accent-muted-foreground'
+                    }
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
+        </MobileGlassSurface>
+      </View>
     </View>
   )
 }

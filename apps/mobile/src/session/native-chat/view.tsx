@@ -392,7 +392,7 @@ export function MobileNativeChatView({
               ? 'Reconnecting…'
               : lockReason === 'waiting'
                 ? 'Waiting for terminal…'
-                : 'Message, @files, /commands'
+                : 'Message'
           }
           filePaths={filePaths}
           onNeedFiles={onNeedFiles}
