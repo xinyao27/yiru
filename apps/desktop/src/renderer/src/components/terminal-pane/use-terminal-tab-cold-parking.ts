@@ -13,7 +13,7 @@ import { useAppStore } from '../../store'
 import {
   findActivityTerminalPortal,
   type ActivityTerminalPortalTarget
-} from '../activity/activity-terminal-portal'
+} from '../activity/terminal-portal'
 import {
   getTerminalTabColdParkRecheckDelayMs,
   selectColdParkedTerminalTabs,

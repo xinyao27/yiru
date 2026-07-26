@@ -11,15 +11,26 @@ import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
 
-import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/agent-session-continuation-dialog'
+// Why: this component is the shared entry every lazy() boundary that mounts a
+// real terminal goes through (terminal-workspace panel, floating-terminal
+// panel, onboarding's inline command terminal) — none of them are eager, so
+// xterm's vendor stylesheet and our vendor-patch overrides only ship in that
+// shared lazy chunk instead of the app's eager first-paint CSS.
+import '@xterm/xterm/css/xterm.css'
+import './terminal.css'
+import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
+import { DaemonActionDialog, useDaemonActions } from '@/components/daemon-actions/use-actions'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
-import { DaemonActionDialog, useDaemonActions } from '@/components/shared/use-daemon-actions'
+import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import {
+  isSyntheticSinglePaneTitle,
+  sanitizeTerminalLayoutPaneTitles
+} from '@/components/terminal-pane/title-sanitization'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog
 } from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
 import TerminalSearch from '@/components/terminal-search'
-import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '@/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
@@ -45,19 +56,14 @@ import type {
   PaneExternalDropTarget,
   PaneManager
 } from '@/lib/pane-manager/pane-manager'
-import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/pane-manager-registry'
 import { safeFit, safeFitAndThen } from '@/lib/pane-manager/pane-tree-ops'
+import { refitAndRefreshAllTerminalPanes } from '@/lib/pane-manager/registry'
 import { clearTerminalScrollbackAndFollowOutput } from '@/lib/pane-manager/terminal-scrollback-clear'
 import {
   armPrimarySelectionNativePasteSuppression,
   isPrimarySelectionEnabled,
   readPrimarySelectionText
 } from '@/lib/primary-selection'
-import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
-import {
-  isSyntheticSinglePaneTitle,
-  sanitizeTerminalLayoutPaneTitles
-} from '@/lib/terminal-pane-title-sanitization'
 import {
   DEFAULT_TERMINAL_DIVIDER_DARK,
   isTerminalBackgroundLight,
@@ -70,11 +76,8 @@ import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
-import { hydrateRuntimeEnvironmentSshState } from '@/runtime/runtime-environment-ssh-state'
-import {
-  inspectRuntimeTerminalProcess,
-  isRemoteRuntimePtyId
-} from '@/runtime/runtime-terminal-inspection'
+import { hydrateRuntimeEnvironmentSshState } from '@/runtime/environment-ssh-state'
+import { inspectRuntimeTerminalProcess, isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import {
   clearWebRuntimeTerminalBuffer,
   closeWebRuntimeTerminal,
@@ -90,32 +93,35 @@ import {
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
+import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
 import {
   getTerminalQuickCommandScope,
   isTerminalQuickCommandComplete,
   terminalQuickCommandMatchesRepo
-} from '../../../../shared/terminal-quick-commands'
-import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal-session-state-save-failure'
-import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal-zero-dimensions-diagnostic'
+} from '../../../../shared/terminal/quick-commands'
+import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal/session-state-save-failure'
+import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal/zero-dimensions-diagnostic'
 import type { TerminalQuickCommand, TerminalQuickCommandScope } from '../../../../shared/types'
-import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace-session-terminal-buffers'
+import { shouldPreserveTerminalScrollbackBuffers } from '../../../../shared/workspace/session-terminal-buffers'
 import { useAppStore } from '../../store'
-import { canToggleNativeChat } from '../native-chat/native-chat-availability'
+import { canToggleNativeChat } from '../native-chat/availability'
 import {
   nativeChatLaunchAgentForLeaf,
   resolveNativeChatLeafRoute
-} from '../native-chat/native-chat-leaf-routing'
-import { shouldChatTakeOverMobileSurface } from '../native-chat/native-chat-send-eligibility'
-import NativeChatView from '../native-chat/native-chat-view'
+} from '../native-chat/leaf-routing'
+import { shouldChatTakeOverMobileSurface } from '../native-chat/send-eligibility'
+import NativeChatView from '../native-chat/view'
+import type { AgentSessionContinuationRequest } from './agent/session-continuation'
 import CloseTerminalDialog, { type CloseTerminalDialogCopyKind } from './close-terminal-dialog'
 import { applyDesktopFitFallbackAfterReplay } from './desktop-fit-fallback'
+import { handleInternalTerminalFileDrop } from './drop/handler'
 import {
   applyExpandedLayoutTo,
   cancelPendingPaneSizeRefreshFrames,
   createExpandCollapseActions,
   restoreExpandedLayoutFrom
 } from './expand-collapse'
+import TerminalPaneHeaderOverlay from './header-overlay'
 import { useTerminalKeyboardShortcuts, type SearchState } from './keyboard-handlers'
 import {
   collectLeafIdsInOrder,
@@ -126,8 +132,8 @@ import { MobileDriverOverlay } from './mobile-driver-overlay'
 import { shouldShowMobileDriverOverlay } from './mobile-driver-overlay-visibility'
 import { getOverrideAffectedPanes, getPanesNeedingOverrideFit } from './override-affected-panes'
 import { fitPanes, isWindowsUserAgent } from './pane-helpers'
-import { connectPanePty } from './pty-connection'
-import type { PtyTransport } from './pty-transport'
+import { connectPanePty } from './pty/connection'
+import type { PtyTransport } from './pty/transport'
 import {
   addSessionRestoredBannerPaneId,
   dismissSessionRestoredBannerPaneIds,
@@ -137,6 +143,12 @@ import {
   type SessionRestoredBannerDismissEvent
 } from './session-restored-banner-pane-state'
 import { SessionRestoredBannerPortals } from './session-restored-banner-portals'
+import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'
+import {
+  detachTerminalPaneToTab,
+  isTerminalTabStripDropTarget,
+  resolveTerminalTabStripDropTarget
+} from './tab-detach'
 import { canContinueAgentSessionInNewSession } from './terminal-agent-session-continuation'
 import type { PreparedAgentSessionFork } from './terminal-agent-session-fork'
 import { TerminalAgentSessionForkDialog } from './terminal-agent-session-fork-dialog'
@@ -147,7 +159,6 @@ import {
 } from './terminal-clipboard-event-paste'
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import TerminalContextMenu from './terminal-context-menu'
-import { handleInternalTerminalFileDrop } from './terminal-drop-handler'
 import { TerminalErrorToast } from './terminal-error-toast'
 import { restoreTerminalFitToDesktop, restoreTerminalFitsToDesktop } from './terminal-fit-restore'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
@@ -155,13 +166,6 @@ import {
   isHostAuthoritativeLayout,
   planTerminalLiveLayoutInsertions
 } from './terminal-live-layout-reconciliation'
-import TerminalPaneHeaderOverlay from './terminal-pane-header-overlay'
-import { splitTerminalPaneWithInheritedCwd } from './terminal-pane-split-with-inherited-cwd'
-import {
-  detachTerminalPaneToTab,
-  isTerminalTabStripDropTarget,
-  resolveTerminalTabStripDropTarget
-} from './terminal-pane-tab-detach'
 import { TerminalSessionStateSaveFailureDialog } from './terminal-session-state-save-failure-dialog'
 import type { MacOptionAsAlt } from './terminal-shortcut-policy'
 import { captureTerminalShutdownLayout } from './terminal-shutdown-layout-capture'
@@ -190,8 +194,26 @@ import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
 import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
 import { useRepoById } from '@/store/selectors'
 
+import {
+  applyTerminalPaneAttentionToManager,
+  subscribeTerminalPaneAttention
+} from './attention-subscriptions'
+import { refreshTerminalImeInputContext } from './ime/input-context-refresh'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
 import { resolveNativeChatLeafTitleAgent } from './native-chat-leaf-title-agent'
+import {
+  executeTerminalPastePlan,
+  planTerminalPasteWithYield,
+  type TerminalPasteSource,
+  type TerminalPasteTextOptions
+} from './paste/coordinator'
+import { formatTerminalPasteExecutionError } from './paste/errors'
+import { resolveTerminalPasteRuntime } from './paste/runtime'
+import { getTerminalPasteSshRemotePlatform } from './paste/ssh-platform'
+import {
+  isTerminalPanePasteFocusCurrent,
+  isTerminalPanePasteTargetCurrent
+} from './paste/target-state'
 import {
   isXtermHelperTextarea,
   releaseTerminalFocusForOutsidePointerDown,
@@ -199,24 +221,6 @@ import {
   resyncTerminalFocusForWindowFocus,
   setRegularTerminalInputFocusAttribute
 } from './regular-terminal-focus-ownership'
-import { refreshTerminalImeInputContext } from './terminal-ime-input-context-refresh'
-import {
-  applyTerminalPaneAttentionToManager,
-  subscribeTerminalPaneAttention
-} from './terminal-pane-attention-subscriptions'
-import {
-  executeTerminalPastePlan,
-  planTerminalPasteWithYield,
-  type TerminalPasteSource,
-  type TerminalPasteTextOptions
-} from './terminal-paste-coordinator'
-import { formatTerminalPasteExecutionError } from './terminal-paste-errors'
-import { resolveTerminalPasteRuntime } from './terminal-paste-runtime'
-import { getTerminalPasteSshRemotePlatform } from './terminal-paste-ssh-platform'
-import {
-  isTerminalPanePasteFocusCurrent,
-  isTerminalPanePasteTargetCurrent
-} from './terminal-paste-target-state'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 import { getCachedTerminalTabForWorktree } from './terminal-tab-lookup'
 import {

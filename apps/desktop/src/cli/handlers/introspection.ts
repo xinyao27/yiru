@@ -1,6 +1,6 @@
 import { buildAgentContext, formatAgentContextSummary } from '../agent-context'
 import type { CommandHandler } from '../dispatch'
-import { COMMAND_SPECS } from '../specs'
+import { COMMAND_SPECS } from '../specs/registry'
 
 export const INTROSPECTION_HANDLERS: Record<string, CommandHandler> = {
   // Why: pure local command — reads the static spec registry and prints it, with

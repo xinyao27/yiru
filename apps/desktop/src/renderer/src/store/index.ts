@@ -1,49 +1,49 @@
 import { create } from 'zustand'
 
-import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
+import { registerHttpLinkStoreAccessor } from '@/components/editor/http-link-routing'
 import {
   registerRendererMemoryProfileContributor,
   summarizeStateCollectionSizes
 } from '@/lib/renderer-memory-profile'
 
+import { createBrowserSlice } from '../components/browser-pane/state'
+import { createCoworkingSharingSlice } from '../components/coworking/state'
+import { createDictationSlice } from '../components/dictation/state'
+import { createDiffCommentsSlice } from '../components/diff-comments/state'
+import { createEditorSlice } from '../components/editor/state'
+import { createGitHubSlice } from '../components/github/state'
+import { createSettingsSlice } from '../components/settings/state'
+import { createClaudeUsageSlice } from '../components/stats/claude-usage'
+import { createCodexUsageSlice } from '../components/stats/codex-usage'
+import { createOpenCodeUsageSlice } from '../components/stats/opencode-usage'
+import { createStatsSlice } from '../components/stats/state'
+import { createMemorySlice } from '../components/status-bar/memory-state'
+import { createPaneForegroundAgentSlice } from '../components/terminal-pane/pane-foreground-agent-state'
+import { createPinnedTabCloseConfirmSlice } from '../components/terminal-pane/pinned-tab-close-confirm-state'
+import { createWorkspaceCleanupSlice } from '../components/workspace-cleanup/state'
+import { createCommitMessageGenerationSlice } from '../components/workspace-panel/commit-message-generation-state'
+import { createPullRequestGenerationSlice } from '../components/workspace-panel/pull-request-generation-state'
+import { createWorkspaceSpaceSlice } from '../components/workspace-space/state'
+import { createYiruProfilesSlice } from '../components/yiru-profiles/state'
 import './slice-contracts'
 import { createAgentStatusSlice } from './slices/agent-status'
-import { createBrowserSlice } from './slices/browser'
-import { createClaudeUsageSlice } from './slices/claude-usage'
-import { createCodexUsageSlice } from './slices/codex-usage'
-import { createCommitMessageGenerationSlice } from './slices/commit-message-generation'
 import { createDetectedAgentsSlice } from './slices/detected-agents'
-import { createDictationSlice } from './slices/dictation'
-import { createDiffCommentsSlice } from './slices/diff-comments'
-import { createEditorSlice } from './slices/editor'
-import { createGitHubSlice } from './slices/github'
 import { createHostedReviewSlice } from './slices/hosted-review'
 import { createKeybindingsSlice } from './slices/keybindings'
-import { createMemorySlice } from './slices/memory'
-import { createOpenCodeUsageSlice } from './slices/opencode-usage'
-import { createPaneForegroundAgentSlice } from './slices/pane-foreground-agent'
-import { createPinnedTabCloseConfirmSlice } from './slices/pinned-tab-close-confirm'
 import { createPreflightSlice } from './slices/preflight'
-import { createPullRequestGenerationSlice } from './slices/pull-request-generation'
 import { createRateLimitSlice } from './slices/rate-limits'
 import { createRecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import { createRemoteServerUpdatesSlice } from './slices/remote-server-updates'
 import { createRepoSlice } from './slices/repos'
 import { createRuntimeEnvironmentSshSlice } from './slices/runtime-environment-ssh'
 import { createRuntimeStatusSlice } from './slices/runtime-status'
-import { createSettingsSlice } from './slices/settings'
 import { createSparsePresetsSlice } from './slices/sparse-presets'
-import { createSpoolSharingSlice } from './slices/spool-sharing'
 import { createSshSlice } from './slices/ssh'
-import { createStatsSlice } from './slices/stats'
 import { createTabsSlice } from './slices/tabs'
 import { createTerminalSlice } from './slices/terminals'
 import { createUISlice } from './slices/ui'
-import { createWorkspaceCleanupSlice } from './slices/workspace-cleanup'
-import { createWorkspaceSpaceSlice } from './slices/workspace-space'
 import { createWorktreeNavHistorySlice } from './slices/worktree-nav-history'
 import { createWorktreeSlice } from './slices/worktrees'
-import { createYiruProfilesSlice } from './slices/yiru-profiles'
 import type { AppState } from './types'
 
 export const useAppStore = create<AppState>()((...a) => ({
@@ -83,7 +83,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createPinnedTabCloseConfirmSlice(...a),
   ...createRecentlyClosedTabsSlice(...a),
   ...createYiruProfilesSlice(...a),
-  ...createSpoolSharingSlice(...a)
+  ...createCoworkingSharingSlice(...a)
 }))
 
 registerHttpLinkStoreAccessor(() => useAppStore.getState())

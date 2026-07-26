@@ -17,7 +17,7 @@ import {
 } from '@/lib/agent-skill-cli-prerequisite'
 import { useAppStore } from '@/store'
 
-import { AgentSkillSetupPanel } from './agent-skill-setup-panel'
+import { AgentSkillSetupPanel } from './agent/skill-setup-panel'
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,

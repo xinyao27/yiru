@@ -1,7 +1,7 @@
 import { useEffect, useRef, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import type { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import {
   getOpenFilesForExternalFileChange,
@@ -9,9 +9,9 @@ import {
   YIRU_EDITOR_FILE_SAVED_EVENT,
   type EditorFileSavedDetail,
   type EditorPathMutationTarget
-} from './editor-autosave'
-import type { DiffContent, FileContent } from './editor-panel-content-types'
-import { isReloadableSingleFileDiffTab } from './editor-panel-diff-reload'
+} from './autosave'
+import type { DiffContent, FileContent } from './panel-content-types'
+import { isReloadableSingleFileDiffTab } from './panel-diff-reload'
 
 type EditorViewModeByFile = ReturnType<typeof useAppStore.getState>['editorViewMode']
 

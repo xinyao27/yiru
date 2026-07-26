@@ -1,4 +1,4 @@
-import { isNativeChatSupportedAgent } from '@/lib/native-chat-supported-agent'
+import { isNativeChatSupportedAgent } from '@/components/native-chat/supported-agent'
 
 import type { GlobalSettings, Tab, TuiAgent } from '../../../shared/types'
 

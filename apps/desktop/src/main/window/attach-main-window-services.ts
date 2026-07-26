@@ -15,29 +15,22 @@ import type {
   UpdateCheckOptions,
   WorktreeStartupLaunch
 } from '../../shared/types'
-import { browserManager } from '../browser/browser-manager'
-import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/browser-media-access'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
-import type { ClaudeAccountSelectionTarget } from '../claude-accounts/runtime-selection'
-import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
-import { registerGlobalAssistantHandlers } from '../global-assistant/global-assistant-ipc'
-import type { GlobalAssistantService } from '../global-assistant/global-assistant-service'
-import { getLocalPtyProvider, registerPtyHandlers } from '../ipc/pty'
-import { registerDaemonManagementHandlers } from '../ipc/pty-management'
-import { registerRemoteWorkspaceHandlers } from '../ipc/remote-workspace'
-import { registerRepoHandlers } from '../ipc/repos'
-import { registerSshHandlers } from '../ipc/ssh'
-import { registerWorkspaceCleanupHandlers } from '../ipc/workspace-cleanup'
-import {
-  scheduleWorktreeBaseDirectoryWatcherSync,
-  setWorktreeBaseDirectoryWatcherSyncContext
-} from '../ipc/worktree-base-directory-watcher'
-import { runWorktreeChangeInvalidators } from '../ipc/worktree-change-invalidators'
-import { registerWorktreeHandlers } from '../ipc/worktrees'
+import { browserManager } from '../browser/manager'
+import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media-access'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
+import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
+import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
+import { registerGlobalAssistantHandlers } from '../global-assistant/ipc'
+import type { GlobalAssistantService } from '../global-assistant/service'
 import { hydrateLocalPtyRegistryAtBoot } from '../memory/hydrate-local-pty-registry'
 import type { Store } from '../persistence'
+import { registerRepoHandlers } from '../project-groups/repos'
+import { registerDaemonManagementHandlers } from '../pty/management'
+import { getLocalPtyProvider, registerPtyHandlers } from '../pty/pty'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
-import { logStartupMilestone } from '../startup/startup-diagnostics'
+import { registerRemoteWorkspaceHandlers } from '../ssh/remote/workspace'
+import { registerSshHandlers } from '../ssh/ssh'
+import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
 import {
   checkForUpdatesFromMenu,
@@ -47,6 +40,13 @@ import {
   setupAutoUpdater,
   dismissNudge
 } from '../updater'
+import { registerWorkspaceCleanupHandlers } from '../workspace-cleanup/workspace-cleanup'
+import {
+  scheduleWorktreeBaseDirectoryWatcherSync,
+  setWorktreeBaseDirectoryWatcherSyncContext
+} from '../worktree/base-directory-watcher'
+import { runWorktreeChangeInvalidators } from '../worktree/change-invalidators'
+import { registerWorktreeHandlers } from '../worktree/worktrees'
 import { getKnownWorktreeIdsForHistoryGc } from './history-gc-worktree-ids'
 import { requestMobileMarkdownFromRenderer } from './mobile-markdown-request-relay'
 import { requestTerminalTabCloseFromRenderer } from './terminal-tab-close-request-relay'

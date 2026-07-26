@@ -7,7 +7,7 @@ import {
   readAiVaultViewOptions,
   writeAiVaultViewOptions,
   type AiVaultViewOptions
-} from './ai-vault-view-options-persistence'
+} from './ai-vault/view-options-persistence'
 
 type AiVaultViewOptionsUpdate = (current: AiVaultViewOptions) => AiVaultViewOptions
 

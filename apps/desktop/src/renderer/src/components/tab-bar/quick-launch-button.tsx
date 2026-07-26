@@ -12,7 +12,7 @@ import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { useAppStore } from '@/store'
 
 import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { filterEnabledTuiAgents } from '../../../../shared/tui-agent-selection'
+import { filterEnabledTuiAgents } from '../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../shared/types'
 import { AgentLaunchMenuItems } from './agent-launch-menu-items'
 import { buildTabAgentLaunchOptions, orderTabLaunchAgents } from './tab-agent-launch-options'

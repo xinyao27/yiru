@@ -1,6 +1,6 @@
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 
-import { isOpenSshConfigBackedTarget } from './system-ssh-args'
+import { isOpenSshConfigBackedTarget } from './system/ssh-args'
 
 export type VsCodeSshAuthorityResult =
   | { ok: true; authority: string }

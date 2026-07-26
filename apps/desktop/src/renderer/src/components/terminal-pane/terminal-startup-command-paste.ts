@@ -1,12 +1,12 @@
 import { pasteTerminalText } from '@/lib/terminal-bracketed-paste'
 
-import type { PtyTransport } from './pty-transport'
 import {
   executeTerminalPastePlan,
   planTerminalPasteWithYield,
   type TerminalPasteExecutionResult,
   type TerminalPasteRuntime
-} from './terminal-paste-coordinator'
+} from './paste/coordinator'
+import type { PtyTransport } from './pty/transport'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 
 type StartupCommandPane = {

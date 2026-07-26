@@ -1,41 +1,70 @@
 import { EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import { useEffect, useState } from 'react'
 
-import { runtimeEnvironmentSupportsCapability } from '@/runtime/runtime-rpc-client'
+import { runtimeEnvironmentSupportsCapability } from '@/runtime/rpc-client'
 
 import type { RuntimeRemoteSshSupport } from './worktree-path-opening'
+
+type SshSupportProbeResult = {
+  runtimeEnvironmentId: string
+  connectionId: string
+  supported: boolean
+}
 
 export function useRuntimeRemoteSshSupport(
   runtimeEnvironmentId?: string | null,
   connectionId?: string | null
 ): RuntimeRemoteSshSupport {
-  const [support, setSupport] = useState<RuntimeRemoteSshSupport>('not-needed')
+  const trimmedEnvironmentId = runtimeEnvironmentId?.trim() ?? ''
+  const trimmedConnectionId = connectionId?.trim() ?? ''
+  const needsProbe = trimmedEnvironmentId !== '' && trimmedConnectionId !== ''
+
+  const [probeResult, setProbeResult] = useState<SshSupportProbeResult | null>(null)
 
   useEffect(() => {
-    if (!runtimeEnvironmentId?.trim() || !connectionId?.trim()) {
-      setSupport('not-needed')
+    if (!needsProbe) {
       return
     }
     let active = true
-    setSupport('checking')
     void runtimeEnvironmentSupportsCapability(
-      runtimeEnvironmentId,
+      trimmedEnvironmentId,
       EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY
     )
       .then((supported) => {
         if (active) {
-          setSupport(supported ? 'supported' : 'unsupported')
+          setProbeResult({
+            runtimeEnvironmentId: trimmedEnvironmentId,
+            connectionId: trimmedConnectionId,
+            supported
+          })
         }
       })
       .catch(() => {
         if (active) {
-          setSupport('unsupported')
+          setProbeResult({
+            runtimeEnvironmentId: trimmedEnvironmentId,
+            connectionId: trimmedConnectionId,
+            supported: false
+          })
         }
       })
     return () => {
       active = false
     }
-  }, [connectionId, runtimeEnvironmentId])
+  }, [needsProbe, trimmedConnectionId, trimmedEnvironmentId])
 
-  return support
+  if (!needsProbe) {
+    return 'not-needed'
+  }
+  // Why: a stale result from a previous (runtimeEnvironmentId, connectionId)
+  // pair must never render as this host's answer — tag every stored result
+  // with the identity that produced it and only trust an exact match.
+  if (
+    probeResult &&
+    probeResult.runtimeEnvironmentId === trimmedEnvironmentId &&
+    probeResult.connectionId === trimmedConnectionId
+  ) {
+    return probeResult.supported ? 'supported' : 'unsupported'
+  }
+  return 'checking'
 }

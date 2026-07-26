@@ -1,6 +1,6 @@
-import type { ManagedPaneInternal } from './pane-manager-types'
 import { reattachWebglIfNeeded } from './pane-webgl-reattach'
 import { resetWebglTextureAtlas } from './pane-webgl-renderer'
+import type { ManagedPaneInternal } from './types'
 
 function scheduleSettledFrame(callback: () => void): void {
   if (typeof globalThis.requestAnimationFrame !== 'function') {

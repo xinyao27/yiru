@@ -8,21 +8,21 @@ import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
 import { translate } from '../i18n/i18n'
-import { I18nProvider } from '../i18n/i18n-provider'
-import WebConnect from './web-connect'
+import { I18nProvider } from '../i18n/provider'
+import WebConnect from './connect'
 import {
   clearPairingInputFromAddressBar,
   decideWebPairingStartup,
   readPairingInputFromLocation
-} from './web-pairing'
-import { installWebPreloadApi } from './web-preload-api'
+} from './pairing'
+import { installWebPreloadApi } from './preload-api'
 import {
   createStoredWebRuntimeEnvironment,
   readStoredWebRuntimeEnvironment,
   saveStoredWebRuntimeEnvironment
-} from './web-runtime-environment'
+} from './runtime-environment'
 
-const App = lazy(() => import('../application-shell'))
+const App = lazy(() => import('../application-shell/shell'))
 
 function WebRoot(): React.JSX.Element {
   const initialPairingInput = useMemo(() => readPairingInputFromLocation(window.location), [])

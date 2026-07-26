@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef } from 'react'
 
-import type { NativeChatSendHandle } from './native-chat-runtime-send'
+import type { NativeChatSendHandle } from './runtime-send'
 
 export type NativeChatSendLifecycle = {
   cancelPendingSends: () => void

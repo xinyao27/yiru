@@ -4,14 +4,13 @@ import type {
 } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
+import { resumeSleepingAgentSessionsForWorktree } from '@/components/terminal-workspace/resume-sleeping-agent-session'
 import { shouldAutoCreateInitialTerminal } from '@/components/terminal/initial-terminal'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
 import { getConnectionId } from '@/lib/connection-context'
 import { queueHookCommandsForFirstWorktreeTab } from '@/lib/hook-command-delayed-delivery'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
-import { resumeSleepingAgentSessionsForWorktree } from '@/lib/resume-sleeping-agent-session'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import {
   getRuntimeEnvironmentIdForWorktree,
@@ -35,18 +34,18 @@ import {
   setWorktreeNavViewActivator
 } from '@/store/slices/worktree-nav-history'
 
-import { agentKindToTuiAgent } from '../../../shared/agent-kind'
-import { repoIsRemote } from '../../../shared/agent-launch-remote'
+import { agentKindToTuiAgent } from '../../../shared/agent/kind'
+import { repoIsRemote } from '../../../shared/agent/launch-remote'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat-session-options'
-import { createSequencedSetupAgentCommands } from '../../../shared/setup-agent-sequencing'
-import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup-runner-command'
-import { isTuiAgent } from '../../../shared/tui-agent-config'
+import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
+import { createSequencedSetupAgentCommands } from '../../../shared/setup/agent-sequencing'
+import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup/runner-command'
+import { isTuiAgent } from '../../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
+} from '../../../shared/tui-agent/launch-defaults'
 /* eslint-disable max-lines -- Why: worktree activation is a single ordered flow spanning startup, setup, and default tabs; splitting it would obscure sequencing guarantees. */
 import type {
   FolderWorkspace,
@@ -58,13 +57,14 @@ import type {
   WorktreeDefaultTabsLaunch,
   WorktreeSetupLaunch
 } from '../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
-import type { AgentStartedTelemetry } from './agent-started-telemetry'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/scope'
+import { seedNativeChatAppliedSessionOptions } from '../components/native-chat/session/option-cache'
 import {
   folderWorkspaceActivationBlocked,
   getFolderWorkspacePathStatusDescription,
   getFolderWorkspacePathStatusTitle
-} from './folder-workspace-path-status'
+} from '../components/sidebar/folder-workspace-path-status'
+import type { AgentStartedTelemetry } from './agent-started-telemetry'
 import { initialAgentTabViewModeProps } from './native-chat-initial-view-mode'
 import { CLIENT_PLATFORM } from './new-workspace'
 import { buildSetupRunnerCommand } from './setup-runner'
@@ -208,9 +208,9 @@ export function activateAndRevealFolderWorkspace(
     return false
   }
 
-  // Why: remote workspaces use opaque Spool routes, not local WorkspaceKeys;
+  // Why: remote workspaces use opaque Coworking routes, not local WorkspaceKeys;
   // any explicit local activation must leave that independent namespace.
-  state.setActiveSpoolWorkspaceRoute(null)
+  state.setActiveCoworkingWorkspaceRoute(null)
 
   if (state.activeView !== 'terminal') {
     state.setActiveView('terminal')
@@ -303,8 +303,8 @@ export function activateAndRevealWorktree(
     return false
   }
   // Why: a local selection must win even when it reselects the worktree that
-  // remained mounted behind an active remote Spool surface.
-  state.setActiveSpoolWorkspaceRoute(null)
+  // remained mounted behind an active remote Coworking surface.
+  state.setActiveCoworkingWorkspaceRoute(null)
   const hasActivationWork = Boolean(opts?.startup || opts?.setup || opts?.defaultTabs)
   // Why: a plain reselect of the already-visible workspace should still reveal
   // the sidebar row, but it must not restamp focus recency and wake persistence.

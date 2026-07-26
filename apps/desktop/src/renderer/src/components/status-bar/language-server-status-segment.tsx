@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
+import { useAppStore } from '@/store'
+
 import {
   monacoLanguageServerManager,
   type LanguageServerManagerStatus
-} from '@/lib/monaco-language-server-manager'
-import { useAppStore } from '@/store'
-
-import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './status-bar-context-menu-policy'
+} from '../editor/monaco-language/server-manager'
+import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 
 type LanguageServerStatusSegmentProps = {
   iconOnly: boolean

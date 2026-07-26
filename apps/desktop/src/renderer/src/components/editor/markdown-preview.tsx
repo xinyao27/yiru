@@ -35,6 +35,34 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
 
+// Why: this component is the only lazy() boundary (content.tsx's
+// `MarkdownPreview`) that mounts rehype-highlight's `.hljs-*` tree, the
+// `.markdown-annotation-card` review states, and rehype-katex's rendered
+// math, so their stylesheets ship in this chunk instead of main.css.
+import './markdown.css'
+import './markdown-review.css'
+import 'katex/dist/katex.min.css'
+import { createConnectionIdForFileSelector } from '@/components/editor/connection-owner-resolution'
+import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
+import { computeEditorFontSize } from '@/components/editor/font-zoom'
+import { openHttpLink, type HttpLinkSourceOwner } from '@/components/editor/http-link-routing'
+import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '@/components/editor/local-path-open-guard'
+import {
+  absolutePathToFileUri,
+  resolveMarkdownLinkTarget
+} from '@/components/editor/markdown-internal-links'
+import { copyMarkdownReviewNotesForAgent } from '@/components/editor/markdown-review-note-copy'
+import {
+  formatMarkdownReviewCardQuote,
+  formatMarkdownReviewNotes,
+  getMarkdownReviewCardQuote,
+  sortMarkdownReviewNotes,
+  type MarkdownReviewNote
+} from '@/components/editor/markdown-review-notes'
+import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -42,26 +70,11 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getConnectionIdForFile } from '@/lib/connection-context'
-import { createConnectionIdForFileSelector } from '@/lib/connection-owner-resolution'
-import { isMarkdownComment } from '@/lib/diff-comment-compat'
-import { computeEditorFontSize } from '@/lib/editor-font-zoom'
-import { openHttpLink, type HttpLinkSourceOwner } from '@/lib/http-link-routing'
 import { detectLanguage } from '@/lib/language-detect'
-import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
-import { absolutePathToFileUri, resolveMarkdownLinkTarget } from '@/lib/markdown-internal-links'
-import { copyMarkdownReviewNotesForAgent } from '@/lib/markdown-review-note-copy'
-import {
-  formatMarkdownReviewCardQuote,
-  formatMarkdownReviewNotes,
-  getMarkdownReviewCardQuote,
-  sortMarkdownReviewNotes,
-  type MarkdownReviewNote
-} from '@/lib/markdown-review-notes'
 import { dirname } from '@/lib/path'
-import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
-import { statRuntimePath } from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { statRuntimePath } from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
@@ -104,6 +117,15 @@ import { useLocalImageSrc } from './use-local-image-src'
 import { usePreserveSectionDuringExternalEdit } from './use-preserve-section-during-external-edit'
 
 const EMPTY_MARKDOWN_DOCUMENTS: MarkdownDocument[] = []
+
+const MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME =
+  'size-[22px] text-muted-foreground hover:text-foreground'
+
+// Why: shared by the copy-notes button and the NotesSendMenu trigger (both
+// render a variant="quiet" Button) so the two review-toolbar icon actions
+// render identical chrome.
+const MARKDOWN_REVIEW_ICON_BUTTON_CLASS_NAME =
+  'inline-flex size-[26px] items-center justify-center border border-transparent hover:border-border/82 aria-expanded:border-border/82 aria-expanded:bg-accent aria-expanded:text-foreground'
 
 type MarkdownPreviewProps = {
   content: string
@@ -1103,6 +1125,7 @@ export default function MarkdownPreview({
         return null
       }
       const commentsForBlock = getMarkdownCommentsForRange(range)
+      const hasReviewNotes = commentsForBlock.length > 0
 
       const handleSubmit = async (body: string): Promise<boolean> => {
         const result = await addDiffComment({
@@ -1123,12 +1146,17 @@ export default function MarkdownPreview({
       }
 
       return (
-        <div className="markdown-annotation-controls">
+        <div className="markdown-annotation-controls relative col-start-2 row-start-1 mt-0 min-w-0 @max-[760px]/markdown-preview:mt-1.5">
           <Button
-            variant="ghost"
+            variant="quiet"
             size="xs"
             type="button"
-            className="markdown-annotation-add focus-visible:bg-accent h-auto border-0 p-0"
+            className={cn(
+              'absolute top-0.5 -left-[26px] inline-flex size-5 items-center justify-center border border-border/72 bg-background outline-none transition-[opacity,color,background-color] duration-100 focus-visible:border-ring focus-visible:opacity-100 @max-[760px]/markdown-preview:static',
+              hasReviewNotes
+                ? 'opacity-100'
+                : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+            )}
             aria-label={translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
             title={translate('auto.components.editor.MarkdownPreview.13f94d760c', 'Add note')}
             onClick={(event) => {
@@ -1147,13 +1175,18 @@ export default function MarkdownPreview({
               onSubmit={handleSubmit}
             />
           ) : null}
-          <div className="markdown-annotation-note-stack">
+          <div
+            className={cn(
+              'flex min-w-0 flex-col gap-2 @max-[760px]/markdown-preview:mt-1.5',
+              activeAnnotationBlockKey === blockKey && 'mt-2'
+            )}
+          >
             {commentsForBlock.map((comment) => (
               <div
                 key={comment.id}
                 data-markdown-review-note-id={comment.id}
                 className={cn(
-                  'markdown-annotation-card',
+                  'markdown-annotation-card mt-0 max-w-none scroll-m-3',
                   activeReviewCommentId === comment.id && 'is-active',
                   attentionReviewCommentId === comment.id && 'is-attention'
                 )}
@@ -1270,10 +1303,9 @@ export default function MarkdownPreview({
       if (!controls) {
         return rendered
       }
-      const hasReviewNotes = getMarkdownCommentsForRange(range).length > 0
       return (
         <div
-          className={cn('markdown-annotation-block', hasReviewNotes && 'has-review-notes')}
+          className="markdown-annotation-block group relative grid grid-cols-[minmax(0,1fr)_minmax(220px,min(28cqw,300px))] items-start gap-x-8 @max-[760px]/markdown-preview:block [&>*:first-child]:min-w-0"
           data-source-line={range.startLine}
           data-source-end-line={range.endLine}
           data-annotation-block-key={blockKey}
@@ -1284,7 +1316,7 @@ export default function MarkdownPreview({
         </div>
       )
     },
-    [getMarkdownCommentsForRange, handleAnnotatedMarkdownBlockClick, renderAnnotationControls]
+    [handleAnnotatedMarkdownBlockClick, renderAnnotationControls]
   )
 
   const components: Components = useMemo(() => {
@@ -1698,7 +1730,6 @@ export default function MarkdownPreview({
           return <li {...props}>{children}</li>
         }
         const blockKey = `li:${range.startLine}-${range.endLine}`
-        const hasReviewNotes = getMarkdownCommentsForRange(range).length > 0
         const controls = renderAnnotationControls(
           range,
           blockKey,
@@ -1707,7 +1738,7 @@ export default function MarkdownPreview({
         return (
           <li {...props}>
             <div
-              className={cn('markdown-annotation-list-block', hasReviewNotes && 'has-review-notes')}
+              className="markdown-annotation-list-block group relative grid grid-cols-[minmax(0,1fr)_minmax(220px,min(28cqw,300px))] items-start gap-x-8 @max-[760px]/markdown-preview:block"
               data-source-line={range.startLine}
               data-source-end-line={range.endLine}
               // Why: only advertise the block to the add-review-note shortcut
@@ -1715,7 +1746,9 @@ export default function MarkdownPreview({
               data-annotation-block-key={controls ? blockKey : undefined}
               onClick={(event) => handleAnnotatedMarkdownBlockClick(range, event)}
             >
-              <span className="markdown-annotation-list-content">{children}</span>
+              <span className="markdown-annotation-list-content col-start-1 min-w-0">
+                {children}
+              </span>
               {controls}
             </div>
           </li>
@@ -1785,7 +1818,6 @@ export default function MarkdownPreview({
     isDark,
     isMac,
     imageRuntimeContext,
-    getMarkdownCommentsForRange,
     handleAnnotatedMarkdownBlockClick,
     markdownDocumentIndex,
     onOpenDocument,
@@ -1806,7 +1838,7 @@ export default function MarkdownPreview({
   ])
 
   return (
-    <div className="markdown-preview-shell">
+    <div className="@container/markdown-preview relative flex h-full min-h-0 min-w-0">
       {showTableOfContents ? (
         <MarkdownTableOfContentsPanel
           items={tableOfContentsItems}
@@ -1819,13 +1851,16 @@ export default function MarkdownPreview({
         tabIndex={0}
         style={{ fontSize: `${editorFontSize}px` }}
         className={cn(
-          'markdown-preview h-full min-h-0 overflow-auto scrollbar-editor',
+          'markdown-preview relative h-full min-h-0 min-w-0 flex-1 overflow-auto px-8 py-6 leading-[1.7] scrollbar-editor focus-visible:outline-none',
           isDark ? 'markdown-dark' : 'markdown-light'
         )}
       >
         {isSearchOpen ? (
-          <div className="markdown-preview-search" onKeyDown={(event) => event.stopPropagation()}>
-            <div className="markdown-preview-search-field">
+          <div
+            className="markdown-preview-search border-border bg-background sticky top-0 z-20 -mr-5 mb-1.5 ml-auto flex w-fit max-w-[min(100%,460px)] items-center border pt-0 pr-0.5 pb-0 pl-1"
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            <div className="border-ring bg-background flex w-[220px] min-w-0 flex-[0_1_auto] items-center border">
               <Input
                 ref={setSearchInputElement}
                 value={query}
@@ -1851,14 +1886,14 @@ export default function MarkdownPreview({
                   'auto.components.editor.MarkdownPreview.517aea303b',
                   'Find in preview'
                 )}
-                className="markdown-preview-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
+                className="placeholder:text-muted-foreground h-7 !border-0 bg-transparent px-2 text-[13px] leading-none focus-visible:!border-0"
                 aria-label={translate(
                   'auto.components.editor.MarkdownPreview.ec77985138',
                   'Find in markdown preview'
                 )}
               />
             </div>
-            <div className="markdown-preview-search-status">
+            <div className="text-muted-foreground min-w-0 flex-none px-1.5 text-xs leading-none whitespace-nowrap tabular-nums">
               {query && matchCount === 0
                 ? translate('auto.components.editor.MarkdownPreview.c5dc92cfe3', 'No results')
                 : `${matchCount === 0 ? 0 : activeMatchIndex + 1}/${matchCount}`}
@@ -1877,7 +1912,7 @@ export default function MarkdownPreview({
                 'auto.components.editor.MarkdownPreview.1febd97f5c',
                 'Previous match'
               )}
-              className="markdown-preview-search-button"
+              className={MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME}
             >
               <ChevronUp weight="regular" size={14} />
             </Button>
@@ -1892,11 +1927,11 @@ export default function MarkdownPreview({
                 'auto.components.editor.MarkdownPreview.b42c41bd0d',
                 'Next match'
               )}
-              className="markdown-preview-search-button"
+              className={MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME}
             >
               <ChevronDown weight="regular" size={14} />
             </Button>
-            <div className="markdown-preview-search-divider" />
+            <div className="bg-border mx-0.5 h-4 w-px" />
             <Button
               type="button"
               variant="ghost"
@@ -1907,19 +1942,19 @@ export default function MarkdownPreview({
                 'auto.components.editor.MarkdownPreview.12052c639c',
                 'Close search'
               )}
-              className="markdown-preview-search-button"
+              className={MARKDOWN_PREVIEW_SEARCH_BUTTON_CLASS_NAME}
             >
               <X weight="regular" size={14} />
             </Button>
           </div>
         ) : null}
         {canShowReviewTools ? (
-          <div className="markdown-review-toolbar">
+          <div className="border-border/72 relative z-[15] mb-2 ml-auto flex w-fit max-w-full items-center gap-1 border bg-[color-mix(in_srgb,var(--background)_94%,var(--editor-surface))] p-1">
             <Button
-              variant="ghost"
+              variant="quiet"
               size="xs"
               type="button"
-              className="markdown-review-toolbar-button focus-visible:bg-accent h-auto border-0 p-0"
+              className="hover:border-border/82 inline-flex h-[26px] min-w-0 items-center justify-center gap-1.5 border border-transparent px-2 text-xs font-semibold"
               onClick={() => {
                 const firstNote = markdownReviewNotes[0]
                 if (firstNote) {
@@ -1940,13 +1975,15 @@ export default function MarkdownPreview({
               <span>
                 {translate('auto.components.editor.MarkdownPreview.322afab6ff', 'Review notes')}
               </span>
-              <span className="markdown-review-count">{markdownReviewNotes.length}</span>
+              <span className="bg-foreground/8 text-muted-foreground inline-flex h-[18px] min-w-[18px] items-center justify-center text-[11px] leading-none tabular-nums">
+                {markdownReviewNotes.length}
+              </span>
             </Button>
             <Button
-              variant="ghost"
+              variant="quiet"
               size="xs"
               type="button"
-              className="markdown-review-icon-button focus-visible:bg-accent h-auto border-0 p-0"
+              className={MARKDOWN_REVIEW_ICON_BUTTON_CLASS_NAME}
               onClick={() => void handleCopyMarkdownReviewNotes()}
               disabled={markdownReviewNotes.length === 0}
               title={translate(
@@ -1966,7 +2003,7 @@ export default function MarkdownPreview({
                 groupId={sourceWorktree.id}
                 modeIdParts={['markdown-notes', sourceWorktree.id, filePath, 'preview-toolbar']}
                 scopes={unsentMarkdownReviewScope}
-                triggerClassName="markdown-review-icon-button"
+                triggerClassName={MARKDOWN_REVIEW_ICON_BUTTON_CLASS_NAME}
                 onDelivered={(notes) => void clearDeliveredDiffComments(sourceWorktree.id, notes)}
               />
             ) : null}
@@ -2099,7 +2136,10 @@ function MarkdownAnnotationComposer({
   }
 
   return (
-    <div className="markdown-annotation-composer" onClick={(event) => event.stopPropagation()}>
+    <div
+      className="mt-0 max-w-none scroll-m-3 border border-[color-mix(in_srgb,var(--foreground)_18%,transparent)] bg-[var(--editor-surface)] p-2 @max-[760px]/markdown-preview:mt-1.5"
+      onClick={(event) => event.stopPropagation()}
+    >
       <div className="yiru-diff-comment-popover-label">
         {translate('auto.components.editor.MarkdownPreview.b1bfc04034', 'Selected text')}
       </div>

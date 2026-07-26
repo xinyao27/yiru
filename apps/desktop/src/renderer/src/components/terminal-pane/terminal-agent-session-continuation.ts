@@ -1,16 +1,16 @@
 import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
-import {
-  buildAgentSessionContinuationPrompt,
-  type AgentSessionContinuationRequest
-} from '@/lib/agent-session-continuation'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { useAppStore } from '@/store'
 
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import type { TuiAgent } from '../../../../shared/types'
+import {
+  buildAgentSessionContinuationPrompt,
+  type AgentSessionContinuationRequest
+} from './agent/session-continuation'
 
 type PrepareAgentSessionContinuationFromPaneArgs = {
   pane: ManagedPane

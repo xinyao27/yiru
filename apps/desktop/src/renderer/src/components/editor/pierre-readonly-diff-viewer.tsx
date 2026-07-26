@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react'
 
-import { isDiffComment } from '@/lib/diff-comment-compat'
-import { resolveDocumentTheme } from '@/lib/document-theme'
-import { resolveEditorFontFamily } from '@/lib/editor-font-family'
-import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
+import { isDiffComment } from '@/components/editor/diff-comment-compat'
+import { resolveDocumentTheme } from '@/components/editor/document-theme'
+import { resolveEditorFontFamily } from '@/components/editor/font-family'
+import { computeDiffEditorFontSize } from '@/components/editor/font-zoom'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 

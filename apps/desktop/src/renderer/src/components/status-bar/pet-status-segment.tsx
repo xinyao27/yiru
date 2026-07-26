@@ -21,7 +21,7 @@ import { cn } from '@/lib/class-names'
 
 import { PET_SIZE_MAX, PET_SIZE_MIN } from '../../../../shared/types'
 import { useAppStore } from '../../store'
-import { BUNDLED_PET, BUNDLED_PETS, findBundledPet, isBundledPetId } from '../pet/pet-models'
+import { BUNDLED_PET, BUNDLED_PETS, findBundledPet, isBundledPetId } from '../pet/models'
 
 // Why: cluster pet-related controls (show/hide, character picker, custom
 // upload + removal, jump-to-settings) behind a single status-bar segment. Only

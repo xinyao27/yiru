@@ -1,9 +1,8 @@
 import { platform } from 'node:os'
 
-import type { EmulatorBridgeOptions } from '../emulator-bridge-types'
-import { EmulatorError } from '../emulator-errors'
-import { sendEmulatorGestureSequence, type EmulatorGesturePoint } from '../emulator-gesture-sender'
-import type { EmulatorSessionInfo } from '../emulator-types'
+import type { EmulatorBridgeOptions } from '../bridge-types'
+import { EmulatorError } from '../errors'
+import { sendEmulatorGestureSequence, type EmulatorGesturePoint } from '../gesture-sender'
 import { parseServeSimDetachedSession } from '../serve-sim-detached-session'
 import { waitForServeSimEndpointReady } from '../serve-sim-endpoint-readiness'
 import {
@@ -25,6 +24,7 @@ import {
   type SimulatorDevice
 } from '../simctl-simulator-devices'
 import { hideNativeSimulatorApp } from '../simulator-app-visibility'
+import type { EmulatorSessionInfo } from '../types'
 import type {
   BackendAvailability,
   EmulatorBackend,

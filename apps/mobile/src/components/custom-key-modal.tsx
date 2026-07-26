@@ -11,7 +11,7 @@ import {
   TERMINAL_SHORTCUT_SPECIAL_KEYS,
   type TerminalShortcutModifier,
   type TerminalShortcutSpecialKey
-} from '../terminal/terminal-accessory-keys'
+} from '../terminal/accessory-keys'
 import { BottomDrawer } from './bottom-drawer'
 
 const CUSTOM_ACCESSORY_KEYS_STORAGE_KEY = 'yiru:custom-accessory-keys'

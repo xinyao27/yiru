@@ -4,7 +4,7 @@ import type { GlobalWindowsRuntimeDefault } from '../../../../shared/project-exe
 import { normalizeGlobalWindowsRuntimeDefault } from '../../../../shared/project-execution-runtime'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
+import { SettingsRow, SettingsSegmentedControl } from './form-controls'
 
 type DefaultRuntimeSegment = GlobalWindowsRuntimeDefault['kind']
 

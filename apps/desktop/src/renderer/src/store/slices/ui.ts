@@ -10,12 +10,12 @@ import type { StateCreator } from 'zustand'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 
-import { buildAgentNotificationId } from '../../../../shared/agent-notification-id'
+import { buildAgentNotificationId } from '../../../../shared/agent/notification-id'
 import {
   DEFAULT_BROWSER_PAGE_ZOOM_LEVEL,
   normalizeBrowserPageZoomLevel
-} from '../../../../shared/browser-page-zoom'
-import { normalizeKagiSessionLink } from '../../../../shared/browser-url'
+} from '../../../../shared/browser/page-zoom'
+import { normalizeKagiSessionLink } from '../../../../shared/browser/url'
 import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
@@ -84,24 +84,24 @@ import {
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
   type WorkspaceCleanupDismissal
-} from '../../../../shared/workspace-cleanup'
-import type { WorkspacePortScanResult } from '../../../../shared/workspace-ports'
+} from '../../../../shared/workspace/cleanup'
+import type { WorkspacePortScanResult } from '../../../../shared/workspace/ports'
 import {
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
-} from '../../../../shared/workspace-statuses'
-import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
-import { DEFAULT_PET_ID, isBundledPetId } from '../../lib/pet-id'
+} from '../../../../shared/workspace/statuses'
+import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/id'
 import {
   deriveRunningAgentSendTargets,
   resolveRunningAgentSendTarget
-} from '../../lib/running-agent-targets'
+} from '../../components/sidebar/running-agent-targets'
 import {
   filterSetupScriptPromptDismissalsToValidRepos,
   getSetupScriptPromptDismissalKey,
   sanitizeSetupScriptPromptDismissals
-} from '../../lib/setup-script-prompt'
-import type { YiruHookScriptKind } from '../../lib/yiru-hook-trust'
+} from '../../components/sidebar/setup-script-prompt'
+import type { YiruHookScriptKind } from '../../components/sidebar/yiru-hook-trust'
+import { agentKindForAgentType, formatAgentTypeLabel } from '../../lib/agent-status'
 import {
   getContextualTourRequestDecision,
   hasContextualTourTarget,
@@ -934,7 +934,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
 
     const label = formatAgentTypeLabel(target.entry.agentType)
     const { activeAgentNotesSendFailureMessage, sendNotesToActiveAgentSession } =
-      await import('@/lib/active-agent-note-send')
+      await import('@/components/editor/active-agent-note-send')
     const result = await sendNotesToActiveAgentSession({
       state: get(),
       worktreeId: mode.worktreeId,

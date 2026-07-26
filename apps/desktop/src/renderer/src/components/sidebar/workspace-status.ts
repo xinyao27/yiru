@@ -16,7 +16,7 @@ import {
   getWorkspaceStatusFromGroupKey,
   getWorkspaceStatusGroupKey,
   isWorkspaceStatusId
-} from '../../../../shared/workspace-statuses'
+} from '../../../../shared/workspace/statuses'
 import {
   getWorkspaceStatusIconOptions,
   type WorkspaceStatusIconOption

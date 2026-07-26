@@ -1,9 +1,9 @@
-import { SessionFileDiscoveryLimitError } from './session-scanner-discovery'
 import {
-  SPOOL_SESSION_INVENTORY_MAX_CANDIDATES,
-  SPOOL_SESSION_INVENTORY_MAX_PATH_BYTES,
-  SPOOL_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES
-} from './spool-session-inventory-source-discovery'
+  COWORKING_SESSION_INVENTORY_MAX_CANDIDATES,
+  COWORKING_SESSION_INVENTORY_MAX_PATH_BYTES,
+  COWORKING_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES
+} from './coworking-session-inventory-source-discovery'
+import { SessionFileDiscoveryLimitError } from './session/scanner-discovery'
 
 export type RemoteSessionInventoryBudget = {
   entries: number
@@ -18,7 +18,7 @@ export function createRemoteSessionInventoryBudget(): RemoteSessionInventoryBudg
 export function remainingRemoteSessionInventoryEntries(
   budget: RemoteSessionInventoryBudget
 ): number {
-  return SPOOL_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES - budget.entries
+  return COWORKING_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES - budget.entries
 }
 
 export function consumeRemoteSessionInventoryEntry(
@@ -28,8 +28,8 @@ export function consumeRemoteSessionInventoryEntry(
   budget.entries++
   budget.pathBytes += Buffer.byteLength(path, 'utf8')
   if (
-    budget.entries > SPOOL_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES ||
-    budget.pathBytes > SPOOL_SESSION_INVENTORY_MAX_PATH_BYTES
+    budget.entries > COWORKING_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES ||
+    budget.pathBytes > COWORKING_SESSION_INVENTORY_MAX_PATH_BYTES
   ) {
     throw new SessionFileDiscoveryLimitError()
   }
@@ -37,7 +37,7 @@ export function consumeRemoteSessionInventoryEntry(
 
 export function consumeRemoteSessionInventoryCandidate(budget: RemoteSessionInventoryBudget): void {
   budget.candidates++
-  if (budget.candidates > SPOOL_SESSION_INVENTORY_MAX_CANDIDATES) {
+  if (budget.candidates > COWORKING_SESSION_INVENTORY_MAX_CANDIDATES) {
     throw new SessionFileDiscoveryLimitError()
   }
 }

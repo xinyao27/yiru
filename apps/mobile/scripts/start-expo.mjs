@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process'
 import path from 'node:path'
 import process from 'node:process'
 
-import { ensureMobileExpoCli } from './mobile-expo-cli.mjs'
+import { ensureMobileExpoCli } from './expo-cli.mjs'
 
 const scriptDir = import.meta.dirname
 const mobileDir = path.resolve(scriptDir, '..')

@@ -8,7 +8,7 @@ import {
   type WorktreeRuntimeOwnerState
 } from '@/lib/worktree-runtime-owner'
 
-import type { PtyTransport } from './pty-transport-types'
+import type { PtyTransport } from './pty/transport-types'
 import type { PaneCwdMap } from './resolve-split-cwd'
 
 const REMOTE_RUNTIME_PTY_ID_PREFIX = 'remote:'

@@ -13,6 +13,8 @@ import {
 
 import { resolveDiffCommentPopoverTop } from './diff-comment-popover-position'
 
+import './diff-comment-styles.css'
+
 // Why: rendered as a DOM sibling overlay inside the editor container rather
 // than as a Monaco content widget because it owns a React textarea with
 // auto-resize behaviour. Positioning mirrors what useDiffCommentDecorator does

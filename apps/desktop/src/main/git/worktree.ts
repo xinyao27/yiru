@@ -8,24 +8,24 @@ import {
   branchHasNoUnmergedChangesOnAnyTarget,
   getBranchCleanupTargetRefs,
   refreshBranchCleanupTargetRefs
-} from '../../shared/git-branch-cleanup'
-import { decodeGitCQuotedPath } from '../../shared/git-cquoted-path'
-import { parseGitRevListAheadBehindCounts } from '../../shared/git-rev-list-output'
+} from '../../shared/git/branch-cleanup'
+import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
+import { parseGitRevListAheadBehindCounts } from '../../shared/git/rev-list-output'
 import {
   hasUnsupportedRevParsePathFormatEcho,
   isUnsupportedRevParsePathFormatError,
   isUnsupportedWorktreeListZError
-} from '../../shared/git-worktree-command-capabilities'
+} from '../../shared/git/worktree-command-capabilities'
 import type {
   GitWorktreeInfo,
   LocalBaseRefRefreshResult,
   LocalBaseRefUpdateSuggestion,
   RemoveWorktreeResult
 } from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
-import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/worktree-submodule-removal'
-import { getLocalGitCapabilityCache } from './git-capability-state'
+import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
+import { isSubmoduleWorktreeRemovalRefusal } from '../../shared/workspace/worktree-submodule-removal'
+import { getLocalGitCapabilityCache } from './capability-state'
 import { gitExecFileAsync, translateWslOutputPaths } from './runner'
 import { resolveGitDir, runWithGitReadCacheInvalidation } from './status'
 import { hasWorktreeBaseCommitRef } from './worktree-base-ref-probe'
@@ -1024,7 +1024,7 @@ async function performAddWorktree(
     await persistWorktreeCreationBase(worktreePath, branch, effectiveBase, options)
   }
 
-  // SSH parity: src/relay/git-handler-worktree-ops.ts addWorktreeOp mirrors this exact
+  // SSH parity: src/relay/git/handler-worktree-ops.ts addWorktreeOp mirrors this exact
   // probe-and-write state machine. If you change the logic here, update
   // the relay handler in lockstep so local and SSH paths stay aligned.
   //

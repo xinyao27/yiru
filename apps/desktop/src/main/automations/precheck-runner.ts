@@ -2,10 +2,10 @@ import { spawn, type ChildProcess } from 'node:child_process'
 
 import type { ClientChannel } from 'ssh2'
 
-import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '../../shared/automation-precheck'
+import { MAX_AUTOMATION_PRECHECK_OUTPUT_CHARS } from '../../shared/automation/precheck'
 import type { AutomationPrecheck, AutomationPrecheckResult } from '../../shared/automations-types'
-import { getSshConnectionManager } from '../ipc/ssh'
-import { shellEscape } from '../ssh/ssh-connection-utils'
+import { shellEscape } from '../ssh/connection-utils'
+import { getSshConnectionManager } from '../ssh/ssh'
 
 type AutomationPrecheckExecutionTarget =
   | {

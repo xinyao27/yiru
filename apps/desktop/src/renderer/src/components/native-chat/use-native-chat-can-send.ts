@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { getDriverForPty, onDriverChange } from '@/lib/pane-manager/mobile-driver-state'
 
-import { deriveNativeChatCanSend } from './native-chat-send-eligibility'
+import { deriveNativeChatCanSend } from './send-eligibility'
 
 /**
  * Track the mobile presence-lock for this chat pane's live pty and derive the

@@ -6,7 +6,7 @@ import {
   showYiruCliRegistrationPromptToast
 } from '@/lib/agent-skill-cli-prerequisite'
 
-import { buildAgentFeatureSkillInstallCommand } from '../../../../shared/agent-feature-install-commands'
+import { buildAgentFeatureSkillInstallCommand } from '../../../../shared/agent/feature-install-commands'
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
 import {
   quotePowerShellLiteral,

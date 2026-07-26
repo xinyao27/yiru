@@ -1,5 +1,5 @@
 import { getCommandTokenPathBasename, getFirstCommandToken } from './command-token-scanner'
-import { TUI_AGENT_CONFIG } from './tui-agent-config'
+import { TUI_AGENT_CONFIG } from './tui-agent/config'
 
 /**
  * Pi-compatible agent kinds. Both Pi and OMP (omp.sh) consume the same

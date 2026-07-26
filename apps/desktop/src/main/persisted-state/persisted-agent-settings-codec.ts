@@ -4,8 +4,8 @@ import {
   hasUnsupportedTuiAgentArgs,
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../shared/tui-agent-launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../shared/tui-agent-selection'
+} from '../../shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '../../shared/tui-agent/selection'
 import type { GlobalSettings } from '../../shared/types'
 
 export type PersistedAgentSettingsDecodeResult = {

@@ -23,8 +23,8 @@ renderer and Electron. Keeping the IPC surface co-located in one file makes secu
 review and type drift checks easier than scattering these bindings across modules. */
 import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
 
-import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
 import type {
   Automation,
@@ -44,6 +44,24 @@ import type {
 import type { CliInstallStatus } from '../shared/cli-install-types'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
+  CoworkingDecideControlArgs,
+  CoworkingRequestControlArgs,
+  CoworkingRequesterInvokeArgs,
+  CoworkingRequesterSubscriptionArgs,
+  CoworkingRequesterSubscriptionEvent,
+  CoworkingRequesterSubscriptionStartResult,
+  CoworkingRequesterSubscriptionStopArgs,
+  CoworkingRequesterSubscriptionStopResult,
+  CoworkingRevokeControlArgs,
+  CoworkingSetProjectVisibilityArgs,
+  CoworkingSetWorktreeVisibilityArgs,
+  CoworkingSharingSnapshot
+} from '../shared/coworking/ipc-contract'
+import type {
+  CoworkingWindowsFirewallRepairResult,
+  CoworkingWindowsFirewallStatus
+} from '../shared/coworking/windows-firewall-contract'
+import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
   CrashReportSubmitArgs,
@@ -57,7 +75,7 @@ import {
 } from '../shared/editor-save-events'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { AppStarSource } from '../shared/gh-star-source'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
@@ -136,32 +154,14 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '../shared/speech-types'
-import type {
-  SpoolDecideControlArgs,
-  SpoolRequestControlArgs,
-  SpoolRequesterInvokeArgs,
-  SpoolRequesterSubscriptionArgs,
-  SpoolRequesterSubscriptionEvent,
-  SpoolRequesterSubscriptionStartResult,
-  SpoolRequesterSubscriptionStopArgs,
-  SpoolRequesterSubscriptionStopResult,
-  SpoolRevokeControlArgs,
-  SpoolSetProjectVisibilityArgs,
-  SpoolSetWorktreeVisibilityArgs,
-  SpoolSharingSnapshot
-} from '../shared/spool/spool-ipc-contract'
-import type {
-  SpoolWindowsFirewallRepairResult,
-  SpoolWindowsFirewallStatus
-} from '../shared/spool/spool-windows-firewall-contract'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {
   WarpThemeImportPreview,
   WarpThemeImportSource
-} from '../shared/terminal-custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-facts'
-import type { TerminalViewAttributes } from '../shared/terminal-view-attributes'
+} from '../shared/terminal/custom-themes'
+import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
+import type { TerminalViewAttributes } from '../shared/terminal/view-attributes'
 import type {
   BaseRefSearchResult,
   BaseRefDefaultResult,
@@ -209,9 +209,9 @@ import {
   YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '../shared/updater-renderer-events'
-import type { WorkspaceCleanupScanProgress } from '../shared/workspace-cleanup'
-import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace-ports'
-import type { WorkspaceSpaceScanProgress } from '../shared/workspace-space-types'
+import type { WorkspaceCleanupScanProgress } from '../shared/workspace/cleanup'
+import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace/ports'
+import type { WorkspaceSpaceScanProgress } from '../shared/workspace/space-types'
 import type { PreflightRuntimeContext, RefreshAgentsResult } from './api-types'
 import type {
   NativeChatAppendedPayload,
@@ -1446,7 +1446,7 @@ const api = {
 
     // Why: the app renderer owns the work-item-details cache. Main targets this
     // bridge for non-origin mutations; origin callers already updated their
-    // cache optimistically — see src/main/ipc/github.ts.
+    // cache optimistically — see src/main/github/github.ts.
     onWorkItemMutated: (
       callback: (payload: { repoPath: string; repoId?: string; type: 'pr'; number: number }) => void
     ): (() => void) => {
@@ -3794,51 +3794,54 @@ const api = {
     }
   },
 
-  spoolSharing: {
-    getSnapshot: (): Promise<SpoolSharingSnapshot> =>
-      ipcRenderer.invoke('spoolSharing:getSnapshot'),
-    setWorktreeVisibility: (args: SpoolSetWorktreeVisibilityArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:setWorktreeVisibility', args),
-    setProjectVisibility: (args: SpoolSetProjectVisibilityArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:setProjectVisibility', args),
-    requestControl: (args: SpoolRequestControlArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:requestControl', args),
-    decideControl: (args: SpoolDecideControlArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:decideControl', args),
-    revokeControl: (args: SpoolRevokeControlArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:revokeControl', args),
-    getWindowsFirewallStatus: (): Promise<SpoolWindowsFirewallStatus> =>
-      ipcRenderer.invoke('spoolSharing:getWindowsFirewallStatus'),
-    repairWindowsFirewall: (): Promise<SpoolWindowsFirewallRepairResult> =>
-      ipcRenderer.invoke('spoolSharing:repairWindowsFirewall'),
-    retryAvailability: (): Promise<void> => ipcRenderer.invoke('spoolSharing:retryAvailability'),
-    invoke: (args: SpoolRequesterInvokeArgs): Promise<unknown> =>
-      ipcRenderer.invoke('spoolSharing:invoke', args),
+  coworkingSharing: {
+    getSnapshot: (): Promise<CoworkingSharingSnapshot> =>
+      ipcRenderer.invoke('coworkingSharing:getSnapshot'),
+    setWorktreeVisibility: (args: CoworkingSetWorktreeVisibilityArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:setWorktreeVisibility', args),
+    setProjectVisibility: (args: CoworkingSetProjectVisibilityArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:setProjectVisibility', args),
+    requestControl: (args: CoworkingRequestControlArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:requestControl', args),
+    decideControl: (args: CoworkingDecideControlArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:decideControl', args),
+    revokeControl: (args: CoworkingRevokeControlArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:revokeControl', args),
+    getWindowsFirewallStatus: (): Promise<CoworkingWindowsFirewallStatus> =>
+      ipcRenderer.invoke('coworkingSharing:getWindowsFirewallStatus'),
+    repairWindowsFirewall: (): Promise<CoworkingWindowsFirewallRepairResult> =>
+      ipcRenderer.invoke('coworkingSharing:repairWindowsFirewall'),
+    retryAvailability: (): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:retryAvailability'),
+    invoke: (args: CoworkingRequesterInvokeArgs): Promise<unknown> =>
+      ipcRenderer.invoke('coworkingSharing:invoke', args),
     startSubscription: (
-      args: SpoolRequesterSubscriptionArgs
-    ): Promise<SpoolRequesterSubscriptionStartResult> =>
-      ipcRenderer.invoke('spoolSharing:startSubscription', args),
+      args: CoworkingRequesterSubscriptionArgs
+    ): Promise<CoworkingRequesterSubscriptionStartResult> =>
+      ipcRenderer.invoke('coworkingSharing:startSubscription', args),
     stopSubscription: (
-      args: SpoolRequesterSubscriptionStopArgs
-    ): Promise<SpoolRequesterSubscriptionStopResult> =>
-      ipcRenderer.invoke('spoolSharing:stopSubscription', args),
+      args: CoworkingRequesterSubscriptionStopArgs
+    ): Promise<CoworkingRequesterSubscriptionStopResult> =>
+      ipcRenderer.invoke('coworkingSharing:stopSubscription', args),
     onSubscriptionEvent: (
-      callback: (event: SpoolRequesterSubscriptionEvent) => void
+      callback: (event: CoworkingRequesterSubscriptionEvent) => void
     ): (() => void) => {
       const listener = (
         _event: Electron.IpcRendererEvent,
-        subscriptionEvent: SpoolRequesterSubscriptionEvent
+        subscriptionEvent: CoworkingRequesterSubscriptionEvent
       ): void => callback(subscriptionEvent)
-      ipcRenderer.on('spoolSharing:subscriptionEvent', listener)
-      return () => ipcRenderer.removeListener('spoolSharing:subscriptionEvent', listener)
+      ipcRenderer.on('coworkingSharing:subscriptionEvent', listener)
+      return () => ipcRenderer.removeListener('coworkingSharing:subscriptionEvent', listener)
     },
-    onChanged: (callback: (snapshot: SpoolSharingSnapshot) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, snapshot: SpoolSharingSnapshot): void =>
-        callback(snapshot)
-      ipcRenderer.on('spoolSharing:changed', listener)
-      return () => ipcRenderer.removeListener('spoolSharing:changed', listener)
+    onChanged: (callback: (snapshot: CoworkingSharingSnapshot) => void): (() => void) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        snapshot: CoworkingSharingSnapshot
+      ): void => callback(snapshot)
+      ipcRenderer.on('coworkingSharing:changed', listener)
+      return () => ipcRenderer.removeListener('coworkingSharing:changed', listener)
     }
-  } satisfies PreloadApi['spoolSharing'],
+  } satisfies PreloadApi['coworkingSharing'],
 
   minimaxCredentials: {
     getStatus: (): Promise<{ configured: boolean }> =>

@@ -13,8 +13,8 @@ import type {
   MobileComposerCreateSelection,
   MobileLinkedWorkItem,
   SmartNameSelection
-} from './mobile-composer-source-types'
-import type { WorkspaceCreateGitPushTarget } from './workspace-create-params'
+} from './composer-source-types'
+import type { WorkspaceCreateGitPushTarget } from './params'
 
 export function buildGitHubLinkedWorkItem(item: {
   type: 'pr'

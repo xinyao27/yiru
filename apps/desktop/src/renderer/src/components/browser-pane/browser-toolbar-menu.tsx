@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { useMountedRef } from '@/hooks/use-mounted-ref'
@@ -8,7 +8,7 @@ import { useAppStore } from '@/store'
 import {
   browserViewportPresetToOverride,
   getBrowserViewportPreset
-} from '../../../../shared/browser-viewport-presets'
+} from '../../../../shared/browser/viewport-presets'
 import type { BrowserViewportPresetId } from '../../../../shared/types'
 import { shouldShowBrowserImportHint } from './browser-import-hint-visibility'
 import { BrowserToolbarMenuDropdown } from './browser-toolbar-menu-dropdown'
@@ -66,20 +66,18 @@ export function BrowserToolbarMenu({
   const [pendingSwitchProfileId, setPendingSwitchProfileId] = useState<string | null | undefined>(
     undefined
   )
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const mountedRef = useMountedRef()
 
-  useLayoutEffect(() => {
-    // Why: step 3 falls back to the Import Cookies row inside this menu, so open
-    // it only when the tour reaches that step and the hint button is hidden.
-    setMenuOpen(shouldForceMenuOpen)
-  }, [shouldForceMenuOpen])
+  // Why: step 3 falls back to the Import Cookies row inside this menu, so force
+  // it open once the tour reaches that step and the hint button is hidden.
+  const menuOpen = shouldForceMenuOpen || userMenuOpen
 
   const handleMenuOpenChange = (open: boolean): void => {
     if (shouldForceMenuOpen && !open) {
       return
     }
-    setMenuOpen(open)
+    setUserMenuOpen(open)
   }
 
   const effectiveProfileId = currentProfileId ?? 'default'

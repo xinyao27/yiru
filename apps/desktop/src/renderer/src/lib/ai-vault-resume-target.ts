@@ -12,8 +12,8 @@ import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import type { AppState } from '@/store/types'
 
 import type { Repo } from '../../../shared/types'
-import { parseWorkspaceKey } from '../../../shared/workspace-scope'
-import { getFolderWorkspaceCandidateRepos } from './folder-workspace-connection'
+import { parseWorkspaceKey } from '../../../shared/workspace/scope'
+import { getFolderWorkspaceCandidateRepos } from '../components/editor/folder-workspace-connection'
 
 export type AiVaultResumeTargetStatus = 'local' | 'ssh' | 'runtime' | 'unknown'
 

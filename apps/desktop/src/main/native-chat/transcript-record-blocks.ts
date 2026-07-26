@@ -8,7 +8,7 @@ import type {
   NativeChatToolResultBlock
 } from '@yiru/workbench-model/agent'
 
-import { asRecord, extractString } from '../ai-vault/session-scanner-values'
+import { asRecord, extractString } from '../ai-vault/session/scanner-values'
 
 /** Coerce an arbitrary tool-result payload into a single output string. */
 export function toolResultOutput(value: unknown): string {

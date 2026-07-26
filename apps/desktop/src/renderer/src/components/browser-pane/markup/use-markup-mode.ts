@@ -11,9 +11,9 @@ import {
   captureMarkupBaseImage,
   type MarkupBaseImage,
   type MarkupCaptureSource
-} from './markup-base-image'
-import type { MarkupShape } from './markup-drawing-model'
-import { composeMarkupDataUrl, type MarkupComposeResult } from './markup-screenshot-compose'
+} from './base-image'
+import type { MarkupShape } from './drawing-model'
+import { composeMarkupDataUrl, type MarkupComposeResult } from './screenshot-compose'
 
 export type MarkupModeState = 'idle' | 'capturing' | 'drawing' | 'composing'
 

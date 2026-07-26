@@ -7,7 +7,7 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import { shouldShowUsagePercentageDisplayChangeNotice } from '../../../../shared/usage-percentage-display-change-notice'
-import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '../settings/appearance-usage-percentage-search'
+import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '../settings/appearance/usage-percentage-search'
 
 // Why: let startup modals settle before the status-bar callout competes for focus.
 const SHOW_DELAY_MS = 1_800
@@ -76,9 +76,19 @@ export function UsagePercentageDisplayChangeNotice({
     activeModal
   })
 
+  // Why: reset the elapsed flag synchronously during render rather than in an
+  // effect, so an eligible → ineligible → eligible cycle starts a fresh
+  // episode and restarts the delay instead of reusing the previous episode's
+  // elapsed flag. See
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [previousEligible, setPreviousEligible] = useState(eligible)
+  if (eligible !== previousEligible) {
+    setPreviousEligible(eligible)
+    setDelayElapsed(false)
+  }
+
   useEffect(() => {
     if (!eligible) {
-      setDelayElapsed(false)
       return
     }
     const timer = window.setTimeout(() => {

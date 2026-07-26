@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { addNonGitFolderAndActivate } from '@/components/sidebar/add-non-git-folder-command'
+import { markOnboardingProjectAdded } from '@/components/sidebar/onboarding-project-checklist'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,9 +13,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
-import { addNonGitFolderAndActivate } from '@/lib/add-non-git-folder-command'
 import { buildDismissedOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
-import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { useAppStore } from '@/store'
 

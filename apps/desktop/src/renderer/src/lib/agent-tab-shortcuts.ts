@@ -3,8 +3,8 @@ import {
   type AgentTabActionId,
   type KeybindingOverrides
 } from '../../../shared/keybindings'
-import { ALL_TUI_AGENTS } from '../../../shared/tui-agent-display-names'
-import { normalizeDisabledTuiAgents, pickTuiAgent } from '../../../shared/tui-agent-selection'
+import { ALL_TUI_AGENTS } from '../../../shared/tui-agent/display-names'
+import { normalizeDisabledTuiAgents, pickTuiAgent } from '../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../shared/types'
 
 export type BoundAgentTabAction = {

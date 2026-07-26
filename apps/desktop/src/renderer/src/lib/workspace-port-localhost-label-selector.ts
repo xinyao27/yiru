@@ -2,7 +2,7 @@ import { useAppStore } from '@/store'
 
 import type { LocalhostWorktreeLabelRoute } from '../../../shared/localhost-worktree-labels'
 import type { GlobalSettings, Project, Repo } from '../../../shared/types'
-import type { WorkspacePort } from '../../../shared/workspace-ports'
+import type { WorkspacePort } from '../../../shared/workspace/ports'
 import { localhostWorktreeLabelRouteForPort } from './workspace-port-localhost-label'
 
 // Why: the port → repo → worktree → project resolution feeding

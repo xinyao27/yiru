@@ -3,11 +3,11 @@ import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import { getConnectionIdFromState } from '@/lib/connection-context'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
+import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/terminal-stream'
 import type { AppState } from '@/store/types'
 
-import type { PtyTransport } from './pty-transport-types'
-import { isWslShellOverride } from './terminal-paste-runtime'
+import { isWslShellOverride } from './paste/runtime'
+import type { PtyTransport } from './pty/transport-types'
 
 type TerminalInputHostPlatformState = Pick<
   AppState,

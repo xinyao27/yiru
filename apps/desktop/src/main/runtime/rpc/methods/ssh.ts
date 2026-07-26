@@ -5,7 +5,7 @@ import {
   getRegisteredSshState,
   listRegisteredRemovedSshTargetLabels,
   listRegisteredSshTargets
-} from '../../../ipc/ssh'
+} from '../../../ssh/ssh'
 import { defineMethod, type RpcMethod } from '../core'
 
 const SshTarget = z.object({

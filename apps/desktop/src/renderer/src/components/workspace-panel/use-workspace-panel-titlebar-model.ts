@@ -2,6 +2,7 @@ import type { IconProps } from '@phosphor-icons/react'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo } from 'react'
 
+import type { ActiveRightSidebarTab } from '@/components/editor/state'
 import {
   getLocalFileManagerLabel,
   getPreferredWorktreeOpenInEntry,
@@ -14,7 +15,6 @@ import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
-import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import {
@@ -22,7 +22,7 @@ import {
   WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID,
   WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID,
   type WorkspaceTitlebarActionId
-} from '../../../../shared/workspace-panel-titlebar-pinned'
+} from '../../../../shared/workspace/panel-titlebar-pinned'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import {
   itemIconWeight,

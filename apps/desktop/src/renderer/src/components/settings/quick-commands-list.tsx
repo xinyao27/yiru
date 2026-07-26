@@ -8,13 +8,13 @@ import {
   getTerminalQuickCommandBody,
   getTerminalQuickCommandScope,
   isTerminalAgentQuickCommand
-} from '../../../../shared/terminal-quick-commands'
+} from '../../../../shared/terminal/quick-commands'
 import type {
   Repo,
   TerminalQuickCommand,
   TerminalQuickCommandScope
 } from '../../../../shared/types'
-import { RepoBadgeMark } from '../repo/repo-badge-label'
+import { RepoBadgeMark } from '../repo/badge-label'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { getQuickCommandRepoLabel } from './quick-commands-scope-filter'

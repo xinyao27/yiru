@@ -2,9 +2,9 @@ import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
-import type { AntigravityWorkspaceResolver } from './session-scanner-antigravity-history'
-import type { FileWithMtime } from './session-scanner-types'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
+import type { AntigravityWorkspaceResolver } from './session/scanner-antigravity-history'
+import type { FileWithMtime } from './session/scanner-types'
 
 export type RemoteScannerContext = {
   provider: IFilesystemProvider

@@ -4,7 +4,7 @@ import { mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
 import type { PersistedState } from '../../shared/types'
-import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from '../startup/startup-diagnostics'
+import { isStartupDiagnosticsEnabled, logStartupDiagnostic } from '../startup/diagnostics'
 import {
   hasDurableStateBackup,
   restoreDurableStateBackup,

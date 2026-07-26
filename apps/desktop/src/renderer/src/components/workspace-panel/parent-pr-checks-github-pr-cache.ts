@@ -1,11 +1,11 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import { LOCAL_EXECUTION_HOST_ID, normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import { isCachedMergedBranchPRCurrentForWorktree } from '@/components/sidebar/worktree-card-pr-display'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import type { AppState } from '@/store/types'
 
 import type { PRInfo, Repo, Worktree } from '../../../../shared/types'
+import { isCachedMergedBranchPRCurrentForWorktree } from '../sidebar/worktree-card/pr-display'
 import type { ParentPrChecksCacheEntry } from './parent-pr-checks-row-types'
 
 export function canUseParentPrChecksGitHubPRCacheEntry(

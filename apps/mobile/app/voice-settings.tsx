@@ -15,7 +15,7 @@ import {
   setDictationConfig,
   type MobileSpeechModel,
   type MobileSpeechSetup
-} from '../src/dictation/mobile-dictation-setup'
+} from '../src/dictation/setup'
 import { useAllHostClients } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'

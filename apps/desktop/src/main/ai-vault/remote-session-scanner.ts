@@ -7,7 +7,7 @@ import { isPathInsideOrEqual } from '@yiru/workbench-model/platform'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import {
   codexRolloutHardlinkIdentity,
   dedupeCodexRolloutFileAliases,
@@ -16,9 +16,9 @@ import {
 import { discoverRemoteSourceCandidates } from './remote-session-scanner-discovery'
 import { remoteSessionSources } from './remote-session-scanner-sources'
 import type { RemoteScannerContext, RemoteSessionCandidate } from './remote-session-scanner-types'
-import { sessionSortTime } from './session-scanner-accumulator'
-import { createAntigravityWorkspaceResolver } from './session-scanner-antigravity-history'
-import { errorMessage } from './session-scanner-values'
+import { sessionSortTime } from './session/scanner-accumulator'
+import { createAntigravityWorkspaceResolver } from './session/scanner-antigravity-history'
+import { errorMessage } from './session/scanner-values'
 
 const DEFAULT_REMOTE_SCAN_LIMIT = 1000
 const REMOTE_SCAN_CONCURRENCY = 8

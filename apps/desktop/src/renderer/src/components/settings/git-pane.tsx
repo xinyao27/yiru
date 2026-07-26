@@ -6,8 +6,8 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import { getBranchPrefixIssue } from '../../../../shared/branch-prefix'
-import type { SourceControlAiSettingsPatch } from '../../../../shared/source-control-ai-types'
-import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from '../../../../shared/source-control-group-order'
+import type { SourceControlAiSettingsPatch } from '../../../../shared/source-control/ai-types'
+import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from '../../../../shared/source-control/group-order'
 import type { GlobalSettings, SourceControlGroupOrder } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { Input } from '../ui/input'
@@ -19,14 +19,14 @@ import {
   CompareAgainstUpstreamSetting,
   compareAgainstUpstreamMatchesSearch
 } from './compare-against-upstream-setting'
+import { SettingsRow, SettingsSegmentedControl } from './form-controls'
 import { getGitPaneSearchEntries } from './git-search'
 import {
   KEEP_LOCAL_MAIN_UP_TO_DATE_SECTION_ID,
   getKeepLocalMainUpToDateTitle
 } from './keep-local-main-up-to-date-setting'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 export { getGitPaneSearchEntries }
 

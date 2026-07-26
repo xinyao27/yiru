@@ -1,8 +1,8 @@
 import type { PRCheckRunDetails } from '@yiru/workbench-model/review'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 
-import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { presentCheckDetail, type CheckDetailJob } from './pr-check-detail-content'
+import { mobilePrSidebarStyles as styles } from './styles'
 
 // Per-check lazily-fetched detail. `loading`/`error` track the in-flight fetch;
 // `details` (once set) is the cache so collapse/re-expand never re-fetches.

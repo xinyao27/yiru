@@ -5,7 +5,7 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 
-import { PullRequestIcon } from './checks-panel-content'
+import { PullRequestIcon } from './checks-panel/content'
 
 function hostedReviewStateClass(review: HostedReviewInfo): string {
   if (review.state === 'merged') {

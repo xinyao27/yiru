@@ -1,6 +1,6 @@
-import { formatAutomationPrecheckTimeout } from '../shared/automation-precheck'
-import { getAutomationLegacyRepoId } from '../shared/automation-run-identity'
-import { formatAutomationSchedule } from '../shared/automation-schedules'
+import { formatAutomationPrecheckTimeout } from '../shared/automation/precheck'
+import { getAutomationLegacyRepoId } from '../shared/automation/run-identity'
+import { formatAutomationSchedule } from '../shared/automation/schedules'
 import type { Automation, AutomationRun } from '../shared/automations-types'
 import type { PublicKnownRuntimeEnvironment } from '../shared/runtime-environments'
 import type {

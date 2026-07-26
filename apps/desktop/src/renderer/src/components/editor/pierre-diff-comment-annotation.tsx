@@ -1,8 +1,8 @@
 import { DiffCommentCard } from '@/components/diff-comments/diff-comment-card'
 import type { DecoratedDiffComment } from '@/components/diff-comments/use-diff-comment-decorator'
+import { getDiffCommentLineLabel } from '@/components/editor/diff-comment-compat'
+import { formatDiffComments } from '@/components/editor/diff-comments-format'
 import { translate } from '@/i18n/i18n'
-import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
-import { formatDiffComments } from '@/lib/diff-comments-format'
 import { useAppStore } from '@/store'
 
 import { NotesSendMenu } from './notes-send-menu'

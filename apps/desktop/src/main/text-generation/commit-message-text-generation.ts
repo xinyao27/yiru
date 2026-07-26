@@ -12,23 +12,23 @@ import {
   getCommitMessageAgentSpec,
   type CommitMessageAgentCapability,
   type CommitMessageModelCapability
-} from '../../shared/commit-message-agent-spec'
+} from '../../shared/commit-message/agent-spec'
 import {
   buildCommitMessagePrompt,
   splitGeneratedCommitMessage,
   type CommitMessageDraftContext,
   type GeneratedCommitMessage
-} from '../../shared/commit-message-generation'
-import { LOCAL_COMMIT_MESSAGE_HOST_KEY } from '../../shared/commit-message-host-key'
+} from '../../shared/commit-message/generation'
+import { LOCAL_COMMIT_MESSAGE_HOST_KEY } from '../../shared/commit-message/host-key'
 import {
   planAgentBinary,
   planCommitMessageGeneration,
   type CommitMessagePlan
-} from '../../shared/commit-message-plan'
+} from '../../shared/commit-message/plan'
 import {
   cleanGeneratedCommitMessage,
   excerptAgentFailureOutput
-} from '../../shared/commit-message-prompt'
+} from '../../shared/commit-message/prompt'
 import {
   buildPullRequestFieldsPrompt,
   parseGeneratedPullRequestFields,
@@ -38,11 +38,11 @@ import {
 import {
   resolveSourceControlAiForOperation,
   type ResolvedSourceControlAiGenerationParams
-} from '../../shared/source-control-ai'
-import { renderSourceControlActionCommandTemplate } from '../../shared/source-control-ai-actions'
-import type { SourceControlAiOperation } from '../../shared/source-control-ai-types'
+} from '../../shared/source-control/ai'
+import { renderSourceControlActionCommandTemplate } from '../../shared/source-control/ai-actions'
+import type { SourceControlAiOperation } from '../../shared/source-control/ai-types'
 import type { GlobalSettings, Repo, TuiAgent } from '../../shared/types'
-import { resolveCliCommand } from '../codex-cli/command'
+import { resolveCliCommand } from '../codex/cli/command'
 import { wslAwareSpawn } from '../git/runner'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import {

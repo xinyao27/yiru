@@ -1,9 +1,9 @@
 import { Editor } from '@tiptap/core'
 
 import { encodeRawMarkdownHtmlForRichEditor } from './raw-markdown-html'
-import { createRichMarkdownExtensions } from './rich-markdown-extensions'
-import { createRichMarkdownHtmlSuperscriptLinkContext } from './rich-markdown-html-superscript-link-context'
-import { createRichMarkdownEditorCodec } from './rich-markdown-source-transport'
+import { createRichMarkdownExtensions } from './rich-markdown/extensions'
+import { createRichMarkdownHtmlSuperscriptLinkContext } from './rich-markdown/html-superscript-link-context'
+import { createRichMarkdownEditorCodec } from './rich-markdown/source-transport'
 
 const roundTripCache = new Map<string, string | null>()
 const MAX_CACHE_ENTRIES = 20

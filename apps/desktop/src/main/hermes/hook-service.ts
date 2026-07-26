@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path'
 import type { SFTPWrapper } from 'ssh2'
 import { parse, stringify } from 'yaml'
 
-import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent-hook-types'
+import type { AgentHookInstallState, AgentHookInstallStatus } from '../../shared/agent/hook-types'
 import {
   readTextFileRemote,
   writeTextFileRemoteAtomic

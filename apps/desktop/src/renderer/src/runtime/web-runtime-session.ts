@@ -16,9 +16,8 @@ import { deliverLaunchPromptToAgentTab } from '../lib/agent-launch-prompt-delive
 import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owner'
 import { useAppStore } from '../store'
 import type { AppState } from '../store/types'
-import { unwrapRuntimeRpcResult } from './runtime-rpc-client'
-import { parseRemoteRuntimePtyId } from './runtime-terminal-stream'
-import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
+import { unwrapRuntimeRpcResult } from './rpc-client'
+import { parseRemoteRuntimePtyId } from './terminal-stream'
 import { recordWebSessionCloseIntent } from './web-session-close-intent'
 import {
   closeWebSessionTabCommand,
@@ -32,6 +31,7 @@ import {
   toHostSessionTabId,
   toWebTerminalSurfaceTabId
 } from './web-terminal-surface-id'
+import { toRuntimeWorktreeSelector } from './worktree-selector'
 
 export {
   HOST_TERMINAL_SURFACE_SEPARATOR,

@@ -5,21 +5,18 @@ import {
 } from '../../shared/runtime-file-watch-limits'
 import type { FsChangeEvent } from '../../shared/types'
 import {
-  WATCHER_IGNORE_DIRS,
-  buildParcelWatcherIgnoreOptions
-} from '../ipc/filesystem-watcher-ignore'
-import {
   forgetRuntimeWatcherProcessRoot,
   subscribeViaRuntimeWatcherProcess,
   type WatcherProcessEvent,
   type WatcherProcessSubscription
-} from '../ipc/parcel-watcher-process'
+} from '../filesystem/parcel-watcher-process'
 import {
   isWatcherProcessFailure,
   type WatcherProcessFailure
-} from '../ipc/parcel-watcher-process-failure'
-import { createRuntimeRootOwnershipReleaser } from './runtime-root-watch-ownership'
-import { closeRuntimeRootWatch } from './runtime-root-watch-teardown'
+} from '../filesystem/parcel-watcher-process-failure'
+import { WATCHER_IGNORE_DIRS, buildParcelWatcherIgnoreOptions } from '../filesystem/watcher-ignore'
+import { createRuntimeRootOwnershipReleaser } from './root-watch-ownership'
+import { closeRuntimeRootWatch } from './root-watch-teardown'
 
 const RUNTIME_FILE_WATCH_IGNORE_OPTIONS = buildParcelWatcherIgnoreOptions(WATCHER_IGNORE_DIRS)
 const RUNTIME_FILE_WATCH_EVENT_LIMIT = 200

@@ -25,7 +25,7 @@ import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { AgentSkillSetupPanel } from './agent-skill-setup-panel'
+import { AgentSkillSetupPanel } from './agent/skill-setup-panel'
 import { CliRegistrationDialog } from './cli-registration-dialog'
 import {
   buildSkillCommandForRuntime,

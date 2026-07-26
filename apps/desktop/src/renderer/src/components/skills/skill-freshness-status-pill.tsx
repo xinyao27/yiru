@@ -1,7 +1,8 @@
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
-import { useSkillFreshness } from '@/hooks/use-skill-freshness'
 import { translate } from '@/i18n/i18n'
 import { getSkillFreshnessDisplayStatus } from '@/lib/skill-freshness-display-status'
+
+import { useSkillFreshness } from './use-skill-freshness'
 
 // Why: the setup rails' Installed pill is presence-only; when freshness knows a
 // safe update exists (or that every copy is current) the pill should say so.

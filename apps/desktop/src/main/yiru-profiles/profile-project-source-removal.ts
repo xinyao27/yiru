@@ -1,5 +1,5 @@
 import type { WorkspaceKey } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../shared/workspace/scope'
 import {
   removeRepoFromHostWorkspaceSessions,
   removeRepoFromWorkspaceSession

@@ -1,9 +1,9 @@
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
+import { SettingsRow, SettingsSegmentedControl } from './form-controls'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { SettingsRow, SettingsSegmentedControl } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 type SourceControlCompareBasePolicy = 'repository-default' | 'branch-upstream'
 

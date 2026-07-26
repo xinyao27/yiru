@@ -5,14 +5,14 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { Check, Pencil, Play, Plus, Trash } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { MobileAgentIcon } from '../components/mobile-agent-icon'
-import { MobileSearchField } from '../components/mobile-search-field'
+import { MobileAgentIcon } from '../components/agent-icon'
+import { MobileSearchField } from '../components/search-field'
 import {
   getQuickCommandDisplayPreview,
   isAgentQuickCommand,
   supportsTerminalAgentQuickCommand
 } from '../terminal/quick-commands'
-import { MOBILE_AGENT_CATALOG } from '../workspace-create/mobile-agent-catalog'
+import { MOBILE_AGENT_CATALOG } from '../workspace-create/agent-catalog'
 
 export const QUICK_COMMAND_SUPPORTED_AGENTS = MOBILE_AGENT_CATALOG.filter((entry) =>
   supportsTerminalAgentQuickCommand(entry.id)

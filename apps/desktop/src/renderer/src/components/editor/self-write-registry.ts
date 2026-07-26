@@ -1,0 +1,107 @@
+import { normalizeAbsolutePathForComparison } from '../workspace-panel/file-explorer/paths'
+
+// Why: the editor's own save path writes to disk, which fans out as an
+// fs:changed event back to useEditorExternalWatch a few ms later. Treating
+// our own write as an "external" change schedules a setContent reload that
+// resets the TipTap selection to the end of the document mid-typing — and,
+// because the RichMarkdownEditor guards (lastCommittedMarkdownRef + current
+// getMarkdown() round-trip) can drift by a trailing newline or soft-break,
+// the reload can silently drop unsaved keystrokes as well. Stamping a path
+// right before writeFile lets the watch hook ignore the echo event without
+// touching the editor at all. Keyed by execution host + normalized absolute
+// path, bounded by a short TTL so a genuinely external edit that lands after
+// the window still gets picked up.
+const SELF_WRITE_TTL_MS = 750
+// Why: SSH/runtime watcher echoes travel a poll-plus-network path and can
+// land seconds after the write. A local-sized TTL lets the echo arrive after
+// the stamp expired, which raises a false changed-on-disk banner on remote
+// tabs while typing with autosave on.
+export const SELF_WRITE_REMOTE_TTL_MS = 3000
+const SELF_WRITE_MAX_STAMPS = 256
+
+export type RecentSelfWrite = {
+  content: string | null
+}
+
+type SelfWriteStamp = RecentSelfWrite & {
+  expiresAt: number
+}
+
+const stamps = new Map<string, SelfWriteStamp>()
+
+export function getEditorSelfWriteHostId(
+  runtimeEnvironmentId?: string | null,
+  connectionId?: string | null
+): string | null {
+  const runtime = runtimeEnvironmentId?.trim()
+  if (runtime) {
+    return `runtime:${runtime}`
+  }
+  const connection = connectionId?.trim()
+  return connection ? `ssh:${connection}` : null
+}
+
+function selfWriteKey(absolutePath: string, executionHostId?: string | null): string {
+  return `${executionHostId?.trim() || 'client'}::${normalizeAbsolutePathForComparison(absolutePath)}`
+}
+
+function pruneExpiredSelfWrites(now = Date.now()): void {
+  for (const [key, stamp] of stamps) {
+    if (now > stamp.expiresAt) {
+      stamps.delete(key)
+    }
+  }
+}
+
+function enforceSelfWriteStampLimit(): void {
+  while (stamps.size > SELF_WRITE_MAX_STAMPS) {
+    const oldest = stamps.keys().next().value
+    if (oldest === undefined) {
+      break
+    }
+    stamps.delete(oldest)
+  }
+}
+
+export function recordSelfWrite(
+  absolutePath: string,
+  content?: string,
+  executionHostId?: string | null,
+  ttlMs: number = SELF_WRITE_TTL_MS
+): void {
+  const now = Date.now()
+  pruneExpiredSelfWrites(now)
+  const key = selfWriteKey(absolutePath, executionHostId)
+  // Why: a missing watcher echo should not leave stale path/content stamps in
+  // memory for the whole renderer session.
+  stamps.delete(key)
+  stamps.set(key, {
+    content: content ?? null,
+    expiresAt: now + ttlMs
+  })
+  enforceSelfWriteStampLimit()
+}
+
+export function clearSelfWrite(absolutePath: string, executionHostId?: string | null): void {
+  stamps.delete(selfWriteKey(absolutePath, executionHostId))
+}
+
+export function getRecentSelfWrite(
+  absolutePath: string,
+  executionHostId?: string | null
+): RecentSelfWrite | null {
+  const key = selfWriteKey(absolutePath, executionHostId)
+  const stamp = stamps.get(key)
+  if (!stamp) {
+    return null
+  }
+  if (Date.now() > stamp.expiresAt) {
+    stamps.delete(key)
+    return null
+  }
+  return { content: stamp.content }
+}
+
+export function hasRecentSelfWrite(absolutePath: string, executionHostId?: string | null): boolean {
+  return getRecentSelfWrite(absolutePath, executionHostId) !== null
+}

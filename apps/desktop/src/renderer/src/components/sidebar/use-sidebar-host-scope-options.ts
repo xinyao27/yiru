@@ -8,7 +8,7 @@ import {
   buildSidebarHostScopeOptions,
   type SidebarHostOption,
   type SidebarHostScopeOption
-} from './sidebar-host-options'
+} from './host-options'
 
 /** Shared host-scope derivation for the sidebar scope strip and the workspace
  * options menu so both surfaces consume the same live runtime status without

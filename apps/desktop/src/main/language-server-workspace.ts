@@ -10,7 +10,6 @@ import type {
   LanguageServerLocationResult,
   LanguageServerSettings
 } from '../shared/language-server'
-import { getActiveSshHostPlatform } from './ipc/ssh'
 import {
   authorizedLanguageServerRelativePath,
   languageServerDisplayPath,
@@ -20,6 +19,7 @@ import {
 } from './language-server-host-path'
 import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
 import type { IFilesystemProvider } from './providers/types'
+import { getActiveSshHostPlatform } from './ssh/ssh'
 import { inspectWslLanguageServerPath } from './wsl-language-server-filesystem'
 
 export type LanguageServerStore = {

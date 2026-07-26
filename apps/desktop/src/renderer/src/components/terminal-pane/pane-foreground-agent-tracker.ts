@@ -1,9 +1,9 @@
-import type { PaneForegroundAgentEntry } from '@/store/slices/pane-foreground-agent'
+import type { PaneForegroundAgentEntry } from '@/components/terminal-pane/pane-foreground-agent-state'
 
 import {
   isAgentForegroundWrapperProcess,
   recognizeAgentProcess
-} from '../../../../shared/agent-process-recognition'
+} from '../../../../shared/agent/process-recognition'
 import { isShellProcess } from '../../../../shared/shell-process-detection'
 import type { TuiAgent } from '../../../../shared/types'
 

@@ -1,4 +1,4 @@
-import { formatWindowLabel } from '@/lib/window-label-formatter'
+import { formatWindowLabel } from '@/components/status-bar/window-label-formatter'
 
 import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
 import { clampUsedPercent } from '../../../../shared/usage-percentage-display'

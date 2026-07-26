@@ -11,8 +11,8 @@ import {
   getMobileLoaderStyleLabel,
   MOBILE_LOADER_STYLES,
   type MobileLoaderStyle
-} from '../src/loading/mobile-loader-style'
-import { useMobileLoaderStyle } from '../src/loading/mobile-loader-style-context'
+} from '../src/loading/loader-style'
+import { useMobileLoaderStyle } from '../src/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
   const router = useRouter()

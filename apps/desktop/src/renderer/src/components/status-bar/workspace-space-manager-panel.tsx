@@ -37,14 +37,14 @@ import type { GitStatusResult, Repo, TerminalTab, Worktree } from '../../../../s
 import type {
   WorkspaceSpaceItem,
   WorkspaceSpaceWorktree
-} from '../../../../shared/workspace-space-types'
-import type { WorktreeForceDeleteReason } from '../../../../shared/worktree-removal'
+} from '../../../../shared/workspace/space-types'
+import type { WorktreeForceDeleteReason } from '../../../../shared/workspace/worktree-removal'
 import { useAppStore } from '../../store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '../../store/selectors'
 import { getHostedReviewCacheKey } from '../../store/slices/hosted-review'
 import { prepareActiveWorktreeFocusAfterDelete } from '../sidebar/active-worktree-focus-after-delete'
-import { runWorktreeBatchDelete } from '../sidebar/delete-worktree-flow'
-import { branchDisplayName } from '../sidebar/worktree-card-helpers'
+import { runWorktreeBatchDelete } from '../sidebar/delete-worktree/flow'
+import { branchDisplayName } from '../sidebar/worktree-card/helpers'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import {

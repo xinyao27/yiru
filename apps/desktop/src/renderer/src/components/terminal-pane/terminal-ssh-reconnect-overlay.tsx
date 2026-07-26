@@ -10,10 +10,10 @@ import { translate } from '@/i18n/i18n'
 import {
   connectRuntimeEnvironmentSshTarget,
   resyncRuntimeEnvironmentSshTargets
-} from '@/runtime/runtime-environment-ssh-state'
+} from '@/runtime/environment-ssh-state'
 import { useAppStore } from '@/store'
 
-import { runWorktreeDelete } from '../sidebar/delete-worktree-flow'
+import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 
 type TerminalSshReconnectOverlayProps = {
   targetId: string

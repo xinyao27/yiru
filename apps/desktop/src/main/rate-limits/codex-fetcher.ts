@@ -18,7 +18,7 @@ import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
 } from '../../shared/wsl-login-shell-command'
-import { resolveCodexCommand } from '../codex-cli/command'
+import { resolveCodexCommand } from '../codex/cli/command'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
 import { getCmdExePath, getSpawnArgsForWindows } from '../win32-utils'
 import {

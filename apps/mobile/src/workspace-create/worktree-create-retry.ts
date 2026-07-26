@@ -6,7 +6,7 @@ import {
 
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
-import { WORKTREE_CREATE_TIMEOUT_MS } from './workspace-create-timeout'
+import { WORKTREE_CREATE_TIMEOUT_MS } from './timeout'
 
 // Why: server-side collision checks (branch already exists locally / on a remote
 // / already has PR #N) can fire even after a pre-flight basename dedupe —

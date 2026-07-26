@@ -32,11 +32,21 @@ import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffe
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
+import { CoworkingProjectVisibilityDialog } from '@/components/coworking/worktree-visibility-dialog'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { RepoForkIndicator } from '@/components/repo/repo-fork-indicator'
-import { RepoIconGlyph } from '@/components/repo/repo-icon'
-import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'
-import { SpoolProjectVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
+import { RepoForkIndicator } from '@/components/repo/fork-indicator'
+import { RepoIconGlyph } from '@/components/repo/icon'
+import {
+  getFolderWorkspacePathStatusDescription,
+  getFolderWorkspacePathStatusTitle
+} from '@/components/sidebar/folder-workspace-path-status'
+import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
+import { deriveRunningAgentSendTargets } from '@/components/sidebar/running-agent-targets'
+import {
+  SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
+  type ScrollToCurrentWorkspaceRevealRequestDetail
+} from '@/components/sidebar/scroll-to-current-workspace-status'
+import { persistWorktreeSortOrderByHost } from '@/components/sidebar/worktree-sort-order-persistence'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -55,23 +65,12 @@ import {
 } from '@/hooks/use-virtualized-scroll-anchor'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import {
-  getFolderWorkspacePathStatusDescription,
-  getFolderWorkspacePathStatusTitle
-} from '@/lib/folder-workspace-path-status'
-import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/lib/folder-workspace-path-status-cache-expiry'
 import { rightSidebarShowsPullRequestData } from '@/lib/right-sidebar-visibility'
-import { deriveRunningAgentSendTargets } from '@/lib/running-agent-targets'
-import {
-  SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
-  type ScrollToCurrentWorkspaceRevealRequestDetail
-} from '@/lib/scroll-to-current-workspace-status'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { track } from '@/lib/telemetry'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { getWorktreeIdsWithLiveAgent } from '@/lib/worktree-activity-state'
-import { persistWorktreeSortOrderByHost } from '@/lib/worktree-sort-order-persistence'
 import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/runtime/virtualized-scroll-anchor-record-request'
 import { useAppStore } from '@/store'
 import {
@@ -86,6 +85,7 @@ import type { PendingSidebarRowReveal, PendingSidebarWorktreeReveal } from '@/st
 import type { AppState } from '@/store/types'
 
 import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
+import type { CoworkingOwnerControlGrantView } from '../../../../shared/coworking/ipc-contract'
 import {
   isConfirmedStaleFolderPathStatus,
   type FolderWorkspacePathStatus
@@ -94,7 +94,6 @@ import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-w
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'
 import type {
   Worktree,
   Repo,
@@ -107,14 +106,19 @@ import type {
   WorkspaceStatus,
   WorkspaceStatusDefinition
 } from '../../../../shared/types'
-import { folderWorkspaceKey, getActiveSidebarWorkspaceId } from '../../../../shared/workspace-scope'
+import { folderWorkspaceKey, getActiveSidebarWorkspaceId } from '../../../../shared/workspace/scope'
 import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
-} from '../../../../shared/worktree-ownership'
+} from '../../../../shared/workspace/worktree-ownership'
+import { getRepositoryIconSectionId } from '../settings/repository/settings-targets'
+import { CoworkingSidebarProjectedRow } from './coworking-sidebar-projected-row'
+import { projectCoworkingSidebarRows, type CoworkingSidebarRow } from './coworking-sidebar-rows'
+import { SidebarDisclosure } from './disclosure'
 import { getEmptyProjectPlaceholderRepoIds } from './empty-project-placeholder-repos'
 import { getFolderWorkspaceCardPrDisplay } from './folder-workspace-card-pr-display'
 import { useHostHeaderDrag } from './host-header-drag'
+import { buildSidebarHostOptions } from './host-options'
 import { HostSectionHeaderMenu } from './host-section-header-menu'
 import { orderHostSectionOptions } from './host-section-order'
 import { addHostSectionRows, type HostHeaderRow, type HostSectionRow } from './host-section-rows'
@@ -145,6 +149,7 @@ import { ProjectGroupDeleteDialog } from './project-group-delete-dialog'
 import { useProjectGroupHeaderDrag } from './project-group-header-drag'
 import { getSidebarOrderedProjectGroupHeaderIdsByBucket } from './project-group-header-drop'
 import { ProjectGroupNameDialog } from './project-group-name-dialog'
+import { SidebarProjectHeader } from './project-header'
 import { ProjectHeaderActions } from './project-header-actions'
 import { resolveProjectGroupHeaderColor } from './project-header-color'
 import { isRepoHeaderActionTarget, useRepoHeaderDrag } from './project-header-drag'
@@ -157,9 +162,6 @@ import {
   REPO_HEADER_ACTION_REVEAL_CLASS
 } from './repo-header-action-button-class'
 import { getRepoHeaderCreateState } from './repo-header-create-state'
-import { SidebarDisclosure } from './sidebar-disclosure'
-import { buildSidebarHostOptions } from './sidebar-host-options'
-import { SidebarProjectHeader } from './sidebar-project-header'
 import {
   buildAttentionByWorktree,
   hasFreshAttributedAgentStatus,
@@ -167,8 +169,6 @@ import {
   type WorktreeAttention
 } from './smart-attention'
 import { buildWorktreeComparator, compareWorktreeSortLabel } from './smart-sort'
-import { SpoolSidebarProjectedRow } from './spool-sidebar-projected-row'
-import { projectSpoolSidebarRows, type SpoolSidebarRow } from './spool-sidebar-rows'
 import SuppressExternalWorktreeInboxDialog from './suppress-external-worktree-inbox-dialog'
 import { useWorkspaceStatusDocumentDrop } from './use-workspace-status-drop'
 import {
@@ -186,8 +186,8 @@ import {
   extractWorkspaceSidebarVirtualRowIndexes,
   getWorkspaceSidebarRowKey,
   projectWorkspaceSidebarRows,
-  SPOOL_REMOTE_WORKTREES_HEADER_KEY,
-  shouldShowSpoolWindowsFirewallDiagnostic,
+  COWORKING_REMOTE_WORKTREES_HEADER_KEY,
+  shouldShowCoworkingWindowsFirewallDiagnostic,
   type WorkspaceSidebarProjectedRow,
   workspaceIndexForLocalRowIndex,
   workspaceSidebarStickyRangeStart
@@ -200,7 +200,7 @@ import {
   readWorkspaceDragDataIds
 } from './workspace-status'
 import WorktreeCard, { type ActiveSurfaceVariant } from './worktree-card'
-import { SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT } from './worktree-card-agents'
+import { SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT } from './worktree-card/agents'
 import {
   getFullDropIndexForWorktreeDragUnit,
   getWorktreeDragUnitGroups
@@ -619,16 +619,16 @@ function getWorktreeVisibilityMenuLabel(repo: Repo): string {
 }
 
 const SIDEBAR_POINTER_DRAG_THRESHOLD_PX = 4
-const EMPTY_SPOOL_REMOTE_DESKTOPS = [] as const
-const EMPTY_SPOOL_OWNER_WORKTREES = [] as const
-const EMPTY_SPOOL_OWNER_CONTROL_GRANTS = [] as const
-const EMPTY_SPOOL_EXPANDED_WORKTREE_REFS_BY_DESKTOP = new Map()
+const EMPTY_COWORKING_REMOTE_DESKTOPS = [] as const
+const EMPTY_COWORKING_OWNER_WORKTREES = [] as const
+const EMPTY_COWORKING_OWNER_CONTROL_GRANTS = [] as const
+const EMPTY_COWORKING_EXPANDED_WORKTREE_REFS_BY_DESKTOP = new Map()
 
 type VirtualizedWorktreeViewportProps = {
   rows: HostSectionRow[]
-  spoolRows: readonly SpoolSidebarRow[]
-  spoolStatus: AppState['spoolSharingStatus']
-  spoolDiagnostic: string | null
+  coworkingRows: readonly CoworkingSidebarRow[]
+  coworkingStatus: AppState['coworkingSharingStatus']
+  coworkingDiagnostic: string | null
   activeWorktreeId: string | null
   currentWorktreeId: string | null
   groupBy: WorktreeGroupBy
@@ -1294,9 +1294,9 @@ function getVirtualRowKey(element: Element): string | null {
 
 const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewport({
   rows,
-  spoolRows,
-  spoolStatus,
-  spoolDiagnostic,
+  coworkingRows,
+  coworkingStatus,
+  coworkingDiagnostic,
   activeWorktreeId,
   currentWorktreeId,
   groupBy,
@@ -1357,23 +1357,24 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   scrollAnchorRef
 }: VirtualizedWorktreeViewportProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const { spoolOwnerWorktrees, spoolOwnerControlGrants } = useAppStore(
+  const { coworkingOwnerWorktrees, coworkingOwnerControlGrants } = useAppStore(
     useShallow((state) => ({
-      // Why: legacy snapshots can hydrate before the Spool slice exists.
-      spoolOwnerWorktrees: state.spoolOwnerWorktrees ?? EMPTY_SPOOL_OWNER_WORKTREES,
-      spoolOwnerControlGrants: state.spoolOwnerControlGrants ?? EMPTY_SPOOL_OWNER_CONTROL_GRANTS
+      // Why: legacy snapshots can hydrate before the Coworking slice exists.
+      coworkingOwnerWorktrees: state.coworkingOwnerWorktrees ?? EMPTY_COWORKING_OWNER_WORKTREES,
+      coworkingOwnerControlGrants:
+        state.coworkingOwnerControlGrants ?? EMPTY_COWORKING_OWNER_CONTROL_GRANTS
     }))
   )
-  const [spoolProjectPublicationTarget, setSpoolProjectPublicationTarget] = useState<{
+  const [coworkingProjectPublicationTarget, setCoworkingProjectPublicationTarget] = useState<{
     projectId: string
     projectName: string
   } | null>(null)
-  const [spoolProjectVisibilityPending, setSpoolProjectVisibilityPending] = useState<
+  const [coworkingProjectVisibilityPending, setCoworkingProjectVisibilityPending] = useState<
     ReadonlySet<string>
   >(new Set())
-  const spoolProjectVisibility = useMemo(() => {
+  const coworkingProjectVisibility = useMemo(() => {
     const byProject = new Map<string, { count: number; publicCount: number }>()
-    for (const worktree of spoolOwnerWorktrees) {
+    for (const worktree of coworkingOwnerWorktrees) {
       if (!worktree.projectId) {
         continue
       }
@@ -1385,58 +1386,60 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       byProject.set(worktree.projectId, current)
     }
     return byProject
-  }, [spoolOwnerWorktrees])
-  const spoolControlGrantsByWorktreeId = useMemo(() => {
+  }, [coworkingOwnerWorktrees])
+  const coworkingControlGrantsByWorktreeId = useMemo(() => {
     // Why: virtual worktree cards receive owner grants as data instead of each
     // subscribing to the global store independently.
-    const result = new Map<string, SpoolOwnerControlGrantView[]>()
-    for (const grant of spoolOwnerControlGrants) {
+    const result = new Map<string, CoworkingOwnerControlGrantView[]>()
+    for (const grant of coworkingOwnerControlGrants) {
       const worktreeGrants = result.get(grant.worktreeId) ?? []
       worktreeGrants.push(grant)
       result.set(grant.worktreeId, worktreeGrants)
     }
     return result
-  }, [spoolOwnerControlGrants])
-  const [spoolRevokingGrantIds, setSpoolRevokingGrantIds] = useState<ReadonlySet<string>>(new Set())
+  }, [coworkingOwnerControlGrants])
+  const [coworkingRevokingGrantIds, setCoworkingRevokingGrantIds] = useState<ReadonlySet<string>>(
+    new Set()
+  )
   // Why: revoke IPC can reply before the authority snapshot removes its row;
   // keep the action disabled until that authoritative removal arrives.
   useEffect(() => {
-    const liveGrantIds = new Set(spoolOwnerControlGrants.map((grant) => grant.grantId))
-    setSpoolRevokingGrantIds((current) => {
+    const liveGrantIds = new Set(coworkingOwnerControlGrants.map((grant) => grant.grantId))
+    setCoworkingRevokingGrantIds((current) => {
       const retained = new Set([...current].filter((grantId) => liveGrantIds.has(grantId)))
       return retained.size === current.size ? current : retained
     })
-  }, [spoolOwnerControlGrants])
-  const revokeSpoolControlGrant = useCallback((grantId: string): void => {
-    setSpoolRevokingGrantIds((current) => new Set(current).add(grantId))
-    void window.api.spoolSharing.revokeControl({ grantId }).catch(() => {
-      setSpoolRevokingGrantIds((current) => {
+  }, [coworkingOwnerControlGrants])
+  const revokeCoworkingControlGrant = useCallback((grantId: string): void => {
+    setCoworkingRevokingGrantIds((current) => new Set(current).add(grantId))
+    void window.api.coworkingSharing.revokeControl({ grantId }).catch(() => {
+      setCoworkingRevokingGrantIds((current) => {
         const next = new Set(current)
         next.delete(grantId)
         return next
       })
       toast.error(
         translate(
-          'auto.components.spool.SpoolOwnerControlGrants.revokeFailed',
+          'auto.components.coworking.CoworkingOwnerControlGrants.revokeFailed',
           'Could not revoke remote control.'
         )
       )
     })
   }, [])
-  const makeSpoolProjectPrivate = useCallback((projectId: string) => {
-    setSpoolProjectVisibilityPending((current) => new Set(current).add(projectId))
-    void window.api.spoolSharing
+  const makeCoworkingProjectPrivate = useCallback((projectId: string) => {
+    setCoworkingProjectVisibilityPending((current) => new Set(current).add(projectId))
+    void window.api.coworkingSharing
       .setProjectVisibility({ projectId, visibility: 'private' })
       .catch(() => {
         toast.error(
           translate(
-            'auto.components.sidebar.WorktreeList.spoolProjectPrivateFailed',
+            'auto.components.sidebar.WorktreeList.coworkingProjectPrivateFailed',
             'Could not make these worktrees private.'
           )
         )
       })
       .finally(() => {
-        setSpoolProjectVisibilityPending((current) => {
+        setCoworkingProjectVisibilityPending((current) => {
           const next = new Set(current)
           next.delete(projectId)
           return next
@@ -1720,13 +1723,13 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     () =>
       projectWorkspaceSidebarRows({
         localRows: renderRows,
-        spoolRows,
-        spoolStatus,
-        spoolDiagnostic,
-        remoteWorktreesCollapsed: collapsedGroups.has(SPOOL_REMOTE_WORKTREES_HEADER_KEY),
+        coworkingRows,
+        coworkingStatus,
+        coworkingDiagnostic,
+        remoteWorktreesCollapsed: collapsedGroups.has(COWORKING_REMOTE_WORKTREES_HEADER_KEY),
         getLocalRowKey: getRenderRowKey
       }),
-    [collapsedGroups, renderRows, spoolDiagnostic, spoolRows, spoolStatus]
+    [collapsedGroups, renderRows, coworkingDiagnostic, coworkingRows, coworkingStatus]
   )
   const workspaceStickyRows = useMemo(
     () =>
@@ -2610,6 +2613,17 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       toggleGroup(groupKey)
     },
     [recordCurrentScrollAnchor, toggleGroup]
+  )
+  // Why: one stable callback shared by every WorktreeCard row instead of a
+  // per-row closure over its group key — WorktreeCard is React.memo'd, and a
+  // fresh closure per row would rebuild every visible card on each render.
+  const handleLineageToggle = useCallback(
+    (groupKey: string, event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      toggleGroupWithScrollAnchor(groupKey)
+    },
+    [toggleGroupWithScrollAnchor]
   )
 
   const navigateWorktree = useCallback(
@@ -4113,10 +4127,10 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                   className="absolute top-0 right-0 left-0"
                   style={{ transform: getVirtualRowTransform(vItem.start) }}
                 >
-                  <SpoolSidebarProjectedRow
+                  <CoworkingSidebarProjectedRow
                     projected={projected}
                     onToggleRemoteWorktrees={() =>
-                      toggleGroupWithScrollAnchor(SPOOL_REMOTE_WORKTREES_HEADER_KEY)
+                      toggleGroupWithScrollAnchor(COWORKING_REMOTE_WORKTREES_HEADER_KEY)
                     }
                   />
                 </div>
@@ -4270,16 +4284,16 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                 isRepoHeader || isProjectGroupHeader
                   ? getProjectGroupHeaderPaddingLeft(projectGroupDepth)
                   : WORKTREE_SECTION_HEADER_PADDING_LEFT
-              const spoolProjectId = row.repo
+              const coworkingProjectId = row.repo
                 ? (getProjectIdFromHeaderRowKey(row.key) ?? row.repo.id)
                 : null
-              const projectSpoolVisibility = spoolProjectId
-                ? spoolProjectVisibility.get(spoolProjectId)
+              const projectCoworkingVisibility = coworkingProjectId
+                ? coworkingProjectVisibility.get(coworkingProjectId)
                 : undefined
               const allProjectWorktreesPublic = Boolean(
-                projectSpoolVisibility &&
-                projectSpoolVisibility.count > 0 &&
-                projectSpoolVisibility.publicCount === projectSpoolVisibility.count
+                projectCoworkingVisibility &&
+                projectCoworkingVisibility.count > 0 &&
+                projectCoworkingVisibility.publicCount === projectCoworkingVisibility.count
               )
               return (
                 <div
@@ -4656,18 +4670,18 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                 {getWorktreeVisibilityMenuLabel(row.repo)}
                               </DropdownMenuItem>
                             ) : null}
-                            {row.repo && spoolProjectId && projectSpoolVisibility ? (
+                            {row.repo && coworkingProjectId && projectCoworkingVisibility ? (
                               <DropdownMenuItem
-                                disabled={spoolProjectVisibilityPending.has(spoolProjectId)}
+                                disabled={coworkingProjectVisibilityPending.has(coworkingProjectId)}
                                 onClick={() => {
                                   if (!row.repo) {
                                     return
                                   }
                                   if (allProjectWorktreesPublic) {
-                                    makeSpoolProjectPrivate(spoolProjectId)
+                                    makeCoworkingProjectPrivate(coworkingProjectId)
                                   } else {
-                                    setSpoolProjectPublicationTarget({
-                                      projectId: spoolProjectId,
+                                    setCoworkingProjectPublicationTarget({
+                                      projectId: coworkingProjectId,
                                       projectName: row.label
                                     })
                                   }
@@ -4680,11 +4694,11 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                 )}
                                 {allProjectWorktreesPublic
                                   ? translate(
-                                      'auto.components.sidebar.WorktreeList.makeSpoolProjectPrivate',
+                                      'auto.components.sidebar.WorktreeList.makeCoworkingProjectPrivate',
                                       'Make all worktrees private'
                                     )
                                   : translate(
-                                      'auto.components.sidebar.WorktreeList.makeSpoolProjectPublic',
+                                      'auto.components.sidebar.WorktreeList.makeCoworkingProjectPublic',
                                       'Make all worktrees public'
                                     )}
                               </DropdownMenuItem>
@@ -4971,18 +4985,13 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                     lineageCollapsed={itemRow.lineageCollapsed}
                     lineageChildren={lineageChildren}
                     lineageChildrenStyle={lineageChildrenStyle}
-                    onLineageToggle={
-                      lineageToggleGroupKey
-                        ? (event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                            toggleGroupWithScrollAnchor(lineageToggleGroupKey)
-                          }
-                        : undefined
-                    }
-                    spoolControlGrants={spoolControlGrantsByWorktreeId.get(itemRow.worktree.id)}
-                    spoolRevokingGrantIds={spoolRevokingGrantIds}
-                    onRevokeSpoolControlGrant={revokeSpoolControlGrant}
+                    onLineageToggle={lineageToggleGroupKey ? handleLineageToggle : undefined}
+                    lineageToggleGroupKey={lineageToggleGroupKey}
+                    coworkingControlGrants={coworkingControlGrantsByWorktreeId.get(
+                      itemRow.worktree.id
+                    )}
+                    coworkingRevokingGrantIds={coworkingRevokingGrantIds}
+                    onRevokeCoworkingControlGrant={revokeCoworkingControlGrant}
                   />
                 </div>
               )
@@ -5207,9 +5216,11 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       onSelectionGesture={onSelectionGesture}
                       onContextMenuSelect={onContextMenuSelect}
                       statusPrDisplay={folderPrDisplay}
-                      spoolControlGrants={spoolControlGrantsByWorktreeId.get(folderWorktree.id)}
-                      spoolRevokingGrantIds={spoolRevokingGrantIds}
-                      onRevokeSpoolControlGrant={revokeSpoolControlGrant}
+                      coworkingControlGrants={coworkingControlGrantsByWorktreeId.get(
+                        folderWorktree.id
+                      )}
+                      coworkingRevokingGrantIds={coworkingRevokingGrantIds}
+                      onRevokeCoworkingControlGrant={revokeCoworkingControlGrant}
                     />
                     <div className="pointer-events-auto absolute top-1.5 right-3">
                       <FolderPathStatusIndicator status={folderWorkspacePathStatus} />
@@ -5263,13 +5274,13 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
           })}
         </div>
       </div>
-      <SpoolProjectVisibilityDialog
-        open={spoolProjectPublicationTarget !== null}
-        projectId={spoolProjectPublicationTarget?.projectId ?? ''}
-        projectName={spoolProjectPublicationTarget?.projectName ?? ''}
+      <CoworkingProjectVisibilityDialog
+        open={coworkingProjectPublicationTarget !== null}
+        projectId={coworkingProjectPublicationTarget?.projectId ?? ''}
+        projectName={coworkingProjectPublicationTarget?.projectName ?? ''}
         onOpenChange={(open) => {
           if (!open) {
-            setSpoolProjectPublicationTarget(null)
+            setCoworkingProjectPublicationTarget(null)
           }
         }}
       />
@@ -5292,27 +5303,28 @@ const WorktreeList = React.memo(function WorktreeList({
   scrollAnchorRef
 }: WorktreeListProps) {
   // ── Granular selectors (each is a primitive or shallow-stable ref) ──
-  const spoolSidebarProjectionInput = useAppStore(
+  const coworkingSidebarProjectionInput = useAppStore(
     useShallow((state) => ({
-      // Why: legacy persisted/test snapshots predate Spool state; treating the
+      // Why: legacy persisted/test snapshots predate Coworking state; treating the
       // absent slice as empty keeps ordinary Projects renderable during hydration.
-      desktops: state.spoolRemoteDesktops ?? EMPTY_SPOOL_REMOTE_DESKTOPS,
+      desktops: state.coworkingRemoteDesktops ?? EMPTY_COWORKING_REMOTE_DESKTOPS,
       expandedWorktreeRefsByDesktop:
-        state.spoolExpandedWorktreeRefsByDesktop ?? EMPTY_SPOOL_EXPANDED_WORKTREE_REFS_BY_DESKTOP,
-      activeRoute: state.activeSpoolWorkspaceRoute ?? null,
-      status: state.spoolSharingStatus ?? 'starting',
-      diagnostic: state.spoolSharingDiagnostic ?? null
+        state.coworkingExpandedWorktreeRefsByDesktop ??
+        EMPTY_COWORKING_EXPANDED_WORKTREE_REFS_BY_DESKTOP,
+      activeRoute: state.activeCoworkingWorkspaceRoute ?? null,
+      status: state.coworkingSharingStatus ?? 'starting',
+      diagnostic: state.coworkingSharingDiagnostic ?? null
     }))
   )
-  const spoolRows = useMemo(
-    () => projectSpoolSidebarRows(spoolSidebarProjectionInput),
-    [spoolSidebarProjectionInput]
+  const coworkingRows = useMemo(
+    () => projectCoworkingSidebarRows(coworkingSidebarProjectionInput),
+    [coworkingSidebarProjectionInput]
   )
-  const hasSpoolSidebarContent =
-    spoolRows.length > 0 ||
-    shouldShowSpoolWindowsFirewallDiagnostic(
-      spoolSidebarProjectionInput.status,
-      spoolSidebarProjectionInput.diagnostic
+  const hasCoworkingSidebarContent =
+    coworkingRows.length > 0 ||
+    shouldShowCoworkingWindowsFirewallDiagnostic(
+      coworkingSidebarProjectionInput.status,
+      coworkingSidebarProjectionInput.diagnostic
     )
   const allWorktrees = useAllWorktrees()
   const repoMap = useRepoMap()
@@ -6159,7 +6171,7 @@ const WorktreeList = React.memo(function WorktreeList({
   // Why: full-page navigation views are not scoped to one worktree, so no
   // sidebar card should appear selected while one of them is active.
   const selectedSidebarWorktreeId =
-    activeView === 'activity' || spoolSidebarProjectionInput.activeRoute !== null
+    activeView === 'activity' || coworkingSidebarProjectionInput.activeRoute !== null
       ? null
       : currentSidebarWorktreeId
 
@@ -6810,7 +6822,7 @@ const WorktreeList = React.memo(function WorktreeList({
     importedWorktreesByRepo.size === 0
   // Why: Project Group headers can render before workspace rows load, but when
   // active filters hide everything the Clear Filters empty state must win.
-  if ((rows.length === 0 || filtersHideAllRows) && !hasSpoolSidebarContent) {
+  if ((rows.length === 0 || filtersHideAllRows) && !hasCoworkingSidebarContent) {
     return (
       <div
         data-worktree-sidebar-container
@@ -6926,9 +6938,9 @@ const WorktreeList = React.memo(function WorktreeList({
       <VirtualizedWorktreeViewport
         key={viewportResetKey}
         rows={sectionRows}
-        spoolRows={spoolRows}
-        spoolStatus={spoolSidebarProjectionInput.status}
-        spoolDiagnostic={spoolSidebarProjectionInput.diagnostic}
+        coworkingRows={coworkingRows}
+        coworkingStatus={coworkingSidebarProjectionInput.status}
+        coworkingDiagnostic={coworkingSidebarProjectionInput.diagnostic}
         activeWorktreeId={selectedSidebarWorktreeId}
         currentWorktreeId={currentSidebarWorktreeId}
         groupBy={groupBy}

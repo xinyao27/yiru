@@ -1,12 +1,12 @@
 import {
   inspectRuntimeTerminalProcess,
   sendRuntimePtyInputVerified
-} from '@/runtime/runtime-terminal-inspection'
+} from '@/runtime/terminal-inspection'
 
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess
-} from '../../../shared/agent-process-recognition'
+} from '../../../shared/agent/process-recognition'
 import { isShellProcess } from '../../../shared/shell-process-detection'
 import type { GlobalSettings } from '../../../shared/types'
 

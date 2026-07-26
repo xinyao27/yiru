@@ -4,9 +4,9 @@
 // it finds out exactly once, whichever signal fires first.
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 
-import { AGENT_HOOK_NOTIFICATION_METHOD } from '../../shared/agent-hook-relay'
+import { AGENT_HOOK_NOTIFICATION_METHOD } from '../../shared/agent/hook-relay'
 import { wslHookRelayConnectionId } from '../../shared/wsl-hook-relay-contract'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 
 export type WslRelayLinkOptions = {
   mux: SshChannelMultiplexer

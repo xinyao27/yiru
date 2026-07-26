@@ -2,7 +2,7 @@ import { Switch, Text, TextInput, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
-import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
+import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 
 type Props = {
   composer: MobileComposerSource

@@ -1,6 +1,6 @@
 import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { SidebarHostOption } from '../sidebar/sidebar-host-options'
+import type { SidebarHostOption } from '../sidebar/host-options'
 
 /** Sentinel scope for "edit the shared client default" rather than a host override. */
 export const CLIENT_DEFAULT_SCOPE = 'client-default'

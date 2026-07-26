@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { translate } from '@/i18n/i18n'
+
 // Decodes the Android H.264 stream (scrcpy access units forwarded over the
 // emulator:videoStream* IPC) with WebCodecs and paints it to a <canvas>. The
 // Android sibling of use-emulator-frame-stream (MJPEG/<img>). Validated against
@@ -35,6 +37,22 @@ function newVideoStreamId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
 }
 
+type VideoStreamState = {
+  error: string | null
+  streamIdentity: string | null
+}
+
+// Why: streamKey isn't read inside the effect body, only used to force a fresh
+// stream on rotate/refresh; folding it into one identity keeps that restart
+// trigger and the resolved-error tag (below) driven by a single value.
+function getVideoStreamIdentity(
+  deviceId: string | undefined,
+  streamKey: string | undefined,
+  enabled: boolean
+): string | null {
+  return enabled && deviceId ? `${deviceId}::${streamKey ?? ''}` : null
+}
+
 export function useEmulatorVideoStream(
   deviceId: string | undefined,
   streamKey: string | undefined,
@@ -42,25 +60,35 @@ export function useEmulatorVideoStream(
   onSize?: (size: StreamSize) => void
 ): { canvasRef: React.RefObject<HTMLCanvasElement | null>; error: string | null } {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [error, setError] = useState<string | null>(null)
+  const streamIdentity = getVideoStreamIdentity(deviceId, streamKey, enabled)
+  const [state, setState] = useState<VideoStreamState>({ error: null, streamIdentity: null })
   const onSizeRef = useRef(onSize)
   onSizeRef.current = onSize
 
   useEffect(() => {
     const api = (window as { api?: { emulator?: EmulatorVideoApi } }).api?.emulator
-    if (!enabled || !deviceId) {
-      setError(null)
+    // Why: the `!deviceId` check is redundant with `!streamIdentity` (identity
+    // is only non-null when deviceId is set) but narrows deviceId's type below.
+    if (!streamIdentity || !deviceId) {
       return
     }
     if (!api?.startVideoStream) {
       return
     }
-    setError(null)
+    // Why: a recurring identity (e.g. re-enabling the same device) can carry a
+    // stale error from a previous attempt; clear it before this attempt starts.
+    setState({ error: null, streamIdentity })
     const DecoderCtor = (globalThis as { VideoDecoder?: typeof VideoDecoder }).VideoDecoder
     const ChunkCtor = (globalThis as { EncodedVideoChunk?: typeof EncodedVideoChunk })
       .EncodedVideoChunk
     if (!DecoderCtor || !ChunkCtor) {
-      setError('This build does not support WebCodecs H.264 decoding.')
+      setState({
+        error: translate(
+          'auto.components.emulator.pane.use.emulator.video.stream.c3fb77cb87',
+          'This build does not support WebCodecs H.264 decoding.'
+        ),
+        streamIdentity
+      })
       return
     }
 
@@ -134,7 +162,7 @@ export function useEmulatorVideoStream(
       if (disposed) {
         return
       }
-      setError(message)
+      setState({ error: message, streamIdentity })
       cleanup()
     }
 
@@ -209,7 +237,8 @@ export function useEmulatorVideoStream(
     return () => {
       cleanup()
     }
-  }, [deviceId, streamKey, enabled])
+  }, [deviceId, streamIdentity])
 
+  const error = state.streamIdentity === streamIdentity ? state.error : null
   return { canvasRef, error }
 }

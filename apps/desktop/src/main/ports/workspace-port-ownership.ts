@@ -8,7 +8,7 @@ import type {
   WorkspacePortKillResult,
   WorkspacePortProbe,
   WorkspacePortScanResult
-} from '../../shared/workspace-ports'
+} from '../../shared/workspace/ports'
 import type { Store } from '../persistence'
 import { scanWorkspacePorts } from './local-workspace-port-scanner'
 

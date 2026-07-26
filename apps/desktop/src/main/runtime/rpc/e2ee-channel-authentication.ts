@@ -108,7 +108,7 @@ export class E2EEChannelAuthentication {
 export function freezeAuthenticatedRpcPrincipal(
   principal: AuthenticatedRpcPrincipal
 ): AuthenticatedRpcPrincipal {
-  if (principal.kind === 'spool') {
+  if (principal.kind === 'coworking') {
     return Object.freeze({ ...principal, tailnet: Object.freeze({ ...principal.tailnet }) })
   }
   return Object.freeze({ ...principal })

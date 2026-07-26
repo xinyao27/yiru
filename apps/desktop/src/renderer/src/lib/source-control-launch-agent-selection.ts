@@ -1,15 +1,15 @@
 import { getAgentCatalog } from '@/lib/agent-catalog'
 
-import { isCustomAgentId } from '../../../shared/commit-message-agent-spec'
+import { isCustomAgentId } from '../../../shared/commit-message/agent-spec'
 import {
   normalizeRepoSourceControlAiOverrides,
   resolveSourceControlActionRecipe
-} from '../../../shared/source-control-ai'
+} from '../../../shared/source-control/ai'
 import type {
   SourceControlActionId,
   SourceControlActionRecipe
-} from '../../../shared/source-control-ai-actions'
-import { filterEnabledTuiAgents } from '../../../shared/tui-agent-selection'
+} from '../../../shared/source-control/ai-actions'
+import { filterEnabledTuiAgents } from '../../../shared/tui-agent/selection'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../shared/types'
 
 export function readSourceControlLaunchRecipeAgentId(

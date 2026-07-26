@@ -1,5 +1,5 @@
-import type { ManagedPane, ManagedPaneInternal } from './pane-manager-types'
 import { cancelPendingSafeFitContinuations, safeFitAndThen } from './pane-tree-ops'
+import type { ManagedPane, ManagedPaneInternal } from './types'
 
 type ProposedDimensions = {
   cols: number

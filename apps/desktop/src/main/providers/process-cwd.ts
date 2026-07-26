@@ -4,7 +4,7 @@ import { readlink } from 'node:fs/promises'
 /**
  * Resolve the current working directory of a local process by pid.
  *
- * Why duplicated from `src/relay/pty-shell-utils.ts`: the relay and Electron
+ * Why duplicated from `src/relay/pty-shell.ts`: the relay and Electron
  * main process have separate build graphs, and cross-importing across them
  * is not a pattern used in this repo. The function is short and pure, and
  * the duplication is cheaper than reshaping both bundle graphs.

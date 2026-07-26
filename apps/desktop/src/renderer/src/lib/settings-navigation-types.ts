@@ -1,7 +1,7 @@
 import type { IconProps } from '@phosphor-icons/react'
 import type { ComponentType } from 'react'
 
-import type { SettingsSearchEntry } from '@/components/settings/settings-search'
+import type { SettingsSearchEntry } from '@/components/settings/search'
 
 export type SettingsNavIcon = ComponentType<IconProps>
 export type SettingsNavInstallStatus =

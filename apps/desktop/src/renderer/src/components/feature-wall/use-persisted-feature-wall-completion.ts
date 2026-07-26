@@ -22,7 +22,7 @@ import {
   readPersistedVisitedReviewSteps,
   readPersistedVisitedWorkbenchSteps,
   readPersistedVisitedWorkflows
-} from './feature-wall-completion-persistence'
+} from './completion-persistence'
 
 export type PersistedFeatureWallCompletionState = {
   visitedWorkflows: Set<FeatureWallWorkflowId>

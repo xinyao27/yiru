@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
 
-import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
+import { mobilePrSidebarStyles as styles } from './styles'
 
 type Props = {
   // Optional: omit for self-explanatory sections (e.g. action buttons) so the

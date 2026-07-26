@@ -21,6 +21,7 @@ import {
 /* eslint-disable max-lines -- Why: the agent-status slice co-locates live map, retained snapshots, retention-suppression, and tab-prefix sweep so the teardown contract stays readable end-to-end. Splitting across files would scatter the drop/remove/retain interactions that must stay in lockstep. */
 import type { StateCreator } from 'zustand'
 
+import { isCompletedAgentWithLiveRecoveryRecord } from '@/components/settings/completed-agent-live-recovery-record'
 import {
   getAgentRowGeneratedTitleText,
   getYiruDispatchTaskId,
@@ -28,12 +29,11 @@ import {
   orchestrationLabelsMatchLiveDispatch
 } from '@/lib/agent-row-primary-text'
 import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
-import { isCompletedAgentWithLiveRecoveryRecord } from '@/lib/completed-agent-live-recovery-record'
 
 import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
-} from '../../../../shared/agent-status-identity'
+} from '../../../../shared/agent/status-identity'
 import { isCommandCodeNewTurnWhileWorking } from '../../../../shared/command-code-turn-boundary'
 import type { TerminalTab } from '../../../../shared/types'
 import type { AppState } from '../types'

@@ -39,11 +39,12 @@ import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { ORPHAN_WORKTREE_ID } from '../../../../shared/constants'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { AppMemory, BrowserWorkspace, UsageValues, Worktree } from '../../../../shared/types'
-import { isWorkspaceOldForCleanup } from '../../../../shared/workspace-cleanup'
+import { isWorkspaceOldForCleanup } from '../../../../shared/workspace/cleanup'
 import { useAppStore } from '../../store'
 import { useWorktreeMap } from '../../store/selectors'
-import { useDaemonActions, DaemonActionDialog } from '../shared/use-daemon-actions'
-import { runWorktreeDelete } from '../sidebar/delete-worktree-flow'
+import { useDaemonActions, DaemonActionDialog } from '../daemon-actions/use-actions'
+import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
+import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 import { mergeSnapshotAndSessions, UNATTRIBUTED_REPO_ID } from './merge-snapshot-and-sessions'
 import {
   getResourceManagerAriaLabel,
@@ -79,7 +80,6 @@ import {
   resolveResourceUsageSpaceScanReady,
   type ResourceUsageSpaceScanSnapshot
 } from './resource-usage-space-scan-ready'
-import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './status-bar-context-menu-policy'
 import { WorkspaceSpaceCompactPanel } from './workspace-space-compact-panel'
 
 const POLL_MS = 2_000

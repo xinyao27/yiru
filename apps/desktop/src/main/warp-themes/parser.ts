@@ -11,7 +11,7 @@ import {
   type TerminalCustomTheme,
   type TerminalCustomThemeMode,
   type WarpThemeImportPreviewTheme
-} from '../../shared/terminal-custom-themes'
+} from '../../shared/terminal/custom-themes'
 import type { TerminalColorOverrides } from '../../shared/types'
 
 const WARP_COLOR_NAMES = [

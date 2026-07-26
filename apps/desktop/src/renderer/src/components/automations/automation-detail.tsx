@@ -7,8 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
 
-import { formatAutomationPrecheckTimeout } from '../../../../shared/automation-precheck'
-import { formatAutomationSchedule } from '../../../../shared/automation-schedules'
+import { formatAutomationPrecheckTimeout } from '../../../../shared/automation/precheck'
+import { formatAutomationSchedule } from '../../../../shared/automation/schedules'
 import type { Automation, AutomationRun } from '../../../../shared/automations-types'
 import { formatAutomationDateTimeWithRelative } from './automation-page-parts'
 import { getAutomationSourceDisplay } from './automation-source-display'

@@ -6,12 +6,12 @@ coordination so those invariants stay in one place. */
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 
+import { getCommentBodyLayoutLineCount } from '@/components/editor/comment-body-line-count'
+import { getDiffCommentLineLabel } from '@/components/editor/diff-comment-compat'
+import { formatDiffComments } from '@/components/editor/diff-comments-format'
 import { PhosphorIconContextProvider } from '@/components/phosphor-icon-context-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { getCommentBodyLayoutLineCount } from '@/lib/comment-body-line-count'
-import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'
-import { formatDiffComments } from '@/lib/diff-comments-format'
 import { useAppStore } from '@/store'
 
 import type { DiffComment } from '../../../../shared/types'
@@ -19,6 +19,8 @@ import { NotesSendMenu, type NotesSendMenuScope } from '../editor/notes-send-men
 import { DiffCommentCard } from './diff-comment-card'
 import { getDiffCommentPopoverTop } from './diff-comment-popover-position'
 import { installDiffCommentZoneMouseDownStopper } from './diff-comment-zone-mouse-events'
+
+import './diff-comment-styles.css'
 
 // Why: Monaco glyph-margin *decorations* don't expose click events in a way
 // that lets us show a polished popover anchored to a line. So instead we own a

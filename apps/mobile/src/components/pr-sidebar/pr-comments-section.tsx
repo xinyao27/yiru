@@ -5,11 +5,10 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
-import { canAddRootComment } from '../../session/pr-comment-actions'
-import type { MobilePrCommentActions } from '../../session/use-mobile-pr-comment-actions'
+import { canAddRootComment } from '../../session/pr/comment-actions'
+import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
+import type { MobilePrCommentActions } from '../../session/pr/use-comment-actions'
 import { CommentMarkdown } from './comment-markdown'
-import { mobilePrSidebarStyles as shared } from './mobile-pr-sidebar-styles'
 import {
   PR_COMMENT_AUDIENCE_FILTERS,
   filterPRCommentsByAudience,
@@ -29,6 +28,7 @@ import {
 } from './pr-comment-groups'
 import { prCommentsStyles as styles } from './pr-comments-styles'
 import { PRSection } from './pr-section'
+import { mobilePrSidebarStyles as shared } from './styles'
 
 type Props = {
   details: GitHubWorkItemDetails | null

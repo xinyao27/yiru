@@ -21,6 +21,12 @@ import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-regist
 import type { TabGroup, TuiAgent } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { mirrorWebRuntimeTabMove } from '../tab-bar/web-runtime-tab-move-mirror'
+import {
+  captureTabGroupPanelGeometrySnapshot,
+  resolveActivePaneColumnSplitTarget,
+  type ActivePaneColumnSplitTarget,
+  type TabGroupPanelGeometrySnapshot
+} from './panel-split-target'
 import { getDragPointer } from './tab-drag-pointer'
 import { TabDragPointerSensor } from './tab-drag-pointer-sensor'
 import {
@@ -31,12 +37,6 @@ import {
   type TabDragActivationSnapshot
 } from './tab-drag-preview-activation'
 import { resolveDragPreviewTabId, resolveSourceGroupRestoreOnDrop } from './tab-drag-preview-target'
-import {
-  captureTabGroupPanelGeometrySnapshot,
-  resolveActivePaneColumnSplitTarget,
-  type ActivePaneColumnSplitTarget,
-  type TabGroupPanelGeometrySnapshot
-} from './tab-group-panel-split-target'
 import {
   resolveTabInsertion,
   useHoveredTabInsertion,

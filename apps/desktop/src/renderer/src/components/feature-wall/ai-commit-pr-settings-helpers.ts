@@ -6,7 +6,7 @@ import {
   type CommitMessageAgentCapability,
   type CommitMessageAgentChoice,
   type CommitMessageModelCapability
-} from '../../../../shared/commit-message-agent-spec'
+} from '../../../../shared/commit-message/agent-spec'
 import type { CommitMessageAiSettings, GlobalSettings, TuiAgent } from '../../../../shared/types'
 
 export const EMPTY_COMMIT_MESSAGE_AI_SETTINGS: CommitMessageAiSettings = {

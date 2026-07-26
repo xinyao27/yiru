@@ -38,13 +38,7 @@
       },
       "loader": {
         "title": "ローダー",
-        "description": "Yiru 全体で使用する読み込みアニメーションを選択します。手描きアイコンは4種類のスケッチを切り替え、Thinking Orbs は6種類のドット状エージェント状態アニメーションを追加します。",
-        "drawing": "手描きアイコン",
-        "code": "コードの波括弧",
-        "macos": "macOS",
-        "square": "スクエア",
-        "flipbook": "フリップブック",
-        "escalade": "Escalade",
+        "description": "Yiru 全体で使用するドット状のエージェント状態アニメーションを選択します。",
         "orbWorking": "作業中",
         "orbSearching": "検索中",
         "orbSolving": "解決中",
@@ -1087,17 +1081,6 @@
             }
           }
         },
-        "GitHubMarkdownComposer": {
-          "015b4e607d": "キャンセル",
-          "e3bd59143c": "入れる",
-          "f24783f470": "https://...",
-          "ec6310b731": "http:// または https:// 画像 URL を使用します。",
-          "b7e4a1c902": "貼り付け、ドロップ、またはクリックしてファイルを追加",
-          "8f1c2d4e6a": "プレビューするものはありません",
-          "c91f0a2b14": "書く",
-          "d82b1e3f05": "プレビュー",
-          "imageUrlTooLarge": "画像 URL が大きすぎます。"
-        },
         "PRFilterDropdowns": {
           "979be3cf6b": "担当者",
           "b27b7e526c": "からのレビュー",
@@ -1346,6 +1329,11 @@
             "unknownBaseBlocker": "未プッシュのコミットを確認できませんでした",
             "dismissedBlocker": "無視済み"
           }
+        },
+        "panel": {
+          "titlebar": {
+            "openIn": "Open in editor"
+          }
         }
       },
       "ui": {
@@ -1369,9 +1357,6 @@
               "65a3dae41d": "プロジェクトがありません"
             }
           }
-        },
-        "sheet": {
-          "1189e9fe0a": "閉じる"
         },
         "team": {
           "multi": {
@@ -1820,7 +1805,9 @@
             "50ec9a165e": "Choose application"
           },
           "TabBarMoreButton": {
-            "more": "その他"
+            "more": "その他",
+            "panelsSection": "Titlebar actions",
+            "panelsEmptyHint": "Drag an action here to hide it from the titlebar"
           }
         }
       },
@@ -2918,22 +2905,6 @@
           "69969ba364": "送信中…",
           "d245c4ef6c": "GitHub issues"
         },
-        "SidebarFilter": {
-          "e3b3898218": "プロジェクトの追加",
-          "92a23e6d07": "フィルターをリセットする",
-          "81ded53722": "SSH",
-          "b9e8802e73": "一致するプロジェクトはありません",
-          "779b7ba05d": "クリア",
-          "139877b384": "すべて選択",
-          "5f7085a077": "プロジェクト",
-          "e5cb32a898": "デフォルトのブランチを非表示にする",
-          "638a2d221d": "スリープ中を非表示",
-          "f506a1262a": "ワークスペースのフィルタリング",
-          "75405270ed": "フィルターの編集 ({{value0}} がアクティブ)",
-          "489d1c8c9f": "プロジェクトを検索...",
-          "ee240a39eb": "フィルターの編集",
-          "automationCreated": "自動化で作成されたワークスペースを非表示"
-        },
         "SidebarHeader": {
           "92154beb7e": "新規ワークスペース",
           "5c9c7c16aa": "プロジェクトを追加してワークスペースを作成する",
@@ -3153,9 +3124,9 @@
           "workspaceSection": "ワークスペース",
           "primaryDeleteDisabled": "プライマリワークツリーは削除できません。代わりにプロジェクトを削除してください。",
           "deleteWorktree": "ワークツリーを削除",
-          "makeSpoolPrivate": "非公開にする",
-          "makeSpoolPublic": "公開する",
-          "spoolPrivateFailed": "この worktree を非公開にできませんでした。"
+          "makeCoworkingPrivate": "非公開にする",
+          "makeCoworkingPublic": "公開する",
+          "coworkingPrivateFailed": "この worktree を非公開にできませんでした。"
         },
         "WorktreeList": {
           "d880ea0744": "グループを作成し、このプロジェクトをそのグループに移動します。",
@@ -3200,9 +3171,9 @@
           "failedNestWorkspace": "ワークスペースをネストできませんでした",
           "sidebarRowMissing": "対象はもう存在しません",
           "failedUnnestWorkspace": "ワークスペースの展開に失敗しました",
-          "makeSpoolProjectPrivate": "すべての worktree を非公開にする",
-          "makeSpoolProjectPublic": "すべての worktree を公開する",
-          "spoolProjectPrivateFailed": "これらの worktree を非公開にできませんでした。"
+          "makeCoworkingProjectPrivate": "すべての worktree を非公開にする",
+          "makeCoworkingProjectPublic": "すべての worktree を公開する",
+          "coworkingProjectPrivateFailed": "これらの worktree を非公開にできませんでした。"
         },
         "WorktreeOpenInMenu": {
           "1417fd8380": "アプリをカスタマイズ...",
@@ -3586,24 +3557,24 @@
           "forget": "Yiruから削除",
           "reconnectAndDelete": "再接続して削除"
         },
-        "SpoolDesktopRow": {
+        "CoworkingDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
         },
-        "SpoolWorktreeRow": {
+        "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "セッションを読み込み中…",
           "ownerTitle": "{{value0}}の{{value1}}",
           "sessionsUnavailable": "セッション一覧を利用できません"
         },
-        "SpoolSidebarProjectedRow": {
-          "heading": "Spool"
+        "CoworkingSidebarProjectedRow": {
+          "heading": "Coworking"
         },
-        "SpoolDesktopUsageHoverCard": {
+        "CoworkingDesktopUsageHoverCard": {
           "usage": "Usage"
         },
-        "SpoolRemoteWorktreesHeader": {
+        "CoworkingRemoteWorktreesHeader": {
           "title": "Remote"
         },
         "WorktreeMetaDialog": {
@@ -3624,35 +3595,35 @@
           "2174f17011": "Save"
         }
       },
-      "spool": {
-        "SpoolAvailabilityStatusSegment": {
-          "title": "Spool を利用できません",
+      "coworking": {
+        "CoworkingAvailabilityStatusSegment": {
+          "title": "Coworking を利用できません",
           "checkAgain": "もう一度確認",
           "checking": "確認中…",
           "tailscaleUnavailable": "このデスクトップで Tailscale が見つかりませんでした。",
           "tailscaleNotRunning": "Tailscale はインストールされていますが、サービスが実行されていません。",
           "tailscalePermissionDenied": "Yiru には Tailscale の状態を読み取る権限がありません。",
-          "tailscaleTimedOut": "Tailscale が時間内に応答しませんでした。Spool は確認を続けます。",
+          "tailscaleTimedOut": "Tailscale が時間内に応答しませんでした。Coworking は確認を続けます。",
           "tailscaleUnsupportedOutput": "Tailscale から、このバージョンの Yiru では読み取れない状態データが返されました。",
-          "portUnavailable": "TCP ポート {{port}} はすでに使用中です。競合するプロセスを終了してください。Spool は確認を続けます。",
-          "permissionDenied": "システム権限により、Yiru は Tailnet 上で Spool のリスナーを開けませんでした。",
-          "persistenceUnavailable": "Spool は共有設定を安全に読み込めなかったため、共有は無効のままです。",
-          "unavailable": "このデスクトップで Spool を起動できませんでした。"
+          "portUnavailable": "TCP ポート {{port}} はすでに使用中です。競合するプロセスを終了してください。Coworking は確認を続けます。",
+          "permissionDenied": "システム権限により、Yiru は Tailnet 上で Coworking のリスナーを開けませんでした。",
+          "persistenceUnavailable": "Coworking は共有設定を安全に読み込めなかったため、共有は無効のままです。",
+          "unavailable": "このデスクトップで Coworking を起動できませんでした。"
         },
-        "SpoolWindowsFirewallNotice": {
+        "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows ファイアウォール規則を修復しました。",
-          "title": "Spool は Windows ファイアウォールによってブロックされています",
-          "readyTitle": "Spool 共有を再起動",
-          "readyDescription": "必要な規則が利用可能になりました。再適用すると、このアプリセッションで Spool が起動します。",
+          "title": "Coworking は Windows ファイアウォールによってブロックされています",
+          "readyTitle": "Coworking を再起動",
+          "readyDescription": "必要な規則が利用可能になりました。再適用すると、このアプリセッションで Coworking が再起動します。",
           "inspectUnavailable": "ファイアウォール規則を確認できませんでした。管理者の承認で再作成してください。",
           "ruleMissing": "インストール済みの Yiru アプリに必要なプライベートネットワーク規則がありません。",
-          "ruleDetails": "Yiru.Spool · TCP {{port}} · プライベート",
+          "ruleDetails": "Yiru.Coworking · TCP {{port}} · プライベート",
           "waiting": "Windows を待機中…",
           "repair": "ファイアウォール規則を修復",
           "reapply": "再適用して起動",
           "repairFailed": "Windows ファイアウォール規則を修復できませんでした。"
         },
-        "SpoolControlRequestDialog": {
+        "CoworkingControlRequestDialog": {
           "decisionFailed": "制御の決定を送信できませんでした。",
           "title": "{{value0}} にこの worktree の制御を許可しますか？",
           "worktree": "Worktree: {{value0}} / {{value1}}",
@@ -3662,13 +3633,13 @@
           "deny": "拒否",
           "allow": "この接続を許可"
         },
-        "SpoolOwnerControlGrants": {
+        "CoworkingOwnerControlGrants": {
           "revokeFailed": "リモート制御を取り消せませんでした。",
           "heading": "リモート制御",
           "hasAccess": "{{value0}} がアクセス中",
           "revoke": "取り消す"
         },
-        "SpoolSessionPane": {
+        "CoworkingSessionPane": {
           "continueFailed": "このセッションを続けられませんでした。",
           "continueOutcomeUnknown": "このセッションは所有者のデスクトップですでに再開されている可能性があります。もう一度再開する前に、セッション一覧とターミナルを確認してください。",
           "retryContinue": "Try again",
@@ -3684,7 +3655,7 @@
           "terminalEnded": "This terminal session has ended.",
           "terminalConnectionLost": "The remote terminal connection was lost."
         },
-        "SpoolTerminalPane": {
+        "CoworkingTerminalPane": {
           "connecting": "ターミナルに接続中…",
           "closed": "ターミナルは終了しました",
           "unavailable": "ターミナルを利用できません",
@@ -3693,10 +3664,10 @@
           "resumeInput": "入力を再開",
           "inputBacklogFull": "リモート入力の処理が追いついていません。表示されるまで待ってから、続けて入力または貼り付けてください。"
         },
-        "SpoolWorktreeVisibilityDialog": {
+        "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "この worktree を公開できませんでした。",
           "title": "{{value0}} を公開しますか？",
-          "description": "Tailnet 上で Yiru Desktop を使用しているメンバーがこの worktree を開けるようになります。",
+          "description": "Tailnet 上で Yiru を使用しているメンバーがこの worktree を開けるようになります。",
           "historyWarning": "既存のすべてのセッション、トランスクリプト、ターミナルのスクロールバック、今後の出力が閲覧可能になります。",
           "shellWarning": "ターミナル履歴には、この worktree 外で生成された内容が含まれる場合があります。",
           "cancel": "キャンセル",
@@ -3708,7 +3679,7 @@
           "projectShellWarning": "ターミナル履歴には、対象 worktree 外で生成された内容が含まれる場合があります。",
           "projectConfirm": "すべて公開する"
         },
-        "SpoolWorkspaceSurface": {
+        "CoworkingWorkspaceSurface": {
           "requestFailed": "制御をリクエストできませんでした。",
           "controlGranted": "制御が許可されました",
           "disconnected": "接続が切れました",
@@ -3724,14 +3695,14 @@
           "terminalDescription": "リモート session が利用可能になると、terminal のスナップショットとリアルタイム出力がここに表示されます。",
           "selectSession": "Session を選択してリモート terminal を開きます。",
           "fileBrowser": "ファイル",
-          "fileDescription": "リモートファイルは所有者の実行ホストに残り、Spool workspace モデルを通じてここで開かれます。",
+          "fileDescription": "リモートファイルは所有者の実行ホストに残り、Coworking workspace モデルを通じてここで開かれます。",
           "changesAndGit": "変更と Git",
           "changesDescription": "Worktree の状態、diff、履歴、ブランチ、upstream の状態がここに表示されます。",
           "mutableMode": "この接続では worktree の変更操作を使用できます。",
           "readOnlyMode": "この公開 worktree は、所有者が制御を許可するまで読み取り専用です。",
           "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
-        "SpoolFileActionDialog": {
+        "CoworkingFileActionDialog": {
           "nameLabel": "名前",
           "cancel": "キャンセル",
           "newFileTitle": "新しいファイル",
@@ -3746,7 +3717,7 @@
           "rename": "名前を変更",
           "delete": "削除"
         },
-        "SpoolFilePreview": {
+        "CoworkingFilePreview": {
           "loading": "ファイルを読み込んでいます…",
           "selectFile": "確認するファイルを選択してください。",
           "reload": "再読み込み",
@@ -3774,7 +3745,7 @@
           "workingCompact": "Working",
           "stagedCompact": "Staged"
         },
-        "SpoolFileTree": {
+        "CoworkingFileTree": {
           "up": "1 つ上のディレクトリへ",
           "root": "ワークツリーのルート",
           "refresh": "ファイルを更新",
@@ -3789,11 +3760,11 @@
           "unavailable": "ファイルを利用できません。",
           "retry": "Retry"
         },
-        "SpoolFilesPane": {
+        "CoworkingFilesPane": {
           "listFailed": "ファイルを読み込めませんでした。",
           "readFailed": "このファイルを読み取れませんでした。",
           "diffFailed": "この差分を読み込めませんでした。",
-          "fileTooLarge": "このファイルは大きすぎるため、Spool 経由で保存できません。",
+          "fileTooLarge": "このファイルは大きすぎるため、Coworking 経由で保存できません。",
           "saved": "ファイルを保存しました。",
           "saveFailed": "このファイルを保存できませんでした。",
           "invalidName": "有効なファイル名を 1 つ入力してください。",
@@ -3801,7 +3772,7 @@
           "outcomeUnknown": "このファイル変更は所有者の worktree で成功している可能性があります。別の変更を行う前に、更新して対象を確認してください。",
           "outcomeUnknownPersistent": "ファイル変更は成功している可能性があります。別の変更を行う前に、更新して対象を確認してください。"
         },
-        "SpoolGitDiffPane": {
+        "CoworkingGitDiffPane": {
           "selectItem": "変更またはコミットを選択して差分を確認してください。",
           "loading": "差分を読み込んでいます…",
           "noDiff": "テキスト差分はありません。",
@@ -3812,7 +3783,7 @@
           "unavailable": "この差分は利用できません。",
           "back": "Back"
         },
-        "SpoolGitPane": {
+        "CoworkingGitPane": {
           "refreshFailed": "Git の状態を読み込めませんでした。",
           "diffFailed": "この差分を読み込めませんでした。",
           "commitTooLong": "コミットメッセージが長すぎます。",
@@ -3821,11 +3792,11 @@
           "outcomeUnknown": "この Git 操作は所有者の worktree で成功している可能性があります。別の変更を行う前に、更新して Git の状態を確認してください。",
           "outcomeUnknownPersistent": "Git 操作は成功している可能性があります。別の変更を行う前に、更新して Git の状態を確認してください。"
         },
-        "SpoolMutationOutcomeNotice": {
+        "CoworkingMutationOutcomeNotice": {
           "title": "結果の確認が必要です",
           "dismiss": "確認後に閉じる"
         },
-        "SpoolGitSidebar": {
+        "CoworkingGitSidebar": {
           "detached": "デタッチされた HEAD",
           "refresh": "更新",
           "changes": "変更",
@@ -3845,12 +3816,12 @@
           "stateUnavailable": "Git の状態を利用できません。",
           "changesLimited": "ステータスの一部のみを表示しています。"
         },
-        "SpoolAgentsPane": {
+        "CoworkingAgentsPane": {
           "publicSessions": "Public agents",
           "noAgentSessions": "No public agent sessions in this worktree.",
           "unknownAgent": "Agent"
         },
-        "SpoolChecksPane": {
+        "CoworkingChecksPane": {
           "reviewChecks": "Review checks",
           "refresh": "Refresh",
           "loadFailed": "Could not load checks from the owner.",
@@ -3881,7 +3852,7 @@
           "merged": "Merged",
           "draft": "Draft"
         },
-        "SpoolSessionCreateMenu": {
+        "CoworkingSessionCreateMenu": {
           "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
           "createFailed": "Could not create the terminal.",
           "noAgents": "No agents available",
@@ -9363,14 +9334,6 @@
           "yoloPermissionsInfo": "Agent permission info",
           "yoloPermissionsTooltip": "Skip permission checks for agents for less interruptions"
         },
-        "FeatureSetupChecklist": {
-          "77f74946f5": "Agents は相互にメッセージを送信し、タスクを実行し、引き継ぎを調整できます。",
-          "399cf885c0": "Agent オーケストレーション",
-          "c5292c409d": "Agents は、要求に応じてアプリ ウィンドウを検査し、ローカル アプリを操作できます。",
-          "1ecfb490ac": "コンピュータ操作",
-          "01426f3a23": "Agents はサイトを移動し、ページを検査し、ブラウザーのタスクを実行できます。",
-          "ea85d9e628": "Agent ブラウザの使用"
-        },
         "FeatureSetupInlineTerminal": {
           "789b59936e": "Enter キーを押してコマンドを実行し、要求されたら npx を確認します。これは、後で [設定] で設定することもできます。",
           "47fc6cc6dc": "スキルセットアップコマンド",
@@ -9454,33 +9417,6 @@
         "OnboardingTourStep": {
           "3f9586c043": "ツアーに参加する",
           "60c5576353": "出口ツアー"
-        },
-        "RepoStep": {
-          "e8fdb36338": "repos をスキャンしています。クリックして停止します。",
-          "b7c4da0504": "SSH? 「設定」でホストをセットアップする",
-          "c33b190ca3": "サーバーパスのみ",
-          "7b679207e4": "ワークスペース",
-          "24c7c8696c": "サーバーパスにクローンを作成します",
-          "7932e95f68": "クローン",
-          "955134915e": "git@github.com:org/repo.git",
-          "288d8444b7": "HTTPS または SSH URL を貼り付けます。",
-          "132425a3e3": "repo のクローンを作成する",
-          "6558d50c69": "一度に多くの repos をインポートしたいですか?親フォルダーを選択します。",
-          "831524961f": "git repo かどうかに関係なく、任意のローカル ディレクトリを選択します。",
-          "f4e9c8dcf8": "フォルダーを参照する",
-          "e8214aa632": "フォルダーとして開く",
-          "3863747c56": "Gitプロジェクトの追加",
-          "2ebbc26343": "/home/user/project",
-          "466108ab89": "ランタイムサーバー上に存在するパスを入力します。",
-          "8cab104e3c": "サーバープロジェクトを開く",
-          "2d20200346": "repos のインポート",
-          "27ca610db1": "戻る",
-          "cecd6593fa": "スキャンしたフォルダー:",
-          "c7af322fc3": "スキャンを停止する",
-          "c3d9d44ca2": "スキャンの停止",
-          "cf23006ba7": "ランタイムサーバー",
-          "7ec3f48820": "/home/user",
-          "2e6438dd34": "{{value0}}このフォルダー内で {{value1}} {{value2}} が見つかりました。"
         },
         "ThemeStep": {
           "a4b254779d": "macOSのオプションキー",
@@ -9597,10 +9533,6 @@
             "currentProjectSource": "current project source",
             "searchGitHub": "Search GitHub PRs",
             "searchGitLab": "Search GitLab MRs"
-          },
-          "ProjectHostSetupCombobox": {
-            "empty": "No hosts are ready for this project.",
-            "placeholder": "Choose host"
           },
           "ProjectCombobox": {
             "search": "Search projects...",
@@ -9957,43 +9889,6 @@
             "cda56c5915": "メモ / launch-plan.md",
             "e16479c1c5": "[データスラッシュメニュー] [データスラッシュ行].slash-active { 背景: rgba(24,24,27,0.07);ボックスシャドウ: インセット 0 0 0 1px rgba(24,24,27,0.06); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122);フォントファミリー: ui-monospace、SFMono- Regular、Menlo、monospace;フォントサイズ: 12.5px; [data-md-active-line][data-role=\"h1\"] { color: 継承;フォントファミリー: 継承;フォントサイズ: 18px;フォントの太さ: 700;文字間隔: -0.01em;行の高さ: 1.2;マージントップ: 6px; } [data-md-caret] {表示: インラインブロック;幅: 1.5ピクセル;高さ: 1em;背景: 現在の色;垂直整列: -2px;左マージン: 1px;アニメーション: md-caret-blink 1.05 秒ステップ (1) 無限; } @keyframes md-caret-blink { 0%, 50% { 不透明度: 1 } 51%, 100% { 不透明度: 0 } } @keyframes md-block-in { from { 不透明度: 0;変換：translateY(-2px); } から { 不透明度: 1;変換: なし。 } } @keyframes md-cursor-ripple { 0% {transform:scale(0.4);不透明度: 0.9; } 100% { 変換: スケール(1.4);不透明度: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { アニメーション: md-cursor-ripple 460ms イーズアウト フォワード; }"
           },
-          "FeatureTourPreview": {
-            "1170621527": ">",
-            "304ad0dfc1": "考え...",
-            "ef8b164dd1": "ソース/認証を確認する",
-            "952d3ddd9a": "セッションが開始されました",
-            "771d8881c2": "claude",
-            "6ed43cb0e0": "ダッシュボードの仕様",
-            "24fedd5a52": "ログイン.spec.ts",
-            "8279e9d95b": "12 個のテストを実行する",
-            "6218a9014d": "pnpm プレイライト テスト",
-            "04d54d50ec": "yiru · zsh",
-            "1aa8a9a24a": "分割可能な terminal",
-            "2a7cfc82c8": "GH #1842 にリンク",
-            "3822d8d14b": "fix/worktree-picker-truncates",
-            "d54aefe09e": "LIN-329",
-            "40bbd92ef4": "始める",
-            "c1f28c03b2": "ワークツリーピッカーが切り捨てる",
-            "fc0cc0b267": "GH #1842",
-            "0688842445": "GH #1799",
-            "5171768676": "3 つの agents を調整する",
-            "cebc7769cd": "認証フローを再設計する",
-            "e44269e97d": "Agent のオーケストレーション",
-            "ec4a73f5e6": "PR 3/3",
-            "cfdfd4d6b4": "PR 2/3",
-            "b1f17bcc74": "PR 1/3",
-            "e38112b289": "請求 Webhook をリファクタリングする",
-            "9c812e0d7c": "CIパイプラインを高速化する",
-            "3c4adfd821": "ログイン競合状態を修正",
-            "56a0271428": "隔離されたワークスペース",
-            "ac51c061e2": "codex",
-            "47f16ecf34": "Ship several things at once. Each workspace keeps its branch, terminal, and agent activity together.",
-            "70aa182266": "Hand off a goal and walk away. A coordinator agent fans out and ships parallel PRs.",
-            "5d6ee181b6": "Open any workspace to return to its terminal, then split panes for tests, logs, and agents.",
-            "ef737dcee1": "Pull request review",
-            "f10c14dd9d": "Open a GitHub pull request or GitLab merge request and review it without switching tools.",
-            "bee6b4088d": "Pull request review"
-          },
           "FeatureWallBody": {
             "25ec5356d6": "設定"
           },
@@ -10210,11 +10105,6 @@
               }
             }
           },
-          "FeatureTourWorkspaceCard": {
-            "a23ed9da7f": "codex",
-            "2f33dc932b": "claude",
-            "9220794f6a": "実行中"
-          },
           "ReviewAnimatedVisual": {
             "8df4d52b68": "プレビュー",
             "8ab622e4d6": "メモ"
@@ -10350,6 +10240,11 @@
               "frame": {
                 "stream": {
                   "f1c0179002": "ストリームはフレームを生成していません。"
+                }
+              },
+              "video": {
+                "stream": {
+                  "c3fb77cb87": "This build does not support WebCodecs H.264 decoding."
                 }
               }
             },
@@ -11968,6 +11863,10 @@
           "undo": "元に戻す",
           "widthOption": "{{value0}} px"
         }
+      },
+      "WorkspacePanelEditorEmptyState": {
+        "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
+        "agentLaunchFailed": "Could not start {{value0}}."
       }
     },
     "i18n": {

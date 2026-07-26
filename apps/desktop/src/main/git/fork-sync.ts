@@ -2,11 +2,11 @@ import {
   syncForkDefaultBranch,
   type GitForkSyncExpectedUpstream,
   type GitForkSyncResult
-} from '../../shared/git-fork-sync'
-import { normalizeGitErrorMessage } from '../../shared/git-remote-error'
-import type { GitRuntimeOptions } from './git-runtime-options'
-import { gitOptionsForWorktree } from './git-runtime-options'
+} from '../../shared/git/fork-sync'
+import { normalizeGitErrorMessage } from '../../shared/git/remote-error'
 import { gitExecFileAsync } from './runner'
+import type { GitRuntimeOptions } from './runtime-options'
+import { gitOptionsForWorktree } from './runtime-options'
 
 export async function gitSyncForkDefaultBranch(
   worktreePath: string,

@@ -8,9 +8,9 @@ import type {
   ComputerProviderCapabilities,
   ComputerSnapshotResult
 } from '../../shared/runtime-types'
-import { normalizeComputerActionResult } from './computer-action-verification-normalization'
-import { validateComputerSidecarPasteText } from './computer-sidecar-paste-validation'
+import { normalizeComputerActionResult } from './action-verification-normalization'
 import { RuntimeClientError } from './runtime-client-error'
+import { validateComputerSidecarPasteText } from './sidecar-paste-validation'
 
 type ComputerSidecarMethod =
   | 'capabilities'

@@ -1,7 +1,7 @@
 import type { editor } from 'monaco-editor'
 
+import { monaco } from '@/components/editor/monaco-setup'
 import { formatShortcutLabel } from '@/hooks/use-shortcut-label'
-import { monaco } from '@/lib/monaco-setup'
 import {
   PRIMARY_SELECTION_MAX_LENGTH,
   isPrimarySelectionEnabled,
@@ -9,8 +9,8 @@ import {
 } from '@/lib/primary-selection'
 import { useAppStore } from '@/store'
 
-import { editorShortcutMatches } from './editor-shortcuts'
 import { formatCopiedSelectionWithContext, getContextualCopyLineRange } from './selection-copy'
+import { editorShortcutMatches } from './shortcuts'
 
 export function setupContextualCopy({
   editorInstance,

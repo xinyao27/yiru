@@ -2,7 +2,7 @@ import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 
 import { getAutoRenameBranchSearchEntries } from './auto-rename-branch-search'
-import { translateSearchKeyword } from './settings-search-keywords'
+import { translateSearchKeyword } from './search-keywords'
 
 export const getGitPaneSearchEntries = createLocalizedCatalog(() => [
   {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
-import { readRuntimeFilePreview } from '@/runtime/runtime-file-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
+import { readRuntimeFilePreview } from '@/runtime/file-client'
 
 import { resolveImageAbsolutePath } from './markdown-preview-links'
 

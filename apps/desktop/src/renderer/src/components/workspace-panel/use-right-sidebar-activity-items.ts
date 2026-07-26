@@ -5,7 +5,7 @@ import { useAppStore } from '@/store'
 import { useRepoById } from '@/store/selectors'
 
 import { isFolderRepo } from '../../../../shared/repo-kind'
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import { createRightSidebarActivityItems } from './right-sidebar-activity-items'
 import { getVisibleRightSidebarActivityItems } from './right-sidebar-activity-visibility'

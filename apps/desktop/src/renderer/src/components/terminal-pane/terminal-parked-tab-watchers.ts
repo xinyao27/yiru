@@ -1,4 +1,4 @@
-import { collectLeafIdsInOrder } from '@/lib/terminal-layout-leaf-ids'
+import { collectLeafIdsInOrder } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import { discardPreHandlerPtyState } from '@/runtime/pty-pre-handler-buffer'
 import {
   capturedPanesByTabId,
@@ -22,15 +22,15 @@ import { useAppStore } from '@/store'
  */
 import { isTerminalLeafId } from '../../../../shared/stable-pane-id'
 import type { TerminalTab } from '../../../../shared/types'
-import { closeTerminalTab } from '../terminal/terminal-tab-actions'
-import { startParkedTerminalByteWatcher } from './parked-terminal-byte-watcher'
-import { subscribeToPtyExit } from './pty-dispatcher'
-import { isSnapshotBackedTerminalPty } from './terminal-hidden-view-parking'
-import { detachTerminalLayoutLeaf } from './terminal-layout-leaf-detach'
+import { closeTerminalTab } from '../terminal/tab-actions'
 import {
   resolveTabTitleAfterPaneClose,
   shouldClearLaunchAgentForClosedPane
-} from './terminal-pane-close-identity'
+} from './close-identity'
+import { startParkedTerminalByteWatcher } from './parked-terminal-byte-watcher'
+import { subscribeToPtyExit } from './pty/dispatcher'
+import { isSnapshotBackedTerminalPty } from './terminal-hidden-view-parking'
+import { detachTerminalLayoutLeaf } from './terminal-layout-leaf-detach'
 
 // Why: re-exported so park wiring keeps one import surface; the registry
 // split exists only to break the store-slice import cycle.

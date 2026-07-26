@@ -21,7 +21,7 @@ import { buildWorktreeAgentRows } from './worktree-agent-rows'
 import {
   selectLivePtyIdsForWorktree,
   selectRuntimePaneTitlesForWorktree
-} from './worktree-card-status-inputs'
+} from './worktree-card/status-inputs'
 
 export { buildWorktreeAgentRows } from './worktree-agent-rows'
 export {

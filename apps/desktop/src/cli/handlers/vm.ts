@@ -3,18 +3,18 @@ import { join } from 'node:path'
 
 // Why: import directly from the doctor module (not the barrel) — it uses Node
 // fs/path and must stay out of the browser bundle that imports the barrel.
-import { doctorEphemeralVmRecipe } from '../../shared/ephemeral-vm-recipe-doctor'
+import { doctorEphemeralVmRecipe } from '../../shared/ephemeral-vm/recipe-doctor'
 import {
   runEphemeralVmRecipeCleanup,
   runEphemeralVmRecipeStart
-} from '../../shared/ephemeral-vm-recipe-runner'
+} from '../../shared/ephemeral-vm/recipe-runner'
 import {
   getEphemeralVmRecipeResultProjectRoot,
   getEphemeralVmRecipeResultWarnings,
   redactEphemeralVmRecipeDiagnosticText,
   type EphemeralVmRecipeDoctorCheck,
   type EphemeralVmRecipeDoctorResult
-} from '../../shared/ephemeral-vm-recipes'
+} from '../../shared/ephemeral-vm/recipes'
 import type { YiruVmRecipe } from '../../shared/types'
 import { parseYiruYaml } from '../../shared/yiru-yaml'
 import type { CommandHandler } from '../dispatch'

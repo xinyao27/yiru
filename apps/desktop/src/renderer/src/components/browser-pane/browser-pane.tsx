@@ -89,16 +89,12 @@ import {
   isRemoteRuntimeFileOperation,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
-import {
-  callRuntimeRpc,
-  RuntimeRpcCallError,
-  type RuntimeClientTarget
-} from '@/runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+} from '@/runtime/file-client'
+import { callRuntimeRpc, RuntimeRpcCallError, type RuntimeClientTarget } from '@/runtime/rpc-client'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import { useAppStore } from '@/store'
 
-import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '../../../../shared/browser-annotation-viewport-bridge'
+import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '../../../../shared/browser/annotation-viewport-bridge'
 import {
   GRAB_BUDGET,
   type BrowserAnnotationIntent,
@@ -108,27 +104,27 @@ import {
   type BrowserGrabRect,
   type BrowserGrabScreenshot,
   type BrowserPageAnnotation
-} from '../../../../shared/browser-grab-types'
+} from '../../../../shared/browser/grab-types'
 import type {
   BrowserDownloadRequestedEvent,
   BrowserDownloadProgressEvent,
   BrowserDownloadFinishedEvent
-} from '../../../../shared/browser-guest-events'
+} from '../../../../shared/browser/guest-events'
 import {
   decodeBrowserScreencastFrame,
   type BrowserScreencastFrameMetadata
-} from '../../../../shared/browser-screencast-protocol'
+} from '../../../../shared/browser/screencast-protocol'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken,
   resolveRemoteFailureExternalUrl,
   toHttpsRecoveryUrl
-} from '../../../../shared/browser-url'
+} from '../../../../shared/browser/url'
 import {
   browserViewportPresetToOverride,
   getBrowserViewportPreset
-} from '../../../../shared/browser-viewport-presets'
+} from '../../../../shared/browser/viewport-presets'
 import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '../../../../shared/constants'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { STATUS_GET_CONTRACT } from '../../../../shared/runtime-method-contracts/runtime-control-contracts'
@@ -174,14 +170,14 @@ import {
   setBrowserPageZoomLevel,
   type BrowserPageZoomDirection
 } from './browser-page-zoom'
-import { getBrowserPagesForWorkspace } from './browser-pane-page-selection'
 import { BrowserToolbarMenu } from './browser-toolbar-menu'
 import { shouldPollChromiumErrorPage } from './chromium-error-page-polling'
 import { formatGrabPayloadAsText } from './grab-confirmation-sheet'
-import { deliverMarkupToClipboard } from './markup/markup-clipboard-delivery'
-import { MarkupDrawButton } from './markup/markup-draw-button'
-import { MarkupOverlay } from './markup/markup-overlay'
+import { deliverMarkupToClipboard } from './markup/clipboard-delivery'
+import { MarkupDrawButton } from './markup/draw-button'
+import { MarkupOverlay } from './markup/overlay'
 import { useMarkupMode, type MarkupCaptureContext } from './markup/use-markup-mode'
+import { getBrowserPagesForWorkspace } from './page-selection'
 import { getRemoteBrowserFrameStyle } from './remote-browser-frame-style'
 import {
   getRemoteBrowserKeyboardShortcut,

@@ -1,4 +1,4 @@
-import { inspectRuntimeTerminalProcess } from '@/runtime/runtime-terminal-inspection'
+import { inspectRuntimeTerminalProcess } from '@/runtime/terminal-inspection'
 import type { AppState } from '@/store'
 import { useAppStore } from '@/store'
 

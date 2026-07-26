@@ -15,7 +15,8 @@ import React, { useEffect, useCallback, useState } from 'react'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { RepoIconGlyph } from '@/components/repo/repo-icon'
+import { RepoIconGlyph } from '@/components/repo/icon'
+import { activateWorktreeFromSidebar } from '@/components/sidebar/worktree-activation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -23,7 +24,6 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { recordRendererCrashBreadcrumb } from '@/lib/crash-diagnostics'
 import { isMacAppDataPath } from '@/lib/passive-macos-app-data-access'
-import { activateWorktreeFromSidebar } from '@/lib/sidebar-worktree-activation'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { getWorkspacePortsByWorktreeId } from '@/lib/workspace-port-groups'
 import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
@@ -32,14 +32,14 @@ import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 
 import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../shared/constants'
+import type { CoworkingOwnerControlGrantView } from '../../../../shared/coworking/ipc-contract'
 import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
 import { isFolderRepo } from '../../../../shared/repo-kind'
-import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'
 import type { Worktree, Repo } from '../../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
 import CacheTimer, { usePromptCacheCountdownStartedAt } from './cache-timer'
-import { runWorktreeDelete } from './delete-worktree-flow'
+import { runWorktreeDelete } from './delete-worktree/flow'
 import { resolveRepoHeaderColor } from './project-header-color'
 import { SshDisconnectedDialog } from './ssh-disconnected-dialog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
@@ -49,25 +49,25 @@ import {
   useWorkspaceDeleteModifierPressed
 } from './workspace-delete-quick-action'
 import { writeWorkspaceDragData } from './workspace-status'
-import WorktreeCardAgents from './worktree-card-agents'
-import { WorktreeCardControlGrants } from './worktree-card-control-grants'
-import { useWorktreeCardDetailsHoverControl } from './worktree-card-details-hover-state'
-import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
-import { CONFLICT_OPERATION_LABELS } from './worktree-card-helpers'
+import WorktreeCardAgents from './worktree-card/agents'
+import { WorktreeCardControlGrants } from './worktree-card/control-grants'
+import { useWorktreeCardDetailsHoverControl } from './worktree-card/details-hover-state'
+import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
+import { CONFLICT_OPERATION_LABELS } from './worktree-card/helpers'
 import {
   WorktreeCardDetailsHover,
   hasWorktreeCardDetails,
   WorktreeCardMetaBadges
-} from './worktree-card-meta'
-import { WorktreeCardPortsDetails, WorktreeCardPortsTrigger } from './worktree-card-ports'
+} from './worktree-card/meta'
+import { WorktreeCardPortsDetails, WorktreeCardPortsTrigger } from './worktree-card/ports'
 import {
   getWorktreeCardPrDisplay,
   isCachedMergedBranchPRCurrentForWorktree
-} from './worktree-card-pr-display'
-import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
-import { WorktreeCardStatusSlot } from './worktree-card-status-slot'
-import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card-surface'
-import { getWorktreeCardTitleDisplay } from './worktree-card-title-display'
+} from './worktree-card/pr-display'
+import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
+import { WorktreeCardStatusSlot } from './worktree-card/status-slot'
+import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card/surface'
+import { getWorktreeCardTitleDisplay } from './worktree-card/title-display'
 import WorktreeContextMenu from './worktree-context-menu'
 import {
   getFlushWorktreeCardPaddingLeft,
@@ -104,7 +104,11 @@ type WorktreeCardProps = {
   lineageCollapsed?: boolean
   lineageChildren?: React.ReactNode
   lineageChildrenStyle?: React.CSSProperties
-  onLineageToggle?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  // Why: takes the group key as an argument instead of being a per-row closure
+  // over it, so WorktreeList can hand every card the same memoized callback —
+  // a fresh closure here would rebuild this React.memo card on every render.
+  onLineageToggle?: (groupKey: string, event: React.MouseEvent<HTMLButtonElement>) => void
+  lineageToggleGroupKey?: string
   isLineageDropTarget?: boolean
   onActivate?: () => void
   onImmediateActivate?: (worktreeId: string, rowKey: string | undefined) => void
@@ -122,14 +126,14 @@ type WorktreeCardProps = {
   nativeDragEnabled?: boolean
   affiliateListMode?: boolean
   statusPrDisplay?: WorktreeCardPrDisplay | null
-  spoolControlGrants?: readonly SpoolOwnerControlGrantView[]
-  spoolRevokingGrantIds?: ReadonlySet<string>
-  onRevokeSpoolControlGrant?: (grantId: string) => void
+  coworkingControlGrants?: readonly CoworkingOwnerControlGrantView[]
+  coworkingRevokingGrantIds?: ReadonlySet<string>
+  onRevokeCoworkingControlGrant?: (grantId: string) => void
 }
 
 const EMPTY_WORKSPACE_PORTS = []
-const EMPTY_SPOOL_CONTROL_GRANTS: readonly SpoolOwnerControlGrantView[] = []
-const EMPTY_SPOOL_REVOKING_GRANT_IDS: ReadonlySet<string> = new Set()
+const EMPTY_COWORKING_CONTROL_GRANTS: readonly CoworkingOwnerControlGrantView[] = []
+const EMPTY_COWORKING_REVOKING_GRANT_IDS: ReadonlySet<string> = new Set()
 const HOSTED_REVIEW_CARD_REFRESH_INTERVAL_MS = 60_000
 
 export function shouldBeginWorktreeRename(
@@ -213,12 +217,13 @@ const WorktreeCard = React.memo(function WorktreeCard({
   lineageChildren,
   lineageChildrenStyle,
   onLineageToggle,
+  lineageToggleGroupKey,
   isLineageDropTarget = false,
   affiliateListMode = false,
   statusPrDisplay = null,
-  spoolControlGrants = EMPTY_SPOOL_CONTROL_GRANTS,
-  spoolRevokingGrantIds = EMPTY_SPOOL_REVOKING_GRANT_IDS,
-  onRevokeSpoolControlGrant
+  coworkingControlGrants = EMPTY_COWORKING_CONTROL_GRANTS,
+  coworkingRevokingGrantIds = EMPTY_COWORKING_REVOKING_GRANT_IDS,
+  onRevokeCoworkingControlGrant
 }: WorktreeCardProps) {
   const openModal = useAppStore((s) => s.openModal)
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
@@ -764,6 +769,18 @@ const WorktreeCard = React.memo(function WorktreeCard({
       : translate('auto.components.sidebar.WorktreeList.045a8aed48', 'children')
   }`
   const showLineageChildChip = lineageChildCount > 0 && onLineageToggle !== undefined
+  // Why: onLineageToggle is stable and lineageToggleGroupKey is a primitive, so
+  // this stays referentially stable across renders — matching this component's
+  // React.memo wrapper instead of silently defeating it with a new closure.
+  const handleLineageToggleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (lineageToggleGroupKey === undefined) {
+        return
+      }
+      onLineageToggle?.(lineageToggleGroupKey, event)
+    },
+    [lineageToggleGroupKey, onLineageToggle]
+  )
 
   const handleDragStart = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -945,7 +962,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const hasSecondaryCardContent =
     hasMetaRow ||
     !!remoteBranchConflict ||
-    spoolControlGrants.length > 0 ||
+    coworkingControlGrants.length > 0 ||
     showInlineAgentList ||
     showLineageChildChip
   const titleOnlyCard = !hasSecondaryCardContent
@@ -1277,11 +1294,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         )}
 
-        {spoolControlGrants.length > 0 && onRevokeSpoolControlGrant ? (
+        {coworkingControlGrants.length > 0 && onRevokeCoworkingControlGrant ? (
           <WorktreeCardControlGrants
-            grants={spoolControlGrants}
-            revokingGrantIds={spoolRevokingGrantIds}
-            onRevoke={onRevokeSpoolControlGrant}
+            grants={coworkingControlGrants}
+            revokingGrantIds={coworkingRevokingGrantIds}
+            onRevoke={onRevokeCoworkingControlGrant}
           />
         ) : null}
 
@@ -1297,7 +1314,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
             worktreeId={worktree.id}
             agents={agentActivityDisplayMode === 'compact' ? compactInlineAgentRows : undefined}
             className={
-              hasMetaRow || remoteBranchConflict || spoolControlGrants.length > 0 ? 'mt-0' : '-mt-1'
+              hasMetaRow || remoteBranchConflict || coworkingControlGrants.length > 0
+                ? 'mt-0'
+                : '-mt-1'
             }
           />
         )}
@@ -1319,7 +1338,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     className="border-border hover:text-foreground relative z-10 h-[18px] max-w-[8rem] border px-1.5 text-[10px] leading-none"
                     aria-label={lineageChildAriaLabel}
                     aria-expanded={!lineageCollapsed}
-                    onClick={onLineageToggle}
+                    onClick={handleLineageToggleClick}
                   >
                     <Workflow weight="regular" className="size-2.5" />
                     <span className="truncate">{childWorkspaceShortLabel}</span>

@@ -24,14 +24,13 @@ import { shouldUseShellReadyStartupDelivery } from '../shared/codex-startup-deli
 import {
   gitCredentialPromptGuardEnv,
   mergeGitConfigEnvProtocol
-} from '../shared/git-credential-prompt-env'
+} from '../shared/git/credential-prompt-env'
 import { PhysicalExitTracker } from '../shared/physical-exit-tracker'
-import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
+import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup/agent-sequencing'
 import { buildStartupCommandSubmission } from '../shared/startup-command-submission'
-import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal-git-credential-guard'
-import { isTuiAgent } from '../shared/tui-agent-config'
+import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/git-credential-guard'
+import { isTuiAgent } from '../shared/tui-agent/config'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
-import { getRelayShellLaunchConfig } from './pty-shell-launch'
 import {
   resolveDefaultShell,
   resolveDefaultCwd,
@@ -40,7 +39,8 @@ import {
   getForegroundProcessName,
   isProcessAlive,
   listShellProfiles
-} from './pty-shell-utils'
+} from './pty-shell'
+import { getRelayShellLaunchConfig } from './pty-shell-launch'
 
 function isMissingNodePtyNativeBinding(error: unknown): boolean {
   return (

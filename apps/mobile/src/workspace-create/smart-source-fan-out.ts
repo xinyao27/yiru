@@ -7,13 +7,13 @@ import {
 import type { BaseRefSearchResult } from '@yiru/workbench-model/workspace'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { MrStateFilter } from './mobile-composer-source-types'
-import { isGitHubWorkItemsSshRemoteRequiredError } from './mobile-work-items'
+import type { MrStateFilter } from './composer-source-types'
 import {
   searchBranches,
   searchGitHubItems,
   searchGitLabItems
 } from './smart-source-search-requests'
+import { isGitHubWorkItemsSshRemoteRequiredError } from './work-items'
 
 export type SmartFanOutResult = {
   githubItems: GitHubWorkItem[]

@@ -3,7 +3,7 @@ import { translate } from '@/i18n/i18n'
 import {
   formatAutomationSchedule,
   isValidAutomationCronSchedule
-} from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/schedules'
 import type {
   ExternalAutomationJob,
   ExternalAutomationManager

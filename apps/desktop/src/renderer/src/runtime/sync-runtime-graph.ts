@@ -6,16 +6,15 @@ import {
   serializePaneTree,
   normalizeTerminalLayoutSnapshot
 } from '@/components/terminal-pane/layout-serialization'
-import { getEagerPtyBufferHandle } from '@/components/terminal-pane/pty-dispatcher'
 import { warnTerminalLifecycleAnomaly } from '@/components/terminal-pane/terminal-lifecycle-diagnostics'
+import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { resolveLeafIdForManager } from '@/lib/pane-manager/pane-key-resolution'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
-import { sanitizeTerminalLayoutPaneTitles } from '@/lib/terminal-pane-title-sanitization'
 import { getSystemPrefersDark, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import type { AppState } from '@/store/types'
 
-import { isClaudeManagementTitle } from '../../../shared/agent-detection'
+import { isClaudeManagementTitle } from '../../../shared/agent/detection'
 import type {
   RuntimeMobileSessionBrowserTab,
   RuntimeMobileSessionFileTab,
@@ -27,7 +26,7 @@ import type {
 } from '../../../shared/runtime-types'
 import { isTerminalLeafId, makePaneKey } from '../../../shared/stable-pane-id'
 import { resolveTerminalTabTitle } from '../../../shared/tab-title-resolution'
-import { isWebTerminalSurfaceTabId } from '../../../shared/terminal-surface-id'
+import { isWebTerminalSurfaceTabId } from '../../../shared/terminal/surface-id'
 import type {
   Tab,
   TabGroup,
@@ -40,8 +39,9 @@ import {
   getGroupVisibleTabOrder,
   type VisibleTabRef
 } from '../components/tab-bar/group-tab-order'
+import { getEagerPtyBufferHandle } from '../components/terminal-pane/pty/dispatcher'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
-import { parseRemoteRuntimePtyId } from './runtime-terminal-stream'
+import { parseRemoteRuntimePtyId } from './terminal-stream'
 
 type RegisteredTerminalTab = {
   tabId: string

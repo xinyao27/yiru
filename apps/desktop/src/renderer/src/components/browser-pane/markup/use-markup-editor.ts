@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { createBrowserUuid } from '@/lib/browser-uuid'
 
-import { blitMarkupScene, renderCommittedLayer } from './markup-canvas-render'
+import { blitMarkupScene, renderCommittedLayer } from './canvas-render'
 import {
   canRedo,
   canUndo,
@@ -17,7 +17,7 @@ import {
   type MarkupDocument,
   type MarkupShape,
   type MarkupTool
-} from './markup-drawing-model'
+} from './drawing-model'
 import { useMarkupKeyboardShortcuts, type PendingText } from './use-markup-keyboard-shortcuts'
 import { useMarkupPointerHandlers } from './use-markup-pointer-handlers'
 
@@ -36,7 +36,19 @@ export function useMarkupEditor(busy: boolean, onCancel: () => void) {
     committedLayerRef.current = document.createElement('canvas')
   }
 
-  const [size, setSize] = useState<Size>({ width: 0, height: 0, dpr: 1 })
+  const sizeRef = useRef<Size>({ width: 0, height: 0, dpr: 1 })
+  const sizeListenersRef = useRef(new Set<() => void>())
+  const subscribeToSize = useCallback((listener: () => void): (() => void) => {
+    sizeListenersRef.current.add(listener)
+    return () => {
+      sizeListenersRef.current.delete(listener)
+    }
+  }, [])
+  const getSizeSnapshot = useCallback((): Size => sizeRef.current, [])
+  // Why: the canvas size comes from a DOM measurement (getBoundingClientRect) kept
+  // current by a ResizeObserver and a window resize listener, not from props or
+  // React state, so it is modeled as an external store instead of useState.
+  const size = useSyncExternalStore(subscribeToSize, getSizeSnapshot)
   const [doc, setDoc] = useState<MarkupDocument>(() => createMarkupDocument())
   const [inProgress, setInProgress] = useState<MarkupShape | null>(null)
   const [tool, setTool] = useState<MarkupTool>('pen')
@@ -54,13 +66,16 @@ export function useMarkupEditor(busy: boolean, onCancel: () => void) {
     const measure = () => {
       const rect = root.getBoundingClientRect()
       const dpr = window.devicePixelRatio || 1
+      const prev = sizeRef.current
       // Why: bail on an unchanged measurement so an identical ResizeObserver/resize
       // tick can't schedule a redundant repaint.
-      setSize((prev) =>
-        prev.width === rect.width && prev.height === rect.height && prev.dpr === dpr
-          ? prev
-          : { width: rect.width, height: rect.height, dpr }
-      )
+      if (prev.width === rect.width && prev.height === rect.height && prev.dpr === dpr) {
+        return
+      }
+      sizeRef.current = { width: rect.width, height: rect.height, dpr }
+      for (const listener of sizeListenersRef.current) {
+        listener()
+      }
     }
     measure()
     const observer = new ResizeObserver(measure)

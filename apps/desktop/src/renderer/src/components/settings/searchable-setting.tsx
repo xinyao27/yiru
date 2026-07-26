@@ -3,7 +3,7 @@ import type React from 'react'
 import { cn } from '@/lib/class-names'
 
 import { useAppStore } from '../../store'
-import { matchesSettingsSearch, type SettingsSearchEntry } from './settings-search'
+import { matchesSettingsSearch, type SettingsSearchEntry } from './search'
 
 type SearchableSettingProps = SettingsSearchEntry & {
   children: React.ReactNode

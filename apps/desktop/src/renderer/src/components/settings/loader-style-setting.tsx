@@ -43,29 +43,17 @@ function handleLoaderStyleKeyDown(
 
 function getLoaderStyleLabel(loaderStyle: LoaderStyle): string {
   switch (loaderStyle) {
-    case 'drawing':
-      return translate('settings.appearance.loader.drawing', 'Drawn icons')
-    case 'code':
-      return translate('settings.appearance.loader.code', 'Code braces')
-    case 'macos':
-      return translate('settings.appearance.loader.macos', 'macOS')
-    case 'square':
-      return translate('settings.appearance.loader.square', 'Square')
-    case 'flipbook':
-      return translate('settings.appearance.loader.flipbook', 'Flipbook')
-    case 'escalade':
-      return translate('settings.appearance.loader.escalade', 'Escalade')
-    case 'thinking-orb-working':
+    case 'working':
       return translate('settings.appearance.loader.orbWorking', 'Working')
-    case 'thinking-orb-searching':
+    case 'searching':
       return translate('settings.appearance.loader.orbSearching', 'Searching')
-    case 'thinking-orb-solving':
+    case 'solving':
       return translate('settings.appearance.loader.orbSolving', 'Solving')
-    case 'thinking-orb-listening':
+    case 'listening':
       return translate('settings.appearance.loader.orbListening', 'Listening')
-    case 'thinking-orb-composing':
+    case 'composing':
       return translate('settings.appearance.loader.orbComposing', 'Composing')
-    case 'thinking-orb-shaping':
+    case 'shaping':
       return translate('settings.appearance.loader.orbShaping', 'Shaping')
   }
 }
@@ -84,7 +72,7 @@ export function LoaderStyleSetting({
         <p className="text-muted-foreground text-xs">
           {translate(
             'settings.appearance.loader.description',
-            'Choose the animation used across Yiru. Drawn icons cycle through four sketches, and Thinking Orbs adds six dotted agent-state animations.'
+            'Choose the dotted agent-state animation used across Yiru.'
           )}
         </p>
       </div>

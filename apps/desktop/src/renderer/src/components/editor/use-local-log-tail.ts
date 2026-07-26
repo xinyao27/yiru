@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 
-import type { OpenFile } from '@/store/slices/editor'
+import type { OpenFile } from '@/components/editor/state'
 
 import type { LocalLogTailChangedPayload } from '../../../../shared/local-log-tail-types'
-import type { FileContent } from './editor-panel-content-types'
 import { LocalLogTailDecoder } from './local-log-tail-decoder'
+import type { FileContent } from './panel-content-types'
 
 type TailSession = {
   fileId: string

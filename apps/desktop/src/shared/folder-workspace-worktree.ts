@@ -1,5 +1,5 @@
 import type { FolderWorkspace, Worktree } from './types'
-import { folderWorkspaceKey } from './workspace-scope'
+import { folderWorkspaceKey } from './workspace/scope'
 
 export function folderWorkspaceToWorktree(folderWorkspace: FolderWorkspace): Worktree {
   const linkedReview = folderWorkspace.linkedReview

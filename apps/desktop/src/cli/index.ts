@@ -13,9 +13,9 @@ import { dispatch } from './dispatch'
 import { reportCliError } from './format'
 import { printHelp } from './help'
 import { RuntimeClient } from './runtime-client'
-import { COMMAND_SPECS } from './specs'
+import { COMMAND_SPECS } from './specs/registry'
 
-export { COMMAND_SPECS } from './specs'
+export { COMMAND_SPECS } from './specs/registry'
 export { buildCurrentWorktreeSelector, normalizeWorktreeSelector } from './selectors'
 
 const COMMAND_PATHS = COMMAND_SPECS.flatMap((spec) => specPaths(spec))

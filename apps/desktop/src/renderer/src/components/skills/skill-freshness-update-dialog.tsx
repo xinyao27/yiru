@@ -14,7 +14,7 @@ import {
 } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { OnboardingInlineCommandTerminal } from '@/components/onboarding/onboarding-inline-command-terminal'
+import { OnboardingInlineCommandTerminal } from '@/components/onboarding/inline-command-terminal'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
@@ -25,7 +25,6 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useSkillFreshness } from '@/hooks/use-skill-freshness'
 import { translate } from '@/i18n/i18n'
 import { notifyInstalledAgentSkillsChanged } from '@/runtime/installed-agent-skill-discovery-state'
 
@@ -38,6 +37,7 @@ import {
   getSkillFreshnessUpdateDialogRequest,
   subscribeSkillFreshnessUpdateDialog
 } from './skill-freshness-update-dialog-request'
+import { useSkillFreshness } from './use-skill-freshness'
 
 type FreshnessSummaryKind = 'loading' | 'empty' | 'eligible' | 'current' | 'attention'
 

@@ -10,6 +10,7 @@ import {
   X
 } from '@phosphor-icons/react'
 
+import { showLocalPathOpenBlockedToast } from '@/components/editor/local-path-open-guard'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -21,10 +22,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
-import { showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
 import { useAppStore } from '@/store'
 
-import type { OpenFile } from '../../store/slices/editor'
+import type { OpenFile } from '../editor/state'
 import { shouldBlockEditorTabLocalOpen } from './editor-tab-local-open-guard'
 import { TabWorkspaceLayoutMenuSection } from './tab-workspace-layout-menu-section'
 

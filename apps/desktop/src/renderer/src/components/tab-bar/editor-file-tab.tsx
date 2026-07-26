@@ -8,7 +8,7 @@ import {
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { getEditorDisplayLabel } from '@/components/editor/editor-labels'
+import { getEditorDisplayLabel } from '@/components/editor/labels'
 import { canOpenMarkdownPreview } from '@/components/editor/markdown-preview-controls'
 import { getUntitledFileRoot } from '@/components/editor/untitled-file-rename-path'
 import { Input } from '@/components/ui/input'
@@ -24,7 +24,7 @@ import { useAppStore } from '@/store'
 import { useRepoById, useWorktreeById } from '@/store/selectors'
 
 import type { GitFileStatus } from '../../../../shared/types'
-import type { OpenFile } from '../../store/slices/editor'
+import type { OpenFile } from '../editor/state'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'
 import { STATUS_COLORS, STATUS_LABELS } from '../workspace-panel/status-display'
 import { getDropIndicatorClasses, type DropIndicator } from './drop-indicator'

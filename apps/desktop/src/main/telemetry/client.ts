@@ -40,10 +40,7 @@ import type {
   SupportReportDraft
 } from '../../shared/telemetry-events'
 import type { Store } from '../persistence'
-import {
-  sendSupportReport,
-  type SupportReportSubmitResult
-} from '../support-report/support-report-client'
+import { sendSupportReport, type SupportReportSubmitResult } from '../support-report/client'
 import { consumeBurstToken, resetBurstCapsForSession } from './burst-cap'
 import { getCohortAtEmit } from './cohort-classifier'
 import { resolveConsent, type ConsentState } from './consent'

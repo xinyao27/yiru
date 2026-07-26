@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 
-import TabGroupDropOverlay from './tab-group-drop-overlay'
+import TabGroupDropOverlay from './drop-overlay'
 import type { TabDropZone } from './use-tab-drag-split'
 
 function getOverlayBounds(

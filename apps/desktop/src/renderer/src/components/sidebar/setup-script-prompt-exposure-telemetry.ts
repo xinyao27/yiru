@@ -1,7 +1,7 @@
-import type { SetupScriptPromptInspection } from '@/lib/setup-script-prompt'
+import type { SetupScriptPromptInspection } from '@/components/sidebar/setup-script-prompt'
 import { track } from '@/lib/telemetry'
 
-import { buildSetupScriptPromptTelemetry } from '../../../../shared/setup-script-telemetry'
+import { buildSetupScriptPromptTelemetry } from '../../../../shared/setup/script-telemetry'
 
 export function trackSetupScriptPromptExposure(input: {
   repoId: string

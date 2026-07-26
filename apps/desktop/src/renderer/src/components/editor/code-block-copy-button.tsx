@@ -68,14 +68,14 @@ export default function CodeBlockCopyButton({
   }, [children, clearCopiedResetTimer])
 
   return (
-    <div className="code-block-wrapper">
+    <div className="code-block-wrapper group relative">
       <pre {...props}>{children}</pre>
       <Button
         variant="ghost"
         size="xs"
         ref={setCopyButtonRef}
         type="button"
-        className="code-block-copy-btn focus-visible:bg-accent h-auto border-0 p-0"
+        className="code-block-copy-btn focus-visible:bg-accent text-muted-foreground can-hover:opacity-0 can-hover:group-hover:opacity-100 absolute top-2 right-2 h-auto border-0 p-1 opacity-100 transition-opacity duration-150"
         onClick={handleCopy}
         aria-label={translate('auto.components.editor.CodeBlockCopyButton.1f9f4def45', 'Copy code')}
         title={translate('auto.components.editor.CodeBlockCopyButton.1f9f4def45', 'Copy code')}
@@ -83,7 +83,7 @@ export default function CodeBlockCopyButton({
         {copied ? (
           <>
             <Check size={14} />
-            <span className="code-block-copy-label">
+            <span className="code-block-copy-label ml-[3px] font-sans text-[11px]">
               {translate('auto.components.editor.CodeBlockCopyButton.28921f5bf9', 'Copied')}
             </span>
           </>

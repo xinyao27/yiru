@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import { cn } from '../../../lib/class-names'
-import { mobileWorktreePreviewStyles } from '../mobile-worktree-preview-tailwind'
+import { mobileWorktreePreviewStyles } from '../worktree-preview-tailwind'
 
 type Indicator = 'spinner' | 'green' | 'muted' | 'red'
 

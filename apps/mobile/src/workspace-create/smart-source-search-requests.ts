@@ -4,8 +4,8 @@ import type { BaseRefSearchResult } from '@yiru/workbench-model/workspace'
 
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
-import type { MrStateFilter } from './mobile-composer-source-types'
-import { PER_REPO_FETCH_LIMIT } from './mobile-work-items'
+import type { MrStateFilter } from './composer-source-types'
+import { PER_REPO_FETCH_LIMIT } from './work-items'
 
 const GITLAB_PER_PAGE = 50
 const BRANCH_LIMIT = 20

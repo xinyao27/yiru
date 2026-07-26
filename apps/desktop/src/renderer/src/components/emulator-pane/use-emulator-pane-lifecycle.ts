@@ -3,9 +3,9 @@ import { useEffect } from 'react'
 import {
   cancelPendingSimulatorPaneShutdown,
   scheduleSimulatorPaneManagedShutdown
-} from '@/lib/simulator-pane-shutdown-scheduler'
+} from '@/components/emulator-pane/simulator-pane-shutdown-scheduler'
 
-import type { SimulatorDeviceRow } from './emulator-pane-types'
+import type { SimulatorDeviceRow } from './types'
 
 type UseEmulatorPaneLifecycleArgs = {
   mountedRef: { current: boolean }

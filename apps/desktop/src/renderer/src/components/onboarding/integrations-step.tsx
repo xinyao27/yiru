@@ -11,7 +11,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
-import { OnboardingInlineCommandTerminal } from './onboarding-inline-command-terminal'
+import { OnboardingInlineCommandTerminal } from './inline-command-terminal'
 
 type GitHubSetupState = 'checking' | 'connected' | 'not-installed' | 'not-authenticated'
 

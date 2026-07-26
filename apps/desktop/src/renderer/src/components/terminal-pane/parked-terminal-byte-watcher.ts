@@ -17,22 +17,22 @@ import { useAppStore } from '@/store'
  * moves to main. See docs/reference/terminal-hidden-view-parking.md and
  * docs/reference/terminal-side-effect-authority.md.
  */
-import { isClaudeAgent } from '../../../../shared/agent-detection'
+import { isClaudeAgent } from '../../../../shared/agent/detection'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode
-} from '../../../../shared/terminal-color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal-github-pr-link-detector'
+} from '../../../../shared/terminal/color-scheme-protocol'
+import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/github-pr-link-detector'
 import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,
   isAgentTaskCompleteTrackingEnabledFromState
-} from './agent-task-complete-policy'
+} from './agent/task-complete-policy'
 import { startParkedTerminalMode2031Responder } from './parked-terminal-mode2031-responder'
-import { subscribeToPtyData } from './pty-data-sidecar-subscriptions'
-import { acquireHiddenRendererPtyDeliveryClaim } from './pty-renderer-delivery-claims'
-import { createPtyOutputProcessor } from './pty-transport'
+import { subscribeToPtyData } from './pty/data-sidecar-subscriptions'
+import { acquireHiddenRendererPtyDeliveryClaim } from './pty/renderer-delivery-claims'
+import { createPtyOutputProcessor } from './pty/transport'
 import { isRendererHiddenPtyDeliveryGateEnabled } from './terminal-hidden-delivery-gate'
 import {
   isMainTerminalSideEffectAuthorityForPty,

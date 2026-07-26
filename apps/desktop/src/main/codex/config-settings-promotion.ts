@@ -12,14 +12,14 @@ import { dirname, join, resolve } from 'node:path'
 
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
-import { writeFileAtomically } from '../codex-accounts/fs-utils'
-import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
+import { writeFileAtomically } from './accounts/fs-utils'
 import {
   createTomlLineScanState,
   getTomlTableHeader,
   isTomlStructuralLine,
   updateTomlLineScanState
 } from './config-toml-line-scan'
+import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './home-paths'
 
 // Why: the config mirror rewrites the runtime config.toml from ~/.codex on
 // every launch (and on background rate-limit fetches), so settings the user

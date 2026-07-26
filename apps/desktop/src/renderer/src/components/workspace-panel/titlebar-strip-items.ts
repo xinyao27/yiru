@@ -6,7 +6,7 @@ import {
   type IconProps
 } from '@phosphor-icons/react'
 
-import type { ActiveRightSidebarTab } from '@/store/slices/editor'
+import type { ActiveRightSidebarTab } from '@/components/editor/state'
 
 import type { ActivityBarItem } from './activity-bar-buttons'
 

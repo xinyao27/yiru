@@ -8,12 +8,7 @@ import {
   MAX_LEFT_SIDEBAR_TINT_OPACITY
 } from '../../../../shared/left-sidebar-appearance'
 import type { GlobalSettings, LeftSidebarAppearanceMode } from '../../../../shared/types'
-import {
-  ColorField,
-  NumberField,
-  SettingsRow,
-  SettingsSegmentedControl
-} from './settings-form-controls'
+import { ColorField, NumberField, SettingsRow, SettingsSegmentedControl } from './form-controls'
 
 type LeftSidebarAppearanceSettingProps = {
   settings: GlobalSettings

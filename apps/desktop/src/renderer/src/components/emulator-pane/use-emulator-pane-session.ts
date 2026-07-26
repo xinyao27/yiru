@@ -3,23 +3,23 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   consumePrelaunchedSimulatorSession,
   isManualSimulatorLaunchPending
-} from '@/lib/simulator-launch-coordination'
-import { shutdownManagedSimulatorIfNoPane } from '@/lib/simulator-pane-shutdown-scheduler'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
+} from '@/components/emulator-pane/simulator-launch-coordination'
+import { shutdownManagedSimulatorIfNoPane } from '@/components/emulator-pane/simulator-pane-shutdown-scheduler'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { resolveEmulatorAttachTarget } from './emulator-attach-target'
 import { toSimulatorDeviceRows, type RawEmulatorDevice } from './emulator-device-row-mapping'
 import { markSimulatorDeviceBooted, markSimulatorDeviceShutdown } from './emulator-device-state'
-import { emulatorPaneErrorMessage } from './emulator-pane-error-message'
-import { buildEmulatorPaneSessionView } from './emulator-pane-session-view'
+import { buildPrelaunchedEmulatorSessionState } from './emulator-prelaunched-session'
+import { emulatorPaneErrorMessage } from './error-message'
+import { buildEmulatorPaneSessionView } from './session-view'
 import {
   deviceLabel,
   simulatorPreviewStreamUrl,
   type EmulatorPaneSession,
   type SimulatorDeviceRow
-} from './emulator-pane-types'
-import { buildPrelaunchedEmulatorSessionState } from './emulator-prelaunched-session'
+} from './types'
 import { useEmulatorPaneControls } from './use-emulator-pane-controls'
 import { useEmulatorPaneLifecycle } from './use-emulator-pane-lifecycle'
 import { useEmulatorPaneManualLaunchEvents } from './use-emulator-pane-manual-launch-events'

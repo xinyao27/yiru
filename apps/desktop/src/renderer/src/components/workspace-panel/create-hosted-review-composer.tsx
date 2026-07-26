@@ -30,7 +30,7 @@ import {
   RIGHT_SIDEBAR_PRIMARY_BUTTON_LABEL_CLASS,
   RIGHT_SIDEBAR_SPLIT_ACTION_ROW_CLASS
 } from './right-sidebar-primary-action-layout'
-import type { DropdownActionKind, DropdownEntry } from './source-control-dropdown-items'
+import type { DropdownActionKind, DropdownEntry } from './source-control/dropdown-items'
 import { stripBaseRef } from './use-create-pull-request-dialog-fields'
 
 const EMPTY_DROPDOWN_ITEMS: DropdownEntry[] = []

@@ -5,11 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getRuntimeEnvironmentIdForRepo } from '@/lib/repo-runtime-owner'
-import {
-  getRuntimeRepoBaseRefDefault,
-  searchRuntimeRepoBaseRefs
-} from '@/runtime/runtime-repo-client'
-import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/runtime-repo-search-bounds'
+import { getRuntimeRepoBaseRefDefault, searchRuntimeRepoBaseRefs } from '@/runtime/repo-client'
+import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/repo-search-bounds'
 import { useAppStore } from '@/store'
 
 import { Button } from '../ui/button'

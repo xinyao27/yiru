@@ -3,7 +3,7 @@ import {
   normalizeVisibleExecutionHostIds
 } from '@yiru/workbench-model/workspace'
 
-import { normalizeBrowserPageZoomLevel } from '../../shared/browser-page-zoom'
+import { normalizeBrowserPageZoomLevel } from '../../shared/browser/page-zoom'
 import {
   getDefaultUIState,
   normalizeAgentActivityDisplayMode,
@@ -19,7 +19,7 @@ import { persistedUIValuesEqual } from '../../shared/persisted-ui-equality'
 import { normalizeStatusBarUsageMode } from '../../shared/status-bar-usage-mode'
 import type { PersistedState } from '../../shared/types'
 import { normalizeUsagePercentageDisplay } from '../../shared/usage-percentage-display'
-import { normalizeWorkspaceStatuses } from '../../shared/workspace-statuses'
+import { normalizeWorkspaceStatuses } from '../../shared/workspace/statuses'
 import {
   mergePersistedContextualTours,
   mergePersistedFeatureInteractions,

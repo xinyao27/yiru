@@ -1,12 +1,12 @@
 import { normalizeTerminalShortcutPolicy } from '../../shared/keybindings'
-import { normalizeTerminalCursorStyleDefault } from '../../shared/terminal-cursor-style-settings'
-import { normalizeTerminalCustomThemes } from '../../shared/terminal-custom-themes'
-import { normalizeTerminalLineHeight } from '../../shared/terminal-line-height-settings'
-import { normalizeTerminalQuickCommands } from '../../shared/terminal-quick-commands'
+import { normalizeTerminalCursorStyleDefault } from '../../shared/terminal/cursor-style-settings'
+import { normalizeTerminalCustomThemes } from '../../shared/terminal/custom-themes'
+import { normalizeTerminalLineHeight } from '../../shared/terminal/line-height-settings'
+import { normalizeTerminalQuickCommands } from '../../shared/terminal/quick-commands'
 import {
   legacyTerminalScrollbackBytesToRows,
   normalizeDesktopTerminalScrollbackRows
-} from '../../shared/terminal-scrollback-policy'
+} from '../../shared/terminal/scrollback-policy'
 import type { GlobalSettings } from '../../shared/types'
 
 type LegacyTerminalSettings = Partial<GlobalSettings> & {

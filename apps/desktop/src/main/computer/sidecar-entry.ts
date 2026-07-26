@@ -1,5 +1,5 @@
-import { currentComputerProvider, shutdownComputerProviders } from './computer-provider-lifecycle'
-import { computerProviderUnavailableMessage } from './computer-provider-unavailable-message'
+import { currentComputerProvider, shutdownComputerProviders } from './provider-lifecycle'
+import { computerProviderUnavailableMessage } from './provider-unavailable-message'
 import { RuntimeClientError } from './runtime-client-error'
 
 type SidecarRequest = {

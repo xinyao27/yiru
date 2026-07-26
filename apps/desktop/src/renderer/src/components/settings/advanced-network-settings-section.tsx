@@ -13,8 +13,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { getAdvancedNetworkSearchEntries } from './advanced-network-search'
+import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './settings-search'
 
 /** Open the proxy fields automatically when a search matches this section. */
 export function shouldOpenNetworkProxyConfig(searchQuery: string): boolean {

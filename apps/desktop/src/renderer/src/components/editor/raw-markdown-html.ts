@@ -3,13 +3,13 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import { isEditableDetailsHtmlBlock, matchDetailsHtmlBlock } from './details-markdown-html'
 import { formatMarkdownDocLinkBody, parseMarkdownDocLink } from './markdown-doc-links'
 import { normalizeMarkdownReferenceLinks } from './markdown-reference-link-normalization'
-import { matchHtmlSuperscriptLinkSource } from './rich-markdown-html-superscript-link-source'
+import { matchHtmlSuperscriptLinkSource } from './rich-markdown/html-superscript-link-source'
 import type {
   RichMarkdownEditorCodec,
   RichMarkdownSourceKind,
   RichMarkdownSourceTransport
-} from './rich-markdown-source-transport'
-import { isReservedRichMarkdownTransportBody } from './rich-markdown-source-transport'
+} from './rich-markdown/source-transport'
+import { isReservedRichMarkdownTransportBody } from './rich-markdown/source-transport'
 
 const INLINE_HTML_PATTERN = /^<!--[\s\S]*?-->|^<\/?[A-Za-z][\w.:-]*(?:\s[^<>]*?)?\/?>/
 

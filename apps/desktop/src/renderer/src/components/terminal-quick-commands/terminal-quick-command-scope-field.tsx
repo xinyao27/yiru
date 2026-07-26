@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 
-import RepoBadgeLabel from '@/components/repo/repo-badge-label'
+import RepoBadgeLabel from '@/components/repo/badge-label'
 import { Label } from '@/components/ui/label'
 import {
   Select,

@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native'
 import { ArrowSquareRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { styles } from './mobile-session-styles'
+import { styles } from './styles'
 
 export function QuickCommandsTabButton({
   disabled,

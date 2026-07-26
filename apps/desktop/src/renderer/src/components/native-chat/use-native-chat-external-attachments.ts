@@ -7,7 +7,7 @@ import {
   resolveNativeChatAttachmentOwner,
   uploadNativeChatAttachmentPaths,
   type NativeChatAttachmentOwner
-} from './native-chat-attachment-upload'
+} from './attachment-upload'
 
 export type UseNativeChatExternalAttachmentsArgs = {
   terminalTabId: string

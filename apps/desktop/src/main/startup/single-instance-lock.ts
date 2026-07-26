@@ -1,6 +1,6 @@
 import type { App } from 'electron'
 
-import { writeStartupDiagnosticLine, type StartupDiagnosticSink } from './startup-diagnostics'
+import { writeStartupDiagnosticLine, type StartupDiagnosticSink } from './diagnostics'
 
 export const SINGLE_INSTANCE_LOCK_FAILURE_MESSAGE =
   '[single-instance] Another Yiru instance is already running for this userData profile; exiting this launch after requesting the existing window. If no Yiru process is running, this may be an Electron/macOS single-instance lock failure.'

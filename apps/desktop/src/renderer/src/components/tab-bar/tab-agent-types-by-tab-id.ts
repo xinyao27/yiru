@@ -4,7 +4,7 @@ import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 import {
   isNativeChatTabWideFallbackSafe,
   resolveNativeChatActiveLayoutLeafId
-} from '../native-chat/native-chat-leaf-routing'
+} from '../native-chat/leaf-routing'
 
 /**
  * Project `agentStatusByPaneKey` down to the stable `{ terminalTabId: agentType }`

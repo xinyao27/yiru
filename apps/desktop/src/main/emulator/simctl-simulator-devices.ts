@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process'
 import type { ExecFileException } from 'node:child_process'
 import { platform } from 'node:os'
 
-import { EmulatorError } from './emulator-errors'
+import { EmulatorError } from './errors'
 import { execServeSimCommand, type ServeSimExecutable } from './serve-sim-execution'
 
 export type SimulatorDevice = {

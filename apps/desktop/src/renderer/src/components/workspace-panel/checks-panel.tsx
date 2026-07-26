@@ -1,32 +1,32 @@
 import React from 'react'
 
-import { SpoolChecksPane } from '@/components/spool/spool-checks-pane'
+import { CoworkingChecksPane } from '@/components/coworking/checks-pane'
 
-import { useChecksPanelAgentActions } from './checks-panel-agent-actions'
-import { useChecksPanelChecksLoading } from './checks-panel-checks-loading'
-import { useChecksPanelCommentActions } from './checks-panel-comment-actions-controller'
-import { useChecksPanelCommentsLoading } from './checks-panel-comments-loading'
-import { useChecksPanelCreateReview } from './checks-panel-create-review'
-import { ChecksPanelEmptyStateView } from './checks-panel-empty-state-view'
-import { useChecksPanelEntryAndEdit } from './checks-panel-entry-and-edit'
-import { useChecksPanelGenerationActions } from './checks-panel-generation-actions'
-import { useChecksPanelGenerationDefaults } from './checks-panel-generation-defaults'
-import { useChecksPanelGenerationFields } from './checks-panel-generation-fields'
-import { useChecksPanelPollingEffects } from './checks-panel-polling-effects'
-import { useChecksPanelRefreshAction } from './checks-panel-refresh-action'
-import { useChecksPanelReviewContext } from './checks-panel-review-context'
-import { useChecksPanelReviewCreation } from './checks-panel-review-creation-actions'
-import { useChecksPanelReviewIdentity } from './checks-panel-review-identity'
-import { useChecksPanelReviewMutations } from './checks-panel-review-mutations'
-import { ChecksPanelReviewView } from './checks-panel-review-view'
-import { useChecksPanelStateCore } from './checks-panel-state-core'
-import { useChecksPanelStatusEffects } from './checks-panel-status-effects'
+import { useChecksPanelAgentActions } from './checks-panel/agent-actions'
+import { useChecksPanelChecksLoading } from './checks-panel/checks-loading'
+import { useChecksPanelCommentActions } from './checks-panel/comment-actions-controller'
+import { useChecksPanelCommentsLoading } from './checks-panel/comments-loading'
+import { useChecksPanelCreateReview } from './checks-panel/create-review'
+import { ChecksPanelEmptyStateView } from './checks-panel/empty-state-view'
+import { useChecksPanelEntryAndEdit } from './checks-panel/entry-and-edit'
+import { useChecksPanelGenerationActions } from './checks-panel/generation-actions'
+import { useChecksPanelGenerationDefaults } from './checks-panel/generation-defaults'
+import { useChecksPanelGenerationFields } from './checks-panel/generation-fields'
+import { useChecksPanelPollingEffects } from './checks-panel/polling-effects'
+import { useChecksPanelRefreshAction } from './checks-panel/refresh-action'
+import { useChecksPanelReviewContext } from './checks-panel/review-context'
+import { useChecksPanelReviewCreation } from './checks-panel/review-creation-actions'
+import { useChecksPanelReviewIdentity } from './checks-panel/review-identity'
+import { useChecksPanelReviewMutations } from './checks-panel/review-mutations'
+import { ChecksPanelReviewView } from './checks-panel/review-view'
+import { useChecksPanelStateCore } from './checks-panel/state-core'
+import { useChecksPanelStatusEffects } from './checks-panel/status-effects'
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
   type RightSidebarPanelSource
 } from './right-sidebar-panel-source'
 
-export { ChecksPanelReviewHeader } from './checks-panel-review-header'
+export { ChecksPanelReviewHeader } from './checks-panel/review-header'
 
 function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Element | null {
   const core = useChecksPanelStateCore(isVisible)
@@ -60,8 +60,8 @@ export default function ChecksPanel({
   source?: RightSidebarPanelSource
   isVisible?: boolean
 }): React.JSX.Element | null {
-  if (source.kind === 'spool') {
-    return source.supportsGit ? <SpoolChecksPane state={source.checksState} /> : null
+  if (source.kind === 'coworking') {
+    return source.supportsGit ? <CoworkingChecksPane state={source.checksState} /> : null
   }
   return <LocalChecksPanel isVisible={isVisible} />
 }

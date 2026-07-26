@@ -14,6 +14,7 @@ import {
   type KeybindingInput
 } from '../../../../shared/keybindings'
 import { useAppStore } from '../../store'
+import { SettingsSubsectionHeader } from './form-controls'
 import {
   hasCommonBindingOverride,
   hasOwnBindingOverride,
@@ -21,14 +22,13 @@ import {
   sameBindings
 } from './keybinding-override-edits'
 import { KeybindingsFileActions } from './keybindings-file-actions'
-import { SettingsSubsectionHeader } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
+import { matchesSettingsSearch } from './search'
 import {
   adjustRecordingIndexAfterRemove,
   appendBinding,
   removeBindingAt,
   replaceBindingAt
-} from './shortcut-binding-list-mutations'
+} from './shortcut/binding-list-mutations'
 import {
   buildShortcutGlobalSearchMatcher,
   matchesShortcutFilter,
@@ -37,16 +37,16 @@ import {
   ShortcutFilterRail,
   type ShortcutFilter,
   type ShortcutRowsByGroup
-} from './shortcut-filter-rail'
+} from './shortcut/filter-rail'
 import {
   EMPTY_DISABLED_TUI_AGENTS,
   disabledAgentTabActionIds,
   groupDefinitions
-} from './shortcut-groups'
-import { clearRecordingActionForShortcutMutation } from './shortcut-recording-state'
-import { ShortcutRowsList } from './shortcut-rows-list'
-import { ShortcutTerminalPolicyControl } from './shortcut-terminal-policy-control'
-import { getShortcutTerminalStatus } from './shortcut-terminal-status'
+} from './shortcut/groups'
+import { clearRecordingActionForShortcutMutation } from './shortcut/recording-state'
+import { ShortcutRowsList } from './shortcut/rows-list'
+import { ShortcutTerminalPolicyControl } from './shortcut/terminal-policy-control'
+import { getShortcutTerminalStatus } from './shortcut/terminal-status'
 import { getTerminalShortcutPolicySearchEntry } from './shortcuts-search'
 
 const isMac = navigator.userAgent.includes('Mac')

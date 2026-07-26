@@ -3,8 +3,8 @@ import type React from 'react'
 import { translate } from '@/i18n/i18n'
 
 import type { GlobalSettings } from '../../../../shared/types'
+import { FontAutocomplete, SettingsRow } from './form-controls'
 import { SearchableSetting } from './searchable-setting'
-import { FontAutocomplete, SettingsRow } from './settings-form-controls'
 
 type EditorFontFamilySettingProps = {
   settings: GlobalSettings

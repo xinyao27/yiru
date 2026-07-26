@@ -12,6 +12,23 @@ export function buildPosixHookPayloadCapture(
   return ['payload=$(cat)', 'if [ -z "$payload" ]; then', ...emptyPayloadLines, 'fi']
 }
 
+// Why: mirrors buildWindowsHookEnvironmentGuardLines. Sourcing the endpoint
+// file refreshes PORT/TOKEN/ENV/VERSION for a PTY that survived a Yiru restart
+// (see claude/hook-service.ts for the staleness rationale); the `|| :` and
+// redirected stderr on the `.` builtin swallow a TOCTOU unlink race or a
+// malformed line rather than leaking a shell parse error into the agent
+// transcript — the guard below already fails open on empty PORT/TOKEN/PANE_KEY.
+export function buildPosixHookEnvironmentGuardLines(): string[] {
+  return [
+    'if [ -n "$YIRU_AGENT_HOOK_ENDPOINT" ] && [ -r "$YIRU_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$YIRU_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'fi',
+    'if [ -z "$YIRU_AGENT_HOOK_PORT" ] || [ -z "$YIRU_AGENT_HOOK_TOKEN" ] || [ -z "$YIRU_PANE_KEY" ]; then',
+    '  exit 0',
+    'fi'
+  ]
+}
+
 export const WINDOWS_HOOK_STDIN_DRAIN_LABEL = 'yiru_agent_hook_drain_stdin'
 export const WINDOWS_HOOK_STDIN_DRAIN_COMMAND = '"%SystemRoot%\\System32\\more.com" >nul 2>nul'
 

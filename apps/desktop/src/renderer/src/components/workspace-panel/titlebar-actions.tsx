@@ -1,6 +1,6 @@
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
-import { TabBarOpenInMenuButton } from '@/components/tab-bar/tab-bar-open-in-menu-button'
-import { TabBarQuickCommandsButton } from '@/components/tab-bar/tab-bar-quick-commands-button'
+import { TabBarOpenInMenuButton } from '@/components/tab-bar/open-in-menu-button'
+import { TabBarQuickCommandsButton } from '@/components/tab-bar/quick-commands-button'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'

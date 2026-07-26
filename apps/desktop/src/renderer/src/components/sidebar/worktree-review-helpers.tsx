@@ -2,8 +2,8 @@ import { GitMerge } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/class-names'
 
-import { PullRequestIcon } from './worktree-card-helpers'
-import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
+import { PullRequestIcon } from './worktree-card/helpers'
+import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
 
 export function getReviewLabel(review: WorktreeCardPrDisplay): 'MR' | 'PR' {
   return review.provider === 'gitlab' ? 'MR' : 'PR'

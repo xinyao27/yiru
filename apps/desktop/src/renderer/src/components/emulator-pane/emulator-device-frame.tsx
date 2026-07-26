@@ -61,6 +61,11 @@ type ScreenCoordinateEvent = Pick<
   'clientX' | 'clientY' | 'currentTarget'
 >
 
+// Why: tagging the resolved size/error with the previewUrl+streamKey identity
+// lets stale values from a prior device or stream refresh be discarded during
+// render, so no reset effect is needed to clear them on prop change.
+type StreamGeometryState = { identity: string; size: StreamSize | null; error: boolean }
+
 export function EmulatorDeviceFrame({
   previewUrl,
   wsUrl,
@@ -80,8 +85,15 @@ export function EmulatorDeviceFrame({
   const liveTouchEdgeRef = useRef<number | undefined>(undefined)
   const lastTouchPointRef = useRef<EmulatorScreenPoint | null>(null)
   const wheelGestureRef = useRef<PendingWheelGesture | null>(null)
-  const [streamError, setStreamError] = useState(false)
-  const [streamSize, setStreamSize] = useState<StreamSize | null>(null)
+  const streamIdentity = `${previewUrl ?? ''}::${streamKey ?? ''}`
+  const [streamGeometryState, setStreamGeometryState] = useState<StreamGeometryState>({
+    identity: streamIdentity,
+    size: null,
+    error: false
+  })
+  const isCurrentStreamGeometry = streamGeometryState.identity === streamIdentity
+  const streamSize = isCurrentStreamGeometry ? streamGeometryState.size : null
+  const streamError = isCurrentStreamGeometry && streamGeometryState.error
   const visualStreamGeometry = useMemo(
     () => resolveVisualStreamGeometry(streamSize, visualOrientation),
     [streamSize, visualOrientation]
@@ -97,11 +109,6 @@ export function EmulatorDeviceFrame({
       canInteract,
       sendKeyboardFrames
     })
-
-  useEffect(() => {
-    setStreamError(false)
-    setStreamSize(null)
-  }, [previewUrl, streamKey])
 
   const mapEventToScreenPoint = useCallback(
     (event: ScreenCoordinateEvent): EmulatorScreenPoint | null =>
@@ -325,16 +332,25 @@ export function EmulatorDeviceFrame({
     [canInteract, flushWheelGesture, sendTouch, visualStreamGeometry]
   )
 
-  const handleStreamSize = useCallback((size: NonNullable<StreamSize>) => {
-    setStreamError(false)
-    setStreamSize((current) =>
-      current?.width === size.width && current.height === size.height ? current : size
-    )
-  }, [])
+  const handleStreamSize = useCallback(
+    (size: NonNullable<StreamSize>) => {
+      setStreamGeometryState((current) => {
+        const same = current.size?.width === size.width && current.size?.height === size.height
+        return current.identity === streamIdentity && !current.error && same
+          ? current
+          : { identity: streamIdentity, size, error: false }
+      })
+    },
+    [streamIdentity]
+  )
 
   const handleStreamError = useCallback(() => {
-    setStreamError(true)
-  }, [])
+    setStreamGeometryState((current) => ({
+      identity: streamIdentity,
+      size: current.identity === streamIdentity ? current.size : null,
+      error: true
+    }))
+  }, [streamIdentity])
 
   // Why: hidden panes still receive emulator frames, including over SSH, so
   // parking the stream avoids background decode/IPC churn while staying attached.

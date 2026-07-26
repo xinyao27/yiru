@@ -1,4 +1,4 @@
-import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
+import { recognizeAgentProcessFromCommandLine } from '../../shared/agent/process-recognition'
 import {
   getFreshProcessTableSnapshot,
   getProcessTableSnapshot,

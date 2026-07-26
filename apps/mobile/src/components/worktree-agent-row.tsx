@@ -4,8 +4,8 @@ import { Text, View } from 'react-native'
 import { cn } from '@/style/class-names'
 
 import { agentDisplayLabel, agentDotState, formatTimeAgo } from '../worktree/agent-row-display'
+import { MobileAgentIcon } from './agent-icon'
 import { AgentStateDot } from './agent-state-dot'
-import { MobileAgentIcon } from './mobile-agent-icon'
 
 const INDENT_PER_DEPTH = 14
 

@@ -1,5 +1,6 @@
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,10 +15,9 @@ import { translate } from '@/i18n/i18n'
 import { getConnectionIdForFile } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { readRuntimeFileContent } from '@/runtime/runtime-file-client'
-import { settingsForRuntimeOwner } from '@/runtime/runtime-rpc-client'
+import { readRuntimeFileContent } from '@/runtime/file-client'
+import { settingsForRuntimeOwner } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 const DiffViewer = lazy(() => import('./diff-viewer'))
 
@@ -46,14 +46,23 @@ export function ExternalFileChangeCompareDialog({
   onReload: () => void
   onKeepEdits: () => void
 }): React.JSX.Element {
-  const [diskState, setDiskState] = useState<DiskReadState>({ kind: 'loading' })
+  // Why: requestIdRef is bumped once per read (including re-opens of the same
+  // file) so a completed/errored result can be tagged with the read it came
+  // from; render derives "loading" whenever the latest known result is for an
+  // older read, instead of an effect setting a loading flag synchronously.
+  const requestIdRef = useRef(0)
+  const [completedRead, setCompletedRead] = useState<{
+    requestId: number
+    state: Exclude<DiskReadState, { kind: 'loading' }>
+  } | null>(null)
 
   useEffect(() => {
     if (!open) {
       return
     }
     let cancelled = false
-    setDiskState({ kind: 'loading' })
+    requestIdRef.current += 1
+    const requestId = requestIdRef.current
     // Why: read at open time — the banner can be minutes old and the agent
     // may have written again since; the comparison must show current disk.
     void readRuntimeFileContent({
@@ -67,23 +76,29 @@ export function ExternalFileChangeCompareDialog({
         if (cancelled) {
           return
         }
-        setDiskState(
-          result.isBinary ? { kind: 'binary' } : { kind: 'ready', content: result.content }
-        )
+        setCompletedRead({
+          requestId,
+          state: result.isBinary ? { kind: 'binary' } : { kind: 'ready', content: result.content }
+        })
       })
       .catch((err: unknown) => {
         if (cancelled) {
           return
         }
-        setDiskState({
-          kind: 'error',
-          message: err instanceof Error ? err.message : String(err)
+        setCompletedRead({
+          requestId,
+          state: { kind: 'error', message: err instanceof Error ? err.message : String(err) }
         })
       })
     return () => {
       cancelled = true
     }
   }, [open, file.filePath, file.relativePath, file.worktreeId, file.runtimeEnvironmentId])
+
+  const diskState: DiskReadState =
+    completedRead && completedRead.requestId === requestIdRef.current
+      ? completedRead.state
+      : { kind: 'loading' }
 
   const language = detectLanguage(file.relativePath)
 

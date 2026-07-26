@@ -9,8 +9,8 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import { ClaudeIcon } from '../status-bar/icons'
-import { CodexInlineIcon } from './feature-tour-preview-glyphs'
-import { FeatureWallClickRing } from './feature-wall-click-ring'
+import { FeatureWallClickRing } from './click-ring'
+import { CodexInlineIcon } from './codex-inline-icon'
 
 // Why: the right-click menu needs the same icons as the real Yiru menu so the
 // visual reads as the actual product, not a generic terminal mockup.

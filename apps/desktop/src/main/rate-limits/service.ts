@@ -12,18 +12,18 @@ import type {
   ProviderRateLimits,
   InactiveAccountUsage
 } from '../../shared/rate-limit-types'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import {
   normalizeClaudeAccountSelectionTarget,
   type ClaudeAccountSelectionTarget,
   type NormalizedClaudeAccountSelectionTarget
-} from '../claude-accounts/runtime-selection'
+} from '../claude/accounts/runtime-selection'
 import {
   normalizeCodexAccountSelectionTarget,
   type CodexAccountSelectionTarget,
   type NormalizedCodexAccountSelectionTarget
-} from '../codex-accounts/runtime-selection'
-import { hasMiniMaxSessionCookie } from '../minimax/minimax-cookie-store'
+} from '../codex/accounts/runtime-selection'
+import { hasMiniMaxSessionCookie } from '../minimax/cookie-store'
 import { fetchClaudeRateLimits, fetchManagedAccountUsage } from './claude-fetcher'
 import type { InactiveClaudeAccountInfo } from './claude-fetcher'
 import { consumeCodexRateLimitResetCredit, fetchCodexRateLimits } from './codex-fetcher'

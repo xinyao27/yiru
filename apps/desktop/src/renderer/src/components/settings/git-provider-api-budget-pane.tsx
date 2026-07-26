@@ -1,10 +1,10 @@
 import { translate } from '@/i18n/i18n'
 
 import { useAppStore } from '../../store'
-import { GitHubRateLimitPanel } from '../github/github-rate-limit-display'
-import { GitLabRateLimitPanel } from '../gitlab/gitlab-rate-limit-display'
+import { GitHubRateLimitPanel } from '../github/rate-limit-display'
+import { GitLabRateLimitPanel } from '../gitlab/rate-limit-display'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { matchesSettingsSearch } from './settings-search'
 
 type GitProviderApiBudgetPaneProps = {
   settingsSearchQuery?: string

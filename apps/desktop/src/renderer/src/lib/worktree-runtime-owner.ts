@@ -14,7 +14,7 @@ import type {
   Repo,
   Worktree
 } from '../../../shared/types'
-import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace-scope'
+import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/scope'
 import {
   findIndexedFolderWorkspaceOwner,
   findIndexedProjectGroupOwner,

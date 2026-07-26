@@ -22,40 +22,40 @@ import {
   getTuiAgentDefaultEnv,
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
+} from '../../../../shared/tui-agent/launch-defaults'
 import {
   applyAgentPermissionMode,
   resolveAgentPermissionModeSummary,
   type AgentPermissionMode
-} from '../../../../shared/tui-agent-permissions'
+} from '../../../../shared/tui-agent/permissions'
 import {
   isTuiAgentEnabled,
   normalizeDisabledTuiAgents
-} from '../../../../shared/tui-agent-selection'
+} from '../../../../shared/tui-agent/selection'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { AgentAwakeSetting } from './agent-awake-setting'
-import { AgentCacheTimerSection } from './agent-cache-timer-section'
-import { parseAgentDefaultEnvDraft, stringifyAgentDefaultEnvDraft } from './agent-default-env-draft'
+import { AgentAwakeSetting } from './agent/awake-setting'
+import { AgentCacheTimerSection } from './agent/cache-timer-section'
+import { parseAgentDefaultEnvDraft, stringifyAgentDefaultEnvDraft } from './agent/default-env-draft'
 import {
   getAgentGeneratedTabTitlesDescription,
   getAgentGeneratedTabTitlesTitle
-} from './agent-generated-tab-title-copy'
-import { AgentRuntimeSetting } from './agent-runtime-setting'
-import { getAgentStatusHooksDescription, getAgentStatusHooksTitle } from './agent-status-hooks-copy'
+} from './agent/generated-tab-title-copy'
+import { AgentRuntimeSetting } from './agent/runtime-setting'
+import { getAgentStatusHooksDescription, getAgentStatusHooksTitle } from './agent/status-hooks-copy'
 import {
   AgentSessionSourceHomeInput,
   buildCodexSessionSourceHomeControl,
   type AgentSessionSourceHomeControl
 } from './codex-session-source-home-control'
-import { getSettingOwnershipSummary } from './setting-ownership'
 import {
   SettingsBadge,
   SettingsSegmentedControl,
   SettingsSubsectionHeader,
   SettingsSwitchRow
-} from './settings-form-controls'
+} from './form-controls'
+import { getSettingOwnershipSummary } from './setting-ownership'
 
 export { getAgentsPaneSearchEntries } from './agents-search'
 

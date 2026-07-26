@@ -2,10 +2,9 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import { connect, type Socket } from 'node:net'
 
-import { emulatorProbe, emulatorProbeError } from '../emulator-probe'
-import { ensureAdbOk } from './android-adb-result'
-import type { AndroidCommandRunner } from './android-command-runner'
-import type { AndroidSdkPaths } from './android-sdk-discovery'
+import { emulatorProbe, emulatorProbeError } from '../probe'
+import { ensureAdbOk } from './adb-result'
+import type { AndroidCommandRunner } from './command-runner'
 import {
   SCRCPY_DEVICE_JAR_PATH,
   pushScrcpyServerArgs,
@@ -20,6 +19,7 @@ import {
   type ScrcpyVideoFrame,
   type ScrcpyVideoMeta
 } from './scrcpy-video-frame-parser'
+import type { AndroidSdkPaths } from './sdk-discovery'
 
 // A live scrcpy session validated against a real emulator. The connection
 // handshake (dummy byte, 64-byte device name, codec meta) and the server option

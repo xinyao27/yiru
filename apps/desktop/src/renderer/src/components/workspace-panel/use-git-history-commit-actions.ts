@@ -10,16 +10,16 @@ import {
   getRuntimeGitCommitCompare,
   getRuntimeGitRemoteCommitUrl,
   type RuntimeGitContext
-} from '@/runtime/runtime-git-client'
+} from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 
-import type { GitHistoryItem } from '../../../../shared/git-history'
+import type { GitHistoryItem } from '../../../../shared/git/history'
 import type { GitBranchChangeEntry, GitCommitCompareResult } from '../../../../shared/types'
 import type { GitHistoryCommitAction } from './git-history-commit-context-menu'
 import {
   shouldOpenSourceControlRowAsPreview,
   type SourceControlRowOpenEvent
-} from './source-control-split-open'
+} from './source-control/split-open'
 
 const EMPTY_BRANCH_CHANGE_ENTRIES: GitBranchChangeEntry[] = []
 

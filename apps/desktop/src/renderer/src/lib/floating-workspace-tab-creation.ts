@@ -3,8 +3,8 @@ import type { AppState } from '@/store/types'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import type { BrowserTab, TerminalTab } from '../../../shared/types'
+import { createUntitledMarkdownFileWithTemplateSelection } from '../components/floating-terminal/create-untitled-markdown'
 import { getConnectionId } from './connection-context'
-import { createUntitledMarkdownFileWithTemplateSelection } from './create-untitled-markdown'
 import { focusTerminalTabSurface } from './focus-terminal-tab-surface'
 import { detectLanguage } from './language-detect'
 

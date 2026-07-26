@@ -57,21 +57,21 @@ import type {
   SearchResult,
   Worktree
 } from '../../shared/types'
-import { wslAwareSpawn } from '../git/runner'
-import { isENOENT, resolveAuthorizedPath } from '../ipc/filesystem-auth'
-import { listQuickOpenFiles } from '../ipc/filesystem-list-files'
-import { searchWithGitGrep } from '../ipc/filesystem-search-git'
-import { getLocalGitOptionsForRegisteredWorktree } from '../ipc/local-worktree-runtime-options'
+import { isENOENT, resolveAuthorizedPath } from '../filesystem/auth'
+import { listQuickOpenFiles } from '../filesystem/list-files'
+import { getLocalGitOptionsForRegisteredWorktree } from '../filesystem/local-worktree-runtime-options'
 import {
   listMarkdownDocuments,
   markdownDocumentsFromRelativePaths
-} from '../ipc/markdown-documents'
+} from '../filesystem/markdown-documents'
 import {
   isWatcherProcessFailure,
   WatcherProcessFailure
-} from '../ipc/parcel-watcher-process-failure'
-import { checkRgAvailable } from '../ipc/rg-availability'
-import { beginWatcherInstall } from '../ipc/watcher-removal-gate'
+} from '../filesystem/parcel-watcher-process-failure'
+import { checkRgAvailable } from '../filesystem/rg-availability'
+import { searchWithGitGrep } from '../filesystem/search-git'
+import { beginWatcherInstall } from '../filesystem/watcher-removal-gate'
+import { wslAwareSpawn } from '../git/runner'
 import type { Store } from '../persistence'
 import {
   getSshFilesystemProvider,
@@ -86,8 +86,8 @@ import {
 import {
   rankRuntimeMobileFilePaths,
   RuntimeMobileFilePathSearchCache
-} from './runtime-mobile-file-path-search'
-import { joinWorktreeRelativePath, normalizeRuntimeRelativePath } from './runtime-relative-paths'
+} from './mobile-file-path-search'
+import { joinWorktreeRelativePath, normalizeRuntimeRelativePath } from './relative-paths'
 
 const MOBILE_FILE_LIST_LIMIT = 5000
 const MOBILE_FILE_PATH_SEARCH_CACHE_LIMIT = 20_000

@@ -7,7 +7,7 @@ import type { AddRepoExistingWorkspaceSource } from '../../../../shared/telemetr
 import {
   buildAddRepoExistingWorkspacesTelemetry,
   shouldTrackAddRepoExistingWorkspacesDetected
-} from './add-repo-existing-workspaces-telemetry'
+} from './add-repo/existing-workspaces-telemetry'
 import { finishProjectAddWithDefaultCheckout } from './project-added-default-checkout'
 
 type CompleteGitRepoAddOptions = {

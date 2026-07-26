@@ -13,7 +13,7 @@ import { delimiter, dirname, join } from 'node:path'
 
 import { app } from 'electron'
 
-import { EmulatorError } from './emulator-errors'
+import { EmulatorError } from './errors'
 import { materializeServeSimRuntime } from './serve-sim-runtime-materializer'
 
 const EXEC_TIMEOUT_MS = 90_000

@@ -5,13 +5,13 @@ import { tuiAgentToAgentKind } from '@/lib/telemetry'
 import { buildAgentStartupPlan } from '@/lib/tui-agent-startup'
 
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
-import type { SessionOptionValue } from '../../../shared/native-chat-session-options'
+import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
+} from '../../../shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled } from '../../../shared/tui-agent/selection'
 import type { GlobalSettings, OnboardingState, TuiAgent } from '../../../shared/types'
 
 export type OnboardingFolderAgentStartup = {

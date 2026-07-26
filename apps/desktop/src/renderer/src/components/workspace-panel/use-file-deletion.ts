@@ -2,25 +2,18 @@ import { useCallback, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import {
-  requestEditorFileSave,
-  requestEditorSaveQuiesce
-} from '@/components/editor/editor-autosave'
+import { requestEditorFileSave, requestEditorSaveQuiesce } from '@/components/editor/autosave'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { dirname } from '@/lib/path'
-import {
-  deleteRuntimePath,
-  readRuntimeFileContent,
-  writeRuntimeFile
-} from '@/runtime/runtime-file-client'
+import { deleteRuntimePath, readRuntimeFileContent, writeRuntimeFile } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
-import { runBatchDeletion, selectDeletionRoots } from './file-explorer-batch-deletion'
-import { getFileExplorerOperationRoute } from './file-explorer-operation-owner'
-import { isPathEqualOrDescendant } from './file-explorer-paths'
-import type { TreeNode } from './file-explorer-types'
-import { commitFileExplorerOp } from './file-explorer-undo-redo'
+import { runBatchDeletion, selectDeletionRoots } from './file-explorer/batch-deletion'
+import { getFileExplorerOperationRoute } from './file-explorer/operation-owner'
+import { isPathEqualOrDescendant } from './file-explorer/paths'
+import type { TreeNode } from './file-explorer/types'
+import { commitFileExplorerOp } from './file-explorer/undo-redo'
 
 type UseFileDeletionParams = {
   activeWorktreeId: string | null

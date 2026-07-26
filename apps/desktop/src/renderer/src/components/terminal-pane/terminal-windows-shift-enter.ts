@@ -1,8 +1,8 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 
-import type { PaneForegroundAgentEntry } from '@/store/slices/pane-foreground-agent'
+import type { PaneForegroundAgentEntry } from '@/components/terminal-pane/pane-foreground-agent-state'
 
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 
 export type WindowsShiftEnterEncoding = 'alt-enter' | 'csi-u'
 

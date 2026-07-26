@@ -1,6 +1,6 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 
-import { nextPetDragAnimation, type PetDragAnimation } from './pet-agent-state'
+import { nextPetDragAnimation, type PetDragAnimation } from './agent-state'
 
 type Point = { x: number; y: number }
 

@@ -7,11 +7,11 @@ import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 
 import type { PtyManagementSession } from '../../../../preload/api-types'
 import { useAppStore } from '../../store'
-import { useDaemonActions, DaemonActionDialog } from '../shared/use-daemon-actions'
+import { useDaemonActions, DaemonActionDialog } from '../daemon-actions/use-actions'
 import { ManageSessionKillDialog } from './manage-session-kill-dialog'
 import { ManageSessionsTable } from './manage-sessions-table'
 import { SearchableSetting } from './searchable-setting'
-import { getManageSessionsSearchEntries } from './terminal-search'
+import { getManageSessionsSearchEntries } from './terminal/search'
 
 type ConfirmKind = 'killOne'
 

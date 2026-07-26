@@ -1,9 +1,9 @@
 import {
   isUnsupportedMergeTreeMergeBaseError,
   isUnsupportedMergeTreeWriteTreeError
-} from '../../shared/git-merge-tree-capability'
+} from '../../shared/git/merge-tree-capability'
 import type { PRConflictSummary } from '../../shared/types'
-import { getLocalGitCapabilityCache } from '../git/git-capability-state'
+import { getLocalGitCapabilityCache } from '../git/capability-state'
 import { gitExecFileAsync } from '../git/runner'
 import {
   buildConflictSummaryCacheKey,

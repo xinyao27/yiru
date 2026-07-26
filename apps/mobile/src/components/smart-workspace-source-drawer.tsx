@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'r
 import { cn } from '@/style/class-names'
 
 import type { RpcClient } from '../transport/rpc-client'
-import type { MrStateFilter, SmartNameMode } from '../workspace-create/mobile-composer-source-types'
+import type { MrStateFilter, SmartNameMode } from '../workspace-create/composer-source-types'
 import {
   MR_STATE_FILTER_OPTIONS,
   resolveAvailableSmartModes,
@@ -13,12 +13,12 @@ import {
   SMART_MODE_OPTIONS,
   type SmartModeAvailabilityInput,
   type SmartModeOption
-} from '../workspace-create/mobile-smart-source-modes'
+} from '../workspace-create/smart-source-modes'
 import {
   lookupGitHubItemByOwnerRepo,
   type PasteRepoCandidate
 } from '../workspace-create/smart-source-paste-intent'
-import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
+import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 import { SmartSourceModeIcon } from './smart-source-mode-icon'

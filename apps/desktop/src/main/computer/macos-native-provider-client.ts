@@ -8,8 +8,7 @@ import type {
   ComputerProviderCapabilities,
   ComputerSnapshotResult
 } from '../../shared/runtime-types'
-import { normalizeComputerActionResult } from './computer-action-verification-normalization'
-import { validateComputerProviderActionParams } from './computer-provider-action-validation'
+import { normalizeComputerActionResult } from './action-verification-normalization'
 import {
   assertMacOSProviderCapability,
   macOSActionCapabilityKey,
@@ -26,6 +25,7 @@ import {
   consumeNativeProviderLines,
   startMacOSNativeProviderSocket
 } from './macos-native-provider-transport'
+import { validateComputerProviderActionParams } from './provider-action-validation'
 import { RuntimeClientError } from './runtime-client-error'
 
 const REQUEST_TIMEOUT_MS = 60_000

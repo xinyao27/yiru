@@ -3,7 +3,7 @@ import {
   nextBrowserPageZoomLevel,
   normalizeBrowserPageZoomLevel,
   type BrowserPageZoomDirection
-} from '../../../../shared/browser-page-zoom'
+} from '../../../../shared/browser/page-zoom'
 
 export {
   BROWSER_PAGE_ZOOM_LEVELS,
@@ -12,7 +12,7 @@ export {
   nextBrowserPageZoomLevel,
   normalizeBrowserPageZoomLevel,
   type BrowserPageZoomDirection
-} from '../../../../shared/browser-page-zoom'
+} from '../../../../shared/browser/page-zoom'
 
 export const YIRU_BROWSER_PAGE_ZOOM_EVENT = 'yiru:browser-page-zoom'
 

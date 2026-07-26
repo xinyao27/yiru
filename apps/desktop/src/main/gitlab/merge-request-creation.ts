@@ -11,7 +11,7 @@ import {
   normalizeHostedReviewHeadRef
 } from '../../shared/hosted-review-refs'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/runtime-relative-paths'
+import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import {
   getHostedReviewLocalGitOptions,
   hasHostedReviewLocalGitOptions,

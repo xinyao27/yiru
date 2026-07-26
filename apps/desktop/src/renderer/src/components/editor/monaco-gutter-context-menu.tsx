@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
-import { getRuntimeGitRemoteFileUrl } from '@/runtime/runtime-git-client'
+import { getRuntimeGitRemoteFileUrl } from '@/runtime/git-client'
 import { useAppStore } from '@/store'
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 

@@ -7,7 +7,7 @@ import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
 import { YiruLogo } from '../src/components/yiru-logo'
-import { ensureNotificationPermissions } from '../src/notifications/mobile-notifications'
+import { ensureNotificationPermissions } from '../src/notifications/notifications'
 import { savePushNotificationsEnabled } from '../src/storage/preferences'
 
 export default function NotificationOptInScreen() {

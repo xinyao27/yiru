@@ -4,8 +4,8 @@ import { useShallow } from 'zustand/react/shallow'
 import {
   getFolderWorkspacePathStatusDescription,
   getFolderWorkspacePathStatusTitle
-} from '@/lib/folder-workspace-path-status'
-import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/lib/folder-workspace-path-status-cache-expiry'
+} from '@/components/sidebar/folder-workspace-path-status'
+import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
 import { useAppStore } from '@/store'
 
 import { isConfirmedStaleFolderPathStatus } from '../../../../shared/folder-workspace-path-status'

@@ -6,7 +6,7 @@ import { AGENT_STATUS_STALE_AFTER_MS, type AgentStatusEntry } from '@yiru/workbe
  * leave the web client in a split-brain tab state. */
 import { useEffect } from 'react'
 
-import { sanitizeTerminalLayoutPaneTitlesForLabels } from '@/lib/terminal-pane-title-sanitization'
+import { sanitizeTerminalLayoutPaneTitlesForLabels } from '@/components/terminal-pane/title-sanitization'
 import {
   getExplicitRuntimeEnvironmentIdForWorktree,
   getRuntimeSessionMirrorEnvironmentIds
@@ -15,7 +15,7 @@ import {
 import {
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../../shared/agent-title-owner'
+} from '../../../shared/agent/title-owner'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import { resolvePaneAgentOwner } from '../../../shared/pane-agent-owner'
 import type {
@@ -39,12 +39,11 @@ import type {
   TerminalTab,
   TuiAgent
 } from '../../../shared/types'
+import type { OpenFile } from '../components/editor/state'
 import type { AppState } from '../store'
 import { useAppStore } from '../store'
-import type { OpenFile } from '../store/slices/editor'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
-import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './runtime-terminal-stream'
-import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
+import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './terminal-stream'
 import {
   beginWebRuntimeWakeTerminalRespawn,
   clearAllWebRuntimeWakeTerminalRespawn,
@@ -73,6 +72,7 @@ import {
   toWebTerminalSurfaceTabId,
   WEB_TERMINAL_SURFACE_TAB_PREFIX
 } from './web-terminal-surface-id'
+import { toRuntimeWorktreeSelector } from './worktree-selector'
 
 const WEB_SESSION_GROUP_PREFIX = 'web-session-tabs:'
 

@@ -6,7 +6,7 @@ import {
   extractTerminalFileLinks,
   resolveTerminalFileLink
 } from '@/lib/terminal-links'
-import { isRemoteRuntimeFileOperation, runtimePathExists } from '@/runtime/runtime-file-client'
+import { isRemoteRuntimeFileOperation, runtimePathExists } from '@/runtime/file-client'
 
 import {
   buildCandidateLogicalLinesForBufferPosition,

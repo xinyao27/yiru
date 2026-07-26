@@ -16,18 +16,11 @@ import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
-import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
-import { ensureHooksConfirmed } from '@/lib/ensure-hooks-confirmed'
+import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
 import { cleanupEphemeralVmRuntimesForDeleted } from '@/lib/ephemeral-vm-runtime-cleanup'
 import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
 import { branchName } from '@/lib/git-utils'
 import { markInputQuietSchedulerInput, scheduleAfterInputQuiet } from '@/lib/input-quiet-scheduler'
-import { clearSessionCommitDraftForWorktree } from '@/lib/source-control-commit-draft-session'
-import {
-  forgetHugeRepoWarningDismissalsForWorktrees,
-  migrateHugeRepoWarningDismissal
-} from '@/lib/source-control-huge-repo-warning-dismissals'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 import { publishRendererCommandResult } from '@/runtime/renderer-command-result-channel'
 import { requestVirtualizedScrollAnchorRecord } from '@/runtime/virtualized-scroll-anchor-record-request'
@@ -62,20 +55,27 @@ import {
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace-scope'
+} from '../../../../shared/workspace/scope'
 import {
   classifyWorktreeForceDeleteReason,
   getLockedWorktreeRemovalReason,
   isLockedWorktreeRemovalError
-} from '../../../../shared/worktree-removal'
+} from '../../../../shared/workspace/worktree-removal'
+import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
+import { clearSessionCommitDraftForWorktree } from '../../components/workspace-panel/source-control/commit-draft-session'
+import {
+  forgetHugeRepoWarningDismissalsForWorktrees,
+  migrateHugeRepoWarningDismissal
+} from '../../components/workspace-panel/source-control/huge-repo-warning-dismissals'
 import {
   callRuntimeRpc,
   getActiveRuntimeTarget,
   isRuntimeScopeForbiddenError,
   RuntimeRpcCallError
-} from '../../runtime/runtime-rpc-client'
-import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-selector'
+} from '../../runtime/rpc-client'
 import { disposeRemovedWorktreeParkedTerminalWatchers } from '../../runtime/terminal-parked-watcher-registry'
+import { toRuntimeWorktreeSelector } from '../../runtime/worktree-selector'
 import type { AppState } from '../types'
 import { moveFocusToRendererBeforeFocusedWebviewHidden } from './browser-webview-cleanup'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'

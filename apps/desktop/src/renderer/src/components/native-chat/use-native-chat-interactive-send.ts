@@ -2,8 +2,8 @@ import { shouldStepNativeChatAskAnswer } from '@yiru/workbench-model/agent'
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useCallback, useLayoutEffect, useRef } from 'react'
 
-import { getSettingsForAgentTabRuntimeOwner } from '@/lib/agent-paste-draft'
-import { sendRuntimePtyInput } from '@/runtime/runtime-terminal-inspection'
+import { getSettingsForAgentTabRuntimeOwner } from '@/components/native-chat/agent-paste-draft'
+import { sendRuntimePtyInput } from '@/runtime/terminal-inspection'
 
 import {
   buildAskAnswerKeys,
@@ -11,12 +11,12 @@ import {
   hasAskAnswer,
   type AskAnswerSelection,
   type AskPrompt
-} from './native-chat-interactive-prompt'
+} from './interactive-prompt'
 import {
   sendNativeChatAskAnswer,
   sendNativeChatMessage,
   type NativeChatSendHandle
-} from './native-chat-runtime-send'
+} from './runtime-send'
 
 // ESC is the agent-TUI interrupt/cancel key over the PTY (matches how the
 // composer forwards Escape). Used to cancel a question or deny an approval.

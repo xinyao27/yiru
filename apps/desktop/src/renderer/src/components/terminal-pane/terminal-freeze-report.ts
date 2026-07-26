@@ -1,4 +1,4 @@
-import { getAllPaneRenderingDiagnostics } from '@/lib/pane-manager/pane-manager-registry'
+import { getAllPaneRenderingDiagnostics } from '@/lib/pane-manager/registry'
 
 import { isDocumentVisibilityProvenStale } from './stale-document-visibility'
 import { getTerminalDeliveryWatchdogDiagnostics } from './terminal-delivery-watchdog'

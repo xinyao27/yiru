@@ -1,0 +1,27 @@
+/* ── Review note states ──────────────────────────────────────────────
+   Why: DiffCommentCard is shared with Monaco's inline diff-comment decorator
+   and does not expose a className prop, so the active/attention states set by
+   MarkdownPreview's annotation rail reach into its internal `.yiru-diff-comment-card`
+   class here rather than growing that component's API for one caller's variant. */
+.markdown-annotation-card.is-active > .yiru-diff-comment-card {
+  border-color: color-mix(in srgb, var(--foreground) 18%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, var(--editor-surface));
+}
+
+.markdown-annotation-card.is-attention > .yiru-diff-comment-card {
+  animation: markdown-note-attention 900ms ease-out;
+}
+
+@keyframes markdown-note-attention {
+  0% {
+    transform: translateX(0);
+  }
+
+  35% {
+    transform: translateX(-3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}

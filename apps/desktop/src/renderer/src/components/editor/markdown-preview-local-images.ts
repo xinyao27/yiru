@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 
-import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 
 import { resolveImageAbsolutePath } from './markdown-preview-links'
 import { getLocalImageCacheKey, loadLocalImageAbsolutePath } from './use-local-image-src'

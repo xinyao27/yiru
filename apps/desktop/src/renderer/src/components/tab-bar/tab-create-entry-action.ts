@@ -1,3 +1,4 @@
+import type { OpenFile } from '@/components/editor/state'
 import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
@@ -6,13 +7,12 @@ import {
   createRuntimePath,
   statRuntimePath,
   type RuntimeFileOperationArgs
-} from '@/runtime/runtime-file-client'
+} from '@/runtime/file-client'
 import {
   createWebRuntimeSessionBrowserTab,
   isWebRuntimeSessionActive
 } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import type { RuntimeFileListState } from '../quick-open-file-list'

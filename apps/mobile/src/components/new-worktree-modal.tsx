@@ -13,12 +13,6 @@ import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcResponse, RpcSuccess } from '../transport/types'
 import { createBlankWorkspace } from '../workspace-create/blank-workspace-create'
-import type { SmartModeAvailabilityInput } from '../workspace-create/mobile-smart-source-modes'
-import {
-  isMobileTuiAgent,
-  isMobileTuiAgentEnabled,
-  MOBILE_TUI_AGENT_LAUNCH_COMMANDS
-} from '../workspace-create/mobile-tui-agents'
 import {
   isSetupHookTrusted,
   normalizeSetupHookTrust,
@@ -26,12 +20,18 @@ import {
   wasSetupHookPreviouslyApproved,
   type SetupHookTrust
 } from '../workspace-create/setup-hook-trust'
+import type { SmartModeAvailabilityInput } from '../workspace-create/smart-source-modes'
 import {
   deriveRepoSlug,
   type PasteRepoCandidate
 } from '../workspace-create/smart-source-paste-intent'
 import { createWorkspaceFromComposerSource } from '../workspace-create/source-workspace-create'
-import { useMobileComposerSource } from '../workspace-create/use-mobile-composer-source'
+import {
+  isMobileTuiAgent,
+  isMobileTuiAgentEnabled,
+  MOBILE_TUI_AGENT_LAUNCH_COMMANDS
+} from '../workspace-create/tui-agents'
+import { useMobileComposerSource } from '../workspace-create/use-composer-source'
 import { normalizeWorkspaceAgent } from '../workspace-create/workspace-agent-selection'
 import {
   deriveWorkspaceSshGate,
@@ -43,9 +43,9 @@ import {
   resolveMobileNewWorkspaceDialogRepoId
 } from '../worktree/new-workspace-dialog-repo-selection'
 import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-worktree-repo'
+import { MobileAgentIcon } from './agent-icon'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 import { BottomDrawerModalHost } from './bottom-drawer-modal-host'
-import { MobileAgentIcon } from './mobile-agent-icon'
 import {
   NEW_WORKTREE_AGENT_OPTIONS as AGENT_OPTIONS,
   NEW_WORKTREE_BLANK_AGENT as BLANK_TERMINAL,

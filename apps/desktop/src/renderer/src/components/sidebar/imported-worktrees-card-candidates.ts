@@ -4,7 +4,7 @@ import type { DetectedWorktreeListResult, Repo, Worktree } from '../../../../sha
 import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
-} from '../../../../shared/worktree-ownership'
+} from '../../../../shared/workspace/worktree-ownership'
 import type { ImportedWorktreesCardCandidate } from './worktree-list-groups'
 
 export function getHiddenImportedWorktrees(

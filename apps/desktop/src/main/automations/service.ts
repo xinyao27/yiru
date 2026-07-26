@@ -3,7 +3,7 @@ import type { WebContents } from 'electron'
 import {
   didAutomationPrecheckPass,
   formatAutomationPrecheckFailure
-} from '../../shared/automation-precheck'
+} from '../../shared/automation/precheck'
 import {
   isFinalAutomationRunStatus,
   type Automation,
@@ -12,8 +12,8 @@ import {
   type AutomationPrecheckResult,
   type AutomationRun
 } from '../../shared/automations-types'
-import type { ClaudeUsageStore } from '../claude-usage/store'
-import type { CodexUsageStore } from '../codex-usage/store'
+import type { ClaudeUsageStore } from '../claude/usage/store'
+import type { CodexUsageStore } from '../codex/usage/store'
 import type { Store } from '../persistence'
 import { clearAutomationDispatchTokens, createAutomationDispatchToken } from './dispatch-tokens'
 import type { HeadlessAutomationDispatcher } from './headless-dispatch'

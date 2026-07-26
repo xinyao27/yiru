@@ -21,12 +21,12 @@ export {
   parseGlabAuthStatusHosts,
   parseGitLabProjectRef,
   resolveProjectRemote
-} from './gitlab-project-ref-resolution'
+} from './project-ref-resolution'
 export type {
   LocalGitExecOptions,
   ProjectRef,
   ResolvedProjectSource
-} from './gitlab-project-ref-resolution'
+} from './project-ref-resolution'
 export { parseGlabApiResponse, type GlabApiResponse } from './glab-api-response'
 
 const MAX_CONCURRENT = 4
@@ -54,7 +54,7 @@ export function acquire(signal?: AbortSignal): Promise<void> {
       }
     }
     queued.abort = () => {
-      // Why: an abandoned Spool read must leave the shared glab queue before
+      // Why: an abandoned Coworking read must leave the shared glab queue before
       // it can later consume one of the four process lanes.
       const index = queue.indexOf(queued)
       if (index !== -1) {

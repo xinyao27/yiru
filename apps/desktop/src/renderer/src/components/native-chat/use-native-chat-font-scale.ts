@@ -5,8 +5,8 @@ import {
   decreaseChatFontScale,
   DEFAULT_CHAT_FONT_SCALE,
   increaseChatFontScale
-} from './native-chat-font-scale'
-import { isMacPlatform } from './native-chat-shortcut'
+} from './font-scale'
+import { isMacPlatform } from './shortcut'
 
 export type ChatFontScaleControls = {
   /** Current chat text scale (1 = default). Apply as a font-size multiplier. */

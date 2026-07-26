@@ -2,12 +2,12 @@ import { useEffect, useMemo } from 'react'
 
 import { getConnectionId } from '@/lib/connection-context'
 import { installWindowVisibilityInterval, isWindowVisible } from '@/lib/window-visibility-interval'
-import { getRuntimeGitConflictOperation } from '@/runtime/runtime-git-client'
+import { getRuntimeGitConflictOperation } from '@/runtime/git-client'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type { GitConflictOperation, Repo } from '../../../../shared/types'
 import { createCoalescedPollRunner, type SlowTaskBackoffOptions } from './coalesced-poll-runner'
-import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'
+import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
 
 const CONFLICT_POLL_INTERVAL_MS = 3000
 

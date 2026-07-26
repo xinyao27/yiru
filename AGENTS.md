@@ -24,6 +24,7 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 | Hardcode `e.metaKey`, a path separator, or a platform font | Section 7 |
 | Import from `src/main/` in `src/renderer/` | Section 1 |
 | Name a file or folder `helpers`, `utils`, `common`, `misc`, or `shared-stuff`; add an `index.ts` re-export barrel | Section 2 |
+| Rename or move a file without updating the paths written as *strings* — build scripts, CI jobs, baselines, allowlists, `Why:` comments | `check-source-path-references.mjs` |
 | Follow an absolute path from a subagent result into the main repo instead of this worktree | Section 12 |
 
 ---
@@ -51,7 +52,7 @@ Stop at the first yes:
 
 1. **An existing feature owns this** → its folder. Not beside it, not in a sibling dump.
 2. **It's a new feature** → create `<feature>/` in the right process root and put everything in it.
-3. **It's genuinely cross-feature** → one level up, named for what it operates on (`git-capability-cache.ts`, `map-with-concurrency.ts`), never for a role.
+3. **It's genuinely cross-feature** → one level up, named for what it operates on (`capability-cache.ts`, `map-with-concurrency.ts`), never for a role.
 
 A feature folder holds everything that belongs only to that feature — components, hooks, state, pure logic, constants, types, CSS — not split across `components/`, `hooks/`, `lib/`, and `store/` by technical role.
 
@@ -155,7 +156,7 @@ Work runs on the local machine, in a WSL distro, over SSH, and through a relay. 
 Yiru shells out to **the user's** git binary, whose version differs across native, WSL, and SSH hosts. **Git 2.25** is the core-workflow baseline.
 
 - Check when every subcommand and option was introduced. Newer behavior needs a baseline-compatible fallback, or must degrade safely.
-- Route the preferred/fallback pair through `GitCapabilityCache` (`shared/git-capability-cache.ts`) with a narrow unsupported-error predicate, so a known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and `simple-git` doesn't paper over host differences.
+- Route the preferred/fallback pair through `GitCapabilityCache` (`shared/git/capability-cache.ts`) with a narrow unsupported-error predicate, so a known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and `simple-git` doesn't paper over host differences.
 - Preserve global options that precede the subcommand (`git -c …`), including auto-maintenance suppression on worktree-create fetches.
 - PR CI runs the compatibility test against real git 2.25.5, 2.38.1, and 2.54.0. Adopting a newer feature means adding its version boundary there so both paths get exercised.
 
@@ -175,7 +176,7 @@ Verify by building, typechecking, linting, and running the app.
 
 ## 10. Verify before you finish
 
-`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts` (switch exhaustiveness, design-token budget, UI style drift, max-lines ratchet, skill guides and manifest, localization catalog and coverage). `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
+`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts` (switch exhaustiveness, design-token budget, UI style drift, source path references, max-lines ratchet, skill guides and manifest, localization catalog and coverage). `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
 
 Report results honestly: if something fails, show the output; if you skipped a step, say which.
 

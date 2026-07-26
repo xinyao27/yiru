@@ -21,10 +21,10 @@ import {
   shouldDriveSyntheticAgentTitleFromHook,
   type SyntheticAgentTitleProfile
 } from '../shared/synthetic-agent-title'
-import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-facts'
-import { resolveTuiAgentPermissionMode } from '../shared/tui-agent-permissions'
+import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
+import { resolveTuiAgentPermissionMode } from '../shared/tui-agent/permissions'
 import type { UpdateCheckOptions } from '../shared/types'
-import { parseWorkspaceKey } from '../shared/workspace-scope'
+import { parseWorkspaceKey } from '../shared/workspace/scope'
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 import { AgentAwakeService } from './agent-awake-service'
 import { rememberBranchRenameFailureOutput } from './agent-hooks/branch-rename-failure-output'
@@ -44,34 +44,40 @@ import { createHeadlessAutomationOutputSnapshotBuffer } from './automations/head
 import { buildHeadlessAutomationWorktreeCreateArgs } from './automations/headless-workspace-create'
 import { AutomationService } from './automations/service'
 import { AgentBrowserBridge } from './browser/agent-browser-bridge'
-import { browserCertificateTrustController, browserManager } from './browser/browser-manager'
-import { initializeBrowserSessionsForApp } from './browser/browser-session-startup'
+import { browserCertificateTrustController, browserManager } from './browser/manager'
 import { OffscreenBrowserBackend } from './browser/offscreen-browser-backend'
+import { initializeBrowserSessionsForApp } from './browser/session-startup'
 import {
   attachClaudeLivePtyPersistence,
   seedLiveClaudePtysFromPersistence
-} from './claude-accounts/live-pty-gate'
-import { ClaudeRuntimeAuthService } from './claude-accounts/runtime-auth-service'
-import { normalizeClaudeRuntimeSelection } from './claude-accounts/runtime-selection'
-import { ClaudeAccountService } from './claude-accounts/service'
-import { ClaudeUsageStore, initClaudeUsagePath } from './claude-usage/store'
-import { CliInstaller } from './cli/cli-installer'
+} from './claude/accounts/live-pty-gate'
+import { ClaudeRuntimeAuthService } from './claude/accounts/runtime-auth-service'
+import { normalizeClaudeRuntimeSelection } from './claude/accounts/runtime-selection'
+import { ClaudeAccountService } from './claude/accounts/service'
+import { ClaudeUsageStore, initClaudeUsagePath } from './claude/usage/store'
+import { CliInstaller } from './cli/installer'
 import { reconcileManagedWslCliRegistrations } from './cli/wsl-cli-registration-reconciliation'
-import { CodexRuntimeHomeService } from './codex-accounts/runtime-home-service'
+import { CodexRuntimeHomeService } from './codex/accounts/runtime-home-service'
 import {
   normalizeCodexRuntimeSelection,
   type CodexAccountSelectionTarget
-} from './codex-accounts/runtime-selection'
-import { CodexAccountService } from './codex-accounts/service'
-import { CodexUsageStore, initCodexUsagePath } from './codex-usage/store'
+} from './codex/accounts/runtime-selection'
+import { CodexAccountService } from './codex/accounts/service'
+import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
 import {
   ensureRealHomeCodexHookState,
   isRealHomeCodexHookLaneUsable
-} from './codex/codex-real-home-hook-install'
-import { startCodexSessionBackfillInBackground } from './codex/codex-session-backfill'
-import { startCodexSessionIndexHealInBackground } from './codex/codex-session-index-heal'
-import { resolveHostCodexSessionSourceHome } from './codex/codex-session-source-home'
-import { codexHookService, setSystemCodexHomeHookSweepSuppressed } from './codex/hook-service'
+} from './codex/real-home-hook-install'
+import { startCodexSessionBackfillInBackground } from './codex/session-backfill'
+import { startCodexSessionIndexHealInBackground } from './codex/session-index-heal'
+import { resolveHostCodexSessionSourceHome } from './codex/session-source-home'
+import { CodexUsageStore, initCodexUsagePath } from './codex/usage/store'
+import {
+  createCoworkingOwnerComposition,
+  type CoworkingOwnerComposition
+} from './coworking/owner/composition'
+import { registerCoworkingSharingHandlers } from './coworking/sharing'
+import { CoworkingUnavailableOwnerService } from './coworking/unavailable-owner-service'
 import {
   recordCoalescedCrashBreadcrumb,
   recordCrashBreadcrumb
@@ -88,39 +94,27 @@ import {
   type ExpectedTeardownScope
 } from './crash-reporting/process-gone-classification'
 import { recordProcessGoneCrash as recordProcessGoneCrashEvent } from './crash-reporting/process-gone-recorder'
-import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemon/daemon-init'
+import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemon/init'
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
-import { EmulatorBridge } from './emulator/emulator-bridge'
+import { EmulatorBridge } from './emulator/bridge'
+import { closeAllWatchers } from './filesystem/watcher'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
-import { GlobalAssistantService } from './global-assistant/global-assistant-service'
+import { GlobalAssistantService } from './global-assistant/service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
-import { closeAllWatchers } from './ipc/filesystem-watcher'
-import { registerMobileHandlers } from './ipc/mobile'
-import { triggerStartupNotificationRegistration } from './ipc/notifications'
-import { killAllPty } from './ipc/pty'
-import {
-  clearProviderPtyState,
-  getPtyIdForPaneKey,
-  registerPaneKeyTeardownListener,
-  getLocalPtyProvider,
-  getSshPtyProvider,
-  registerHeadlessPtyRuntime
-} from './ipc/pty'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
-import { registerSpoolSharingHandlers } from './ipc/spool-sharing'
-import { disposeWorktreeBaseDirectoryWatchers } from './ipc/worktree-base-directory-watcher'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
   getNextDefaultOnAppearanceSettingValue,
   registerAppMenu,
   rebuildAppMenu
 } from './menu/register-app-menu'
-import { readMiniMaxSessionCookie } from './minimax/minimax-cookie-store'
+import { readMiniMaxSessionCookie } from './minimax/cookie-store'
 import { applyElectronProxySettings } from './network/proxy-settings'
-import { initObservability, shutdownObservability } from './observability'
-import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode-usage/store'
+import { triggerStartupNotificationRegistration } from './notifications/notifications'
+import { initObservability, shutdownObservability } from './observability/service'
+import { OpenCodeUsageStore, initOpenCodeUsagePath } from './opencode/usage/store'
 import {
   Store,
   initDataPath,
@@ -128,24 +122,29 @@ import {
   migrateMobilePairingDataToCanonicalUserDataPath
 } from './persistence'
 import { LocalPtyProvider } from './providers/local-pty-provider'
+import { killAllPty } from './pty/pty'
+import {
+  clearProviderPtyState,
+  getPtyIdForPaneKey,
+  registerPaneKeyTeardownListener,
+  getLocalPtyProvider,
+  getSshPtyProvider,
+  registerHeadlessPtyRuntime
+} from './pty/pty'
 import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit-target'
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
+import { registerMobileHandlers } from './runtime/mobile'
 import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
-import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
-import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
+import { YiruRuntimeRpcServer } from './runtime/rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
 import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/yiru-runtime-files'
 import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
-import {
-  createSpoolDesktopComposition,
-  type SpoolDesktopComposition
-} from './spool/spool-desktop-composition'
-import { SpoolUnavailableDesktopService } from './spool/spool-unavailable-desktop-service'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -166,6 +165,11 @@ import {
   suppressDevEducationForStore
 } from './startup/dev-education-suppression'
 import { getDevInstanceIdentity } from './startup/dev-instance-identity'
+import {
+  isStartupDiagnosticsEnabled,
+  logStartupDiagnostic,
+  logStartupMilestone
+} from './startup/diagnostics'
 import { ensureVirtualDisplayForHeadlessServe } from './startup/ensure-virtual-display'
 import { startEventLoopStallProbe } from './startup/event-loop-stall-probe'
 import { startFirstWindowStartupServices } from './startup/first-window-startup-services'
@@ -186,11 +190,6 @@ import {
   shouldBypassSingleInstanceLock,
   shouldSkipSingleInstanceLock
 } from './startup/single-instance-lock'
-import {
-  isStartupDiagnosticsEnabled,
-  logStartupDiagnostic,
-  logStartupMilestone
-} from './startup/startup-diagnostics'
 import { shouldQuitWhenAllWindowsClosed } from './startup/window-all-closed-quit-policy'
 import { ensureWindowsUserDataAclGrant } from './startup/windows-user-data-acl'
 import { createWslCliReconciliationStartupBarrier } from './startup/wsl-cli-reconciliation-startup-barrier'
@@ -233,6 +232,7 @@ import {
 import { createMainWindow, loadMainWindow } from './window/create-main-window'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { notifyMainWindowBecameVisible } from './window/main-window-visibility'
+import { disposeWorktreeBaseDirectoryWatchers } from './worktree/base-directory-watcher'
 import { getDefaultWslDistro } from './wsl'
 import { ensureActiveYiruProfile, initYiruProfilePaths } from './yiru-profiles/profile-index-store'
 
@@ -254,8 +254,8 @@ let runtime: YiruRuntimeService | null = null
 let globalAssistant: GlobalAssistantService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
-let spoolDesktop: SpoolDesktopComposition | null = null
-let unregisterSpoolSharingHandlers: (() => void) | null = null
+let coworkingOwner: CoworkingOwnerComposition | null = null
+let unregisterCoworkingSharingHandlers: (() => void) | null = null
 // Why: set during early startup; gates whether headless serve installs the
 // offscreen browser backend (and thus advertises browser pane support).
 let headlessBrowserDisplayAvailable = false
@@ -472,7 +472,7 @@ installUncaughtPipeErrorGuard()
 // Why: propagate the Yiru app version into `process.env` so PTY-env
 // construction in both main (local-pty-provider) and the forked daemon
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
-// electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
+// electron. The daemon inherits `process.env` via fork (daemon/init.ts:93).
 process.env.YIRU_APP_VERSION = app.getVersion()
 configureRemoteServerUpdater({
   getSnapshot: getRemoteServerUpdaterSnapshot,
@@ -2410,7 +2410,7 @@ app.whenReady().then(async () => {
   }
 
   try {
-    spoolDesktop = createSpoolDesktopComposition({
+    coworkingOwner = createCoworkingOwnerComposition({
       store,
       runtime: runtimeService,
       rateLimits,
@@ -2423,12 +2423,12 @@ app.whenReady().then(async () => {
       osFamily:
         process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
     })
-    unregisterSpoolSharingHandlers = registerSpoolSharingHandlers(spoolDesktop.service)
+    unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(coworkingOwner.service)
   } catch (error) {
-    // Why: corrupt sharing state or a missing platform dependency disables only Spool.
-    console.error('[spool] Failed to compose Desktop sharing:', error)
-    unregisterSpoolSharingHandlers = registerSpoolSharingHandlers(
-      new SpoolUnavailableDesktopService()
+    // Why: corrupt sharing state or a missing platform dependency disables only Coworking.
+    console.error('[coworking] Failed to compose Desktop sharing:', error)
+    unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(
+      new CoworkingUnavailableOwnerService()
     )
   }
 
@@ -2440,7 +2440,7 @@ app.whenReady().then(async () => {
     runtimeRpc.start().catch((error) => {
       console.error('[runtime] Failed to start local RPC transport:', error)
     }),
-    spoolDesktop?.start()
+    coworkingOwner?.start()
   ])
 
   // Why: the macOS notification permission dialog must fire after the window
@@ -2531,8 +2531,8 @@ app.on('will-quit', (e) => {
   // app.quit() re-fires will-quit, but the second pass skips straight through.
   if (!daemonDisconnectDone) {
     e.preventDefault()
-    unregisterSpoolSharingHandlers?.()
-    unregisterSpoolSharingHandlers = null
+    unregisterCoworkingSharingHandlers?.()
+    unregisterCoworkingSharingHandlers = null
     // Why: capture ownership synchronously (before any await) so the guard
     // still has the right pid/runtimeId to compare against if shutdown
     // partially clears global state. Evaluating these inside .then() would
@@ -2560,9 +2560,9 @@ app.on('will-quit', (e) => {
             console.error('[runtime] Failed to stop local RPC transport:', error)
           })
       : Promise.resolve()
-    const spoolStop = spoolDesktop
-      ? spoolDesktop.stop().catch((error) => {
-          console.error('[spool] Failed to stop Desktop sharing:', error)
+    const coworkingStop = coworkingOwner
+      ? coworkingOwner.stop().catch((error) => {
+          console.error('[coworking] Failed to stop Desktop sharing:', error)
         })
       : Promise.resolve()
     // Why: Promise.allSettled — we need BOTH the daemon disconnect and the
@@ -2581,7 +2581,7 @@ app.on('will-quit', (e) => {
     Promise.allSettled([
       daemonTeardown,
       rpcStopAndClear,
-      spoolStop,
+      coworkingStop,
       watcherShutdown,
       emulatorShutdown,
       globalAssistantShutdown

@@ -1,22 +1,22 @@
 import { DEFAULT_APP_ICON_ID } from './app-icon'
-import { DEFAULT_BROWSER_PAGE_ZOOM_LEVEL } from './browser-page-zoom'
+import { DEFAULT_BROWSER_PAGE_ZOOM_LEVEL } from './browser/page-zoom'
 import {
   DEFAULT_LEFT_SIDEBAR_TINT_COLOR,
   DEFAULT_LEFT_SIDEBAR_TINT_OPACITY
 } from './left-sidebar-appearance'
 import { DEFAULT_LOADER_STYLE } from './loader-style'
 import { DEFAULT_OPEN_IN_APPLICATIONS } from './open-in-applications'
-import { DEFAULT_SETUP_AGENT_STARTUP_POLICY } from './setup-agent-startup-policy'
-import { getDefaultSourceControlAiSettings } from './source-control-ai'
-import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from './source-control-group-order'
+import { DEFAULT_SETUP_AGENT_STARTUP_POLICY } from './setup/agent-startup-policy'
+import { getDefaultSourceControlAiSettings } from './source-control/ai'
+import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from './source-control/group-order'
 import type { VoiceSettings } from './speech-types'
 import { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
 import { DEFAULT_STATUS_BAR_USAGE_MODE } from './status-bar-usage-mode'
-import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal-fonts'
-import { getDefaultTerminalQuickCommands } from './terminal-quick-commands'
-import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from './terminal-scrollback-policy'
-import { DEFAULT_TUI_AGENT_ARGS, DEFAULT_TUI_AGENT_ENV } from './tui-agent-launch-defaults'
-import { DEFAULT_DISABLED_TUI_AGENTS } from './tui-agent-selection'
+import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal/fonts'
+import { getDefaultTerminalQuickCommands } from './terminal/quick-commands'
+import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from './terminal/scrollback-policy'
+import { DEFAULT_TUI_AGENT_ARGS, DEFAULT_TUI_AGENT_ENV } from './tui-agent/launch-defaults'
+import { DEFAULT_DISABLED_TUI_AGENTS } from './tui-agent/selection'
 /* eslint-disable max-lines -- Why: default persisted settings live in one schema-shaped object so migrations and tests compare against one source of truth. */
 import type {
   GlobalSettings,
@@ -31,19 +31,19 @@ import type {
 } from './types'
 import { UI_LANGUAGE_SYSTEM } from './ui-language'
 import { DEFAULT_USAGE_PERCENTAGE_DISPLAY } from './usage-percentage-display'
-import { DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS } from './workspace-panel-titlebar-pinned'
-import { cloneDefaultWorkspaceStatuses } from './workspace-statuses'
-import { DEFAULT_WORKTREE_CARD_PROPERTIES } from './worktree-card-properties'
+import { DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS } from './workspace/panel-titlebar-pinned'
+import { cloneDefaultWorkspaceStatuses } from './workspace/statuses'
+import { DEFAULT_WORKTREE_CARD_PROPERTIES } from './workspace/worktree-card-properties'
 
 export { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
 export {
   DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS,
   normalizeWorkspacePanelTitlebarPinnedIds
-} from './workspace-panel-titlebar-pinned'
+} from './workspace/panel-titlebar-pinned'
 export {
   DEFAULT_WORKTREE_CARD_PROPERTIES,
   normalizeWorktreeCardProperties
-} from './worktree-card-properties'
+} from './workspace/worktree-card-properties'
 
 export const SCHEMA_VERSION = 1
 export const DEFAULT_APP_FONT_FAMILY = 'system-ui'
@@ -229,7 +229,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     // Why 'auto': when the user has picked a known ligature font we want the
     // feature enabled by default, but we never force it if they pick a font
     // that lacks ligatures or if they've explicitly opted out. The resolver
-    // is in shared/terminal-ligatures.ts.
+    // is in shared/terminal/ligatures.ts.
     terminalLigatures: 'auto',
     terminalCursorStyle: 'block',
     terminalCursorStyleDefaultedToBlock: true,

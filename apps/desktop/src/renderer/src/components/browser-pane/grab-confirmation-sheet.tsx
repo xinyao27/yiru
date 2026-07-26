@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 
-import type { BrowserGrabPayload } from '../../../../shared/browser-grab-types'
+import type { BrowserGrabPayload } from '../../../../shared/browser/grab-types'
 
 // ---------------------------------------------------------------------------
 // Grab payload → human-readable prompt context

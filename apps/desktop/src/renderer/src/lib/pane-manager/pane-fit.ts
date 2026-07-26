@@ -1,5 +1,4 @@
 import { getFitOverrideForPty } from './mobile-fit-overrides'
-import type { ManagedPane, ManagedPaneInternal, ScrollState } from './pane-manager-types'
 import {
   captureScrollState,
   releaseScrollStateMarker,
@@ -16,6 +15,7 @@ import {
   deferTerminalGeometryMutationDuringRebuild,
   isTerminalScrollIntentRebuildInFlight
 } from './terminal-scroll-intent-rebuild'
+import type { ManagedPane, ManagedPaneInternal, ScrollState } from './types'
 
 const MIN_PANE_FIT_WIDTH_PX = 48
 const MIN_PANE_FIT_HEIGHT_PX = 24

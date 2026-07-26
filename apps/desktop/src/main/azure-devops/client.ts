@@ -9,7 +9,7 @@ import {
   normalizeAzureDevOpsApiBaseUrl,
   requestAzureDevOpsJson,
   requestAzureDevOpsJsonAtBase
-} from './azure-devops-api-request'
+} from './api-request'
 import {
   deriveAzureDevOpsStatus,
   mapAzureDevOpsPullRequest,
@@ -18,7 +18,7 @@ import {
   type RawAzureDevOpsStatus
 } from './pull-request-mappers'
 import { getAzureDevOpsRepoRef, type AzureDevOpsRepoRef } from './repository-ref'
-export { normalizeAzureDevOpsApiBaseUrl } from './azure-devops-api-request'
+export { normalizeAzureDevOpsApiBaseUrl } from './api-request'
 
 export type AzureDevOpsAuthStatus = {
   configured: boolean

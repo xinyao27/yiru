@@ -3,8 +3,8 @@ import type { AgentProviderSessionMetadata } from '@yiru/workbench-model/agent'
 import { useAppStore } from '@/store'
 
 import { getSyntheticAgentTitleProfile } from '../../../../shared/synthetic-agent-title'
-import { resolveTuiAgentPermissionMode } from '../../../../shared/tui-agent-permissions'
-import type { AgentCompletionStatusSnapshot } from './agent-completion-coordinator-types'
+import { resolveTuiAgentPermissionMode } from '../../../../shared/tui-agent/permissions'
+import type { AgentCompletionStatusSnapshot } from './agent/completion-coordinator-types'
 
 const CODEX_AUTO_APPROVED_PERMISSION_STATES = ['waiting', 'blocked'] as const
 

@@ -22,8 +22,8 @@ import { StringDecoder } from 'node:string_decoder'
 import {
   appendGitConfigEnv,
   gitCredentialPromptGuardEnv
-} from '../../shared/git-credential-prompt-env'
-import { UNTRANSLATED_GIT_OUTPUT_ENV } from '../../shared/git-output-locale'
+} from '../../shared/git/credential-prompt-env'
+import { UNTRANSLATED_GIT_OUTPUT_ENV } from '../../shared/git/output-locale'
 import { endSubprocessStdin } from '../../shared/subprocess-stdin-write'
 import {
   buildWslLoginShellCommand,

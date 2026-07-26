@@ -5,7 +5,7 @@ import { useAppStore } from '@/store'
 
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '../../../../shared/constants'
 import type { EventProps } from '../../../../shared/telemetry-events'
-import { applyAgentPermissionMode } from '../../../../shared/tui-agent-permissions'
+import { applyAgentPermissionMode } from '../../../../shared/tui-agent/permissions'
 import type { GlobalSettings, OnboardingState, TuiAgent } from '../../../../shared/types'
 import type { StepId, StepNumber } from './use-onboarding-flow-types'
 

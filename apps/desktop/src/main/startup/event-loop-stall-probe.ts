@@ -1,4 +1,4 @@
-import { logStartupDiagnostic } from './startup-diagnostics'
+import { logStartupDiagnostic } from './diagnostics'
 
 const TICK_MS = 25
 const REPORT_EVERY_MS = 2_000

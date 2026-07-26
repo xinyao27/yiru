@@ -7,7 +7,7 @@ import type { SFTPWrapper } from 'ssh2'
 
 import { WSL_HOOK_FS_METHODS, type WslFsResult } from '../../shared/wsl-hook-relay-contract'
 import { wslCodexRuntimeHomeForGuestHome } from '../pty/codex-home-wsl-env'
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import type { installRemoteManagedAgentHooks } from './remote-managed-hook-installers'
 
 /** Run the shared remote hook installers against a WSL guest over the relay's

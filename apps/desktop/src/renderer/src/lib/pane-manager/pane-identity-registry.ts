@@ -1,6 +1,6 @@
 import { isTerminalLeafId, type TerminalLeafId } from '../../../../shared/stable-pane-id'
 import { mintStablePaneId } from './mint-stable-pane-id'
-import type { ManagedPaneInternal } from './pane-manager-types'
+import type { ManagedPaneInternal } from './types'
 
 export class PaneIdentityRegistry {
   private leafIdByNumericId: Map<number, TerminalLeafId> = new Map()

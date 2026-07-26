@@ -1,5 +1,5 @@
 import type { UsageRateLimitSource } from '../../shared/rate-limit-types'
-import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
+import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 
 export type ClaudeUsageRefreshStep = {
   source: UsageRateLimitSource

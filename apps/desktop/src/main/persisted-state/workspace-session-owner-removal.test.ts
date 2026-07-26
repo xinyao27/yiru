@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vite-plus/test'
 
 import { getDefaultWorkspaceSession } from '../../shared/constants'
 import type { TerminalTab, WorkspaceSessionState } from '../../shared/types'
-import { worktreeWorkspaceKey } from '../../shared/workspace-scope'
+import { worktreeWorkspaceKey } from '../../shared/workspace/scope'
 import {
   removeRepoFromWorkspaceSession,
   removeRepoFromWorkspaceSessionsForHost

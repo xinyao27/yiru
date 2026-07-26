@@ -8,7 +8,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { addressForPort } from '@/lib/workspace-port-urls'
 
-import type { WorkspacePort } from '../../../../shared/workspace-ports'
+import type { WorkspacePort } from '../../../../shared/workspace/ports'
 
 export function LocalWorkspacePortDetailsDialog({
   port,

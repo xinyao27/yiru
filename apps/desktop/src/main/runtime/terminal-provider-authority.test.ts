@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vite-plus/test'
 
-import type { DaemonEvent } from '../daemon/daemon-stream-events'
+import type { DaemonEvent } from '../daemon/stream-events'
 import type { ListSessionsResult, SessionInfo } from '../daemon/types'
 
 const daemonClientHarness = vi.hoisted(() => ({
@@ -56,16 +56,16 @@ vi.mock('../daemon/client', () => ({
 }))
 
 import { toAppSshPtyId } from '../../shared/ssh-pty-id'
-import { DaemonPtyAdapter } from '../daemon/daemon-pty-adapter'
+import { DaemonPtyAdapter } from '../daemon/pty-adapter'
 import { mintPtySessionId } from '../daemon/pty-session-id'
 import { SshPtyProvider } from '../providers/ssh-pty-provider'
+import { SshChannelMultiplexer, type MultiplexerTransport } from '../ssh/channel-multiplexer'
 import {
   FrameDecoder,
   encodeJsonRpcFrame,
   parseJsonRpcMessage,
   type JsonRpcMessage
-} from '../ssh/relay-protocol'
-import { SshChannelMultiplexer, type MultiplexerTransport } from '../ssh/ssh-channel-multiplexer'
+} from '../ssh/relay/protocol'
 
 function createSession(sessionId: string, isAlive: boolean): SessionInfo {
   return {

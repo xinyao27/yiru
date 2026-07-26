@@ -6,8 +6,16 @@ import { useShallow } from 'zustand/react/shallow'
 import { AgentStateDot, agentStateLabel, type AgentDotState } from '@/components/agent-state-dot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { useNow } from '@/components/dashboard/use-now'
+import {
+  activeAgentNotesSendFailureMessage,
+  sendNotesToActiveAgentSession,
+  type ActiveAgentNotesSendResult
+} from '@/components/editor/active-agent-note-send'
+import {
+  deriveNotesSendAgentTargets,
+  type NotesSendAgentTarget
+} from '@/components/editor/notes-send-agent-targets'
 import { useWorktreeAgentRows } from '@/components/sidebar/use-worktree-agent-rows'
-import { selectLivePtyIdsForWorktree } from '@/components/sidebar/worktree-card-status-inputs'
 import { QuickLaunchAgentMenuItems } from '@/components/tab-bar/quick-launch-button'
 import {
   DropdownMenuItem,
@@ -15,23 +23,15 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
-import {
-  activeAgentNotesSendFailureMessage,
-  sendNotesToActiveAgentSession,
-  type ActiveAgentNotesSendResult
-} from '@/lib/active-agent-note-send'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentKindForAgentType, formatAgentTypeLabel } from '@/lib/agent-status'
 import { agentTypeToIconAgent } from '@/lib/agent-status'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import {
-  deriveNotesSendAgentTargets,
-  type NotesSendAgentTarget
-} from '@/lib/notes-send-agent-targets'
 import { track } from '@/lib/telemetry'
 import { useAppStore } from '@/store'
 
 import type { LaunchSource } from '../../../../shared/telemetry-events'
+import { selectLivePtyIdsForWorktree } from '../sidebar/worktree-card/status-inputs'
 
 type OrderedSendTarget = {
   target: NotesSendAgentTarget

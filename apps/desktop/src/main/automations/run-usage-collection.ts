@@ -1,6 +1,6 @@
 import type { Automation, AutomationRun, AutomationRunUsage } from '../../shared/automations-types'
-import type { ClaudeUsageStore } from '../claude-usage/store'
-import type { CodexUsageStore } from '../codex-usage/store'
+import type { ClaudeUsageStore } from '../claude/usage/store'
+import type { CodexUsageStore } from '../codex/usage/store'
 
 function createUnavailableAutomationUsage(
   collectedAt: number,

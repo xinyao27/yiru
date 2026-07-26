@@ -150,20 +150,44 @@ export function WorktreeTitleInlineRename({
     input.select()
   }, [])
 
-  // Why: open the editor when a parent requests it (the workspace.rename
-  // shortcut). Always consume the request so the parent's trigger can't linger;
-  // skip the actual open when disabled or already editing.
+  // Why: ack the parent's one-shot rename request (the workspace.rename
+  // shortcut) exactly once per request, even when the open below is skipped.
+  // This effect only calls the parent's callback — never a local setter — so
+  // there is no state adjustment for no-adjust-state-on-prop-change to flag.
+  // The ref (not the `beginEditing` pulse itself) tracks whether the current
+  // request has been acked, so a same-value re-render — including React's
+  // Strict Mode remount check — can't ack twice; it resets once the parent
+  // clears its trigger so the *next* request is treated as fresh.
+  const ackedBeginEditingRef = useRef(false)
   useEffect(() => {
     if (!beginEditing) {
+      ackedBeginEditingRef.current = false
       return
     }
+    if (ackedBeginEditingRef.current) {
+      return
+    }
+    ackedBeginEditingRef.current = true
     onBeginEditingConsumed?.()
-    if (disabled || editing) {
-      return
+  }, [beginEditing, onBeginEditingConsumed])
+
+  // Why: opening the editor for a beginEditing request reacts to a prop
+  // that's already rendered, not state mirroring it — adjusting it here
+  // during render (own state only, guarded by the ref below) replaces a
+  // synchronous setEditing(true) keyed on a prop with the same idiom React
+  // recommends for adjusting state when a prop changes. The ref tracks
+  // "opened for this request" independently of the ack ref above, so Strict
+  // Mode re-invoking render can't open it twice.
+  const openedForBeginEditingRef = useRef(false)
+  if (!beginEditing) {
+    openedForBeginEditingRef.current = false
+  } else if (!openedForBeginEditingRef.current) {
+    openedForBeginEditingRef.current = true
+    if (!disabled && !editing) {
+      setValue(displayName)
+      setEditing(true)
     }
-    setValue(displayName)
-    setEditing(true)
-  }, [beginEditing, disabled, editing, displayName, onBeginEditingConsumed])
+  }
 
   const stopCardEvent = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation()

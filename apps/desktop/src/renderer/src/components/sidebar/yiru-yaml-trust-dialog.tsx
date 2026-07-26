@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react'
 
+import type { YiruHookScriptKind } from '@/components/sidebar/yiru-hook-trust'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import type { YiruHookScriptKind } from '@/lib/yiru-hook-trust'
 import { useAppStore } from '@/store'
 
 type ScriptKind = YiruHookScriptKind

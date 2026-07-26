@@ -1,11 +1,11 @@
 import type { Terminal } from '@xterm/xterm'
 
-import type { ScrollState } from './pane-manager-types'
 import {
   captureLogicalLineAnchor,
   resolveLogicalCellOffsetLine
 } from './terminal-reflow-scroll-anchor'
 import { forceTerminalViewportScrollbarSync } from './terminal-viewport-scrollbar-sync'
+import type { ScrollState } from './types'
 
 const terminalOutputEpochs = new WeakMap<Terminal, number>()
 const deferredScrollRestores = new WeakMap<

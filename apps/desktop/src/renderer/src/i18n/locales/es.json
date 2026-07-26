@@ -38,13 +38,7 @@
       },
       "loader": {
         "title": "Cargador",
-        "description": "Elige la animación de carga que se usa en Yiru. Los iconos dibujados alternan entre cuatro bocetos y Thinking Orbs añade seis animaciones punteadas de estados del agente.",
-        "drawing": "Iconos dibujados",
-        "code": "Llaves de código",
-        "macos": "macOS",
-        "square": "Cuadrado",
-        "flipbook": "Libro animado",
-        "escalade": "Escalade",
+        "description": "Elige la animación punteada de estados del agente que se usa en Yiru.",
         "orbWorking": "Trabajando",
         "orbSearching": "Buscando",
         "orbSolving": "Resolviendo",
@@ -1087,17 +1081,6 @@
             }
           }
         },
-        "GitHubMarkdownComposer": {
-          "015b4e607d": "Cancelar",
-          "e3bd59143c": "Insertar",
-          "f24783f470": "https://...",
-          "ec6310b731": "Usa una URL de imagen http:// o https://.",
-          "b7e4a1c902": "Pega, suelta o haz clic para agregar archivos",
-          "8f1c2d4e6a": "No hay nada que previsualizar",
-          "c91f0a2b14": "Escribir",
-          "d82b1e3f05": "Previsualizar",
-          "imageUrlTooLarge": "La URL de la imagen es demasiado grande."
-        },
         "PRFilterDropdowns": {
           "979be3cf6b": "Asignado",
           "b27b7e526c": "Revisión de",
@@ -1346,6 +1329,11 @@
             "unknownBaseBlocker": "No se pudieron verificar confirmaciones sin enviar",
             "dismissedBlocker": "Ignorado"
           }
+        },
+        "panel": {
+          "titlebar": {
+            "openIn": "Open in editor"
+          }
         }
       },
       "ui": {
@@ -1369,9 +1357,6 @@
               "65a3dae41d": "Sin proyectos"
             }
           }
-        },
-        "sheet": {
-          "1189e9fe0a": "Cerrar"
         },
         "team": {
           "multi": {
@@ -1820,7 +1805,9 @@
             "50ec9a165e": "Choose application"
           },
           "TabBarMoreButton": {
-            "more": "Más"
+            "more": "Más",
+            "panelsSection": "Titlebar actions",
+            "panelsEmptyHint": "Drag an action here to hide it from the titlebar"
           }
         }
       },
@@ -2937,22 +2924,6 @@
           "69969ba364": "Envío…",
           "d245c4ef6c": "GitHub issues"
         },
-        "SidebarFilter": {
-          "e3b3898218": "Agregar proyecto",
-          "92a23e6d07": "Restablecer filtros",
-          "81ded53722": "SSH",
-          "b9e8802e73": "Ningún proyecto coincide",
-          "779b7ba05d": "Limpiar",
-          "139877b384": "Seleccionar todo",
-          "5f7085a077": "Proyectos",
-          "e5cb32a898": "Ocultar rama predeterminada",
-          "638a2d221d": "Ocultar en reposo",
-          "f506a1262a": "Filtrar espacios de trabajo",
-          "75405270ed": "Editar filtros ({{value0}} activo)",
-          "489d1c8c9f": "Buscar proyectos...",
-          "ee240a39eb": "Editar filtros",
-          "automationCreated": "Ocultar creados por automatizaciones"
-        },
         "SidebarHeader": {
           "92154beb7e": "Nuevo espacio de trabajo",
           "5c9c7c16aa": "Agregar un proyecto para crear espacios de trabajo",
@@ -3172,9 +3143,9 @@
           "workspaceSection": "Espacio de trabajo",
           "primaryDeleteDisabled": "El worktree principal no se puede eliminar. Quita el proyecto en su lugar.",
           "deleteWorktree": "Eliminar worktree",
-          "makeSpoolPrivate": "Hacer privado",
-          "makeSpoolPublic": "Hacer público",
-          "spoolPrivateFailed": "No se pudo hacer privado este worktree."
+          "makeCoworkingPrivate": "Hacer privado",
+          "makeCoworkingPublic": "Hacer público",
+          "coworkingPrivateFailed": "No se pudo hacer privado este worktree."
         },
         "WorktreeList": {
           "d880ea0744": "Crea un grupo y mueve este proyecto a él.",
@@ -3219,9 +3190,9 @@
           "failedNestWorkspace": "No se pudo anidar el espacio de trabajo",
           "sidebarRowMissing": "El destino ya no existe",
           "failedUnnestWorkspace": "Error al expandir el espacio de trabajo",
-          "makeSpoolProjectPrivate": "Hacer privados todos los worktrees",
-          "makeSpoolProjectPublic": "Hacer públicos todos los worktrees",
-          "spoolProjectPrivateFailed": "No se pudieron hacer privados estos worktrees."
+          "makeCoworkingProjectPrivate": "Hacer privados todos los worktrees",
+          "makeCoworkingProjectPublic": "Hacer públicos todos los worktrees",
+          "coworkingProjectPrivateFailed": "No se pudieron hacer privados estos worktrees."
         },
         "WorktreeOpenInMenu": {
           "1417fd8380": "Personalizar apps...",
@@ -3586,24 +3557,24 @@
           "forget": "Eliminar de Yiru",
           "reconnectAndDelete": "Reconectar y eliminar"
         },
-        "SpoolDesktopRow": {
+        "CoworkingDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
         },
-        "SpoolWorktreeRow": {
+        "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "Cargando sesiones…",
           "ownerTitle": "{{value1}} de {{value0}}",
           "sessionsUnavailable": "La lista de sesiones no está disponible"
         },
-        "SpoolSidebarProjectedRow": {
-          "heading": "Spool"
+        "CoworkingSidebarProjectedRow": {
+          "heading": "Coworking"
         },
-        "SpoolDesktopUsageHoverCard": {
+        "CoworkingDesktopUsageHoverCard": {
           "usage": "Usage"
         },
-        "SpoolRemoteWorktreesHeader": {
+        "CoworkingRemoteWorktreesHeader": {
           "title": "Remote"
         },
         "WorktreeMetaDialog": {
@@ -3624,35 +3595,35 @@
           "2174f17011": "Save"
         }
       },
-      "spool": {
-        "SpoolAvailabilityStatusSegment": {
-          "title": "Spool no está disponible",
+      "coworking": {
+        "CoworkingAvailabilityStatusSegment": {
+          "title": "Coworking no está disponible",
           "checkAgain": "Comprobar de nuevo",
           "checking": "Comprobando…",
           "tailscaleUnavailable": "No se encontró Tailscale en este equipo.",
           "tailscaleNotRunning": "Tailscale está instalado, pero su servicio no está en ejecución.",
           "tailscalePermissionDenied": "Yiru no tiene permiso para leer el estado de Tailscale.",
-          "tailscaleTimedOut": "Tailscale no respondió a tiempo. Spool seguirá comprobándolo.",
+          "tailscaleTimedOut": "Tailscale no respondió a tiempo. Coworking seguirá comprobándolo.",
           "tailscaleUnsupportedOutput": "Tailscale devolvió datos de estado que esta versión de Yiru no puede leer.",
-          "portUnavailable": "El puerto TCP {{port}} ya está en uso. Cierra el proceso que causa el conflicto; Spool seguirá comprobándolo.",
-          "permissionDenied": "Los permisos del sistema impidieron que Yiru abriera el servicio de escucha de Spool en Tailnet.",
-          "persistenceUnavailable": "Spool no pudo cargar de forma segura los ajustes de uso compartido, así que este permanece desactivado.",
-          "unavailable": "Spool no pudo iniciarse en este equipo."
+          "portUnavailable": "El puerto TCP {{port}} ya está en uso. Cierra el proceso que causa el conflicto; Coworking seguirá comprobándolo.",
+          "permissionDenied": "Los permisos del sistema impidieron que Yiru abriera el servicio de escucha de Coworking en Tailnet.",
+          "persistenceUnavailable": "Coworking no pudo cargar de forma segura los ajustes de uso compartido, así que este permanece desactivado.",
+          "unavailable": "Coworking no pudo iniciarse en este equipo."
         },
-        "SpoolWindowsFirewallNotice": {
+        "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Se reparó la regla de Firewall de Windows.",
-          "title": "Firewall de Windows está bloqueando Spool",
-          "readyTitle": "Reiniciar el uso compartido de Spool",
-          "readyDescription": "La regla necesaria ya está disponible. Vuelve a aplicarla para iniciar Spool en esta sesión de la aplicación.",
+          "title": "Firewall de Windows está bloqueando Coworking",
+          "readyTitle": "Reiniciar Coworking",
+          "readyDescription": "La regla necesaria ya está disponible. Vuelve a aplicarla para reiniciar Coworking en esta sesión de la aplicación.",
           "inspectUnavailable": "No se pudo comprobar la regla del firewall. Vuelve a crearla con permisos de administrador.",
           "ruleMissing": "La aplicación Yiru instalada no tiene la regla necesaria para redes privadas.",
-          "ruleDetails": "Yiru.Spool · TCP {{port}} · Privada",
+          "ruleDetails": "Yiru.Coworking · TCP {{port}} · Privada",
           "waiting": "Esperando a Windows…",
           "repair": "Reparar regla del firewall",
           "reapply": "Volver a aplicar e iniciar",
           "repairFailed": "No se pudo reparar la regla de Firewall de Windows."
         },
-        "SpoolControlRequestDialog": {
+        "CoworkingControlRequestDialog": {
           "decisionFailed": "No se pudo enviar la decisión de control.",
           "title": "¿Permitir que {{value0}} controle este worktree?",
           "worktree": "Worktree: {{value0}} / {{value1}}",
@@ -3662,13 +3633,13 @@
           "deny": "Denegar",
           "allow": "Permitir esta conexión"
         },
-        "SpoolOwnerControlGrants": {
+        "CoworkingOwnerControlGrants": {
           "revokeFailed": "No se pudo revocar el control remoto.",
           "heading": "Control remoto",
           "hasAccess": "{{value0}} tiene acceso",
           "revoke": "Revocar"
         },
-        "SpoolSessionPane": {
+        "CoworkingSessionPane": {
           "continueFailed": "No se pudo continuar esta sesión.",
           "continueOutcomeUnknown": "Es posible que esta sesión se haya continuado en el equipo del propietario. Revisa la lista de sesiones y el terminal antes de volver a continuarla.",
           "retryContinue": "Try again",
@@ -3684,7 +3655,7 @@
           "terminalEnded": "This terminal session has ended.",
           "terminalConnectionLost": "The remote terminal connection was lost."
         },
-        "SpoolTerminalPane": {
+        "CoworkingTerminalPane": {
           "connecting": "Conectando terminal…",
           "closed": "Terminal cerrado",
           "unavailable": "Terminal no disponible",
@@ -3693,10 +3664,10 @@
           "resumeInput": "Reanudar entrada",
           "inputBacklogFull": "La entrada remota aún se está procesando. Espera a que aparezca antes de escribir o pegar más."
         },
-        "SpoolWorktreeVisibilityDialog": {
+        "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "No se pudo hacer público este worktree.",
           "title": "¿Hacer público {{value0}}?",
-          "description": "Las personas que usan Yiru Desktop en tu Tailnet podrán abrir este worktree.",
+          "description": "Las personas que usan Yiru en tu Tailnet podrán abrir este worktree.",
           "historyWarning": "Todas las sesiones, transcripciones, el historial del terminal y la salida futura podrán leerse.",
           "shellWarning": "El historial del terminal puede incluir contenido producido fuera de este worktree.",
           "cancel": "Cancelar",
@@ -3708,7 +3679,7 @@
           "projectShellWarning": "El historial del terminal puede incluir contenido producido fuera de esos worktrees.",
           "projectConfirm": "Hacer públicos todos"
         },
-        "SpoolWorkspaceSurface": {
+        "CoworkingWorkspaceSurface": {
           "requestFailed": "No se pudo solicitar el control.",
           "controlGranted": "Control concedido",
           "disconnected": "Desconectado",
@@ -3724,14 +3695,14 @@
           "terminalDescription": "Las instantáneas y la salida en tiempo real del terminal aparecen aquí cuando la sesión remota está disponible.",
           "selectSession": "Selecciona una sesión para abrir su terminal remoto.",
           "fileBrowser": "Archivos",
-          "fileDescription": "Los archivos remotos permanecen en el host de ejecución del propietario y se abren aquí mediante el modelo de workspace de Spool.",
+          "fileDescription": "Los archivos remotos permanecen en el host de ejecución del propietario y se abren aquí mediante el modelo de workspace de Coworking.",
           "changesAndGit": "Cambios y Git",
           "changesDescription": "El estado del worktree, los diffs, el historial, la rama y el upstream aparecen aquí.",
           "mutableMode": "Esta conexión puede usar los controles de modificación del worktree.",
           "readOnlyMode": "Este worktree público es de solo lectura hasta que su propietario conceda el control.",
           "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
-        "SpoolFileActionDialog": {
+        "CoworkingFileActionDialog": {
           "nameLabel": "Nombre",
           "cancel": "Cancelar",
           "newFileTitle": "Nuevo archivo",
@@ -3746,7 +3717,7 @@
           "rename": "Cambiar nombre",
           "delete": "Eliminar"
         },
-        "SpoolFilePreview": {
+        "CoworkingFilePreview": {
           "loading": "Cargando archivo…",
           "selectFile": "Selecciona un archivo para inspeccionarlo.",
           "reload": "Volver a cargar",
@@ -3774,7 +3745,7 @@
           "workingCompact": "Working",
           "stagedCompact": "Staged"
         },
-        "SpoolFileTree": {
+        "CoworkingFileTree": {
           "up": "Subir un directorio",
           "root": "Raíz del worktree",
           "refresh": "Actualizar archivos",
@@ -3789,11 +3760,11 @@
           "unavailable": "Los archivos no están disponibles.",
           "retry": "Retry"
         },
-        "SpoolFilesPane": {
+        "CoworkingFilesPane": {
           "listFailed": "No se pudieron cargar los archivos.",
           "readFailed": "No se pudo leer este archivo.",
           "diffFailed": "No se pudo cargar este diff.",
-          "fileTooLarge": "Este archivo es demasiado grande para guardarlo mediante Spool.",
+          "fileTooLarge": "Este archivo es demasiado grande para guardarlo mediante Coworking.",
           "saved": "Archivo guardado.",
           "saveFailed": "No se pudo guardar este archivo.",
           "invalidName": "Introduce un único nombre de archivo válido.",
@@ -3801,7 +3772,7 @@
           "outcomeUnknown": "Es posible que este cambio de archivo se haya completado en el worktree del propietario. Actualiza y revisa el elemento antes de hacer otro cambio.",
           "outcomeUnknownPersistent": "Es posible que el cambio de archivo se haya completado. Actualiza y revisa el elemento antes de hacer otro cambio."
         },
-        "SpoolGitDiffPane": {
+        "CoworkingGitDiffPane": {
           "selectItem": "Selecciona un cambio o commit para inspeccionar su diff.",
           "loading": "Cargando diff…",
           "noDiff": "No hay un diff de texto disponible.",
@@ -3812,7 +3783,7 @@
           "unavailable": "Este diff no está disponible.",
           "back": "Back"
         },
-        "SpoolGitPane": {
+        "CoworkingGitPane": {
           "refreshFailed": "No se pudo cargar el estado de Git.",
           "diffFailed": "No se pudo cargar este diff.",
           "commitTooLong": "El mensaje del commit es demasiado largo.",
@@ -3821,11 +3792,11 @@
           "outcomeUnknown": "Es posible que esta acción de Git se haya completado en el worktree del propietario. Actualiza y revisa el estado de Git antes de hacer otro cambio.",
           "outcomeUnknownPersistent": "Es posible que la acción de Git se haya completado. Actualiza y revisa el estado de Git antes de hacer otro cambio."
         },
-        "SpoolMutationOutcomeNotice": {
+        "CoworkingMutationOutcomeNotice": {
           "title": "El resultado necesita confirmación",
           "dismiss": "Cerrar después de revisar"
         },
-        "SpoolGitSidebar": {
+        "CoworkingGitSidebar": {
           "detached": "HEAD separado",
           "refresh": "Actualizar",
           "changes": "Cambios",
@@ -3845,12 +3816,12 @@
           "stateUnavailable": "El estado de Git no está disponible.",
           "changesLimited": "Solo se muestra una parte del estado."
         },
-        "SpoolAgentsPane": {
+        "CoworkingAgentsPane": {
           "publicSessions": "Public agents",
           "noAgentSessions": "No public agent sessions in this worktree.",
           "unknownAgent": "Agent"
         },
-        "SpoolChecksPane": {
+        "CoworkingChecksPane": {
           "reviewChecks": "Review checks",
           "refresh": "Refresh",
           "loadFailed": "Could not load checks from the owner.",
@@ -3881,7 +3852,7 @@
           "merged": "Merged",
           "draft": "Draft"
         },
-        "SpoolSessionCreateMenu": {
+        "CoworkingSessionCreateMenu": {
           "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
           "createFailed": "Could not create the terminal.",
           "noAgents": "No agents available",
@@ -9363,14 +9334,6 @@
           "yoloPermissionsInfo": "Información de permisos del agente",
           "yoloPermissionsTooltip": "Omite las comprobaciones de permisos de los agentes para reducir interrupciones"
         },
-        "FeatureSetupChecklist": {
-          "77f74946f5": "Los agentes pueden enviarse mensajes entre sí, tomar tareas y coordinar handoffs.",
-          "399cf885c0": "Orquestación de agentes",
-          "c5292c409d": "Los agentes pueden inspeccionar ventanas de apps y operar apps locales cuando se lo pidas.",
-          "1ecfb490ac": "Uso de la computadora",
-          "01426f3a23": "Los agentes pueden navegar por sitios, inspeccionar páginas y trabajar en tareas del navegador.",
-          "ea85d9e628": "Uso del navegador por agentes"
-        },
         "FeatureSetupInlineTerminal": {
           "789b59936e": "Pulsa Enter para ejecutar el comando y confirma npx si se te solicita. También puedes configurarlo más tarde en Configuración.",
           "47fc6cc6dc": "Comando de configuración de skills",
@@ -9454,33 +9417,6 @@
         "OnboardingTourStep": {
           "3f9586c043": "Haz el recorrido",
           "60c5576353": "Salir del recorrido"
-        },
-        "RepoStep": {
-          "e8fdb36338": "Escaneo de repositorios. Haga clic para detener.",
-          "b7c4da0504": "¿SSH? Configura hosts en Configuración",
-          "c33b190ca3": "Solo rutas del host",
-          "7b679207e4": "Espacio de trabajo",
-          "24c7c8696c": "Clonar en ruta del host",
-          "7932e95f68": "Clonar",
-          "955134915e": "git@github.com:org/repo.git",
-          "288d8444b7": "Pegue una URL HTTPS o SSH.",
-          "132425a3e3": "Clonar un repositorio",
-          "6558d50c69": "¿Quieres importar muchos repositorios a la vez? Seleccione la carpeta principal.",
-          "831524961f": "Elija cualquier directorio local, repositorio git o no.",
-          "f4e9c8dcf8": "Buscar una carpeta",
-          "e8214aa632": "Abrir como carpeta",
-          "3863747c56": "Agregar proyecto Git",
-          "2ebbc26343": "/home/user/project",
-          "466108ab89": "Introduce una ruta que exista en el host seleccionado.",
-          "8cab104e3c": "Abrir un proyecto en este host",
-          "2d20200346": "Importar repositorios",
-          "27ca610db1": "Atrás",
-          "cecd6593fa": "Carpeta escaneada:",
-          "c7af322fc3": "Dejar de escanear",
-          "c3d9d44ca2": "Detener escaneo",
-          "cf23006ba7": "Host seleccionado",
-          "7ec3f48820": "/home/user",
-          "2e6438dd34": "{{value0}}Se encontraron {{value1}} {{value2}} en esta carpeta."
         },
         "ThemeStep": {
           "a4b254779d": "Tecla de opción de macOS",
@@ -9597,10 +9533,6 @@
             "currentProjectSource": "current project source",
             "searchGitHub": "Search GitHub PRs",
             "searchGitLab": "Search GitLab MRs"
-          },
-          "ProjectHostSetupCombobox": {
-            "empty": "No hay hosts listos para este proyecto.",
-            "placeholder": "Elegir host"
           },
           "ProjectCombobox": {
             "search": "Buscar proyectos...",
@@ -9957,43 +9889,6 @@
             "cda56c5915": "notes / launch-plan.md",
             "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }"
           },
-          "FeatureTourPreview": {
-            "1170621527": ">",
-            "304ad0dfc1": "Pensando...",
-            "ef8b164dd1": "revisar src/auth",
-            "952d3ddd9a": "sesión iniciada",
-            "771d8881c2": "claude",
-            "6ed43cb0e0": "dashboard.spec.ts",
-            "24fedd5a52": "login.spec.ts",
-            "8279e9d95b": "Ejecutando 12 pruebas",
-            "6218a9014d": "pnpm playwright test",
-            "04d54d50ec": "yiru · zsh",
-            "1aa8a9a24a": "Terminal dividible",
-            "2a7cfc82c8": "Vinculado a GH #1842",
-            "3822d8d14b": "fix/worktree-picker-truncates",
-            "d54aefe09e": "LIN-329",
-            "40bbd92ef4": "Comenzar",
-            "c1f28c03b2": "El selector de worktree se trunca",
-            "fc0cc0b267": "GH #1842",
-            "0688842445": "GH #1799",
-            "5171768676": "orquestando 3 agentes",
-            "cebc7769cd": "rediseñar el flujo de autenticación",
-            "e44269e97d": "Orquestación de agentes",
-            "ec4a73f5e6": "PR 3/3",
-            "cfdfd4d6b4": "PR 2/3",
-            "b1f17bcc74": "PR 1/3",
-            "e38112b289": "refactorizar el webhook de facturación",
-            "9c812e0d7c": "acelerar el proceso de CI",
-            "3c4adfd821": "arreglar la condición de carrera de inicio de sesión",
-            "56a0271428": "Espacios de trabajo aislados",
-            "ac51c061e2": "codex",
-            "47f16ecf34": "Avanza en varias cosas a la vez. Cada workspace mantiene juntos su rama, terminal y actividad de agentes.",
-            "70aa182266": "Delega un objetivo y sigue con lo tuyo. Un agente coordinador se despliega y publica PRs en paralelo.",
-            "5d6ee181b6": "Abre cualquier workspace para volver a su terminal y luego divide paneles para tests, logs y agentes.",
-            "ef737dcee1": "Pull request review",
-            "f10c14dd9d": "Open a GitHub pull request or GitLab merge request and review it without switching tools.",
-            "bee6b4088d": "Pull request review"
-          },
           "FeatureWallBody": {
             "25ec5356d6": "Configuración"
           },
@@ -10210,11 +10105,6 @@
               }
             }
           },
-          "FeatureTourWorkspaceCard": {
-            "a23ed9da7f": "codex",
-            "2f33dc932b": "claude",
-            "9220794f6a": "laboral"
-          },
           "ReviewAnimatedVisual": {
             "8df4d52b68": "pr-vista",
             "8ab622e4d6": "notas"
@@ -10350,6 +10240,11 @@
               "frame": {
                 "stream": {
                   "f1c0179002": "La transmisión no produce fotogramas."
+                }
+              },
+              "video": {
+                "stream": {
+                  "c3fb77cb87": "This build does not support WebCodecs H.264 decoding."
                 }
               }
             },
@@ -11968,6 +11863,10 @@
           "undo": "Deshacer",
           "widthOption": "{{value0}} px"
         }
+      },
+      "WorkspacePanelEditorEmptyState": {
+        "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
+        "agentLaunchFailed": "Could not start {{value0}}."
       }
     },
     "i18n": {

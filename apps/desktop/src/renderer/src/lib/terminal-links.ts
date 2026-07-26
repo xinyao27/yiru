@@ -1,9 +1,9 @@
 import {
   parseExplicitFileLinkTarget,
   resolveExplicitFileLinkTarget
-} from './explicit-file-link-target'
+} from '../components/native-chat/explicit-file-link-target'
 /* eslint-disable max-lines -- Why: terminal link parsing depends on ordered passes sharing range state. */
-import { normalizeAbsolutePath } from './terminal-path-normalization'
+import { normalizeAbsolutePath } from '../components/terminal-pane/terminal-path-normalization'
 
 export type ParsedTerminalFileLink = {
   pathText: string

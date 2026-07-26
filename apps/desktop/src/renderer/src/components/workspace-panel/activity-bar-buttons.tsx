@@ -1,6 +1,7 @@
 import { DotsThree as MoreHorizontal, type IconProps } from '@phosphor-icons/react'
 import React from 'react'
 
+import type { ActiveRightSidebarTab } from '@/components/editor/state'
 import { getSelectableControlStateClasses } from '@/components/selectable-control-state-classes'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,7 +14,6 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
 import type { CheckStatus } from '../../../../shared/types'
 import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'

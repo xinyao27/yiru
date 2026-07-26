@@ -10,7 +10,7 @@ import { classifyTitleActivity, isExplicitAgentStatusFresh } from '@/lib/pane-ag
 import { resolveRuntimePaneTitleLeafId } from '@/lib/runtime-pane-title-leaf-id'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'
 
-import type { AgentStatus } from '../../../../shared/agent-detection'
+import type { AgentStatus } from '../../../../shared/agent/detection'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { TerminalLayoutSnapshot, TerminalTab, Worktree } from '../../../../shared/types'
 

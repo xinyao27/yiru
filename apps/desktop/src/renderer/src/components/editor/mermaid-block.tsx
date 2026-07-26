@@ -103,8 +103,8 @@ export default function MermaidBlock({
 
   if (error) {
     return (
-      <div className="mermaid-block">
-        <div className="mermaid-error">
+      <div className="mermaid-block [&_svg]:h-auto [&_svg]:max-w-full">
+        <div className="mb-[0.5em] text-[0.85em] text-[color:var(--color-warning,#d29922)]">
           {translate('auto.components.editor.MermaidBlock.dcc132e691', 'Diagram error:')}
           {error}
         </div>
@@ -115,5 +115,5 @@ export default function MermaidBlock({
     )
   }
 
-  return <div className="mermaid-block" ref={containerRef} />
+  return <div className="mermaid-block [&_svg]:h-auto [&_svg]:max-w-full" ref={containerRef} />
 }

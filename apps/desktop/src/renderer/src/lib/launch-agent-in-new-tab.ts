@@ -1,7 +1,6 @@
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
 import { translate } from '@/i18n/i18n'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
@@ -23,15 +22,16 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { isWebRuntimeSessionActive } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
 
-import { repoIsRemote } from '../../../shared/agent-launch-remote'
-import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat-session-option-defaults'
+import { repoIsRemote } from '../../../shared/agent/launch-remote'
+import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
 import type { LaunchSource } from '../../../shared/telemetry-events'
-import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
+} from '../../../shared/tui-agent/launch-defaults'
 import type { TuiAgent } from '../../../shared/types'
+import { seedNativeChatAppliedSessionOptions } from '../components/native-chat/session/option-cache'
 
 export type LaunchAgentInNewTabArgs = {
   agent: TuiAgent

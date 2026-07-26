@@ -3,8 +3,8 @@ import {
   getCachedAutomaticPushTargetUpstreamStatus,
   invalidateAutomaticPushTargetUpstreamStatusCache,
   storeCachedAutomaticPushTargetUpstreamStatus
-} from '@/lib/push-target-upstream-refresh-cache'
-import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/runtime-git-client'
+} from '@/components/workspace-panel/push-target-upstream-refresh-cache'
+import { getRuntimeGitStatus, getRuntimeGitUpstreamStatus } from '@/runtime/git-client'
 
 import type {
   GitPushTarget,

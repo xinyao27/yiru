@@ -6,7 +6,7 @@ import {
 import { isExistingPersistedProfile } from '../../shared/project-order-manual-default-notice'
 import type { GlobalSettings, OnboardingState, PersistedState } from '../../shared/types'
 import { resolveUsagePercentageDisplayChangeNoticeDismissed } from '../../shared/usage-percentage-display-change-notice'
-import { normalizePersistedWorkspaceStatuses } from '../../shared/workspace-statuses'
+import { normalizePersistedWorkspaceStatuses } from '../../shared/workspace/statuses'
 import {
   normalizePersistedRightSidebarTab,
   normalizePersistedShowDotfiles,

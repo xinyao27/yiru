@@ -21,7 +21,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { SpoolWorktreeVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
+import { CoworkingWorktreeVisibilityDialog } from '@/components/coworking/worktree-visibility-dialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -52,12 +52,12 @@ import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace-scope'
-import { runWorktreeBatchDelete, runWorktreeDelete } from './delete-worktree-flow'
+} from '../../../../shared/workspace/scope'
+import { runWorktreeBatchDelete, runWorktreeDelete } from './delete-worktree/flow'
 import { ProjectGroupNameDialog } from './project-group-name-dialog'
 import { runSleepWorktrees } from './sleep-worktree-flow'
 import { getWorkspaceStatus, getWorkspaceStatusVisualMeta } from './workspace-status'
-import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
+import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
 import { getLineageRenderInfo } from './worktree-list-groups'
 import { WorktreeOpenInSubMenu } from './worktree-open-in-menu'
 import { getEligibleWorktreeParents } from './worktree-parent-candidates'
@@ -300,8 +300,8 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
     effectiveSelectedWorktrees
   )
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false)
-  const [spoolPublicationDialogOpen, setSpoolPublicationDialogOpen] = useState(false)
-  const [spoolVisibilityPending, setSpoolVisibilityPending] = useState(false)
+  const [coworkingPublicationDialogOpen, setCoworkingPublicationDialogOpen] = useState(false)
+  const [coworkingVisibilityPending, setCoworkingVisibilityPending] = useState(false)
   const [parentPicker, setParentPicker] = useState<{
     childWorktreeId: string
     anchorElement: HTMLElement
@@ -344,9 +344,9 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
   const deleteStateByWorktreeId = useAppStore((s) =>
     selectMenuScopedMap(menuOpen, s.deleteStateByWorktreeId, EMPTY_DELETE_STATE_BY_WORKTREE_ID)
   )
-  const spoolOwnerWorktree = useAppStore((state) =>
-    menuOpen || spoolPublicationDialogOpen
-      ? (state.spoolOwnerWorktrees.find((entry) => entry.worktreeId === worktree.id) ?? null)
+  const coworkingOwnerWorktree = useAppStore((state) =>
+    menuOpen || coworkingPublicationDialogOpen
+      ? (state.coworkingOwnerWorktrees.find((entry) => entry.worktreeId === worktree.id) ?? null)
       : null
   )
   const scopeRef = useRef<HTMLDivElement>(null)
@@ -454,27 +454,27 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
     setWorktreesPinnedAndReveal([worktree.id], !worktree.isPinned)
   }, [worktree.id, worktree.isPinned, setWorktreesPinnedAndReveal])
 
-  const handleSpoolVisibility = useCallback(() => {
-    if (!spoolOwnerWorktree || spoolVisibilityPending) {
+  const handleCoworkingVisibility = useCallback(() => {
+    if (!coworkingOwnerWorktree || coworkingVisibilityPending) {
       return
     }
-    if (spoolOwnerWorktree.visibility === 'private') {
-      setSpoolPublicationDialogOpen(true)
+    if (coworkingOwnerWorktree.visibility === 'private') {
+      setCoworkingPublicationDialogOpen(true)
       return
     }
-    setSpoolVisibilityPending(true)
-    void window.api.spoolSharing
+    setCoworkingVisibilityPending(true)
+    void window.api.coworkingSharing
       .setWorktreeVisibility({ worktreeId: worktree.id, visibility: 'private' })
       .catch(() => {
         toast.error(
           translate(
-            'auto.components.sidebar.WorktreeContextMenu.spoolPrivateFailed',
+            'auto.components.sidebar.WorktreeContextMenu.coworkingPrivateFailed',
             'Could not make this worktree private.'
           )
         )
       })
-      .finally(() => setSpoolVisibilityPending(false))
-  }, [spoolOwnerWorktree, spoolVisibilityPending, worktree.id])
+      .finally(() => setCoworkingVisibilityPending(false))
+  }, [coworkingOwnerWorktree, coworkingVisibilityPending, worktree.id])
 
   const handleCreateGroupFromRepo = useCallback(() => {
     if (!repo) {
@@ -777,23 +777,23 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
                 <Copy className="size-3.5" />
                 {translate('auto.components.sidebar.WorktreeContextMenu.3350101edb', 'Copy Path')}
               </DropdownMenuItem>
-              {spoolOwnerWorktree ? (
+              {coworkingOwnerWorktree ? (
                 <DropdownMenuItem
-                  onClick={handleSpoolVisibility}
-                  disabled={isDeleting || spoolVisibilityPending}
+                  onClick={handleCoworkingVisibility}
+                  disabled={isDeleting || coworkingVisibilityPending}
                 >
-                  {spoolOwnerWorktree.visibility === 'public' ? (
+                  {coworkingOwnerWorktree.visibility === 'public' ? (
                     <LockKeyhole className="size-3.5" />
                   ) : (
                     <Globe2 className="size-3.5" />
                   )}
-                  {spoolOwnerWorktree.visibility === 'public'
+                  {coworkingOwnerWorktree.visibility === 'public'
                     ? translate(
-                        'auto.components.sidebar.WorktreeContextMenu.makeSpoolPrivate',
+                        'auto.components.sidebar.WorktreeContextMenu.makeCoworkingPrivate',
                         'Make private'
                       )
                     : translate(
-                        'auto.components.sidebar.WorktreeContextMenu.makeSpoolPublic',
+                        'auto.components.sidebar.WorktreeContextMenu.makeCoworkingPublic',
                         'Make public'
                       )}
                 </DropdownMenuItem>
@@ -997,11 +997,11 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <SpoolWorktreeVisibilityDialog
-        open={spoolPublicationDialogOpen}
+      <CoworkingWorktreeVisibilityDialog
+        open={coworkingPublicationDialogOpen}
         worktreeId={worktree.id}
         worktreeName={worktree.displayName || worktree.branch || worktree.id}
-        onOpenChange={setSpoolPublicationDialogOpen}
+        onOpenChange={setCoworkingPublicationDialogOpen}
       />
       <ProjectGroupNameDialog
         open={createGroupDialogOpen}

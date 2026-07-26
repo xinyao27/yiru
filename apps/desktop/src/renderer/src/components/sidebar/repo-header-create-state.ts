@@ -4,7 +4,7 @@ import { translate } from '@/i18n/i18n'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type { Repo } from '../../../../shared/types'
-import { getSelectedRepoSshGate } from '../../lib/new-workspace-ssh-gate'
+import { getSelectedRepoSshGate } from './new-workspace-ssh-gate'
 
 export type RepoHeaderCreateState = {
   disabled: boolean

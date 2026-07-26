@@ -1,6 +1,6 @@
 import { defaultRangeExtractor, type Range } from '@tanstack/react-virtual'
 
-import type { SpoolSidebarRow } from './spool-sidebar-rows'
+import type { CoworkingSidebarRow } from './coworking-sidebar-rows'
 import type { RenderRow } from './worktree-list-virtual-rows'
 import {
   estimateRenderRowSize,
@@ -15,28 +15,28 @@ export type WorkspaceSidebarProjectedRow =
       row: RenderRow
     }
   | {
-      kind: 'spool-windows-firewall'
-      key: 'spool:windows-firewall'
+      kind: 'coworking-windows-firewall'
+      key: 'coworking:windows-firewall'
     }
   | {
-      kind: 'spool-remote-worktrees-header'
-      key: 'spool:remote-worktrees-header'
+      kind: 'coworking-remote-worktrees-header'
+      key: 'coworking:remote-worktrees-header'
       worktreeCount: number
       collapsed: boolean
     }
   | {
-      kind: 'spool'
+      kind: 'coworking'
       key: string
-      row: SpoolSidebarRow
+      row: CoworkingSidebarRow
       localProjectHeaderKey?: string
     }
 
-type MatchedSpoolRows = {
-  rows: SpoolSidebarRow[]
+type MatchedCoworkingRows = {
+  rows: CoworkingSidebarRow[]
   worktreeCount: number
 }
 
-export const SPOOL_REMOTE_WORKTREES_HEADER_KEY = 'spool:remote-worktrees-header'
+export const COWORKING_REMOTE_WORKTREES_HEADER_KEY = 'coworking:remote-worktrees-header'
 
 function getLocalProjectHeaderIndexByIdentity(
   localRows: readonly RenderRow[]
@@ -72,18 +72,18 @@ function getLocalProjectHeaderIndexByIdentity(
   return indexByIdentity
 }
 
-function groupSpoolRowsByLocalProject(
-  spoolRows: readonly SpoolSidebarRow[],
+function groupCoworkingRowsByLocalProject(
+  coworkingRows: readonly CoworkingSidebarRow[],
   localHeaderIndexByIdentity: ReadonlyMap<string, number>
 ): {
-  matchedByHeaderIndex: Map<number, MatchedSpoolRows>
-  unmatched: SpoolSidebarRow[]
+  matchedByHeaderIndex: Map<number, MatchedCoworkingRows>
+  unmatched: CoworkingSidebarRow[]
 } {
-  const matchedByHeaderIndex = new Map<number, MatchedSpoolRows>()
-  const unmatched: SpoolSidebarRow[] = []
-  let activeTarget: SpoolSidebarRow[] | null = null
-  for (const row of spoolRows) {
-    if (row.type === 'spool-worktree') {
+  const matchedByHeaderIndex = new Map<number, MatchedCoworkingRows>()
+  const unmatched: CoworkingSidebarRow[] = []
+  let activeTarget: CoworkingSidebarRow[] | null = null
+  for (const row of coworkingRows) {
+    if (row.type === 'coworking-worktree') {
       const localHeaderIndex = row.projectIdentityKey
         ? localHeaderIndexByIdentity.get(row.projectIdentityKey)
         : undefined
@@ -99,7 +99,7 @@ function groupSpoolRowsByLocalProject(
       activeTarget = matched.rows
       continue
     }
-    if (row.type === 'spool-session' && activeTarget) {
+    if (row.type === 'coworking-session' && activeTarget) {
       activeTarget.push(row)
       continue
     }
@@ -113,29 +113,29 @@ function isLocalSectionBoundary(row: RenderRow | undefined): boolean {
   return !row || row.type === 'header' || row.type === 'host-header'
 }
 
-export function shouldShowSpoolWindowsFirewallDiagnostic(
+export function shouldShowCoworkingWindowsFirewallDiagnostic(
   status: 'starting' | 'ready' | 'unavailable',
   diagnostic: string | null
 ): boolean {
-  return status === 'unavailable' && diagnostic === 'spool_windows_firewall_unavailable'
+  return status === 'unavailable' && diagnostic === 'coworking_windows_firewall_unavailable'
 }
 
 export function projectWorkspaceSidebarRows(args: {
   localRows: readonly RenderRow[]
-  spoolRows: readonly SpoolSidebarRow[]
-  spoolStatus: 'starting' | 'ready' | 'unavailable'
-  spoolDiagnostic: string | null
+  coworkingRows: readonly CoworkingSidebarRow[]
+  coworkingStatus: 'starting' | 'ready' | 'unavailable'
+  coworkingDiagnostic: string | null
   remoteWorktreesCollapsed?: boolean
   getLocalRowKey: (row: RenderRow) => string
 }): WorkspaceSidebarProjectedRow[] {
   const localHeaderIndexByIdentity = getLocalProjectHeaderIndexByIdentity(args.localRows)
-  const { matchedByHeaderIndex, unmatched } = groupSpoolRowsByLocalProject(
-    args.spoolRows,
+  const { matchedByHeaderIndex, unmatched } = groupCoworkingRowsByLocalProject(
+    args.coworkingRows,
     localHeaderIndexByIdentity
   )
   const rows: WorkspaceSidebarProjectedRow[] = []
   let activeMatched:
-    | { headerKey: string; collapsed: boolean; spoolRows: readonly SpoolSidebarRow[] }
+    | { headerKey: string; collapsed: boolean; coworkingRows: readonly CoworkingSidebarRow[] }
     | undefined
   for (const [localIndex, localRow] of args.localRows.entries()) {
     const matched = localRow.type === 'header' ? matchedByHeaderIndex.get(localIndex) : undefined
@@ -153,15 +153,15 @@ export function projectWorkspaceSidebarRows(args: {
       activeMatched = {
         headerKey: localRow.key,
         collapsed: localRow.collapsed === true,
-        spoolRows: matched.rows
+        coworkingRows: matched.rows
       }
     }
     if (activeMatched && isLocalSectionBoundary(args.localRows[localIndex + 1])) {
       const completedMatch = activeMatched
       if (!completedMatch.collapsed) {
         rows.push(
-          ...completedMatch.spoolRows.map((row) => ({
-            kind: 'spool' as const,
+          ...completedMatch.coworkingRows.map((row) => ({
+            kind: 'coworking' as const,
             key: row.key,
             row,
             localProjectHeaderKey: completedMatch.headerKey
@@ -171,29 +171,29 @@ export function projectWorkspaceSidebarRows(args: {
       activeMatched = undefined
     }
   }
-  const showWindowsFirewall = shouldShowSpoolWindowsFirewallDiagnostic(
-    args.spoolStatus,
-    args.spoolDiagnostic
+  const showWindowsFirewall = shouldShowCoworkingWindowsFirewallDiagnostic(
+    args.coworkingStatus,
+    args.coworkingDiagnostic
   )
-  if (args.spoolRows.length === 0 && !showWindowsFirewall) {
+  if (args.coworkingRows.length === 0 && !showWindowsFirewall) {
     return rows
   }
   if (showWindowsFirewall) {
-    rows.push({ kind: 'spool-windows-firewall', key: 'spool:windows-firewall' })
+    rows.push({ kind: 'coworking-windows-firewall', key: 'coworking:windows-firewall' })
   }
-  const unmatchedWorktreeCount = unmatched.filter((row) => row.type === 'spool-worktree').length
+  const unmatchedWorktreeCount = unmatched.filter((row) => row.type === 'coworking-worktree').length
   if (unmatchedWorktreeCount > 0) {
     // Why: a remote worktree without one unambiguous local Project must not
     // visually inherit whichever local Project happens to precede it.
     rows.push({
-      kind: 'spool-remote-worktrees-header',
-      key: SPOOL_REMOTE_WORKTREES_HEADER_KEY,
+      kind: 'coworking-remote-worktrees-header',
+      key: COWORKING_REMOTE_WORKTREES_HEADER_KEY,
       worktreeCount: unmatchedWorktreeCount,
       collapsed: args.remoteWorktreesCollapsed === true
     })
   }
   if (unmatchedWorktreeCount === 0 || !args.remoteWorktreesCollapsed) {
-    rows.push(...unmatched.map((row) => ({ kind: 'spool' as const, key: row.key, row })))
+    rows.push(...unmatched.map((row) => ({ kind: 'coworking' as const, key: row.key, row })))
   }
   return rows
 }
@@ -228,16 +228,16 @@ export function estimateWorkspaceSidebarRowSize(args: {
       args.activeStickyHeaderIndex
     )
   }
-  if (projected.kind === 'spool-windows-firewall') {
+  if (projected.kind === 'coworking-windows-firewall') {
     return 154
   }
-  if (projected.kind === 'spool-remote-worktrees-header') {
+  if (projected.kind === 'coworking-remote-worktrees-header') {
     return 32
   }
-  if (projected.row.type === 'spool-desktop-status') {
+  if (projected.row.type === 'coworking-desktop-status') {
     return 32
   }
-  if (projected.row.type === 'spool-worktree') {
+  if (projected.row.type === 'coworking-worktree') {
     return projected.row.branch || projected.row.sessionCatalogStatus !== 'complete' ? 44 : 32
   }
   return 24
@@ -254,7 +254,7 @@ export function extractWorkspaceSidebarVirtualRowIndexes(args: {
   // diagnostics and unmatched remote projects must not inherit the last header.
   if (
     rangeStart?.kind !== 'local' &&
-    !(rangeStart?.kind === 'spool' && rangeStart.localProjectHeaderKey)
+    !(rangeStart?.kind === 'coworking' && rangeStart.localProjectHeaderKey)
   ) {
     return defaultRangeExtractor(args.range)
   }
@@ -270,7 +270,7 @@ export function workspaceSidebarStickyRangeStart(
   rows: readonly WorkspaceSidebarProjectedRow[]
 ): number | null {
   const row = rows[rangeStartIndex]
-  return row?.kind === 'local' || (row?.kind === 'spool' && row.localProjectHeaderKey)
+  return row?.kind === 'local' || (row?.kind === 'coworking' && row.localProjectHeaderKey)
     ? rangeStartIndex
     : null
 }

@@ -10,8 +10,8 @@
  * execution and transport-specific path translation (WSL).
  *
  * Why this module exists (design doc: docs/design/share-text-search.md):
- * Before extraction, the local (`src/main/ipc/filesystem.ts`,
- * `filesystem-search-git.ts`) and relay (`src/relay/fs-handler-utils.ts`,
+ * Before extraction, the local (`src/main/filesystem/filesystem.ts`,
+ * `filesystem-search-git.ts`) and relay (`src/relay/fs/handler-text-search.ts`,
  * `fs-handler-git-fallback.ts`) search implementations had diverged on
  * rg arg construction, rg --json parsing, the git-grep submatch regex,
  * relative-path normalization, and — most consequentially — the relay's
@@ -21,8 +21,8 @@
  */
 import { posix, win32 } from 'node:path'
 
+import { escapeRegex } from './escape-regex'
 import { normalizeSearchResult } from './search-match-count'
-import { escapeRegex } from './string-utils'
 import type { SearchFileResult, SearchMatch, SearchOptions, SearchResult } from './types'
 
 export type SearchAccumulator = {

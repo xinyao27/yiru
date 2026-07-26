@@ -1,7 +1,7 @@
 import type { IBuffer, IDisposable } from '@xterm/xterm'
 
-import type { ManagedPaneInternal, ScrollState } from './pane-manager-types'
 import { releaseScrollStateMarker, restoreScrollState } from './pane-scroll'
+import type { ManagedPaneInternal, ScrollState } from './types'
 
 function refreshAfterReparent(pane: ManagedPaneInternal): void {
   try {

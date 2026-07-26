@@ -1,6 +1,5 @@
 import type { JSX } from 'react'
 
-import { AgentSkillSetupPanel } from '@/components/settings/agent-skill-setup-panel'
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,
@@ -19,6 +18,8 @@ import {
 } from '@/lib/agent-skill-cli-prerequisite'
 import { BROWSER_USE_ENABLED_STORAGE_KEY } from '@/lib/browser-use-setup-state'
 import { useAppStore } from '@/store'
+
+import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
 
 export function BrowserUseSkillSetupCard(props: {
   compact?: boolean

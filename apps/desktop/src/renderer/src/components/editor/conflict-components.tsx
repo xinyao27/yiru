@@ -10,11 +10,11 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 
+import type { ConflictReviewEntry, OpenFile } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import type { ConflictReviewEntry, OpenFile } from '@/store/slices/editor'
 
 import type { GitConflictKind, GitStatusEntry } from '../../../../shared/types'
 import { ConflictReviewFileTree } from './conflict-review-file-tree'

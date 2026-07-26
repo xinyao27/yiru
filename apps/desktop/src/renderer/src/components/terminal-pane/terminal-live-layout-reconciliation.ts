@@ -1,4 +1,4 @@
-import { isRemoteRuntimePtyId } from '@/runtime/runtime-terminal-inspection'
+import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 
 import type { TerminalPaneLayoutNode, TerminalPaneSplitDirection } from '../../../../shared/types'
 

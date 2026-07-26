@@ -12,7 +12,7 @@ import {
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import type { AgentHookSource } from '../../shared/agent-hook-relay'
+import type { AgentHookSource } from '../../shared/agent/hook-relay'
 import { writeRollingFileBackup } from '../rolling-file-backup'
 import { grantDirAcl, isPermissionError } from '../win32-utils'
 import { resolveHooksJsonWritePath } from './hook-config-write-path'
@@ -233,6 +233,15 @@ export function buildWindowsAgentHookCurlPostCommand(source: AgentHookSource): s
     '>nul 2>&1'
   ].join(' ')
 }
+
+// Why: POSIX sibling of buildWindowsAgentHookCurlPostCommand — same wire
+// fields, same `/hook/<source>` routing, just curl-via-sh instead of
+// curl-via-cmd. Split into its own file (see posix-agent-hook-post-command.ts)
+// to keep this file under the 300-line budget.
+export {
+  buildPosixAgentHookCurlPostCommand,
+  type PosixAgentHookExtraField
+} from './posix-agent-hook-post-command'
 
 export function removeManagedCommands(
   definitions: HookDefinition[],

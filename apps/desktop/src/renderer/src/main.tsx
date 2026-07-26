@@ -3,17 +3,17 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { useTranslation } from 'react-i18next'
 
-import App from './application-shell'
+import App from './application-shell/shell'
+import { applyDocumentTheme } from './components/editor/document-theme'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
 import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
 import { translate } from './i18n/i18n'
-import { I18nProvider } from './i18n/i18n-provider'
+import { I18nProvider } from './i18n/provider'
 import {
   installRendererCrashDiagnostics,
   recordRendererCrashBreadcrumb
 } from './lib/crash-diagnostics'
-import { applyDocumentTheme } from './lib/document-theme'
-import { shouldEnableReactGrab } from './lib/react-grab-dev-gate'
+import { shouldEnableReactGrab } from './react-grab-dev-gate'
 
 recordRendererCrashBreadcrumb('renderer_bootstrap_started', { dev: import.meta.env.DEV })
 installRendererCrashDiagnostics()

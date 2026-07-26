@@ -1,12 +1,11 @@
 import * as monaco from 'monaco-editor'
 
-import { monacoLanguageServerManager } from '@/lib/monaco-language-server-manager'
-
 import {
   getImportModuleSpecifierAtPosition,
   isRelativeModuleSpecifier,
   type ImportModuleSpecifier
 } from './import-module-specifier'
+import { monacoLanguageServerManager } from './monaco-language/server-manager'
 import type { EditorNavigationTarget } from './open-editor-navigation-target'
 import {
   resolveRelativeImportTarget,

@@ -1,5 +1,5 @@
+import { assertRpcClipboardTextWriteWithinLimit } from '../clipboard-text-validation'
 import { defineMethod, type RpcMethod } from '../core'
-import { assertRpcClipboardTextWriteWithinLimit } from '../rpc-clipboard-text-validation'
 import { Fill, KeyboardInsert, Type } from './browser-schemas'
 
 export const BROWSER_TEXT_METHODS: RpcMethod[] = [

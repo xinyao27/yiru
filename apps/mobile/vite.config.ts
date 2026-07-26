@@ -13,7 +13,7 @@ export default defineConfig({
     // formatting or lint debt every time the embedded engine is rebuilt.
     ignorePatterns: [
       ...(rootLintConfig?.ignorePatterns ?? []),
-      'src/terminal/terminal-webview-engine.generated.ts'
+      'src/terminal/webview-engine.generated.ts'
     ],
     rules: {
       ...rootLintConfig?.rules,

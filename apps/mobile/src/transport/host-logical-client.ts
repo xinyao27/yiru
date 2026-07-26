@@ -1,4 +1,4 @@
-import { directPathForEndpoint } from './mobile-direct-endpoint-probe'
+import { directPathForEndpoint } from './direct-endpoint-probe'
 import { connect, type RpcClient } from './rpc-client'
 import { createStableLogicalRpcClient } from './stable-logical-rpc-client'
 import type { ConnectionLogSink, HostProfile } from './types'

@@ -1,14 +1,14 @@
 import type { SshTarget } from '@yiru/runtime-protocol/ssh-connection'
 
-import type { EphemeralVmRecipeConnection } from '../shared/ephemeral-vm-recipes'
+import type { EphemeralVmRecipeConnection } from '../shared/ephemeral-vm/recipes'
+import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
+import { getSshGitProvider } from './providers/ssh-git-dispatch'
 import {
   connectRegisteredSshTarget,
   disconnectRegisteredSshTarget,
   getSshConnectionStore,
   removeRegisteredSshTarget
-} from './ipc/ssh'
-import { getSshFilesystemProvider } from './providers/ssh-filesystem-dispatch'
-import { getSshGitProvider } from './providers/ssh-git-dispatch'
+} from './ssh/ssh'
 
 const SSH_PROVIDER_READY_TIMEOUT_MS = 10_000
 const SSH_PROVIDER_READY_INTERVAL_MS = 100

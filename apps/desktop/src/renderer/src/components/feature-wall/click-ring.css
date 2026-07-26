@@ -1,0 +1,16 @@
+/* Shared click pulse for feature-wall fake cursors. Matches the Editor tour
+   ring so every animated mouse click reads as the same interaction. */
+.feature-wall-click-ring {
+  animation: feature-wall-click-ring 460ms ease-out forwards;
+}
+
+@keyframes feature-wall-click-ring {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}

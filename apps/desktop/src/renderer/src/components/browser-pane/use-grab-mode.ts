@@ -5,7 +5,7 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import type {
   BrowserGrabPayload,
   BrowserGrabScreenshot
-} from '../../../../shared/browser-grab-types'
+} from '../../../../shared/browser/grab-types'
 import { isEditableKeyboardTarget } from './browser-keyboard'
 
 // ---------------------------------------------------------------------------

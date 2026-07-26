@@ -1,10 +1,9 @@
-import { activateYiruTerminalUnicodeProvider } from '../../../../shared/terminal-unicode-provider'
+import { activateYiruTerminalUnicodeProvider } from '../../../../shared/terminal/unicode-provider'
 import { attachDomRendererFocusClassSync } from './pane-dom-focus-class-sync'
 import {
   attachPaneFitResizeObserver,
   detachPaneFitResizeObserver
 } from './pane-fit-resize-observer'
-import type { ManagedPaneInternal } from './pane-manager-types'
 import { cancelDeferredScrollRestore } from './pane-scroll'
 import { clearPendingSplitScrollRestore } from './pane-split-scroll'
 import { attachTerminalMouseWheelMultiplier } from './pane-terminal-mouse-wheel'
@@ -14,6 +13,7 @@ import { configureLazyArabicShapingJoiner } from './terminal-arabic-shaping-join
 import { resolveCursorAgentImeAnchor } from './terminal-ime-anchor'
 import { TerminalLigaturesAddon } from './terminal-ligatures-addon'
 import { attachTerminalScrollIntentTracking } from './terminal-scroll-intent-dom-tracking'
+import type { ManagedPaneInternal } from './types'
 
 // ---------------------------------------------------------------------------
 // Pane creation, terminal open/close, addon management

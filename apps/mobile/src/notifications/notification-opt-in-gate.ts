@@ -2,7 +2,7 @@ import {
   readPushNotificationsPreference,
   savePushNotificationsEnabled
 } from '../storage/preferences'
-import { getNotificationPermissionState } from './mobile-notifications'
+import { getNotificationPermissionState } from './notifications'
 
 export async function shouldPresentNotificationOptIn(): Promise<boolean> {
   const preference = await readPushNotificationsPreference()

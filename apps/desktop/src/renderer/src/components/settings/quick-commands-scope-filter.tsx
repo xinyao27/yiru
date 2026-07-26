@@ -5,7 +5,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { Repo } from '../../../../shared/types'
-import RepoBadgeLabel from '../repo/repo-badge-label'
+import RepoBadgeLabel from '../repo/badge-label'
 import { Button } from '../ui/button'
 import { Command, CommandItem, CommandList } from '../ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'

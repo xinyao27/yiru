@@ -1,4 +1,4 @@
-import { writeStartupDiagnosticLine } from '../startup/startup-diagnostics'
+import { writeStartupDiagnosticLine } from '../startup/diagnostics'
 
 const MAIN_THREAD_DIAGNOSTICS_ENV = 'YIRU_MAIN_THREAD_DIAGNOSTICS'
 

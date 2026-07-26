@@ -1,20 +1,20 @@
-import type { SpoolChecksReadState } from '@/components/spool/spool-checks-pane'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
+import type { CoworkingChecksReadState } from '@/components/coworking/checks-pane'
+import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
 
 import type {
-  SpoolSessionCatalogEntry,
-  SpoolSessionCatalogPageState
-} from '../../../../shared/spool/spool-catalog-contract'
+  CoworkingSessionCatalogEntry,
+  CoworkingSessionCatalogPageState
+} from '../../../../shared/coworking/catalog-contract'
 
 export type RightSidebarPanelSource =
   | { kind: 'local' }
   | {
-      kind: 'spool'
-      route: SpoolWorkspaceRoute
+      kind: 'coworking'
+      route: CoworkingWorkspaceRoute
       supportsGit: boolean
-      sessions: readonly SpoolSessionCatalogEntry[]
-      catalogStatus: SpoolSessionCatalogPageState['status']
-      checksState: SpoolChecksReadState
+      sessions: readonly CoworkingSessionCatalogEntry[]
+      catalogStatus: CoworkingSessionCatalogPageState['status']
+      checksState: CoworkingChecksReadState
     }
 
 export const LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE: RightSidebarPanelSource = { kind: 'local' }

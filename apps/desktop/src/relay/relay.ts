@@ -33,16 +33,18 @@ import {
   AGENT_HOOK_INSTALL_PLUGINS_METHOD,
   AGENT_HOOK_NOTIFICATION_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD
-} from '../shared/agent-hook-relay'
+} from '../shared/agent/hook-relay'
 import { detectPiAgentKindFromCommand } from '../shared/pi-agent-kind'
-import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
+import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup/agent-sequencing'
 import { AgentExecHandler } from './agent-exec-handler'
 import { endpointDirForRelaySocket, RelayAgentHookServer } from './agent-hook-server'
 import { RelayContext } from './context'
+import { relayLogLine } from './diagnostic-log'
 import { RelayDispatcher } from './dispatcher'
 import { ExternalAutomationsHandler } from './external-automations-handler'
-import { FsHandler } from './fs-handler'
-import { GitHandler } from './git-handler'
+import { FsHandler } from './fs/handler'
+import { GitHandler } from './git/handler'
+import { readLaunchVersion, runConnectHandshake, setupDaemonHandshake } from './handshake'
 import { PluginOverlayManager, getRelayPiStatusExtensionPath } from './plugin-overlay'
 import { resolveOpenCodeSourceConfigDir, resolvePiSourceAgentDir } from './plugin-overlay-env'
 import { assertPluginSourceUnderByteCap } from './plugin-source-limit'
@@ -58,8 +60,6 @@ import {
   type JsonRpcResponse
 } from './protocol'
 import { PtyHandler } from './pty-handler'
-import { relayLogLine } from './relay-diagnostic-log'
-import { readLaunchVersion, runConnectHandshake, setupDaemonHandshake } from './relay-handshake'
 import { pickRemoteCliEnv } from './remote-cli-env'
 import { shouldReadRemoteCliStdin } from './remote-cli-stdin'
 import { remoteCliRequestTimeoutMs } from './remote-cli-timeout'

@@ -1,21 +1,21 @@
 import { Switch } from '@/components/ui/switch'
 import { translate } from '@/i18n/i18n'
-import {
-  MAX_AGENT_HIBERNATION_IDLE_MS,
-  MIN_AGENT_HIBERNATION_IDLE_MS,
-  getEffectiveAgentHibernationIdleMs
-} from '@/lib/agent-hibernation-planner'
 
 import type { GlobalSettings } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { Label } from '../ui/label'
+import {
+  MAX_AGENT_HIBERNATION_IDLE_MS,
+  MIN_AGENT_HIBERNATION_IDLE_MS,
+  getEffectiveAgentHibernationIdleMs
+} from './agent/hibernation-planner'
 import { EphemeralVmsExperimentalSetting } from './ephemeral-vms-experimental-setting'
 import { getExperimentalPaneSearchEntries, getExperimentalSearchEntry } from './experimental-search'
+import { NumberField, SettingsSwitch } from './form-controls'
 import { HiddenExperimentalGroup } from './hidden-experimental-group'
 import { NativeChatExperimentalSetting } from './native-chat-experimental-setting'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
-import { NumberField, SettingsSwitch } from './settings-form-controls'
-import { matchesSettingsSearch } from './settings-search'
 
 export { getExperimentalPaneSearchEntries }
 

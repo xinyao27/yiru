@@ -3,8 +3,8 @@ import { translate } from '@/i18n/i18n'
 
 import { cn } from '../../../lib/class-names'
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
-import { mobileHomePreviewStyles } from '../mobile-home-preview-tailwind'
-import { mobilePageStyles } from '../mobile-page-tailwind'
+import { mobileHomePreviewStyles } from '../home-preview-tailwind'
+import { mobilePageStyles } from '../page-tailwind'
 
 export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element {
   return (

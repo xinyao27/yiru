@@ -1,9 +1,5 @@
-import type { EmulatorGesturePoint } from '../emulator-gesture-sender'
-import type {
-  EmulatorBackendKind,
-  EmulatorSessionInfo,
-  EmulatorStreamCodec
-} from '../emulator-types'
+import type { EmulatorGesturePoint } from '../gesture-sender'
+import type { EmulatorBackendKind, EmulatorSessionInfo, EmulatorStreamCodec } from '../types'
 
 export type { EmulatorBackendKind, EmulatorStreamCodec }
 

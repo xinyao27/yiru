@@ -3,10 +3,7 @@ import {
   type ReadClipboardTextOptions
 } from '@yiru/workbench-model/ui'
 
-import {
-  TERMINAL_PASTE_MAX_BYTES,
-  type TerminalPasteTextOptions
-} from './terminal-paste-coordinator'
+import { TERMINAL_PASTE_MAX_BYTES, type TerminalPasteTextOptions } from './paste/coordinator'
 
 type SaveClipboardImageAsTempFile = (args?: {
   connectionId?: string | null

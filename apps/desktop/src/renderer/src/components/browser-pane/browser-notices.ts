@@ -1,11 +1,11 @@
 import { translate } from '@/i18n/i18n'
 
-import { isChromiumCertificateErrorCode } from '../../../../shared/browser-certificate-errors'
+import { isChromiumCertificateErrorCode } from '../../../../shared/browser/certificate-errors'
 import type {
   BrowserDownloadFinishedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '../../../../shared/browser-guest-events'
+} from '../../../../shared/browser/guest-events'
 import type { BrowserLoadError } from '../../../../shared/types'
 
 export type LoadFailureMeta = {

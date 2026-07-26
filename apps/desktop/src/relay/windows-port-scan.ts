@@ -3,8 +3,8 @@ import { promisify } from 'node:util'
 
 import { encodePowerShellCommand } from '../shared/powershell-command-encoding'
 import { getProcessOutputFields } from '../shared/process-output-field-scanner'
+import { buildRelayCommandEnv } from './command-env'
 import type { DetectedPort } from './port-scan-handler'
-import { buildRelayCommandEnv } from './relay-command-env'
 
 const SYSTEM_PORTS_TO_EXCLUDE = new Set([22])
 const MAX_DETECTED_PORTS = 50

@@ -1,4 +1,4 @@
-import { getRepositoryLocalCommandsSectionId } from '@/components/settings/repository-settings-targets'
+import { getRepositoryLocalCommandsSectionId } from '../settings/repository/settings-targets'
 
 export function openSetupScriptSettings(input: {
   repoId: string

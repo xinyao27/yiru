@@ -2,12 +2,6 @@ import { applyDividerStyles, applyPaneOpacity } from './pane-divider'
 import type { DragReorderCallbacks } from './pane-drag-reorder'
 import { updateMultiPaneState } from './pane-drag-reorder'
 import { disposePane, openTerminal } from './pane-lifecycle'
-import type {
-  ManagedPane,
-  ManagedPaneInternal,
-  PaneManagerOptions,
-  PaneStyleOptions
-} from './pane-manager-types'
 import { toPublicPane } from './pane-public-view'
 import { clearPendingSplitScrollRestore, scheduleSplitScrollRestore } from './pane-split-scroll'
 import {
@@ -20,6 +14,12 @@ import {
 } from './pane-tree-ops'
 import { reattachWebglIfNeeded } from './pane-webgl-reattach'
 import { disposeWebgl } from './pane-webgl-renderer'
+import type {
+  ManagedPane,
+  ManagedPaneInternal,
+  PaneManagerOptions,
+  PaneStyleOptions
+} from './types'
 
 type MovedPaneSplitState = {
   pane: ManagedPaneInternal

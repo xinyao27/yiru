@@ -6,7 +6,7 @@ import {
   GiteaIntegrationCard,
   GitHubIntegrationCard,
   GitLabIntegrationCard
-} from './source-control-integration-cards'
+} from './source-control/integration-cards'
 import { useIntegrationProviderStatusRefresh } from './use-integration-provider-status-refresh'
 export { getIntegrationsPaneSearchEntries } from './integrations-search'
 

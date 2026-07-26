@@ -1,6 +1,6 @@
 import { PTY_SESSION_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
 
-import { isRemoteRuntimePtyId } from '@/runtime/runtime-terminal-inspection'
+import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 
 import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import type { TerminalTab } from '../../../../shared/types'

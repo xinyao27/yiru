@@ -1,6 +1,11 @@
 import { FileText } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 
+import type {
+  MarkdownTemplatePickerRequest,
+  MarkdownTemplateSelection
+} from '@/components/editor/markdown-template-picker-request'
+import { subscribeMarkdownTemplatePicker } from '@/components/editor/markdown-template-picker-request'
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,11 +15,6 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { translate } from '@/i18n/i18n'
-import type {
-  MarkdownTemplatePickerRequest,
-  MarkdownTemplateSelection
-} from '@/lib/markdown-template-picker-request'
-import { subscribeMarkdownTemplatePicker } from '@/lib/markdown-template-picker-request'
 
 export function MarkdownTemplatePicker(): JSX.Element {
   const [activeRequest, setActiveRequest] = useState<MarkdownTemplatePickerRequest | null>(null)

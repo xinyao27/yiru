@@ -4,12 +4,12 @@ import {
   type AgentStatusOrchestrationContext
 } from '@yiru/workbench-model/agent'
 
-import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import {
   mergeAgentStatusOrchestration,
   parseAgentStatusPaneIdentity,
   resolveAgentStatusWorktreeId
-} from '@/lib/agent-status-worktree-attribution'
+} from '@/components/sidebar/agent-status-worktree-attribution'
+import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import { migrationUnsupportedToAgentStatusEntry } from '@/lib/migration-unsupported-agent-entry'
 import type { AppState } from '@/store'
 

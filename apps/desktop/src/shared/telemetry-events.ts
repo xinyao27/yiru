@@ -15,7 +15,7 @@
 
 import { z } from 'zod'
 
-import { AGENT_HOOK_TARGETS } from './agent-hook-types'
+import { AGENT_HOOK_TARGETS } from './agent/hook-types'
 import {
   CONTEXTUAL_TOUR_OUTCOMES,
   FEATURE_EDUCATION_CONTEXTUAL_TOUR_IDS,
@@ -44,7 +44,7 @@ import {
   NESTED_REPO_TELEMETRY_SURFACES,
   bucketNestedRepoTelemetryCount
 } from './nested-repo-telemetry'
-import { SETUP_SCRIPT_IMPORT_PROVIDERS } from './setup-script-import-providers'
+import { SETUP_SCRIPT_IMPORT_PROVIDERS } from './setup/script-import-providers'
 import {
   starNagAgentBucketSchema,
   starNagOutcomeSchema,
@@ -58,7 +58,7 @@ import type {
   PathSource,
   ShellHydrationFailureReason
 } from './types'
-import { WORKSPACE_SOURCE_VALUES, type WorkspaceSource } from './workspace-source'
+import { WORKSPACE_SOURCE_VALUES, type WorkspaceSource } from './workspace/source'
 
 // ── Shared property enums ───────────────────────────────────────────────
 

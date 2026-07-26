@@ -1,8 +1,8 @@
 import QRCodeBrowser from 'qrcode/lib/browser'
 import { useEffect, useState } from 'react'
 
-import type { MobilePageStage } from './mobile-page-stage'
-import { getMobileReleaseLink, type MobilePlatform } from './mobile-release-link'
+import type { MobilePageStage } from './page-stage'
+import { getMobileReleaseLink, type MobilePlatform } from './release-link'
 
 async function renderQrDataUrl(text: string): Promise<string> {
   return QRCodeBrowser.toDataURL(text, {
@@ -12,30 +12,32 @@ async function renderQrDataUrl(text: string): Promise<string> {
   })
 }
 
+type InstallQrResult = { stage: MobilePageStage; platform: MobilePlatform; dataUrl: string }
+
 export function useMobileInstallQr(
   stage: MobilePageStage | null,
   platform: MobilePlatform
 ): string | null {
-  const [installQrUrl, setInstallQrUrl] = useState<string | null>(null)
+  const [result, setResult] = useState<InstallQrResult | null>(null)
 
-  // Why: render install QRs lazily and clear the old platform's QR while the
-  // replacement is generated so users cannot scan a stale destination.
+  // Why: render install QRs lazily. The result is tagged with the (stage, platform)
+  // it was generated for; the return expression below derives null whenever that tag
+  // doesn't match the current pair, so a stale platform's QR can never render while
+  // the replacement is still generating.
   useEffect(() => {
     if (stage !== 'flow') {
       return
     }
-    setInstallQrUrl(null)
     let cancelled = false
     void (async () => {
       try {
         const dataUrl = await renderQrDataUrl(getMobileReleaseLink(platform).url)
         if (!cancelled) {
-          setInstallQrUrl(dataUrl)
+          setResult({ stage, platform, dataUrl })
         }
       } catch {
-        if (!cancelled) {
-          setInstallQrUrl(null)
-        }
+        // Why: leave `result` untouched — the derivation below already renders null
+        // for this (stage, platform) until a successful generation lands.
       }
     })()
     return () => {
@@ -43,5 +45,5 @@ export function useMobileInstallQr(
     }
   }, [platform, stage])
 
-  return installQrUrl
+  return result && result.stage === stage && result.platform === platform ? result.dataUrl : null
 }

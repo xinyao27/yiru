@@ -1,6 +1,6 @@
 import { useCallback, type Dispatch, type RefObject, type SetStateAction } from 'react'
 
-import { dispatchDictationControl } from '../dictation/dictation-control-events'
+import { dispatchDictationControl } from '../dictation/control-events'
 
 export function useNativeChatDictationActions(args: {
   textareaRef: RefObject<HTMLTextAreaElement | null>

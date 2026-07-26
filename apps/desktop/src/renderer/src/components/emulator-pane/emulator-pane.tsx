@@ -2,8 +2,8 @@ import { translate } from '@/i18n/i18n'
 
 import type { Tab } from '../../../../shared/types'
 import { EmulatorDeviceFrame } from './emulator-device-frame'
-import { EmulatorPaneToolbar } from './emulator-pane-toolbar'
 import { MobileEmulatorAgentSetupGuideLayer } from './mobile-emulator-agent-setup-guide-layer'
+import { EmulatorPaneToolbar } from './toolbar'
 import { useEmulatorPaneSession } from './use-emulator-pane-session'
 
 type EmulatorPaneProps = {

@@ -2,15 +2,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { applyDocumentTheme } from '@/components/editor/document-theme'
 import { isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
-import { applyDocumentTheme } from '@/lib/document-theme'
 import { getSelectedNestedRepoPathsInScanOrder } from '@/lib/nested-repo-selected-paths'
 import { buildOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
 import { track } from '@/lib/telemetry'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '../../../../shared/constants'
@@ -23,7 +23,7 @@ import {
   type NestedRepoTelemetryRuntimeKind
 } from '../../../../shared/nested-repo-telemetry'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import { resolveAgentPermissionModeSummary } from '../../../../shared/tui-agent-permissions'
+import { resolveAgentPermissionModeSummary } from '../../../../shared/tui-agent/permissions'
 import type {
   GlobalSettings,
   NestedRepoScanResult,
@@ -33,7 +33,7 @@ import type {
 } from '../../../../shared/types'
 import { openProjectDefaultCheckout } from '../sidebar/project-added-default-checkout'
 import { buildAgentPickedPayload } from './agent-picked-payload'
-import { resolveOnboardingSettingsHydration } from './onboarding-settings-hydration'
+import { resolveOnboardingSettingsHydration } from './settings-hydration'
 import { persistStep, useCloseWith, usePersistCurrentStep } from './use-onboarding-flow-persistence'
 import { STEPS, type StepNumber } from './use-onboarding-flow-types'
 import { buildWindowsTerminalSnapshotPayload } from './windows-terminal-onboarding-telemetry'

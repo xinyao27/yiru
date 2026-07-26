@@ -4,7 +4,7 @@ import {
   DEFAULT_MOBILE_LOADER_STYLE,
   normalizeMobileLoaderStyle,
   type MobileLoaderStyle
-} from '../loading/mobile-loader-style'
+} from '../loading/loader-style'
 
 const PINS_PREFIX = 'yiru:pins:'
 const NOTIF_KEY = 'yiru:pushNotificationsEnabled'

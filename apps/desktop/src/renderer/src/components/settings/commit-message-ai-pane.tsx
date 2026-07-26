@@ -8,28 +8,28 @@ import {
   CUSTOM_AGENT_ID,
   isCustomAgentId,
   type CommitMessageModelCapability
-} from '../../../../shared/commit-message-agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message-host-key'
+} from '../../../../shared/commit-message/agent-spec'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message/host-key'
 import {
   normalizeSourceControlAiSettings,
   readSourceControlAiModelChoiceForHost,
   selectSourceControlAiModelChoiceForHost
-} from '../../../../shared/source-control-ai'
-import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '../../../../shared/source-control-ai-actions'
+} from '../../../../shared/source-control/ai'
+import { SOURCE_CONTROL_TEXT_ACTION_IDS } from '../../../../shared/source-control/ai-actions'
 import type {
   SourceControlAiSettingsPatch,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
+} from '../../../../shared/source-control/ai-types'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
-import { getRuntimeGitScope } from '../../runtime/runtime-git-client'
+import { getRuntimeGitScope } from '../../runtime/git-client'
 import { useAppStore } from '../../store'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { HostedReviewCreationDefaults } from './hosted-review-creation-defaults'
+import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
 import { getSettingOwnershipSummary } from './setting-ownership'
-import { matchesSettingsSearch } from './settings-search'
-import { SourceControlAiActionRecipeDefaults } from './source-control-ai-action-recipe-defaults'
+import { SourceControlAiActionRecipeDefaults } from './source-control/ai-action-recipe-defaults'
 
 type CommitMessageAiPaneProps = {
   settings: GlobalSettings

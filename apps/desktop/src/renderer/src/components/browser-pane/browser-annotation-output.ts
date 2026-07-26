@@ -2,7 +2,7 @@ import type {
   BrowserGrabComputedStyles,
   BrowserGrabPayload,
   BrowserPageAnnotation
-} from '../../../../shared/browser-grab-types'
+} from '../../../../shared/browser/grab-types'
 
 function formatPageHeading(payload: BrowserGrabPayload): string {
   try {

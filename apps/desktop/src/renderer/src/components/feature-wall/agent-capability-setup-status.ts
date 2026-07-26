@@ -15,7 +15,7 @@ import {
 import type {
   OnboardingFeatureSetupId,
   OnboardingFeatureSetupSelection
-} from '../onboarding/onboarding-feature-setup'
+} from '../onboarding/feature-setup'
 
 export type AgentCapabilityInstallStatusTone = 'ready' | 'pending' | 'checking' | 'error'
 

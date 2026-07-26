@@ -8,16 +8,19 @@ handling, and editor-local UI overlays so split-pane state remains coherent. */
 import React, { useRef, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
+import { registerFileSearchSelectedTextProvider } from '@/components/editor/file-search-selection'
+import { resolveEditorFontFamily } from '@/components/editor/font-family'
+import { computeEditorFontSize } from '@/components/editor/font-zoom'
+import {
+  formatMarkdownReviewNotes,
+  type MarkdownReviewNote
+} from '@/components/editor/markdown-review-notes'
+import { resolveCursorThemeName } from '@/components/editor/monaco-setup'
+import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { isMarkdownComment } from '@/lib/diff-comment-compat'
-import { resolveEditorFontFamily } from '@/lib/editor-font-family'
-import { computeEditorFontSize } from '@/lib/editor-font-zoom'
-import { registerFileSearchSelectedTextProvider } from '@/lib/file-search-selection'
-import { formatMarkdownReviewNotes, type MarkdownReviewNote } from '@/lib/markdown-review-notes'
-import { resolveCursorThemeName } from '@/lib/monaco-setup'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
-import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/lib/scroll-cache'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 
@@ -29,11 +32,6 @@ import {
   getDiffCommentPopoverTop
 } from '../diff-comments/diff-comment-popover-position'
 import { useDiffCommentDecorator } from '../diff-comments/use-diff-comment-decorator'
-import {
-  installEditorAddReviewNoteShortcut,
-  installEditorSaveShortcut,
-  installMonacoEditorFindShortcut
-} from './editor-shortcuts'
 import { buildFileEditorWordWrapOptions } from './file-editor-word-wrap-options'
 import {
   clampMonacoAutoHeight,
@@ -50,6 +48,7 @@ import {
 import { monacoFindOptions } from './monaco-find-options'
 import { MonacoGutterContextMenu } from './monaco-gutter-context-menu'
 import { createMonacoImportNavigationController } from './monaco-import-navigation'
+import { useMonacoLanguageServer } from './monaco-language/use-server'
 import { handleMonacoLargeTextPaste } from './monaco-large-text-paste'
 import {
   clearMarkdownDocCompletionDocuments,
@@ -71,8 +70,12 @@ import {
 } from './monaco-programmatic-sync'
 import { MAX_REVEAL_CONTENT_WAIT_FRAMES, performReveal } from './monaco-reveal'
 import { openEditorNavigationTarget } from './open-editor-navigation-target'
+import {
+  installEditorAddReviewNoteShortcut,
+  installEditorSaveShortcut,
+  installMonacoEditorFindShortcut
+} from './shortcuts'
 import { useContextualCopySetup } from './use-contextual-copy-setup'
-import { useMonacoLanguageServer } from './use-monaco-language-server'
 
 type MonacoEditorProps = {
   fileId: string

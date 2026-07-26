@@ -4,32 +4,32 @@ import { readFile, stat } from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { isBinaryBuffer } from '../../shared/binary-buffer'
-import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
-import { createGitConfigSnapshotRunner } from '../../shared/git-config-snapshot-runner'
-import { decodeGitCQuotedPath } from '../../shared/git-cquoted-path'
+import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
+import { createGitConfigSnapshotRunner } from '../../shared/git/config-snapshot-runner'
+import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
 import {
   removeSafeUntrackedDiscardTarget,
   removeSafeUntrackedDiscardTargets
-} from '../../shared/git-discard-path-safety'
+} from '../../shared/git/discard-path-safety'
 import {
   getEffectiveGitUpstreamStatus,
   getGitUpstreamStatusForUpstreamName,
   splitRemoteBranchName
-} from '../../shared/git-effective-upstream'
-import { parseGitRevListFirstParentOid } from '../../shared/git-rev-list-output'
-import { DEFAULT_GIT_STATUS_LIMIT } from '../../shared/git-status-limit'
+} from '../../shared/git/effective-upstream'
+import { parseGitRevListFirstParentOid } from '../../shared/git/rev-list-output'
+import { DEFAULT_GIT_STATUS_LIMIT } from '../../shared/git/status-limit'
 import {
   beginGitStatusLineStatsCacheWrite,
   clearGitStatusLineStatsCache,
   clearGitStatusLineStatsCacheKey,
   reuseOrRecomputeGitStatusLineStats
-} from '../../shared/git-status-line-stats-cache'
+} from '../../shared/git/status-line-stats-cache'
 import {
   applyLineStats,
   collectUntrackedAdditions,
   parseNumstat,
   type GitLineStats
-} from '../../shared/git-uncommitted-line-stats'
+} from '../../shared/git/uncommitted-line-stats'
 import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'
 import { getLargeDiffRenderLimit } from '../../shared/large-diff-render-limit'
 import type {
@@ -46,9 +46,7 @@ import type {
   GitStatusResult,
   GitUpstreamStatus
 } from '../../shared/types'
-import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
-import type { GitRuntimeOptions } from './git-runtime-options'
-import { gitOptionsForWorktree } from './git-runtime-options'
+import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
 import { describeMaxBufferOverflowError, isMaxBufferOverflowError } from './max-buffer-overflow'
 import {
   gitExecFileAsync,
@@ -56,6 +54,8 @@ import {
   gitOptionalLocksDisabledEnv,
   gitStreamStdout
 } from './runner'
+import type { GitRuntimeOptions } from './runtime-options'
+import { gitOptionsForWorktree } from './runtime-options'
 import { StatusPorcelainParser } from './status-porcelain-parser'
 import { hasWorktreeBaseCommitRef } from './worktree-base-ref-probe'
 

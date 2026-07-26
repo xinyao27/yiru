@@ -4,7 +4,7 @@ import { Pressable, ScrollView, Switch, Text, View } from 'react-native'
 import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { useMobileDefaultSessionViewPreference } from '../src/session/use-mobile-default-session-view-preference'
+import { useMobileDefaultSessionViewPreference } from '../src/session/use-default-session-view-preference'
 
 export default function NativeChatSettingsScreen() {
   const router = useRouter()

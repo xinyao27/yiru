@@ -3,7 +3,7 @@ import {
   getWslSelectionKey,
   normalizeCodexRuntimeSelection,
   type CodexAccountSelectionTarget
-} from '../codex-accounts/runtime-selection'
+} from '../codex/accounts/runtime-selection'
 import {
   getProjectRuntimeRateLimitTarget,
   normalizeOptionalDistro

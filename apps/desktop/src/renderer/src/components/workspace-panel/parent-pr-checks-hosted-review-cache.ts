@@ -1,11 +1,10 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 
+import type { PRInfo, Worktree } from '../../../../shared/types'
 import {
   getWorktreeCardPrDisplay,
   isCachedMergedBranchPRCurrentForWorktree
-} from '@/components/sidebar/worktree-card-pr-display'
-
-import type { PRInfo, Worktree } from '../../../../shared/types'
+} from '../sidebar/worktree-card/pr-display'
 import type { ParentPrChecksCacheEntry } from './parent-pr-checks-row-types'
 
 export function canUseParentPrChecksHostedReviewCacheEntry(

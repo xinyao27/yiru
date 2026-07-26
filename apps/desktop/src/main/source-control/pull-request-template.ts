@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { joinWorktreeRelativePath } from '../runtime/runtime-relative-paths'
+import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 
 const PULL_REQUEST_TEMPLATE_CANDIDATES = [
   '.github/pull_request_template.md',

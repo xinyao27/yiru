@@ -18,9 +18,9 @@ import type {
   ExternalAutomationRunsPage,
   ExternalAutomationUpdateInput
 } from '../../shared/automations-types'
-import { getActiveMultiplexer } from '../ipc/ssh'
 import type { Store } from '../persistence'
-import { isRuntimeOwnedSshTarget } from '../ssh/ssh-connection-store'
+import { isRuntimeOwnedSshTarget } from '../ssh/connection-store'
+import { getActiveMultiplexer } from '../ssh/ssh'
 import { mapHermesJobs, mapOpenClawJobs } from './external-job-mappers'
 import {
   clearHermesCronOutputRunCountCache,

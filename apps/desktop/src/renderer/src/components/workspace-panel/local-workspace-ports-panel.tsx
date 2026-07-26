@@ -16,11 +16,11 @@ import {
 } from '@/lib/workspace-port-actions'
 import { resolveLocalhostLabelRouteForPort } from '@/lib/workspace-port-localhost-label-selector'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { useActiveWorktree, useRepoById } from '@/store/selectors'
 
-import type { WorkspacePort } from '../../../../shared/workspace-ports'
+import type { WorkspacePort } from '../../../../shared/workspace/ports'
 import { LocalWorkspacePortDetailsDialog } from './local-workspace-port-details-dialog'
 import { LocalWorkspacePortSection } from './local-workspace-port-list'
 import { getLocalWorkspacePortSections } from './local-workspace-port-sections'

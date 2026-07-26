@@ -1,13 +1,13 @@
 import type { FeatureInteractionId } from '../../../shared/feature-interactions'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import { isBrowserPaneUiRuntimeRpcParams } from '../../../shared/runtime-rpc-feature-interaction-source'
-import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
-import { emulatorProbe, emulatorProbeError } from '../../emulator/emulator-probe'
+import type { TerminalStreamFrame } from '../../../shared/terminal/stream-protocol'
+import { emulatorProbe, emulatorProbeError } from '../../emulator/probe'
 import type { YiruRuntimeService } from '../yiru-runtime'
 // Why: the dispatcher is the one place that knows how to turn a validated
 // RPC request into a response envelope. Splitting it from the transport
 // makes it unit-testable without spinning up a socket, and keeps
-// runtime-rpc.ts focused on framing/auth/connection bookkeeping.
+// rpc.ts focused on framing/auth/connection bookkeeping.
 import {
   ZodError,
   InvalidArgumentError,

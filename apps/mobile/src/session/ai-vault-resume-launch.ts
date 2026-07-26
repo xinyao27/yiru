@@ -12,13 +12,13 @@ import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { resolveWindowsShellStartupFamily } from '@yiru/workbench-model/platform'
 
-import type { MobileAiVaultResumeTargetStatus } from '../agent-history/agent-history-resume-target'
+import type { MobileAiVaultResumeTargetStatus } from '../agent-history/resume-target'
 import type { RpcClient } from '../transport/rpc-client'
 import {
   readMobileReviewCreatedTerminal,
   readMobileReviewTerminalSendAccepted,
   type MobileReviewTerminalTab
-} from './mobile-diff-review-rpc'
+} from './diff/review-rpc'
 
 const NODE_PLATFORMS = new Set<NodeJS.Platform>([
   'aix',

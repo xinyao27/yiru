@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path'
 
 import type { SFTPWrapper } from 'ssh2'
 
-import type { AgentHookInstallStatus } from '../../shared/agent-hook-types'
+import type { AgentHookInstallStatus } from '../../shared/agent/hook-types'
 import {
   readTextFileRemote,
   writeTextFileRemoteAtomic

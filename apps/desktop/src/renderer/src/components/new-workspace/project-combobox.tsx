@@ -1,7 +1,11 @@
 import { Check, FolderOpen, FolderPlus, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import RepoBadgeLabel from '@/components/repo/repo-badge-label'
+import {
+  searchNewWorkspaceProjectOptions,
+  type NewWorkspaceProjectOption
+} from '@/components/new-workspace-composer-card/new-workspace-project-options'
+import RepoBadgeLabel from '@/components/repo/badge-label'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -13,10 +17,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
-import {
-  searchNewWorkspaceProjectOptions,
-  type NewWorkspaceProjectOption
-} from '@/lib/new-workspace-project-options'
 
 type ProjectComboboxProps = {
   options: readonly NewWorkspaceProjectOption[]

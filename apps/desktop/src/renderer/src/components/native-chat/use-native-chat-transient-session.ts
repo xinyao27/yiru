@@ -4,14 +4,14 @@ import { useMemo } from 'react'
 import {
   deriveNativeChatStreamingText,
   nativeChatStreamingMessage
-} from '../../../../shared/native-chat-streaming'
-import { deriveNativeChatActivePrompt } from './native-chat-active-prompt'
+} from '../../../../shared/native-chat/streaming'
+import { deriveNativeChatActivePrompt } from './active-prompt'
 import {
   commandMarkersAsMessages,
   pendingSendsAsMessages,
   type NativeChatCommandMarker,
   type NativeChatPendingSend
-} from './native-chat-pending'
+} from './pending'
 import type { NativeChatLiveSession } from './use-native-chat-live-session'
 
 export function useNativeChatTransientSession(args: {

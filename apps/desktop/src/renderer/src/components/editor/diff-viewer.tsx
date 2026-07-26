@@ -2,12 +2,12 @@ import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { isDiffComment } from '@/lib/diff-comment-compat'
-import { resolveDocumentTheme } from '@/lib/document-theme'
-import { resolveEditorFontFamily } from '@/lib/editor-font-family'
-import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
-import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
-import { diffViewStateCache, setWithLRU } from '@/lib/scroll-cache'
+import { isDiffComment } from '@/components/editor/diff-comment-compat'
+import { resolveDocumentTheme } from '@/components/editor/document-theme'
+import { resolveEditorFontFamily } from '@/components/editor/font-family'
+import { computeDiffEditorFontSize } from '@/components/editor/font-zoom'
+import { monaco, resolveCursorThemeName } from '@/components/editor/monaco-setup'
+import { diffViewStateCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 
@@ -24,12 +24,13 @@ import { buildDiffEditorWordWrapOptions } from './diff-editor-word-wrap-options'
 import { useDiffEditorRegistration } from './diff-navigation-context'
 import { getDiffViewerLargeDiffSaveAction } from './diff-viewer-large-diff-save-action'
 import type { DiffViewerProps } from './diff-viewer-props'
-import { installEditorSaveShortcut, installMonacoEditorFindShortcut } from './editor-shortcuts'
 import { LargeDiffFallback } from './large-diff-fallback'
 import { getLargeDiffRenderLimit } from './large-diff-render-limit'
 import { monacoFindOptions } from './monaco-find-options'
 import { PierreReadonlyDiffViewer } from './pierre-readonly-diff-viewer'
+import { installEditorSaveShortcut, installMonacoEditorFindShortcut } from './shortcuts'
 import { useContextualCopySetup } from './use-contextual-copy-setup'
+import { useDiffViewerFirstChangeScroll } from './use-diff-viewer-first-change-scroll'
 import { useDiffViewerLargeDiffLifecycle } from './use-diff-viewer-large-diff-lifecycle'
 
 function MonacoDiffViewer({
@@ -164,88 +165,21 @@ function MonacoDiffViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modifiedEditor, popover?.lineNumber])
 
-  // Why: on a fresh open (no cached view state, no pending scroll-to-note),
-  // center the first diff change in the viewport. We do this from a dedicated
-  // effect — not from handleMount — so it sequences AFTER the comment
-  // decorator inserts its view zones. If we scrolled during handleMount, late
-  // zone insertion would shift content downward and the user would land on a
-  // note further down the file instead of the first change.
-  //
-  // `getTopForLineNumber(line, /* includeViewZones */ true)` accounts for any
-  // zones already in the layout, so the math survives whatever the decorator
-  // added in this render pass. The didScroll guard makes this strictly
-  // one-shot per mount.
-  const didAutoScrollFirstDiffRef = useRef(false)
-  const didAutoScrollModelKeyRef = useRef(modelKey)
-  useEffect(() => {
-    if (didAutoScrollModelKeyRef.current !== modelKey) {
-      didAutoScrollModelKeyRef.current = modelKey
-      // Why: the one-shot above is intentionally per-modelKey. Reset inside
-      // this Effect before its first-diff guard runs for the new file.
-      didAutoScrollFirstDiffRef.current = false
-    }
-    const diffEditor = diffEditorRef.current
-    if (!diffEditor || !modifiedEditor) {
-      return
-    }
-    if (didAutoScrollFirstDiffRef.current) {
-      return
-    }
-    if (diffViewStateCache.get(modelKey)) {
-      return
-    }
-    if (pendingScrollForThisViewer) {
-      // Why: the decorator owns this scroll for this mount, so permanently
-      // yield by setting the one-shot flag. Otherwise, when the decorator
-      // ack's and `pendingScrollForThisViewer` flips back to null, this
-      // effect would re-run with empty cache + un-set flag and overwrite
-      // the comment scroll with a jump to the first diff.
-      didAutoScrollFirstDiffRef.current = true
-      return
-    }
-    let rafId: number | null = null
-    const run = (): void => {
-      if (didAutoScrollFirstDiffRef.current) {
-        return
-      }
-      const changes = diffEditor.getLineChanges()
-      if (!changes || changes.length === 0) {
-        return
-      }
-      const line = Math.max(1, changes[0].modifiedStartLineNumber)
-      // Defer one frame so any view zones added in this render pass are part
-      // of the layout before we measure. Cancel any earlier pending rAF so
-      // a late onDidUpdateDiff can't enqueue a redundant scroll.
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-      rafId = requestAnimationFrame(() => {
-        rafId = null
-        if (didAutoScrollFirstDiffRef.current || !modifiedEditor.getModel()) {
-          return
-        }
-        const top = modifiedEditor.getTopForLineNumber(line, true)
-        const editorHeight = modifiedEditor.getLayoutInfo().height
-        modifiedEditor.setPosition({ lineNumber: line, column: 1 })
-        modifiedEditor.setScrollTop(Math.max(0, top - editorHeight / 2))
-        didAutoScrollFirstDiffRef.current = true
-      })
-    }
-    // If the diff result is already available, run immediately; otherwise
-    // wait for it. onDidUpdateDiff fires once the diff computation lands.
-    if (diffEditor.getLineChanges()) {
-      run()
-    }
-    const sub = diffEditor.onDidUpdateDiff(() => run())
-    return () => {
-      sub.dispose()
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-    }
-  }, [modifiedEditor, modelKey, pendingScrollForThisViewer])
+  useDiffViewerFirstChangeScroll({
+    diffEditorRef,
+    modifiedEditor,
+    modelKey,
+    pendingScrollForThisViewer
+  })
+
+  // Why: the caller (not the lifecycle hook) knows when it enters fallback,
+  // so it owns the generation counter that rotates Monaco paths — bumping it
+  // here is an ordinary event-driven state update, not state adjusted from
+  // an Effect keyed on a prop.
+  const [largeDiffFallbackGeneration, setLargeDiffFallbackGeneration] = useState(0)
 
   const handleEnterLargeDiffFallback = useCallback(() => {
+    setLargeDiffFallbackGeneration((generation) => generation + 1)
     // Why: when a tab transitions to the safety fallback, stale Monaco refs
     // must not keep comment decorators or save handlers talking to disposed UI.
     lineNumberOptionsSubRef.current?.dispose()
@@ -313,6 +247,7 @@ function MonacoDiffViewer({
     modelKey,
     originalModelKey,
     modifiedModelKey,
+    fallbackGeneration: largeDiffFallbackGeneration,
     onEnterFallback: handleEnterLargeDiffFallback
   })
 
@@ -337,8 +272,8 @@ function MonacoDiffViewer({
       if (savedViewState) {
         requestAnimationFrame(() => diffEditor.restoreViewState(savedViewState))
       }
-      // Auto-scroll to first diff is handled in a separate useEffect below so
-      // it can sequence after the comment-decorator inserts its view zones —
+      // Auto-scroll to first diff is handled by useDiffViewerFirstChangeScroll
+      // so it can sequence after the comment-decorator inserts its view zones —
       // otherwise late zones shift content downward and the user lands away
       // from the first change (e.g. on a note further down the file).
 

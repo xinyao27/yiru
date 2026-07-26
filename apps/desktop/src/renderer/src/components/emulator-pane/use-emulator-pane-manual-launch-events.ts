@@ -3,10 +3,10 @@ import { useEffect } from 'react'
 import {
   EMULATOR_MANUAL_LAUNCH_FAILED_EVENT,
   EMULATOR_MANUAL_LAUNCH_STARTED_EVENT
-} from '@/lib/simulator-launch-coordination'
+} from '@/components/emulator-pane/simulator-launch-coordination'
 import { useAppStore } from '@/store'
 
-import type { EmulatorPaneSession } from './emulator-pane-types'
+import type { EmulatorPaneSession } from './types'
 
 type UseEmulatorPaneManualLaunchEventsArgs = {
   worktreeId: string

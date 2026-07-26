@@ -23,10 +23,10 @@ import {
 import type { WorkspacePortGroup } from '@/lib/workspace-port-groups'
 import { useLocalhostLabelRouteForPort } from '@/lib/workspace-port-localhost-label-selector'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
+import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
-import type { WorkspacePort } from '../../../../shared/workspace-ports'
+import type { WorkspacePort } from '../../../../shared/workspace/ports'
 
 function PortAction({
   label,

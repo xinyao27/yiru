@@ -9,8 +9,8 @@ import {
   findGrokChatHistoryBySessionId,
   resolveGrokSessionsDir
 } from '../../shared/grok-session-paths'
-import { walkSessionFiles } from '../ai-vault/session-scanner-discovery'
-import { getYiruManagedCodexHomePath } from '../codex/codex-home-paths'
+import { walkSessionFiles } from '../ai-vault/session/scanner-discovery'
+import { getYiruManagedCodexHomePath } from '../codex/home-paths'
 
 // Why: these mirror the path constants in ai-vault/session-scanner.ts. Reads
 // run in the main process against the runtime's own home directory; over SSH

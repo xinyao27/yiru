@@ -5,7 +5,7 @@ import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-mo
 
 import { projectHostSetupProjectionFromRepos } from '../../shared/project-host-setup-projection'
 import type { PersistedState, Repo, SparsePreset, WorkspaceKey } from '../../shared/types'
-import { parseWorkspaceKey } from '../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../shared/workspace/scope'
 import { mergeHostWorkspaceSessions, mergeWorkspaceSessions } from './profile-project-session-state'
 import {
   extractHostSessionsForTransfer,

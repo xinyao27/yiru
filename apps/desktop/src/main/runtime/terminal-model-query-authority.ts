@@ -14,7 +14,7 @@ import type { GlobalSettings } from '../../shared/types'
 import {
   isHiddenPtyDeliveryGateEnabled,
   shouldDropHiddenRendererPtyData
-} from '../ipc/pty-hidden-delivery-gate'
+} from '../pty/hidden-delivery-gate'
 
 export type TerminalModelQueryAuthoritySettings = Pick<
   GlobalSettings,

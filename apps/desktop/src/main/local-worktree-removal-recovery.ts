@@ -1,9 +1,9 @@
 import type { GitWorktreeInfo, RemoveWorktreeResult } from '../shared/types'
-import { assertWorktreeUnlockedForRemoval } from '../shared/worktree-removal'
+import { assertWorktreeUnlockedForRemoval } from '../shared/workspace/worktree-removal'
 import { gitExecFileAsync } from './git/runner'
 import { listWorktreesStrict, type GitWorktreeExecOptions } from './git/worktree'
-import { areWorktreePathsEqual, formatWorktreeRemovalError } from './ipc/worktree-logic'
 import { removeLocalWorktreePath } from './local-worktree-filesystem'
+import { areWorktreePathsEqual, formatWorktreeRemovalError } from './worktree/logic'
 
 type LocalWindowsRemovalRecoveryArgs = {
   error: unknown

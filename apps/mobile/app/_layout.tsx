@@ -12,7 +12,7 @@ import { IconContext } from '@/components/uniwind-icons'
 import { SafeAreaListener, SafeAreaProvider } from '@/components/uniwind-native-components'
 
 import { YiruLogo } from '../src/components/yiru-logo'
-import { MobileLoaderStyleProvider } from '../src/loading/mobile-loader-style-context'
+import { MobileLoaderStyleProvider } from '../src/loading/loader-style-context'
 import { getNotificationNavigationPath } from '../src/notifications/notification-routing'
 import { RpcClientProvider } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'

@@ -4,6 +4,8 @@ import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: terminal pane lifecycle wiring is intentionally co-located so PTY attach, theme sync, and runtime graph publication remain consistent for live terminals. */
 import { useEffect, useRef } from 'react'
 
+import { resolveLocalhostHttpLinkDisplayUrl } from '@/components/editor/http-link-routing'
+import { resolveTerminalLayoutActiveLeafId } from '@/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   SPLIT_TERMINAL_PANE_EVENT,
   CLOSE_TERMINAL_PANE_EVENT,
@@ -13,7 +15,6 @@ import {
   type WakeHibernatedAgentsWorktreeDetail
 } from '@/constants/terminal'
 import { getConnectionId } from '@/lib/connection-context'
-import { resolveLocalhostHttpLinkDisplayUrl } from '@/lib/http-link-routing'
 import type { EffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/detect-option-as-alt'
 import {
   PaneManager,
@@ -39,12 +40,11 @@ import {
   isPrimarySelectionEnabled,
   setPrimarySelectionText
 } from '@/lib/primary-selection'
-import { resolveTerminalLayoutActiveLeafId } from '@/lib/terminal-layout-leaf-ids'
 import { resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { acquireWebviewsDragPassthrough } from '@/runtime/browser-webview-registry'
-import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/runtime-terminal-stream'
 import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
+import { getRemoteRuntimePtyEnvironmentId } from '@/runtime/terminal-stream'
 import { consumePendingWebRuntimeSplitMirrorTelemetry } from '@/runtime/web-runtime-session'
 import { useAppStore } from '@/store'
 
@@ -55,10 +55,10 @@ import type { EventProps } from '../../../../shared/telemetry-events'
 import {
   DEFAULT_TERMINAL_FONT_SIZE,
   resolveTerminalFontWeights
-} from '../../../../shared/terminal-fonts'
-import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal-kitty-keyboard-mode-tracker'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal-line-height-settings'
-import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal-scrollback-policy'
+} from '../../../../shared/terminal/fonts'
+import type { TerminalKittyKeyboardModeTracker } from '../../../../shared/terminal/kitty-keyboard-mode-tracker'
+import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
+import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal/scrollback-policy'
 import type {
   GlobalSettings,
   SetupSplitDirection,
@@ -66,8 +66,25 @@ import type {
   TerminalLayoutSnapshot,
   TuiAgent
 } from '../../../../shared/types'
-import { closeTerminalTab } from '../terminal/terminal-tab-actions'
+import { closeTerminalTab } from '../terminal/tab-actions'
+import {
+  resolveTabTitleAfterPaneClose,
+  shouldClearLaunchAgentForClosedPane
+} from './close-identity'
 import { applyExpandedLayoutTo, restoreExpandedLayoutFrom } from './expand-collapse'
+import {
+  armTerminalImePendingCandidateKeyRelease,
+  clearTerminalImePendingCandidateKeyRelease,
+  createTerminalImePendingCandidateKeyReleases,
+  shouldApplyTerminalImePendingCandidateKeyRelease
+} from './ime/candidate-key-release-guard'
+import { installTerminalImeCompositionTracker } from './ime/composition-tracker'
+import {
+  DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES,
+  getMacNativeTextInputSourceTracker
+} from './ime/input-source'
+import { installTerminalImeLinuxCandidateState } from './ime/linux-candidate-state'
+import { installTerminalImeNativeTextForwarder } from './ime/native-text-forwarder'
 import {
   buildFontFamily,
   normalizeTerminalLayoutSnapshot,
@@ -80,30 +97,18 @@ import { handleOsc52ClipboardRequest } from './osc52-clipboard'
 import { showOsc52ClipboardBlockedToast } from './osc52-clipboard-blocked-toast'
 import { fitAndFocusPanes, fitPanes } from './pane-helpers'
 import { parseOsc7 } from './parse-osc7'
-import { connectPanePty } from './pty-connection'
-import type { PtyTransport } from './pty-transport'
+import { connectPanePty } from './pty/connection'
+import type { PtyTransport } from './pty/transport'
 import { isPaneReplaying, type ReplayingPanesRef } from './replay-guard'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { seedStartupSessionRestoredBanner } from './session-restored-banner-pane-state'
+import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { applyTerminalAppearance, installMode2031Handlers } from './terminal-appearance'
 import {
   reconcileMissingSessions,
   type ReconcilableBinding
 } from './terminal-dead-session-reconcile'
 import { createTerminalHandleLinkProvider } from './terminal-handle-links'
-import {
-  armTerminalImePendingCandidateKeyRelease,
-  clearTerminalImePendingCandidateKeyRelease,
-  createTerminalImePendingCandidateKeyReleases,
-  shouldApplyTerminalImePendingCandidateKeyRelease
-} from './terminal-ime-candidate-key-release-guard'
-import { installTerminalImeCompositionTracker } from './terminal-ime-composition-tracker'
-import {
-  DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES,
-  getMacNativeTextInputSourceTracker
-} from './terminal-ime-input-source'
-import { installTerminalImeLinuxCandidateState } from './terminal-ime-linux-candidate-state'
-import { installTerminalImeNativeTextForwarder } from './terminal-ime-native-text-forwarder'
 import { resolveTerminalJisYenInput } from './terminal-jis-yen-input'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'
 import {
@@ -115,11 +120,6 @@ import {
 import type { LinkHandlerDeps } from './terminal-link-handlers'
 import { pushMode2031SeedReply } from './terminal-mode-2031-replies'
 import { handleOscLink } from './terminal-osc-link-routing'
-import {
-  resolveTabTitleAfterPaneClose,
-  shouldClearLaunchAgentForClosedPane
-} from './terminal-pane-close-identity'
-import { recordCreatedTerminalPaneSplit } from './terminal-pane-split-completion'
 import { captureParkedTerminalPaneCandidates } from './terminal-parked-tab-watchers'
 import { guardParserHandler } from './terminal-parser-handler-guard'
 import {

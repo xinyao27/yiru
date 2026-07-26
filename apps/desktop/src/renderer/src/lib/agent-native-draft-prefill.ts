@@ -1,4 +1,4 @@
-import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent/config'
 import type { TuiAgent } from '../../../shared/types'
 
 // Why: agents with a native draft-prefill flag/env launch with the prompt

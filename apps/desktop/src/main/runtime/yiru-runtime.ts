@@ -76,29 +76,29 @@ import {
   isCursorNativeAgentTitle,
   isShellProcess,
   normalizeTerminalTitle
-} from '../../shared/agent-detection'
-import type { AgentStatus } from '../../shared/agent-detection'
-import { repoIsRemote } from '../../shared/agent-launch-remote'
+} from '../../shared/agent/detection'
+import type { AgentStatus } from '../../shared/agent/detection'
+import { repoIsRemote } from '../../shared/agent/launch-remote'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
   recognizeAgentProcess
-} from '../../shared/agent-process-recognition'
+} from '../../shared/agent/process-recognition'
 import {
   AGENT_PROMPT_BRACKETED_PASTE_END,
   AGENT_PROMPT_SUBMIT,
   AGENT_PROMPT_SUBMIT_DELAY_MS,
   buildAgentPromptPasteBytes
-} from '../../shared/agent-prompt-injection'
+} from '../../shared/agent/prompt-injection'
 import {
   createAgentStatusOscProcessor,
   type ProcessedAgentStatusChunk
-} from '../../shared/agent-status-osc'
+} from '../../shared/agent/status-osc'
 import {
   hasCompatibleAgentTitleIdentity,
   normalizeCompatibleAgentStatusEntryForOwner,
   normalizeCompatibleAgentTitleForOwner
-} from '../../shared/agent-title-owner'
+} from '../../shared/agent/title-owner'
 import type {
   Automation,
   AutomationCreateInput,
@@ -119,6 +119,10 @@ import {
   GLOBAL_ASSISTANT_WORKTREE_ID,
   getDefaultVoiceSettings
 } from '../../shared/constants'
+import type {
+  CoworkingPairedRuntimeResolvedWorktree,
+  CoworkingPairedRuntimeWorktreeSelector
+} from '../../shared/coworking/paired-runtime-host-contract'
 import { createDraftPasteReadyScanner } from '../../shared/draft-paste-ready-scanner'
 import { mergeExternalWorktreeInboxPaths } from '../../shared/external-worktree-inbox'
 import type { TerminalPaneSplitSource } from '../../shared/feature-education-telemetry'
@@ -128,8 +132,8 @@ import type {
   FolderWorkspacePathStatusRequest
 } from '../../shared/folder-workspace-path-status'
 import { folderWorkspaceToWorktree } from '../../shared/folder-workspace-worktree'
-import { getGitCloneFailureMessage } from '../../shared/git-clone-failure-message'
-import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git-fetch-auto-maintenance'
+import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
+import { GIT_FETCH_SKIP_AUTO_MAINTENANCE_CONFIG_ARGS } from '../../shared/git/fetch-auto-maintenance'
 import { buildOrchestrationTaskDisplayMetadata } from '../../shared/orchestration-task-display'
 import { extractOscTitleScanTail } from '../../shared/osc-title-scan-tail'
 import { FIRST_PANE_ID } from '../../shared/pane-key'
@@ -200,48 +204,44 @@ import type {
 import {
   createSequencedSetupAgentCommands,
   SETUP_AGENT_SEQUENCE_STARTUP_COMMAND_ENV
-} from '../../shared/setup-agent-sequencing'
+} from '../../shared/setup/agent-sequencing'
 import {
   buildSetupRunnerCommand,
   getSetupRunnerCommandPlatformForPath
-} from '../../shared/setup-runner-command'
-import { inspectSetupScriptImportCandidates } from '../../shared/setup-script-imports'
+} from '../../shared/setup/runner-command'
+import { inspectSetupScriptImportCandidates } from '../../shared/setup/script-imports'
 import type { VoiceSettings } from '../../shared/speech-types'
-import type {
-  SpoolPairedRuntimeResolvedWorktree,
-  SpoolPairedRuntimeWorktreeSelector
-} from '../../shared/spool/spool-paired-runtime-host-contract'
 import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
-import type { TerminalGitHubPRLink } from '../../shared/terminal-github-pr-link-detector'
+import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
 import {
   isTerminalInputTooLargeWithYield,
   TERMINAL_INPUT_TOO_LARGE_ERROR,
   iterateTerminalInputChunks
-} from '../../shared/terminal-input'
-import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal-kitty-keyboard-mode-tracker'
+} from '../../shared/terminal/input'
+import { TerminalKittyKeyboardModeTracker } from '../../shared/terminal/kitty-keyboard-mode-tracker'
 import {
   createTerminalTitleTracker,
   stripBrailleSpinnerGlyphs,
   type TerminalTitleTracker
-} from '../../shared/terminal-output-side-effects'
+} from '../../shared/terminal/output-side-effects'
 import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
-} from '../../shared/terminal-side-effect-facts'
-import { resolveTerminalStartupCwd } from '../../shared/terminal-startup-cwd'
-import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../shared/terminal-tab-id'
+} from '../../shared/terminal/side-effect-facts'
+import { resolveTerminalStartupCwd } from '../../shared/terminal/startup-cwd'
+import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../shared/terminal/tab-id'
 import {
   getTuiAgentLaunchCommand,
   isTuiAgent,
   TUI_AGENT_CONFIG
-} from '../../shared/tui-agent-config'
+} from '../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../shared/tui-agent-launch-defaults'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent-selection'
-import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '../../shared/tui-agent-startup'
+} from '../../shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent/selection'
+import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '../../shared/tui-agent/startup'
 import type {
   AutomationWorkspaceProvenance,
   BaseRefSearchResult,
@@ -310,22 +310,22 @@ import type {
   WorkspacePortKillResult,
   WorkspacePortProbe,
   WorkspacePortScanResult
-} from '../../shared/workspace-ports'
+} from '../../shared/workspace/ports'
 import {
   folderWorkspaceKey,
   isWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../shared/workspace-scope'
-import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace-session-terminal-tab-close'
-import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
-import { resolveWorktreeAddBaseRef } from '../../shared/worktree-base-ref'
+} from '../../shared/workspace/scope'
+import { closeTerminalTabInWorkspaceSession } from '../../shared/workspace/session-terminal-tab-close'
+import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace/statuses'
+import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
 import {
   buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
   toDetectedWorktree
-} from '../../shared/worktree-ownership'
-import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
+} from '../../shared/workspace/worktree-ownership'
+import { assertWorktreeUnlockedForRemoval } from '../../shared/workspace/worktree-removal'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import {
   markCodexProjectTrusted,
@@ -336,19 +336,29 @@ import {
   configureAiVaultSessionSources,
   listAiVaultSessions
 } from '../ai-vault/cached-session-list'
-import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
+import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-configuration'
 import type { AutomationService } from '../automations/service'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
-import type { BrowserBackend } from '../browser/browser-backend'
-import type { ClaudeAccountService } from '../claude-accounts/service'
-import type { CodexAccountService } from '../codex-accounts/service'
+import type { BrowserBackend } from '../browser/backend'
+import type { ClaudeAccountService } from '../claude/accounts/service'
+import type { CodexAccountService } from '../codex/accounts/service'
 import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
-import type { EmulatorBridge } from '../emulator/emulator-bridge'
+import type { EmulatorBridge } from '../emulator/bridge'
+import { isENOENT } from '../filesystem/auth'
+import { invalidateAuthorizedRootsCache } from '../filesystem/auth'
+import {
+  closeLocalWatcherForWorktreePath,
+  closeRemoteWatcherForWorktreePath,
+  forgetLocalWatcherRemovalSnapshot,
+  forgetRemoteWatcherRemovalSnapshot,
+  restoreLocalWatcherAfterFailedRemoval,
+  restoreRemoteWatcherAfterFailedRemoval
+} from '../filesystem/watcher'
+import { acquireWatcherRemovalGate } from '../filesystem/watcher-removal-gate'
+import { getSshGitCapabilityCache } from '../git/capability-state'
 import { hasCommitObjectViaGitExec } from '../git/commit-object-ref'
-import { getSshGitCapabilityCache } from '../git/git-capability-state'
-import { resolveLocalGitUsername } from '../git/git-username'
 import {
   getBaseRefDefault,
   getDefaultRemote,
@@ -377,6 +387,7 @@ import {
 } from '../git/repo-clone-path'
 import { gitExecFileAsync, gitSpawn, nonInteractiveGitEnv } from '../git/runner'
 import { runWithGitReadCacheInvalidation } from '../git/status'
+import { resolveLocalGitUsername } from '../git/username'
 import {
   listWorktrees,
   listWorktreesStrict,
@@ -438,11 +449,8 @@ import {
   updateMR as updateGitLabMR,
   updateMRReviewers as updateGitLabMRReviewers
 } from '../gitlab/client'
-import {
-  normalizeGitLabMRListState,
-  normalizeGitLabPositiveInteger
-} from '../gitlab/gitlab-preload-args'
 import { getGlabKnownHosts } from '../gitlab/gl-utils'
+import { normalizeGitLabMRListState, normalizeGitLabPositiveInteger } from '../gitlab/preload-args'
 import { getWorkItemDetails as getGitLabWorkItemDetails } from '../gitlab/work-item-details'
 import {
   createSetupRunnerScript,
@@ -457,47 +465,6 @@ import {
   runHook,
   shouldRunSetupForCreate
 } from '../hooks'
-import { isENOENT } from '../ipc/filesystem-auth'
-import { invalidateAuthorizedRootsCache } from '../ipc/filesystem-auth'
-import {
-  closeLocalWatcherForWorktreePath,
-  closeRemoteWatcherForWorktreePath,
-  forgetLocalWatcherRemovalSnapshot,
-  forgetRemoteWatcherRemovalSnapshot,
-  restoreLocalWatcherAfterFailedRemoval,
-  restoreRemoteWatcherAfterFailedRemoval
-} from '../ipc/filesystem-watcher'
-import { detectInstalledAgentsWithShellPathHydration, detectRemoteAgents } from '../ipc/preflight'
-import { normalizeSparseDirectories } from '../ipc/sparse-checkout-directories'
-import { acquireWatcherRemovalGate } from '../ipc/watcher-removal-gate'
-import {
-  computeValidatedBranchName,
-  computeWorktreePath,
-  computeWorkspaceRoot,
-  ensurePathWithinWorkspace,
-  formatWorktreeRemovalError,
-  getWorktreeCreationLayout,
-  getWorktreePathSettings,
-  isOrphanCompatiblePreflightError,
-  isOrphanedWorktreeError,
-  mergeWorktree,
-  sanitizeWorktreeName,
-  shouldSetDisplayName,
-  areWorktreePathsEqual
-} from '../ipc/worktree-logic'
-import { worktreePathComparisonKey } from '../ipc/worktree-path-comparison'
-import {
-  cleanupUnusedWorktreePushTargetRemote,
-  cleanupUnusedWorktreePushTargetRemoteSsh,
-  createRemoteWorktree,
-  configureCreatedWorktreePushTarget,
-  prepareWorktreePushTarget
-} from '../ipc/worktree-remote'
-import {
-  createWorktreeLinkedPaths,
-  findExistingWorktreeSymlinkPaths,
-  removeWorktreeLinkedPaths
-} from '../ipc/worktree-symlinks'
 import { LanguageServerManager } from '../language-server-manager'
 import { resolveLocalProjectRuntimeForWorktreeId } from '../local-project-runtime-resolution'
 import {
@@ -517,6 +484,10 @@ import {
   killWorkspacePort,
   scanWorkspacePortProbes
 } from '../ports/workspace-port-ownership'
+import {
+  detectInstalledAgentsWithShellPathHydration,
+  detectRemoteAgents
+} from '../preflight/preflight'
 import {
   assertFolderWorkspacePathUsable,
   getFolderWorkspacePathStatus,
@@ -551,12 +522,10 @@ import {
   createHostedReview as createHostedReviewFromRepo,
   getHostedReviewCreationEligibility as getHostedReviewCreationEligibilityFromRepo
 } from '../source-control/hosted-review-creation'
+import { normalizeSparseDirectories } from '../sparse-checkout-directories'
 import { getCatalogModel, isLocalSpeechModel, SPEECH_MODEL_CATALOG } from '../speech/model-catalog'
-import {
-  deleteLocalSpeechModel,
-  getSpeechModelDeletionErrorCode
-} from '../speech/speech-model-deletion'
-import { getSpeechModelManager, getSpeechSttService } from '../speech/speech-runtime-service'
+import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../speech/model-deletion'
+import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
@@ -587,6 +556,34 @@ import {
 } from '../worktree-removal-safety'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'
 import { persistExistingWorktreeSortOrder } from '../worktree-sort-order-persistence'
+import {
+  computeValidatedBranchName,
+  computeWorktreePath,
+  computeWorkspaceRoot,
+  ensurePathWithinWorkspace,
+  formatWorktreeRemovalError,
+  getWorktreeCreationLayout,
+  getWorktreePathSettings,
+  isOrphanCompatiblePreflightError,
+  isOrphanedWorktreeError,
+  mergeWorktree,
+  sanitizeWorktreeName,
+  shouldSetDisplayName,
+  areWorktreePathsEqual
+} from '../worktree/logic'
+import { worktreePathComparisonKey } from '../worktree/path-comparison'
+import {
+  cleanupUnusedWorktreePushTargetRemote,
+  cleanupUnusedWorktreePushTargetRemoteSsh,
+  createRemoteWorktree,
+  configureCreatedWorktreePushTarget,
+  prepareWorktreePushTarget
+} from '../worktree/remote'
+import {
+  createWorktreeLinkedPaths,
+  findExistingWorktreeSymlinkPaths,
+  removeWorktreeLinkedPaths
+} from '../worktree/symlinks'
 import { ClaudeAgentTeamsService } from './claude-agent-teams-service'
 import type {
   AgentTeamsTmuxCompatRequest,
@@ -614,7 +611,7 @@ import {
 import { resolveTerminalOrchestrationCliCommand } from './orchestration/cli-command'
 import { OrchestrationDb } from './orchestration/db'
 import { formatMessagesForInjection } from './orchestration/formatter'
-import { joinWorktreeRelativePath } from './runtime-relative-paths'
+import { joinWorktreeRelativePath } from './relative-paths'
 import { MOBILE_SUBSCRIBE_SCROLLBACK_ROWS } from './scrollback-limits'
 import {
   isNativeWindowsConptyPty,
@@ -845,7 +842,7 @@ function isCursorAgentOrchestrationTarget(
 type RuntimePtyWorktreeRecord = {
   ptyId: string
   worktreeId: string
-  /** Trusted spawn-time identity; null means the PTY must not cross a Spool boundary. */
+  /** Trusted spawn-time identity; null means the PTY must not cross a Coworking boundary. */
   worktreeInstanceId: string | null
   connectionId: string | null
   // Why: a Windows host can own both native and WSL panes; preamble command
@@ -908,7 +905,7 @@ type TerminalCreateOptions = {
   // intermediate pty-backed publish so the new tab doesn't briefly flash in
   // the wrong (active) group before the corrected snapshot lands.
   deferMobileSessionPublish?: boolean
-  /** Why: Spool grants can be revoked during async launch preparation. */
+  /** Why: Coworking grants can be revoked during async launch preparation. */
   beforeSpawn?: () => void | Promise<void>
   /** Why: agent trust persistence is also a launch side effect, before PTY spawn. */
   beforeAgentTrust?: () => void | Promise<void>
@@ -12252,7 +12249,7 @@ export class YiruRuntimeService {
       ...(args.signal ? { signal: args.signal } : {}),
       ...executionOptions
     })
-    // Why: public Spool reads inspect existing reviews and must not attribute them as newly created.
+    // Why: public Coworking reads inspect existing reviews and must not attribute them as newly created.
     if (
       args.recordStats !== false &&
       review?.provider === 'github' &&
@@ -13103,9 +13100,9 @@ export class YiruRuntimeService {
     return await this.resolveWorktreeSelector(worktreeSelector)
   }
 
-  async resolvePairedRuntimeSpoolWorktree(
-    selector: SpoolPairedRuntimeWorktreeSelector
-  ): Promise<SpoolPairedRuntimeResolvedWorktree> {
+  async resolvePairedRuntimeCoworkingWorktree(
+    selector: CoworkingPairedRuntimeWorktreeSelector
+  ): Promise<CoworkingPairedRuntimeResolvedWorktree> {
     const store = this.requireStore()
     const worktree = await this.resolveWorktreeSelector(`id:${selector.worktreeId}`)
     const repo = store.getRepo(worktree.repoId)
@@ -13144,7 +13141,7 @@ export class YiruRuntimeService {
     }
   }
 
-  getPairedRuntimeSpoolStore(): Store {
+  getPairedRuntimeCoworkingStore(): Store {
     // Why: only the internal paired-runtime host adapter needs Store-backed path authorization.
     return this.requireStore()
   }

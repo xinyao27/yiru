@@ -14,7 +14,7 @@ import { cn } from '@/style/class-names'
 import { triggerMediumImpact } from '../platform/haptics'
 import { spacing } from '../theme/uniwind-theme-values'
 import { AgentSpinner } from './agent-spinner'
-import { MobileRepoIcon } from './mobile-repo-icon'
+import { MobileRepoIcon } from './repo-icon'
 import { WorktreeAgentList } from './worktree-agent-list'
 import { WorktreeMetaGlyphs, prStateColorClasses } from './worktree-meta-glyphs'
 

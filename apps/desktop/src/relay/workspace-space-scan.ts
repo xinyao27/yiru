@@ -7,12 +7,12 @@ import { basename, join } from 'node:path'
 import { platform } from 'node:process'
 import { promisify } from 'node:util'
 
-import { compactWorkspaceSpaceItems } from '../shared/workspace-space-compaction'
+import { compactWorkspaceSpaceItems } from '../shared/workspace/space-compaction'
 import type {
   WorkspaceSpaceDirectoryScanResult,
   WorkspaceSpaceItem,
   WorkspaceSpaceItemKind
-} from '../shared/workspace-space-types'
+} from '../shared/workspace/space-types'
 import type { RequestContext } from './dispatcher'
 
 const RELAY_FS_CONCURRENCY = 48

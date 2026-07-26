@@ -3,13 +3,8 @@ import { cn } from '@/lib/class-names'
 
 import { createDivider, disposeDivider } from './pane-divider'
 import { safeFit } from './pane-fit'
-import type {
-  DropZone,
-  ManagedPane,
-  ManagedPaneInternal,
-  PaneStyleOptions
-} from './pane-manager-types'
 import { disposeWebgl, attachWebgl } from './pane-webgl-renderer'
+import type { DropZone, ManagedPane, ManagedPaneInternal, PaneStyleOptions } from './types'
 
 export {
   cancelPendingSafeFitContinuations,

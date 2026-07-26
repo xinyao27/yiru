@@ -4,10 +4,10 @@ import {
   GIT_CHECK_IGNORE_TIMEOUT_MS,
   parseGitCheckIgnorePaths,
   splitGitCheckIgnorePathsByStdinBytes
-} from '../../shared/git-check-ignore-stdio'
-import type { GitRuntimeOptions } from './git-runtime-options'
-import { gitOptionsForWorktree } from './git-runtime-options'
+} from '../../shared/git/check-ignore-stdio'
 import { gitExecFileAsync } from './runner'
+import type { GitRuntimeOptions } from './runtime-options'
+import { gitOptionsForWorktree } from './runtime-options'
 
 type GitExecError = Error & { stdout?: string; code?: number | string }
 

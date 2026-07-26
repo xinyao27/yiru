@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { translate } from '@/i18n/i18n'
 import {
   buildImportedHookSettings,
   formatCandidateProvenance,
@@ -11,14 +9,16 @@ import {
   ignoresSharedSetupScripts,
   inspectSetupScriptPromptState,
   type SetupScriptPromptInspection
-} from '@/lib/setup-script-prompt'
+} from '@/components/sidebar/setup-script-prompt'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
+import { translate } from '@/i18n/i18n'
 import { track } from '@/lib/telemetry'
-import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/runtime-hooks-client'
+import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/hooks-client'
 import { useAppStore } from '@/store'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { SetupScriptImportCandidate } from '../../../../shared/setup-script-imports'
-import { buildSetupScriptPromptActionTelemetry } from '../../../../shared/setup-script-telemetry'
+import type { SetupScriptImportCandidate } from '../../../../shared/setup/script-imports'
+import { buildSetupScriptPromptActionTelemetry } from '../../../../shared/setup/script-telemetry'
 import { openSetupScriptSettings } from './open-setup-script-settings'
 import { SetupScriptPromptCardShell } from './setup-script-prompt-card-shell'
 import { trackSetupScriptPromptExposure } from './setup-script-prompt-exposure-telemetry'

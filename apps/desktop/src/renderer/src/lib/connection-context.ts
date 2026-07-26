@@ -1,12 +1,12 @@
 import { useAppStore } from '@/store'
 
-import { parseWorkspaceKey } from '../../../shared/workspace-scope'
+import { parseWorkspaceKey } from '../../../shared/workspace/scope'
 import {
   getConnectionIdForFileFromState,
   getConnectionIdFromState
-} from './connection-owner-resolution'
+} from '../components/editor/connection-owner-resolution'
 
-export { getConnectionIdFromState } from './connection-owner-resolution'
+export { getConnectionIdFromState } from '../components/editor/connection-owner-resolution'
 
 /**
  * Resolve the SSH connectionId for a worktree. Returns null for local repos,

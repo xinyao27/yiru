@@ -14,9 +14,9 @@ import {
   isRecentTabSwitcherCommitRelease,
   matchesRecentTabSwitcherChord
 } from '../../../../shared/window-shortcut-policy'
-import { activateCyclableTab } from '../../hooks/ipc-tab-switch'
 import { getShortcutPlatform } from '../../hooks/use-shortcut-label'
 import { useAppStore } from '../../store'
+import { activateCyclableTab } from './ipc-tab-switch'
 import {
   buildRecentTabSwitcherModel,
   getNextRecentTabSwitcherIndex,

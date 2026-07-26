@@ -5,7 +5,10 @@ import {
   fileUriToFilesystemPath
 } from '@yiru/workbench-model/platform'
 
-import type { HttpLinkSourceOwner, OpenHttpLinkOptions } from '@/lib/http-link-routing'
+import type {
+  HttpLinkSourceOwner,
+  OpenHttpLinkOptions
+} from '@/components/editor/http-link-routing'
 
 function toFileUrl(filePath: string): string {
   return filesystemPathToFileUri(filePath)

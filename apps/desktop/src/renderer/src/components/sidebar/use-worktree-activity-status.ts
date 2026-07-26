@@ -5,12 +5,12 @@ import { resolveWorktreeStatus, type WorktreeStatus } from '@/lib/worktree-statu
 import { useAppStore } from '@/store'
 
 import { selectWorktreeAgentActivitySummary } from './worktree-agent-activity-summary'
-import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './worktree-card-helpers'
+import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './worktree-card/helpers'
 import {
   selectLivePtyIdsForWorktree,
   selectTerminalLayoutRootsForWorktree,
   selectRuntimePaneTitlesForWorktree
-} from './worktree-card-status-inputs'
+} from './worktree-card/status-inputs'
 
 export function useWorktreeActivityStatus(worktreeId: string): WorktreeStatus {
   const tabs = useAppStore((s) => s.tabsByWorktree[worktreeId] ?? EMPTY_TABS)

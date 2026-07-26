@@ -1,9 +1,9 @@
 import { useEffect, type RefObject } from 'react'
 
+import type { OpenFile } from '@/components/editor/state'
 import { detectLanguage } from '@/lib/language-detect'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { useAppStore } from '@/store'
-import type { OpenFile } from '@/store/slices/editor'
 
 import { canOpenMarkdownPreview, isMarkdownPreviewShortcut } from './markdown-preview-controls'
 

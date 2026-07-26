@@ -16,7 +16,7 @@ import { redactPtyIdForDiagnostics } from '../../../../shared/pty-delivery-diagn
  * output flows or while no PTY delivery is expected).
  */
 import type { PtyRendererDeliveryHealthReply } from '../../../../shared/pty-renderer-delivery-health'
-import { deliverPulledPtyModelRestoreMarkers } from './pty-model-restore-channel'
+import { deliverPulledPtyModelRestoreMarkers } from './pty/model-restore-channel'
 import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
 import { getProcessedPtyCharTotals } from './terminal-pty-ack-gate'
 

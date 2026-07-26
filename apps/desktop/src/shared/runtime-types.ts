@@ -9,7 +9,7 @@ import type {
   RuntimeMarkdownReadTabResult,
   RuntimeMarkdownSaveTabResult
 } from './mobile-markdown-document'
-import type { RemoteRuntimeSharedConnectionDiagnostics } from './remote-runtime-shared-control-types'
+import type { RemoteRuntimeSharedConnectionDiagnostics } from './remote-runtime/shared-control-types'
 import type { RemoteServerUpdateSupport } from './remote-server-update'
 import type {
   BaseRefSearchResult,

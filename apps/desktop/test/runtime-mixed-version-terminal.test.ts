@@ -18,7 +18,7 @@ import { YiruRuntimeService } from '../src/main/runtime/yiru-runtime'
 import {
   clearRuntimeCompatibilityCache,
   runtimeEnvironmentSupportsCapability
-} from '../src/renderer/src/runtime/runtime-environment-compatibility'
+} from '../src/renderer/src/runtime/environment-compatibility'
 
 type PtyController = NonNullable<Parameters<YiruRuntimeService['setPtyController']>[0]>
 

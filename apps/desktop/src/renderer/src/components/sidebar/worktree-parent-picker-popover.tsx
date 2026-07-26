@@ -3,7 +3,7 @@ import { GitMerge, HardDrives as Server } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
+import { RepoBadgeMark } from '@/components/repo/badge-label'
 import {
   Command,
   CommandEmpty,
@@ -18,7 +18,7 @@ import { useAllWorktrees, useRepoMap, useWorktreeMap } from '@/store/selectors'
 
 import type { Worktree } from '../../../../shared/types'
 import { WorktreeActivityStatusIndicator } from './worktree-activity-status-indicator'
-import { branchDisplayName } from './worktree-card-helpers'
+import { branchDisplayName } from './worktree-card/helpers'
 import { getEligibleWorktreeParents } from './worktree-parent-candidates'
 
 type WorktreeParentPickerPopoverProps = {

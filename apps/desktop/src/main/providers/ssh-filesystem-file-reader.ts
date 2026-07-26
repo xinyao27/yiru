@@ -1,5 +1,5 @@
-import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { isMethodNotFoundError, readFileViaStream } from '../ssh/ssh-filesystem-stream-reader'
+import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
+import { isMethodNotFoundError, readFileViaStream } from '../ssh/filesystem-stream-reader'
 import type { FileReadResult } from './types'
 
 const warnedLegacyRelays = new WeakSet<SshChannelMultiplexer>()

@@ -24,7 +24,7 @@ import {
 } from '../../../../shared/runtime-method-contracts/git-method-params'
 /* eslint-disable max-lines -- Why: this table is the runtime git RPC contract; splitting it would make method coverage harder to audit. */
 import { GIT_STATUS_CONTRACT } from '../../../../shared/runtime-method-contracts/source-control-contracts'
-import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control-ai'
+import type { ResolvedSourceControlAiGenerationParams } from '../../../../shared/source-control/ai'
 import type { GlobalSettings } from '../../../../shared/types'
 import { defineMethod, type RpcMethod } from '../core'
 

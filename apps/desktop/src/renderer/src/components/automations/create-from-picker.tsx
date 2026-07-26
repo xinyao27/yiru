@@ -14,11 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getRuntimeEnvironmentIdForRepo } from '@/lib/repo-runtime-owner'
-import {
-  getRuntimeRepoBaseRefDefault,
-  searchRuntimeRepoBaseRefs
-} from '@/runtime/runtime-repo-client'
-import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/runtime-repo-search-bounds'
+import { getRuntimeRepoBaseRefDefault, searchRuntimeRepoBaseRefs } from '@/runtime/repo-client'
+import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/repo-search-bounds'
 import { useAppStore } from '@/store'
 
 import type { Repo, Worktree } from '../../../../shared/types'

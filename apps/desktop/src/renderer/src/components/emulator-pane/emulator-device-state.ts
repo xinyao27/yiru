@@ -1,4 +1,4 @@
-import type { SimulatorDeviceRow } from './emulator-pane-types'
+import type { SimulatorDeviceRow } from './types'
 
 export function markSimulatorDeviceState(
   devices: SimulatorDeviceRow[],

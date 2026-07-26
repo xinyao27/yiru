@@ -1,4 +1,4 @@
-import type { ManagedPane, ManagedPaneInternal } from './pane-manager-types'
+import type { ManagedPane, ManagedPaneInternal } from './types'
 
 export function toPublicPane(pane: ManagedPaneInternal): ManagedPane {
   return {

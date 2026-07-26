@@ -1,6 +1,6 @@
 import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 
-// Mirrors the desktop AGENT_STATUS_STALE_AFTER_MS (src/shared/agent-status-types.ts:
+// Mirrors the desktop AGENT_STATUS_STALE_AFTER_MS (packages/workbench-model/src/agent-status-types.ts:
 // 30 min). Defined locally because Metro cannot resolve this desktop runtime value;
 // root type-only imports remain safe.
 export const AGENT_STATUS_STALE_AFTER_MS = 30 * 60 * 1000

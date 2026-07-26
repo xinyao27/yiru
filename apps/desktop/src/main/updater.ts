@@ -12,8 +12,8 @@ import type {
 import type { UpdateCheckOptions, UpdateStatus } from '../shared/types'
 import { writeMainThreadDiagnosticMarker } from './diagnostics/main-thread-churn-probe'
 import { loadElectronAutoUpdater, type ElectronAutoUpdater } from './electron-updater-loader'
-import { killAllPty } from './ipc/pty'
 import { withUpdaterSpan } from './observability/instrumentation'
+import { killAllPty } from './pty/pty'
 import { resolveRemoteServerUpdateSupport } from './remote-server-update-support'
 import {
   failServeUpdateHandoff,

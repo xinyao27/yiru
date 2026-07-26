@@ -6,13 +6,6 @@ import {
   readHooksJson,
   type HookDefinition
 } from '../agent-hooks/installer-utils'
-import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
-import {
-  CODEX_EVENT_NAME_BY_LABEL,
-  createCodexHookTrustEntry,
-  getCodexHookTrustSignature,
-  getCodexManagedScriptFileName
-} from './codex-hook-identity'
 import {
   codexHookSourcePathsEqual,
   getCodexExplicitHomeHookSourcePath,
@@ -23,6 +16,13 @@ import {
   upsertHookTrustEntries,
   type CodexTrustEntry
 } from './config-toml-trust'
+import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './home-paths'
+import {
+  CODEX_EVENT_NAME_BY_LABEL,
+  createCodexHookTrustEntry,
+  getCodexHookTrustSignature,
+  getCodexManagedScriptFileName
+} from './hook-identity'
 
 // Why: ~/.codex/config.toml is the single source of truth for user-hook
 // trust, but the Codex TUI can only write approvals into the runtime

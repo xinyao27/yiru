@@ -1,4 +1,4 @@
-import { isTuiAgent } from './tui-agent-config'
+import { isTuiAgent } from './tui-agent/config'
 import type { FolderWorkspace, FolderWorkspaceLinkedReview, ProjectGroup } from './types'
 
 export function normalizeFolderWorkspaceName(

@@ -1,4 +1,4 @@
-import { buildAutomationWorkspaceProvenance } from '../../shared/automation-workspace-provenance'
+import { buildAutomationWorkspaceProvenance } from '../../shared/automation/workspace-provenance'
 import type { Automation, AutomationRun } from '../../shared/automations-types'
 import type { Repo } from '../../shared/types'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'

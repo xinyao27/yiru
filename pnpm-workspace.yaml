@@ -166,6 +166,7 @@ catalogs:
   mobile:
     '@noble/hashes': 1.8.0
     '@react-native-async-storage/async-storage': 2.2.0
+    '@shopify/react-native-skia': 2.10.0
     '@types/react': 19.2.14
     '@types/ws': 8.18.1
     '@xterm/addon-unicode11': 0.10.0-beta.285
@@ -196,6 +197,7 @@ catalogs:
     expo-secure-store: 55.0.13
     expo-splash-screen: 55.0.20
     expo-status-bar: 55.0.6
+    expo-thinking-orbs: 0.1.0
     lowlight: 3.3.0
     react: 19.2.6
     react-dom: 19.2.6

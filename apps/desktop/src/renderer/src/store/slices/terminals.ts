@@ -12,34 +12,30 @@ import {
 /* eslint-disable max-lines */
 import type { StateCreator } from 'zustand'
 
-import { forgetAgentHibernationTabOutput } from '@/lib/agent-hibernation-output-activity'
-import { forgetAgentStartupDeliveriesForTabs } from '@/lib/agent-startup-delivery-guards'
-import { isClaudeAgent } from '@/lib/agent-status'
-import { createBrowserUuid } from '@/lib/browser-uuid'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { getFolderWorkspaceConnectionId } from '@/lib/folder-workspace-connection'
-import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
-import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
-import type { NativeChatLaunchPrompt } from '@/lib/native-chat-launch-prompt'
-import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
+import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
+import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
+import { hasWorktreeSleepIntent } from '@/components/sidebar/worktree-sleep-intent'
 import {
   normalizeTerminalLayoutSnapshot,
   resolvePtyBoundActiveLeafId
-} from '@/lib/terminal-layout-leaf-ids'
-import { sanitizeTerminalLayoutPaneTitles } from '@/lib/terminal-pane-title-sanitization'
+} from '@/components/terminal-pane/terminal-layout-leaf-ids'
+import { sanitizeTerminalLayoutPaneTitles } from '@/components/terminal-pane/title-sanitization'
+import { isClaudeAgent } from '@/lib/agent-status'
+import { createBrowserUuid } from '@/lib/browser-uuid'
+import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
+import { forgetForegroundTerminalTabs } from '@/lib/foreground-terminal-tabs'
+import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { classifyTitleActivity } from '@/lib/pane-agent-evidence'
 import {
   addAdditionalValidWorkspaceKeys,
   type WorkspaceSessionHydrationOptions
 } from '@/lib/workspace-session-hydration-keys'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { hasWorktreeSleepIntent } from '@/lib/worktree-sleep-intent'
 import {
   restorePtyDataHandlersAfterFailedShutdown,
   unregisterPtyDataHandlers
 } from '@/runtime/pty-handler-registry'
-import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
-import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '@/runtime/runtime-terminal-stream'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
 // Why: import the store-free registry, not terminal-parked-tab-watchers —
 // that module imports @/store, and a slice importing it would re-enter store
@@ -49,14 +45,16 @@ import {
   retireParkedTerminalTab
 } from '@/runtime/terminal-parked-watcher-registry'
 import { shutdownBufferCaptures } from '@/runtime/terminal-shutdown-buffer-captures'
+import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '@/runtime/terminal-stream'
 import {
   createWebSessionTerminalCommand,
   setWebSessionTabPropsCommand
 } from '@/runtime/web-session-commands'
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
+import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
-import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent-decorative-title-signature'
-import { deriveGeneratedTabTitle } from '../../../../shared/agent-tab-title'
+import { isDecorativeAgentTitleFrameChange } from '../../../../shared/agent/decorative-title-signature'
+import { deriveGeneratedTabTitle } from '../../../../shared/agent/tab-title'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import {
   DEFAULT_REPO_BADGE_COLOR,
@@ -69,7 +67,7 @@ import {
   parseLegacyNumericPaneKey,
   parsePaneKey
 } from '../../../../shared/stable-pane-id'
-import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../../../shared/terminal-tab-id'
+import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../../../shared/terminal/tab-id'
 import type {
   Repo,
   SetupSplitDirection,
@@ -85,7 +83,9 @@ import {
   folderWorkspaceKey,
   parseWorkspaceKey,
   worktreeWorkspaceKey
-} from '../../../../shared/workspace-scope'
+} from '../../../../shared/workspace/scope'
+import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
+import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
 import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
 import type { AppState } from '../types'
 import {

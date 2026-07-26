@@ -5,7 +5,7 @@ import {
   OptionalString,
   requiredString
 } from '../../../../shared/runtime-method-contracts/runtime-method-params'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import { defineMethod, type RpcMethod } from '../core'
 
 const FolderWorkspaceLinkedReview = z

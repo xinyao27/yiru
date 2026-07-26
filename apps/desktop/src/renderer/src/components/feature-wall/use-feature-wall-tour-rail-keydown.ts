@@ -8,7 +8,7 @@ import {
 import {
   getFeatureWallRailNavigationTarget,
   type FeatureWallRailNavigationKey
-} from './feature-wall-rail-navigation'
+} from './rail-navigation'
 
 const FEATURE_WALL_TOUR_NAVIGATION_KEYS = new Set<string>(['ArrowUp', 'ArrowDown', 'Home', 'End'])
 

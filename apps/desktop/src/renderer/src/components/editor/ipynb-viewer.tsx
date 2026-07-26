@@ -31,6 +31,14 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 
+import { resolveDocumentTheme } from '@/components/editor/document-theme'
+import {
+  resolveEditorFontFamily,
+  resolveEditorFontFamilyOrInherit
+} from '@/components/editor/font-family'
+import { computeEditorFontSize } from '@/components/editor/font-zoom'
+import { monaco, resolveCursorThemeName } from '@/components/editor/monaco-setup'
+import { scrollTopCache, setWithLRU } from '@/components/editor/scroll-cache'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
@@ -55,19 +63,8 @@ import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getConnectionId } from '@/lib/connection-context'
-import { resolveDocumentTheme } from '@/lib/document-theme'
-import { resolveEditorFontFamily, resolveEditorFontFamilyOrInherit } from '@/lib/editor-font-family'
-import { computeEditorFontSize } from '@/lib/editor-font-zoom'
-import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
-import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
 import { useAppStore } from '@/store'
 
-import { registerPendingEditorFlush } from './editor-pending-flush'
-import {
-  editorShortcutMatches,
-  installEditorSaveShortcut,
-  installMonacoEditorFindShortcut
-} from './editor-shortcuts'
 import { getIpynbCodeCellEditorHeight, getIpynbCodeCellPreviewLines } from './ipynb-code-cell-lines'
 import {
   deleteIpynbCell,
@@ -82,6 +79,12 @@ import {
   type IpynbOutputItem
 } from './ipynb-parse'
 import MonacoCodeExcerpt from './monaco-code-excerpt'
+import { registerPendingEditorFlush } from './pending-flush'
+import {
+  editorShortcutMatches,
+  installEditorSaveShortcut,
+  installMonacoEditorFindShortcut
+} from './shortcuts'
 
 type IpynbViewerProps = {
   content: string

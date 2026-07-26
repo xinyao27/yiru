@@ -20,7 +20,9 @@ const state = {
 }
 
 vi.mock('@/lib/connection-context', () => ({ getConnectionId: () => null }))
-vi.mock('@/lib/markdown-internal-links', () => ({ absolutePathToFileUri: (path: string) => path }))
+vi.mock('@/components/editor/markdown-internal-links', () => ({
+  absolutePathToFileUri: (path: string) => path
+}))
 vi.mock('@/lib/terminal-links', () => ({
   isPathInsideWorktree: (path: string, root: string) => path.startsWith(`${root}/`),
   toWorktreeRelativePath: (path: string, root: string) => path.slice(root.length + 1)
@@ -28,11 +30,11 @@ vi.mock('@/lib/terminal-links', () => ({
 vi.mock('@/lib/worktree-activation', () => ({
   activateAndRevealWorktree: mocks.activateAndRevealWorktree
 }))
-vi.mock('@/runtime/runtime-file-client', () => ({
+vi.mock('@/runtime/file-client', () => ({
   isRemoteRuntimeFileOperation: () => true,
   statRuntimePath: mocks.statRuntimePath
 }))
-vi.mock('@/runtime/runtime-rpc-client', () => ({ settingsForRuntimeOwner: () => ({}) }))
+vi.mock('@/runtime/rpc-client', () => ({ settingsForRuntimeOwner: () => ({}) }))
 vi.mock('@/store', () => ({ useAppStore: { getState: () => state } }))
 vi.mock('./terminal-worktree-path-link', () => ({ resolveKnownWorktreeRootPathLink: () => null }))
 

@@ -1,0 +1,241 @@
+/* ── Pane title bar ──────────────────────────────────────
+   Rendered by header-overlay.tsx. Colors are CSS custom properties, not
+   design tokens, because title contrast follows the terminal surface (the
+   user's xterm theme), not the app theme — see [data-pane-title-surface]. */
+
+[data-pane-title-surface] {
+  /* Why: title contrast follows the terminal surface, not the app theme, so
+     these values stay local to terminal chrome instead of becoming theme tokens. */
+  --yiru-pane-title-height: 24px;
+  --yiru-pane-title-fg: rgb(255 255 255 / 0.52);
+  --yiru-pane-title-input-fg: rgb(255 255 255 / 0.7);
+  --yiru-pane-title-placeholder: rgb(255 255 255 / 0.38);
+  --yiru-pane-title-button-fg: rgb(255 255 255);
+  --yiru-pane-title-button-hover-fg: rgb(255 255 255);
+  --yiru-pane-title-input-bg: rgb(255 255 255 / 0.04);
+  --yiru-pane-title-separator: rgb(255 255 255 / 0.06);
+}
+
+[data-pane-title-surface='light'] {
+  --yiru-pane-title-fg: rgb(24 24 27 / 0.64);
+  --yiru-pane-title-input-fg: rgb(24 24 27 / 0.82);
+  --yiru-pane-title-placeholder: rgb(24 24 27 / 0.48);
+  --yiru-pane-title-button-fg: rgb(24 24 27);
+  --yiru-pane-title-button-hover-fg: rgb(24 24 27);
+  --yiru-pane-title-input-bg: rgb(24 24 27 / 0.05);
+  --yiru-pane-title-separator: rgb(24 24 27 / 0.1);
+}
+
+/* Floating title overlay. The title owns the top strip of the pane, while titled
+   panes reserve matching terminal height so the first row remains visible. */
+.pane-title-overlay-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.pane-title-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--yiru-pane-title-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--yiru-pane-title-fg, rgb(255 255 255 / 0.52));
+  background: var(--yiru-pane-title-bg, #000);
+  border-bottom: 1px solid var(--yiru-pane-title-separator, rgb(255 255 255 / 0.06));
+  pointer-events: auto;
+  user-select: none;
+}
+
+.pane-title-drag-handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 32px;
+  height: var(--yiru-pane-title-height);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0;
+  background: color-mix(in srgb, var(--yiru-pane-title-fg) 36%, transparent);
+  transform: translateX(-50%);
+  transition: opacity 150ms ease;
+}
+
+.pane-title-drag-handle::after {
+  content: '...';
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--yiru-pane-title-button-hover-fg);
+}
+
+.pane-title-drag-handle:hover {
+  opacity: 1;
+}
+
+.pane-title-drag-handle:active {
+  cursor: grabbing;
+}
+
+.session-restored-banner {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  z-index: 5;
+  height: var(--yiru-pane-title-height);
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--yiru-pane-title-fg);
+  background: transparent;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pane-title-text {
+  align-self: stretch;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  line-height: var(--yiru-pane-title-height);
+}
+
+.pane-title-text:focus-visible {
+  background: var(--accent);
+}
+
+.pane-title-bar[data-chromeless] {
+  background: transparent;
+  border-bottom: none;
+  padding: 0 2px;
+  pointer-events: none;
+}
+
+.pane-title-bar[data-chromeless] .pane-title-actions {
+  pointer-events: auto;
+}
+
+.pane-title-bar[data-chromeless] .pane-title-split-trigger,
+.pane-title-bar[data-chromeless] .pane-title-close {
+  position: relative;
+  width: 18px;
+  min-width: 18px;
+  height: var(--yiru-pane-title-height);
+  padding: 0;
+}
+
+.pane-title-bar[data-chromeless] .pane-title-close {
+  margin-left: -1px;
+}
+
+.pane-title-close {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--yiru-pane-title-button-fg, rgb(255 255 255 / 0.3));
+  background: var(--yiru-pane-title-bg, var(--background));
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    color 120ms ease;
+}
+
+.pane-title-actions {
+  position: relative;
+  z-index: 3;
+}
+
+.pane-title-split-trigger {
+  color: var(--yiru-pane-title-button-fg, rgb(255 255 255 / 0.3));
+  background: var(--yiru-pane-title-bg, var(--background));
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.pane-title-bar[data-chromeless] .pane-title-split-trigger svg,
+.pane-title-bar[data-chromeless] .pane-title-close svg {
+  /* Why: chromeless controls overlap terminal text, so their glyphs need a
+     heavier stroke to remain legible without a backing glow. */
+  stroke-width: 2.75px;
+}
+
+.pane-title-bar[data-active-pane] .pane-title-split-trigger,
+.pane-title-bar[data-active-pane] .pane-title-close,
+.pane-title-bar:hover .pane-title-split-trigger,
+.pane-title-bar:focus-within .pane-title-split-trigger {
+  opacity: 1;
+}
+
+.pane-title-bar:hover .pane-title-close,
+.pane-title-bar:focus-within .pane-title-close,
+.pane-title-close:focus-visible {
+  opacity: 1;
+}
+
+.pane-title-close:hover,
+.pane-title-close:active,
+.pane-title-close[data-state='delayed-open'],
+.pane-title-close[data-state='instant-open'],
+.pane-title-split-trigger:hover,
+.pane-title-split-trigger:active,
+.pane-title-split-trigger[data-state='delayed-open'],
+.pane-title-split-trigger[data-state='instant-open'] {
+  background: var(--accent);
+  color: var(--yiru-pane-title-button-hover-fg, rgb(255 255 255 / 0.8));
+}
+
+/* Inline edit input — matches the title text styling exactly to prevent
+   layout shift. A subtle bottom border indicates active edit mode. */
+/* When inline-editing, remove the bar's side padding so the input
+   stretches edge-to-edge; the input carries its own left padding. */
+.pane-title-bar[data-editing] {
+  padding: 0;
+}
+
+.pane-title-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: var(--yiru-pane-title-height);
+  box-sizing: border-box;
+  padding: 0 8px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: var(--yiru-pane-title-input-bg, rgb(255 255 255 / 0.04));
+  outline: none;
+  font-size: 13px;
+  line-height: 20px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  color: var(--yiru-pane-title-input-fg, rgb(255 255 255 / 0.7));
+  caret-color: var(--yiru-pane-title-input-fg, rgb(255 255 255 / 0.7));
+}
+
+.pane-title-input::placeholder {
+  color: var(--yiru-pane-title-placeholder, rgb(255 255 255 / 0.38));
+}
+
+.pane-title-input:focus-visible {
+  border-color: var(--ring);
+}

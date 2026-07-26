@@ -593,7 +593,7 @@ State and host identity:
 Renderer and UX:
 
 - The ~13 setting/feature surfaces that today print raw `npx skills ...` strings from
-  `src/shared/agent-feature-install-commands.ts` (CliSection, OrchestrationPane, BrowserUsePane,
+  `src/shared/agent/feature-install-commands.ts` (CliSection, OrchestrationPane, BrowserUsePane,
   EphemeralVmsPane, ComputerUseSkillSetupPanel, the emulator CTAs, and the feature-wall /
   feature-tip cards) become ledger-state rows with adoption/update actions.
 - `src/renderer/src/hooks/use-installed-agent-skills.ts` — `notifyInstalledAgentSkillsChanged()` is

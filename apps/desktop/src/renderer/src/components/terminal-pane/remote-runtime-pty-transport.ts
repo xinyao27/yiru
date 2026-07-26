@@ -15,25 +15,25 @@ import type {
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
-} from '../../../../shared/terminal-input'
+} from '../../../../shared/terminal/input'
 import {
   getRemoteRuntimeTerminalMultiplexer,
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,
   type RemoteRuntimeMultiplexedTerminal
 } from '../../runtime/remote-runtime-terminal-multiplexer'
-import { unwrapRuntimeRpcResult } from '../../runtime/runtime-rpc-client'
+import { unwrapRuntimeRpcResult } from '../../runtime/rpc-client'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle,
   runtimeTerminalErrorMessage,
   toRemoteRuntimePtyId
-} from '../../runtime/runtime-terminal-stream'
+} from '../../runtime/terminal-stream'
 import {
   toRuntimeTerminalWorktreeSelector,
   toRuntimeWorktreeSelector
-} from '../../runtime/runtime-worktree-selector'
-import { createPtyOutputProcessor } from './pty-transport'
-import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty-transport-types'
+} from '../../runtime/worktree-selector'
+import { createPtyOutputProcessor } from './pty/transport'
+import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty/transport-types'
 import {
   createRemoteRuntimePtyTextBatcher,
   createRemoteRuntimeViewportBatcher

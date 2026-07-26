@@ -15,7 +15,7 @@ import {
   type TerminalQuickCommandMutation
 } from '@yiru/workbench-model/ui'
 
-import { MOBILE_TUI_AGENT_LABELS } from '../workspace-create/mobile-tui-agents'
+import { MOBILE_TUI_AGENT_LABELS } from '../workspace-create/tui-agents'
 
 export {
   applyTerminalQuickCommandMutation,

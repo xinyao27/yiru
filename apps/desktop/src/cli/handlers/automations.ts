@@ -1,8 +1,8 @@
 import {
   DEFAULT_AUTOMATION_PRECHECK_TIMEOUT_SECONDS,
   MAX_AUTOMATION_PRECHECK_TIMEOUT_SECONDS
-} from '../../shared/automation-precheck'
-import { buildAutomationRrule, isValidAutomationSchedule } from '../../shared/automation-schedules'
+} from '../../shared/automation/precheck'
+import { buildAutomationRrule, isValidAutomationSchedule } from '../../shared/automation/schedules'
 /* eslint-disable max-lines -- Why: automation handlers share schedule parsing, target resolution, and RPC payload shaping for one command family. */
 import type {
   Automation,
@@ -18,7 +18,7 @@ import {
   type ProjectSourceContext,
   type WorkspaceRunContext
 } from '../../shared/project-source-context'
-import { isTuiAgent } from '../../shared/tui-agent-config'
+import { isTuiAgent } from '../../shared/tui-agent/config'
 import type { ProjectHostSetup, TuiAgent } from '../../shared/types'
 import type { CommandHandler } from '../dispatch'
 import {

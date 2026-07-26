@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 import { workspaceSourceSchema } from '../telemetry-events'
-import { isTuiAgent } from '../tui-agent-config'
+import { isTuiAgent } from '../tui-agent/config'
 import type { TuiAgent } from '../types'
-import { sleepingAgentLaunchConfigSchema } from '../workspace-session-sleeping-agents'
+import { sleepingAgentLaunchConfigSchema } from '../workspace/session-sleeping-agents'
 import {
   OptionalBoolean,
   OptionalFiniteNumber,

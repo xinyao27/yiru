@@ -6,6 +6,8 @@ import { cn } from '@/lib/class-names'
 
 import type { AgentKey, AgentRowState } from './orchestration-types'
 
+import './orchestration.css'
+
 export function WorkspaceCard(props: {
   variant: 'coordinator' | 'default'
   name: string

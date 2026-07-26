@@ -3,7 +3,7 @@ import { join } from 'node:path'
 
 import { app } from 'electron'
 
-import { getVersionManagerBinPaths } from '../codex-cli/command'
+import { getVersionManagerBinPaths } from '../codex/cli/command'
 
 const DEV_PARENT_SHUTDOWN_GRACE_MS = 3000
 const HTTP1_COMPATIBILITY_ENV_VAR = 'YIRU_DISABLE_HTTP2'

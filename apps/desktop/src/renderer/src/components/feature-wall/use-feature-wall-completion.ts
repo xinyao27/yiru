@@ -8,7 +8,7 @@ import {
   getCommitMessageAgentCapability,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from '../../../../shared/commit-message-agent-spec'
+} from '../../../../shared/commit-message/agent-spec'
 import type { FeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
 import type { FeatureWallWorkflowId } from '../../../../shared/feature-wall-workflows'
 import type { ReviewStepId } from '../../../../shared/review-steps'
@@ -18,8 +18,8 @@ import {
   FEATURE_WALL_REVIEW_STEP_IDS,
   FEATURE_WALL_WORKBENCH_STEP_IDS,
   getFeatureWallCompletionProgress
-} from './feature-wall-completion-progress'
-import { hasFeatureWallUsageTracking } from './feature-wall-usage-tracking'
+} from './completion-progress'
+import { hasFeatureWallUsageTracking } from './usage-tracking'
 import { useFeatureWallSessionDepth } from './use-feature-wall-session-depth'
 import { usePersistedFeatureWallCompletion } from './use-persisted-feature-wall-completion'
 

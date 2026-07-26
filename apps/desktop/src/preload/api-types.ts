@@ -18,10 +18,10 @@ import type {
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
-import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
+import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
+import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
-import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser-annotation-viewport-bridge'
+import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser/annotation-viewport-bridge'
 import type {
   BrowserSetGrabModeArgs,
   BrowserSetGrabModeResult,
@@ -32,7 +32,7 @@ import type {
   BrowserCaptureSelectionScreenshotResult,
   BrowserExtractHoverArgs,
   BrowserExtractHoverResult
-} from '../shared/browser-grab-types'
+} from '../shared/browser/grab-types'
 import type {
   BrowserContextMenuDismissedEvent,
   BrowserContextMenuRequestedEvent,
@@ -41,13 +41,31 @@ import type {
   BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '../shared/browser-guest-events'
+} from '../shared/browser/guest-events'
 import type { CliInstallStatus } from '../shared/cli-install-types'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '../shared/commit-message-agent-spec'
+} from '../shared/commit-message/agent-spec'
+import type {
+  CoworkingDecideControlArgs,
+  CoworkingRequestControlArgs,
+  CoworkingRequesterInvokeArgs,
+  CoworkingRequesterSubscriptionArgs,
+  CoworkingRequesterSubscriptionEvent,
+  CoworkingRequesterSubscriptionStartResult,
+  CoworkingRequesterSubscriptionStopArgs,
+  CoworkingRequesterSubscriptionStopResult,
+  CoworkingRevokeControlArgs,
+  CoworkingSetProjectVisibilityArgs,
+  CoworkingSetWorktreeVisibilityArgs,
+  CoworkingSharingSnapshot
+} from '../shared/coworking/ipc-contract'
+import type {
+  CoworkingWindowsFirewallRepairResult,
+  CoworkingWindowsFirewallStatus
+} from '../shared/coworking/windows-firewall-contract'
 import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
@@ -60,15 +78,15 @@ import type {
 import type {
   EphemeralVmRecipeDoctorResult,
   EphemeralVmRecipeResultWarning
-} from '../shared/ephemeral-vm-recipes'
-import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm-runtimes'
+} from '../shared/ephemeral-vm/recipes'
+import type { EphemeralVmRuntimeRecord } from '../shared/ephemeral-vm/runtimes'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { FeatureInteractionId } from '../shared/feature-interactions'
 import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
 } from '../shared/folder-workspace-path-status'
-import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
+import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
 import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type {
   LanguageServerDocumentUriArgs,
@@ -112,7 +130,7 @@ import type {
   RuntimeTerminalDriverState,
   RuntimeTerminalPresentation
 } from '../shared/runtime-types'
-import type { SetupScriptImportCandidate } from '../shared/setup-script-imports'
+import type { SetupScriptImportCandidate } from '../shared/setup/script-imports'
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
@@ -120,36 +138,18 @@ import type {
 } from '../shared/shell-open-types'
 import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
-import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control-ai'
-import type { SourceControlAiSettings } from '../shared/source-control-ai-types'
-import type {
-  SpoolDecideControlArgs,
-  SpoolRequestControlArgs,
-  SpoolRequesterInvokeArgs,
-  SpoolRequesterSubscriptionArgs,
-  SpoolRequesterSubscriptionEvent,
-  SpoolRequesterSubscriptionStartResult,
-  SpoolRequesterSubscriptionStopArgs,
-  SpoolRequesterSubscriptionStopResult,
-  SpoolRevokeControlArgs,
-  SpoolSetProjectVisibilityArgs,
-  SpoolSetWorktreeVisibilityArgs,
-  SpoolSharingSnapshot
-} from '../shared/spool/spool-ipc-contract'
-import type {
-  SpoolWindowsFirewallRepairResult,
-  SpoolWindowsFirewallStatus
-} from '../shared/spool/spool-windows-firewall-contract'
+import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/ai'
+import type { SourceControlAiSettings } from '../shared/source-control/ai-types'
 import type {
   WarpThemeImportPreview,
   WarpThemeImportSource
-} from '../shared/terminal-custom-themes'
-import type { TerminalSideEffectBatch } from '../shared/terminal-side-effect-facts'
+} from '../shared/terminal/custom-themes'
+import type { TerminalSideEffectBatch } from '../shared/terminal/side-effect-facts'
 import type {
   TerminalTabCloseRequest,
   TerminalTabCloseResponse
-} from '../shared/terminal-tab-close'
-import type { TerminalViewAttributes } from '../shared/terminal-view-attributes'
+} from '../shared/terminal/tab-close'
+import type { TerminalViewAttributes } from '../shared/terminal/view-attributes'
 import type {
   BaseRefDefaultResult,
   BaseRefSearchResult,
@@ -404,18 +404,18 @@ import type {
   WorkspaceCleanupScanArgs,
   WorkspaceCleanupScanProgress,
   WorkspaceCleanupScanResult
-} from '../shared/workspace-cleanup'
+} from '../shared/workspace/cleanup'
 import type {
   WorkspacePortAdvertisedUrlChangedEvent,
   WorkspacePortKillRequest,
   WorkspacePortKillResult,
   WorkspacePortScanRequest,
   WorkspacePortScanResult
-} from '../shared/workspace-ports'
+} from '../shared/workspace/ports'
 import type {
   WorkspaceSpaceAnalyzeResult,
   WorkspaceSpaceScanProgress
-} from '../shared/workspace-space-types'
+} from '../shared/workspace/space-types'
 
 type GitLabRepoSelectorArgs = {
   repoPath: string
@@ -2738,25 +2738,27 @@ export type PreloadApi = {
     refreshGrok: () => Promise<RateLimitState>
     onUpdate: (callback: (state: RateLimitState) => void) => () => void
   }
-  spoolSharing: {
-    getSnapshot: () => Promise<SpoolSharingSnapshot>
-    setWorktreeVisibility: (args: SpoolSetWorktreeVisibilityArgs) => Promise<void>
-    setProjectVisibility: (args: SpoolSetProjectVisibilityArgs) => Promise<void>
-    requestControl: (args: SpoolRequestControlArgs) => Promise<void>
-    decideControl: (args: SpoolDecideControlArgs) => Promise<void>
-    revokeControl: (args: SpoolRevokeControlArgs) => Promise<void>
-    getWindowsFirewallStatus: () => Promise<SpoolWindowsFirewallStatus>
-    repairWindowsFirewall: () => Promise<SpoolWindowsFirewallRepairResult>
+  coworkingSharing: {
+    getSnapshot: () => Promise<CoworkingSharingSnapshot>
+    setWorktreeVisibility: (args: CoworkingSetWorktreeVisibilityArgs) => Promise<void>
+    setProjectVisibility: (args: CoworkingSetProjectVisibilityArgs) => Promise<void>
+    requestControl: (args: CoworkingRequestControlArgs) => Promise<void>
+    decideControl: (args: CoworkingDecideControlArgs) => Promise<void>
+    revokeControl: (args: CoworkingRevokeControlArgs) => Promise<void>
+    getWindowsFirewallStatus: () => Promise<CoworkingWindowsFirewallStatus>
+    repairWindowsFirewall: () => Promise<CoworkingWindowsFirewallRepairResult>
     retryAvailability: () => Promise<void>
-    invoke: (args: SpoolRequesterInvokeArgs) => Promise<unknown>
+    invoke: (args: CoworkingRequesterInvokeArgs) => Promise<unknown>
     startSubscription: (
-      args: SpoolRequesterSubscriptionArgs
-    ) => Promise<SpoolRequesterSubscriptionStartResult>
+      args: CoworkingRequesterSubscriptionArgs
+    ) => Promise<CoworkingRequesterSubscriptionStartResult>
     stopSubscription: (
-      args: SpoolRequesterSubscriptionStopArgs
-    ) => Promise<SpoolRequesterSubscriptionStopResult>
-    onSubscriptionEvent: (callback: (event: SpoolRequesterSubscriptionEvent) => void) => () => void
-    onChanged: (callback: (snapshot: SpoolSharingSnapshot) => void) => () => void
+      args: CoworkingRequesterSubscriptionStopArgs
+    ) => Promise<CoworkingRequesterSubscriptionStopResult>
+    onSubscriptionEvent: (
+      callback: (event: CoworkingRequesterSubscriptionEvent) => void
+    ) => () => void
+    onChanged: (callback: (snapshot: CoworkingSharingSnapshot) => void) => () => void
   }
   minimaxCredentials: {
     getStatus: () => Promise<{ configured: boolean }>
