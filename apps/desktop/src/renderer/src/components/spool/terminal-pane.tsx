@@ -4,6 +4,12 @@ import type React from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+// Why: this file owns its own xterm.js instance (mirroring the pane-manager
+// one instead of reusing it) and renders `.xterm-container`, so it needs
+// xterm's vendor stylesheet plus the vendor-patch overrides directly — the
+// Spool workspace is its own lazy() chunk that never imports terminal-pane.tsx.
+import '@xterm/xterm/css/xterm.css'
+import '@/components/terminal-pane/terminal.css'
 import { selectSpoolCanControl } from '@/components/spool/selectors'
 import { buildFontFamily } from '@/components/terminal-pane/layout-serialization'
 import { composeActiveTerminalTheme } from '@/components/terminal-pane/terminal-appearance'

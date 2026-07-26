@@ -7,6 +7,11 @@ import {
 } from '@phosphor-icons/react'
 import type { CSSProperties, RefObject } from 'react'
 
+// Why: this file is the only place that renders `.pane-title-bar` /
+// `.pane-title-overlay-layer` / `[data-pane-title-surface]`, and it is only
+// reachable through the terminal-pane lazy chunk — keeping the stylesheet
+// here instead of main.css keeps title-bar chrome out of eager first-paint CSS.
+import './pane-title.css'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

@@ -28,8 +28,13 @@
    anti-aliases into a faint 1px line above/below the themed .xterm. Match
    xterm's own selector so this also covers terminals mounted outside the pane
    manager, and let the themed .xterm background show through; the viewport
-   reuses the canonical editor scrollbar rules in main.css. */
-.xterm:not(.allow-transparency) .xterm-viewport {
+   reuses the canonical editor scrollbar rules in main.css.
+   Why the doubled `.xterm-viewport`: this now ships in a lazy CSS chunk that
+   can load after xterm.css in the cascade instead of always after it like it
+   did as a `main.css` `@import`. The doubled class keeps this selector one
+   step more specific than xterm.css's identical selector so the override
+   wins on specificity, not on load order. */
+.xterm:not(.allow-transparency) .xterm-viewport.xterm-viewport {
   background-color: transparent;
 }
 

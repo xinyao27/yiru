@@ -35,6 +35,13 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
 
+// Why: this component is the only lazy() boundary (content.tsx's
+// `MarkdownPreview`) that mounts rehype-highlight's `.hljs-*` tree, the
+// `.markdown-annotation-card` review states, and rehype-katex's rendered
+// math, so their stylesheets ship in this chunk instead of main.css.
+import './markdown.css'
+import './markdown-review.css'
+import 'katex/dist/katex.min.css'
 import { createConnectionIdForFileSelector } from '@/components/editor/connection-owner-resolution'
 import { isMarkdownComment } from '@/components/editor/diff-comment-compat'
 import { computeEditorFontSize } from '@/components/editor/font-zoom'

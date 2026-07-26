@@ -11,6 +11,13 @@ import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useShallow } from 'zustand/react/shallow'
 
+// Why: this component is the shared entry every lazy() boundary that mounts a
+// real terminal goes through (terminal-workspace panel, floating-terminal
+// panel, onboarding's inline command terminal) — none of them are eager, so
+// xterm's vendor stylesheet and our vendor-patch overrides only ship in that
+// shared lazy chunk instead of the app's eager first-paint CSS.
+import '@xterm/xterm/css/xterm.css'
+import './terminal.css'
 import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
 import { useLinkRoutingPreferenceDialog } from '@/components/link-routing-preference-dialog'
 import { DaemonActionDialog, useDaemonActions } from '@/components/shared/use-daemon-actions'

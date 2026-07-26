@@ -1,14 +1,14 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '@xterm/xterm/css/xterm.css';
-@import 'katex/dist/katex.min.css';
-@import '../components/editor/markdown.css';
+/* Why: markdown-body.css uses `@layer components`, which Tailwind v4 can only
+   resolve inside a CSS entry that has the `@import 'tailwindcss'` context
+   above — it must stay a global @import, not a lazy-chunk side-effect import.
+   xterm.css, katex.css, and the other colocated feature stylesheets that used
+   to live here (markdown.css, markdown-review.css, rich-markdown-content.css,
+   pane-manager.css, terminal.css, pane-title.css) moved to side-effect
+   imports at their owning lazy-loaded component/module so they ship in that
+   feature's chunk instead of this eager first-paint stylesheet. */
 @import '../components/editor/markdown-body.css';
-@import '../components/editor/markdown-review.css';
-@import '../components/editor/rich-markdown-content.css';
-@import '../lib/pane-manager/pane-manager.css';
-@import '../components/terminal-pane/terminal.css';
-@import '../components/terminal-pane/pane-title.css';
 
 @font-face {
   font-family: 'Geist';

@@ -1,6 +1,11 @@
 import { useEditorState, type Editor } from '@tiptap/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+// Why: this module is the RichMarkdownEditor lazy chunk's entry — Tiptap
+// renders its markdown content into DOM it owns (headings, lists, tables,
+// syntax-highlight spans) that has no JSX to carry a Tailwind className, so
+// those rules stay real CSS here instead of the app's eager main.css.
+import './rich-markdown-content.css'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 

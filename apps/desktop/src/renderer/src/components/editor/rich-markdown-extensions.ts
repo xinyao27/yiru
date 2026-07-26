@@ -15,6 +15,12 @@ import { Markdown } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
 import { createLowlight, common } from 'lowlight'
 
+// Why: `@tiptap/extension-mathematics` renders BlockMath/InlineMath through
+// the `katex` package, which needs its stylesheet for the rendered `.katex`
+// markup. This module (via markdown-round-trip.ts and the rich-markdown
+// editor instance) is only reachable through the editor's lazy chunks, so
+// the CSS ships there instead of the app's eager main.css.
+import 'katex/dist/katex.min.css'
 import type { RuntimeFileOperationArgs } from '@/runtime/file-client'
 
 import { DragSelectionGuard } from './drag-selection-guard'
