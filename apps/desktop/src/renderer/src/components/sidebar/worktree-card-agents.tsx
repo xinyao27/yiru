@@ -335,9 +335,13 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
           // disclosure stripe below it. Variant B in the mockups.
           childAgentCount={hasChildAgents ? childAgents.length : undefined}
           childAgentsExpanded={expanded}
-          onToggleChildAgents={
-            hasChildAgents ? () => toggleLineageParent(agent.paneKey) : undefined
-          }
+          // Why: toggleLineageParent is already a stable useCallback that
+          // takes the paneKey as an argument, so every row shares this one
+          // reference instead of building its own closure — a fresh closure
+          // here would rebuild this React.memo row on every render while an
+          // agent's status streams in.
+          onToggleChildAgents={hasChildAgents ? toggleLineageParent : undefined}
+          childAgentsToggleKey={hasChildAgents ? agent.paneKey : undefined}
           // Why: keep leaf rows aligned with parent rows in the same card —
           // see anyRootHasChildren above.
           reserveDisclosureGutter={isRootAgent && anyRootHasChildren && !hasChildAgents}
@@ -395,9 +399,12 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
           onSendTargetClick={isAgentSendTargetModeActive ? handleSendTargetClick : undefined}
           childAgentCount={hasChildAgents ? childAgents.length : undefined}
           childAgentsExpanded={expanded}
-          onToggleChildAgents={
-            hasChildAgents ? () => toggleLineageParent(agent.paneKey) : undefined
-          }
+          // Why: same stable-reference rationale as the full-row branch above
+          // — toggleLineageParent takes paneKey as a parameter so the compact
+          // row shares one callback reference instead of rebuilding a closure
+          // per row on every streaming status update.
+          onToggleChildAgents={hasChildAgents ? toggleLineageParent : undefined}
+          childAgentsToggleKey={hasChildAgents ? agent.paneKey : undefined}
           reserveDisclosureGutter={isRootAgent && anyRootHasChildren && !hasChildAgents}
           isFocusedPane={agent.paneKey === focusedAgentPaneKey}
           cacheTimerActive={cacheTimerActive}

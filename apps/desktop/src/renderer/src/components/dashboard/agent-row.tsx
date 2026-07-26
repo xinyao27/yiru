@@ -126,7 +126,12 @@ type Props = {
   // Why: inline-card orchestration rows fold children under a leading chevron.
   childAgentCount?: number
   childAgentsExpanded?: boolean
-  onToggleChildAgents?: () => void
+  // Why: takes the paneKey as an argument instead of being a per-row closure
+  // over it, so WorktreeCardAgentsBody can hand every row the same memoized
+  // callback — a fresh closure here would rebuild this React.memo row every
+  // time an agent's status streams in.
+  onToggleChildAgents?: (paneKey: string) => void
+  childAgentsToggleKey?: string
   // Why: leaf siblings reserve the chevron gutter so state dots align.
   reserveDisclosureGutter?: boolean
   // Why: chevron indentation replaces fixed-offset lineage connector art.
@@ -151,6 +156,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
   childAgentCount,
   childAgentsExpanded = false,
   onToggleChildAgents,
+  childAgentsToggleKey,
   reserveDisclosureGutter = false,
   hideLineageConnectors = false,
   sendTargetStatus,
@@ -165,6 +171,16 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
   const handleToggleExpanded = useCallback(() => {
     setExpanded((prev) => !prev)
   }, [])
+  // Why: onToggleChildAgents is stable and childAgentsToggleKey is a
+  // primitive, so this stays referentially stable across renders — matching
+  // this component's React.memo wrapper instead of silently defeating it with
+  // a new closure.
+  const handleToggleChildAgents = useCallback(() => {
+    if (childAgentsToggleKey === undefined) {
+      return
+    }
+    onToggleChildAgents?.(childAgentsToggleKey)
+  }, [childAgentsToggleKey, onToggleChildAgents])
   // Why: agent rows navigate directly to the agent's own tab, while the
   // surrounding worktree card navigates to whatever tab the worktree last had
   // focused. Stop propagation so the card click handler does not run second
@@ -322,7 +338,7 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
         <DashboardAgentChildDisclosure
           childAgentCount={childAgentCount}
           childAgentsExpanded={childAgentsExpanded}
-          onToggleChildAgents={onToggleChildAgents}
+          onToggleChildAgents={onToggleChildAgents ? handleToggleChildAgents : undefined}
           reserveDisclosureGutter={reserveDisclosureGutter}
         />
         {/* Why: state indicator lives in the leading gutter so the user's

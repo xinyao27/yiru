@@ -109,7 +109,12 @@ type CompactAgentRowProps = {
   onSendTargetClick?: (paneKey: string) => void
   childAgentCount?: number
   childAgentsExpanded?: boolean
-  onToggleChildAgents?: () => void
+  // Why: takes the paneKey as an argument instead of being a per-row closure
+  // over it, so WorktreeCardAgentsBody can hand every row the same memoized
+  // callback — a fresh closure here would rebuild this React.memo row every
+  // time an agent's status streams in.
+  onToggleChildAgents?: (paneKey: string) => void
+  childAgentsToggleKey?: string
   reserveDisclosureGutter?: boolean
   isFocusedPane?: boolean
   hideIdentityIcon?: boolean
@@ -126,6 +131,7 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
   childAgentCount,
   childAgentsExpanded = false,
   onToggleChildAgents,
+  childAgentsToggleKey,
   reserveDisclosureGutter = false,
   isFocusedPane = false,
   hideIdentityIcon = false,
@@ -176,13 +182,20 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
     },
     [agent.paneKey, onSendTargetClick, sendTargetStatus]
   )
+  // Why: onToggleChildAgents is stable and childAgentsToggleKey is a
+  // primitive, so this stays referentially stable across renders — matching
+  // this component's React.memo wrapper instead of silently defeating it with
+  // a new closure.
   const handleToggleChildren = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
       e.stopPropagation()
-      onToggleChildAgents?.()
+      if (childAgentsToggleKey === undefined) {
+        return
+      }
+      onToggleChildAgents?.(childAgentsToggleKey)
     },
-    [onToggleChildAgents]
+    [childAgentsToggleKey, onToggleChildAgents]
   )
 
   const rowBody = (

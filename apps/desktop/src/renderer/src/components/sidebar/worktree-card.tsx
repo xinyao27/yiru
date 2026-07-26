@@ -104,7 +104,11 @@ type WorktreeCardProps = {
   lineageCollapsed?: boolean
   lineageChildren?: React.ReactNode
   lineageChildrenStyle?: React.CSSProperties
-  onLineageToggle?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  // Why: takes the group key as an argument instead of being a per-row closure
+  // over it, so WorktreeList can hand every card the same memoized callback —
+  // a fresh closure here would rebuild this React.memo card on every render.
+  onLineageToggle?: (groupKey: string, event: React.MouseEvent<HTMLButtonElement>) => void
+  lineageToggleGroupKey?: string
   isLineageDropTarget?: boolean
   onActivate?: () => void
   onImmediateActivate?: (worktreeId: string, rowKey: string | undefined) => void
@@ -213,6 +217,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
   lineageChildren,
   lineageChildrenStyle,
   onLineageToggle,
+  lineageToggleGroupKey,
   isLineageDropTarget = false,
   affiliateListMode = false,
   statusPrDisplay = null,
@@ -764,6 +769,18 @@ const WorktreeCard = React.memo(function WorktreeCard({
       : translate('auto.components.sidebar.WorktreeList.045a8aed48', 'children')
   }`
   const showLineageChildChip = lineageChildCount > 0 && onLineageToggle !== undefined
+  // Why: onLineageToggle is stable and lineageToggleGroupKey is a primitive, so
+  // this stays referentially stable across renders — matching this component's
+  // React.memo wrapper instead of silently defeating it with a new closure.
+  const handleLineageToggleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (lineageToggleGroupKey === undefined) {
+        return
+      }
+      onLineageToggle?.(lineageToggleGroupKey, event)
+    },
+    [lineageToggleGroupKey, onLineageToggle]
+  )
 
   const handleDragStart = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -1319,7 +1336,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     className="border-border hover:text-foreground relative z-10 h-[18px] max-w-[8rem] border px-1.5 text-[10px] leading-none"
                     aria-label={lineageChildAriaLabel}
                     aria-expanded={!lineageCollapsed}
-                    onClick={onLineageToggle}
+                    onClick={handleLineageToggleClick}
                   >
                     <Workflow weight="regular" className="size-2.5" />
                     <span className="truncate">{childWorkspaceShortLabel}</span>

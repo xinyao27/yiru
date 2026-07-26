@@ -100,13 +100,14 @@ export default function FolderWorkspaceWorktreesPanel(): React.JSX.Element {
         }
         onLineageToggle={
           hasSafeLineageChildren
-            ? (event) => {
+            ? (_groupKey, event) => {
                 event.preventDefault()
                 event.stopPropagation()
                 toggleLineage(worktree.id)
               }
             : undefined
         }
+        lineageToggleGroupKey={hasSafeLineageChildren ? worktree.id : undefined}
       />
     )
   }

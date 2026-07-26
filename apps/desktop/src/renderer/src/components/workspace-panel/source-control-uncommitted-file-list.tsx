@@ -85,12 +85,7 @@ export function SourceControlUncommittedFileList({
               />
             )
           }
-          const expansion = isExpandableSubmoduleEntry(node.entry)
-            ? {
-                isExpanded: expandedSubmoduleKeys.has(getSubmoduleExpansionKey(node.entry)),
-                onToggle: () => toggleSubmodule(node.entry)
-              }
-            : undefined
+          const isSubmoduleExpandable = isExpandableSubmoduleEntry(node.entry)
           return (
             <UncommittedEntryRow
               key={node.key}
@@ -111,7 +106,12 @@ export function SourceControlUncommittedFileList({
               onDiscard={requestDiscardEntry}
               commentCount={diffCommentCountByPath.get(node.entry.path) ?? 0}
               showPathHint={false}
-              submoduleExpansion={expansion}
+              isSubmoduleExpanded={
+                isSubmoduleExpandable
+                  ? expandedSubmoduleKeys.has(getSubmoduleExpansionKey(node.entry))
+                  : undefined
+              }
+              onToggleSubmodule={isSubmoduleExpandable ? toggleSubmodule : undefined}
             />
           )
         }}
@@ -139,12 +139,7 @@ export function SourceControlUncommittedFileList({
         }
         const entry = row.entry
         const key = `${entry.area}::${entry.path}`
-        const expansion = isExpandableSubmoduleEntry(entry)
-          ? {
-              isExpanded: expandedSubmoduleKeys.has(getSubmoduleExpansionKey(entry)),
-              onToggle: () => toggleSubmodule(entry)
-            }
-          : undefined
+        const isSubmoduleExpandable = isExpandableSubmoduleEntry(entry)
         return (
           <UncommittedEntryRow
             key={key}
@@ -164,7 +159,12 @@ export function SourceControlUncommittedFileList({
             onUnstage={handleUnstage}
             onDiscard={requestDiscardEntry}
             commentCount={diffCommentCountByPath.get(entry.path) ?? 0}
-            submoduleExpansion={expansion}
+            isSubmoduleExpanded={
+              isSubmoduleExpandable
+                ? expandedSubmoduleKeys.has(getSubmoduleExpansionKey(entry))
+                : undefined
+            }
+            onToggleSubmodule={isSubmoduleExpandable ? toggleSubmodule : undefined}
           />
         )
       }}

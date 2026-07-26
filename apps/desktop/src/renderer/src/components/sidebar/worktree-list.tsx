@@ -2614,6 +2614,17 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     },
     [recordCurrentScrollAnchor, toggleGroup]
   )
+  // Why: one stable callback shared by every WorktreeCard row instead of a
+  // per-row closure over its group key — WorktreeCard is React.memo'd, and a
+  // fresh closure per row would rebuild every visible card on each render.
+  const handleLineageToggle = useCallback(
+    (groupKey: string, event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      toggleGroupWithScrollAnchor(groupKey)
+    },
+    [toggleGroupWithScrollAnchor]
+  )
 
   const navigateWorktree = useCallback(
     (direction: 'up' | 'down') => {
@@ -4974,15 +4985,8 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                     lineageCollapsed={itemRow.lineageCollapsed}
                     lineageChildren={lineageChildren}
                     lineageChildrenStyle={lineageChildrenStyle}
-                    onLineageToggle={
-                      lineageToggleGroupKey
-                        ? (event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                            toggleGroupWithScrollAnchor(lineageToggleGroupKey)
-                          }
-                        : undefined
-                    }
+                    onLineageToggle={lineageToggleGroupKey ? handleLineageToggle : undefined}
+                    lineageToggleGroupKey={lineageToggleGroupKey}
                     spoolControlGrants={spoolControlGrantsByWorktreeId.get(itemRow.worktree.id)}
                     spoolRevokingGrantIds={spoolRevokingGrantIds}
                     onRevokeSpoolControlGrant={revokeSpoolControlGrant}

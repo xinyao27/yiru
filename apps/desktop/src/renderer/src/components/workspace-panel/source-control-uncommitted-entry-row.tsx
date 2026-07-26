@@ -59,7 +59,8 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
   onDiscard,
   commentCount,
   showPathHint = true,
-  submoduleExpansion
+  isSubmoduleExpanded,
+  onToggleSubmodule
 }: {
   entryKey: string
   entry: GitStatusEntry
@@ -80,7 +81,11 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
   showPathHint?: boolean
   // When set, the row is a dirty submodule: clicking toggles lazy expansion of
   // its inner changes instead of opening a (uninformative) gitlink diff.
-  submoduleExpansion?: { isExpanded: boolean; onToggle: () => void }
+  isSubmoduleExpanded?: boolean
+  // Why: kept as (entry) => void, not a closure bound to this row's entry, so
+  // callers can pass the already-memoized toggleSubmodule straight through —
+  // a wrapper closure here would rebuild this React.memo row on every render.
+  onToggleSubmodule?: (entry: GitStatusEntry) => void
 }): React.JSX.Element {
   const FileIcon = getFileTypeIcon(entry.path)
   const fileName = basename(entry.path)
@@ -138,13 +143,13 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
           e.dataTransfer.effectAllowed = 'copy'
         }}
         onClick={(e) => {
-          if (submoduleExpansion) {
+          if (onToggleSubmodule) {
             // Why: a double-click emits two click events; without this guard it
             // expands and immediately collapses the submodule row.
             if (e.detail > 1) {
               return
             }
-            submoduleExpansion.onToggle()
+            onToggleSubmodule(entry)
             return
           }
           if (onSelect) {
@@ -154,18 +159,18 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
           }
         }}
         onDoubleClick={(e) => {
-          if (submoduleExpansion) {
+          if (onToggleSubmodule) {
             return
           }
           onOpen(entry, toPermanentSourceControlRowOpenEvent(e))
         }}
       >
-        {submoduleExpansion && (
+        {onToggleSubmodule && (
           <ChevronDown
             weight="regular"
             className={cn(
               'size-3 shrink-0 text-muted-foreground transition-transform',
-              !submoduleExpansion.isExpanded && '-rotate-90'
+              !isSubmoduleExpanded && '-rotate-90'
             )}
           />
         )}
