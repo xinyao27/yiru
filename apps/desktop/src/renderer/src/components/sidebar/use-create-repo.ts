@@ -13,7 +13,7 @@ import { useAppStore } from '@/store'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type { Repo } from '../../../../shared/types'
-import { upsertAddedRepoWithProjectHostSetup } from './add-repo-store-upsert'
+import { upsertAddedRepoWithProjectHostSetup } from './add-repo/store-upsert'
 
 export function useCreateRepo(
   fetchWorktrees: (

@@ -53,11 +53,11 @@ import {
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace/scope'
-import { runWorktreeBatchDelete, runWorktreeDelete } from './delete-worktree-flow'
+import { runWorktreeBatchDelete, runWorktreeDelete } from './delete-worktree/flow'
 import { ProjectGroupNameDialog } from './project-group-name-dialog'
 import { runSleepWorktrees } from './sleep-worktree-flow'
 import { getWorkspaceStatus, getWorkspaceStatusVisualMeta } from './workspace-status'
-import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
+import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
 import { getLineageRenderInfo } from './worktree-list-groups'
 import { WorktreeOpenInSubMenu } from './worktree-open-in-menu'
 import { getEligibleWorktreeParents } from './worktree-parent-candidates'

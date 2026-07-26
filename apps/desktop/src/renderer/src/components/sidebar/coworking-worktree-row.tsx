@@ -9,7 +9,7 @@ import type { CoworkingWorktreeSidebarRow } from './coworking-sidebar-rows'
 import { getCoworkingWorktreeDisplayTitle } from './coworking-worktree-display-title'
 import { SidebarDisclosure } from './disclosure'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
-import { WorktreeCardSurface } from './worktree-card-surface'
+import { WorktreeCardSurface } from './worktree-card/surface'
 import {
   DIRECT_PROJECT_WORKTREE_CONTENT_INDENT,
   getFlushWorktreeCardPaddingLeft

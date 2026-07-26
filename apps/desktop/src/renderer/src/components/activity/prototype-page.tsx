@@ -69,7 +69,7 @@ import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { parsePaneKey } from '../../../../shared/stable-pane-id'
 import type { Repo, TerminalTab, Worktree } from '../../../../shared/types'
 import CommentMarkdown from '../sidebar/comment-markdown'
-import { FilledBellIcon } from '../sidebar/worktree-card-helpers'
+import { FilledBellIcon } from '../sidebar/worktree-card/helpers'
 import { setActivityTerminalPortals, type ActivityTerminalPortalTarget } from './terminal-portal'
 
 type ThreadReadFilter = 'all' | 'unread'

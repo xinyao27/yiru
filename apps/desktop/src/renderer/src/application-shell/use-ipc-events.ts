@@ -21,7 +21,6 @@ import {
 } from '@/components/emulator-pane/simulator-launch-coordination'
 import { zoomLevelToPercent, ZOOM_MIN, ZOOM_MAX } from '@/components/settings/constants'
 import { applyUIZoom } from '@/components/settings/ui-zoom'
-import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
 import { getVisibleWorktreeIds } from '@/components/sidebar/visible-worktrees'
 import {
@@ -116,6 +115,7 @@ import type {
   WorkspaceSessionState
 } from '../../../shared/types'
 import { isWslHookRelayConnectionId } from '../../../shared/wsl-hook-relay-contract'
+import { runWorktreeDelete } from '../components/sidebar/delete-worktree/flow'
 import { useAppStore } from '../store'
 import { guardPinnedTabClose, resolvePinnedTabLabel } from '../store/pinned-tab-close-guard'
 import type { AppState } from '../store/types'

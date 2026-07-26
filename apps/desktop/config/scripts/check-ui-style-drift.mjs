@@ -20,7 +20,7 @@ const NATIVE_BUTTON_ALLOWLIST = new Set([
  */
 const NATIVE_FORM_ALLOWLIST = new Set([
   'src/renderer/src/components/browser-pane/markup/overlay.tsx',
-  'src/renderer/src/components/editor/rich-markdown-code-block.tsx',
+  'src/renderer/src/components/editor/rich-markdown/code-block.tsx',
   'src/renderer/src/components/native-chat/composer-field.tsx'
 ])
 

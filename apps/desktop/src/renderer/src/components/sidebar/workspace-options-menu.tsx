@@ -26,7 +26,7 @@ import SidebarRepositoryFilterSection from './repository-filter-section'
 import { useSidebarHostScopeOptions } from './use-sidebar-host-scope-options'
 import SidebarWorkspaceFilterSection from './workspace-filter-section'
 import { PROJECT_ORDER_OPTIONS, SORT_OPTIONS } from './workspace-option-items'
-import { WorktreeCardDisplayMenuSection } from './worktree-card-display-menu-section'
+import { WorktreeCardDisplayMenuSection } from './worktree-card/display-menu-section'
 
 const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsMenu() {
   const showSleepingWorkspaces = useAppStore((s) => s.showSleepingWorkspaces)

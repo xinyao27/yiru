@@ -48,6 +48,7 @@ import {
 import { monacoFindOptions } from './monaco-find-options'
 import { MonacoGutterContextMenu } from './monaco-gutter-context-menu'
 import { createMonacoImportNavigationController } from './monaco-import-navigation'
+import { useMonacoLanguageServer } from './monaco-language/use-server'
 import { handleMonacoLargeTextPaste } from './monaco-large-text-paste'
 import {
   clearMarkdownDocCompletionDocuments,
@@ -75,7 +76,6 @@ import {
   installMonacoEditorFindShortcut
 } from './shortcuts'
 import { useContextualCopySetup } from './use-contextual-copy-setup'
-import { useMonacoLanguageServer } from './use-monaco-language-server'
 
 type MonacoEditorProps = {
   fileId: string

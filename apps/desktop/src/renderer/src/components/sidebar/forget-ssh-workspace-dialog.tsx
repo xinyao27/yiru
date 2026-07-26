@@ -16,7 +16,7 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import { runWorktreeDeleteWithToast } from './delete-worktree-flow'
+import { runWorktreeDeleteWithToast } from './delete-worktree/flow'
 import type { SshWorkspaceForgetResolution } from './ssh-workspace-forget-resolution'
 
 type ForgetSshWorkspaceModalData = {

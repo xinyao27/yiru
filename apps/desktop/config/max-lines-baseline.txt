@@ -125,7 +125,7 @@ inline apps/desktop/src/renderer/src/components/browser-pane/browser-pane.tsx
 inline apps/desktop/src/renderer/src/components/browser-pane/state.ts
 inline apps/desktop/src/renderer/src/components/diff-comments/state.ts
 inline apps/desktop/src/renderer/src/components/diff-comments/use-diff-comment-decorator.tsx
-inline apps/desktop/src/renderer/src/components/editor/combined-diff-viewer.tsx
+inline apps/desktop/src/renderer/src/components/editor/combined-diff/viewer.tsx
 inline apps/desktop/src/renderer/src/components/editor/autosave-controller.ts
 inline apps/desktop/src/renderer/src/components/editor/content.tsx
 inline apps/desktop/src/renderer/src/components/editor/ipynb-parse.ts

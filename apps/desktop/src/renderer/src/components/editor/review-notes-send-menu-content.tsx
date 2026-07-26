@@ -16,7 +16,6 @@ import {
   type NotesSendAgentTarget
 } from '@/components/editor/notes-send-agent-targets'
 import { useWorktreeAgentRows } from '@/components/sidebar/use-worktree-agent-rows'
-import { selectLivePtyIdsForWorktree } from '@/components/sidebar/worktree-card-status-inputs'
 import { QuickLaunchAgentMenuItems } from '@/components/tab-bar/quick-launch-button'
 import {
   DropdownMenuItem,
@@ -32,6 +31,7 @@ import { track } from '@/lib/telemetry'
 import { useAppStore } from '@/store'
 
 import type { LaunchSource } from '../../../../shared/telemetry-events'
+import { selectLivePtyIdsForWorktree } from '../sidebar/worktree-card/status-inputs'
 
 type OrderedSendTarget = {
   target: NotesSendAgentTarget

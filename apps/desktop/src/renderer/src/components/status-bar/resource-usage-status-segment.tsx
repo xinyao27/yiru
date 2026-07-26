@@ -43,7 +43,7 @@ import { isWorkspaceOldForCleanup } from '../../../../shared/workspace/cleanup'
 import { useAppStore } from '../../store'
 import { useWorktreeMap } from '../../store/selectors'
 import { useDaemonActions, DaemonActionDialog } from '../shared/use-daemon-actions'
-import { runWorktreeDelete } from '../sidebar/delete-worktree-flow'
+import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 import { mergeSnapshotAndSessions, UNATTRIBUTED_REPO_ID } from './merge-snapshot-and-sessions'
 import {

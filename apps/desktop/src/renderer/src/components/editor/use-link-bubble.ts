@@ -7,10 +7,10 @@ import { scrollToAnchorInEditor } from './markdown-anchor-scroll'
 import {
   classifyHtmlSuperscriptLinkAction,
   type RichMarkdownHtmlSuperscriptLinkContext
-} from './rich-markdown-html-superscript-link-context'
-import { getLinkBubblePosition } from './rich-markdown-link-bubble'
-import type { LinkBubbleState } from './rich-markdown-link-bubble'
-import { copyRichMarkdownLink } from './rich-markdown-link-clipboard'
+} from './rich-markdown/html-superscript-link-context'
+import { getLinkBubblePosition } from './rich-markdown/link-bubble'
+import type { LinkBubbleState } from './rich-markdown/link-bubble'
+import { copyRichMarkdownLink } from './rich-markdown/link-clipboard'
 
 /**
  * Extracts link-editing action handlers from the editor component to reduce

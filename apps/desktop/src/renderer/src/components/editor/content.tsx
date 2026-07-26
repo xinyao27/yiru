@@ -35,13 +35,13 @@ import {
   findGitConflictBlocks,
   getGitConflictMarkerLineLength
 } from './monaco-conflict-decorations'
-import { RichMarkdownErrorBoundary } from './rich-markdown-error-boundary'
+import { RichMarkdownErrorBoundary } from './rich-markdown/error-boundary'
 import { useMarkdownDocuments } from './use-markdown-documents'
 
 const MonacoEditor = lazy(() => import('./monaco-editor'))
 const DiffViewer = lazy(() => import('./diff-viewer'))
-const CombinedDiffViewer = lazy(() => import('./combined-diff-viewer'))
-const RichMarkdownEditor = lazy(() => import('./rich-markdown-editor'))
+const CombinedDiffViewer = lazy(() => import('./combined-diff/viewer'))
+const RichMarkdownEditor = lazy(() => import('./rich-markdown/editor'))
 const MarkdownPreview = lazy(() => import('./markdown-preview'))
 const ImageViewer = lazy(() => import('./image-viewer'))
 const ImageDiffViewer = lazy(() => import('./image-diff-viewer'))

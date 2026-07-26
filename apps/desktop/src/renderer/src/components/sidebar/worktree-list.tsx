@@ -200,7 +200,7 @@ import {
   readWorkspaceDragDataIds
 } from './workspace-status'
 import WorktreeCard, { type ActiveSurfaceVariant } from './worktree-card'
-import { SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT } from './worktree-card-agents'
+import { SUPPRESS_WORKTREE_LIST_SCROLL_ADJUSTMENT_EVENT } from './worktree-card/agents'
 import {
   getFullDropIndexForWorktreeDragUnit,
   getWorktreeDragUnitGroups

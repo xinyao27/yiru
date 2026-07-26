@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { callRuntimeRpc } from '@/runtime/rpc-client'
 import { browseRuntimeServerDirectory } from '@/runtime/server-directory-browser'
 
-import type { AddRepoDialogStep } from './add-repo-dialog-types'
+import type { AddRepoDialogStep } from './add-repo/dialog-types'
 import { getDefaultCreateProjectParent, type GitAvailability } from './create-project-defaults'
 
 const LOCAL_GIT_AVAILABILITY_TIMEOUT_MS = 1500

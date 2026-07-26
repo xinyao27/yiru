@@ -6,7 +6,7 @@ import type { AppState } from '@/store/types'
 
 import type { Repo, Worktree, WorktreeLineage, WorkspaceLineage } from '../../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
-import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
+import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
 
 type FolderWorkspaceCardPrDisplayArgs = {
   folderWorkspaceId: string

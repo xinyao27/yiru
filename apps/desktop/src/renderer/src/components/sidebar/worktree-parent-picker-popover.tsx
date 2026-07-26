@@ -18,7 +18,7 @@ import { useAllWorktrees, useRepoMap, useWorktreeMap } from '@/store/selectors'
 
 import type { Worktree } from '../../../../shared/types'
 import { WorktreeActivityStatusIndicator } from './worktree-activity-status-indicator'
-import { branchDisplayName } from './worktree-card-helpers'
+import { branchDisplayName } from './worktree-card/helpers'
 import { getEligibleWorktreeParents } from './worktree-parent-candidates'
 
 type WorktreeParentPickerPopoverProps = {

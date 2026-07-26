@@ -22,7 +22,7 @@ import { useAppStore } from '@/store'
 
 import { resolveGitHubPRMergeMethods } from '../../../../shared/github-pr-merge-methods'
 import type { PRInfo, Repo, Worktree } from '../../../../shared/types'
-import { runWorktreeDelete } from '../sidebar/delete-worktree-flow'
+import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import { presentGitLabMRMergeState } from './gitlab-mr-merge-state'
 import {
   ClosedReviewActions,

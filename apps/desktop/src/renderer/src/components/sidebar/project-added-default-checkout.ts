@@ -10,7 +10,7 @@ import type {
   EventProps
 } from '../../../../shared/telemetry-events'
 import type { DetectedWorktreeListResult, Worktree } from '../../../../shared/types'
-import { finalizeImportedRepoAfterSkip } from './add-repo-skip-finalization'
+import { finalizeImportedRepoAfterSkip } from './add-repo/skip-finalization'
 
 type DefaultCheckoutHandoffReason = EventProps<'add_repo_default_checkout_handoff'>['reason']
 

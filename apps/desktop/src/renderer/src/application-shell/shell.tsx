@@ -80,7 +80,7 @@ import { CrashReportDialog } from '../components/crash-report/dialog'
 import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
 import { applyDocumentTheme } from '../components/editor/document-theme'
 import { getSelectedTextForFileSearch } from '../components/editor/file-search-selection'
-import { LanguageServerWorkspaceEditDialog } from '../components/editor/language-server-workspace-edit-dialog'
+import { LanguageServerWorkspaceEditDialog } from '../components/editor/language-server/workspace-edit-dialog'
 import { MarkdownTemplatePicker } from '../components/editor/markdown-template-picker'
 import { useEditorExternalWatch } from '../components/editor/use-editor-external-watch'
 import {
@@ -359,13 +359,13 @@ const StatusBar = lazy(() =>
 const SetupGuideModal = lazy(() => import('../components/setup-guide/modal'))
 const FeatureWallModal = lazy(() => import('../components/feature-wall/modal'))
 const FeatureTipsModal = lazy(() => import('../components/feature-tips/modal'))
-const AddRepoDialog = lazy(() => import('../components/sidebar/add-repo-dialog'))
+const AddRepoDialog = lazy(() => import('../components/sidebar/add-repo/dialog'))
 const NonGitFolderDialog = lazy(() => import('../components/sidebar/non-git-folder-dialog'))
 const AddProjectFromFolderDialog = lazy(
   () => import('../components/sidebar/add-project-from-folder-dialog')
 )
 const ProjectAddedDialog = lazy(() => import('../components/sidebar/project-added-dialog'))
-const DeleteWorktreeDialog = lazy(() => import('../components/sidebar/delete-worktree-dialog'))
+const DeleteWorktreeDialog = lazy(() => import('../components/sidebar/delete-worktree/dialog'))
 const DictationController = lazy(() =>
   import('../components/dictation/controller').then((module) => ({
     default: module.DictationController

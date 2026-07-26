@@ -2,10 +2,6 @@ import { Code, WarningCircle } from '@phosphor-icons/react'
 import { getWorktreePathBasenameFromId } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useState, useSyncExternalStore } from 'react'
 
-import {
-  monacoLanguageServerManager,
-  type LanguageServerManagerStatus
-} from '@/components/editor/monaco-language-server-manager'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -13,6 +9,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
+import {
+  monacoLanguageServerManager,
+  type LanguageServerManagerStatus
+} from '../editor/monaco-language/server-manager'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from './context-menu-policy'
 
 type LanguageServerStatusSegmentProps = {

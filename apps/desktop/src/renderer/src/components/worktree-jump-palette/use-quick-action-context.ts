@@ -5,13 +5,13 @@ import {
   buildCmdJQuickActionContext,
   type CmdJActiveGroupSnapshot
 } from '@/components/cmd-j/quick-action-context'
-import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import {
   getComposerEligibleRepos,
   resolveComposerGitRepoId
 } from '@/components/worktree-jump-palette/new-workspace-composer-repo'
 import { useAppStore } from '@/store'
 
+import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import type { PaletteStoreState } from './use-palette-store-state'
 
 type QuickActionContextInput = Pick<

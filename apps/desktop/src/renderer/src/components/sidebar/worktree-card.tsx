@@ -39,7 +39,7 @@ import type { Worktree, Repo } from '../../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
 import CacheTimer, { usePromptCacheCountdownStartedAt } from './cache-timer'
-import { runWorktreeDelete } from './delete-worktree-flow'
+import { runWorktreeDelete } from './delete-worktree/flow'
 import { resolveRepoHeaderColor } from './project-header-color'
 import { SshDisconnectedDialog } from './ssh-disconnected-dialog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
@@ -49,25 +49,25 @@ import {
   useWorkspaceDeleteModifierPressed
 } from './workspace-delete-quick-action'
 import { writeWorkspaceDragData } from './workspace-status'
-import WorktreeCardAgents from './worktree-card-agents'
-import { WorktreeCardControlGrants } from './worktree-card-control-grants'
-import { useWorktreeCardDetailsHoverControl } from './worktree-card-details-hover-state'
-import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
-import { CONFLICT_OPERATION_LABELS } from './worktree-card-helpers'
+import WorktreeCardAgents from './worktree-card/agents'
+import { WorktreeCardControlGrants } from './worktree-card/control-grants'
+import { useWorktreeCardDetailsHoverControl } from './worktree-card/details-hover-state'
+import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
+import { CONFLICT_OPERATION_LABELS } from './worktree-card/helpers'
 import {
   WorktreeCardDetailsHover,
   hasWorktreeCardDetails,
   WorktreeCardMetaBadges
-} from './worktree-card-meta'
-import { WorktreeCardPortsDetails, WorktreeCardPortsTrigger } from './worktree-card-ports'
+} from './worktree-card/meta'
+import { WorktreeCardPortsDetails, WorktreeCardPortsTrigger } from './worktree-card/ports'
 import {
   getWorktreeCardPrDisplay,
   isCachedMergedBranchPRCurrentForWorktree
-} from './worktree-card-pr-display'
-import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
-import { WorktreeCardStatusSlot } from './worktree-card-status-slot'
-import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card-surface'
-import { getWorktreeCardTitleDisplay } from './worktree-card-title-display'
+} from './worktree-card/pr-display'
+import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
+import { WorktreeCardStatusSlot } from './worktree-card/status-slot'
+import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card/surface'
+import { getWorktreeCardTitleDisplay } from './worktree-card/title-display'
 import WorktreeContextMenu from './worktree-context-menu'
 import {
   getFlushWorktreeCardPaddingLeft,
