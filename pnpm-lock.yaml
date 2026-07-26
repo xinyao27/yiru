@@ -488,6 +488,9 @@ catalogs:
     react-native:
       specifier: 0.83.9
       version: 0.83.9
+    react-native-enriched-markdown:
+      specifier: 0.7.1
+      version: 0.7.1
     react-native-gesture-handler:
       specifier: 2.31.2
       version: 2.31.2
@@ -1049,6 +1052,9 @@ importers:
       expo-thinking-orbs:
         specifier: catalog:mobile
         version: 0.1.0(f04ee46e6adb3989efa4d945f6365671)
+      katex:
+        specifier: 'catalog:'
+        version: 0.18.0
       lowlight:
         specifier: catalog:mobile
         version: 3.3.0
@@ -1064,6 +1070,9 @@ importers:
       react-native:
         specifier: catalog:mobile
         version: 0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1)
+      react-native-enriched-markdown:
+        specifier: catalog:mobile
+        version: 0.7.1(@expo/config-plugins@55.0.11(supports-color@8.1.1))(katex@0.18.0)(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6)
       react-native-gesture-handler:
         specifier: catalog:mobile
         version: 2.31.2(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6)
@@ -9820,6 +9829,19 @@ packages:
     peerDependencies:
       '@types/react': '>=18'
       react: '>=18'
+
+  react-native-enriched-markdown@0.7.1:
+    resolution: {integrity: sha512-un++NMEfwKkcaf7LXywejKlZcGpL6bg+Yn8JJJJjol5pgCzkFyC1clxVS0IMRZV9GpZC/0ag04pZ0DJg7ki/FA==}
+    peerDependencies:
+      '@expo/config-plugins': '>=50.0.0'
+      katex: '>=0.16.0'
+      react: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      '@expo/config-plugins':
+        optional: true
+      katex:
+        optional: true
 
   react-native-gesture-handler@2.31.2:
     resolution: {integrity: sha512-rw5q74i2AfS7YGYdbxQDhOU7xqgY6WRM1132/CCm3erqjblhECZDZFHIm0tteHoC9ih24wogVBVVzcTBQtZ+5A==}
@@ -22313,6 +22335,14 @@ snapshots:
       vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
+
+  react-native-enriched-markdown@0.7.1(@expo/config-plugins@55.0.11(supports-color@8.1.1))(katex@0.18.0)(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+      react-native: 0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1)
+    optionalDependencies:
+      '@expo/config-plugins': 55.0.11(supports-color@8.1.1)
+      katex: 0.18.0
 
   react-native-gesture-handler@2.31.2(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6):
     dependencies:

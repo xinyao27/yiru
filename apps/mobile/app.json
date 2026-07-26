@@ -105,7 +105,8 @@
         "expo-build-properties",
         {
           "ios": {
-            "buildReactNativeFromSource": true
+            "buildReactNativeFromSource": true,
+            "useFrameworks": "dynamic"
           },
           "android": {
             "usesCleartextTraffic": true
