@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 
-import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
-
 import {
   COWORKING_INGRESS_PORT,
   type CoworkingOsFamily
@@ -11,23 +9,21 @@ import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { CoworkingAccessAuthority } from './access-authority'
-import { loadOrCreateCoworkingE2EEKeypair } from './e2ee-keypair'
 import { CoworkingExecutionGateway } from './execution-gateway'
 import { CoworkingCanonicalHistoricalSessionConsistency } from './historical-session-consistency'
 import { CoworkingIngress } from './ingress'
-import { CoworkingProbeService } from './ingress-probe'
 import { CoworkingLegacySessionAttestor } from './legacy-session-attestor'
 import { resolveCoworkingLocalWslDistro } from './local-wsl-route'
 import { CoworkingMobileVaultSessionSource } from './mobile-vault-session-source'
-import { CoworkingOwnerCatalog } from './owner-catalog'
 import { CoworkingOwnerComposition } from './owner-lifecycle'
 import { CoworkingOwnerService } from './owner-service'
 import { CoworkingOwnerShareSource } from './owner-share-source'
 import { DefaultCoworkingOwnerWorktreeCatalog } from './owner-worktree-catalog'
+import { resolveCoworkingOwnerWorktreeDescriptor } from './owner-worktree-descriptor'
 import { YiruCoworkingPairedRuntimeHostAdapter } from './paired-runtime-host-adapter'
 import { YiruCoworkingPairedRuntimeSessionReader } from './paired-runtime-session-reader'
 import { listCoworkingPairedRuntimeWorktrees } from './paired-runtime-worktree-catalog'
-import { HttpCoworkingProbeClient } from './probe-client'
+import { createCoworkingPeerConnectivity } from './peer-connectivity'
 import { subscribePublicSessionRoutes } from './public-session-route-subscription'
 import { CoworkingQuotaProjection } from './quota-projection'
 import { CoworkingRpcGateway } from './rpc-gateway'
@@ -36,10 +32,7 @@ import { CoworkingSessionCatalog } from './session-catalog'
 import { CoworkingSessionProvenanceIndex } from './session-provenance-index'
 import { CoworkingActualHostSessionRootMatcher } from './session-root-matcher'
 import { CoworkingShareCatalog } from './share-catalog'
-import { DefaultTailnetPeerDirectory } from './tailnet-peer-directory'
-import { TailscaleCommandAdapter } from './tailscale-command-adapter'
 import { CoworkingTerminalAttachmentRegistry } from './terminal-attachment-registry'
-import { CoworkingTicketAuthority } from './ticket-authority'
 import { CoworkingVisibilityDenyJournal } from './visibility-deny-journal'
 import {
   assertWindowsCoworkingFirewallReady,
@@ -207,22 +200,15 @@ export function createCoworkingOwnerComposition(
       gateway.disconnectAll('Worktree publication changed')
     }
   })
-  const tailnet = new TailscaleCommandAdapter()
-  const keypair = loadOrCreateCoworkingE2EEKeypair(options.userDataPath)
-  const tickets = new CoworkingTicketAuthority()
-  const probe = new CoworkingProbeService({
-    tailnet,
-    tickets,
-    keypair,
-    ownerRuntimeId: options.ownerRuntimeId,
-    yiruVersion: options.yiruVersion,
-    osFamily: options.osFamily
-  })
-  const probeClient = new HttpCoworkingProbeClient()
-  const ownerCatalog = new CoworkingOwnerCatalog(
-    new DefaultTailnetPeerDirectory(tailnet, probeClient),
-    probeClient
-  )
+  const { tailnet, keypair, tickets, probe, ownerCatalog, firewallEnvironment } =
+    createCoworkingPeerConnectivity({
+      userDataPath: options.userDataPath,
+      ownerRuntimeId: options.ownerRuntimeId,
+      yiruVersion: options.yiruVersion,
+      osFamily: options.osFamily,
+      isPackaged: options.isPackaged,
+      executablePath: options.executablePath
+    })
   let service: CoworkingOwnerService | null = null
   let composition: CoworkingOwnerComposition | null = null
   const ingress = new CoworkingIngress({
@@ -235,12 +221,6 @@ export function createCoworkingOwnerComposition(
     ownerKeyFingerprint: keypair.fingerprint,
     onUnavailable: (error) => void service?.reportIngressUnavailable(error)
   })
-  const firewallEnvironment = {
-    platform: process.platform,
-    isPackaged: options.isPackaged,
-    executablePath: options.executablePath,
-    systemRoot: process.env.SystemRoot
-  }
   service = new CoworkingOwnerService({
     visibility,
     access,
@@ -254,22 +234,8 @@ export function createCoworkingOwnerComposition(
       repair: () => repairWindowsCoworkingFirewall(COWORKING_INGRESS_PORT, firewallEnvironment)
     },
     onAvailabilityRecovered: () => composition?.recoverAfterAvailability() ?? Promise.resolve(),
-    describeOwnerWorktree: (worktreeId) => {
-      const meta = options.store.getWorktreeMeta(worktreeId)
-      const repo = options.store.getRepo(getRepoIdFromWorktreeId(worktreeId))
-      if (!meta || !repo) {
-        return null
-      }
-      const projectId = meta.projectId ?? null
-      const project = projectId
-        ? options.store.getProjects().find((candidate) => candidate.id === projectId)
-        : null
-      return {
-        displayName: meta.displayName,
-        projectId,
-        projectDisplayName: project?.displayName ?? repo.displayName
-      }
-    }
+    describeOwnerWorktree: (worktreeId) =>
+      resolveCoworkingOwnerWorktreeDescriptor(options.store, worktreeId)
   })
   const unsubscribeProvenance = visibility.subscribe((change) => {
     if (

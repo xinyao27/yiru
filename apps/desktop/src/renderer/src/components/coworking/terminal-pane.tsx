@@ -1,5 +1,5 @@
 import { FitAddon } from '@xterm/addon-fit'
-import { Terminal, type ITerminalOptions } from '@xterm/xterm'
+import { Terminal } from '@xterm/xterm'
 import type React from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -11,13 +11,9 @@ import { toast } from 'sonner'
 import '@xterm/xterm/css/xterm.css'
 import '@/components/terminal-pane/terminal.css'
 import { selectCoworkingCanControl } from '@/components/coworking/selectors'
-import { buildFontFamily } from '@/components/terminal-pane/layout-serialization'
-import { composeActiveTerminalTheme } from '@/components/terminal-pane/terminal-appearance'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { buildDefaultTerminalOptions } from '@/lib/pane-manager/pane-terminal-options'
-import { getBuiltinTheme, resolveEffectiveTerminalAppearance } from '@/lib/terminal-theme'
 import { useAppStore } from '@/store'
 
 import type { CoworkingRequesterSubscriptionEvent } from '../../../../shared/coworking/ipc-contract'
@@ -26,9 +22,6 @@ import type {
   CoworkingTerminalSubscriptionEvent,
   CoworkingMutationResult
 } from '../../../../shared/coworking/operation-contract'
-import { resolveTerminalFontWeights } from '../../../../shared/terminal/fonts'
-import { normalizeTerminalLineHeight } from '../../../../shared/terminal/line-height-settings'
-import type { GlobalSettings } from '../../../../shared/types'
 import { getCoworkingRequesterTransportErrorCode } from './requester-error'
 import { isSameCoworkingSessionRoute, type CoworkingSessionRoute } from './session-route'
 import { notifyCoworkingTerminalInputBacklog } from './terminal-input-backlog'
@@ -36,6 +29,7 @@ import {
   createCoworkingTerminalMutationQueue,
   type CoworkingTerminalMutation
 } from './terminal-mutation-queue'
+import { createTerminalOptions } from './terminal-options'
 import {
   getCoworkingTerminalStatusLabel,
   type CoworkingTerminalConnectionStatus
@@ -402,30 +396,4 @@ function isTerminalSize(cols: unknown, rows: unknown): boolean {
     Number(rows) >= 1 &&
     Number(rows) <= 500
   )
-}
-
-function createTerminalOptions(
-  settings: GlobalSettings | null,
-  systemPrefersDark: boolean,
-  canControl: boolean
-): ITerminalOptions {
-  const defaults = buildDefaultTerminalOptions()
-  if (!settings) {
-    return { ...defaults, disableStdin: !canControl }
-  }
-  const appearance = resolveEffectiveTerminalAppearance(settings, systemPrefersDark)
-  const baseTheme = appearance.theme ?? getBuiltinTheme(appearance.themeName)
-  const weights = resolveTerminalFontWeights(settings.terminalFontWeight)
-  return {
-    ...defaults,
-    disableStdin: !canControl,
-    theme: composeActiveTerminalTheme(baseTheme, settings) ?? undefined,
-    fontFamily: buildFontFamily(settings.terminalFontFamily),
-    fontSize: settings.terminalFontSize,
-    fontWeight: weights.fontWeight,
-    fontWeightBold: weights.fontWeightBold,
-    lineHeight: normalizeTerminalLineHeight(settings.terminalLineHeight),
-    allowTransparency:
-      settings.terminalBackgroundOpacity !== undefined && settings.terminalBackgroundOpacity < 1
-  }
 }
