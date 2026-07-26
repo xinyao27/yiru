@@ -18,8 +18,8 @@ import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/termi
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../../../shared/tui-agent-launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
+} from '../../../../shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent/selection'
 import type { GlobalSettings } from '../../../../shared/types'
 import { normalizeUiLanguage } from '../../../../shared/ui-language'
 import type { AppState } from '../../store/types'

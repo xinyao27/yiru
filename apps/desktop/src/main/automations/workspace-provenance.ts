@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { getAutomationRunRepoId } from '../../shared/automation-run-identity'
-import { buildAutomationWorkspaceProvenance } from '../../shared/automation-workspace-provenance'
+import { getAutomationRunRepoId } from '../../shared/automation/run-identity'
+import { buildAutomationWorkspaceProvenance } from '../../shared/automation/workspace-provenance'
 import type { Automation, AutomationRun } from '../../shared/automations-types'
 import type {
   AutomationWorkspaceProvenance,

@@ -8,7 +8,7 @@ import {
   getCommitMessageAgentCapability,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from '../../../../shared/commit-message-agent-spec'
+} from '../../../../shared/commit-message/agent-spec'
 import type { FeatureWallTourDepthSummary } from '../../../../shared/feature-wall-tour-depth'
 import type { FeatureWallWorkflowId } from '../../../../shared/feature-wall-workflows'
 import type { ReviewStepId } from '../../../../shared/review-steps'

@@ -2,7 +2,7 @@ import type {
   SetupScriptImportCandidate,
   SetupScriptImportFileExists,
   SetupScriptImportFileRead
-} from './setup-script-imports'
+} from './script-imports'
 
 const PACKAGE_JSON_PATH = 'package.json'
 type PackageManagerName = 'pnpm' | 'bun' | 'yarn' | 'npm'

@@ -16,7 +16,7 @@ import { useAppStore } from '@/store'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import type { TuiAgent } from '../../../../shared/types'
 
 type ForkAgentSessionFromPaneArgs = {

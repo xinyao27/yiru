@@ -1,4 +1,4 @@
-import { isCustomAgentId } from '../../../../../shared/commit-message-agent-spec'
+import { isCustomAgentId } from '../../../../../shared/commit-message/agent-spec'
 import {
   normalizeRepoSourceControlAiOverrides,
   normalizeSourceControlAiSettings,

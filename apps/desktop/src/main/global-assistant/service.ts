@@ -9,18 +9,18 @@ import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/plat
 
 import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../shared/constants'
 import type { GlobalAssistantSession } from '../../shared/global-assistant-types'
-import { isTuiAgent, TUI_AGENT_CONFIG } from '../../shared/tui-agent-config'
+import { isTuiAgent, TUI_AGENT_CONFIG } from '../../shared/tui-agent/config'
 import {
   getTuiAgentDefaultArgs,
   getTuiAgentDefaultEnv
-} from '../../shared/tui-agent-launch-defaults'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent-selection'
+} from '../../shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent/selection'
 import {
   buildAgentResumeStartupPlan,
   buildAgentStartupPlan,
   type AgentStartupPlan
-} from '../../shared/tui-agent-startup'
-import type { AgentStartupShell } from '../../shared/tui-agent-startup-shell'
+} from '../../shared/tui-agent/startup'
+import type { AgentStartupShell } from '../../shared/tui-agent/startup-shell'
 import type { TuiAgent } from '../../shared/types'
 import {
   markCodexProjectTrusted,

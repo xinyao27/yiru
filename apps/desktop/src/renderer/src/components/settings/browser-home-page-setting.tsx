@@ -2,7 +2,7 @@ import { toast } from 'sonner'
 
 import { translate } from '@/i18n/i18n'
 
-import { normalizeBrowserNavigationUrl } from '../../../../shared/browser-url'
+import { normalizeBrowserNavigationUrl } from '../../../../shared/browser/url'
 import { YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'

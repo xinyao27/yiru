@@ -8,8 +8,8 @@ import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner
 import { useAppStore } from '@/store'
 
 import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
+import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../shared/types'
 
 type LaunchAgentSessionContinuationArgs = {

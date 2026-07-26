@@ -23,7 +23,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getLiveBrowserUrl } from '@/runtime/browser-live-url'
 
-import { redactKagiSessionToken } from '../../../../shared/browser-url'
+import { redactKagiSessionToken } from '../../../../shared/browser/url'
 import { YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
 import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import type { TabDragItemData } from '../tab-group/use-tab-drag-split'

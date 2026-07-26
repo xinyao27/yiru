@@ -48,7 +48,7 @@ import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
 } from '../../shared/pty-renderer-delivery-health'
-import { resolveSetupAgentSequenceLaunchCommand } from '../../shared/setup-agent-sequencing'
+import { resolveSetupAgentSequenceLaunchCommand } from '../../shared/setup/agent-sequencing'
 import {
   isTerminalLeafId,
   makePaneKey,
@@ -73,7 +73,7 @@ import {
 } from '../../shared/terminal/startup-cwd'
 import { isValidTerminalTabId } from '../../shared/terminal/tab-id'
 import { validateTerminalViewAttributes } from '../../shared/terminal/view-attributes'
-import { isTuiAgent } from '../../shared/tui-agent-config'
+import { isTuiAgent } from '../../shared/tui-agent/config'
 import type { GlobalSettings, TuiAgent } from '../../shared/types'
 import { parseWorkspaceKey } from '../../shared/workspace/scope'
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'

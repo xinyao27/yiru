@@ -8,7 +8,7 @@ import {
   getCommitMessageAgentCapability,
   isCustomAgentId,
   listCommitMessageAgentCapabilities
-} from '../../../../shared/commit-message-agent-spec'
+} from '../../../../shared/commit-message/agent-spec'
 import {
   SOURCE_CONTROL_TEXT_ACTION_IDS,
   type SourceControlActionId

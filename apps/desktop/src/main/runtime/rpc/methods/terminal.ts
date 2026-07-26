@@ -30,7 +30,7 @@ import {
   encodeTerminalStreamText,
   type TerminalStreamFrame
 } from '../../../../shared/terminal/stream-protocol'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import {
   MOBILE_SNAPSHOT_BYTE_BUDGET,
   MOBILE_SUBSCRIBE_SCROLLBACK_ROWS

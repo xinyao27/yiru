@@ -1,8 +1,8 @@
 import type { RuntimeGitLocalBranches } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
-import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
-import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message-host-key'
+import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
+import { getCommitMessageModelDiscoveryHostKey } from '../../shared/commit-message/host-key'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
 import type { RuntimeGitCheckoutResult } from '../../shared/runtime-types'
 import {

@@ -20,8 +20,8 @@ import { resolveNativeChatSessionOptionDefaults } from '../../../../shared/nativ
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
+} from '../../../../shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
 
 type FloatingTerminalWindowControlsProps = {
   maximized: boolean

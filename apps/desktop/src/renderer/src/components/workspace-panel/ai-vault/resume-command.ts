@@ -12,8 +12,8 @@ import { LOCAL_EXECUTION_HOST_ID, parseExecutionHostId } from '@yiru/workbench-m
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../../shared/tui-agent-launch-defaults'
-import type { AgentStartupShell } from '../../../../../shared/tui-agent-startup-shell'
+} from '../../../../../shared/tui-agent/launch-defaults'
+import type { AgentStartupShell } from '../../../../../shared/tui-agent/startup-shell'
 import { parseWorkspaceKey } from '../../../../../shared/workspace/scope'
 import { getLocalProjectExecutionRuntimeContext } from '../../../lib/local-preflight-context'
 import { CLIENT_PLATFORM } from '../../../lib/new-workspace'

@@ -3,8 +3,8 @@ import {
   DEFAULT_TUI_AGENT_ENV as YOLO_TUI_AGENT_ENV
 } from '@yiru/workbench-model/agent'
 
-import { TUI_AGENT_CONFIG } from './tui-agent-config'
-import type { TuiAgent } from './types'
+import type { TuiAgent } from '../types'
+import { TUI_AGENT_CONFIG } from './config'
 
 export { YOLO_TUI_AGENT_ARGS, YOLO_TUI_AGENT_ENV }
 

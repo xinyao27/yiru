@@ -1,4 +1,4 @@
-import { ALL_TUI_AGENTS, TUI_AGENT_DISPLAY_NAMES } from './tui-agent-display-names'
+import { ALL_TUI_AGENTS, TUI_AGENT_DISPLAY_NAMES } from './tui-agent/display-names'
 /* eslint-disable max-lines -- Why: the central shortcut registry, parser,
  * formatter, and conflict detector must stay in one shared module so main,
  * renderer, browser guests, and Settings cannot drift apart. */

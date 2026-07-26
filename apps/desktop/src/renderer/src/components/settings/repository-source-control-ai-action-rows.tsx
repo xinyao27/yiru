@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 
-import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message-agent-spec'
+import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message/agent-spec'
 import {
   SOURCE_CONTROL_ACTION_IDS,
   SOURCE_CONTROL_ACTION_LABELS,

@@ -10,27 +10,27 @@ import {
   type BrowserAnnotationViewportBridgeOptions,
   BROWSER_ANNOTATION_VIEWPORT_BRIDGE_WORLD_ID,
   buildBrowserAnnotationViewportBridgeScript
-} from '../../shared/browser-annotation-viewport-bridge'
+} from '../../shared/browser/annotation-viewport-bridge'
 import type {
   BrowserGrabCancelReason,
   BrowserGrabPayload,
   BrowserGrabRect,
   BrowserGrabResult,
   BrowserGrabScreenshot
-} from '../../shared/browser-grab-types'
+} from '../../shared/browser/grab-types'
 import type {
   BrowserDownloadFinishedEvent,
   BrowserDownloadProgressEvent,
   BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '../../shared/browser-guest-events'
+} from '../../shared/browser/guest-events'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken,
   toSecureCertificateEndpoint
-} from '../../shared/browser-url'
+} from '../../shared/browser/url'
 import { YIRU_BROWSER_BLANK_URL } from '../../shared/constants'
 import type { KeybindingOverrides } from '../../shared/keybindings'
 import type { BrowserViewportOverride } from '../../shared/types'

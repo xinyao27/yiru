@@ -1,5 +1,5 @@
-import { isTuiAgent } from './tui-agent-config'
-import type { TuiAgent } from './types'
+import type { TuiAgent } from '../types'
+import { isTuiAgent } from './config'
 
 // Keep this order in sync with the desktop agent catalog. It defines the
 // automatic fallback priority when the user has not chosen a default agent.

@@ -1,5 +1,5 @@
-import type { TuiAgent } from './types'
-import { getYiruCliCommandNameForPlatform } from './yiru-cli-command-name'
+import type { TuiAgent } from '../types'
+import { getYiruCliCommandNameForPlatform } from '../yiru-cli-command-name'
 
 export type AgentPromptInjectionMode =
   | 'argv'

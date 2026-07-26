@@ -1,7 +1,7 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 
 import { getFirstCommandToken } from '../command-token-scanner'
-import { getTuiAgentDetectCommands, TUI_AGENT_CONFIG } from '../tui-agent-config'
+import { getTuiAgentDetectCommands, TUI_AGENT_CONFIG } from '../tui-agent/config'
 import type { TuiAgent } from '../types'
 import { filterHeadlessOneShotAgentCommand } from './headless-command'
 

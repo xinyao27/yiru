@@ -23,7 +23,7 @@ import {
   type NestedRepoTelemetryRuntimeKind
 } from '../../../../shared/nested-repo-telemetry'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import { resolveAgentPermissionModeSummary } from '../../../../shared/tui-agent-permissions'
+import { resolveAgentPermissionModeSummary } from '../../../../shared/tui-agent/permissions'
 import type {
   GlobalSettings,
   NestedRepoScanResult,

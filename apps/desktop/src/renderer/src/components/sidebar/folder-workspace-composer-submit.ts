@@ -20,8 +20,8 @@ import { activateAndRevealFolderWorkspace } from '@/lib/worktree-activation'
 
 import type { SessionOptionValue } from '../../../../shared/native-chat/session-options'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
-import type { AgentStartupShell } from '../../../../shared/tui-agent-startup-shell'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
+import type { AgentStartupShell } from '../../../../shared/tui-agent/startup-shell'
 import type { FolderWorkspace, ProjectGroup, TuiAgent } from '../../../../shared/types'
 import { folderWorkspaceKey } from '../../../../shared/workspace/scope'
 import {

@@ -1,4 +1,4 @@
-import type { BrowserViewportOverride, BrowserViewportPresetId } from './types'
+import type { BrowserViewportOverride, BrowserViewportPresetId } from '../types'
 
 export type BrowserViewportPreset = {
   id: BrowserViewportPresetId

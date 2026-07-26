@@ -3,7 +3,7 @@ import {
   quoteStartupArg,
   tokenizeStartupCommand,
   type AgentStartupShell
-} from './tui-agent-startup-shell'
+} from './tui-agent/startup-shell'
 
 const QUERY_ENV_LIMIT = 24_000
 const QUERY_PLACEHOLDER = '__YIRU_HERMES_STARTUP_QUERY__'

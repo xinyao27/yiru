@@ -4,12 +4,12 @@ forwarding from webContents guests. Splitting this rebase-only integration
 would make the security boundary harder to audit. */
 import { screen, webContents } from 'electron'
 
-import type { BrowserPageZoomDirection } from '../../shared/browser-page-zoom'
+import type { BrowserPageZoomDirection } from '../../shared/browser/page-zoom'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken
-} from '../../shared/browser-url'
+} from '../../shared/browser/url'
 import { keybindingMatchesAction, type KeybindingOverrides } from '../../shared/keybindings'
 import {
   ModifierDoubleTapDetector,

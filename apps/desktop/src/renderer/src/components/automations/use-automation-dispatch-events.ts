@@ -15,8 +15,8 @@ import { useAppStore } from '@/store'
 import {
   didAutomationPrecheckPass,
   formatAutomationPrecheckFailure
-} from '../../../../shared/automation-precheck'
-import { getAutomationRunRepoId } from '../../../../shared/automation-run-identity'
+} from '../../../../shared/automation/precheck'
+import { getAutomationRunRepoId } from '../../../../shared/automation/run-identity'
 import type {
   AutomationDispatchResult,
   AutomationPrecheckResult

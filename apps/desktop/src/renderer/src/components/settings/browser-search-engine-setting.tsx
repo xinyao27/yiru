@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
 
-import { SEARCH_ENGINE_LABELS, type SearchEngine } from '../../../../shared/browser-url'
+import { SEARCH_ENGINE_LABELS, type SearchEngine } from '../../../../shared/browser/url'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { KagiSessionLinkForm } from './kagi-session-link-form'

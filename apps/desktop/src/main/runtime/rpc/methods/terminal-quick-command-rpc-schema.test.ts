@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test'
 
 import { supportsTerminalAgentQuickCommand } from '../../../../shared/terminal/quick-commands'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import { CreateTerminalTab } from './session-tabs-schemas'
 import { TerminalQuickCommandsUpdate } from './terminal-quick-command-rpc-schema'
 

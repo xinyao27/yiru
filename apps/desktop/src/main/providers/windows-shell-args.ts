@@ -1,6 +1,6 @@
 import { win32 as pathWin32 } from 'node:path'
 
-import { quoteStartupArg } from '../../shared/tui-agent-startup-shell'
+import { quoteStartupArg } from '../../shared/tui-agent/startup-shell'
 import {
   buildWslInteractiveLoginShellCommand,
   escapeWslShCommandForWindows,

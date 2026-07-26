@@ -8,7 +8,7 @@ import { cn } from '@/lib/class-names'
 import {
   formatAutomationSchedule,
   getAutomationCronExpressionFields
-} from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/schedules'
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'
 

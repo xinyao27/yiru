@@ -13,7 +13,7 @@ import { useAppStore } from '@/store'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
+} from '../../../../shared/tui-agent/launch-defaults'
 
 export type ResumeSleepingAgentSessionsOptions = {
   suppressNavigation?: boolean

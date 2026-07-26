@@ -8,8 +8,8 @@ import {
   CUSTOM_AGENT_ID,
   isCustomAgentId,
   type CommitMessageModelCapability
-} from '../../../../shared/commit-message-agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message-host-key'
+} from '../../../../shared/commit-message/agent-spec'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message/host-key'
 import {
   normalizeSourceControlAiSettings,
   readSourceControlAiModelChoiceForHost,

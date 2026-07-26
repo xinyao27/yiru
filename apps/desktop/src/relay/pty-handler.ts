@@ -26,10 +26,10 @@ import {
   mergeGitConfigEnvProtocol
 } from '../shared/git/credential-prompt-env'
 import { PhysicalExitTracker } from '../shared/physical-exit-tracker'
-import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup-agent-sequencing'
+import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup/agent-sequencing'
 import { buildStartupCommandSubmission } from '../shared/startup-command-submission'
 import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/git-credential-guard'
-import { isTuiAgent } from '../shared/tui-agent-config'
+import { isTuiAgent } from '../shared/tui-agent/config'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import {
   resolveDefaultShell,

@@ -1,4 +1,4 @@
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import type { TuiAgent } from '../../../../shared/types'
 
 export function chooseInitialContinuationAgent(args: {

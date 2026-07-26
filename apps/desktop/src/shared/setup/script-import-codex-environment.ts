@@ -1,4 +1,4 @@
-import type { SetupScriptImportCandidate, SetupScriptImportFileRead } from './setup-script-imports'
+import type { SetupScriptImportCandidate, SetupScriptImportFileRead } from './script-imports'
 
 const CODEX_ENVIRONMENT_PATH = '.codex/environments/environment.toml'
 

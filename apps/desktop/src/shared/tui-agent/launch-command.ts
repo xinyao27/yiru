@@ -1,13 +1,13 @@
-import { resolveAgentSessionOptionLaunch } from './agent/session-option-launch'
-import type { SessionOptionValue } from './native-chat/session-options'
-import { getTuiAgentLaunchCommand, TUI_AGENT_CONFIG } from './tui-agent-config'
+import { resolveAgentSessionOptionLaunch } from '../agent/session-option-launch'
+import type { SessionOptionValue } from '../native-chat/session-options'
+import type { TuiAgent } from '../types'
+import { getTuiAgentLaunchCommand, TUI_AGENT_CONFIG } from './config'
 import {
   planAgentCliArgsSuffix,
   quoteStartupArg,
   tokenizeStartupCommand,
   type AgentStartupShell
-} from './tui-agent-startup-shell'
-import type { TuiAgent } from './types'
+} from './startup-shell'
 
 export type ResolvedAgentLaunchCommand =
   | {

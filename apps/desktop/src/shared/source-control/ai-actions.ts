@@ -1,5 +1,5 @@
-import { isCustomAgentId, type CustomAgentId } from '../commit-message-agent-spec'
-import { isTuiAgent } from '../tui-agent-config'
+import { isCustomAgentId, type CustomAgentId } from '../commit-message/agent-spec'
+import { isTuiAgent } from '../tui-agent/config'
 import type { TuiAgent } from '../types'
 
 export type SourceControlTextActionId = 'commitMessage' | 'pullRequest' | 'branchName'

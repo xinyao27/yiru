@@ -2,7 +2,7 @@ import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import React, { useMemo } from 'react'
 
 import { buildBranchNamePrompt } from '../../../../../shared/branch-name-from-work'
-import { buildCommitMessagePrompt } from '../../../../../shared/commit-message-generation'
+import { buildCommitMessagePrompt } from '../../../../../shared/commit-message/generation'
 import { buildPullRequestFieldsPrompt } from '../../../../../shared/pull-request-generation'
 import {
   resolveSourceControlAiForOperation,

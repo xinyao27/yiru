@@ -26,11 +26,11 @@ import { createAgentStatusOscProcessor } from '../../../../shared/agent/status-o
 import { shouldUseShellReadyStartupDelivery } from '../../../../shared/codex-startup-delivery'
 import type { RuntimeTerminalCreate } from '../../../../shared/runtime-types'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
+} from '../../../../shared/tui-agent/launch-defaults'
 import { scheduleAgentBackgroundDraft } from './agent-background-draft-delivery'
 import { runBestEffortAgentBackgroundCleanups } from './agent-background-session-cleanup'
 import type {

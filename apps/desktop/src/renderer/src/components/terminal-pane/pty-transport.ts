@@ -30,7 +30,7 @@ import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
 } from '../../../../shared/terminal/input'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import {
   ptyDataHandlers,
   ptyReplayHandlers,

@@ -1,4 +1,4 @@
-import type { Automation } from './automations-types'
+import type { Automation } from '../automations-types'
 
 type AutomationRunIdentityFields = Pick<Automation, 'projectId' | 'runContext'>
 

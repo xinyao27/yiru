@@ -17,8 +17,8 @@ import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/h
 import { useAppStore } from '@/store'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import type { SetupScriptImportCandidate } from '../../../../shared/setup-script-imports'
-import { buildSetupScriptPromptActionTelemetry } from '../../../../shared/setup-script-telemetry'
+import type { SetupScriptImportCandidate } from '../../../../shared/setup/script-imports'
+import { buildSetupScriptPromptActionTelemetry } from '../../../../shared/setup/script-telemetry'
 import { openSetupScriptSettings } from './open-setup-script-settings'
 import { SetupScriptPromptCardShell } from './setup-script-prompt-card-shell'
 import { trackSetupScriptPromptExposure } from './setup-script-prompt-exposure-telemetry'

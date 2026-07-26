@@ -3,7 +3,7 @@ import { isRuntimeScopeForbiddenError } from '@/runtime/rpc-client'
 
 import { getDefaultRepoHookSettings } from '../../../../shared/constants'
 import { resolveHookCommandSourcePolicy } from '../../../../shared/hook-command-source-policy'
-import type { SetupScriptImportCandidate } from '../../../../shared/setup-script-imports'
+import type { SetupScriptImportCandidate } from '../../../../shared/setup/script-imports'
 import type { Repo, RepoHookSettings } from '../../../../shared/types'
 
 const SETUP_SCRIPT_PROMPT_DISMISSAL_PREFIX = 'generation-v1:'

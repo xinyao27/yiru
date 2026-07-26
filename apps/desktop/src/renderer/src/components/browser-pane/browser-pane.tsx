@@ -94,7 +94,7 @@ import { callRuntimeRpc, RuntimeRpcCallError, type RuntimeClientTarget } from '@
 import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 import { useAppStore } from '@/store'
 
-import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '../../../../shared/browser-annotation-viewport-bridge'
+import { BROWSER_ANNOTATION_VIEWPORT_MESSAGE_PREFIX } from '../../../../shared/browser/annotation-viewport-bridge'
 import {
   GRAB_BUDGET,
   type BrowserAnnotationIntent,
@@ -104,27 +104,27 @@ import {
   type BrowserGrabRect,
   type BrowserGrabScreenshot,
   type BrowserPageAnnotation
-} from '../../../../shared/browser-grab-types'
+} from '../../../../shared/browser/grab-types'
 import type {
   BrowserDownloadRequestedEvent,
   BrowserDownloadProgressEvent,
   BrowserDownloadFinishedEvent
-} from '../../../../shared/browser-guest-events'
+} from '../../../../shared/browser/guest-events'
 import {
   decodeBrowserScreencastFrame,
   type BrowserScreencastFrameMetadata
-} from '../../../../shared/browser-screencast-protocol'
+} from '../../../../shared/browser/screencast-protocol'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
   redactKagiSessionToken,
   resolveRemoteFailureExternalUrl,
   toHttpsRecoveryUrl
-} from '../../../../shared/browser-url'
+} from '../../../../shared/browser/url'
 import {
   browserViewportPresetToOverride,
   getBrowserViewportPreset
-} from '../../../../shared/browser-viewport-presets'
+} from '../../../../shared/browser/viewport-presets'
 import { YIRU_BROWSER_BLANK_URL, YIRU_BROWSER_PARTITION } from '../../../../shared/constants'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
 import { STATUS_GET_CONTRACT } from '../../../../shared/runtime-method-contracts/runtime-control-contracts'

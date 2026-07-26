@@ -3,7 +3,7 @@ import type { WebContents } from 'electron'
 import {
   didAutomationPrecheckPass,
   formatAutomationPrecheckFailure
-} from '../../shared/automation-precheck'
+} from '../../shared/automation/precheck'
 import {
   isFinalAutomationRunStatus,
   type Automation,

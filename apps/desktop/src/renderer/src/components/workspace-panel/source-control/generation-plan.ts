@@ -1,4 +1,4 @@
-import { planCommitMessageGeneration } from '../../../../../shared/commit-message-plan'
+import { planCommitMessageGeneration } from '../../../../../shared/commit-message/plan'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../../../shared/source-control/ai'
 import {
   renderSourceControlActionCommandTemplate,

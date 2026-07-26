@@ -1,4 +1,4 @@
-import { isFinalAutomationRunStatus, type AutomationRun } from './automations-types'
+import { isFinalAutomationRunStatus, type AutomationRun } from '../automations-types'
 
 export const MAX_AUTOMATION_RUNS_PER_AUTOMATION = 100
 

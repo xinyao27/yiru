@@ -28,13 +28,13 @@ import {
 while its codecs, file mechanics, and notifications are extracted incrementally. */
 import { app } from 'electron'
 
-import { normalizeAutomationPrecheck } from '../shared/automation-precheck'
-import { getAutomationLegacyRepoId } from '../shared/automation-run-identity'
-import { nextAutomationRunNumber, pruneAutomationRuns } from '../shared/automation-run-retention'
+import { normalizeAutomationPrecheck } from '../shared/automation/precheck'
+import { getAutomationLegacyRepoId } from '../shared/automation/run-identity'
+import { nextAutomationRunNumber, pruneAutomationRuns } from '../shared/automation/run-retention'
 import {
   latestAutomationOccurrenceAtOrBefore,
   nextAutomationOccurrenceAfter
-} from '../shared/automation-schedules'
+} from '../shared/automation/schedules'
 import type {
   Automation,
   AutomationCreateInput,

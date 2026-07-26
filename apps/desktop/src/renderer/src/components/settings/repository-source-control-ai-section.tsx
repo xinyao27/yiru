@@ -4,7 +4,7 @@ import type React from 'react'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message-agent-spec'
+import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message/agent-spec'
 import {
   normalizeRepoSourceControlAiOverrides,
   normalizeSourceControlAiSettings

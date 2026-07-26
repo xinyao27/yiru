@@ -10,7 +10,7 @@ import {
 import { useAppStore } from '@/store'
 
 import type { CatalogModel } from '../../../../shared/agent/session-option-catalog'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message-host-key'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../shared/commit-message/host-key'
 
 export type NativeChatModelDiscoveryContext = {
   hostKey: string

@@ -9,7 +9,7 @@ import {
   type TerminalOscColorQueryReplyColors,
   type TerminalOscColorQuerySlot
 } from '../../shared/terminal/osc-color-reply'
-import { isTuiAgent } from '../../shared/tui-agent-config'
+import { isTuiAgent } from '../../shared/tui-agent/config'
 
 type StartupTerminalColorQueryProvider = {
   write(id: string, data: string): void

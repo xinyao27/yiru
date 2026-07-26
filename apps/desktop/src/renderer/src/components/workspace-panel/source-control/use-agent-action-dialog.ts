@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '@/store'
 
 import { renderSourceControlActionCommandTemplate } from '../../../../../shared/source-control/ai-actions'
-import { isTuiAgentEnabled } from '../../../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../../shared/types'
 import { getAgentCatalog } from '../../../lib/agent-catalog'
 import {

@@ -2,7 +2,7 @@ import {
   isTuiAgentEnabled,
   pickTuiAgent,
   TUI_AGENT_AUTO_PICK_ORDER
-} from '../../../shared/tui-agent-selection'
+} from '../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../shared/types'
 
 export function pickQuickWorkspaceAgent(

@@ -6,7 +6,7 @@ import {
   isValidBrowserAnnotationViewportBridgeMarkers,
   isValidBrowserAnnotationViewportBridgeToken,
   type BrowserSetAnnotationViewportBridgeArgs
-} from '../../shared/browser-annotation-viewport-bridge'
+} from '../../shared/browser/annotation-viewport-bridge'
 import type {
   BrowserSetGrabModeArgs,
   BrowserSetGrabModeResult,
@@ -17,7 +17,7 @@ import type {
   BrowserCaptureSelectionScreenshotResult,
   BrowserExtractHoverArgs,
   BrowserExtractHoverResult
-} from '../../shared/browser-grab-types'
+} from '../../shared/browser/grab-types'
 import type {
   BrowserCookieImportResult,
   BrowserCertificateProceedResult,

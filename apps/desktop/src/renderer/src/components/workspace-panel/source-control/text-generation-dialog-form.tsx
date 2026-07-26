@@ -11,7 +11,7 @@ import {
   CUSTOM_AGENT_ID,
   isCustomAgentId,
   listCommitMessageAgentCapabilities
-} from '../../../../../shared/commit-message-agent-spec'
+} from '../../../../../shared/commit-message/agent-spec'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../../../shared/source-control/ai'
 import type { SourceControlTextActionId } from '../../../../../shared/source-control/ai-actions'
 import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'

@@ -10,8 +10,8 @@ import {
   listCommitMessageAgentCapabilities,
   type CommitMessageAgentCapability,
   type CommitMessageModelCapability
-} from '../../../../shared/commit-message-agent-spec'
-import { CUSTOM_PROMPT_PLACEHOLDER } from '../../../../shared/commit-message-prompt'
+} from '../../../../shared/commit-message/agent-spec'
+import { CUSTOM_PROMPT_PLACEHOLDER } from '../../../../shared/commit-message/prompt'
 import type { CommitMessageAiSettings } from '../../../../shared/types'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'

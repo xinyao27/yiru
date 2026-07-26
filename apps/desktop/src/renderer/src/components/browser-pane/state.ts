@@ -26,8 +26,8 @@ import { createWebSessionBrowserTabCommand } from '@/runtime/web-session-command
 import { requestWebSessionTabsRefresh } from '@/runtime/web-session-tabs-refresh-requests'
 import { toRuntimeWorktreeSelector } from '@/runtime/worktree-selector'
 
-import { GRAB_BUDGET, type BrowserPageAnnotation } from '../../../../shared/browser-grab-types'
-import { redactKagiSessionToken } from '../../../../shared/browser-url'
+import { GRAB_BUDGET, type BrowserPageAnnotation } from '../../../../shared/browser/grab-types'
+import { redactKagiSessionToken } from '../../../../shared/browser/url'
 import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '../../../../shared/constants'
 import type {
   BrowserDetectProfilesResult,

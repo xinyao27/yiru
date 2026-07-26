@@ -1,6 +1,6 @@
 import type { AppState } from '@/store'
 
-import { isCustomAgentId } from '../../../../../shared/commit-message-agent-spec'
+import { isCustomAgentId } from '../../../../../shared/commit-message/agent-spec'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../../../shared/source-control/ai'
 import type {
   SourceControlActionRecipe,

@@ -1,22 +1,22 @@
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 
-import { isShellProcess } from './agent/detection'
-import { inlineAgentDraftFitsPlatform } from './agent/draft-platform-limit'
+import { isShellProcess } from '../agent/detection'
+import { inlineAgentDraftFitsPlatform } from '../agent/draft-platform-limit'
 export { buildAgentResumeStartupPlan } from '@yiru/workbench-model/agent'
-import type { StartupCommandDelivery } from './codex-startup-delivery'
-import { planHermesStartupQuery } from './hermes-startup-query'
-import type { SessionOptionValue } from './native-chat/session-options'
-import { buildSleepingAgentLaunchConfig } from './sleeping-agent-launch-config'
-import { TUI_AGENT_CONFIG } from './tui-agent-config'
-import { resolveAgentLaunchCommand } from './tui-agent-launch-command'
+import type { StartupCommandDelivery } from '../codex-startup-delivery'
+import { planHermesStartupQuery } from '../hermes-startup-query'
+import type { SessionOptionValue } from '../native-chat/session-options'
+import { buildSleepingAgentLaunchConfig } from '../sleeping-agent-launch-config'
+import type { TuiAgent } from '../types'
+import { TUI_AGENT_CONFIG } from './config'
+import { resolveAgentLaunchCommand } from './launch-command'
 import {
   clearEnvCommand,
   commandSeparator,
   quoteStartupArg,
   resolveStartupShell,
   type AgentStartupShell
-} from './tui-agent-startup-shell'
-import type { TuiAgent } from './types'
+} from './startup-shell'
 
 export type AgentStartupPlan = {
   agent: TuiAgent
@@ -266,5 +266,5 @@ export {
   planAgentCliArgsSuffix,
   quoteStartupArg,
   resolveStartupShell
-} from './tui-agent-startup-shell'
-export type { AgentCliArgsPlan, AgentStartupShell } from './tui-agent-startup-shell'
+} from './startup-shell'
+export type { AgentCliArgsPlan, AgentStartupShell } from './startup-shell'

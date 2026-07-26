@@ -4,7 +4,7 @@ import {
   type KeybindingActionId,
   type KeybindingDefinition
 } from '../../../../shared/keybindings'
-import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
+import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../shared/types'
 
 export type ShortcutGroup = {

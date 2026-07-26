@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useAppStore } from '@/store'
 
-import { isCustomAgentId } from '../../../../../shared/commit-message-agent-spec'
+import { isCustomAgentId } from '../../../../../shared/commit-message/agent-spec'
 import { getConnectionId } from '../../../lib/connection-context'
 import {
   generateRuntimeCommitMessage,

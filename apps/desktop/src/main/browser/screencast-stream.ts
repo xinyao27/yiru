@@ -8,7 +8,7 @@ import {
   encodeBrowserScreencastFrame,
   type BrowserScreencastFormat,
   type BrowserScreencastFrameMetadata
-} from '../../shared/browser-screencast-protocol'
+} from '../../shared/browser/screencast-protocol'
 import { BrowserError } from './cdp-bridge'
 import { acquireElectronDebugger, type ElectronDebuggerLease } from './electron-debugger-lease'
 import { readBrowserScreencastImageSize } from './screencast-image-size'

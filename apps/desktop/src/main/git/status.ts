@@ -4,7 +4,7 @@ import { readFile, stat } from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { isBinaryBuffer } from '../../shared/binary-buffer'
-import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
+import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
 import { createGitConfigSnapshotRunner } from '../../shared/git/config-snapshot-runner'
 import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
 import {

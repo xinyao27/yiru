@@ -1,8 +1,8 @@
 import { resolveTuiAgentLaunchArgs, resolveTuiAgentLaunchEnv } from '@yiru/workbench-model/agent'
 
-import { isTuiAgent } from './tui-agent-config'
-import { YOLO_TUI_AGENT_ARGS, YOLO_TUI_AGENT_ENV } from './tui-agent-permissions'
-import type { TuiAgent } from './types'
+import type { TuiAgent } from '../types'
+import { isTuiAgent } from './config'
+import { YOLO_TUI_AGENT_ARGS, YOLO_TUI_AGENT_ENV } from './permissions'
 
 export { resolveTuiAgentLaunchArgs, resolveTuiAgentLaunchEnv }
 

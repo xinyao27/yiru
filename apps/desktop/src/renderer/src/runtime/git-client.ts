@@ -7,8 +7,8 @@ import {
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '../../../shared/commit-message-agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../shared/commit-message-host-key'
+} from '../../../shared/commit-message/agent-spec'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../shared/commit-message/host-key'
 import type { GitHistoryOptions, GitHistoryResult } from '../../../shared/git/history'
 import { GIT_STATUS_CONTRACT } from '../../../shared/runtime-method-contracts/source-control-contracts'
 import type { ResolvedSourceControlAiGenerationParams } from '../../../shared/source-control/ai'

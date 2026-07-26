@@ -2,7 +2,7 @@ import { getAgentLabel } from '@/lib/agent-catalog'
 import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
 
 import type { DiscoveredSkill } from '../../../../shared/skills'
-import { TUI_AGENT_AUTO_PICK_ORDER } from '../../../../shared/tui-agent-selection'
+import { TUI_AGENT_AUTO_PICK_ORDER } from '../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../shared/types'
 
 export type OrchestrationSkillLocationId =

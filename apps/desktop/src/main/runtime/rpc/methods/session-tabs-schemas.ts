@@ -2,7 +2,7 @@ import { MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH } from '@yiru/workbench-model/ui'
 import { z } from 'zod'
 
 import { OptionalBoolean } from '../../../../shared/runtime-method-contracts/runtime-method-params'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import type { TuiAgent } from '../../../../shared/types'
 import { sleepingAgentLaunchConfigSchema } from '../../../../shared/workspace/session-sleeping-agents'
 

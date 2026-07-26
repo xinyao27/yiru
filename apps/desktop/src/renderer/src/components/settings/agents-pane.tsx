@@ -22,16 +22,16 @@ import {
   getTuiAgentDefaultEnv,
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
+} from '../../../../shared/tui-agent/launch-defaults'
 import {
   applyAgentPermissionMode,
   resolveAgentPermissionModeSummary,
   type AgentPermissionMode
-} from '../../../../shared/tui-agent-permissions'
+} from '../../../../shared/tui-agent/permissions'
 import {
   isTuiAgentEnabled,
   normalizeDisabledTuiAgents
-} from '../../../../shared/tui-agent-selection'
+} from '../../../../shared/tui-agent/selection'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'

@@ -3,7 +3,7 @@ import { isRemoteRuntimePtyId } from '@/runtime/terminal-inspection'
 import { subscribeToRuntimeTerminalData } from '@/runtime/terminal-stream'
 
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'
-import type { DraftPasteReadySignal } from '../../../../shared/tui-agent-config'
+import type { DraftPasteReadySignal } from '../../../../shared/tui-agent/config'
 import type { GlobalSettings } from '../../../../shared/types'
 
 const BRACKETED_PASTE_QUIET_MS = 1500

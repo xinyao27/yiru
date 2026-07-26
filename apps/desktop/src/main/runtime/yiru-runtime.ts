@@ -204,12 +204,12 @@ import type {
 import {
   createSequencedSetupAgentCommands,
   SETUP_AGENT_SEQUENCE_STARTUP_COMMAND_ENV
-} from '../../shared/setup-agent-sequencing'
+} from '../../shared/setup/agent-sequencing'
 import {
   buildSetupRunnerCommand,
   getSetupRunnerCommandPlatformForPath
-} from '../../shared/setup-runner-command'
-import { inspectSetupScriptImportCandidates } from '../../shared/setup-script-imports'
+} from '../../shared/setup/runner-command'
+import { inspectSetupScriptImportCandidates } from '../../shared/setup/script-imports'
 import type { VoiceSettings } from '../../shared/speech-types'
 import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
@@ -235,13 +235,13 @@ import {
   getTuiAgentLaunchCommand,
   isTuiAgent,
   TUI_AGENT_CONFIG
-} from '../../shared/tui-agent-config'
+} from '../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../shared/tui-agent-launch-defaults'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent-selection'
-import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '../../shared/tui-agent-startup'
+} from '../../shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled, pickTuiAgent } from '../../shared/tui-agent/selection'
+import { buildAgentDraftLaunchPlan, buildAgentStartupPlan } from '../../shared/tui-agent/startup'
 import type {
   AutomationWorkspaceProvenance,
   BaseRefSearchResult,

@@ -21,7 +21,7 @@ import { cn } from '@/lib/class-names'
 import {
   formatAutomationSchedule,
   isValidAutomationSchedule
-} from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/schedules'
 import { parseHermesOutput, type ParsedHermesSection } from './hermes-cron-output-parse'
 
 function isPromptSection(section: ParsedHermesSection): boolean {

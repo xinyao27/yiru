@@ -31,7 +31,7 @@ import { normalizeRepoBadgeColor } from '../../shared/repo-badge-color'
 import { isFolderRepo } from '../../shared/repo-kind'
 import { normalizeRepoSourceControlAiOverrides } from '../../shared/source-control/ai'
 import type { RepoMethod } from '../../shared/telemetry-events'
-import { isTuiAgent } from '../../shared/tui-agent-config'
+import { isTuiAgent } from '../../shared/tui-agent/config'
 import type {
   BaseRefSearchResult,
   Project,

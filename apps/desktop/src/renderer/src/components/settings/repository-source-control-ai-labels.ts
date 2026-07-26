@@ -1,5 +1,5 @@
-import type { CustomAgentId } from '../../../../shared/commit-message-agent-spec'
-import { isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
+import type { CustomAgentId } from '../../../../shared/commit-message/agent-spec'
+import { isCustomAgentId } from '../../../../shared/commit-message/agent-spec'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   resolveSourceControlActionCommandTemplate,

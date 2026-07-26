@@ -14,8 +14,8 @@ import { buildAgentNotificationId } from '../../../../shared/agent/notification-
 import {
   DEFAULT_BROWSER_PAGE_ZOOM_LEVEL,
   normalizeBrowserPageZoomLevel
-} from '../../../../shared/browser-page-zoom'
-import { normalizeKagiSessionLink } from '../../../../shared/browser-url'
+} from '../../../../shared/browser/page-zoom'
+import { normalizeKagiSessionLink } from '../../../../shared/browser/url'
 import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,

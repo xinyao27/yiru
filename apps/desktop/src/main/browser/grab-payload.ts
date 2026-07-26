@@ -1,9 +1,9 @@
-import type { BrowserGrabPayload, BrowserGrabRect } from '../../shared/browser-grab-types'
+import type { BrowserGrabPayload, BrowserGrabRect } from '../../shared/browser/grab-types'
 import {
   GRAB_BUDGET,
   GRAB_SAFE_ATTRIBUTE_NAMES,
   GRAB_SECRET_PATTERNS
-} from '../../shared/browser-grab-types'
+} from '../../shared/browser/grab-types'
 
 const SAFE_GRAB_URL_PROTOCOLS = new Set(['http:', 'https:', 'file:'])
 

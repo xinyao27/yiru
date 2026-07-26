@@ -7,12 +7,12 @@ import { getAgentCatalog } from '@/lib/agent-catalog'
 import {
   isValidAutomationCronSchedule,
   isValidAutomationSchedule
-} from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/schedules'
 import type {
   AutomationSchedulePreset,
   AutomationWorkspaceMode
 } from '../../../../shared/automations-types'
-import { filterEnabledTuiAgents } from '../../../../shared/tui-agent-selection'
+import { filterEnabledTuiAgents } from '../../../../shared/tui-agent/selection'
 import type {
   GlobalSettings,
   YiruHooks,

@@ -125,7 +125,7 @@ import { createCommandCodeOutputStatusDetector } from '../../../../shared/comman
 import { createDraftPasteReadyScanner } from '../../../../shared/draft-paste-ready-scanner'
 import { resolvePaneAgentOwner } from '../../../../shared/pane-agent-owner'
 import { redactPtyIdForDiagnostics } from '../../../../shared/pty-delivery-diagnostics'
-import { resolveSetupAgentSequenceLaunchCommand } from '../../../../shared/setup-agent-sequencing'
+import { resolveSetupAgentSequenceLaunchCommand } from '../../../../shared/setup/agent-sequencing'
 import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import { makePaneKey, parseLegacyNumericPaneKey } from '../../../../shared/stable-pane-id'
 import {
@@ -147,11 +147,11 @@ import {
 } from '../../../../shared/terminal/reply-query-extraction'
 import { serializeWithAbsoluteCursor } from '../../../../shared/terminal/serialize-absolute-cursor'
 import { createTerminalZeroDimensionsMessage } from '../../../../shared/terminal/zero-dimensions-diagnostic'
-import { isTuiAgent, TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
+import { isTuiAgent, TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
+} from '../../../../shared/tui-agent/launch-defaults'
 import type { SetupSplitDirection, TuiAgent } from '../../../../shared/types'
 import { parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { createAgentCompletionCoordinator } from './agent-completion-coordinator'

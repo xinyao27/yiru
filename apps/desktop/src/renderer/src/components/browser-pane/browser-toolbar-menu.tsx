@@ -8,7 +8,7 @@ import { useAppStore } from '@/store'
 import {
   browserViewportPresetToOverride,
   getBrowserViewportPreset
-} from '../../../../shared/browser-viewport-presets'
+} from '../../../../shared/browser/viewport-presets'
 import type { BrowserViewportPresetId } from '../../../../shared/types'
 import { shouldShowBrowserImportHint } from './browser-import-hint-visibility'
 import { BrowserToolbarMenuDropdown } from './browser-toolbar-menu-dropdown'

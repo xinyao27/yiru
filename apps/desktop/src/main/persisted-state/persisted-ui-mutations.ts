@@ -3,7 +3,7 @@ import {
   normalizeVisibleExecutionHostIds
 } from '@yiru/workbench-model/workspace'
 
-import { normalizeBrowserPageZoomLevel } from '../../shared/browser-page-zoom'
+import { normalizeBrowserPageZoomLevel } from '../../shared/browser/page-zoom'
 import {
   getDefaultUIState,
   normalizeAgentActivityDisplayMode,

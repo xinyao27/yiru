@@ -9,8 +9,8 @@ import {
   type CustomAgentId,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from '../commit-message-agent-spec'
-import { LOCAL_COMMIT_MESSAGE_HOST_KEY } from '../commit-message-host-key'
+} from '../commit-message/agent-spec'
+import { LOCAL_COMMIT_MESSAGE_HOST_KEY } from '../commit-message/host-key'
 import type {
   CommitMessageAiModelCapability,
   CommitMessageAiSettings,

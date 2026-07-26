@@ -22,8 +22,8 @@ import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal/sc
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '../../shared/tui-agent-launch-defaults'
-import { normalizeDisabledTuiAgents } from '../../shared/tui-agent-selection'
+} from '../../shared/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '../../shared/tui-agent/selection'
 import type { GlobalSettings, YiruWorkspaceLayout } from '../../shared/types'
 import { normalizeUiLanguage } from '../../shared/ui-language'
 import { normalizePersistedNotificationSettings } from './persisted-notification-settings-codec'

@@ -1,5 +1,5 @@
 import type { SourceControlAiWriteTarget } from '../../../../../shared/source-control/ai-recipe-save'
-import { isTuiAgentEnabled } from '../../../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../../shared/types'
 import { translate } from '../../../i18n/i18n'
 import { getAgentCatalog } from '../../../lib/agent-catalog'

@@ -60,7 +60,7 @@ import { useAppStore } from '@/store'
 import { useRepoMap, useWorktreeMap } from '@/store/selectors'
 
 import type { PreflightStatus } from '../../../../preload/api-types'
-import { getAutomationRunRepoId } from '../../../../shared/automation-run-identity'
+import { getAutomationRunRepoId } from '../../../../shared/automation/run-identity'
 import {
   buildAutomationCronSchedule,
   buildAutomationRrule,
@@ -68,7 +68,7 @@ import {
   isValidAutomationCronSchedule,
   isValidAutomationSchedule,
   tryParseAutomationRrule
-} from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/schedules'
 import type {
   Automation,
   ExternalAutomationAction,
@@ -82,7 +82,7 @@ import type {
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
+import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
 import type { YiruHooks, Repo, Worktree } from '../../../../shared/types'
 import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import {

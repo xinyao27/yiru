@@ -22,7 +22,7 @@ import {
   renderSourceControlActionCommandTemplate
 } from '../../../../shared/source-control/ai-actions'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
 import type {
   GitHubWorkItem,
   TuiAgent,

@@ -8,7 +8,7 @@ import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import { useAppStore } from '@/store'
 
-import { filterEnabledTuiAgents } from '../../../../shared/tui-agent-selection'
+import { filterEnabledTuiAgents } from '../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../shared/types'
 
 type AgentSectionProps = {

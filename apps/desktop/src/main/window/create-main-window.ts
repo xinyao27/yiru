@@ -15,11 +15,11 @@ import {
   shell
 } from 'electron'
 
-import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser-guest-web-preferences'
+import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser/guest-web-preferences'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl
-} from '../../shared/browser-url'
+} from '../../shared/browser/url'
 import { isCrashReportReason } from '../../shared/crash-reporting'
 import {
   normalizeTerminalShortcutPolicy,

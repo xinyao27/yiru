@@ -1,12 +1,12 @@
 import { DEFAULT_APP_ICON_ID } from './app-icon'
-import { DEFAULT_BROWSER_PAGE_ZOOM_LEVEL } from './browser-page-zoom'
+import { DEFAULT_BROWSER_PAGE_ZOOM_LEVEL } from './browser/page-zoom'
 import {
   DEFAULT_LEFT_SIDEBAR_TINT_COLOR,
   DEFAULT_LEFT_SIDEBAR_TINT_OPACITY
 } from './left-sidebar-appearance'
 import { DEFAULT_LOADER_STYLE } from './loader-style'
 import { DEFAULT_OPEN_IN_APPLICATIONS } from './open-in-applications'
-import { DEFAULT_SETUP_AGENT_STARTUP_POLICY } from './setup-agent-startup-policy'
+import { DEFAULT_SETUP_AGENT_STARTUP_POLICY } from './setup/agent-startup-policy'
 import { getDefaultSourceControlAiSettings } from './source-control/ai'
 import { DEFAULT_SOURCE_CONTROL_GROUP_ORDER } from './source-control/group-order'
 import type { VoiceSettings } from './speech-types'
@@ -15,8 +15,8 @@ import { DEFAULT_STATUS_BAR_USAGE_MODE } from './status-bar-usage-mode'
 import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal/fonts'
 import { getDefaultTerminalQuickCommands } from './terminal/quick-commands'
 import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from './terminal/scrollback-policy'
-import { DEFAULT_TUI_AGENT_ARGS, DEFAULT_TUI_AGENT_ENV } from './tui-agent-launch-defaults'
-import { DEFAULT_DISABLED_TUI_AGENTS } from './tui-agent-selection'
+import { DEFAULT_TUI_AGENT_ARGS, DEFAULT_TUI_AGENT_ENV } from './tui-agent/launch-defaults'
+import { DEFAULT_DISABLED_TUI_AGENTS } from './tui-agent/selection'
 /* eslint-disable max-lines -- Why: default persisted settings live in one schema-shaped object so migrations and tests compare against one source of truth. */
 import type {
   GlobalSettings,

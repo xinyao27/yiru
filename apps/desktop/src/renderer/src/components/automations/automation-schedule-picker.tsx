@@ -18,7 +18,7 @@ import {
   buildAutomationRrule,
   formatAutomationSchedule,
   isValidAutomationSchedule
-} from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/schedules'
 import type { AutomationSchedulePreset } from '../../../../shared/automations-types'
 import { AutomationCustomCronPanel } from './automation-custom-cron-panel'
 import type { AutomationDraft } from './automation-editor-dialog'

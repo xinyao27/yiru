@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import { getBrowserCookieImportSourceLabels } from '../../../../shared/browser-cookie-import-sources'
+import { getBrowserCookieImportSourceLabels } from '../../../../shared/browser/cookie-import-sources'
 import { formatBrowserImportSummary } from './browser-detected-browsers-summary'
 import { shouldShowBrowserImportHint } from './browser-import-hint-visibility'
 

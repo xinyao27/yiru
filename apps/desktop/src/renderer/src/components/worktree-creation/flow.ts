@@ -26,7 +26,7 @@ import {
 import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 
-import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import type { CreateWorktreeResult } from '../../../../shared/types'
 
 type ContinueBackgroundWorktreeCreationOptions = {

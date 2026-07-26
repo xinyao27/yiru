@@ -121,8 +121,8 @@ import { isGitRepoKind } from '../../../../shared/repo-kind'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../../shared/tui-agent-launch-defaults'
-import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
+} from '../../../../shared/tui-agent/launch-defaults'
+import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
 import type {
   GitHubWorkItem,
   GitHubPrStartPoint,

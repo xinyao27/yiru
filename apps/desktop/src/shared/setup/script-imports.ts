@@ -1,6 +1,6 @@
-import { inspectCodexEnvironmentConfig } from './setup-script-import-codex-environment'
-import type { SetupScriptImportProvider } from './setup-script-import-providers'
-import { inspectPackageManagerSetupCandidate } from './setup-script-package-manager-suggestion'
+import { inspectCodexEnvironmentConfig } from './script-import-codex-environment'
+import type { SetupScriptImportProvider } from './script-import-providers'
+import { inspectPackageManagerSetupCandidate } from './script-package-manager-suggestion'
 
 export type SetupScriptImportCandidate = {
   provider: SetupScriptImportProvider

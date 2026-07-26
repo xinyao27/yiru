@@ -7,7 +7,7 @@ import type {
   SourceControlLaunchActionId
 } from '../../../../../shared/source-control/ai-actions'
 import { buildSourceControlRecoveryAgentCommandInput } from '../../../../../shared/source-control/recovery-agent-command'
-import { isTuiAgentEnabled } from '../../../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../../../shared/tui-agent/selection'
 import { translate } from '../../../i18n/i18n'
 import { getConnectionId } from '../../../lib/connection-context'
 import { focusTerminalTabSurface } from '../../../lib/focus-terminal-tab-surface'

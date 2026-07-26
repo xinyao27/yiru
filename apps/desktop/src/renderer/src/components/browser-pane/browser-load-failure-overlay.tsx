@@ -11,7 +11,7 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
-import { isEligibleLocalCertificateHost } from '../../../../shared/browser-url'
+import { isEligibleLocalCertificateHost } from '../../../../shared/browser/url'
 import type {
   BrowserCertificateFailure,
   BrowserCertificateProceedFailureReason,

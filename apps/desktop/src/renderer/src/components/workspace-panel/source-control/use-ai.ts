@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 
 import { useAppStore } from '@/store'
 
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../../shared/commit-message-host-key'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '../../../../../shared/commit-message/host-key'
 import {
   DEFAULT_SOURCE_CONTROL_AI_PR_CREATION_DEFAULTS,
   resolveSourceControlActionRecipe,

@@ -11,7 +11,7 @@ import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 import { useAppStore } from '@/store'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 
-import { buildSetupRunnerCommand } from '../../../../shared/setup-runner-command'
+import { buildSetupRunnerCommand } from '../../../../shared/setup/runner-command'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type {
   TerminalLayoutSnapshot,

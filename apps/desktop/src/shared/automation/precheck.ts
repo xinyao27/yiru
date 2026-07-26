@@ -1,4 +1,4 @@
-import type { AutomationPrecheck, AutomationPrecheckResult } from './automations-types'
+import type { AutomationPrecheck, AutomationPrecheckResult } from '../automations-types'
 
 export const DEFAULT_AUTOMATION_PRECHECK_TIMEOUT_SECONDS = 60
 export const MAX_AUTOMATION_PRECHECK_TIMEOUT_SECONDS = 600

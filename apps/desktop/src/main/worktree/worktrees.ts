@@ -8,7 +8,7 @@ import { ipcMain } from 'electron'
 
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { isFolderRepo } from '../../shared/repo-kind'
-import { inspectSetupScriptImportCandidates } from '../../shared/setup-script-imports'
+import { inspectSetupScriptImportCandidates } from '../../shared/setup/script-imports'
 import { workspaceSourceSchema, type WorkspaceSource } from '../../shared/telemetry-events'
 import type {
   AutomationWorkspaceProvenance,

@@ -1,5 +1,5 @@
-import type { CommitMessageDraftContext } from '../../shared/commit-message-generation'
-import type { CommitMessagePlan } from '../../shared/commit-message-plan'
+import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
+import type { CommitMessagePlan } from '../../shared/commit-message/plan'
 import { gitExecMutatesRepository } from '../../shared/git/exec-mutation'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
 import { InFlightPromiseDedupe, stableInFlightKey } from '../../shared/in-flight-promise-dedupe'

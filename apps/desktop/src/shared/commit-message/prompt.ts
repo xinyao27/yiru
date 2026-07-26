@@ -17,10 +17,7 @@ Staged diff:
 \`\`\`
 `
 
-export {
-  cleanGeneratedCommitMessage,
-  excerptAgentFailureOutput
-} from './commit-message-agent-output'
+export { cleanGeneratedCommitMessage, excerptAgentFailureOutput } from './agent-output'
 
 /** Builds the final prompt sent to the agent. The custom suffix is appended verbatim
  *  when non-empty so the user can override style (Conventional Commits, gitmoji, …). */

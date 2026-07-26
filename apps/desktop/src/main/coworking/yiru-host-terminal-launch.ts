@@ -6,13 +6,13 @@ import type {
   CoworkingTerminalCreateHostResult,
   CoworkingTerminalLaunchOptionsResult
 } from '../../shared/coworking/operation-contract'
-import { isTuiAgent } from '../../shared/tui-agent-config'
-import { TUI_AGENT_DISPLAY_NAMES } from '../../shared/tui-agent-display-names'
+import { isTuiAgent } from '../../shared/tui-agent/config'
+import { TUI_AGENT_DISPLAY_NAMES } from '../../shared/tui-agent/display-names'
 import {
   isTuiAgentEnabled,
   pickTuiAgent,
   TUI_AGENT_AUTO_PICK_ORDER
-} from '../../shared/tui-agent-selection'
+} from '../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../shared/types'
 import type { Store } from '../persistence'
 import {

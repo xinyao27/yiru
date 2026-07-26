@@ -1,7 +1,7 @@
 import {
   backfillAutomationRunNumbers,
   pruneAutomationRuns
-} from '../../shared/automation-run-retention'
+} from '../../shared/automation/run-retention'
 import { getDefaultPersistedState } from '../../shared/constants'
 import { normalizeFeatureInteractionTelemetryBuckets } from '../../shared/feature-interactions'
 import { normalizeFolderWorkspaces } from '../../shared/folder-workspaces'

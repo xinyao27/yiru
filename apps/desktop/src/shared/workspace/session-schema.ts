@@ -11,7 +11,7 @@
 import { z } from 'zod'
 
 import { isValidTerminalTabId } from '../terminal/tab-id'
-import { isTuiAgent } from '../tui-agent-config'
+import { isTuiAgent } from '../tui-agent/config'
 import type {
   BrowserWorkspace,
   TabGroupLayoutNode,

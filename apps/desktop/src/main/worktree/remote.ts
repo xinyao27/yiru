@@ -16,7 +16,7 @@ import type { BrowserWindow } from 'electron'
 
 import { assertGitPushTargetShape } from '../../shared/git/push-target-validation'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
-import { TUI_AGENT_CONFIG, isTuiAgent } from '../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG, isTuiAgent } from '../../shared/tui-agent/config'
 import type {
   AutomationWorkspaceProvenance,
   CreateWorktreeArgs,
@@ -78,12 +78,12 @@ type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
 import type { BranchPrefixSettings } from '../../shared/branch-prefix'
-import { createSequencedSetupAgentCommands } from '../../shared/setup-agent-sequencing'
-import { shouldWaitForSetupBeforeAgentStartup } from '../../shared/setup-agent-startup-policy'
+import { createSequencedSetupAgentCommands } from '../../shared/setup/agent-sequencing'
+import { shouldWaitForSetupBeforeAgentStartup } from '../../shared/setup/agent-startup-policy'
 import {
   buildSetupRunnerCommand,
   getSetupRunnerCommandPlatformForPath
-} from '../../shared/setup-runner-command'
+} from '../../shared/setup/runner-command'
 import { parseWorkspaceKey, worktreeWorkspaceKey } from '../../shared/workspace/scope'
 import {
   markCodexProjectTrusted,

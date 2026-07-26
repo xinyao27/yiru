@@ -10,8 +10,8 @@ import {
 import { useAppStore } from '@/store'
 import { useRepos } from '@/store/selectors'
 
-import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message-agent-spec'
-import type { CustomAgentId } from '../../../../shared/commit-message-agent-spec'
+import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message/agent-spec'
+import type { CustomAgentId } from '../../../../shared/commit-message/agent-spec'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import {
   SOURCE_CONTROL_ACTION_IDS,

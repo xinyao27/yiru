@@ -1,6 +1,6 @@
 import type { Session } from 'electron'
 
-import { toSecureCertificateEndpoint } from '../../shared/browser-url'
+import { toSecureCertificateEndpoint } from '../../shared/browser/url'
 import { MAX_CERTIFICATE_GRANTS, type CertificateTrustGrant } from './certificate-challenge'
 
 type CertificateIdentity = Pick<

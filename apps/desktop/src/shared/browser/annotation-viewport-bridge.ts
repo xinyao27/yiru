@@ -1,4 +1,4 @@
-import type { BrowserGrabRect } from './browser-grab-types'
+import type { BrowserGrabRect } from './grab-types'
 
 export type BrowserAnnotationViewportBridgeMarker = {
   id: string

@@ -26,11 +26,11 @@ import { useAppStore } from '@/store'
 import { repoIsRemote } from '../../../shared/agent/launch-remote'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
 import type { LaunchSource } from '../../../shared/telemetry-events'
-import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
+import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
+} from '../../../shared/tui-agent/launch-defaults'
 import type { TuiAgent } from '../../../shared/types'
 
 export type LaunchAgentInNewTabArgs = {

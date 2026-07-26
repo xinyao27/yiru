@@ -10,8 +10,8 @@ import type { SessionOptionValue } from '../../../shared/native-chat/session-opt
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
+} from '../../../shared/tui-agent/launch-defaults'
+import { isTuiAgentEnabled } from '../../../shared/tui-agent/selection'
 import type { GlobalSettings, OnboardingState, TuiAgent } from '../../../shared/types'
 
 export type OnboardingFolderAgentStartup = {

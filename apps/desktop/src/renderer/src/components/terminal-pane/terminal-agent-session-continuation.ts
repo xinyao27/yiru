@@ -9,7 +9,7 @@ import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { useAppStore } from '@/store'
 
 import { makePaneKey } from '../../../../shared/stable-pane-id'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import type { TuiAgent } from '../../../../shared/types'
 
 type PrepareAgentSessionContinuationFromPaneArgs = {

@@ -1,10 +1,6 @@
-import {
-  getCommitMessageAgentSpec,
-  getCommitMessageModel,
-  isCustomAgentId
-} from './commit-message-agent-spec'
-import { planCustomCommand, tokenizeCustomCommandTemplate } from './commit-message-prompt'
-import type { TuiAgent } from './types'
+import type { TuiAgent } from '../types'
+import { getCommitMessageAgentSpec, getCommitMessageModel, isCustomAgentId } from './agent-spec'
+import { planCustomCommand, tokenizeCustomCommandTemplate } from './prompt'
 
 // Why: planning is a pure transformation from "user request + prompt text"
 // into "spawn-ready binary + argv". Keeping it in shared lets both the local

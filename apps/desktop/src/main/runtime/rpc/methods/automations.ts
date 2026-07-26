@@ -4,8 +4,8 @@ import { z } from 'zod'
 import {
   MAX_AUTOMATION_PRECHECK_TIMEOUT_SECONDS,
   normalizeAutomationPrecheckTimeoutSeconds
-} from '../../../../shared/automation-precheck'
-import { isValidAutomationSchedule } from '../../../../shared/automation-schedules'
+} from '../../../../shared/automation/precheck'
+import { isValidAutomationSchedule } from '../../../../shared/automation/schedules'
 import type { ProjectSourceIdentity as SharedProjectSourceIdentity } from '../../../../shared/project-source-context'
 import {
   OptionalBoolean,
@@ -15,7 +15,7 @@ import {
   requiredNumber,
   requiredString
 } from '../../../../shared/runtime-method-contracts/runtime-method-params'
-import { isTuiAgent } from '../../../../shared/tui-agent-config'
+import { isTuiAgent } from '../../../../shared/tui-agent/config'
 import { defineMethod, type RpcMethod } from '../core'
 
 const TuiAgent = requiredString('Missing provider').refine(isTuiAgent, {

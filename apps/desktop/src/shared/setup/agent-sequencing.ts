@@ -1,4 +1,4 @@
-import { resolveSetupRunnerCommand, type SetupRunnerCommandPlatform } from './setup-runner-command'
+import { resolveSetupRunnerCommand, type SetupRunnerCommandPlatform } from './runner-command'
 
 const DEFAULT_WAIT_TIMEOUT_SECONDS = 2 * 60 * 60
 export const SETUP_AGENT_SEQUENCE_STARTUP_COMMAND_ENV = 'YIRU_SEQUENCED_STARTUP_COMMAND'

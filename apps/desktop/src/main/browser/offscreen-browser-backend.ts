@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { BrowserWindow } from 'electron'
 
-import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser-guest-web-preferences'
+import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser/guest-web-preferences'
 import { YIRU_BROWSER_PARTITION } from '../../shared/constants'
 import type { BrowserBackend, BrowserBackendCreateTab } from './backend'
 import type { BrowserManager } from './manager'

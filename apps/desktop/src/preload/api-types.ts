@@ -21,7 +21,7 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { AgentHookInstallStatus } from '../shared/agent/hook-types'
 import type { AgentInterruptInferenceRequest } from '../shared/agent/interrupt-intent'
 import type { AppIdentity } from '../shared/app-identity'
-import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser-annotation-viewport-bridge'
+import type { BrowserSetAnnotationViewportBridgeArgs } from '../shared/browser/annotation-viewport-bridge'
 import type {
   BrowserSetGrabModeArgs,
   BrowserSetGrabModeResult,
@@ -32,7 +32,7 @@ import type {
   BrowserCaptureSelectionScreenshotResult,
   BrowserExtractHoverArgs,
   BrowserExtractHoverResult
-} from '../shared/browser-grab-types'
+} from '../shared/browser/grab-types'
 import type {
   BrowserContextMenuDismissedEvent,
   BrowserContextMenuRequestedEvent,
@@ -41,13 +41,13 @@ import type {
   BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '../shared/browser-guest-events'
+} from '../shared/browser/guest-events'
 import type { CliInstallStatus } from '../shared/cli-install-types'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '../shared/commit-message-agent-spec'
+} from '../shared/commit-message/agent-spec'
 import type {
   CoworkingDecideControlArgs,
   CoworkingRequestControlArgs,
@@ -130,7 +130,7 @@ import type {
   RuntimeTerminalDriverState,
   RuntimeTerminalPresentation
 } from '../shared/runtime-types'
-import type { SetupScriptImportCandidate } from '../shared/setup-script-imports'
+import type { SetupScriptImportCandidate } from '../shared/setup/script-imports'
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,

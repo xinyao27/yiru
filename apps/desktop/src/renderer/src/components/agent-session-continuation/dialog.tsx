@@ -34,7 +34,7 @@ import { translate } from '@/i18n/i18n'
 import { getAgentCatalog, getAgentLabel } from '@/lib/agent-catalog'
 import { useAppStore } from '@/store'
 
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
+import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
 import type { TuiAgent } from '../../../../shared/types'
 import { chooseInitialContinuationAgent } from './selection'
 

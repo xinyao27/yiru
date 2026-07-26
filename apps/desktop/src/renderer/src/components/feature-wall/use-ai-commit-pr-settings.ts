@@ -8,7 +8,7 @@ import {
   getCommitMessageAgentCapability,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
-} from '../../../../shared/commit-message-agent-spec'
+} from '../../../../shared/commit-message/agent-spec'
 import type { CommitMessageAiSettings, TuiAgent } from '../../../../shared/types'
 import {
   EMPTY_COMMIT_MESSAGE_AI_SETTINGS,

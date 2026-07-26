@@ -195,8 +195,8 @@ inline apps/desktop/src/renderer/src/store/slices/worktrees.ts
 inline apps/desktop/src/renderer/src/web/preload-api.ts
 inline apps/desktop/src/renderer/src/web/runtime-client.ts
 inline apps/desktop/src/shared/agent/hook-listener.ts
-inline apps/desktop/src/shared/automation-schedules.ts
-inline apps/desktop/src/shared/commit-message-agent-spec.ts
+inline apps/desktop/src/shared/automation/schedules.ts
+inline apps/desktop/src/shared/commit-message/agent-spec.ts
 inline apps/desktop/src/shared/constants.ts
 inline apps/desktop/src/shared/keybindings.ts
 inline apps/desktop/src/shared/marine-creatures.ts

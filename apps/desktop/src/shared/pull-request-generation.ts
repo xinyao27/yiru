@@ -1,4 +1,4 @@
-import { truncateDiffForPrompt } from './commit-message-prompt'
+import { truncateDiffForPrompt } from './commit-message/prompt'
 
 export type PullRequestDraftContext = {
   branch: string | null

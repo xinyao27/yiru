@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import type { BrowserScreencastFrameMetadata } from '../../../../shared/browser-screencast-protocol'
+import type { BrowserScreencastFrameMetadata } from '../../../../shared/browser/screencast-protocol'
 
 export function getRemoteBrowserFrameStyle(
   _metadata: BrowserScreencastFrameMetadata | null

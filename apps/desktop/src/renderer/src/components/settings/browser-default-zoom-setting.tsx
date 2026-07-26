@@ -4,7 +4,7 @@ import {
   BROWSER_PAGE_ZOOM_LEVELS,
   browserPageZoomLevelToPercent,
   normalizeBrowserPageZoomLevel
-} from '../../../../shared/browser-page-zoom'
+} from '../../../../shared/browser/page-zoom'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { SearchableSetting } from './searchable-setting'

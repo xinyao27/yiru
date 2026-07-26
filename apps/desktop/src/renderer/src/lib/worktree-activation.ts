@@ -40,13 +40,13 @@ import { repoIsRemote } from '../../../shared/agent/launch-remote'
 import type { StartupCommandDelivery } from '../../../shared/codex-startup-delivery'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
 import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
-import { createSequencedSetupAgentCommands } from '../../../shared/setup-agent-sequencing'
-import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup-runner-command'
-import { isTuiAgent } from '../../../shared/tui-agent-config'
+import { createSequencedSetupAgentCommands } from '../../../shared/setup/agent-sequencing'
+import { getSetupRunnerCommandPlatformForPath } from '../../../shared/setup/runner-command'
+import { isTuiAgent } from '../../../shared/tui-agent/config'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
-} from '../../../shared/tui-agent-launch-defaults'
+} from '../../../shared/tui-agent/launch-defaults'
 /* eslint-disable max-lines -- Why: worktree activation is a single ordered flow spanning startup, setup, and default tabs; splitting it would obscure sequencing guarantees. */
 import type {
   FolderWorkspace,

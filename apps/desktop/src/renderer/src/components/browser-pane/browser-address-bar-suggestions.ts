@@ -9,7 +9,7 @@ import {
   normalizeBrowserNavigationUrl,
   SEARCH_ENGINE_LABELS,
   type SearchEngine
-} from '../../../../shared/browser-url'
+} from '../../../../shared/browser/url'
 import type { BrowserHistoryEntry } from '../../../../shared/types'
 
 export const MAX_BROWSER_ADDRESS_BAR_SUGGESTIONS = 8

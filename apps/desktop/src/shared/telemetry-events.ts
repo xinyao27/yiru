@@ -44,7 +44,7 @@ import {
   NESTED_REPO_TELEMETRY_SURFACES,
   bucketNestedRepoTelemetryCount
 } from './nested-repo-telemetry'
-import { SETUP_SCRIPT_IMPORT_PROVIDERS } from './setup-script-import-providers'
+import { SETUP_SCRIPT_IMPORT_PROVIDERS } from './setup/script-import-providers'
 import {
   starNagAgentBucketSchema,
   starNagOutcomeSchema,
