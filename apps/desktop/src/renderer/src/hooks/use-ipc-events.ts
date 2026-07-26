@@ -1265,7 +1265,7 @@ export function useIpcEvents(): void {
         if (store.activeView !== 'terminal') {
           return
         }
-        if (store.activeSpoolWorkspaceRoute) {
+        if (store.activeCoworkingWorkspaceRoute) {
           store.showRightSidebarFiles()
           return
         }

@@ -73,6 +73,12 @@ import { startCodexSessionBackfillInBackground } from './codex/session-backfill'
 import { startCodexSessionIndexHealInBackground } from './codex/session-index-heal'
 import { resolveHostCodexSessionSourceHome } from './codex/session-source-home'
 import {
+  createCoworkingOwnerComposition,
+  type CoworkingOwnerComposition
+} from './coworking/owner-composition'
+import { registerCoworkingSharingHandlers } from './coworking/sharing'
+import { CoworkingUnavailableOwnerService } from './coworking/unavailable-owner-service'
+import {
   recordCoalescedCrashBreadcrumb,
   recordCrashBreadcrumb
 } from './crash-reporting/crash-breadcrumb-store'
@@ -139,12 +145,6 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
-import {
-  createSpoolDesktopComposition,
-  type SpoolDesktopComposition
-} from './spool/desktop-composition'
-import { registerSpoolSharingHandlers } from './spool/sharing'
-import { SpoolUnavailableDesktopService } from './spool/unavailable-desktop-service'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -254,8 +254,8 @@ let runtime: YiruRuntimeService | null = null
 let globalAssistant: GlobalAssistantService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
-let spoolDesktop: SpoolDesktopComposition | null = null
-let unregisterSpoolSharingHandlers: (() => void) | null = null
+let coworkingOwner: CoworkingOwnerComposition | null = null
+let unregisterCoworkingSharingHandlers: (() => void) | null = null
 // Why: set during early startup; gates whether headless serve installs the
 // offscreen browser backend (and thus advertises browser pane support).
 let headlessBrowserDisplayAvailable = false
@@ -2410,7 +2410,7 @@ app.whenReady().then(async () => {
   }
 
   try {
-    spoolDesktop = createSpoolDesktopComposition({
+    coworkingOwner = createCoworkingOwnerComposition({
       store,
       runtime: runtimeService,
       rateLimits,
@@ -2423,12 +2423,12 @@ app.whenReady().then(async () => {
       osFamily:
         process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
     })
-    unregisterSpoolSharingHandlers = registerSpoolSharingHandlers(spoolDesktop.service)
+    unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(coworkingOwner.service)
   } catch (error) {
-    // Why: corrupt sharing state or a missing platform dependency disables only Spool.
-    console.error('[spool] Failed to compose Desktop sharing:', error)
-    unregisterSpoolSharingHandlers = registerSpoolSharingHandlers(
-      new SpoolUnavailableDesktopService()
+    // Why: corrupt sharing state or a missing platform dependency disables only Coworking.
+    console.error('[coworking] Failed to compose Desktop sharing:', error)
+    unregisterCoworkingSharingHandlers = registerCoworkingSharingHandlers(
+      new CoworkingUnavailableOwnerService()
     )
   }
 
@@ -2440,7 +2440,7 @@ app.whenReady().then(async () => {
     runtimeRpc.start().catch((error) => {
       console.error('[runtime] Failed to start local RPC transport:', error)
     }),
-    spoolDesktop?.start()
+    coworkingOwner?.start()
   ])
 
   // Why: the macOS notification permission dialog must fire after the window
@@ -2531,8 +2531,8 @@ app.on('will-quit', (e) => {
   // app.quit() re-fires will-quit, but the second pass skips straight through.
   if (!daemonDisconnectDone) {
     e.preventDefault()
-    unregisterSpoolSharingHandlers?.()
-    unregisterSpoolSharingHandlers = null
+    unregisterCoworkingSharingHandlers?.()
+    unregisterCoworkingSharingHandlers = null
     // Why: capture ownership synchronously (before any await) so the guard
     // still has the right pid/runtimeId to compare against if shutdown
     // partially clears global state. Evaluating these inside .then() would
@@ -2560,9 +2560,9 @@ app.on('will-quit', (e) => {
             console.error('[runtime] Failed to stop local RPC transport:', error)
           })
       : Promise.resolve()
-    const spoolStop = spoolDesktop
-      ? spoolDesktop.stop().catch((error) => {
-          console.error('[spool] Failed to stop Desktop sharing:', error)
+    const coworkingStop = coworkingOwner
+      ? coworkingOwner.stop().catch((error) => {
+          console.error('[coworking] Failed to stop Desktop sharing:', error)
         })
       : Promise.resolve()
     // Why: Promise.allSettled — we need BOTH the daemon disconnect and the
@@ -2581,7 +2581,7 @@ app.on('will-quit', (e) => {
     Promise.allSettled([
       daemonTeardown,
       rpcStopAndClear,
-      spoolStop,
+      coworkingStop,
       watcherShutdown,
       emulatorShutdown,
       globalAssistantShutdown

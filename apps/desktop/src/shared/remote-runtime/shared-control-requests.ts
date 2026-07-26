@@ -68,7 +68,7 @@ export function requestSharedControl<TResult>(args: {
     void args.ensureReady().then(
       async () => {
         try {
-          // Why: queued Spool mutations must revalidate after connection setup, at transmission.
+          // Why: queued Coworking mutations must revalidate after connection setup, at transmission.
           await args.beforeSend?.()
           args.signal?.throwIfAborted()
           const pending = args.pendingRequests.get(requestId)

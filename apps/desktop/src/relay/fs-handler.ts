@@ -19,12 +19,12 @@ import type { RelayContext } from './context'
 import { expandTilde } from './context'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { RelayFilesystemWatchRegistry } from './filesystem-watch-registry'
+import { registerCoworkingVerifiedFilesystemHandlers } from './fs-handler-coworking-verified'
 import { readRelayFileContent } from './fs-handler-file-content'
 import { startRelayFileStream } from './fs-handler-file-stream-request'
 import { listFilesWithGit, searchWithGitGrep } from './fs-handler-git-fallback'
 import { buildInstallRgMessage } from './fs-handler-install-rg'
 import { listFilesWithReaddir } from './fs-handler-readdir-fallback'
-import { registerSpoolVerifiedFilesystemHandlers } from './fs-handler-spool-verified'
 import {
   readVerifiedTerminalArtifact,
   writeVerifiedTerminalArtifact
@@ -120,7 +120,7 @@ export class FsHandler {
   }
 
   private registerHandlers(): void {
-    registerSpoolVerifiedFilesystemHandlers(this.dispatcher)
+    registerCoworkingVerifiedFilesystemHandlers(this.dispatcher)
     this.dispatcher.onRequest('fs.readDir', (p, context) => this.readDir(p, context))
     this.dispatcher.onRequest('fs.readFile', (p) => this.readFile(p))
     this.dispatcher.onRequest('fs.readFileStream', (p, c) => this.readFileStream(p, c))

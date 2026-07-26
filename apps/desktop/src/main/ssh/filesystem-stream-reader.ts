@@ -1,10 +1,10 @@
 import { TextDecoder } from 'node:util'
 
 import {
-  SPOOL_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
-  SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
-  SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
-} from '../../shared/spool/resource-limits'
+  COWORKING_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
+  COWORKING_SESSION_INVENTORY_STREAM_PROFILE,
+  COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
+} from '../../shared/coworking/resource-limits'
 import type { FileReadResult } from '../providers/types'
 import type { SshChannelMultiplexer } from './channel-multiplexer'
 import {
@@ -64,12 +64,12 @@ export async function consumeSessionInventoryJsonLines(
   signal?: AbortSignal
 ): Promise<void> {
   const decoder = new BoundedUtf8LineDecoder(
-    SPOOL_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
+    COWORKING_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
     consumeLine
   )
   await consumeSshFileStream(mux, filePath, {
-    maxBytes: SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES,
-    profile: SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
+    maxBytes: COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES,
+    profile: COWORKING_SESSION_INVENTORY_STREAM_PROFILE,
     signal,
     onMetadata: (metadata) => {
       if (metadata.isBinary || metadata.isImage || metadata.resultEncoding === 'base64') {

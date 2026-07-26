@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SpoolGitPane } from '@/components/spool/git-pane'
+import { CoworkingGitPane } from '@/components/coworking/git-pane'
 
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
@@ -77,8 +77,8 @@ function SourceControl({
   isVisible?: boolean
   workspacePanelTabId?: string
 }): React.JSX.Element | null {
-  if (source.kind === 'spool') {
-    return source.supportsGit ? <SpoolGitPane route={source.route} /> : null
+  if (source.kind === 'coworking') {
+    return source.supportsGit ? <CoworkingGitPane route={source.route} /> : null
   }
   return <LocalSourceControl isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }

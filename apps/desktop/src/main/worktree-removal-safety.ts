@@ -22,8 +22,8 @@ const YIRU_CREATION_SOURCES = new Set<NonNullable<WorktreeMeta['yiruCreationSour
 ])
 const YIRU_OWNED_PROVENANCE_META_KEYS = [
   'instanceId',
-  'spoolVisibility',
-  'spoolIncarnationId',
+  'coworkingVisibility',
+  'coworkingIncarnationId',
   'yiruCreatedAt',
   'yiruCreationSource',
   'yiruCreationWorkspaceLayout',

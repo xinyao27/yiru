@@ -2,9 +2,9 @@ import { open, stat } from 'node:fs/promises'
 import { extname } from 'node:path'
 
 import {
-  SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
-  SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
-} from '../shared/spool/resource-limits'
+  COWORKING_SESSION_INVENTORY_STREAM_PROFILE,
+  COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
+} from '../shared/coworking/resource-limits'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import {
   IMAGE_MIME_TYPES,
@@ -47,10 +47,10 @@ export type StreamPumpOptions = {
   paceWithAcks: boolean
 }
 
-export type RelayFileStreamProfile = typeof SPOOL_SESSION_INVENTORY_STREAM_PROFILE | undefined
+export type RelayFileStreamProfile = typeof COWORKING_SESSION_INVENTORY_STREAM_PROFILE | undefined
 
 export function parseRelayFileStreamProfile(value: unknown): RelayFileStreamProfile {
-  if (value === undefined || value === SPOOL_SESSION_INVENTORY_STREAM_PROFILE) {
+  if (value === undefined || value === COWORKING_SESSION_INVENTORY_STREAM_PROFILE) {
     return value
   }
   throw new Error('Invalid fs.readFileStream profile')
@@ -66,12 +66,12 @@ export async function readRelayFileStreamMetadata(
 ): Promise<StreamMetadata> {
   const stats = await stat(filePath)
   const mimeType = IMAGE_MIME_TYPES[extname(filePath).toLowerCase()]
-  if (profile === SPOOL_SESSION_INVENTORY_STREAM_PROFILE && mimeType) {
+  if (profile === COWORKING_SESSION_INVENTORY_STREAM_PROFILE && mimeType) {
     throw new Error('Session inventory streams require text files')
   }
   const sizeLimit =
-    profile === SPOOL_SESSION_INVENTORY_STREAM_PROFILE
-      ? SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
+    profile === COWORKING_SESSION_INVENTORY_STREAM_PROFILE
+      ? COWORKING_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
       : mimeType
         ? MAX_PREVIEWABLE_BINARY_SIZE
         : MAX_TEXT_FILE_SIZE

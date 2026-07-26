@@ -148,8 +148,8 @@ export function getActiveSshAiVaultHostInfo(targetId: string): SshRelayAiVaultHo
   return activeSessions.get(targetId)?.getAiVaultHostInfo() ?? null
 }
 
-/** Owner-only Spool lookup; runtime-owned targets stay hidden from every renderer API. */
-export function getActiveSshSpoolHostInfo(targetId: string): SshRelayAiVaultHostInfo | null {
+/** Owner-only Coworking lookup; runtime-owned targets stay hidden from every renderer API. */
+export function getActiveSshCoworkingHostInfo(targetId: string): SshRelayAiVaultHostInfo | null {
   return activeSessions.get(targetId)?.getAiVaultHostInfo() ?? null
 }
 

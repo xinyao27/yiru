@@ -79,11 +79,11 @@ import {
   STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS,
   shouldOpenStatusBarContextMenu
 } from './context-menu-policy'
+import { CoworkingAvailabilityStatusSegment } from './coworking-availability-status-segment'
 import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
 import { ProviderLetterBadge, ProviderUsageSegment } from './provider-usage-segment'
 import { getVisibleUsageProvider, isUsageEmptyState } from './provider-visibility'
 import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-segment'
-import { SpoolAvailabilityStatusSegment } from './spool-availability-status-segment'
 import { ProviderPanel, barColor, clampUsedPercent, formatResetCreditExpiry } from './tooltip'
 import { UpdateStatusSegment } from './update-status-segment'
 import { StatusBarUsageEmptyCta } from './usage-empty-cta'
@@ -2190,7 +2190,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
           {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
           {showSsh ? <SshStatusSegment compact={compact} iconOnly /> : null}
         </React.Suspense>
-        <SpoolAvailabilityStatusSegment />
+        <CoworkingAvailabilityStatusSegment />
         {showFloatingTerminalToggle && (
           <FloatingTerminalIconContextMenu currentLocation="status-bar" className="relative h-full">
             <Tooltip>

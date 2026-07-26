@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SpoolFilesPane } from '@/components/spool/files-pane'
+import { CoworkingFilesPane } from '@/components/coworking/files-pane'
 
 import { FileExplorerFilesMemo } from './file-explorer-files'
 import {
@@ -17,8 +17,8 @@ function FileExplorer({
   isVisible?: boolean
   workspacePanelTabId?: string
 }): React.JSX.Element {
-  if (source.kind === 'spool') {
-    return <SpoolFilesPane route={source.route} supportsDiff={source.supportsGit} />
+  if (source.kind === 'coworking') {
+    return <CoworkingFilesPane route={source.route} supportsDiff={source.supportsGit} />
   }
   return <FileExplorerFilesMemo isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }

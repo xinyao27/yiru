@@ -32,9 +32,9 @@ import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
 
 import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../shared/constants'
+import type { CoworkingOwnerControlGrantView } from '../../../../shared/coworking/ipc-contract'
 import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
 import { isFolderRepo } from '../../../../shared/repo-kind'
-import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/ipc-contract'
 import type { Worktree, Repo } from '../../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace/scope'
 import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
@@ -126,14 +126,14 @@ type WorktreeCardProps = {
   nativeDragEnabled?: boolean
   affiliateListMode?: boolean
   statusPrDisplay?: WorktreeCardPrDisplay | null
-  spoolControlGrants?: readonly SpoolOwnerControlGrantView[]
-  spoolRevokingGrantIds?: ReadonlySet<string>
-  onRevokeSpoolControlGrant?: (grantId: string) => void
+  coworkingControlGrants?: readonly CoworkingOwnerControlGrantView[]
+  coworkingRevokingGrantIds?: ReadonlySet<string>
+  onRevokeCoworkingControlGrant?: (grantId: string) => void
 }
 
 const EMPTY_WORKSPACE_PORTS = []
-const EMPTY_SPOOL_CONTROL_GRANTS: readonly SpoolOwnerControlGrantView[] = []
-const EMPTY_SPOOL_REVOKING_GRANT_IDS: ReadonlySet<string> = new Set()
+const EMPTY_COWORKING_CONTROL_GRANTS: readonly CoworkingOwnerControlGrantView[] = []
+const EMPTY_COWORKING_REVOKING_GRANT_IDS: ReadonlySet<string> = new Set()
 const HOSTED_REVIEW_CARD_REFRESH_INTERVAL_MS = 60_000
 
 export function shouldBeginWorktreeRename(
@@ -221,9 +221,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
   isLineageDropTarget = false,
   affiliateListMode = false,
   statusPrDisplay = null,
-  spoolControlGrants = EMPTY_SPOOL_CONTROL_GRANTS,
-  spoolRevokingGrantIds = EMPTY_SPOOL_REVOKING_GRANT_IDS,
-  onRevokeSpoolControlGrant
+  coworkingControlGrants = EMPTY_COWORKING_CONTROL_GRANTS,
+  coworkingRevokingGrantIds = EMPTY_COWORKING_REVOKING_GRANT_IDS,
+  onRevokeCoworkingControlGrant
 }: WorktreeCardProps) {
   const openModal = useAppStore((s) => s.openModal)
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
@@ -962,7 +962,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const hasSecondaryCardContent =
     hasMetaRow ||
     !!remoteBranchConflict ||
-    spoolControlGrants.length > 0 ||
+    coworkingControlGrants.length > 0 ||
     showInlineAgentList ||
     showLineageChildChip
   const titleOnlyCard = !hasSecondaryCardContent
@@ -1294,11 +1294,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         )}
 
-        {spoolControlGrants.length > 0 && onRevokeSpoolControlGrant ? (
+        {coworkingControlGrants.length > 0 && onRevokeCoworkingControlGrant ? (
           <WorktreeCardControlGrants
-            grants={spoolControlGrants}
-            revokingGrantIds={spoolRevokingGrantIds}
-            onRevoke={onRevokeSpoolControlGrant}
+            grants={coworkingControlGrants}
+            revokingGrantIds={coworkingRevokingGrantIds}
+            onRevoke={onRevokeCoworkingControlGrant}
           />
         ) : null}
 
@@ -1314,7 +1314,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
             worktreeId={worktree.id}
             agents={agentActivityDisplayMode === 'compact' ? compactInlineAgentRows : undefined}
             className={
-              hasMetaRow || remoteBranchConflict || spoolControlGrants.length > 0 ? 'mt-0' : '-mt-1'
+              hasMetaRow || remoteBranchConflict || coworkingControlGrants.length > 0
+                ? 'mt-0'
+                : '-mt-1'
             }
           />
         )}

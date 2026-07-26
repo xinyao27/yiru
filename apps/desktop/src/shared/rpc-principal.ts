@@ -5,8 +5,8 @@ export type TailnetPrincipal = {
   nodeDisplayName: string
 }
 
-export type AuthenticatedSpoolPrincipal = {
-  kind: 'spool'
+export type AuthenticatedCoworkingPrincipal = {
+  kind: 'coworking'
   connectionId: string
   tailnet: TailnetPrincipal
   channelKeyFingerprint: string
@@ -14,4 +14,4 @@ export type AuthenticatedSpoolPrincipal = {
 
 export type AuthenticatedRpcPrincipal =
   | { kind: 'paired-device'; deviceId: string; scope: 'mobile' | 'runtime' }
-  | AuthenticatedSpoolPrincipal
+  | AuthenticatedCoworkingPrincipal

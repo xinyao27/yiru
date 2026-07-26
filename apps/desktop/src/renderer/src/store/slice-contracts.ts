@@ -1,10 +1,10 @@
 import type { BrowserSlice } from '../components/browser-pane/state'
+import type { CoworkingSharingSlice } from '../components/coworking/state'
 import type { DictationSlice } from '../components/dictation/state'
 import type { DiffCommentsSlice } from '../components/diff-comments/state'
 import type { EditorSlice } from '../components/editor/state'
 import type { GitHubSlice } from '../components/github/state'
 import type { SettingsSlice } from '../components/settings/state'
-import type { SpoolSharingSlice } from '../components/spool/state'
 import type { ClaudeUsageSlice } from '../components/stats/claude-usage'
 import type { CodexUsageSlice } from '../components/stats/codex-usage'
 import type { OpenCodeUsageSlice } from '../components/stats/opencode-usage'
@@ -76,5 +76,5 @@ declare module './types' {
       PinnedTabCloseConfirmSlice,
       RecentlyClosedTabsSlice,
       YiruProfilesSlice,
-      SpoolSharingSlice {}
+      CoworkingSharingSlice {}
 }

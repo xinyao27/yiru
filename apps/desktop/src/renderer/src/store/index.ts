@@ -7,12 +7,12 @@ import {
 } from '@/lib/renderer-memory-profile'
 
 import { createBrowserSlice } from '../components/browser-pane/state'
+import { createCoworkingSharingSlice } from '../components/coworking/state'
 import { createDictationSlice } from '../components/dictation/state'
 import { createDiffCommentsSlice } from '../components/diff-comments/state'
 import { createEditorSlice } from '../components/editor/state'
 import { createGitHubSlice } from '../components/github/state'
 import { createSettingsSlice } from '../components/settings/state'
-import { createSpoolSharingSlice } from '../components/spool/state'
 import { createClaudeUsageSlice } from '../components/stats/claude-usage'
 import { createCodexUsageSlice } from '../components/stats/codex-usage'
 import { createOpenCodeUsageSlice } from '../components/stats/opencode-usage'
@@ -83,7 +83,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createPinnedTabCloseConfirmSlice(...a),
   ...createRecentlyClosedTabsSlice(...a),
   ...createYiruProfilesSlice(...a),
-  ...createSpoolSharingSlice(...a)
+  ...createCoworkingSharingSlice(...a)
 }))
 
 registerHttpLinkStoreAccessor(() => useAppStore.getState())

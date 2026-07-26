@@ -7,7 +7,8 @@ import {
 } from '../ssh/filesystem-stream-reader'
 import { isWindowsRemoteHost, type RemoteHostPlatform } from '../ssh/remote-platform'
 import { uploadBuffer } from '../ssh/sftp-upload'
-import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
+import type { CoworkingVerifiedRemoteFilesystem } from './coworking-verified-filesystem-types'
+import { createSshCoworkingVerifiedFilesystem } from './ssh-coworking-verified-filesystem'
 import {
   downloadFileViaSftp,
   downloadFolderViaSftp,
@@ -31,7 +32,6 @@ import {
   type WatchRegistration
 } from './ssh-filesystem-provider-watch'
 import { routeSshFilesystemWatchNotification } from './ssh-filesystem-watch-notifications'
-import { createSshSpoolVerifiedFilesystem } from './ssh-spool-verified-filesystem'
 import type {
   IFilesystemProvider,
   FileStat,
@@ -42,7 +42,7 @@ import type {
 const WORKSPACE_SPACE_SCAN_TIMEOUT_MS = 130_000
 
 export class SshFilesystemProvider implements IFilesystemProvider {
-  readonly spoolVerifiedFiles: SpoolVerifiedRemoteFilesystem
+  readonly coworkingVerifiedFiles: CoworkingVerifiedRemoteFilesystem
   readonly downloadFolder?: FolderDownloader
   private connectionId: string
   private mux: SshChannelMultiplexer
@@ -60,7 +60,7 @@ export class SshFilesystemProvider implements IFilesystemProvider {
   ) {
     this.connectionId = connectionId
     this.mux = mux
-    this.spoolVerifiedFiles = createSshSpoolVerifiedFilesystem(mux)
+    this.coworkingVerifiedFiles = createSshCoworkingVerifiedFilesystem(mux)
 
     if (createSftp) {
       // Why: system SSH has single-file transfer but no ssh2 SFTP channel;

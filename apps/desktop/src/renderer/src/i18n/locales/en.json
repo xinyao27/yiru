@@ -3189,9 +3189,9 @@
           "workspaceSection": "Workspace",
           "primaryDeleteDisabled": "Primary worktree — can't be deleted. Remove the project instead.",
           "deleteWorktree": "Delete Worktree",
-          "makeSpoolPrivate": "Make private",
-          "makeSpoolPublic": "Make public",
-          "spoolPrivateFailed": "Could not make this worktree private."
+          "makeCoworkingPrivate": "Make private",
+          "makeCoworkingPublic": "Make public",
+          "coworkingPrivateFailed": "Could not make this worktree private."
         },
         "WorktreeList": {
           "7a8b9c0d1e": "Update required",
@@ -3236,9 +3236,9 @@
           "failedNestWorkspace": "Failed to nest workspace",
           "sidebarRowMissing": "Target no longer exists",
           "failedUnnestWorkspace": "Failed to unnest workspace",
-          "makeSpoolProjectPrivate": "Make all worktrees private",
-          "makeSpoolProjectPublic": "Make all worktrees public",
-          "spoolProjectPrivateFailed": "Could not make these worktrees private."
+          "makeCoworkingProjectPrivate": "Make all worktrees private",
+          "makeCoworkingProjectPublic": "Make all worktrees public",
+          "coworkingProjectPrivateFailed": "Could not make these worktrees private."
         },
         "WorktreeOpenInMenu": {
           "1417fd8380": "Customize apps...",
@@ -3580,24 +3580,24 @@
           "forget": "Remove from Yiru",
           "reconnectAndDelete": "Reconnect & Delete"
         },
-        "SpoolDesktopRow": {
+        "CoworkingDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
         },
-        "SpoolWorktreeRow": {
+        "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "Loading sessions…",
           "ownerTitle": "{{value0}}'s {{value1}}",
           "sessionsUnavailable": "Session list unavailable"
         },
-        "SpoolSidebarProjectedRow": {
-          "heading": "Spool"
+        "CoworkingSidebarProjectedRow": {
+          "heading": "Coworking"
         },
-        "SpoolDesktopUsageHoverCard": {
+        "CoworkingDesktopUsageHoverCard": {
           "usage": "Usage"
         },
-        "SpoolRemoteWorktreesHeader": {
+        "CoworkingRemoteWorktreesHeader": {
           "title": "Remote"
         },
         "WorktreeMetaDialog": {
@@ -3618,35 +3618,35 @@
           "2174f17011": "Save"
         }
       },
-      "spool": {
-        "SpoolAvailabilityStatusSegment": {
-          "title": "Spool is unavailable",
+      "coworking": {
+        "CoworkingAvailabilityStatusSegment": {
+          "title": "Coworking is unavailable",
           "checkAgain": "Check again",
           "checking": "Checking…",
           "tailscaleUnavailable": "Tailscale could not be found on this desktop.",
           "tailscaleNotRunning": "Tailscale is installed, but its service is not running.",
           "tailscalePermissionDenied": "Yiru does not have permission to read Tailscale status.",
-          "tailscaleTimedOut": "Tailscale did not respond in time. Spool will keep checking.",
+          "tailscaleTimedOut": "Tailscale did not respond in time. Coworking will keep checking.",
           "tailscaleUnsupportedOutput": "Tailscale returned status data that this Yiru version cannot read.",
-          "portUnavailable": "TCP port {{port}} is already in use. Close the conflicting process; Spool will keep checking.",
-          "permissionDenied": "System permissions prevented Yiru from opening the Spool Tailnet listener.",
-          "persistenceUnavailable": "Spool could not safely load sharing settings, so sharing remains off.",
-          "unavailable": "Spool could not start on this desktop."
+          "portUnavailable": "TCP port {{port}} is already in use. Close the conflicting process; Coworking will keep checking.",
+          "permissionDenied": "System permissions prevented Yiru from opening the Coworking Tailnet listener.",
+          "persistenceUnavailable": "Coworking could not safely load sharing settings, so sharing remains off.",
+          "unavailable": "Coworking could not start on this desktop."
         },
-        "SpoolWindowsFirewallNotice": {
+        "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows Firewall rule repaired.",
-          "title": "Spool is blocked by Windows Firewall",
-          "readyTitle": "Restart Spool sharing",
-          "readyDescription": "The required rule is available now. Reapply it to restart Spool in this app session.",
+          "title": "Coworking is blocked by Windows Firewall",
+          "readyTitle": "Restart coworking",
+          "readyDescription": "The required rule is available now. Reapply it to restart coworking in this app session.",
           "inspectUnavailable": "The firewall rule could not be inspected. Recreate it with administrator approval.",
           "ruleMissing": "The packaged Yiru app does not have the required Private-network rule.",
-          "ruleDetails": "Yiru.Spool · TCP {{port}} · Private",
+          "ruleDetails": "Yiru.Coworking · TCP {{port}} · Private",
           "waiting": "Waiting for Windows…",
           "repair": "Repair firewall rule",
           "reapply": "Reapply and restart",
           "repairFailed": "Could not repair the Windows Firewall rule."
         },
-        "SpoolControlRequestDialog": {
+        "CoworkingControlRequestDialog": {
           "decisionFailed": "Could not send the control decision.",
           "title": "Allow {{value0}} to control this worktree?",
           "worktree": "Worktree: {{value0}} / {{value1}}",
@@ -3656,13 +3656,13 @@
           "deny": "Deny",
           "allow": "Allow this connection"
         },
-        "SpoolOwnerControlGrants": {
+        "CoworkingOwnerControlGrants": {
           "revokeFailed": "Could not revoke remote control.",
           "heading": "Remote control",
           "hasAccess": "{{value0}} has access",
           "revoke": "Revoke"
         },
-        "SpoolSessionPane": {
+        "CoworkingSessionPane": {
           "continueFailed": "Could not continue this session.",
           "continueOutcomeUnknown": "Continuing this session may have succeeded on the owner’s desktop. Inspect the session list and terminal before continuing it again.",
           "retryContinue": "Try again",
@@ -3678,7 +3678,7 @@
           "terminalEnded": "This terminal session has ended.",
           "terminalConnectionLost": "The remote terminal connection was lost."
         },
-        "SpoolTerminalPane": {
+        "CoworkingTerminalPane": {
           "connecting": "Connecting terminal…",
           "closed": "Terminal closed",
           "unavailable": "Terminal unavailable",
@@ -3687,7 +3687,7 @@
           "resumeInput": "Resume input",
           "inputBacklogFull": "Remote input is still catching up. Wait for it to appear before typing or pasting more."
         },
-        "SpoolWorktreeVisibilityDialog": {
+        "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "Could not make this worktree public.",
           "title": "Make {{value0}} public?",
           "description": "People using Yiru Desktop on your Tailnet will be able to open this worktree.",
@@ -3702,7 +3702,7 @@
           "projectShellWarning": "Terminal history may include content produced outside those worktrees.",
           "projectConfirm": "Make all public"
         },
-        "SpoolWorkspaceSurface": {
+        "CoworkingWorkspaceSurface": {
           "requestFailed": "Could not request control.",
           "controlGranted": "Control granted",
           "disconnected": "Disconnected",
@@ -3718,14 +3718,14 @@
           "terminalDescription": "Terminal snapshots and realtime output appear here when the remote session is available.",
           "selectSession": "Select a session to open its remote terminal.",
           "fileBrowser": "Files",
-          "fileDescription": "Remote files stay on the owner’s execution host and open here through the Spool workspace model.",
+          "fileDescription": "Remote files stay on the owner’s execution host and open here through the Coworking workspace model.",
           "changesAndGit": "Changes and Git",
           "changesDescription": "Worktree status, diffs, history, branch, and upstream state appear here.",
           "mutableMode": "This connection can use worktree mutation controls.",
           "readOnlyMode": "This public worktree is read-only until its owner grants control.",
           "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
-        "SpoolFileActionDialog": {
+        "CoworkingFileActionDialog": {
           "nameLabel": "Name",
           "cancel": "Cancel",
           "newFileTitle": "New file",
@@ -3740,7 +3740,7 @@
           "rename": "Rename",
           "delete": "Delete"
         },
-        "SpoolFilePreview": {
+        "CoworkingFilePreview": {
           "loading": "Loading file…",
           "selectFile": "Select a file to inspect it.",
           "reload": "Reload",
@@ -3768,7 +3768,7 @@
           "workingCompact": "Working",
           "stagedCompact": "Staged"
         },
-        "SpoolFileTree": {
+        "CoworkingFileTree": {
           "up": "Up one directory",
           "root": "Worktree root",
           "refresh": "Refresh files",
@@ -3783,11 +3783,11 @@
           "unavailable": "Files are unavailable.",
           "retry": "Retry"
         },
-        "SpoolFilesPane": {
+        "CoworkingFilesPane": {
           "listFailed": "Could not load files.",
           "readFailed": "Could not read this file.",
           "diffFailed": "Could not load this diff.",
-          "fileTooLarge": "This file is too large to save through Spool.",
+          "fileTooLarge": "This file is too large to save through Coworking.",
           "saved": "File saved.",
           "saveFailed": "Could not save this file.",
           "invalidName": "Enter a single valid file name.",
@@ -3795,7 +3795,7 @@
           "outcomeUnknown": "This file change may have succeeded on the owner’s worktree. Refresh and inspect the item before making another change.",
           "outcomeUnknownPersistent": "The file change may have succeeded. Refresh and inspect the item before making another change."
         },
-        "SpoolGitDiffPane": {
+        "CoworkingGitDiffPane": {
           "selectItem": "Select a change or commit to inspect its diff.",
           "loading": "Loading diff…",
           "noDiff": "No textual diff is available.",
@@ -3806,7 +3806,7 @@
           "unavailable": "This diff is unavailable.",
           "back": "Back"
         },
-        "SpoolGitPane": {
+        "CoworkingGitPane": {
           "refreshFailed": "Could not load Git state.",
           "diffFailed": "Could not load this diff.",
           "commitTooLong": "The commit message is too long.",
@@ -3815,11 +3815,11 @@
           "outcomeUnknown": "This Git action may have succeeded on the owner’s worktree. Refresh and inspect Git state before making another change.",
           "outcomeUnknownPersistent": "The Git action may have succeeded. Refresh and inspect Git state before making another change."
         },
-        "SpoolMutationOutcomeNotice": {
+        "CoworkingMutationOutcomeNotice": {
           "title": "Result needs confirmation",
           "dismiss": "Dismiss after checking"
         },
-        "SpoolGitSidebar": {
+        "CoworkingGitSidebar": {
           "detached": "Detached HEAD",
           "refresh": "Refresh",
           "changes": "Changes",
@@ -3839,12 +3839,12 @@
           "stateUnavailable": "Git state is unavailable.",
           "changesLimited": "Only part of this status is shown."
         },
-        "SpoolAgentsPane": {
+        "CoworkingAgentsPane": {
           "publicSessions": "Public agents",
           "noAgentSessions": "No public agent sessions in this worktree.",
           "unknownAgent": "Agent"
         },
-        "SpoolChecksPane": {
+        "CoworkingChecksPane": {
           "reviewChecks": "Review checks",
           "refresh": "Refresh",
           "loadFailed": "Could not load checks from the owner.",
@@ -3875,7 +3875,7 @@
           "merged": "Merged",
           "draft": "Draft"
         },
-        "SpoolSessionCreateMenu": {
+        "CoworkingSessionCreateMenu": {
           "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
           "createFailed": "Could not create the terminal.",
           "noAgents": "No agents available",

@@ -63,7 +63,7 @@ export async function getProjectRefForRemote(
   }
 
   if (localGitOptions.signal) {
-    // Why: cancellation belongs to one Spool read; it must not abort a shared
+    // Why: cancellation belongs to one Coworking read; it must not abort a shared
     // provider-detection probe that an unrelated local sidebar is awaiting.
     return resolveProjectRefForRemote(
       repoPath,

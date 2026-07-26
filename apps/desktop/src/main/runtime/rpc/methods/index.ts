@@ -9,6 +9,7 @@ import { CLIENT_EVENT_METHODS } from './client-events'
 import { CLIENT_UI_METHODS } from './client-ui'
 import { CLIPBOARD_METHODS } from './clipboard'
 import { COMPUTER_METHODS } from './computer'
+import { COWORKING_HOST_METHODS } from './coworking-host'
 import { DIAGNOSTICS_METHODS } from './diagnostics'
 import { EMULATOR_METHODS } from './emulator'
 import { EXTERNAL_EDITOR_METHODS } from './external-editor'
@@ -27,7 +28,6 @@ import { REPO_METHODS } from './repo'
 import { SESSION_TAB_METHODS } from './session-tabs'
 import { SKILL_METHODS } from './skills'
 import { SPEECH_METHODS } from './speech'
-import { SPOOL_HOST_METHODS } from './spool-host'
 import { SSH_METHODS } from './ssh'
 import { STATS_METHODS } from './stats'
 import { STATUS_METHODS } from './status'
@@ -76,6 +76,6 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...CLIENT_UI_METHODS,
   ...EMULATOR_METHODS,
   ...EXTERNAL_EDITOR_METHODS,
-  ...SPOOL_HOST_METHODS,
+  ...COWORKING_HOST_METHODS,
   ...LANGUAGE_SERVER_METHODS
 ]

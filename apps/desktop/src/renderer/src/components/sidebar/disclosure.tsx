@@ -61,13 +61,17 @@ export function SidebarDisclosure({
         (itemLabel
           ? expanded
             ? translate(
-                'auto.components.sidebar.SpoolWorktreeRow.collapse',
+                'auto.components.sidebar.CoworkingWorktreeRow.collapse',
                 'Collapse {{value0}}',
                 { value0: itemLabel }
               )
-            : translate('auto.components.sidebar.SpoolWorktreeRow.expand', 'Expand {{value0}}', {
-                value0: itemLabel
-              })
+            : translate(
+                'auto.components.sidebar.CoworkingWorktreeRow.expand',
+                'Expand {{value0}}',
+                {
+                  value0: itemLabel
+                }
+              )
           : undefined)
       }
       aria-expanded={expanded}

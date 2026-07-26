@@ -83,6 +83,8 @@ import { ActivityTitlebarControls } from './components/activity/titlebar-control
 import { AgentHibernationGate } from './components/agent-hibernation-gate'
 import { useAutomationDispatchEvents } from './components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from './components/confirmation-dialog'
+import { CoworkingControlRequestDialog } from './components/coworking/control-request-dialog'
+import { useCoworkingSharingBridge } from './components/coworking/use-sharing-bridge'
 import { CrashReportDialog } from './components/crash-report/dialog'
 import RetainedAgentsSyncGate from './components/dashboard/retained-agents-sync-gate'
 import { applyDocumentTheme } from './components/editor/document-theme'
@@ -121,8 +123,6 @@ import Sidebar from './components/sidebar/panel'
 import { SidebarWorkspaceSearchButton } from './components/sidebar/workspace-search-button'
 import { SkillFreshnessNudge } from './components/skills/skill-freshness-nudge'
 import { SkillFreshnessUpdateDialog } from './components/skills/skill-freshness-update-dialog'
-import { SpoolControlRequestDialog } from './components/spool/control-request-dialog'
-import { useSpoolSharingBridge } from './components/spool/use-spool-sharing-bridge'
 import { StarNagCard } from './components/star-nag-card'
 import { StarNagAgentValueMomentObserver } from './components/star-nag/agent-value-moment-observer'
 import { StarNagToastHost } from './components/star-nag/toast-host'
@@ -356,7 +356,7 @@ const QuickOpen = lazy(() => import('./components/quick-open'))
 const WorktreeJumpPalette = lazy(() => import('./components/worktree-jump-palette/panel'))
 const WorkspaceCleanupDialog = lazy(() => import('./components/workspace-cleanup/dialog'))
 const Terminal = lazy(() => import('./components/terminal-workspace/panel'))
-const SpoolWorkspaceSurface = lazy(() => import('./components/spool/workspace-surface'))
+const CoworkingWorkspaceSurface = lazy(() => import('./components/coworking/workspace-surface'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
@@ -453,7 +453,7 @@ function App(): React.JSX.Element {
   const clearUnreadDockBadge = useUnreadDockBadge()
   useRadixBodyPointerEventsRecovery()
   useWebSessionTabsSync()
-  useSpoolSharingBridge()
+  useCoworkingSharingBridge()
   const [floatingTerminalOpen, setFloatingTerminalOpen] = useState(false)
   const floatingWorkspaceTourInteractionSnapshotRef = useRef<{
     wasPreviouslyInteracted?: boolean
@@ -508,8 +508,9 @@ function App(): React.JSX.Element {
   )
 
   const activeView = useAppStore((s) => s.activeView)
-  const activeSpoolWorkspaceRoute = useAppStore((s) => s.activeSpoolWorkspaceRoute)
-  const hasActiveSpoolWorkspace = activeView === 'terminal' && activeSpoolWorkspaceRoute !== null
+  const activeCoworkingWorkspaceRoute = useAppStore((s) => s.activeCoworkingWorkspaceRoute)
+  const hasActiveCoworkingWorkspace =
+    activeView === 'terminal' && activeCoworkingWorkspaceRoute !== null
   const activeModal = useAppStore((s) => s.activeModal)
   const featureTipsSeenIds = useAppStore((s) => s.featureTipsSeenIds)
   const featureInteractions = useAppStore((s) => s.featureInteractions)
@@ -558,7 +559,7 @@ function App(): React.JSX.Element {
   )
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const showFloatingTerminalButton =
-    !hasActiveSpoolWorkspace &&
+    !hasActiveCoworkingWorkspace &&
     floatingTerminalEnabled &&
     (floatingTerminalTriggerLocation === 'floating-button' || !statusBarVisible)
   const hasMountedTerminalWorkbenchRef = useRef(false)
@@ -580,15 +581,15 @@ function App(): React.JSX.Element {
       activeView,
       activePendingCreationId,
       hasActivePendingCreation: activePendingCreationExists
-    }) && !hasActiveSpoolWorkspace
+    }) && !hasActiveCoworkingWorkspace
   const workspaceChromeActive =
     activeView === 'terminal' &&
-    (activeWorktreeId !== null || hasActiveSpoolWorkspace) &&
+    (activeWorktreeId !== null || hasActiveCoworkingWorkspace) &&
     !creationLayoutActive
   const terminalWorkbenchVisible =
     activeView === 'terminal' &&
     activeWorktreeId !== null &&
-    !hasActiveSpoolWorkspace &&
+    !hasActiveCoworkingWorkspace &&
     !creationLayoutActive
   // Why: the floating workspace is a transient overlay; hotkey minimize should
   // return keyboard focus to the surface the user was working in before it.
@@ -1598,7 +1599,10 @@ function App(): React.JSX.Element {
 
   const hasTabBar = tabCount >= 2
   const showTitlebarExpandButton =
-    workspaceChromeActive && !hasActiveSpoolWorkspace && !hasTabBar && effectiveActiveTabExpanded
+    workspaceChromeActive &&
+    !hasActiveCoworkingWorkspace &&
+    !hasTabBar &&
+    effectiveActiveTabExpanded
   // Why: Activity and Space are full-page navigation surfaces — same
   // treatment as Settings — so the worktree sidebar is removed for those views.
   const showSidebar =
@@ -1638,7 +1642,7 @@ function App(): React.JSX.Element {
     )
   }
 
-  const localWorkspaceChromeActive = workspaceChromeActive && !hasActiveSpoolWorkspace
+  const localWorkspaceChromeActive = workspaceChromeActive && !hasActiveCoworkingWorkspace
   const globalShortcutStateRef = useRef({
     activeView,
     activeWorktreeId,
@@ -1730,8 +1734,8 @@ function App(): React.JSX.Element {
         activeWorktreeId !== null &&
         workspaceChromeActive
 
-      const spoolWorkspaceActive =
-        activeView === 'terminal' && useAppStore.getState().activeSpoolWorkspaceRoute !== null
+      const coworkingWorkspaceActive =
+        activeView === 'terminal' && useAppStore.getState().activeCoworkingWorkspaceRoute !== null
 
       const openSearchTab = (query: string | null): void => {
         openWorkspacePanelTab({
@@ -1926,7 +1930,7 @@ function App(): React.JSX.Element {
       // (contentEditable) or a browser guest webContents, both of which bypass
       // this renderer-side window keydown listener.
 
-      if (spoolWorkspaceActive) {
+      if (coworkingWorkspaceActive) {
         const state = useAppStore.getState()
         if (matchShortcut('sidebar.right.toggle')) {
           input.preventDefault()
@@ -2328,7 +2332,7 @@ function App(): React.JSX.Element {
   const workspaceProfileSwitcher =
     showProfileSwitcherInTopRight &&
     workspaceChromeActive &&
-    !hasActiveSpoolWorkspace &&
+    !hasActiveCoworkingWorkspace &&
     leftTitlebarChromeLayout.shouldMount &&
     !stackedSidebarOpen ? (
       <div
@@ -2366,7 +2370,7 @@ function App(): React.JSX.Element {
         <ConfirmationDialogProvider>
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
-            <SpoolControlRequestDialog />
+            <CoworkingControlRequestDialog />
             <LanguageServerWorkspaceEditDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
@@ -2572,7 +2576,7 @@ function App(): React.JSX.Element {
                               {activeView === 'activity' ? <ActivityPrototypePage /> : null}
                               {activeView === 'space' ? <WorkspaceSpacePage /> : null}
                               {activeView === 'mobile' ? <MobilePage /> : null}
-                              {hasActiveSpoolWorkspace ? <SpoolWorkspaceSurface /> : null}
+                              {hasActiveCoworkingWorkspace ? <CoworkingWorkspaceSurface /> : null}
                               {activeView === 'terminal' &&
                               creationLayoutActive &&
                               activePendingCreationId ? (
@@ -2585,7 +2589,7 @@ function App(): React.JSX.Element {
                               ) : null}
                               {activeView === 'terminal' &&
                               !activeWorktreeId &&
-                              !hasActiveSpoolWorkspace &&
+                              !hasActiveCoworkingWorkspace &&
                               !creationLayoutActive ? (
                                 <Landing />
                               ) : null}
@@ -2628,7 +2632,7 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               </Suspense>
             ) : null}
-            {statusBarVisible && !hasActiveSpoolWorkspace ? (
+            {statusBarVisible && !hasActiveCoworkingWorkspace ? (
               <Suspense
                 fallback={
                   // Why: Suspense must not flash an opaque footer while the real

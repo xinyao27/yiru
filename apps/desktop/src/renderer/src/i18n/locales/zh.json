@@ -3124,9 +3124,9 @@
           "workspaceSection": "工作区",
           "primaryDeleteDisabled": "主工作树不能删除。请改为移除项目。",
           "deleteWorktree": "删除工作树",
-          "makeSpoolPrivate": "设为私有",
-          "makeSpoolPublic": "设为公开",
-          "spoolPrivateFailed": "无法将此 worktree 设为私有。"
+          "makeCoworkingPrivate": "设为私有",
+          "makeCoworkingPublic": "设为公开",
+          "coworkingPrivateFailed": "无法将此 worktree 设为私有。"
         },
         "WorktreeList": {
           "d880ea0744": "创建一个组并将该项目移入其中。",
@@ -3171,9 +3171,9 @@
           "failedNestWorkspace": "无法嵌套工作区",
           "sidebarRowMissing": "目标不再存在",
           "failedUnnestWorkspace": "展开工作区失败",
-          "makeSpoolProjectPrivate": "将所有 worktree 设为私有",
-          "makeSpoolProjectPublic": "将所有 worktree 设为公开",
-          "spoolProjectPrivateFailed": "无法将这些 worktree 设为私有。"
+          "makeCoworkingProjectPrivate": "将所有 worktree 设为私有",
+          "makeCoworkingProjectPublic": "将所有 worktree 设为公开",
+          "coworkingProjectPrivateFailed": "无法将这些 worktree 设为私有。"
         },
         "WorktreeOpenInMenu": {
           "1417fd8380": "自定义应用程序...",
@@ -3557,24 +3557,24 @@
           "forget": "从 Yiru 中移除",
           "reconnectAndDelete": "重新连接并删除"
         },
-        "SpoolDesktopRow": {
+        "CoworkingDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
         },
-        "SpoolWorktreeRow": {
+        "CoworkingWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "正在加载会话…",
           "ownerTitle": "{{value0}} 的 {{value1}}",
           "sessionsUnavailable": "会话列表不可用"
         },
-        "SpoolSidebarProjectedRow": {
-          "heading": "Spool"
+        "CoworkingSidebarProjectedRow": {
+          "heading": "Coworking"
         },
-        "SpoolDesktopUsageHoverCard": {
+        "CoworkingDesktopUsageHoverCard": {
           "usage": "Usage"
         },
-        "SpoolRemoteWorktreesHeader": {
+        "CoworkingRemoteWorktreesHeader": {
           "title": "Remote"
         },
         "WorktreeMetaDialog": {
@@ -3595,35 +3595,35 @@
           "2174f17011": "Save"
         }
       },
-      "spool": {
-        "SpoolAvailabilityStatusSegment": {
-          "title": "Spool 不可用",
+      "coworking": {
+        "CoworkingAvailabilityStatusSegment": {
+          "title": "Coworking 不可用",
           "checkAgain": "重新检查",
           "checking": "正在检查…",
           "tailscaleUnavailable": "在这台电脑上找不到 Tailscale。",
           "tailscaleNotRunning": "Tailscale 已安装，但其服务未运行。",
           "tailscalePermissionDenied": "Yiru 没有读取 Tailscale 状态的权限。",
-          "tailscaleTimedOut": "Tailscale 未及时响应。Spool 会继续检查。",
+          "tailscaleTimedOut": "Tailscale 未及时响应。Coworking 会继续检查。",
           "tailscaleUnsupportedOutput": "Tailscale 返回了当前 Yiru 版本无法读取的状态数据。",
-          "portUnavailable": "TCP 端口 {{port}} 已被占用。请关闭冲突进程，Spool 会继续检查。",
-          "permissionDenied": "系统权限阻止 Yiru 在 Tailnet 上打开 Spool 监听端口。",
-          "persistenceUnavailable": "Spool 无法安全加载共享设置，因此共享功能保持关闭。",
-          "unavailable": "Spool 无法在这台电脑上启动。"
+          "portUnavailable": "TCP 端口 {{port}} 已被占用。请关闭冲突进程，Coworking 会继续检查。",
+          "permissionDenied": "系统权限阻止 Yiru 在 Tailnet 上打开 Coworking 监听端口。",
+          "persistenceUnavailable": "Coworking 无法安全加载共享设置，因此共享功能保持关闭。",
+          "unavailable": "Coworking 无法在这台电脑上启动。"
         },
-        "SpoolWindowsFirewallNotice": {
+        "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 防火墙规则已修复。",
-          "title": "Spool 被 Windows 防火墙阻止",
-          "readyTitle": "重新启动 Spool 分享",
-          "readyDescription": "所需规则现在已可用。重新应用规则即可在当前应用会话中启动 Spool。",
+          "title": "Coworking 被 Windows 防火墙阻止",
+          "readyTitle": "重新启动 Coworking 分享",
+          "readyDescription": "所需规则现在已可用。重新应用规则即可在当前应用会话中启动 Coworking。",
           "inspectUnavailable": "无法检查防火墙规则。请通过管理员确认重新创建规则。",
           "ruleMissing": "已安装的 Yiru 应用缺少所需的专用网络规则。",
-          "ruleDetails": "Yiru.Spool · TCP {{port}} · 专用网络",
+          "ruleDetails": "Yiru.Coworking · TCP {{port}} · 专用网络",
           "waiting": "等待 Windows…",
           "repair": "修复防火墙规则",
           "reapply": "重新应用并启动",
           "repairFailed": "无法修复 Windows 防火墙规则。"
         },
-        "SpoolControlRequestDialog": {
+        "CoworkingControlRequestDialog": {
           "decisionFailed": "无法发送控制决定。",
           "title": "允许 {{value0}} 控制这个 worktree？",
           "worktree": "Worktree：{{value0}} / {{value1}}",
@@ -3633,13 +3633,13 @@
           "deny": "拒绝",
           "allow": "允许此连接"
         },
-        "SpoolOwnerControlGrants": {
+        "CoworkingOwnerControlGrants": {
           "revokeFailed": "无法撤销远程控制。",
           "heading": "远程控制",
           "hasAccess": "{{value0}} 已获得访问权限",
           "revoke": "撤销"
         },
-        "SpoolSessionPane": {
+        "CoworkingSessionPane": {
           "continueFailed": "无法继续此 session。",
           "continueOutcomeUnknown": "此 session 可能已在所有者的电脑上继续运行。请先检查 session 列表和终端，再次执行继续操作。",
           "retryContinue": "Try again",
@@ -3655,7 +3655,7 @@
           "terminalEnded": "This terminal session has ended.",
           "terminalConnectionLost": "The remote terminal connection was lost."
         },
-        "SpoolTerminalPane": {
+        "CoworkingTerminalPane": {
           "connecting": "正在连接终端…",
           "closed": "终端已关闭",
           "unavailable": "终端不可用",
@@ -3664,7 +3664,7 @@
           "resumeInput": "恢复输入",
           "inputBacklogFull": "远程输入仍在追赶。请等输入显示后，再继续键入或粘贴更多内容。"
         },
-        "SpoolWorktreeVisibilityDialog": {
+        "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "无法将此 worktree 设为公开。",
           "title": "将 {{value0}} 设为公开？",
           "description": "Tailnet 中使用 Yiru Desktop 的成员将能够打开此 worktree。",
@@ -3679,7 +3679,7 @@
           "projectShellWarning": "终端历史可能包含在这些 worktree 之外产生的内容。",
           "projectConfirm": "全部设为公开"
         },
-        "SpoolWorkspaceSurface": {
+        "CoworkingWorkspaceSurface": {
           "requestFailed": "无法请求控制权限。",
           "controlGranted": "已获得控制权限",
           "disconnected": "已断开连接",
@@ -3695,14 +3695,14 @@
           "terminalDescription": "远程 session 可用后，终端快照和实时输出会显示在这里。",
           "selectSession": "选择一个 session 以打开其远程终端。",
           "fileBrowser": "文件",
-          "fileDescription": "远程文件保留在所有者的执行主机上，并通过 Spool workspace 模型在这里打开。",
+          "fileDescription": "远程文件保留在所有者的执行主机上，并通过 Coworking workspace 模型在这里打开。",
           "changesAndGit": "更改与 Git",
           "changesDescription": "Worktree 状态、diff、历史、分支和 upstream 状态会显示在这里。",
           "mutableMode": "此连接可以使用 worktree 的修改操作。",
           "readOnlyMode": "这个公开 worktree 在所有者授予控制权限前保持只读。",
           "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
-        "SpoolFileActionDialog": {
+        "CoworkingFileActionDialog": {
           "nameLabel": "名称",
           "cancel": "取消",
           "newFileTitle": "新建文件",
@@ -3717,7 +3717,7 @@
           "rename": "重命名",
           "delete": "删除"
         },
-        "SpoolFilePreview": {
+        "CoworkingFilePreview": {
           "loading": "正在加载文件…",
           "selectFile": "选择一个文件进行查看。",
           "reload": "重新加载",
@@ -3745,7 +3745,7 @@
           "workingCompact": "Working",
           "stagedCompact": "Staged"
         },
-        "SpoolFileTree": {
+        "CoworkingFileTree": {
           "up": "返回上一级目录",
           "root": "Worktree 根目录",
           "refresh": "刷新文件",
@@ -3760,11 +3760,11 @@
           "unavailable": "文件不可用。",
           "retry": "Retry"
         },
-        "SpoolFilesPane": {
+        "CoworkingFilesPane": {
           "listFailed": "无法加载文件。",
           "readFailed": "无法读取此文件。",
           "diffFailed": "无法加载此 diff。",
-          "fileTooLarge": "此文件太大，无法通过 Spool 保存。",
+          "fileTooLarge": "此文件太大，无法通过 Coworking 保存。",
           "saved": "文件已保存。",
           "saveFailed": "无法保存此文件。",
           "invalidName": "请输入一个有效的文件名。",
@@ -3772,7 +3772,7 @@
           "outcomeUnknown": "此次文件更改可能已在所有者的 worktree 中成功。请先刷新并检查该项目，再进行其他更改。",
           "outcomeUnknownPersistent": "此次文件更改可能已经成功。请先刷新并检查该项目，再进行其他更改。"
         },
-        "SpoolGitDiffPane": {
+        "CoworkingGitDiffPane": {
           "selectItem": "选择一项更改或提交以查看其 diff。",
           "loading": "正在加载 diff…",
           "noDiff": "没有可用的文本 diff。",
@@ -3783,7 +3783,7 @@
           "unavailable": "此 diff 不可用。",
           "back": "Back"
         },
-        "SpoolGitPane": {
+        "CoworkingGitPane": {
           "refreshFailed": "无法加载 Git 状态。",
           "diffFailed": "无法加载此 diff。",
           "commitTooLong": "提交信息过长。",
@@ -3792,11 +3792,11 @@
           "outcomeUnknown": "此次 Git 操作可能已在所有者的 worktree 中成功。请先刷新并检查 Git 状态，再进行其他更改。",
           "outcomeUnknownPersistent": "此次 Git 操作可能已经成功。请先刷新并检查 Git 状态，再进行其他更改。"
         },
-        "SpoolMutationOutcomeNotice": {
+        "CoworkingMutationOutcomeNotice": {
           "title": "需要确认操作结果",
           "dismiss": "检查后关闭"
         },
-        "SpoolGitSidebar": {
+        "CoworkingGitSidebar": {
           "detached": "分离的 HEAD",
           "refresh": "刷新",
           "changes": "更改",
@@ -3816,12 +3816,12 @@
           "stateUnavailable": "Git 状态不可用。",
           "changesLimited": "这里只显示了部分状态。"
         },
-        "SpoolAgentsPane": {
+        "CoworkingAgentsPane": {
           "publicSessions": "Public agents",
           "noAgentSessions": "No public agent sessions in this worktree.",
           "unknownAgent": "Agent"
         },
-        "SpoolChecksPane": {
+        "CoworkingChecksPane": {
           "reviewChecks": "Review checks",
           "refresh": "Refresh",
           "loadFailed": "Could not load checks from the owner.",
@@ -3852,7 +3852,7 @@
           "merged": "Merged",
           "draft": "Draft"
         },
-        "SpoolSessionCreateMenu": {
+        "CoworkingSessionCreateMenu": {
           "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
           "createFailed": "Could not create the terminal.",
           "noAgents": "No agents available",

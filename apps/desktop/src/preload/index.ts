@@ -44,6 +44,24 @@ import type {
 import type { CliInstallStatus } from '../shared/cli-install-types'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type {
+  CoworkingDecideControlArgs,
+  CoworkingRequestControlArgs,
+  CoworkingRequesterInvokeArgs,
+  CoworkingRequesterSubscriptionArgs,
+  CoworkingRequesterSubscriptionEvent,
+  CoworkingRequesterSubscriptionStartResult,
+  CoworkingRequesterSubscriptionStopArgs,
+  CoworkingRequesterSubscriptionStopResult,
+  CoworkingRevokeControlArgs,
+  CoworkingSetProjectVisibilityArgs,
+  CoworkingSetWorktreeVisibilityArgs,
+  CoworkingSharingSnapshot
+} from '../shared/coworking/ipc-contract'
+import type {
+  CoworkingWindowsFirewallRepairResult,
+  CoworkingWindowsFirewallStatus
+} from '../shared/coworking/windows-firewall-contract'
+import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
   CrashReportSubmitArgs,
@@ -136,24 +154,6 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '../shared/speech-types'
-import type {
-  SpoolDecideControlArgs,
-  SpoolRequestControlArgs,
-  SpoolRequesterInvokeArgs,
-  SpoolRequesterSubscriptionArgs,
-  SpoolRequesterSubscriptionEvent,
-  SpoolRequesterSubscriptionStartResult,
-  SpoolRequesterSubscriptionStopArgs,
-  SpoolRequesterSubscriptionStopResult,
-  SpoolRevokeControlArgs,
-  SpoolSetProjectVisibilityArgs,
-  SpoolSetWorktreeVisibilityArgs,
-  SpoolSharingSnapshot
-} from '../shared/spool/ipc-contract'
-import type {
-  SpoolWindowsFirewallRepairResult,
-  SpoolWindowsFirewallStatus
-} from '../shared/spool/windows-firewall-contract'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {
@@ -3794,51 +3794,54 @@ const api = {
     }
   },
 
-  spoolSharing: {
-    getSnapshot: (): Promise<SpoolSharingSnapshot> =>
-      ipcRenderer.invoke('spoolSharing:getSnapshot'),
-    setWorktreeVisibility: (args: SpoolSetWorktreeVisibilityArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:setWorktreeVisibility', args),
-    setProjectVisibility: (args: SpoolSetProjectVisibilityArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:setProjectVisibility', args),
-    requestControl: (args: SpoolRequestControlArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:requestControl', args),
-    decideControl: (args: SpoolDecideControlArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:decideControl', args),
-    revokeControl: (args: SpoolRevokeControlArgs): Promise<void> =>
-      ipcRenderer.invoke('spoolSharing:revokeControl', args),
-    getWindowsFirewallStatus: (): Promise<SpoolWindowsFirewallStatus> =>
-      ipcRenderer.invoke('spoolSharing:getWindowsFirewallStatus'),
-    repairWindowsFirewall: (): Promise<SpoolWindowsFirewallRepairResult> =>
-      ipcRenderer.invoke('spoolSharing:repairWindowsFirewall'),
-    retryAvailability: (): Promise<void> => ipcRenderer.invoke('spoolSharing:retryAvailability'),
-    invoke: (args: SpoolRequesterInvokeArgs): Promise<unknown> =>
-      ipcRenderer.invoke('spoolSharing:invoke', args),
+  coworkingSharing: {
+    getSnapshot: (): Promise<CoworkingSharingSnapshot> =>
+      ipcRenderer.invoke('coworkingSharing:getSnapshot'),
+    setWorktreeVisibility: (args: CoworkingSetWorktreeVisibilityArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:setWorktreeVisibility', args),
+    setProjectVisibility: (args: CoworkingSetProjectVisibilityArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:setProjectVisibility', args),
+    requestControl: (args: CoworkingRequestControlArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:requestControl', args),
+    decideControl: (args: CoworkingDecideControlArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:decideControl', args),
+    revokeControl: (args: CoworkingRevokeControlArgs): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:revokeControl', args),
+    getWindowsFirewallStatus: (): Promise<CoworkingWindowsFirewallStatus> =>
+      ipcRenderer.invoke('coworkingSharing:getWindowsFirewallStatus'),
+    repairWindowsFirewall: (): Promise<CoworkingWindowsFirewallRepairResult> =>
+      ipcRenderer.invoke('coworkingSharing:repairWindowsFirewall'),
+    retryAvailability: (): Promise<void> =>
+      ipcRenderer.invoke('coworkingSharing:retryAvailability'),
+    invoke: (args: CoworkingRequesterInvokeArgs): Promise<unknown> =>
+      ipcRenderer.invoke('coworkingSharing:invoke', args),
     startSubscription: (
-      args: SpoolRequesterSubscriptionArgs
-    ): Promise<SpoolRequesterSubscriptionStartResult> =>
-      ipcRenderer.invoke('spoolSharing:startSubscription', args),
+      args: CoworkingRequesterSubscriptionArgs
+    ): Promise<CoworkingRequesterSubscriptionStartResult> =>
+      ipcRenderer.invoke('coworkingSharing:startSubscription', args),
     stopSubscription: (
-      args: SpoolRequesterSubscriptionStopArgs
-    ): Promise<SpoolRequesterSubscriptionStopResult> =>
-      ipcRenderer.invoke('spoolSharing:stopSubscription', args),
+      args: CoworkingRequesterSubscriptionStopArgs
+    ): Promise<CoworkingRequesterSubscriptionStopResult> =>
+      ipcRenderer.invoke('coworkingSharing:stopSubscription', args),
     onSubscriptionEvent: (
-      callback: (event: SpoolRequesterSubscriptionEvent) => void
+      callback: (event: CoworkingRequesterSubscriptionEvent) => void
     ): (() => void) => {
       const listener = (
         _event: Electron.IpcRendererEvent,
-        subscriptionEvent: SpoolRequesterSubscriptionEvent
+        subscriptionEvent: CoworkingRequesterSubscriptionEvent
       ): void => callback(subscriptionEvent)
-      ipcRenderer.on('spoolSharing:subscriptionEvent', listener)
-      return () => ipcRenderer.removeListener('spoolSharing:subscriptionEvent', listener)
+      ipcRenderer.on('coworkingSharing:subscriptionEvent', listener)
+      return () => ipcRenderer.removeListener('coworkingSharing:subscriptionEvent', listener)
     },
-    onChanged: (callback: (snapshot: SpoolSharingSnapshot) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, snapshot: SpoolSharingSnapshot): void =>
-        callback(snapshot)
-      ipcRenderer.on('spoolSharing:changed', listener)
-      return () => ipcRenderer.removeListener('spoolSharing:changed', listener)
+    onChanged: (callback: (snapshot: CoworkingSharingSnapshot) => void): (() => void) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        snapshot: CoworkingSharingSnapshot
+      ): void => callback(snapshot)
+      ipcRenderer.on('coworkingSharing:changed', listener)
+      return () => ipcRenderer.removeListener('coworkingSharing:changed', listener)
     }
-  } satisfies PreloadApi['spoolSharing'],
+  } satisfies PreloadApi['coworkingSharing'],
 
   minimaxCredentials: {
     getStatus: (): Promise<{ configured: boolean }> =>

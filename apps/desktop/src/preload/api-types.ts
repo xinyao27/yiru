@@ -49,6 +49,24 @@ import type {
   CommitMessageModelCapability
 } from '../shared/commit-message-agent-spec'
 import type {
+  CoworkingDecideControlArgs,
+  CoworkingRequestControlArgs,
+  CoworkingRequesterInvokeArgs,
+  CoworkingRequesterSubscriptionArgs,
+  CoworkingRequesterSubscriptionEvent,
+  CoworkingRequesterSubscriptionStartResult,
+  CoworkingRequesterSubscriptionStopArgs,
+  CoworkingRequesterSubscriptionStopResult,
+  CoworkingRevokeControlArgs,
+  CoworkingSetProjectVisibilityArgs,
+  CoworkingSetWorktreeVisibilityArgs,
+  CoworkingSharingSnapshot
+} from '../shared/coworking/ipc-contract'
+import type {
+  CoworkingWindowsFirewallRepairResult,
+  CoworkingWindowsFirewallStatus
+} from '../shared/coworking/windows-firewall-contract'
+import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
   CrashReportRecord,
@@ -122,24 +140,6 @@ import type { SkillFreshnessInventory } from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/ai'
 import type { SourceControlAiSettings } from '../shared/source-control/ai-types'
-import type {
-  SpoolDecideControlArgs,
-  SpoolRequestControlArgs,
-  SpoolRequesterInvokeArgs,
-  SpoolRequesterSubscriptionArgs,
-  SpoolRequesterSubscriptionEvent,
-  SpoolRequesterSubscriptionStartResult,
-  SpoolRequesterSubscriptionStopArgs,
-  SpoolRequesterSubscriptionStopResult,
-  SpoolRevokeControlArgs,
-  SpoolSetProjectVisibilityArgs,
-  SpoolSetWorktreeVisibilityArgs,
-  SpoolSharingSnapshot
-} from '../shared/spool/ipc-contract'
-import type {
-  SpoolWindowsFirewallRepairResult,
-  SpoolWindowsFirewallStatus
-} from '../shared/spool/windows-firewall-contract'
 import type {
   WarpThemeImportPreview,
   WarpThemeImportSource
@@ -2738,25 +2738,27 @@ export type PreloadApi = {
     refreshGrok: () => Promise<RateLimitState>
     onUpdate: (callback: (state: RateLimitState) => void) => () => void
   }
-  spoolSharing: {
-    getSnapshot: () => Promise<SpoolSharingSnapshot>
-    setWorktreeVisibility: (args: SpoolSetWorktreeVisibilityArgs) => Promise<void>
-    setProjectVisibility: (args: SpoolSetProjectVisibilityArgs) => Promise<void>
-    requestControl: (args: SpoolRequestControlArgs) => Promise<void>
-    decideControl: (args: SpoolDecideControlArgs) => Promise<void>
-    revokeControl: (args: SpoolRevokeControlArgs) => Promise<void>
-    getWindowsFirewallStatus: () => Promise<SpoolWindowsFirewallStatus>
-    repairWindowsFirewall: () => Promise<SpoolWindowsFirewallRepairResult>
+  coworkingSharing: {
+    getSnapshot: () => Promise<CoworkingSharingSnapshot>
+    setWorktreeVisibility: (args: CoworkingSetWorktreeVisibilityArgs) => Promise<void>
+    setProjectVisibility: (args: CoworkingSetProjectVisibilityArgs) => Promise<void>
+    requestControl: (args: CoworkingRequestControlArgs) => Promise<void>
+    decideControl: (args: CoworkingDecideControlArgs) => Promise<void>
+    revokeControl: (args: CoworkingRevokeControlArgs) => Promise<void>
+    getWindowsFirewallStatus: () => Promise<CoworkingWindowsFirewallStatus>
+    repairWindowsFirewall: () => Promise<CoworkingWindowsFirewallRepairResult>
     retryAvailability: () => Promise<void>
-    invoke: (args: SpoolRequesterInvokeArgs) => Promise<unknown>
+    invoke: (args: CoworkingRequesterInvokeArgs) => Promise<unknown>
     startSubscription: (
-      args: SpoolRequesterSubscriptionArgs
-    ) => Promise<SpoolRequesterSubscriptionStartResult>
+      args: CoworkingRequesterSubscriptionArgs
+    ) => Promise<CoworkingRequesterSubscriptionStartResult>
     stopSubscription: (
-      args: SpoolRequesterSubscriptionStopArgs
-    ) => Promise<SpoolRequesterSubscriptionStopResult>
-    onSubscriptionEvent: (callback: (event: SpoolRequesterSubscriptionEvent) => void) => () => void
-    onChanged: (callback: (snapshot: SpoolSharingSnapshot) => void) => () => void
+      args: CoworkingRequesterSubscriptionStopArgs
+    ) => Promise<CoworkingRequesterSubscriptionStopResult>
+    onSubscriptionEvent: (
+      callback: (event: CoworkingRequesterSubscriptionEvent) => void
+    ) => () => void
+    onChanged: (callback: (snapshot: CoworkingSharingSnapshot) => void) => () => void
   }
   minimaxCredentials: {
     getStatus: () => Promise<{ configured: boolean }>

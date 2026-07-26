@@ -1539,21 +1539,21 @@ export type StoreOptions = {
   dataFile?: string
 }
 
-type SpoolVisibilityCommitBase = {
+type CoworkingVisibilityCommitBase = {
   worktreeId: string
   expectedInstanceId: string
 }
 
-export type SpoolVisibilityCommitChange = SpoolVisibilityCommitBase &
+export type CoworkingVisibilityCommitChange = CoworkingVisibilityCommitBase &
   (
     | {
         visibility: 'public'
-        spoolIncarnationId: string
+        coworkingIncarnationId: string
         nextInstanceId?: never
       }
     | {
         visibility: 'private'
-        spoolIncarnationId?: string
+        coworkingIncarnationId?: string
         nextInstanceId?: string
       }
   )
@@ -2939,12 +2939,14 @@ export class Store {
     return updated
   }
 
-  commitSpoolVisibility(changes: readonly SpoolVisibilityCommitChange[]): readonly WorktreeMeta[] {
+  commitCoworkingVisibility(
+    changes: readonly CoworkingVisibilityCommitChange[]
+  ): readonly WorktreeMeta[] {
     if (changes.length === 0) {
       return []
     }
     if (this.durableStateFile.frozen) {
-      throw new Error('spool_visibility_store_frozen')
+      throw new Error('coworking_visibility_store_frozen')
     }
     const previousMeta = this.state.worktreeMeta
     const previousWorktreeLineage = this.state.worktreeLineageById
@@ -2961,15 +2963,15 @@ export class Store {
 
     for (const change of changes) {
       if (changedWorktreeIds.has(change.worktreeId)) {
-        throw new Error('spool_visibility_duplicate_change')
+        throw new Error('coworking_visibility_duplicate_change')
       }
       changedWorktreeIds.add(change.worktreeId)
       const existing = nextMeta[change.worktreeId]
       if (!existing || existing.instanceId !== change.expectedInstanceId) {
-        throw new Error('spool_visibility_stale_instance')
+        throw new Error('coworking_visibility_stale_instance')
       }
-      if (change.visibility === 'public' && !change.spoolIncarnationId?.trim()) {
-        throw new Error('spool_visibility_missing_incarnation')
+      if (change.visibility === 'public' && !change.coworkingIncarnationId?.trim()) {
+        throw new Error('coworking_visibility_missing_incarnation')
       }
       if (
         change.nextInstanceId !== undefined &&
@@ -2977,7 +2979,7 @@ export class Store {
           existingInstanceIds.has(change.nextInstanceId) ||
           nextInstanceIds.has(change.nextInstanceId))
       ) {
-        throw new Error('spool_visibility_invalid_next_instance')
+        throw new Error('coworking_visibility_invalid_next_instance')
       }
       if (change.nextInstanceId) {
         nextInstanceIds.add(change.nextInstanceId)
@@ -3002,10 +3004,10 @@ export class Store {
       }
       const updated: WorktreeMeta = {
         ...existing,
-        spoolVisibility: change.visibility,
-        ...(change.spoolIncarnationId === undefined
+        coworkingVisibility: change.visibility,
+        ...(change.coworkingIncarnationId === undefined
           ? {}
-          : { spoolIncarnationId: change.spoolIncarnationId }),
+          : { coworkingIncarnationId: change.coworkingIncarnationId }),
         ...(change.nextInstanceId === undefined ? {} : { instanceId: change.nextInstanceId })
       }
       nextMeta[change.worktreeId] = updated

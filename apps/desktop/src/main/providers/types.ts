@@ -24,9 +24,9 @@ import type {
   SearchResult
 } from '../../shared/types'
 import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/space-types'
+import type { CoworkingVerifiedRemoteFilesystem } from './coworking-verified-filesystem-types'
 import type { IGitMutationProvider } from './git-provider-mutation-contract'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
-import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
 
 export type { GitProviderMutationOptions } from './git-provider-mutation-contract'
 
@@ -261,8 +261,8 @@ export type FileReadResult = {
 }
 
 export type IFilesystemProvider = {
-  /** Why: Spool cannot fall back to ordinary SSH file calls after binding a physical path. */
-  readonly spoolVerifiedFiles?: SpoolVerifiedRemoteFilesystem
+  /** Why: Coworking cannot fall back to ordinary SSH file calls after binding a physical path. */
+  readonly coworkingVerifiedFiles?: CoworkingVerifiedRemoteFilesystem
   readDir(dirPath: string, options?: { limit?: number; signal?: AbortSignal }): Promise<DirEntry[]>
   readFile(filePath: string, options?: { signal?: AbortSignal }): Promise<FileReadResult>
   /** Why: inventory must parse large JSONL without materializing the transcript. */

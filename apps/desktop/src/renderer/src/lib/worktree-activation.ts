@@ -208,9 +208,9 @@ export function activateAndRevealFolderWorkspace(
     return false
   }
 
-  // Why: remote workspaces use opaque Spool routes, not local WorkspaceKeys;
+  // Why: remote workspaces use opaque Coworking routes, not local WorkspaceKeys;
   // any explicit local activation must leave that independent namespace.
-  state.setActiveSpoolWorkspaceRoute(null)
+  state.setActiveCoworkingWorkspaceRoute(null)
 
   if (state.activeView !== 'terminal') {
     state.setActiveView('terminal')
@@ -303,8 +303,8 @@ export function activateAndRevealWorktree(
     return false
   }
   // Why: a local selection must win even when it reselects the worktree that
-  // remained mounted behind an active remote Spool surface.
-  state.setActiveSpoolWorkspaceRoute(null)
+  // remained mounted behind an active remote Coworking surface.
+  state.setActiveCoworkingWorkspaceRoute(null)
   const hasActivationWork = Boolean(opts?.startup || opts?.setup || opts?.defaultTabs)
   // Why: a plain reselect of the already-visible workspace should still reveal
   // the sidebar row, but it must not restamp focus recency and wake persistence.

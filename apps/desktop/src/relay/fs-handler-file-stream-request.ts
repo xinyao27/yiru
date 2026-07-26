@@ -1,4 +1,4 @@
-import { SPOOL_SESSION_INVENTORY_STREAM_PROFILE } from '../shared/spool/resource-limits'
+import { COWORKING_SESSION_INVENTORY_STREAM_PROFILE } from '../shared/coworking/resource-limits'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { parseRelayFileStreamProfile, readRelayFileStreamMetadata } from './fs-handler-file-read'
 import type { RelayStreamRegistry } from './fs-stream-registry'
@@ -12,7 +12,7 @@ export function startRelayFileStream(
 ) {
   const requestContext = context ?? { clientId: 0, isStale: () => false }
   const profile = parseRelayFileStreamProfile(params.profile)
-  if (profile === SPOOL_SESSION_INVENTORY_STREAM_PROFILE && params.flowControl !== 'ack') {
+  if (profile === COWORKING_SESSION_INVENTORY_STREAM_PROFILE && params.flowControl !== 'ack') {
     // Why: the elevated transcript cap is safe only when client acknowledgments
     // bound unconsumed chunks on the shared interactive SSH channel.
     throw new Error('Session inventory streams require ack flow control')

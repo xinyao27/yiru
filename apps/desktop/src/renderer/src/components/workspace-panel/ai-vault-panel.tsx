@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { AgentSessionContinuationDialog } from '@/components/agent-session-continuation/dialog'
-import { SpoolAgentsPane } from '@/components/spool/agents-pane'
+import { CoworkingAgentsPane } from '@/components/coworking/agents-pane'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import {
@@ -404,9 +404,9 @@ export default function AiVaultPanel({
 }: {
   source?: RightSidebarPanelSource
 }): React.JSX.Element {
-  if (source.kind === 'spool') {
+  if (source.kind === 'coworking') {
     const { route, sessions, catalogStatus } = source
-    return <SpoolAgentsPane {...{ route, sessions, catalogStatus }} />
+    return <CoworkingAgentsPane {...{ route, sessions, catalogStatus }} />
   }
   return <LocalAiVaultPanel />
 }

@@ -119,6 +119,10 @@ import {
   GLOBAL_ASSISTANT_WORKTREE_ID,
   getDefaultVoiceSettings
 } from '../../shared/constants'
+import type {
+  CoworkingPairedRuntimeResolvedWorktree,
+  CoworkingPairedRuntimeWorktreeSelector
+} from '../../shared/coworking/paired-runtime-host-contract'
 import { createDraftPasteReadyScanner } from '../../shared/draft-paste-ready-scanner'
 import { mergeExternalWorktreeInboxPaths } from '../../shared/external-worktree-inbox'
 import type { TerminalPaneSplitSource } from '../../shared/feature-education-telemetry'
@@ -207,10 +211,6 @@ import {
 } from '../../shared/setup-runner-command'
 import { inspectSetupScriptImportCandidates } from '../../shared/setup-script-imports'
 import type { VoiceSettings } from '../../shared/speech-types'
-import type {
-  SpoolPairedRuntimeResolvedWorktree,
-  SpoolPairedRuntimeWorktreeSelector
-} from '../../shared/spool/paired-runtime-host-contract'
 import { parseAppSshPtyId } from '../../shared/ssh-pty-id'
 import { isTerminalLeafId, makePaneKey, parsePaneKey } from '../../shared/stable-pane-id'
 import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
@@ -842,7 +842,7 @@ function isCursorAgentOrchestrationTarget(
 type RuntimePtyWorktreeRecord = {
   ptyId: string
   worktreeId: string
-  /** Trusted spawn-time identity; null means the PTY must not cross a Spool boundary. */
+  /** Trusted spawn-time identity; null means the PTY must not cross a Coworking boundary. */
   worktreeInstanceId: string | null
   connectionId: string | null
   // Why: a Windows host can own both native and WSL panes; preamble command
@@ -905,7 +905,7 @@ type TerminalCreateOptions = {
   // intermediate pty-backed publish so the new tab doesn't briefly flash in
   // the wrong (active) group before the corrected snapshot lands.
   deferMobileSessionPublish?: boolean
-  /** Why: Spool grants can be revoked during async launch preparation. */
+  /** Why: Coworking grants can be revoked during async launch preparation. */
   beforeSpawn?: () => void | Promise<void>
   /** Why: agent trust persistence is also a launch side effect, before PTY spawn. */
   beforeAgentTrust?: () => void | Promise<void>
@@ -12249,7 +12249,7 @@ export class YiruRuntimeService {
       ...(args.signal ? { signal: args.signal } : {}),
       ...executionOptions
     })
-    // Why: public Spool reads inspect existing reviews and must not attribute them as newly created.
+    // Why: public Coworking reads inspect existing reviews and must not attribute them as newly created.
     if (
       args.recordStats !== false &&
       review?.provider === 'github' &&
@@ -13100,9 +13100,9 @@ export class YiruRuntimeService {
     return await this.resolveWorktreeSelector(worktreeSelector)
   }
 
-  async resolvePairedRuntimeSpoolWorktree(
-    selector: SpoolPairedRuntimeWorktreeSelector
-  ): Promise<SpoolPairedRuntimeResolvedWorktree> {
+  async resolvePairedRuntimeCoworkingWorktree(
+    selector: CoworkingPairedRuntimeWorktreeSelector
+  ): Promise<CoworkingPairedRuntimeResolvedWorktree> {
     const store = this.requireStore()
     const worktree = await this.resolveWorktreeSelector(`id:${selector.worktreeId}`)
     const repo = store.getRepo(worktree.repoId)
@@ -13141,7 +13141,7 @@ export class YiruRuntimeService {
     }
   }
 
-  getPairedRuntimeSpoolStore(): Store {
+  getPairedRuntimeCoworkingStore(): Store {
     // Why: only the internal paired-runtime host adapter needs Store-backed path authorization.
     return this.requireStore()
   }

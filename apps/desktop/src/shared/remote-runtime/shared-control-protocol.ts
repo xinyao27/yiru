@@ -93,15 +93,15 @@ export function getCleanupRequest(
       params: { subscriptionId: subscription.requestId }
     }
   }
-  if (subscription.method === 'spool.host.subscribeTerminal') {
+  if (subscription.method === 'coworking.host.subscribeTerminal') {
     return {
       method: 'terminal.unsubscribe',
-      params: { subscriptionId: `spool.host.terminal:${subscription.requestId}` }
+      params: { subscriptionId: `coworking.host.terminal:${subscription.requestId}` }
     }
   }
-  if (subscription.method === 'spool.host.subscribeSessionChanges') {
+  if (subscription.method === 'coworking.host.subscribeSessionChanges') {
     return {
-      method: 'spool.host.unsubscribeSessionChanges',
+      method: 'coworking.host.unsubscribeSessionChanges',
       params: { requestId: subscription.requestId }
     }
   }

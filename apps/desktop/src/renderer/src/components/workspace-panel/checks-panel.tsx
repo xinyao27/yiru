@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { SpoolChecksPane } from '@/components/spool/checks-pane'
+import { CoworkingChecksPane } from '@/components/coworking/checks-pane'
 
 import { useChecksPanelAgentActions } from './checks-panel-agent-actions'
 import { useChecksPanelChecksLoading } from './checks-panel-checks-loading'
@@ -60,8 +60,8 @@ export default function ChecksPanel({
   source?: RightSidebarPanelSource
   isVisible?: boolean
 }): React.JSX.Element | null {
-  if (source.kind === 'spool') {
-    return source.supportsGit ? <SpoolChecksPane state={source.checksState} /> : null
+  if (source.kind === 'coworking') {
+    return source.supportsGit ? <CoworkingChecksPane state={source.checksState} /> : null
   }
   return <LocalChecksPanel isVisible={isVisible} />
 }
