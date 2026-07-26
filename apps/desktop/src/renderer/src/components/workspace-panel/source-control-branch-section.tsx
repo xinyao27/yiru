@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -7,11 +9,13 @@ import { SourceControlBranchTreeDirectoryRow } from './source-control-directory-
 import { SourceControlSectionHeader as SectionHeader } from './source-control-section-header'
 import { SourceControlVirtualFileList } from './source-control-virtual-file-list'
 
-export function SourceControlBranchSection({
-  controller
-}: {
+type SourceControlBranchSectionProps = {
   controller: SourceControlController
-}): React.JSX.Element | null {
+}
+
+function SourceControlBranchSection({
+  controller
+}: SourceControlBranchSectionProps): React.JSX.Element | null {
   const {
     activeConnectionId,
     activeWorktree,
@@ -121,3 +125,43 @@ export function SourceControlBranchSection({
     </div>
   )
 }
+
+// Why: `controller` is rebuilt every render by the 21-hook chain in
+// source-control-controller.tsx (each layer spreads the previous scope), so
+// a default shallow compare on the prop never bails. Compare only the
+// fields this component actually reads — verified against the destructure
+// and JSX above, and confirmed this component never forwards the whole
+// `controller` to a child (each child gets specific extracted props) — so a
+// missed field can't silently show stale branch data downstream either. If
+// a future edit reads a new field off `controller` here, add it below too.
+function areSourceControlBranchSectionPropsEqual(
+  prev: SourceControlBranchSectionProps,
+  next: SourceControlBranchSectionProps
+): boolean {
+  const a = prev.controller
+  const b = next.controller
+  return (
+    a.activeConnectionId === b.activeConnectionId &&
+    a.activeWorktree === b.activeWorktree &&
+    a.activeWorktreeId === b.activeWorktreeId &&
+    a.branchSummary === b.branchSummary &&
+    a.collapsedSections === b.collapsedSections &&
+    a.collapsedTreeDirs === b.collapsedTreeDirs &&
+    a.diffCommentCountByPath === b.diffCommentCountByPath &&
+    a.fileListScrollElement === b.fileListScrollElement &&
+    a.filteredBranchEntries === b.filteredBranchEntries &&
+    a.openBranchAllDiffs === b.openBranchAllDiffs &&
+    a.openCommittedDiff === b.openCommittedDiff &&
+    a.revealInExplorer === b.revealInExplorer &&
+    a.sourceControlViewMode === b.sourceControlViewMode &&
+    a.toggleSection === b.toggleSection &&
+    a.toggleTreeDir === b.toggleTreeDir &&
+    a.visibleBranchTreeRows === b.visibleBranchTreeRows &&
+    a.worktreePath === b.worktreePath
+  )
+}
+
+export const SourceControlBranchSectionMemo = React.memo(
+  SourceControlBranchSection,
+  areSourceControlBranchSectionPropsEqual
+)

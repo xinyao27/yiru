@@ -1,12 +1,12 @@
 import { BulkActionBar } from './bulk-action-bar'
-import { SourceControlBranchSection } from './source-control-branch-section'
+import { SourceControlBranchSectionMemo } from './source-control-branch-section'
 import { CompareUnavailable } from './source-control-compare-summary'
 import type { SourceControlController } from './source-control-controller'
 import { shouldShowSourceControlCompareUnavailableCard } from './source-control-header-toolbar'
-import { SourceControlHistorySection } from './source-control-history-section'
+import { SourceControlHistorySectionMemo } from './source-control-history-section'
 import { SourceControlPanelCommit } from './source-control-panel-commit'
 import { SourceControlPanelStatus } from './source-control-panel-status'
-import { SourceControlUncommittedSections } from './source-control-uncommitted-sections'
+import { SourceControlUncommittedSectionsMemo } from './source-control-uncommitted-sections'
 
 export function SourceControlPanelBody({
   controller
@@ -57,7 +57,7 @@ export function SourceControlPanelBody({
           showGenericEmptyState={showGenericEmptyState}
         />
         {hasFilteredUncommittedEntries ? (
-          <SourceControlUncommittedSections controller={controller} />
+          <SourceControlUncommittedSectionsMemo controller={controller} />
         ) : null}
         {shouldShowSourceControlCompareUnavailableCard(
           branchSummary,
@@ -71,8 +71,8 @@ export function SourceControlPanelBody({
             onRetry={() => void refreshBranchCompare()}
           />
         ) : null}
-        <SourceControlBranchSection controller={controller} />
-        <SourceControlHistorySection controller={controller} />
+        <SourceControlBranchSectionMemo controller={controller} />
+        <SourceControlHistorySectionMemo controller={controller} />
       </div>
 
       {selectedKeys.size > 0 ? (

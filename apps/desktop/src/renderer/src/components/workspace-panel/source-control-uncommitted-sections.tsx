@@ -1,4 +1,5 @@
 import { Minus, Plus, Trash, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
+import React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
@@ -15,11 +16,13 @@ import { SourceControlSectionHeader as SectionHeader } from './source-control-se
 import { getSourceControlSectionViewAction } from './source-control-section-order'
 import { SourceControlUncommittedFileList } from './source-control-uncommitted-file-list'
 
-export function SourceControlUncommittedSections({
-  controller
-}: {
+type SourceControlUncommittedSectionsProps = {
   controller: SourceControlController
-}): React.JSX.Element {
+}
+
+function SourceControlUncommittedSections({
+  controller
+}: SourceControlUncommittedSectionsProps): React.JSX.Element {
   const {
     activeWorktreeId,
     collapsedSections,
@@ -167,3 +170,14 @@ export function SourceControlUncommittedSections({
     </>
   )
 }
+
+// Why: unlike the branch and history sections, this component forwards the
+// entire `controller` object to SourceControlUncommittedFileList for every
+// expanded section — that child reads roughly two dozen other controller
+// fields (selection, staged diffs, submodule state, ...) this component
+// never touches directly. A comparator scoped to the fields read here would
+// miss changes that child needs and let it render with stale data, so this
+// intentionally stays a plain reference compare on `controller` — safe, but
+// only pays off once the 21-hook chain itself stops rebuilding that object
+// every render.
+export const SourceControlUncommittedSectionsMemo = React.memo(SourceControlUncommittedSections)
