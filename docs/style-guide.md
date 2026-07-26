@@ -203,7 +203,7 @@ Immediate on/off → `Switch`. Independent boolean → `Checkbox`. Never `Button
 | Right-click actions | `ContextMenu` | A hand-rolled `role="menu"` portal |
 | Click-revealed arbitrary content | `Popover` | `Dialog` — it traps focus and dims |
 | A decision required before continuing | `Dialog` | `Popover`, inline overlay |
-| Panel sliding from an edge | `Sheet` | Centered `Dialog` |
+| Panel sliding from an edge | No primitive yet — build one in `components/ui/` when the need arises | Repurposing a centered `Dialog`, or a hand-rolled fixed/translate panel |
 | One choice from a known list | `Select` | Native `<select>`, custom listbox |
 | One choice with search | `Command` inside `Popover` | `Select` |
 | Transient confirmation | `sonner` toast | `Dialog`, inline banner |
