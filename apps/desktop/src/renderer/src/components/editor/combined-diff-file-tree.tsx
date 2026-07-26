@@ -9,16 +9,16 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
+
+import type { GitBranchChangeEntry, GitStagingArea, GitStatusEntry } from '../../../../shared/types'
 import {
   buildGitStatusSourceControlTree,
   buildSourceControlTree,
   compactSourceControlTree,
   flattenSourceControlTree
-} from '@/components/workspace-panel/source-control-tree'
-import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
-
-import type { GitBranchChangeEntry, GitStagingArea, GitStatusEntry } from '../../../../shared/types'
+} from '../workspace-panel/source-control/tree'
 import {
   getEntryExtension,
   getFilteredCombinedDiffFileTreeEntries,

@@ -3,18 +3,18 @@ import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import {
-  getFileExplorerOperationOwnerFromState,
-  getFileExplorerOwnerUnresolvedMessage,
-  getFileExplorerOperationRoute
-} from '@/components/workspace-panel/file-explorer-operation-owner'
-import type { FileExplorerOperationOwner } from '@/components/workspace-panel/file-explorer-types'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { cancelRuntimeFileList, listRuntimeFiles } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 import { useWorktreesForRepo } from '@/store/selectors'
 
 import type { Worktree } from '../../../shared/types'
+import {
+  getFileExplorerOperationOwnerFromState,
+  getFileExplorerOwnerUnresolvedMessage,
+  getFileExplorerOperationRoute
+} from './workspace-panel/file-explorer/operation-owner'
+import type { FileExplorerOperationOwner } from './workspace-panel/file-explorer/types'
 
 export type RuntimeFileListState = {
   files: string[]

@@ -5,7 +5,6 @@ import {
   getBrokenChecks,
   getCheckDetailsPromptKey
 } from '@/components/pr-checks-fix-prompt'
-import { gitHubPRToChecksPanelReview } from '@/components/workspace-panel/checks-panel-review'
 import { translate } from '@/i18n/i18n'
 import { getWorktreeGitIdentityDisplay } from '@/lib/worktree-git-identity-display'
 import { useAppStore } from '@/store'
@@ -14,6 +13,7 @@ import { getHostedReviewCacheKey } from '@/store/slices/hosted-review-cache-iden
 import { findWorktreeById } from '@/store/slices/worktree-helpers'
 
 import type { PRCheckDetail, PRCheckRunDetails, Repo } from '../../../../shared/types'
+import { gitHubPRToChecksPanelReview } from '../workspace-panel/checks-panel/review'
 
 export function resolveCheckRunDetailsFixCheck(
   check: PRCheckDetail,

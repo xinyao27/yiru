@@ -11,8 +11,8 @@ import type {
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control/ai-recipe-save'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
-import { sourceControlActionRecipeMatchesTarget } from './source-control-action-recipe-match'
-import { resolveSourceControlAgentSaveTarget } from './source-control-agent-action-dialog-support'
+import { sourceControlActionRecipeMatchesTarget } from './source-control/action-recipe-match'
+import { resolveSourceControlAgentSaveTarget } from './source-control/agent-action-dialog-support'
 
 type RunSourceControlAgentActionStartArgs = {
   selectedAgent: TuiAgent

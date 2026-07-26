@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { startFixChecksAgent } from '@/components/editor/fix-checks-agent-launch'
-import { openSourceControlAiSettingsTarget } from '@/components/workspace-panel/source-control-ai-settings-navigation'
 import { translate } from '@/i18n/i18n'
 import { getConnectionId } from '@/lib/connection-context'
 import { readSourceControlLaunchRecipeAgentId } from '@/lib/source-control-launch-agent-selection'
@@ -20,6 +19,7 @@ import {
   type SourceControlAiWriteTarget
 } from '../../../../shared/source-control/ai-recipe-save'
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
+import { openSourceControlAiSettingsTarget } from '../workspace-panel/source-control/ai-settings-navigation'
 import {
   buildCheckRunDetailsFixBasePrompt,
   getCheckRunDetailsFixDisabledReason,

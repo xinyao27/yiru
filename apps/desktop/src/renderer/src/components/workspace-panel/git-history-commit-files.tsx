@@ -13,7 +13,7 @@ import {
   toPermanentSourceControlRowOpenEvent,
   toSourceControlRowOpenEvent,
   type SourceControlRowOpenEvent
-} from './source-control-split-open'
+} from './source-control/split-open'
 import { STATUS_COLORS, STATUS_LABELS } from './status-display'
 
 // State for a single commit's lazily-loaded file list. Owned by GitHistoryPanel,

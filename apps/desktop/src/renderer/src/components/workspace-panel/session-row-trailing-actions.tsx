@@ -19,12 +19,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
-import { SessionActionMenuItems } from './ai-vault-session-action-menu-items'
-import { agentLabel } from './ai-vault-session-filters'
+import { SessionActionMenuItems } from './ai-vault/session-action-menu-items'
+import { agentLabel } from './ai-vault/session-filters'
 import {
   aiVaultWorktreeJumpTooltip,
   type AiVaultSessionWorktreeInfo
-} from './ai-vault-session-worktree'
+} from './ai-vault/session-worktree'
 
 // Why: hover-only actions live on the title row and collapse on hover-capable
 // devices so the prompt keeps the full width until the row is hovered.

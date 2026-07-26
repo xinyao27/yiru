@@ -12,19 +12,19 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { isDotfileRelativePath } from '@/components/workspace-panel/file-explorer-entries'
-import { FileExplorerToolbar } from '@/components/workspace-panel/file-explorer-toolbar'
-import { FileExplorerTreeRowButton } from '@/components/workspace-panel/file-explorer-tree-row-button'
-import { FileExplorerTreeStatus } from '@/components/workspace-panel/file-explorer-tree-status'
-import type { TreeNode } from '@/components/workspace-panel/file-explorer-types'
-import { FileExplorerVirtualList } from '@/components/workspace-panel/file-explorer-virtual-list'
-import { useFileExplorerManualRefresh } from '@/components/workspace-panel/use-file-explorer-manual-refresh'
 import { translate } from '@/i18n/i18n'
 
 import type {
   CoworkingFileListResult,
   CoworkingFileTreeEntry
 } from '../../../../shared/coworking/operation-contract'
+import { isDotfileRelativePath } from '../workspace-panel/file-explorer/entries'
+import { FileExplorerToolbar } from '../workspace-panel/file-explorer/toolbar'
+import { FileExplorerTreeRowButton } from '../workspace-panel/file-explorer/tree-row-button'
+import { FileExplorerTreeStatus } from '../workspace-panel/file-explorer/tree-status'
+import type { TreeNode } from '../workspace-panel/file-explorer/types'
+import { useFileExplorerManualRefresh } from '../workspace-panel/file-explorer/use-manual-refresh'
+import { FileExplorerVirtualList } from '../workspace-panel/file-explorer/virtual-list'
 import { CoworkingTooltipIconButton } from './tooltip-icon-button'
 
 type CoworkingFileTreeRow =

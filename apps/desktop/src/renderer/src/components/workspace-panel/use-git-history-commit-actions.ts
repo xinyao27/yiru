@@ -19,7 +19,7 @@ import type { GitHistoryCommitAction } from './git-history-commit-context-menu'
 import {
   shouldOpenSourceControlRowAsPreview,
   type SourceControlRowOpenEvent
-} from './source-control-split-open'
+} from './source-control/split-open'
 
 const EMPTY_BRANCH_CHANGE_ENTRIES: GitBranchChangeEntry[] = []
 

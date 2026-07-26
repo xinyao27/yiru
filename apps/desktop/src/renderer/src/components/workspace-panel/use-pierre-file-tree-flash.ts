@@ -1,7 +1,7 @@
 import type { FileTree } from '@pierre/trees'
 import { useLayoutEffect } from 'react'
 
-import type { PierreFileTreeData } from './pierre-file-tree-data'
+import type { PierreFileTreeData } from './file-explorer/pierre-file-tree-data'
 
 export function usePierreFileTreeFlash({
   flashingPath,

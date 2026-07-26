@@ -11,7 +11,7 @@ import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoById, useRepoMap, useWorktreeById } from '@/store/selectors'
 
 import { isGitRepoKind } from '../../../../shared/repo-kind'
-import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'
+import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
 import { useGitStatusFileWatchRefresh } from './git-status-file-watch-refresh'
 import { useGitStatusPushSignalRefresh } from './git-status-push-signal-refresh'
 import { refreshGitStatusForWorktree } from './git-status-refresh'

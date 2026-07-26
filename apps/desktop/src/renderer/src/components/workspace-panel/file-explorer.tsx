@@ -3,7 +3,7 @@ import React from 'react'
 import { CoworkingFilesPane } from '@/components/coworking/files-pane'
 import { getCoworkingWorktreeRouteKey } from '@/components/coworking/worktree-route'
 
-import { FileExplorerFilesMemo } from './file-explorer-files'
+import { FileExplorerFilesMemo } from './file-explorer/files'
 import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
   type RightSidebarPanelSource

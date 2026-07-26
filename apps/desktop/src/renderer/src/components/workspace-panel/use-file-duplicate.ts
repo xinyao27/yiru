@@ -5,8 +5,8 @@ import { getConnectionId } from '@/lib/connection-context'
 import { basename, dirname, joinPath } from '@/lib/path'
 import { copyRuntimePath, runtimePathExists } from '@/runtime/file-client'
 
-import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer-runtime-owner'
-import type { TreeNode } from './file-explorer-types'
+import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
+import type { TreeNode } from './file-explorer/types'
 
 /**
  * Electron's ipcRenderer.invoke wraps errors as:

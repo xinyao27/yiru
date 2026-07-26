@@ -8,17 +8,17 @@ import React from 'react'
 
 import type { ConflictReviewEntry } from '@/components/editor/state'
 import { Button } from '@/components/ui/button'
-import {
-  buildSourceControlTree,
-  compactSourceControlTree,
-  flattenSourceControlTree,
-  type SourceControlTreeNode
-} from '@/components/workspace-panel/source-control-tree'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 
 import type { GitStatusEntry } from '../../../../shared/types'
+import {
+  buildSourceControlTree,
+  compactSourceControlTree,
+  flattenSourceControlTree,
+  type SourceControlTreeNode
+} from '../workspace-panel/source-control/tree'
 
 type ConflictReviewTreeEntry = ConflictReviewEntry & {
   liveEntry?: GitStatusEntry

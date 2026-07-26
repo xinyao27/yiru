@@ -12,7 +12,7 @@ const FileExplorer = lazy(() => import('./file-explorer'))
 const SourceControl = lazy(() => import('./source-control'))
 const ChecksPanel = lazy(() => import('./checks-panel'))
 const PortsPanel = lazy(() => import('./ports-panel'))
-const AiVaultPanel = lazy(() => import('./ai-vault-panel'))
+const AiVaultPanel = lazy(() => import('./ai-vault/panel'))
 const FolderWorkspaceWorktreesPanel = lazy(() => import('./folder-workspace-worktrees-panel'))
 const FolderWorkspacePrChecksPanel = lazy(() => import('./folder-workspace-pr-checks-panel'))
 

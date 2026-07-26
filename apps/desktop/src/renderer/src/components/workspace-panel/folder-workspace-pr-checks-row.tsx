@@ -17,7 +17,7 @@ import {
   ChecksList,
   prStateColor,
   PullRequestIcon
-} from './checks-panel-content'
+} from './checks-panel/content'
 import type { ParentPrChecksRow } from './parent-pr-checks-rows'
 
 type FolderWorkspacePrChecksRowProps = {

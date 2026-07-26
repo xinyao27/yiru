@@ -2,7 +2,6 @@ import { Folder, FolderOpen, CaretDown as ChevronDown } from '@phosphor-icons/re
 import type React from 'react'
 
 import { Button } from '@/components/ui/button'
-import type { SourceControlTreeNode } from '@/components/workspace-panel/source-control-tree'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/workspace-panel/status-display'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -15,6 +14,7 @@ import type {
   GitStagingArea,
   GitStatusEntry
 } from '../../../../shared/types'
+import type { SourceControlTreeNode } from '../workspace-panel/source-control/tree'
 import {
   getCombinedDiffFileTreeSectionKey,
   type CombinedDiffBranchTreeArea,

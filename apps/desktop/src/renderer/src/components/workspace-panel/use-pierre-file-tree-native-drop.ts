@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-import type { PierreFileTreeData } from './pierre-file-tree-data'
+import type { PierreFileTreeData } from './file-explorer/pierre-file-tree-data'
 
 const NATIVE_DRAG_EXPAND_DELAY_MS = 500
 

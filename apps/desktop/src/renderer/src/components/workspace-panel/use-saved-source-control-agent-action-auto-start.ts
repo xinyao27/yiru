@@ -5,8 +5,8 @@ import type {
   SourceControlLaunchActionId
 } from '../../../../shared/source-control/ai-actions'
 import type { GlobalSettings, Repo, TuiAgent } from '../../../../shared/types'
-import { sourceControlActionRecipeMatchesTarget } from './source-control-action-recipe-match'
-import { isSourceControlAgentDetectedAndEnabled } from './source-control-agent-action-dialog-support'
+import { sourceControlActionRecipeMatchesTarget } from './source-control/action-recipe-match'
+import { isSourceControlAgentDetectedAndEnabled } from './source-control/agent-action-dialog-support'
 
 type SavedSourceControlAgentActionTargetValue = 'repo' | 'global'
 

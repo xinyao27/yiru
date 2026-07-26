@@ -24,7 +24,7 @@ import {
 } from './git-history-commit-context-menu'
 import { GitHistoryCommitFiles, type GitHistoryCommitFilesState } from './git-history-commit-files'
 import { GitHistoryRow } from './git-history-row'
-import type { SourceControlRowOpenEvent } from './source-control-split-open'
+import type { SourceControlRowOpenEvent } from './source-control/split-open'
 
 export type GitHistoryPanelState =
   | { status: 'idle' | 'loading'; result?: GitHistoryResult; error?: string }

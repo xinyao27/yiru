@@ -6,7 +6,7 @@ import {
   WORKSPACE_FILE_PATHS_MIME
 } from '@/lib/workspace-file-drag'
 
-import type { PierreFileTreeData } from './pierre-file-tree-data'
+import type { PierreFileTreeData } from './file-explorer/pierre-file-tree-data'
 
 export function usePierreFileTreeDragPayload({
   onDragSourceChange,

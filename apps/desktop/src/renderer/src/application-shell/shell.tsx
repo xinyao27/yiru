@@ -130,7 +130,7 @@ import { dispatchWindowCloseRequest } from '../components/window-close-request-c
 import {
   folderRelativePathToIncludeGlob,
   selectedExplorerFolderRelativePath
-} from '../components/workspace-panel/file-search-include-pattern'
+} from '../components/workspace-panel/file-explorer/file-search-include-pattern'
 import { useGitStatusPolling } from '../components/workspace-panel/use-git-status-polling'
 import { YiruProfileSwitcher } from '../components/yiru-profiles/yiru-profile-switcher'
 import { useShortcutLabel } from '../hooks/use-shortcut-label'

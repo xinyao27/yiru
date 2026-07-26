@@ -9,11 +9,11 @@ import { dirname } from '@/lib/path'
 import { deleteRuntimePath, readRuntimeFileContent, writeRuntimeFile } from '@/runtime/file-client'
 import { useAppStore } from '@/store'
 
-import { runBatchDeletion, selectDeletionRoots } from './file-explorer-batch-deletion'
-import { getFileExplorerOperationRoute } from './file-explorer-operation-owner'
-import { isPathEqualOrDescendant } from './file-explorer-paths'
-import type { TreeNode } from './file-explorer-types'
-import { commitFileExplorerOp } from './file-explorer-undo-redo'
+import { runBatchDeletion, selectDeletionRoots } from './file-explorer/batch-deletion'
+import { getFileExplorerOperationRoute } from './file-explorer/operation-owner'
+import { isPathEqualOrDescendant } from './file-explorer/paths'
+import type { TreeNode } from './file-explorer/types'
+import { commitFileExplorerOp } from './file-explorer/undo-redo'
 
 type UseFileDeletionParams = {
   activeWorktreeId: string | null

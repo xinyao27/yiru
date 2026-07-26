@@ -4,10 +4,6 @@ import { useMemo, useRef } from 'react'
 
 import type { CoworkingWorkspaceRoute } from '@/components/coworking/types'
 import { Button } from '@/components/ui/button'
-import {
-  AiVaultPanelNotice,
-  AiVaultPanelSurface
-} from '@/components/workspace-panel/ai-vault-panel-surface'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
@@ -17,6 +13,7 @@ import type {
   CoworkingSessionCatalogEntry,
   CoworkingSessionCatalogPageState
 } from '../../../../shared/coworking/catalog-contract'
+import { AiVaultPanelNotice, AiVaultPanelSurface } from '../workspace-panel/ai-vault/panel-surface'
 import { getCoworkingSessionCatalogStatusLabel } from './session-catalog-status'
 
 const AGENT_ROW_ESTIMATED_HEIGHT = 53

@@ -2,12 +2,12 @@ import type React from 'react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { SourceControlSectionHeader } from '@/components/workspace-panel/source-control-section-header'
-import { SourceControlVirtualFileList } from '@/components/workspace-panel/source-control-virtual-file-list'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
 import type { CoworkingGitStatusEntry } from '../../../../shared/coworking/operation-contract'
+import { SourceControlSectionHeader } from '../workspace-panel/source-control/section-header'
+import { SourceControlVirtualFileList } from '../workspace-panel/source-control/virtual-file-list'
 import { CoworkingTruncatedPathLabel } from './truncated-path-label'
 
 export function CoworkingGitChangesList({

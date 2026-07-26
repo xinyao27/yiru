@@ -3,7 +3,6 @@ import type React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { CHECK_COLOR, CHECK_ICON } from '@/components/workspace-panel/check-status-presentation'
-import { ChecksList } from '@/components/workspace-panel/checks-panel-content'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -11,6 +10,7 @@ import type {
   CoworkingChecksReadResult,
   CoworkingChecksReview
 } from '../../../../shared/coworking/operation-contract'
+import { ChecksList } from '../workspace-panel/checks-panel/content'
 
 export function CoworkingChecksResult({
   result
