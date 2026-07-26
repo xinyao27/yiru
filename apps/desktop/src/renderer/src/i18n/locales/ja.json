@@ -1081,17 +1081,6 @@
             }
           }
         },
-        "GitHubMarkdownComposer": {
-          "015b4e607d": "キャンセル",
-          "e3bd59143c": "入れる",
-          "f24783f470": "https://...",
-          "ec6310b731": "http:// または https:// 画像 URL を使用します。",
-          "b7e4a1c902": "貼り付け、ドロップ、またはクリックしてファイルを追加",
-          "8f1c2d4e6a": "プレビューするものはありません",
-          "c91f0a2b14": "書く",
-          "d82b1e3f05": "プレビュー",
-          "imageUrlTooLarge": "画像 URL が大きすぎます。"
-        },
         "PRFilterDropdowns": {
           "979be3cf6b": "担当者",
           "b27b7e526c": "からのレビュー",
@@ -1368,9 +1357,6 @@
               "65a3dae41d": "プロジェクトがありません"
             }
           }
-        },
-        "sheet": {
-          "1189e9fe0a": "閉じる"
         },
         "team": {
           "multi": {
@@ -2918,22 +2904,6 @@
           "f2e42e1307": "送信",
           "69969ba364": "送信中…",
           "d245c4ef6c": "GitHub issues"
-        },
-        "SidebarFilter": {
-          "e3b3898218": "プロジェクトの追加",
-          "92a23e6d07": "フィルターをリセットする",
-          "81ded53722": "SSH",
-          "b9e8802e73": "一致するプロジェクトはありません",
-          "779b7ba05d": "クリア",
-          "139877b384": "すべて選択",
-          "5f7085a077": "プロジェクト",
-          "e5cb32a898": "デフォルトのブランチを非表示にする",
-          "638a2d221d": "スリープ中を非表示",
-          "f506a1262a": "ワークスペースのフィルタリング",
-          "75405270ed": "フィルターの編集 ({{value0}} がアクティブ)",
-          "489d1c8c9f": "プロジェクトを検索...",
-          "ee240a39eb": "フィルターの編集",
-          "automationCreated": "自動化で作成されたワークスペースを非表示"
         },
         "SidebarHeader": {
           "92154beb7e": "新規ワークスペース",
@@ -9364,14 +9334,6 @@
           "yoloPermissionsInfo": "Agent permission info",
           "yoloPermissionsTooltip": "Skip permission checks for agents for less interruptions"
         },
-        "FeatureSetupChecklist": {
-          "77f74946f5": "Agents は相互にメッセージを送信し、タスクを実行し、引き継ぎを調整できます。",
-          "399cf885c0": "Agent オーケストレーション",
-          "c5292c409d": "Agents は、要求に応じてアプリ ウィンドウを検査し、ローカル アプリを操作できます。",
-          "1ecfb490ac": "コンピュータ操作",
-          "01426f3a23": "Agents はサイトを移動し、ページを検査し、ブラウザーのタスクを実行できます。",
-          "ea85d9e628": "Agent ブラウザの使用"
-        },
         "FeatureSetupInlineTerminal": {
           "789b59936e": "Enter キーを押してコマンドを実行し、要求されたら npx を確認します。これは、後で [設定] で設定することもできます。",
           "47fc6cc6dc": "スキルセットアップコマンド",
@@ -9455,33 +9417,6 @@
         "OnboardingTourStep": {
           "3f9586c043": "ツアーに参加する",
           "60c5576353": "出口ツアー"
-        },
-        "RepoStep": {
-          "e8fdb36338": "repos をスキャンしています。クリックして停止します。",
-          "b7c4da0504": "SSH? 「設定」でホストをセットアップする",
-          "c33b190ca3": "サーバーパスのみ",
-          "7b679207e4": "ワークスペース",
-          "24c7c8696c": "サーバーパスにクローンを作成します",
-          "7932e95f68": "クローン",
-          "955134915e": "git@github.com:org/repo.git",
-          "288d8444b7": "HTTPS または SSH URL を貼り付けます。",
-          "132425a3e3": "repo のクローンを作成する",
-          "6558d50c69": "一度に多くの repos をインポートしたいですか?親フォルダーを選択します。",
-          "831524961f": "git repo かどうかに関係なく、任意のローカル ディレクトリを選択します。",
-          "f4e9c8dcf8": "フォルダーを参照する",
-          "e8214aa632": "フォルダーとして開く",
-          "3863747c56": "Gitプロジェクトの追加",
-          "2ebbc26343": "/home/user/project",
-          "466108ab89": "ランタイムサーバー上に存在するパスを入力します。",
-          "8cab104e3c": "サーバープロジェクトを開く",
-          "2d20200346": "repos のインポート",
-          "27ca610db1": "戻る",
-          "cecd6593fa": "スキャンしたフォルダー:",
-          "c7af322fc3": "スキャンを停止する",
-          "c3d9d44ca2": "スキャンの停止",
-          "cf23006ba7": "ランタイムサーバー",
-          "7ec3f48820": "/home/user",
-          "2e6438dd34": "{{value0}}このフォルダー内で {{value1}} {{value2}} が見つかりました。"
         },
         "ThemeStep": {
           "a4b254779d": "macOSのオプションキー",
@@ -9958,43 +9893,6 @@
             "cda56c5915": "メモ / launch-plan.md",
             "e16479c1c5": "[データスラッシュメニュー] [データスラッシュ行].slash-active { 背景: rgba(24,24,27,0.07);ボックスシャドウ: インセット 0 0 0 1px rgba(24,24,27,0.06); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122);フォントファミリー: ui-monospace、SFMono- Regular、Menlo、monospace;フォントサイズ: 12.5px; [data-md-active-line][data-role=\"h1\"] { color: 継承;フォントファミリー: 継承;フォントサイズ: 18px;フォントの太さ: 700;文字間隔: -0.01em;行の高さ: 1.2;マージントップ: 6px; } [data-md-caret] {表示: インラインブロック;幅: 1.5ピクセル;高さ: 1em;背景: 現在の色;垂直整列: -2px;左マージン: 1px;アニメーション: md-caret-blink 1.05 秒ステップ (1) 無限; } @keyframes md-caret-blink { 0%, 50% { 不透明度: 1 } 51%, 100% { 不透明度: 0 } } @keyframes md-block-in { from { 不透明度: 0;変換：translateY(-2px); } から { 不透明度: 1;変換: なし。 } } @keyframes md-cursor-ripple { 0% {transform:scale(0.4);不透明度: 0.9; } 100% { 変換: スケール(1.4);不透明度: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { アニメーション: md-cursor-ripple 460ms イーズアウト フォワード; }"
           },
-          "FeatureTourPreview": {
-            "1170621527": ">",
-            "304ad0dfc1": "考え...",
-            "ef8b164dd1": "ソース/認証を確認する",
-            "952d3ddd9a": "セッションが開始されました",
-            "771d8881c2": "claude",
-            "6ed43cb0e0": "ダッシュボードの仕様",
-            "24fedd5a52": "ログイン.spec.ts",
-            "8279e9d95b": "12 個のテストを実行する",
-            "6218a9014d": "pnpm プレイライト テスト",
-            "04d54d50ec": "yiru · zsh",
-            "1aa8a9a24a": "分割可能な terminal",
-            "2a7cfc82c8": "GH #1842 にリンク",
-            "3822d8d14b": "fix/worktree-picker-truncates",
-            "d54aefe09e": "LIN-329",
-            "40bbd92ef4": "始める",
-            "c1f28c03b2": "ワークツリーピッカーが切り捨てる",
-            "fc0cc0b267": "GH #1842",
-            "0688842445": "GH #1799",
-            "5171768676": "3 つの agents を調整する",
-            "cebc7769cd": "認証フローを再設計する",
-            "e44269e97d": "Agent のオーケストレーション",
-            "ec4a73f5e6": "PR 3/3",
-            "cfdfd4d6b4": "PR 2/3",
-            "b1f17bcc74": "PR 1/3",
-            "e38112b289": "請求 Webhook をリファクタリングする",
-            "9c812e0d7c": "CIパイプラインを高速化する",
-            "3c4adfd821": "ログイン競合状態を修正",
-            "56a0271428": "隔離されたワークスペース",
-            "ac51c061e2": "codex",
-            "47f16ecf34": "Ship several things at once. Each workspace keeps its branch, terminal, and agent activity together.",
-            "70aa182266": "Hand off a goal and walk away. A coordinator agent fans out and ships parallel PRs.",
-            "5d6ee181b6": "Open any workspace to return to its terminal, then split panes for tests, logs, and agents.",
-            "ef737dcee1": "Pull request review",
-            "f10c14dd9d": "Open a GitHub pull request or GitLab merge request and review it without switching tools.",
-            "bee6b4088d": "Pull request review"
-          },
           "FeatureWallBody": {
             "25ec5356d6": "設定"
           },
@@ -10210,11 +10108,6 @@
                 }
               }
             }
-          },
-          "FeatureTourWorkspaceCard": {
-            "a23ed9da7f": "codex",
-            "2f33dc932b": "claude",
-            "9220794f6a": "実行中"
           },
           "ReviewAnimatedVisual": {
             "8df4d52b68": "プレビュー",

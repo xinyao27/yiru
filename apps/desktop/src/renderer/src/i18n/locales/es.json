@@ -1081,17 +1081,6 @@
             }
           }
         },
-        "GitHubMarkdownComposer": {
-          "015b4e607d": "Cancelar",
-          "e3bd59143c": "Insertar",
-          "f24783f470": "https://...",
-          "ec6310b731": "Usa una URL de imagen http:// o https://.",
-          "b7e4a1c902": "Pega, suelta o haz clic para agregar archivos",
-          "8f1c2d4e6a": "No hay nada que previsualizar",
-          "c91f0a2b14": "Escribir",
-          "d82b1e3f05": "Previsualizar",
-          "imageUrlTooLarge": "La URL de la imagen es demasiado grande."
-        },
         "PRFilterDropdowns": {
           "979be3cf6b": "Asignado",
           "b27b7e526c": "Revisión de",
@@ -1368,9 +1357,6 @@
               "65a3dae41d": "Sin proyectos"
             }
           }
-        },
-        "sheet": {
-          "1189e9fe0a": "Cerrar"
         },
         "team": {
           "multi": {
@@ -2937,22 +2923,6 @@
           "f2e42e1307": "Enviar",
           "69969ba364": "Envío…",
           "d245c4ef6c": "GitHub issues"
-        },
-        "SidebarFilter": {
-          "e3b3898218": "Agregar proyecto",
-          "92a23e6d07": "Restablecer filtros",
-          "81ded53722": "SSH",
-          "b9e8802e73": "Ningún proyecto coincide",
-          "779b7ba05d": "Limpiar",
-          "139877b384": "Seleccionar todo",
-          "5f7085a077": "Proyectos",
-          "e5cb32a898": "Ocultar rama predeterminada",
-          "638a2d221d": "Ocultar en reposo",
-          "f506a1262a": "Filtrar espacios de trabajo",
-          "75405270ed": "Editar filtros ({{value0}} activo)",
-          "489d1c8c9f": "Buscar proyectos...",
-          "ee240a39eb": "Editar filtros",
-          "automationCreated": "Ocultar creados por automatizaciones"
         },
         "SidebarHeader": {
           "92154beb7e": "Nuevo espacio de trabajo",
@@ -9364,14 +9334,6 @@
           "yoloPermissionsInfo": "Información de permisos del agente",
           "yoloPermissionsTooltip": "Omite las comprobaciones de permisos de los agentes para reducir interrupciones"
         },
-        "FeatureSetupChecklist": {
-          "77f74946f5": "Los agentes pueden enviarse mensajes entre sí, tomar tareas y coordinar handoffs.",
-          "399cf885c0": "Orquestación de agentes",
-          "c5292c409d": "Los agentes pueden inspeccionar ventanas de apps y operar apps locales cuando se lo pidas.",
-          "1ecfb490ac": "Uso de la computadora",
-          "01426f3a23": "Los agentes pueden navegar por sitios, inspeccionar páginas y trabajar en tareas del navegador.",
-          "ea85d9e628": "Uso del navegador por agentes"
-        },
         "FeatureSetupInlineTerminal": {
           "789b59936e": "Pulsa Enter para ejecutar el comando y confirma npx si se te solicita. También puedes configurarlo más tarde en Configuración.",
           "47fc6cc6dc": "Comando de configuración de skills",
@@ -9455,33 +9417,6 @@
         "OnboardingTourStep": {
           "3f9586c043": "Haz el recorrido",
           "60c5576353": "Salir del recorrido"
-        },
-        "RepoStep": {
-          "e8fdb36338": "Escaneo de repositorios. Haga clic para detener.",
-          "b7c4da0504": "¿SSH? Configura hosts en Configuración",
-          "c33b190ca3": "Solo rutas del host",
-          "7b679207e4": "Espacio de trabajo",
-          "24c7c8696c": "Clonar en ruta del host",
-          "7932e95f68": "Clonar",
-          "955134915e": "git@github.com:org/repo.git",
-          "288d8444b7": "Pegue una URL HTTPS o SSH.",
-          "132425a3e3": "Clonar un repositorio",
-          "6558d50c69": "¿Quieres importar muchos repositorios a la vez? Seleccione la carpeta principal.",
-          "831524961f": "Elija cualquier directorio local, repositorio git o no.",
-          "f4e9c8dcf8": "Buscar una carpeta",
-          "e8214aa632": "Abrir como carpeta",
-          "3863747c56": "Agregar proyecto Git",
-          "2ebbc26343": "/home/user/project",
-          "466108ab89": "Introduce una ruta que exista en el host seleccionado.",
-          "8cab104e3c": "Abrir un proyecto en este host",
-          "2d20200346": "Importar repositorios",
-          "27ca610db1": "Atrás",
-          "cecd6593fa": "Carpeta escaneada:",
-          "c7af322fc3": "Dejar de escanear",
-          "c3d9d44ca2": "Detener escaneo",
-          "cf23006ba7": "Host seleccionado",
-          "7ec3f48820": "/home/user",
-          "2e6438dd34": "{{value0}}Se encontraron {{value1}} {{value2}} en esta carpeta."
         },
         "ThemeStep": {
           "a4b254779d": "Tecla de opción de macOS",
@@ -9958,43 +9893,6 @@
             "cda56c5915": "notes / launch-plan.md",
             "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }"
           },
-          "FeatureTourPreview": {
-            "1170621527": ">",
-            "304ad0dfc1": "Pensando...",
-            "ef8b164dd1": "revisar src/auth",
-            "952d3ddd9a": "sesión iniciada",
-            "771d8881c2": "claude",
-            "6ed43cb0e0": "dashboard.spec.ts",
-            "24fedd5a52": "login.spec.ts",
-            "8279e9d95b": "Ejecutando 12 pruebas",
-            "6218a9014d": "pnpm playwright test",
-            "04d54d50ec": "yiru · zsh",
-            "1aa8a9a24a": "Terminal dividible",
-            "2a7cfc82c8": "Vinculado a GH #1842",
-            "3822d8d14b": "fix/worktree-picker-truncates",
-            "d54aefe09e": "LIN-329",
-            "40bbd92ef4": "Comenzar",
-            "c1f28c03b2": "El selector de worktree se trunca",
-            "fc0cc0b267": "GH #1842",
-            "0688842445": "GH #1799",
-            "5171768676": "orquestando 3 agentes",
-            "cebc7769cd": "rediseñar el flujo de autenticación",
-            "e44269e97d": "Orquestación de agentes",
-            "ec4a73f5e6": "PR 3/3",
-            "cfdfd4d6b4": "PR 2/3",
-            "b1f17bcc74": "PR 1/3",
-            "e38112b289": "refactorizar el webhook de facturación",
-            "9c812e0d7c": "acelerar el proceso de CI",
-            "3c4adfd821": "arreglar la condición de carrera de inicio de sesión",
-            "56a0271428": "Espacios de trabajo aislados",
-            "ac51c061e2": "codex",
-            "47f16ecf34": "Avanza en varias cosas a la vez. Cada workspace mantiene juntos su rama, terminal y actividad de agentes.",
-            "70aa182266": "Delega un objetivo y sigue con lo tuyo. Un agente coordinador se despliega y publica PRs en paralelo.",
-            "5d6ee181b6": "Abre cualquier workspace para volver a su terminal y luego divide paneles para tests, logs y agentes.",
-            "ef737dcee1": "Pull request review",
-            "f10c14dd9d": "Open a GitHub pull request or GitLab merge request and review it without switching tools.",
-            "bee6b4088d": "Pull request review"
-          },
           "FeatureWallBody": {
             "25ec5356d6": "Configuración"
           },
@@ -10210,11 +10108,6 @@
                 }
               }
             }
-          },
-          "FeatureTourWorkspaceCard": {
-            "a23ed9da7f": "codex",
-            "2f33dc932b": "claude",
-            "9220794f6a": "laboral"
           },
           "ReviewAnimatedVisual": {
             "8df4d52b68": "pr-vista",
