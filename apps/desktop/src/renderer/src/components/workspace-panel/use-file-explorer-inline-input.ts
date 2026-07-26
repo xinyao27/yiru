@@ -188,12 +188,19 @@ export function useFileExplorerInlineInput({
     [inlineInput, activeWorktreeId, worktreePath, refreshDir, openFile, scheduleScrollFocus]
   )
 
-  return {
-    inlineInput,
-    inlineInputIndex,
-    startNew,
-    startRename,
-    dismissInlineInput,
-    handleInlineSubmit
-  }
+  // Why: this hook's return is consumed as a single opaque `inline` group by
+  // useFileExplorerInteractions' outer useMemo (file-explorer-interactions.tsx)
+  // — every field below is already individually stable, so memoize the
+  // wrapper too or that outer memo recomputes on every render regardless.
+  return useMemo(
+    () => ({
+      inlineInput,
+      inlineInputIndex,
+      startNew,
+      startRename,
+      dismissInlineInput,
+      handleInlineSubmit
+    }),
+    [inlineInput, inlineInputIndex, startNew, startRename, dismissInlineInput, handleInlineSubmit]
+  )
 }

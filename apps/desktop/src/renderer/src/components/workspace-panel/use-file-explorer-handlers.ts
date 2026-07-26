@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import type React from 'react'
 import type { RefObject } from 'react'
 import { toast } from 'sonner'
@@ -216,5 +216,12 @@ export function useFileExplorerHandlers({
     [scrollRef]
   )
 
-  return { handleClick, handleDoubleClick, handleWheelCapture }
+  // Why: this hook's return is consumed as a single opaque `handlers` group by
+  // useFileExplorerInteractions' outer useMemo (file-explorer-interactions.tsx)
+  // — every field below is already individually stable, so memoize the
+  // wrapper too or that outer memo recomputes on every render regardless.
+  return useMemo(
+    () => ({ handleClick, handleDoubleClick, handleWheelCapture }),
+    [handleClick, handleDoubleClick, handleWheelCapture]
+  )
 }

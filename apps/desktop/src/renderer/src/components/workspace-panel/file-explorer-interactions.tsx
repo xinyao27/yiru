@@ -1,23 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'
-import { createNewTerminalTab } from '@/components/terminal/tab-create'
-import { renameFileOnDisk } from '@/lib/rename-file'
 import { useAppStore } from '@/store'
 
-import {
-  buildAddProjectFromFolderModalData,
-  canShowAddAsProjectAction
-} from './file-explorer-add-project-action'
 import type { FileExplorerModel } from './file-explorer-model'
 import { shouldResetFileExplorerForVisibleWorktree } from './file-explorer-reset'
 import type { TreeNode } from './file-explorer-types'
 import { clearFileExplorerUndoHistory } from './file-explorer-undo-redo'
-import { folderRelativePathToIncludeGlob } from './file-search-include-pattern'
 import { splitPathSegments } from './path-tree'
 import type { PierreFileExplorerTreeHandle } from './pierre-file-explorer-tree'
 import { useFileDeletion } from './use-file-deletion'
-import { useFileDuplicate } from './use-file-duplicate'
 import { useFileExplorerAutoReveal } from './use-file-explorer-auto-reveal'
 import { useFileExplorerDragDrop } from './use-file-explorer-drag-drop'
 import { useFileExplorerHandlers } from './use-file-explorer-handlers'
@@ -25,6 +16,7 @@ import { useFileExplorerImport } from './use-file-explorer-import'
 import { useFileExplorerInlineInput } from './use-file-explorer-inline-input'
 import { useFileExplorerKeys } from './use-file-explorer-keys'
 import { useFileExplorerReveal } from './use-file-explorer-reveal'
+import { useFileExplorerRowActions } from './use-file-explorer-row-actions'
 import { useFileExplorerSelection } from './use-file-explorer-selection'
 import { useFileExplorerWatch } from './use-file-explorer-watch'
 
@@ -34,8 +26,6 @@ export function useFileExplorerInteractions(
 ) {
   const { view, owner, tree, actions } = model
   const sshConnectedGeneration = useAppStore((state) => state.sshConnectedGeneration)
-  const collapseAllDirs = useAppStore((state) => state.collapseAllDirs)
-  const collapseDirSubtree = useAppStore((state) => state.collapseDirSubtree)
   const toggleDir = useAppStore((state) => state.toggleDir)
   const pendingExplorerReveal = useAppStore((state) => state.pendingExplorerReveal)
   const clearPendingExplorerReveal = useAppStore((state) => state.clearPendingExplorerReveal)
@@ -44,9 +34,6 @@ export function useFileExplorerInteractions(
   const activeFileId = useAppStore((state) => state.activeFileId)
   const openFiles = useAppStore((state) => state.openFiles)
   const closeFile = useAppStore((state) => state.closeFile)
-  const openModal = useAppStore((state) => state.openModal)
-  const showRightSidebarSearch = useAppStore((state) => state.showRightSidebarSearch)
-  const toggleShowDotfilesForWorktree = useAppStore((state) => state.toggleShowDotfilesForWorktree)
 
   const [flashingPath, setFlashingPath] = useState<string | null>(null)
   const [bgMenuOpen, setBgMenuOpen] = useState(false)
@@ -240,137 +227,98 @@ export function useFileExplorerInteractions(
     nativeTreeNavigation: true
   })
 
-  const { requestDelete, requestDeleteAll } = deletion
-  const handleContextMenuDelete = useCallback(
-    (node: TreeNode) => {
-      if (selection.selectedPaths.has(node.path) && selectedNodes.length > 1) {
-        requestDeleteAll(selectedNodes)
-      } else {
-        requestDelete(node)
-      }
-    },
-    [requestDelete, requestDeleteAll, selectedNodes, selection.selectedPaths]
-  )
-  const handleDuplicate = useFileDuplicate({
+  // Why: delete/duplicate/collapse/rename/open-in-terminal/background-menu
+  // actions live in a sibling hook (use-file-explorer-row-actions.ts) so this
+  // file stays under the .tsx line budget — it already returns its own
+  // memoized group, so actionsGroup below just merges in `toggleDir`.
+  const rowActions = useFileExplorerRowActions({
     activeWorktreeId: owner.activeWorktreeId,
+    activeRepo: owner.activeRepo,
     worktreePath: owner.worktreePath,
-    refreshDir: tree.refreshDir
+    explorerView: view.explorerView,
+    hasNameFilter: view.hasNameFilter,
+    refreshDir: tree.refreshDir,
+    selectedPaths: selection.selectedPaths,
+    selectedNodes,
+    requestDelete: deletion.requestDelete,
+    requestDeleteAll: deletion.requestDeleteAll,
+    inlineInput: inline.inlineInput,
+    startNew: inline.startNew,
+    setBgMenuOpen,
+    setBgMenuPoint
   })
-  const handleCollapseFolderSubtree = useCallback(
-    (node: TreeNode) => {
-      if (owner.activeWorktreeId && node.isDirectory) {
-        collapseDirSubtree(owner.activeWorktreeId, node.path)
-      }
-    },
-    [collapseDirSubtree, owner.activeWorktreeId]
-  )
-  const handleFindInFolder = useCallback(
-    (node: TreeNode) => {
-      if (owner.activeWorktreeId && node.isDirectory) {
-        showRightSidebarSearch({
-          includePattern: folderRelativePathToIncludeGlob(node.relativePath)
-        })
-      }
-    },
-    [owner.activeWorktreeId, showRightSidebarSearch]
-  )
-  const handleAddFolderAsProject = useCallback(
-    (node: TreeNode) => {
-      if (owner.activeRepo && canShowAddAsProjectAction(node, owner.activeRepo)) {
-        openModal(
-          'confirm-add-project-from-folder',
-          buildAddProjectFromFolderModalData(node, owner.activeRepo)
-        )
-      }
-    },
-    [openModal, owner.activeRepo]
-  )
-  const handleOpenInTerminal = useCallback(
-    (node: TreeNode) => {
-      if (owner.activeWorktreeId && node.isDirectory) {
-        createNewTerminalTab(owner.activeWorktreeId, undefined, { startupCwd: node.path })
-      }
-    },
-    [owner.activeWorktreeId]
-  )
-  const handlePierreRenameNode = useCallback(
-    (node: TreeNode, newName: string) => {
-      if (owner.activeWorktreeId && owner.worktreePath) {
-        void renameFileOnDisk({
-          oldPath: node.path,
-          newName,
-          worktreeId: owner.activeWorktreeId,
-          worktreePath: owner.worktreePath,
-          refreshDir: tree.refreshDir
-        })
-      }
-    },
-    [owner.activeWorktreeId, owner.worktreePath, tree.refreshDir]
-  )
-  const handleCollapseAll = useCallback(() => {
-    if (owner.activeWorktreeId && view.explorerView === 'files' && !view.hasNameFilter) {
-      collapseAllDirs(owner.activeWorktreeId)
-    }
-  }, [collapseAllDirs, owner.activeWorktreeId, view.explorerView, view.hasNameFilter])
-  const handleToggleDotfiles = useCallback(() => {
-    if (owner.activeWorktreeId) {
-      toggleShowDotfilesForWorktree(owner.activeWorktreeId)
-    }
-  }, [owner.activeWorktreeId, toggleShowDotfilesForWorktree])
-  const handleBackgroundContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    const isTreeRow = event.nativeEvent
-      .composedPath()
-      .some((entry) => entry instanceof HTMLElement && entry.dataset.type === 'item')
-    if (isTreeRow || (event.target as HTMLElement).closest('[data-slot="context-menu-trigger"]')) {
-      return
-    }
-    event.preventDefault()
-    window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-    setBgMenuPoint({ x: event.clientX, y: event.clientY })
-    setBgMenuOpen(true)
-  }, [])
-  const { inlineInput, startNew } = inline
-  const handleBackgroundDoubleClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (!owner.worktreePath || inlineInput) {
-        return
-      }
-      const isTreeRow = event.nativeEvent
-        .composedPath()
-        .some((entry) => entry instanceof HTMLElement && entry.dataset.type === 'item')
-      if (
-        !(isTreeRow || (event.target as HTMLElement).closest('[data-slot="context-menu-trigger"]'))
-      ) {
-        startNew('file', owner.worktreePath, 0)
-      }
-    },
-    [inlineInput, owner.worktreePath, startNew]
-  )
 
-  return {
-    selection: { ...selection, selectedNode },
-    deletion,
-    dragDrop,
-    inline,
-    handlers,
-    refs: { scrollRef, pierreTreeRef, setExplorerShellRef },
-    menu: { bgMenuOpen, setBgMenuOpen, bgMenuPoint },
-    display: { flashingPath, activeFileId },
-    actions: {
-      handleContextMenuDelete,
-      handleDuplicate,
-      handleCollapseFolderSubtree,
-      handleFindInFolder,
-      handleAddFolderAsProject,
-      handleOpenInTerminal,
-      handlePierreRenameNode,
-      handleCollapseAll,
-      handleToggleDotfiles,
-      handleBackgroundContextMenu,
-      handleBackgroundDoubleClick,
-      toggleDir
-    }
-  }
+  // Why: useFileExplorerSelection returns a fresh object literal every call
+  // even though each of its own fields is individually useState/useCallback
+  // stable. This hook already spreads it into a new `selection` shape, so
+  // rebuild that shape from the stable leaves instead of depending on the
+  // whole (always-new) `selection` object — same leaf-drilling this feature
+  // already uses for `tree`/`display` in useFileExplorerModel.
+  const selectionGroup = useMemo(
+    () => ({
+      selectedPath: selection.selectedPath,
+      selectedPaths: selection.selectedPaths,
+      setSingleSelectedPath: selection.setSingleSelectedPath,
+      setSelectedPaths: selection.setSelectedPaths,
+      resetSelection: selection.resetSelection,
+      selectRowWithModifiers: selection.selectRowWithModifiers,
+      moveSelection: selection.moveSelection,
+      preserveSelectionForContextMenu: selection.preserveSelectionForContextMenu,
+      copyPathsForNode: selection.copyPathsForNode,
+      selectedNode
+    }),
+    [
+      selection.selectedPath,
+      selection.selectedPaths,
+      selection.setSingleSelectedPath,
+      selection.setSelectedPaths,
+      selection.resetSelection,
+      selection.selectRowWithModifiers,
+      selection.moveSelection,
+      selection.preserveSelectionForContextMenu,
+      selection.copyPathsForNode,
+      selectedNode
+    ]
+  )
+  const refsGroup = useMemo(
+    () => ({ scrollRef, pierreTreeRef, setExplorerShellRef }),
+    [setExplorerShellRef]
+  )
+  const menuGroup = useMemo(
+    () => ({ bgMenuOpen, setBgMenuOpen, bgMenuPoint }),
+    [bgMenuOpen, setBgMenuOpen, bgMenuPoint]
+  )
+  const displayGroup = useMemo(() => ({ flashingPath, activeFileId }), [flashingPath, activeFileId])
+  const actionsGroup = useMemo(() => ({ ...rowActions, toggleDir }), [rowActions, toggleDir])
+
+  // Why: every dependency below is memoized at its own source, so this result
+  // changes reference only when an underlying value really changes. Returning a
+  // fresh literal from any of those hooks would silently defeat React.memo on
+  // every consumer of this object.
+  return useMemo(
+    () => ({
+      selection: selectionGroup,
+      deletion,
+      dragDrop,
+      inline,
+      handlers,
+      refs: refsGroup,
+      menu: menuGroup,
+      display: displayGroup,
+      actions: actionsGroup
+    }),
+    [
+      selectionGroup,
+      deletion,
+      dragDrop,
+      inline,
+      handlers,
+      refsGroup,
+      menuGroup,
+      displayGroup,
+      actionsGroup
+    ]
+  )
 }
 
 export type FileExplorerInteractions = ReturnType<typeof useFileExplorerInteractions>

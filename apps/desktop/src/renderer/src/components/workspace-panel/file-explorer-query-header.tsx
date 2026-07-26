@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { cn } from '@/lib/class-names'
 
 import type { FileExplorerInteractions } from './file-explorer-interactions'
@@ -8,13 +10,15 @@ import { FileExplorerToolbar } from './file-explorer-toolbar'
 import { SearchFilters } from './search-filters'
 import { SearchQueryRow } from './search-query-row'
 
-export function FileExplorerQueryHeader({
-  model,
-  interactions
-}: {
+type FileExplorerQueryHeaderProps = {
   model: FileExplorerModel
   interactions: FileExplorerInteractions
-}): React.JSX.Element {
+}
+
+function FileExplorerQueryHeader({
+  model,
+  interactions
+}: FileExplorerQueryHeaderProps): React.JSX.Element {
   const { view, owner, tree, display, actions } = model
   const canCollapseAll = view.isFilesViewActive && !view.hasNameFilter && tree.expanded.size > 0
 
@@ -73,3 +77,11 @@ export function FileExplorerQueryHeader({
     </>
   )
 }
+
+// Why: useFileExplorerModel and useFileSearchPanel now both memoize their
+// full return chain, so `model` itself is stable when nothing in it
+// changed. `interactions` is still capped by three sibling hooks
+// (dragDrop/inline/handlers in useFileExplorerInteractions) that return a
+// fresh object literal every call — see the Why: comment on that hook's
+// return for detail.
+export const FileExplorerQueryHeaderMemo = React.memo(FileExplorerQueryHeader)

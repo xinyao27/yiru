@@ -5,8 +5,8 @@ import { translate } from '@/i18n/i18n'
 import { FileExplorerBackgroundMenu } from './file-explorer-background-menu'
 import { useFileExplorerInteractions } from './file-explorer-interactions'
 import { useFileExplorerModel } from './file-explorer-model'
-import { FileExplorerQueryHeader } from './file-explorer-query-header'
-import { FileExplorerTreeContent } from './file-explorer-tree-content'
+import { FileExplorerQueryHeaderMemo } from './file-explorer-query-header'
+import { FileExplorerTreeContentMemo } from './file-explorer-tree-content'
 
 function FileExplorerFiles({
   isVisible,
@@ -48,8 +48,8 @@ function FileExplorerFiles({
         }
         className="flex min-h-0 flex-1 flex-col"
       >
-        <FileExplorerQueryHeader model={model} interactions={interactions} />
-        <FileExplorerTreeContent model={model} interactions={interactions} />
+        <FileExplorerQueryHeaderMemo model={model} interactions={interactions} />
+        <FileExplorerTreeContentMemo model={model} interactions={interactions} />
       </div>
       <FileExplorerBackgroundMenu
         open={interactions.menu.bgMenuOpen}

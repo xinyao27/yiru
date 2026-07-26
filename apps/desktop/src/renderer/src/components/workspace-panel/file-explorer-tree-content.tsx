@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { dirname, normalizeRelativePath } from '@/lib/path'
@@ -11,13 +13,15 @@ import { PierreFileExplorerTree } from './pierre-file-explorer-tree'
 import { SearchResultsPane } from './search-results-pane'
 import { shouldShowIgnoredDecoration, STATUS_COLORS } from './status-display'
 
-export function FileExplorerTreeContent({
-  model,
-  interactions
-}: {
+type FileExplorerTreeContentProps = {
   model: FileExplorerModel
   interactions: FileExplorerInteractions
-}): React.JSX.Element {
+}
+
+function FileExplorerTreeContent({
+  model,
+  interactions
+}: FileExplorerTreeContentProps): React.JSX.Element {
   const { view, owner, tree, display, actions } = model
   const { selection, deletion, dragDrop, inline, handlers, refs } = interactions
   const isEmptyState = tree.visibleRowCount === 0 && !inline.inlineInput
@@ -207,3 +211,11 @@ export function FileExplorerTreeContent({
     </div>
   )
 }
+
+// Why: useFileExplorerModel and useFileSearchPanel now both memoize their
+// full return chain, so `model` itself is stable when nothing in it
+// changed. `interactions` is still capped by three sibling hooks
+// (dragDrop/inline/handlers in useFileExplorerInteractions) that return a
+// fresh object literal every call — see the Why: comment on that hook's
+// return for detail.
+export const FileExplorerTreeContentMemo = React.memo(FileExplorerTreeContent)

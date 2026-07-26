@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -107,74 +107,85 @@ export function useFileExplorerDragDrop({
     stopAndClearDragState()
   }, [stopAndClearDragState])
 
-  const rootDragHandlers = {
-    onDragOver: useCallback(
-      (event: React.DragEvent) => {
-        const isInternal = event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME)
-        const isNative = event.dataTransfer.types.includes('Files')
-        if (!isInternal && !isNative) {
-          return
-        }
-        event.preventDefault()
-        event.dataTransfer.dropEffect = isInternal ? 'move' : 'copy'
-        recordDragClientY(event.clientY)
-      },
-      [recordDragClientY]
-    ),
-    onDragEnter: useCallback((event: React.DragEvent) => {
+  const handleRootDragOver = useCallback(
+    (event: React.DragEvent) => {
       const isInternal = event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME)
-      const isNative = !isInternal && event.dataTransfer.types.includes('Files')
+      const isNative = event.dataTransfer.types.includes('Files')
       if (!isInternal && !isNative) {
         return
       }
       event.preventDefault()
-      if (isInternal) {
-        rootDragCounterRef.current += 1
-        setIsRootDragOver(true)
-      } else {
-        nativeRootDragCounterRef.current += 1
-        setIsNativeDragOver(true)
+      event.dataTransfer.dropEffect = isInternal ? 'move' : 'copy'
+      recordDragClientY(event.clientY)
+    },
+    [recordDragClientY]
+  )
+  const handleRootDragEnter = useCallback((event: React.DragEvent) => {
+    const isInternal = event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME)
+    const isNative = !isInternal && event.dataTransfer.types.includes('Files')
+    if (!isInternal && !isNative) {
+      return
+    }
+    event.preventDefault()
+    if (isInternal) {
+      rootDragCounterRef.current += 1
+      setIsRootDragOver(true)
+    } else {
+      nativeRootDragCounterRef.current += 1
+      setIsNativeDragOver(true)
+    }
+  }, [])
+  const handleRootDragLeave = useCallback(() => {
+    rootDragCounterRef.current -= 1
+    if (rootDragCounterRef.current <= 0) {
+      rootDragCounterRef.current = 0
+      setIsRootDragOver(false)
+    }
+    nativeRootDragCounterRef.current -= 1
+    if (nativeRootDragCounterRef.current <= 0) {
+      nativeRootDragCounterRef.current = 0
+      setIsNativeDragOver(false)
+    }
+    if (rootDragCounterRef.current === 0 && nativeRootDragCounterRef.current === 0) {
+      stopDragEdgeScroll()
+    }
+  }, [stopDragEdgeScroll])
+  const handleRootDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault()
+      stopDragEdgeScroll()
+      rootDragCounterRef.current = 0
+      setIsRootDragOver(false)
+      setDropTargetDir(null)
+      // Why: native imports arrive through preload IPC, not this handler.
+      clearNativeDragState()
+      if (!worktreePath) {
+        return
       }
-    }, []),
-    onDragLeave: useCallback(() => {
-      rootDragCounterRef.current -= 1
-      if (rootDragCounterRef.current <= 0) {
-        rootDragCounterRef.current = 0
-        setIsRootDragOver(false)
+      const dragPaths = readWorkspaceFileDragPaths(event.dataTransfer)
+      if (dragPaths.status === 'rejected') {
+        toast.error(getWorkspaceFileDragRejectionMessage(dragPaths.reason))
+        return
       }
-      nativeRootDragCounterRef.current -= 1
-      if (nativeRootDragCounterRef.current <= 0) {
-        nativeRootDragCounterRef.current = 0
-        setIsNativeDragOver(false)
+      for (const sourcePath of dragPaths.paths) {
+        handleMoveDrop(sourcePath, worktreePath)
       }
-      if (rootDragCounterRef.current === 0 && nativeRootDragCounterRef.current === 0) {
-        stopDragEdgeScroll()
-      }
-    }, [stopDragEdgeScroll]),
-    onDrop: useCallback(
-      (event: React.DragEvent) => {
-        event.preventDefault()
-        stopDragEdgeScroll()
-        rootDragCounterRef.current = 0
-        setIsRootDragOver(false)
-        setDropTargetDir(null)
-        // Why: native imports arrive through preload IPC, not this handler.
-        clearNativeDragState()
-        if (!worktreePath) {
-          return
-        }
-        const dragPaths = readWorkspaceFileDragPaths(event.dataTransfer)
-        if (dragPaths.status === 'rejected') {
-          toast.error(getWorkspaceFileDragRejectionMessage(dragPaths.reason))
-          return
-        }
-        for (const sourcePath of dragPaths.paths) {
-          handleMoveDrop(sourcePath, worktreePath)
-        }
-      },
-      [clearNativeDragState, handleMoveDrop, stopDragEdgeScroll, worktreePath]
-    )
-  }
+    },
+    [clearNativeDragState, handleMoveDrop, stopDragEdgeScroll, worktreePath]
+  )
+  // Why: the row/root drop targets read this object by identity every render
+  // (see file-explorer-interactions.tsx); without memoizing it, a fresh
+  // object here defeats every consumer's React.memo even though each handler
+  // leaf below is already useCallback-stable.
+  const rootDragHandlers = useMemo(
+    () => ({
+      onDragOver: handleRootDragOver,
+      onDragEnter: handleRootDragEnter,
+      onDragLeave: handleRootDragLeave,
+      onDrop: handleRootDrop
+    }),
+    [handleRootDragOver, handleRootDragEnter, handleRootDragLeave, handleRootDrop]
+  )
 
   const handleDragExpandDir = useCallback(
     (dirPath: string) => {
@@ -203,20 +214,42 @@ export function useFileExplorerDragDrop({
     [activeWorktreeId]
   )
 
-  return {
-    handleMoveDrop,
-    handleDragExpandDir,
-    dropTargetDir,
-    setDropTargetDir,
-    dragSourcePath,
-    setDragSourcePath,
-    isRootDragOver,
-    isNativeDragOver,
-    nativeDropTargetDir,
-    setNativeDropTargetDir,
-    handleNativeDragExpandDir,
-    stopDragEdgeScroll,
-    rootDragHandlers,
-    clearNativeDragState
-  }
+  // Why: this hook's return is consumed as a single opaque `dragDrop` group by
+  // useFileExplorerInteractions' outer useMemo (file-explorer-interactions.tsx)
+  // — every field below is already individually stable, so memoize the
+  // wrapper too or that outer memo recomputes on every render regardless.
+  return useMemo(
+    () => ({
+      handleMoveDrop,
+      handleDragExpandDir,
+      dropTargetDir,
+      setDropTargetDir,
+      dragSourcePath,
+      setDragSourcePath,
+      isRootDragOver,
+      isNativeDragOver,
+      nativeDropTargetDir,
+      setNativeDropTargetDir,
+      handleNativeDragExpandDir,
+      stopDragEdgeScroll,
+      rootDragHandlers,
+      clearNativeDragState
+    }),
+    [
+      handleMoveDrop,
+      handleDragExpandDir,
+      dropTargetDir,
+      setDropTargetDir,
+      dragSourcePath,
+      setDragSourcePath,
+      isRootDragOver,
+      isNativeDragOver,
+      nativeDropTargetDir,
+      setNativeDropTargetDir,
+      handleNativeDragExpandDir,
+      stopDragEdgeScroll,
+      rootDragHandlers,
+      clearNativeDragState
+    ]
+  )
 }

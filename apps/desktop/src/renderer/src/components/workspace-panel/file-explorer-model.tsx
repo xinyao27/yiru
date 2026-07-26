@@ -91,7 +91,7 @@ export function useFileExplorerModel({
     [activeWorktreeId, expandedDirs]
   )
 
-  const tree = useFileExplorerTree(worktreePath, expanded, activeWorktreeId)
+  const treeState = useFileExplorerTree(worktreePath, expanded, activeWorktreeId)
   const hasNameFilterQuery = nameFilterQuery.trim().length > 0
   const nameFilterQueryTooLarge = useMemo(
     () => isFileExplorerNameFilterQueryTooLarge(nameFilterQuery),
@@ -132,7 +132,7 @@ export function useFileExplorerModel({
   const projection = useFileExplorerVisibleRowProjection(
     activeWorktreeId,
     visibleFilesWorktreePath,
-    tree.dirCache,
+    treeState.dirCache,
     expanded,
     activeRepoSupportsGit && isFilesViewActive,
     showDotfiles,
@@ -148,7 +148,7 @@ export function useFileExplorerModel({
           : expanded,
     [expanded, hasNameFilter, projection.nameFilterExpandedPaths]
   )
-  const manualRefresh = useFileExplorerManualRefresh(tree.refreshTree)
+  const manualRefresh = useFileExplorerManualRefresh(treeState.refreshTree)
   const gitStatusByWorktree = useAppStore((state) => state.gitStatusByWorktree)
   const entries = useMemo(
     () => (activeWorktreeId ? (gitStatusByWorktree[activeWorktreeId] ?? []) : []),
@@ -170,8 +170,33 @@ export function useFileExplorerModel({
     )
   }, [])
 
-  return {
-    view: {
+  // Why: each hook above already memoizes its own values, but bundling them
+  // into five inline object literals produced a fresh reference every render
+  // regardless — one gitStatusByWorktree tick invalidated every consumer of
+  // the model. useMemo per group so an unrelated update leaves the other
+  // groups referentially stable for consumers that read them.
+  //
+  // useRuntimeFileListForWorktree (nameFilterFiles) returns a fresh wrapper
+  // object every call even though its own fields are individually
+  // useState-stable — same shape as the treeState/manualRefresh wrappers
+  // below. Rebuild it from those leaves so `view`'s dependency array reads
+  // the stable fields instead of the always-new wrapper.
+  const nameFilterFilesStable = useMemo(
+    () => ({
+      files: nameFilterFiles.files,
+      loading: nameFilterFiles.loading,
+      loadError: nameFilterFiles.loadError,
+      operationOwner: nameFilterFiles.operationOwner
+    }),
+    [
+      nameFilterFiles.files,
+      nameFilterFiles.loading,
+      nameFilterFiles.loadError,
+      nameFilterFiles.operationOwner
+    ]
+  )
+  const view = useMemo(
+    () => ({
       explorerView,
       isFilesViewActive,
       searchPanel,
@@ -180,10 +205,24 @@ export function useFileExplorerModel({
       handleClearNameFilter,
       handleSelectExplorerView,
       hasNameFilter,
-      nameFilterFiles,
+      nameFilterFiles: nameFilterFilesStable,
       nameFilterSource
-    },
-    owner: {
+    }),
+    [
+      explorerView,
+      isFilesViewActive,
+      searchPanel,
+      nameFilterQuery,
+      setNameFilterQuery,
+      handleClearNameFilter,
+      handleSelectExplorerView,
+      hasNameFilter,
+      nameFilterFilesStable,
+      nameFilterSource
+    ]
+  )
+  const owner = useMemo(
+    () => ({
       activeWorktreeId,
       activeRepo,
       activeRuntimeEnvironmentId,
@@ -191,30 +230,101 @@ export function useFileExplorerModel({
       visibleFilesWorktreePath,
       runtimeDownloadContext,
       supportsFolderDownload
-    },
-    tree: {
-      ...tree,
+    }),
+    [
+      activeWorktreeId,
+      activeRepo,
+      activeRuntimeEnvironmentId,
+      worktreePath,
+      visibleFilesWorktreePath,
+      runtimeDownloadContext,
+      supportsFolderDownload
+    ]
+  )
+  // Why: useFileExplorerTree returns a fresh wrapper object every render even
+  // though its own fields (dirCache, loadDir, ...) are individually stable
+  // via useState/useCallback. Depend on those leaf fields, not on
+  // `treeState` itself, or this memo would recompute every render too.
+  const tree = useMemo(
+    () => ({
+      dirCache: treeState.dirCache,
+      setDirCache: treeState.setDirCache,
+      rootCache: treeState.rootCache,
+      rootError: treeState.rootError,
+      loadDir: treeState.loadDir,
+      statPath: treeState.statPath,
+      markPathAsDirectory: treeState.markPathAsDirectory,
+      refreshTree: treeState.refreshTree,
+      refreshDir: treeState.refreshDir,
+      resetAndLoad: treeState.resetAndLoad,
       expanded,
       rowExpandedPaths,
       rowProjection: projection.rowProjection,
       visibleRowCount: projection.rowProjection.getVisibleCount(),
       ignoredByRelativePath: projection.ignoredByRelativePath
-    },
-    display: {
+    }),
+    [
+      treeState.dirCache,
+      treeState.setDirCache,
+      treeState.rootCache,
+      treeState.rootError,
+      treeState.loadDir,
+      treeState.statPath,
+      treeState.markPathAsDirectory,
+      treeState.refreshTree,
+      treeState.refreshDir,
+      treeState.resetAndLoad,
+      expanded,
+      rowExpandedPaths,
+      projection.rowProjection,
+      projection.ignoredByRelativePath
+    ]
+  )
+  // Why: same reasoning as `tree` above — useFileExplorerManualRefresh
+  // returns a fresh wrapper each render around stable leaf values, so depend
+  // on those leaves rather than on `manualRefresh` itself.
+  const display = useMemo(
+    () => ({
       repoName,
       activeRepoSupportsGit,
       showDotfiles,
       showGitIgnoredFiles: projection.showGitIgnoredFiles,
-      manualRefresh,
+      manualRefresh: {
+        isRefreshing: manualRefresh.isRefreshing,
+        showRefreshSpinner: manualRefresh.showRefreshSpinner,
+        handleRefresh: manualRefresh.handleRefresh
+      },
       statusByRelativePath,
       folderStatusByRelativePath
-    },
-    actions: {
+    }),
+    [
+      repoName,
+      activeRepoSupportsGit,
+      showDotfiles,
+      projection.showGitIgnoredFiles,
+      manualRefresh.isRefreshing,
+      manualRefresh.showRefreshSpinner,
+      manualRefresh.handleRefresh,
+      statusByRelativePath,
+      folderStatusByRelativePath
+    ]
+  )
+  const actions = useMemo(
+    () => ({
       toggleGitIgnoredFiles: projection.toggleGitIgnoredFiles,
       handleToggleNameFilterDir,
       handleExpandNameFilterDir
-    }
-  }
+    }),
+    [projection.toggleGitIgnoredFiles, handleToggleNameFilterDir, handleExpandNameFilterDir]
+  )
+
+  // Why: without this outer memo, `model` would still be a fresh object
+  // every render even with the five groups above stabilized, which would
+  // defeat React.memo on any consumer that receives the whole model.
+  return useMemo(
+    () => ({ view, owner, tree, display, actions }),
+    [view, owner, tree, display, actions]
+  )
 }
 
 export type FileExplorerModel = ReturnType<typeof useFileExplorerModel>

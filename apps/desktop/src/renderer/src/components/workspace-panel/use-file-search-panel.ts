@@ -10,6 +10,7 @@ import { cancelRevealFrame, openMatchResult } from './search-match-open'
 import type { SearchQueryRowProps } from './search-query-row'
 import { buildSearchRows } from './search-rows'
 import { useFileSearchRunner } from './use-file-search-runner'
+import { useFileSearchToggles } from './use-file-search-toggles'
 
 const EMPTY_COLLAPSED_FILES = new Set<string>()
 
@@ -240,46 +241,26 @@ export function useFileSearchPanel(
     [activeWorktreeId, openFile, setPendingEditorReveal, workspacePanelTabId]
   )
 
-  return {
-    activeWorktreeId,
-    queryRowProps: {
-      inputRef,
-      query: fileSearchQuery,
-      loading: fileSearchLoading,
-      caseSensitive: fileSearchCaseSensitive,
-      wholeWord: fileSearchWholeWord,
-      useRegex: fileSearchUseRegex,
-      onQueryChange: handleQueryChange,
-      onKeyDown: handleKeyDown,
-      onClearSearch: handleClearSearch,
-      onToggleCaseSensitive: () => {
-        updateActiveSearchState({ caseSensitive: !fileSearchCaseSensitive })
-        rerunSearch()
-      },
-      onToggleWholeWord: () => {
-        updateActiveSearchState({ wholeWord: !fileSearchWholeWord })
-        rerunSearch()
-      },
-      onToggleRegex: () => {
-        updateActiveSearchState({ useRegex: !fileSearchUseRegex })
-        rerunSearch()
-      }
-    },
-    filtersProps: {
-      includePattern: fileSearchIncludePattern,
-      excludePattern: fileSearchExcludePattern,
-      includeInputRef,
-      excludeInputRef,
-      onIncludeChange: (value: string) => {
-        updateActiveSearchState({ includePattern: value })
-        rerunSearch()
-      },
-      onExcludeChange: (value: string) => {
-        updateActiveSearchState({ excludePattern: value })
-        rerunSearch()
-      }
-    },
-    resultsProps: {
+  const { queryRowProps, filtersProps } = useFileSearchToggles({
+    inputRef,
+    includeInputRef,
+    excludeInputRef,
+    query: fileSearchQuery,
+    loading: fileSearchLoading,
+    caseSensitive: fileSearchCaseSensitive,
+    wholeWord: fileSearchWholeWord,
+    useRegex: fileSearchUseRegex,
+    includePattern: fileSearchIncludePattern,
+    excludePattern: fileSearchExcludePattern,
+    onQueryChange: handleQueryChange,
+    onKeyDown: handleKeyDown,
+    onClearSearch: handleClearSearch,
+    updateActiveSearchState,
+    rerunSearch
+  })
+
+  const resultsProps = useMemo(
+    () => ({
       results: deferredSearchResults,
       hasCommittedResults: fileSearchResults !== null,
       query: fileSearchQuery,
@@ -288,7 +269,26 @@ export function useFileSearchPanel(
       scrollRef: resultsScrollRef,
       onToggleCollapsedFile: toggleActiveCollapsedFile,
       onMatchClick: handleMatchClick
-    },
-    focusQueryInput
-  }
+    }),
+    [
+      deferredSearchResults,
+      fileSearchResults,
+      fileSearchQuery,
+      fileSearchLoading,
+      searchRows,
+      toggleActiveCollapsedFile,
+      handleMatchClick
+    ]
+  )
+
+  return useMemo(
+    () => ({
+      activeWorktreeId,
+      queryRowProps,
+      filtersProps,
+      resultsProps,
+      focusQueryInput
+    }),
+    [activeWorktreeId, queryRowProps, filtersProps, resultsProps, focusQueryInput]
+  )
 }
