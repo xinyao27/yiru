@@ -9,7 +9,7 @@ const {
 const {
   createPackagedRuntimeNodeModuleResources,
   prunePackagedRuntimeNodeModules,
-  verifyPackagedMainRuntimeDeps
+  verifyPackagedRuntimeDeps
 } = require('./packaged-runtime-node-modules.cjs')
 
 const isMacRelease = process.env.YIRU_MAC_RELEASE === '1'
@@ -159,12 +159,8 @@ module.exports = {
       return
     }
     prunePackagedRuntimeNodeModules(resourcesDir, context.electronPlatformName, context.arch)
-    verifyPackagedMainRuntimeDeps(resourcesDir)
-    // Why: boot the packaged daemon-entry under plain Node, but only for the
-    // slice matching the packaging host's arch — daemon-entry.js is JS, yet it
-    // require()s the native (N-API) node-pty for the TARGET arch, which the host
-    // Node cannot load cross-arch. `Arch` enum: ia32=0, x64=1, armv7l=2,
-    // arm64=3, universal=4 (universal contains the host slice, so run it).
+    verifyPackagedRuntimeDeps(resourcesDir)
+    // Why: daemon-entry loads target-arch node-pty, so only boot it on the host slice.
     const archEnumByNodeArch = { ia32: 0, x64: 1, armv7l: 2, arm64: 3 }
     const hostArchEnum = archEnumByNodeArch[process.arch]
     if (context.arch === hostArchEnum || context.arch === 4) {
