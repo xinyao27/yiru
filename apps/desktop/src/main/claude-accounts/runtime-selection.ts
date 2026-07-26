@@ -3,27 +3,27 @@ import type {
   ClaudeManagedAccountRuntimeSelection,
   GlobalSettings
 } from '../../shared/types'
+import {
+  getManagedSelectionTargetForAccount,
+  getSelectedManagedAccountIdForTarget,
+  getWslSelectionKey,
+  normalizeManagedAccountSelectionTarget,
+  normalizeManagedRuntimeSelection,
+  pruneInvalidManagedRuntimeSelection,
+  removeManagedAccountIdFromSelection,
+  setSelectedManagedAccountIdForTarget,
+  type ManagedAccountSelectionTarget,
+  type NormalizedManagedAccountSelectionTarget
+} from '../managed-account-runtime-selection'
 
-export type ClaudeAccountSelectionTarget = {
-  runtime?: 'host' | 'wsl'
-  wslDistro?: string | null
-}
+export type ClaudeAccountSelectionTarget = ManagedAccountSelectionTarget
 
-export type NormalizedClaudeAccountSelectionTarget = {
-  runtime: 'host' | 'wsl'
-  wslDistro: string | null
-}
+export type NormalizedClaudeAccountSelectionTarget = NormalizedManagedAccountSelectionTarget
 
 export function normalizeClaudeAccountSelectionTarget(
   target?: ClaudeAccountSelectionTarget | null
 ): NormalizedClaudeAccountSelectionTarget {
-  if (target?.runtime === 'wsl') {
-    return {
-      runtime: 'wsl',
-      wslDistro: normalizeWslDistro(target.wslDistro)
-    }
-  }
-  return { runtime: 'host', wslDistro: null }
+  return normalizeManagedAccountSelectionTarget(target)
 }
 
 export function normalizeClaudeRuntimeSelection(
@@ -32,13 +32,10 @@ export function normalizeClaudeRuntimeSelection(
     'activeClaudeManagedAccountId' | 'activeClaudeManagedAccountIdsByRuntime'
   >
 ): ClaudeManagedAccountRuntimeSelection {
-  return {
-    host:
-      settings.activeClaudeManagedAccountIdsByRuntime?.host ??
-      settings.activeClaudeManagedAccountId ??
-      null,
-    wsl: { ...settings.activeClaudeManagedAccountIdsByRuntime?.wsl }
-  }
+  return normalizeManagedRuntimeSelection({
+    activeManagedAccountId: settings.activeClaudeManagedAccountId,
+    activeManagedAccountIdsByRuntime: settings.activeClaudeManagedAccountIdsByRuntime
+  })
 }
 
 export function getSelectedClaudeAccountIdForTarget(
@@ -48,18 +45,12 @@ export function getSelectedClaudeAccountIdForTarget(
   >,
   target?: ClaudeAccountSelectionTarget | null
 ): string | null {
-  const selection = normalizeClaudeRuntimeSelection(settings)
-  const normalizedTarget = normalizeClaudeAccountSelectionTarget(target)
-  if (normalizedTarget.runtime === 'host') {
-    return selection.host
-  }
-  if (normalizedTarget.wslDistro) {
-    return selection.wsl[getClaudeWslSelectionKey(normalizedTarget.wslDistro)] ?? null
-  }
-  const selectedIds = Array.from(new Set(Object.values(selection.wsl).filter(Boolean)))
-  return (
-    selection.wsl[getClaudeWslSelectionKey(null)] ??
-    (selectedIds.length === 1 ? selectedIds[0] : null)
+  return getSelectedManagedAccountIdForTarget(
+    {
+      activeManagedAccountId: settings.activeClaudeManagedAccountId,
+      activeManagedAccountIdsByRuntime: settings.activeClaudeManagedAccountIdsByRuntime
+    },
+    target
   )
 }
 
@@ -68,80 +59,40 @@ export function setSelectedClaudeAccountIdForTarget(
   accountId: string | null,
   target?: ClaudeAccountSelectionTarget | null
 ): ClaudeManagedAccountRuntimeSelection {
-  const normalizedTarget = normalizeClaudeAccountSelectionTarget(target)
-  if (normalizedTarget.runtime === 'host') {
-    return { host: accountId, wsl: { ...selection.wsl } }
-  }
-  if (accountId === null && normalizedTarget.wslDistro === null) {
-    return {
-      host: selection.host,
-      wsl: Object.fromEntries(Object.keys(selection.wsl).map((key) => [key, null]))
-    }
-  }
-  return {
-    host: selection.host,
-    wsl: {
-      ...selection.wsl,
-      [getClaudeWslSelectionKey(normalizedTarget.wslDistro)]: accountId
-    }
-  }
+  return setSelectedManagedAccountIdForTarget(selection, accountId, target)
 }
 
 export function removeClaudeAccountIdFromSelection(
   selection: ClaudeManagedAccountRuntimeSelection,
   accountId: string
 ): ClaudeManagedAccountRuntimeSelection {
-  const nextWsl: Record<string, string | null> = {}
-  for (const [distro, selectedId] of Object.entries(selection.wsl)) {
-    nextWsl[distro] = selectedId === accountId ? null : selectedId
-  }
-  return {
-    host: selection.host === accountId ? null : selection.host,
-    wsl: nextWsl
-  }
+  return removeManagedAccountIdFromSelection(selection, accountId)
 }
 
 export function pruneInvalidClaudeRuntimeSelection(
   selection: ClaudeManagedAccountRuntimeSelection,
   accounts: ClaudeManagedAccount[]
 ): ClaudeManagedAccountRuntimeSelection {
-  const hostAccount = selection.host
-    ? accounts.find((account) => account.id === selection.host)
-    : null
-  const nextWsl: Record<string, string | null> = {}
-  for (const [distroKey, accountId] of Object.entries(selection.wsl)) {
-    if (!accountId) {
-      nextWsl[distroKey] = null
-      continue
-    }
-    const account = accounts.find((entry) => entry.id === accountId)
-    nextWsl[distroKey] =
-      account &&
-      account.managedAuthRuntime === 'wsl' &&
-      getClaudeWslSelectionKey(account.wslDistro) === distroKey
-        ? accountId
-        : null
-  }
-  return {
-    host: hostAccount && hostAccount.managedAuthRuntime !== 'wsl' ? selection.host : null,
-    wsl: nextWsl
-  }
+  return pruneInvalidManagedRuntimeSelection(
+    selection,
+    accounts.map((account) => ({
+      id: account.id,
+      runtime: account.managedAuthRuntime,
+      wslDistro: account.wslDistro
+    }))
+  )
 }
 
 export function getClaudeSelectionTargetForAccount(
   account: ClaudeManagedAccount
 ): ClaudeAccountSelectionTarget {
-  if (account.managedAuthRuntime === 'wsl') {
-    return { runtime: 'wsl', wslDistro: account.wslDistro ?? null }
-  }
-  return { runtime: 'host' }
+  return getManagedSelectionTargetForAccount({
+    id: account.id,
+    runtime: account.managedAuthRuntime,
+    wslDistro: account.wslDistro
+  })
 }
 
 export function getClaudeWslSelectionKey(wslDistro: string | null | undefined): string {
-  return normalizeWslDistro(wslDistro) ?? '__default__'
-}
-
-function normalizeWslDistro(wslDistro: string | null | undefined): string | null {
-  const trimmed = wslDistro?.trim()
-  return trimmed ? trimmed : null
+  return getWslSelectionKey(wslDistro)
 }
