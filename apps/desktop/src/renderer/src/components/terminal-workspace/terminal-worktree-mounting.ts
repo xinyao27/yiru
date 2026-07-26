@@ -7,7 +7,6 @@ import {
 
 import { hasRegisteredRuntimeTerminalTab } from '../../runtime/sync-runtime-graph'
 import { useAppStore } from '../../store'
-import type { ActivityTerminalPortalTarget } from '../activity/terminal-portal'
 import { canWatcherCoverParkedTerminalTab } from '../terminal-pane/terminal-parked-tab-watchers'
 import { isMainTerminalSideEffectAuthorityForPty } from '../terminal-pane/terminal-side-effect-facts-handler'
 import {
@@ -28,7 +27,6 @@ type WorkspaceSurface = { id: string; path: string }
 
 type TerminalWorktreeMountingArgs = {
   workspaceSurfaces: WorkspaceSurface[]
-  activityTerminalPortals: ActivityTerminalPortalTarget[]
 }
 
 export type TerminalWorktreeMounting = {
@@ -47,8 +45,7 @@ export type TerminalWorktreeMounting = {
 // concern in `useTerminalColdParking`, which reads the refs this hook
 // returns.
 export function useTerminalWorktreeMounting({
-  workspaceSurfaces,
-  activityTerminalPortals
+  workspaceSurfaces
 }: TerminalWorktreeMountingArgs): TerminalWorktreeMounting {
   const activeWorktreeId = useAppStore((s) => s.activeWorktreeId)
   const tabsByWorktree = useAppStore((s) => s.tabsByWorktree)
@@ -221,11 +218,6 @@ export function useTerminalWorktreeMounting({
       const activeUnifiedTab = unifiedTabById.get(group.activeTabId)
       if (activeUnifiedTab?.contentType === 'terminal') {
         immediateTabIds.add(activeUnifiedTab.entityId)
-      }
-    }
-    for (const portal of activityTerminalPortals) {
-      if (portal.worktreeId === activeWorktreeId) {
-        immediateTabIds.add(portal.tabId)
       }
     }
     // Why: a queued startup needs a mounted pane to run its command.

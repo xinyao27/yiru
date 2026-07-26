@@ -71,7 +71,6 @@ import {
 import { supportsNativeSidebarMaterial } from '../../../shared/native-sidebar-material-support'
 import type { RemoteWorkspacePatchResult } from '../../../shared/remote-workspace-types'
 import type { OnboardingState, UpdateStatus } from '../../../shared/types'
-import { ActivityTitlebarControls } from '../components/activity/titlebar-controls'
 import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
 import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'
@@ -343,7 +342,6 @@ function WindowControls(): React.JSX.Element {
 const Landing = lazy(() => import('./landing-page'))
 const WorktreeCreationPanel = lazy(() => import('../components/worktree-creation/panel'))
 const AutomationsPage = lazy(() => import('../components/automations/page'))
-const ActivityPrototypePage = lazy(() => import('../components/activity/prototype-page'))
 const Settings = lazy(() => import('../components/settings/page'))
 const SkillsPage = lazy(() => import('../components/skills/page'))
 const WorkspaceSpacePage = lazy(() => import('../components/workspace-space/page'))
@@ -1613,13 +1611,9 @@ function App(): React.JSX.Element {
     !hasActiveCoworkingWorkspace &&
     !hasTabBar &&
     effectiveActiveTabExpanded
-  // Why: Activity and Space are full-page navigation surfaces — same
-  // treatment as Settings — so the worktree sidebar is removed for those views.
-  const showSidebar =
-    activeView !== 'settings' &&
-    activeView !== 'activity' &&
-    activeView !== 'space' &&
-    activeView !== 'skills'
+  // Why: Space and Skills are full-page navigation surfaces, so they remove the
+  // worktree sidebar just like Settings does.
+  const showSidebar = activeView !== 'settings' && activeView !== 'space' && activeView !== 'skills'
   const settingsChromeOverlayActive = activeView === 'settings'
   const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
   // Why: Landing keep the full titlebar only when the sidebar is
@@ -2295,9 +2289,7 @@ function App(): React.JSX.Element {
 
   const titlebarMainStrip = (
     <>
-      {activeView === 'activity' ? (
-        <ActivityTitlebarControls />
-      ) : creationLayoutActive ? null : (
+      {creationLayoutActive ? null : (
         <div
           id="titlebar-tabs"
           className={cn(
@@ -2583,7 +2575,6 @@ function App(): React.JSX.Element {
                               ) : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
-                              {activeView === 'activity' ? <ActivityPrototypePage /> : null}
                               {activeView === 'space' ? <WorkspaceSpacePage /> : null}
                               {activeView === 'mobile' ? <MobilePage /> : null}
                               {hasActiveCoworkingWorkspace ? <CoworkingWorkspaceSurface /> : null}

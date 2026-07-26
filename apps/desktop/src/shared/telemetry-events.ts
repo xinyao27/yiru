@@ -293,7 +293,6 @@ export const SETTINGS_CHANGED_WHITELIST = [
   'experimentalMobile',
   'experimentalPet',
   'experimentalNativeChat',
-  'experimentalActivity',
   'experimentalTerminalAttention',
   'experimentalAgentHibernation',
   'experimentalEphemeralVms',

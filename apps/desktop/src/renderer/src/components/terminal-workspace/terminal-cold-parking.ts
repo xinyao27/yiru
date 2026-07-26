@@ -10,10 +10,6 @@ import {
 import type { TabGroupLayoutNode } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import {
-  findActivityTerminalPortal,
-  type ActivityTerminalPortalTarget
-} from '../activity/terminal-portal'
-import {
   getTerminalWorktreeColdParkRecheckDelayMs,
   selectColdParkedTerminalWorktrees,
   type TerminalWorktreeColdParkCandidate
@@ -30,7 +26,6 @@ type WorkspaceSurface = { id: string; path: string }
 
 type TerminalColdParkingArgs = {
   workspaceSurfaces: WorkspaceSurface[]
-  activityTerminalPortals: ActivityTerminalPortalTarget[]
   mountedWorktreeIdsRef: RefObject<Set<string>>
   measurableBackgroundWorktreeIdsRef: RefObject<Set<string>>
   activationDeferredMountTabIdsByWorktreeRef: RefObject<Map<string, ReadonlySet<string>>>
@@ -46,7 +41,6 @@ type TerminalColdParkingArgs = {
 // render no overlay layer.
 export function useTerminalColdParking({
   workspaceSurfaces,
-  activityTerminalPortals,
   mountedWorktreeIdsRef,
   measurableBackgroundWorktreeIdsRef,
   activationDeferredMountTabIdsByWorktreeRef,
@@ -109,7 +103,6 @@ export function useTerminalColdParking({
     parkingTimers.clear()
 
     const nowMs = Date.now()
-    const portalWorktreeIds = new Set(activityTerminalPortals.map((portal) => portal.worktreeId))
     const currentWorktreeIds = new Set(workspaceSurfaces.map((workspace) => workspace.id))
     for (const worktreeId of Array.from(terminalWorktreeHiddenSinceRef.current.keys())) {
       if (!currentWorktreeIds.has(worktreeId) || !mountedWorktreeIdsRef.current.has(worktreeId)) {
@@ -127,8 +120,7 @@ export function useTerminalColdParking({
       const isVisible = activeView === 'terminal' && activeWorktreeId === worktreeId
       const shouldMeasureHiddenWorktree =
         !isVisible && measurableBackgroundWorktreeIdsRef.current.has(worktreeId)
-      const hasActivityTerminalPortal = portalWorktreeIds.has(worktreeId)
-      if (isVisible || shouldMeasureHiddenWorktree || hasActivityTerminalPortal) {
+      if (isVisible || shouldMeasureHiddenWorktree) {
         terminalWorktreeHiddenSinceRef.current.delete(worktreeId)
       } else if (!terminalWorktreeHiddenSinceRef.current.has(worktreeId)) {
         terminalWorktreeHiddenSinceRef.current.set(worktreeId, nowMs)
@@ -139,7 +131,6 @@ export function useTerminalColdParking({
         terminalTabs: tabsByWorktree[worktreeId] ?? [],
         isVisible,
         shouldMeasureHiddenWorktree,
-        hasActivityTerminalPortal,
         hiddenSinceMs: terminalWorktreeHiddenSinceRef.current.get(worktreeId) ?? null
       })
     }
@@ -171,7 +162,6 @@ export function useTerminalColdParking({
       if (
         candidate.isVisible ||
         candidate.shouldMeasureHiddenWorktree ||
-        candidate.hasActivityTerminalPortal ||
         nextParkedTerminalWorktreeIds.has(candidate.worktreeId)
       ) {
         continue
@@ -193,7 +183,6 @@ export function useTerminalColdParking({
   }, [
     activeView,
     activeWorktreeId,
-    activityTerminalPortals,
     backgroundMountRevision,
     measurableBackgroundWorktreeIdsRef,
     mountedWorktreeIdsRef,
@@ -230,13 +219,7 @@ export function useTerminalColdParking({
           !isVisible && !shouldMeasureHiddenWorktree && parkedTerminalWorktreeIds.has(workspace.id)
         if (parked) {
           for (const tab of tabs) {
-            const activityTerminalPortal = findActivityTerminalPortal(activityTerminalPortals, {
-              worktreeId: workspace.id,
-              tabId: tab.id
-            })
-            if (!activityTerminalPortal) {
-              parkedTabIds.add(tab.id)
-            }
+            parkedTabIds.add(tab.id)
           }
         }
         // Why: activation-deferred tabs are unmounted like parked ones; the
@@ -248,11 +231,7 @@ export function useTerminalColdParking({
           if (
             deferredTabIds?.has(tab.id) &&
             !parkedTabIds.has(tab.id) &&
-            canWatcherCoverParkedTerminalTab(workspace.id, tab) &&
-            !findActivityTerminalPortal(activityTerminalPortals, {
-              worktreeId: workspace.id,
-              tabId: tab.id
-            })
+            canWatcherCoverParkedTerminalTab(workspace.id, tab)
           ) {
             parkedTabIds.add(tab.id)
           }
@@ -275,7 +254,6 @@ export function useTerminalColdParking({
     activeView,
     activeWorktreeId,
     activationDeferredMountTabIdsByWorktreeRef,
-    activityTerminalPortals,
     activeTabIdByWorktree,
     anyMountedWorktreeHasLayout,
     backgroundMountRevision,

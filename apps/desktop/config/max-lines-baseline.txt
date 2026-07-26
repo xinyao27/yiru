@@ -118,7 +118,6 @@ inline apps/desktop/src/relay/pty-handler.ts
 inline apps/desktop/src/relay/relay.ts
 inline apps/desktop/src/relay/workspace-space-scan.ts
 inline apps/desktop/src/renderer/src/application-shell/shell.tsx
-inline apps/desktop/src/renderer/src/components/activity/prototype-page.tsx
 inline apps/desktop/src/renderer/src/components/automations/page.tsx
 inline apps/desktop/src/renderer/src/components/automations/use-automation-dispatch-events.ts
 inline apps/desktop/src/renderer/src/components/browser-pane/browser-pane.tsx

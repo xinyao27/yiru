@@ -374,21 +374,6 @@
   "auto.components.WorktreeJumpPalette.worktreesHeader": {
     "ko": "워크트리"
   },
-  "auto.components.activity.ActivityPrototypePage.770d458144": {
-    "ko": "agent 활동 그룹화 기준"
-  },
-  "auto.components.activity.ActivityPrototypePage.8de7c5beaa": {
-    "ko": "Terminal을 사용할 수 없음"
-  },
-  "auto.components.activity.ActivityPrototypePage.afdc2139a8": {
-    "ko": "Agent terminal이 닫혔습니다. 계속하려면 이 워크스페이스에서 새 terminal을 여세요."
-  },
-  "auto.components.activity.ActivityPrototypePage.b29191b3e0": {
-    "ko": "워크트리"
-  },
-  "auto.components.activity.ActivityTitlebarControls.f915168c8e": {
-    "ko": "읽지 않음"
-  },
   "auto.components.agent.AgentCombobox.48c6a5a9b4": {
     "ko": "agents 검색..."
   },

@@ -36,24 +36,30 @@ type RetiredGlobalSettings = Partial<GlobalSettings> & {
   experimentalNewWorktreeCardStyle?: unknown
   compactWorktreeCards?: unknown
   experimentalCompactWorktreeCards?: unknown
+  experimentalActivity?: unknown
+  experimentalActivityDefaultedOffForAllUsers?: unknown
 }
 
 // Why: settings use object-spread merges, so retired disk keys must be
 // removed explicitly or every later save would preserve dead product state.
 export function stripRetiredGlobalSettings(
-  value: Partial<GlobalSettings> | undefined
+  value: RetiredGlobalSettings | undefined
 ): Partial<GlobalSettings> {
   const {
     terminalScrollbackBytes: _scrollbackBytes,
     experimentalNewWorktreeCardStyle: _newCardStyle,
     compactWorktreeCards: _compactCards,
     experimentalCompactWorktreeCards: _experimentalCompactCards,
+    experimentalActivity: _experimentalActivity,
+    experimentalActivityDefaultedOffForAllUsers: _experimentalActivityMigration,
     ...settings
-  } = (value ?? {}) as RetiredGlobalSettings
+  } = value ?? {}
   void _scrollbackBytes
   void _newCardStyle
   void _compactCards
   void _experimentalCompactCards
+  void _experimentalActivity
+  void _experimentalActivityMigration
   return settings
 }
 
@@ -88,6 +94,10 @@ export function decodePersistedSettings(
     'compactWorktreeCards',
     'experimentalCompactWorktreeCards'
   ].some((key) => Object.hasOwn(raw, key))
+  const hasRetiredActivitySettings = [
+    'experimentalActivity',
+    'experimentalActivityDefaultedOffForAllUsers'
+  ].some((key) => Object.hasOwn(raw, key))
 
   return {
     settings: {
@@ -100,11 +110,6 @@ export function decodePersistedSettings(
       ...floatingWorkspace.settings,
       ...autoRenameBranchFromWork,
       localWindowsRuntimeDefault,
-      experimentalActivity:
-        raw.experimentalActivityDefaultedOffForAllUsers === true
-          ? (raw.experimentalActivity ?? false)
-          : false,
-      experimentalActivityDefaultedOffForAllUsers: true,
       minimizeToTrayOnClose: raw.minimizeToTrayOnClose === true,
       showMenuBarIcon: raw.showMenuBarIcon !== false,
       showPinnedWorktreesInGroups: raw.showPinnedWorktreesInGroups === true,
@@ -133,6 +138,7 @@ export function decodePersistedSettings(
       raw.autoRenameBranchFromWorkDefaultedOn !== true ||
       (raw.localWindowsRuntimeDefault === undefined && localWindowsRuntimeDefault.kind === 'wsl') ||
       hasRetiredCardSettings ||
+      hasRetiredActivitySettings ||
       (raw.sourceControlGroupOrder !== undefined &&
         raw.sourceControlGroupOrder !== sourceControlGroupOrder)
   }
