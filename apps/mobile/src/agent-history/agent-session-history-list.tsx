@@ -81,7 +81,7 @@ export function MobileAgentSessionHistoryList({
           <Text className="text-muted-foreground text-xs font-semibold uppercase" numberOfLines={1}>
             {section.label}
           </Text>
-          <Text className="text-muted-foreground/60 text-xs">{section.data.length}</Text>
+          <Text className="text-muted-foreground text-xs">{section.data.length}</Text>
         </View>
       )}
       renderItem={renderItem}
@@ -112,14 +112,14 @@ function AgentHistoryCardRow({
   )
 
   return (
-    <Pressable className={cn('bg-card p-3 mb-2', 'active:bg-accent')} onPress={onPress}>
+    <Pressable className={cn('mb-2 rounded-2xl bg-card p-3', 'active:bg-accent')} onPress={onPress}>
       <View className="flex-row items-center gap-2">
         <MobileAgentIcon agentId={card.agent} size={16} />
         <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
           {card.title}
         </Text>
         {card.timeAgo ? (
-          <Text className="text-muted-foreground/60 text-xs">{card.timeAgo}</Text>
+          <Text className="text-muted-foreground text-xs">{card.timeAgo}</Text>
         ) : null}
       </View>
       {card.lastMessage ? (
@@ -136,7 +136,7 @@ function AgentHistoryCardRow({
           {card.messageCount} {card.messageCount === 1 ? 'message' : 'messages'}
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
-          <View className="bg-secondary px-2 py-[2px]">
+          <View className="bg-secondary rounded-full px-2 py-0.5">
             <Text className="text-primary text-xs font-semibold">current worktree</Text>
           </View>
         ) : null}
@@ -144,7 +144,7 @@ function AgentHistoryCardRow({
           <Pressable
             className={cn(
               'min-h-7 min-w-7 items-center justify-center ml-auto px-1 py-1',
-              resumeActionState?.disabled && 'opacity-[0.45]',
+              resumeActionState?.disabled && 'opacity-50',
               !resumeActionState?.disabled && 'active:bg-accent'
             )}
             onPress={(event) => {
@@ -169,8 +169,8 @@ function AgentHistoryCardRow({
       {expanded && previewTurns.length > 0 ? (
         <View className="border-t-border mt-2 gap-2 border-t pt-2">
           {previewTurns.map((turn, index) => (
-            <View key={`${card.id}-turn-${index}`} className="gap-[2px]">
-              <Text className="text-muted-foreground/60 text-xs font-semibold uppercase">
+            <View key={`${card.id}-turn-${index}`} className="gap-0.5">
+              <Text className="text-muted-foreground text-xs font-semibold uppercase">
                 {turn.role}
               </Text>
               <Text className="text-muted-foreground text-xs">{turn.text}</Text>

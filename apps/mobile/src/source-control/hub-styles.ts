@@ -6,7 +6,7 @@ export const hubStyles = {
   // Pushes the chevron to the trailing edge without a fixed-width spacer.
   chipSpacer: cn('flex-1 min-w-2'),
 
-  chipMutedText: cn('flex-1 text-muted-foreground/60 text-xs'),
+  chipMutedText: cn('flex-1 text-muted-foreground text-xs'),
   // Fills the remaining space below the header/segments/card so each segment's
   // scroll view (SectionList / PR sidebar / history list) expands and scrolls.
   tabBody: cn('flex-1'),

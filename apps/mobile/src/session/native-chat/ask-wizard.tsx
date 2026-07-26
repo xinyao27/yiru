@@ -100,7 +100,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
   const otherSelected = (selections[index] ?? []).includes(OTHER)
 
   return (
-    <View className="bg-card border-t-hairline border-t-border max-h-[380px]">
+    <View className="border-t-hairline border-t-border bg-card max-h-96 overflow-hidden rounded-t-3xl">
       {total > 1 ? (
         <ScrollView
           horizontal
@@ -153,7 +153,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
         />
         {otherSelected ? (
           <TextInput
-            className="bg-secondary border-border text-foreground mb-1 min-h-11 border p-2 text-sm"
+            className="border-border bg-secondary text-foreground mb-1 min-h-11 rounded-xl border p-2 text-sm"
             value={otherText[index]}
             onChangeText={(v) => setOther(index, v)}
             placeholder="Type your answer"
@@ -166,7 +166,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
 
       <View className="border-t-hairline border-t-border flex-row items-center justify-between gap-2 p-3">
         <Pressable
-          className="px-2 py-2"
+          className="rounded-xl px-2 py-2"
           onPress={async () => {
             if (!submittingRef.current && onCancel) {
               submittingRef.current = true
@@ -185,19 +185,19 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           <Text className="text-muted-foreground text-sm font-semibold">Cancel</Text>
         </Pressable>
         {total > 1 ? (
-          <Text className="text-muted-foreground/60 text-xs">
+          <Text className="text-muted-foreground text-xs">
             {index + 1}/{total}
           </Text>
         ) : null}
         <Pressable
-          className={cn('py-2 px-4 bg-primary', !canAdvance && 'bg-secondary')}
+          className={cn('rounded-xl bg-primary px-4 py-2', !canAdvance && 'bg-secondary')}
           onPress={advance}
           disabled={!canAdvance}
         >
           <Text
             className={cn(
               'text-primary-foreground text-sm font-bold',
-              !canAdvance && 'text-muted-foreground/60'
+              !canAdvance && 'text-muted-foreground'
             )}
           >
             {isLast ? 'Send answer' : 'Next'}
@@ -224,7 +224,7 @@ function OptionRow({
   return (
     <Pressable
       className={cn(
-        'flex-row gap-2 p-2 bg-secondary border border-border mb-1',
+        'border-border mb-1 flex-row gap-2 rounded-xl border bg-secondary p-2',
         selected && 'border-green-500'
       )}
       onPress={onPress}
@@ -232,14 +232,14 @@ function OptionRow({
       {/* Multi-select reads as a checkbox (square); single-select as a radio (circle). */}
       <View
         className={cn(
-          'w-[18px] h-[18px] border-[1.5px] border-muted-foreground/60 items-center justify-center mt-[1px]',
-          multi ? '' : '',
+          'border-border mt-px h-5 w-5 items-center justify-center border-2',
+          multi ? 'rounded-md' : 'rounded-full',
           selected && 'bg-green-500 border-green-500'
         )}
       >
         {selected ? <Check size={12} colorClassName="accent-primary-foreground" /> : null}
       </View>
-      <View className="flex-1 gap-[2px]">
+      <View className="flex-1 gap-0.5">
         <Text className="text-foreground text-sm font-semibold">{label}</Text>
         {description ? (
           <Text className="text-muted-foreground text-xs" numberOfLines={3}>

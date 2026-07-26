@@ -44,19 +44,19 @@ export function UsageBar({
   // Why: same consumption bands as desktop barColor (green <60, amber <80, red ≥80).
   const barColorClassName =
     used == null
-      ? 'bg-neutral-500/40'
+      ? 'bg-muted'
       : used >= 80
         ? 'bg-red-500'
         : used >= 60
           ? 'bg-amber-500'
           : 'bg-green-500'
   return (
-    <View className="flex-1 gap-[2px]">
+    <View className="flex-1 gap-0.5">
       <View className="flex-row items-center gap-1">
-        <Text className="text-muted-foreground/60 w-[22px] text-xs">{label}</Text>
-        <View className="bg-secondary h-1.5 flex-1 overflow-hidden">
+        <Text className="text-muted-foreground w-6 text-xs">{label}</Text>
+        <View className="bg-secondary h-1.5 flex-1 overflow-hidden rounded-full">
           <View
-            className={cn('h-full', unavailable ? 'bg-neutral-500/40' : barColorClassName)}
+            className={cn('h-full', unavailable ? 'bg-muted' : barColorClassName)}
             style={{ width: `${used ?? 0}%` }}
           />
         </View>
@@ -74,7 +74,7 @@ export function UsageBar({
       </View>
       {resetText ? (
         // Why: the indent aligns the countdown with the usage track above it.
-        <Text className="text-muted-foreground/60 ml-[26px] text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground ml-7 text-xs" numberOfLines={1}>
           {resetText}
         </Text>
       ) : null}

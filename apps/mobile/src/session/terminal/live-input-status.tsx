@@ -8,7 +8,7 @@ export function MobileTerminalLiveInputStatus({ isAttaching }: MobileTerminalLiv
   const detail = isAttaching ? 'Uploading image to host' : 'Tap to show keyboard'
 
   return (
-    <View className="flex-1 gap-[1px]">
+    <View className="flex-1 gap-px">
       <Text className="text-foreground text-xs font-semibold" numberOfLines={1}>
         Live input
       </Text>

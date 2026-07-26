@@ -88,9 +88,9 @@ export function MobileSearchField({
     // Why: the raised fill makes search read as a control against base and panel surfaces.
     <View
       className={cn(
-        'min-h-[42px] flex-row items-center gap-2 bg-secondary border border-border pl-3 pr-1 py-1.5 ios:py-2',
-        focused && 'border-muted-foreground/60',
-        !editable && 'opacity-[0.55]'
+        'border-border min-h-11 flex-row items-center gap-2 rounded-xl border bg-secondary py-1.5 pr-1 pl-3 ios:py-2',
+        focused && 'border-primary',
+        !editable && 'opacity-60'
       )}
     >
       <Search
@@ -131,11 +131,11 @@ export function MobileSearchField({
           hitSlop={8}
           accessibilityRole="button"
           accessibilityLabel={clearAccessibilityLabel}
-          className="active:bg-accent min-h-9 min-w-9 items-center justify-center"
+          className="active:bg-accent min-h-9 min-w-9 items-center justify-center rounded-full"
         >
           {/* Why: chip + larger hit target — a bare 14px X was hard to tap and
               read as decoration rather than a clear control. */}
-          <View className="bg-muted-foreground/60 h-6 w-6 items-center justify-center">
+          <View className="bg-muted-foreground h-6 w-6 items-center justify-center rounded-full">
             <X size={12} colorClassName="accent-background" />
           </View>
         </Pressable>

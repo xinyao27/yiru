@@ -173,7 +173,7 @@ export function MobilePrComposeForm({
         <View className="flex-row items-center gap-1">
           <Pressable
             className={cn(
-              'min-h-8 flex-row items-center justify-center gap-1 px-2 border-hairline border-border bg-card',
+              'border-hairline border-border bg-card min-h-8 flex-row items-center justify-center gap-1 rounded-xl px-2',
               'active:bg-accent'
             )}
             disabled={generating || submitting}
@@ -220,7 +220,7 @@ export function MobilePrComposeForm({
 
       <View className="gap-2">
         <TextInput
-          className="bg-secondary text-foreground min-h-10 px-3 py-2 text-sm font-semibold"
+          className="bg-secondary text-foreground min-h-10 rounded-xl px-3 py-2 text-sm font-semibold"
           value={title}
           onChangeText={setTitle}
           placeholder="Title"
@@ -229,7 +229,7 @@ export function MobilePrComposeForm({
           accessibilityLabel={`${copy.titleLabel} title`}
         />
         <TextInput
-          className="bg-secondary text-foreground min-h-[120px] px-3 py-2 text-sm"
+          className="bg-secondary text-foreground min-h-30 rounded-xl px-3 py-2 text-sm"
           style={{ textAlignVertical: 'top' }}
           value={body}
           onChangeText={setBody}
@@ -261,7 +261,7 @@ export function MobilePrComposeForm({
         </View>
       </View>
 
-      <View className="border-hairline border-border bg-card min-h-9 flex-row items-center justify-between gap-2 px-2">
+      <View className="border-hairline border-border bg-card min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2">
         <Text className="text-foreground text-xs font-bold">Create as draft</Text>
         <Switch
           value={draft}
@@ -283,8 +283,8 @@ export function MobilePrComposeForm({
       ) : null}
       <Pressable
         className={cn(
-          'mt-1 min-h-11 bg-primary flex-row items-center justify-center gap-1',
-          (submitting || !canSubmit) && 'opacity-[0.45]',
+          'mt-1 min-h-11 flex-row items-center justify-center gap-1 rounded-xl bg-primary',
+          (submitting || !canSubmit) && 'opacity-50',
           'active:bg-accent'
         )}
         disabled={submitting || !canSubmit}

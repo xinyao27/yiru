@@ -46,7 +46,7 @@ function Reactions({ reactions }: { reactions?: GitHubReaction[] }) {
       {visible.map((r) => (
         <View
           key={r.content}
-          className="border-hairline border-border bg-secondary h-6 flex-row items-center gap-1 px-2"
+          className="border-hairline border-border bg-secondary h-6 flex-row items-center gap-1 rounded-full px-2"
         >
           <Text>{REACTION_EMOJI[r.content]}</Text>
           <Text className="text-foreground text-xs">{r.count}</Text>
@@ -91,9 +91,9 @@ export const PRCommentCard = memo(function PRCommentCard({
   return (
     <View
       className={cn(
-        'border-hairline border-border bg-card overflow-hidden',
+        'border-hairline border-border bg-card overflow-hidden rounded-2xl',
         isReply && 'ml-4',
-        comment.isResolved && 'opacity-[0.6]'
+        comment.isResolved && 'opacity-60'
       )}
     >
       <View className="border-b-hairline border-b-border flex-row items-center gap-2 px-3 py-2">
@@ -115,18 +115,18 @@ export const PRCommentCard = memo(function PRCommentCard({
           · {formatPrCommentRelativeTime(comment.createdAt, Date.now())}
         </Text>
         {fileLabel ? (
-          <Text className="text-muted-foreground/60 shrink font-mono text-[11px]" numberOfLines={1}>
+          <Text className="text-muted-foreground shrink font-mono text-xs" numberOfLines={1}>
             {fileLabel}
           </Text>
         ) : null}
         {comment.isResolved ? (
-          <View className="border-hairline border-border bg-secondary px-2 py-[1px]">
-            <Text className="text-muted-foreground text-[11px]">resolved</Text>
+          <View className="border-hairline border-border bg-secondary rounded-full px-2 py-px">
+            <Text className="text-muted-foreground text-xs">resolved</Text>
           </View>
         ) : null}
         {comment.url ? (
           <Pressable
-            className="ml-auto h-7 w-7 items-center justify-center"
+            className="ml-auto h-7 w-7 items-center justify-center rounded-full"
             onPress={() => void Linking.openURL(comment.url).catch(() => {})}
             hitSlop={8}
             accessibilityRole="button"

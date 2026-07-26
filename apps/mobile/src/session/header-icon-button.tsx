@@ -25,7 +25,7 @@ export function MobileSessionHeaderIconButton({
   return (
     <Pressable
       className={cn(
-        'w-9 h-9 items-center justify-center ml-1',
+        'ml-1 h-9 w-9 items-center justify-center rounded-full',
         'active:bg-accent',
         active && 'bg-secondary'
       )}

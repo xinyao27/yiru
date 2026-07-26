@@ -22,6 +22,7 @@ import {
   type LayoutChangeEvent,
   type ListRenderItem
 } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
 import {
   Warning as AlertTriangle,
@@ -172,6 +173,7 @@ import {
   saveTerminalTextScale,
   type MobileTerminalLinkOpenMode
 } from '../../../../src/storage/preferences'
+import { resolveCssNumber } from '../../../../src/style/resolve-css-variable'
 import {
   getDefaultTerminalAccessoryBuiltInIds,
   getVisibleTerminalAccessoryKeys,
@@ -221,7 +223,6 @@ import type {
   TerminalModes,
   TerminalWebViewHandle
 } from '../../../../src/terminal/webview/contract'
-import { spacing } from '../../../../src/theme/uniwind-theme-values'
 import { useHostClient, useForceReconnect } from '../../../../src/transport/client-context'
 import {
   useLastConnectedAt,
@@ -281,6 +282,9 @@ function MarkdownReader({
   onDiscard: () => void
   keyboardLift: number
 }) {
+  const [spacing3Value, spacing4Value] = useCSSVariable(['--spacing-3', '--spacing-4'])
+  const spacing3 = resolveCssNumber(spacing3Value)
+  const spacing4 = resolveCssNumber(spacing4Value)
   // The editor lives in a WebView; native Keyboard events under-report its
   // covered area, so prefer the inset measured inside the WebView when larger.
   const [webviewKeyboardInset, setWebviewKeyboardInset] = useState(0)
@@ -297,7 +301,7 @@ function MarkdownReader({
       <View className={styles.markdownState}>
         <Text className={styles.markdownError}>{doc.message}</Text>
         <Pressable
-          className="bg-secondary border-border flex-row items-center gap-1 self-start border px-3 py-1"
+          className="bg-secondary border-border flex-row items-center gap-1 self-start rounded-xl border px-3 py-1"
           onPress={onRefresh}
         >
           <RefreshCw size={14} colorClassName="accent-foreground" />
@@ -336,8 +340,8 @@ function MarkdownReader({
             {
               bottom: resolveMarkdownFloatingActionsBottom({
                 keyboardLift: effectiveKeyboardLift,
-                restingBottom: spacing.lg,
-                liftedClearance: spacing.md
+                restingBottom: spacing4,
+                liftedClearance: spacing3
               })
             }
           ]}
@@ -345,7 +349,7 @@ function MarkdownReader({
           {statusText ? (
             <Text
               className={cn(
-                'max-w-full self-end overflow-hidden text-muted-foreground bg-card border border-border px-2 py-1 text-xs',
+                'border-border text-muted-foreground max-w-full self-end overflow-hidden rounded-xl border bg-card px-2 py-1 text-xs',
                 doc.saveError ? styles.markdownError : null
               )}
               numberOfLines={2}
@@ -353,7 +357,7 @@ function MarkdownReader({
               {statusText}
             </Text>
           ) : null}
-          <View className="flex-row flex-wrap justify-end gap-1">
+          <MobileGlassSurface className="flex-row flex-wrap justify-end gap-1 overflow-hidden rounded-2xl p-1">
             {showCopy ? (
               <Pressable className={styles.markdownFloatingButton} onPress={onCopy}>
                 <Text className={styles.markdownFloatingButtonText}>Copy</Text>
@@ -375,7 +379,7 @@ function MarkdownReader({
                 className={cn(
                   styles.markdownFloatingButton,
                   'bg-secondary',
-                  (!doc.editable || !doc.isDirty || doc.saving) && 'opacity-[0.45]'
+                  (!doc.editable || !doc.isDirty || doc.saving) && 'opacity-50'
                 )}
                 disabled={!doc.editable || !doc.isDirty || doc.saving}
                 onPress={onSave}
@@ -387,7 +391,7 @@ function MarkdownReader({
                 )}
               </Pressable>
             ) : null}
-          </View>
+          </MobileGlassSurface>
         </View>
       ) : null}
     </View>
@@ -431,26 +435,24 @@ function DiffLineRow({
     <View className="mb-1">
       <View
         className={cn(
-          'flex-row items-start border-l-2 border-l-[var(--editor-surface)] pr-2',
-          line.kind === 'add' &&
-            'bg-[var(--editor-diff-inserted-line-background)] border-l-[var(--git-decoration-added)]',
-          line.kind === 'delete' &&
-            'bg-[var(--editor-diff-removed-line-background)] border-l-[var(--git-decoration-deleted)]'
+          'flex-row items-start border-l-2 border-editor-surface pr-2',
+          line.kind === 'add' && 'bg-diff-inserted border-git-added',
+          line.kind === 'delete' && 'bg-diff-removed border-git-deleted'
         )}
       >
-        <Text className="text-muted-foreground/60 w-[42px] pr-2 text-right font-mono text-xs leading-[22px]">
+        <Text className="text-muted-foreground w-11 pr-2 text-right font-mono text-xs leading-6">
           {gutterLineNumber}
         </Text>
         <Text
           selectable
-          className="text-foreground flex-1 font-mono text-sm leading-[22px]"
+          className="text-foreground flex-1 font-mono text-sm leading-6"
           accessibilityLabel={`${title} diff line ${index + 1}`}
         >
           <Text
             className={cn(
-              'text-muted-foreground/60',
-              line.kind === 'add' && 'text-[var(--git-decoration-added)]',
-              line.kind === 'delete' && 'text-[var(--git-decoration-deleted)]'
+              'text-muted-foreground',
+              line.kind === 'add' && 'text-git-added',
+              line.kind === 'delete' && 'text-git-deleted'
             )}
           >
             {line.kind === 'add' ? '+ ' : line.kind === 'delete' ? '- ' : '  '}
@@ -460,7 +462,7 @@ function DiffLineRow({
         {canComment ? (
           <Pressable
             className={cn(
-              'w-[26px] h-[22px] items-center justify-center',
+              'w-7 h-6 items-center justify-center',
               'active:bg-accent',
               commentsBusy && styles.diffCommentButtonDisabled
             )}
@@ -479,14 +481,14 @@ function DiffLineRow({
       {comments.length > 0 ? (
         <View className="mt-1 mr-2 ml-11 gap-1">
           {comments.map((comment) => (
-            <View key={comment.id} className="border-border bg-card border px-2 py-1">
-              <View className="mb-[2px] flex-row items-center gap-1">
+            <View key={comment.id} className="border-border bg-card rounded-xl border px-2 py-1">
+              <View className="mb-0.5 flex-row items-center gap-1">
                 <MessageSquare size={12} colorClassName="accent-muted-foreground" />
-                <Text className="text-muted-foreground/60 flex-1 text-xs font-semibold">
+                <Text className="text-muted-foreground flex-1 text-xs font-semibold">
                   Line {comment.lineNumber}
                 </Text>
                 <Pressable
-                  className="h-[22px] w-[22px] items-center justify-center"
+                  className="h-6 w-6 items-center justify-center rounded-full"
                   disabled={commentsBusy}
                   onPress={() => onDeleteComment(comment.id)}
                   accessibilityLabel={`Delete note on line ${comment.lineNumber}`}
@@ -494,15 +496,15 @@ function DiffLineRow({
                   <X size={12} colorClassName="accent-muted-foreground" />
                 </Pressable>
               </View>
-              <Text className="text-foreground text-xs leading-[17px]">{comment.body}</Text>
+              <Text className="text-foreground text-xs leading-5">{comment.body}</Text>
             </View>
           ))}
         </View>
       ) : null}
       {isCommenting ? (
-        <View className="border-border bg-card mt-1 mr-2 ml-11 gap-1 border p-2">
+        <View className="border-border bg-card mt-1 mr-2 ml-11 gap-1 rounded-xl border p-2">
           <TextInput
-            className={cn(styles.textInput, 'min-h-[70px] h-[70px] mr-0 pt-2 pb-2')}
+            className={cn(styles.textInput, 'min-h-18 h-18 mr-0 pt-2 pb-2')}
             value={commentDraft}
             onChangeText={onDraftChange}
             placeholder="Add review note"
@@ -514,7 +516,7 @@ function DiffLineRow({
           />
           <View className="flex-row justify-end gap-1">
             <Pressable
-              className="min-h-[30px] justify-center px-3"
+              className="min-h-8 justify-center rounded-lg px-3"
               disabled={commentsBusy}
               onPress={onCancelComment}
             >
@@ -522,7 +524,7 @@ function DiffLineRow({
             </Pressable>
             <Pressable
               className={cn(
-                'min-h-[30px] justify-center bg-secondary px-3',
+                'min-h-8 justify-center rounded-lg bg-secondary px-3',
                 (!commentDraft.trim() || commentsBusy) && styles.diffCommentButtonDisabled
               )}
               disabled={!commentDraft.trim() || commentsBusy}
@@ -763,7 +765,7 @@ function FileReader({
 
   if (doc.kind === 'image') {
     return (
-      <View className="min-h-0 flex-1 bg-[var(--editor-surface)]">
+      <View className="bg-editor-surface min-h-0 flex-1">
         <ScrollView
           className="flex-1"
           contentContainerClassName="grow items-center justify-center p-4"
@@ -790,7 +792,7 @@ function FileReader({
       >
         <Text
           selectable
-          className="text-foreground font-mono text-sm leading-[22px]"
+          className="text-foreground font-mono text-sm leading-6"
           accessibilityLabel={`${title} preview`}
         >
           <MobileSyntaxSegments
@@ -4573,7 +4575,7 @@ export default function SessionScreen() {
                   {worktreeName || 'Terminal'}
                 </Text>
                 <Pressable
-                  className="mt-[2px] flex-row items-center"
+                  className="mt-0.5 flex-row items-center"
                   disabled={!showConnectionRetry}
                   onPress={() => {
                     if (hostId) {
@@ -4762,11 +4764,9 @@ export default function SessionScreen() {
             {createWarning ? (
               <View className="bg-card border-b-hairline border-b-border flex-row items-start gap-2 px-3 py-2">
                 <AlertTriangle size={16} colorClassName="accent-amber-500" />
-                <Text className="text-foreground flex-1 text-xs leading-[16px]">
-                  {createWarning}
-                </Text>
+                <Text className="text-foreground flex-1 text-xs leading-4">{createWarning}</Text>
                 <Pressable
-                  className="mt-[-4px] h-6 w-6 items-center justify-center"
+                  className="-mt-1 h-6 w-6 items-center justify-center"
                   onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
                   accessibilityLabel="Dismiss workspace creation warning"
                   hitSlop={8}
@@ -4789,12 +4789,12 @@ export default function SessionScreen() {
                 <View className="flex-row flex-wrap justify-center gap-2">
                   <Pressable
                     className={cn(
-                      'bg-secondary border border-border px-6 py-2.5',
+                      'border-border rounded-xl border bg-secondary px-6 py-2.5',
                       (creating ||
                         creatingBrowser ||
                         creatingMarkdown ||
                         connState !== 'connected') &&
-                        'opacity-[0.5]'
+                        'opacity-50'
                     )}
                     disabled={
                       creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
@@ -4960,14 +4960,14 @@ export default function SessionScreen() {
             trigger a server-side PTY viewport change. The dock hides in native
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
-              <View
-                className="z-[20]"
+              <MobileGlassSurface
+                className="z-20 overflow-hidden rounded-t-3xl"
                 style={[
                   { paddingBottom: insets.bottom, transform: [{ translateY: -keyboardLift }] }
                 ]}
               >
                 {/* Accessory keys */}
-                <View className="border-t-border bg-card flex-row items-center border-t">
+                <View className="flex-row items-center">
                   {/* Why: a fixed, always-visible escape hatch from the open
                   keyboard. Kept outside the horizontal ScrollView so it does
                   not scroll away, and out of the terminal-byte shortcut path so
@@ -4975,7 +4975,7 @@ export default function SessionScreen() {
                   {keyboardLift > 0 && (
                     <Pressable
                       className={cn(
-                        'items-center justify-center ml-2 my-1 bg-secondary px-2.5 py-0 min-w-9 h-7',
+                        'ml-2 my-1 h-7 min-w-9 items-center justify-center rounded-lg bg-secondary px-2.5 py-0',
                         'active:bg-accent'
                       )}
                       onPress={dismissSoftwareKeyboard}
@@ -4984,9 +4984,9 @@ export default function SessionScreen() {
                       accessibilityLabel="Dismiss keyboard"
                       accessibilityHint="Hides the software keyboard and keeps the current terminal session open."
                     >
-                      <View className="relative h-[18px] w-[18px] items-center justify-start">
+                      <View className="relative h-5 w-5 items-center justify-start">
                         <KeyboardIcon size={15} colorClassName="accent-muted-foreground" />
-                        <View className="absolute bottom-[-2px]">
+                        <View className="absolute -bottom-0.5">
                           <ChevronDown size={10} colorClassName="accent-muted-foreground" />
                         </View>
                       </View>
@@ -5152,9 +5152,9 @@ export default function SessionScreen() {
                   <View className={cn(styles.inputBar, 'gap-2')}>
                     <Pressable
                       className={cn(
-                        'flex-1 min-h-[34px] flex-row items-center gap-2 bg-secondary border border-border px-2.5',
+                        'border-border min-h-9 flex-1 flex-row items-center gap-2 rounded-xl border bg-secondary px-2.5',
                         'active:bg-accent',
-                        !canSend && 'opacity-[0.45]'
+                        !canSend && 'opacity-50'
                       )}
                       disabled={!canSend}
                       onPress={focusLiveInput}
@@ -5175,7 +5175,7 @@ export default function SessionScreen() {
                     />
                     <TextInput
                       ref={liveInputRef}
-                      className="text-foreground absolute h-[1px] w-[1px] opacity-[0]"
+                      className="text-foreground absolute h-px w-px opacity-0"
                       value={liveInputCapture}
                       onChangeText={handleLiveInputChange}
                       onKeyPress={handleLiveInputKeyPress}
@@ -5242,7 +5242,7 @@ export default function SessionScreen() {
                     />
                     <Pressable
                       className={cn(
-                        'bg-secondary w-[34px] h-[34px] items-center justify-center',
+                        'h-9 w-9 items-center justify-center rounded-xl bg-secondary',
                         !canSend && styles.sendButtonDisabled
                       )}
                       disabled={!canSend}
@@ -5253,7 +5253,7 @@ export default function SessionScreen() {
                     </Pressable>
                   </View>
                 )}
-              </View>
+              </MobileGlassSurface>
             )}
           </View>
           {canDockPanel && activePanel !== null && (

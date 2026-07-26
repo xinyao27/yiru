@@ -26,8 +26,6 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
-import { useThemeColors } from '../theme/uniwind-theme-values'
-
 // The desktop payload keeps historical icon names; map them to Phosphor so
 // mobile and desktop still render the same project concept.
 const REPO_PHOSPHOR_ICONS: Record<string, Icon> = {
@@ -61,8 +59,6 @@ type Props = {
 
 // Why: matching the desktop fallback keeps unidentified repos recognizable across clients.
 export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
-  const colors = useThemeColors()
-  const resolvedColor = color ?? colors.textSecondary
   if (repoIcon?.type === 'image') {
     return (
       <View className={styles.iconBox} style={{ width: size, height: size }}>
@@ -87,7 +83,11 @@ export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
   const Icon = (repoIcon?.type === 'lucide' && REPO_PHOSPHOR_ICONS[repoIcon.name]) || Folder
   return (
     <View className={styles.iconBox} style={{ width: size, height: size }}>
-      <Icon size={size} color={resolvedColor} />
+      <Icon
+        size={size}
+        color={color}
+        colorClassName={color ? undefined : 'accent-muted-foreground'}
+      />
     </View>
   )
 }

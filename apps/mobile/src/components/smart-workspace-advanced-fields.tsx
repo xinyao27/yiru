@@ -72,5 +72,7 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
 const styles = {
   field: cn('mb-3'),
   label: cn('text-xs font-medium text-muted-foreground mb-1'),
-  input: cn('bg-secondary text-foreground px-3 py-2 ios:py-2.5 text-sm border border-border')
+  input: cn(
+    'border-border bg-secondary text-foreground rounded-xl border px-3 py-2 text-sm ios:py-2.5'
+  )
 } as const

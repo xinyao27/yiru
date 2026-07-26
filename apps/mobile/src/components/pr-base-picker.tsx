@@ -80,8 +80,8 @@ export function MobilePrBasePicker({
     <View>
       <View
         className={cn(
-          'min-h-10 flex-row items-center gap-1 bg-secondary px-3 py-1',
-          !editable && 'opacity-[0.6]'
+          'min-h-10 flex-row items-center gap-1 rounded-xl bg-secondary px-3 py-1',
+          !editable && 'opacity-60'
         )}
       >
         <TextInput
@@ -102,7 +102,7 @@ export function MobilePrBasePicker({
         <ChevronDown size={14} colorClassName="accent-muted-foreground" />
       </View>
       {focused && results.length > 0 ? (
-        <View className="border-hairline border-border bg-card mt-1 overflow-hidden">
+        <View className="border-hairline border-border bg-card mt-1 overflow-hidden rounded-xl">
           {results.map((ref) => (
             <Pressable
               key={ref}

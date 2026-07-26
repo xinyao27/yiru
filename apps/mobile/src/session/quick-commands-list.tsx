@@ -97,7 +97,7 @@ export function QuickCommandsList(props: ListProps) {
       ) : null}
       <Pressable
         className={cn(
-          'mt-1 flex-row items-center gap-2 border border-dashed border-border bg-card px-3 py-3 active:bg-accent',
+          'border-border active:bg-accent mt-1 flex-row items-center gap-2 rounded-2xl border border-dashed bg-card px-3 py-3',
           (disabled || !canAdd) && styles.disabled
         )}
         disabled={disabled || !canAdd}
@@ -130,7 +130,7 @@ function QuickCommandGroup({
 }) {
   return (
     <View>
-      <Text className="text-muted-foreground px-1 pt-1 pb-1 text-[11px] font-semibold tracking-[0.05em] uppercase">
+      <Text className="text-muted-foreground px-1 pt-1 pb-1 text-xs font-semibold tracking-wider uppercase">
         {label}
       </Text>
       <View className={styles.group}>
@@ -252,9 +252,9 @@ export function QuickCommandAgentPicker({
 }
 
 const styles = {
-  disabled: cn('opacity-[0.45]'),
+  disabled: cn('opacity-50'),
   empty: cn('py-4 text-center text-sm text-muted-foreground'),
-  group: cn('overflow-hidden border border-border bg-card'),
+  group: cn('border-border overflow-hidden rounded-2xl border bg-card'),
   rowBorder: cn('border-t border-t-border'),
   rowIcon: cn('h-7 w-7 items-center justify-center bg-muted'),
   rowAction: cn('h-11 w-10 items-center justify-center active:bg-accent')

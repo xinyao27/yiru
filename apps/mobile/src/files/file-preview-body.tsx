@@ -36,7 +36,7 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
       <View className={styles.state}>
         <Text className="text-destructive text-center text-sm">{preview.message}</Text>
         <Pressable
-          className="border-hairline border-border min-h-9 items-center justify-center px-4"
+          className="border-hairline border-border min-h-9 items-center justify-center rounded-xl px-4"
           onPress={options.onRetry}
         >
           <Text className="text-foreground text-sm font-semibold">Retry</Text>
@@ -55,7 +55,7 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
   }
   if (preview.kind === 'image') {
     return (
-      <View className="flex-1 bg-[var(--editor-surface)]">
+      <View className="bg-editor-surface flex-1">
         <ScrollView
           className={styles.scroll}
           contentContainerClassName="grow items-center justify-center p-3"
@@ -65,7 +65,7 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
         >
           <Image
             source={{ uri: preview.dataUri }}
-            className="bg-[var(--editor-surface)]"
+            className="bg-editor-surface"
             style={[{ width: options.imageWidth, height: options.imageHeight }]}
             resizeMode="contain"
             onError={options.onImageError}

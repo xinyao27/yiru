@@ -3,10 +3,9 @@ import {
   YIRU_GITHUB_REPOSITORY_URL
 } from '@yiru/workbench-model/product'
 import Constants from 'expo-constants'
-import { useRouter } from 'expo-router'
 import { View, Text, Pressable, Linking, Platform } from 'react-native'
 
-import { CaretLeft as ChevronLeft, GithubLogo, Globe } from '@/components/uniwind-icons'
+import { GithubLogo, Globe } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { YiruLogo } from '../src/components/yiru-logo'
@@ -25,28 +24,17 @@ function getVersionLabel(): string {
 }
 
 export default function AboutScreen() {
-  const router = useRouter()
   return (
-    <View className="bg-background pt-safe-offset-2 flex-1 p-4">
-      <View className="mb-6 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">About</Text>
-      </View>
-
+    <View className="bg-background flex-1 p-4">
       <View className="mb-4 items-center py-6">
-        <YiruLogo size={28} />
+        <YiruLogo size={28} colorClassName="accent-foreground" />
         <Text className="text-foreground mt-2 text-sm font-extrabold">Yiru</Text>
-        <Text className="text-muted-foreground/60 mt-1 text-xs">
+        <Text className="text-muted-foreground mt-1 text-xs">
           Open-source agent IDE for 100x builders
         </Text>
       </View>
 
-      <View className="bg-card overflow-hidden">
+      <View className="bg-card overflow-hidden rounded-2xl">
         <Pressable
           className={cn(styles.row, styles.rowPressedActive)}
           onPress={() => void Linking.openURL('https://yiru.ai')}
@@ -64,7 +52,7 @@ export default function AboutScreen() {
         </Pressable>
       </View>
 
-      <Text className="text-muted-foreground/60 mt-4 text-center text-xs">{getVersionLabel()}</Text>
+      <Text className="text-muted-foreground mt-4 text-center text-xs">{getVersionLabel()}</Text>
     </View>
   )
 }

@@ -60,14 +60,12 @@ export function TextInputModal({
     <BottomDrawer visible={visible} onClose={onCancel}>
       <View className="px-1 pb-2">
         <Text className="text-foreground text-sm font-semibold">{title}</Text>
-        {message ? (
-          <Text className="text-muted-foreground/60 mt-[2px] text-xs">{message}</Text>
-        ) : null}
+        {message ? <Text className="text-muted-foreground mt-0.5 text-xs">{message}</Text> : null}
       </View>
 
       {/* Why: the raised fill reads as an input surface instead of a recessed panel. */}
       <TextInput
-        className="bg-secondary text-foreground ios:py-2.5 border-border border px-3 py-2 text-sm"
+        className="border-border bg-secondary text-foreground ios:py-2.5 rounded-xl border px-3 py-2 text-sm"
         value={value}
         onChangeText={setValue}
         placeholder={placeholder}
@@ -83,14 +81,17 @@ export function TextInputModal({
       />
 
       <View className="mt-3 flex-row justify-end gap-2">
-        <Pressable className={cn('px-4 py-2', styles.buttonPressedActive)} onPress={onCancel}>
+        <Pressable
+          className={cn('rounded-xl px-4 py-2', styles.buttonPressedActive)}
+          onPress={onCancel}
+        >
           <Text className="text-muted-foreground text-sm font-medium">Cancel</Text>
         </Pressable>
         <Pressable
           className={cn(
-            'bg-primary px-4 py-2',
+            'rounded-xl bg-primary px-4 py-2',
             styles.buttonPressedActive,
-            !canSubmit && 'opacity-[0.4]'
+            !canSubmit && 'opacity-40'
           )}
           disabled={!canSubmit}
           onPress={handleSubmit}

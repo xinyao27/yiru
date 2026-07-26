@@ -75,24 +75,23 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
   return (
     <PRSection title="Conflicts">
       {conflict.commitsBehind !== null && conflict.baseCommit !== null ? (
-        <Text className="text-muted-foreground text-[11px]">
+        <Text className="text-muted-foreground text-xs">
           {conflict.commitsBehind} commit{conflict.commitsBehind === 1 ? '' : 's'} behind (base
           commit:{' '}
-          <Text className="text-muted-foreground font-mono text-[11px]">{conflict.baseCommit}</Text>
-          )
+          <Text className="text-muted-foreground font-mono text-xs">{conflict.baseCommit}</Text>)
         </Text>
       ) : null}
 
       {conflict.fileDetailsUnavailable ? (
         <View>
-          <Text className="text-foreground text-[11px] font-semibold">
+          <Text className="text-foreground text-xs font-semibold">
             This branch has conflicts that must be resolved
           </Text>
-          <Text className="text-muted-foreground mt-1 text-[11px]">{noticeBody}</Text>
+          <Text className="text-muted-foreground mt-1 text-xs">{noticeBody}</Text>
           {conflict.mergeabilityRefreshCommands ? (
-            <View className="border-hairline border-border bg-secondary mt-2 p-2">
+            <View className="border-hairline border-border bg-secondary mt-2 rounded-xl p-2">
               <View className="flex-row items-center justify-between gap-2">
-                <Text className="text-muted-foreground text-[10px] font-semibold">
+                <Text className="text-muted-foreground text-xs font-semibold">
                   Run from this worktree
                 </Text>
                 <Pressable
@@ -109,15 +108,12 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
                   ) : (
                     <Copy size={13} colorClassName="accent-foreground" />
                   )}
-                  <Text className="text-foreground text-[11px] font-semibold">
+                  <Text className="text-foreground text-xs font-semibold">
                     {commandsCopied ? 'Copied' : 'Copy commands'}
                   </Text>
                 </Pressable>
               </View>
-              <Text
-                selectable
-                className="text-foreground mt-2 font-mono text-[10px] leading-[15px]"
-              >
+              <Text selectable className="text-foreground mt-2 font-mono text-xs leading-4">
                 {conflict.mergeabilityRefreshCommands}
               </Text>
             </View>
@@ -127,17 +123,20 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
         <View>
           <View className="mt-2 flex-row items-center gap-2">
             <FileWarning size={14} colorClassName="accent-muted-foreground" />
-            <Text className="text-muted-foreground text-[11px]">Conflicting files</Text>
+            <Text className="text-muted-foreground text-xs">Conflicting files</Text>
           </View>
           <ScrollView
-            className="mt-2 max-h-[180px]"
+            className="mt-2 max-h-44"
             contentContainerClassName="gap-1"
             nestedScrollEnabled
             showsVerticalScrollIndicator={false}
           >
             {conflict.files.map((filePath) => (
-              <View key={filePath} className="border-hairline border-border bg-secondary px-2 py-1">
-                <Text className="text-foreground font-mono text-[11px]">{filePath}</Text>
+              <View
+                key={filePath}
+                className="border-hairline border-border bg-secondary rounded-lg px-2 py-1"
+              >
+                <Text className="text-foreground font-mono text-xs">{filePath}</Text>
               </View>
             ))}
           </ScrollView>
@@ -150,7 +149,7 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
         <View className="gap-1">
           <Pressable
             className={cn(
-              'min-h-9 flex-row items-center justify-center gap-1 px-3 border-hairline border-border bg-secondary',
+              'border-hairline border-border min-h-9 flex-row items-center justify-center gap-1 rounded-xl bg-secondary px-3',
               'active:bg-accent'
             )}
             onPress={triage.resolveConflicts}

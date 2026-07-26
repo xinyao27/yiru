@@ -2,7 +2,7 @@ import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { Image, Text, View } from 'react-native'
 import type { ImageSourcePropType } from 'react-native'
 import Svg, { Defs, G, LinearGradient, Path, Stop } from 'react-native-svg'
-import { useCSSVariable } from 'uniwind'
+import { withUniwind } from 'uniwind'
 
 import { Terminal } from '@/components/uniwind-icons'
 
@@ -13,7 +13,7 @@ import { ClaudeIcon, OpenAIIcon } from './agent-icons'
 // Why: agent branding should match the desktop/new-worktree picker everywhere
 // mobile lets users choose the agent that will own a workspace.
 
-function PiIcon({ size = 16, color }: { size?: number; color: string }) {
+function PiIconBase({ size = 16, color }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 800 800">
       <Path
@@ -25,6 +25,8 @@ function PiIcon({ size = 16, color }: { size?: number; color: string }) {
     </Svg>
   )
 }
+
+const PiIcon = withUniwind(PiIconBase)
 
 function OmpIcon({ size = 16 }: { size?: number }) {
   // SVG sourced from omp.sh's transparent homepage mark. Why: react-native-svg
@@ -43,7 +45,7 @@ function OmpIcon({ size = 16 }: { size?: number }) {
   )
 }
 
-function AiderIcon({ size = 16, color }: { size?: number; color: string }) {
+function AiderIconBase({ size = 16, color }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 436 436">
       <G transform="translate(0,436) scale(0.1,-0.1)" fill={color} stroke="none">
@@ -53,6 +55,8 @@ function AiderIcon({ size = 16, color }: { size?: number; color: string }) {
     </Svg>
   )
 }
+
+const AiderIcon = withUniwind(AiderIconBase)
 
 function BundledIcon({ source, size = 16 }: { source: ImageSourcePropType; size?: number }) {
   return <Image source={source} style={{ width: size, height: size }} />
@@ -78,21 +82,20 @@ function AgentLetterIcon({ letter, size = 16 }: { letter: string; size?: number 
 }
 
 export function MobileAgentIcon({ agentId, size = 16 }: { agentId: string; size?: number }) {
-  const foreground = useCSSVariable('--color-foreground') as string
   if (agentId === 'claude' || agentId === 'claude-agent-teams') {
     return <ClaudeIcon size={size} />
   }
   if (agentId === 'codex') {
-    return <OpenAIIcon size={size} />
+    return <OpenAIIcon size={size} colorClassName="accent-foreground" />
   }
   if (agentId === 'pi') {
-    return <PiIcon size={size} color={foreground} />
+    return <PiIcon size={size} colorClassName="accent-foreground" />
   }
   if (agentId === 'omp') {
     return <OmpIcon size={size} />
   }
   if (agentId === 'aider') {
-    return <AiderIcon size={size} color={foreground} />
+    return <AiderIcon size={size} colorClassName="accent-foreground" />
   }
   if (agentId === '__blank__' || agentId === 'blank') {
     return <Terminal size={size} colorClassName="accent-muted-foreground" />

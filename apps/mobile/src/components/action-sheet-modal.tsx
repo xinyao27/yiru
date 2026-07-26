@@ -50,17 +50,15 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
       {(title || message) && (
         <View className="px-1 pb-2">
           {title ? (
-            <Text className="text-muted-foreground/60 text-xs font-medium" numberOfLines={1}>
+            <Text className="text-muted-foreground text-xs font-medium" numberOfLines={1}>
               {title}
             </Text>
           ) : null}
-          {message ? (
-            <Text className="text-muted-foreground/60 mt-[2px] text-xs">{message}</Text>
-          ) : null}
+          {message ? <Text className="text-muted-foreground mt-0.5 text-xs">{message}</Text> : null}
         </View>
       )}
 
-      <View className="bg-card overflow-hidden">
+      <View className="bg-card overflow-hidden rounded-2xl">
         {actions.map((action, i) => {
           const Icon = iconForAction(action.label, action.destructive, action.icon)
           const customIcon = action.renderIcon?.()
@@ -70,7 +68,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
               <Pressable
                 className={cn(
                   'flex-row items-center gap-2.5 py-3 px-3.5',
-                  action.disabled && 'opacity-[0.58]',
+                  action.disabled && 'opacity-60',
                   !action.disabled && !action.loading && 'active:bg-accent'
                 )}
                 disabled={action.disabled || action.loading}
@@ -100,7 +98,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
                     {action.label}
                   </Text>
                   {action.hint ? (
-                    <Text className="text-muted-foreground/60 mt-[2px] text-xs">{action.hint}</Text>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">{action.hint}</Text>
                   ) : null}
                 </View>
                 {action.loading ? (

@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
 import {
   CaretDown as ChevronDown,
@@ -9,9 +10,9 @@ import {
   Image as ImageIcon
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { triggerSelection } from '../platform/haptics'
-import { spacing } from '../theme/uniwind-theme-values'
 import { fileExplorerStyles as styles } from './file-explorer-styles'
 import { canPreviewMobileFileRow } from './file-preview-navigation'
 import { type FileExplorerRow, isMarkdownPath, type TreeNode } from './file-tree'
@@ -26,13 +27,12 @@ type Props = {
 
 export function MobileFileExplorerRow(props: Props) {
   const { item, expanded, onPreviewFile, onRetryDirectory, onToggleDirectory } = props
+  const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
+  const paddingLeft = spacing4 * (item.depth + 1)
 
   if (item.kind === 'loading') {
     return (
-      <View
-        className={styles.inlineStatusRow}
-        style={[{ paddingLeft: spacing.lg + item.depth * 18 }]}
-      >
+      <View className={styles.inlineStatusRow} style={[{ paddingLeft }]}>
         <View className={styles.chevronSpacer} />
         <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         <Text className="text-muted-foreground text-xs">Loading...</Text>
@@ -42,10 +42,7 @@ export function MobileFileExplorerRow(props: Props) {
 
   if (item.kind === 'error') {
     return (
-      <View
-        className={styles.inlineStatusRow}
-        style={[{ paddingLeft: spacing.lg + item.depth * 18 }]}
-      >
+      <View className={styles.inlineStatusRow} style={[{ paddingLeft }]}>
         <View className={styles.chevronSpacer} />
         <Text className="text-destructive min-w-0 flex-1 text-xs" numberOfLines={1}>
           {item.message || 'Unable to load folder'}
@@ -72,6 +69,7 @@ export function MobileFileExplorerRow(props: Props) {
       <TreeRow
         item={item}
         expanded={expanded}
+        paddingLeft={paddingLeft}
         onPreviewFile={onPreviewFile}
         onToggleDirectory={onToggleDirectory}
       />
@@ -88,10 +86,11 @@ function isTreeNode(item: FileExplorerRow): item is TreeNode {
 function TreeRow(props: {
   item: TreeNode
   expanded: ReadonlySet<string>
+  paddingLeft: number
   onPreviewFile: (relativePath: string, displayName: string) => void
   onToggleDirectory: (relativePath: string) => void
 }) {
-  const { item, expanded, onPreviewFile, onToggleDirectory } = props
+  const { item, expanded, paddingLeft, onPreviewFile, onToggleDirectory } = props
   const isDirectory = item.kind === 'directory'
   const isExpanded = expanded.has(item.relativePath)
   // Images render in the mobile viewer (via files.readPreview), so a binary
@@ -108,9 +107,9 @@ function TreeRow(props: {
       className={cn(
         'min-h-11 flex-row items-center gap-2 pr-3',
         !disabled && styles.rowPressedActive,
-        disabled && 'opacity-[0.58]'
+        disabled && 'opacity-60'
       )}
-      style={{ paddingLeft: spacing.lg + item.depth * 18 }}
+      style={{ paddingLeft }}
       disabled={disabled}
       onPress={() => {
         triggerSelection()
@@ -148,15 +147,13 @@ function TreeRow(props: {
       )}
       <View className="min-w-0 flex-1">
         <Text
-          className={cn('text-foreground text-sm', disabled && 'text-muted-foreground/60')}
+          className={cn('text-foreground text-sm', disabled && 'text-muted-foreground')}
           numberOfLines={1}
         >
           {item.name}
         </Text>
         {disabled ? (
-          <Text className="text-muted-foreground/60 mt-[1px] text-[11px]">
-            Unavailable on mobile
-          </Text>
+          <Text className="text-muted-foreground mt-px text-xs">Unavailable on mobile</Text>
         ) : null}
       </View>
     </Pressable>

@@ -154,7 +154,7 @@ export function SmartWorkspaceSourceDrawer({
       </View>
 
       <TextInput
-        className="bg-secondary text-foreground border-border mb-2 border px-3 py-2 text-sm"
+        className="border-border bg-secondary text-foreground mb-2 rounded-xl border px-3 py-2 text-sm"
         value={composer.name}
         onChangeText={composer.setName}
         placeholder="Type a name or search a source"
@@ -173,7 +173,7 @@ export function SmartWorkspaceSourceDrawer({
             <Pressable
               key={option.id}
               className={cn(
-                'flex-row items-center gap-1 px-2.5 py-1.5 border border-border',
+                'border-border flex-row items-center gap-1 rounded-full border px-2.5 py-1.5',
                 selected && 'bg-card border-muted-foreground'
               )}
               onPress={() => setMode(option.id)}
@@ -203,7 +203,7 @@ export function SmartWorkspaceSourceDrawer({
               <Pressable
                 key={option.id}
                 className={cn(
-                  'px-3 py-1 border border-border',
+                  'border-border rounded-full border px-3 py-1',
                   selected && 'bg-card border-muted-foreground'
                 )}
                 onPress={() => setMrStateFilter(option.id)}
@@ -223,19 +223,19 @@ export function SmartWorkspaceSourceDrawer({
       ) : null}
 
       {crossRepoPrompt ? (
-        <View className="bg-secondary border-border mb-2 gap-2 border p-3">
+        <View className="border-border bg-secondary mb-2 gap-2 rounded-2xl border p-3">
           <Text className="text-muted-foreground text-xs">
             This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
           </Text>
           <View className="flex-row justify-end gap-2">
             <Pressable
-              className="border-border border px-3 py-1.5"
+              className="border-border rounded-xl border px-3 py-1.5"
               onPress={dismissCrossRepoPrompt}
             >
               <Text className="text-muted-foreground text-xs">Cancel</Text>
             </Pressable>
             <Pressable
-              className="bg-card border-muted-foreground border px-3 py-1.5"
+              className="border-muted-foreground bg-card rounded-xl border px-3 py-1.5"
               onPress={() => void handleAcceptCrossRepo()}
             >
               <Text className="text-foreground text-xs font-semibold">
@@ -259,7 +259,7 @@ export function SmartWorkspaceSourceDrawer({
       <FlatList
         data={rows}
         keyExtractor={(row) => row.value}
-        className="bg-card max-h-[420px] grow-0 overflow-hidden"
+        className="bg-card max-h-96 grow-0 overflow-hidden rounded-2xl"
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled
         ListFooterComponent={
@@ -268,7 +268,7 @@ export function SmartWorkspaceSourceDrawer({
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             </View>
           ) : showEmpty ? (
-            <Text className="text-muted-foreground/60 py-4 text-center text-xs">
+            <Text className="text-muted-foreground py-4 text-center text-xs">
               {emptyHint || 'No results found.'}
             </Text>
           ) : null
@@ -282,5 +282,5 @@ export function SmartWorkspaceSourceDrawer({
 }
 
 const styles = {
-  notice: cn('text-xs text-muted-foreground/60 px-1 pb-2')
+  notice: cn('text-xs text-muted-foreground px-1 pb-2')
 } as const

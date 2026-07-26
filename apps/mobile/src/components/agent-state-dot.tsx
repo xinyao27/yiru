@@ -13,7 +13,7 @@ const DOT_COLOR_CLASSES: Record<Exclude<AgentDotState, 'working'>, string> = {
   blocked: 'bg-red-500',
   waiting: 'bg-red-500',
   interrupted: 'bg-red-500',
-  idle: 'bg-neutral-500/40'
+  idle: 'bg-status-neutral'
 }
 
 export function AgentStateDot({ state }: { state: AgentDotState }) {

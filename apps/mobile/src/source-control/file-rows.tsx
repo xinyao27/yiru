@@ -175,7 +175,7 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
         <View className="min-w-0 flex-1">
           <Text className={styles.sectionTitle}>Committed on Branch</Text>
           {branchCompareSummaryText ? (
-            <Text className="text-muted-foreground/60 mt-[2px] text-xs" numberOfLines={1}>
+            <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
               {branchCompareSummaryText}
             </Text>
           ) : null}

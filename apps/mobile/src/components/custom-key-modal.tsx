@@ -190,7 +190,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       <View className="flex-row items-center pb-2">
         {showBack ? (
           <Pressable
-            className="active:bg-accent h-[30px] w-[30px] items-center justify-center"
+            className="active:bg-accent h-8 w-8 items-center justify-center rounded-full"
             onPress={onBack}
             accessibilityLabel="Back"
           >
@@ -277,7 +277,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   <Pressable
                     key={modifier.id}
                     className={cn(
-                      'flex-1 h-10 bg-card flex-row items-center justify-center gap-1',
+                      'h-10 flex-1 flex-row items-center justify-center gap-1 rounded-xl bg-card',
                       selected && 'bg-accent',
                       !selected && 'active:bg-accent'
                     )}
@@ -296,7 +296,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                     {modifier.glyph ? (
                       <Text
                         className={cn(
-                          'text-muted-foreground/60 text-xs font-mono',
+                          'text-muted-foreground text-xs font-mono',
                           selected && 'text-muted-foreground'
                         )}
                       >
@@ -312,7 +312,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           <View className={styles.section}>
             <Text className={styles.sectionLabel}>Key</Text>
             <TextInput
-              className="bg-card border-border text-foreground h-14 w-full border text-center font-mono text-sm font-semibold"
+              className="border-border bg-card text-foreground h-14 w-full rounded-xl border text-center font-mono text-sm font-semibold"
               value={shortcutKey.length === 1 ? shortcutKey.toUpperCase() : ''}
               onChangeText={handleShortcutKeyInput}
               placeholder={SPECIAL_KEY_BY_ID[shortcutKey]?.label ?? 'C'}
@@ -352,10 +352,10 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
         <View className="gap-3 pt-1 pb-3">
           {SPECIAL_KEY_GROUPS.map((group) => (
             <View key={group.title} className="gap-1">
-              <Text className="text-muted-foreground/60 mb-1 pl-[2px] text-[11px] tracking-[0.8px] uppercase">
+              <Text className="text-muted-foreground mb-1 pl-0.5 text-xs tracking-wider uppercase">
                 {group.title}
               </Text>
-              <View className="mx-[-2px] flex-row flex-wrap">
+              <View className="-mx-0.5 flex-row flex-wrap">
                 {group.ids.map((id) => {
                   const key = SPECIAL_KEY_BY_ID[id]
                   if (!key) {
@@ -364,10 +364,10 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   const selected = shortcutKey === id
                   const flexBasis = `${100 / group.columns}%` as const
                   return (
-                    <View key={id} className="px-[2px] py-[2px]" style={[{ flexBasis }]}>
+                    <View key={id} className="px-0.5 py-0.5" style={[{ flexBasis }]}>
                       <Pressable
                         className={cn(
-                          'h-10 bg-card items-center justify-center',
+                          'h-10 items-center justify-center rounded-xl bg-card',
                           selected && 'bg-accent',
                           !selected && 'active:bg-accent'
                         )}
@@ -449,21 +449,25 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 }
 
 const styles = {
-  backSpacer: cn('w-[30px]'),
-  group: cn('bg-card overflow-hidden'),
+  backSpacer: cn('w-8'),
+  group: cn('overflow-hidden rounded-2xl bg-card'),
   separator: cn('h-hairline bg-border mx-3'),
   row: cn('py-3 px-3.5'),
   rowPressedActive: cn('active:bg-accent'),
-  rowLabel: cn('text-sm font-medium text-foreground mb-[1px]'),
-  rowHint: cn('text-xs text-muted-foreground/60'),
-  previewPlus: cn('text-muted-foreground/60 text-sm'),
-  keycap: cn('min-w-12 h-12 px-3 bg-card border border-border items-center justify-center'),
+  rowLabel: cn('text-sm font-medium text-foreground mb-px'),
+  rowHint: cn('text-xs text-muted-foreground'),
+  previewPlus: cn('text-muted-foreground text-sm'),
+  keycap: cn(
+    'border-border min-w-12 h-12 items-center justify-center rounded-xl border bg-card px-3'
+  ),
   section: cn('mt-3'),
-  sectionLabel: cn('text-[11px] text-muted-foreground/60 uppercase tracking-[0.8px] mb-2 pl-[2px]'),
+  sectionLabel: cn('text-xs text-muted-foreground uppercase tracking-wider mb-2 pl-0.5'),
   fieldLabel: cn('text-xs font-medium text-muted-foreground'),
-  fieldInput: cn('bg-background text-foreground px-3 py-2 text-sm font-mono border border-border'),
-  saveButton: cn('mt-3 bg-primary py-3 items-center'),
+  fieldInput: cn(
+    'border-border bg-background text-foreground rounded-xl border px-3 py-2 font-mono text-sm'
+  ),
+  saveButton: cn('mt-3 items-center rounded-xl bg-primary py-3'),
   saveButtonDisabled: cn('bg-secondary'),
   saveButtonText: cn('text-primary-foreground text-sm font-semibold'),
-  saveButtonTextDisabled: cn('text-muted-foreground/60')
+  saveButtonTextDisabled: cn('text-muted-foreground')
 } as const

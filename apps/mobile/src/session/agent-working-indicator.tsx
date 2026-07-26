@@ -27,12 +27,12 @@ export function MobileAgentWorkingIndicator(): React.JSX.Element {
 
   return (
     <View className="flex-row items-center gap-2 px-3 py-2">
-      <Text className="text-muted-foreground/60 text-xs italic">Agent is working</Text>
+      <Text className="text-muted-foreground text-xs italic">Agent is working</Text>
       <View className="flex-row gap-1">
         {dots.map((dot, i) => (
           <Animated.View
             key={i}
-            className="bg-muted-foreground h-[5px] w-[5px]"
+            className="bg-muted-foreground h-1.5 w-1.5"
             style={[{ opacity: dot }]}
           />
         ))}

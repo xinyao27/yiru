@@ -48,9 +48,9 @@ export function ConnectionLog({ entries, title }: Props) {
   const baseTs = entries[0]!.ts
 
   return (
-    <View className="bg-card border-hairline border-border max-h-60 w-full px-3 py-2">
+    <View className="border-hairline border-border bg-card max-h-60 w-full rounded-2xl px-3 py-2">
       {title && (
-        <Text className="text-muted-foreground/60 mb-1 font-mono text-xs tracking-[1px] uppercase">
+        <Text className="text-muted-foreground mb-1 font-mono text-xs tracking-wider uppercase">
           {title}
         </Text>
       )}
@@ -63,26 +63,24 @@ export function ConnectionLog({ entries, title }: Props) {
       >
         {entries.map((entry) => (
           <View key={entry.id} className="flex-row items-start gap-2">
-            <Text className="text-muted-foreground/60 w-[52px] pt-[1px] font-mono text-xs">
+            <Text className="text-muted-foreground w-14 pt-px font-mono text-xs">
               {formatTime(entry.ts, baseTs)}
             </Text>
             <Text
               className={cn(
-                'font-mono text-xs w-3 text-center pt-[1px]',
+                'font-mono text-xs w-3 text-center pt-px',
                 LEVEL_COLOR_CLASS[entry.level]
               )}
             >
               {LEVEL_GLYPH[entry.level]}
             </Text>
             <View className="flex-1">
-              <Text
-                className={cn('font-mono text-xs leading-[16px]', LEVEL_COLOR_CLASS[entry.level])}
-              >
+              <Text className={cn('font-mono text-xs leading-4', LEVEL_COLOR_CLASS[entry.level])}>
                 {entry.message}
               </Text>
               {entry.detail && (
                 <Text
-                  className="text-muted-foreground/60 mt-[1px] font-mono text-[11px] leading-[14px]"
+                  className="text-muted-foreground mt-px font-mono text-xs leading-4"
                   numberOfLines={2}
                 >
                   {entry.detail}

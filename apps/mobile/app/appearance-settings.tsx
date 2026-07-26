@@ -1,8 +1,7 @@
-import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@/components/uniwind-icons'
+import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 
 import { LoadingIndicator } from '../src/components/loading-indicator'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
@@ -14,7 +13,6 @@ import {
 import { useMobileLoaderStyle } from '../src/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
-  const router = useRouter()
   const [pickerOpen, setPickerOpen] = useState(false)
   const { loaderStyle, setLoaderStyle } = useMobileLoaderStyle()
   const options = useMemo<PickerOption<MobileLoaderStyle>[]>(
@@ -28,36 +26,26 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
   )
 
   return (
-    <View className="bg-background pt-safe-offset-2 flex-1 px-4 pt-0">
-      <View className="mt-2 mb-4 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">Appearance</Text>
-      </View>
-
+    <View className="bg-background flex-1 px-4 pt-4">
       <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
-        <Text className="text-muted-foreground/60 mb-1 px-1 text-[11px] font-semibold tracking-[0.5px]">
+        <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
           LOADING
         </Text>
-        <Text className="text-muted-foreground px-1 text-xs leading-[20px]">
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose the animation shown while agents are working on this device.
         </Text>
-        <View className="bg-card mt-2 overflow-hidden">
+        <View className="bg-card mt-2 overflow-hidden rounded-2xl">
           <Pressable
             accessibilityRole="button"
             className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
             onPress={() => setPickerOpen(true)}
           >
-            <View className="w-[22px] items-center">
+            <View className="w-6 items-center">
               <LoadingIndicator size={20} />
             </View>
             <View className="flex-1">
               <Text className="text-foreground text-sm font-medium">Loader</Text>
-              <Text className="text-muted-foreground mt-[2px] text-xs">
+              <Text className="text-muted-foreground mt-0.5 text-xs">
                 {getMobileLoaderStyleLabel(loaderStyle)}
               </Text>
             </View>

@@ -11,11 +11,13 @@ export const prCommentsStyles = {
 
   group: cn('gap-2'),
 
-  avatar: cn('w-5 h-5 bg-secondary'),
+  avatar: cn('h-5 w-5 rounded-full bg-secondary'),
 
-  empty: cn('border-hairline border-dashed border-border px-3 py-6 text-muted-foreground text-xs'),
+  empty: cn(
+    'border-hairline border-border text-muted-foreground rounded-xl border-dashed px-3 py-6 text-xs'
+  ),
   actionButton: cn(
-    'flex-row items-center gap-1 min-h-7 px-2 border-hairline border-border bg-secondary'
+    'border-hairline border-border min-h-7 flex-row items-center gap-1 rounded-lg bg-secondary px-2'
   ),
   actionButtonPressedActive: cn('active:bg-accent'),
   actionButtonText: cn('text-muted-foreground text-xs font-semibold')

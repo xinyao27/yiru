@@ -3,7 +3,6 @@ import { useState, useCallback, useRef } from 'react'
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from 'react-native'
 
 import {
-  CaretLeft as ChevronLeft,
   CaretDown as ChevronDown,
   CaretUp as ChevronUp,
   Pulse as Activity,
@@ -168,17 +167,7 @@ export default function TroubleshootScreen() {
   }, [])
 
   return (
-    <View ref={setTroubleshootRootRef} className="bg-background pt-safe-offset-2 flex-1 p-4">
-      <View className="mb-4 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">Troubleshooting</Text>
-      </View>
-
+    <View ref={setTroubleshootRootRef} className="bg-background flex-1 p-4">
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-6"
@@ -188,7 +177,7 @@ export default function TroubleshootScreen() {
           className={cn(
             styles.diagnosticButton,
             styles.diagnosticButtonPressedActive,
-            diagnosticStatus === 'running' && 'opacity-[0.5]'
+            diagnosticStatus === 'running' && 'opacity-50'
           )}
           onPress={runDiagnostics}
           disabled={diagnosticStatus === 'running'}
@@ -225,7 +214,7 @@ export default function TroubleshootScreen() {
                   <Text className="text-foreground text-sm font-medium">{check.label}</Text>
                   <Text
                     className={cn(
-                      'flex-1 text-right text-xs text-muted-foreground/60',
+                      'flex-1 text-right text-xs text-muted-foreground',
                       check.status === 'fail' && 'text-destructive'
                     )}
                   >
@@ -237,7 +226,7 @@ export default function TroubleshootScreen() {
           </View>
         )}
 
-        <Text className="text-muted-foreground/60 mt-2 mb-2 px-1 text-xs font-semibold tracking-[0.5px] uppercase">
+        <Text className="text-muted-foreground mt-2 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
           Common issues
         </Text>
 
@@ -261,10 +250,8 @@ export default function TroubleshootScreen() {
                 <View className="gap-1.5 px-3.5 pb-3">
                   {section.steps.map((step, j) => (
                     <View key={j} className="flex-row gap-2">
-                      <Text className="text-muted-foreground/60 text-xs leading-[18px]">•</Text>
-                      <Text className="text-muted-foreground/60 flex-1 text-xs leading-[18px]">
-                        {step}
-                      </Text>
+                      <Text className="text-muted-foreground text-xs leading-5">•</Text>
+                      <Text className="text-muted-foreground flex-1 text-xs leading-5">{step}</Text>
                     </View>
                   ))}
                 </View>
@@ -280,9 +267,11 @@ export default function TroubleshootScreen() {
 }
 
 const styles = {
-  diagnosticButton: cn('flex-row items-center justify-center gap-2 bg-secondary py-3 px-4 mb-4'),
+  diagnosticButton: cn(
+    'mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-secondary px-4 py-3'
+  ),
   diagnosticButtonPressedActive: cn('active:bg-accent'),
   diagnosticButtonLabel: cn('text-sm font-semibold text-foreground'),
-  section: cn('bg-card overflow-hidden mb-4'),
+  section: cn('mb-4 overflow-hidden rounded-2xl bg-card'),
   separator: cn('h-hairline bg-border mx-3')
 } as const

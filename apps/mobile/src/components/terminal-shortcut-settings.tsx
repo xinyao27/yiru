@@ -218,7 +218,7 @@ export function TerminalShortcutSettings({
   return (
     <>
       <Text className={cn(styles.groupHeading, styles.groupTopGap)}>SHORTCUT BAR</Text>
-      <Text className="text-muted-foreground px-1 text-xs leading-[20px]">
+      <Text className="text-muted-foreground px-1 text-xs leading-5">
         Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on
         the terminal shortcut bar.
       </Text>
@@ -283,7 +283,7 @@ export function TerminalShortcutSettings({
                   </Text>
                 </View>
                 <Pressable
-                  className="h-8 w-8 items-center justify-center bg-red-500/10 active:bg-red-500/20"
+                  className="bg-secondary active:bg-accent h-8 w-8 items-center justify-center rounded-full"
                   onPress={() => handleDeleteCustomKey(key)}
                 >
                   <X size={16} colorClassName="accent-destructive" />
@@ -319,9 +319,9 @@ export function TerminalShortcutSettings({
 }
 
 const styles = {
-  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
+  groupHeading: cn('text-xs font-semibold text-muted-foreground tracking-wide mb-1 px-1'),
   groupTopGap: cn('mt-6'),
-  section: cn('bg-card overflow-hidden'),
+  section: cn('overflow-hidden rounded-2xl bg-card'),
   sectionTopGap: cn('mt-2'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
   rowPressedActive: cn('active:bg-accent'),
@@ -330,7 +330,7 @@ const styles = {
   reorderRowContent: cn('flex-1 h-full flex-row items-center gap-2.5 pl-3.5'),
   rowContent: cn('flex-1'),
   rowLabel: cn('text-sm font-medium text-foreground'),
-  rowSublabel: cn('text-xs text-muted-foreground mt-[2px]'),
-  keycap: cn('min-w-[62px] items-center bg-secondary px-2 py-1'),
+  rowSublabel: cn('text-xs text-muted-foreground mt-0.5'),
+  keycap: cn('min-w-16 items-center rounded-lg bg-secondary px-2 py-1'),
   keycapText: cn('text-muted-foreground text-xs font-mono')
 } as const

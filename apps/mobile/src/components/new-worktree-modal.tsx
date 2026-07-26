@@ -791,7 +791,7 @@ function NewWorktreeModalContent({
       <BottomDrawer visible={visible && drawerView === 'form'} onClose={onClose}>
         <View className="mb-3 px-1">
           <Text className="text-foreground text-sm font-semibold">Create Workspace</Text>
-          <Text className="text-muted-foreground/60 mt-[2px] text-xs">
+          <Text className="text-muted-foreground mt-0.5 text-xs">
             Pick a repository and agent to spin up a new workspace.
           </Text>
         </View>
@@ -822,10 +822,7 @@ function NewWorktreeModalContent({
                   />
                 ) : null}
                 <Text
-                  className={cn(
-                    styles.fieldButtonText,
-                    !selectedRepo && 'text-muted-foreground/60'
-                  )}
+                  className={cn(styles.fieldButtonText, !selectedRepo && 'text-muted-foreground')}
                   numberOfLines={1}
                 >
                   {selectedRepo?.displayName ?? 'Select a repository'}
@@ -843,15 +840,13 @@ function NewWorktreeModalContent({
             />
 
             {composer.forkPushWarning ? (
-              <Text className="mt-[-8px] mb-3 text-xs text-amber-500">
-                {composer.forkPushWarning}
-              </Text>
+              <Text className="-mt-2 mb-3 text-xs text-amber-500">{composer.forkPushWarning}</Text>
             ) : null}
 
             {selectedRepoConnectionId ? (
               <View className={styles.field}>
                 <Text className={styles.label}>SSH Connection</Text>
-                <View className="bg-secondary border-border gap-1 border px-3 py-2">
+                <View className="border-border bg-secondary gap-1 rounded-2xl border px-3 py-2">
                   <View className="flex-row items-center gap-2">
                     <View
                       className={cn(
@@ -867,7 +862,7 @@ function NewWorktreeModalContent({
                       <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
                         {selectedRepo?.displayName ?? 'Remote repository'}
                       </Text>
-                      <Text className="text-muted-foreground mt-[1px] text-xs">
+                      <Text className="text-muted-foreground mt-px text-xs">
                         {workspaceSshStatusLabel(sshGate.status)}
                       </Text>
                     </View>
@@ -933,7 +928,7 @@ function NewWorktreeModalContent({
                 <View className={styles.field}>
                   <Text className={styles.label}>Note</Text>
                   <TextInput
-                    className="bg-secondary text-foreground ios:py-2.5 border-border border px-3 py-2 text-sm"
+                    className="border-border bg-secondary text-foreground ios:py-2.5 rounded-xl border px-3 py-2 text-sm"
                     value={note}
                     onChangeText={setNote}
                     placeholder="Write a note"
@@ -948,14 +943,14 @@ function NewWorktreeModalContent({
                     <View className="mb-1 flex-row items-center justify-between">
                       <Text className={styles.label}>Setup script</Text>
                       {setupSource && (
-                        <View className="bg-secondary px-1.5 py-[2px]">
-                          <Text className="text-muted-foreground/60 text-[10px] font-semibold tracking-[0.5px]">
+                        <View className="bg-secondary rounded-md px-1.5 py-0.5">
+                          <Text className="text-muted-foreground text-xs font-semibold tracking-wide">
                             {setupSource === 'yiru.yaml' ? 'YIRU.YAML' : 'HOOKS'}
                           </Text>
                         </View>
                       )}
                     </View>
-                    <View className="bg-secondary border-border border p-3">
+                    <View className="border-border bg-secondary rounded-2xl border p-3">
                       {setupRunPolicy === 'ask' ? (
                         <View className="mb-2 flex-row gap-2">
                           <Pressable
@@ -991,7 +986,7 @@ function NewWorktreeModalContent({
                           />
                         </View>
                       )}
-                      <View className="bg-background px-2.5 py-2">
+                      <View className="bg-background rounded-xl px-2.5 py-2">
                         <Text className="text-foreground font-mono text-xs">{setupCommand}</Text>
                       </View>
                     </View>
@@ -1006,7 +1001,7 @@ function NewWorktreeModalContent({
               <Pressable
                 className={cn(
                   'bg-primary px-4 py-2 min-w-40 items-center',
-                  !canCreate && 'opacity-[0.4]'
+                  !canCreate && 'opacity-40'
                 )}
                 disabled={!canCreate}
                 onPress={() => void handleCreate()}
@@ -1091,12 +1086,12 @@ const styles = {
   field: cn('mb-3'),
   label: cn('text-xs font-medium text-muted-foreground mb-1'),
   fieldButton: cn(
-    'flex-row items-center gap-2 bg-secondary px-3 py-2 ios:py-2.5 border border-border'
+    'border-border flex-row items-center gap-2 rounded-xl border bg-secondary px-3 py-2 ios:py-2.5'
   ),
   fieldButtonText: cn('flex-1 text-sm text-foreground'),
   repoDot: cn('w-2 h-2'),
-  disabled: cn('opacity-[0.55]'),
-  setupChoiceButton: cn('flex-1 items-center border border-border py-2'),
+  disabled: cn('opacity-60'),
+  setupChoiceButton: cn('border-border flex-1 items-center rounded-xl border py-2'),
   setupChoiceButtonSelected: cn('bg-card border-muted-foreground'),
   setupChoiceText: cn('text-xs font-semibold text-foreground')
 } as const

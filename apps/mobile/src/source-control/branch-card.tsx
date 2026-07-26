@@ -43,7 +43,7 @@ export function MobileSourceControlBranchCard({
 }: Props) {
   const showConflict = conflictOperation !== null && conflictOperation !== 'unknown'
   return (
-    <View className="bg-card border-hairline border-border m-4 mb-2 p-3">
+    <View className="border-hairline border-border bg-card m-4 mb-2 rounded-2xl p-3">
       <View className="flex-row items-center justify-between gap-3">
         <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <GitMerge size={15} colorClassName="accent-muted-foreground" />
@@ -65,8 +65,8 @@ export function MobileSourceControlBranchCard({
           {conflictOperation === 'merge' || conflictOperation === 'rebase' ? (
             <Pressable
               className={cn(
-                'min-h-8 px-3 py-1 border border-amber-500 bg-secondary items-center justify-center shrink-0',
-                conflictBusy && 'opacity-[0.45]',
+                'min-h-8 shrink-0 items-center justify-center rounded-xl border border-amber-500 bg-secondary px-3 py-1',
+                conflictBusy && 'opacity-50',
                 !conflictBusy && 'active:bg-accent'
               )}
               disabled={conflictBusy}

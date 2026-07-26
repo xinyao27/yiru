@@ -123,8 +123,8 @@ export function MobileNativeChatComposer({
   return (
     <View className="px-2 pb-2">
       {suggestions.length > 0 ? (
-        <View className="border-border bg-popover mb-2 max-h-[180px] overflow-hidden rounded-2xl border">
-          <ScrollView keyboardShouldPersistTaps="always" className="max-h-[180px]">
+        <View className="border-border bg-popover mb-2 max-h-44 overflow-hidden rounded-2xl border">
+          <ScrollView keyboardShouldPersistTaps="always" className="max-h-44">
             {suggestions.map((s) => (
               <Pressable
                 key={s}
@@ -155,7 +155,7 @@ export function MobileNativeChatComposer({
               ) : (
                 <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
               )}
-              <Text className="text-muted-foreground/60 text-xs font-semibold">
+              <Text className="text-muted-foreground text-xs font-semibold">
                 {toolsExpanded ? 'Collapse' : 'Tools'}
               </Text>
             </Pressable>
@@ -193,7 +193,7 @@ export function MobileNativeChatComposer({
             </Pressable>
           ) : null}
           <TextInput
-            className="text-foreground max-h-[140px] min-h-11 flex-1 rounded-2xl px-2.5 py-3 text-sm leading-5"
+            className="text-foreground max-h-36 min-h-11 flex-1 rounded-2xl px-2.5 py-3 text-sm leading-5"
             value={value}
             onChangeText={handleChange}
             // Controlled only transiently right after an autocomplete insert.

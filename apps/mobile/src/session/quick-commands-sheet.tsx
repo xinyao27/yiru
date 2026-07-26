@@ -146,7 +146,7 @@ export function QuickCommandsSheet({
           <View className={styles.backSpacer} />
         ) : (
           <Pressable
-            className="active:bg-accent h-[30px] w-[30px] items-center justify-center"
+            className="active:bg-accent h-8 w-8 items-center justify-center rounded-full"
             onPress={() => setView(view === 'agent' ? 'editor' : 'list')}
             accessibilityLabel="Back"
           >
@@ -215,5 +215,5 @@ export function QuickCommandsSheet({
 }
 
 const styles = {
-  backSpacer: cn('w-[30px]')
+  backSpacer: cn('w-8')
 } as const

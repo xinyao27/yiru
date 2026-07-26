@@ -1,11 +1,12 @@
 import type { GitBranchChangeEntry } from '@yiru/workbench-model/review'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
-import { spacing } from '../theme/uniwind-theme-values'
 import { useForceReconnect } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState, RpcSuccess } from '../transport/types'
@@ -35,6 +36,7 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
   bottomInset,
   refreshNonce = 0
 }: Props) {
+  const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   const forceReconnect = useForceReconnect()
   const [rows, setRows] = useState<MobileCommitRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -153,10 +155,7 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
               <Text className="text-foreground text-sm" numberOfLines={1}>
                 {item.subject}
               </Text>
-              <Text
-                className="text-muted-foreground/60 mt-[2px] font-mono text-xs"
-                numberOfLines={1}
-              >
+              <Text className="text-muted-foreground mt-0.5 font-mono text-xs" numberOfLines={1}>
                 {item.shortId} · {item.author} · {item.relativeTime}
               </Text>
             </View>
@@ -166,7 +165,7 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
               {files === 'loading' || files === undefined ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : files.length === 0 ? (
-                <Text className="text-muted-foreground/60 text-xs">No file changes</Text>
+                <Text className="text-muted-foreground text-xs">No file changes</Text>
               ) : (
                 files.map((file) => (
                   <View key={file.path} className="flex-row items-center gap-2">
@@ -177,13 +176,9 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
                       {file.path}
                     </Text>
                     <Text className="font-mono text-xs">
-                      {file.added ? (
-                        <Text className="text-[var(--git-decoration-added)]">+{file.added} </Text>
-                      ) : null}
+                      {file.added ? <Text className="text-git-added">+{file.added} </Text> : null}
                       {file.removed ? (
-                        <Text className="text-[var(--git-decoration-deleted)]">
-                          -{file.removed}
-                        </Text>
+                        <Text className="text-git-deleted">-{file.removed}</Text>
                       ) : null}
                     </Text>
                   </View>
@@ -210,7 +205,7 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
           {view.kind === 'waiting' ? 'Waiting for desktop...' : view.message}
         </Text>
         <Pressable
-          className="bg-secondary mt-3 px-4 py-2"
+          className="bg-secondary mt-3 rounded-xl px-4 py-2"
           onPress={retry}
           accessibilityLabel="Retry"
         >
@@ -238,12 +233,12 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
       data={view.rows}
       renderItem={renderCommit}
       keyExtractor={(row) => row.id}
-      contentContainerStyle={{ paddingBottom: spacing.lg + bottomInset }}
+      contentContainerStyle={{ paddingBottom: spacing4 + bottomInset }}
     />
   )
 })
 
 const styles = {
   state: cn('flex-1 items-center justify-center p-4'),
-  stateText: cn('text-muted-foreground/60 text-sm')
+  stateText: cn('text-muted-foreground text-sm')
 } as const

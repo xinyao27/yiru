@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
@@ -11,7 +11,6 @@ import {
   ScrollView
 } from 'react-native'
 
-import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { useForceReconnect, usePrimeHosts } from '../../../src/transport/client-context'
@@ -149,40 +148,43 @@ export default function EditHostScreen() {
   }
 
   return (
-    <View className="bg-background pt-safe-offset-2 flex-1">
-      <View className="flex-row items-center gap-2 px-3 pb-3">
-        <Pressable
-          className="h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground flex-1 text-sm font-bold">Edit host</Text>
-        <Pressable
-          className={cn(
-            'min-w-16 h-[34px] px-3 bg-primary items-center justify-center',
-            !canSave && 'opacity-[0.4]',
-            'active:bg-accent'
-          )}
-          onPress={() => void handleSave()}
-          disabled={!canSave}
-          accessibilityRole="button"
-          accessibilityLabel="Save host"
-        >
-          {saving ? (
-            <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-          ) : (
-            <Text className="text-primary-foreground text-sm font-semibold">Save</Text>
-          )}
-        </Pressable>
-      </View>
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          headerRight:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <Pressable
+                    className={cn('rounded-xl px-3 py-1.5', !canSave && 'opacity-40')}
+                    disabled={!canSave}
+                    onPress={() => void handleSave()}
+                  >
+                    <Text className="text-primary text-sm font-semibold">Save</Text>
+                  </Pressable>
+                )
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Save host"
+            disabled={!canSave}
+            onPress={() => void handleSave()}
+            variant="prominent"
+          >
+            Save
+          </Stack.Toolbar.Button>
+        </Stack.Toolbar>
+      ) : null}
 
       {loadError ? (
         <View className="flex-1 gap-3 px-4 pt-6">
           <Text className={styles.errorText}>{loadError}</Text>
-          <Pressable className="bg-secondary self-start px-3 py-2" onPress={() => router.back()}>
+          <Pressable
+            className="bg-secondary self-start rounded-xl px-3 py-2"
+            onPress={() => router.back()}
+          >
             <Text className="text-foreground text-sm font-medium">Go back</Text>
           </Pressable>
         </View>
@@ -199,7 +201,7 @@ export default function EditHostScreen() {
             contentContainerClassName="px-4 gap-2 pb-safe-offset-6"
             keyboardShouldPersistTaps="handled"
           >
-            <Text className="text-muted-foreground mb-2 text-sm leading-[20px]">
+            <Text className="text-muted-foreground mb-2 text-sm leading-5">
               Change the display name or connection address. Address edits only switch where this
               phone connects — they do not re-pair. Use this when the same desktop is reachable at a
               different IP (for example home LAN vs Tailscale).
@@ -243,7 +245,7 @@ export default function EditHostScreen() {
                 }
               }}
             />
-            <Text className="text-muted-foreground/60 text-xs leading-[16px]">
+            <Text className="text-muted-foreground text-xs leading-4">
               Accepts IP, host:port, or ws:// / wss://. Missing port defaults to the current port
               (or 6768).
             </Text>
@@ -268,7 +270,7 @@ export default function EditHostScreen() {
 }
 
 const styles = {
-  label: cn('text-muted-foreground text-xs font-medium mt-2 uppercase tracking-[0.4px]'),
-  input: cn('bg-card border border-border text-foreground text-sm px-3 py-2.5 ios:py-3'),
+  label: cn('text-muted-foreground text-xs font-medium mt-2 uppercase tracking-wide'),
+  input: cn('border-border bg-card text-foreground rounded-xl border px-3 py-2.5 text-sm ios:py-3'),
   errorText: cn('text-destructive text-sm mt-3')
 } as const

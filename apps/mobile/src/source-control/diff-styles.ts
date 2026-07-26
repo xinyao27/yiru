@@ -5,6 +5,6 @@ import { cn } from '@/style/class-names'
 export const diffStyles = {
   state: cn('flex-1 items-center justify-center p-6'),
   stateTitle: cn('text-foreground text-sm font-bold mb-1'),
-  stateText: cn('text-muted-foreground text-sm leading-[20px] text-center'),
+  stateText: cn('text-muted-foreground text-sm leading-5 text-center'),
   diffState: cn('min-h-40 items-center justify-center p-4')
 } as const

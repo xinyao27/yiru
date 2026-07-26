@@ -26,12 +26,12 @@ export function MobileHostCard(props: {
     : null
   return (
     <Pressable
-      className="bg-card border-border active:bg-accent flex-row items-center border px-3 py-3"
+      className="border-border active:bg-accent bg-card flex-row items-center rounded-2xl border px-3 py-3"
       onPress={props.onPress}
       onLongPress={props.onLongPress}
       delayLongPress={400}
     >
-      <View className="bg-secondary mr-3.5 h-[46px] w-[46px] items-center justify-center">
+      <View className="bg-secondary mr-3.5 h-12 w-12 items-center justify-center rounded-xl">
         <Monitor
           size={20}
           colorClassName={connected ? 'accent-foreground' : 'accent-muted-foreground'}
@@ -40,14 +40,14 @@ export function MobileHostCard(props: {
       <View className="mr-2 min-w-0 flex-1">
         <Text
           className={cn(
-            'text-foreground text-sm font-semibold leading-[20px]',
+            'text-foreground text-sm font-semibold leading-5',
             !connected && 'text-muted-foreground'
           )}
           numberOfLines={1}
         >
           {props.host.name}
         </Text>
-        <View className="mt-[3px] min-w-0 flex-row items-center gap-1.5">
+        <View className="mt-1 min-w-0 flex-row items-center gap-1.5">
           <StatusDot state={props.state} verdict={props.verdict} />
           <Text
             className={cn('flex-1 text-xs text-muted-foreground', isError && 'text-destructive')}
@@ -58,15 +58,12 @@ export function MobileHostCard(props: {
           </Text>
         </View>
         {connected && worktreeSummary ? (
-          <Text className="text-muted-foreground/60 mt-[2px] ml-6 text-xs" numberOfLines={1}>
+          <Text className="text-muted-foreground mt-0.5 ml-6 text-xs" numberOfLines={1}>
             {worktreeSummary}
           </Text>
         ) : null}
         {props.verdict.kind === 'unreachable' ? (
-          <Text
-            className="text-muted-foreground/60 mt-1 text-[11px] leading-[15px]"
-            numberOfLines={2}
-          >
+          <Text className="text-muted-foreground mt-1 text-xs leading-4" numberOfLines={2}>
             Check that this phone can reach the selected LAN or private-network address
           </Text>
         ) : null}

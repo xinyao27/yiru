@@ -45,20 +45,20 @@ export function SetupHookTrustDrawer({
                 ? `${prompt.repoName}'s setup script changed`
                 : `Run setup from ${prompt.repoName}?`}
             </Text>
-            <Text className="text-muted-foreground/60 mt-[2px] text-xs">
+            <Text className="text-muted-foreground mt-0.5 text-xs">
               This repository's yiru.yaml runs before the workspace starts. Only run it if you trust
               this repository.
             </Text>
           </View>
 
-          <View className="bg-secondary border-border mb-3 border p-3">
+          <View className="border-border bg-secondary mb-3 rounded-2xl border p-3">
             <Text className="text-muted-foreground mb-2 text-xs font-semibold">
               {prompt.previouslyApproved ? 'New setup script' : 'Setup script'}
             </Text>
             <Text className="text-foreground font-mono text-xs">{prompt.scriptContent}</Text>
           </View>
 
-          <View className="bg-card overflow-hidden">
+          <View className="bg-card overflow-hidden rounded-2xl">
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
               <Check size={16} colorClassName="accent-foreground" />
               <Text className={styles.trustActionText}>Run hooks</Text>

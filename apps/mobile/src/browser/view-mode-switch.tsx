@@ -21,7 +21,7 @@ export function MobileBrowserViewModeSwitch({
   onChange
 }: Props): React.JSX.Element {
   return (
-    <View className="bg-secondary min-h-7 flex-row items-center p-[2px]">
+    <View className="bg-secondary min-h-7 flex-row items-center overflow-hidden rounded-lg p-0.5">
       {VIEW_MODES.map((mode) => (
         <ViewModeButton
           key={mode.id}
@@ -49,10 +49,10 @@ function ViewModeButton({
   return (
     <Pressable
       className={cn(
-        'min-h-6 min-w-[52px] items-center justify-center px-2',
+        'min-h-6 min-w-13 items-center justify-center rounded-md px-2',
         selected && 'bg-accent',
         !disabled && !selected && 'active:bg-accent',
-        disabled && 'opacity-[0.35]'
+        disabled && 'opacity-40'
       )}
       disabled={disabled}
       onPress={onPress}

@@ -7,7 +7,7 @@ import { TerminalWindow as SquareTerminal } from '@/components/uniwind-icons'
 export function WorkspaceDetailPlaceholder() {
   return (
     <View className="bg-background flex-1 items-center justify-center px-6">
-      <View className="bg-card mb-4 h-14 w-14 items-center justify-center">
+      <View className="bg-card mb-4 h-14 w-14 items-center justify-center rounded-3xl">
         <SquareTerminal size={28} colorClassName="accent-muted-foreground" />
       </View>
       <Text className="text-foreground mb-1 text-sm font-semibold">No workspace open</Text>

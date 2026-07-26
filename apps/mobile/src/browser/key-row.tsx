@@ -16,9 +16,9 @@ export function MobileBrowserKeyRow({ disabled, onKeypress }: Props): React.JSX.
         <Pressable
           key={key}
           className={cn(
-            'min-h-[30px] min-w-[42px] items-center justify-center bg-secondary px-2',
+            'min-h-8 min-w-11 items-center justify-center rounded-lg bg-secondary px-2',
             'active:bg-accent',
-            disabled && 'opacity-[0.35]'
+            disabled && 'opacity-40'
           )}
           disabled={disabled}
           onPress={() => onKeypress(key)}
@@ -26,7 +26,7 @@ export function MobileBrowserKeyRow({ disabled, onKeypress }: Props): React.JSX.
           <Text
             className={cn(
               'text-muted-foreground text-xs font-mono',
-              disabled && 'text-muted-foreground/60'
+              disabled && 'text-muted-foreground'
             )}
           >
             {key === 'Backspace' ? '⌫' : key === 'Escape' ? 'Esc' : key}

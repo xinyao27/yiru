@@ -31,14 +31,14 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
           <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
             {entry.path}
           </Text>
-          <Text className="text-muted-foreground/60 mt-[2px] text-xs" numberOfLines={1}>
+          <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
             {branchDiffPreview.kind === 'ready'
               ? `${branchDiffPreview.summary.baseRef}..HEAD`
               : 'Committed on branch'}
           </Text>
         </View>
         <Pressable
-          className={cn('w-[34px] h-[34px] items-center justify-center', 'active:bg-accent')}
+          className={cn('w-9 h-9 items-center justify-center', 'active:bg-accent')}
           onPress={onClose}
           hitSlop={8}
           accessibilityLabel="Close committed diff preview"
@@ -58,7 +58,7 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
       ) : (
         <View className="pt-3 pb-4">
           {branchDiffPreview.truncated ? (
-            <Text className="text-muted-foreground/60 mb-2 text-xs">
+            <Text className="text-muted-foreground mb-2 text-xs">
               Diff truncated for mobile preview.
             </Text>
           ) : null}
@@ -66,18 +66,18 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
             <View
               key={`${index}:${line.kind}:${line.oldLineNumber ?? ''}:${line.newLineNumber ?? ''}`}
               className={cn(
-                'flex-row items-start gap-1 py-[2px] px-1',
-                line.kind === 'add' && 'bg-[var(--editor-diff-inserted-line-background)]',
-                line.kind === 'delete' && 'bg-[var(--editor-diff-removed-line-background)]'
+                'flex-row items-start gap-1 py-0.5 px-1',
+                line.kind === 'add' && 'bg-diff-inserted',
+                line.kind === 'delete' && 'bg-diff-removed'
               )}
             >
-              <Text className="text-muted-foreground/60 w-10 text-right font-mono text-xs">
+              <Text className="text-muted-foreground w-10 text-right font-mono text-xs">
                 {mobileDiffLineNumber(line)}
               </Text>
               <Text className="text-muted-foreground w-3 font-mono text-xs">
                 {mobileDiffLinePrefix(line.kind)}
               </Text>
-              <Text className="text-foreground flex-1 font-mono text-xs leading-[17px]">
+              <Text className="text-foreground flex-1 font-mono text-xs leading-5">
                 {line.text ? <MobileSyntaxSegments segments={line.segments} /> : ' '}
               </Text>
             </View>

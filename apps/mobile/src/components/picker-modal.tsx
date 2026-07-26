@@ -43,7 +43,7 @@ export function PickerModal<T extends string = string>({
   return (
     <BottomDrawer visible={visible} onClose={onClose} zIndex={zIndex}>
       <View className="px-1 pb-2">
-        <Text className="text-muted-foreground/60 text-xs font-medium">{title}</Text>
+        <Text className="text-muted-foreground text-xs font-medium">{title}</Text>
       </View>
 
       <PickerModalContent
@@ -67,7 +67,7 @@ function PickerModalContent<T extends string = string>({
   // Why: closed BottomDrawer instances return null, so keeping option rows in
   // this child avoids rebuilding hidden picker contents on every parent render.
   return (
-    <View className="bg-card overflow-hidden">
+    <View className="bg-card overflow-hidden rounded-2xl">
       {options.map((opt, i) => {
         const isSelected = opt.value === selected
         return (
@@ -78,7 +78,7 @@ function PickerModalContent<T extends string = string>({
               className={cn(
                 'flex-row items-center py-3 px-3.5',
                 !opt.disabled && 'active:bg-accent',
-                opt.disabled && 'opacity-[0.45]'
+                opt.disabled && 'opacity-50'
               )}
               onPress={() => {
                 if (opt.disabled) {
@@ -100,16 +100,14 @@ function PickerModalContent<T extends string = string>({
               }
             >
               {opt.renderIcon ? (
-                <View className="mr-2 w-[22px] items-center">{opt.renderIcon(isSelected)}</View>
+                <View className="mr-2 w-6 items-center">{opt.renderIcon(isSelected)}</View>
               ) : null}
               <View className="min-w-0 flex-1">
                 <Text className={cn('text-sm text-foreground', isSelected && 'font-semibold')}>
                   {opt.label}
                 </Text>
                 {opt.subtitle ? (
-                  <Text className="text-muted-foreground/60 mt-[1px] text-[11px]">
-                    {opt.subtitle}
-                  </Text>
+                  <Text className="text-muted-foreground mt-px text-xs">{opt.subtitle}</Text>
                 ) : null}
               </View>
               {isSelected && <Check size={16} colorClassName="accent-foreground" />}

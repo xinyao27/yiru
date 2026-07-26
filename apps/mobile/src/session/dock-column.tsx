@@ -41,7 +41,7 @@ export function SessionDockColumn({
       {/* Why: the invisible, elevated leaf overlay owns the border drag before
           the inner ScrollView can intercept it on Android. */}
       <View
-        className="absolute top-0 bottom-0 left-0 z-[20] w-6"
+        className="absolute top-0 bottom-0 left-0 z-20 w-6"
         style={{ elevation: 20 }}
         {...panHandlers}
       />

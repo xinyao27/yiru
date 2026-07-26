@@ -196,7 +196,7 @@ function NoteComposerDrawer({ controller }: Props) {
           </Pressable>
         </View>
         <TextInput
-          className="border-hairline border-border bg-card text-foreground min-h-28 p-3 text-sm leading-[20px]"
+          className="border-hairline border-border bg-card text-foreground min-h-28 rounded-2xl p-3 text-sm leading-5"
           style={{ textAlignVertical: 'top' }}
           value={controller.composerBody}
           onChangeText={controller.setComposerBody}
@@ -249,7 +249,7 @@ function SaveNoteButton({
   const disabled = controller.composerBody.trim().length === 0
   return (
     <Pressable
-      className={cn(styles.primaryButton, disabled && 'opacity-[0.45]', 'active:bg-accent')}
+      className={cn(styles.primaryButton, disabled && 'opacity-50', 'active:bg-accent')}
       disabled={disabled}
       onPress={() => void controller.saveComposer()}
       accessibilityRole="button"

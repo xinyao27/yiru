@@ -65,7 +65,7 @@ export function TerminalPaneView({
       // Why: inactive terminal WebViews stay mounted to preserve xterm state,
       // while touch and visibility are disabled until the tab is active again.
       pointerEvents={active ? 'auto' : 'none'}
-      className={cn('absolute inset-0', !active && 'opacity-[0]')}
+      className={cn('absolute inset-0', !active && 'opacity-0')}
       style={[keyboardLift > 0 && { transform: [{ translateY: -keyboardLift }] }]}
     >
       <TerminalWebView

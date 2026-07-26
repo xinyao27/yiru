@@ -21,9 +21,9 @@ export function MobileBrowserToolbarIconButton({
   return (
     <Pressable
       className={cn(
-        'w-[26px] h-[26px] items-center justify-center',
+        'h-7 w-7 items-center justify-center rounded-full',
         !disabled && 'active:bg-accent',
-        disabled && 'opacity-[0.35]'
+        disabled && 'opacity-40'
       )}
       style={style}
       disabled={disabled}

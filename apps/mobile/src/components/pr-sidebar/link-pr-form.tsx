@@ -61,7 +61,7 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
       </View>
       <Text className="text-muted-foreground mt-2 mb-1 text-xs">PR number or GitHub URL</Text>
       <TextInput
-        className="bg-secondary text-foreground px-3 py-2 text-sm"
+        className="bg-secondary text-foreground rounded-xl px-3 py-2 text-sm"
         value={input}
         onChangeText={setInput}
         placeholder="#123 or https://github.com/owner/repo/pull/123"
@@ -73,8 +73,8 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
       {error ? <Text className="text-destructive mt-3 text-xs">{error}</Text> : null}
       <Pressable
         className={cn(
-          'mt-4 min-h-[46px] bg-primary items-center justify-center',
-          (submitting || parsed === null) && 'opacity-[0.45]',
+          'mt-4 min-h-12 items-center justify-center rounded-xl bg-primary',
+          (submitting || parsed === null) && 'opacity-50',
           'active:bg-accent'
         )}
         disabled={submitting || parsed === null}

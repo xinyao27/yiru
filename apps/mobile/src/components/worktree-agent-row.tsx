@@ -27,7 +27,7 @@ export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
 
   return (
     <View
-      className="mt-[3px] flex-row items-center gap-1"
+      className="mt-1 flex-row items-center gap-1"
       style={[{ paddingLeft: depth * INDENT_PER_DEPTH }]}
     >
       <AgentStateDot state={dotState} />
@@ -36,14 +36,14 @@ export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
       {agent.agentType ? <MobileAgentIcon agentId={agent.agentType} size={13} /> : null}
       <Text
         className={cn(
-          'flex-1 text-[11px] text-muted-foreground/60',
+          'flex-1 text-xs text-muted-foreground',
           unvisited && 'text-foreground font-semibold'
         )}
         numberOfLines={1}
       >
         {label}
       </Text>
-      <Text className="text-muted-foreground/60 text-[10px]">{ts}</Text>
+      <Text className="text-muted-foreground text-xs">{ts}</Text>
     </View>
   )
 }

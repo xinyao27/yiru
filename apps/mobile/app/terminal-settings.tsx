@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, Pressable, Switch } from 'react-native'
 import Animated, {
@@ -8,7 +7,6 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import {
-  CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
   TextT as Type
@@ -126,8 +124,6 @@ function HostFitRow({
 }
 
 export default function TerminalSettingsScreen() {
-  const router = useRouter()
-
   const [hosts, setHosts] = useState<HostProfile[]>([])
   useEffect(() => {
     void loadHosts().then(setHosts)
@@ -260,17 +256,7 @@ export default function TerminalSettingsScreen() {
   )
 
   return (
-    <GestureHandlerRootView className="bg-background pt-safe-offset-2 flex-1 px-4 pt-0">
-      <View className="mt-2 mb-4 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">Terminal</Text>
-      </View>
-
+    <GestureHandlerRootView className="bg-background flex-1 px-4 pt-4">
       <Animated.ScrollView
         ref={scrollRef}
         contentContainerClassName="pb-6"
@@ -393,14 +379,14 @@ export default function TerminalSettingsScreen() {
 }
 
 const styles = {
-  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
-  groupDescription: cn('text-xs text-muted-foreground leading-[20px] px-1'),
-  section: cn('bg-card overflow-hidden'),
+  groupHeading: cn('text-xs font-semibold text-muted-foreground tracking-wide mb-1 px-1'),
+  groupDescription: cn('text-xs text-muted-foreground leading-5 px-1'),
+  section: cn('overflow-hidden rounded-2xl bg-card'),
   sectionTopGap: cn('mt-2'),
   inputGroupGap: cn('mt-6'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
   rowPressedActive: cn('active:bg-accent'),
   rowContent: cn('flex-1'),
   rowLabel: cn('text-sm font-medium text-foreground'),
-  rowSublabel: cn('text-xs text-muted-foreground mt-[2px]')
+  rowSublabel: cn('text-xs text-muted-foreground mt-0.5')
 } as const

@@ -30,7 +30,7 @@ export function ConfirmModal({
       <View className="pb-4">
         <Text className="text-foreground text-sm font-bold">{title}</Text>
         {message ? (
-          <Text className="text-muted-foreground mt-1 text-sm leading-[20px]">{message}</Text>
+          <Text className="text-muted-foreground mt-1 text-sm leading-5">{message}</Text>
         ) : null}
       </View>
       <View className="flex-row gap-2">
@@ -67,6 +67,6 @@ export function ConfirmModal({
 }
 
 const styles = {
-  button: cn('flex-1 py-2.5 items-center'),
+  button: cn('flex-1 items-center rounded-xl py-2.5'),
   pressedActive: cn('active:bg-accent')
 } as const

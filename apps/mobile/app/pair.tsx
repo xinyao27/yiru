@@ -45,10 +45,10 @@ export default function PairRedirectScreen() {
     <View className="bg-background flex-1 items-center justify-center p-4">
       {missingCode ? (
         <>
-          <Text className="text-destructive mb-6 text-center text-sm leading-[20px]">
+          <Text className="text-destructive mb-6 text-center text-sm leading-5">
             Missing pairing code
           </Text>
-          <Pressable className="bg-primary items-center px-6 py-2.5" onPress={goHome}>
+          <Pressable className="bg-primary items-center rounded-2xl px-6 py-2.5" onPress={goHome}>
             <Text className="text-primary-foreground text-sm font-semibold">Back to home</Text>
           </Pressable>
         </>

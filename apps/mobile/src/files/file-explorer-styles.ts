@@ -3,7 +3,7 @@ import { cn } from '@/style/class-names'
 export const fileExplorerStyles = {
   header: cn('bg-card border-b-hairline border-b-border'),
 
-  backButton: cn('w-9 h-9 items-center justify-center'),
+  backButton: cn('h-9 w-9 items-center justify-center rounded-full'),
   backButtonPressedActive: cn('active:bg-accent'),
 
   rowPressedActive: cn('active:bg-accent'),

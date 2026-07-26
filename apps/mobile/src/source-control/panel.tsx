@@ -1,7 +1,12 @@
+import { Stack } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native'
 
-import { SafeAreaView } from '@/components/uniwind-native-components'
+import {
+  ArrowClockwise as RefreshCw,
+  ArrowSquareOut as ExternalLink,
+  CaretLeft as ChevronLeft
+} from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { openMobilePrUrl } from '../components/pr-compose-sheet'
@@ -292,7 +297,7 @@ export function MobileSourceControlPanel({
         <Text className={styles.stateText}>{screenState.message}</Text>
         {screenState.kind === 'error' ? (
           <Pressable
-            className="bg-secondary mt-3 px-4 py-2"
+            className="bg-secondary mt-3 rounded-xl px-4 py-2"
             onPress={() => {
               // Why: retrying the request is useless while the transport's
               // reconnect loop is parked at its give-up cap — revive the
@@ -326,13 +331,77 @@ export function MobileSourceControlPanel({
 
   return (
     <View ref={setRootRef} className="bg-background flex-1">
-      {embedded ? (
-        <View className={styles.header}>{header}</View>
-      ) : (
-        <SafeAreaView className={styles.header} edges={['top']}>
-          {header}
-        </SafeAreaView>
-      )}
+      {!embedded ? (
+        <Stack.Screen
+          options={{
+            title: `Source Control · ${worktreeLabel}`,
+            headerLeft:
+              Platform.OS === 'ios'
+                ? undefined
+                : () => (
+                    <Pressable
+                      accessibilityLabel="Back"
+                      className="h-9 w-9 items-center justify-center rounded-full"
+                      onPress={() => router.back()}
+                    >
+                      <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
+                    </Pressable>
+                  ),
+            headerRight:
+              Platform.OS === 'ios'
+                ? undefined
+                : () => (
+                    <View className="flex-row items-center gap-1">
+                      {prWebUrl ? (
+                        <Pressable
+                          className="h-9 w-9 items-center justify-center rounded-full"
+                          onPress={() => openMobilePrUrl(prWebUrl)}
+                        >
+                          <ExternalLink size={18} colorClassName="accent-muted-foreground" />
+                        </Pressable>
+                      ) : null}
+                      <Pressable
+                        className="h-9 w-9 items-center justify-center rounded-full"
+                        disabled={ioBusy}
+                        onPress={onRefresh}
+                      >
+                        <RefreshCw size={18} colorClassName="accent-muted-foreground" />
+                      </Pressable>
+                    </View>
+                  )
+          }}
+        />
+      ) : null}
+      {!embedded && Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Back"
+            icon="chevron.left"
+            onPress={() => router.back()}
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {!embedded && Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel={
+              prWebNumber != null
+                ? `Open pull request #${prWebNumber} on the web`
+                : 'Open pull request on the web'
+            }
+            hidden={!prWebUrl}
+            icon="arrow.up.right.square"
+            onPress={prWebUrl ? () => openMobilePrUrl(prWebUrl) : undefined}
+          />
+          <Stack.Toolbar.Button
+            accessibilityLabel="Refresh source control"
+            disabled={ioBusy}
+            icon="arrow.clockwise"
+            onPress={onRefresh}
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {embedded ? <View className={styles.header}>{header}</View> : null}
 
       <MobileSourceControlSegments active={activeTab} onSelect={selectTab} />
 

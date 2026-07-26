@@ -83,7 +83,7 @@ export function MobileDiffReviewBody({
           />
         )
       }}
-      contentContainerClassName="pb-[140px] bg-[var(--editor-surface)]"
+      contentContainerClassName="pb-36 bg-editor-surface"
       onScrollToIndexFailed={(info) => {
         listRef.current?.scrollToOffset({
           offset: Math.max(0, info.averageItemLength * info.index),
@@ -92,7 +92,7 @@ export function MobileDiffReviewBody({
       }}
       ListFooterComponent={
         diffState.truncated ? (
-          <Text className="text-muted-foreground/60 p-3 text-center text-xs">
+          <Text className="text-muted-foreground p-3 text-center text-xs">
             Diff truncated for mobile preview.
           </Text>
         ) : null
@@ -152,11 +152,11 @@ function CenteredState({
       {title ? (
         <Text className="text-foreground text-center text-sm font-bold">{title}</Text>
       ) : null}
-      <Text className="text-muted-foreground text-center text-sm leading-[20px]">{text}</Text>
+      <Text className="text-muted-foreground text-center text-sm leading-5">{text}</Text>
       {onRetry ? (
         <Pressable
           className={cn(
-            'min-h-11 flex-row items-center gap-1 px-3 bg-secondary',
+            'min-h-11 flex-row items-center gap-1 rounded-xl bg-secondary px-3',
             'active:bg-accent'
           )}
           onPress={onRetry}

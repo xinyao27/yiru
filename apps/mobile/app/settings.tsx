@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from 'react'
 import { View, Text, Pressable, Linking, ActivityIndicator, ScrollView } from 'react-native'
 
 import {
-  CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
   Info,
   Bell,
@@ -87,17 +86,7 @@ export default function SettingsScreen() {
   const showCredentialCleanup = pendingCredentialCount > 0 || credentialStorageUnreadable
 
   return (
-    <View className="bg-background pt-safe-offset-2 flex-1 px-4">
-      <View className="mb-6 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">Settings</Text>
-      </View>
-
+    <View className="bg-background flex-1 px-4 pt-4">
       <ScrollView contentContainerClassName="pb-safe-offset-4" showsVerticalScrollIndicator={false}>
         <View className={styles.section}>
           <Pressable
@@ -174,7 +163,7 @@ export default function SettingsScreen() {
                 </Text>
                 <Text
                   accessibilityLiveRegion="polite"
-                  className="text-muted-foreground text-xs leading-[17px]"
+                  className="text-muted-foreground text-xs leading-5"
                 >
                   {credentialRetryFailed
                     ? "Cleanup still couldn't be confirmed. Try again later."
@@ -193,7 +182,7 @@ export default function SettingsScreen() {
                 disabled={retryingCredentialCleanup}
                 hitSlop={8}
                 className={cn(
-                  'w-18 h-8 bg-secondary items-center justify-center',
+                  'w-18 h-8 items-center justify-center rounded-xl bg-secondary',
                   !retryingCredentialCleanup && styles.rowPressedActive
                 )}
                 onPress={() => void retryCredentialCleanup()}
@@ -231,7 +220,7 @@ export default function SettingsScreen() {
 }
 
 const styles = {
-  section: cn('bg-card overflow-hidden'),
+  section: cn('overflow-hidden rounded-2xl bg-card'),
   sectionSpacer: cn('mt-3'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
   rowPressedActive: cn('active:bg-accent'),

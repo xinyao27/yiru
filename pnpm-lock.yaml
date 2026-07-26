@@ -986,9 +986,9 @@ importers:
       buffer:
         specifier: catalog:mobile
         version: 6.0.3
-      clsx:
-        specifier: catalog:mobile
-        version: 2.1.1
+      cnfast:
+        specifier: 'catalog:'
+        version: 0.0.8
       expo:
         specifier: catalog:mobile
         version: 55.0.27(c2c88c7cc3326de0141408f15eb3e6fa)
@@ -1103,9 +1103,6 @@ importers:
       react-native-worklets:
         specifier: catalog:mobile
         version: 0.8.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(react-native@0.83.9(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.14)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6)(supports-color@8.1.1)
-      tailwind-merge:
-        specifier: catalog:mobile
-        version: 3.5.0
       tailwindcss:
         specifier: catalog:mobile
         version: 4.3.3

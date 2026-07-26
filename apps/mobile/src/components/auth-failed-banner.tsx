@@ -40,6 +40,6 @@ export function AuthFailedBanner({
 }
 
 const styles = {
-  action: cn('py-1'),
+  action: cn('rounded-xl px-2 py-1'),
   actionText: cn('text-primary text-xs font-semibold')
 } as const

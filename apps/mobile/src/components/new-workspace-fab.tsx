@@ -1,5 +1,6 @@
 import { Pressable } from 'react-native'
 
+import { MobileGlassSurface } from '@/components/glass/surface'
 import { Plus } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
@@ -8,24 +9,26 @@ type NewWorkspaceFabProps = {
   disabled?: boolean
 }
 
-// Phone-only floating "+" for creating a workspace. Absolutely positioned so it
-// never intercepts list row taps, and lifted above the home indicator.
 export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): React.JSX.Element {
   return (
-    <Pressable
+    <MobileGlassSurface
       className={cn(
-        'absolute right-4 w-12 h-12 items-center justify-center bg-primary',
-        'active:bg-accent',
-        'bottom-safe-offset-6',
-        disabled && 'opacity-[0.5]'
+        'bottom-safe-offset-6 absolute right-4 h-12 w-12 overflow-hidden rounded-full',
+        disabled && 'opacity-50'
       )}
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel="New workspace"
-      hitSlop={8}
+      isInteractive={!disabled}
+      tintColorClassName="accent-accent"
     >
-      <Plus size={24} weight="regular" colorClassName="accent-primary-foreground" />
-    </Pressable>
+      <Pressable
+        accessibilityLabel="New workspace"
+        accessibilityRole="button"
+        className="active:bg-accent h-full w-full items-center justify-center"
+        disabled={disabled}
+        hitSlop={8}
+        onPress={onPress}
+      >
+        <Plus size={24} weight="regular" colorClassName="accent-foreground" />
+      </Pressable>
+    </MobileGlassSurface>
   )
 }

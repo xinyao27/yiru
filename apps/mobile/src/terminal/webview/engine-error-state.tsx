@@ -79,9 +79,9 @@ export function TerminalWebViewEngineErrorOverlay({
   onReload
 }: TerminalWebViewEngineErrorOverlayProps) {
   return (
-    <View className="absolute inset-0 items-center justify-center gap-3 bg-[var(--terminal-background)] p-6">
+    <View className="bg-terminal-surface absolute inset-0 items-center justify-center gap-3 p-6">
       <Text className="text-foreground text-center text-sm font-bold">Terminal failed to load</Text>
-      <Text className="text-muted-foreground text-center text-xs leading-[18px]" numberOfLines={4}>
+      <Text className="text-muted-foreground text-center text-xs leading-5" numberOfLines={4}>
         {message}
       </Text>
       <Pressable

@@ -54,30 +54,30 @@ export default function NotificationOptInScreen() {
       {/* Why: this screen cannot be dismissed with Back, so scrolling keeps
           every decision reachable in landscape and at large text sizes. */}
       <ScrollView contentContainerClassName="grow" showsVerticalScrollIndicator={false}>
-        <View className="min-h-[52px] flex-row items-center gap-2">
-          <YiruLogo size={22} />
+        <View className="min-h-13 flex-row items-center gap-2">
+          <YiruLogo size={22} colorClassName="accent-foreground" />
           <Text className="text-foreground text-sm font-bold">Yiru</Text>
         </View>
 
         <View className="grow items-center justify-center py-6">
-          <View className="bg-secondary mb-6 h-16 w-16 items-center justify-center">
+          <View className="bg-secondary mb-6 h-16 w-16 items-center justify-center rounded-3xl">
             <BellRing size={30} colorClassName="accent-foreground" />
           </View>
-          <Text className="text-muted-foreground/60 mb-2 text-[11px] font-semibold tracking-[0.55px] uppercase">
+          <Text className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
             Notifications
           </Text>
-          <Text className="text-foreground max-w-[420px] text-center text-sm font-bold tracking-[-0.3px]">
+          <Text className="text-foreground max-w-md text-center text-sm font-bold tracking-tight">
             Stay updated while away
           </Text>
-          <Text className="text-muted-foreground mt-3 max-w-[420px] text-center text-sm leading-[21px]">
+          <Text className="text-muted-foreground mt-3 max-w-md text-center text-sm leading-5">
             Get notified on this device when an agent needs your input or finishes a task.
           </Text>
         </View>
 
-        <View className="w-full max-w-[420px] self-center pb-4">
+        <View className="w-full max-w-md self-center pb-4">
           {error ? (
             <Text
-              className="text-destructive mb-2 text-center text-xs leading-[18px]"
+              className="text-destructive mb-2 text-center text-xs leading-5"
               accessibilityRole="alert"
             >
               {error}
@@ -88,7 +88,7 @@ export default function NotificationOptInScreen() {
             accessibilityLabel="Enable agent notifications"
             disabled={busyChoice !== null}
             className={cn(
-              'min-h-11 items-center justify-center bg-primary py-2',
+              'min-h-11 items-center justify-center rounded-2xl bg-primary py-2',
               styles.buttonPressedActive,
               busyChoice !== null && styles.buttonDisabled
             )}
@@ -106,7 +106,7 @@ export default function NotificationOptInScreen() {
             accessibilityRole="button"
             disabled={busyChoice !== null}
             className={cn(
-              'min-h-11 items-center justify-center mt-1 py-2',
+              'mt-1 min-h-11 items-center justify-center rounded-2xl py-2',
               styles.buttonPressedActive,
               busyChoice !== null && styles.buttonDisabled
             )}
@@ -118,7 +118,7 @@ export default function NotificationOptInScreen() {
               <Text className="text-muted-foreground text-sm font-medium">Not now</Text>
             )}
           </Pressable>
-          <Text className="text-muted-foreground/60 mt-2 text-center text-xs leading-[18px]">
+          <Text className="text-muted-foreground mt-2 text-center text-xs leading-5">
             You can change this any time in Settings.
           </Text>
         </View>
@@ -129,5 +129,5 @@ export default function NotificationOptInScreen() {
 
 const styles = {
   buttonPressedActive: cn('active:bg-accent'),
-  buttonDisabled: cn('opacity-[0.58]')
+  buttonDisabled: cn('opacity-60')
 } as const

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { useCSSVariable } from 'uniwind'
 
 import { useMobileGlassAvailable } from '../components/glass/availability'
 import { MobileGlassGroup } from '../components/glass/group'
@@ -8,8 +7,6 @@ import { MobileGlassSurface } from '../components/glass/surface'
 import { ArrowUp, Plus } from '../components/uniwind-icons'
 
 export function MobileUiLabGlassCatalog(): React.JSX.Element {
-  const primaryValue = useCSSVariable('--color-primary')
-  const primary = typeof primaryValue === 'string' ? primaryValue : undefined
   const isGlassAvailable = useMobileGlassAvailable()
   const [previewPresses, setPreviewPresses] = useState(0)
 
@@ -42,7 +39,7 @@ export function MobileUiLabGlassCatalog(): React.JSX.Element {
           <MobileGlassSurface
             className="h-11 w-11 overflow-hidden rounded-full"
             isInteractive
-            tintColor={primary}
+            tintColorClassName="accent-primary"
           >
             <Pressable
               accessibilityLabel="Preview prominent glass action"

@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState, useCallback } from 'react'
 import {
   View,
@@ -10,13 +10,7 @@ import {
   Alert
 } from 'react-native'
 
-import {
-  CaretLeft as ChevronLeft,
-  Check,
-  ArrowClockwise as RefreshCw,
-  User
-} from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
+import { Check, User } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import {
@@ -36,8 +30,6 @@ import type { RpcSuccess } from '../../../src/transport/types'
 import { styles } from './accounts-screen-styles'
 
 export default function AccountsScreen() {
-  const router = useRouter()
-
   const { hostId } = useLocalSearchParams<{ hostId: string }>()
 
   // Why: shared client per host. See docs/mobile-shared-client-per-host.md.
@@ -157,11 +149,11 @@ export default function AccountsScreen() {
       <View className="mb-6">
         <View className="mb-2 flex-row items-center gap-2">
           <Icon size={14} />
-          <Text className="text-muted-foreground text-xs font-semibold tracking-[0.5px] uppercase">
+          <Text className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             {title}
           </Text>
         </View>
-        <View className="bg-card overflow-hidden">
+        <View className="bg-card overflow-hidden rounded-2xl">
           {/* System default row */}
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
@@ -264,31 +256,16 @@ export default function AccountsScreen() {
   }
 
   return (
-    <SafeAreaView className="bg-background flex-1" edges={['top']}>
-      <View className="flex-row items-center gap-2 px-3 pt-2 pb-2">
-        <Pressable className="h-9 w-9 items-center justify-center" onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-foreground" />
-        </Pressable>
-        <View className="flex-1">
-          <Text className="text-foreground text-sm font-bold">Accounts</Text>
-          {hostName ? (
-            <Text className="text-muted-foreground mt-[1px] text-xs" numberOfLines={1}>
-              {hostName}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          className="h-9 w-9 items-center justify-center"
-          onPress={refresh}
+    <View className="bg-background flex-1">
+      <Stack.Screen options={{ title: hostName ? `Accounts · ${hostName}` : 'Accounts' }} />
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          accessibilityLabel="Refresh accounts"
           disabled={!client || refreshing || connState !== 'connected'}
-        >
-          {refreshing ? (
-            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-          ) : (
-            <RefreshCw size={18} colorClassName="accent-muted-foreground" />
-          )}
-        </Pressable>
-      </View>
+          icon="arrow.clockwise"
+          onPress={refresh}
+        />
+      </Stack.Toolbar>
 
       <ScrollView
         contentContainerClassName={cn('px-4 pt-2', 'pb-safe-offset-6')}
@@ -320,13 +297,13 @@ export default function AccountsScreen() {
             {renderProviderSection('codex', 'Codex')}
             <View className="flex-row items-start gap-2 px-2 pt-2">
               <User size={14} colorClassName="accent-muted-foreground" />
-              <Text className="text-muted-foreground/60 flex-1 text-xs leading-[18px]">
+              <Text className="text-muted-foreground flex-1 text-xs leading-5">
                 Add or re-authenticate accounts from desktop Settings → Accounts.
               </Text>
             </View>
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }

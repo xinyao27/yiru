@@ -1,4 +1,6 @@
-import { colors } from '../../theme/uniwind-theme-values'
+// Why: the terminal document paints before React can deliver its live theme;
+// this bootstrap value prevents a white WebView flash, then set-theme takes over.
+export const TERMINAL_BOOTSTRAP_BACKGROUND = '#1a1b26'
 
 // Theme normalization and page-surface painting injected into the WebView IIFE.
 export const TERMINAL_WEBVIEW_THEME_JS = `
@@ -19,7 +21,7 @@ export const TERMINAL_WEBVIEW_THEME_JS = `
   function applyTerminalTheme(input) {
     terminalThemeInput = input;
     terminalTheme = normalizeTerminalTheme(input);
-    var background = terminalTheme.background || '${colors.terminalBg}';
+    var background = terminalTheme.background || '${TERMINAL_BOOTSTRAP_BACKGROUND}';
     document.documentElement.style.background = background;
     document.body.style.background = background;
     if (term) term.options.theme = terminalTheme;

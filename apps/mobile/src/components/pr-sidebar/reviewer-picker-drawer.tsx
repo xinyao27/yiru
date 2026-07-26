@@ -94,7 +94,7 @@ export function ReviewerPickerDrawer({
     <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
       <Text className="text-foreground mb-2 text-sm font-bold">Reviewers</Text>
       <TextInput
-        className="border-hairline border-border bg-card text-foreground mb-2 min-h-10 px-3 text-sm"
+        className="border-hairline border-border bg-card text-foreground mb-2 min-h-10 rounded-xl px-3 text-sm"
         value={query}
         onChangeText={setQuery}
         placeholder="Search people"

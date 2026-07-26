@@ -1,8 +1,6 @@
-import { useRouter, useFocusEffect } from 'expo-router'
+import { useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect } from 'react'
 import { AppState, Linking, View, Text, Pressable, Switch } from 'react-native'
-
-import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
 
 import {
   ensureNotificationPermissions,
@@ -22,8 +20,6 @@ const DEFAULT_PERMISSION_STATE: NotificationPermissionState = {
 }
 
 export default function NotificationsScreen() {
-  const router = useRouter()
-
   const [pushEnabled, setPushEnabled] = useState(false)
   const [permissionState, setPermissionState] = useState(DEFAULT_PERMISSION_STATE)
 
@@ -73,18 +69,8 @@ export default function NotificationsScreen() {
     : 'Get notified on this device when an agent needs your input or finishes a task.'
 
   return (
-    <View className="bg-background pt-safe-offset-2 flex-1 p-4">
-      <View className="mb-6 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">Notifications</Text>
-      </View>
-
-      <View className="bg-card overflow-hidden">
+    <View className="bg-background flex-1 p-4">
+      <View className="bg-card overflow-hidden rounded-2xl">
         <View className="flex-row items-center gap-2.5 px-3.5 py-3">
           <Text className="text-foreground flex-1 text-sm font-medium">Agent notifications</Text>
           <Switch
@@ -97,10 +83,10 @@ export default function NotificationsScreen() {
             ios_backgroundColorClassName="accent-secondary"
           />
         </View>
-        <Text className="text-muted-foreground/60 px-3.5 pb-3 text-xs leading-[18px]">{hint}</Text>
+        <Text className="text-muted-foreground px-3.5 pb-3 text-xs leading-5">{hint}</Text>
         {notificationsBlocked && (
           <Pressable
-            className="bg-secondary active:bg-accent mx-3.5 mb-3 self-start px-2 py-1"
+            className="active:bg-accent bg-secondary mx-3.5 mb-3 self-start rounded-xl px-2 py-1"
             onPress={() => void Linking.openSettings()}
           >
             <Text className="text-foreground text-xs font-semibold">Open Settings</Text>

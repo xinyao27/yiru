@@ -27,18 +27,18 @@ type Props = {
 function statusColorClassName(status: MobileDiffReviewQueueItem['status']): string {
   switch (status) {
     case 'added':
-      return 'text-[var(--git-decoration-added)] border-[var(--git-decoration-added)]'
+      return 'text-git-added border-git-added'
     case 'copied':
-      return 'text-[var(--git-decoration-copied)] border-[var(--git-decoration-copied)]'
+      return 'text-git-copied border-git-copied'
     case 'deleted':
-      return 'text-[var(--git-decoration-deleted)] border-[var(--git-decoration-deleted)]'
+      return 'text-git-deleted border-git-deleted'
     case 'renamed':
-      return 'text-[var(--git-decoration-renamed)] border-[var(--git-decoration-renamed)]'
+      return 'text-git-renamed border-git-renamed'
     case 'untracked':
-      return 'text-[var(--git-decoration-untracked)] border-[var(--git-decoration-untracked)]'
+      return 'text-git-untracked border-git-untracked'
     case 'modified':
     default:
-      return 'text-[var(--git-decoration-modified)] border-[var(--git-decoration-modified)]'
+      return 'text-git-modified border-git-modified'
   }
 }
 
@@ -58,7 +58,10 @@ export function MobileDiffReviewFileSummary({
     <View className="bg-background border-b-hairline border-b-border px-4 pt-3 pb-2">
       <View className="flex-row items-center gap-2">
         <View
-          className={cn('w-7 h-7 border-hairline items-center justify-center', badgeColorClassName)}
+          className={cn(
+            'border-hairline h-7 w-7 items-center justify-center rounded-lg',
+            badgeColorClassName
+          )}
         >
           <Text className={cn('text-xs font-extrabold', badgeColorClassName)}>
             {MOBILE_GIT_STATUS_LABELS[item.status]}
@@ -99,14 +102,14 @@ export function MobileDiffReviewFileSummary({
             <Pressable
               key={note.id}
               className={cn(
-                'min-h-11 p-2 bg-card border-hairline border-border',
+                'border-hairline border-border bg-card min-h-11 rounded-xl p-2',
                 'active:bg-accent'
               )}
               onPress={() => onEditNote(note)}
               accessibilityRole="button"
               accessibilityLabel="Edit file note"
             >
-              <Text className="text-muted-foreground text-xs leading-[17px]" numberOfLines={2}>
+              <Text className="text-muted-foreground text-xs leading-5" numberOfLines={2}>
                 {note.body}
               </Text>
               {staleCommentIds.has(note.id) ? (

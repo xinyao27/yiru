@@ -125,10 +125,8 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         title="Comments"
         trailing={
           comments.length > 0 ? (
-            <View className="border-hairline border-border bg-secondary px-2 py-[1px]">
-              <Text className="text-muted-foreground text-[11px] font-semibold">
-                {comments.length}
-              </Text>
+            <View className="border-hairline border-border bg-secondary rounded-full px-2 py-px">
+              <Text className="text-muted-foreground text-xs font-semibold">{comments.length}</Text>
             </View>
           ) : undefined
         }
@@ -144,7 +142,7 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
             ) : (
               <>
                 {isPr ? (
-                  <View className="border-hairline border-border bg-background flex-row gap-[2px] p-[2px]">
+                  <View className="border-hairline border-border bg-background flex-row gap-0.5 overflow-hidden rounded-xl p-0.5">
                     {PR_COMMENT_AUDIENCE_FILTERS.map((tab) => {
                       const active = tab.value === filter
                       return (
@@ -192,7 +190,7 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                     ))}
                     {remaining > 0 ? (
                       <Pressable
-                        className="border-hairline border-border bg-card min-h-10 items-center justify-center"
+                        className="border-hairline border-border bg-card min-h-10 items-center justify-center rounded-xl"
                         onPress={() => setLimit((l) => l + COMMENT_PAGE)}
                         accessibilityRole="button"
                       >
@@ -255,7 +253,7 @@ function CommentGroupView({
   return (
     <View className={styles.group}>
       <Pressable
-        className="border-hairline border-border bg-card flex-row items-center gap-2 px-3 py-2"
+        className="border-hairline border-border bg-card flex-row items-center gap-2 rounded-2xl px-3 py-2"
         onPress={() => setExpanded((v) => !v)}
         accessibilityRole="button"
       >

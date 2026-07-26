@@ -7,8 +7,10 @@ const baseStyles = {
   header: cn('bg-card border-b-hairline border-b-border'),
   refreshButton: cn('w-9 h-9 items-center justify-center ml-1'),
   countText: cn('text-muted-foreground text-xs'),
-  bulkButton: cn('flex-1 min-h-9 bg-secondary items-center justify-center flex-row gap-1'),
-  bulkButtonDisabled: cn('opacity-[0.45]'),
+  bulkButton: cn(
+    'min-h-9 flex-1 flex-row items-center justify-center gap-1 rounded-xl bg-secondary'
+  ),
+  bulkButtonDisabled: cn('opacity-50'),
   bulkButtonText: cn('text-foreground text-sm font-semibold')
 } as const
 

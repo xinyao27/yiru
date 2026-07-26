@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useRouter, useFocusEffect } from 'expo-router'
+import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, Pressable, FlatList, Alert } from 'react-native'
+import { View, Text, Pressable, FlatList, Alert, Platform } from 'react-native'
 
 import {
   QrCode,
@@ -13,7 +13,6 @@ import {
   Power as PowerOff,
   PencilSimple as Edit3
 } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
 import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
@@ -31,7 +30,6 @@ import { ActionSheetModal, type ActionSheetAction } from '../src/components/acti
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
 import { MobileHostCard } from '../src/components/host-card'
-import { YiruLogo } from '../src/components/yiru-logo'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
@@ -585,22 +583,31 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="bg-background flex-1" edges={['top']}>
-      {/* ─── Top bar ─── */}
-      <View className="flex-row items-center justify-between px-4 pt-2 pb-3">
-        <View className="min-w-0 flex-row items-center">
-          <View className="mr-2">
-            <YiruLogo size={18} />
-          </View>
-          <Text className="text-foreground text-sm font-bold">Yiru</Text>
-        </View>
-        <Pressable
-          className="active:bg-accent h-9 w-9 items-center justify-center"
-          onPress={() => router.push('/settings')}
-        >
-          <Settings size={18} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      </View>
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          headerRight:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <Pressable
+                    className="h-9 w-9 items-center justify-center rounded-full"
+                    onPress={() => router.push('/settings')}
+                  >
+                    <Settings size={18} colorClassName="accent-muted-foreground" />
+                  </Pressable>
+                )
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Settings"
+            icon="gearshape"
+            onPress={() => router.push('/settings')}
+          />
+        </Stack.Toolbar>
+      ) : null}
 
       {hosts.length === 0 ? (
         /* ─── Empty state: onboarding ─── */
@@ -616,12 +623,12 @@ export default function HomeScreen() {
             <Text className="text-foreground mb-2.5 text-center text-sm font-bold">
               Connect your desktop
             </Text>
-            <Text className="text-muted-foreground mb-8 text-center text-sm leading-[22px]">
+            <Text className="text-muted-foreground mb-8 text-center text-sm leading-6">
               Pair with Yiru on your computer to check on your agents, jump into any terminal, and
               drive work from your phone.
             </Text>
             <Pressable
-              className="bg-primary flex-row items-center gap-2.5 px-7 py-3.5"
+              className="bg-primary flex-row items-center gap-2.5 rounded-2xl px-7 py-3.5"
               onPress={() => router.push('/pair-scan')}
             >
               <QrCode size={17} colorClassName="accent-primary-foreground" />
@@ -639,16 +646,12 @@ export default function HomeScreen() {
                   i > 0 && 'border-t border-t-border'
                 )}
               >
-                <View className="border-border bg-secondary mt-[1px] h-7 w-7 items-center justify-center border">
+                <View className="border-border bg-secondary mt-px h-7 w-7 items-center justify-center rounded-full border">
                   <Text className="text-muted-foreground text-xs font-bold">{i + 1}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-foreground mb-[3px] text-sm font-semibold">
-                    {step.title}
-                  </Text>
-                  <Text className="text-muted-foreground/60 text-xs leading-[17px]">
-                    {step.desc}
-                  </Text>
+                  <Text className="text-foreground mb-1 text-sm font-semibold">{step.title}</Text>
+                  <Text className="text-muted-foreground text-xs leading-5">{step.desc}</Text>
                 </View>
               </View>
             ))}
@@ -671,7 +674,7 @@ export default function HomeScreen() {
           ListHeaderComponent={
             <View>
               <View className="pt-1 pb-3">
-                <Text className="text-foreground text-sm font-extrabold tracking-[-0.3px]">
+                <Text className="text-foreground text-sm font-extrabold tracking-tight">
                   Welcome back
                 </Text>
               </View>
@@ -739,7 +742,7 @@ export default function HomeScreen() {
                   <Text className={cn(styles.sectionHeading, 'mt-4')}>Resume</Text>
                   <Pressable
                     className={cn(
-                      'flex-row items-center bg-card border border-border pl-3 pr-3 py-3',
+                      'border-border flex-row items-center rounded-2xl border bg-card py-3 pr-3 pl-3',
                       styles.hostCardPressedActive
                     )}
                     onPress={() =>
@@ -748,16 +751,16 @@ export default function HomeScreen() {
                       )
                     }
                   >
-                    <View className="bg-secondary mr-3.5 h-[46px] w-[46px] items-center justify-center">
+                    <View className="bg-secondary mr-3.5 h-12 w-12 items-center justify-center rounded-xl">
                       <Terminal size={18} colorClassName="accent-muted-foreground" />
                     </View>
                     <View className="min-w-0 flex-1">
                       <Text className="text-foreground text-xs font-semibold" numberOfLines={1}>
                         {resumeWorktree.worktree.displayName}
                       </Text>
-                      <View className="mt-[3px] flex-row items-center gap-1.5">
+                      <View className="mt-1 flex-row items-center gap-1.5">
                         <View
-                          className="h-[7px] w-[7px]"
+                          className="h-2 w-2"
                           style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
                         />
                         <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
@@ -788,7 +791,7 @@ export default function HomeScreen() {
                   disabled={!primaryConnectedHost}
                   className={cn(
                     styles.quickAction,
-                    !primaryConnectedHost && 'opacity-[0.45]',
+                    !primaryConnectedHost && 'opacity-50',
                     styles.hostCardPressedActive
                   )}
                   onPress={() => {
@@ -820,14 +823,14 @@ export default function HomeScreen() {
                       <Pressable
                         key={host.id}
                         className={cn(
-                          'bg-card border border-border px-3 py-2.5 gap-2 mb-2',
+                          'border-border mb-2 gap-2 rounded-2xl border bg-card px-3 py-2.5',
                           styles.hostCardPressedActive
                         )}
                         onPress={() => router.push(`/h/${host.id}/accounts`)}
                       >
                         {showHostName ? (
                           <Text
-                            className="text-muted-foreground/60 text-[11px] font-medium tracking-[0.4px] uppercase"
+                            className="text-muted-foreground text-xs font-medium tracking-wide uppercase"
                             numberOfLines={1}
                           >
                             {host.name}
@@ -851,14 +854,14 @@ export default function HomeScreen() {
                           const weeklyBar = getUsageBarState(limits, 'weekly')
                           return (
                             <View key={provider} className="flex-row items-center gap-2.5">
-                              <View className="bg-secondary h-8 w-8 items-center justify-center">
+                              <View className="bg-secondary h-8 w-8 items-center justify-center rounded-lg">
                                 {provider === 'claude' ? (
                                   <ClaudeIcon size={18} />
                                 ) : (
                                   <OpenAIIcon size={18} colorClassName="accent-foreground" />
                                 )}
                               </View>
-                              <View className="min-w-0 flex-1 gap-[2px]">
+                              <View className="min-w-0 flex-1 gap-0.5">
                                 <Text
                                   className="text-foreground text-xs font-semibold"
                                   numberOfLines={1}
@@ -965,7 +968,7 @@ export default function HomeScreen() {
         onConfirm={() => void handleRemove()}
         onCancel={() => setConfirmRemove(null)}
       />
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -989,16 +992,18 @@ const ONBOARDING_STEPS = [
 ]
 
 const styles = {
-  statCard: cn('flex-1 bg-card border border-border py-2 px-3'),
-  statValue: cn('text-foreground text-sm font-bold tracking-[-0.3px]'),
-  statLabel: cn('text-muted-foreground/60 text-[11px] font-medium mt-[2px]'),
+  statCard: cn('border-border flex-1 rounded-2xl border bg-card px-3 py-2'),
+  statValue: cn('text-foreground text-sm font-bold tracking-tight'),
+  statLabel: cn('text-muted-foreground text-xs font-medium mt-0.5'),
   /* ─── Section heading ─── */
   sectionHeading: cn(
-    'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.6px] mb-2 px-1'
+    'text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1'
   ),
   /* ─── Host cards ─── */
   hostCardPressedActive: cn('active:bg-accent'),
-  quickAction: cn('flex-1 flex-row bg-card border border-border py-2.5 px-3 items-center gap-2.5'),
-  quickActionIcon: cn('bg-secondary h-7 w-7 items-center justify-center'),
+  quickAction: cn(
+    'border-border flex-1 flex-row items-center gap-2.5 rounded-2xl border bg-card px-3 py-2.5'
+  ),
+  quickActionIcon: cn('h-7 w-7 items-center justify-center rounded-lg bg-secondary'),
   quickActionLabel: cn('text-xs font-semibold text-muted-foreground')
 } as const

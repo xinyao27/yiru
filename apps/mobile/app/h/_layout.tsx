@@ -46,21 +46,32 @@ function HostStack({ animation, showSessionHeader }: HostStackProps): React.JSX.
       }}
     >
       <Stack.Screen name="[hostId]/index" options={{ title: 'Host' }} />
-      <Stack.Screen name="[hostId]/edit" options={{ title: 'Edit host' }} />
-      <Stack.Screen name="[hostId]/accounts" options={{ title: 'Accounts' }} />
+      <Stack.Screen name="[hostId]/edit" options={{ headerShown: true, title: 'Edit host' }} />
+      <Stack.Screen name="[hostId]/accounts" options={{ headerShown: true, title: 'Accounts' }} />
       <Stack.Screen
         name="[hostId]/session/[worktreeId]"
         options={{ headerShown: showSessionHeader, title: 'Terminal' }}
       />
       <Stack.Screen
         name="[hostId]/source-control/[worktreeId]"
-        options={{ title: 'Source Control' }}
+        options={{ headerShown: true, title: 'Source Control' }}
       />
       <Stack.Screen
         name="[hostId]/agent-history/[worktreeId]"
-        options={{ title: 'Agent Session History' }}
+        options={{ headerShown: true, title: 'Agent Session History' }}
       />
-      <Stack.Screen name="[hostId]/review/[worktreeId]" options={{ title: 'Changes' }} />
+      <Stack.Screen
+        name="[hostId]/files/[worktreeId]"
+        options={{ headerShown: true, title: 'Files' }}
+      />
+      <Stack.Screen
+        name="[hostId]/files/preview/[worktreeId]"
+        options={{ headerShown: true, title: 'Preview' }}
+      />
+      <Stack.Screen
+        name="[hostId]/review/[worktreeId]"
+        options={{ headerShown: true, title: 'Changes' }}
+      />
       <Stack.Screen name="[hostId]/pr/[worktreeId]" options={{ title: 'Pull Request' }} />
     </Stack>
   )
@@ -159,7 +170,7 @@ export default function HostGroupLayout() {
           {/* Why: the invisible, elevated strip straddles the border so it owns
               the drag above the worktree list on Android. */}
           <View
-            className="absolute top-0 right-0 bottom-0 z-[20] w-6"
+            className="absolute top-0 right-0 bottom-0 z-20 w-6"
             style={{ elevation: 20 }}
             {...resizer.panHandlers}
           />

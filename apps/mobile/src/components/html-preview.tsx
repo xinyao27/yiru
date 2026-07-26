@@ -63,7 +63,7 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
 }
 
 const styles = {
-  toggle: cn('flex-row items-center gap-[5px] px-2 py-1 bg-secondary'),
-  toggleActive: cn('bg-card border border-border'),
+  toggle: cn('flex-row items-center gap-1.5 rounded-lg bg-secondary px-2 py-1'),
+  toggleActive: cn('border-border border bg-card'),
   toggleText: cn('text-muted-foreground text-xs')
 } as const

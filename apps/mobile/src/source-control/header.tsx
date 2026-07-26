@@ -32,7 +32,7 @@ export function MobileSourceControlHeader({
   prNumber = null
 }: Props) {
   return (
-    <View className="min-h-[58px] flex-row items-center px-2">
+    <View className="min-h-15 flex-row items-center px-2">
       <Pressable
         className={cn('w-9 h-9 items-center justify-center mr-1', 'active:bg-accent')}
         onPress={onBack}
@@ -49,7 +49,7 @@ export function MobileSourceControlHeader({
         <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
           Source Control
         </Text>
-        <Text className="text-muted-foreground mt-[2px] text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
           {worktreeLabel}
         </Text>
       </View>
@@ -69,7 +69,7 @@ export function MobileSourceControlHeader({
         </Pressable>
       ) : null}
       <Pressable
-        className={cn(styles.refreshButton, ioBusy && 'opacity-[0.45]', 'active:bg-accent')}
+        className={cn(styles.refreshButton, ioBusy && 'opacity-50', 'active:bg-accent')}
         onPress={onRefresh}
         disabled={ioBusy}
         hitSlop={8}

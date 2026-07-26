@@ -6,13 +6,9 @@ import {
   type MarkdownStyle,
   type Md4cFlags
 } from 'react-native-enriched-markdown'
+import { useCSSVariable } from 'uniwind'
 
-import {
-  spacing,
-  useThemeColors,
-  type ThemeColors,
-  typography
-} from '../theme/uniwind-theme-values'
+import { resolveCssNumber, resolveCssString } from '../style/resolve-css-variable'
 import { filePathFromMarkdownUrl, linkifyMarkdownFilePaths } from './markdown-file-links'
 import { normalizeMobileMarkdownPreviewHtml } from './markdown-preview-html'
 
@@ -44,17 +40,36 @@ function openMarkdownUrl(url: string, onOpenFile?: (relativePath: string) => voi
   }
 }
 
-function createMarkdownStyle(colors: ThemeColors, textScale: number): MarkdownStyle {
-  const bodySize = 14 * textScale
-  const bodyLineHeight = 20 * textScale
-  const blockGap = spacing.sm * textScale
+type MarkdownTheme = {
+  background: string
+  border: string
+  card: string
+  foreground: string
+  mutedForeground: string
+  primary: string
+  bodySize: number
+  bodyLineHeight: number
+  codeSize: number
+  codeLineHeight: number
+  radius: number
+  spacing1: number
+  spacing2: number
+  spacing3: number
+  spacing4: number
+  monoFamily: string
+}
+
+function createMarkdownStyle(theme: MarkdownTheme, textScale: number): MarkdownStyle {
+  const bodySize = theme.bodySize * textScale
+  const bodyLineHeight = theme.bodyLineHeight * textScale
+  const blockGap = theme.spacing2 * textScale
   const body = {
-    color: colors.textPrimary,
+    color: theme.foreground,
     fontSize: bodySize,
     lineHeight: bodyLineHeight
   }
   const heading = (size: number): NonNullable<MarkdownStyle['h1']> => ({
-    color: colors.textPrimary,
+    color: theme.foreground,
     fontSize: size * textScale,
     fontWeight: '700',
     lineHeight: (size + 6) * textScale,
@@ -66,97 +81,97 @@ function createMarkdownStyle(colors: ThemeColors, textScale: number): MarkdownSt
     blockquote: {
       ...body,
       backgroundColor: 'transparent',
-      borderColor: colors.borderSubtle,
+      borderColor: theme.border,
       borderWidth: 2,
-      gapWidth: spacing.sm,
+      gapWidth: theme.spacing2,
       marginBottom: blockGap,
       marginTop: blockGap
     },
     code: {
-      backgroundColor: colors.bgPanel,
-      borderColor: colors.borderSubtle,
-      color: colors.textPrimary,
-      fontFamily: typography.monoFamily,
-      fontSize: 12 * textScale
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      color: theme.foreground,
+      fontFamily: theme.monoFamily,
+      fontSize: theme.codeSize * textScale
     },
     codeBlock: {
       ...body,
-      backgroundColor: colors.bgPanel,
-      borderColor: colors.borderSubtle,
-      borderRadius: 0,
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      borderRadius: theme.radius,
       borderWidth: StyleSheet.hairlineWidth,
-      fontFamily: typography.monoFamily,
-      fontSize: 12 * textScale,
-      lineHeight: 17 * textScale,
+      fontFamily: theme.monoFamily,
+      fontSize: theme.codeSize * textScale,
+      lineHeight: theme.codeLineHeight * textScale,
       marginBottom: blockGap,
       marginTop: blockGap,
-      padding: spacing.sm
+      padding: theme.spacing2
     },
-    em: { color: colors.textPrimary, fontStyle: 'italic' },
-    h1: heading(14),
-    h2: heading(14),
-    h3: heading(14),
-    h4: heading(14),
-    h5: heading(14),
-    h6: { ...heading(14), color: colors.textSecondary },
-    image: { borderRadius: 0, height: 180, marginBottom: blockGap, marginTop: blockGap },
+    em: { color: theme.foreground, fontStyle: 'italic' },
+    h1: heading(theme.bodySize),
+    h2: heading(theme.bodySize),
+    h3: heading(theme.bodySize),
+    h4: heading(theme.bodySize),
+    h5: heading(theme.bodySize),
+    h6: { ...heading(theme.bodySize), color: theme.mutedForeground },
+    image: { borderRadius: theme.radius, height: 180, marginBottom: blockGap, marginTop: blockGap },
     inlineImage: { size: bodySize },
-    link: { color: colors.accentBlue, underline: true },
+    link: { color: theme.primary, underline: true },
     linkVariants: {
-      '^yiru-file://': { color: colors.accentBlue, underline: true }
+      '^yiru-file://': { color: theme.primary, underline: true }
     },
     list: {
       ...body,
-      bulletColor: colors.textSecondary,
-      gapWidth: spacing.sm,
-      markerColor: colors.textSecondary,
+      bulletColor: theme.mutedForeground,
+      gapWidth: theme.spacing2,
+      markerColor: theme.mutedForeground,
       markerFontWeight: '600',
       markerMinWidth: 0,
       marginBottom: blockGap,
-      marginLeft: spacing.md,
+      marginLeft: theme.spacing3,
       marginTop: 0
     },
     math: {
       backgroundColor: 'transparent',
-      color: colors.textPrimary,
+      color: theme.foreground,
       fontSize: bodySize,
       marginBottom: blockGap,
       marginTop: blockGap
     },
-    inlineMath: { color: colors.textPrimary },
+    inlineMath: { color: theme.foreground },
     paragraph: { ...body, marginBottom: blockGap, marginTop: 0 },
-    strikethrough: { color: colors.textPrimary },
-    strong: { color: colors.textPrimary, fontWeight: 'bold' },
+    strikethrough: { color: theme.foreground },
+    strong: { color: theme.foreground, fontWeight: 'bold' },
     table: {
       ...body,
-      borderColor: colors.borderSubtle,
-      borderRadius: 0,
+      borderColor: theme.border,
+      borderRadius: theme.radius,
       borderWidth: StyleSheet.hairlineWidth,
-      cellPaddingHorizontal: spacing.sm,
-      cellPaddingVertical: spacing.xs,
-      headerBackgroundColor: colors.bgPanel,
-      headerTextColor: colors.textPrimary,
+      cellPaddingHorizontal: theme.spacing2,
+      cellPaddingVertical: theme.spacing1,
+      headerBackgroundColor: theme.card,
+      headerTextColor: theme.foreground,
       marginBottom: blockGap,
       marginTop: blockGap,
-      rowEvenBackgroundColor: colors.bgPanel,
+      rowEvenBackgroundColor: theme.card,
       rowOddBackgroundColor: 'transparent'
     },
     taskList: {
-      borderColor: colors.textPrimary,
-      checkboxBorderRadius: 0,
-      checkboxSize: 16,
-      checkedColor: colors.accentBlue,
+      borderColor: theme.foreground,
+      checkboxBorderRadius: 4,
+      checkboxSize: theme.spacing4,
+      checkedColor: theme.primary,
       checkedStrikethrough: false,
-      checkedTextColor: colors.textPrimary,
-      checkmarkColor: colors.bgBase
+      checkedTextColor: theme.foreground,
+      checkmarkColor: theme.background
     },
     thematicBreak: {
-      color: colors.borderSubtle,
+      color: theme.border,
       height: StyleSheet.hairlineWidth,
       marginBottom: blockGap,
       marginTop: blockGap
     },
-    underline: { color: colors.textPrimary }
+    underline: { color: theme.foreground }
   }
 }
 
@@ -166,13 +181,51 @@ export function MobileMarkdown({
   textScale = 1,
   onOpenFile
 }: MobileMarkdownProps): React.JSX.Element | null {
-  const colors = useThemeColors()
+  const values = useCSSVariable([
+    '--color-background',
+    '--color-border',
+    '--color-card',
+    '--color-foreground',
+    '--color-muted-foreground',
+    '--color-primary',
+    '--text-base',
+    '--text-base--line-height',
+    '--text-sm',
+    '--text-sm--line-height',
+    '--radius-md',
+    '--spacing-1',
+    '--spacing-2',
+    '--spacing-3',
+    '--spacing-4',
+    '--font-mono'
+  ])
+  const theme = useMemo<MarkdownTheme>(
+    () => ({
+      background: resolveCssString(values[0]),
+      border: resolveCssString(values[1]),
+      card: resolveCssString(values[2]),
+      foreground: resolveCssString(values[3]),
+      mutedForeground: resolveCssString(values[4]),
+      primary: resolveCssString(values[5]),
+      bodySize: resolveCssNumber(values[6]),
+      bodyLineHeight: resolveCssNumber(values[7]),
+      codeSize: resolveCssNumber(values[8]),
+      codeLineHeight: resolveCssNumber(values[9]),
+      radius: resolveCssNumber(values[10]),
+      spacing1: resolveCssNumber(values[11]),
+      spacing2: resolveCssNumber(values[12]),
+      spacing3: resolveCssNumber(values[13]),
+      spacing4: resolveCssNumber(values[14]),
+      monoFamily: resolveCssString(values[15])
+    }),
+    [values]
+  )
   const text = content?.trim() || fallback
   const markdown = useMemo(() => {
     const normalized = normalizeMobileMarkdownPreviewHtml(text)
     return onOpenFile ? linkifyMarkdownFilePaths(normalized) : normalized
   }, [onOpenFile, text])
-  const markdownStyle = useMemo(() => createMarkdownStyle(colors, textScale), [colors, textScale])
+  const markdownStyle = useMemo(() => createMarkdownStyle(theme, textScale), [textScale, theme])
   const handleLinkPress = useCallback(
     (event: LinkPressEvent) => openMarkdownUrl(event.url, onOpenFile),
     [onOpenFile]
@@ -183,7 +236,9 @@ export function MobileMarkdown({
   }
 
   if (!markdown) {
-    return <Text style={{ color: colors.textPrimary, fontSize: 14 * textScale }}>{text}</Text>
+    return (
+      <Text style={{ color: theme.foreground, fontSize: theme.bodySize * textScale }}>{text}</Text>
+    )
   }
 
   return (

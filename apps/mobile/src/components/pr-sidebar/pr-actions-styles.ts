@@ -7,10 +7,10 @@ export const prActionsStyles = {
   secondaryButton: cn('flex-1'),
   // Primary CTA (merge) and secondary action buttons (close/reopen/rerun/add).
   actionButton: cn(
-    'min-h-11 flex-row items-center justify-center gap-2 py-2 px-3 bg-secondary border-hairline border-border'
+    'border-hairline border-border min-h-11 flex-row items-center justify-center gap-2 rounded-xl bg-secondary px-3 py-2'
   ),
 
-  actionButtonDisabled: cn('opacity-[0.5]'),
+  actionButtonDisabled: cn('opacity-50'),
   // Why: shrink + single-line (numberOfLines=1 at call sites) so a long label
   // like "Link existing pull request" can't wrap and inflate the button's
   // effective padding on a narrow sidebar.

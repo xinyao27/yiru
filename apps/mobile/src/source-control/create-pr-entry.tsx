@@ -18,7 +18,7 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
     <View className="mt-3 gap-1">
       <Pressable
         className={cn(
-          'min-h-[42px] bg-primary items-center justify-center flex-row gap-1 px-3',
+          'min-h-11 flex-row items-center justify-center gap-1 rounded-xl bg-primary px-3',
           !enabled && 'bg-secondary border-hairline border-border',
           enabled && 'active:bg-accent'
         )}
@@ -49,7 +49,7 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
         </Text>
       </Pressable>
       {action.hint ? (
-        <Text className="text-muted-foreground/60 text-xs leading-[16px]" numberOfLines={2}>
+        <Text className="text-muted-foreground text-xs leading-4" numberOfLines={2}>
           {action.hint}
         </Text>
       ) : null}

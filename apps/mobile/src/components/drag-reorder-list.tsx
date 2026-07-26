@@ -12,11 +12,12 @@ import Animated, {
   type AnimatedRef,
   type SharedValue
 } from 'react-native-reanimated'
+import { useCSSVariable } from 'uniwind'
 
 import { DotsSixVertical as GripVertical } from '@/components/uniwind-icons'
+import { resolveCssString } from '@/style/resolve-css-variable'
 
 import { triggerMediumImpact, triggerSelection } from '../platform/haptics'
-import { useThemeColors } from '../theme/uniwind-theme-values'
 import {
   clampDragReorderIndex,
   dragReorderPositionsFromKeys,
@@ -229,7 +230,12 @@ function DragReorderRow({
   onAccessibilityMove: (key: string, delta: number) => void
   children: ReactNode
 }): React.JSX.Element {
-  const colors = useThemeColors()
+  const [activeBackgroundValue, backgroundValue] = useCSSVariable([
+    '--color-accent',
+    '--color-card'
+  ])
+  const activeBackground = resolveCssString(activeBackgroundValue)
+  const background = resolveCssString(backgroundValue)
   const {
     positions,
     activeKey,
@@ -275,17 +281,17 @@ function DragReorderRow({
       return {
         top: activeTop.value,
         zIndex: 2,
-        backgroundColor: colors.bgRaised,
+        backgroundColor: activeBackground,
         transform: [{ scale: 1.02 }]
       }
     }
     return {
       top: withSpring(index * rowHeight, ROW_SPRING),
       zIndex: 0,
-      backgroundColor: colors.bgPanel,
+      backgroundColor: background,
       transform: [{ scale: 1 }]
     }
-  }, [colors.bgPanel, colors.bgRaised])
+  }, [activeBackground, background])
 
   return (
     <Animated.View

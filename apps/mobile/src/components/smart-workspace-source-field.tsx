@@ -49,10 +49,10 @@ export function SmartWorkspaceSourceField({
   return (
     <View className="mb-3">
       <Text className="text-muted-foreground mb-1 text-xs font-medium">
-        {label} <Text className="text-muted-foreground/60 font-normal">[Optional]</Text>
+        {label} <Text className="text-muted-foreground font-normal">[Optional]</Text>
       </Text>
       {selection ? (
-        <View className="bg-secondary border-border flex-row items-center gap-2 border px-3 py-2">
+        <View className="border-border bg-secondary flex-row items-center gap-2 rounded-xl border px-3 py-2">
           <SelectionIcon kind={selection.kind} />
           <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
             {selection.label}
@@ -72,14 +72,14 @@ export function SmartWorkspaceSourceField({
       ) : (
         <Pressable
           className={cn(
-            'bg-secondary px-3 py-2.5 border border-border',
-            disabled && 'opacity-[0.55]'
+            'border-border rounded-xl border bg-secondary px-3 py-2.5',
+            disabled && 'opacity-60'
           )}
           disabled={disabled}
           onPress={openDrawer}
         >
           <Text
-            className={cn('text-sm text-foreground', !composer.name && 'text-muted-foreground/60')}
+            className={cn('text-sm text-foreground', !composer.name && 'text-muted-foreground')}
             numberOfLines={1}
           >
             {composer.name || 'Type a name or search a source'}

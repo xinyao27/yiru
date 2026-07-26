@@ -27,6 +27,7 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
+import { MobileGlassSurface } from '../components/glass/surface'
 import type {
   BrowserScreencastFrame,
   BrowserScreencastFrameMetadata
@@ -1059,7 +1060,7 @@ export function MobileBrowserPane({
   const frameLayerClassName = useCallback((layer: FrameLayer) => {
     return cn(
       'absolute inset-0 items-center justify-center',
-      visibleFrameLayerRef.current !== layer && 'opacity-[0]'
+      visibleFrameLayerRef.current !== layer && 'opacity-0'
     )
   }, [])
   const browserLayerRef = useCallback(
@@ -1083,7 +1084,7 @@ export function MobileBrowserPane({
 
   return (
     <View ref={setRootViewRef} className="bg-background min-h-0 flex-1">
-      <View className="border-b-border bg-card min-h-8 flex-row items-center gap-1 border-b px-2 py-[2px]">
+      <MobileGlassSurface className="min-h-8 flex-row items-center gap-1 px-2 py-0.5">
         <MobileBrowserToolbarIconButton
           disabled={controlsDisabled || !tab.canGoBack}
           label="Back"
@@ -1106,7 +1107,7 @@ export function MobileBrowserPane({
           <RefreshCw size={15} colorClassName="accent-muted-foreground" />
         </MobileBrowserToolbarIconButton>
         <TextInput
-          className="bg-secondary text-foreground h-7 min-w-0 flex-1 px-2 py-0 font-mono text-xs leading-[16px]"
+          className="bg-secondary text-foreground h-7 min-w-0 flex-1 rounded-lg px-2 py-0 font-mono text-xs leading-4"
           style={{ includeFontPadding: false, textAlignVertical: 'center' }}
           value={addressValue}
           onChangeText={setAddressValue}
@@ -1129,7 +1130,7 @@ export function MobileBrowserPane({
           value={browserViewMode}
           onChange={selectBrowserViewMode}
         />
-      </View>
+      </MobileGlassSurface>
 
       <View
         className="bg-background min-h-0 flex-1 overflow-hidden"
@@ -1222,25 +1223,23 @@ export function MobileBrowserPane({
         {!renderedFrameSource || busy || error ? (
           <View
             pointerEvents="none"
-            className="absolute inset-0 items-center justify-center gap-2 bg-black/20 p-6"
+            className="bg-content-dimmer absolute inset-0 items-center justify-center gap-2 p-6"
           >
             {busy || (!ready && !error) ? (
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
             {error ? (
-              <Text className="text-foreground bg-card border-border overflow-hidden border px-3 py-2 text-center text-xs">
+              <Text className="text-foreground border-border bg-card overflow-hidden rounded-xl border px-3 py-2 text-center text-xs">
                 {error}
               </Text>
             ) : null}
           </View>
         ) : null}
         {dialog ? (
-          <View className="absolute inset-0 z-[30] items-center justify-center bg-black/50 p-6">
-            <View className="border-border bg-background w-full max-w-[360px] border p-4">
+          <View className="bg-modal-backdrop absolute inset-0 z-30 items-center justify-center p-6">
+            <View className="border-border bg-background w-full max-w-sm rounded-3xl border p-4">
               <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
-              <Text className="text-muted-foreground mt-2 text-sm leading-[20px]">
-                {dialog.message}
-              </Text>
+              <Text className="text-muted-foreground mt-2 text-sm leading-5">{dialog.message}</Text>
               <View className="mt-4 flex-row justify-end gap-2">
                 {dialog.dialogType !== 'alert' ? (
                   <Pressable
@@ -1266,8 +1265,8 @@ export function MobileBrowserPane({
         ) : null}
       </View>
 
-      <View
-        className="border-t-border bg-card z-[20] border-t"
+      <MobileGlassSurface
+        className="z-20 overflow-hidden rounded-t-3xl"
         style={[{ paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }]}
       >
         <MobileBrowserPointerModifiers
@@ -1281,7 +1280,7 @@ export function MobileBrowserPane({
         />
         <View className="flex-row items-center px-3 pt-1 pb-1.5">
           <TextInput
-            className="bg-secondary text-foreground mr-2 h-[34px] flex-1 px-3 font-mono text-sm"
+            className="bg-secondary text-foreground mr-2 h-9 flex-1 rounded-xl px-3 font-mono text-sm"
             value={keyboardValue}
             onChangeText={setKeyboardValue}
             placeholder="Type on page…"
@@ -1293,8 +1292,8 @@ export function MobileBrowserPane({
           />
           <Pressable
             className={cn(
-              'w-[34px] h-[34px] items-center justify-center bg-secondary',
-              (controlsDisabled || !keyboardValue) && 'opacity-[0.35]'
+              'h-9 w-9 items-center justify-center rounded-xl bg-secondary',
+              (controlsDisabled || !keyboardValue) && 'opacity-40'
             )}
             disabled={controlsDisabled || !keyboardValue}
             onPress={() => void sendKeyboardText()}
@@ -1303,7 +1302,7 @@ export function MobileBrowserPane({
             <ArrowUp size={18} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
-      </View>
+      </MobileGlassSurface>
     </View>
   )
 }
@@ -1483,7 +1482,7 @@ function updatePinchZoom(
 }
 
 const styles = {
-  dialogButton: cn('min-h-[34px] bg-secondary px-3 items-center justify-center'),
+  dialogButton: cn('min-h-9 items-center justify-center rounded-xl bg-secondary px-3'),
   dialogButtonPressedActive: cn('active:bg-accent'),
   dialogButtonText: cn('text-muted-foreground text-sm font-semibold')
 } as const

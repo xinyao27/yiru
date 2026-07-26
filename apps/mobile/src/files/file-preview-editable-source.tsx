@@ -37,10 +37,10 @@ export function MobileFilePreviewEditableSource({
   }, [draftContent, lineColumn, revealedTargetKey, selectionTargetKey])
 
   return (
-    <View className="flex-1 bg-[var(--editor-surface)] p-3">
+    <View className="bg-editor-surface flex-1 p-3">
       {saveError ? <Text className="text-destructive mb-2 text-xs">{saveError}</Text> : null}
       <TextInput
-        className="text-foreground flex-1 p-0 font-mono text-[13px] leading-[19px]"
+        className="text-foreground flex-1 p-0 font-mono text-xs leading-5"
         value={draftContent}
         onChangeText={onDraftChange}
         multiline

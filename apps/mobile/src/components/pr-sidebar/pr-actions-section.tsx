@@ -141,7 +141,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
           <Text className="text-foreground shrink text-sm">Auto-merge when ready</Text>
           <Pressable
             className={cn(
-              'min-w-14 min-h-[30px] items-center justify-center px-2 border-hairline border-border bg-card',
+              'border-hairline border-border bg-card min-h-8 min-w-14 items-center justify-center rounded-full px-2',
               autoMerge && 'border-muted-foreground bg-secondary'
             )}
             onPress={() => {
@@ -216,7 +216,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
       ) : null}
 
       {actionError ? (
-        <Text className="text-destructive text-xs leading-[18px]">{actionError}</Text>
+        <Text className="text-destructive text-xs leading-5">{actionError}</Text>
       ) : null}
 
       <ConfirmModal

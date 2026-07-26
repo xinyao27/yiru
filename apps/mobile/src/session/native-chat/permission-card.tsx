@@ -35,7 +35,7 @@ function MobileNativeChatPermissionImpl({
         <Text className="text-foreground text-sm font-semibold">{permission.title}</Text>
       </View>
       {permission.detail ? (
-        <Text className="text-muted-foreground text-xs leading-[17px]">{permission.detail}</Text>
+        <Text className="text-muted-foreground text-xs leading-5">{permission.detail}</Text>
       ) : null}
       <View className="flex-row flex-wrap gap-2">
         {permission.options.map((option, index) => {

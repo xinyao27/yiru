@@ -3,22 +3,21 @@
 import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-runtime-types'
 
 import { TERMINAL_TEXT_SCALES } from '../../storage/preferences'
-import { colors } from '../../theme/uniwind-theme-values'
 import { TERMINAL_PATH_TAP_JS } from '../path-tap-injected'
 import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from '../webview-engine.generated'
 import { TERMINAL_QUERY_REPLY_JS } from './query-reply-injected'
 import { TERMINAL_REFLOW_JS } from './reflow-injected'
 import { TERMINAL_SURFACE_SWAP_JS } from './surface-swap-injected'
 import { TERMINAL_TAP_DISPATCH_JS } from './tap-dispatch-injected'
-import { TERMINAL_WEBVIEW_THEME_JS } from './theme-injected'
+import { TERMINAL_BOOTSTRAP_BACKGROUND, TERMINAL_WEBVIEW_THEME_JS } from './theme-injected'
 import { URL_TAP_WEBVIEW_JS } from './url-tap'
 import { TERMINAL_WEBGL_RECOVERY_JS } from './webgl-recovery-injected'
 
 const DEFAULT_TERMINAL_THEME: RuntimeMobileTerminalTheme['theme'] = {
-  background: colors.terminalBg,
+  background: TERMINAL_BOOTSTRAP_BACKGROUND,
   foreground: '#c0caf5',
   cursor: '#c0caf5',
-  cursorAccent: colors.terminalBg,
+  cursorAccent: TERMINAL_BOOTSTRAP_BACKGROUND,
   selectionBackground: '#33467c',
   selectionForeground: '#c0caf5',
   black: '#15161e',
@@ -65,7 +64,7 @@ window.onerror = function(msg) {
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
-    background: ${colors.terminalBg};
+    background: ${TERMINAL_BOOTSTRAP_BACKGROUND};
     overflow: hidden;
     width: 100%;
     height: 100%;
@@ -117,7 +116,7 @@ window.onerror = function(msg) {
     right: 0;
     width: 3px;
     min-height: 24px;
-    border-radius: 0;
+    border-radius: 999px;
     background: rgba(192, 202, 245, 0.6);
     will-change: transform, height;
   }
@@ -146,7 +145,7 @@ window.onerror = function(msg) {
     transform: translateX(-50%);
     width: 14px; height: 14px;
     background: #7aa2f7;
-    border-radius: 0;
+    border-radius: 999px;
     border: 2px solid #c0caf5;
   }
   .sel-handle.start::before { top: 8px; }
@@ -171,7 +170,7 @@ window.onerror = function(msg) {
     position: absolute;
     pointer-events: auto;
     background: #2a2f4a;
-    border-radius: 0;
+    border-radius: 10px;
     display: flex;
     overflow: hidden;
     transform: translateY(-100%);

@@ -80,7 +80,7 @@ export function MobileNativeChatQuestion({
     <View className="bg-card border-hairline border-border mx-4 my-2 gap-2 rounded-2xl p-3">
       <View className="flex-row items-center gap-2">
         <CircleHelp size={15} colorClassName="accent-primary" />
-        <Text className="text-foreground flex-1 text-sm leading-[21px] font-semibold">
+        <Text className="text-foreground flex-1 text-sm leading-5 font-semibold">
           {question.question}
         </Text>
       </View>
@@ -104,7 +104,7 @@ export function MobileNativeChatQuestion({
                 {question.multiSelect ? (
                   <View
                     className={cn(
-                      'w-5 h-5 rounded-md border-[1.5px] border-muted-foreground/60 items-center justify-center',
+                      'w-5 h-5 rounded-md border-2 border-border items-center justify-center',
                       isSelected && 'bg-primary border-primary'
                     )}
                   >
@@ -134,7 +134,7 @@ export function MobileNativeChatQuestion({
           <Text
             className={cn(
               'text-primary-foreground text-sm font-semibold',
-              !canSubmitMulti && 'text-muted-foreground/60'
+              !canSubmitMulti && 'text-muted-foreground'
             )}
           >
             Submit{selected.length > 0 ? ` (${selected.length})` : ''}
@@ -144,7 +144,7 @@ export function MobileNativeChatQuestion({
 
       <View className="flex-row items-end gap-2">
         <TextInput
-          className="text-foreground bg-secondary max-h-[120px] min-h-10 flex-1 rounded-xl px-3 pt-2 pb-2 text-sm"
+          className="text-foreground bg-secondary max-h-30 min-h-10 flex-1 rounded-xl px-3 pt-2 pb-2 text-sm"
           value={freeText}
           onChangeText={setFreeText}
           placeholder={hasOptions ? 'Or type a reply…' : 'Type your reply…'}

@@ -1,8 +1,10 @@
 import { ThinkingOrb } from 'expo-thinking-orbs'
+import { withUniwind } from 'uniwind'
 
 import type { MobileLoaderStyle } from '../loading/loader-style'
 import { useMobileLoaderStyle } from '../loading/loader-style-context'
-import { useThemeColors } from '../theme/uniwind-theme-values'
+
+const UniwindThinkingOrb = withUniwind(ThinkingOrb)
 
 type LoadingIndicatorProps = {
   size?: number
@@ -14,9 +16,12 @@ export function LoadingIndicator({
   loaderStyle
 }: LoadingIndicatorProps): React.JSX.Element {
   const configuredStyle = useMobileLoaderStyle().loaderStyle
-  // Why: the orb ships its own grayscale ramp; tinting keeps it on the app's
-  // foreground color the way the desktop loader does.
-  const color = useThemeColors().textPrimary
 
-  return <ThinkingOrb state={loaderStyle ?? configuredStyle} size={size} color={color} />
+  return (
+    <UniwindThinkingOrb
+      state={loaderStyle ?? configuredStyle}
+      size={size}
+      colorClassName="accent-foreground"
+    />
+  )
 }

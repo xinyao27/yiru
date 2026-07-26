@@ -1,7 +1,8 @@
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, Text } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
+import { MobileGlassSurface } from '../components/glass/surface'
 import {
   SOURCE_CONTROL_HUB_TABS,
   SOURCE_CONTROL_HUB_TAB_LABELS,
@@ -17,8 +18,9 @@ type Props = {
 // scroll position and the shared branch card persist across Changes/PR/History.
 export function MobileSourceControlSegments({ active, onSelect }: Props) {
   return (
-    <View
-      className="bg-card border-b-hairline border-b-border w-full flex-row items-stretch"
+    <MobileGlassSurface
+      className="mx-4 mt-3 flex-row overflow-hidden rounded-2xl"
+      isInteractive
       accessibilityRole="tablist"
     >
       {SOURCE_CONTROL_HUB_TABS.map((tab) => {
@@ -27,8 +29,8 @@ export function MobileSourceControlSegments({ active, onSelect }: Props) {
           <Pressable
             key={tab}
             className={cn(
-              'flex-1 min-h-10 items-center justify-center px-1 border-b-2 border-b-transparent',
-              isActive && 'border-b-foreground',
+              'min-h-10 flex-1 items-center justify-center border-b-2 border-b-transparent px-1',
+              isActive && 'border-b-foreground bg-card',
               !isActive && 'active:bg-accent'
             )}
             onPress={() => onSelect(tab)}
@@ -48,6 +50,6 @@ export function MobileSourceControlSegments({ active, onSelect }: Props) {
           </Pressable>
         )
       })}
-    </View>
+    </MobileGlassSurface>
   )
 }

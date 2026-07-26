@@ -1,10 +1,9 @@
 import * as Clipboard from 'expo-clipboard'
 import Constants from 'expo-constants'
-import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { View, Text, Pressable, Platform } from 'react-native'
 
-import { CaretLeft as ChevronLeft, Copy, Check } from '@/components/uniwind-icons'
+import { Copy, Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { ConnectionLog } from '../src/components/connection-log'
@@ -26,8 +25,6 @@ const EMPTY_ENTRIES: readonly ConnectionLogEntry[] = []
 // screen also *acquires* the host client — opening it kicks a dial and the
 // log fills live instead of showing a stale tail.
 export default function ConnectionLogScreen() {
-  const router = useRouter()
-
   const [hosts, setHosts] = useState<HostProfile[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -82,24 +79,14 @@ export default function ConnectionLogScreen() {
   }, [selected, state, reconnectAttempts, lastConnectedAt, entries])
 
   return (
-    <View className="bg-background pt-safe-offset-2 flex-1 p-4">
-      <View className="mb-4 flex-row items-center">
-        <Pressable
-          className="mr-2 h-9 w-9 items-center justify-center"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground text-sm font-bold">Connection log</Text>
-      </View>
-
+    <View className="bg-background flex-1 p-4">
       {hosts.length > 1 && (
         <View className="mb-3 flex-row flex-wrap gap-2">
           {hosts.map((host) => (
             <Pressable
               key={host.id}
               className={cn(
-                'py-1.5 px-3 bg-secondary',
+                'rounded-full bg-secondary px-3 py-1.5',
                 host.id === selectedId && 'bg-card border border-border'
               )}
               onPress={() => setSelectedId(host.id)}
@@ -126,7 +113,7 @@ export default function ConnectionLogScreen() {
               {reconnectAttempts > 0 ? ` · attempt ${reconnectAttempts}` : ''}
             </Text>
             <Pressable
-              className="bg-secondary flex-row items-center gap-1.5 px-3 py-1.5"
+              className="bg-secondary flex-row items-center gap-1.5 rounded-xl px-3 py-1.5"
               onPress={() => void copyDiagnostics()}
             >
               {copied ? (
@@ -155,5 +142,5 @@ export default function ConnectionLogScreen() {
 }
 
 const styles = {
-  emptyText: cn('text-xs text-muted-foreground/60 leading-[18px]')
+  emptyText: cn('text-xs text-muted-foreground leading-5')
 } as const

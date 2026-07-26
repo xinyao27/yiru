@@ -29,13 +29,13 @@ export function ProtocolBlockScreen({ verdict }: Props) {
 
   return (
     <View className="bg-background flex-1 justify-center px-4">
-      <View className="bg-card border-border border p-4">
+      <View className="border-border bg-card rounded-3xl border p-4">
         <Text className="text-foreground mb-2 text-sm font-bold">{title}</Text>
-        <Text className="text-muted-foreground mb-4 text-sm leading-[20px]">{body}</Text>
+        <Text className="text-muted-foreground mb-4 text-sm leading-5">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
             updates continue to use the repository release page. */}
         <Pressable
-          className={cn('bg-primary py-2.5 items-center mb-2', styles.pressedActive)}
+          className={cn('mb-2 items-center rounded-2xl bg-primary py-2.5', styles.pressedActive)}
           onPress={() => {
             void Linking.openURL(primaryAction.url)
           }}
@@ -45,7 +45,7 @@ export function ProtocolBlockScreen({ verdict }: Props) {
           </Text>
         </Pressable>
         <Pressable
-          className={cn('bg-secondary py-2.5 items-center', styles.pressedActive)}
+          className={cn('items-center rounded-2xl bg-secondary py-2.5', styles.pressedActive)}
           onPress={() => {
             // Why: route back to the host list so the user can pair a
             // different host instead of getting trapped on this screen.
@@ -54,7 +54,7 @@ export function ProtocolBlockScreen({ verdict }: Props) {
         >
           <Text className="text-foreground text-sm font-semibold">Back to hosts</Text>
         </Pressable>
-        <Text className="text-muted-foreground/60 mt-3 text-xs leading-[17px]">{recoveryNote}</Text>
+        <Text className="text-muted-foreground mt-3 text-xs leading-5">{recoveryNote}</Text>
       </View>
     </View>
   )

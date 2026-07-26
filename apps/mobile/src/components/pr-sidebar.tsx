@@ -180,7 +180,7 @@ function PrSidebarContent({
       <View className={styles.stateArea}>
         <Text className={styles.stateText}>{message}</Text>
         <Pressable
-          className="bg-secondary min-h-11 flex-row items-center gap-1 px-3"
+          className="bg-secondary min-h-11 flex-row items-center gap-1 rounded-xl px-3"
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel="Retry loading pull request"
@@ -201,7 +201,7 @@ function PrSidebarContent({
         : 'Not permitted — your GitHub account is not connected.')
     return (
       <View className={styles.stateArea}>
-        <Text className="text-muted-foreground text-center text-sm leading-[20px]">{message}</Text>
+        <Text className="text-muted-foreground text-center text-sm leading-5">{message}</Text>
       </View>
     )
   }

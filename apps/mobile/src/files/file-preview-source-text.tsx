@@ -54,7 +54,7 @@ export function MobileFilePreviewSourceText({
       ) : null}
       <Text
         selectable
-        className="text-foreground font-mono text-[13px] leading-[19px]"
+        className="text-foreground font-mono text-xs leading-5"
         accessibilityLabel="File preview"
       >
         <MobileSyntaxSegments segments={syntax.segments} />

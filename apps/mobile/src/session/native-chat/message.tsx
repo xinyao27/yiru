@@ -28,17 +28,15 @@ const MAX_TOOL_RUN_DIFF_ROWS = 240
 
 function DiffView({ lines }: { lines: DiffLine[] }): React.JSX.Element {
   return (
-    <View className="bg-card overflow-hidden py-1">
+    <View className="bg-card overflow-hidden rounded-xl py-1">
       {lines.map((line, i) => (
         <Text
           key={i}
           className={cn(
-            'text-muted-foreground font-mono text-xs leading-[17px] px-2',
-            line.kind === 'add' &&
-              'text-[var(--git-decoration-added)] bg-[var(--editor-diff-inserted-line-background)]',
-            line.kind === 'del' &&
-              'text-[var(--git-decoration-deleted)] bg-[var(--editor-diff-removed-line-background)]',
-            line.kind === 'meta' && 'text-muted-foreground/60'
+            'text-muted-foreground font-mono text-xs leading-5 px-2',
+            line.kind === 'add' && 'text-git-added bg-diff-inserted',
+            line.kind === 'del' && 'text-git-deleted bg-diff-removed',
+            line.kind === 'meta' && 'text-muted-foreground'
           )}
         >
           {line.kind === 'add' ? '+' : line.kind === 'del' ? '-' : ' '}
@@ -65,9 +63,7 @@ function ResultBody({
     return <DiffView lines={diff} />
   }
   return (
-    <View
-      className={cn('bg-card p-3', isError && 'bg-[var(--editor-diff-removed-line-background)]')}
-    >
+    <View className={cn('rounded-xl bg-card p-3', isError && 'bg-diff-removed')}>
       <Text className={styles.mono}>
         {output.length > MAX_TOOL_RESULT_CHARS
           ? `${output.slice(0, MAX_TOOL_RESULT_CHARS)}…`
@@ -108,7 +104,7 @@ function ToolLine({
   return (
     <View>
       <Pressable
-        className="flex-row items-center gap-2 py-[3px]"
+        className="flex-row items-center gap-2 py-1"
         onPress={() => hasDetail && setExpanded((v) => !v)}
         hitSlop={6}
       >
@@ -159,16 +155,14 @@ function Prose({
     if (invert) {
       return (
         <Text
-          className="text-primary-foreground text-sm leading-[23px] font-medium"
+          className="text-primary-foreground text-sm leading-6 font-medium"
           style={[{ fontSize: TEXT_SIZE * fontScale }]}
         >
           {block.text}
         </Text>
       )
     }
-    return (
-      <MobileMarkdown content={block.text} textScale={1.25 * fontScale} onOpenFile={onOpenFile} />
-    )
+    return <MobileMarkdown content={block.text} textScale={fontScale} onOpenFile={onOpenFile} />
   }
   if (isImageRefBlock(block)) {
     return (
@@ -209,7 +203,7 @@ function ToolRun({
     <View className="mt-1">
       <View className="flex-row items-center gap-2">
         <Pressable
-          className="flex-1 flex-row items-center gap-2 py-[3px]"
+          className="flex-1 flex-row items-center gap-2 py-1"
           onPress={() => setOpen((v) => !v)}
           hitSlop={6}
         >
@@ -219,7 +213,7 @@ function ToolRun({
             <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
           )}
           <Text className="font-mono text-xs font-bold text-green-500">{callCount}×</Text>
-          <Text className="text-muted-foreground/60 flex-1 font-mono text-xs" numberOfLines={1}>
+          <Text className="text-muted-foreground flex-1 font-mono text-xs" numberOfLines={1}>
             {summary || `${callCount} tool ${callCount === 1 ? 'call' : 'calls'}`}
           </Text>
         </Pressable>
@@ -255,7 +249,7 @@ function AgentControls({
   onScrollToTop?: () => void
 }): React.JSX.Element {
   return (
-    <View className="mb-[2px] flex-row justify-end gap-1 opacity-[0.7]">
+    <View className="mb-0.5 flex-row justify-end gap-1 opacity-70">
       <Pressable
         className={cn(styles.controlButton, styles.controlPressedActive)}
         onPress={onCopy}
@@ -347,15 +341,15 @@ function MobileNativeChatMessageImpl({
   return (
     <View className={cn('px-4 py-2', isUser && 'items-end')}>
       {isUser && queued ? (
-        <Text className="text-muted-foreground/60 mb-[2px] text-[11px] font-semibold">Queued</Text>
+        <Text className="text-muted-foreground mb-0.5 text-xs font-semibold">Queued</Text>
       ) : null}
       <View
         className={cn(
           'max-w-full gap-2',
-          isUser && 'max-w-[88%] rounded-2xl bg-primary px-3 py-2',
-          isReasoning && 'opacity-[0.7]',
-          queued && 'opacity-[0.55]',
-          copied && 'bg-[var(--editor-diff-inserted-line-background)]'
+          isUser && 'max-w-7/8 rounded-2xl bg-primary px-3 py-2',
+          isReasoning && 'opacity-70',
+          queued && 'opacity-60',
+          copied && 'bg-diff-inserted'
         )}
       >
         {prose.map((block, index) => (

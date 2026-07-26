@@ -51,27 +51,27 @@ export default function RootLayout() {
   const handledNotificationIdsRef = useRef<Set<string>>(new Set())
   const { theme } = useUniwind()
   const baseNavigationTheme = theme === 'dark' ? DarkTheme : DefaultTheme
-  const foreground = resolveCssColor(
-    useCSSVariable('--color-foreground'),
-    baseNavigationTheme.colors.text
-  )
-  const background = resolveCssColor(
-    useCSSVariable('--color-background'),
-    baseNavigationTheme.colors.background
-  )
-  const card = resolveCssColor(useCSSVariable('--color-card'), baseNavigationTheme.colors.card)
-  const border = resolveCssColor(
-    useCSSVariable('--color-border'),
-    baseNavigationTheme.colors.border
-  )
-  const primary = resolveCssColor(
-    useCSSVariable('--color-primary'),
-    baseNavigationTheme.colors.primary
-  )
-  const notification = resolveCssColor(
-    useCSSVariable('--color-destructive'),
-    baseNavigationTheme.colors.notification
-  )
+  const [
+    foregroundValue,
+    backgroundValue,
+    cardValue,
+    borderValue,
+    primaryValue,
+    notificationValue
+  ] = useCSSVariable([
+    '--color-foreground',
+    '--color-background',
+    '--color-card',
+    '--color-border',
+    '--color-primary',
+    '--color-destructive'
+  ])
+  const foreground = resolveCssColor(foregroundValue, baseNavigationTheme.colors.text)
+  const background = resolveCssColor(backgroundValue, baseNavigationTheme.colors.background)
+  const card = resolveCssColor(cardValue, baseNavigationTheme.colors.card)
+  const border = resolveCssColor(borderValue, baseNavigationTheme.colors.border)
+  const primary = resolveCssColor(primaryValue, baseNavigationTheme.colors.primary)
+  const notification = resolveCssColor(notificationValue, baseNavigationTheme.colors.notification)
   const iconContextValue = useMemo(
     () => ({ color: foreground, weight: 'duotone' as const }),
     [foreground]
@@ -91,7 +91,6 @@ export default function RootLayout() {
     }),
     [background, baseNavigationTheme, border, card, foreground, notification, primary]
   )
-  const headerStyle = useResolveClassNames('bg-card') as { backgroundColor?: string }
   const headerTitleStyle = useResolveClassNames('text-sm font-semibold') as Pick<
     TextStyle,
     'fontFamily' | 'fontSize' | 'fontWeight'
@@ -232,7 +231,6 @@ export default function RootLayout() {
                   <ThemeProvider value={navigationTheme}>
                     <Stack
                       screenOptions={{
-                        headerStyle,
                         headerTintColor: foreground,
                         headerTitleStyle,
                         contentStyle,
@@ -247,8 +245,10 @@ export default function RootLayout() {
                       <Stack.Screen
                         name="index"
                         options={{
-                          headerShown: false,
-                          headerTitle: () => <YiruLogo size={22} />
+                          headerShown: true,
+                          headerTitle: () => (
+                            <YiruLogo size={22} colorClassName="accent-foreground" />
+                          )
                         }}
                       />
                       <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
@@ -262,16 +262,16 @@ export default function RootLayout() {
                           gestureEnabled: false
                         }}
                       />
-                      <Stack.Screen name="settings" options={{ headerShown: false }} />
-                      <Stack.Screen name="appearance-settings" options={{ headerShown: false }} />
-                      <Stack.Screen name="native-chat-settings" options={{ headerShown: false }} />
-                      <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
-                      <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
-                      <Stack.Screen name="notifications" options={{ headerShown: false }} />
-                      <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
-                      <Stack.Screen name="connection-log" options={{ headerShown: false }} />
-                      <Stack.Screen name="about" options={{ headerShown: false }} />
-                      <Stack.Screen name="ui-lab" options={{ headerShown: false }} />
+                      <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+                      <Stack.Screen name="appearance-settings" options={{ title: 'Appearance' }} />
+                      <Stack.Screen name="native-chat-settings" options={{ title: 'Chat UI' }} />
+                      <Stack.Screen name="terminal-settings" options={{ title: 'Terminal' }} />
+                      <Stack.Screen name="browser-settings" options={{ title: 'Browser' }} />
+                      <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+                      <Stack.Screen name="troubleshoot" options={{ title: 'Troubleshooting' }} />
+                      <Stack.Screen name="connection-log" options={{ title: 'Connection log' }} />
+                      <Stack.Screen name="about" options={{ title: 'About' }} />
+                      <Stack.Screen name="ui-lab" options={{ title: 'UI Lab' }} />
                       <Stack.Screen name="h" options={{ headerShown: false }} />
                     </Stack>
                   </ThemeProvider>

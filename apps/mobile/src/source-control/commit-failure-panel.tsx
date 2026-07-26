@@ -22,18 +22,18 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
   const detailsText = failure.error.trim()
 
   return (
-    <View className="bg-secondary border-hairline border-destructive mt-2 gap-2 p-2">
+    <View className="border-hairline border-destructive bg-secondary mt-2 gap-2 rounded-2xl p-2">
       <View className="flex-row items-center gap-2">
         <View className="min-w-0 flex-1">
           <Text className="text-foreground text-sm font-bold">Commit failed</Text>
-          <Text className="text-muted-foreground mt-[2px] text-xs leading-[16px]" numberOfLines={2}>
+          <Text className="text-muted-foreground mt-0.5 text-xs leading-4" numberOfLines={2}>
             {action.summary ?? 'Commit failed.'}
           </Text>
         </View>
         <Pressable
           className={cn(
             'min-h-9 px-3 bg-primary flex-row items-center justify-center gap-1',
-            action.launching && 'opacity-[0.45]',
+            action.launching && 'opacity-50',
             'active:bg-accent'
           )}
           onPress={() => void action.launch()}
@@ -65,14 +65,12 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
             </Text>
           </Pressable>
           {expanded ? (
-            <Text className="text-muted-foreground font-mono text-xs leading-[17px]">
-              {detailsText}
-            </Text>
+            <Text className="text-muted-foreground font-mono text-xs leading-5">{detailsText}</Text>
           ) : null}
         </>
       ) : null}
       {action.launchError ? (
-        <Text className="text-destructive text-xs leading-[16px]">{action.launchError}</Text>
+        <Text className="text-destructive text-xs leading-4">{action.launchError}</Text>
       ) : null}
     </View>
   )

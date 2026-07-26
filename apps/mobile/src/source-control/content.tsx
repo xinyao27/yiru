@@ -7,6 +7,7 @@ import {
   TextInput,
   View
 } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
 import {
   Minus,
@@ -15,8 +16,9 @@ import {
   Sparkle as Sparkles
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
-import { spacing } from '../theme/uniwind-theme-values'
+import { MobileGlassSurface } from '../components/glass/surface'
 import { MobileCommitFailurePanel } from './commit-failure-panel'
 import { MobileSourceControlCreatePrEntry } from './create-pr-entry'
 import { makeRenderFileRow, BranchCompareFooter } from './file-rows'
@@ -32,6 +34,7 @@ type Props = {
 // Changes tab: local file changes only — uncommitted (staged/unstaged) plus
 // committed-on-branch vs base. PR conflicts and push status live elsewhere.
 export function MobileSourceControlContent({ state }: Props) {
+  const spacing3 = resolveCssNumber(useCSSVariable('--spacing-3'))
   const {
     insets,
     connState,
@@ -88,7 +91,7 @@ export function MobileSourceControlContent({ state }: Props) {
         // Why: once data has loaded the screen looks alive even when the
         // desktop link is down, so taps appear to do nothing (STA-1511).
         // Surface the reconnect state where the user is looking.
-        <View className="bg-secondary border-hairline mx-4 mt-4 mb-[-8px] flex-row items-center gap-2 border-amber-500 px-3 py-2">
+        <View className="border-hairline bg-secondary mx-4 mt-4 -mb-2 flex-row items-center gap-2 rounded-xl border-amber-500 px-3 py-2">
           <ActivityIndicator size="small" colorClassName="accent-amber-500" />
           <Text className="text-foreground text-xs">Reconnecting to desktop...</Text>
         </View>
@@ -100,8 +103,8 @@ export function MobileSourceControlContent({ state }: Props) {
             action={commitFailureRecoveryAction}
           />
         ) : actionError ? (
-          <View className="bg-secondary border-hairline border-destructive mt-2 px-3 py-2">
-            <Text className="text-foreground text-xs leading-[16px]" numberOfLines={2}>
+          <View className="border-hairline border-destructive bg-secondary mt-2 rounded-xl px-3 py-2">
+            <Text className="text-foreground text-xs leading-4" numberOfLines={2}>
               {actionError}
             </Text>
           </View>
@@ -142,7 +145,7 @@ export function MobileSourceControlContent({ state }: Props) {
           </Pressable>
           <Pressable
             className={cn(
-              'w-[42px] min-h-9 bg-secondary items-center justify-center',
+              'min-h-9 w-11 items-center justify-center rounded-xl bg-secondary',
               'active:bg-accent',
               ioBusy && styles.bulkButtonDisabled
             )}
@@ -192,12 +195,12 @@ export function MobileSourceControlContent({ state }: Props) {
         />
       )}
 
-      <View
-        className="bg-card border-t-hairline border-t-border absolute right-0 left-0 gap-1 p-4 pt-3"
+      <MobileGlassSurface
+        className="absolute right-0 left-0 gap-1 overflow-hidden rounded-t-3xl p-4 pt-3"
         style={[
           {
             bottom: keyboardLift > 0 ? keyboardLift + KEYBOARD_COMMIT_BAR_CLEARANCE : keyboardLift,
-            paddingBottom: keyboardLift > 0 ? spacing.md : spacing.md + insets.bottom
+            paddingBottom: keyboardLift > 0 ? spacing3 : spacing3 + insets.bottom
           }
         ]}
       >
@@ -212,9 +215,7 @@ export function MobileSourceControlContent({ state }: Props) {
               accessibilityState={{ disabled: true }}
               accessibilityLabel="Commit message disabled. No staged files."
             >
-              <Text className="text-muted-foreground/60 text-sm font-semibold">
-                No staged files
-              </Text>
+              <Text className="text-muted-foreground text-sm font-semibold">No staged files</Text>
             </View>
           ) : (
             <TextInput
@@ -231,7 +232,7 @@ export function MobileSourceControlContent({ state }: Props) {
           {shouldShowGenerateButton ? (
             <Pressable
               className={cn(
-                'w-[42px] min-h-[42px] bg-secondary items-center justify-center',
+                'min-h-11 w-11 items-center justify-center rounded-xl bg-secondary',
                 busyAction !== null && styles.commitButtonDisabled,
                 'active:bg-accent'
               )}
@@ -256,7 +257,7 @@ export function MobileSourceControlContent({ state }: Props) {
           ) : null}
           <Pressable
             className={cn(
-              'min-w-[88px] min-h-[42px] bg-primary items-center justify-center px-3',
+              'min-h-11 min-w-24 items-center justify-center rounded-xl bg-primary px-3',
               createPrHeroActive && 'bg-transparent border-hairline border-border',
               primaryAction.disabled && styles.commitButtonDisabled,
               'active:bg-accent'
@@ -285,7 +286,7 @@ export function MobileSourceControlContent({ state }: Props) {
             )}
           </Pressable>
         </View>
-      </View>
+      </MobileGlassSurface>
     </>
   )
 }

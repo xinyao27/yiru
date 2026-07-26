@@ -301,7 +301,7 @@ export function MobileNativeChatView({
                     {loadingEarlier ? (
                       <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                     ) : (
-                      <Text className="text-muted-foreground/60 text-xs font-semibold">
+                      <Text className="text-muted-foreground text-xs font-semibold">
                         Load earlier messages
                       </Text>
                     )}
@@ -314,7 +314,7 @@ export function MobileNativeChatView({
                     <Text className="text-muted-foreground mb-1 text-center text-sm font-semibold">
                       {emptyState.title}
                     </Text>
-                    <Text className="text-muted-foreground/60 text-center text-xs">
+                    <Text className="text-muted-foreground text-center text-xs">
                       {emptyState.subtitle}
                     </Text>
                   </View>

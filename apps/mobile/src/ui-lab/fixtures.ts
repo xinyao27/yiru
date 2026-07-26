@@ -6,14 +6,23 @@ export const UI_LAB_TERMINAL_HANDLE = 'ui-lab-terminal'
 export const UI_LAB_SESSION_ID = 'ui-lab-session'
 export const UI_LAB_WORKTREE_ID = 'ui-lab-worktree'
 
-const UI_LAB_SCENARIO_IDS = ['chat', 'working', 'permission', 'empty', 'error', 'markdown'] as const
+const UI_LAB_SCENARIO_IDS = [
+  'chat',
+  'working',
+  'permission',
+  'empty',
+  'error',
+  'terminal',
+  'markdown',
+  'browser'
+] as const
 export type MobileUiLabScenarioId = (typeof UI_LAB_SCENARIO_IDS)[number]
 
 export type MobileUiLabScenario = {
   id: MobileUiLabScenarioId
   title: string
   description: string
-  surface: 'chat' | 'markdown'
+  surface: 'chat' | 'terminal' | 'markdown' | 'browser'
 }
 
 export const UI_LAB_SCENARIOS = [
@@ -48,10 +57,22 @@ export const UI_LAB_SCENARIOS = [
     surface: 'chat'
   },
   {
+    id: 'terminal',
+    title: 'Terminal',
+    description: 'The production terminal canvas, accessory row, and command composer.',
+    surface: 'terminal'
+  },
+  {
     id: 'markdown',
     title: 'Markdown tab',
     description: 'A real session Markdown tab with tables, code, file paths, and math.',
     surface: 'markdown'
+  },
+  {
+    id: 'browser',
+    title: 'Browser tab',
+    description: 'The production browser toolbar, viewport, address bar, and key controls.',
+    surface: 'browser'
   }
 ] as const satisfies readonly MobileUiLabScenario[]
 

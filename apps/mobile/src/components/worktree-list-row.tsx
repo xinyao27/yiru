@@ -1,6 +1,7 @@
 import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
 import {
   Bell,
@@ -10,9 +11,9 @@ import {
   GitPullRequest
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { triggerMediumImpact } from '../platform/haptics'
-import { spacing } from '../theme/uniwind-theme-values'
 import { AgentSpinner } from './agent-spinner'
 import { MobileRepoIcon } from './repo-icon'
 import { WorktreeAgentList } from './worktree-agent-list'
@@ -75,6 +76,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   onLongPress,
   onToggleLineage
 }: Props<T>) {
+  const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   const isFolderWorkspace = item.workspaceKind === 'folder-workspace'
   const folderMeta = item.comment?.trim() || item.path || 'Folder'
   const metaText = isFolderWorkspace ? folderMeta : displayBranch(item.branch)
@@ -90,7 +92,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
         item.isActive && 'bg-card border-l-muted-foreground',
         'active:bg-accent'
       )}
-      style={lineageDepth > 0 ? { paddingLeft: spacing.lg + lineageDepth * 18 } : undefined}
+      style={lineageDepth > 0 ? { paddingLeft: spacing4 * (lineageDepth + 1) } : undefined}
       disabled={isReadOnly}
       onPress={() => onPress(item)}
       onLongPress={
@@ -104,10 +106,10 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       delayLongPress={400}
     >
       {/* Why: 2px centers the 12px status shell on the title's first line. */}
-      <View className="mr-2 w-5 items-center gap-1 pt-[2px]">
+      <View className="mr-2 w-5 items-center gap-1 pt-0.5">
         <AgentSpinner status={status} />
         {item.unread && (
-          <View className="mt-[2px]">
+          <View className="mt-0.5">
             <Bell size={10} colorClassName="accent-amber-500" />
           </View>
         )}
@@ -119,23 +121,23 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             className={cn(
               'text-sm font-semibold text-foreground shrink',
               item.unread && 'font-bold',
-              isReadOnly && 'opacity-[0.5]'
+              isReadOnly && 'opacity-50'
             )}
             numberOfLines={1}
           >
             {item.displayName || item.repo}
           </Text>
           {item.linkedPR && (
-            <View className="bg-secondary flex-row items-center gap-[3px] px-[5px] py-[1px]">
+            <View className="bg-secondary flex-row items-center gap-1 rounded-full px-1.5 py-px">
               <GitPullRequest size={10} colorClassName={linkedPrColors?.accent} />
-              <Text className={cn('text-[10px] text-muted-foreground', linkedPrColors?.text)}>
+              <Text className={cn('text-xs text-muted-foreground', linkedPrColors?.text)}>
                 #{item.linkedPR.number}
               </Text>
             </View>
           )}
           {isFolderWorkspace && (
-            <View className="bg-secondary px-[5px] py-[1px]">
-              <Text className="text-muted-foreground text-[10px]">Folder</Text>
+            <View className="bg-secondary rounded-full px-1.5 py-px">
+              <Text className="text-muted-foreground text-xs">Folder</Text>
             </View>
           )}
           <WorktreeMetaGlyphs
@@ -144,11 +146,11 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             linkedGitLabMR={item.linkedGitLabMR}
           />
         </View>
-        <View className="mt-[2px] flex-row items-center gap-1">
+        <View className="mt-0.5 flex-row items-center gap-1">
           {lineageDepth > 0 && (
-            <View className="bg-secondary flex-row items-center gap-[3px] px-[5px] py-[1px]">
+            <View className="bg-secondary flex-row items-center gap-1 rounded-full px-1.5 py-px">
               <GitMerge size={10} colorClassName="accent-muted-foreground" />
-              <Text className="text-muted-foreground/60 text-[10px]">Child</Text>
+              <Text className="text-muted-foreground text-xs">Child</Text>
             </View>
           )}
           {/* Repo glyph+name only when not already grouped under this repo;
@@ -157,12 +159,12 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
           {!hideRepo && (
             <>
               <MobileRepoIcon repoIcon={repoIcon} size={11} color={repoColor} />
-              <Text className="text-muted-foreground max-w-[100px] text-[11px]" numberOfLines={1}>
+              <Text className="text-muted-foreground max-w-24 text-xs" numberOfLines={1}>
                 {item.repo}
               </Text>
             </>
           )}
-          <Text className="text-muted-foreground/60 shrink font-mono text-[11px]" numberOfLines={1}>
+          <Text className="text-muted-foreground shrink font-mono text-xs" numberOfLines={1}>
             {metaText}
           </Text>
         </View>
@@ -173,7 +175,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
         ) : null}
         {lineageChildCount > 0 && onToggleLineage ? (
           <Pressable
-            className="bg-secondary mt-1 flex-row items-center gap-1 self-start px-2 py-1"
+            className="bg-secondary mt-1 flex-row items-center gap-1 self-start rounded-full px-2 py-1"
             onPress={(event) => {
               event.stopPropagation()
               onToggleLineage(item)
@@ -185,7 +187,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
               <ChevronDown size={12} colorClassName="accent-muted-foreground" />
             )}
             <GitMerge size={12} colorClassName="accent-muted-foreground" />
-            <Text className="text-muted-foreground text-[11px] font-semibold">
+            <Text className="text-muted-foreground text-xs font-semibold">
               {lineageChildCount} {lineageChildCount === 1 ? 'child' : 'children'}
             </Text>
           </Pressable>
@@ -193,7 +195,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       </View>
 
       {item.liveTerminalCount > 0 && (
-        <Text className="text-muted-foreground/60 min-w-4 pt-[3px] text-right text-xs">
+        <Text className="text-muted-foreground min-w-4 pt-1 text-right text-xs">
           {item.liveTerminalCount}
         </Text>
       )}

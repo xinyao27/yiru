@@ -15,6 +15,7 @@ type MobileGlassSurfaceProps = Omit<
   forceFallback?: boolean
   isInteractive?: boolean
   tintColor?: string
+  tintColorClassName?: string
 }
 
 export function MobileGlassSurface({
@@ -22,6 +23,7 @@ export function MobileGlassSurface({
   forceFallback = false,
   isInteractive = false,
   tintColor,
+  tintColorClassName,
   ...viewProps
 }: MobileGlassSurfaceProps): React.JSX.Element {
   const isAvailable = useMobileGlassAvailable() && !forceFallback
@@ -41,6 +43,7 @@ export function MobileGlassSurface({
       glassEffectStyle="regular"
       isInteractive={isInteractive}
       tintColor={tintColor}
+      tintColorClassName={tintColorClassName}
     />
   )
 }

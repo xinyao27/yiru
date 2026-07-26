@@ -43,17 +43,17 @@ export function MobileDiffReviewLine({
     <View
       className={cn(
         'flex-row items-stretch border-b-hairline border-b-border',
-        line.kind === 'add' && 'bg-[var(--editor-diff-inserted-line-background)]',
-        line.kind === 'delete' && 'bg-[var(--editor-diff-removed-line-background)]',
+        line.kind === 'add' && 'bg-diff-inserted',
+        line.kind === 'delete' && 'bg-diff-removed',
         active && 'border-l-2 border-l-primary'
       )}
       accessible
       accessibilityLabel={accessibilityLabelForLine(line)}
     >
-      <Text className="text-muted-foreground/60 w-[18px] text-center font-mono text-xs leading-[18px]">
+      <Text className="text-muted-foreground w-5 text-center font-mono text-xs leading-5">
         {mobileDiffLinePrefix(line.kind)}
       </Text>
-      <Text className="text-muted-foreground/60 w-11 pr-1 text-right font-mono text-xs leading-[18px]">
+      <Text className="text-muted-foreground w-11 pr-1 text-right font-mono text-xs leading-5">
         {lineNumber ? String(lineNumber) : ''}
       </Text>
       <Pressable
@@ -71,12 +71,12 @@ export function MobileDiffReviewLine({
             : accessibilityLabelForLine(line)
         }
       >
-        <Text className="text-foreground font-mono text-xs leading-[18px]">
+        <Text className="text-foreground font-mono text-xs leading-5">
           <MobileSyntaxSegments segments={line.segments} />
         </Text>
       </Pressable>
       {comments.length > 0 ? (
-        <View className="w-10 items-center justify-center gap-[2px]">
+        <View className="w-10 items-center justify-center gap-0.5">
           {comments.map((comment) => (
             <Pressable
               key={comment.id}

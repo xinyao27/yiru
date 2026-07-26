@@ -19,7 +19,7 @@ export function WorktreeAgentList({ agents, now, unvisited }: Props) {
   // re-render (the shared useNow tick re-renders this list every 30s).
   const nodes = useMemo(() => flattenAgentRowLineage(agents), [agents])
   return (
-    <View className="mt-[3px]">
+    <View className="mt-1">
       {nodes.map((node) => (
         <WorktreeAgentRow
           key={node.row.paneKey}

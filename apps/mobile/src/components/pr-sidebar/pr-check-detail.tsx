@@ -110,10 +110,8 @@ function JobRow({ job }: { job: CheckDetailJob }) {
         </View>
       ))}
       {job.logTail ? (
-        <ScrollView className="bg-secondary max-h-40 px-2 py-1" nestedScrollEnabled>
-          <Text className="text-muted-foreground font-mono text-xs leading-[16px]">
-            {job.logTail}
-          </Text>
+        <ScrollView className="bg-secondary max-h-40 rounded-xl px-2 py-1" nestedScrollEnabled>
+          <Text className="text-muted-foreground font-mono text-xs leading-4">{job.logTail}</Text>
         </ScrollView>
       ) : null}
     </View>

@@ -35,7 +35,7 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={chipAccessibilityLabel(summary)}
     >
-      <View className="w-[18px] items-center">
+      <View className="w-5 items-center">
         <GitPullRequest size={15} colorClassName="accent-muted-foreground" />
       </View>
       {summary.kind === 'loading' ? (
@@ -61,7 +61,7 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
       ) : (
         <>
           <Text className="text-foreground text-sm font-bold">#{summary.number}</Text>
-          <View className={cn('px-2 py-[1px] border-hairline', stateColors?.border)}>
+          <View className={cn('px-2 py-px border-hairline', stateColors?.border)}>
             <Text className={cn('text-xs font-bold', stateColors?.text)}>{summary.stateLabel}</Text>
           </View>
           <ChipRollup rollup={summary.rollup} />

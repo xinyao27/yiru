@@ -19,6 +19,7 @@ import Animated, {
   interpolate,
   Extrapolation
 } from 'react-native-reanimated'
+import { useCSSVariable } from 'uniwind'
 
 import {
   Gesture,
@@ -27,9 +28,9 @@ import {
 } from '@/components/uniwind-native-components'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
-import { spacing } from '../theme/uniwind-theme-values'
 import { useInsideBottomDrawerModalHost } from './bottom-drawer-modal-host'
 import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
 
@@ -124,6 +125,7 @@ function MountedBottomDrawer({
   const contentDragCanDismiss = useSharedValue(false)
   const { height: screenHeight } = useWindowDimensions()
   const insets = useSafeAreaInsets()
+  const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   // Why: on wide/tablet canvases a full-width sheet looks stretched; cap it and
   // center it horizontally. Vertical bottom-anchoring (and all the drag/keyboard
   // transforms below) is unchanged, so phone behavior stays identical.
@@ -296,13 +298,13 @@ function MountedBottomDrawer({
   const overlay = (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
-      className="absolute inset-0 z-[1000]"
+      className="absolute inset-0 z-50"
       style={[{ zIndex }]}
       accessibilityViewIsModal
       aria-modal
     >
       <GestureHandlerRootView className="flex-1">
-        <Animated.View className="absolute inset-0 bg-black/50" style={[backdropStyle]}>
+        <Animated.View className="bg-modal-backdrop absolute inset-0" style={[backdropStyle]}>
           <Pressable className="absolute inset-0" onPress={dismiss} />
         </Animated.View>
 
@@ -311,13 +313,13 @@ function MountedBottomDrawer({
           pointerEvents="box-none"
         >
           <Animated.View
-            className="bg-background px-3"
+            className="bg-background overflow-hidden rounded-t-3xl px-3"
             style={[
               {
                 width: '100%',
                 maxWidth: isWideLayout ? modalMaxWidth : undefined,
-                maxHeight: screenHeight - insets.top - spacing.lg,
-                paddingBottom: insets.bottom + spacing.lg
+                maxHeight: screenHeight - insets.top - spacing4,
+                paddingBottom: insets.bottom + spacing4
               },
               drawerStyle
             ]}
@@ -382,7 +384,7 @@ function MountedBottomDrawer({
                 </ScrollView>
               </>
             )}
-            <View className="bg-background absolute right-0 bottom-[-500px] left-0 h-[500px]" />
+            <View className="bg-background absolute top-full right-0 left-0 h-screen" />
           </Animated.View>
         </View>
       </GestureHandlerRootView>
@@ -404,6 +406,6 @@ function MountedBottomDrawer({
 }
 
 const styles = {
-  handle: cn('self-center w-9 h-1 bg-muted-foreground/60 opacity-[0.4]'),
+  handle: cn('h-1 w-9 self-center rounded-full bg-muted-foreground opacity-40'),
   handleHitArea: cn('items-center pt-2 pb-3')
 } as const

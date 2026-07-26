@@ -1,8 +1,7 @@
 import { Redirect, Stack, useRouter } from 'expo-router'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Platform, Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '../components/uniwind-icons'
-import { SafeAreaView } from '../components/uniwind-native-components'
+import { CaretRight as ChevronRight, X } from '../components/uniwind-icons'
 import { updateSessionViewOverride } from '../storage/session-view-preferences'
 import {
   mobileUiLabHostId,
@@ -12,6 +11,67 @@ import {
   type MobileUiLabScenario
 } from './fixtures'
 import { MobileUiLabGlassCatalog } from './glass-catalog'
+
+const UI_LAB_SYSTEM_SCREENS = [
+  { title: 'Settings', description: 'The production settings index.', href: '/settings' },
+  {
+    title: 'Appearance',
+    description: 'Theme and loader preferences.',
+    href: '/appearance-settings'
+  },
+  {
+    title: 'Chat UI',
+    description: 'Native chat display preferences.',
+    href: '/native-chat-settings'
+  },
+  {
+    title: 'Terminal',
+    description: 'Terminal scale, input, and shortcut settings.',
+    href: '/terminal-settings'
+  },
+  { title: 'Browser', description: 'Browser interaction preferences.', href: '/browser-settings' },
+  { title: 'Notifications', description: 'Push notification controls.', href: '/notifications' },
+  {
+    title: 'Troubleshooting',
+    description: 'Diagnostics and connection tools.',
+    href: '/troubleshoot'
+  },
+  { title: 'About', description: 'Version and product information.', href: '/about' }
+] as const
+
+type MobileUiLabWorkspaceSurface = 'workspace' | 'source-control' | 'files' | 'history' | 'review'
+
+const UI_LAB_WORKSPACE_SCREENS = [
+  {
+    id: 'workspace',
+    title: 'Workspace list',
+    description: 'The real host workspace route with activity, filters, and Glass chrome.'
+  },
+  {
+    id: 'source-control',
+    title: 'Source Control',
+    description: 'Staged, unstaged, untracked, and committed changes with the real commit bar.'
+  },
+  {
+    id: 'files',
+    title: 'Files',
+    description: 'The production file tree; file rows open the real preview route.'
+  },
+  {
+    id: 'history',
+    title: 'Agent History',
+    description: 'A production history list with an expandable mocked Codex session.'
+  },
+  {
+    id: 'review',
+    title: 'Diff Review',
+    description: 'The production review queue, diff viewer, filters, and floating controls.'
+  }
+] as const satisfies readonly {
+  id: MobileUiLabWorkspaceSurface
+  title: string
+  description: string
+}[]
 
 export function MobileUiLabScreen(): React.JSX.Element {
   const router = useRouter()
@@ -30,46 +90,91 @@ export function MobileUiLabScreen(): React.JSX.Element {
 
   const openScenario = async (scenario: MobileUiLabScenario): Promise<void> => {
     const hostId = mobileUiLabHostId(scenario.id)
-    if (scenario.surface === 'chat') {
-      await updateSessionViewOverride(hostId, UI_LAB_WORKTREE_ID, UI_LAB_TERMINAL_TAB_ID, 'chat')
+    if (scenario.surface === 'chat' || scenario.surface === 'terminal') {
+      await updateSessionViewOverride(
+        hostId,
+        UI_LAB_WORKTREE_ID,
+        UI_LAB_TERMINAL_TAB_ID,
+        scenario.surface
+      )
     }
     router.push(`/h/${hostId}/session/${UI_LAB_WORKTREE_ID}?name=${encodeURIComponent('UI Lab')}`)
   }
 
+  const openWorkspaceSurface = (surface: MobileUiLabWorkspaceSurface): void => {
+    const hostId = mobileUiLabHostId('chat')
+    const params = { hostId, worktreeId: UI_LAB_WORKTREE_ID, name: 'UI Lab' }
+    switch (surface) {
+      case 'workspace':
+        router.push({ pathname: '/h/[hostId]', params: { hostId, uiLabName: 'UI Lab' } })
+        break
+      case 'source-control':
+        router.push({ pathname: '/h/[hostId]/source-control/[worktreeId]', params })
+        break
+      case 'files':
+        router.push({ pathname: '/h/[hostId]/files/[worktreeId]', params })
+        break
+      case 'history':
+        router.push({ pathname: '/h/[hostId]/agent-history/[worktreeId]', params })
+        break
+      case 'review':
+        router.push({ pathname: '/h/[hostId]/review/[worktreeId]', params })
+        break
+    }
+  }
+
   return (
-    <SafeAreaView className="bg-background flex-1" edges={['top']}>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="border-b-hairline border-border h-12 flex-row items-center gap-2 px-3">
-        <Pressable
-          accessibilityLabel="Close UI Lab"
-          className="active:bg-accent h-9 w-9 items-center justify-center"
-          onPress={leave}
-        >
-          <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className="text-foreground flex-1 text-sm font-semibold">UI Lab</Text>
-        <Text className="border-hairline border-border text-muted-foreground px-1.5 py-1 text-[10px] font-semibold">
-          DEV ONLY
-        </Text>
-      </View>
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          title: 'UI Lab',
+          headerLeft:
+            Platform.OS === 'android'
+              ? () => (
+                  <Pressable
+                    accessibilityLabel="Close UI Lab"
+                    className="active:bg-accent h-10 w-10 items-center justify-center rounded-full"
+                    onPress={leave}
+                  >
+                    <X size={20} colorClassName="accent-muted-foreground" />
+                  </Pressable>
+                )
+              : undefined
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button icon="xmark" onPress={leave} />
+        </Stack.Toolbar>
+      ) : null}
       <ScrollView
         className="flex-1"
         contentContainerClassName="p-4 pb-safe-offset-6"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-foreground text-sm font-semibold">
-          Production screens with mock data
-        </Text>
+        <View className="bg-card mb-4 flex-row items-center gap-3 rounded-2xl px-3 py-2.5">
+          <View className="min-w-0 flex-1">
+            <Text className="text-foreground text-sm font-semibold">Production UI test mode</Text>
+            <Text className="text-muted-foreground mt-0.5 text-xs leading-4">
+              Every destination below is the real app route. Only host responses are mocked.
+            </Text>
+          </View>
+          <Text className="border-border text-muted-foreground rounded-full border px-2 py-1 text-xs font-semibold">
+            DEV ONLY
+          </Text>
+        </View>
+
+        <Text className="text-foreground text-sm font-semibold">Session surfaces</Text>
         <Text className="text-muted-foreground mt-1 text-xs leading-5">
-          Each fixture opens the real mobile session route. Only its runtime responses are mocked.
+          Exercise the production session shell with deterministic terminal, chat, file, and browser
+          states.
         </Text>
-        <MobileUiLabGlassCatalog />
-        <View className="border-t-hairline border-border mt-4">
-          {UI_LAB_SCENARIOS.map((scenario) => (
+        <View className="bg-card mt-3 overflow-hidden rounded-2xl">
+          {UI_LAB_SCENARIOS.map((scenario, index) => (
             <Pressable
               key={scenario.id}
               accessibilityRole="button"
-              className="border-b-hairline border-border active:bg-accent min-h-16 flex-row items-center gap-3 py-3"
+              className="active:bg-accent min-h-16 flex-row items-center gap-3 px-3 py-3"
               onPress={() => void openScenario(scenario)}
             >
               <View className="min-w-0 flex-1">
@@ -79,10 +184,64 @@ export function MobileUiLabScreen(): React.JSX.Element {
                 </Text>
               </View>
               <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              {index < UI_LAB_SCENARIOS.length - 1 ? (
+                <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
+              ) : null}
             </Pressable>
           ))}
         </View>
+
+        <Text className="text-foreground mt-5 text-sm font-semibold">Workspace surfaces</Text>
+        <Text className="text-muted-foreground mt-1 text-xs leading-5">
+          Inspect production data-heavy routes without pairing a desktop.
+        </Text>
+        <View className="bg-card mt-3 overflow-hidden rounded-2xl">
+          {UI_LAB_WORKSPACE_SCREENS.map((screen, index) => (
+            <Pressable
+              key={screen.id}
+              accessibilityRole="button"
+              className="active:bg-accent min-h-16 flex-row items-center gap-3 px-3 py-3"
+              onPress={() => openWorkspaceSurface(screen.id)}
+            >
+              <View className="min-w-0 flex-1">
+                <Text className="text-foreground text-sm font-medium">{screen.title}</Text>
+                <Text className="text-muted-foreground mt-1 text-xs leading-4">
+                  {screen.description}
+                </Text>
+              </View>
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              {index < UI_LAB_WORKSPACE_SCREENS.length - 1 ? (
+                <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
+
+        <Text className="text-foreground mt-5 text-sm font-semibold">System screens</Text>
+        <View className="bg-card mt-3 overflow-hidden rounded-2xl">
+          {UI_LAB_SYSTEM_SCREENS.map((screen, index) => (
+            <Pressable
+              key={screen.href}
+              accessibilityRole="button"
+              className="active:bg-accent min-h-16 flex-row items-center gap-3 px-3 py-3"
+              onPress={() => router.push(screen.href)}
+            >
+              <View className="min-w-0 flex-1">
+                <Text className="text-foreground text-sm font-medium">{screen.title}</Text>
+                <Text className="text-muted-foreground mt-1 text-xs leading-4">
+                  {screen.description}
+                </Text>
+              </View>
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              {index < UI_LAB_SYSTEM_SCREENS.length - 1 ? (
+                <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
+
+        <MobileUiLabGlassCatalog />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }

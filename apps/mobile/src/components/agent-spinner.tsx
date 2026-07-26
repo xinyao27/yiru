@@ -13,7 +13,7 @@ const STATUS_COLOR_CLASSES: Record<WorktreeStatus, string> = {
   active: 'bg-emerald-500',
   done: 'bg-emerald-500',
   permission: 'bg-red-500',
-  inactive: 'bg-neutral-500/40'
+  inactive: 'bg-status-neutral'
 }
 
 export function AgentSpinner({ status }: { status: WorktreeStatus }) {

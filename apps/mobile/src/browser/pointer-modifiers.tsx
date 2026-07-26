@@ -30,10 +30,10 @@ export function MobileBrowserPointerModifiers({
           <Pressable
             key={modifier.id}
             className={cn(
-              'min-h-[30px] min-w-[42px] items-center justify-center bg-secondary px-2',
+              'min-h-8 min-w-11 items-center justify-center rounded-lg bg-secondary px-2',
               selected && 'bg-accent',
               !selected && 'active:bg-accent',
-              disabled && 'opacity-[0.35]'
+              disabled && 'opacity-40'
             )}
             disabled={disabled}
             onPress={() => onToggle(modifier.id)}
@@ -45,7 +45,7 @@ export function MobileBrowserPointerModifiers({
               className={cn(
                 'text-muted-foreground text-xs font-mono',
                 selected && 'text-accent-foreground',
-                disabled && 'text-muted-foreground/60'
+                disabled && 'text-muted-foreground'
               )}
             >
               {modifier.label}

@@ -14,6 +14,7 @@ import { cn } from '@/style/class-names'
 import type { MobileDiffReviewQueueItem } from '../session/diff/review-queue'
 import type { GitMutationMethod } from '../session/diff/review-screen-model'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
+import { MobileGlassSurface } from './glass/surface'
 
 type Props = {
   busyAction: string | null
@@ -35,9 +36,9 @@ export function MobileDiffReviewFooter({
   onMoveFile
 }: Props) {
   return (
-    <View
+    <MobileGlassSurface
       className={cn(
-        'absolute left-0 right-0 bottom-0 px-4 pt-2 gap-2 bg-background border-t-hairline border-t-border',
+        'absolute right-0 bottom-0 left-0 gap-2 overflow-hidden rounded-t-3xl px-4 pt-2',
         'pb-safe-offset-2'
       )}
     >
@@ -90,7 +91,7 @@ export function MobileDiffReviewFooter({
         </Pressable>
         <Pressable
           className={cn(
-            'min-h-11 flex-row items-center justify-center gap-1 px-3 bg-secondary',
+            'min-h-11 flex-row items-center justify-center gap-1 rounded-xl bg-secondary px-3',
             'active:bg-accent'
           )}
           onPress={onAddFileNote}
@@ -124,6 +125,6 @@ export function MobileDiffReviewFooter({
           <ChevronRight size={17} colorClassName="accent-foreground" />
         </Pressable>
       </View>
-    </View>
+    </MobileGlassSurface>
   )
 }

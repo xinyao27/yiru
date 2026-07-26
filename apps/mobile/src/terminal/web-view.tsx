@@ -400,11 +400,11 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
     )
 
     return (
-      <View className={cn('flex-1 bg-[var(--terminal-background)]', className)}>
+      <View className={cn('flex-1 bg-terminal-surface', className)}>
         <UniwindWebView
           ref={webViewRef}
           source={XTERM_WEBVIEW_SOURCE}
-          className="flex-1 bg-[var(--terminal-background)]"
+          className="bg-terminal-surface flex-1"
           originWhitelist={['*']}
           scrollEnabled={false}
           // Why: Android parent gesture containers can intercept vertical drags

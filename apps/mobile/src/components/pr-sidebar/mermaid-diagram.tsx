@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
-import { useUniwind } from 'uniwind'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
 import { UniwindWebView } from '@/components/uniwind-web-view'
 import { cn } from '@/style/class-names'
-
-import { type ThemeColors, useThemeColors } from '../../theme/uniwind-theme-values'
+import { resolveCssString } from '@/style/resolve-css-variable'
 
 type Props = {
+  codeClassName: string
   source: string
-  base: number
 }
 
 // Renders a ```mermaid fence as a diagram via a sandboxed WebView (mermaid has no
@@ -17,16 +16,33 @@ type Props = {
 // SVG follows the active app theme, and the WebView posts back its rendered
 // height so we can size to content. On any failure (no network, parse error,
 // render error) we fall back to the raw source in a labeled mono code box.
-export function MermaidDiagram({ source, base }: Props) {
-  const colors = useThemeColors()
+export function MermaidDiagram({ codeClassName, source }: Props) {
   const { theme } = useUniwind()
+  const values = useCSSVariable([
+    '--color-accent',
+    '--color-card',
+    '--color-foreground',
+    '--color-muted-foreground'
+  ])
+  const diagramTheme = useMemo<MermaidTheme>(
+    () => ({
+      background: resolveCssString(values[0]),
+      card: resolveCssString(values[1]),
+      foreground: resolveCssString(values[2]),
+      mutedForeground: resolveCssString(values[3])
+    }),
+    [values]
+  )
   const [height, setHeight] = useState(0)
   const [failed, setFailed] = useState(false)
   const colorScheme = theme === 'light' ? 'light' : 'dark'
-  const html = useMemo(() => buildHtml(source, colors, colorScheme), [colorScheme, colors, source])
+  const html = useMemo(
+    () => buildHtml(source, diagramTheme, colorScheme),
+    [colorScheme, diagramTheme, source]
+  )
 
   if (failed) {
-    return <MermaidFallback source={source} base={base} />
+    return <MermaidFallback codeClassName={codeClassName} source={source} />
   }
 
   return (
@@ -68,16 +84,14 @@ export function MermaidDiagram({ source, base }: Props) {
   )
 }
 
-function MermaidFallback({ source, base }: Props) {
+function MermaidFallback({ codeClassName, source }: Props) {
   return (
     <View className={styles.frame}>
       <View className={styles.label}>
         <Text className={styles.labelText}>mermaid</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="p-2">
-        <Text className="text-foreground font-mono" style={[{ fontSize: base - 1 }]}>
-          {source}
-        </Text>
+        <Text className={cn('text-foreground font-mono', codeClassName)}>{source}</Text>
       </ScrollView>
     </View>
   )
@@ -85,7 +99,14 @@ function MermaidFallback({ source, base }: Props) {
 
 // Self-contained HTML: load mermaid from CDN, render the graph, post the body
 // height (or "error") back to RN. Theme variables follow the active app palette.
-function buildHtml(source: string, colors: ThemeColors, colorScheme: 'light' | 'dark'): string {
+type MermaidTheme = {
+  background: string
+  card: string
+  foreground: string
+  mutedForeground: string
+}
+
+function buildHtml(source: string, theme: MermaidTheme, colorScheme: 'light' | 'dark'): string {
   // JSON.stringify safely escapes the user's diagram source for embedding.
   const encoded = JSON.stringify(source)
   return `<!DOCTYPE html>
@@ -93,7 +114,7 @@ function buildHtml(source: string, colors: ThemeColors, colorScheme: 'light' | '
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <style>
-  html, body { margin: 0; padding: 0; background: ${colors.bgRaised}; }
+  html, body { margin: 0; padding: 0; background: ${theme.background}; }
   #c { padding: 8px; }
   #c svg { max-width: 100%; height: auto; }
 </style>
@@ -116,11 +137,11 @@ function buildHtml(source: string, colors: ThemeColors, colorScheme: 'light' | '
       securityLevel: 'strict',
       darkMode: ${colorScheme === 'dark'},
       themeVariables: {
-        background: '${colors.bgRaised}',
-        primaryColor: '${colors.bgPanel}',
-        primaryTextColor: '${colors.textPrimary}',
-        lineColor: '${colors.textSecondary}',
-        textColor: '${colors.textPrimary}'
+        background: '${theme.background}',
+        primaryColor: '${theme.card}',
+        primaryTextColor: '${theme.foreground}',
+        lineColor: '${theme.mutedForeground}',
+        textColor: '${theme.foreground}'
       }
     });
     mermaid.run({ querySelector: '.mermaid' })
@@ -135,7 +156,7 @@ function buildHtml(source: string, colors: ThemeColors, colorScheme: 'light' | '
 }
 
 const styles = {
-  frame: cn('border-hairline border-border mb-2 overflow-hidden bg-secondary'),
-  label: cn('px-2 py-[2px] border-b-hairline border-b-border bg-card'),
-  labelText: cn('text-muted-foreground text-[11px] font-mono')
+  frame: cn('border-hairline border-border mb-2 overflow-hidden rounded-xl bg-secondary'),
+  label: cn('px-2 py-0.5 border-b-hairline border-b-border bg-card'),
+  labelText: cn('text-muted-foreground text-xs font-mono')
 } as const

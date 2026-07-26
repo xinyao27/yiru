@@ -168,7 +168,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
       {/* Triage strip at the top of the section (desktop PRTriageStrip): a failing
           summary + a Fix action, so the most actionable state leads the list. */}
       {triage && summary.failed > 0 ? (
-        <View className="border-hairline border-destructive flex-row items-center gap-2 bg-[var(--editor-diff-removed-line-background)] p-2">
+        <View className="border-hairline border-destructive bg-diff-removed flex-row items-center gap-2 rounded-xl p-2">
           <View className="min-w-0 flex-1">
             <Text className="text-foreground text-xs font-bold" numberOfLines={1}>
               {summary.failed} failing check{summary.failed === 1 ? '' : 's'}
@@ -179,7 +179,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
           </View>
           <Pressable
             className={cn(
-              'min-h-8 flex-row items-center gap-1 px-2 border-hairline border-border bg-secondary',
+              'border-hairline border-border min-h-8 flex-row items-center gap-1 rounded-xl bg-secondary px-2',
               'active:bg-accent'
             )}
             onPress={triage.fixChecks}
@@ -213,7 +213,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
               accessibilityLabel={`${check.name} check details`}
             >
               <Chevron size={14} colorClassName="accent-muted-foreground" />
-              <View className={cn('w-2 h-2', statusColors.background)} />
+              <View className={cn('h-2 w-2 rounded-full', statusColors.background)} />
               <View className={styles.rowMain}>
                 <Text className={styles.rowTitle} numberOfLines={1}>
                   {check.name}

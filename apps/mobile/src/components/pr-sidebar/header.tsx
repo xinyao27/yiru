@@ -53,7 +53,7 @@ export function PRSidebarHeader({
             accessibilityRole="link"
             accessibilityLabel={`Open pull request #${pr.number} on the web`}
             className={cn(
-              'self-start px-2 py-[2px] border-hairline bg-secondary',
+              'border-hairline self-start rounded-full bg-secondary px-2 py-0.5',
               badgeColors.border,
               'active:bg-accent'
             )}
@@ -188,7 +188,7 @@ function PRTitle({
       accessibilityRole={editable ? 'button' : undefined}
       accessibilityLabel={editable ? 'Edit pull request title' : undefined}
     >
-      <Text className="text-foreground flex-1 text-sm leading-[24px] font-bold">{title}</Text>
+      <Text className="text-foreground flex-1 text-sm leading-6 font-bold">{title}</Text>
       {editable ? (
         <View className="min-h-7 min-w-7 items-center justify-center">
           <Pencil size={14} colorClassName="accent-muted-foreground" />

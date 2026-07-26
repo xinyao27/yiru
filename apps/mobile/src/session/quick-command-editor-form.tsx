@@ -43,7 +43,7 @@ function ChoiceToggle({
           <Pressable
             key={option.value}
             className={cn(
-              'h-10 flex-1 items-center justify-center border border-border bg-card',
+              'border-border h-10 flex-1 items-center justify-center rounded-xl border bg-card',
               selected && 'border-muted-foreground bg-accent',
               option.disabled && styles.disabled
             )}
@@ -113,7 +113,7 @@ export function QuickCommandEditorForm({
         <View className={styles.field}>
           <Text className={styles.label}>Agent</Text>
           <Pressable
-            className="border-border bg-card active:bg-accent flex-row items-center justify-between border px-3 py-2.5"
+            className="border-border active:bg-accent bg-card flex-row items-center justify-between rounded-xl border px-3 py-2.5"
             onPress={onOpenAgentPicker}
           >
             {draft.agent ? (
@@ -133,7 +133,7 @@ export function QuickCommandEditorForm({
       <View className={styles.field}>
         <Text className={styles.label}>{isAgent ? 'Prompt' : 'Command Text'}</Text>
         <TextInput
-          className={cn(styles.input, 'min-h-[92px]', !isAgent && 'font-mono')}
+          className={cn(styles.input, 'min-h-24', !isAgent && 'font-mono')}
           style={{ textAlignVertical: 'top' }}
           value={isAgent ? draft.prompt : draft.command}
           onChangeText={(text) => onChange(isAgent ? { prompt: text } : { command: text })}
@@ -211,7 +211,7 @@ export function QuickCommandEditorForm({
       {error ? <Text className="text-destructive mt-1 text-xs">{error}</Text> : null}
       <View className="mt-2 flex-row gap-2">
         <Pressable
-          className="border-border active:bg-accent flex-1 items-center border py-3"
+          className="border-border active:bg-accent flex-1 items-center rounded-xl border py-3"
           onPress={onCancel}
         >
           <Text className="text-foreground text-sm font-semibold">Cancel</Text>
@@ -236,6 +236,6 @@ export function QuickCommandEditorForm({
 const styles = {
   field: cn('gap-2'),
   label: cn('text-xs font-semibold text-muted-foreground'),
-  input: cn('border border-border bg-card px-3 py-2.5 text-sm text-foreground'),
-  disabled: cn('opacity-[0.4]')
+  input: cn('border-border text-foreground rounded-xl border bg-card px-3 py-2.5 text-sm'),
+  disabled: cn('opacity-40')
 } as const

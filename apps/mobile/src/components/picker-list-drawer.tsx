@@ -69,12 +69,12 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
       contentScrollable={false}
     >
       <View className="px-1 pb-2">
-        <Text className="text-muted-foreground/60 text-xs font-medium">{title}</Text>
+        <Text className="text-muted-foreground text-xs font-medium">{title}</Text>
       </View>
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        className="bg-card max-h-[420px] grow-0 overflow-hidden"
+        className="bg-card max-h-96 grow-0 overflow-hidden rounded-2xl"
         contentContainerClassName={cn(items.length === 0 ? 'min-h-6' : undefined)}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled

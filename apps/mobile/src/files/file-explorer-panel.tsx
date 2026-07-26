@@ -1,8 +1,9 @@
-import { useRouter } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   Pressable,
   Text,
   View,
@@ -10,7 +11,6 @@ import {
 } from 'react-native'
 
 import { CaretLeft as ChevronLeft, X } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
 import { getWorktreeLabel } from '../session/worktree-label'
@@ -289,31 +289,20 @@ export function MobileFileExplorerPanel(props: {
   }
 
   const headerBar = (
-    <View className="min-h-[58px] flex-row items-center gap-3 px-3">
-      {embedded ? (
-        <Pressable
-          className={cn(styles.backButton, styles.backButtonPressedActive)}
-          onPress={() => onRequestClose?.()}
-          hitSlop={8}
-          accessibilityLabel="Close files"
-        >
-          <X size={20} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      ) : (
-        <Pressable
-          className={cn(styles.backButton, styles.backButtonPressedActive)}
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel="Back to session"
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      )}
+    <View className="min-h-15 flex-row items-center gap-3 px-3">
+      <Pressable
+        className={cn(styles.backButton, styles.backButtonPressedActive)}
+        onPress={() => onRequestClose?.()}
+        hitSlop={8}
+        accessibilityLabel="Close files"
+      >
+        <X size={20} colorClassName="accent-muted-foreground" />
+      </Pressable>
       <View className="min-w-0 flex-1">
         <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Files
         </Text>
-        <Text className="text-muted-foreground mt-[2px] text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
           {worktreeLabel}
           {legacyListTruncated ? ' - Showing first 5000' : ''}
         </Text>
@@ -332,7 +321,7 @@ export function MobileFileExplorerPanel(props: {
           the parked transport instead (issue #5049); loadDirectory re-runs via
           its effect once the new client connects. */}
       <Pressable
-        className="border-hairline border-border min-h-9 items-center justify-center px-4"
+        className="border-hairline border-border min-h-9 items-center justify-center rounded-xl px-4"
         onPress={() =>
           connState !== 'connected' && hostId ? void forceReconnect(hostId) : void loadDirectory('')
         }
@@ -354,17 +343,35 @@ export function MobileFileExplorerPanel(props: {
     />
   )
 
-  // Embedded: the dock column owns safe-area/layout, so render a plain View and
-  // a non-inset header. Full-screen: keep the SafeAreaView top inset + chrome.
   return (
     <View className="bg-background flex-1">
-      {embedded ? (
-        <View className={styles.header}>{headerBar}</View>
-      ) : (
-        <SafeAreaView className={styles.header} edges={['top']}>
-          {headerBar}
-        </SafeAreaView>
-      )}
+      <Stack.Screen
+        options={{
+          title: `Files · ${worktreeLabel}`,
+          headerLeft:
+            !embedded && Platform.OS !== 'ios'
+              ? () => (
+                  <Pressable
+                    accessibilityLabel="Back"
+                    className="h-9 w-9 items-center justify-center rounded-full"
+                    onPress={() => router.back()}
+                  >
+                    <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
+                  </Pressable>
+                )
+              : undefined
+        }}
+      />
+      {!embedded && Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Back"
+            icon="chevron.left"
+            onPress={() => router.back()}
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {embedded ? <View className={styles.header}>{headerBar}</View> : null}
       {body}
     </View>
   )

@@ -39,6 +39,7 @@ import { ActionSheetContent } from '../../../src/components/action-sheet-modal'
 import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
+import { MobileGlassSurface } from '../../../src/components/glass/surface'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
 import { PickerModal } from '../../../src/components/picker-modal'
@@ -129,9 +130,10 @@ export function HostScreen({
   action: actionProp,
   onHideSidebar
 }: HostScreenProps = {}) {
-  const params = useLocalSearchParams<{ hostId: string; action?: string }>()
+  const params = useLocalSearchParams<{ hostId: string; action?: string; uiLabName?: string }>()
   const hostId = hostIdProp ?? params.hostId
   const action = actionProp ?? params.action
+  const uiLabName = __DEV__ && typeof params.uiLabName === 'string' ? params.uiLabName : ''
   const router = useRouter()
   const pathname = usePathname()
 
@@ -297,6 +299,10 @@ export function HostScreen({
     if (!hostId) {
       return
     }
+    if (uiLabName) {
+      setHostName(uiLabName)
+      return
+    }
     let stale = false
     void (async () => {
       const pins = await loadPinnedIds(hostId)
@@ -308,7 +314,7 @@ export function HostScreen({
     return () => {
       stale = true
     }
-  }, [hostId])
+  }, [hostId, uiLabName])
 
   // Read the desktop's shared view settings (PersistedUIState) and merge them
   // onto local state. Runs on connect and on screen focus so changes made on
@@ -363,6 +369,10 @@ export function HostScreen({
     if (!hostId) {
       return
     }
+    if (uiLabName) {
+      setHostName(uiLabName)
+      return
+    }
     let stale = false
     void loadHosts().then((hosts) => {
       if (stale) {
@@ -379,7 +389,7 @@ export function HostScreen({
     return () => {
       stale = true
     }
-  }, [hostId])
+  }, [hostId, uiLabName])
 
   const fetchRepoMetadata = useCallback(
     async (options: { force?: boolean } = {}) => {
@@ -843,119 +853,225 @@ export function HostScreen({
       {/* Why: the safe-area inset wraps only the top chrome so the status-bar
           strip and the header share one bg-card color — previously the strip
           showed the screen's bg-background against the bg-card header. */}
-      <SafeAreaView className="bg-card border-b-border border-b" edges={['top']}>
-        <View className="min-h-[34px] flex-row items-center justify-between px-4 pt-1">
-          <Pressable
-            className="mr-1 h-8 w-8 items-center justify-center"
-            onPress={leaveHost}
-            accessibilityRole="button"
-            accessibilityLabel="Back to hosts"
-            hitSlop={8}
-          >
-            <ChevronLeft size={22} colorClassName="accent-foreground" />
-          </Pressable>
-          {(() => {
-            const headerVerdict = classifyConnection({
-              state: connState,
-              reconnectAttempts,
-              lastConnectedAt
-            })
-            return (
-              <>
-                <View className="mr-3 min-w-0 flex-1 flex-row items-center">
-                  <StatusDot state={connState} verdict={headerVerdict} />
-                  <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
-                    {hostName || 'Host'}
-                  </Text>
-                </View>
-                {connState !== 'connected' &&
-                  (() => {
-                    // Why: status label removed in favor of just the dot +
-                    // Reconnect button — the home screen already surfaces the
-                    // verdict text per host, and the dot color already
-                    // signals severity here. Auth-failed routes through its
-                    // dedicated banner so we still want to suppress the
-                    // Reconnect button for that case.
-                    const verdict = headerVerdict
-                    const isError = isErrorVerdict(verdict)
-                    const showReconnectButton = isError && hostId && verdict.kind !== 'auth-failed'
-                    if (!showReconnectButton) {
-                      return null
-                    }
-                    return (
-                      <Pressable
-                        className="bg-card border-border border px-2 py-1"
-                        onPress={() => void forceReconnectHost(hostId!)}
-                        hitSlop={8}
-                      >
-                        <Text className="text-foreground text-xs font-semibold">Reconnect</Text>
-                      </Pressable>
-                    )
-                  })()}
-              </>
-            )
-          })()}
-          {!embedded && floatingWorkspaceEnabled ? (
+      <SafeAreaView className="bg-background" edges={['top']}>
+        <MobileGlassSurface>
+          <View className="min-h-9 flex-row items-center justify-between px-4 pt-1">
             <Pressable
-              className={cn(
-                'w-8 h-7 items-center justify-center',
-                connState !== 'connected' && styles.toolbarIconDisabled
-              )}
-              onPress={openFloatingWorkspace}
-              disabled={connState !== 'connected'}
+              className="mr-1 h-8 w-8 items-center justify-center rounded-full"
+              onPress={leaveHost}
               accessibilityRole="button"
-              accessibilityLabel="Floating Workspace"
+              accessibilityLabel="Back to hosts"
               hitSlop={8}
             >
-              <SquareTerminal
-                size={18}
-                colorClassName={
-                  connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
-                }
-              />
+              <ChevronLeft size={22} colorClassName="accent-foreground" />
             </Pressable>
-          ) : null}
-          {embedded && onHideSidebar ? (
-            <Pressable
-              className="ml-1 h-6 w-6 items-center justify-center"
-              onPress={onHideSidebar}
-              accessibilityRole="button"
-              accessibilityLabel="Hide sidebar"
-              hitSlop={8}
-            >
-              <PanelLeftClose size={14} colorClassName="accent-muted-foreground" />
-            </Pressable>
-          ) : null}
-        </View>
+            {(() => {
+              const headerVerdict = classifyConnection({
+                state: connState,
+                reconnectAttempts,
+                lastConnectedAt
+              })
+              return (
+                <>
+                  <View className="mr-3 min-w-0 flex-1 flex-row items-center">
+                    <StatusDot state={connState} verdict={headerVerdict} />
+                    <Text
+                      className="text-foreground flex-1 text-sm font-semibold"
+                      numberOfLines={1}
+                    >
+                      {hostName || 'Host'}
+                    </Text>
+                  </View>
+                  {connState !== 'connected' &&
+                    (() => {
+                      // Why: status label removed in favor of just the dot +
+                      // Reconnect button — the home screen already surfaces the
+                      // verdict text per host, and the dot color already
+                      // signals severity here. Auth-failed routes through its
+                      // dedicated banner so we still want to suppress the
+                      // Reconnect button for that case.
+                      const verdict = headerVerdict
+                      const isError = isErrorVerdict(verdict)
+                      const showReconnectButton =
+                        isError && hostId && verdict.kind !== 'auth-failed'
+                      if (!showReconnectButton) {
+                        return null
+                      }
+                      return (
+                        <Pressable
+                          className="border-border bg-card rounded-xl border px-2 py-1"
+                          onPress={() => void forceReconnectHost(hostId!)}
+                          hitSlop={8}
+                        >
+                          <Text className="text-foreground text-xs font-semibold">Reconnect</Text>
+                        </Pressable>
+                      )
+                    })()}
+                </>
+              )
+            })()}
+            {!embedded && floatingWorkspaceEnabled ? (
+              <Pressable
+                className={cn(
+                  'h-7 w-8 items-center justify-center rounded-full',
+                  connState !== 'connected' && styles.toolbarIconDisabled
+                )}
+                onPress={openFloatingWorkspace}
+                disabled={connState !== 'connected'}
+                accessibilityRole="button"
+                accessibilityLabel="Floating Workspace"
+                hitSlop={8}
+              >
+                <SquareTerminal
+                  size={18}
+                  colorClassName={
+                    connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
+                  }
+                />
+              </Pressable>
+            ) : null}
+            {embedded && onHideSidebar ? (
+              <Pressable
+                className="ml-1 h-6 w-6 items-center justify-center rounded-full"
+                onPress={onHideSidebar}
+                accessibilityRole="button"
+                accessibilityLabel="Hide sidebar"
+                hitSlop={8}
+              >
+                <PanelLeftClose size={14} colorClassName="accent-muted-foreground" />
+              </Pressable>
+            ) : null}
+          </View>
 
-        {/* Filter/sort/group toolbar */}
-        {embedded ? (
-          <View className="border-b-border gap-1 border-b px-2 py-1.5">
-            <View className={styles.embeddedToolbarRow}>
-              {floatingWorkspaceEnabled ? (
+          {/* Filter/sort/group toolbar */}
+          {embedded ? (
+            <View className="border-b-border gap-1 border-b px-2 py-1.5">
+              <View className={styles.embeddedToolbarRow}>
+                {floatingWorkspaceEnabled ? (
+                  <Pressable
+                    className={cn(
+                      styles.embeddedToolbarIconButton,
+                      connState !== 'connected' && styles.toolbarIconDisabled
+                    )}
+                    onPress={openFloatingWorkspace}
+                    disabled={connState !== 'connected'}
+                    accessibilityRole="button"
+                    accessibilityLabel="Floating Workspace"
+                  >
+                    <SquareTerminal size={16} colorClassName="accent-muted-foreground" />
+                  </Pressable>
+                ) : null}
+
+                <Pressable
+                  className={cn(
+                    styles.filterChip,
+                    'flex-1 min-w-0 h-8 justify-center px-1 py-0',
+                    activeFilterCount > 0 && styles.filterChipActive
+                  )}
+                  onPress={() => setShowFilterModal(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Filter workspaces${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
+                >
+                  <Filter
+                    size={12}
+                    colorClassName={
+                      activeFilterCount > 0 ? 'accent-foreground' : 'accent-muted-foreground'
+                    }
+                  />
+                  <Text
+                    className={cn(
+                      styles.filterChipText,
+                      activeFilterCount > 0 && styles.filterChipTextActive
+                    )}
+                    numberOfLines={1}
+                  >
+                    Filter{activeFilterCount > 0 ? ` ${activeFilterCount}` : ''}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  className={cn(styles.modeButton, styles.embeddedModeButton)}
+                  onPress={() => setShowSortPicker(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Sort by ${selectedSortLabel}`}
+                >
+                  <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
+                  <Text className={styles.sortLabel} numberOfLines={1}>
+                    {selectedSortLabel}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  className={cn(styles.modeButton, styles.embeddedModeButton)}
+                  onPress={() => setShowGroupPicker(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Group workspaces"
+                >
+                  <Layers size={14} colorClassName="accent-muted-foreground" />
+                  <Text className={styles.sortLabel} numberOfLines={1}>
+                    {groupMode === 'none'
+                      ? 'Group'
+                      : groupMode === 'workspaceStatus'
+                        ? 'Status'
+                        : groupMode === 'repo'
+                          ? 'Repo'
+                          : 'PR'}
+                  </Text>
+                </Pressable>
+              </View>
+
+              <View className={styles.embeddedToolbarRow}>
                 <Pressable
                   className={cn(
                     styles.embeddedToolbarIconButton,
                     connState !== 'connected' && styles.toolbarIconDisabled
                   )}
-                  onPress={openFloatingWorkspace}
+                  onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
                   disabled={connState !== 'connected'}
                   accessibilityRole="button"
-                  accessibilityLabel="Floating Workspace"
+                  accessibilityLabel="Accounts"
                 >
-                  <SquareTerminal size={16} colorClassName="accent-muted-foreground" />
+                  <UserCircle size={16} colorClassName="accent-muted-foreground" />
                 </Pressable>
-              ) : null}
 
+                <Pressable
+                  className={cn(
+                    styles.embeddedToolbarIconButton,
+                    connState !== 'connected' && styles.toolbarIconDisabled
+                  )}
+                  onPress={openNewWorktreeModal}
+                  disabled={connState !== 'connected'}
+                  accessibilityRole="button"
+                  accessibilityLabel="New workspace"
+                >
+                  <Plus
+                    size={16}
+                    weight="regular"
+                    colorClassName={
+                      connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
+                    }
+                  />
+                </Pressable>
+
+                <Pressable
+                  className={styles.embeddedToolbarIconButton}
+                  onPress={() => setShowSearch((s) => !s)}
+                  accessibilityRole="button"
+                  accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
+                >
+                  {showSearch ? (
+                    <X size={16} colorClassName="accent-muted-foreground" />
+                  ) : (
+                    <Search size={16} colorClassName="accent-muted-foreground" />
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <View className="border-b-border flex-row items-center gap-2 border-b px-3 py-1.5">
               <Pressable
-                className={cn(
-                  styles.filterChip,
-                  'flex-1 min-w-0 h-[30px] justify-center px-1 py-0',
-                  activeFilterCount > 0 && styles.filterChipActive
-                )}
+                className={cn(styles.filterChip, activeFilterCount > 0 && styles.filterChipActive)}
                 onPress={() => setShowFilterModal(true)}
-                accessibilityRole="button"
-                accessibilityLabel={`Filter workspaces${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
               >
                 <Filter
                   size={12}
@@ -968,30 +1084,19 @@ export function HostScreen({
                     styles.filterChipText,
                     activeFilterCount > 0 && styles.filterChipTextActive
                   )}
-                  numberOfLines={1}
                 >
-                  Filter{activeFilterCount > 0 ? ` ${activeFilterCount}` : ''}
+                  Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
                 </Text>
               </Pressable>
 
-              <Pressable
-                className={cn(styles.modeButton, styles.embeddedModeButton)}
-                onPress={() => setShowSortPicker(true)}
-                accessibilityRole="button"
-                accessibilityLabel={`Sort by ${selectedSortLabel}`}
-              >
+              <Pressable className={styles.modeButton} onPress={() => setShowSortPicker(true)}>
                 <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
                 <Text className={styles.sortLabel} numberOfLines={1}>
                   {selectedSortLabel}
                 </Text>
               </Pressable>
 
-              <Pressable
-                className={cn(styles.modeButton, styles.embeddedModeButton)}
-                onPress={() => setShowGroupPicker(true)}
-                accessibilityRole="button"
-                accessibilityLabel="Group workspaces"
-              >
+              <Pressable className={styles.modeButton} onPress={() => setShowGroupPicker(true)}>
                 <Layers size={14} colorClassName="accent-muted-foreground" />
                 <Text className={styles.sortLabel} numberOfLines={1}>
                   {groupMode === 'none'
@@ -1003,47 +1108,18 @@ export function HostScreen({
                         : 'PR'}
                 </Text>
               </Pressable>
-            </View>
 
-            <View className={styles.embeddedToolbarRow}>
+              <View className="flex-1" />
+
               <Pressable
-                className={cn(
-                  styles.embeddedToolbarIconButton,
-                  connState !== 'connected' && styles.toolbarIconDisabled
-                )}
+                className={styles.searchToggle}
                 onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
                 disabled={connState !== 'connected'}
-                accessibilityRole="button"
-                accessibilityLabel="Accounts"
               >
                 <UserCircle size={16} colorClassName="accent-muted-foreground" />
               </Pressable>
 
-              <Pressable
-                className={cn(
-                  styles.embeddedToolbarIconButton,
-                  connState !== 'connected' && styles.toolbarIconDisabled
-                )}
-                onPress={openNewWorktreeModal}
-                disabled={connState !== 'connected'}
-                accessibilityRole="button"
-                accessibilityLabel="New workspace"
-              >
-                <Plus
-                  size={16}
-                  weight="regular"
-                  colorClassName={
-                    connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
-                  }
-                />
-              </Pressable>
-
-              <Pressable
-                className={styles.embeddedToolbarIconButton}
-                onPress={() => setShowSearch((s) => !s)}
-                accessibilityRole="button"
-                accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
-              >
+              <Pressable className={styles.searchToggle} onPress={() => setShowSearch((s) => !s)}>
                 {showSearch ? (
                   <X size={16} colorClassName="accent-muted-foreground" />
                 ) : (
@@ -1051,68 +1127,8 @@ export function HostScreen({
                 )}
               </Pressable>
             </View>
-          </View>
-        ) : (
-          <View className="border-b-border flex-row items-center gap-2 border-b px-3 py-1.5">
-            <Pressable
-              className={cn(styles.filterChip, activeFilterCount > 0 && styles.filterChipActive)}
-              onPress={() => setShowFilterModal(true)}
-            >
-              <Filter
-                size={12}
-                colorClassName={
-                  activeFilterCount > 0 ? 'accent-foreground' : 'accent-muted-foreground'
-                }
-              />
-              <Text
-                className={cn(
-                  styles.filterChipText,
-                  activeFilterCount > 0 && styles.filterChipTextActive
-                )}
-              >
-                Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
-              </Text>
-            </Pressable>
-
-            <Pressable className={styles.modeButton} onPress={() => setShowSortPicker(true)}>
-              <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
-              <Text className={styles.sortLabel} numberOfLines={1}>
-                {selectedSortLabel}
-              </Text>
-            </Pressable>
-
-            <Pressable className={styles.modeButton} onPress={() => setShowGroupPicker(true)}>
-              <Layers size={14} colorClassName="accent-muted-foreground" />
-              <Text className={styles.sortLabel} numberOfLines={1}>
-                {groupMode === 'none'
-                  ? 'Group'
-                  : groupMode === 'workspaceStatus'
-                    ? 'Status'
-                    : groupMode === 'repo'
-                      ? 'Repo'
-                      : 'PR'}
-              </Text>
-            </Pressable>
-
-            <View className="flex-1" />
-
-            <Pressable
-              className={styles.searchToggle}
-              onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
-              disabled={connState !== 'connected'}
-            >
-              <UserCircle size={16} colorClassName="accent-muted-foreground" />
-            </Pressable>
-
-            <Pressable className={styles.searchToggle} onPress={() => setShowSearch((s) => !s)}>
-              {showSearch ? (
-                <X size={16} colorClassName="accent-muted-foreground" />
-              ) : (
-                <Search size={16} colorClassName="accent-muted-foreground" />
-              )}
-            </Pressable>
-          </View>
-        )}
+          )}
+        </MobileGlassSurface>
       </SafeAreaView>
 
       {/* Auth failed banner */}
@@ -1178,7 +1194,7 @@ export function HostScreen({
           // above the Samsung 3-button nav / iOS home indicator.
           contentContainerClassName={cn(
             'pb-4',
-            embedded ? 'pb-safe-offset-4' : 'pb-safe-offset-[72px]'
+            embedded ? 'pb-safe-offset-4' : 'pb-safe-offset-18'
           )}
           contentContainerStyle={
             isWideLayout && !embedded
@@ -1223,10 +1239,10 @@ export function HostScreen({
                     />
                   </View>
                 ) : null}
-                <Text className="text-muted-foreground/60 text-[11px] font-semibold tracking-[0.5px] uppercase">
+                <Text className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                   {section.title}
                 </Text>
-                <Text className="text-muted-foreground/60 ml-1 text-[11px]">{count}</Text>
+                <Text className="text-muted-foreground ml-1 text-xs">{count}</Text>
               </Pressable>
             )
           }}
@@ -1341,7 +1357,7 @@ export function HostScreen({
           <View>
             <View className="pb-4">
               <Text className="text-foreground text-sm font-bold">Delete Worktree</Text>
-              <Text className="text-muted-foreground mt-1 text-sm leading-[20px]">
+              <Text className="text-muted-foreground mt-1 text-sm leading-5">
                 Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
               </Text>
             </View>
@@ -1463,30 +1479,30 @@ export default function HostWorktreeRoute() {
 }
 
 function ListSeparator() {
-  return <View className="bg-border mr-4 ml-10 h-[1px]" />
+  return <View className="bg-border mr-4 ml-10 h-px" />
 }
 
 const styles = {
   embeddedToolbarRow: cn('flex-row items-center gap-2'),
-  embeddedModeButton: cn('flex-1 min-w-0 h-[30px] justify-center px-1 py-0'),
-  filterChip: cn('flex-row items-center gap-1 px-2.5 py-1 border border-border'),
+  embeddedModeButton: cn('flex-1 min-w-0 h-8 justify-center px-1 py-0'),
+  filterChip: cn('border-border flex-row items-center gap-1 rounded-full border px-2.5 py-1'),
   filterChipActive: cn('border-muted-foreground bg-secondary'),
   filterChipText: cn('text-xs text-muted-foreground'),
   filterChipTextActive: cn('text-foreground'),
   modeButton: cn('flex-row items-center shrink min-w-0 gap-1 px-2 py-1'),
   sortLabel: cn('shrink min-w-0 text-xs text-muted-foreground'),
   embeddedToolbarIconButton: cn('flex-1 h-7 items-center justify-center'),
-  toolbarIconDisabled: cn('opacity-[0.6]'),
-  searchToggle: cn('p-1'),
+  toolbarIconDisabled: cn('opacity-60'),
+  searchToggle: cn('rounded-full p-1'),
   centered: cn('flex-1 items-center justify-center'),
   sectionIcon: cn('mr-1'),
   filterSectionLabel: cn(
-    'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px] mb-1 px-1'
+    'text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 px-1'
   ),
-  filterGroup: cn('bg-card overflow-hidden mb-3'),
+  filterGroup: cn('mb-3 overflow-hidden rounded-2xl bg-card'),
   filterRow: cn('flex-row items-center py-3 px-3.5 gap-2'),
   filterRowText: cn('flex-1 text-sm text-foreground'),
   filterSeparator: cn('h-hairline bg-border mx-3'),
-  confirmBtn: cn('flex-1 py-2.5 items-center'),
+  confirmBtn: cn('flex-1 items-center rounded-xl py-2.5'),
   confirmBtnPressedActive: cn('active:bg-accent')
 } as const
