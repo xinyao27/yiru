@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
 
-import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
+import type { MobileNetworkInterface } from '../settings/mobile/network-interface-selection'
 import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice } from './hero'
 import type { StepIndex } from './hero'
 import type { MobilePageStage } from './page-stage'

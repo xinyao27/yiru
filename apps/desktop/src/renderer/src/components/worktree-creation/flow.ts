@@ -1,6 +1,5 @@
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import {
   formatWorkspaceCreateError,
   getWorkspaceCreateErrorToastMessage
@@ -28,6 +27,7 @@ import { useAppStore } from '@/store'
 
 import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import type { CreateWorktreeResult } from '../../../../shared/types'
+import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
 
 type ContinueBackgroundWorktreeCreationOptions = {
   revealCreationSurface?: boolean

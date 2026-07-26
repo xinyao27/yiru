@@ -11,7 +11,7 @@ import { useDaemonActions, DaemonActionDialog } from '../daemon-actions/use-acti
 import { ManageSessionKillDialog } from './manage-session-kill-dialog'
 import { ManageSessionsTable } from './manage-sessions-table'
 import { SearchableSetting } from './searchable-setting'
-import { getManageSessionsSearchEntries } from './terminal-search'
+import { getManageSessionsSearchEntries } from './terminal/search'
 
 type ConfirmKind = 'killOne'
 

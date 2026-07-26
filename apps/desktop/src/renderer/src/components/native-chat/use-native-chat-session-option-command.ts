@@ -7,10 +7,10 @@ import {
   createClaudeModelSwitchConfirmationObserver,
   type ClaudeModelSwitchConfirmationObserver
 } from './claude-model-switch-confirmation'
-import { pushHistory, type HistoryState } from './composer-state'
-import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer-target'
+import { pushHistory, type HistoryState } from './composer/state'
+import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer/target'
 import { sendNativeChatMessageVerified } from './runtime-send'
-import type { NativeChatSessionOptionDispatchCommand } from './session-option-command-dispatch'
+import type { NativeChatSessionOptionDispatchCommand } from './session/option-command-dispatch'
 
 export function useNativeChatSessionOptionCommand(args: {
   agent: AgentType

@@ -11,7 +11,7 @@ import type { FeatureWallOpenSourceTelemetry } from '../../../../shared/telemetr
 import type { GlobalSettings } from '../../../../shared/types'
 import type { WorkbenchStep } from '../../../../shared/workbench-steps'
 import { GitHubRow } from '../onboarding/integrations-step'
-import { OrchestrationSetupCard } from '../settings/orchestration-setup-card'
+import { OrchestrationSetupCard } from '../settings/orchestration/setup-card'
 import { AgentsOrchestrationVisual } from './agents-orchestration-visual'
 import { UsageAccountsCard } from './agents-orchestration/usage-accounts-card'
 import { AiCommitPrSettingsCard } from './ai-commit-pr-settings-card'

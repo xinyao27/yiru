@@ -1,6 +1,6 @@
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import type { CoworkingUnavailableCatalogSource } from './owner-worktree-catalog-contract'
+import type { CoworkingUnavailableCatalogSource } from './owner/worktree-catalog-contract'
 import type {
   CoworkingOwnerWorktree,
   CoworkingWorktreeIncarnationUnavailableReason,

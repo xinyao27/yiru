@@ -1,6 +1,6 @@
 import { readRequesterControlState } from './control-state-wire-validation'
-import type { CoworkingOwnerRecord } from './owner-record'
-import type { CoworkingSubscription } from './peer-connection-contract'
+import type { CoworkingOwnerRecord } from './owner/record'
+import type { CoworkingSubscription } from './peer/connection-contract'
 
 export function ensureCoworkingControlSubscription(
   record: CoworkingOwnerRecord,

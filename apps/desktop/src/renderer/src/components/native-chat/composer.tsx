@@ -6,15 +6,15 @@ import { sendRuntimePtyInput } from '@/runtime/terminal-inspection'
 
 import { getVerifiedNativeChatCommands } from '../../../../shared/native-chat/agent-profiles'
 import { useAppStore } from '../../store'
-import { NativeChatComposerField } from './composer-field'
+import { NativeChatComposerField } from './composer/field'
 import {
   applyMentionSuggestion,
   EMPTY_HISTORY,
   pushHistory,
   type HistoryState
-} from './composer-state'
-import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer-target'
-import type { NativeChatComposerHandle, NativeChatComposerProps } from './composer-types'
+} from './composer/state'
+import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer/target'
+import type { NativeChatComposerHandle, NativeChatComposerProps } from './composer/types'
 import { readNativeChatDraftCache } from './draft-cache'
 import {
   sendNativeChatMessage,
@@ -36,7 +36,7 @@ import { useNativeChatSessionOptionCommand } from './use-native-chat-session-opt
 import { useNativeChatSessionOptions } from './use-native-chat-session-options'
 import { useNativeChatTypedInsertion } from './use-native-chat-typed-insertion'
 
-export type { NativeChatComposerHandle, NativeChatComposerProps } from './composer-types'
+export type { NativeChatComposerHandle, NativeChatComposerProps } from './composer/types'
 
 // Why: a plain ESC byte is what the agent TUIs read as the interrupt key over a
 // PTY (matching how xterm forwards Escape). The richer interrupt-intent

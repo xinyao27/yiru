@@ -5,7 +5,7 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 
 import { cn } from '../../lib/class-names'
-import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
+import type { MobileNetworkInterface } from '../settings/mobile/network-interface-selection'
 import { AndroidLogo, IosBrandIcon } from './brand-icons'
 import { NetworkInterfacePicker } from './network-interface-picker'
 import type { MobilePlatform, MobileReleaseLink } from './release-link'

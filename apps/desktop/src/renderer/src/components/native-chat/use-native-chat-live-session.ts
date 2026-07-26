@@ -33,7 +33,7 @@ import {
   getNativeChatSessionTransport,
   nextNativeChatSubscriptionId,
   resolveNativeChatUnsubscribe
-} from './session-transport'
+} from './session/transport'
 import { useNativeChatCompletionRefresh } from './use-native-chat-completion-refresh'
 
 export type UseNativeChatLiveSessionArgs = {

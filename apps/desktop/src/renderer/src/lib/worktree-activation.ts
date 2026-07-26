@@ -4,7 +4,6 @@ import type {
 } from '@yiru/workbench-model/agent'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import { resumeSleepingAgentSessionsForWorktree } from '@/components/terminal-workspace/resume-sleeping-agent-session'
 import { shouldAutoCreateInitialTerminal } from '@/components/terminal/initial-terminal'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
@@ -59,6 +58,7 @@ import type {
   WorktreeSetupLaunch
 } from '../../../shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../shared/workspace/scope'
+import { seedNativeChatAppliedSessionOptions } from '../components/native-chat/session/option-cache'
 import {
   folderWorkspaceActivationBlocked,
   getFolderWorkspacePathStatusDescription,

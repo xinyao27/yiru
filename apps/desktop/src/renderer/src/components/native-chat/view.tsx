@@ -26,7 +26,7 @@ import {
   type NativeChatPendingSend
 } from './pending'
 import { selectNativeChatRuntimeEnvironmentId } from './runtime-owner'
-import { NativeChatSessionGate } from './session-gate'
+import { NativeChatSessionGate } from './session/gate'
 import { findTabAgentEntry } from './tab-agent-entry'
 import {
   shouldFocusNativeChatComposerFromEditingKey,

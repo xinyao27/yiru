@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
 import type { SkillSourceKind } from '../../../../shared/skills'
-import type { ComposerAutocomplete, NativeChatPickerItem } from './composer-state'
+import type { ComposerAutocomplete, NativeChatPickerItem } from './composer/state'
 
 export const NativeChatPickerMenu = memo(function NativeChatPickerMenu({
   autocomplete,

@@ -11,7 +11,7 @@ import type { GlobalSettings, Project, ProjectUpdateArgs } from '../../../../sha
 import { Button } from '../ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { SettingsRow, SettingsSegmentedControl } from './form-controls'
-import type { ProjectRuntimeSessionSummary } from './repository-runtime-session-summary'
+import type { ProjectRuntimeSessionSummary } from './repository/runtime-session-summary'
 
 type ProjectRuntimeSegment = LocalWindowsRuntimePreference['kind']
 

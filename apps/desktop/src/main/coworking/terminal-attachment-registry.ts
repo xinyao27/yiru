@@ -1,7 +1,7 @@
 import type {
   CoworkingResolvedHistoricalSession,
   CoworkingResolvedLiveSession
-} from './session-catalog'
+} from './session/catalog'
 import type { CoworkingPublicWorktreeInstance } from './worktree-publication-state'
 
 const MAX_TERMINAL_ATTACHMENTS_PER_CONNECTION = 2_000

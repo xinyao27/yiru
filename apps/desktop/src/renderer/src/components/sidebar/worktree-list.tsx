@@ -36,7 +36,6 @@ import { CoworkingProjectVisibilityDialog } from '@/components/coworking/worktre
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { RepoForkIndicator } from '@/components/repo/fork-indicator'
 import { RepoIconGlyph } from '@/components/repo/icon'
-import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'
 import {
   getFolderWorkspacePathStatusDescription,
   getFolderWorkspacePathStatusTitle
@@ -112,6 +111,7 @@ import {
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility
 } from '../../../../shared/workspace/worktree-ownership'
+import { getRepositoryIconSectionId } from '../settings/repository/settings-targets'
 import { CoworkingSidebarProjectedRow } from './coworking-sidebar-projected-row'
 import { projectCoworkingSidebarRows, type CoworkingSidebarRow } from './coworking-sidebar-rows'
 import { SidebarDisclosure } from './disclosure'

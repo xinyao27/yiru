@@ -22,7 +22,7 @@ import {
   COWORKING_LOCAL_SCOPE_PREFIX,
   COWORKING_SSH_SCOPE_PREFIX,
   coworkingFilesystemProvider
-} from './yiru-host-paths'
+} from './yiru-host/paths'
 
 const OPEN_NOFOLLOW = typeof constants.O_NOFOLLOW === 'number' ? constants.O_NOFOLLOW : 0
 const OPEN_DIRECTORY = typeof constants.O_DIRECTORY === 'number' ? constants.O_DIRECTORY : 0

@@ -16,7 +16,7 @@ import {
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { getProviderAccountScope } from './provider-account-scope'
 import { ProviderHostScopeControl } from './provider-host-scope-control'
-import { usePreflightCardStatuses } from './source-control-preflight-card-status'
+import { usePreflightCardStatuses } from './source-control/preflight-card-status'
 
 function ProviderAccountScopeDetails({
   children

@@ -7,7 +7,7 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import { shouldShowUsagePercentageDisplayChangeNotice } from '../../../../shared/usage-percentage-display-change-notice'
-import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '../settings/appearance-usage-percentage-search'
+import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '../settings/appearance/usage-percentage-search'
 
 // Why: let startup modals settle before the status-bar callout competes for focus.
 const SHOW_DELAY_MS = 1_800

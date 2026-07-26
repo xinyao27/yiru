@@ -4,7 +4,7 @@ import { translate } from '@/i18n/i18n'
 
 import { parseManualNetworkAddress } from '../../../../shared/network/manual-address'
 import { AddressPicker, type AddressOption } from '../network/address-picker'
-import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
+import type { MobileNetworkInterface } from '../settings/mobile/network-interface-selection'
 
 // Why: MobileHero (mobile pairing screen) and MobilePairingSetupSection
 // (Settings → Mobile) both need the same network selector. This wraps the

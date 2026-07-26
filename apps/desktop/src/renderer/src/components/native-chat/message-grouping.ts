@@ -15,7 +15,7 @@ import {
   type NativeChatToolResultBlock
 } from '@yiru/workbench-model/agent'
 
-import { compareMessages } from './session-assembler'
+import { compareMessages } from './session/assembler'
 
 /** A tool-call block paired with the result that answered it, when one exists.
  *  `result` is null while the call is still in flight (no result yet). */

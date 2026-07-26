@@ -5,17 +5,17 @@ import {
   type ReadyMobileSessionTerminalTab
 } from './mobile-vault-session-projection'
 import { CoworkingObservedWorktreeProvenance } from './observed-worktree-provenance'
-import type { CoworkingOwnerSessionRecords } from './owner-session-records'
+import type { CoworkingOwnerSessionRecords } from './owner/session-records'
 import { CoworkingProviderSessionObserver } from './provider-session-observer'
-import { CoworkingSessionIdentityAliases } from './session-identity-aliases'
-import type { CoworkingSessionProvenanceIndex } from './session-provenance-index'
+import { CoworkingSessionIdentityAliases } from './session/identity-aliases'
+import type { CoworkingSessionProvenanceIndex } from './session/provenance-index'
 import {
   isSameSessionIdentityScope,
   LIVE_SESSION_INVENTORY_SCOPE,
   liveSessionReadRequest,
   toReadRequest
-} from './session-read-request'
-import { CoworkingSessionReadRoutes, coworkingSessionReadRouteBinding } from './session-read-routes'
+} from './session/read-request'
+import { CoworkingSessionReadRoutes, coworkingSessionReadRouteBinding } from './session/read-routes'
 import type {
   CoworkingExecutionHostSessionReader,
   CoworkingHistoricalSessionCandidate,
@@ -25,8 +25,8 @@ import type {
   CoworkingOwnerHistoricalSessionRecord,
   CoworkingSessionSource,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
-import { toSessionWorktree } from './session-worktree-binding'
+} from './session/source'
+import { toSessionWorktree } from './session/worktree-binding'
 import type { CoworkingTerminalSessionBindings } from './terminal-session-bindings'
 import type { CoworkingOwnerWorktree } from './worktree-incarnation'
 import type { CoworkingPublicWorktreeInstance } from './worktree-visibility'

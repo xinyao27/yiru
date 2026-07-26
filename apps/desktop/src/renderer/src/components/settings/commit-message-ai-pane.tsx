@@ -29,7 +29,7 @@ import { HostedReviewCreationDefaults } from './hosted-review-creation-defaults'
 import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
 import { getSettingOwnershipSummary } from './setting-ownership'
-import { SourceControlAiActionRecipeDefaults } from './source-control-ai-action-recipe-defaults'
+import { SourceControlAiActionRecipeDefaults } from './source-control/ai-action-recipe-defaults'
 
 type CommitMessageAiPaneProps = {
   settings: GlobalSettings

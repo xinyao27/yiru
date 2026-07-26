@@ -14,7 +14,7 @@ import {
 import type {
   CoworkingExecutionHostSessionReader,
   CoworkingHistoricalSessionPurpose
-} from '../../../coworking/session-source'
+} from '../../../coworking/session/source'
 import type { CoworkingTerminalSessionBindings } from '../../../coworking/terminal-session-bindings'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 

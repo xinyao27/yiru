@@ -3,14 +3,14 @@ import { useCallback, type Dispatch, type KeyboardEventHandler, type SetStateAct
 import {
   isNativeChatComposerComposing,
   shouldSubmitNativeChatComposer
-} from './composer-key-policy'
+} from './composer/key-policy'
 import {
   recallNext,
   recallPrevious,
   type ComposerAutocomplete,
   type HistoryState,
   type NativeChatPickerItem
-} from './composer-state'
+} from './composer/state'
 
 export type UseNativeChatComposerKeyDownArgs = {
   autocomplete: ComposerAutocomplete

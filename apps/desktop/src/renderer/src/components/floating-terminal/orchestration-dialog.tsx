@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
-import { AgentSkillSetupPanel } from '@/components/settings/agent-skill-setup-panel'
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,
@@ -30,6 +29,8 @@ import {
   ORCHESTRATION_SKILL_UPDATE_COMMAND
 } from '@/lib/orchestration-install-command'
 import { useAppStore } from '@/store'
+
+import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
 
 type FloatingTerminalOrchestrationDialogProps = {
   open: boolean

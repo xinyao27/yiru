@@ -17,19 +17,19 @@ import {
   createNativeChatSessionOptionRecord,
   readNativeChatSessionOptionCache,
   writeNativeChatSessionOptionCache
-} from './session-option-cache'
-import { buildNativeChatSessionOptionCommand } from './session-option-command-builder'
+} from './session/option-cache'
+import { buildNativeChatSessionOptionCommand } from './session/option-command-builder'
 import type {
   NativeChatSessionOptionDispatchCommand,
   NativeChatSessionOptionDispatchResult
-} from './session-option-command-dispatch'
-import { recordNativeChatSessionOptionCommand } from './session-option-command-recording'
-import { applyNativeChatReportedSessionOptions } from './session-option-reporting'
+} from './session/option-command-dispatch'
+import { recordNativeChatSessionOptionCommand } from './session/option-command-recording'
+import { applyNativeChatReportedSessionOptions } from './session/option-reporting'
 import {
   buildNativeChatSessionOptionSnapshot,
   flattenNativeChatSessionOptionRecord,
   type NativeChatSessionOptionMode
-} from './session-option-snapshot'
+} from './session/option-snapshot'
 
 type PersistSelection = (args: {
   modelId: string

@@ -1,5 +1,5 @@
 import type { AuthenticatedCoworkingPrincipal } from '../../shared/rpc-principal'
-import { CoworkingCatalogProjection } from './catalog-projection'
+import { CoworkingCatalogProjection } from './catalog/projection'
 import type { CoworkingQuotaProjection } from './quota-projection'
 import type { CoworkingShareCatalogSource } from './share-catalog-source'
 import type { CoworkingWorktreeVisibility } from './worktree-visibility'

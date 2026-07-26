@@ -6,7 +6,7 @@ import { gitExecFileAsync } from '../git/runner'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { requireSingleCoworkingGitPath, toCoworkingLocalAccessPath } from './canonical-host-path'
 import type { CoworkingCanonicalHostPath } from './worktree-containment'
-import { coworkingHostPath, coworkingSshConnectionIdFromScope } from './yiru-host-paths'
+import { coworkingHostPath, coworkingSshConnectionIdFromScope } from './yiru-host/paths'
 
 const GIT_ADMIN_PATH_TIMEOUT_MS = 10_000
 const GIT_ADMIN_PATH_MAX_BUFFER_BYTES = 64 * 1024

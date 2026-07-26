@@ -7,13 +7,13 @@ import {
   resolveCoworkingLiveSessionIdentity,
   coworkingObservedAgentProvider
 } from './live-session-display-identity'
-import { normalizeOwnerHistoricalSessionRecord } from './owner-session-records'
+import { normalizeOwnerHistoricalSessionRecord } from './owner/session-records'
 import type {
   CoworkingHistoricalSessionCandidate,
   CoworkingLiveSessionCandidate,
   CoworkingSessionClientTab,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
+} from './session/source'
 import type { CoworkingTerminalSessionBindings } from './terminal-session-bindings'
 
 const MAX_PROVIDER_SESSION_ID_LENGTH = 512

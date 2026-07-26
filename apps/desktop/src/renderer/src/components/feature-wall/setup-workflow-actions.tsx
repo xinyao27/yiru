@@ -15,7 +15,7 @@ import {
   requestContextualTourWhenReady,
   type RequestContextualTourWhenReadyArgs
 } from '../contextual-tours/request-contextual-tour-when-ready'
-import { getRepositoryLocalCommandsSectionId } from '../settings/repository-settings-targets'
+import { getRepositoryLocalCommandsSectionId } from '../settings/repository/settings-targets'
 
 export const SETUP_GUIDE_PROJECT_PROMPT = "First add a project you'd like to work on."
 

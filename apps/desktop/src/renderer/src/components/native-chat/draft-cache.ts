@@ -4,7 +4,7 @@
 // the typed-but-unsent draft would be lost on every TUI/GUI round-trip. Mirrors
 // the attachment cache so both halves of an unsent message survive the toggle.
 
-import { setBoundedScopeCacheEntry } from './composer-scope-cache'
+import { setBoundedScopeCacheEntry } from './composer/scope-cache'
 
 const draftCache = new Map<string, string>()
 

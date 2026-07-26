@@ -4,12 +4,12 @@ import type {
   CoworkingLiveSessionDisplayIdentity,
   CoworkingLiveSessionIdentity
 } from './live-session-display-identity'
-import { coworkingLiveTerminalSessionKey } from './session-resolution'
+import { coworkingLiveTerminalSessionKey } from './session/resolution'
 import type {
   CoworkingOwnerHistoricalSessionRecord,
   CoworkingSessionProvider,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
+} from './session/source'
 import type { CoworkingPublicWorktreeInstance } from './worktree-publication-state'
 
 const MAX_TERMINAL_SESSION_BINDINGS = 2_000

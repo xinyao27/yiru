@@ -14,7 +14,7 @@
 
 import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 
-import { compareMessages, mergeOne } from './session-assembler'
+import { compareMessages, mergeOne } from './session/assembler'
 
 export type IncrementalChatAssembler = {
   byId: Map<string, NativeChatMessage>

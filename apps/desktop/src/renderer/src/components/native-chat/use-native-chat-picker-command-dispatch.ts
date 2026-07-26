@@ -7,8 +7,8 @@ import {
   emitNativeChatSendClassified
 } from '@/components/native-chat/telemetry'
 
-import { pushHistory, type HistoryState, type NativeChatPickerItem } from './composer-state'
-import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer-target'
+import { pushHistory, type HistoryState, type NativeChatPickerItem } from './composer/state'
+import { nativeChatComposerTargetIsRemote, type NativeChatResolvedTarget } from './composer/target'
 import type { NativeChatPtySessionOptionsSurface } from './pty-session-options'
 import { sendNativeChatMessage } from './runtime-send'
 import type { NativeChatSendLifecycle } from './use-native-chat-send-lifecycle'

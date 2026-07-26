@@ -9,7 +9,7 @@ import {
   deriveComposerAutocomplete,
   editReplacesTriggerToken,
   type SlashCommandSuggestion
-} from './composer-state'
+} from './composer/state'
 
 const COMMANDS: SlashCommandSuggestion[] = [
   { name: 'clear' },

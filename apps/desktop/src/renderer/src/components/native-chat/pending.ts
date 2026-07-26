@@ -7,7 +7,7 @@ import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 
 import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
 
-import { setBoundedScopeCacheEntry } from './composer-scope-cache'
+import { setBoundedScopeCacheEntry } from './composer/scope-cache'
 import {
   advancedNativeChatUserContentCounts,
   assignNativeChatPendingOccurrence,

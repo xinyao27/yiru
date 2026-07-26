@@ -9,16 +9,16 @@ import {
   createNativeChatPtySessionOptions,
   type NativeChatPtySessionOptionsSurface
 } from './pty-session-options'
-import type { NativeChatSessionOptionDispatchCommand } from './session-option-command-dispatch'
+import type { NativeChatSessionOptionDispatchCommand } from './session/option-command-dispatch'
 import {
   discoverNativeChatCatalogModels,
   resolveNativeChatModelDiscoveryContext
-} from './session-option-discovery'
+} from './session/option-discovery'
 import {
   ensureNativeChatModelEnrichment,
   readNativeChatEnrichedModels,
   subscribeNativeChatEnrichedModels
-} from './session-option-enrichment'
+} from './session/option-enrichment'
 
 const EMPTY_SNAPSHOT: SessionOptionDescriptor[] = []
 const subscribeEmpty = (): (() => void) => () => {}

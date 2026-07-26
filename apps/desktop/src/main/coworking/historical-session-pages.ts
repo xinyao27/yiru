@@ -1,10 +1,10 @@
-import { COWORKING_SESSION_PROVENANCE_MAX_ENTRIES } from './session-provenance-index'
+import { COWORKING_SESSION_PROVENANCE_MAX_ENTRIES } from './session/provenance-index'
 import type {
   CoworkingHistoricalSessionCandidate,
   CoworkingHistoricalSessionPurpose,
   CoworkingSessionSource,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
+} from './session/source'
 
 export const COWORKING_HISTORICAL_SESSION_PAGE_SIZE = 512
 

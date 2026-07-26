@@ -6,18 +6,18 @@ import {
   getAgentAwakeDescription,
   getAgentAwakeSearchKeywords,
   getAgentAwakeTitle
-} from './agent-awake-copy'
-import { getAgentCacheTimerSearchEntries } from './agent-cache-timer-search'
+} from './agent/awake-copy'
+import { getAgentCacheTimerSearchEntries } from './agent/cache-timer-search'
 import {
   getAgentGeneratedTabTitlesDescription,
   getAgentGeneratedTabTitlesSearchKeywords,
   getAgentGeneratedTabTitlesTitle
-} from './agent-generated-tab-title-copy'
+} from './agent/generated-tab-title-copy'
 import {
   getAgentStatusHooksDescription,
   getAgentStatusHooksSearchKeywords,
   getAgentStatusHooksTitle
-} from './agent-status-hooks-copy'
+} from './agent/status-hooks-copy'
 import { searchKeywords, translateSearchKeyword, uniqueKeywords } from './search-keywords'
 
 function buildAgentSettingsKeywords(): string[] {

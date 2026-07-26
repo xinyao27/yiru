@@ -19,7 +19,7 @@ import { resolveCoworkingRepoLocalWslDistro } from '../../../coworking/repo-actu
 import type { CoworkingOwnerWorktree } from '../../../coworking/worktree-incarnation'
 import { CoworkingActualHostWorktreeIncarnationHost } from '../../../coworking/worktree-incarnation-host'
 import type { CoworkingPublicWorktreeInstance } from '../../../coworking/worktree-publication-state'
-import { createYiruCoworkingHostAdapter } from '../../../coworking/yiru-host-adapter'
+import { createYiruCoworkingHostAdapter } from '../../../coworking/yiru-host/adapter'
 import { getLocalProjectWorktreeGitOptions } from '../../../project-runtime-git-options'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { RpcContext } from '../core'

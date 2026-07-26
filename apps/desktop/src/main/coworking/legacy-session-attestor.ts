@@ -5,14 +5,14 @@ import {
   type CoworkingLegacyPublicationAttestation,
   type CoworkingSessionProvenance,
   type CoworkingSessionProvenanceIndex
-} from './session-provenance-index'
+} from './session/provenance-index'
 import type {
   CoworkingHistoricalSessionCandidate,
   CoworkingPreparedSessionRootMatcher,
   CoworkingSessionRootMatcher,
   CoworkingSessionSource,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
+} from './session/source'
 import {
   createEmptyCoworkingPublicationPersistence,
   type CoworkingPreparedPublicationPersistence

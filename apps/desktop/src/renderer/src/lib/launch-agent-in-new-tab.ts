@@ -1,7 +1,6 @@
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import { reconcileTabOrder } from '@/components/tab-bar/reconcile-order'
 import { translate } from '@/i18n/i18n'
 import { getAgentLaunchPlatformForRepo } from '@/lib/agent-launch-platform'
@@ -32,6 +31,7 @@ import {
   resolveTuiAgentLaunchEnv
 } from '../../../shared/tui-agent/launch-defaults'
 import type { TuiAgent } from '../../../shared/types'
+import { seedNativeChatAppliedSessionOptions } from '../components/native-chat/session/option-cache'
 
 export type LaunchAgentInNewTabArgs = {
   agent: TuiAgent

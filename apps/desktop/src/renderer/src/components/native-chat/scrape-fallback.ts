@@ -8,7 +8,7 @@
 
 import type { AgentType, NativeChatMessage, NativeChatSession } from '@yiru/workbench-model/agent'
 
-import { assembleNativeChatSession } from './session-assembler'
+import { assembleNativeChatSession } from './session/assembler'
 
 // Why: replicate (not import) the minimal ANSI/control-sequence strip used by
 // agent-session-fork-context.ts so we don't modify that file. Same three

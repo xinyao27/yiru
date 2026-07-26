@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { statusColor } from '@/components/settings/ssh-target-card'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,6 +16,8 @@ import {
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+
+import { statusColor } from '../settings/ssh/target-card'
 
 type SshDisconnectedDialogProps = {
   open: boolean

@@ -1,12 +1,12 @@
 import { coworkingObservedAgentProvider } from './live-session-display-identity'
 import { normalizeCoworkingSessionIdentifier } from './mobile-vault-session-projection'
 import type { ObservedWorktreeProvenanceScope } from './observed-worktree-provenance'
-import type { CoworkingSessionIdentityAliases } from './session-identity-aliases'
-import type { CoworkingSessionProvenanceIndex } from './session-provenance-index'
+import type { CoworkingSessionIdentityAliases } from './session/identity-aliases'
+import type { CoworkingSessionProvenanceIndex } from './session/provenance-index'
 import type {
   CoworkingMobileSessionTabsResult,
   CoworkingObservedProviderSession
-} from './session-source'
+} from './session/source'
 import type { CoworkingTerminalSessionBindings } from './terminal-session-bindings'
 
 const MAX_PROVIDER_SESSION_ID_LENGTH = 512

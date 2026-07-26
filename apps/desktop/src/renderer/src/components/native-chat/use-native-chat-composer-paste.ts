@@ -8,7 +8,7 @@ import {
   nativeChatWorktreeNotReadyNotice,
   type NativeChatAttachmentOwner
 } from './attachment-upload'
-import { NATIVE_CHAT_CONTEXT_PASTE_MAX_BYTES } from './composer-target'
+import { NATIVE_CHAT_CONTEXT_PASTE_MAX_BYTES } from './composer/target'
 import { resolveImagePaste } from './image-paste'
 
 export type UseNativeChatComposerPasteArgs = {

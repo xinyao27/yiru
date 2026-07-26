@@ -5,7 +5,7 @@ import type {
   CoworkingPreparedHistoricalSessionConsistency,
   CoworkingSessionRootMatcher,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
+} from './session/source'
 import type {
   CoworkingOwnerWorktree,
   CoworkingRegisteredWorktreeRoot,

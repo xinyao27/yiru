@@ -23,7 +23,7 @@ import {
   isRelayGracePeriodValid,
   parseRelayGracePeriodSeconds,
   type EditingTarget
-} from '../settings/ssh-target-draft'
+} from '../settings/ssh/target-draft'
 import { RemoteServerFields, SshHostFields } from './add-remote-host-fields'
 
 export type AddRemoteHostMode = 'ssh' | 'server'

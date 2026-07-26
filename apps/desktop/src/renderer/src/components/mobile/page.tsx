@@ -8,8 +8,8 @@ import { useAppStore } from '@/store'
 import {
   selectRefreshedNetworkAddress,
   type MobileNetworkInterface
-} from '../settings/mobile-network-interface-selection'
-import { useMobilePairingDevicePolling } from '../settings/mobile-pairing-device-polling'
+} from '../settings/mobile/network-interface-selection'
+import { useMobilePairingDevicePolling } from '../settings/mobile/pairing-device-polling'
 import type { PairedDevice, StepIndex } from './hero'
 import { MobilePageContent } from './page-content'
 import { shouldShowPairedAfterDeviceRefresh, type MobilePageStage as FlowStage } from './page-stage'

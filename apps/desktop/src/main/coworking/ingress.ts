@@ -13,7 +13,7 @@ import {
 import type { CoworkingE2EEKeypair } from './e2ee-keypair'
 import { openCoworkingEncryptedConnection } from './ingress-encrypted-connection'
 import type { CoworkingProbeService } from './ingress-probe'
-import type { CoworkingRpcGateway } from './rpc-gateway'
+import type { CoworkingRpcGateway } from './rpc/gateway'
 import type { TailnetControl, TailnetPrincipal, TailnetSnapshot } from './tailnet-control'
 import { normalizeTailnetIp } from './tailscale-json-projection'
 import type { CoworkingTicketAuthority } from './ticket-authority'

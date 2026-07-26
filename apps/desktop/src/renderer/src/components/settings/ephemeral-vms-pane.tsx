@@ -29,7 +29,7 @@ import {
 import { useAppStore } from '@/store'
 
 import { Button } from '../ui/button'
-import { AgentSkillSetupPanel } from './agent-skill-setup-panel'
+import { AgentSkillSetupPanel } from './agent/skill-setup-panel'
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,

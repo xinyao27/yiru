@@ -372,7 +372,7 @@ const DictationController = lazy(() =>
   }))
 )
 const SshPassphraseDialog = lazy(() =>
-  import('../components/settings/ssh-passphrase-dialog').then((module) => ({
+  import('../components/settings/ssh/passphrase-dialog').then((module) => ({
     default: module.SshPassphraseDialog
   }))
 )

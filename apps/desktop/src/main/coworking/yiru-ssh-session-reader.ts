@@ -21,7 +21,7 @@ import { CoworkingExecutionError } from './execution-error'
 import type {
   CoworkingExecutionHostSessionReader,
   CoworkingExecutionHostSessionReadRequest
-} from './session-source'
+} from './session/source'
 
 const SSH_SESSION_INVENTORY_PAGE_SIZE = 64
 

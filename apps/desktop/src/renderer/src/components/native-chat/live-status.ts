@@ -10,7 +10,7 @@ import type {
 } from '@yiru/workbench-model/agent'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 
-import { assembleNativeChatSession, type NativeChatSources } from './session-assembler'
+import { assembleNativeChatSession, type NativeChatSources } from './session/assembler'
 
 export type NativeChatLiveMergeInput = {
   sources: NativeChatSources

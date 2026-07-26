@@ -8,8 +8,8 @@ import {
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
-import { AgentSkillSetupPanel } from '../settings/agent-skill-setup-panel'
-import { StepBadge } from '../settings/browser-use-step-badge'
+import { AgentSkillSetupPanel } from '../settings/agent/skill-setup-panel'
+import { StepBadge } from '../settings/browser/use-step-badge'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import {

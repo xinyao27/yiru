@@ -2,11 +2,11 @@ import {
   belongsToLegacyAttestation,
   sameCoworkingSessionProvenance,
   coworkingSessionProvenanceKey
-} from './session-provenance-identity'
+} from './session/provenance-identity'
 import type {
   CoworkingLegacyPublicationProof,
   CoworkingSessionProvenance
-} from './session-provenance-index'
+} from './session/provenance-index'
 
 export function collectLegacyProvenanceCandidates(
   publications: readonly CoworkingLegacyPublicationProof[]

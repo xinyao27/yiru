@@ -6,7 +6,7 @@ import { COWORKING_MAX_STREAM_QUEUED_BYTES } from '../../shared/coworking/resour
 import { COWORKING_PROTOCOL_VERSION } from '../../shared/coworking/wire-contract'
 import { E2EEChannel } from '../runtime/rpc/e2ee-channel'
 import type { CoworkingE2EEKeypair } from './e2ee-keypair'
-import type { CoworkingRpcGateway, CoworkingServerConnection } from './rpc-gateway'
+import type { CoworkingRpcGateway, CoworkingServerConnection } from './rpc/gateway'
 import type { TailnetPrincipal } from './tailnet-control'
 import type { CoworkingTicketAuthority } from './ticket-authority'
 import { startCoworkingWebSocketHeartbeat } from './websocket-heartbeat'

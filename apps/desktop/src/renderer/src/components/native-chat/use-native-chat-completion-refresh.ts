@@ -2,7 +2,7 @@ import type { NativeChatMessage } from '@yiru/workbench-model/agent'
 import type { AgentStatusState, AgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useRef } from 'react'
 
-import type { NativeChatSessionTransport } from './session-transport'
+import type { NativeChatSessionTransport } from './session/transport'
 
 export function useNativeChatCompletionRefresh(args: {
   agent: AgentType

@@ -2,7 +2,6 @@ import { Minus, ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@phosphor-
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -22,6 +21,7 @@ import {
   resolveTuiAgentLaunchEnv
 } from '../../../../shared/tui-agent/launch-defaults'
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
+import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
 
 type FloatingTerminalWindowControlsProps = {
   maximized: boolean

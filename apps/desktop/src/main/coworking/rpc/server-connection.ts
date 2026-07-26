@@ -1,0 +1,315 @@
+import type {
+  CoworkingRpcFailure,
+  CoworkingRpcRequest,
+  CoworkingRpcResponse
+} from '../../../shared/coworking/wire-contract'
+import { COWORKING_MAX_RPC_PLAINTEXT_BYTES } from '../../../shared/coworking/wire-contract'
+import type { AuthenticatedCoworkingPrincipal } from '../../../shared/rpc-principal'
+import {
+  COWORKING_CANCEL_REQUEST_METHOD,
+  COWORKING_CANCEL_SUBSCRIPTION_METHOD
+} from './cancellation'
+import { projectCoworkingRpcErrorCode, projectCoworkingRpcErrorMessage } from './error'
+import type {
+  BoundCoworkingInvocation,
+  CoworkingConnectionTransport,
+  CoworkingRpcGatewayOptions,
+  CoworkingRpcInvocationContext,
+  CoworkingRpcMethodSpec,
+  CoworkingServerConnection
+} from './gateway'
+import { parseCoworkingRpcRequest } from './request-validation'
+import { handleCoworkingRpcCancellation } from './server-cancellation'
+import {
+  MAX_CONCURRENT_COWORKING_RPCS,
+  MAX_COWORKING_SUBSCRIPTIONS,
+  safelyCleanupCoworkingSubscription,
+  type ActiveCoworkingSubscription
+} from './server-policy'
+import { isCoworkingRpcStream, type CoworkingRpcStream } from './stream'
+
+export class CoworkingGatewayConnection implements CoworkingServerConnection {
+  private readonly requestAborts = new Map<string, AbortController>()
+  private readonly subscriptions = new Map<string, ActiveCoworkingSubscription>()
+  private readonly requestIds = new Set<string>()
+  private activeRequests = 0
+  private closed = false
+
+  constructor(
+    private readonly principal: AuthenticatedCoworkingPrincipal,
+    private readonly transport: CoworkingConnectionTransport,
+    private readonly options: CoworkingRpcGatewayOptions,
+    private readonly onClosed?: () => void
+  ) {}
+
+  dispatchJson(frame: string): void {
+    if (this.closed) {
+      return
+    }
+    const request = parseCoworkingRpcRequest(frame)
+    if (!request) {
+      this.sendFailure('unknown', 'invalid_argument')
+      return
+    }
+    if (request.method === COWORKING_CANCEL_SUBSCRIPTION_METHOD) {
+      this.cancelRequested(request, (requestId) => this.finishSubscription(requestId, false))
+      return
+    }
+    if (request.method === COWORKING_CANCEL_REQUEST_METHOD) {
+      this.cancelRequested(request, (requestId) => {
+        this.requestAborts.get(requestId)?.abort()
+        // Why: older clients cancel a timed-out stream as a request while its
+        // async setup is already tracked as a subscription; release both states.
+        this.finishSubscription(requestId, false)
+      })
+      return
+    }
+    if (this.requestIds.has(request.id)) {
+      // Why: a reused id could make a response look like it belongs to the original stream.
+      this.disconnect(1008, 'Duplicate request id')
+      return
+    }
+    const method = this.options.registry.get(request.method)
+    if (!method) {
+      this.sendFailure(request.id, 'method_not_found')
+      return
+    }
+    if (this.activeRequests >= MAX_CONCURRENT_COWORKING_RPCS) {
+      this.sendFailure(request.id, 'resource_busy')
+      return
+    }
+    if (method.streaming && this.subscriptions.size >= MAX_COWORKING_SUBSCRIPTIONS) {
+      this.sendFailure(request.id, 'resource_busy')
+      return
+    }
+    const parsed = method.schema.safeParse(request.params)
+    if (!parsed.success) {
+      this.sendFailure(request.id, 'invalid_argument')
+      return
+    }
+    const abort = new AbortController()
+    this.requestIds.add(request.id)
+    this.requestAborts.set(request.id, abort)
+    this.activeRequests++
+    const context: CoworkingRpcInvocationContext = {
+      principal: this.principal,
+      requestId: request.id,
+      signal: abort.signal
+    }
+    void this.invoke(method, parsed.data, context).finally(() => {
+      this.requestAborts.delete(request.id)
+      this.activeRequests--
+      if (!this.subscriptions.has(request.id)) {
+        this.requestIds.delete(request.id)
+      }
+    })
+  }
+
+  dispatchBinary(frame: Uint8Array<ArrayBufferLike>): void {
+    if (this.closed) {
+      return
+    }
+    void frame
+    // Why: accepting binary multiplex would create a second terminal-control policy path.
+    this.disconnect(1003, 'Binary frames are not supported')
+  }
+
+  disconnect(code: number, reason: string): void {
+    this.close()
+    this.transport.close(code, reason)
+  }
+
+  close(): void {
+    if (this.closed) {
+      return
+    }
+    this.closed = true
+    for (const abort of this.requestAborts.values()) {
+      abort.abort()
+    }
+    this.requestAborts.clear()
+    for (const requestId of this.subscriptions.keys()) {
+      this.finishSubscription(requestId, false)
+    }
+    this.requestIds.clear()
+    try {
+      try {
+        this.options.onConnectionClosed?.(this.principal.connectionId)
+      } catch {
+        // Why: transport teardown must remain idempotent even when a downstream
+        // cleanup reports an error after its authority has already been revoked.
+      }
+    } finally {
+      this.onClosed?.()
+    }
+  }
+
+  private async invoke(
+    method: CoworkingRpcMethodSpec,
+    params: unknown,
+    context: CoworkingRpcInvocationContext
+  ): Promise<void> {
+    try {
+      const bound = await method.bind(params, context)
+      this.options.authorize(method.access, bound, this.principal)
+      const result = await method.execute(bound.value, context)
+      if (this.closed || context.signal.aborted || !bound.isCurrent()) {
+        return
+      }
+      if (method.streaming) {
+        if (!isCoworkingRpcStream(result)) {
+          throw new Error('Coworking subscription returned a non-stream result')
+        }
+        await this.openSubscription(method, bound, result, context)
+        return
+      }
+      if (isCoworkingRpcStream(result)) {
+        throw new Error('Coworking request returned an undeclared stream')
+      }
+      this.send({
+        id: context.requestId,
+        ok: true,
+        result: method.project(result),
+        ownerRuntimeId: this.options.ownerRuntimeId
+      })
+    } catch (error) {
+      if (!this.closed && !context.signal.aborted) {
+        this.sendFailure(
+          context.requestId,
+          projectCoworkingRpcErrorCode(error),
+          projectCoworkingRpcErrorMessage(error)
+        )
+      }
+    }
+  }
+
+  private async openSubscription(
+    method: CoworkingRpcMethodSpec,
+    bound: BoundCoworkingInvocation,
+    stream: CoworkingRpcStream,
+    context: CoworkingRpcInvocationContext
+  ): Promise<void> {
+    const active: ActiveCoworkingSubscription = {
+      abort: new AbortController(),
+      cleanup: null,
+      unsubscribeInvalidation: null
+    }
+    this.subscriptions.set(context.requestId, active)
+    active.unsubscribeInvalidation =
+      bound.subscribeInvalidation?.(() => this.finishSubscription(context.requestId, false)) ?? null
+    const isUsable = (): boolean =>
+      !this.closed &&
+      this.subscriptions.get(context.requestId) === active &&
+      !active.abort.signal.aborted &&
+      bound.isCurrent()
+    let cleanup: (() => void) | void
+    try {
+      cleanup = await stream.open(
+        {
+          next: (value) => {
+            if (!isUsable()) {
+              this.finishSubscription(context.requestId, false)
+              return
+            }
+            const sent = this.send({
+              id: context.requestId,
+              ok: true,
+              result: method.project(value),
+              streaming: true,
+              ownerRuntimeId: this.options.ownerRuntimeId
+            })
+            if (!sent) {
+              this.finishSubscription(context.requestId, false)
+            }
+          },
+          error: (error) => {
+            if (isUsable()) {
+              this.sendFailure(
+                context.requestId,
+                projectCoworkingRpcErrorCode(error),
+                projectCoworkingRpcErrorMessage(error)
+              )
+            }
+            this.finishSubscription(context.requestId, false)
+          },
+          complete: () => this.finishSubscription(context.requestId, true)
+        },
+        { ...context, signal: active.abort.signal }
+      )
+    } catch (error) {
+      this.finishSubscription(context.requestId, false)
+      throw error
+    }
+    if (this.subscriptions.get(context.requestId) === active) {
+      active.cleanup = cleanup ?? null
+    } else {
+      cleanup?.()
+    }
+  }
+
+  private cancelRequested(request: CoworkingRpcRequest, cancel: (requestId: string) => void): void {
+    handleCoworkingRpcCancellation(request, {
+      activeRequestIds: this.requestIds,
+      cancel,
+      disconnectDuplicate: () => this.disconnect(1008, 'Duplicate request id'),
+      sendInvalidArgument: () => this.sendFailure(request.id, 'invalid_argument'),
+      sendCancelled: () =>
+        void this.send({
+          id: request.id,
+          ok: true,
+          result: { cancelled: true },
+          ownerRuntimeId: this.options.ownerRuntimeId
+        })
+    })
+  }
+
+  private finishSubscription(requestId: string, notifyRequester: boolean): void {
+    const active = this.subscriptions.get(requestId)
+    if (!active) {
+      return
+    }
+    this.subscriptions.delete(requestId)
+    this.requestIds.delete(requestId)
+    active.abort.abort()
+    safelyCleanupCoworkingSubscription(active.unsubscribeInvalidation)
+    safelyCleanupCoworkingSubscription(active.cleanup)
+    if (notifyRequester && !this.closed) {
+      this.send({
+        id: requestId,
+        ok: true,
+        result: null,
+        ownerRuntimeId: this.options.ownerRuntimeId
+      })
+    }
+  }
+
+  private sendFailure(
+    id: string,
+    code: CoworkingRpcFailure['error']['code'],
+    message: string = code
+  ): void {
+    this.send({
+      id,
+      ok: false,
+      error: { code, message },
+      ownerRuntimeId: this.options.ownerRuntimeId
+    })
+  }
+
+  private send(response: CoworkingRpcResponse): boolean {
+    if (this.closed) {
+      return false
+    }
+    const frame = JSON.stringify(response)
+    if (Buffer.byteLength(frame, 'utf8') <= COWORKING_MAX_RPC_PLAINTEXT_BYTES) {
+      this.transport.sendJson(frame, response.ok && response.streaming ? response.id : undefined)
+      return true
+    }
+    if (response.ok) {
+      this.sendFailure(response.id, 'result_too_large')
+      return false
+    }
+    this.disconnect(1011, 'Oversized RPC failure')
+    return false
+  }
+}

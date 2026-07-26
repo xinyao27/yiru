@@ -1,7 +1,7 @@
 import type {
   CoworkingExecutionHostSessionReadRequest,
   CoworkingSessionWorktreeIdentity
-} from './session-source'
+} from './session/source'
 
 const MAX_OBSERVED_WORKTREES = 256
 

@@ -75,7 +75,7 @@ import { CodexUsageStore, initCodexUsagePath } from './codex/usage/store'
 import {
   createCoworkingOwnerComposition,
   type CoworkingOwnerComposition
-} from './coworking/owner-composition'
+} from './coworking/owner/composition'
 import { registerCoworkingSharingHandlers } from './coworking/sharing'
 import { CoworkingUnavailableOwnerService } from './coworking/unavailable-owner-service'
 import {

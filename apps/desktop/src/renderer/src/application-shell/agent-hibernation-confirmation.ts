@@ -1,4 +1,4 @@
-import type { AgentHibernationCandidate } from '../components/settings/agent-hibernation-planner'
+import type { AgentHibernationCandidate } from '../components/settings/agent/hibernation-planner'
 
 export type AgentHibernationConfirmationState = Record<string, string>
 

@@ -20,7 +20,6 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { ensureHooksConfirmed } from '@/components/automations/ensure-hooks-confirmed'
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from '@/components/contextual-tours/contextual-tour-composer-events'
-import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/session-option-cache'
 import {
   buildNewWorkspaceCreateTargetOptions,
   getProjectGroupIdFromNewWorkspaceOptionId,
@@ -141,6 +140,7 @@ import type {
   ProjectGroup
 } from '../../../../shared/types'
 import { isWorkspaceStatusId } from '../../../../shared/workspace/statuses'
+import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
 import {
   resolveComposerBranchNameOverrideForCreate,
   resolveComposerBranchPick,

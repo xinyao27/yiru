@@ -12,7 +12,7 @@ import type {
   CoworkingExecutionHostSessionReadRequest,
   CoworkingMobileSessionTabsResult,
   CoworkingObservedProviderSession
-} from './session-source'
+} from './session/source'
 
 type CoworkingSessionRuntime = Pick<
   YiruRuntimeService,

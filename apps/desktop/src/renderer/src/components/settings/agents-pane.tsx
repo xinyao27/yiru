@@ -35,15 +35,15 @@ import {
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { AgentAwakeSetting } from './agent-awake-setting'
-import { AgentCacheTimerSection } from './agent-cache-timer-section'
-import { parseAgentDefaultEnvDraft, stringifyAgentDefaultEnvDraft } from './agent-default-env-draft'
+import { AgentAwakeSetting } from './agent/awake-setting'
+import { AgentCacheTimerSection } from './agent/cache-timer-section'
+import { parseAgentDefaultEnvDraft, stringifyAgentDefaultEnvDraft } from './agent/default-env-draft'
 import {
   getAgentGeneratedTabTitlesDescription,
   getAgentGeneratedTabTitlesTitle
-} from './agent-generated-tab-title-copy'
-import { AgentRuntimeSetting } from './agent-runtime-setting'
-import { getAgentStatusHooksDescription, getAgentStatusHooksTitle } from './agent-status-hooks-copy'
+} from './agent/generated-tab-title-copy'
+import { AgentRuntimeSetting } from './agent/runtime-setting'
+import { getAgentStatusHooksDescription, getAgentStatusHooksTitle } from './agent/status-hooks-copy'
 import {
   AgentSessionSourceHomeInput,
   buildCodexSessionSourceHomeControl,

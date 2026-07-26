@@ -2,7 +2,7 @@ import { mapWithConcurrency } from '../../shared/map-with-concurrency'
 import type {
   CoworkingOwnerWorktreeCatalog,
   CoworkingOwnerWorktreeCatalogInventory
-} from './owner-worktree-catalog-contract'
+} from './owner/worktree-catalog-contract'
 import {
   CoworkingOwnerWorktreeCatalogError,
   CoworkingPublicationValidationError,
@@ -49,7 +49,7 @@ export type {
   CoworkingOwnerWorktreeCatalog,
   CoworkingOwnerWorktreeCatalogInventory,
   CoworkingUnavailableCatalogSource
-} from './owner-worktree-catalog-contract'
+} from './owner/worktree-catalog-contract'
 
 export type CoworkingPublicationCandidate = {
   target: CoworkingOwnerWorktree
