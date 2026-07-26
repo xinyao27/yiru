@@ -86,8 +86,8 @@ import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
 } from '../shared/folder-workspace-path-status'
+import type { FridaySession } from '../shared/friday-types'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
-import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type {
   LanguageServerDocumentUriArgs,
   LanguageServerDocumentUriResult,
@@ -2065,9 +2065,9 @@ export type PreloadApi = {
   openCodeUsage: OpenCodeUsageApi
   aiVault: AiVaultApi
   nativeChat: NativeChatApi
-  globalAssistant: {
-    getOrCreate: () => Promise<GlobalAssistantSession>
-    restart: () => Promise<GlobalAssistantSession>
+  friday: {
+    getOrCreate: () => Promise<FridaySession>
+    restart: () => Promise<FridaySession>
   }
   fs: {
     readDir: (args: { dirPath: string; connectionId?: string }) => Promise<DirEntry[]>
@@ -2529,7 +2529,7 @@ export type PreloadApi = {
         launchToken?: string
         launchAgent?: TuiAgent
         viewMode?: 'terminal' | 'chat'
-        isGlobalAssistant?: boolean
+        isFriday?: boolean
         title?: string
         ptyId?: string
         activate?: boolean

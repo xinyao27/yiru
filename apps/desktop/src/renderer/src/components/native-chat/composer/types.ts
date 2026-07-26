@@ -22,6 +22,7 @@ export type NativeChatComposerProps = {
   onSlashCommand?: (command: string) => void
   /** Picker-only agent commands continue in the hosted TUI after dispatch. */
   onSwitchToTerminal?: () => void
+  onRelaunchSession?: () => void
   /** Reads the hosted TUI's current rendered screen when chat is entered. */
   readTerminalScreen?: () => string | null
 }

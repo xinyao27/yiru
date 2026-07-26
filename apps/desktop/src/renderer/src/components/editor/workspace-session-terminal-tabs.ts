@@ -11,7 +11,7 @@ export function buildSanitizedTabsByWorktree(
       tabs
         // Why: the app shuts down the assistant PTY on exit; persisting its
         // runtime-only tab would restore dead terminal chrome on next launch.
-        .filter((tab) => tab.isGlobalAssistant !== true)
+        .filter((tab) => tab.isFriday !== true)
         .map((tab) => {
           const { pendingActivationSpawn: _unused, ...rest } = tab
           void _unused

@@ -1,6 +1,6 @@
 import type { TuiAgent } from './types'
 
-export type GlobalAssistantSession = {
+export type FridaySession = {
   agent: TuiAgent
   handle: string
   paneKey: string

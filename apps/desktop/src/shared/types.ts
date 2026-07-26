@@ -735,7 +735,7 @@ export type Tab = {
   viewMode?: 'terminal' | 'chat'
   /** App-owned assistant tabs remain ordinary terminal tabs so every existing
    * tab-group, persistence, and close path continues to apply. */
-  isGlobalAssistant?: boolean
+  isFriday?: boolean
 }
 
 export type TabGroup = {
@@ -793,7 +793,7 @@ export type TerminalTab = {
    *  and manually-started agents omit it. */
   launchAgent?: TuiAgent
   /** Identifies the app-owned assistant without inventing a new content type. */
-  isGlobalAssistant?: boolean
+  isFriday?: boolean
   /** Why: when `setActiveWorktree` bumps generation on all-dead tabs to drive a
    *  TerminalPane remount, the fresh PTY that results is caused by navigation,
    *  not by the user doing work. Without this flag the resulting

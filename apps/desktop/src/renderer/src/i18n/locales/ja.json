@@ -11909,7 +11909,8 @@
       "agentUnavailable": "このワークスペースホストで {{agent}} が検出されませんでした。",
       "sent": "セッションコンテキストを新しい {{agent}} セッションに送信しました。",
       "deliveryFailed": "新しい {{agent}} セッションは開始しましたが、コンテキストを送信できませんでした。",
-      "launchFailed": "新しい {{agent}} セッションを開始できませんでした。"
+      "launchFailed": "新しい {{agent}} セッションを開始できませんでした。",
+      "launchOptions": "起動オプション"
     },
     "native-chat": {
       "composer": {
@@ -11966,7 +11967,8 @@
           "high": "高",
           "xhigh": "最高",
           "max": "最大"
-        }
+        },
+        "relaunchWithOtherAgent": "Agent やモデルを変更…"
       },
       "tool": {
         "running": "実行中…",
@@ -12043,7 +12045,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "アシスタントを開く",
       "startError": "グローバルアシスタントを起動できませんでした。",
       "newConversation": "新しい会話",

@@ -99,9 +99,9 @@ import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/bridge'
 import { closeAllWatchers } from './filesystem/watcher'
+import { FridayService } from './friday/service'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
-import { GlobalAssistantService } from './global-assistant/service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
@@ -251,7 +251,7 @@ let codexRuntimeHome: CodexRuntimeHomeService | null = null
 let claudeAccounts: ClaudeAccountService | null = null
 let claudeRuntimeAuth: ClaudeRuntimeAuthService | null = null
 let runtime: YiruRuntimeService | null = null
-let globalAssistant: GlobalAssistantService | null = null
+let friday: FridayService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
 let coworkingOwner: CoworkingOwnerComposition | null = null
@@ -1140,7 +1140,7 @@ function openMainWindow(): BrowserWindow {
       isRecoveryReloadInFlight,
       onBeforeUpdateQuit: () =>
         preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store }),
-      globalAssistant: globalAssistant ?? undefined
+      friday: friday ?? undefined
     }
   )
   rateLimits.attach(window)
@@ -2050,7 +2050,7 @@ app.whenReady().then(async () => {
       isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {}
   })
   runtime = runtimeService
-  globalAssistant = new GlobalAssistantService(store, runtimeService, getCanonicalUserDataPath())
+  friday = new FridayService(store, runtimeService, getCanonicalUserDataPath())
   browserManager.setBrowserGuestStateChangedListener((worktreeId) => {
     runtimeService.notifyMobileSessionTabsChanged(worktreeId)
   })
@@ -2519,8 +2519,8 @@ app.on('will-quit', (e) => {
   runtime?.getOffscreenBrowserBackend()?.destroyAll?.()
   browserManager.setBrowserGuestStateChangedListener(null)
   const emulatorShutdown = runtime?.getEmulatorBridge()?.destroyAllSessions() ?? Promise.resolve()
-  const globalAssistantShutdown = globalAssistant?.dispose() ?? Promise.resolve()
-  globalAssistant = null
+  const fridayShutdown = friday?.dispose() ?? Promise.resolve()
+  friday = null
   killAllPty()
   const watcherShutdown = shutdownWatchersOnce()
   store?.flush()
@@ -2584,7 +2584,7 @@ app.on('will-quit', (e) => {
       coworkingStop,
       watcherShutdown,
       emulatorShutdown,
-      globalAssistantShutdown
+      fridayShutdown
     ])
       .then(() => shutdownTelemetry())
       .then(() => shutdownObservability())

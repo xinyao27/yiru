@@ -19,6 +19,9 @@ type PrepareAgentSessionContinuationFromPaneArgs = {
   groupId: string | null
   workspacePath: string
   initialCwd: string
+  /** Why: switching Agent or model is a valid thing to do on a session that has
+   *  nothing to hand off yet, so that entry point must not demand context. */
+  requireContext?: boolean
 }
 
 export function canContinueAgentSessionInNewSession(
@@ -49,7 +52,8 @@ export function prepareAgentSessionContinuationFromPane({
   worktreeId,
   groupId,
   workspacePath,
-  initialCwd
+  initialCwd,
+  requireContext = true
 }: PrepareAgentSessionContinuationFromPaneArgs): AgentSessionContinuationRequest | null {
   const state = useAppStore.getState()
   const paneKey = makePaneKey(tabId, pane.leafId)
@@ -67,7 +71,7 @@ export function prepareAgentSessionContinuationFromPane({
     lastPrompt: status?.prompt,
     lastAssistantMessage: status?.lastAssistantMessage
   }
-  if (!buildAgentSessionContinuationPrompt(source, 'focused')) {
+  if (requireContext && !buildAgentSessionContinuationPrompt(source, 'focused')) {
     toast.error(
       translate(
         'components.agentSessionContinuation.noContext',

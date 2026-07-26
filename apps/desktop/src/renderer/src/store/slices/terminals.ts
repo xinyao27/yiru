@@ -603,7 +603,7 @@ export type TerminalSlice = {
       viewMode?: Tab['viewMode']
       /** Keeps the assistant inside the terminal tab model while allowing its
        * native-chat surface to bypass the ordinary experimental preference. */
-      isGlobalAssistant?: boolean
+      isFriday?: boolean
       startupCwd?: string
     }
   ) => TerminalTab
@@ -1027,7 +1027,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         ...(createdShellOverride !== undefined ? { shellOverride: createdShellOverride } : {}),
         ...(startupCwd && startupCwd.length > 0 ? { startupCwd } : {}),
         ...(options?.launchAgent ? { launchAgent: options.launchAgent } : {}),
-        ...(options?.isGlobalAssistant ? { isGlobalAssistant: true } : {}),
+        ...(options?.isFriday ? { isFriday: true } : {}),
         // Why: when terminal-workspace.tsx's activation fallback auto-creates a tab for a
         // first-visit worktree, the resulting PTY spawn is caused by the user
         // clicking the worktree, not by work happening in it. Tagging the tab
@@ -1106,7 +1106,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         // Why: agent launches open in chat when the opt-in default is on;
         // omitted for all other tabs so they keep the implicit 'terminal' mode.
         ...(options?.viewMode ? { viewMode: options.viewMode } : {}),
-        ...(options?.isGlobalAssistant ? { isGlobalAssistant: true } : {})
+        ...(options?.isFriday ? { isFriday: true } : {})
       }
       const nextGroupOrder = dedupeTabOrder([...cleanedGroupOrder, unifiedTab.id])
       const nextRecent = shouldActivate

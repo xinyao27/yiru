@@ -74,10 +74,10 @@ import {
   type EditorPrepareHotExitDetail
 } from '../shared/editor-save-events'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
+import type { FridaySession } from '../shared/friday-types'
 import type { AppStarSource } from '../shared/gh-star-source'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
-import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
 import type { LanguageServerEvent } from '../shared/language-server'
 import type {
@@ -3164,7 +3164,7 @@ const api = {
         launchToken?: string
         launchAgent?: TuiAgent
         viewMode?: 'terminal' | 'chat'
-        isGlobalAssistant?: boolean
+        isFriday?: boolean
         title?: string
         ptyId?: string
         activate?: boolean
@@ -3188,7 +3188,7 @@ const api = {
           launchToken?: string
           launchAgent?: TuiAgent
           viewMode?: 'terminal' | 'chat'
-          isGlobalAssistant?: boolean
+          isFriday?: boolean
           title?: string
           ptyId?: string
           activate?: boolean
@@ -3646,10 +3646,9 @@ const api = {
     }
   },
 
-  globalAssistant: {
-    getOrCreate: (): Promise<GlobalAssistantSession> =>
-      ipcRenderer.invoke('globalAssistant:getOrCreate'),
-    restart: (): Promise<GlobalAssistantSession> => ipcRenderer.invoke('globalAssistant:restart')
+  friday: {
+    getOrCreate: (): Promise<FridaySession> => ipcRenderer.invoke('friday:getOrCreate'),
+    restart: (): Promise<FridaySession> => ipcRenderer.invoke('friday:restart')
   },
 
   runtime: {

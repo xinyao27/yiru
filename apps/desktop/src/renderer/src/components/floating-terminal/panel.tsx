@@ -1792,8 +1792,8 @@ function FloatingTerminalEmptyState({
             )}
             <span className="truncate text-left leading-none">
               {assistantLoadingVisible
-                ? translate('components.global-assistant.starting', 'Starting assistant…')
-                : translate('components.global-assistant.open', 'Open Assistant')}
+                ? translate('components.friday.starting', 'Starting assistant…')
+                : translate('components.friday.open', 'Open Assistant')}
             </span>
             <FloatingEmptyStateShortcut shortcut={assistantShortcut} />
           </Button>

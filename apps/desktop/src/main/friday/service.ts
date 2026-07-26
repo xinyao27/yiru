@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { isResumableTuiAgent } from '@yiru/workbench-model/agent'
@@ -7,8 +7,8 @@ import { isNativeChatSupportedAgent } from '@yiru/workbench-model/agent'
 import { normalizeRuntimePathForComparison } from '@yiru/workbench-model/platform'
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
 
-import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../shared/constants'
-import type { GlobalAssistantSession } from '../../shared/global-assistant-types'
+import { FRIDAY_WORKTREE_ID } from '../../shared/constants'
+import type { FridaySession } from '../../shared/friday-types'
 import { isTuiAgent, TUI_AGENT_CONFIG } from '../../shared/tui-agent/config'
 import {
   getTuiAgentDefaultArgs,
@@ -30,37 +30,16 @@ import {
 import type { Store } from '../persistence'
 import { detectInstalledAgentsWithShellPathHydration } from '../preflight/preflight'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import {
+  getFridayHomePath,
+  getLegacyFridayHomePath,
+  migrateFridayHomeIfNeeded
+} from './home-migration'
+import { FRIDAY_IDENTITY, resolveFridayIdentityFileAction } from './identity'
 
-const ASSISTANT_IDENTITY = `# Yiru Global Assistant
-
-You are Yiru's global assistant. Help the user operate Yiru, coordinate work across projects,
-and inspect local or connected workspaces through the Yiru CLI.
-
-## Operating Yiru
-
-- Use \`yiru worktree list\` to inspect workspaces and \`yiru worktree show --worktree <selector>\` for details.
-- Use \`yiru worktree create --repo <repo> --name <name> --agent <agent> --prompt <task>\` to dispatch work.
-- Use \`yiru terminal list\`, \`yiru terminal read --terminal <handle>\`, and \`yiru terminal send --terminal <handle> --text <text> --enter\` to work with terminals.
-- Use \`yiru orchestration task-list\` and related orchestration commands to coordinate tasks.
-- Use \`yiru automations list\` and \`yiru automations runs --id <automation>\` to inspect automations.
-- Use \`yiru automations run <automation>\` to trigger an automation immediately.
-- Use \`yiru sessions list\` or \`yiru sessions search <query>\` to find prior AI sessions.
-- Run \`yiru --help\` or \`yiru <group> --help\` when you need the current command contract.
-
-Read \`YIRU_CLI_COMMAND\` and use its value as the executable when it is set; this points to the
-active CLI command in development builds. Otherwise use \`yiru\` as shown above.
-
-## Safety
-
-Always ask for confirmation immediately before deleting a workspace, stopping a terminal or
-automation, removing a session, or taking another destructive action. Explain exactly what will
-be affected. Never assume the currently selected workspace is local; Yiru may be connected to an
-SSH host.
-`
-
-export class GlobalAssistantService {
-  private session: GlobalAssistantSession | null = null
-  private creating: Promise<GlobalAssistantSession> | null = null
+export class FridayService {
+  private session: FridaySession | null = null
+  private creating: Promise<FridaySession> | null = null
   private disposed = false
 
   constructor(
@@ -69,9 +48,9 @@ export class GlobalAssistantService {
     private readonly userDataPath: string
   ) {}
 
-  async getOrCreate(): Promise<GlobalAssistantSession> {
+  async getOrCreate(): Promise<FridaySession> {
     if (this.disposed) {
-      throw new Error('Global Assistant is shutting down.')
+      throw new Error('Friday is shutting down.')
     }
     let session = this.session
     if (!session || !(await this.isAlive(session))) {
@@ -81,9 +60,9 @@ export class GlobalAssistantService {
     return this.revealSession(session)
   }
 
-  async restart(): Promise<GlobalAssistantSession> {
+  async restart(): Promise<FridaySession> {
     if (this.disposed) {
-      throw new Error('Global Assistant is shutting down.')
+      throw new Error('Friday is shutting down.')
     }
     const pending = this.creating
     if (pending) {
@@ -111,7 +90,7 @@ export class GlobalAssistantService {
     }
   }
 
-  private startCreatingSession(mode: 'resume' | 'fresh'): Promise<GlobalAssistantSession> {
+  private startCreatingSession(mode: 'resume' | 'fresh'): Promise<FridaySession> {
     if (!this.creating) {
       this.creating = this.createSession(mode).finally(() => {
         this.creating = null
@@ -120,18 +99,19 @@ export class GlobalAssistantService {
     return this.creating
   }
 
-  private async revealSession(session: GlobalAssistantSession): Promise<GlobalAssistantSession> {
-    const tabId = await this.runtime.revealGlobalAssistantChat(session.handle)
+  private async revealSession(session: FridaySession): Promise<FridaySession> {
+    const tabId = await this.runtime.revealFridayChat(session.handle)
     const revealed = tabId === session.tabId ? session : { ...session, tabId }
     this.session = revealed
     return revealed
   }
 
-  private async createSession(mode: 'resume' | 'fresh'): Promise<GlobalAssistantSession> {
-    const assistantPath = join(this.userDataPath, 'assistant')
-    await this.ensureIdentityFiles(assistantPath)
+  private async createSession(mode: 'resume' | 'fresh'): Promise<FridaySession> {
+    await migrateFridayHomeIfNeeded(this.userDataPath)
+    const fridayHome = getFridayHomePath(this.userDataPath)
+    await this.ensureIdentityFiles(fridayHome)
     const agent = await this.resolveAgent()
-    this.markWorkspaceTrusted(agent, assistantPath)
+    this.markWorkspaceTrusted(agent, fridayHome)
 
     const settings = this.store.getSettings()
     const agentArgs = getTuiAgentDefaultArgs(agent)
@@ -141,11 +121,11 @@ export class GlobalAssistantService {
       isRemote: false,
       terminalWindowsShell: settings.terminalWindowsShell
     })
-    // Why: the assistant must operate Yiru unattended even when ordinary
+    // Why: Friday must operate Yiru unattended even when ordinary
     // workspace agents are configured to stop for per-tool approval.
     const startup =
       mode === 'resume'
-        ? await this.buildResumeStartup(agent, assistantPath, agentArgs, agentEnv, shell)
+        ? await this.buildResumeStartup(agent, fridayHome, agentArgs, agentEnv, shell)
         : null
     const effectiveStartup =
       startup ??
@@ -160,12 +140,12 @@ export class GlobalAssistantService {
         allowEmptyPromptLaunch: true
       })
     if (!effectiveStartup) {
-      throw new Error(`Could not build the ${agent} launch command for Global Assistant.`)
+      throw new Error(`Could not build the ${agent} launch command for Friday.`)
     }
 
-    const terminal = await this.runtime.createTerminal(GLOBAL_ASSISTANT_WORKTREE_ID, {
+    const terminal = await this.runtime.createTerminal(FRIDAY_WORKTREE_ID, {
       command: effectiveStartup.launchCommand,
-      cwd: assistantPath,
+      cwd: fridayHome,
       ...(effectiveStartup.env ? { env: effectiveStartup.env } : {}),
       launchConfig: effectiveStartup.launchConfig,
       launchAgent: agent,
@@ -173,7 +153,7 @@ export class GlobalAssistantService {
         ? { startupCommandDelivery: effectiveStartup.startupCommandDelivery }
         : {}),
       viewMode: 'chat',
-      title: 'Yiru Assistant',
+      title: 'Friday',
       presentation: 'background',
       // Why: this PTY exists only for native chat until the user explicitly
       // chooses the raw-terminal escape; mobile/session tab lists stay clean.
@@ -181,7 +161,7 @@ export class GlobalAssistantService {
     })
     if (!terminal.tabId || !terminal.paneKey || !terminal.ptyId) {
       await this.runtime.closeTerminal(terminal.handle).catch(() => undefined)
-      throw new Error('Global Assistant started without a usable terminal identity.')
+      throw new Error('Friday started without a usable terminal identity.')
     }
     return {
       agent,
@@ -189,13 +169,13 @@ export class GlobalAssistantService {
       paneKey: terminal.paneKey,
       ptyId: terminal.ptyId,
       tabId: terminal.tabId,
-      worktreeId: GLOBAL_ASSISTANT_WORKTREE_ID
+      worktreeId: FRIDAY_WORKTREE_ID
     }
   }
 
   private async buildResumeStartup(
     agent: TuiAgent,
-    assistantPath: string,
+    fridayHome: string,
     agentArgs: string,
     agentEnv: Record<string, string>,
     shell: AgentStartupShell | undefined
@@ -203,15 +183,19 @@ export class GlobalAssistantService {
     if (!isResumableTuiAgent(agent)) {
       return null
     }
+    // Why: providers index their session transcripts by cwd, so a conversation
+    // started before the Friday rename is only discoverable under the old home.
+    // Drop the legacy path after 2026-11-01.
+    const scopePaths = [fridayHome, getLegacyFridayHomePath(this.userDataPath)]
     const result = await this.runtime
-      .listAiVaultSessions({ limit: 50, scopePaths: [assistantPath] })
+      .listAiVaultSessions({ limit: 50, scopePaths })
       .catch(() => null)
-    const assistantPathKey = normalizeRuntimePathForComparison(assistantPath)
+    const homeKeys = new Set(scopePaths.map(normalizeRuntimePathForComparison))
     const previous = result?.sessions.find(
       (session) =>
         session.agent === agent &&
         session.cwd !== null &&
-        normalizeRuntimePathForComparison(session.cwd) === assistantPathKey &&
+        homeKeys.has(normalizeRuntimePathForComparison(session.cwd)) &&
         isAiVaultSessionResumableContent(session)
     )
     if (!previous) {
@@ -233,7 +217,7 @@ export class GlobalAssistantService {
     const settings = this.store.getSettings()
     const preferred = settings.defaultTuiAgent
     if (preferred === 'blank') {
-      throw new Error('Choose a native-chat capable default agent before opening Global Assistant.')
+      throw new Error('Choose a native-chat capable default agent before opening Friday.')
     }
     if (preferred) {
       if (!isTuiAgentEnabled(preferred, settings.disabledTuiAgents)) {
@@ -250,39 +234,37 @@ export class GlobalAssistantService {
       .filter(isNativeChatSupportedAgent)
     const picked = pickTuiAgent(null, detected, settings.disabledTuiAgents)
     if (!picked) {
-      throw new Error(
-        'Install or enable Claude, OpenClaude, Codex, or Grok to use Global Assistant.'
-      )
+      throw new Error('Install or enable Claude, OpenClaude, Codex, or Grok to use Friday.')
     }
     return picked
   }
 
-  private async ensureIdentityFiles(assistantPath: string): Promise<void> {
-    await mkdir(assistantPath, { recursive: true })
+  private async ensureIdentityFiles(fridayHome: string): Promise<void> {
+    await mkdir(fridayHome, { recursive: true })
     // Why: both Claude-family and Codex-family agents read their own identity
-    // filename; exclusive creation preserves any user customization thereafter.
+    // filename, so Friday's identity has to exist under each one.
     await Promise.all([
-      writeIdentityFile(join(assistantPath, 'CLAUDE.md')),
-      writeIdentityFile(join(assistantPath, 'AGENTS.md'))
+      writeIdentityFile(join(fridayHome, 'CLAUDE.md')),
+      writeIdentityFile(join(fridayHome, 'AGENTS.md'))
     ])
   }
 
-  private markWorkspaceTrusted(agent: TuiAgent, assistantPath: string): void {
+  private markWorkspaceTrusted(agent: TuiAgent, fridayHome: string): void {
     const preset = TUI_AGENT_CONFIG[agent].preflightTrust
     try {
       if (preset === 'cursor') {
-        markCursorWorkspaceTrusted(assistantPath)
+        markCursorWorkspaceTrusted(fridayHome)
       } else if (preset === 'copilot') {
-        markCopilotFolderTrusted(assistantPath)
+        markCopilotFolderTrusted(fridayHome)
       } else if (preset === 'codex') {
-        markCodexProjectTrusted(assistantPath)
+        markCodexProjectTrusted(fridayHome)
       }
     } catch {
       // Best-effort: an agent trust prompt is recoverable in raw-terminal mode.
     }
   }
 
-  private async isAlive(session: GlobalAssistantSession): Promise<boolean> {
+  private async isAlive(session: FridaySession): Promise<boolean> {
     try {
       await this.runtime.getTerminalAgentStatus(session.handle)
       return true
@@ -292,12 +274,21 @@ export class GlobalAssistantService {
   }
 }
 
-async function writeIdentityFile(filePath: string): Promise<void> {
+async function readExistingIdentity(filePath: string): Promise<string | null> {
   try {
-    await writeFile(filePath, ASSISTANT_IDENTITY, { encoding: 'utf8', flag: 'wx' })
+    return await readFile(filePath, 'utf8')
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
-      throw error
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null
     }
+    throw error
   }
+}
+
+async function writeIdentityFile(filePath: string): Promise<void> {
+  const existing = await readExistingIdentity(filePath)
+  if (resolveFridayIdentityFileAction(existing) === 'keep') {
+    return
+  }
+  await writeFile(filePath, FRIDAY_IDENTITY, { encoding: 'utf8' })
 }

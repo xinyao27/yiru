@@ -35,7 +35,7 @@ import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
 import { CODEX_ACCOUNT_RESTART_STARTUP } from '@/lib/codex-session-restart'
 import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
 import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
-import { requestGlobalAssistant } from '@/lib/global-assistant'
+import { requestFriday } from '@/lib/friday'
 import { useEffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/use-effective-mac-option-as-alt'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
@@ -725,8 +725,8 @@ export default function TerminalPane({
   const terminalTab = useAppStore((store) =>
     getCachedTerminalTabForWorktree(store.tabsByWorktree, worktreeId, tabId)
   )
-  const isGlobalAssistantTab = terminalTab?.isGlobalAssistant === true
-  const effectiveChatViewMode = (nativeChatEnabled || isGlobalAssistantTab) && isChatViewMode
+  const isFridayTab = terminalTab?.isFriday === true
+  const effectiveChatViewMode = (nativeChatEnabled || isFridayTab) && isChatViewMode
   const restoredLayout = useMemo(
     () => (terminalTab ? sanitizeTerminalLayoutPaneTitles(savedLayout, terminalTab) : savedLayout),
     [savedLayout, terminalTab]
@@ -795,7 +795,7 @@ export default function TerminalPane({
         leafIds: getNativeChatLeafIds()
       })
       return canToggleNativeChat({
-        experimentalNativeChatEnabled: nativeChatEnabled || isGlobalAssistantTab,
+        experimentalNativeChatEnabled: nativeChatEnabled || isFridayTab,
         contentType: 'terminal',
         launchAgent: detectedAgent ? null : launchAgent,
         detectedAgent,
@@ -805,7 +805,7 @@ export default function TerminalPane({
     },
     [
       tabAgentTypeByLeaf,
-      isGlobalAssistantTab,
+      isFridayTab,
       nativeChatEnabled,
       nativeChatTranscriptIsLocalReadable,
       terminalTab?.launchAgent,
@@ -820,17 +820,10 @@ export default function TerminalPane({
       // chat; it must not make an unsupported sibling look eligible.
       const isChatViewForLeaf = effectiveChatViewMode && leafId !== null && chatLeafId === leafId
       return (
-        ((nativeChatEnabled || isGlobalAssistantTab) && isChatViewForLeaf) ||
-        isChatEligibleForLeaf(leafId)
+        ((nativeChatEnabled || isFridayTab) && isChatViewForLeaf) || isChatEligibleForLeaf(leafId)
       )
     },
-    [
-      chatLeafId,
-      effectiveChatViewMode,
-      isChatEligibleForLeaf,
-      isGlobalAssistantTab,
-      nativeChatEnabled
-    ]
+    [chatLeafId, effectiveChatViewMode, isChatEligibleForLeaf, isFridayTab, nativeChatEnabled]
   )
   const toggleNativeChatForLeaf = useCallback(
     (leafId: string) => {
@@ -3198,9 +3191,10 @@ export default function TerminalPane({
                 launchAgent={chatPaneLaunchAgent}
                 resolvedAgent={chatPaneResolvedAgent}
                 onSwitchToTerminal={() => toggleNativeChatForLeaf(chatPane.leafId)}
-                onNewConversation={
-                  isGlobalAssistantTab ? () => requestGlobalAssistant('restart') : undefined
+                onRelaunchSession={() =>
+                  contextMenu.runForPane(chatPane.id, contextMenu.onRelaunchAgentSession)
                 }
+                onNewConversation={isFridayTab ? () => requestFriday('restart') : undefined}
                 readTerminalScreen={readNativeChatTerminalScreen}
                 contextMenuActions={{
                   onSplitRight: () => contextMenu.runForPane(chatPane.id, contextMenu.onSplitRight),

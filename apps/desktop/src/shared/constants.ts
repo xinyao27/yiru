@@ -63,7 +63,7 @@ export const ONBOARDING_FLOW_VERSION = 4
 export const YIRU_BROWSER_PARTITION = 'persist:yiru-browser'
 // Why: the assistant PTY is local and long-lived but has no repository-backed
 // workspace, so it needs a stable synthetic owner across main and renderer.
-export const GLOBAL_ASSISTANT_WORKTREE_ID = 'global-assistant'
+export const FRIDAY_WORKTREE_ID = 'friday'
 // Why: blank browser tabs must start from an inert guest URL that does not
 // navigate the privileged main window to about:blank. Renderer and main both
 // need the exact same value so the attach policy can allow only this one safe

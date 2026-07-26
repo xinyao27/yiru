@@ -24,6 +24,7 @@ import { useAppStore } from '@/store'
 
 import { repoIsRemote } from '../../../shared/agent/launch-remote'
 import { resolveNativeChatSessionOptionDefaults } from '../../../shared/native-chat/session-option-defaults'
+import type { SessionOptionValue } from '../../../shared/native-chat/session-options'
 import type { LaunchSource } from '../../../shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent/config'
 import {
@@ -59,6 +60,9 @@ export type LaunchAgentInNewTabArgs = {
   launchPlatform?: NodeJS.Platform
   /** Called after the prompt is actually delivered to the agent input path. */
   onPromptDelivered?: () => void
+  /** Model and per-model option picks for this launch. Overrides the persisted
+   *  defaults so a caller can relaunch onto a different model or effort level. */
+  sessionOptions?: Record<string, SessionOptionValue>
 }
 
 export type LaunchAgentInNewTabResult = {
@@ -136,10 +140,9 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
     isRemote,
     agentArgs: effectiveAgentArgs,
     agentEnv,
-    sessionOptions: resolveNativeChatSessionOptionDefaults(
-      store.settings?.nativeChatSessionOptions,
-      agent
-    )
+    sessionOptions:
+      args.sessionOptions ??
+      resolveNativeChatSessionOptionDefaults(store.settings?.nativeChatSessionOptions, agent)
   }
   const trimmedPrompt = prompt?.trim() ?? ''
   const hasPrompt = trimmedPrompt.length > 0

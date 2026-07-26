@@ -6,7 +6,7 @@ import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use
 import { translate } from '@/i18n/i18n'
 import { resolveDefaultAgentForNewTab } from '@/lib/agent-tab-shortcuts'
 import { getConnectionIdFromState } from '@/lib/connection-context'
-import { requestGlobalAssistant } from '@/lib/global-assistant'
+import { requestFriday } from '@/lib/friday'
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { useAppStore } from '@/store'
 
@@ -119,7 +119,7 @@ export function WorkspacePanelEditorEmptyState({
       {
         actionId: 'assistant.toggle',
         shortcut: toggleAssistantShortcut,
-        onClick: () => requestGlobalAssistant()
+        onClick: () => requestFriday()
       }
     ] satisfies WorkspacePanelShortcutHint[]
   ).filter((hint) => hint.shortcut.keys.length > 0)

@@ -14,6 +14,7 @@ export type NativeChatComposerActionsProps = {
   dictationDisabled: boolean
   sendDisabled: boolean
   isWorking: boolean
+  onRelaunchSession?: () => void
   isDictating: boolean
   isDictationHoldMode: boolean
   onAttach: () => void
@@ -31,6 +32,7 @@ export function NativeChatComposerActions({
   dictationDisabled,
   sendDisabled,
   isWorking,
+  onRelaunchSession,
   isDictating,
   isDictationHoldMode,
   onAttach,
@@ -76,6 +78,7 @@ export function NativeChatComposerActions({
           surface={sessionOptionsSurface}
           snapshot={sessionOptionsSnapshot}
           isWorking={isWorking}
+          onRelaunchSession={onRelaunchSession}
         />
         <Tooltip>
           <TooltipTrigger

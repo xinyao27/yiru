@@ -11909,7 +11909,8 @@
       "agentUnavailable": "未在此工作区主机上检测到 {{agent}}。",
       "sent": "已将会话上下文发送到新的 {{agent}} 会话。",
       "deliveryFailed": "新的 {{agent}} 会话已启动，但无法发送上下文。",
-      "launchFailed": "无法启动新的 {{agent}} 会话。"
+      "launchFailed": "无法启动新的 {{agent}} 会话。",
+      "launchOptions": "启动选项"
     },
     "native-chat": {
       "composer": {
@@ -11966,7 +11967,8 @@
           "high": "高",
           "xhigh": "极高",
           "max": "最大"
-        }
+        },
+        "relaunchWithOtherAgent": "更换 Agent 或模型…"
       },
       "tool": {
         "running": "正在运行…",
@@ -12043,7 +12045,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "打开助理",
       "startError": "全局助理无法启动。",
       "newConversation": "新建对话",

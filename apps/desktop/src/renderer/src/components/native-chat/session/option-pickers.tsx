@@ -34,6 +34,9 @@ export type NativeChatSessionOptionPickersProps = {
   surface: SessionOptionsSurface | null
   snapshot: SessionOptionDescriptor[]
   isWorking: boolean
+  /** Why: some agents only accept a model or effort change as a launch flag, so
+   *  the only honest way to switch is starting a new session with those flags. */
+  onRelaunchSession?: () => void
 }
 
 const CATEGORY_ORDER: Record<string, number> = {
@@ -138,13 +141,21 @@ function DescriptorMenuRows(props: {
   descriptor: SessionOptionDescriptor
   pending: boolean
   setValue: (value: SessionOptionValue) => void
-}): React.JSX.Element {
-  const { descriptor, pending, setValue } = props
+  /** Why: with a relaunch entry available, handing off to the agent's own TUI
+   *  picker is a second, worse answer to the same question. */
+  suppressAgentPicker?: boolean
+}): React.JSX.Element | null {
+  const { descriptor, pending, setValue, suppressAgentPicker } = props
   if (descriptor.action) {
+    if (descriptor.action.type === 'agent-picker' && suppressAgentPicker) {
+      return null
+    }
     return (
       <DropdownMenuItem
         disabled={!descriptor.settable || pending}
-        onSelect={() =>
+        // Why: Base UI menu items fire onClick; onSelect is only a DOM
+        // text-selection event here, so it type-checks but never runs.
+        onClick={() =>
           setValue(
             descriptor.kind.type === 'boolean'
               ? !(descriptor.kind.currentValue ?? false)
@@ -191,7 +202,8 @@ function DescriptorMenuRows(props: {
 function NativeChatSessionOptionPickersInner({
   surface,
   snapshot,
-  isWorking
+  isWorking,
+  onRelaunchSession
 }: NativeChatSessionOptionPickersProps): React.JSX.Element | null {
   const [pendingId, setPendingId] = useState<string | null>(null)
   const model = snapshot.find((descriptor) => descriptor.category === 'model')
@@ -216,6 +228,7 @@ function NativeChatSessionOptionPickersInner({
       .finally(() => setPendingId(null))
   }
 
+  const modelRowsSuppressed = Boolean(onRelaunchSession) && model.action?.type === 'agent-picker'
   const modelReason = nativeChatSessionOptionDisabledReason(model.disabledReason)
   const modelTooltip = translate('components.native-chat.composer.model', 'Model')
   const optionsTooltip = nativeChatOptionsPillTitle(options)
@@ -249,6 +262,7 @@ function NativeChatSessionOptionPickersInner({
                     descriptor={descriptor}
                     pending={pendingId !== null}
                     setValue={(value) => setOption(descriptor, value)}
+                    suppressAgentPicker={Boolean(onRelaunchSession)}
                   />
                 </div>
               )
@@ -272,7 +286,19 @@ function NativeChatSessionOptionPickersInner({
             descriptor={model}
             pending={pendingId !== null}
             setValue={(value) => setOption(model, value)}
+            suppressAgentPicker={Boolean(onRelaunchSession)}
           />
+          {onRelaunchSession ? (
+            <>
+              {modelRowsSuppressed ? null : <DropdownMenuSeparator />}
+              <DropdownMenuItem onClick={onRelaunchSession}>
+                {translate(
+                  'components.native-chat.composer.relaunchWithOtherAgent',
+                  'Switch Agent or model…'
+                )}
+              </DropdownMenuItem>
+            </>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

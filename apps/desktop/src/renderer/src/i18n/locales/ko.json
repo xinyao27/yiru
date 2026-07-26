@@ -11909,7 +11909,8 @@
       "agentUnavailable": "이 워크스페이스 호스트에서 {{agent}}을(를) 찾지 못했습니다.",
       "sent": "세션 컨텍스트를 새 {{agent}} 세션으로 보냈습니다.",
       "deliveryFailed": "새 {{agent}} 세션은 시작되었지만 컨텍스트를 보내지 못했습니다.",
-      "launchFailed": "새 {{agent}} 세션을 시작할 수 없습니다."
+      "launchFailed": "새 {{agent}} 세션을 시작할 수 없습니다.",
+      "launchOptions": "실행 옵션"
     },
     "native-chat": {
       "composer": {
@@ -11966,7 +11967,8 @@
           "high": "높음",
           "xhigh": "매우 높음",
           "max": "최대"
-        }
+        },
+        "relaunchWithOtherAgent": "Agent 또는 모델 변경…"
       },
       "tool": {
         "running": "실행 중…",
@@ -12043,7 +12045,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "어시스턴트 열기",
       "startError": "글로벌 어시스턴트를 시작할 수 없습니다.",
       "newConversation": "새 대화",

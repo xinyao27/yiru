@@ -64,6 +64,7 @@ export type NativeChatViewProps = {
   resolvedAgent?: TuiAgent | null
   /** Return this pane to the hosted terminal surface. */
   onSwitchToTerminal?: () => void
+  onRelaunchSession?: () => void
   /** Start a fresh app-owned assistant session when this chat owns one. */
   onNewConversation?: () => void
   /** Current xterm screen reader used to recover agent-reported session state. */
@@ -79,6 +80,7 @@ export default function NativeChatView({
   launchAgent,
   resolvedAgent,
   onSwitchToTerminal,
+  onRelaunchSession,
   onNewConversation,
   readTerminalScreen,
   contextMenuActions
@@ -113,6 +115,7 @@ export default function NativeChatView({
           targetPtyId={targetPtyId}
           terminalTabId={terminalTabId}
           onSwitchToTerminal={onSwitchToTerminal}
+          onRelaunchSession={onRelaunchSession}
           onNewConversation={onNewConversation}
           readTerminalScreen={readTerminalScreen}
           contextMenuActions={contextMenuActions}
@@ -130,6 +133,7 @@ function NativeChatResolvedView({
   targetPtyId,
   terminalTabId,
   onSwitchToTerminal,
+  onRelaunchSession,
   onNewConversation,
   readTerminalScreen,
   contextMenuActions
@@ -141,6 +145,7 @@ function NativeChatResolvedView({
   targetPtyId: string | null
   terminalTabId: string
   onSwitchToTerminal?: () => void
+  onRelaunchSession?: () => void
   onNewConversation?: () => void
   readTerminalScreen?: () => string | null
   contextMenuActions?: Omit<NativeChatContextMenuActions, 'onPaste'>
@@ -451,6 +456,7 @@ function NativeChatResolvedView({
             onOptimisticSendCanceled={onOptimisticSendCanceled}
             onSlashCommand={onSlashCommand}
             onSwitchToTerminal={onSwitchToTerminal}
+            {...(onRelaunchSession ? { onRelaunchSession } : {})}
             readTerminalScreen={readTerminalScreen}
           />
         )}

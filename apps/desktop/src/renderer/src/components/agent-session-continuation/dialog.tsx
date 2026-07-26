@@ -36,12 +36,25 @@ import {
   type AgentSessionContinuationContextMode,
   type AgentSessionContinuationRequest
 } from '../terminal-pane/agent/session-continuation'
+import {
+  AgentSessionContinuationLaunchOptions,
+  buildContinuationSessionOptions,
+  EMPTY_CONTINUATION_LAUNCH_OPTIONS,
+  resolveContinuationLaunchOptionsForModel,
+  type ContinuationLaunchOptions
+} from './launch-options'
 import { chooseInitialContinuationAgent } from './selection'
 
 type AgentSessionContinuationDialogProps = {
   open: boolean
   request: AgentSessionContinuationRequest | null
   onOpenChange: (open: boolean) => void
+}
+
+type UserLaunchOptionsSelection = {
+  worktreeId: string | null
+  agent: TuiAgent | null
+  options: ContinuationLaunchOptions
 }
 
 const EMPTY_DISABLED_AGENTS: TuiAgent[] = []
@@ -69,6 +82,9 @@ export function AgentSessionContinuationDialog({
   const [detectionResult, setDetectionResult] = useState<AgentDetectionResult | null>(null)
   const [userAgentSelection, setUserAgentSelection] = useState<UserAgentSelection | null>(null)
   const [userContextMode, setUserContextMode] = useState<UserContextModeSelection | null>(null)
+  const [userLaunchOptions, setUserLaunchOptions] = useState<UserLaunchOptionsSelection | null>(
+    null
+  )
   const [starting, setStarting] = useState(false)
   const [showStarting, setShowStarting] = useState(false)
   const disabledAgents = settings?.disabledTuiAgents ?? EMPTY_DISABLED_AGENTS
@@ -92,6 +108,11 @@ export function AgentSessionContinuationDialog({
     [enabledDetectedAgents]
   )
   const hasFullContext = request ? hasFullAgentSessionContext(request.source) : false
+  // Why: reached from the composer's Agent/model switch, the session may have
+  // nothing to hand off yet — offering a context mode would claim otherwise.
+  const hasAnyContext = request
+    ? buildAgentSessionContinuationPrompt(request.source, 'focused') !== null
+    : false
 
   const autoPickedAgent = useMemo(
     () =>
@@ -114,6 +135,20 @@ export function AgentSessionContinuationDialog({
     userContextMode && userContextMode.worktreeId === requestWorktreeId
       ? userContextMode.mode
       : 'focused'
+  // Why: tagged by agent as well as request, so switching Agent reseeds the
+  // model and option picks from that agent's own catalog without a reset step.
+  const launchOptions = useMemo(() => {
+    if (
+      userLaunchOptions &&
+      userLaunchOptions.worktreeId === requestWorktreeId &&
+      userLaunchOptions.agent === selectedAgent
+    ) {
+      return userLaunchOptions.options
+    }
+    return selectedAgent
+      ? resolveContinuationLaunchOptionsForModel(selectedAgent, null)
+      : EMPTY_CONTINUATION_LAUNCH_OPTIONS
+  }, [requestWorktreeId, selectedAgent, userLaunchOptions])
 
   useEffect(() => {
     if (!open || !request) {
@@ -153,11 +188,11 @@ export function AgentSessionContinuationDialog({
     if (!request || !selectedAgent || starting) {
       return
     }
-    const prompt = buildAgentSessionContinuationPrompt(request.source, contextMode)
-    if (!prompt) {
-      return
-    }
+    // Why: an Agent or model switch is valid before the session has produced
+    // anything to carry over, so an empty handoff still launches.
+    const prompt = buildAgentSessionContinuationPrompt(request.source, contextMode) ?? ''
     setStarting(true)
+    const sessionOptions = buildContinuationSessionOptions(launchOptions)
     const launched = await launchAgentSessionContinuation({
       agent: selectedAgent,
       prompt,
@@ -165,7 +200,8 @@ export function AgentSessionContinuationDialog({
       groupId: request.groupId,
       workspacePath: request.workspacePath,
       initialCwd: request.initialCwd,
-      launchSource: request.launchSource
+      launchSource: request.launchSource,
+      ...(sessionOptions ? { sessionOptions } : {})
     })
     setStarting(false)
     if (launched) {
@@ -262,7 +298,22 @@ export function AgentSessionContinuationDialog({
             ) : null}
           </div>
 
-          <div className="min-w-0 space-y-2">
+          {selectedAgent ? (
+            <AgentSessionContinuationLaunchOptions
+              agent={selectedAgent}
+              options={launchOptions}
+              onChange={(next) =>
+                setUserLaunchOptions({
+                  worktreeId: requestWorktreeId,
+                  agent: selectedAgent,
+                  options: next
+                })
+              }
+              disabled={starting}
+            />
+          ) : null}
+
+          <div className={hasAnyContext ? 'min-w-0 space-y-2' : 'hidden'}>
             <Label>{translate('components.agentSessionContinuation.context', 'Context')}</Label>
             <Select
               value={contextMode}

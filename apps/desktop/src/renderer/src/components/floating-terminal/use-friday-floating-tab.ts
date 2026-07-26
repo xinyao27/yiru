@@ -4,18 +4,14 @@ import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { focusNativeChatTabSurface } from '@/lib/focus-terminal-tab-surface'
-import {
-  getGlobalAssistantRequestMode,
-  TOGGLE_GLOBAL_ASSISTANT_EVENT,
-  type GlobalAssistantRequestMode
-} from '@/lib/global-assistant'
+import { getFridayRequestMode, TOGGLE_FRIDAY_EVENT, type FridayRequestMode } from '@/lib/friday'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 
-type UseGlobalAssistantFloatingTabArgs = {
+type UseFridayFloatingTabArgs = {
   floatingWorkspaceOpen: boolean
   setFloatingWorkspaceOpen: (nextOpen: SetStateAction<boolean>) => void
 }
@@ -31,10 +27,10 @@ function isActiveFloatingAssistantTab(state: AppState, terminalTabId: string): b
   return activeTab?.contentType === 'terminal' && activeTab.entityId === terminalTabId
 }
 
-export function useGlobalAssistantFloatingTab({
+export function useFridayFloatingTab({
   floatingWorkspaceOpen,
   setFloatingWorkspaceOpen
-}: UseGlobalAssistantFloatingTabArgs): {
+}: UseFridayFloatingTabArgs): {
   assistantPending: boolean
   assistantLoadingVisible: boolean
   openAssistant: () => void
@@ -47,7 +43,7 @@ export function useGlobalAssistantFloatingTab({
   const mountedRef = useMountedRef()
 
   const requestAssistant = useCallback(
-    (mode: GlobalAssistantRequestMode): void => {
+    (mode: FridayRequestMode): void => {
       if (requestRef.current) {
         return
       }
@@ -62,9 +58,7 @@ export function useGlobalAssistantFloatingTab({
       }, 200)
 
       const request =
-        mode === 'restart'
-          ? window.api.globalAssistant.restart()
-          : window.api.globalAssistant.getOrCreate()
+        mode === 'restart' ? window.api.friday.restart() : window.api.friday.getOrCreate()
       requestRef.current = request
       void request
         .then((session) => {
@@ -84,10 +78,7 @@ export function useGlobalAssistantFloatingTab({
           toast.error(
             extractIpcErrorMessage(
               error,
-              translate(
-                'components.global-assistant.startError',
-                'Global Assistant could not start.'
-              )
+              translate('components.friday.startError', 'Friday could not start.')
             )
           )
         })
@@ -110,7 +101,7 @@ export function useGlobalAssistantFloatingTab({
 
   useEffect(() => {
     const handleAssistantRequest = (event: Event): void => {
-      const mode = getGlobalAssistantRequestMode(event)
+      const mode = getFridayRequestMode(event)
       const assistantTabId = assistantTabIdRef.current
       if (
         mode === 'reuse' &&
@@ -123,8 +114,8 @@ export function useGlobalAssistantFloatingTab({
       }
       requestAssistant(mode)
     }
-    window.addEventListener(TOGGLE_GLOBAL_ASSISTANT_EVENT, handleAssistantRequest)
-    return () => window.removeEventListener(TOGGLE_GLOBAL_ASSISTANT_EVENT, handleAssistantRequest)
+    window.addEventListener(TOGGLE_FRIDAY_EVENT, handleAssistantRequest)
+    return () => window.removeEventListener(TOGGLE_FRIDAY_EVENT, handleAssistantRequest)
   }, [floatingWorkspaceOpen, requestAssistant, setFloatingWorkspaceOpen])
 
   useEffect(

@@ -66,6 +66,7 @@ export const NativeChatComposer = forwardRef<NativeChatComposerHandle, NativeCha
       onOptimisticSendCanceled,
       onSlashCommand,
       onSwitchToTerminal,
+      onRelaunchSession,
       readTerminalScreen
     },
     ref
@@ -393,6 +394,7 @@ export const NativeChatComposer = forwardRef<NativeChatComposerHandle, NativeCha
         onStop={interrupt}
         sessionOptionsSurface={sessionOptionsSurface}
         sessionOptionsSnapshot={sessionOptionsSnapshot}
+        onRelaunchSession={onRelaunchSession}
       />
     )
   }

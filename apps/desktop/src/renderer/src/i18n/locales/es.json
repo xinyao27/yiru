@@ -11909,7 +11909,8 @@
       "agentUnavailable": "No se detectó {{agent}} en el host de este espacio de trabajo.",
       "sent": "El contexto de la sesión se envió a {{agent}} en una sesión nueva.",
       "deliveryFailed": "La nueva sesión de {{agent}} se inició, pero no se pudo enviar su contexto.",
-      "launchFailed": "No se pudo iniciar una sesión nueva de {{agent}}."
+      "launchFailed": "No se pudo iniciar una sesión nueva de {{agent}}.",
+      "launchOptions": "Opciones de inicio"
     },
     "native-chat": {
       "composer": {
@@ -11966,7 +11967,8 @@
           "high": "Alto",
           "xhigh": "Muy alto",
           "max": "Máximo"
-        }
+        },
+        "relaunchWithOtherAgent": "Cambiar de Agent o modelo…"
       },
       "tool": {
         "running": "Ejecutando…",
@@ -12043,7 +12045,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "Abrir el asistente",
       "startError": "No se pudo iniciar el Asistente global.",
       "newConversation": "Nueva conversación",

@@ -11932,7 +11932,8 @@
       "agentUnavailable": "{{agent}} was not detected on this workspace host.",
       "sent": "Session context sent to {{agent}} in a new session.",
       "deliveryFailed": "The new {{agent}} session started, but its context could not be sent.",
-      "launchFailed": "Could not start a new {{agent}} session."
+      "launchFailed": "Could not start a new {{agent}} session.",
+      "launchOptions": "Launch options"
     },
     "native-chat": {
       "composer": {
@@ -11989,7 +11990,8 @@
           "high": "High",
           "xhigh": "Extra high",
           "max": "Max"
-        }
+        },
+        "relaunchWithOtherAgent": "Switch Agent or model…"
       },
       "tool": {
         "running": "Running…",
@@ -12066,9 +12068,9 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "Open Assistant",
-      "startError": "Global Assistant could not start.",
+      "startError": "Friday could not start.",
       "newConversation": "New conversation",
       "starting": "Starting assistant…"
     }
