@@ -37,9 +37,9 @@ import { SshConnectionStore } from './connection-store'
 import { isAuthError } from './connection-utils'
 import { requestCredential, registerCredentialHandler } from './passphrase'
 import { SshPortForwardManager } from './port-forward'
-import { forceStopRelayForTarget } from './relay-reset'
-import { SshRelaySession, type SshRelayAiVaultHostInfo } from './relay-session'
-import type { RemoteHostPlatform } from './remote-platform'
+import { forceStopRelayForTarget } from './relay/reset'
+import { SshRelaySession, type SshRelayAiVaultHostInfo } from './relay/session'
+import type { RemoteHostPlatform } from './remote/platform'
 
 let sshStore: SshConnectionStore | null = null
 let connectionManager: SshConnectionManager | null = null

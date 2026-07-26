@@ -4,8 +4,8 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/remote-platform'
-import { joinRemotePath } from '../ssh/remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
+import { joinRemotePath } from '../ssh/remote/platform'
 import {
   consumeRemoteSessionInventoryCandidate,
   consumeRemoteSessionInventoryEntry,
@@ -27,11 +27,11 @@ import type {
 import type {
   AiVaultSessionInventorySlice,
   AiVaultSessionInventorySnapshot
-} from './session-inventory-page-types'
-import { createAntigravityWorkspaceResolver } from './session-scanner-antigravity-history'
-import { SessionFileDiscoveryLimitError } from './session-scanner-discovery'
-import { partitionSubagentTranscriptPaths } from './session-scanner-subagent-transcripts'
-import type { FileWithMtime } from './session-scanner-types'
+} from './session/inventory-page-types'
+import { createAntigravityWorkspaceResolver } from './session/scanner-antigravity-history'
+import { SessionFileDiscoveryLimitError } from './session/scanner-discovery'
+import { partitionSubagentTranscriptPaths } from './session/scanner-subagent-transcripts'
+import type { FileWithMtime } from './session/scanner-types'
 
 const REMOTE_INVENTORY_CONCURRENCY = 8
 

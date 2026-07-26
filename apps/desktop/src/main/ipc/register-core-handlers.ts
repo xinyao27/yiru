@@ -8,7 +8,7 @@ import {
   getSavedRuntimeAiVaultHostInfos,
   scanRuntimeAiVaultSessions
 } from '../ai-vault/runtime-session-scanner'
-import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
+import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-configuration'
 import { registerAutomationHandlers } from '../automations/automations'
 import type { AutomationService } from '../automations/service'
 import {

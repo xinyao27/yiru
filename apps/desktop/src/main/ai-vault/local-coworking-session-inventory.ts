@@ -10,26 +10,26 @@ import {
   COWORKING_SESSION_INVENTORY_SNAPSHOT_OPENING_RESERVATION_BYTES
 } from './coworking-session-inventory-memory-budget'
 import { discoverCoworkingSessionInventorySources } from './coworking-session-inventory-source-discovery'
-import { AiVaultSessionInventoryCursorStore } from './session-inventory-cursor-store'
+import { AiVaultSessionInventoryCursorStore } from './session/inventory-cursor-store'
 import type {
   AiVaultSessionInventoryPage,
   AiVaultSessionInventorySlice,
   AiVaultSessionInventorySnapshot
-} from './session-inventory-page-types'
-import { SessionInventorySnapshotCache } from './session-inventory-snapshot-cache'
+} from './session/inventory-page-types'
+import { SessionInventorySnapshotCache } from './session/inventory-snapshot-cache'
 import {
   getConfiguredAiVaultAdditionalCodexSessionsDirs,
   getConfiguredAiVaultClaudeProjectsDirs
-} from './session-root-configuration'
-import { codexHomeForSessionsDir } from './session-scanner-codex-paths'
-import { parseAgentSessionFileCached } from './session-scanner-parse-cache'
+} from './session/root-configuration'
+import { codexHomeForSessionsDir } from './session/scanner-codex-paths'
+import { parseAgentSessionFileCached } from './session/scanner-parse-cache'
 import {
   claudeProjectsRootDirs,
   codexSessionRootDirs,
   DEFAULT_CODEX_HOME_DIR
-} from './session-scanner-source-discovery'
-import type { SessionFileCandidate } from './session-scanner-types'
-import { resolveAiVaultWslHomeDirsForDistro } from './session-wsl-home-resolution'
+} from './session/scanner-source-discovery'
+import type { SessionFileCandidate } from './session/scanner-types'
+import { resolveAiVaultWslHomeDirsForDistro } from './session/wsl-home-resolution'
 
 const SESSION_PARSE_CONCURRENCY = 8
 const INVENTORY_PAGE_SIZE = 64

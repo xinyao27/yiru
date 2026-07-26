@@ -87,7 +87,7 @@ import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identit
 import { enrichRepoGitUsernames } from '../repo-git-username-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
 import { normalizeSparseDirectories } from '../sparse-checkout-directories'
-import { joinRemotePath } from '../ssh/remote-platform'
+import { joinRemotePath } from '../ssh/remote/platform'
 import { getActiveMultiplexer } from '../ssh/ssh'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'

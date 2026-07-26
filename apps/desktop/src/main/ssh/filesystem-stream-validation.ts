@@ -1,4 +1,4 @@
-import { JsonRpcErrorCode, RelayErrorCode } from './relay-protocol'
+import { JsonRpcErrorCode, RelayErrorCode } from './relay/protocol'
 
 export type SshFileStreamMetadata = {
   streamId?: number

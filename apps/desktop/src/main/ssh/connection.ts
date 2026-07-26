@@ -37,7 +37,7 @@ import {
   createLinkedSshFileTransferSignal,
   raceSftpFileTransferWithAbort
 } from './file-transfer-abort'
-import type { RemoteHostPlatform } from './remote-platform'
+import type { RemoteHostPlatform } from './remote/platform'
 import { isSshSessionLimitError } from './session-limit-error'
 import {
   getYiruControlSocketPath,
@@ -50,7 +50,7 @@ import {
   writeFileViaSystemSsh,
   type SystemSshBuildArgsOptions,
   type SystemSshProcess
-} from './system-fallback'
+} from './system/fallback'
 export type { SshConnectionCallbacks } from './connection-utils'
 
 type SshRemoteFileOptions = {
@@ -412,7 +412,7 @@ export class SshConnection {
         sftp.on('error', swallowLateSftpError)
         sftp.once('close', () => sftp.removeListener('error', swallowLateSftpError))
         try {
-          const { uploadDirectory } = await import('./relay-deploy-helpers')
+          const { uploadDirectory } = await import('./relay/deploy-helpers')
           await raceSftpFileTransferWithAbort(
             uploadDirectory(sftp, localDir, remoteDir),
             linkedSignal.signal,

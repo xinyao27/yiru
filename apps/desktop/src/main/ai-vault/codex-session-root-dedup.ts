@@ -1,7 +1,7 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
-import { sessionSortTime } from './session-scanner-accumulator'
+import { sessionSortTime } from './session/scanner-accumulator'
 
 // Why: the session bridge and the real-home backfill hardlink one physical
 // Codex rollout into multiple scanned roots (managed runtime home and the

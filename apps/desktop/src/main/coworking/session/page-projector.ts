@@ -1,6 +1,6 @@
 import { COWORKING_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../../shared/coworking/catalog-contract'
 import { COWORKING_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../../shared/coworking/resource-limits'
-import { waitForSessionInventoryAbort } from '../../ai-vault/session-inventory-abort'
+import { waitForSessionInventoryAbort } from '../../ai-vault/session/inventory-abort'
 import { CoworkingExecutionError } from '../execution-error'
 import { readCoworkingHistoricalSessionPages } from '../historical-session-pages'
 import {

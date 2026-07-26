@@ -13,7 +13,7 @@ import {
   type JsonRpcRequest,
   type JsonRpcResponse,
   type JsonRpcNotification
-} from './relay-protocol'
+} from './relay/protocol'
 
 export type MultiplexerTransport = {
   write: (data: Buffer) => void

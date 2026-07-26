@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { COWORKING_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../../shared/coworking/catalog-contract'
 import type { CoworkingSessionCatalogPage } from '../../../shared/coworking/catalog-contract'
-import { createSessionInventoryAbortController } from '../../ai-vault/session-inventory-abort'
+import { createSessionInventoryAbortController } from '../../ai-vault/session/inventory-abort'
 import { isSameCoworkingPublicWorktreeInstance } from '../public-worktree-instance-identity'
 import {
   projectCoworkingSessionCatalogValue,

@@ -7,7 +7,7 @@ import type {
   StartedPortForward
 } from './port-forward-provider'
 import { Ssh2PortForwardProvider } from './ssh2-port-forward-provider'
-import { SystemSshPortForwardProvider } from './system-ssh-port-forward-provider'
+import { SystemSshPortForwardProvider } from './system/ssh-port-forward-provider'
 
 export type { PortForwardEntry }
 export type { PortForwardCloseReason }

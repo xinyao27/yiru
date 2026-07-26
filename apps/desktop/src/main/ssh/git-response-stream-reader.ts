@@ -1,5 +1,5 @@
 import type { SshChannelMultiplexer } from './channel-multiplexer'
-import { RelayErrorCode, isGitResponseStreamMarker } from './relay-protocol'
+import { RelayErrorCode, isGitResponseStreamMarker } from './relay/protocol'
 
 const SENTINEL_STREAM_ID = -1
 

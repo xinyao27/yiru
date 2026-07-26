@@ -1,5 +1,5 @@
 import { AI_VAULT_LIST_SESSIONS_CONTRACT } from '../../../../shared/runtime-method-contracts/ai-vault-contracts'
-import { restampAiVaultListResult } from '../../../ai-vault/session-list-results'
+import { restampAiVaultListResult } from '../../../ai-vault/session/list-results'
 import { defineMethod, type RpcMethod } from '../core'
 
 export const AI_VAULT_METHODS: RpcMethod[] = [

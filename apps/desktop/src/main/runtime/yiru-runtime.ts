@@ -336,7 +336,7 @@ import {
   configureAiVaultSessionSources,
   listAiVaultSessions
 } from '../ai-vault/cached-session-list'
-import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
+import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-configuration'
 import type { AutomationService } from '../automations/service'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { BrowserBackend } from '../browser/backend'

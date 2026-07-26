@@ -5,7 +5,7 @@ import {
   consumeSessionInventoryJsonLines,
   isMethodNotFoundError
 } from '../ssh/filesystem-stream-reader'
-import { isWindowsRemoteHost, type RemoteHostPlatform } from '../ssh/remote-platform'
+import { isWindowsRemoteHost, type RemoteHostPlatform } from '../ssh/remote/platform'
 import { uploadBuffer } from '../ssh/sftp-upload'
 import type { CoworkingVerifiedRemoteFilesystem } from './coworking-verified-filesystem-types'
 import { createSshCoworkingVerifiedFilesystem } from './ssh-coworking-verified-filesystem'

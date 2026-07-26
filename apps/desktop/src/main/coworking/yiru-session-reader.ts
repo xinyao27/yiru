@@ -4,7 +4,7 @@ import {
   listLocalCoworkingSessionInventoryPage,
   releaseLocalCoworkingSessionInventoryPage
 } from '../ai-vault/local-coworking-session-inventory'
-import { SessionFileDiscoveryLimitError } from '../ai-vault/session-scanner-discovery'
+import { SessionFileDiscoveryLimitError } from '../ai-vault/session/scanner-discovery'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { CoworkingExecutionError } from './execution-error'
 import type {

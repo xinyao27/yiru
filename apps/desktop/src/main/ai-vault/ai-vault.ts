@@ -29,9 +29,9 @@ import {
   type AiVaultSessionSources
 } from './cached-session-list'
 import { scanRemoteAiVaultSessions } from './remote-session-scanner'
-import { aiVaultScanIssueResult, mergeAiVaultListResults } from './session-list-results'
-import { listClaudeSubagentSessions } from './session-scanner-claude-subagents'
-import { claudeProjectsRootDirs } from './session-scanner-source-discovery'
+import { aiVaultScanIssueResult, mergeAiVaultListResults } from './session/list-results'
+import { listClaudeSubagentSessions } from './session/scanner-claude-subagents'
+import { claudeProjectsRootDirs } from './session/scanner-source-discovery'
 
 const AI_VAULT_CACHE_TTL_MS = 15_000
 const AI_VAULT_ALL_HOST_RUNTIME_TIMEOUT_MS = 3_000

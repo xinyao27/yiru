@@ -2,8 +2,8 @@ import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/a
 import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 
 import { getWslHomeAsync, listWslDistrosAsync } from '../wsl'
-import { getConfiguredAiVaultAdditionalCodexSessionsDirs } from './session-root-configuration'
-import { scanAiVaultSessions } from './session-scanner'
+import { getConfiguredAiVaultAdditionalCodexSessionsDirs } from './session/root-configuration'
+import { scanAiVaultSessions } from './session/scanner'
 
 // Why: ONE module owns the scan cache so the desktop IPC handler AND the runtime
 // RPC method share a single cache instance — opening the desktop panel and the
@@ -14,8 +14,8 @@ export {
   configureAiVaultSessionSources,
   getConfiguredAiVaultAdditionalCodexSessionsDirs,
   getConfiguredAiVaultClaudeProjectsDirs
-} from './session-root-configuration'
-export type { AiVaultSessionSources } from './session-root-configuration'
+} from './session/root-configuration'
+export type { AiVaultSessionSources } from './session/root-configuration'
 
 type CachedAiVaultList = {
   key: string

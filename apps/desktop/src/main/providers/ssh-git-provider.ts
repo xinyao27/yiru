@@ -28,8 +28,8 @@ import {
    small amount of param plumbing. */
 import type { SshChannelMultiplexer } from '../ssh/channel-multiplexer'
 import { requestGitStreamable } from '../ssh/git-response-stream-reader'
-import { JsonRpcErrorCode } from '../ssh/relay-protocol'
-import type { RemoteHostPlatform } from '../ssh/remote-platform'
+import { JsonRpcErrorCode } from '../ssh/relay/protocol'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import type { RemoteCommitMessageExecResult } from '../text-generation/commit-message-text-generation'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
 import type { GitProviderMutationOptions, IGitProvider } from './types'

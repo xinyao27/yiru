@@ -8,20 +8,20 @@ import {
 } from '../main/filesystem/watcher-ignore'
 import { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
-import { emitRelayWatcherEvents, emitRelayWatcherOverflow } from './watcher-event-emitter'
-import { joinRelayWatcherPendingSetup } from './watcher-pending-setup-join'
-import { createRelayWatcherProcessPool, type RelayWatcherProcessPool } from './watcher-process-pool'
-import { RelayWatcherRemovalFence } from './watcher-removal-fence'
-import { assertRelayWatcherRootCapacity } from './watcher-root-capacity'
-import { trackRelayWatcherSetup, type RelayWatcherPendingSetup } from './watcher-setup-tracking'
-import { awaitRelayWatcherSetup, shouldRetryInitialRelayWatch } from './watcher-setup-wait'
-import { releaseStaleRelayWatches } from './watcher-stale-client-release'
-import { createRelayWatcherState } from './watcher-state'
+import { emitRelayWatcherEvents, emitRelayWatcherOverflow } from './watcher/event-emitter'
+import { joinRelayWatcherPendingSetup } from './watcher/pending-setup-join'
+import { createRelayWatcherProcessPool, type RelayWatcherProcessPool } from './watcher/process-pool'
+import { RelayWatcherRemovalFence } from './watcher/removal-fence'
+import { assertRelayWatcherRootCapacity } from './watcher/root-capacity'
+import { trackRelayWatcherSetup, type RelayWatcherPendingSetup } from './watcher/setup-tracking'
+import { awaitRelayWatcherSetup, shouldRetryInitialRelayWatch } from './watcher/setup-wait'
+import { releaseStaleRelayWatches } from './watcher/stale-client-release'
+import { createRelayWatcherState } from './watcher/state'
 import {
   RelayWatcherTeardownTracker,
   type RelayWatcherTeardownState
-} from './watcher-teardown-tracker'
-import { emitRelayWatcherTerminalFailure } from './watcher-terminal-notifier'
+} from './watcher/teardown-tracker'
+import { emitRelayWatcherTerminalFailure } from './watcher/terminal-notifier'
 
 const RELAY_WATCH_OPTIONS = buildParcelWatcherIgnoreOptions(WATCHER_IGNORE_DIRS)
 

@@ -1,19 +1,19 @@
 import type { AiVaultSession } from '@yiru/workbench-model/agent'
 
-import type { RemoteHostPlatform } from '../ssh/remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import { remoteCodexIndexTitles } from './remote-session-scanner-codex-index'
 import type { RemoteScannerContext } from './remote-session-scanner-types'
 import {
   consumeCodexSessionLine,
   createCodexSessionParseState,
   finalizeCodexSessionParseState
-} from './session-scanner-codex-parser'
+} from './session/scanner-codex-parser'
 import {
   consumeClaudeSessionLine,
   createClaudeSessionParseState,
   finalizeClaudeSessionParseState
-} from './session-scanner-primary-parsers'
-import type { FileWithMtime } from './session-scanner-types'
+} from './session/scanner-primary-parsers'
+import type { FileWithMtime } from './session/scanner-types'
 
 export async function parseRemoteClaudeSessionStream(
   file: FileWithMtime,

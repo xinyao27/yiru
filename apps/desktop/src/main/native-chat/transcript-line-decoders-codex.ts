@@ -7,7 +7,7 @@ import {
   extractString,
   parseJsonObject,
   timestampMs
-} from '../ai-vault/session-scanner-values'
+} from '../ai-vault/session/scanner-values'
 import { claudeContentBlocks, toolResultOutput } from './transcript-record-blocks'
 
 export function decodeCodexTranscriptLine(

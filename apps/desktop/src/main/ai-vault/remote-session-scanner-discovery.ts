@@ -3,16 +3,16 @@ import { extname } from 'node:path'
 import type { AiVaultScanIssue } from '@yiru/workbench-model/agent'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
-import { joinRemotePath } from '../ssh/remote-platform'
+import { joinRemotePath } from '../ssh/remote/platform'
 import { isMissingRemoteSessionPathError, statRemoteSessionFile } from './remote-session-file-stat'
 import type {
   RemoteScannerContext,
   RemoteSessionCandidate,
   RemoteSessionSource
 } from './remote-session-scanner-types'
-import { partitionSubagentTranscriptPaths } from './session-scanner-subagent-transcripts'
-import type { FileWithMtime } from './session-scanner-types'
-import { errorMessage } from './session-scanner-values'
+import { partitionSubagentTranscriptPaths } from './session/scanner-subagent-transcripts'
+import type { FileWithMtime } from './session/scanner-types'
+import { errorMessage } from './session/scanner-values'
 
 const REMOTE_DISCOVERY_CONCURRENCY = 8
 

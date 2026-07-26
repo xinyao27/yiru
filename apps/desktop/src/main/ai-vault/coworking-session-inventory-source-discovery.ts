@@ -1,13 +1,13 @@
 import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent'
 
-import { discoverFiles, type SessionFileDiscoveryBudget } from './session-scanner-discovery'
+import { discoverFiles, type SessionFileDiscoveryBudget } from './session/scanner-discovery'
 import {
   claudeProjectsRootDirs,
   codexSessionRootDirs,
   normalizeAiVaultWslHomeDirs
-} from './session-scanner-source-discovery'
-import { SUBAGENT_DIR_NAME } from './session-scanner-subagent-transcripts'
-import type { AiVaultScanOptions, SessionFileDiscovery } from './session-scanner-types'
+} from './session/scanner-source-discovery'
+import { SUBAGENT_DIR_NAME } from './session/scanner-subagent-transcripts'
+import type { AiVaultScanOptions, SessionFileDiscovery } from './session/scanner-types'
 
 export const COWORKING_SESSION_INVENTORY_MAX_CANDIDATES = 50_000
 export const COWORKING_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES = 100_000

@@ -10,12 +10,12 @@ import {
   readRemoteAiVaultSessionInventoryPage,
   type RemoteAiVaultSessionInventorySnapshot
 } from '../ai-vault/remote-session-inventory'
-import { AiVaultSessionInventoryCursorStore } from '../ai-vault/session-inventory-cursor-store'
-import { SessionInventorySnapshotCache } from '../ai-vault/session-inventory-snapshot-cache'
-import { SessionFileDiscoveryLimitError } from '../ai-vault/session-scanner-discovery'
+import { AiVaultSessionInventoryCursorStore } from '../ai-vault/session/inventory-cursor-store'
+import { SessionInventorySnapshotCache } from '../ai-vault/session/inventory-snapshot-cache'
+import { SessionFileDiscoveryLimitError } from '../ai-vault/session/scanner-discovery'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import type { IFilesystemProvider } from '../providers/types'
-import type { SshRelayAiVaultHostInfo } from '../ssh/relay-session'
+import type { SshRelayAiVaultHostInfo } from '../ssh/relay/session'
 import { getActiveSshCoworkingHostInfo } from '../ssh/ssh'
 import { CoworkingExecutionError } from './execution-error'
 import type {

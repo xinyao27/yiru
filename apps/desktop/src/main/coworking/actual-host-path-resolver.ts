@@ -5,7 +5,7 @@ import { gitExecFileAsync } from '../git/runner'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import type { IFilesystemProvider } from '../providers/types'
-import type { RemoteHostPlatform } from '../ssh/remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
 import {
   canonicalizeCoworkingLocalHostPath,
   canonicalizeCoworkingSshHostPath

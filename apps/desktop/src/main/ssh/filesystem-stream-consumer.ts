@@ -5,7 +5,7 @@ import {
   StreamProtocolError,
   type SshFileStreamMetadata
 } from './filesystem-stream-validation'
-import { STREAM_CHUNK_SIZE } from './relay-protocol'
+import { STREAM_CHUNK_SIZE } from './relay/protocol'
 
 export { isMethodNotFoundError, StreamProtocolError } from './filesystem-stream-validation'
 export type { SshFileStreamMetadata } from './filesystem-stream-validation'

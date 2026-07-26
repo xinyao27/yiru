@@ -9,7 +9,7 @@ import {
   quotePosixShell
 } from '../shared/wsl-login-shell-command'
 import type { LanguageServerWorkspace } from './language-server-workspace'
-import { powerShellCommand, powerShellLiteral, powerShellNativeArg } from './ssh/remote-powershell'
+import { powerShellCommand, powerShellLiteral, powerShellNativeArg } from './ssh/remote/powershell'
 import { getSshConnectionManager, getActiveSshHostPlatform } from './ssh/ssh'
 import { getSpawnArgsForWindows, resolveWindowsCommand } from './win32-utils'
 

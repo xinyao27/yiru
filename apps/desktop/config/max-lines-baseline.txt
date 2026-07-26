@@ -63,7 +63,7 @@ inline apps/desktop/src/main/gitlab/gitlab.ts
 inline apps/desktop/src/main/notifications/notifications.ts
 inline apps/desktop/src/main/pet/pet.ts
 inline apps/desktop/src/main/pty/pty.ts
-inline apps/desktop/src/main/ssh/remote-workspace.ts
+inline apps/desktop/src/main/ssh/remote/workspace.ts
 inline apps/desktop/src/main/project-groups/repos.ts
 inline apps/desktop/src/main/ssh/ssh.ts
 inline apps/desktop/src/main/worktree/remote.ts
@@ -100,8 +100,8 @@ inline apps/desktop/src/main/speech/model-manager.ts
 inline apps/desktop/src/main/speech/stt-service.ts
 inline apps/desktop/src/main/ssh/channel-multiplexer.ts
 inline apps/desktop/src/main/ssh/connection.ts
-inline apps/desktop/src/main/ssh/relay-deploy.ts
-inline apps/desktop/src/main/ssh/relay-session.ts
+inline apps/desktop/src/main/ssh/relay/deploy.ts
+inline apps/desktop/src/main/ssh/relay/session.ts
 inline apps/desktop/src/main/text-generation/commit-message-text-generation.ts
 inline apps/desktop/src/main/updater.ts
 inline apps/desktop/src/main/window/attach-main-window-services.ts
@@ -112,8 +112,8 @@ inline apps/desktop/src/preload/index.ts
 inline apps/desktop/src/relay/agent-hook-server.ts
 inline apps/desktop/src/relay/dispatcher.ts
 inline apps/desktop/src/relay/external-automations-handler.ts
-inline apps/desktop/src/relay/fs-handler.ts
-inline apps/desktop/src/relay/git-handler.ts
+inline apps/desktop/src/relay/fs/handler.ts
+inline apps/desktop/src/relay/git/handler.ts
 inline apps/desktop/src/relay/pty-handler.ts
 inline apps/desktop/src/relay/relay.ts
 inline apps/desktop/src/relay/workspace-space-scan.ts

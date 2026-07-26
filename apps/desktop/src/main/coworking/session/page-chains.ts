@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import { waitForSessionInventoryAbort } from '../../ai-vault/session-inventory-abort'
+import { waitForSessionInventoryAbort } from '../../ai-vault/session/inventory-abort'
 import { CoworkingExecutionError } from '../execution-error'
 import type { CoworkingPublicWorktreeInstance } from '../worktree-visibility'
 import type { CoworkingSessionPageProjector, CoworkingSessionPageState } from './page-projector'

@@ -2,8 +2,8 @@ import type { AiVaultAgent, AiVaultScanIssue } from '@yiru/workbench-model/agent
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { FileStat, IFilesystemProvider } from '../providers/types'
-import type { FileWithMtime } from './session-scanner-types'
-import { errorMessage } from './session-scanner-values'
+import type { FileWithMtime } from './session/scanner-types'
+import { errorMessage } from './session/scanner-values'
 
 export async function statRemoteSessionFile(
   provider: IFilesystemProvider,

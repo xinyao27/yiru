@@ -9,7 +9,7 @@ import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { app } from 'electron'
 
 import type { ClaudeManagedAccount } from '../../../shared/types'
-import type { AiVaultSessionRuntimeTarget } from '../../ai-vault/session-root-configuration'
+import type { AiVaultSessionRuntimeTarget } from '../../ai-vault/session/root-configuration'
 import { writeFileAtomically } from '../../codex/accounts/fs-utils'
 import type { Store } from '../../persistence'
 import { getDefaultWslDistro, getWslHome, getWslHomeAsync, toWindowsWslPath } from '../../wsl'

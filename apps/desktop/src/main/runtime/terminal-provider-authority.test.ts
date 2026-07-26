@@ -65,7 +65,7 @@ import {
   encodeJsonRpcFrame,
   parseJsonRpcMessage,
   type JsonRpcMessage
-} from '../ssh/relay-protocol'
+} from '../ssh/relay/protocol'
 
 function createSession(sessionId: string, isAlive: boolean): SessionInfo {
   return {

@@ -3,7 +3,7 @@ import {
   COWORKING_SESSION_INVENTORY_MAX_PATH_BYTES,
   COWORKING_SESSION_INVENTORY_MAX_TRAVERSAL_ENTRIES
 } from './coworking-session-inventory-source-discovery'
-import { SessionFileDiscoveryLimitError } from './session-scanner-discovery'
+import { SessionFileDiscoveryLimitError } from './session/scanner-discovery'
 
 export type RemoteSessionInventoryBudget = {
   entries: number

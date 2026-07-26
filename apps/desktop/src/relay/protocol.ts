@@ -1,4 +1,4 @@
-// Self-contained relay protocol — mirrors src/main/ssh/relay-protocol.ts
+// Self-contained relay protocol — mirrors src/main/ssh/relay/protocol.ts
 // but has no Electron dependencies. Deployed standalone to remote hosts.
 
 export const RELAY_VERSION = '0.1.0'

@@ -1,7 +1,7 @@
 import type { AiVaultAgent, AiVaultSession } from '@yiru/workbench-model/agent'
 
-import type { RemoteHostPlatform } from '../ssh/remote-platform'
-import { joinRemotePath } from '../ssh/remote-platform'
+import type { RemoteHostPlatform } from '../ssh/remote/platform'
+import { joinRemotePath } from '../ssh/remote/platform'
 import { remoteCodexIndexTitles } from './remote-session-scanner-codex-index'
 import type {
   RemoteParserOptions,
@@ -12,21 +12,21 @@ import {
   parseRemoteClaudeSessionStream,
   parseRemoteCodexSessionStream
 } from './remote-session-stream-parsers'
-import { parseAntigravitySessionContent } from './session-scanner-antigravity-parser'
-import { isAntigravityTranscriptPath } from './session-scanner-antigravity-paths'
-import { parseCodexSessionContent } from './session-scanner-codex-parser'
-import { parseDevinSessionContent } from './session-scanner-devin-parser'
-import { parseDroidSessionContent } from './session-scanner-droid-parser'
-import { parseGeminiSessionContent } from './session-scanner-gemini-parsers'
-import { parseMessageGraphSessionContent } from './session-scanner-graph-parsers'
-import { parseClaudeSessionContent } from './session-scanner-primary-parsers'
+import { parseAntigravitySessionContent } from './session/scanner-antigravity-parser'
+import { isAntigravityTranscriptPath } from './session/scanner-antigravity-paths'
+import { parseCodexSessionContent } from './session/scanner-codex-parser'
+import { parseDevinSessionContent } from './session/scanner-devin-parser'
+import { parseDroidSessionContent } from './session/scanner-droid-parser'
+import { parseGeminiSessionContent } from './session/scanner-gemini-parsers'
+import { parseMessageGraphSessionContent } from './session/scanner-graph-parsers'
+import { parseClaudeSessionContent } from './session/scanner-primary-parsers'
 import {
   parseCopilotSessionContent,
   parseCursorSessionContent,
   parseHermesSessionContent
-} from './session-scanner-secondary-parsers'
-import type { FileWithMtime } from './session-scanner-types'
-import { normalizeAgentSessionsDir } from './session-scanner-values'
+} from './session/scanner-secondary-parsers'
+import type { FileWithMtime } from './session/scanner-types'
+import { normalizeAgentSessionsDir } from './session/scanner-values'
 
 type RemoteContentParser = (
   file: FileWithMtime,
