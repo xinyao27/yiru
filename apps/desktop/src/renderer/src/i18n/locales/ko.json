@@ -9534,10 +9534,6 @@
             "searchGitHub": "Search GitHub PRs",
             "searchGitLab": "Search GitLab MRs"
           },
-          "ProjectHostSetupCombobox": {
-            "empty": "이 프로젝트에 준비된 호스트가 없습니다.",
-            "placeholder": "호스트 선택"
-          },
           "ProjectCombobox": {
             "search": "프로젝트 검색...",
             "empty": "검색과 일치하는 프로젝트가 없습니다.",

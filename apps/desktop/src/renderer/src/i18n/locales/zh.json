@@ -9534,10 +9534,6 @@
             "searchGitHub": "Search GitHub PRs",
             "searchGitLab": "Search GitLab MRs"
           },
-          "ProjectHostSetupCombobox": {
-            "empty": "此项目没有已就绪的主机。",
-            "placeholder": "选择主机"
-          },
           "ProjectCombobox": {
             "search": "搜索项目...",
             "empty": "没有匹配搜索的项目。",

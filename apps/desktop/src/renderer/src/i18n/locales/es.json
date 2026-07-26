@@ -9534,10 +9534,6 @@
             "searchGitHub": "Search GitHub PRs",
             "searchGitLab": "Search GitLab MRs"
           },
-          "ProjectHostSetupCombobox": {
-            "empty": "No hay hosts listos para este proyecto.",
-            "placeholder": "Elegir host"
-          },
           "ProjectCombobox": {
             "search": "Buscar proyectos...",
             "empty": "Ningún proyecto coincide con tu búsqueda.",
