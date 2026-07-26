@@ -24,6 +24,7 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 | Hardcode `e.metaKey`, a path separator, or a platform font | Section 7 |
 | Import from `src/main/` in `src/renderer/` | Section 1 |
 | Name a file or folder `helpers`, `utils`, `common`, `misc`, or `shared-stuff`; add an `index.ts` re-export barrel | Section 2 |
+| Rename or move a file without updating the paths written as *strings* — build scripts, CI jobs, baselines, allowlists, `Why:` comments | `check-source-path-references.mjs` |
 | Follow an absolute path from a subagent result into the main repo instead of this worktree | Section 12 |
 
 ---
@@ -175,7 +176,7 @@ Verify by building, typechecking, linting, and running the app.
 
 ## 10. Verify before you finish
 
-`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts` (switch exhaustiveness, design-token budget, UI style drift, max-lines ratchet, skill guides and manifest, localization catalog and coverage). `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
+`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts` (switch exhaustiveness, design-token budget, UI style drift, source path references, max-lines ratchet, skill guides and manifest, localization catalog and coverage). `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
 
 Report results honestly: if something fails, show the output; if you skipped a step, say which.
 

@@ -3,7 +3,7 @@
 // regex backslashes here are single (the real runtime form) — not the doubled
 // form a backtick template literal would otherwise require.
 //
-// This mirrors the unit-tested apps/mobile/src/terminal/terminal-path-tap.ts; keep
+// This mirrors the unit-tested apps/mobile/src/terminal/path-tap.ts; keep
 // the two in sync. The TS module is the source of truth for the algorithm and
 // has the regression tests; this string only exists because the WebView can't
 // import RN modules.

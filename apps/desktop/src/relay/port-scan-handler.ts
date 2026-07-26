@@ -4,7 +4,7 @@ import { getProcessOutputFields } from '../shared/process-output-field-scanner'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { scanWindowsListeningPorts } from './windows-port-scan'
 
-// Keep in sync with src/shared/ssh-types.ts — DetectedPort
+// Keep in sync with packages/runtime-protocol/src/ssh-types.ts — DetectedPort
 export type DetectedPort = {
   port: number
   host: string

@@ -861,7 +861,7 @@ export function createIpcPtyTransport(opts: IpcPtyTransportOptions = {}): PtyTra
         // both the raw Error.message and Electron's IPC-wrapped form
         // ("Error invoking remote method 'pty:spawn': TerminalKilledError:
         // ..."). The phrase "was explicitly killed" only appears in that one
-        // error type (see src/main/daemon/daemon-pty-adapter.ts), so a
+        // error type (see src/main/daemon/pty-adapter.ts), so a
         // substring match is safe.
         if (msg.includes('was explicitly killed')) {
           return undefined
