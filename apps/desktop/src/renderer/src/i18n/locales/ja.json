@@ -3613,8 +3613,8 @@
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows ファイアウォール規則を修復しました。",
           "title": "Coworking は Windows ファイアウォールによってブロックされています",
-          "readyTitle": "Coworking 共有を再起動",
-          "readyDescription": "必要な規則が利用可能になりました。再適用すると、このアプリセッションで Coworking が起動します。",
+          "readyTitle": "Coworking を再起動",
+          "readyDescription": "必要な規則が利用可能になりました。再適用すると、このアプリセッションで Coworking が再起動します。",
           "inspectUnavailable": "ファイアウォール規則を確認できませんでした。管理者の承認で再作成してください。",
           "ruleMissing": "インストール済みの Yiru アプリに必要なプライベートネットワーク規則がありません。",
           "ruleDetails": "Yiru.Coworking · TCP {{port}} · プライベート",
@@ -3667,7 +3667,7 @@
         "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "この worktree を公開できませんでした。",
           "title": "{{value0}} を公開しますか？",
-          "description": "Tailnet 上で Yiru Desktop を使用しているメンバーがこの worktree を開けるようになります。",
+          "description": "Tailnet 上で Yiru を使用しているメンバーがこの worktree を開けるようになります。",
           "historyWarning": "既存のすべてのセッション、トランスクリプト、ターミナルのスクロールバック、今後の出力が閲覧可能になります。",
           "shellWarning": "ターミナル履歴には、この worktree 外で生成された内容が含まれる場合があります。",
           "cancel": "キャンセル",

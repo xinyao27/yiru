@@ -3613,8 +3613,8 @@
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 防火墙规则已修复。",
           "title": "Coworking 被 Windows 防火墙阻止",
-          "readyTitle": "重新启动 Coworking 分享",
-          "readyDescription": "所需规则现在已可用。重新应用规则即可在当前应用会话中启动 Coworking。",
+          "readyTitle": "重新启动 Coworking",
+          "readyDescription": "所需规则现在已可用。重新应用规则即可在当前应用会话中重新启动 Coworking。",
           "inspectUnavailable": "无法检查防火墙规则。请通过管理员确认重新创建规则。",
           "ruleMissing": "已安装的 Yiru 应用缺少所需的专用网络规则。",
           "ruleDetails": "Yiru.Coworking · TCP {{port}} · 专用网络",
@@ -3667,7 +3667,7 @@
         "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "无法将此 worktree 设为公开。",
           "title": "将 {{value0}} 设为公开？",
-          "description": "Tailnet 中使用 Yiru Desktop 的成员将能够打开此 worktree。",
+          "description": "Tailnet 中使用 Yiru 的成员将能够打开此 worktree。",
           "historyWarning": "所有现有 session、transcript、终端回滚记录及未来终端输出都将可读。",
           "shellWarning": "终端历史可能包含在此 worktree 之外产生的内容。",
           "cancel": "取消",

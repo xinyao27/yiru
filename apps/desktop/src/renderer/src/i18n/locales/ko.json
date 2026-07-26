@@ -3613,8 +3613,8 @@
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows 방화벽 규칙을 복구했습니다.",
           "title": "Windows 방화벽이 Coworking을 차단하고 있습니다",
-          "readyTitle": "Coworking 공유 다시 시작",
-          "readyDescription": "필요한 규칙을 사용할 수 있습니다. 규칙을 다시 적용해 이 앱 세션에서 Coworking을 시작하세요.",
+          "readyTitle": "Coworking 다시 시작",
+          "readyDescription": "필요한 규칙을 사용할 수 있습니다. 규칙을 다시 적용해 이 앱 세션에서 Coworking을 다시 시작하세요.",
           "inspectUnavailable": "방화벽 규칙을 확인할 수 없습니다. 관리자 승인을 받아 다시 만드세요.",
           "ruleMissing": "설치된 Yiru 앱에 필요한 개인 네트워크 규칙이 없습니다.",
           "ruleDetails": "Yiru.Coworking · TCP {{port}} · 개인",
@@ -3667,7 +3667,7 @@
         "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "이 worktree를 공개로 전환할 수 없습니다.",
           "title": "{{value0}}을(를) 공개할까요?",
-          "description": "Tailnet에서 Yiru Desktop을 사용하는 구성원이 이 worktree를 열 수 있게 됩니다.",
+          "description": "Tailnet에서 Yiru를 사용하는 구성원이 이 worktree를 열 수 있게 됩니다.",
           "historyWarning": "기존의 모든 세션, 대화 기록, 터미널 스크롤백 및 이후 출력이 읽기 가능해집니다.",
           "shellWarning": "터미널 기록에는 이 worktree 외부에서 생성된 내용이 포함될 수 있습니다.",
           "cancel": "취소",

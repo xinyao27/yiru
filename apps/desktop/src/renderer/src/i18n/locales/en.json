@@ -3636,8 +3636,8 @@
         "CoworkingWindowsFirewallNotice": {
           "repairSuccess": "Windows Firewall rule repaired.",
           "title": "Coworking is blocked by Windows Firewall",
-          "readyTitle": "Restart coworking",
-          "readyDescription": "The required rule is available now. Reapply it to restart coworking in this app session.",
+          "readyTitle": "Restart Coworking",
+          "readyDescription": "The required rule is available now. Reapply it to restart Coworking in this app session.",
           "inspectUnavailable": "The firewall rule could not be inspected. Recreate it with administrator approval.",
           "ruleMissing": "The packaged Yiru app does not have the required Private-network rule.",
           "ruleDetails": "Yiru.Coworking · TCP {{port}} · Private",
@@ -3690,7 +3690,7 @@
         "CoworkingWorktreeVisibilityDialog": {
           "publishFailed": "Could not make this worktree public.",
           "title": "Make {{value0}} public?",
-          "description": "People using Yiru Desktop on your Tailnet will be able to open this worktree.",
+          "description": "People using Yiru on your Tailnet will be able to open this worktree.",
           "historyWarning": "All existing sessions, transcripts, terminal scrollback, and future terminal output will be readable.",
           "shellWarning": "Terminal history may include content produced outside this worktree.",
           "cancel": "Cancel",
