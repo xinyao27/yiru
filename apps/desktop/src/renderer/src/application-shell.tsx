@@ -119,7 +119,6 @@ import { installRendererCommandToasts } from './components/renderer-command-toas
 import Sidebar from './components/sidebar/panel'
 import { SidebarWorkspaceSearchButton } from './components/sidebar/workspace-search-button'
 import { SkillFreshnessNudge } from './components/skills/skill-freshness-nudge'
-import { SkillFreshnessUpdateDialog } from './components/skills/skill-freshness-update-dialog'
 import { StarNagCard } from './components/star-nag-card'
 import { StarNagAgentValueMomentObserver } from './components/star-nag/agent-value-moment-observer'
 import { StarNagToastHost } from './components/star-nag/toast-host'
@@ -382,6 +381,14 @@ const UpdateCard = lazy(() =>
 )
 const RemoteServerUpdateDialog = lazy(
   () => import('./components/settings/remote-server-update-dialog')
+)
+// Why: this dialog embeds a live terminal pane, so importing it eagerly drags
+// xterm and the whole pane-manager engine into the entry chunk — about 2.3MB
+// for a surface that only appears when a skill needs updating.
+const SkillFreshnessUpdateDialog = lazy(() =>
+  import('./components/skills/skill-freshness-update-dialog').then((module) => ({
+    default: module.SkillFreshnessUpdateDialog
+  }))
 )
 const ContextualTourOverlay = lazy(() =>
   import('./components/contextual-tours/contextual-tour-overlay').then((module) => ({
@@ -2946,13 +2953,15 @@ function App(): React.JSX.Element {
             </RecoverableRenderErrorBoundary>
             {/* Why: the dialog hosts a live terminal pane, which requires the
                 link-routing preference context; mounting outside crashes it. */}
-            <RecoverableRenderErrorBoundary
-              boundaryId="overlay.skill-freshness-update-dialog"
-              surface="overlay"
-              compact
-            >
-              <SkillFreshnessUpdateDialog />
-            </RecoverableRenderErrorBoundary>
+            <Suspense fallback={null}>
+              <RecoverableRenderErrorBoundary
+                boundaryId="overlay.skill-freshness-update-dialog"
+                surface="overlay"
+                compact
+              >
+                <SkillFreshnessUpdateDialog />
+              </RecoverableRenderErrorBoundary>
+            </Suspense>
             <Suspense fallback={null}>
               <RecoverableRenderErrorBoundary
                 boundaryId="overlay.remote-server-update-dialog"
