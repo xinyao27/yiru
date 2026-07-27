@@ -55,7 +55,7 @@
       --color-syntax-string: #a31515;
       --color-syntax-type: #267f99;
       --color-syntax-variable: #001080;
-      --color-terminal-surface: #1a1b26;
+      --color-terminal-surface: #f8f8f8;
       --color-status-neutral: rgba(20, 20, 20, 0.4);
     }
 
@@ -109,7 +109,7 @@
       --color-syntax-string: #ce9178;
       --color-syntax-type: #4ec9b0;
       --color-syntax-variable: #9cdcfe;
-      --color-terminal-surface: #1a1b26;
+      --color-terminal-surface: #141414;
       --color-status-neutral: rgba(240, 240, 240, 0.4);
     }
   }

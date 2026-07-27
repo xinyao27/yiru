@@ -41,6 +41,7 @@ import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycl
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'
 import type { ConnectionState, HostProfile } from '../src/transport/types'
+import { repoColor } from '../src/worktree/repo-color'
 import { pickResumeWorktree } from '../src/worktree/resume-worktree'
 
 function endpointLabel(endpoint: string): string {
@@ -213,17 +214,6 @@ function fetchAccountsSnapshot(
       }
     })
     .catch(() => {})
-}
-
-// Why: repo names get a stable color derived from hashing, matching the
-// host detail page's colored dots for visual consistency.
-const REPO_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4']
-function repoColor(name: string): string {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) | 0
-  }
-  return REPO_COLORS[Math.abs(hash) % REPO_COLORS.length]
 }
 
 export default function HomeScreen() {
@@ -801,7 +791,7 @@ export default function HomeScreen() {
                   }}
                 >
                   <View className={styles.quickActionIcon}>
-                    <Plus size={16} weight="regular" colorClassName="accent-muted-foreground" />
+                    <Plus size={16} colorClassName="accent-muted-foreground" />
                   </View>
                   <Text className={styles.quickActionLabel}>New Workspace</Text>
                 </Pressable>

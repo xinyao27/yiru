@@ -92,6 +92,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/appearance-settings')}
+            accessibilityLabel="Appearance"
+            accessibilityRole="button"
           >
             <Palette size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Appearance</Text>
@@ -101,6 +103,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/native-chat-settings')}
+            accessibilityLabel="Chat UI"
+            accessibilityRole="button"
           >
             <MessageSquare size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Chat UI</Text>
@@ -110,6 +114,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/terminal-settings')}
+            accessibilityLabel="Terminal"
+            accessibilityRole="button"
           >
             <TerminalIcon size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Terminal</Text>
@@ -119,6 +125,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/browser-settings')}
+            accessibilityLabel="Browser"
+            accessibilityRole="button"
           >
             <Globe size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Browser</Text>
@@ -128,6 +136,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/notifications')}
+            accessibilityLabel="Notifications"
+            accessibilityRole="button"
           >
             <Bell size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Notifications</Text>
@@ -137,6 +147,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/troubleshoot')}
+            accessibilityLabel="Troubleshooting"
+            accessibilityRole="button"
           >
             <Wrench size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Troubleshooting</Text>
@@ -146,6 +158,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/about')}
+            accessibilityLabel="About"
+            accessibilityRole="button"
           >
             <Info size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>About</Text>
@@ -201,6 +215,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => void Linking.openURL('https://yiru.ai/privacy')}
+            accessibilityLabel="Privacy Policy"
+            accessibilityRole="link"
           >
             <Shield size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Privacy Policy</Text>
@@ -209,6 +225,8 @@ export default function SettingsScreen() {
           <Pressable
             className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => void Linking.openURL(YIRU_GITHUB_ISSUES_URL)}
+            accessibilityLabel="Support"
+            accessibilityRole="link"
           >
             <LifeBuoy size={16} colorClassName="accent-muted-foreground" />
             <Text className={styles.rowLabel}>Support</Text>

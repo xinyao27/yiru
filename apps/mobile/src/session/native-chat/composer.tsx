@@ -140,10 +140,7 @@ export function MobileNativeChatComposer({
           </ScrollView>
         </View>
       ) : null}
-      <MobileGlassSurface
-        className="mb-1 min-h-8 flex-row items-center justify-between overflow-hidden rounded-2xl px-1"
-        forceFallback
-      >
+      <MobileGlassSurface className="mb-1 min-h-8 flex-row items-center justify-between overflow-hidden rounded-2xl px-1">
         <View className="min-w-0 flex-1 flex-row items-center gap-1">
           {agentWorking ? <MobileAgentWorkingIndicator /> : null}
           <Pressable
@@ -178,11 +175,9 @@ export function MobileNativeChatComposer({
           {sendFailureMessage}
         </Text>
       ) : null}
-      {/* Why: Expo Glass can disappear after route navigation (expo/expo#41024).
-          Keep iMessage geometry while the opaque semantic fallback prevents transcript bleed. */}
       <View className="flex-row items-end gap-2">
         {onAttachImage ? (
-          <MobileGlassSurface className="h-11 w-11 overflow-hidden rounded-full" forceFallback>
+          <MobileGlassSurface className="h-11 w-11 overflow-hidden rounded-full">
             <Pressable
               accessibilityLabel="Attach image"
               className="active:bg-accent h-full w-full items-center justify-center rounded-full"
@@ -197,7 +192,7 @@ export function MobileNativeChatComposer({
             </Pressable>
           </MobileGlassSurface>
         ) : null}
-        <MobileGlassSurface className="min-h-11 flex-1 overflow-hidden rounded-3xl" forceFallback>
+        <MobileGlassSurface className="min-h-11 flex-1 overflow-hidden rounded-3xl">
           <View className="min-h-11 flex-row items-end">
             <TextInput
               className="text-foreground max-h-32 min-h-11 flex-1 px-3 py-2.5 text-base"

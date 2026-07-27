@@ -1,6 +1,6 @@
-// Why: the terminal document paints before React can deliver its live theme;
-// this bootstrap value prevents a white WebView flash, then set-theme takes over.
-export const TERMINAL_BOOTSTRAP_BACKGROUND = '#1a1b26'
+// Why: the native WebView surface already paints the active mobile canvas;
+// transparency avoids an opposite-theme flash before React delivers the live theme.
+export const TERMINAL_BOOTSTRAP_BACKGROUND = 'transparent'
 
 // Theme normalization and page-surface painting injected into the WebView IIFE.
 export const TERMINAL_WEBVIEW_THEME_JS = `

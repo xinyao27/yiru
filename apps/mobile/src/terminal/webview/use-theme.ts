@@ -8,17 +8,24 @@ import type { MobileTerminalTheme } from './contract'
 // into the runtime message shape without reloading the terminal document.
 export function useTerminalWebViewTheme(terminalTheme?: MobileTerminalTheme) {
   const { theme } = useUniwind()
-  const terminalBackground = resolveCssString(useCSSVariable('--color-terminal-surface'))
+  const [backgroundValue, foregroundValue] = useCSSVariable([
+    '--color-terminal-surface',
+    '--color-foreground'
+  ])
+  const terminalBackground = resolveCssString(backgroundValue)
+  const terminalForeground = resolveCssString(foregroundValue)
   const effectiveTerminalTheme = useMemo(
     () => ({
       mode: terminalTheme?.mode ?? (theme === 'light' ? 'light' : 'dark'),
       theme: {
+        ...terminalTheme?.theme,
+        foreground: terminalForeground,
+        cursor: terminalForeground,
         background: terminalBackground,
-        cursorAccent: terminalBackground,
-        ...terminalTheme?.theme
+        cursorAccent: terminalBackground
       }
     }),
-    [terminalBackground, terminalTheme, theme]
+    [terminalBackground, terminalForeground, terminalTheme, theme]
   )
   return effectiveTerminalTheme
 }

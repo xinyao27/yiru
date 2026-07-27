@@ -27,7 +27,7 @@ export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): Re
         hitSlop={8}
         onPress={onPress}
       >
-        <Plus size={24} weight="regular" colorClassName="accent-foreground" />
+        <Plus size={24} colorClassName="accent-foreground" />
       </Pressable>
     </MobileGlassSurface>
   )

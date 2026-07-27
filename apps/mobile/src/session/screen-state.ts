@@ -1,15 +1,11 @@
-import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-import type { TuiAgent } from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry, TuiAgent } from '@yiru/workbench-model/agent'
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 
-import type { MobileBrowserTab } from '../../../../src/browser/pane'
-import type { MobileDiffLine } from '../../../../src/session/diff/lines'
-import type {
-  MobileHighlightedDiffLine,
-  MobileSyntaxSegment
-} from '../../../../src/session/file-syntax'
-import type { TerminalRecord } from '../../../../src/session/terminal/records'
-import type { MobileTerminalTheme } from '../../../../src/terminal/webview/contract'
+import type { MobileBrowserTab } from '../browser/pane'
+import type { MobileTerminalTheme } from '../terminal/webview/contract'
+import type { MobileDiffLine } from './diff/lines'
+import type { MobileHighlightedDiffLine, MobileSyntaxSegment } from './file-syntax'
+import type { TerminalRecord } from './terminal/records'
 
 export type Terminal = TerminalRecord
 

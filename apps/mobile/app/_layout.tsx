@@ -51,29 +51,21 @@ export default function RootLayout() {
   const handledNotificationIdsRef = useRef<Set<string>>(new Set())
   const { theme } = useUniwind()
   const baseNavigationTheme = theme === 'dark' ? DarkTheme : DefaultTheme
-  const [
-    foregroundValue,
-    backgroundValue,
-    cardValue,
-    borderValue,
-    primaryValue,
-    notificationValue
-  ] = useCSSVariable([
-    '--color-foreground',
-    '--color-background',
-    '--color-card',
-    '--color-border',
-    '--color-primary',
-    '--color-destructive'
-  ])
+  const [foregroundValue, backgroundValue, borderValue, primaryValue, notificationValue] =
+    useCSSVariable([
+      '--color-foreground',
+      '--color-background',
+      '--color-border',
+      '--color-primary',
+      '--color-destructive'
+    ])
   const foreground = resolveCssColor(foregroundValue, baseNavigationTheme.colors.text)
   const background = resolveCssColor(backgroundValue, baseNavigationTheme.colors.background)
-  const card = resolveCssColor(cardValue, baseNavigationTheme.colors.card)
   const border = resolveCssColor(borderValue, baseNavigationTheme.colors.border)
   const primary = resolveCssColor(primaryValue, baseNavigationTheme.colors.primary)
   const notification = resolveCssColor(notificationValue, baseNavigationTheme.colors.notification)
   const iconContextValue = useMemo(
-    () => ({ color: foreground, weight: 'duotone' as const }),
+    () => ({ color: foreground, weight: 'regular' as const }),
     [foreground]
   )
   const navigationTheme = useMemo(
@@ -83,13 +75,13 @@ export default function RootLayout() {
         ...baseNavigationTheme.colors,
         background,
         border,
-        card,
+        card: background,
         notification,
         primary,
         text: foreground
       }
     }),
-    [background, baseNavigationTheme, border, card, foreground, notification, primary]
+    [background, baseNavigationTheme, border, foreground, notification, primary]
   )
   const headerTitleStyle = useResolveClassNames('text-sm font-semibold') as Pick<
     TextStyle,
@@ -245,6 +237,7 @@ export default function RootLayout() {
                       <Stack.Screen
                         name="index"
                         options={{
+                          title: 'Yiru',
                           headerShown: true,
                           headerTitle: () => (
                             <YiruLogo size={22} colorClassName="accent-foreground" />
@@ -262,7 +255,10 @@ export default function RootLayout() {
                           gestureEnabled: false
                         }}
                       />
-                      <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+                      <Stack.Screen
+                        name="settings"
+                        options={{ title: 'Settings', headerBackTitle: 'Yiru' }}
+                      />
                       <Stack.Screen name="appearance-settings" options={{ title: 'Appearance' }} />
                       <Stack.Screen name="native-chat-settings" options={{ title: 'Chat UI' }} />
                       <Stack.Screen name="terminal-settings" options={{ title: 'Terminal' }} />

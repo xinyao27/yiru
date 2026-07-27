@@ -8,6 +8,7 @@ import {
   ArrowUp,
   CaretDown as ChevronDown,
   Copy,
+  ImageSquare,
   ArrowSquareRight as SquareChevronRight
 } from '../../components/uniwind-icons'
 import { cn } from '../../style/class-names'
@@ -166,9 +167,18 @@ function Prose({
   }
   if (isImageRefBlock(block)) {
     return (
-      <Text className="text-muted-foreground text-sm" style={[{ fontSize: TEXT_SIZE * fontScale }]}>
-        🖼 {block.alt ?? block.path ?? block.url ?? 'image'}
-      </Text>
+      <View className="flex-row items-center gap-1">
+        <ImageSquare
+          size={Math.round(TEXT_SIZE * fontScale)}
+          colorClassName="accent-muted-foreground"
+        />
+        <Text
+          className="text-muted-foreground flex-1 text-sm"
+          style={[{ fontSize: TEXT_SIZE * fontScale }]}
+        >
+          {block.alt ?? block.path ?? block.url ?? 'image'}
+        </Text>
+      </View>
     )
   }
   return null

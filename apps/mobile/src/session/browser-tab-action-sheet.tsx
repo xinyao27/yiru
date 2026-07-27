@@ -4,8 +4,8 @@ import {
   ArrowClockwise as RefreshCw
 } from '@/components/uniwind-icons'
 
-import type { MobileSessionTab } from '../../app/h/[hostId]/session/route-types'
 import { ActionSheetModal } from '../components/action-sheet-modal'
+import type { MobileSessionTab } from './screen-state'
 import { getMobileSessionTabTitle } from './terminal/tab-agent'
 
 type BrowserTab = Extract<MobileSessionTab, { type: 'browser' }>

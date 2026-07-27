@@ -42,6 +42,7 @@ import {
   refreshMobileNewWorkspaceDialogSelectedRepo,
   resolveMobileNewWorkspaceDialogRepoId
 } from '../worktree/new-workspace-dialog-repo-selection'
+import { repoColor } from '../worktree/repo-color'
 import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-worktree-repo'
 import { MobileAgentIcon } from './agent-icon'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
@@ -109,14 +110,6 @@ type NewWorktreeDrawerView = 'form' | 'transition' | 'source' | 'repo' | 'agent'
 // Why: iOS cannot reliably present a second native modal until the first drawer's
 // exit commits; one extra frame keeps transitions sequential on slower devices.
 const NEW_WORKTREE_DRAWER_TRANSITION_MS = BOTTOM_DRAWER_HIDE_DURATION_MS + 16
-function repoColor(name: string): string {
-  const palette = ['#f97316', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16', '#f59e0b', '#6366f1']
-  let hash = 0
-  for (let i = 0; i < name.length; i += 1) {
-    hash = (hash * 31 + name.charCodeAt(i)) | 0
-  }
-  return palette[Math.abs(hash) % palette.length]!
-}
 
 function repoBadgeColor(repo: Repo | null): string {
   return repo?.badgeColor || repoColor(repo?.displayName ?? 'repository')

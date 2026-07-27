@@ -65,7 +65,6 @@ import {
 } from '../../../../src/components/custom-key-modal'
 import { MobileGlassSurface } from '../../../../src/components/glass/surface'
 import { MobileHtmlPreview } from '../../../../src/components/html-preview'
-import { PhosphorIconContextProvider } from '../../../../src/components/phosphor-icon-context-provider'
 import { MobileRichMarkdownEditor } from '../../../../src/components/rich-markdown-editor'
 import { StatusDot } from '../../../../src/components/status-dot'
 import { MobileSyntaxSegments } from '../../../../src/components/syntax-segments'
@@ -128,6 +127,29 @@ import {
 } from '../../../../src/session/panel-host'
 import { useMobilePrBranchContext } from '../../../../src/session/pr/use-branch-context'
 import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
+import { QuickCommandsTabButton } from '../../../../src/session/quick-commands-tab-button'
+import { sessionScreenClassNames as styles } from '../../../../src/session/screen-class-names'
+import type {
+  DiffCommentActions,
+  DiffNotesDelivery,
+  DiffSyntaxState,
+  DirtyMarkdownDraft,
+  FileDocState,
+  FileSyntaxState,
+  MarkdownDocState,
+  MobileDisplayMode,
+  MobileNewTabAgentLoadState,
+  MobileSessionTab,
+  MobileSessionTabType,
+  RenderableDiffLine,
+  RuntimeRepoSummary,
+  RuntimeStatusResult,
+  SessionTabsResult,
+  Terminal,
+  TerminalCreateResult,
+  TerminalGestureInputBucket,
+  TerminalGestureInputQueue
+} from '../../../../src/session/screen-state'
 import { MOBILE_SESSION_STATUS_LABELS } from '../../../../src/session/status-labels'
 import {
   activateMobileSessionTab,
@@ -237,29 +259,6 @@ import type { RpcClient } from '../../../../src/transport/rpc-client'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '../../../../src/transport/types'
 import { getRepoIdFromMobileWorktreeId } from '../../../../src/worktree-id'
 import { headlessActivationNeedsHostRenderer } from '../../../../src/worktree/activation-result'
-import { QuickCommandsTabButton } from './quick-commands-tab-button'
-import type {
-  DiffCommentActions,
-  DiffNotesDelivery,
-  DiffSyntaxState,
-  DirtyMarkdownDraft,
-  FileDocState,
-  FileSyntaxState,
-  MarkdownDocState,
-  MobileDisplayMode,
-  MobileNewTabAgentLoadState,
-  MobileSessionTab,
-  MobileSessionTabType,
-  RenderableDiffLine,
-  RuntimeRepoSummary,
-  RuntimeStatusResult,
-  SessionTabsResult,
-  Terminal,
-  TerminalCreateResult,
-  TerminalGestureInputBucket,
-  TerminalGestureInputQueue
-} from './route-types'
-import { styles } from './styles'
 
 const TERMINAL_KEYBOARD_DISMISS_ACTION_SHEET_FALLBACK_MS = 450
 
@@ -4559,7 +4558,7 @@ export default function SessionScreen() {
       ) : null}
       <View className="flex-1">
         {!useNativeSessionHeader ? (
-          <SafeAreaView className="bg-card border-b-border border-b" edges={['top']}>
+          <SafeAreaView className="border-b-border bg-background border-b" edges={['top']}>
             <View className="min-h-11 flex-row items-center px-2 py-1">
               <Pressable
                 className="active:bg-accent mr-1 h-9 w-9 items-center justify-center"
@@ -4650,7 +4649,7 @@ export default function SessionScreen() {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 className="max-h-10 flex-1"
-                contentContainerClassName="px-1"
+                contentContainerClassName="gap-1 px-1"
                 keyboardShouldPersistTaps="handled"
                 scrollEventThrottle={16}
                 onScroll={(e) => {
@@ -4686,34 +4685,31 @@ export default function SessionScreen() {
                     }}
                     delayLongPress={400}
                   >
-                    <PhosphorIconContextProvider weight="regular">
-                      <View className="max-w-full flex-row items-center gap-1">
-                        {/* Why: tab identity glyphs match desktop's compact regular-weight chrome. */}
-                        {t.type === 'browser' && (
-                          <Globe size={13} colorClassName="accent-muted-foreground" />
+                    <View className="max-w-full flex-row items-center gap-1">
+                      {t.type === 'browser' && (
+                        <Globe size={13} colorClassName="accent-muted-foreground" />
+                      )}
+                      {t.type === 'markdown' && (
+                        <FileText size={13} colorClassName="accent-muted-foreground" />
+                      )}
+                      {t.type === 'file' && (
+                        <File size={13} colorClassName="accent-muted-foreground" />
+                      )}
+                      {t.type === 'terminal' &&
+                        (() => {
+                          const agentId = resolveMobileTerminalTabAgentId(t)
+                          return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
+                        })()}
+                      <Text
+                        className={cn(
+                          'shrink text-muted-foreground text-xs',
+                          t.id === activeSessionTabId && 'text-foreground'
                         )}
-                        {t.type === 'markdown' && (
-                          <FileText size={13} colorClassName="accent-muted-foreground" />
-                        )}
-                        {t.type === 'file' && (
-                          <File size={13} colorClassName="accent-muted-foreground" />
-                        )}
-                        {t.type === 'terminal' &&
-                          (() => {
-                            const agentId = resolveMobileTerminalTabAgentId(t)
-                            return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
-                          })()}
-                        <Text
-                          className={cn(
-                            'shrink text-muted-foreground text-xs',
-                            t.id === activeSessionTabId && 'text-foreground'
-                          )}
-                          numberOfLines={1}
-                        >
-                          {getMobileSessionTabTitle(t)}
-                        </Text>
-                      </View>
-                    </PhosphorIconContextProvider>
+                        numberOfLines={1}
+                      >
+                        {getMobileSessionTabTitle(t)}
+                      </Text>
+                    </View>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -4735,7 +4731,7 @@ export default function SessionScreen() {
                 }}
                 accessibilityLabel="New tab"
               >
-                <Plus size={16} weight="regular" colorClassName="accent-muted-foreground" />
+                <Plus size={16} colorClassName="accent-muted-foreground" />
               </Pressable>
               {shouldShowMobileQuickCommandsAction(quickCommandsSupported) ? (
                 <QuickCommandsTabButton

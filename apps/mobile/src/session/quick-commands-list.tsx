@@ -185,7 +185,7 @@ function QuickCommandRow({
           {isAgent ? (
             <MobileAgentIcon agentId={command.agent} size={16} />
           ) : (
-            <Play size={14} weight="fill" colorClassName="accent-foreground" />
+            <Play size={14} colorClassName="accent-foreground" />
           )}
         </View>
         <View className="min-w-0 flex-1">
