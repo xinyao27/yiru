@@ -29,7 +29,6 @@ export type SourceControlControllerInput = {
 export function useSourceControlStoreState(scope: SourceControlControllerInput) {
   const refreshBranchCompareRef = useRef<() => Promise<void>>(async () => {})
   const refreshGitHistoryRef = useRef<() => Promise<void>>(async () => {})
-  const sourceControlRef = useRef<HTMLDivElement | null>(null)
   const [fileListScrollElement, setFileListScrollElement] = useState<HTMLDivElement | null>(null)
   const isMac = useMemo(() => navigator.userAgent.includes('Mac'), [])
   const pendingCommentEditorRevealFrameIdsRef = useRef<number[]>([])
@@ -42,7 +41,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
     activeWorktreeId ? s.activeGroupIdByWorktree[activeWorktreeId] : undefined
   )
   const worktreeMap = useWorktreeMap()
-  const rightSidebarTab = useAppStore((s) => s.rightSidebarTab)
   const activeRepo = useRepoById(activeWorktree?.repoId ?? null)
   const gitIdentityDisplay = activeWorktree ? getWorktreeGitIdentityDisplay(activeWorktree) : null
   const detachedHeadDisplay = gitIdentityDisplay?.kind === 'detached' ? gitIdentityDisplay : null
@@ -180,7 +178,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
     if (node === null) {
       cancelSourceControlEditorRevealFrames(pendingCommentEditorRevealFrameIdsRef)
     }
-    sourceControlRef.current = node
   }, [])
   const handleCopyDiffComments = useCallback(async (): Promise<void> => {
     if (diffCommentsForActive.length === 0) {
@@ -255,7 +252,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
   const [filterExpanded, setFilterExpanded] = useState(false)
   return {
     ...scope,
-    sourceControlRef,
     fileListScrollElement,
     setFileListScrollElement,
     isMac,
@@ -267,7 +263,6 @@ export function useSourceControlStoreState(scope: SourceControlControllerInput) 
     activeWorktreeInstanceId,
     activeGroupId,
     worktreeMap,
-    rightSidebarTab,
     activeRepo,
     gitIdentityDisplay,
     detachedHeadDisplay,

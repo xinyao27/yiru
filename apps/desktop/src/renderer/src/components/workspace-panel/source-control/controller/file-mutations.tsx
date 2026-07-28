@@ -23,7 +23,6 @@ export function useSourceControlFileMutations(scope: SourceControlHistoryControl
   const {
     activeRepoSettings,
     activeWorktreeId,
-    clearSelection,
     grouped,
     isExecutingBulk,
     pendingDiscard,
@@ -213,7 +212,6 @@ export function useSourceControlFileMutations(scope: SourceControlHistoryControl
         }
         if (!result.aborted) {
           await refreshActiveGitStatusAfterMutation()
-          clearSelection()
         }
       } finally {
         setIsExecutingBulk(false)
@@ -225,7 +223,6 @@ export function useSourceControlFileMutations(scope: SourceControlHistoryControl
       activeWorktreeId,
       grouped,
       isExecutingBulk,
-      clearSelection,
       discardMany,
       discardSingle,
       refreshActiveGitStatusAfterMutation,

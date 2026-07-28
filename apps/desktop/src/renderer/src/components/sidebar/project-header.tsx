@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { PhosphorIconContextProvider } from '@/components/phosphor-icon-context-provider'
 import { cn } from '@/lib/class-names'
 
 type SidebarProjectHeaderIconProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -46,26 +45,22 @@ export const SidebarProjectHeader = React.forwardRef<HTMLDivElement, SidebarProj
         {...props}
       >
         {icon ? (
-          // Why: project-header identity glyphs are regular, while action-menu
-          // portals outside the visible row retain the renderer default.
-          <PhosphorIconContextProvider weight="regular">
-            <div
-              className={cn(
-                'flex size-4 shrink-0 items-center justify-center',
-                iconClassName,
-                iconPropsClassName
-              )}
-              {...restIconProps}
-            >
-              {icon}
-            </div>
-          </PhosphorIconContextProvider>
+          <div
+            className={cn(
+              'flex size-4 shrink-0 items-center justify-center',
+              iconClassName,
+              iconPropsClassName
+            )}
+            {...restIconProps}
+          >
+            {icon}
+          </div>
         ) : null}
 
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1.5">
             <div className="min-w-0 truncate text-[13px] leading-none font-semibold">{label}</div>
-            <PhosphorIconContextProvider weight="regular">{labelAfter}</PhosphorIconContextProvider>
+            {labelAfter}
           </div>
         </div>
 

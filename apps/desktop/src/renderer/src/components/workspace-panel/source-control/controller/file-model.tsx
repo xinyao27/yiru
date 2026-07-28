@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import type { GitStatusSourceControlTreeNode } from '../directory-action-paths'
-import { compareGitStatusEntries } from '../empty-state'
 import {
   filterSourceControlGroupedPathEntries,
   filterSourceControlPathEntries,
@@ -15,8 +14,8 @@ import {
   type SourceControlDisplaySectionId,
   type SourceControlEntryGroups
 } from '../section-order'
+import { compareGitStatusEntries } from '../status-sort'
 import {
-  collectListSelectionEntries,
   injectExpandedSubmoduleEntries,
   injectExpandedSubmoduleRows,
   type RenderableSourceControlNode,
@@ -30,7 +29,6 @@ import {
   flattenSourceControlTree,
   namespaceSourceControlTreeDirectoryKeys
 } from '../tree'
-import type { FlatEntry } from '../use-selection'
 import type { SourceControlHostedReviewStateController } from './hosted-review-state'
 
 export function useSourceControlFileModel(scope: SourceControlHostedReviewStateController) {
@@ -196,18 +194,22 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     () => flattenSourceControlTree(branchTreeRoots, collapsedTreeDirs),
     [branchTreeRoots, collapsedTreeDirs]
   )
-  const visibleSelectionEntries = useMemo(() => {
-    const arr: FlatEntry[] = []
-    // Why: selection and open-key bookkeeping must use the same injected
-    // submodule rows that list view renders.
+  const visibleFileRowKeys = useMemo(() => {
+    const keys = new Set<string>()
+    // Why: open-file bookkeeping must use the same injected submodule rows
+    // that the list view renders.
     if (sourceControlViewMode === 'list') {
       for (const section of displaySections) {
         if (collapsedSections.has(section.id)) {
           continue
         }
-        arr.push(...collectListSelectionEntries(visibleListRowsBySection[section.id] ?? []))
+        for (const row of visibleListRowsBySection[section.id] ?? []) {
+          if (row.type === 'entry') {
+            keys.add(`${row.entry.area}::${row.entry.path}`)
+          }
+        }
       }
-      return arr
+      return keys
     }
 
     for (const section of displaySections) {
@@ -216,11 +218,11 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
       }
       for (const node of visibleTreeRowsBySection[section.id] ?? []) {
         if (node.type === 'file') {
-          arr.push({ key: node.key, entry: node.entry, area: node.area })
+          keys.add(node.key)
         }
       }
     }
-    return arr
+    return keys
   }, [
     collapsedSections,
     displaySections,
@@ -266,7 +268,7 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     visibleListRowsBySection,
     branchTreeRoots,
     visibleBranchTreeRows,
-    visibleSelectionEntries,
+    visibleFileRowKeys,
     isExecutingBulk,
     setIsExecutingBulk,
     unresolvedConflicts,

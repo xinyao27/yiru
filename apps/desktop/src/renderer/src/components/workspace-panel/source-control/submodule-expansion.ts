@@ -2,7 +2,6 @@ import type { GitStatusEntry } from '../../../../../shared/types'
 import { basename } from '../../../lib/path'
 import type { SourceControlSectionArea } from './section-order'
 import type { SourceControlTreeNode } from './tree'
-import type { FlatEntry } from './use-selection'
 
 export type SubmoduleSectionTreeNode = SourceControlTreeNode<
   GitStatusEntry,
@@ -12,7 +11,7 @@ export type SubmoduleSectionTreeNode = SourceControlTreeNode<
 /**
  * Loading/empty/error placeholder shown beneath an expanded submodule while its
  * inner status is fetched on demand. Kept separate from real tree nodes so it
- * never leaks into selection or bulk path collection.
+ * is never treated as a file entry.
  */
 export type SubmodulePlaceholderNode = {
   type: 'submodule-placeholder'
@@ -174,28 +173,6 @@ export function injectExpandedSubmoduleEntries(
       result.push({
         type: 'entry',
         entry: buildSubmoduleChildEntry(submodulePath, innerEntry, entry.area)
-      })
-    }
-  }
-  return result
-}
-
-/**
- * Map injected list rows to selection entries. List-view selection/range/open-key
- * bookkeeping must read the same submodule-injected rows it renders; otherwise an
- * expanded submodule's child files render with handlers but stay unselectable.
- * Placeholders are skipped because they are not selectable.
- */
-export function collectListSelectionEntries(
-  rows: readonly RenderableSubmoduleListItem[]
-): FlatEntry[] {
-  const result: FlatEntry[] = []
-  for (const row of rows) {
-    if (row.type === 'entry') {
-      result.push({
-        key: `${row.entry.area}::${row.entry.path}`,
-        entry: row.entry,
-        area: row.entry.area
       })
     }
   }

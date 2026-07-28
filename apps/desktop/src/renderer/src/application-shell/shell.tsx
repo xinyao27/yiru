@@ -105,7 +105,6 @@ import { useGlobalAssistantFloatingTab } from '../components/floating-terminal/u
 import { shouldShowOnboarding } from '../components/onboarding/should-show-onboarding'
 import { onOnboardingReopened } from '../components/onboarding/show-onboarding-event'
 import { shouldRenderPetOverlay } from '../components/pet/overlay-visibility'
-import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
 import { WorkspacePortScanner } from '../components/ports/workspace-port-scanner'
 import { installRendererCommandToasts } from '../components/renderer-command-toasts'
 import Sidebar from '../components/sidebar/panel'
@@ -2232,55 +2231,53 @@ function App(): React.JSX.Element {
               <SidebarWorkspaceSearchButton variant={titlebarControlVariant} stretch />
             ) : null}
             {/* Why: compact history arrows use the quieter regular-weight chrome treatment. */}
-            <PhosphorIconContextProvider weight="regular">
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant={titlebarControlVariant}
-                      size="icon-titlebar"
-                      className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
-                      onClick={() => useAppStore.getState().goBackWorktree()}
-                      disabled={!canGoBackWorktree}
-                      aria-label={translate('auto.App.064bd07810', 'Go back')}
-                    >
-                      <ArrowLeft weight="regular" />
-                    </Button>
-                  }
-                />
-                <TooltipContent side="bottom" sideOffset={6}>
-                  {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
-                    value0: historyBackShortcutLabel
-                  })}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant={titlebarControlVariant}
-                      size="icon-titlebar"
-                      // Why: titlebar-left owns the right seam against the tab strip
-                      // in both open and floating chrome; a trailing control border
-                      // doubles that hairline (and looks faint when disabled).
-                      className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
-                      onClick={() => useAppStore.getState().goForwardWorktree()}
-                      disabled={!canGoForwardWorktree}
-                      aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
-                    >
-                      <ArrowRight weight="regular" />
-                    </Button>
-                  }
-                />
-                <TooltipContent side="bottom" sideOffset={6}>
-                  {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
-                    value0: historyForwardShortcutLabel
-                  })}
-                </TooltipContent>
-              </Tooltip>
-            </PhosphorIconContextProvider>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={titlebarControlVariant}
+                    size="icon-titlebar"
+                    className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
+                    onClick={() => useAppStore.getState().goBackWorktree()}
+                    disabled={!canGoBackWorktree}
+                    aria-label={translate('auto.App.064bd07810', 'Go back')}
+                  >
+                    <ArrowLeft weight="regular" />
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
+                  value0: historyBackShortcutLabel
+                })}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={titlebarControlVariant}
+                    size="icon-titlebar"
+                    // Why: titlebar-left owns the right seam against the tab strip
+                    // in both open and floating chrome; a trailing control border
+                    // doubles that hairline (and looks faint when disabled).
+                    className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
+                    onClick={() => useAppStore.getState().goForwardWorktree()}
+                    disabled={!canGoForwardWorktree}
+                    aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
+                  >
+                    <ArrowRight weight="regular" />
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
+                  value0: historyForwardShortcutLabel
+                })}
+              </TooltipContent>
+            </Tooltip>
           </ButtonGroup>
         </div>
       )}

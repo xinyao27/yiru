@@ -8,8 +8,8 @@ import {
   getUnstageAllPaths,
   isStageableStatusEntry
 } from '../discard-all-sequence'
+import { ActionButton } from './action-button'
 import type { SourceControlController } from './controller'
-import { ActionButton } from './empty-state'
 import { CONFLICTS_SECTION_LABEL, SECTION_LABELS } from './panel-constants'
 import { SourceControlSectionHeader as SectionHeader } from './section-header'
 import { getSourceControlSectionViewAction } from './section-order'
@@ -173,7 +173,7 @@ function SourceControlUncommittedSections({
 // Why: unlike the branch and history sections, this component forwards the
 // entire `controller` object to SourceControlUncommittedFileList for every
 // expanded section — that child reads roughly two dozen other controller
-// fields (selection, staged diffs, submodule state, ...) this component
+// fields (open files, staged diffs, submodule state, ...) this component
 // never touches directly. A comparator scoped to the fields read here would
 // miss changes that child needs and let it render with stale data, so this
 // intentionally stays a plain reference compare on `controller` — safe, but
