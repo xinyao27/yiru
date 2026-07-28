@@ -105,9 +105,9 @@ export function TabBarOpenInMenuButton({
         pinDraggable && 'cursor-grab active:cursor-grabbing',
         getDropIndicatorClasses(dropIndicator)
       )}
-      // Why: capture so Menu/Tooltip triggers cannot stopPropagation before the
-      // pin drag session arms — otherwise Open in looks undraggable.
-      onPointerDownCapture={pinDraggable ? startPinDrag : undefined}
+      // Why: bubble after the menu trigger records pointer type, then stop before
+      // the surrounding tab-strip drag handler sees the press.
+      onPointerDown={pinDraggable ? startPinDrag : undefined}
     >
       <DropdownMenu modal={false}>
         <Tooltip>

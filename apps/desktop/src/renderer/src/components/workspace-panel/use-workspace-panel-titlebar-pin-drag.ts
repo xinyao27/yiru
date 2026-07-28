@@ -111,9 +111,6 @@ export function useWorkspacePanelTitlebarPinDrag({
   )
 
   useEffect(() => {
-    if (!isPanelDragActive) {
-      return
-    }
     const onPointerMove = (event: PointerEvent): void => {
       const session = dragSessionRef.current
       if (!session || event.pointerId !== session.pointerId) {
@@ -126,6 +123,7 @@ export function useWorkspacePanelTitlebarPinDrag({
           return
         }
         session.promoted = true
+        setIsPanelDragActive(true)
         if (session.handleEl.isConnected) {
           try {
             session.handleEl.setPointerCapture(session.pointerId)
@@ -180,7 +178,7 @@ export function useWorkspacePanelTitlebarPinDrag({
         clickSwallowTimeoutRef.current = null
       }
     }
-  }, [finishDrag, isPanelDragActive, resolveStripRoot])
+  }, [finishDrag, resolveStripRoot])
 
   useEffect(() => {
     if (!isPanelDragActive) {
@@ -217,7 +215,6 @@ export function useWorkspacePanelTitlebarPinDrag({
         handleEl,
         promoted: false
       }
-      setIsPanelDragActive(true)
       dropTargetRef.current = null
       setDropTarget(null)
     },
