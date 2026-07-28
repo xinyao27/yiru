@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { cn } from '../../../lib/class-names'
+import { cn } from '@/lib/class-names'
+
 import {
   SOURCE_CONTROL_TREE_DIRECTORY_PADDING_PX,
   SOURCE_CONTROL_TREE_FILE_PADDING_PX,

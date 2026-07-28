@@ -1,9 +1,8 @@
 import type { IconProps } from '@phosphor-icons/react'
 import React from 'react'
 
-import { cn } from '../../../lib/class-names'
-import { Button } from '../../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 type ActionButtonProps = {
   icon: React.ComponentType<{ className?: string; weight?: IconProps['weight'] }>
@@ -26,7 +25,6 @@ export function ActionButton(props: ActionButtonProps): React.JSX.Element {
             type="button"
             variant={surface === 'row' ? 'row-action' : 'sidebar-outline'}
             size="icon-xs"
-            className={cn(disabled && 'opacity-50 cursor-not-allowed')}
             aria-label={title}
             aria-disabled={disabled}
             onClick={(event) => {
