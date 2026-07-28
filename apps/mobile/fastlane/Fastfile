@@ -23,6 +23,7 @@ MOBILE_ROOT = File.expand_path("..", __dir__)
 # Why: fastlane executes lanes from apps/mobile/fastlane even when GitHub Actions
 # starts in apps/mobile/, so release file paths must be rooted at the mobile app.
 APP_CONFIG_PATH = File.join(MOBILE_ROOT, "app.json")
+PROJECT = File.join(MOBILE_ROOT, "ios", "Yiru.xcodeproj")
 WORKSPACE = File.join(MOBILE_ROOT, "ios", "Yiru.xcworkspace")
 BUILD_OUTPUT_DIRECTORY = File.join(MOBILE_ROOT, "build")
 SCHEME = "Yiru"
@@ -177,18 +178,24 @@ platform :ios do
     # doesn't exist in this fastlane version).
     profile_name = lane_context[SharedValues::SIGH_NAME]
 
-    # Manual signing: the archive needs the team, profile, and signing style set
-    # explicitly (no -allowProvisioningUpdates). Without DEVELOPMENT_TEAM the
-    # archive fails: "Signing for Yiru requires a development team".
+    # Why: xcodebuild command-line signing settings apply to every workspace
+    # target. Dynamic Pods reject the app's provisioning profile, so configure
+    # manual signing only on Yiru's generated Release target.
+    update_code_signing_settings(
+      path: PROJECT,
+      use_automatic_signing: false,
+      team_id: team_id,
+      targets: [SCHEME],
+      build_configurations: ["Release"],
+      code_sign_identity: "Apple Distribution",
+      profile_name: profile_name,
+    )
+
     build_app(
       workspace: WORKSPACE,
       scheme: SCHEME,
       configuration: "Release",
       export_method: "app-store",
-      xcargs: "DEVELOPMENT_TEAM=#{team_id} " \
-        "CODE_SIGN_STYLE=Manual " \
-        "CODE_SIGN_IDENTITY='Apple Distribution' " \
-        "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'",
       export_options: {
         teamID: team_id,
         signingStyle: "manual",
