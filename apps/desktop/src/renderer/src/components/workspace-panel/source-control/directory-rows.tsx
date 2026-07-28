@@ -23,24 +23,40 @@ import { SourceControlRowActions, SourceControlTreeRow } from './tree-row'
 
 type DirectoryRowNode = Pick<SourceControlTreeDirectoryNode, 'depth' | 'fileCount' | 'name'>
 
-function DirectoryRow({
-  node,
-  isCollapsed,
-  onToggle,
-  actions
-}: {
+type DirectoryRowProps = {
   node: DirectoryRowNode
   isCollapsed: boolean
   onToggle: () => void
   actions?: React.ReactNode
-}): React.JSX.Element {
+}
+
+type SourceControlTreeDirectoryRowProps = {
+  node: SourceControlTreeDirectoryNode
+  actionPaths: SourceControlDirectoryActionPaths
+  hideBulkActions: boolean
+  isExecutingBulk: boolean
+  isCollapsed: boolean
+  onToggle: () => void
+  onRequestDiscardPaths: (area: DiscardAllArea, paths: readonly string[]) => void
+  onStagePaths: (paths: readonly string[]) => Promise<void>
+  onUnstagePaths: (paths: readonly string[]) => Promise<void>
+}
+
+type SourceControlBranchTreeDirectoryRowProps = {
+  node: BranchSourceControlTreeDirectoryNode
+  isCollapsed: boolean
+  onToggle: () => void
+}
+
+function DirectoryRow(props: DirectoryRowProps): React.JSX.Element {
+  const { node, isCollapsed, onToggle, actions } = props
   return (
     <SourceControlTreeRow depth={node.depth} rowType="directory">
       <Button
         variant="ghost"
-        size="xs"
+        size="row-trigger"
         type="button"
-        className="flex h-auto min-w-0 flex-1 justify-start border-0 p-0 text-left font-normal whitespace-normal"
+        className="min-w-0 flex-1 justify-start"
         onClick={onToggle}
         aria-expanded={!isCollapsed}
       >
@@ -63,27 +79,20 @@ function DirectoryRow({
   )
 }
 
-export function SourceControlTreeDirectoryRow({
-  node,
-  actionPaths,
-  hideBulkActions,
-  isExecutingBulk,
-  isCollapsed,
-  onToggle,
-  onRequestDiscardPaths,
-  onStagePaths,
-  onUnstagePaths
-}: {
-  node: SourceControlTreeDirectoryNode
-  actionPaths: SourceControlDirectoryActionPaths
-  hideBulkActions: boolean
-  isExecutingBulk: boolean
-  isCollapsed: boolean
-  onToggle: () => void
-  onRequestDiscardPaths: (area: DiscardAllArea, paths: readonly string[]) => void
-  onStagePaths: (paths: readonly string[]) => Promise<void>
-  onUnstagePaths: (paths: readonly string[]) => Promise<void>
-}): React.JSX.Element {
+export function SourceControlTreeDirectoryRow(
+  props: SourceControlTreeDirectoryRowProps
+): React.JSX.Element {
+  const {
+    node,
+    actionPaths,
+    hideBulkActions,
+    isExecutingBulk,
+    isCollapsed,
+    onToggle,
+    onRequestDiscardPaths,
+    onStagePaths,
+    onUnstagePaths
+  } = props
   // Why: filtered tree nodes only contain visible descendants. Folder-wide
   // bulk labels would overpromise if they acted on that filtered subset.
   const canStage = !hideBulkActions && actionPaths.stagePaths.length > 0
@@ -102,6 +111,7 @@ export function SourceControlTreeDirectoryRow({
               <ActionButton
                 surface="row"
                 icon={node.area === 'untracked' ? Trash : Undo2}
+                iconWeight={node.area === 'untracked' ? undefined : 'regular'}
                 title={
                   node.area === 'untracked'
                     ? translate(
@@ -157,14 +167,9 @@ export function SourceControlTreeDirectoryRow({
   )
 }
 
-export function SourceControlBranchTreeDirectoryRow({
-  node,
-  isCollapsed,
-  onToggle
-}: {
-  node: BranchSourceControlTreeDirectoryNode
-  isCollapsed: boolean
-  onToggle: () => void
-}): React.JSX.Element {
+export function SourceControlBranchTreeDirectoryRow(
+  props: SourceControlBranchTreeDirectoryRowProps
+): React.JSX.Element {
+  const { node, isCollapsed, onToggle } = props
   return <DirectoryRow node={node} isCollapsed={isCollapsed} onToggle={onToggle} />
 }

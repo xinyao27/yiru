@@ -177,6 +177,7 @@ Every primitive part carries `data-slot="<name>"` — don't strip it. Merge clas
 | `default` | The one affirmative action in a flow |
 | `secondary` | Lower-emphasis sibling beside a `default` |
 | `outline` | Toolbar and standalone actions where a filled button reads heavy |
+| `sidebar-outline` | Outline toolbar actions resting on a sidebar surface |
 | `outline-transparent` | Titlebar controls whose vertical separators reveal host material |
 | `ghost` | Icon buttons, row triggers — anywhere chrome should disappear |
 | `quiet` | Muted icon/toolbar controls resting quieter than `ghost` |
@@ -187,7 +188,7 @@ Every primitive part carries `data-slot="<name>"` — don't strip it. Merge clas
 | `link` | Inline text action inside a paragraph |
 | `destructive` | Delete, discard, irreversible. Never Cancel. |
 
-Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `popover-hint`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
+Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `row-trigger` · `popover-hint`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
 
 ### Forms
 

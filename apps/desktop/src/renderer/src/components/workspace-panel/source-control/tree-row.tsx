@@ -13,13 +13,8 @@ type SourceControlTreeRowProps = Omit<React.ComponentProps<'div'>, 'className' |
   isCurrent?: boolean
 }
 
-export function SourceControlTreeRow({
-  depth,
-  rowType,
-  isCurrent = false,
-  children,
-  ...props
-}: SourceControlTreeRowProps): React.JSX.Element {
+export function SourceControlTreeRow(props: SourceControlTreeRowProps): React.JSX.Element {
+  const { depth, rowType, isCurrent = false, children, ...divProps } = props
   const padding =
     rowType === 'directory'
       ? SOURCE_CONTROL_TREE_DIRECTORY_PADDING_PX
@@ -27,7 +22,7 @@ export function SourceControlTreeRow({
 
   return (
     <div
-      {...props}
+      {...divProps}
       data-current={isCurrent ? 'true' : undefined}
       className={cn(
         'group hover:bg-accent focus-within:bg-accent relative flex items-center gap-1 py-1 pr-3 transition-colors',
@@ -43,11 +38,12 @@ export function SourceControlTreeRow({
   )
 }
 
-export function SourceControlRowActions({
-  children
-}: {
+type SourceControlRowActionsProps = {
   children: React.ReactNode
-}): React.JSX.Element {
+}
+
+export function SourceControlRowActions(props: SourceControlRowActionsProps): React.JSX.Element {
+  const { children } = props
   // Why: faded actions stay mounted so their tooltip triggers remain
   // measurable and keyboard focus can reveal them.
   return (

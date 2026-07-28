@@ -70,6 +70,7 @@ function SourceControlUncommittedSections({
                     {canRevertAll ? (
                       <ActionButton
                         icon={area === 'untracked' ? Trash : Undo2}
+                        iconWeight={area === 'untracked' ? undefined : 'regular'}
                         title={
                           area === 'untracked'
                             ? translate(

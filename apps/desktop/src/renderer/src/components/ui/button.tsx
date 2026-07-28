@@ -17,6 +17,10 @@ const buttonVariants = cva(
         // Why: toolbar controls must keep an opaque resting surface in both themes.
         outline:
           'border border-border bg-background text-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
+        // Why: right-sidebar toolbar controls need the standard outline interaction
+        // states without painting a main-canvas background over the sidebar.
+        'sidebar-outline':
+          'border border-border bg-sidebar text-muted-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-sidebar dark:hover:bg-accent',
         // Why: titlebar chrome shares the row seams, so controls only draw vertical separators.
         'outline-transparent':
           'border border-y-0 border-border bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
@@ -52,6 +56,8 @@ const buttonVariants = cva(
         // Why: multi-line list actions need content-driven height without bypassing Button chrome.
         'list-row': 'h-auto px-3 py-2',
         'picker-row': 'h-auto gap-2 px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
+        'row-trigger':
+          "h-auto gap-1 p-0 text-left text-xs font-normal whitespace-normal [&_svg:not([class*='size-'])]:size-3",
         'popover-hint': 'h-auto gap-2 px-3 py-1.5 text-left',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         // Why: status actions fill the footer while their content retains compact spacing.

@@ -1,8 +1,8 @@
 import { IconContext } from '@phosphor-icons/react'
 import type { JSX, PropsWithChildren } from 'react'
 
-// Why: each independent React root needs the same renderer-wide Phosphor
-// defaults because context cannot cross root boundaries.
+// Why: the desktop and web entrypoints are separate app roots, but both use
+// the same renderer-wide Phosphor defaults.
 const DEFAULT_ICON_CONTEXT_VALUE = {
   color: 'currentColor',
   size: '1em',

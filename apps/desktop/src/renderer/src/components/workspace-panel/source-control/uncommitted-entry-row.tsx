@@ -17,10 +17,11 @@ import { getFileTypeIcon } from '../../../lib/file-type-icons'
 import { basename, dirname, joinPath } from '../../../lib/path'
 import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../ui/tooltip'
-import { isStageableStatusEntry, isSubmoduleWorktreeOnlyChange } from '../discard-all-sequence'
+import { isSubmoduleWorktreeOnlyChange } from '../discard-all-sequence'
 import { STATUS_COLORS, STATUS_LABELS } from '../status-display'
 import { ActionButton } from './action-button'
 import { getLocalizedConflictKindLabel } from './diff-comments-inline-list'
+import { canDiscardStatusEntry, canStageStatusEntry, canUnstageStatusEntry } from './entry-actions'
 import { SourceControlEntryContextMenu } from './entry-context-menu'
 import { DiffLineCounts } from './entry-details'
 import { SUBMODULE_WORKTREE_ONLY_LABEL, SUBMODULE_WORKTREE_ONLY_TOOLTIP } from './panel-constants'
@@ -76,15 +77,11 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
     : null
   // Why: unresolved rows cannot stage before review, and all conflict rows hide
   // discard because it can erase resolution work or recreate the conflict.
-  const canDiscard =
-    entry.conflictStatus !== 'unresolved' &&
-    entry.conflictStatus !== 'resolved_locally' &&
-    !entry.submoduleRoot &&
-    (entry.area === 'unstaged' || entry.area === 'untracked')
-  const canStage = isStageableStatusEntry(entry)
+  const canDiscard = canDiscardStatusEntry(entry)
+  const canStage = canStageStatusEntry(entry)
   // Why: a submodule-internal staged row is read-only from the parent worktree,
   // so the parent repo's Unstage must not be offered (mirrors bulk unstage).
-  const canUnstage = entry.area === 'staged' && !entry.submoduleRoot
+  const canUnstage = canUnstageStatusEntry(entry)
 
   return (
     <SourceControlEntryContextMenu
@@ -194,6 +191,7 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
             <ActionButton
               surface="row"
               icon={entry.area === 'untracked' ? Trash : Undo2}
+              iconWeight={entry.area === 'untracked' ? undefined : 'regular'}
               title={
                 entry.area === 'untracked'
                   ? translate(
