@@ -5,16 +5,16 @@ type MobileTerminalLiveInputStatusProps = {
 }
 
 export function MobileTerminalLiveInputStatus({ isAttaching }: MobileTerminalLiveInputStatusProps) {
-  const detail = isAttaching ? 'Uploading image to host' : 'Tap to show keyboard'
-
   return (
-    <View className="flex-1 gap-px">
-      <Text className="text-foreground text-xs font-semibold" numberOfLines={1}>
+    <View className="flex-1 justify-center">
+      <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
         Live input
       </Text>
-      <Text className="text-muted-foreground font-mono text-xs" numberOfLines={1}>
-        {detail}
-      </Text>
+      {isAttaching ? (
+        <Text className="text-muted-foreground font-mono text-xs" numberOfLines={1}>
+          Uploading image to host
+        </Text>
+      ) : null}
     </View>
   )
 }

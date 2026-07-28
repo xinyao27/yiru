@@ -1,12 +1,14 @@
 import * as Clipboard from 'expo-clipboard'
 import Constants from 'expo-constants'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { View, Text, Pressable, Platform } from 'react-native'
+import { View, Text, Platform } from 'react-native'
 
 import { Copy, Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { ConnectionLog } from '../src/components/connection-log'
+import { MobileGlassGroup } from '../src/components/glass/group'
+import { MobileGlassPressable } from '../src/components/glass/pressable'
 import { buildConnectionDiagnosticsReport } from '../src/diagnostics/connection-diagnostics-report'
 import { useHostClient } from '../src/transport/client-context'
 import {
@@ -81,28 +83,26 @@ export default function ConnectionLogScreen() {
   return (
     <View className="bg-background flex-1 p-4">
       {hosts.length > 1 && (
-        <View className="mb-3 flex-row flex-wrap gap-2">
+        <MobileGlassGroup className="mb-3 flex-row flex-wrap gap-2" spacing={8}>
           {hosts.map((host) => (
-            <Pressable
+            <MobileGlassPressable
               key={host.id}
-              className={cn(
-                'rounded-full bg-secondary px-3 py-1.5',
-                host.id === selectedId && 'bg-card border border-border'
-              )}
+              className={cn('rounded-full', host.id === selectedId && 'border-primary')}
+              contentClassName="rounded-full px-3 py-2"
               onPress={() => setSelectedId(host.id)}
             >
               <Text
                 className={cn(
-                  'text-xs text-muted-foreground max-w-40',
-                  host.id === selectedId && 'text-foreground font-semibold'
+                  'text-muted-foreground max-w-40 text-xs',
+                  host.id === selectedId && 'text-foreground'
                 )}
                 numberOfLines={1}
               >
                 {host.name}
               </Text>
-            </Pressable>
+            </MobileGlassPressable>
           ))}
-        </View>
+        </MobileGlassGroup>
       )}
 
       {selected ? (
@@ -112,35 +112,32 @@ export default function ConnectionLogScreen() {
               {state}
               {reconnectAttempts > 0 ? ` · attempt ${reconnectAttempts}` : ''}
             </Text>
-            <Pressable
-              className="bg-secondary flex-row items-center gap-1.5 rounded-xl px-3 py-1.5"
+            <MobileGlassPressable
+              className="rounded-full"
+              contentClassName="min-h-8 flex-row items-center gap-1.5 rounded-full px-3"
               onPress={() => void copyDiagnostics()}
             >
               {copied ? (
-                <Check size={14} colorClassName="accent-green-500" />
+                <Check size={16} colorClassName="accent-green-500" />
               ) : (
-                <Copy size={14} colorClassName="accent-muted-foreground" />
+                <Copy size={16} colorClassName="accent-muted-foreground" />
               )}
-              <Text className="text-foreground text-xs font-semibold">
+              <Text className="text-foreground text-xs">
                 {copied ? 'Copied' : 'Copy diagnostics'}
               </Text>
-            </Pressable>
+            </MobileGlassPressable>
           </View>
           {entries.length > 0 ? (
             <ConnectionLog entries={[...entries]} title={selected.name} />
           ) : (
-            <Text className={styles.emptyText}>
+            <Text className="text-muted-foreground text-xs leading-5">
               No connection events yet this session. Events appear as the app dials this host.
             </Text>
           )}
         </>
       ) : (
-        <Text className={styles.emptyText}>No paired hosts.</Text>
+        <Text className="text-muted-foreground text-xs leading-5">No paired hosts.</Text>
       )}
     </View>
   )
 }
-
-const styles = {
-  emptyText: cn('text-xs text-muted-foreground leading-5')
-} as const

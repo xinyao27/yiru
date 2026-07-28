@@ -1,28 +1,15 @@
 import { useCameraPermissions } from 'expo-camera'
 import { useRouter } from 'expo-router'
 import { useState, useRef, useCallback } from 'react'
-import {
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  Linking,
-  type LayoutChangeEvent
-} from 'react-native'
+import { View, Text, ActivityIndicator, Linking, type LayoutChangeEvent } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
 import { UniwindCameraView } from '@/components/uniwind-camera-view'
-import {
-  CaretLeft as ChevronLeft,
-  Clipboard as ClipboardIcon,
-  QrCode
-} from '@/components/uniwind-icons'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { ConnectionLog } from '../src/components/connection-log'
-import { MobileGlassSurface } from '../src/components/glass/surface'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { TextInputModal } from '../src/components/text-input-modal'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { useCloseHost } from '../src/transport/client-context'
@@ -43,9 +30,7 @@ const SCAN_RETICLE_MAX_SIZE = 360
 function Step({ number, text }: { number: number; text: string }) {
   return (
     <View className="flex-row items-center gap-2">
-      <View className="bg-secondary h-6 w-6 items-center justify-center rounded-full">
-        <Text className="text-muted-foreground text-xs font-bold">{number}</Text>
-      </View>
+      <Text className="text-muted-foreground w-6 text-center text-sm">{number}</Text>
       <Text className="text-muted-foreground text-sm">{text}</Text>
     </View>
   )
@@ -205,11 +190,9 @@ export default function PairScanScreen() {
     processingRef.current = false
   }
 
-  // Why: bottom inset accounts for Android 3-button nav bars and iOS
-  // home-indicator areas that would otherwise overlap the 'Or paste
-  // pairing code' button at the bottom of the scan screen.
+  // Why: the native route header owns the top safe area; only the bottom
+  // inset is needed for Android navigation bars and the iOS home indicator.
   const containerPadding = {
-    paddingTop: insets.top + spacing2,
     paddingBottom: insets.bottom + spacing2
   }
   // Why: iPad camera previews are often rectangular, but QR guides should
@@ -221,7 +204,11 @@ export default function PairScanScreen() {
 
   if (!permission) {
     return (
-      <View ref={setPairScanRootRef} className={styles.container} style={[containerPadding]}>
+      <View
+        ref={setPairScanRootRef}
+        className="bg-background flex-1 p-4"
+        style={[containerPadding]}
+      >
         <ActivityIndicator colorClassName="accent-muted-foreground" />
       </View>
     )
@@ -230,16 +217,12 @@ export default function PairScanScreen() {
   if (!permission.granted) {
     const canAskAgain = permission.canAskAgain !== false
     return (
-      <View ref={setPairScanRootRef} className={styles.container} style={[containerPadding]}>
-        <MobileGlassSurface className={styles.backButton} isInteractive>
-          <Pressable
-            className="h-9 w-9 items-center justify-center rounded-full"
-            onPress={() => router.back()}
-          >
-            <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-          </Pressable>
-        </MobileGlassSurface>
-        <View className={styles.centered}>
+      <View
+        ref={setPairScanRootRef}
+        className="bg-background flex-1 p-4"
+        style={[containerPadding]}
+      >
+        <View className="flex-1 items-center justify-center">
           <Text className="text-foreground mb-2 text-sm font-semibold">
             {canAskAgain ? 'Pair with desktop' : 'Camera Access Disabled'}
           </Text>
@@ -248,22 +231,18 @@ export default function PairScanScreen() {
               ? 'Scan the QR code from Yiru on your desktop, or paste the pairing code instead.'
               : 'Enable camera access in Settings, or paste the pairing code instead.'}
           </Text>
-          <Pressable
-            className={styles.primaryButton}
+          <MobileGlassTextButton
+            isProminent
+            label={canAskAgain ? 'Continue' : 'Open Settings'}
             onPress={canAskAgain ? requestPermission : () => void Linking.openSettings()}
-          >
-            {canAskAgain && <QrCode size={16} colorClassName="accent-primary-foreground" />}
-            <Text className={styles.primaryButtonText}>
-              {canAskAgain ? 'Continue' : 'Open Settings'}
-            </Text>
-          </Pressable>
-          <Pressable
-            className={cn(styles.pasteButton, styles.pasteButtonPressedActive)}
+            size="large"
+          />
+          <MobileGlassTextButton
+            className="mt-2"
+            label="Paste code instead"
             onPress={() => setPasteVisible(true)}
-          >
-            <ClipboardIcon size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.pasteButtonText}>Paste code instead</Text>
-          </Pressable>
+            size="large"
+          />
         </View>
         <TextInputModal
           visible={pasteVisible}
@@ -278,17 +257,8 @@ export default function PairScanScreen() {
   }
 
   return (
-    <View ref={setPairScanRootRef} className={styles.container} style={[containerPadding]}>
-      <MobileGlassSurface className={styles.backButton} isInteractive>
-        <Pressable
-          className="h-9 w-9 items-center justify-center rounded-full"
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      </MobileGlassSurface>
-
-      <View className="mb-4 ml-2 gap-2">
+    <View ref={setPairScanRootRef} className="bg-background flex-1 p-4" style={[containerPadding]}>
+      <View className="mb-4 gap-2">
         <Step number={1} text="Open Yiru on your computer" />
         <Step number={2} text="Go to Settings → Mobile" />
         <Step number={3} text="Scan the QR code" />
@@ -311,59 +281,54 @@ export default function PairScanScreen() {
               />
               <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
                 <View className="relative" style={[{ width: reticleSize, height: reticleSize }]}>
-                  <View className={cn(styles.corner, 'top-0 left-0 border-t-2 border-l-2')} />
-                  <View className={cn(styles.corner, 'top-0 right-0 border-t-2 border-r-2')} />
-                  <View className={cn(styles.corner, 'bottom-0 left-0 border-b-2 border-l-2')} />
-                  <View className={cn(styles.corner, 'bottom-0 right-0 border-b-2 border-r-2')} />
+                  <View className="border-camera-reticle absolute top-0 left-0 h-7 w-7 border-t-2 border-l-2" />
+                  <View className="border-camera-reticle absolute top-0 right-0 h-7 w-7 border-t-2 border-r-2" />
+                  <View className="border-camera-reticle absolute bottom-0 left-0 h-7 w-7 border-b-2 border-l-2" />
+                  <View className="border-camera-reticle absolute right-0 bottom-0 h-7 w-7 border-r-2 border-b-2" />
                 </View>
               </View>
             </View>
           )}
           {/* Why: preserve the camera's layout slot while the paste sheet is open. */}
-          {pasteVisible && <View className="bg-card flex-1 rounded-3xl" />}
-          <Pressable
-            className={cn(styles.pasteButton, styles.pasteButtonPressedActive)}
+          {pasteVisible && <View className="bg-background flex-1 rounded-3xl" />}
+          <MobileGlassTextButton
+            className="mt-3 self-center"
+            label="Or paste pairing code"
             onPress={() => setPasteVisible(true)}
-          >
-            <ClipboardIcon size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.pasteButtonText}>Or paste pairing code</Text>
-          </Pressable>
+          />
         </>
       )}
 
       {status === 'connecting' && (
-        <View className={styles.centered}>
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" colorClassName="accent-muted-foreground" />
           <Text className="text-muted-foreground mt-4 text-sm">Connecting…</Text>
-          <View className={styles.logSlot}>
+          <View className="mt-4 w-full px-2">
             <ConnectionLog entries={logs} title="Pairing log" />
           </View>
         </View>
       )}
 
       {status === 'error' && (
-        <View className={styles.centered}>
+        <View className="flex-1 items-center justify-center">
           <Text className="text-destructive mb-6 text-center text-sm leading-5">
             {errorMessage}
           </Text>
           {logs.length > 0 && (
-            <View className={styles.logSlot}>
+            <View className="mt-4 w-full px-2">
               <ConnectionLog entries={logs} title="Pairing log" />
             </View>
           )}
           <View className="items-center gap-2">
-            <Pressable className={styles.primaryButton} onPress={retry}>
-              <Text className={styles.primaryButtonText}>Try Again</Text>
-            </Pressable>
-            <Pressable
-              className={cn('px-6 py-2', styles.pasteButtonPressedActive)}
+            <MobileGlassTextButton isProminent label="Try Again" onPress={retry} size="large" />
+            <MobileGlassTextButton
+              label="Paste code instead"
               onPress={() => {
                 retry()
                 setPasteVisible(true)
               }}
-            >
-              <Text className="text-muted-foreground text-sm font-medium">Paste code instead</Text>
-            </Pressable>
+              size="large"
+            />
           </View>
         </View>
       )}
@@ -379,18 +344,3 @@ export default function PairScanScreen() {
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  backButton: cn('mb-2 h-9 w-9 overflow-hidden rounded-full'),
-  corner: cn('absolute w-7 h-7 border-camera-reticle'),
-  centered: cn('flex-1 items-center justify-center'),
-  logSlot: cn('w-full mt-4 px-2'),
-  primaryButton: cn(
-    'flex-row items-center justify-center gap-1 rounded-2xl bg-primary px-6 py-2.5'
-  ),
-  primaryButtonText: cn('text-primary-foreground text-sm font-semibold'),
-  pasteButton: cn('mt-3 flex-row items-center justify-center gap-1 rounded-xl py-2'),
-  pasteButtonPressedActive: cn('active:bg-accent'),
-  pasteButtonText: cn('text-muted-foreground text-sm font-medium')
-} as const

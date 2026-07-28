@@ -1,12 +1,9 @@
 import { Stack } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
-import {
-  ArrowClockwise as RefreshCw,
-  ArrowSquareOut as ExternalLink,
-  CaretLeft as ChevronLeft
-} from '@/components/uniwind-icons'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { cn } from '@/style/class-names'
 
 import { openMobilePrUrl } from '../components/pr-compose-sheet'
@@ -296,8 +293,9 @@ export function MobileSourceControlPanel({
         </Text>
         <Text className={styles.stateText}>{screenState.message}</Text>
         {screenState.kind === 'error' ? (
-          <Pressable
-            className="bg-secondary mt-3 rounded-xl px-4 py-2"
+          <MobileGlassTextButton
+            className="mt-3"
+            label="Retry"
             onPress={() => {
               // Why: retrying the request is useless while the transport's
               // reconnect loop is parked at its give-up cap — revive the
@@ -309,9 +307,8 @@ export function MobileSourceControlPanel({
               }
               void loadStatus()
             }}
-          >
-            <Text className="text-foreground text-sm font-semibold">Retry</Text>
-          </Pressable>
+            size="large"
+          />
         ) : null}
       </View>
     ) : null
@@ -339,34 +336,30 @@ export function MobileSourceControlPanel({
               Platform.OS === 'ios'
                 ? undefined
                 : () => (
-                    <Pressable
+                    <MobileGlassIconButton
                       accessibilityLabel="Back"
-                      className="h-9 w-9 items-center justify-center rounded-full"
+                      icon="back"
                       onPress={() => router.back()}
-                    >
-                      <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
-                    </Pressable>
+                    />
                   ),
             headerRight:
               Platform.OS === 'ios'
                 ? undefined
                 : () => (
-                    <View className="flex-row items-center gap-1">
+                    <View className="flex-row items-center gap-2">
                       {prWebUrl ? (
-                        <Pressable
-                          className="h-9 w-9 items-center justify-center rounded-full"
+                        <MobileGlassIconButton
+                          accessibilityLabel="Open pull request on the web"
+                          icon="external"
                           onPress={() => openMobilePrUrl(prWebUrl)}
-                        >
-                          <ExternalLink size={18} colorClassName="accent-muted-foreground" />
-                        </Pressable>
+                        />
                       ) : null}
-                      <Pressable
-                        className="h-9 w-9 items-center justify-center rounded-full"
+                      <MobileGlassIconButton
+                        accessibilityLabel="Refresh source control"
                         disabled={ioBusy}
+                        icon="refresh"
                         onPress={onRefresh}
-                      >
-                        <RefreshCw size={18} colorClassName="accent-muted-foreground" />
-                      </Pressable>
+                      />
                     </View>
                   )
           }}
@@ -401,7 +394,7 @@ export function MobileSourceControlPanel({
           />
         </Stack.Toolbar>
       ) : null}
-      {embedded ? <View className={styles.header}>{header}</View> : null}
+      {embedded ? <View className="bg-background">{header}</View> : null}
 
       <MobileSourceControlSegments active={activeTab} onSelect={selectTab} />
 

@@ -1,7 +1,5 @@
-import { Pressable } from 'react-native'
-
+import { MobileGlassPressable } from '@/components/glass/pressable'
 import { ArrowSquareRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 type QuickCommandsTabButtonProps = {
   disabled: boolean
@@ -13,18 +11,17 @@ export function QuickCommandsTabButton({
   onPress
 }: QuickCommandsTabButtonProps): React.JSX.Element {
   return (
-    <Pressable
-      className={cn(
-        'h-10 w-10 items-center justify-center rounded-xl active:bg-accent',
-        disabled && 'opacity-50'
-      )}
-      disabled={disabled}
-      onPress={onPress}
+    <MobileGlassPressable
       accessibilityLabel="Quick commands"
       accessibilityRole="button"
       accessibilityState={{ disabled }}
+      className="rounded-full"
+      contentClassName="h-9 w-9 items-center justify-center rounded-full"
+      disabled={disabled}
+      hitSlop={4}
+      onPress={onPress}
     >
-      <ArrowSquareRight size={16} colorClassName="accent-muted-foreground" />
-    </Pressable>
+      <ArrowSquareRight size={18} colorClassName="accent-muted-foreground" />
+    </MobileGlassPressable>
   )
 }

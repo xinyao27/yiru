@@ -1,8 +1,9 @@
-import { Pressable, Text, View } from 'react-native'
+import { Text } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { MobileGlassGroup } from '../components/glass/group'
+import { MobileGlassPressable } from '../components/glass/pressable'
 
-const BROWSER_KEYS = ['Enter', 'Backspace', 'Tab', 'Escape'] as const
+export const BROWSER_KEYS = ['Enter', 'Backspace', 'Tab', 'Escape'] as const
 
 type Props = {
   disabled: boolean
@@ -11,28 +12,20 @@ type Props = {
 
 export function MobileBrowserKeyRow({ disabled, onKeypress }: Props): React.JSX.Element {
   return (
-    <View className="flex-row gap-1 px-2 pt-1">
+    <MobileGlassGroup className="flex-row gap-2 px-2 pt-1" spacing={8}>
       {BROWSER_KEYS.map((key) => (
-        <Pressable
+        <MobileGlassPressable
           key={key}
-          className={cn(
-            'min-h-8 min-w-11 items-center justify-center rounded-lg bg-secondary px-2',
-            'active:bg-accent',
-            disabled && 'opacity-40'
-          )}
+          className="min-h-8 min-w-11 rounded-full"
+          contentClassName="min-h-8 items-center justify-center rounded-full px-3"
           disabled={disabled}
           onPress={() => onKeypress(key)}
         >
-          <Text
-            className={cn(
-              'text-muted-foreground text-xs font-mono',
-              disabled && 'text-muted-foreground'
-            )}
-          >
+          <Text className="text-muted-foreground font-mono text-xs">
             {key === 'Backspace' ? '⌫' : key === 'Escape' ? 'Esc' : key}
           </Text>
-        </Pressable>
+        </MobileGlassPressable>
       ))}
-    </View>
+    </MobileGlassGroup>
   )
 }

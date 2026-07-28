@@ -13,21 +13,12 @@ import {
 } from 'react-native'
 
 import {
-  MagnifyingGlass as Search,
-  X,
   PushPin as Pin,
-  SlidersHorizontal,
-  Stack as Layers,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  CaretLeft as ChevronLeft,
-  Plus,
   Moon,
-  Funnel as Filter,
   Check,
-  UserCircle,
-  SidebarSimple as PanelLeftClose,
-  TerminalWindow as SquareTerminal
+  SidebarSimple as PanelLeftClose
 } from '@/components/uniwind-icons'
 import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
@@ -39,14 +30,16 @@ import { ActionSheetContent } from '../../../src/components/action-sheet-modal'
 import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
-import { MobileGlassSurface } from '../../../src/components/glass/surface'
+import { MobileGlassIconButton } from '../../../src/components/glass/icon-button'
+import { MobileGlassPressable } from '../../../src/components/glass/pressable'
+import { MobileGlassSection } from '../../../src/components/glass/section'
+import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
 import { PickerModal } from '../../../src/components/picker-modal'
 import { ProtocolBlockScreen } from '../../../src/components/protocol-block-screen'
 import { MobileRepoIcon } from '../../../src/components/repo-icon'
 import { MobileSearchField } from '../../../src/components/search-field'
-import { StatusDot } from '../../../src/components/status-dot'
 import { WorkspaceDetailPlaceholder } from '../../../src/components/workspace-detail-placeholder'
 import { WorktreeListRow } from '../../../src/components/worktree-list-row'
 import { useActiveWorktreeScroll } from '../../../src/hooks/use-active-worktree-scroll'
@@ -81,6 +74,10 @@ import type { RpcSuccess } from '../../../src/transport/types'
 import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'
 import type { RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
 import { areWorktreeListsEqual } from '../../../src/worktree/list-snapshot'
+import {
+  MobileWorkspaceListHeaderActions,
+  MobileWorkspaceListToolbar
+} from '../../../src/worktree/list-toolbar'
 import { repoColor } from '../../../src/worktree/repo-color'
 import { useWorkspaceSections } from '../../../src/worktree/use-workspace-sections'
 import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/workspace-lineage'
@@ -835,10 +832,28 @@ export function HostScreen({
   const { sectionListRef, onScrollToIndexFailed } = useActiveWorktreeScroll(sections)
 
   const isReadOnly = connState === 'auth-failed'
+  const headerVerdict = classifyConnection({
+    state: connState,
+    reconnectAttempts,
+    lastConnectedAt
+  })
+  const showReconnectButton =
+    connState !== 'connected' &&
+    isErrorVerdict(headerVerdict) &&
+    !!hostId &&
+    headerVerdict.kind !== 'auth-failed'
+  const groupLabel =
+    groupMode === 'none'
+      ? 'Group'
+      : groupMode === 'workspaceStatus'
+        ? 'Status'
+        : groupMode === 'repo'
+          ? 'Repo'
+          : 'PR'
 
   if (error) {
     return (
-      <View className={styles.centered}>
+      <View className="flex-1 items-center justify-center">
         <Text className="text-destructive text-sm">{error}</Text>
       </View>
     )
@@ -850,284 +865,72 @@ export function HostScreen({
 
   return (
     <View className="bg-background flex-1">
-      {/* Why: the safe-area inset wraps only the top chrome so the status-bar
-          strip and the header share one bg-card color — previously the strip
-          showed the screen's bg-background against the bg-card header. */}
       <SafeAreaView className="bg-background" edges={['top']}>
-        <MobileGlassSurface>
-          <View className="min-h-9 flex-row items-center justify-between px-4 pt-1">
-            <Pressable
-              className="mr-1 h-8 w-8 items-center justify-center rounded-full"
-              onPress={leaveHost}
-              accessibilityRole="button"
+        <View className="gap-2 px-3 pt-1 pb-2">
+          <View className="min-h-10 flex-row items-center gap-2">
+            <MobileGlassIconButton
               accessibilityLabel="Back to hosts"
-              hitSlop={8}
-            >
-              <ChevronLeft size={22} colorClassName="accent-foreground" />
-            </Pressable>
-            {(() => {
-              const headerVerdict = classifyConnection({
-                state: connState,
-                reconnectAttempts,
-                lastConnectedAt
-              })
-              return (
-                <>
-                  <View className="mr-3 min-w-0 flex-1 flex-row items-center">
-                    <StatusDot state={connState} verdict={headerVerdict} />
-                    <Text
-                      className="text-foreground flex-1 text-sm font-semibold"
-                      numberOfLines={1}
-                    >
-                      {hostName || 'Host'}
-                    </Text>
-                  </View>
-                  {connState !== 'connected' &&
-                    (() => {
-                      // Why: status label removed in favor of just the dot +
-                      // Reconnect button — the home screen already surfaces the
-                      // verdict text per host, and the dot color already
-                      // signals severity here. Auth-failed routes through its
-                      // dedicated banner so we still want to suppress the
-                      // Reconnect button for that case.
-                      const verdict = headerVerdict
-                      const isError = isErrorVerdict(verdict)
-                      const showReconnectButton =
-                        isError && hostId && verdict.kind !== 'auth-failed'
-                      if (!showReconnectButton) {
-                        return null
-                      }
-                      return (
-                        <Pressable
-                          className="border-border bg-card rounded-xl border px-2 py-1"
-                          onPress={() => void forceReconnectHost(hostId!)}
-                          hitSlop={8}
-                        >
-                          <Text className="text-foreground text-xs font-semibold">Reconnect</Text>
-                        </Pressable>
-                      )
-                    })()}
-                </>
-              )
-            })()}
-            {!embedded && floatingWorkspaceEnabled ? (
-              <Pressable
-                className={cn(
-                  'h-7 w-8 items-center justify-center rounded-full',
-                  connState !== 'connected' && styles.toolbarIconDisabled
-                )}
-                onPress={openFloatingWorkspace}
-                disabled={connState !== 'connected'}
+              icon="back"
+              onPress={leaveHost}
+            />
+            <View className="min-w-0 flex-1">
+              <Text className="text-foreground flex-1 text-base font-semibold" numberOfLines={1}>
+                {hostName || 'Host'}
+              </Text>
+            </View>
+            {showReconnectButton ? (
+              <MobileGlassPressable
                 accessibilityRole="button"
-                accessibilityLabel="Floating Workspace"
+                className="rounded-full"
+                contentClassName="min-h-9 justify-center rounded-full px-3"
                 hitSlop={8}
-              >
-                <SquareTerminal
-                  size={18}
-                  colorClassName={
-                    connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
+                onPress={() => {
+                  if (hostId) {
+                    void forceReconnectHost(hostId)
                   }
-                />
-              </Pressable>
+                }}
+              >
+                <Text className="text-foreground text-sm">Reconnect</Text>
+              </MobileGlassPressable>
+            ) : null}
+            {!embedded ? (
+              <MobileWorkspaceListHeaderActions
+                canUseHost={connState === 'connected'}
+                showSearch={showSearch}
+                onAccounts={() => navigateFromHostList(`/h/${hostId}/accounts`)}
+                onSearch={() => setShowSearch((current) => !current)}
+              />
             ) : null}
             {embedded && onHideSidebar ? (
-              <Pressable
-                className="ml-1 h-6 w-6 items-center justify-center rounded-full"
-                onPress={onHideSidebar}
-                accessibilityRole="button"
+              <MobileGlassPressable
                 accessibilityLabel="Hide sidebar"
-                hitSlop={8}
+                accessibilityRole="button"
+                className="h-9 w-9 rounded-full"
+                contentClassName="h-full w-full items-center justify-center rounded-full"
+                hitSlop={4}
+                onPress={onHideSidebar}
               >
-                <PanelLeftClose size={14} colorClassName="accent-muted-foreground" />
-              </Pressable>
+                <PanelLeftClose size={18} colorClassName="accent-muted-foreground" />
+              </MobileGlassPressable>
             ) : null}
           </View>
-
-          {/* Filter/sort/group toolbar */}
-          {embedded ? (
-            <View className="border-b-border gap-1 border-b px-2 py-1.5">
-              <View className={styles.embeddedToolbarRow}>
-                {floatingWorkspaceEnabled ? (
-                  <Pressable
-                    className={cn(
-                      styles.embeddedToolbarIconButton,
-                      connState !== 'connected' && styles.toolbarIconDisabled
-                    )}
-                    onPress={openFloatingWorkspace}
-                    disabled={connState !== 'connected'}
-                    accessibilityRole="button"
-                    accessibilityLabel="Floating Workspace"
-                  >
-                    <SquareTerminal size={16} colorClassName="accent-muted-foreground" />
-                  </Pressable>
-                ) : null}
-
-                <Pressable
-                  className={cn(
-                    styles.filterChip,
-                    'flex-1 min-w-0 h-8 justify-center px-1 py-0',
-                    activeFilterCount > 0 && styles.filterChipActive
-                  )}
-                  onPress={() => setShowFilterModal(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Filter workspaces${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
-                >
-                  <Filter
-                    size={12}
-                    colorClassName={
-                      activeFilterCount > 0 ? 'accent-foreground' : 'accent-muted-foreground'
-                    }
-                  />
-                  <Text
-                    className={cn(
-                      styles.filterChipText,
-                      activeFilterCount > 0 && styles.filterChipTextActive
-                    )}
-                    numberOfLines={1}
-                  >
-                    Filter{activeFilterCount > 0 ? ` ${activeFilterCount}` : ''}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  className={cn(styles.modeButton, styles.embeddedModeButton)}
-                  onPress={() => setShowSortPicker(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Sort by ${selectedSortLabel}`}
-                >
-                  <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
-                  <Text className={styles.sortLabel} numberOfLines={1}>
-                    {selectedSortLabel}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  className={cn(styles.modeButton, styles.embeddedModeButton)}
-                  onPress={() => setShowGroupPicker(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Group workspaces"
-                >
-                  <Layers size={14} colorClassName="accent-muted-foreground" />
-                  <Text className={styles.sortLabel} numberOfLines={1}>
-                    {groupMode === 'none'
-                      ? 'Group'
-                      : groupMode === 'workspaceStatus'
-                        ? 'Status'
-                        : groupMode === 'repo'
-                          ? 'Repo'
-                          : 'PR'}
-                  </Text>
-                </Pressable>
-              </View>
-
-              <View className={styles.embeddedToolbarRow}>
-                <Pressable
-                  className={cn(
-                    styles.embeddedToolbarIconButton,
-                    connState !== 'connected' && styles.toolbarIconDisabled
-                  )}
-                  onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
-                  disabled={connState !== 'connected'}
-                  accessibilityRole="button"
-                  accessibilityLabel="Accounts"
-                >
-                  <UserCircle size={16} colorClassName="accent-muted-foreground" />
-                </Pressable>
-
-                <Pressable
-                  className={cn(
-                    styles.embeddedToolbarIconButton,
-                    connState !== 'connected' && styles.toolbarIconDisabled
-                  )}
-                  onPress={openNewWorktreeModal}
-                  disabled={connState !== 'connected'}
-                  accessibilityRole="button"
-                  accessibilityLabel="New workspace"
-                >
-                  <Plus
-                    size={16}
-                    colorClassName={
-                      connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
-                    }
-                  />
-                </Pressable>
-
-                <Pressable
-                  className={styles.embeddedToolbarIconButton}
-                  onPress={() => setShowSearch((s) => !s)}
-                  accessibilityRole="button"
-                  accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
-                >
-                  {showSearch ? (
-                    <X size={16} colorClassName="accent-muted-foreground" />
-                  ) : (
-                    <Search size={16} colorClassName="accent-muted-foreground" />
-                  )}
-                </Pressable>
-              </View>
-            </View>
-          ) : (
-            <View className="border-b-border flex-row items-center gap-2 border-b px-3 py-1.5">
-              <Pressable
-                className={cn(styles.filterChip, activeFilterCount > 0 && styles.filterChipActive)}
-                onPress={() => setShowFilterModal(true)}
-              >
-                <Filter
-                  size={12}
-                  colorClassName={
-                    activeFilterCount > 0 ? 'accent-foreground' : 'accent-muted-foreground'
-                  }
-                />
-                <Text
-                  className={cn(
-                    styles.filterChipText,
-                    activeFilterCount > 0 && styles.filterChipTextActive
-                  )}
-                >
-                  Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
-                </Text>
-              </Pressable>
-
-              <Pressable className={styles.modeButton} onPress={() => setShowSortPicker(true)}>
-                <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
-                <Text className={styles.sortLabel} numberOfLines={1}>
-                  {selectedSortLabel}
-                </Text>
-              </Pressable>
-
-              <Pressable className={styles.modeButton} onPress={() => setShowGroupPicker(true)}>
-                <Layers size={14} colorClassName="accent-muted-foreground" />
-                <Text className={styles.sortLabel} numberOfLines={1}>
-                  {groupMode === 'none'
-                    ? 'Group'
-                    : groupMode === 'workspaceStatus'
-                      ? 'Status'
-                      : groupMode === 'repo'
-                        ? 'Repo'
-                        : 'PR'}
-                </Text>
-              </Pressable>
-
-              <View className="flex-1" />
-
-              <Pressable
-                className={styles.searchToggle}
-                onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
-                disabled={connState !== 'connected'}
-              >
-                <UserCircle size={16} colorClassName="accent-muted-foreground" />
-              </Pressable>
-
-              <Pressable className={styles.searchToggle} onPress={() => setShowSearch((s) => !s)}>
-                {showSearch ? (
-                  <X size={16} colorClassName="accent-muted-foreground" />
-                ) : (
-                  <Search size={16} colorClassName="accent-muted-foreground" />
-                )}
-              </Pressable>
-            </View>
-          )}
-        </MobileGlassSurface>
+          <MobileWorkspaceListToolbar
+            activeFilterCount={activeFilterCount}
+            canUseHost={connState === 'connected'}
+            embedded={embedded}
+            floatingWorkspaceEnabled={floatingWorkspaceEnabled}
+            groupLabel={groupLabel}
+            showSearch={showSearch}
+            sortLabel={selectedSortLabel}
+            onAccounts={() => navigateFromHostList(`/h/${hostId}/accounts`)}
+            onFilter={() => setShowFilterModal(true)}
+            onFloatingWorkspace={openFloatingWorkspace}
+            onGroup={() => setShowGroupPicker(true)}
+            onNewWorkspace={openNewWorktreeModal}
+            onSearch={() => setShowSearch((current) => !current)}
+            onSort={() => setShowSortPicker(true)}
+          />
+        </View>
       </SafeAreaView>
 
       {/* Auth failed banner */}
@@ -1142,7 +945,7 @@ export function HostScreen({
 
       {/* Search bar */}
       {showSearch && (
-        <View className="border-b-hairline border-b-border bg-card px-3 py-2">
+        <View className="px-3 pb-2">
           <MobileSearchField
             value={search}
             onChangeText={setSearch}
@@ -1160,14 +963,14 @@ export function HostScreen({
       {((connState === 'connecting' || connState === 'reconnecting') &&
         displayWorktrees.length === 0) ||
       (connState === 'connected' && !worktreesLoaded && displayWorktrees.length === 0) ? (
-        <View className={styles.centered}>
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         </View>
       ) : null}
 
       {/* Empty state */}
       {connState === 'connected' && worktreesLoaded && sections.length === 0 && (
-        <View className={styles.centered}>
+        <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground text-sm">
             {search
               ? 'No matching worktrees'
@@ -1212,36 +1015,35 @@ export function HostScreen({
             const repoSectionIcon = groupMode === 'repo' ? repoIconsByName.get(section.title) : null
             return (
               <Pressable
-                className="flex-row items-center px-4 pt-3 pb-1"
+                accessibilityRole="button"
+                className="mx-3 mt-3 min-h-9 flex-row items-center px-2"
                 onPress={() => toggleCollapsed(section.key)}
               >
                 {isCollapsed ? (
-                  <View className={styles.sectionIcon}>
-                    <ChevronRight size={12} colorClassName="accent-muted-foreground" />
+                  <View className="mr-1">
+                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
                   </View>
                 ) : (
-                  <View className={styles.sectionIcon}>
-                    <ChevronDown size={12} colorClassName="accent-muted-foreground" />
+                  <View className="mr-1">
+                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
                   </View>
                 )}
                 {section.icon === 'pin' && (
-                  <View className={styles.sectionIcon}>
-                    <Pin size={12} colorClassName="accent-muted-foreground" />
+                  <View className="mr-1">
+                    <Pin size={16} colorClassName="accent-muted-foreground" />
                   </View>
                 )}
-                {groupMode === 'repo' ? (
+                {groupMode === 'repo' && section.icon !== 'pin' ? (
                   <View className="mr-1">
                     <MobileRepoIcon
                       repoIcon={repoSectionIcon}
-                      size={14}
+                      size={16}
                       color={repoSectionColor ?? undefined}
                     />
                   </View>
                 ) : null}
-                <Text className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                  {section.title}
-                </Text>
-                <Text className="text-muted-foreground ml-1 text-xs">{count}</Text>
+                <Text className="text-foreground text-sm">{section.title}</Text>
+                <Text className="text-muted-foreground ml-1 text-sm">{count}</Text>
               </Pressable>
             )
           }}
@@ -1300,7 +1102,7 @@ export function HostScreen({
 
       <BottomDrawer visible={showFilterModal} onClose={() => setShowFilterModal(false)}>
         <View className="mb-3 flex-row items-center justify-between px-1">
-          <Text className="text-foreground text-sm font-semibold">Filter</Text>
+          <Text className="text-foreground text-sm">Filter</Text>
           {activeFilterCount > 0 && (
             <Pressable onPress={clearFilters}>
               <Text className="text-muted-foreground text-xs">Clear filters</Text>
@@ -1308,29 +1110,35 @@ export function HostScreen({
           )}
         </View>
 
-        <Text className={styles.filterSectionLabel}>Workspaces</Text>
-        <View className={styles.filterGroup}>
-          <Pressable className={styles.filterRow} onPress={toggleHideSleeping}>
-            <Text className={styles.filterRowText}>Hide sleeping</Text>
+        <Text className="text-muted-foreground mb-1 px-1 text-sm">Workspaces</Text>
+        <MobileGlassSection className="mb-3">
+          <Pressable className="flex-row items-center gap-2 px-3 py-3" onPress={toggleHideSleeping}>
+            <Text className="text-foreground flex-1 text-sm">Hide sleeping</Text>
             {filters.hideSleeping && <Check size={14} colorClassName="accent-foreground" />}
           </Pressable>
-          <View className={styles.filterSeparator} />
-          <Pressable className={styles.filterRow} onPress={toggleHideDefaultBranch}>
-            <Text className={styles.filterRowText}>Hide default branch</Text>
+          <View className="bg-border h-hairline mx-3" />
+          <Pressable
+            className="flex-row items-center gap-2 px-3 py-3"
+            onPress={toggleHideDefaultBranch}
+          >
+            <Text className="text-foreground flex-1 text-sm">Hide default branch</Text>
             {filters.hideDefaultBranch && <Check size={14} colorClassName="accent-foreground" />}
           </Pressable>
-        </View>
+        </MobileGlassSection>
 
         {uniqueRepos.length > 1 && (
           <>
-            <Text className={styles.filterSectionLabel}>Repositories</Text>
-            <View className={styles.filterGroup}>
+            <Text className="text-muted-foreground mb-1 px-1 text-sm">Repositories</Text>
+            <MobileGlassSection className="mb-3">
               {uniqueRepos.map((repo, i) => (
                 <View key={repo.id}>
-                  {i > 0 && <View className={styles.filterSeparator} />}
-                  <Pressable className={styles.filterRow} onPress={() => toggleRepoFilter(repo.id)}>
+                  {i > 0 && <View className="bg-border h-hairline mx-3" />}
+                  <Pressable
+                    className="flex-row items-center gap-2 px-3 py-3"
+                    onPress={() => toggleRepoFilter(repo.id)}
+                  >
                     <View className="h-2 w-2" style={[{ backgroundColor: repo.color }]} />
-                    <Text className={styles.filterRowText} numberOfLines={1}>
+                    <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
                       {repo.name}
                     </Text>
                     {filters.filterRepoIds.has(repo.id) && (
@@ -1339,7 +1147,7 @@ export function HostScreen({
                   </Pressable>
                 </View>
               ))}
-            </View>
+            </MobileGlassSection>
           </>
         )}
       </BottomDrawer>
@@ -1355,20 +1163,23 @@ export function HostScreen({
         {confirmDelete ? (
           <View>
             <View className="pb-4">
-              <Text className="text-foreground text-sm font-bold">Delete Worktree</Text>
+              <Text className="text-foreground text-sm">Delete Worktree</Text>
               <Text className="text-muted-foreground mt-1 text-sm leading-5">
                 Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
               </Text>
             </View>
             <View className="flex-row gap-2">
-              <Pressable
-                className={cn(styles.confirmBtn, 'bg-card', styles.confirmBtnPressedActive)}
+              <MobileGlassTextButton
+                className="flex-1"
+                isFullWidth
+                label="Cancel"
                 onPress={() => setConfirmDelete(null)}
-              >
-                <Text className="text-muted-foreground text-sm font-semibold">Cancel</Text>
-              </Pressable>
-              <Pressable
-                className={cn(styles.confirmBtn, 'bg-destructive', styles.confirmBtnPressedActive)}
+              />
+              <MobileGlassTextButton
+                className="flex-1"
+                isDestructive
+                isFullWidth
+                label="Delete"
                 onPress={() => {
                   if (confirmDelete) {
                     void handleDeleteWorktree(confirmDelete)
@@ -1376,9 +1187,7 @@ export function HostScreen({
                   setConfirmDelete(null)
                   setActionTarget(null)
                 }}
-              >
-                <Text className="text-destructive-foreground text-sm font-semibold">Delete</Text>
-              </Pressable>
+              />
             </View>
           </View>
         ) : (
@@ -1478,30 +1287,5 @@ export default function HostWorktreeRoute() {
 }
 
 function ListSeparator() {
-  return <View className="bg-border mr-4 ml-10 h-px" />
+  return <View className="bg-border h-hairline mx-6" />
 }
-
-const styles = {
-  embeddedToolbarRow: cn('flex-row items-center gap-2'),
-  embeddedModeButton: cn('flex-1 min-w-0 h-8 justify-center px-1 py-0'),
-  filterChip: cn('border-border flex-row items-center gap-1 rounded-full border px-2.5 py-1'),
-  filterChipActive: cn('border-muted-foreground bg-secondary'),
-  filterChipText: cn('text-xs text-muted-foreground'),
-  filterChipTextActive: cn('text-foreground'),
-  modeButton: cn('flex-row items-center shrink min-w-0 gap-1 px-2 py-1'),
-  sortLabel: cn('shrink min-w-0 text-xs text-muted-foreground'),
-  embeddedToolbarIconButton: cn('flex-1 h-7 items-center justify-center'),
-  toolbarIconDisabled: cn('opacity-60'),
-  searchToggle: cn('rounded-full p-1'),
-  centered: cn('flex-1 items-center justify-center'),
-  sectionIcon: cn('mr-1'),
-  filterSectionLabel: cn(
-    'text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 px-1'
-  ),
-  filterGroup: cn('mb-3 overflow-hidden rounded-2xl bg-card'),
-  filterRow: cn('flex-row items-center py-3 px-3.5 gap-2'),
-  filterRowText: cn('flex-1 text-sm text-foreground'),
-  filterSeparator: cn('h-hairline bg-border mx-3'),
-  confirmBtn: cn('flex-1 items-center rounded-xl py-2.5'),
-  confirmBtnPressedActive: cn('active:bg-accent')
-} as const

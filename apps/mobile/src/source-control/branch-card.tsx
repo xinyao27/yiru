@@ -1,8 +1,8 @@
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 import { GitMerge } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import { mobileConflictAbortLabel } from './conflict-abort'
 import { MobileSourceControlPrChip } from './pr-chip'
 import type { MobilePrChipSummary } from './pr-chip-summary'
@@ -43,11 +43,11 @@ export function MobileSourceControlBranchCard({
 }: Props) {
   const showConflict = conflictOperation !== null && conflictOperation !== 'unknown'
   return (
-    <View className="border-hairline border-border bg-card m-4 mb-2 rounded-2xl p-3">
+    <View className="mx-4 mt-3 mb-2 p-3">
       <View className="flex-row items-center justify-between gap-3">
         <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <GitMerge size={15} colorClassName="accent-muted-foreground" />
-          <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
+          <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
             {branchLabel}
           </Text>
         </View>
@@ -63,19 +63,14 @@ export function MobileSourceControlBranchCard({
         <View className="mt-2 max-w-full flex-row flex-wrap items-center gap-2 self-start">
           <Text className="text-xs text-amber-500 capitalize">{conflictOperation}</Text>
           {conflictOperation === 'merge' || conflictOperation === 'rebase' ? (
-            <Pressable
-              className={cn(
-                'min-h-8 shrink-0 items-center justify-center rounded-xl border border-amber-500 bg-secondary px-3 py-1',
-                conflictBusy && 'opacity-50',
-                !conflictBusy && 'active:bg-accent'
-              )}
+            <MobileGlassTextButton
+              className="shrink-0"
               disabled={conflictBusy}
+              isDestructive
+              label={mobileConflictAbortLabel(conflictOperation, conflictAborting)}
               onPress={() => onAbortConflict(conflictOperation)}
-            >
-              <Text className="text-sm font-semibold text-amber-500 capitalize">
-                {mobileConflictAbortLabel(conflictOperation, conflictAborting)}
-              </Text>
-            </Pressable>
+              size="small"
+            />
           ) : null}
         </View>
       ) : null}

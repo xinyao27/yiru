@@ -1,16 +1,13 @@
 import type { GitHubReaction, GitHubReactionContent, PRComment } from '@yiru/workbench-model/review'
 import { memo, useState } from 'react'
-import { Image, Linking, Pressable, Text, View } from 'react-native'
+import { Image, Linking, Text, View } from 'react-native'
 
-import {
-  Check,
-  ArrowElbowDownRight as CornerDownRight,
-  ArrowSquareOut as ExternalLink,
-  ArrowCounterClockwise as Undo2
-} from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { isResolvableComment } from '../../session/pr/comment-actions'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassSection } from '../glass/section'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import { PRCommentComposer } from './pr-comment-composer'
 import { formatPrCommentRelativeTime } from './pr-comment-time'
@@ -89,13 +86,7 @@ export const PRCommentCard = memo(function PRCommentCard({
   }
 
   return (
-    <View
-      className={cn(
-        'border-hairline border-border bg-card overflow-hidden rounded-2xl',
-        isReply && 'ml-4',
-        comment.isResolved && 'opacity-60'
-      )}
-    >
+    <MobileGlassSection className={cn(isReply && 'ml-4', comment.isResolved && 'opacity-60')}>
       <View className="border-b-hairline border-b-border flex-row items-center gap-2 px-3 py-2">
         {comment.authorAvatarUrl ? (
           <Image source={{ uri: comment.authorAvatarUrl }} className={styles.avatar} />
@@ -125,15 +116,12 @@ export const PRCommentCard = memo(function PRCommentCard({
           </View>
         ) : null}
         {comment.url ? (
-          <Pressable
-            className="ml-auto h-7 w-7 items-center justify-center rounded-full"
-            onPress={() => void Linking.openURL(comment.url).catch(() => {})}
-            hitSlop={8}
-            accessibilityRole="button"
+          <MobileGlassIconButton
             accessibilityLabel="Open comment on GitHub"
-          >
-            <ExternalLink size={14} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            icon="external"
+            onPress={() => void Linking.openURL(comment.url).catch(() => {})}
+            size="small"
+          />
         ) : null}
       </View>
       <View className="px-3 py-2">
@@ -142,35 +130,21 @@ export const PRCommentCard = memo(function PRCommentCard({
       </View>
       {actions ? (
         <View className="flex-row gap-2 px-3 pt-1 pb-2">
-          <Pressable
-            className={cn(styles.actionButton, styles.actionButtonPressedActive)}
-            onPress={() => setReplyOpen((v) => !v)}
-            disabled={replyBusy}
-            hitSlop={6}
-            accessibilityRole="button"
+          <MobileGlassTextButton
             accessibilityLabel="Reply to comment"
-          >
-            <CornerDownRight size={13} colorClassName="accent-muted-foreground" />
-            <Text className={styles.actionButtonText}>Reply</Text>
-          </Pressable>
+            disabled={replyBusy}
+            label="Reply"
+            onPress={() => setReplyOpen((value) => !value)}
+            size="small"
+          />
           {canResolve ? (
-            <Pressable
-              className={cn(styles.actionButton, styles.actionButtonPressedActive)}
-              onPress={() => void actions.toggleResolve(comment)}
-              disabled={resolveBusy}
-              hitSlop={6}
-              accessibilityRole="button"
+            <MobileGlassTextButton
               accessibilityLabel={comment.isResolved ? 'Unresolve thread' : 'Resolve thread'}
-            >
-              {comment.isResolved ? (
-                <Undo2 size={13} colorClassName="accent-muted-foreground" />
-              ) : (
-                <Check size={13} colorClassName="accent-muted-foreground" />
-              )}
-              <Text className={styles.actionButtonText}>
-                {resolveBusy ? '…' : comment.isResolved ? 'Unresolve' : 'Resolve'}
-              </Text>
-            </Pressable>
+              disabled={resolveBusy}
+              label={resolveBusy ? '…' : comment.isResolved ? 'Unresolve' : 'Resolve'}
+              onPress={() => void actions.toggleResolve(comment)}
+              size="small"
+            />
           ) : null}
         </View>
       ) : null}
@@ -186,6 +160,6 @@ export const PRCommentCard = memo(function PRCommentCard({
           />
         </View>
       ) : null}
-    </View>
+    </MobileGlassSection>
   )
 })

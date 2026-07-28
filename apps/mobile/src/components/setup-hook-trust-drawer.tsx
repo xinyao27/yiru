@@ -4,6 +4,7 @@ import { Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassSection } from './glass/section'
 
 export type SetupTrustPrompt = {
   repoId: string
@@ -58,7 +59,7 @@ export function SetupHookTrustDrawer({
             <Text className="text-foreground font-mono text-xs">{prompt.scriptContent}</Text>
           </View>
 
-          <View className="bg-card overflow-hidden rounded-2xl">
+          <MobileGlassSection>
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
               <Check size={16} colorClassName="accent-foreground" />
               <Text className={styles.trustActionText}>Run hooks</Text>
@@ -72,7 +73,7 @@ export function SetupHookTrustDrawer({
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onDontRun}>
               <Text className={styles.trustActionText}>Don't run</Text>
             </Pressable>
-          </View>
+          </MobileGlassSection>
         </View>
       ) : null}
     </BottomDrawer>

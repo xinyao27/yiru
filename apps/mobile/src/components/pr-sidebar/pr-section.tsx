@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
 
+import { MobileGlassSection } from '../glass/section'
 import { mobilePrSidebarStyles as styles } from './styles'
 
 type Props = {
@@ -19,7 +20,7 @@ type Props = {
 export function PRSection({ title, trailing, children }: Props) {
   const showHeader = Boolean(title) || trailing != null
   return (
-    <View className={styles.section}>
+    <MobileGlassSection className={styles.section}>
       {showHeader ? (
         <View className="border-b-hairline border-b-border min-h-10 flex-row items-center justify-between gap-2 px-3 py-2">
           {title ? <Text className="text-foreground text-xs font-semibold">{title}</Text> : null}
@@ -27,6 +28,6 @@ export function PRSection({ title, trailing, children }: Props) {
         </View>
       ) : null}
       <View className={styles.sectionBody}>{children}</View>
-    </View>
+    </MobileGlassSection>
   )
 }

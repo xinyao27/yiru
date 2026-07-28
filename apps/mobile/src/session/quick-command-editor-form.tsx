@@ -5,6 +5,10 @@ import { CaretDown, CaretRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
+import { MobileGlassGroup } from '../components/glass/group'
+import { MobileGlassPressable } from '../components/glass/pressable'
+import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import {
   getQuickCommandAgentLabel,
   MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH,
@@ -36,34 +40,26 @@ function ChoiceToggle({
   onChange: (value: string) => void
 }) {
   return (
-    <View className="flex-row gap-2">
+    <MobileGlassGroup className="flex-row gap-2" spacing={8}>
       {options.map((option) => {
         const selected = value === option.value
         return (
-          <Pressable
+          <MobileGlassPressable
             key={option.value}
-            className={cn(
-              'border-border h-10 flex-1 items-center justify-center rounded-xl border bg-card',
-              selected && 'border-muted-foreground bg-accent',
-              option.disabled && styles.disabled
-            )}
-            disabled={option.disabled}
-            onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected, disabled: option.disabled }}
+            className={cn('h-10 flex-1 rounded-full', selected && 'border-muted-foreground')}
+            contentClassName="h-full items-center justify-center rounded-full px-3"
+            disabled={option.disabled}
+            onPress={() => onChange(option.value)}
           >
-            <Text
-              className={cn(
-                'text-xs font-medium text-muted-foreground',
-                selected && 'text-foreground'
-              )}
-            >
+            <Text className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}>
               {option.label}
             </Text>
-          </Pressable>
+          </MobileGlassPressable>
         )
       })}
-    </View>
+    </MobileGlassGroup>
   )
 }
 
@@ -84,22 +80,24 @@ export function QuickCommandEditorForm({
   const canSave = isQuickCommandDraftValid(draft) && !saving
   return (
     <View className="gap-3 pt-1 pb-2">
-      <View className={styles.field}>
-        <Text className={styles.label}>Label</Text>
-        <TextInput
-          className={styles.input}
-          value={draft.label}
-          onChangeText={(label) => onChange({ label })}
-          placeholder="Start dev server"
-          placeholderTextColorClassName="accent-muted-foreground"
-          autoCapitalize="none"
-          autoCorrect={false}
-          maxLength={MAX_QUICK_COMMAND_LABEL_LENGTH}
-          selectionColorClassName="accent-primary"
-        />
+      <View className="gap-2">
+        <Text className="text-muted-foreground text-xs">Label</Text>
+        <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground px-3 py-2.5 text-sm"
+            value={draft.label}
+            onChangeText={(label) => onChange({ label })}
+            placeholder="Start dev server"
+            placeholderTextColorClassName="accent-muted-foreground"
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={MAX_QUICK_COMMAND_LABEL_LENGTH}
+            selectionColorClassName="accent-primary"
+          />
+        </MobileGlassSurface>
       </View>
-      <View className={styles.field}>
-        <Text className={styles.label}>Action</Text>
+      <View className="gap-2">
+        <Text className="text-muted-foreground text-xs">Action</Text>
         <ChoiceToggle
           options={[
             { value: 'terminal-command', label: 'Terminal Command' },
@@ -110,10 +108,11 @@ export function QuickCommandEditorForm({
         />
       </View>
       {isAgent ? (
-        <View className={styles.field}>
-          <Text className={styles.label}>Agent</Text>
-          <Pressable
-            className="border-border active:bg-accent bg-card flex-row items-center justify-between rounded-xl border px-3 py-2.5"
+        <View className="gap-2">
+          <Text className="text-muted-foreground text-xs">Agent</Text>
+          <MobileGlassPressable
+            className="rounded-xl"
+            contentClassName="flex-row items-center justify-between px-3 py-2.5"
             onPress={onOpenAgentPicker}
           >
             {draft.agent ? (
@@ -127,33 +126,37 @@ export function QuickCommandEditorForm({
               <Text className="text-muted-foreground text-sm">Choose agent</Text>
             )}
             <CaretDown size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
+          </MobileGlassPressable>
         </View>
       ) : null}
-      <View className={styles.field}>
-        <Text className={styles.label}>{isAgent ? 'Prompt' : 'Command Text'}</Text>
-        <TextInput
-          className={cn(styles.input, 'min-h-24', !isAgent && 'font-mono')}
-          style={{ textAlignVertical: 'top' }}
-          value={isAgent ? draft.prompt : draft.command}
-          onChangeText={(text) => onChange(isAgent ? { prompt: text } : { command: text })}
-          placeholder={isAgent ? 'Ask the agent to investigate this workspace' : 'pnpm dev'}
-          placeholderTextColorClassName="accent-muted-foreground"
-          autoCapitalize="none"
-          autoCorrect={false}
-          multiline
-          maxLength={
-            isAgent ? MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH : MAX_QUICK_COMMAND_TERMINAL_TEXT_LENGTH
-          }
-          selectionColorClassName="accent-primary"
-        />
+      <View className="gap-2">
+        <Text className="text-muted-foreground text-xs">{isAgent ? 'Prompt' : 'Command Text'}</Text>
+        <MobileGlassSurface className="min-h-24 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className={cn('text-foreground min-h-24 px-3 py-2.5 text-sm', !isAgent && 'font-mono')}
+            style={{ textAlignVertical: 'top' }}
+            value={isAgent ? draft.prompt : draft.command}
+            onChangeText={(text) => onChange(isAgent ? { prompt: text } : { command: text })}
+            placeholder={isAgent ? 'Ask the agent to investigate this workspace' : 'pnpm dev'}
+            placeholderTextColorClassName="accent-muted-foreground"
+            autoCapitalize="none"
+            autoCorrect={false}
+            multiline
+            maxLength={
+              isAgent
+                ? MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH
+                : MAX_QUICK_COMMAND_TERMINAL_TEXT_LENGTH
+            }
+            selectionColorClassName="accent-primary"
+          />
+        </MobileGlassSurface>
         {isAgent ? (
           <Text className="text-muted-foreground text-xs">
             Supports skills, file paths, and built-in commands.
           </Text>
         ) : null}
       </View>
-      <View className={styles.field}>
+      <View className="gap-2">
         <Pressable
           className="active:bg-accent flex-row items-center gap-1 py-1"
           onPress={() => setAdvancedOpen((open) => !open)}
@@ -186,8 +189,8 @@ export function QuickCommandEditorForm({
                 />
               </View>
             ) : null}
-            <View className={styles.field}>
-              <Text className={styles.label}>Scope</Text>
+            <View className="gap-2">
+              <Text className="text-muted-foreground text-xs">Scope</Text>
               <ChoiceToggle
                 options={[
                   { value: 'global', label: 'Global' },
@@ -210,32 +213,23 @@ export function QuickCommandEditorForm({
       </View>
       {error ? <Text className="text-destructive mt-1 text-xs">{error}</Text> : null}
       <View className="mt-2 flex-row gap-2">
-        <Pressable
-          className="border-border active:bg-accent flex-1 items-center rounded-xl border py-3"
+        <MobileGlassTextButton
+          className="flex-1"
+          isFullWidth
+          label="Cancel"
           onPress={onCancel}
-        >
-          <Text className="text-foreground text-sm font-semibold">Cancel</Text>
-        </Pressable>
-        <Pressable
-          className={cn(
-            'flex-1 items-center bg-primary py-3 active:bg-accent',
-            !canSave && styles.disabled
-          )}
+          size="large"
+        />
+        <MobileGlassTextButton
+          className="flex-1"
           disabled={!canSave}
+          isFullWidth
+          isProminent
+          label={mode === 'edit' ? 'Save' : 'Add Quick Command'}
           onPress={onSave}
-        >
-          <Text className="text-primary-foreground text-sm font-bold">
-            {mode === 'edit' ? 'Save' : 'Add Quick Command'}
-          </Text>
-        </Pressable>
+          size="large"
+        />
       </View>
     </View>
   )
 }
-
-const styles = {
-  field: cn('gap-2'),
-  label: cn('text-xs font-semibold text-muted-foreground'),
-  input: cn('border-border text-foreground rounded-xl border bg-card px-3 py-2.5 text-sm'),
-  disabled: cn('opacity-40')
-} as const

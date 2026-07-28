@@ -1,10 +1,12 @@
 import type { AiVaultScope, AiVaultSession } from '@yiru/workbench-model/agent'
 import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Platform, Pressable, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
-import { CaretLeft as ChevronLeft, ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassPressable } from '@/components/glass/pressable'
+import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
+import { MobileGlassSurface } from '@/components/glass/surface'
 
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import {
@@ -23,6 +25,7 @@ import { MobileAgentSessionHistoryList } from './agent-session-history-list'
 import { shouldShowMobileCurrentWorktreeBadge } from './current-worktree-badge'
 import { createMobileAiVaultResumeMutationId, loadMobileResumeMetadata } from './resume-metadata'
 import { resolveMobileAiVaultSessionResumeTarget } from './resume-target'
+import { MobileAgentHistorySearchControl } from './search-control'
 import { buildMobileAgentHistorySections } from './sections'
 import { buildMobileAgentHistoryResumeActionState } from './session-card'
 import { styles } from './styles'
@@ -34,10 +37,10 @@ export type MobileAgentSessionHistoryPanelProps = {
   name?: string
 }
 
-const SCOPE_TABS: { scope: AiVaultScope; label: string }[] = [
-  { scope: 'workspace', label: 'Workspace' },
-  { scope: 'project', label: 'Project' },
-  { scope: 'all', label: 'All' }
+const SCOPE_TABS: { value: AiVaultScope; label: string }[] = [
+  { value: 'workspace', label: 'Workspace' },
+  { value: 'project', label: 'Project' },
+  { value: 'all', label: 'All' }
 ]
 
 export function MobileAgentSessionHistoryPanel({
@@ -238,24 +241,21 @@ export function MobileAgentSessionHistoryPanel({
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <Pressable
+                  <MobileGlassIconButton
                     accessibilityLabel="Back"
-                    className="h-9 w-9 items-center justify-center rounded-full"
+                    icon="back"
                     onPress={() => router.back()}
-                  >
-                    <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 ),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <Pressable
-                    className="h-9 w-9 items-center justify-center rounded-full"
+                  <MobileGlassIconButton
+                    accessibilityLabel="Refresh agent history"
+                    icon="refresh"
                     onPress={() => void onRefresh()}
-                  >
-                    <RefreshCw size={18} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 )
         }}
       />
@@ -293,58 +293,39 @@ export function MobileAgentSessionHistoryPanel({
         <View className={styles.state}>
           <Text className={styles.stateTitle}>Unable to Load</Text>
           <Text className={styles.stateText}>{screenState.message}</Text>
-          <Pressable className="bg-secondary mt-2 rounded-xl px-4 py-2" onPress={retry}>
-            <Text className="text-foreground text-sm font-semibold">Retry</Text>
-          </Pressable>
+          <MobileGlassPressable
+            className="mt-2 rounded-full"
+            contentClassName="rounded-full px-4 py-2"
+            fallbackClassName="bg-secondary"
+            onPress={retry}
+          >
+            <Text className="text-foreground text-sm">Retry</Text>
+          </MobileGlassPressable>
         </View>
       ) : (
         <>
-          <View className="flex-row gap-1 px-3 pt-2">
-            {SCOPE_TABS.map((tab) => {
-              const active = scope === tab.scope
-              return (
-                <Pressable
-                  key={tab.scope}
-                  className={cn(
-                    'flex-1 items-center rounded-xl bg-card py-2',
-                    active && 'bg-secondary'
-                  )}
-                  onPress={() => onSelectScope(tab.scope)}
-                >
-                  <Text
-                    className={cn(
-                      'text-muted-foreground text-sm',
-                      active && 'text-foreground font-semibold'
-                    )}
-                  >
-                    {tab.label}
-                  </Text>
-                </Pressable>
-              )
-            })}
-          </View>
           <View className="px-3 pt-2">
-            <TextInput
-              className="bg-card text-foreground rounded-xl px-3 py-2 text-sm"
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search sessions, repo:, path:"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="none"
-              autoCorrect={false}
+            <MobileGlassSegmentedControl
+              accessibilityLabel="Agent session scope"
+              onChange={onSelectScope}
+              options={SCOPE_TABS}
+              value={scope}
             />
           </View>
+          <View className="px-3 pt-2">
+            <MobileAgentHistorySearchControl onChangeText={setQuery} value={query} />
+          </View>
           {issues.length > 0 ? (
-            <View className="bg-card mx-3 mt-2 rounded-xl p-2">
+            <MobileGlassSurface className="mx-3 mt-2 rounded-xl p-2">
               <Text className="text-xs text-amber-500">
                 {issues.length} {issues.length === 1 ? 'transcript' : 'transcripts'} skipped
               </Text>
-            </View>
+            </MobileGlassSurface>
           ) : null}
           {resumeMessage ? (
-            <View className="bg-card mx-3 mt-2 rounded-xl p-2">
+            <MobileGlassSurface className="mx-3 mt-2 rounded-xl p-2">
               <Text className="text-muted-foreground text-xs">{resumeMessage}</Text>
-            </View>
+            </MobileGlassSurface>
           ) : null}
           {sections.length === 0 ? (
             <View className={styles.state}>

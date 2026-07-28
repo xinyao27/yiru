@@ -26,25 +26,17 @@ import { useCSSVariable } from 'uniwind'
 
 import {
   Warning as AlertTriangle,
-  ArrowUp,
   Robot as Bot,
-  CaretDown as ChevronDown,
   CaretLeft as ChevronLeft,
-  CaretDoubleRight as ChevronsRight,
   Copy,
   Folder,
-  File,
   FileText,
   GitMerge,
   Globe,
-  Keyboard as KeyboardIcon,
   Chat as MessageSquare,
-  Monitor,
   DotsThree as MoreHorizontal,
   Plus,
   ArrowClockwise as RefreshCw,
-  PaperPlaneTilt as Send,
-  DeviceMobile as Smartphone,
   TerminalWindow as SquareTerminal,
   X
 } from '@/components/uniwind-icons'
@@ -63,7 +55,11 @@ import {
   saveCustomKeys,
   type CustomKey
 } from '../../../../src/components/custom-key-modal'
+import { MobileGlassGroup } from '../../../../src/components/glass/group'
+import { MobileGlassIconButton } from '../../../../src/components/glass/icon-button'
+import { MobileGlassPressable } from '../../../../src/components/glass/pressable'
 import { MobileGlassSurface } from '../../../../src/components/glass/surface'
+import { MobileGlassTextButton } from '../../../../src/components/glass/text-button'
 import { MobileHtmlPreview } from '../../../../src/components/html-preview'
 import { MobileRichMarkdownEditor } from '../../../../src/components/rich-markdown-editor'
 import { StatusDot } from '../../../../src/components/status-dot'
@@ -127,7 +123,6 @@ import {
 } from '../../../../src/session/panel-host'
 import { useMobilePrBranchContext } from '../../../../src/session/pr/use-branch-context'
 import { QuickCommandsSheet } from '../../../../src/session/quick-commands-sheet'
-import { QuickCommandsTabButton } from '../../../../src/session/quick-commands-tab-button'
 import { sessionScreenClassNames as styles } from '../../../../src/session/screen-class-names'
 import type {
   DiffCommentActions,
@@ -161,12 +156,12 @@ import {
   confirmsMirroredTabSelection,
   type AppliedSnapshotMarker
 } from '../../../../src/session/tab-snapshot-gate'
-import { resolveTabStripScrollOffset } from '../../../../src/session/tab-strip-scroll'
+import { MobileSessionTabStrip } from '../../../../src/session/tab-strip'
+import { MobileTerminalAccessoryKey } from '../../../../src/session/terminal/accessory-key'
 import { getMobileTerminalActionSheetActions } from '../../../../src/session/terminal/action-sheet-actions'
 import { MobileTerminalDiagnostics } from '../../../../src/session/terminal/diagnostics'
 import { openMobileTerminalFileTap } from '../../../../src/session/terminal/file-tap-open'
-import { MobileTerminalInputActions } from '../../../../src/session/terminal/input-actions'
-import { MobileTerminalLiveInputStatus } from '../../../../src/session/terminal/live-input-status'
+import { MobileTerminalInputBar } from '../../../../src/session/terminal/input-bar'
 import { TerminalPaneView } from '../../../../src/session/terminal/pane-view'
 import {
   getActiveTabIdForHandle,
@@ -178,10 +173,6 @@ import {
   updateTerminalCwdFromStreamEvent
 } from '../../../../src/session/terminal/records'
 import { subscribeMobileTerminalSafely } from '../../../../src/session/terminal/stream-subscribe'
-import {
-  getMobileSessionTabTitle,
-  resolveMobileTerminalTabAgentId
-} from '../../../../src/session/terminal/tab-agent'
 import { useTerminalLiveInputModePreference } from '../../../../src/session/terminal/use-live-input-mode-preference'
 import { useMobileTerminalPaste } from '../../../../src/session/terminal/use-paste'
 import { useMobileAttachmentInputLeaseGate } from '../../../../src/session/use-attachment-input-lease-gate'
@@ -195,7 +186,7 @@ import {
   saveTerminalTextScale,
   type MobileTerminalLinkOpenMode
 } from '../../../../src/storage/preferences'
-import { resolveCssNumber } from '../../../../src/style/resolve-css-variable'
+import { resolveCssNumber, resolveCssString } from '../../../../src/style/resolve-css-variable'
 import {
   getDefaultTerminalAccessoryBuiltInIds,
   getVisibleTerminalAccessoryKeys,
@@ -215,10 +206,7 @@ import {
   TERMINAL_GESTURE_INPUT_REFILL_PER_SECOND
 } from '../../../../src/terminal/gesture-input'
 import { dismissTerminalKeyboard } from '../../../../src/terminal/keyboard-dismiss'
-import {
-  getTerminalCommandKeyboardType,
-  getTerminalLiveInputKeyboardType
-} from '../../../../src/terminal/keyboard-type'
+import { getTerminalLiveInputKeyboardType } from '../../../../src/terminal/keyboard-type'
 import { createTerminalLiveAccessoryInput } from '../../../../src/terminal/live/accessory-input'
 import { getTerminalLiveAccessoryRawSendTarget } from '../../../../src/terminal/live/accessory-raw-send-target'
 import {
@@ -299,13 +287,7 @@ function MarkdownReader({
     return (
       <View className={styles.markdownState}>
         <Text className={styles.markdownError}>{doc.message}</Text>
-        <Pressable
-          className="bg-secondary border-border flex-row items-center gap-1 self-start rounded-xl border px-3 py-1"
-          onPress={onRefresh}
-        >
-          <RefreshCw size={14} colorClassName="accent-foreground" />
-          <Text className="text-foreground text-xs font-semibold">Retry</Text>
-        </Pressable>
+        <MobileGlassTextButton label="Retry" onPress={onRefresh} size="small" />
       </View>
     )
   }
@@ -346,51 +328,45 @@ function MarkdownReader({
           ]}
         >
           {statusText ? (
-            <Text
-              className={cn(
-                'border-border text-muted-foreground max-w-full self-end overflow-hidden rounded-xl border bg-card px-2 py-1 text-xs',
-                doc.saveError ? styles.markdownError : null
-              )}
-              numberOfLines={2}
-            >
-              {statusText}
-            </Text>
+            <MobileGlassSurface className="max-w-full self-end overflow-hidden rounded-xl px-2 py-1">
+              <Text
+                className={cn(
+                  'text-muted-foreground text-xs',
+                  doc.saveError ? styles.markdownError : null
+                )}
+                numberOfLines={2}
+              >
+                {statusText}
+              </Text>
+            </MobileGlassSurface>
           ) : null}
-          <MobileGlassSurface className="flex-row flex-wrap justify-end gap-1 overflow-hidden rounded-2xl p-1">
-            {showCopy ? (
-              <Pressable className={styles.markdownFloatingButton} onPress={onCopy}>
-                <Text className={styles.markdownFloatingButtonText}>Copy</Text>
-              </Pressable>
-            ) : null}
+          <MobileGlassGroup className="flex-row flex-wrap justify-end gap-2" spacing={8}>
+            {showCopy ? <MobileGlassTextButton label="Copy" onPress={onCopy} size="small" /> : null}
             {showRefresh ? (
-              <Pressable className={styles.markdownFloatingButton} onPress={onRefresh}>
-                <RefreshCw size={13} colorClassName="accent-foreground" />
-                <Text className={styles.markdownFloatingButtonText}>Refresh</Text>
-              </Pressable>
+              <MobileGlassTextButton label="Refresh" onPress={onRefresh} size="small" />
             ) : null}
             {doc.isDirty ? (
-              <Pressable className={styles.markdownFloatingButton} onPress={onDiscard}>
-                <Text className={styles.markdownFloatingButtonText}>Discard</Text>
-              </Pressable>
+              <MobileGlassTextButton
+                isDestructive
+                label="Discard"
+                onPress={onDiscard}
+                size="small"
+              />
             ) : null}
             {showSave ? (
-              <Pressable
-                className={cn(
-                  styles.markdownFloatingButton,
-                  'bg-secondary',
-                  (!doc.editable || !doc.isDirty || doc.saving) && 'opacity-50'
-                )}
-                disabled={!doc.editable || !doc.isDirty || doc.saving}
-                onPress={onSave}
-              >
-                {doc.saving ? (
-                  <ActivityIndicator size="small" colorClassName="accent-foreground" />
-                ) : (
-                  <Text className={styles.markdownFloatingButtonText}>Save</Text>
-                )}
-              </Pressable>
+              doc.saving ? (
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+              ) : (
+                <MobileGlassTextButton
+                  disabled={!doc.editable || !doc.isDirty}
+                  isProminent
+                  label="Save"
+                  onPress={onSave}
+                  size="small"
+                />
+              )
             ) : null}
-          </MobileGlassSurface>
+          </MobileGlassGroup>
         </View>
       ) : null}
     </View>
@@ -480,30 +456,29 @@ function DiffLineRow({
       {comments.length > 0 ? (
         <View className="mt-1 mr-2 ml-11 gap-1">
           {comments.map((comment) => (
-            <View key={comment.id} className="border-border bg-card rounded-xl border px-2 py-1">
+            <MobileGlassSurface key={comment.id} className="rounded-xl px-2 py-1">
               <View className="mb-0.5 flex-row items-center gap-1">
                 <MessageSquare size={12} colorClassName="accent-muted-foreground" />
                 <Text className="text-muted-foreground flex-1 text-xs font-semibold">
                   Line {comment.lineNumber}
                 </Text>
-                <Pressable
-                  className="h-6 w-6 items-center justify-center rounded-full"
-                  disabled={commentsBusy}
-                  onPress={() => onDeleteComment(comment.id)}
+                <MobileGlassIconButton
                   accessibilityLabel={`Delete note on line ${comment.lineNumber}`}
-                >
-                  <X size={12} colorClassName="accent-muted-foreground" />
-                </Pressable>
+                  disabled={commentsBusy}
+                  icon="close"
+                  onPress={() => onDeleteComment(comment.id)}
+                  size="small"
+                />
               </View>
               <Text className="text-foreground text-xs leading-5">{comment.body}</Text>
-            </View>
+            </MobileGlassSurface>
           ))}
         </View>
       ) : null}
       {isCommenting ? (
-        <View className="border-border bg-card mt-1 mr-2 ml-11 gap-1 rounded-xl border p-2">
+        <MobileGlassSurface className="mt-1 mr-2 ml-11 gap-2 rounded-xl p-2">
           <TextInput
-            className={cn(styles.textInput, 'min-h-18 h-18 mr-0 pt-2 pb-2')}
+            className="text-foreground mr-0 h-20 min-h-20 flex-1 px-3 py-2 font-mono text-sm"
             value={commentDraft}
             onChangeText={onDraftChange}
             placeholder="Add review note"
@@ -514,29 +489,25 @@ function DiffLineRow({
             autoFocus
           />
           <View className="flex-row justify-end gap-1">
-            <Pressable
-              className="min-h-8 justify-center rounded-lg px-3"
+            <MobileGlassTextButton
               disabled={commentsBusy}
+              label="Cancel"
               onPress={onCancelComment}
-            >
-              <Text className="text-muted-foreground text-xs font-semibold">Cancel</Text>
-            </Pressable>
-            <Pressable
-              className={cn(
-                'min-h-8 justify-center rounded-lg bg-secondary px-3',
-                (!commentDraft.trim() || commentsBusy) && styles.diffCommentButtonDisabled
-              )}
+              size="small"
+            />
+            <MobileGlassTextButton
               disabled={!commentDraft.trim() || commentsBusy}
+              isProminent
+              label="Save note"
               onPress={() => {
                 if (commentLine !== undefined) {
                   onSubmitComment(commentLine)
                 }
               }}
-            >
-              <Text className="text-foreground text-xs font-bold">Save note</Text>
-            </Pressable>
+              size="small"
+            />
           </View>
-        </View>
+        </MobileGlassSurface>
       ) : null}
     </View>
   )
@@ -707,7 +678,10 @@ function FileReader({
     return (
       <View className={styles.markdownEditor}>
         {diffCommentActions ? (
-          <View className="border-b-hairline border-b-border bg-card flex-row items-center justify-between gap-2 px-4 py-2">
+          <MobileGlassSurface
+            className="flex-row items-center justify-between gap-2 px-4 py-2"
+            isInteractive
+          >
             <View className="min-w-0 flex-1 flex-row items-center gap-1">
               <MessageSquare size={14} colorClassName="accent-muted-foreground" />
               <Text className="text-muted-foreground text-xs font-semibold">
@@ -716,33 +690,24 @@ function FileReader({
                   : `${commentCount} review ${commentCount === 1 ? 'note' : 'notes'}`}
               </Text>
             </View>
-            <View className="flex-row items-center gap-1">
-              <Pressable
-                className={cn(
-                  styles.diffNotesActionButton,
-                  !canCopyNotes && styles.diffCommentButtonDisabled
-                )}
-                disabled={!canCopyNotes}
-                onPress={() => void diffCommentActions.onCopyAll()}
+            <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
+              <MobileGlassTextButton
                 accessibilityLabel="Copy review notes"
-              >
-                <Copy size={13} colorClassName="accent-muted-foreground" />
-                <Text className={styles.diffNotesActionText}>Copy</Text>
-              </Pressable>
-              <Pressable
-                className={cn(
-                  styles.diffNotesActionButton,
-                  !canSendNotes && styles.diffCommentButtonDisabled
-                )}
-                disabled={!canSendNotes}
-                onPress={diffCommentActions.onSendAll}
+                disabled={!canCopyNotes}
+                label="Copy"
+                onPress={() => void diffCommentActions.onCopyAll()}
+                size="small"
+              />
+              <MobileGlassTextButton
                 accessibilityLabel="Send review notes to AI"
-              >
-                <Send size={13} colorClassName="accent-muted-foreground" />
-                <Text className={styles.diffNotesActionText}>Send</Text>
-              </Pressable>
-            </View>
-          </View>
+                disabled={!canSendNotes}
+                isProminent
+                label="Send"
+                onPress={diffCommentActions.onSendAll}
+                size="small"
+              />
+            </MobileGlassGroup>
+          </MobileGlassSurface>
         ) : null}
         <FlatList
           data={activeDiffSyntax ?? plainDiffLines}
@@ -836,6 +801,9 @@ export default function SessionScreen() {
   const isFloatingWorkspaceRoute = isFloatingWorkspaceWorktreeId(worktreeId)
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const [backgroundValue, spacing2Value] = useCSSVariable(['--color-background', '--spacing-2'])
+  const backgroundColor = resolveCssString(backgroundValue)
+  const keyboardComposerGap = resolveCssNumber(spacing2Value)
   // Why: shared client per host owned by RpcClientProvider. See
   // docs/mobile-shared-client-per-host.md.
   const { client, state: connState } = useHostClient(hostId)
@@ -923,11 +891,6 @@ export default function SessionScreen() {
   const activeSessionTabIdRef = useRef<string | null>(null)
   // Auto-scroll the tab strip so the active tab (synced from desktop on
   // worktree entry) is revealed without a manual scroll.
-  const tabStripRef = useRef<ScrollView>(null)
-  const tabStripOffsetRef = useRef(0)
-  const tabStripViewportWidthRef = useRef(0)
-  const tabStripContentWidthRef = useRef(0)
-  const tabLayoutsRef = useRef<Map<string, { x: number; width: number }>>(new Map())
   const [markdownDocs, setMarkdownDocs] = useState<Map<string, MarkdownDocState>>(new Map())
   const markdownDocsRef = useRef<Map<string, MarkdownDocState>>(new Map())
   const [fileDocs, setFileDocs] = useState<Map<string, FileDocState>>(new Map())
@@ -2543,34 +2506,6 @@ export default function SessionScreen() {
       hideSub.remove()
     }
   }, [notifyKeyboardVisibility])
-
-  const scrollActiveTabIntoView = useCallback((tabId: string | null, animated: boolean) => {
-    if (!tabId) {
-      return
-    }
-    const layout = tabLayoutsRef.current.get(tabId)
-    if (!layout) {
-      return
-    }
-    const nextOffset = resolveTabStripScrollOffset({
-      tabX: layout.x,
-      tabWidth: layout.width,
-      viewportWidth: tabStripViewportWidthRef.current,
-      contentWidth: tabStripContentWidthRef.current,
-      currentOffset: tabStripOffsetRef.current
-    })
-    if (nextOffset !== tabStripOffsetRef.current) {
-      tabStripOffsetRef.current = nextOffset
-      tabStripRef.current?.scrollTo({ x: nextOffset, animated })
-    }
-  }, [])
-
-  // Reveal the active tab whenever it changes (e.g. desktop's open tab synced on
-  // worktree entry). Defer one frame so freshly mounted tab layouts are recorded.
-  useEffect(() => {
-    const id = requestAnimationFrame(() => scrollActiveTabIntoView(activeSessionTabId, true))
-    return () => cancelAnimationFrame(id)
-  }, [activeSessionTabId, scrollActiveTabIntoView])
 
   useEffect(() => {
     if (hostId && worktreeId) {
@@ -4338,6 +4273,7 @@ export default function SessionScreen() {
         ? Math.max(0, keyboardHeight - insets.bottom)
         : keyboardHeight
       : 0
+  const terminalComposerKeyboardOffset = keyboardLift + (keyboardLift > 0 ? keyboardComposerGap : 0)
   const activeTerminalKeyboardLift = (() => {
     if (keyboardLift <= 0 || !activeHandle) {
       return 0
@@ -4500,9 +4436,10 @@ export default function SessionScreen() {
       gestureEnabled: !hasDirtyMarkdownDrafts,
       headerBackVisible: false,
       headerShadowVisible: false,
+      headerStyle: { backgroundColor },
       title: worktreeName || 'Terminal'
     }),
-    [hasDirtyMarkdownDrafts, worktreeName]
+    [backgroundColor, hasDirtyMarkdownDrafts, worktreeName]
   )
 
   return (
@@ -4559,15 +4496,12 @@ export default function SessionScreen() {
       <View className="flex-1">
         {!useNativeSessionHeader ? (
           <SafeAreaView className="border-b-border bg-background border-b" edges={['top']}>
-            <View className="min-h-11 flex-row items-center px-2 py-1">
-              <Pressable
-                className="active:bg-accent mr-1 h-9 w-9 items-center justify-center"
-                onPress={requestLeaveSession}
-                hitSlop={8}
+            <View className="min-h-15 flex-row items-center gap-2 px-3 py-1">
+              <MobileSessionHeaderIconButton
                 accessibilityLabel="Back to worktrees"
-              >
-                <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-              </Pressable>
+                icon={ChevronLeft}
+                onPress={requestLeaveSession}
+              />
 
               <View className="min-w-0 flex-1">
                 <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
@@ -4619,136 +4553,48 @@ export default function SessionScreen() {
         ) : null}
 
         {useNativeSessionHeader && connState !== 'connected' ? (
-          <Pressable
-            className="border-border bg-secondary active:bg-accent mx-3 mt-2 flex-row items-center gap-2 rounded-xl border px-3 py-2"
+          <MobileGlassPressable
+            accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+            accessibilityRole={showConnectionRetry ? 'button' : undefined}
+            className="mx-3 mt-2 rounded-xl"
+            contentClassName="flex-row items-center gap-2 px-3 py-2"
             disabled={!showConnectionRetry}
             onPress={() => {
               if (hostId) {
                 void forceReconnectHost(hostId)
               }
             }}
-            accessibilityRole={showConnectionRetry ? 'button' : undefined}
-            accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
           >
             <StatusDot state={connState} />
             <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
               {terminalSummary}
             </Text>
-          </Pressable>
+          </MobileGlassPressable>
         ) : null}
 
         {visibleTabs.length > 0 ? (
-          <MobileGlassSurface className="mx-2 mt-2 mb-1 overflow-hidden rounded-2xl">
-            <View className="flex-row items-center">
-              {/* Why: tab taps must register on the first press while the live
-                  keyboard is open instead of being eaten by keyboard dismissal
-                  (#5106); leaving a non-live tab still closes the keyboard
-                  because the live input unmounts. */}
-              <ScrollView
-                ref={tabStripRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className="max-h-10 flex-1"
-                contentContainerClassName="gap-1 px-1"
-                keyboardShouldPersistTaps="handled"
-                scrollEventThrottle={16}
-                onScroll={(e) => {
-                  tabStripOffsetRef.current = e.nativeEvent.contentOffset.x
-                }}
-                onLayout={(e) => {
-                  tabStripViewportWidthRef.current = e.nativeEvent.layout.width
-                  scrollActiveTabIntoView(activeSessionTabIdRef.current, false)
-                }}
-                onContentSizeChange={(width) => {
-                  tabStripContentWidthRef.current = width
-                  scrollActiveTabIntoView(activeSessionTabIdRef.current, false)
-                }}
-              >
-                {visibleTabs.map((t) => (
-                  <Pressable
-                    key={t.id}
-                    className={cn(
-                      'min-h-10 min-w-24 max-w-40 items-center justify-center rounded-xl px-3 py-2 active:bg-accent',
-                      t.id === activeSessionTabId && 'bg-accent'
-                    )}
-                    onLayout={(e) => {
-                      const { x, width } = e.nativeEvent.layout
-                      tabLayoutsRef.current.set(t.id, { x, width })
-                      if (t.id === activeSessionTabIdRef.current) {
-                        scrollActiveTabIntoView(t.id, false)
-                      }
-                    }}
-                    onPress={() => switchSessionTab(t)}
-                    onLongPress={() => {
-                      triggerMediumImpact()
-                      openSessionTabActionSheetAfterKeyboardDismiss(t)
-                    }}
-                    delayLongPress={400}
-                  >
-                    <View className="max-w-full flex-row items-center gap-1">
-                      {t.type === 'browser' && (
-                        <Globe size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'markdown' && (
-                        <FileText size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'file' && (
-                        <File size={13} colorClassName="accent-muted-foreground" />
-                      )}
-                      {t.type === 'terminal' &&
-                        (() => {
-                          const agentId = resolveMobileTerminalTabAgentId(t)
-                          return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
-                        })()}
-                      <Text
-                        className={cn(
-                          'shrink text-muted-foreground text-xs',
-                          t.id === activeSessionTabId && 'text-foreground'
-                        )}
-                        numberOfLines={1}
-                      >
-                        {getMobileSessionTabTitle(t)}
-                      </Text>
-                    </View>
-                  </Pressable>
-                ))}
-              </ScrollView>
-              {/* Why: pinned outside the scroll strip so the new-agent button
-                  stays reachable no matter how far the tabs scroll. */}
-              <Pressable
-                className={cn(
-                  styles.newTerminalButton,
-                  'active:bg-accent',
-                  (creating || creatingBrowser || creatingMarkdown || connState !== 'connected') &&
-                    styles.newTerminalButtonDisabled
-                )}
-                disabled={
-                  creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
-                }
-                onPress={() => {
-                  setCreateError('')
-                  setShowCreateTabDrawer(true)
-                }}
-                accessibilityLabel="New tab"
-              >
-                <Plus size={16} colorClassName="accent-muted-foreground" />
-              </Pressable>
-              {shouldShowMobileQuickCommandsAction(quickCommandsSupported) ? (
-                <QuickCommandsTabButton
-                  disabled={
-                    creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
-                  }
-                  onPress={() => {
-                    if (quickCommandsSupported === true) {
-                      setShowQuickCommands(true)
-                      return
-                    }
-                    showToast('Checking desktop capabilities - try again in a moment', 1600)
-                  }}
-                />
-              ) : null}
-            </View>
-          </MobileGlassSurface>
+          <MobileSessionTabStrip
+            activeTabId={activeSessionTabId}
+            disabled={creating || creatingBrowser || creatingMarkdown || connState !== 'connected'}
+            tabs={visibleTabs}
+            showQuickCommands={shouldShowMobileQuickCommandsAction(quickCommandsSupported)}
+            onTabPress={switchSessionTab}
+            onTabLongPress={(tab) => {
+              triggerMediumImpact()
+              openSessionTabActionSheetAfterKeyboardDismiss(tab)
+            }}
+            onNewTabPress={() => {
+              setCreateError('')
+              setShowCreateTabDrawer(true)
+            }}
+            onQuickCommandsPress={() => {
+              if (quickCommandsSupported === true) {
+                setShowQuickCommands(true)
+                return
+              }
+              showToast('Checking desktop capabilities - try again in a moment', 1600)
+            }}
+          />
         ) : null}
 
         {/* Content-row host (KTD2): the header/tab chrome stays a full-width sibling
@@ -4758,7 +4604,7 @@ export default function SessionScreen() {
         <View className="flex-1 flex-row" onLayout={handleSessionContentRowLayout}>
           <View className="min-w-0 flex-1">
             {createWarning ? (
-              <View className="bg-card border-b-hairline border-b-border flex-row items-start gap-2 px-3 py-2">
+              <MobileGlassSurface className="mx-3 mt-2 flex-row items-start gap-2 rounded-xl px-3 py-2">
                 <AlertTriangle size={16} colorClassName="accent-amber-500" />
                 <Text className="text-foreground flex-1 text-xs leading-4">{createWarning}</Text>
                 <Pressable
@@ -4769,7 +4615,7 @@ export default function SessionScreen() {
                 >
                   <X size={16} colorClassName="accent-muted-foreground" />
                 </Pressable>
-              </View>
+              </MobileGlassSurface>
             ) : null}
 
             {showLoadingState ? (
@@ -4783,29 +4629,19 @@ export default function SessionScreen() {
                   <Text className="text-destructive mb-2 text-xs">{createError}</Text>
                 ) : null}
                 <View className="flex-row flex-wrap justify-center gap-2">
-                  <Pressable
-                    className={cn(
-                      'border-border rounded-xl border bg-secondary px-6 py-2.5',
-                      (creating ||
-                        creatingBrowser ||
-                        creatingMarkdown ||
-                        connState !== 'connected') &&
-                        'opacity-50'
-                    )}
+                  <MobileGlassTextButton
                     disabled={
                       creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
+                    }
+                    label={
+                      creating || creatingBrowser || creatingMarkdown ? 'Creating...' : 'Create Tab'
                     }
                     onPress={() => {
                       setCreateError('')
                       setShowCreateTabDrawer(true)
                     }}
-                  >
-                    <Text className="text-foreground text-sm font-semibold">
-                      {creating || creatingBrowser || creatingMarkdown
-                        ? 'Creating...'
-                        : 'Create Tab'}
-                    </Text>
-                  </Pressable>
+                    size="large"
+                  />
                 </View>
               </View>
             ) : activeMarkdownTab ? (
@@ -4935,7 +4771,7 @@ export default function SessionScreen() {
                 ))}
                 <MobileNativeChatOverlay
                   controller={nativeChatController}
-                  onAttachImage={() => void attachImage('library')}
+                  onAttachImage={attachImage}
                   isAttaching={isAttaching}
                   inputLockReason={nativeChatInputLockReason}
                   keyboardInset={keyboardLift}
@@ -4956,55 +4792,43 @@ export default function SessionScreen() {
             trigger a server-side PTY viewport change. The dock hides in native
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
-              <MobileGlassSurface
-                className="z-20 overflow-hidden rounded-t-3xl"
+              <View
+                className="z-20 px-3 pt-1"
                 style={[
-                  { paddingBottom: insets.bottom, transform: [{ translateY: -keyboardLift }] }
+                  {
+                    paddingBottom: insets.bottom,
+                    transform: [{ translateY: -terminalComposerKeyboardOffset }]
+                  }
                 ]}
               >
                 {/* Accessory keys */}
-                <View className="flex-row items-center">
+                <View className="flex-row items-center gap-2">
                   {/* Why: a fixed, always-visible escape hatch from the open
                   keyboard. Kept outside the horizontal ScrollView so it does
                   not scroll away, and out of the terminal-byte shortcut path so
                   it cannot be hidden by user shortcut customization (#5106). */}
                   {keyboardLift > 0 && (
-                    <Pressable
-                      className={cn(
-                        'ml-2 my-1 h-7 min-w-9 items-center justify-center rounded-lg bg-secondary px-2.5 py-0',
-                        'active:bg-accent'
-                      )}
+                    <MobileTerminalAccessoryKey
+                      icon="dismiss-keyboard"
                       onPress={dismissSoftwareKeyboard}
                       hitSlop={8}
-                      accessibilityRole="button"
                       accessibilityLabel="Dismiss keyboard"
                       accessibilityHint="Hides the software keyboard and keeps the current terminal session open."
-                    >
-                      <View className="relative h-5 w-5 items-center justify-start">
-                        <KeyboardIcon size={15} colorClassName="accent-muted-foreground" />
-                        <View className="absolute -bottom-0.5">
-                          <ChevronDown size={10} colorClassName="accent-muted-foreground" />
-                        </View>
-                      </View>
-                    </Pressable>
+                    />
                   )}
                   {/* Why: with default tap handling the first tap on any accessory
                   key dismisses the open keyboard and is swallowed, so live
                   input lost its keyboard on every Esc/Tab press (#5106). */}
                   <ScrollView
-                    className="min-w-0 flex-1"
+                    className="min-w-0 flex-1 overflow-visible"
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerClassName="px-2 py-1 gap-1"
+                    contentContainerClassName="gap-2 py-2"
                     keyboardShouldPersistTaps="always"
                   >
-                    <Pressable
-                      className={cn(
-                        styles.accessoryKey,
-                        'active:bg-accent',
-                        !canSend && styles.accessoryKeyDisabled
-                      )}
+                    <MobileTerminalAccessoryKey
                       disabled={!canSend}
+                      icon={isPhoneMode(activeHandle) ? 'desktop' : 'phone'}
                       onPress={() => {
                         if (activeHandle) {
                           void toggleDisplayMode(activeHandle)
@@ -5015,65 +4839,31 @@ export default function SessionScreen() {
                           ? 'Switch to desktop mode'
                           : 'Switch to phone mode'
                       }
-                    >
-                      {isPhoneMode(activeHandle) ? (
-                        <Monitor size={14} colorClassName="accent-muted-foreground" />
-                      ) : (
-                        <Smartphone size={14} colorClassName="accent-muted-foreground" />
-                      )}
-                    </Pressable>
-                    <Pressable
-                      className={cn(
-                        styles.accessoryKey,
-                        liveInputEnabled && 'bg-accent',
-                        'active:bg-accent',
-                        !canSend && styles.accessoryKeyDisabled
-                      )}
+                    />
+                    <MobileTerminalAccessoryKey
                       disabled={!canSend}
+                      icon="live-input"
+                      isSelected={liveInputEnabled}
                       onPress={toggleLiveInput}
                       accessibilityLabel={
                         liveInputEnabled
                           ? 'Switch to buffered command input'
                           : 'Switch to live terminal input'
                       }
-                    >
-                      <ChevronsRight
-                        size={14}
-                        colorClassName={
-                          liveInputEnabled ? 'accent-primary-foreground' : 'accent-muted-foreground'
-                        }
-                      />
-                    </Pressable>
+                    />
                     {canPaste && (
-                      <Pressable
-                        className={cn(
-                          styles.accessoryKey,
-                          'active:bg-accent',
-                          !canSend && styles.accessoryKeyDisabled
-                        )}
+                      <MobileTerminalAccessoryKey
                         disabled={!canSend}
+                        label="Paste"
                         onPress={() => void handlePaste()}
                         accessibilityLabel="Paste from clipboard"
-                      >
-                        <Text
-                          className={cn(
-                            styles.accessoryKeyText,
-                            !canSend && styles.accessoryKeyTextDisabled
-                          )}
-                        >
-                          Paste
-                        </Text>
-                      </Pressable>
+                      />
                     )}
                     {visibleBuiltInAccessoryKeys.map((key) => (
-                      <Pressable
+                      <MobileTerminalAccessoryKey
                         key={key.id}
-                        className={cn(
-                          styles.accessoryKey,
-                          'active:bg-accent',
-                          !canSend && styles.accessoryKeyDisabled
-                        )}
                         disabled={!canSend}
+                        label={key.label}
                         onPressIn={() => {
                           if (!key.repeatable) {
                             return
@@ -5094,27 +4884,13 @@ export default function SessionScreen() {
                           void handleAccessoryKey(createTerminalLiveAccessoryInput(key))
                         }}
                         accessibilityLabel={key.accessibilityLabel ?? `Send ${key.label}`}
-                      >
-                        <Text
-                          className={cn(
-                            styles.accessoryKeyText,
-                            !canSend && styles.accessoryKeyTextDisabled
-                          )}
-                        >
-                          {key.label}
-                        </Text>
-                      </Pressable>
+                      />
                     ))}
                     {customKeys.map((key) => (
-                      <Pressable
+                      <MobileTerminalAccessoryKey
                         key={key.id}
-                        className={cn(
-                          styles.accessoryKey,
-                          'border border-border',
-                          'active:bg-accent',
-                          !canSend && styles.accessoryKeyDisabled
-                        )}
                         disabled={!canSend}
+                        label={key.label}
                         onPress={() => void handleAccessoryKey({ bytes: key.bytes })}
                         onLongPress={() => {
                           triggerMediumImpact()
@@ -5122,134 +4898,54 @@ export default function SessionScreen() {
                         }}
                         delayLongPress={400}
                         accessibilityLabel={`Send ${key.label}`}
-                      >
-                        <Text
-                          className={cn(
-                            styles.accessoryKeyText,
-                            !canSend && styles.accessoryKeyTextDisabled
-                          )}
-                        >
-                          {key.label}
-                        </Text>
-                      </Pressable>
+                      />
                     ))}
-                    <Pressable
-                      className={cn(styles.accessoryKey, 'active:bg-accent')}
+                    <MobileTerminalAccessoryKey
+                      icon="add"
                       onPress={() => setShowCustomKeyModal(true)}
                       accessibilityLabel="Add custom shortcut"
-                    >
-                      <Plus size={14} colorClassName="accent-muted-foreground" />
-                    </Pressable>
+                    />
                   </ScrollView>
                 </View>
 
                 {/* Input bar */}
+                <MobileTerminalInputBar
+                  autocompleteEnabled={autocompleteEnabled}
+                  canSend={canSend}
+                  commandInputRef={commandInputRef}
+                  input={input}
+                  isAttaching={isAttaching}
+                  liveInputEnabled={liveInputEnabled}
+                  onAttachImage={attachImage}
+                  onChangeText={setInput}
+                  onFocusLiveInput={focusLiveInput}
+                  onSend={() => void handleSend()}
+                />
                 {liveInputEnabled ? (
-                  <View className={cn(styles.inputBar, 'gap-2')}>
-                    <Pressable
-                      className={cn(
-                        'border-border min-h-9 flex-1 flex-row items-center gap-2 rounded-xl border bg-secondary px-2.5',
-                        'active:bg-accent',
-                        !canSend && 'opacity-50'
-                      )}
-                      disabled={!canSend}
-                      onPress={focusLiveInput}
-                      accessibilityRole="button"
-                      accessibilityLabel="Show keyboard for live terminal input"
-                      accessibilityHint="Typed text is sent directly to the active terminal"
-                    >
-                      <KeyboardIcon size={16} colorClassName="accent-muted-foreground" />
-                      <MobileTerminalLiveInputStatus isAttaching={isAttaching} />
-                    </Pressable>
-                    <MobileTerminalInputActions
-                      canSend={canSend}
-                      isAttaching={isAttaching}
-                      buttonClassName={styles.inputActionButton}
-                      disabledButtonClassName={styles.sendButtonDisabled}
-                      onAttachImage={() => void attachImage('library')}
-                      onAttachFile={() => void attachImage('files')}
-                    />
-                    <TextInput
-                      ref={liveInputRef}
-                      className="text-foreground absolute h-px w-px opacity-0"
-                      value={liveInputCapture}
-                      onChangeText={handleLiveInputChange}
-                      onKeyPress={handleLiveInputKeyPress}
-                      onSubmitEditing={handleLiveInputSubmit}
-                      placeholder=""
-                      showSoftInputOnFocus
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      spellCheck={false}
-                      smartInsertDelete={false}
-                      // Why: iOS textContentType wins over autoComplete and can
-                      // narrow the keyboard surface; keep IME switching available.
-                      autoComplete="off"
-                      keyboardType={getTerminalLiveInputKeyboardType(Platform.OS)}
-                      returnKeyType="default"
-                      blurOnSubmit={false}
-                      editable={canSend}
-                      importantForAutofill="no"
-                    />
-                  </View>
-                ) : (
-                  <View className={styles.inputBar}>
-                    <TextInput
-                      ref={commandInputRef}
-                      // Why: Android caches the IME inputType at mount, so toggling
-                      // autocomplete must remount there; iOS can update without a focus-costly remount.
-                      key={
-                        Platform.OS === 'android'
-                          ? autocompleteEnabled
-                            ? 'cmd-input-ac-on'
-                            : 'cmd-input-ac-off'
-                          : 'cmd-input'
-                      }
-                      className={styles.textInput}
-                      value={input}
-                      // Why: iOS can reset active IME composition when JS writes a
-                      // value that differs from the native field text;
-                      // store the raw field text and normalize at send time.
-                      onChangeText={setInput}
-                      placeholder="Type a command…"
-                      placeholderTextColorClassName="accent-muted-foreground"
-                      autoCapitalize="none"
-                      autoCorrect={autocompleteEnabled}
-                      spellCheck={autocompleteEnabled}
-                      smartInsertDelete={false}
-                      // Why: terminal commands are not autofill content, but the
-                      // keyboard must stay default so non-Latin IMEs remain selectable.
-                      autoComplete="off"
-                      keyboardType={getTerminalCommandKeyboardType(
-                        Platform.OS,
-                        autocompleteEnabled
-                      )}
-                      returnKeyType="send"
-                      editable={canSend}
-                      onSubmitEditing={() => void handleSend()}
-                    />
-                    <MobileTerminalInputActions
-                      canSend={canSend}
-                      isAttaching={isAttaching}
-                      buttonClassName={styles.inputActionButton}
-                      disabledButtonClassName={styles.sendButtonDisabled}
-                      onAttachImage={() => void attachImage('library')}
-                      onAttachFile={() => void attachImage('files')}
-                    />
-                    <Pressable
-                      className={cn(
-                        'h-9 w-9 items-center justify-center rounded-xl bg-secondary',
-                        !canSend && styles.sendButtonDisabled
-                      )}
-                      disabled={!canSend}
-                      onPress={() => void handleSend()}
-                      accessibilityLabel="Send command"
-                    >
-                      <ArrowUp size={18} colorClassName="accent-muted-foreground" />
-                    </Pressable>
-                  </View>
-                )}
-              </MobileGlassSurface>
+                  <TextInput
+                    ref={liveInputRef}
+                    className="text-foreground absolute h-px w-px opacity-0"
+                    value={liveInputCapture}
+                    onChangeText={handleLiveInputChange}
+                    onKeyPress={handleLiveInputKeyPress}
+                    onSubmitEditing={handleLiveInputSubmit}
+                    placeholder=""
+                    showSoftInputOnFocus
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    spellCheck={false}
+                    smartInsertDelete={false}
+                    // Why: iOS textContentType wins over autoComplete and can
+                    // narrow the keyboard surface; keep IME switching available.
+                    autoComplete="off"
+                    keyboardType={getTerminalLiveInputKeyboardType(Platform.OS)}
+                    returnKeyType="default"
+                    blurOnSubmit={false}
+                    editable={canSend}
+                    importantForAutofill="no"
+                  />
+                ) : null}
+              </View>
             )}
           </View>
           {canDockPanel && activePanel !== null && (

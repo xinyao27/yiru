@@ -6,6 +6,7 @@ import { cn } from '@/style/class-names'
 
 import { searchBaseRefs } from '../source-control/base-ref-search'
 import type { RpcClient } from '../transport/rpc-client'
+import { MobileGlassSurface } from './glass/surface'
 
 type Props = {
   client: RpcClient | null
@@ -78,11 +79,12 @@ export function MobilePrBasePicker({
 
   return (
     <View>
-      <View
+      <MobileGlassSurface
         className={cn(
-          'min-h-10 flex-row items-center gap-1 rounded-xl bg-secondary px-3 py-1',
+          'min-h-10 flex-row items-center gap-1 overflow-hidden rounded-xl px-3 py-1',
           !editable && 'opacity-60'
         )}
+        isInteractive
       >
         <TextInput
           className="text-foreground min-w-0 flex-1 p-0 font-mono text-sm"
@@ -100,9 +102,9 @@ export function MobilePrBasePicker({
           editable={editable}
         />
         <ChevronDown size={14} colorClassName="accent-muted-foreground" />
-      </View>
+      </MobileGlassSurface>
       {focused && results.length > 0 ? (
-        <View className="border-hairline border-border bg-card mt-1 overflow-hidden rounded-xl">
+        <MobileGlassSurface className="mt-1 overflow-hidden rounded-xl">
           {results.map((ref) => (
             <Pressable
               key={ref}
@@ -118,7 +120,7 @@ export function MobilePrBasePicker({
               {ref === value ? <Check size={14} colorClassName="accent-foreground" /> : null}
             </Pressable>
           ))}
-        </View>
+        </MobileGlassSurface>
       ) : null}
     </View>
   )

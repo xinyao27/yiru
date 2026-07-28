@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
-
-import { cn } from '@/style/class-names'
+import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
 import { triggerError, triggerSuccess } from '../../platform/haptics'
 import { parseGitHubPrReference } from '../../source-control/github-pr-link-parse'
 import { linkMobilePr } from '../../source-control/pr-link'
 import type { RpcClient } from '../../transport/rpc-client'
+import { MobileGlassSurface } from '../glass/surface'
+import { MobileGlassTextButton } from '../glass/text-button'
 
 type Props = {
   client: RpcClient | null
@@ -49,45 +49,42 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
     <View>
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-foreground text-sm font-bold">Link existing pull request</Text>
-        <Pressable
-          onPress={onCancel}
+        <MobileGlassTextButton
           disabled={submitting}
-          accessibilityRole="button"
-          accessibilityLabel="Cancel"
-          hitSlop={8}
-        >
-          <Text className="text-muted-foreground text-xs font-semibold">Cancel</Text>
-        </Pressable>
+          label="Cancel"
+          onPress={onCancel}
+          size="small"
+        />
       </View>
       <Text className="text-muted-foreground mt-2 mb-1 text-xs">PR number or GitHub URL</Text>
-      <TextInput
-        className="bg-secondary text-foreground rounded-xl px-3 py-2 text-sm"
-        value={input}
-        onChangeText={setInput}
-        placeholder="#123 or https://github.com/owner/repo/pull/123"
-        placeholderTextColorClassName="accent-muted-foreground"
-        autoCapitalize="none"
-        autoCorrect={false}
-        editable={!submitting}
-      />
+      <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+        <TextInput
+          className="text-foreground px-3 py-2 text-sm"
+          value={input}
+          onChangeText={setInput}
+          placeholder="#123 or https://github.com/owner/repo/pull/123"
+          placeholderTextColorClassName="accent-muted-foreground"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!submitting}
+        />
+      </MobileGlassSurface>
       {error ? <Text className="text-destructive mt-3 text-xs">{error}</Text> : null}
-      <Pressable
-        className={cn(
-          'mt-4 min-h-12 items-center justify-center rounded-xl bg-primary',
-          (submitting || parsed === null) && 'opacity-50',
-          'active:bg-accent'
-        )}
-        disabled={submitting || parsed === null}
-        onPress={() => void submit()}
-      >
-        {submitting ? (
-          <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-        ) : (
-          <Text className="text-primary-foreground text-sm font-semibold">
-            {parsed ? `Link #${parsed}` : 'Link pull request'}
-          </Text>
-        )}
-      </Pressable>
+      {submitting ? (
+        <View className="mt-4 min-h-11 items-center justify-center">
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        </View>
+      ) : (
+        <MobileGlassTextButton
+          className="mt-4"
+          disabled={parsed === null}
+          isFullWidth
+          isProminent
+          label={parsed ? `Link #${parsed}` : 'Link pull request'}
+          onPress={() => void submit()}
+          size="large"
+        />
+      )}
     </View>
   )
 }

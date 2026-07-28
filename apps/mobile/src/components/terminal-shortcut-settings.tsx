@@ -18,6 +18,8 @@ import {
 } from '../terminal/accessory-layout'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
+import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassSurface } from './glass/surface'
 
 // Why: DragReorderList absolutely positions rows, so every row in a
 // reorderable section must share one fixed height.
@@ -222,7 +224,7 @@ export function TerminalShortcutSettings({
         Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on
         the terminal shortcut bar.
       </Text>
-      <View className={cn(styles.section, styles.sectionTopGap)}>
+      <MobileGlassSurface className={cn(styles.section, styles.sectionTopGap)}>
         <DragReorderList
           items={orderedAccessoryKeys}
           itemKey={(shortcutKey) => shortcutKey.id}
@@ -248,10 +250,10 @@ export function TerminalShortcutSettings({
             </Text>
           </View>
         </Pressable>
-      </View>
+      </MobileGlassSurface>
 
       <Text className={cn(styles.groupHeading, styles.groupTopGap)}>CUSTOM SHORTCUTS</Text>
-      <View className={cn(styles.section, styles.sectionTopGap)}>
+      <MobileGlassSurface className={cn(styles.section, styles.sectionTopGap)}>
         {customKeys.length === 0 ? (
           <>
             <View className="items-center justify-center p-3">
@@ -282,12 +284,14 @@ export function TerminalShortcutSettings({
                     {key.bytes.replace(/\r/g, ' ↵')}
                   </Text>
                 </View>
-                <Pressable
-                  className="bg-secondary active:bg-accent h-8 w-8 items-center justify-center rounded-full"
+                <MobileGlassPressable
+                  accessibilityLabel={`Delete ${key.label}`}
+                  className="h-8 w-8 rounded-full"
+                  contentClassName="h-full w-full items-center justify-center rounded-full"
                   onPress={() => handleDeleteCustomKey(key)}
                 >
                   <X size={16} colorClassName="accent-destructive" />
-                </Pressable>
+                </MobileGlassPressable>
               </View>
             )}
           />
@@ -302,7 +306,7 @@ export function TerminalShortcutSettings({
           </View>
           <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </Pressable>
-      </View>
+      </MobileGlassSurface>
 
       <CustomKeyModal
         visible={showCustomKeyModal}
@@ -321,7 +325,7 @@ export function TerminalShortcutSettings({
 const styles = {
   groupHeading: cn('text-xs font-semibold text-muted-foreground tracking-wide mb-1 px-1'),
   groupTopGap: cn('mt-6'),
-  section: cn('overflow-hidden rounded-2xl bg-card'),
+  section: cn('overflow-hidden rounded-2xl'),
   sectionTopGap: cn('mt-2'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
   rowPressedActive: cn('active:bg-accent'),

@@ -24,6 +24,7 @@ import {
   UsageBar
 } from '../../../src/components/account-usage'
 import { ClaudeIcon, OpenAIIcon } from '../../../src/components/agent-icons'
+import { MobileGlassSection } from '../../../src/components/glass/section'
 import { useHostClient } from '../../../src/transport/client-context'
 import { loadHosts } from '../../../src/transport/host-store'
 import type { RpcSuccess } from '../../../src/transport/types'
@@ -166,7 +167,7 @@ export default function AccountsScreen() {
             {title}
           </Text>
         </View>
-        <View className="bg-card overflow-hidden rounded-2xl">
+        <MobileGlassSection>
           {/* System default row */}
           <Pressable
             className={cn(accountScreenClassNames.row, accountScreenClassNames.rowPressedActive)}
@@ -266,7 +267,7 @@ export default function AccountsScreen() {
               </View>
             )
           })}
-        </View>
+        </MobileGlassSection>
       </View>
     )
   }

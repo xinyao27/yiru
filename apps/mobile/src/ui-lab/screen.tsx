@@ -1,7 +1,9 @@
 import { Redirect, Stack, useRouter } from 'expo-router'
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretRight as ChevronRight, X } from '../components/uniwind-icons'
+import { MobileGlassIconButton } from '../components/glass/icon-button'
+import { MobileGlassSection } from '../components/glass/section'
+import { CaretRight as ChevronRight } from '../components/uniwind-icons'
 import { updateSessionViewOverride } from '../storage/session-view-preferences'
 import {
   mobileUiLabHostId,
@@ -131,13 +133,11 @@ export function MobileUiLabScreen(): React.JSX.Element {
           headerLeft:
             Platform.OS === 'android'
               ? () => (
-                  <Pressable
+                  <MobileGlassIconButton
                     accessibilityLabel="Close UI Lab"
-                    className="active:bg-accent h-10 w-10 items-center justify-center rounded-full"
+                    icon="close"
                     onPress={leave}
-                  >
-                    <X size={20} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 )
               : undefined
         }}
@@ -152,24 +152,12 @@ export function MobileUiLabScreen(): React.JSX.Element {
         contentContainerClassName="p-4 pb-safe-offset-6"
         showsVerticalScrollIndicator={false}
       >
-        <View className="bg-card mb-4 flex-row items-center gap-3 rounded-2xl px-3 py-2.5">
-          <View className="min-w-0 flex-1">
-            <Text className="text-foreground text-sm font-semibold">Production UI test mode</Text>
-            <Text className="text-muted-foreground mt-0.5 text-xs leading-4">
-              Every destination below is the real app route. Only host responses are mocked.
-            </Text>
-          </View>
-          <Text className="border-border text-muted-foreground rounded-full border px-2 py-1 text-xs font-semibold">
-            DEV ONLY
-          </Text>
-        </View>
-
         <Text className="text-foreground text-sm font-semibold">Session surfaces</Text>
         <Text className="text-muted-foreground mt-1 text-xs leading-5">
           Exercise the production session shell with deterministic terminal, chat, file, and browser
           states.
         </Text>
-        <View className="bg-card mt-3 overflow-hidden rounded-2xl">
+        <MobileGlassSection className="mt-3">
           {UI_LAB_SCENARIOS.map((scenario, index) => (
             <Pressable
               key={scenario.id}
@@ -189,13 +177,13 @@ export function MobileUiLabScreen(): React.JSX.Element {
               ) : null}
             </Pressable>
           ))}
-        </View>
+        </MobileGlassSection>
 
         <Text className="text-foreground mt-5 text-sm font-semibold">Workspace surfaces</Text>
         <Text className="text-muted-foreground mt-1 text-xs leading-5">
           Inspect production data-heavy routes without pairing a desktop.
         </Text>
-        <View className="bg-card mt-3 overflow-hidden rounded-2xl">
+        <MobileGlassSection className="mt-3">
           {UI_LAB_WORKSPACE_SCREENS.map((screen, index) => (
             <Pressable
               key={screen.id}
@@ -215,10 +203,10 @@ export function MobileUiLabScreen(): React.JSX.Element {
               ) : null}
             </Pressable>
           ))}
-        </View>
+        </MobileGlassSection>
 
         <Text className="text-foreground mt-5 text-sm font-semibold">System screens</Text>
-        <View className="bg-card mt-3 overflow-hidden rounded-2xl">
+        <MobileGlassSection className="mt-3">
           {UI_LAB_SYSTEM_SCREENS.map((screen, index) => (
             <Pressable
               key={screen.href}
@@ -238,7 +226,7 @@ export function MobileUiLabScreen(): React.JSX.Element {
               ) : null}
             </Pressable>
           ))}
-        </View>
+        </MobileGlassSection>
 
         <MobileUiLabGlassCatalog />
       </ScrollView>

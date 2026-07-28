@@ -12,6 +12,7 @@ type MobileGlassSurfaceProps = Omit<
   'colorScheme' | 'glassEffectStyle' | 'isInteractive' | 'ref' | 'tintColor'
 > & {
   className?: string
+  fallbackClassName?: string
   forceFallback?: boolean
   isInteractive?: boolean
   tintColor?: string
@@ -20,6 +21,7 @@ type MobileGlassSurfaceProps = Omit<
 
 export function MobileGlassSurface({
   className,
+  fallbackClassName,
   forceFallback = false,
   isInteractive = false,
   tintColor,
@@ -31,14 +33,17 @@ export function MobileGlassSurface({
 
   if (!isAvailable) {
     return (
-      <View {...viewProps} className={cn('border-hairline border-border bg-card', className)} />
+      <View
+        {...viewProps}
+        className={cn('border-hairline border-border bg-card', className, fallbackClassName)}
+      />
     )
   }
 
   return (
     <UniwindGlassView
       {...viewProps}
-      className={cn('border-hairline border-border', className)}
+      className={className}
       colorScheme={theme}
       glassEffectStyle="regular"
       isInteractive={isInteractive}

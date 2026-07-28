@@ -2,7 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, TextInput, Switch } from 'react-native'
 
-import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassPressable } from '@/components/glass/pressable'
+import { MobileGlassSection } from '@/components/glass/section'
+import { MobileGlassSurface } from '@/components/glass/surface'
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { cn } from '@/style/class-names'
 
 import {
@@ -189,15 +193,14 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
     <BottomDrawer visible={visible} onClose={onClose}>
       <View className="flex-row items-center pb-2">
         {showBack ? (
-          <Pressable
-            className="active:bg-accent h-8 w-8 items-center justify-center rounded-full"
-            onPress={onBack}
+          <MobileGlassIconButton
             accessibilityLabel="Back"
-          >
-            <ChevronLeft size={18} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            icon="back"
+            onPress={onBack}
+            size="small"
+          />
         ) : (
-          <View className={styles.backSpacer} />
+          <View className="w-8" />
         )}
         <Text className="text-foreground flex-1 text-center text-sm font-semibold">
           {step === 'choose-type' && 'Add Shortcut'}
@@ -205,39 +208,37 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           {step === 'special-keys' && 'Pick a key'}
           {step === 'text-macro' && 'Text Macro'}
         </Text>
-        <View className={styles.backSpacer} />
+        <View className="w-8" />
       </View>
 
       {step === 'choose-type' && (
-        <View className={styles.group}>
+        <MobileGlassSection>
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent px-3.5 py-3"
             onPress={() => setStep('shortcut-combo')}
           >
-            <Text className={styles.rowLabel}>Shortcut Combo</Text>
-            <Text className={styles.rowHint}>Build Ctrl, Alt, and Shift key chords</Text>
+            <Text className="text-foreground mb-px text-sm">Shortcut Combo</Text>
+            <Text className="text-muted-foreground text-xs">
+              Build Ctrl, Alt, and Shift key chords
+            </Text>
           </Pressable>
-          <View className={styles.separator} />
-          <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
-            onPress={() => setStep('text-macro')}
-          >
-            <Text className={styles.rowLabel}>Text Macro</Text>
-            <Text className={styles.rowHint}>Send custom text command</Text>
+          <View className="h-hairline bg-border mx-3" />
+          <Pressable className="active:bg-accent px-3.5 py-3" onPress={() => setStep('text-macro')}>
+            <Text className="text-foreground mb-px text-sm">Text Macro</Text>
+            <Text className="text-muted-foreground text-xs">Send custom text command</Text>
           </Pressable>
           {onManageShortcuts ? (
             <>
-              <View className={styles.separator} />
-              <Pressable
-                className={cn(styles.row, styles.rowPressedActive)}
-                onPress={onManageShortcuts}
-              >
-                <Text className={styles.rowLabel}>Manage Shortcuts</Text>
-                <Text className={styles.rowHint}>Show, hide, or reorder shortcut keys</Text>
+              <View className="h-hairline bg-border mx-3" />
+              <Pressable className="active:bg-accent px-3.5 py-3" onPress={onManageShortcuts}>
+                <Text className="text-foreground mb-px text-sm">Manage Shortcuts</Text>
+                <Text className="text-muted-foreground text-xs">
+                  Show, hide, or reorder shortcut keys
+                </Text>
               </Pressable>
             </>
           ) : null}
-        </View>
+        </MobileGlassSection>
       )}
 
       {step === 'shortcut-combo' && (
@@ -245,8 +246,8 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           <View className="flex-row flex-wrap items-center justify-center gap-2 py-5">
             {orderedActiveModifiers.map((modifier, index) => (
               <View key={modifier.id} className="flex-row items-center gap-2">
-                {index > 0 ? <Text className={styles.previewPlus}>+</Text> : null}
-                <View className={cn(styles.keycap, 'min-w-0')}>
+                {index > 0 ? <Text className="text-muted-foreground text-sm">+</Text> : null}
+                <View className="border-border bg-card h-12 items-center justify-center rounded-xl border px-3">
                   <Text className="text-muted-foreground font-mono text-sm font-semibold">
                     {modifier.label}
                   </Text>
@@ -254,9 +255,14 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
               </View>
             ))}
             {orderedActiveModifiers.length > 0 ? (
-              <Text className={styles.previewPlus}>+</Text>
+              <Text className="text-muted-foreground text-sm">+</Text>
             ) : null}
-            <View className={cn(styles.keycap, !shortcutPreview && 'border-amber-500')}>
+            <View
+              className={cn(
+                'border-border bg-card h-12 min-w-12 items-center justify-center rounded-xl border px-3',
+                !shortcutPreview && 'border-amber-500'
+              )}
+            >
               <Text
                 className={cn(
                   'text-foreground font-mono text-sm font-semibold',
@@ -268,83 +274,71 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
             </View>
           </View>
 
-          <View className={styles.section}>
-            <Text className={styles.sectionLabel}>Modifiers</Text>
+          <View className="mt-3">
+            <Text className="text-muted-foreground mb-2 pl-0.5 text-xs tracking-wider uppercase">
+              Modifiers
+            </Text>
             <View className="flex-row gap-2">
               {SHORTCUT_MODIFIERS.map((modifier) => {
                 const selected = shortcutModifiers.includes(modifier.id)
                 return (
-                  <Pressable
+                  <MobileGlassPressable
                     key={modifier.id}
-                    className={cn(
-                      'h-10 flex-1 flex-row items-center justify-center gap-1 rounded-xl bg-card',
-                      selected && 'bg-accent',
-                      !selected && 'active:bg-accent'
-                    )}
-                    onPress={() => toggleShortcutModifier(modifier.id)}
+                    className={cn('h-10 flex-1 rounded-xl', selected && 'border-muted-foreground')}
+                    contentClassName="h-full flex-row items-center justify-center gap-1 rounded-xl"
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
+                    onPress={() => toggleShortcutModifier(modifier.id)}
                   >
                     <Text
-                      className={cn(
-                        'text-muted-foreground text-sm font-medium',
-                        selected && 'text-accent-foreground'
-                      )}
+                      className={cn('text-muted-foreground text-sm', selected && 'text-foreground')}
                     >
                       {modifier.label}
                     </Text>
                     {modifier.glyph ? (
-                      <Text
-                        className={cn(
-                          'text-muted-foreground text-xs font-mono',
-                          selected && 'text-muted-foreground'
-                        )}
-                      >
+                      <Text className="text-muted-foreground font-mono text-xs">
                         {modifier.glyph}
                       </Text>
                     ) : null}
-                  </Pressable>
+                  </MobileGlassPressable>
                 )
               })}
             </View>
           </View>
 
-          <View className={styles.section}>
-            <Text className={styles.sectionLabel}>Key</Text>
-            <TextInput
-              className="border-border bg-card text-foreground h-14 w-full rounded-xl border text-center font-mono text-sm font-semibold"
-              value={shortcutKey.length === 1 ? shortcutKey.toUpperCase() : ''}
-              onChangeText={handleShortcutKeyInput}
-              placeholder={SPECIAL_KEY_BY_ID[shortcutKey]?.label ?? 'C'}
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="characters"
-              autoCorrect={false}
-              maxLength={1}
-            />
-            <Pressable
-              className="active:bg-accent items-center py-2"
+          <View className="mt-3">
+            <Text className="text-muted-foreground mb-2 pl-0.5 text-xs tracking-wider uppercase">
+              Key
+            </Text>
+            <MobileGlassSurface className="h-14 w-full overflow-hidden rounded-xl" isInteractive>
+              <TextInput
+                className="text-foreground h-full w-full text-center font-mono text-sm"
+                value={shortcutKey.length === 1 ? shortcutKey.toUpperCase() : ''}
+                onChangeText={handleShortcutKeyInput}
+                placeholder={SPECIAL_KEY_BY_ID[shortcutKey]?.label ?? 'C'}
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="characters"
+                autoCorrect={false}
+                maxLength={1}
+              />
+            </MobileGlassSurface>
+            <MobileGlassTextButton
+              className="mt-2 self-center"
+              label="More keys — Tab, arrows, F1–F12…"
               onPress={() => setStep('special-keys')}
-            >
-              <Text className="text-muted-foreground text-xs underline">
-                More keys — Tab, arrows, F1–F12…
-              </Text>
-            </Pressable>
+              size="small"
+            />
           </View>
 
-          <Pressable
-            className={cn(styles.saveButton, !shortcutPreview && styles.saveButtonDisabled)}
+          <MobileGlassTextButton
+            className="mt-3"
             disabled={!shortcutPreview}
+            isFullWidth
+            isProminent
+            label="Add"
             onPress={handleShortcutSave}
-          >
-            <Text
-              className={cn(
-                styles.saveButtonText,
-                !shortcutPreview && styles.saveButtonTextDisabled
-              )}
-            >
-              Add
-            </Text>
-          </Pressable>
+            size="large"
+          />
         </View>
       )}
 
@@ -365,25 +359,15 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   const flexBasis = `${100 / group.columns}%` as const
                   return (
                     <View key={id} className="px-0.5 py-0.5" style={[{ flexBasis }]}>
-                      <Pressable
-                        className={cn(
-                          'h-10 items-center justify-center rounded-xl bg-card',
-                          selected && 'bg-accent',
-                          !selected && 'active:bg-accent'
-                        )}
-                        onPress={() => handleSpecialKeyPick(id)}
+                      <MobileGlassPressable
+                        className={cn('h-10 rounded-xl', selected && 'border-muted-foreground')}
+                        contentClassName="h-full items-center justify-center rounded-xl"
                         accessibilityLabel={key.accessibilityLabel}
                         accessibilityState={{ selected }}
+                        onPress={() => handleSpecialKeyPick(id)}
                       >
-                        <Text
-                          className={cn(
-                            'text-xs font-semibold text-foreground font-mono',
-                            selected && 'text-accent-foreground'
-                          )}
-                        >
-                          {key.label}
-                        </Text>
-                      </Pressable>
+                        <Text className="text-foreground font-mono text-xs">{key.label}</Text>
+                      </MobileGlassPressable>
                     </View>
                   )
                 })}
@@ -394,28 +378,32 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'text-macro' && (
-        <View className={styles.group}>
+        <MobileGlassSection>
           <View className="gap-2 p-3">
-            <Text className={styles.fieldLabel}>Label</Text>
-            <TextInput
-              className={styles.fieldInput}
-              value={macroLabel}
-              onChangeText={setMacroLabel}
-              placeholder="e.g. Build"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <Text className={styles.fieldLabel}>Command</Text>
-            <TextInput
-              className={styles.fieldInput}
-              value={macroText}
-              onChangeText={setMacroText}
-              placeholder="e.g. pnpm build"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+            <Text className="text-muted-foreground text-xs">Label</Text>
+            <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+              <TextInput
+                className="text-foreground px-3 py-2 font-mono text-sm"
+                value={macroLabel}
+                onChangeText={setMacroLabel}
+                placeholder="e.g. Build"
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </MobileGlassSurface>
+            <Text className="text-muted-foreground text-xs">Command</Text>
+            <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+              <TextInput
+                className="text-foreground px-3 py-2 font-mono text-sm"
+                value={macroText}
+                onChangeText={setMacroText}
+                placeholder="e.g. pnpm build"
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </MobileGlassSurface>
             <View className="flex-row items-center justify-between py-1">
               <Text className="text-foreground text-sm">Press Enter</Text>
               <Switch
@@ -427,47 +415,18 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                 ios_backgroundColorClassName="accent-secondary"
               />
             </View>
-            <Pressable
-              className={cn(styles.saveButton, !macroText.trim() && styles.saveButtonDisabled)}
+            <MobileGlassTextButton
+              className="mt-3"
               disabled={!macroText.trim()}
+              isFullWidth
+              isProminent
+              label="Add Shortcut"
               onPress={handleMacroSave}
-            >
-              <Text
-                className={cn(
-                  styles.saveButtonText,
-                  !macroText.trim() && styles.saveButtonTextDisabled
-                )}
-              >
-                Add Shortcut
-              </Text>
-            </Pressable>
+              size="large"
+            />
           </View>
-        </View>
+        </MobileGlassSection>
       )}
     </BottomDrawer>
   )
 }
-
-const styles = {
-  backSpacer: cn('w-8'),
-  group: cn('overflow-hidden rounded-2xl bg-card'),
-  separator: cn('h-hairline bg-border mx-3'),
-  row: cn('py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-accent'),
-  rowLabel: cn('text-sm font-medium text-foreground mb-px'),
-  rowHint: cn('text-xs text-muted-foreground'),
-  previewPlus: cn('text-muted-foreground text-sm'),
-  keycap: cn(
-    'border-border min-w-12 h-12 items-center justify-center rounded-xl border bg-card px-3'
-  ),
-  section: cn('mt-3'),
-  sectionLabel: cn('text-xs text-muted-foreground uppercase tracking-wider mb-2 pl-0.5'),
-  fieldLabel: cn('text-xs font-medium text-muted-foreground'),
-  fieldInput: cn(
-    'border-border bg-background text-foreground rounded-xl border px-3 py-2 font-mono text-sm'
-  ),
-  saveButton: cn('mt-3 items-center rounded-xl bg-primary py-3'),
-  saveButtonDisabled: cn('bg-secondary'),
-  saveButtonText: cn('text-primary-foreground text-sm font-semibold'),
-  saveButtonTextDisabled: cn('text-muted-foreground')
-} as const

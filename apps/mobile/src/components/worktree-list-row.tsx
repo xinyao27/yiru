@@ -85,13 +85,8 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   const linkedPrColors = item.linkedPR ? prStateColorClasses(item.linkedPR.state) : null
 
   return (
-    // Why: reserve the left border in every row so the active accent never shifts content.
     <Pressable
-      className={cn(
-        'flex-row items-start py-2.5 pl-4 pr-4 border-l-2 border-l-transparent',
-        item.isActive && 'bg-card border-l-muted-foreground',
-        'active:bg-accent'
-      )}
+      className={cn('mx-3 flex-row items-start rounded-xl px-2 py-3', 'active:bg-accent')}
       style={lineageDepth > 0 ? { paddingLeft: spacing4 * (lineageDepth + 1) } : undefined}
       disabled={isReadOnly}
       onPress={() => onPress(item)}
@@ -105,32 +100,27 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       }
       delayLongPress={400}
     >
-      {/* Why: 2px centers the 12px status shell on the title's first line. */}
-      <View className="mr-2 w-5 items-center gap-1 pt-0.5">
-        <AgentSpinner status={status} />
-        {item.unread && (
-          <View className="mt-0.5">
-            <Bell size={10} colorClassName="accent-amber-500" />
-          </View>
-        )}
+      <View className="mr-2 w-5">
+        <View className="h-6 items-center justify-center">
+          <AgentSpinner status={status} />
+        </View>
+        <View className="h-5 items-center justify-center">
+          {item.unread ? <Bell size={14} colorClassName="accent-amber-500" /> : null}
+        </View>
       </View>
 
       <View className="mr-2 flex-1">
-        <View className="flex-row items-center gap-2">
+        <View className="min-h-6 flex-row items-center gap-2">
           <Text
-            className={cn(
-              'text-sm font-semibold text-foreground shrink',
-              item.unread && 'font-bold',
-              isReadOnly && 'opacity-50'
-            )}
+            className={cn('text-foreground shrink text-base', isReadOnly && 'opacity-50')}
             numberOfLines={1}
           >
             {item.displayName || item.repo}
           </Text>
           {item.linkedPR && (
             <View className="bg-secondary flex-row items-center gap-1 rounded-full px-1.5 py-px">
-              <GitPullRequest size={10} colorClassName={linkedPrColors?.accent} />
-              <Text className={cn('text-xs text-muted-foreground', linkedPrColors?.text)}>
+              <GitPullRequest size={14} colorClassName={linkedPrColors?.accent} />
+              <Text className={cn('text-muted-foreground text-sm', linkedPrColors?.text)}>
                 #{item.linkedPR.number}
               </Text>
             </View>
@@ -146,10 +136,10 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             linkedGitLabMR={item.linkedGitLabMR}
           />
         </View>
-        <View className="mt-0.5 flex-row items-center gap-1">
+        <View className="min-h-5 flex-row items-center gap-1">
           {lineageDepth > 0 && (
             <View className="bg-secondary flex-row items-center gap-1 rounded-full px-1.5 py-px">
-              <GitMerge size={10} colorClassName="accent-muted-foreground" />
+              <GitMerge size={14} colorClassName="accent-muted-foreground" />
               <Text className="text-muted-foreground text-xs">Child</Text>
             </View>
           )}
@@ -158,13 +148,13 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
               rather than a bare colored dot. */}
           {!hideRepo && (
             <>
-              <MobileRepoIcon repoIcon={repoIcon} size={11} color={repoColor} />
-              <Text className="text-muted-foreground max-w-24 text-xs" numberOfLines={1}>
+              <MobileRepoIcon repoIcon={repoIcon} size={14} color={repoColor} />
+              <Text className="text-muted-foreground max-w-24 text-sm" numberOfLines={1}>
                 {item.repo}
               </Text>
             </>
           )}
-          <Text className="text-muted-foreground shrink font-mono text-xs" numberOfLines={1}>
+          <Text className="text-muted-foreground shrink text-sm" numberOfLines={1}>
             {metaText}
           </Text>
         </View>
@@ -187,7 +177,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
               <ChevronDown size={12} colorClassName="accent-muted-foreground" />
             )}
             <GitMerge size={12} colorClassName="accent-muted-foreground" />
-            <Text className="text-muted-foreground text-xs font-semibold">
+            <Text className="text-muted-foreground text-xs">
               {lineageChildCount} {lineageChildCount === 1 ? 'child' : 'children'}
             </Text>
           </Pressable>
@@ -195,9 +185,9 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       </View>
 
       {item.liveTerminalCount > 0 && (
-        <Text className="text-muted-foreground min-w-4 pt-1 text-right text-xs">
-          {item.liveTerminalCount}
-        </Text>
+        <View className="h-6 min-w-4 items-end justify-center">
+          <Text className="text-muted-foreground text-sm">{item.liveTerminalCount}</Text>
+        </View>
       )}
     </Pressable>
   )

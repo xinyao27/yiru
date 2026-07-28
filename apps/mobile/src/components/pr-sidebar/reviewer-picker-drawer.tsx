@@ -7,6 +7,7 @@ import { Check } from '@/components/uniwind-icons'
 import { fetchAssignableUsers } from '../../session/github-pr-rpc'
 import type { RpcClient } from '../../transport/rpc-client'
 import { BottomDrawer } from '../bottom-drawer'
+import { MobileGlassSurface } from '../glass/surface'
 import { mobilePrSidebarStyles as styles } from './styles'
 
 type Props = {
@@ -93,15 +94,17 @@ export function ReviewerPickerDrawer({
   return (
     <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
       <Text className="text-foreground mb-2 text-sm font-bold">Reviewers</Text>
-      <TextInput
-        className="border-hairline border-border bg-card text-foreground mb-2 min-h-10 rounded-xl px-3 text-sm"
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Search people"
-        placeholderTextColorClassName="accent-muted-foreground"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
+      <MobileGlassSurface className="mb-2 min-h-10 overflow-hidden rounded-xl" isInteractive>
+        <TextInput
+          className="text-foreground min-h-10 px-3 text-sm"
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search people"
+          placeholderTextColorClassName="accent-muted-foreground"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </MobileGlassSurface>
       {load.status === 'loading' ? (
         <View className={styles.pickerStateArea}>
           <ActivityIndicator colorClassName="accent-muted-foreground" />

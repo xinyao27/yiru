@@ -4,6 +4,7 @@ import { ScrollView, Text, View } from 'react-native'
 import { cn } from '@/style/class-names'
 
 import type { ConnectionLogEntry } from '../transport/types'
+import { MobileGlassSection } from './glass/section'
 
 type Props = {
   entries: ConnectionLogEntry[]
@@ -48,7 +49,7 @@ export function ConnectionLog({ entries, title }: Props) {
   const baseTs = entries[0]!.ts
 
   return (
-    <View className="border-hairline border-border bg-card max-h-60 w-full rounded-2xl px-3 py-2">
+    <MobileGlassSection className="max-h-60 w-full px-3 py-2">
       {title && (
         <Text className="text-muted-foreground mb-1 font-mono text-xs tracking-wider uppercase">
           {title}
@@ -90,6 +91,6 @@ export function ConnectionLog({ entries, title }: Props) {
           </View>
         ))}
       </ScrollView>
-    </View>
+    </MobileGlassSection>
   )
 }

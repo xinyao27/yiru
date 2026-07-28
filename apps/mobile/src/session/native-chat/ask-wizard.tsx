@@ -1,6 +1,9 @@
-import { useMemo, useRef, useState } from 'react'
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useRef, useState } from 'react'
+import { ScrollView, Text, TextInput, View } from 'react-native'
 
+import { MobileGlassPressable } from '../../components/glass/pressable'
+import { MobileGlassSurface } from '../../components/glass/surface'
+import { MobileGlassTextButton } from '../../components/glass/text-button'
 import { Check } from '../../components/uniwind-icons'
 import { cn } from '../../style/class-names'
 import type { AskAnswerSelection, AskPrompt } from './ask'
@@ -62,16 +65,8 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
 
   const total = prompt.questions.length
   const isLast = index === total - 1
-  const currentAnswered = useMemo(
-    () => isAnswered(index),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selections, otherText, index]
-  )
-  const allAnswered = useMemo(
-    () => prompt.questions.every((_, i) => isAnswered(i)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [otherText, prompt.questions, selections]
-  )
+  const currentAnswered = isAnswered(index)
+  const allAnswered = prompt.questions.every((_, questionIndex) => isAnswered(questionIndex))
   const canAdvance = !submitting && (isLast ? allAnswered : currentAnswered)
 
   const submit = async (): Promise<void> => {
@@ -100,7 +95,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
   const otherSelected = (selections[index] ?? []).includes(OTHER)
 
   return (
-    <View className="border-t-hairline border-t-border bg-card max-h-96 overflow-hidden rounded-t-3xl">
+    <MobileGlassSurface className="max-h-96 overflow-hidden rounded-t-3xl">
       {total > 1 ? (
         <ScrollView
           horizontal
@@ -109,26 +104,26 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           contentContainerClassName="px-2 gap-1 items-center"
           keyboardShouldPersistTaps="always"
         >
-          {prompt.questions.map((qq, i) => (
-            <Pressable
-              key={i}
-              className={cn(
-                'flex-row items-center gap-1 min-h-9 px-2 py-1 border-b-2 border-b-transparent',
-                i === index && 'border-b-green-500'
-              )}
-              onPress={() => setIndex(i)}
+          {prompt.questions.map((qq, questionIndex) => (
+            <MobileGlassPressable
+              key={`${qq.header}:${qq.question}`}
+              className={cn('rounded-full', questionIndex === index && 'border-green-500')}
+              contentClassName="min-h-8 flex-row items-center gap-1 rounded-full px-3 py-1"
+              onPress={() => setIndex(questionIndex)}
             >
               <Text
                 className={cn(
-                  'text-muted-foreground text-xs font-semibold',
-                  i === index && 'text-foreground'
+                  'text-muted-foreground text-xs',
+                  questionIndex === index && 'text-foreground'
                 )}
                 numberOfLines={1}
               >
-                {qq.header || `Step ${i + 1}`}
+                {qq.header || `Step ${questionIndex + 1}`}
               </Text>
-              {isAnswered(i) ? <Check size={11} colorClassName="accent-green-500" /> : null}
-            </Pressable>
+              {isAnswered(questionIndex) ? (
+                <Check size={11} colorClassName="accent-green-500" />
+              ) : null}
+            </MobileGlassPressable>
           ))}
         </ScrollView>
       ) : null}
@@ -152,21 +147,24 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           onPress={() => toggle(index, OTHER, q.multiSelect)}
         />
         {otherSelected ? (
-          <TextInput
-            className="border-border bg-secondary text-foreground mb-1 min-h-11 rounded-xl border p-2 text-sm"
-            value={otherText[index]}
-            onChangeText={(v) => setOther(index, v)}
-            placeholder="Type your answer"
-            placeholderTextColorClassName="accent-muted-foreground"
-            multiline
-            autoFocus
-          />
+          <MobileGlassSurface className="mb-1 min-h-11 overflow-hidden rounded-xl" isInteractive>
+            <TextInput
+              className="text-foreground min-h-11 p-2 text-sm"
+              value={otherText[index]}
+              onChangeText={(value) => setOther(index, value)}
+              placeholder="Type your answer"
+              placeholderTextColorClassName="accent-muted-foreground"
+              multiline
+              autoFocus
+            />
+          </MobileGlassSurface>
         ) : null}
       </ScrollView>
 
       <View className="border-t-hairline border-t-border flex-row items-center justify-between gap-2 p-3">
-        <Pressable
-          className="rounded-xl px-2 py-2"
+        <MobileGlassTextButton
+          disabled={submitting}
+          label="Cancel"
           onPress={async () => {
             if (!submittingRef.current && onCancel) {
               submittingRef.current = true
@@ -179,32 +177,22 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
               }
             }
           }}
-          disabled={submitting}
-          hitSlop={8}
-        >
-          <Text className="text-muted-foreground text-sm font-semibold">Cancel</Text>
-        </Pressable>
+          size="small"
+        />
         {total > 1 ? (
           <Text className="text-muted-foreground text-xs">
             {index + 1}/{total}
           </Text>
         ) : null}
-        <Pressable
-          className={cn('rounded-xl bg-primary px-4 py-2', !canAdvance && 'bg-secondary')}
-          onPress={advance}
+        <MobileGlassTextButton
           disabled={!canAdvance}
-        >
-          <Text
-            className={cn(
-              'text-primary-foreground text-sm font-bold',
-              !canAdvance && 'text-muted-foreground'
-            )}
-          >
-            {isLast ? 'Send answer' : 'Next'}
-          </Text>
-        </Pressable>
+          isProminent
+          label={isLast ? 'Send answer' : 'Next'}
+          onPress={() => void advance()}
+          size="small"
+        />
       </View>
-    </View>
+    </MobileGlassSurface>
   )
 }
 
@@ -222,31 +210,28 @@ function OptionRow({
   onPress: () => void
 }): React.JSX.Element {
   return (
-    <Pressable
-      className={cn(
-        'border-border mb-1 flex-row gap-2 rounded-xl border bg-secondary p-2',
-        selected && 'border-green-500'
-      )}
+    <MobileGlassPressable
+      className={cn('mb-1 rounded-xl', selected && 'border-green-500')}
+      contentClassName="flex-row gap-2 p-2"
       onPress={onPress}
     >
-      {/* Multi-select reads as a checkbox (square); single-select as a radio (circle). */}
       <View
         className={cn(
           'border-border mt-px h-5 w-5 items-center justify-center border-2',
           multi ? 'rounded-md' : 'rounded-full',
-          selected && 'bg-green-500 border-green-500'
+          selected && 'border-green-500 bg-green-500'
         )}
       >
         {selected ? <Check size={12} colorClassName="accent-primary-foreground" /> : null}
       </View>
       <View className="flex-1 gap-0.5">
-        <Text className="text-foreground text-sm font-semibold">{label}</Text>
+        <Text className="text-foreground text-sm">{label}</Text>
         {description ? (
           <Text className="text-muted-foreground text-xs" numberOfLines={3}>
             {description}
           </Text>
         ) : null}
       </View>
-    </Pressable>
+    </MobileGlassPressable>
   )
 }

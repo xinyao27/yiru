@@ -3,8 +3,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, SectionList, Text, View } from 'react-native'
 
-import { Play } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import type { MobileAgentHistorySection } from './sections'
@@ -78,7 +77,7 @@ export function MobileAgentSessionHistoryList({
       }
       renderSectionHeader={({ section }) => (
         <View className="flex-row items-center gap-2 py-2">
-          <Text className="text-muted-foreground text-xs font-semibold uppercase" numberOfLines={1}>
+          <Text className="text-muted-foreground text-xs uppercase" numberOfLines={1}>
             {section.label}
           </Text>
           <Text className="text-muted-foreground text-xs">{section.data.length}</Text>
@@ -112,10 +111,10 @@ function AgentHistoryCardRow({
   )
 
   return (
-    <Pressable className={cn('mb-2 rounded-2xl bg-card p-3', 'active:bg-accent')} onPress={onPress}>
+    <Pressable className="active:bg-accent border-border border-b-hairline py-3" onPress={onPress}>
       <View className="flex-row items-center gap-2">
         <MobileAgentIcon agentId={card.agent} size={16} />
-        <Text className="text-foreground flex-1 text-sm font-semibold" numberOfLines={1}>
+        <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
           {card.title}
         </Text>
         {card.timeAgo ? (
@@ -137,42 +136,35 @@ function AgentHistoryCardRow({
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
           <View className="bg-secondary rounded-full px-2 py-0.5">
-            <Text className="text-primary text-xs font-semibold">current worktree</Text>
+            <Text className="text-primary text-xs">current worktree</Text>
           </View>
         ) : null}
         {session && onResume ? (
-          <Pressable
-            className={cn(
-              'min-h-7 min-w-7 items-center justify-center ml-auto px-1 py-1',
-              resumeActionState?.disabled && 'opacity-50',
-              !resumeActionState?.disabled && 'active:bg-accent'
-            )}
-            onPress={(event) => {
-              event.stopPropagation()
-              if (!resumeActionState?.disabled) {
-                void onResume(session)
-              }
-            }}
-            disabled={resumeActionState?.disabled}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel="Resume agent session"
-          >
+          <View className="ml-auto h-8 w-8 items-center justify-center">
             {resumeActionState?.loading ? (
               <ActivityIndicator size="small" colorClassName="accent-foreground" />
             ) : (
-              <Play size={17} colorClassName="accent-foreground" />
+              <MobileGlassIconButton
+                accessibilityLabel="Resume agent session"
+                disabled={resumeActionState?.disabled}
+                icon="play"
+                onPress={(event) => {
+                  event.stopPropagation()
+                  if (!resumeActionState?.disabled) {
+                    void onResume(session)
+                  }
+                }}
+                size="small"
+              />
             )}
-          </Pressable>
+          </View>
         ) : null}
       </View>
       {expanded && previewTurns.length > 0 ? (
         <View className="border-t-border mt-2 gap-2 border-t pt-2">
           {previewTurns.map((turn, index) => (
             <View key={`${card.id}-turn-${index}`} className="gap-0.5">
-              <Text className="text-muted-foreground text-xs font-semibold uppercase">
-                {turn.role}
-              </Text>
+              <Text className="text-muted-foreground text-xs uppercase">{turn.role}</Text>
               <Text className="text-muted-foreground text-xs">{turn.text}</Text>
             </View>
           ))}

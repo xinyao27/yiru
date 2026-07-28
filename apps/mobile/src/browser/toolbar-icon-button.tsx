@@ -1,36 +1,30 @@
 import type { ReactNode } from 'react'
-import { Pressable, type StyleProp, type ViewStyle } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { MobileGlassPressable } from '../components/glass/pressable'
 
 type Props = {
   children: ReactNode
   disabled?: boolean
   label: string
   onPress: () => void
-  style?: StyleProp<ViewStyle>
 }
 
 export function MobileBrowserToolbarIconButton({
   children,
   disabled,
   label,
-  onPress,
-  style
+  onPress
 }: Props): React.JSX.Element {
   return (
-    <Pressable
-      className={cn(
-        'h-7 w-7 items-center justify-center rounded-full',
-        !disabled && 'active:bg-accent',
-        disabled && 'opacity-40'
-      )}
-      style={style}
-      disabled={disabled}
-      onPress={onPress}
+    <MobileGlassPressable
       accessibilityLabel={label}
+      className="h-8 w-8 rounded-full"
+      contentClassName="h-full w-full items-center justify-center rounded-full"
+      disabled={disabled}
+      hitSlop={6}
+      onPress={onPress}
     >
       {children}
-    </Pressable>
+    </MobileGlassPressable>
   )
 }

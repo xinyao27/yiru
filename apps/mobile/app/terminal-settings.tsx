@@ -12,8 +12,8 @@ import {
   TextT as Type
 } from '@/components/uniwind-icons'
 import { GestureHandlerRootView } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
 
+import { MobileGlassSection } from '../src/components/glass/section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import { TerminalShortcutSettings } from '../src/components/terminal-shortcut-settings'
 import {
@@ -109,14 +109,14 @@ function HostFitRow({
 }): React.JSX.Element {
   return (
     <Pressable
-      className={cn(styles.row, styles.rowPressedActive)}
+      className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
       onPress={onPress}
       disabled={!client}
     >
       <Smartphone size={16} colorClassName="accent-muted-foreground" />
-      <View className={styles.rowContent}>
-        <Text className={styles.rowLabel}>{hostName}</Text>
-        <Text className={styles.rowSublabel}>{autoRestoreSummary(ms)}</Text>
+      <View className="flex-1">
+        <Text className="text-foreground text-sm">{hostName}</Text>
+        <Text className="text-muted-foreground mt-0.5 text-xs">{autoRestoreSummary(ms)}</Text>
       </View>
       <ChevronRight size={16} colorClassName="accent-muted-foreground" />
     </Pressable>
@@ -267,8 +267,10 @@ export default function TerminalSettingsScreen() {
           scrollContentHeight.value = height
         }}
       >
-        <Text className={styles.groupHeading}>WHEN YOU LEAVE THE APP</Text>
-        <Text className={styles.groupDescription}>
+        <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
+          WHEN YOU LEAVE THE APP
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
           While you&apos;re using a terminal on your phone, Yiru shrinks it to fit your screen. When
           you close the app or switch away, this controls whether it stays at phone size (so
           interactive CLI tools don&apos;t reflow) or resizes back to your desktop. You can always
@@ -276,13 +278,13 @@ export default function TerminalSettingsScreen() {
         </Text>
 
         {hosts.length === 0 ? (
-          <View className={cn(styles.section, styles.sectionTopGap)}>
+          <MobileGlassSection className="mt-2">
             <Text className="text-muted-foreground p-3 text-sm">
               No paired desktops yet. Pair one to control terminal behavior.
             </Text>
-          </View>
+          </MobileGlassSection>
         ) : (
-          <View className={cn(styles.section, styles.sectionTopGap)}>
+          <MobileGlassSection className="mt-2">
             {hosts.map((host, idx) => {
               const client = hostClientsById.get(host.id) ?? null
               return (
@@ -297,42 +299,50 @@ export default function TerminalSettingsScreen() {
                 </View>
               )
             })}
-          </View>
+          </MobileGlassSection>
         )}
 
-        <Text className={cn(styles.groupHeading, styles.inputGroupGap)}>TEXT SIZE</Text>
-        <Text className={styles.groupDescription}>
+        <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
+          TEXT SIZE
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
           Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes
           show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal
           itself, which updates this setting. Per-device display only; doesn&apos;t change the
           desktop terminal.
         </Text>
-        <View className={cn(styles.section, styles.sectionTopGap)}>
+        <MobileGlassSection className="mt-2">
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
             onPress={() => setTextSizePickerOpen(true)}
           >
             <Type size={16} colorClassName="accent-muted-foreground" />
-            <View className={styles.rowContent}>
-              <Text className={styles.rowLabel}>Text size</Text>
-              <Text className={styles.rowSublabel}>{textSizeSummary(textScale)}</Text>
+            <View className="flex-1">
+              <Text className="text-foreground text-sm">Text size</Text>
+              <Text className="text-muted-foreground mt-0.5 text-xs">
+                {textSizeSummary(textScale)}
+              </Text>
             </View>
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-        </View>
+        </MobileGlassSection>
 
-        <Text className={cn(styles.groupHeading, styles.inputGroupGap)}>KEYBOARD INPUT</Text>
-        <Text className={styles.groupDescription}>
+        <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
+          KEYBOARD INPUT
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
           Enable phone-style autocomplete, autocorrect, and spelling suggestions in the terminal
           command bar. Off by default so the keyboard never rewrites commands, flags, or paths.
           Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes,
           so suggestions don&apos;t apply there.
         </Text>
-        <View className={cn(styles.section, styles.sectionTopGap)}>
-          <View className={styles.row}>
-            <View className={styles.rowContent}>
-              <Text className={styles.rowLabel}>Autocomplete &amp; autocorrect</Text>
-              <Text className={styles.rowSublabel}>{autocompleteEnabled ? 'On' : 'Off'}</Text>
+        <MobileGlassSection className="mt-2">
+          <View className="flex-row items-center gap-2.5 px-3.5 py-3">
+            <View className="flex-1">
+              <Text className="text-foreground text-sm">Autocomplete &amp; autocorrect</Text>
+              <Text className="text-muted-foreground mt-0.5 text-xs">
+                {autocompleteEnabled ? 'On' : 'Off'}
+              </Text>
             </View>
             <Switch
               value={autocompleteEnabled}
@@ -343,7 +353,7 @@ export default function TerminalSettingsScreen() {
               ios_backgroundColorClassName="accent-accent"
             />
           </View>
-        </View>
+        </MobileGlassSection>
 
         <TerminalShortcutSettings
           scrollRef={scrollRef}
@@ -377,16 +387,3 @@ export default function TerminalSettingsScreen() {
     </GestureHandlerRootView>
   )
 }
-
-const styles = {
-  groupHeading: cn('text-xs font-semibold text-muted-foreground tracking-wide mb-1 px-1'),
-  groupDescription: cn('text-xs text-muted-foreground leading-5 px-1'),
-  section: cn('overflow-hidden rounded-2xl bg-card'),
-  sectionTopGap: cn('mt-2'),
-  inputGroupGap: cn('mt-6'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-accent'),
-  rowContent: cn('flex-1'),
-  rowLabel: cn('text-sm font-medium text-foreground'),
-  rowSublabel: cn('text-xs text-muted-foreground mt-0.5')
-} as const

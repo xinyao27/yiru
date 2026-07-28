@@ -1,16 +1,32 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
-
-import { MobileGlassSurface } from '../../components/glass/surface'
 import {
-  ArrowUp,
-  ArrowsInLineVertical as ChevronsDownUp,
-  ArrowsOutLineVertical as ChevronsUpDown,
-  Plus,
-  Square
-} from '../../components/uniwind-icons'
-import { MobileAgentWorkingIndicator } from '../agent-working-indicator'
+  Canvas,
+  Group,
+  LinearGradient,
+  matchFont,
+  Picture,
+  Text as SkiaText,
+  vec
+} from '@shopify/react-native-skia'
+import { useThinkingOrbPicture } from 'expo-thinking-orbs'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Animated, Pressable, ScrollView, Text, View } from 'react-native'
+import {
+  cancelAnimation,
+  Easing,
+  useDerivedValue,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming
+} from 'react-native-reanimated'
+import { useCSSVariable } from 'uniwind'
+
+import { MobileGlassSection } from '../../components/glass/section'
+import { useMobileLoaderStyle } from '../../loading/loader-style-context'
+import { resolveCssNumber, resolveCssString } from '../../style/resolve-css-variable'
+import type { MobileImageSource } from '../image-source-picker'
 import { applyAutocomplete, detectAutocompleteTrigger, rankSuggestions } from './autocomplete'
+import { MobileNativeChatInput } from './composer-input'
 
 // Common agent slash commands offered as autocomplete; sending them is just text
 // to the agent's terminal, so the set is intentionally provider-agnostic.
@@ -26,12 +42,16 @@ const SLASH_COMMANDS = [
 ]
 
 const NO_FILE_PATHS: string[] = []
+const WORKING_STATUS_DELAY_MS = 200
+const WORKING_STATUS_FADE_DURATION_MS = 150
+const WORKING_SHIMMER_DURATION_MS = 1600
+const WORKING_STATUS_LABEL = 'Working'
 
 type MobileNativeChatComposerProps = {
   value: string
   onChangeText: (text: string) => void
   onSend: (text: string) => Promise<boolean>
-  onAttachImage?: () => void
+  onAttachImage?: (source: MobileImageSource) => void
   isAttaching?: boolean
   disabled?: boolean
   placeholder?: string
@@ -39,9 +59,107 @@ type MobileNativeChatComposerProps = {
   onNeedFiles?: (query: string) => void
   agentWorking?: boolean
   onStop?: () => void
-  toolsExpanded: boolean
-  onToggleToolsExpanded: () => void
   sendFailureMessage?: string | null
+}
+
+function MobileAgentWorkingGraphic(): React.JSX.Element {
+  const { loaderStyle } = useMobileLoaderStyle()
+  const reduceMotion = useReducedMotion()
+  const values = useCSSVariable([
+    '--color-foreground',
+    '--color-muted-foreground',
+    '--spacing-2',
+    '--spacing-5',
+    '--text-sm',
+    '--text-sm--line-height'
+  ])
+  const foreground = resolveCssString(values[0])
+  const mutedForeground = resolveCssString(values[1])
+  const gap = resolveCssNumber(values[2])
+  const orbSize = resolveCssNumber(values[3])
+  const fontSize = resolveCssNumber(values[4])
+  const lineHeight = resolveCssNumber(values[5])
+  const font = useMemo(() => matchFont({ fontSize, fontWeight: '500' }), [fontSize])
+  const labelWidth = Math.ceil(font.measureText(WORKING_STATUS_LABEL).width)
+  const canvasHeight = Math.max(lineHeight, orbSize)
+  const fontMetrics = font.getMetrics()
+  const baseline =
+    (canvasHeight - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent
+  const labelOffset = orbSize + gap
+  const shimmerProgress = useSharedValue(reduceMotion ? 0.5 : 0)
+  const orbPicture = useThinkingOrbPicture({
+    state: loaderStyle,
+    size: orbSize,
+    color: foreground,
+    paused: reduceMotion
+  })
+  const shimmerStart = useDerivedValue(
+    () => vec((shimmerProgress.value * 2 - 1) * labelWidth, 0),
+    [labelWidth]
+  )
+  const shimmerEnd = useDerivedValue(
+    () => vec(shimmerProgress.value * 2 * labelWidth, 0),
+    [labelWidth]
+  )
+
+  useEffect(() => {
+    shimmerProgress.value = reduceMotion ? 0.5 : 0
+    if (!reduceMotion) {
+      shimmerProgress.value = withRepeat(
+        withTiming(1, { duration: WORKING_SHIMMER_DURATION_MS, easing: Easing.linear }),
+        -1,
+        false
+      )
+    }
+    return () => cancelAnimation(shimmerProgress)
+  }, [reduceMotion, shimmerProgress])
+
+  return (
+    <View accessibilityRole="text" accessibilityLabel={WORKING_STATUS_LABEL}>
+      <Canvas style={{ width: labelOffset + labelWidth, height: canvasHeight }}>
+        <Group transform={[{ translateY: (canvasHeight - orbSize) / 2 }]}>
+          <Picture picture={orbPicture} />
+        </Group>
+        <Group transform={[{ translateX: labelOffset }]}>
+          <SkiaText x={0} y={baseline} text={WORKING_STATUS_LABEL} font={font}>
+            <LinearGradient
+              start={shimmerStart}
+              end={shimmerEnd}
+              colors={
+                reduceMotion
+                  ? [foreground, foreground]
+                  : [mutedForeground, mutedForeground, foreground, mutedForeground, mutedForeground]
+              }
+              positions={reduceMotion ? [0, 1] : [0, 0.35, 0.5, 0.65, 1]}
+            />
+          </SkiaText>
+        </Group>
+      </Canvas>
+    </View>
+  )
+}
+
+function MobileAgentWorkingStatus(): React.JSX.Element {
+  const opacity = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    const animation = Animated.timing(opacity, {
+      delay: WORKING_STATUS_DELAY_MS,
+      duration: WORKING_STATUS_FADE_DURATION_MS,
+      toValue: 1,
+      useNativeDriver: true
+    })
+    animation.start()
+    return () => animation.stop()
+  }, [opacity])
+
+  return (
+    <View className="mb-2 min-h-10 px-3">
+      <Animated.View className="min-h-10 flex-row items-center" style={{ opacity }}>
+        <MobileAgentWorkingGraphic />
+      </Animated.View>
+    </View>
+  )
 }
 
 export function MobileNativeChatComposer({
@@ -56,8 +174,6 @@ export function MobileNativeChatComposer({
   onNeedFiles,
   agentWorking = false,
   onStop,
-  toolsExpanded,
-  onToggleToolsExpanded,
   sendFailureMessage
 }: MobileNativeChatComposerProps): React.JSX.Element {
   const [cursor, setCursor] = useState(0)
@@ -122,9 +238,9 @@ export function MobileNativeChatComposer({
   }
 
   return (
-    <View className="px-2 pb-2">
+    <View className="px-3 pb-2">
       {suggestions.length > 0 ? (
-        <View className="border-border bg-popover mb-2 max-h-44 overflow-hidden rounded-2xl border">
+        <MobileGlassSection className="mb-2 max-h-44">
           <ScrollView keyboardShouldPersistTaps="always" className="max-h-44">
             {suggestions.map((s) => (
               <Pressable
@@ -138,105 +254,32 @@ export function MobileNativeChatComposer({
               </Pressable>
             ))}
           </ScrollView>
-        </View>
+        </MobileGlassSection>
       ) : null}
-      <MobileGlassSurface className="mb-1 min-h-8 flex-row items-center justify-between overflow-hidden rounded-2xl px-1">
-        <View className="min-w-0 flex-1 flex-row items-center gap-1">
-          {agentWorking ? <MobileAgentWorkingIndicator /> : null}
-          <Pressable
-            className="active:bg-accent h-8 flex-row items-center gap-1 rounded-full px-2"
-            onPress={onToggleToolsExpanded}
-            hitSlop={8}
-          >
-            {toolsExpanded ? (
-              <ChevronsDownUp size={14} colorClassName="accent-muted-foreground" />
-            ) : (
-              <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
-            )}
-            <Text className="text-muted-foreground text-xs font-semibold">
-              {toolsExpanded ? 'Collapse' : 'Tools'}
-            </Text>
-          </Pressable>
-        </View>
-        {agentWorking ? (
-          <Pressable
-            className="active:bg-accent h-8 flex-row items-center gap-1 rounded-full px-2"
-            onPress={onStop}
-            hitSlop={8}
-            accessibilityLabel="Stop the agent"
-          >
-            <Square size={13} colorClassName="accent-destructive" />
-            <Text className="text-destructive text-xs font-bold">Stop</Text>
-          </Pressable>
-        ) : null}
-      </MobileGlassSurface>
+      {agentWorking ? <MobileAgentWorkingStatus /> : null}
       {sendFailureMessage ? (
         <Text className="text-destructive mb-1 px-3 text-center text-xs font-semibold">
           {sendFailureMessage}
         </Text>
       ) : null}
-      <View className="flex-row items-end gap-2">
-        {onAttachImage ? (
-          <MobileGlassSurface className="h-11 w-11 overflow-hidden rounded-full">
-            <Pressable
-              accessibilityLabel="Attach image"
-              className="active:bg-accent h-full w-full items-center justify-center rounded-full"
-              onPress={onAttachImage}
-              disabled={isAttaching || disabled}
-            >
-              {isAttaching ? (
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              ) : (
-                <Plus size={22} colorClassName="accent-foreground" />
-              )}
-            </Pressable>
-          </MobileGlassSurface>
-        ) : null}
-        <MobileGlassSurface className="min-h-11 flex-1 overflow-hidden rounded-3xl">
-          <View className="min-h-11 flex-row items-end">
-            <TextInput
-              className="text-foreground max-h-32 min-h-11 flex-1 px-3 py-2.5 text-base"
-              value={value}
-              onChangeText={handleChange}
-              // Controlled only transiently right after an autocomplete insert.
-              selection={pendingSelection ?? undefined}
-              onSelectionChange={(e) => {
-                setCursor(e.nativeEvent.selection.end)
-                setPendingSelection(null)
-              }}
-              placeholder={placeholder}
-              placeholderTextColorClassName="accent-muted-foreground"
-              selectionColorClassName="accent-primary"
-              multiline
-              editable={!disabled}
-              scrollEnabled
-              submitBehavior="newline"
-              textAlignVertical="top"
-            />
-            <View className="m-1 h-9 w-9 shrink-0">
-              {hasMessage ? (
-                <Pressable
-                  accessibilityLabel="Send message"
-                  className={
-                    canSend
-                      ? 'bg-primary active:bg-accent h-full w-full items-center justify-center rounded-full'
-                      : 'bg-secondary h-full w-full items-center justify-center rounded-full'
-                  }
-                  onPress={handleSend}
-                  disabled={!canSend}
-                >
-                  <ArrowUp
-                    size={20}
-                    colorClassName={
-                      canSend ? 'accent-primary-foreground' : 'accent-muted-foreground'
-                    }
-                  />
-                </Pressable>
-              ) : null}
-            </View>
-          </View>
-        </MobileGlassSurface>
-      </View>
+      <MobileNativeChatInput
+        value={value}
+        onChangeText={handleChange}
+        selection={pendingSelection}
+        onSelectionChange={(nextCursor) => {
+          setCursor(nextCursor)
+          setPendingSelection(null)
+        }}
+        onAttachImage={onAttachImage}
+        isAttaching={isAttaching}
+        disabled={disabled}
+        placeholder={placeholder}
+        hasMessage={hasMessage}
+        canSend={canSend}
+        onSend={handleSend}
+        agentWorking={agentWorking}
+        onStop={onStop}
+      />
     </View>
   )
 }

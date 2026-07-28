@@ -1,7 +1,9 @@
 import { useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect } from 'react'
-import { AppState, Linking, View, Text, Pressable, Switch } from 'react-native'
+import { AppState, Linking, View, Text, Switch } from 'react-native'
 
+import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import {
   ensureNotificationPermissions,
   getNotificationPermissionState,
@@ -70,7 +72,7 @@ export default function NotificationsScreen() {
 
   return (
     <View className="bg-background flex-1 p-4">
-      <View className="bg-card overflow-hidden rounded-2xl">
+      <MobileGlassSection>
         <View className="flex-row items-center gap-2.5 px-3.5 py-3">
           <Text className="text-foreground flex-1 text-sm font-medium">Agent notifications</Text>
           <Switch
@@ -85,14 +87,14 @@ export default function NotificationsScreen() {
         </View>
         <Text className="text-muted-foreground px-3.5 pb-3 text-xs leading-5">{hint}</Text>
         {notificationsBlocked && (
-          <Pressable
-            className="active:bg-accent bg-secondary mx-3.5 mb-3 self-start rounded-xl px-2 py-1"
+          <MobileGlassTextButton
+            className="mx-3.5 mb-3 self-start"
+            label="Open Settings"
             onPress={() => void Linking.openSettings()}
-          >
-            <Text className="text-foreground text-xs font-semibold">Open Settings</Text>
-          </Pressable>
+            size="small"
+          />
         )}
-      </View>
+      </MobileGlassSection>
     </View>
   )
 }

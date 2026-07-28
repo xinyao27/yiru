@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 import { CaretRight as ChevronRight, Monitor } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
@@ -8,6 +8,7 @@ import { verdictDisplayLabel } from '../transport/connection-health'
 import { mobileConnectionPathLabel } from '../transport/connection-path-label'
 import type { MobileConnectionPath } from '../transport/stable-logical-rpc-client'
 import type { ConnectionState, HostProfile } from '../transport/types'
+import { MobileGlassPressable } from './glass/pressable'
 import { StatusDot } from './status-dot'
 
 export function MobileHostCard(props: {
@@ -25,13 +26,14 @@ export function MobileHostCard(props: {
     ? `${props.worktreeCounts.total} worktree${props.worktreeCounts.total === 1 ? '' : 's'}${props.worktreeCounts.active > 0 ? ` · ${props.worktreeCounts.active} active` : ''}`
     : null
   return (
-    <Pressable
-      className="border-border active:bg-accent bg-card flex-row items-center rounded-2xl border px-3 py-3"
-      onPress={props.onPress}
-      onLongPress={props.onLongPress}
+    <MobileGlassPressable
+      className="rounded-2xl"
+      contentClassName="flex-row items-center rounded-2xl px-3 py-3"
       delayLongPress={400}
+      onLongPress={props.onLongPress}
+      onPress={props.onPress}
     >
-      <View className="bg-secondary mr-3.5 h-12 w-12 items-center justify-center rounded-xl">
+      <View className="mr-3 h-11 w-11 items-center justify-center">
         <Monitor
           size={20}
           colorClassName={connected ? 'accent-foreground' : 'accent-muted-foreground'}
@@ -68,7 +70,7 @@ export function MobileHostCard(props: {
           </Text>
         ) : null}
       </View>
-      <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-    </Pressable>
+      <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+    </MobileGlassPressable>
   )
 }

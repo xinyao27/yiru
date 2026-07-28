@@ -1,5 +1,5 @@
-import cursorDarkThemeJson from '@/assets/editor-themes/cursor-dark-color-theme.json'
-import cursorLightThemeJson from '@/assets/editor-themes/cursor-light-color-theme.json'
+import cursorDarkThemeJson from './cursor-dark-color-theme.json'
+import cursorLightThemeJson from './cursor-light-color-theme.json'
 
 export const CURSOR_DARK_THEME_NAME = 'cursor-dark'
 export const CURSOR_LIGHT_THEME_NAME = 'cursor-light'
@@ -22,9 +22,9 @@ export type CursorThemeSource = {
 }
 
 // Why: these are the unmodified default themes bundled with Cursor 3.12.17;
-// adapters below preserve one source for Monaco editors and Pierre diffs.
-export const cursorDarkThemeSource = cursorDarkThemeJson as CursorThemeSource
-export const cursorLightThemeSource = cursorLightThemeJson as CursorThemeSource
+// keeping them here gives every client one canonical syntax palette.
+export const cursorDarkThemeSource: CursorThemeSource = cursorDarkThemeJson
+export const cursorLightThemeSource: CursorThemeSource = cursorLightThemeJson
 
 export function resolveCursorThemeName(isDark: boolean): string {
   return isDark ? CURSOR_DARK_THEME_NAME : CURSOR_LIGHT_THEME_NAME

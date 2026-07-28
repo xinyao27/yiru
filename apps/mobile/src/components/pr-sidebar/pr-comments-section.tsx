@@ -1,13 +1,16 @@
 import type { GitHubWorkItemDetails, PRState } from '@yiru/workbench-model/review'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 
+import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { canAddRootComment } from '../../session/pr/comment-actions'
 import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
 import type { MobilePrCommentActions } from '../../session/pr/use-comment-actions'
+import { MobileGlassPressable } from '../glass/pressable'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import {
   PR_COMMENT_AUDIENCE_FILTERS,
@@ -85,6 +88,14 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
     () => getPRCommentAudienceCounts(comments, botAuthorOverrides),
     [botAuthorOverrides, comments]
   )
+  const audienceOptions = useMemo<MobileGlassSegmentOption<PRCommentAudienceFilter>[]>(
+    () =>
+      PR_COMMENT_AUDIENCE_FILTERS.map((option) => ({
+        label: `${option.label} ${counts[option.value]}`,
+        value: option.value
+      })),
+    [counts]
+  )
   const visible = useMemo(
     () => filterPRCommentsByAudience(comments, filter, botAuthorOverrides),
     [botAuthorOverrides, comments, filter]
@@ -142,40 +153,13 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
             ) : (
               <>
                 {isPr ? (
-                  <View className="border-hairline border-border bg-background flex-row gap-0.5 overflow-hidden rounded-xl p-0.5">
-                    {PR_COMMENT_AUDIENCE_FILTERS.map((tab) => {
-                      const active = tab.value === filter
-                      return (
-                        <Pressable
-                          key={tab.value}
-                          className={cn(
-                            'flex-1 min-h-8 flex-row items-center justify-center gap-1',
-                            active && 'bg-secondary'
-                          )}
-                          onPress={() => selectFilter(tab.value)}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: active }}
-                        >
-                          <Text
-                            className={cn(
-                              styles.audienceTabText,
-                              active && styles.audienceTabTextActive
-                            )}
-                          >
-                            {tab.label}
-                          </Text>
-                          <Text
-                            className={cn(
-                              styles.audienceTabText,
-                              active && styles.audienceTabTextActive
-                            )}
-                          >
-                            {counts[tab.value]}
-                          </Text>
-                        </Pressable>
-                      )
-                    })}
-                  </View>
+                  <MobileGlassSegmentedControl
+                    accessibilityLabel="Comment audience"
+                    options={audienceOptions}
+                    size="small"
+                    value={filter}
+                    onChange={selectFilter}
+                  />
                 ) : null}
                 {visible.length === 0 ? (
                   <Text className={styles.empty}>{getPRCommentAudienceEmptyLabel(filter)}</Text>
@@ -189,16 +173,14 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                       />
                     ))}
                     {remaining > 0 ? (
-                      <Pressable
-                        className="border-hairline border-border bg-card min-h-10 items-center justify-center rounded-xl"
+                      <MobileGlassTextButton
+                        isFullWidth
+                        label={`Show ${Math.min(remaining, COMMENT_PAGE)} more${
+                          remaining > COMMENT_PAGE ? ` of ${remaining}` : ''
+                        }`}
                         onPress={() => setLimit((l) => l + COMMENT_PAGE)}
-                        accessibilityRole="button"
-                      >
-                        <Text className="text-muted-foreground text-xs font-semibold">
-                          Show {Math.min(remaining, COMMENT_PAGE)} more
-                          {remaining > COMMENT_PAGE ? ` of ${remaining}` : ''}
-                        </Text>
-                      </Pressable>
+                        size="regular"
+                      />
                     ) : null}
                   </>
                 )}
@@ -252,17 +234,18 @@ function CommentGroupView({
   const Chevron = expanded ? ChevronDown : ChevronRight
   return (
     <View className={styles.group}>
-      <Pressable
-        className="border-hairline border-border bg-card flex-row items-center gap-2 rounded-2xl px-3 py-2"
-        onPress={() => setExpanded((v) => !v)}
+      <MobileGlassPressable
         accessibilityRole="button"
+        className="rounded-2xl"
+        contentClassName="flex-row items-center gap-2 px-3 py-2"
+        onPress={() => setExpanded((value) => !value)}
       >
         <Chevron size={14} colorClassName="accent-muted-foreground" />
         <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
           Resolved {group.kind === 'thread' ? 'thread' : 'comment'} by {root.author}
           {count > 1 ? ` (${count})` : ''}
         </Text>
-      </Pressable>
+      </MobileGlassPressable>
       {expanded ? <View className={shared.sectionBody}>{cards}</View> : null}
     </View>
   )

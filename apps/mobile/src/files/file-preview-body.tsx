@@ -1,5 +1,6 @@
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native'
 
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import { MobileFileMarkdownPreview } from './file-markdown-preview'
 import { MobileFilePreviewEditableSource } from './file-preview-editable-source'
 import type { MobileFilePreviewLineColumn } from './file-preview-line-column'
@@ -35,12 +36,7 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
     return (
       <View className={styles.state}>
         <Text className="text-destructive text-center text-sm">{preview.message}</Text>
-        <Pressable
-          className="border-hairline border-border min-h-9 items-center justify-center rounded-xl px-4"
-          onPress={options.onRetry}
-        >
-          <Text className="text-foreground text-sm font-semibold">Retry</Text>
-        </Pressable>
+        <MobileGlassTextButton label="Retry" onPress={options.onRetry} />
       </View>
     )
   }

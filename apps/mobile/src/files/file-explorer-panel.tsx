@@ -4,14 +4,13 @@ import {
   ActivityIndicator,
   FlatList,
   Platform,
-  Pressable,
   Text,
   View,
   type ListRenderItem
 } from 'react-native'
 
-import { CaretLeft as ChevronLeft, X } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useHostClient, useForceReconnect } from '../transport/client-context'
@@ -289,15 +288,12 @@ export function MobileFileExplorerPanel(props: {
   }
 
   const headerBar = (
-    <View className="min-h-15 flex-row items-center gap-3 px-3">
-      <Pressable
-        className={cn(styles.backButton, styles.backButtonPressedActive)}
-        onPress={() => onRequestClose?.()}
-        hitSlop={8}
+    <View className="min-h-15 flex-row items-center gap-2 px-3">
+      <MobileGlassIconButton
         accessibilityLabel="Close files"
-      >
-        <X size={20} colorClassName="accent-muted-foreground" />
-      </Pressable>
+        icon="close"
+        onPress={() => onRequestClose?.()}
+      />
       <View className="min-w-0 flex-1">
         <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Files
@@ -320,14 +316,12 @@ export function MobileFileExplorerPanel(props: {
       {/* Why: while disconnected, re-sending the request is useless — revive
           the parked transport instead (issue #5049); loadDirectory re-runs via
           its effect once the new client connects. */}
-      <Pressable
-        className="border-hairline border-border min-h-9 items-center justify-center rounded-xl px-4"
+      <MobileGlassTextButton
+        label="Retry"
         onPress={() =>
           connState !== 'connected' && hostId ? void forceReconnect(hostId) : void loadDirectory('')
         }
-      >
-        <Text className="text-foreground text-sm font-semibold">Retry</Text>
-      </Pressable>
+      />
     </View>
   ) : rows.length === 0 ? (
     <View className={styles.state}>
@@ -351,13 +345,11 @@ export function MobileFileExplorerPanel(props: {
           headerLeft:
             !embedded && Platform.OS !== 'ios'
               ? () => (
-                  <Pressable
+                  <MobileGlassIconButton
                     accessibilityLabel="Back"
-                    className="h-9 w-9 items-center justify-center rounded-full"
+                    icon="back"
                     onPress={() => router.back()}
-                  >
-                    <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 )
               : undefined
         }}

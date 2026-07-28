@@ -1,7 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
-import { Pressable, Text, TextInput, View } from 'react-native'
+import { Text, TextInput, View } from 'react-native'
 
-import { ArrowUp, Check, Question as CircleHelp } from '../../components/uniwind-icons'
+import { MobileGlassIconButton } from '../../components/glass/icon-button'
+import { MobileGlassPressable } from '../../components/glass/pressable'
+import { MobileGlassSection } from '../../components/glass/section'
+import { MobileGlassSurface } from '../../components/glass/surface'
+import { MobileGlassTextButton } from '../../components/glass/text-button'
+import { Check, Question as CircleHelp } from '../../components/uniwind-icons'
 import { cn } from '../../style/class-names'
 import { formatQuestionAnswer, type MobileChatQuestion } from './question'
 
@@ -77,7 +82,7 @@ export function MobileNativeChatQuestion({
   )
 
   return (
-    <View className="bg-card border-hairline border-border mx-4 my-2 gap-2 rounded-2xl p-3">
+    <MobileGlassSection className="mx-4 my-2 gap-2 p-3">
       <View className="flex-row items-center gap-2">
         <CircleHelp size={15} colorClassName="accent-primary" />
         <Text className="text-foreground flex-1 text-sm leading-5 font-semibold">
@@ -90,22 +95,19 @@ export function MobileNativeChatQuestion({
           {optionRows.map(({ label, key }) => {
             const isSelected = selected.includes(label)
             return (
-              <Pressable
+              <MobileGlassPressable
                 key={key}
                 accessibilityRole={question.multiSelect ? 'checkbox' : 'button'}
                 accessibilityState={question.multiSelect ? { checked: isSelected } : undefined}
-                className={cn(
-                  'flex-row items-center gap-2 min-h-11 rounded-xl px-3 py-2 bg-secondary border-hairline border-border',
-                  isSelected && 'border-primary',
-                  styles.pressedActive
-                )}
+                className={cn('rounded-xl', isSelected && 'border-primary')}
+                contentClassName="min-h-11 flex-row items-center gap-2 px-3 py-2"
                 onPress={() => (question.multiSelect ? toggle(label) : answerSingle(label))}
               >
                 {question.multiSelect ? (
                   <View
                     className={cn(
-                      'w-5 h-5 rounded-md border-2 border-border items-center justify-center',
-                      isSelected && 'bg-primary border-primary'
+                      'border-border h-5 w-5 items-center justify-center rounded-md border-2',
+                      isSelected && 'border-primary bg-primary'
                     )}
                   >
                     {isSelected ? (
@@ -114,68 +116,49 @@ export function MobileNativeChatQuestion({
                   </View>
                 ) : null}
                 <Text className="text-foreground flex-1 text-sm">{label}</Text>
-              </Pressable>
+              </MobileGlassPressable>
             )
           })}
         </View>
       ) : null}
 
       {question.multiSelect && hasOptions ? (
-        <Pressable
+        <MobileGlassTextButton
           accessibilityLabel="Submit selected options"
-          className={cn(
-            'min-h-11 items-center justify-center rounded-xl bg-primary',
-            !canSubmitMulti && 'bg-secondary',
-            canSubmitMulti && styles.pressedActive
-          )}
-          onPress={submitMulti}
           disabled={!canSubmitMulti}
-        >
-          <Text
-            className={cn(
-              'text-primary-foreground text-sm font-semibold',
-              !canSubmitMulti && 'text-muted-foreground'
-            )}
-          >
-            Submit{selected.length > 0 ? ` (${selected.length})` : ''}
-          </Text>
-        </Pressable>
+          isFullWidth
+          isProminent
+          label={`Submit${selected.length > 0 ? ` (${selected.length})` : ''}`}
+          onPress={() => void submitMulti()}
+          size="large"
+        />
       ) : null}
 
       <View className="flex-row items-end gap-2">
-        <TextInput
-          className="text-foreground bg-secondary max-h-30 min-h-10 flex-1 rounded-xl px-3 pt-2 pb-2 text-sm"
-          value={freeText}
-          onChangeText={setFreeText}
-          placeholder={hasOptions ? 'Or type a reply…' : 'Type your reply…'}
-          placeholderTextColorClassName="accent-muted-foreground"
-          selectionColorClassName="accent-primary"
-          onSubmitEditing={submitFreeText}
-          returnKeyType="send"
-          multiline
-        />
-        <Pressable
-          accessibilityLabel="Send reply"
-          className={cn(
-            'w-10 h-10 items-center justify-center rounded-full bg-primary',
-            !canSendFreeText && 'bg-secondary',
-            canSendFreeText && styles.pressedActive
-          )}
-          onPress={submitFreeText}
-          disabled={!canSendFreeText}
+        <MobileGlassSurface
+          className="max-h-30 min-h-10 flex-1 overflow-hidden rounded-xl"
+          isInteractive
         >
-          <ArrowUp
-            size={18}
-            colorClassName={
-              canSendFreeText ? 'accent-primary-foreground' : 'accent-muted-foreground'
-            }
+          <TextInput
+            className="text-foreground min-h-10 px-3 py-2 text-sm"
+            value={freeText}
+            onChangeText={setFreeText}
+            placeholder={hasOptions ? 'Or type a reply…' : 'Type your reply…'}
+            placeholderTextColorClassName="accent-muted-foreground"
+            selectionColorClassName="accent-primary"
+            onSubmitEditing={submitFreeText}
+            returnKeyType="send"
+            multiline
           />
-        </Pressable>
+        </MobileGlassSurface>
+        <MobileGlassIconButton
+          accessibilityLabel="Send reply"
+          disabled={!canSendFreeText}
+          icon="send"
+          onPress={() => void submitFreeText()}
+          size="regular"
+        />
       </View>
-    </View>
+    </MobileGlassSection>
   )
 }
-
-const styles = {
-  pressedActive: cn('active:bg-accent')
-} as const

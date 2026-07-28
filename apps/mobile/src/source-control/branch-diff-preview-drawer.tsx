@@ -1,6 +1,6 @@
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 
-import { X } from '@/components/uniwind-icons'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from '../components/bottom-drawer'
@@ -37,14 +37,11 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
               : 'Committed on branch'}
           </Text>
         </View>
-        <Pressable
-          className={cn('w-9 h-9 items-center justify-center', 'active:bg-accent')}
-          onPress={onClose}
-          hitSlop={8}
+        <MobileGlassIconButton
           accessibilityLabel="Close committed diff preview"
-        >
-          <X size={18} colorClassName="accent-muted-foreground" />
-        </Pressable>
+          icon="close"
+          onPress={onClose}
+        />
       </View>
       {branchDiffPreview.kind === 'loading' ? (
         <View className={styles.diffState}>

@@ -5,6 +5,7 @@ import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '@/components/
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassSection } from './glass/section'
 
 export type ActionSheetAction = {
   label: string
@@ -58,7 +59,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
         </View>
       )}
 
-      <View className="bg-card overflow-hidden rounded-2xl">
+      <MobileGlassSection>
         {actions.map((action, i) => {
           const Icon = iconForAction(action.label, action.destructive, action.icon)
           const customIcon = action.renderIcon?.()
@@ -108,7 +109,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
             </View>
           )
         })}
-      </View>
+      </MobileGlassSection>
     </>
   )
 }

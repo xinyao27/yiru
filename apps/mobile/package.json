@@ -38,13 +38,18 @@
     "start:ui": "node scripts/start-emulator.mjs --ui-lab"
   },
   "dependencies": {
+    "@expo/ui": "catalog:mobile",
     "@noble/hashes": "catalog:mobile",
     "@react-native-async-storage/async-storage": "catalog:mobile",
     "@react-navigation/native": "catalog:mobile",
+    "@shikijs/core": "catalog:mobile",
+    "@shikijs/engine-oniguruma": "catalog:mobile",
+    "@shikijs/langs": "catalog:mobile",
     "@shopify/react-native-skia": "catalog:mobile",
     "@xterm/addon-unicode11": "catalog:mobile",
     "@xterm/addon-webgl": "catalog:mobile",
     "@xterm/xterm": "catalog:mobile",
+    "@yiru/editor-themes": "catalog:",
     "@yiru/mobile-relay-protocol": "catalog:",
     "@yiru/runtime-protocol": "catalog:",
     "@yiru/workbench-model": "catalog:",
@@ -65,7 +70,6 @@
     "expo-image-picker": "catalog:mobile",
     "expo-keep-awake": "catalog:mobile",
     "expo-linking": "catalog:mobile",
-    "expo-modules-core": "catalog:mobile",
     "expo-network": "catalog:mobile",
     "expo-notifications": "catalog:mobile",
     "expo-router": "catalog:mobile",
@@ -84,6 +88,7 @@
     "react-native-reanimated": "catalog:mobile",
     "react-native-safe-area-context": "catalog:mobile",
     "react-native-screens": "catalog:mobile",
+    "react-native-shiki-engine": "catalog:mobile",
     "react-native-svg": "catalog:mobile",
     "react-native-web": "catalog:mobile",
     "react-native-webview": "catalog:mobile",
@@ -105,5 +110,12 @@
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@11.15.0"
+  "packageManager": "pnpm@11.15.0",
+  "expo": {
+    "install": {
+      "exclude": [
+        "@shopify/react-native-skia"
+      ]
+    }
+  }
 }

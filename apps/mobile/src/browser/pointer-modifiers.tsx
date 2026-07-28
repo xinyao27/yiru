@@ -1,10 +1,13 @@
-import { Pressable, Text, View } from 'react-native'
+import { Text } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
+import { MobileGlassGroup } from '../components/glass/group'
+import { MobileGlassPressable } from '../components/glass/pressable'
+
 export type BrowserPointerModifier = 'cmd' | 'ctrl' | 'alt' | 'shift'
 
-const BROWSER_POINTER_MODIFIERS: { id: BrowserPointerModifier; label: string }[] = [
+export const BROWSER_POINTER_MODIFIERS: { id: BrowserPointerModifier; label: string }[] = [
   { id: 'cmd', label: 'Cmd' },
   { id: 'ctrl', label: 'Ctrl' },
   { id: 'alt', label: 'Alt' },
@@ -23,36 +26,31 @@ export function MobileBrowserPointerModifiers({
   onToggle
 }: Props): React.JSX.Element {
   return (
-    <View className="flex-row gap-1 px-2 pt-1">
+    <MobileGlassGroup className="flex-row gap-2 px-2 pt-1" spacing={8}>
       {BROWSER_POINTER_MODIFIERS.map((modifier) => {
         const selected = selectedModifiers.includes(modifier.id)
         return (
-          <Pressable
+          <MobileGlassPressable
             key={modifier.id}
-            className={cn(
-              'min-h-8 min-w-11 items-center justify-center rounded-lg bg-secondary px-2',
-              selected && 'bg-accent',
-              !selected && 'active:bg-accent',
-              disabled && 'opacity-40'
-            )}
+            className={cn('min-h-8 min-w-11 rounded-full', selected && 'border-muted-foreground')}
+            contentClassName="min-h-8 items-center justify-center rounded-full px-3"
             disabled={disabled}
-            onPress={() => onToggle(modifier.id)}
+            accessibilityLabel={`${modifier.label} click modifier`}
             accessibilityRole="button"
             accessibilityState={{ selected, disabled }}
-            accessibilityLabel={`${modifier.label} click modifier`}
+            onPress={() => onToggle(modifier.id)}
           >
             <Text
               className={cn(
-                'text-muted-foreground text-xs font-mono',
-                selected && 'text-accent-foreground',
-                disabled && 'text-muted-foreground'
+                'text-muted-foreground font-mono text-xs',
+                selected && 'text-foreground'
               )}
             >
               {modifier.label}
             </Text>
-          </Pressable>
+          </MobileGlassPressable>
         )
       })}
-    </View>
+    </MobileGlassGroup>
   )
 }

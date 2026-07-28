@@ -6,6 +6,8 @@ import { Check, Pencil, Play, Plus, Trash } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
+import { MobileGlassPressable } from '../components/glass/pressable'
+import { MobileGlassSection } from '../components/glass/section'
 import { MobileSearchField } from '../components/search-field'
 import {
   getQuickCommandDisplayPreview,
@@ -95,20 +97,18 @@ export function QuickCommandsList(props: ListProps) {
           onDelete={onDelete}
         />
       ) : null}
-      <Pressable
-        className={cn(
-          'border-border active:bg-accent mt-1 flex-row items-center gap-2 rounded-2xl border border-dashed bg-card px-3 py-3',
-          (disabled || !canAdd) && styles.disabled
-        )}
+      <MobileGlassPressable
+        accessibilityRole="button"
+        className="mt-1 rounded-2xl border-dashed"
+        contentClassName="flex-row items-center gap-2 px-3 py-3"
         disabled={disabled || !canAdd}
         onPress={onAdd}
-        accessibilityRole="button"
       >
         <Plus size={18} colorClassName="accent-muted-foreground" />
-        <Text className="text-foreground text-sm font-semibold">
+        <Text className="text-foreground text-sm">
           {canAdd ? 'New quick command' : 'Quick command limit reached'}
         </Text>
-      </Pressable>
+      </MobileGlassPressable>
     </View>
   )
 }
@@ -133,7 +133,7 @@ function QuickCommandGroup({
       <Text className="text-muted-foreground px-1 pt-1 pb-1 text-xs font-semibold tracking-wider uppercase">
         {label}
       </Text>
-      <View className={styles.group}>
+      <MobileGlassSection>
         {commands.map((command, index) => (
           <QuickCommandRow
             key={command.id}
@@ -145,7 +145,7 @@ function QuickCommandGroup({
             onDelete={onDelete}
           />
         ))}
-      </View>
+      </MobileGlassSection>
     </View>
   )
 }
@@ -200,22 +200,24 @@ function QuickCommandRow({
           </Text>
         </View>
       </Pressable>
-      <Pressable
-        className={styles.rowAction}
+      <MobileGlassPressable
+        accessibilityLabel={`Edit ${command.label}`}
+        className="h-8 w-8 rounded-full"
+        contentClassName="h-full w-full items-center justify-center rounded-full"
         disabled={disabled}
         onPress={() => onEdit(command)}
-        accessibilityLabel={`Edit ${command.label}`}
       >
         <Pencil size={15} colorClassName="accent-muted-foreground" />
-      </Pressable>
-      <Pressable
-        className={styles.rowAction}
+      </MobileGlassPressable>
+      <MobileGlassPressable
+        accessibilityLabel={`Delete ${command.label}`}
+        className="mr-2 h-8 w-8 rounded-full"
+        contentClassName="h-full w-full items-center justify-center rounded-full"
         disabled={disabled}
         onPress={() => onDelete(command)}
-        accessibilityLabel={`Delete ${command.label}`}
       >
         <Trash size={15} colorClassName="accent-destructive" />
-      </Pressable>
+      </MobileGlassPressable>
     </View>
   )
 }
@@ -228,7 +230,7 @@ export function QuickCommandAgentPicker({
   onSelect: (agent: TuiAgent) => void
 }) {
   return (
-    <View className={styles.group}>
+    <MobileGlassSection>
       {QUICK_COMMAND_SUPPORTED_AGENTS.map((agent, index) => (
         <Pressable
           key={agent.id}
@@ -247,15 +249,13 @@ export function QuickCommandAgentPicker({
           {selected === agent.id ? <Check size={16} colorClassName="accent-foreground" /> : null}
         </Pressable>
       ))}
-    </View>
+    </MobileGlassSection>
   )
 }
 
 const styles = {
   disabled: cn('opacity-50'),
   empty: cn('py-4 text-center text-sm text-muted-foreground'),
-  group: cn('border-border overflow-hidden rounded-2xl border bg-card'),
   rowBorder: cn('border-t border-t-border'),
-  rowIcon: cn('h-7 w-7 items-center justify-center bg-muted'),
-  rowAction: cn('h-11 w-10 items-center justify-center active:bg-accent')
+  rowIcon: cn('h-7 w-7 items-center justify-center bg-muted')
 } as const

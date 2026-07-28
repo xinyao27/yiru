@@ -1,12 +1,8 @@
 import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { Platform, Pressable, Text, View, type LayoutChangeEvent } from 'react-native'
+import { Platform, Text, View, type LayoutChangeEvent } from 'react-native'
 
-import {
-  CaretLeft as ChevronLeft,
-  DotsThree as MoreHorizontal,
-  ListChecks
-} from '@/components/uniwind-icons'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
@@ -74,33 +70,29 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <Pressable
+                  <MobileGlassIconButton
                     accessibilityLabel="Back"
-                    className="h-9 w-9 items-center justify-center rounded-full"
+                    icon="back"
                     onPress={() => router.back()}
-                  >
-                    <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 ),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <View className="flex-row items-center gap-1">
+                  <View className="flex-row items-center gap-2">
                     {showPRTrigger ? (
-                      <Pressable
-                        className="h-9 w-9 items-center justify-center rounded-full"
+                      <MobileGlassIconButton
+                        accessibilityLabel="Open pull request review"
+                        icon="checks"
                         onPress={controller.openPRSidebar}
-                      >
-                        <ListChecks size={19} colorClassName="accent-foreground" />
-                      </Pressable>
+                      />
                     ) : null}
-                    <Pressable
-                      className="h-9 w-9 items-center justify-center rounded-full"
+                    <MobileGlassIconButton
+                      accessibilityLabel="More review actions"
+                      icon="more"
                       onPress={() => controller.setShowOverflow(true)}
-                    >
-                      <MoreHorizontal size={19} colorClassName="accent-foreground" />
-                    </Pressable>
+                    />
                   </View>
                 )
         }}

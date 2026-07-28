@@ -7,13 +7,13 @@ const PLATFORM_SUPPORTS_GLASS =
 
 const MobileGlassAvailabilityContext = createContext(false)
 
-type MobileGlassAvailabilityProviderProps = {
+type MobileGlassScopeProps = {
   children: ReactNode
 }
 
 export function MobileGlassAvailabilityProvider({
   children
-}: MobileGlassAvailabilityProviderProps): React.JSX.Element {
+}: MobileGlassScopeProps): React.JSX.Element {
   const [allowsTransparency, setAllowsTransparency] = useState(false)
 
   useEffect(() => {
@@ -42,6 +42,10 @@ export function MobileGlassAvailabilityProvider({
       {children}
     </MobileGlassAvailabilityContext>
   )
+}
+
+export function MobileGlassFallbackScope({ children }: MobileGlassScopeProps): React.JSX.Element {
+  return <MobileGlassAvailabilityContext value={false}>{children}</MobileGlassAvailabilityContext>
 }
 
 export function useMobileGlassAvailable(): boolean {

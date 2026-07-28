@@ -1,18 +1,12 @@
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { FlatList, Text, View } from 'react-native'
 
+import { MobileGlassGroup } from '@/components/glass/group'
+import { MobileGlassPressable } from '@/components/glass/pressable'
 import { cn } from '@/style/class-names'
 
-import type { MobileDiffReviewQueueFilter } from '../session/diff/review-queue'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '../session/diff/review-screen-model'
+import type { MobileDiffReviewHeaderProps } from './diff-review-header-props'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
-
-type Props = {
-  filter: MobileDiffReviewQueueFilter
-  queueLength: number
-  reviewedCount: number
-  unsentCount: number
-  onSelectFilter: (filter: MobileDiffReviewQueueFilter) => void
-}
 
 export function MobileDiffReviewHeader({
   filter,
@@ -20,9 +14,9 @@ export function MobileDiffReviewHeader({
   reviewedCount,
   unsentCount,
   onSelectFilter
-}: Props) {
+}: MobileDiffReviewHeaderProps) {
   return (
-    <View className="border-b-hairline border-b-border px-4 pt-2 pb-2">
+    <View className="px-3 py-2">
       <View className="flex-row justify-between gap-3">
         <Text className={styles.progressText}>
           {reviewedCount}/{queueLength} reviewed
@@ -31,35 +25,36 @@ export function MobileDiffReviewHeader({
           {mobileReviewCountLabel(unsentCount, 'unsent note', 'unsent notes')}
         </Text>
       </View>
-      <FlatList
-        data={REVIEW_FILTERS}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item}
-        contentContainerClassName="gap-2 pt-3 pb-1"
-        renderItem={({ item }) => (
-          <Pressable
-            className={cn(
-              'border-hairline border-border bg-card min-h-9 items-center justify-center rounded-full px-3',
-              filter === item && 'border-border bg-accent',
-              'active:bg-accent'
-            )}
-            onPress={() => onSelectFilter(item)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: filter === item }}
-            accessibilityLabel={`Show ${item} review files`}
-          >
-            <Text
-              className={cn(
-                'text-muted-foreground text-xs font-bold',
-                filter === item && 'text-accent-foreground'
-              )}
+      <MobileGlassGroup className="mt-3" spacing={8}>
+        <FlatList
+          data={REVIEW_FILTERS}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item}
+          contentContainerClassName="gap-2"
+          renderItem={({ item }) => (
+            <MobileGlassPressable
+              accessibilityLabel={`Show ${item} review files`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: filter === item }}
+              className="rounded-full"
+              contentClassName="min-h-8 items-center justify-center rounded-full px-3"
+              hitSlop={6}
+              onPress={() => onSelectFilter(item)}
+              tintColorClassName={filter === item ? 'accent-secondary' : undefined}
             >
-              {item === 'all' ? 'All' : item[0]?.toUpperCase() + item.slice(1)}
-            </Text>
-          </Pressable>
-        )}
-      />
+              <Text
+                className={cn(
+                  'text-sm',
+                  filter === item ? 'text-foreground' : 'text-muted-foreground'
+                )}
+              >
+                {item === 'all' ? 'All' : item[0]?.toUpperCase() + item.slice(1)}
+              </Text>
+            </MobileGlassPressable>
+          )}
+        />
+      </MobileGlassGroup>
     </View>
   )
 }

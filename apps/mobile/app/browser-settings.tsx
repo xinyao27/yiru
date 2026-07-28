@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretRight as ChevronRight, Globe } from '@/components/uniwind-icons'
 
+import { MobileGlassSection } from '../src/components/glass/section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
   loadTerminalLinkOpenMode,
@@ -51,7 +52,7 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
         <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose where HTTP(S) links tapped in terminal output open.
         </Text>
-        <View className="bg-card mt-2 overflow-hidden rounded-2xl">
+        <MobileGlassSection className="mt-2">
           <Pressable
             className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
             onPress={() => setPickerOpen(true)}
@@ -65,7 +66,7 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
             </View>
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-        </View>
+        </MobileGlassSection>
       </ScrollView>
 
       <PickerModal<MobileTerminalLinkOpenMode>

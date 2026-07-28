@@ -1,11 +1,12 @@
 import { View } from 'react-native'
 
+import type { MobileImageSource } from '../image-source-picker'
 import type { MobileNativeChatController } from './use-controller'
 import { MobileNativeChatView, type MobileNativeChatInputLockReason } from './view'
 
 type Props = {
   controller: MobileNativeChatController
-  onAttachImage: () => void
+  onAttachImage: (source: MobileImageSource) => void
   isAttaching: boolean
   inputLockReason: MobileNativeChatInputLockReason | null
   keyboardInset: number

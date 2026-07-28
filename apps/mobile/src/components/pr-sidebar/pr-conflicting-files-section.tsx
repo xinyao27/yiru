@@ -1,11 +1,11 @@
 import type { PRInfo } from '@yiru/workbench-model/review'
 import * as Clipboard from 'expo-clipboard'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 
-import { Check, Copy, FileX as FileWarning, Sparkle as Sparkles } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { FileX as FileWarning } from '@/components/uniwind-icons'
 
+import { MobileGlassTextButton } from '../glass/text-button'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { resolveConflictDisplay } from './pr-conflict-presentation'
 import { PRSection } from './pr-section'
@@ -94,24 +94,12 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
                 <Text className="text-muted-foreground text-xs font-semibold">
                   Run from this worktree
                 </Text>
-                <Pressable
-                  className={cn(
-                    'flex-row items-center gap-1 border-hairline border-border px-2 py-1',
-                    'active:bg-accent'
-                  )}
-                  onPress={() => void copyRefreshCommands()}
-                  accessibilityRole="button"
+                <MobileGlassTextButton
                   accessibilityLabel="Copy mergeability refresh commands"
-                >
-                  {commandsCopied ? (
-                    <Check size={13} colorClassName="accent-foreground" />
-                  ) : (
-                    <Copy size={13} colorClassName="accent-foreground" />
-                  )}
-                  <Text className="text-foreground text-xs font-semibold">
-                    {commandsCopied ? 'Copied' : 'Copy commands'}
-                  </Text>
-                </Pressable>
+                  label={commandsCopied ? 'Copied' : 'Copy commands'}
+                  onPress={() => void copyRefreshCommands()}
+                  size="small"
+                />
               </View>
               <Text selectable className="text-foreground mt-2 font-mono text-xs leading-4">
                 {conflict.mergeabilityRefreshCommands}
@@ -147,25 +135,14 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
           agent that brings the base branch in and completes the merge. */}
       {triage ? (
         <View className="gap-1">
-          <Pressable
-            className={cn(
-              'border-hairline border-border min-h-9 flex-row items-center justify-center gap-1 rounded-xl bg-secondary px-3',
-              'active:bg-accent'
-            )}
-            onPress={triage.resolveConflicts}
-            disabled={triage.isBusy}
-            accessibilityRole="button"
+          <MobileGlassTextButton
             accessibilityLabel="Resolve conflicts with AI"
-          >
-            {triage.isBusy ? (
-              <ActivityIndicator colorClassName="accent-muted-foreground" />
-            ) : (
-              <Sparkles size={14} colorClassName="accent-muted-foreground" />
-            )}
-            <Text className="text-muted-foreground text-sm font-semibold">
-              Resolve conflicts with AI
-            </Text>
-          </Pressable>
+            disabled={triage.isBusy}
+            isFullWidth
+            label={triage.isBusy ? 'Resolving…' : 'Resolve conflicts with AI'}
+            onPress={triage.resolveConflicts}
+            size="regular"
+          />
           {triage.error ? <Text className={triageStyles.triageError}>{triage.error}</Text> : null}
         </View>
       ) : null}

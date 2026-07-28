@@ -1,24 +1,10 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  SectionList,
-  Text,
-  TextInput,
-  View
-} from 'react-native'
+import { ActivityIndicator, ScrollView, SectionList, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import {
-  Minus,
-  DotsThree as MoreHorizontal,
-  Plus,
-  Sparkle as Sparkles
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
 
-import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileSourceControlBulkActions } from './bulk-actions'
+import { MobileSourceControlCommitBar } from './commit-bar'
 import { MobileCommitFailurePanel } from './commit-failure-panel'
 import { MobileSourceControlCreatePrEntry } from './create-pr-entry'
 import { makeRenderFileRow, BranchCompareFooter } from './file-rows'
@@ -110,53 +96,16 @@ export function MobileSourceControlContent({ state }: Props) {
           </View>
         ) : null}
         <MobileSourceControlCreatePrEntry action={createPrAction} />
-        <View className="mt-3 flex-row gap-2">
-          <Pressable
-            className={cn(
-              styles.bulkButton,
-              (stageablePaths.length === 0 || ioBusy) && styles.bulkButtonDisabled,
-              'active:bg-accent'
-            )}
-            onPress={() => void stageAll()}
-            disabled={ioBusy || stageablePaths.length === 0}
-          >
-            {busyAction === 'stage-all' ? (
-              <ActivityIndicator size="small" colorClassName="accent-foreground" />
-            ) : (
-              <Plus size={15} colorClassName="accent-foreground" />
-            )}
-            <Text className={styles.bulkButtonText}>Stage All</Text>
-          </Pressable>
-          <Pressable
-            className={cn(
-              styles.bulkButton,
-              (unstageablePaths.length === 0 || ioBusy) && styles.bulkButtonDisabled,
-              'active:bg-accent'
-            )}
-            onPress={() => void unstageAll()}
-            disabled={ioBusy || unstageablePaths.length === 0}
-          >
-            {busyAction === 'unstage-all' ? (
-              <ActivityIndicator size="small" colorClassName="accent-foreground" />
-            ) : (
-              <Minus size={15} colorClassName="accent-foreground" />
-            )}
-            <Text className={styles.bulkButtonText}>Unstage All</Text>
-          </Pressable>
-          <Pressable
-            className={cn(
-              'min-h-9 w-11 items-center justify-center rounded-xl bg-secondary',
-              'active:bg-accent',
-              ioBusy && styles.bulkButtonDisabled
-            )}
-            onPress={() => setShowActionSheet(true)}
-            disabled={ioBusy}
-            hitSlop={8}
-            accessibilityLabel="Open source control actions"
-          >
-            <MoreHorizontal size={18} colorClassName="accent-foreground" />
-          </Pressable>
-        </View>
+        <MobileSourceControlBulkActions
+          actionsDisabled={ioBusy}
+          onMore={() => setShowActionSheet(true)}
+          onStageAll={() => void stageAll()}
+          onUnstageAll={() => void unstageAll()}
+          stageDisabled={ioBusy || stageablePaths.length === 0}
+          stageLoading={busyAction === 'stage-all'}
+          unstageDisabled={ioBusy || unstageablePaths.length === 0}
+          unstageLoading={busyAction === 'unstage-all'}
+        />
       </View>
 
       {!hasVisibleChanges ? (
@@ -195,8 +144,8 @@ export function MobileSourceControlContent({ state }: Props) {
         />
       )}
 
-      <MobileGlassSurface
-        className="absolute right-0 left-0 gap-1 overflow-hidden rounded-t-3xl p-4 pt-3"
+      <View
+        className="absolute right-0 left-0 px-3 pt-2"
         style={[
           {
             bottom: keyboardLift > 0 ? keyboardLift + KEYBOARD_COMMIT_BAR_CLEARANCE : keyboardLift,
@@ -204,89 +153,26 @@ export function MobileSourceControlContent({ state }: Props) {
           }
         ]}
       >
-        <View className="flex-row gap-2">
-          {stagedCount === 0 ? (
-            <View
-              className={cn(
-                styles.commitInput,
-                'bg-card border-border border-dashed items-center justify-center'
-              )}
-              accessibilityRole="text"
-              accessibilityState={{ disabled: true }}
-              accessibilityLabel="Commit message disabled. No staged files."
-            >
-              <Text className="text-muted-foreground text-sm font-semibold">No staged files</Text>
-            </View>
-          ) : (
-            <TextInput
-              className={styles.commitInput}
-              value={commitMessage}
-              onChangeText={setCommitMessage}
-              placeholder="Commit message"
-              placeholderTextColorClassName="accent-muted-foreground"
-              editable={busyAction === null && openingPath === null && openingBranchPath === null}
-              returnKeyType="done"
-              onSubmitEditing={primaryAction.onPress}
-            />
-          )}
-          {shouldShowGenerateButton ? (
-            <Pressable
-              className={cn(
-                'min-h-11 w-11 items-center justify-center rounded-xl bg-secondary',
-                busyAction !== null && styles.commitButtonDisabled,
-                'active:bg-accent'
-              )}
-              // Why: commit-message AI belongs to the commit path; hiding it
-              // during Stage All keeps the quick action visually unambiguous.
-              disabled={busyAction !== null}
-              onPress={() =>
-                generatingMessage ? cancelGenerateCommitMessage() : void generateCommitMessage()
-              }
-              accessibilityLabel={
-                generatingMessage
-                  ? 'Cancel commit message generation'
-                  : 'Generate commit message with AI'
-              }
-            >
-              {generatingMessage ? (
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              ) : (
-                <Sparkles size={16} colorClassName="accent-muted-foreground" />
-              )}
-            </Pressable>
-          ) : null}
-          <Pressable
-            className={cn(
-              'min-h-11 min-w-24 items-center justify-center rounded-xl bg-primary px-3',
-              createPrHeroActive && 'bg-transparent border-hairline border-border',
-              primaryAction.disabled && styles.commitButtonDisabled,
-              'active:bg-accent'
-            )}
-            onPress={primaryAction.onPress}
-            disabled={primaryAction.disabled}
-            accessibilityLabel={primaryAction.accessibilityLabel}
-            accessibilityHint={primaryAction.accessibilityHint}
-          >
-            {primaryAction.loading ? (
-              <ActivityIndicator
-                size="small"
-                colorClassName={
-                  createPrHeroActive ? 'accent-foreground' : 'accent-primary-foreground'
-                }
-              />
-            ) : (
-              <Text
-                className={cn(
-                  'text-primary-foreground text-sm font-bold',
-                  createPrHeroActive && 'text-foreground'
-                )}
-              >
-                {primaryAction.label}
-              </Text>
-            )}
-          </Pressable>
-        </View>
-      </MobileGlassSurface>
+        <MobileSourceControlCommitBar
+          commitMessage={commitMessage}
+          generateDisabled={busyAction !== null}
+          generatingMessage={generatingMessage}
+          hasStagedFiles={stagedCount > 0}
+          inputDisabled={ioBusy}
+          isCreatePrAction={createPrHeroActive}
+          onChangeText={setCommitMessage}
+          onGenerate={() =>
+            generatingMessage ? cancelGenerateCommitMessage() : void generateCommitMessage()
+          }
+          onPrimaryAction={primaryAction.onPress}
+          primaryAccessibilityHint={primaryAction.accessibilityHint}
+          primaryAccessibilityLabel={primaryAction.accessibilityLabel}
+          primaryDisabled={primaryAction.disabled}
+          primaryLabel={primaryAction.label}
+          primaryLoading={primaryAction.loading}
+          showGenerateButton={shouldShowGenerateButton}
+        />
+      </View>
     </>
   )
 }

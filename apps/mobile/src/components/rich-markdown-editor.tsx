@@ -26,6 +26,7 @@ import { UniwindWebView } from '@/components/uniwind-web-view'
 import { cn } from '@/style/class-names'
 import { resolveCssNumber, resolveCssString } from '@/style/resolve-css-variable'
 
+import { MobileGlassSurface } from './glass/surface'
 import {
   buildMobileRichMarkdownEditorHtml,
   escapeInjectedJavaScriptString
@@ -309,7 +310,7 @@ function MobileRichMarkdownEditorInner({
 
   return (
     <View className="bg-background min-h-0 flex-1">
-      <View className="border-b-hairline border-b-border bg-card min-h-11">
+      <MobileGlassSurface className="min-h-11" isInteractive>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -339,7 +340,7 @@ function MobileRichMarkdownEditorInner({
             )
           })}
         </ScrollView>
-      </View>
+      </MobileGlassSurface>
       <UniwindWebView
         ref={webViewRef}
         source={webViewSource}

@@ -3,7 +3,6 @@ import type { SectionListRenderItem } from 'react-native'
 
 import {
   CaretRight as ChevronRight,
-  FileText,
   Minus,
   Plus,
   Trash as Trash2
@@ -43,6 +42,7 @@ export function makeRenderFileRow(
     const rowDisabled =
       !item.canOpen || busyAction !== null || openingPath !== null || openingBranchPath !== null
     const ioBusy = busyAction !== null || openingPath !== null || openingBranchPath !== null
+    const hasInlineActions = item.area === 'staged' || item.canStage || item.canDiscard
     return (
       <Pressable
         className={cn(
@@ -60,7 +60,6 @@ export function makeRenderFileRow(
             {MOBILE_GIT_STATUS_LABELS[item.status]}
           </Text>
         </View>
-        <FileText size={16} colorClassName="accent-muted-foreground" />
         <View className={styles.fileTextBlock}>
           <Text
             className={cn(styles.filePath, !item.canOpen && styles.filePathDisabled)}
@@ -132,7 +131,7 @@ export function makeRenderFileRow(
             ) : null}
           </View>
         ) : null}
-        {!rowBusy && item.canOpen ? (
+        {!rowBusy && item.canOpen && !hasInlineActions ? (
           <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         ) : null}
       </Pressable>
@@ -224,7 +223,6 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
                   {MOBILE_GIT_STATUS_LABELS[entry.status]}
                 </Text>
               </View>
-              <FileText size={16} colorClassName="accent-muted-foreground" />
               <View className={styles.fileTextBlock}>
                 <Text
                   className={cn(styles.filePath, !entry.canOpen && styles.filePathDisabled)}

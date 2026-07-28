@@ -215,7 +215,7 @@ export default function RootLayout() {
         <IconContext.Provider value={iconContextValue}>
           <MobileLoaderStyleProvider>
             <RpcClientProvider
-              createClientOverride={IS_UI_LAB ? createMobileUiLabRpcClient : undefined}
+              createClientOverride={__DEV__ ? createMobileUiLabRpcClient : undefined}
             >
               <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
                 <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
@@ -244,7 +244,7 @@ export default function RootLayout() {
                           )
                         }}
                       />
-                      <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
+                      <Stack.Screen name="pair-scan" options={{ title: 'Pair with desktop' }} />
                       <Stack.Screen name="pair" options={{ headerShown: false }} />
                       <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
                       <Stack.Screen

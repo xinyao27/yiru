@@ -10,24 +10,16 @@ import {
   Image,
   PanResponder,
   PixelRatio,
-  Platform,
-  Pressable,
   Text,
-  TextInput,
   View,
   type GestureResponderEvent,
   type PanResponderGestureState
 } from 'react-native'
 
-import {
-  ArrowUp,
-  CaretLeft as ChevronLeft,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import type {
   BrowserScreencastFrame,
   BrowserScreencastFrameMetadata
@@ -35,14 +27,13 @@ import type {
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcFailure, RpcSuccess } from '../transport/types'
 import { resolveMobileBrowserAddressSync } from './address-sync'
-import { MobileBrowserKeyRow } from './key-row'
-import { MobileBrowserPointerModifiers, type BrowserPointerModifier } from './pointer-modifiers'
+import { MobileBrowserKeyboardChrome, MobileBrowserTopChrome } from './chrome'
+import type { BrowserPointerModifier } from './pointer-modifiers'
 import {
   MOBILE_BROWSER_FRAME_MIN_INTERVAL_MS,
   buildMobileBrowserScreencastRequest,
   type MobileBrowserViewMode
 } from './screencast-request'
-import { MobileBrowserToolbarIconButton } from './toolbar-icon-button'
 import {
   clampBrowserZoomState,
   computeBrowserFrameGeometry,
@@ -56,7 +47,6 @@ import {
 } from './touch-geometry'
 import { displayBrowserUrl, normalizeBrowserUrl } from './url'
 import { getInitialMobileBrowserViewMode, saveMobileBrowserViewMode } from './view-mode-state'
-import { MobileBrowserViewModeSwitch } from './view-mode-switch'
 
 export type MobileBrowserTab = {
   type: 'browser'
@@ -1020,10 +1010,6 @@ export function MobileBrowserPane({
   )
 
   const controlsDisabled = !client || !tab.browserPageId || screencastSupported !== true
-  const addressSelection = useMemo(
-    () => (addressFocused ? undefined : { start: 0, end: 0 }),
-    [addressFocused]
-  )
   const goBack = useCallback(() => {
     if (controlsDisabled || !tab.canGoBack) {
       return
@@ -1083,55 +1069,7 @@ export function MobileBrowserPane({
   )
 
   return (
-    <View ref={setRootViewRef} className="bg-background min-h-0 flex-1">
-      <MobileGlassSurface className="min-h-8 flex-row items-center gap-1 px-2 py-0.5">
-        <MobileBrowserToolbarIconButton
-          disabled={controlsDisabled || !tab.canGoBack}
-          label="Back"
-          onPress={goBack}
-        >
-          <ChevronLeft size={15} colorClassName="accent-muted-foreground" />
-        </MobileBrowserToolbarIconButton>
-        <MobileBrowserToolbarIconButton
-          disabled={controlsDisabled || !tab.canGoForward}
-          label="Forward"
-          onPress={goForward}
-        >
-          <ChevronRight size={15} colorClassName="accent-muted-foreground" />
-        </MobileBrowserToolbarIconButton>
-        <MobileBrowserToolbarIconButton
-          disabled={controlsDisabled}
-          label="Reload"
-          onPress={reloadPage}
-        >
-          <RefreshCw size={15} colorClassName="accent-muted-foreground" />
-        </MobileBrowserToolbarIconButton>
-        <TextInput
-          className="bg-secondary text-foreground h-7 min-w-0 flex-1 rounded-lg px-2 py-0 font-mono text-xs leading-4"
-          style={{ includeFontPadding: false, textAlignVertical: 'center' }}
-          value={addressValue}
-          onChangeText={setAddressValue}
-          onFocus={() => setAddressFocused(true)}
-          onBlur={() => setAddressFocused(false)}
-          onSubmitEditing={() => void navigateToAddress()}
-          selectTextOnFocus
-          selection={addressSelection}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
-          numberOfLines={1}
-          returnKeyType="go"
-          placeholder="URL"
-          placeholderTextColorClassName="accent-muted-foreground"
-          editable={!controlsDisabled}
-        />
-        <MobileBrowserViewModeSwitch
-          disabled={controlsDisabled}
-          value={browserViewMode}
-          onChange={selectBrowserViewMode}
-        />
-      </MobileGlassSurface>
-
+    <View ref={setRootViewRef} className="bg-background relative min-h-0 flex-1">
       <View
         className="bg-background min-h-0 flex-1 overflow-hidden"
         onLayout={(event) => {
@@ -1229,80 +1167,64 @@ export function MobileBrowserPane({
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
             {error ? (
-              <Text className="text-foreground border-border bg-card overflow-hidden rounded-xl border px-3 py-2 text-center text-xs">
-                {error}
-              </Text>
+              <MobileGlassSurface className="overflow-hidden rounded-xl px-3 py-2">
+                <Text className="text-foreground text-center text-xs">{error}</Text>
+              </MobileGlassSurface>
             ) : null}
           </View>
         ) : null}
         {dialog ? (
           <View className="bg-modal-backdrop absolute inset-0 z-30 items-center justify-center p-6">
-            <View className="border-border bg-background w-full max-w-sm rounded-3xl border p-4">
+            <MobileGlassSurface className="w-full max-w-sm rounded-3xl p-4">
               <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
               <Text className="text-muted-foreground mt-2 text-sm leading-5">{dialog.message}</Text>
               <View className="mt-4 flex-row justify-end gap-2">
                 {dialog.dialogType !== 'alert' ? (
-                  <Pressable
-                    className={cn(styles.dialogButton, styles.dialogButtonPressedActive)}
+                  <MobileGlassTextButton
+                    label="Cancel"
                     onPress={() => void sendDialogCommand('browser.dialogDismiss')}
-                  >
-                    <Text className={styles.dialogButtonText}>Cancel</Text>
-                  </Pressable>
+                  />
                 ) : null}
-                <Pressable
-                  className={cn(
-                    styles.dialogButton,
-                    'bg-primary',
-                    styles.dialogButtonPressedActive
-                  )}
+                <MobileGlassTextButton
+                  isProminent
+                  label="OK"
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
-                >
-                  <Text className={cn(styles.dialogButtonText, 'text-primary-foreground')}>OK</Text>
-                </Pressable>
+                />
               </View>
-            </View>
+            </MobileGlassSurface>
           </View>
         ) : null}
       </View>
-
-      <MobileGlassSurface
-        className="z-20 overflow-hidden rounded-t-3xl"
-        style={[{ paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }]}
-      >
-        <MobileBrowserPointerModifiers
+      <View className="absolute inset-x-0 top-0 z-20">
+        <MobileBrowserTopChrome
+          addressFocused={addressFocused}
+          addressValue={addressValue}
+          canGoBack={tab.canGoBack}
+          canGoForward={tab.canGoForward}
           disabled={controlsDisabled}
+          onAddressChange={setAddressValue}
+          onAddressFocusChange={setAddressFocused}
+          onAddressSubmit={() => void navigateToAddress()}
+          onBackPress={goBack}
+          onForwardPress={goForward}
+          onReloadPress={reloadPage}
+          onViewModeChange={selectBrowserViewMode}
+          viewMode={browserViewMode}
+        />
+      </View>
+      <View className="absolute inset-x-0 bottom-0 z-20">
+        <MobileBrowserKeyboardChrome
+          bottomInset={bottomInset}
+          disabled={controlsDisabled}
+          keyboardLift={keyboardLift}
+          keyboardValue={keyboardValue}
+          onKeyboardValueChange={setKeyboardValue}
+          onKeyPress={(key) => void sendKeypress(key)}
+          onModifierToggle={togglePointerModifier}
+          onSendPress={() => void sendKeyboardText()}
           selectedModifiers={pointerModifiers}
-          onToggle={togglePointerModifier}
         />
-        <MobileBrowserKeyRow
-          disabled={controlsDisabled}
-          onKeypress={(key) => void sendKeypress(key)}
-        />
-        <View className="flex-row items-center px-3 pt-1 pb-1.5">
-          <TextInput
-            className="bg-secondary text-foreground mr-2 h-9 flex-1 rounded-xl px-3 font-mono text-sm"
-            value={keyboardValue}
-            onChangeText={setKeyboardValue}
-            placeholder="Type on page…"
-            placeholderTextColorClassName="accent-muted-foreground"
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!controlsDisabled}
-            onSubmitEditing={() => void sendKeyboardText()}
-          />
-          <Pressable
-            className={cn(
-              'h-9 w-9 items-center justify-center rounded-xl bg-secondary',
-              (controlsDisabled || !keyboardValue) && 'opacity-40'
-            )}
-            disabled={controlsDisabled || !keyboardValue}
-            onPress={() => void sendKeyboardText()}
-            accessibilityLabel="Send text to browser"
-          >
-            <ArrowUp size={18} colorClassName="accent-muted-foreground" />
-          </Pressable>
-        </View>
-      </MobileGlassSurface>
+      </View>
     </View>
   )
 }
@@ -1480,9 +1402,3 @@ function updatePinchZoom(
     MAX_ZOOM
   )
 }
-
-const styles = {
-  dialogButton: cn('min-h-9 items-center justify-center rounded-xl bg-secondary px-3'),
-  dialogButtonPressedActive: cn('active:bg-accent'),
-  dialogButtonText: cn('text-muted-foreground text-sm font-semibold')
-} as const

@@ -1,14 +1,6 @@
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
-import {
-  CaretLeft as ChevronLeft,
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw,
-  X
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-
-import { styles } from './styles'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 type Props = {
   embedded: boolean
@@ -32,21 +24,14 @@ export function MobileSourceControlHeader({
   prNumber = null
 }: Props) {
   return (
-    <View className="min-h-15 flex-row items-center px-2">
-      <Pressable
-        className={cn('w-9 h-9 items-center justify-center mr-1', 'active:bg-accent')}
-        onPress={onBack}
-        hitSlop={8}
+    <View className="min-h-15 flex-row items-center gap-2 px-3">
+      <MobileGlassIconButton
         accessibilityLabel={embedded ? 'Close source control' : 'Back to session'}
-      >
-        {embedded ? (
-          <X size={22} colorClassName="accent-muted-foreground" />
-        ) : (
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        )}
-      </Pressable>
+        icon={embedded ? 'close' : 'back'}
+        onPress={onBack}
+      />
       <View className="min-w-0 flex-1">
-        <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
+        <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Source Control
         </Text>
         <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
@@ -54,29 +39,22 @@ export function MobileSourceControlHeader({
         </Text>
       </View>
       {onOpenPrWeb ? (
-        <Pressable
-          className={cn(styles.refreshButton, 'active:bg-accent')}
-          onPress={onOpenPrWeb}
-          hitSlop={8}
-          accessibilityRole="link"
+        <MobileGlassIconButton
           accessibilityLabel={
             prNumber != null
               ? `Open pull request #${prNumber} on the web`
               : 'Open pull request on the web'
           }
-        >
-          <ExternalLink size={18} colorClassName="accent-muted-foreground" />
-        </Pressable>
+          icon="external"
+          onPress={onOpenPrWeb}
+        />
       ) : null}
-      <Pressable
-        className={cn(styles.refreshButton, ioBusy && 'opacity-50', 'active:bg-accent')}
-        onPress={onRefresh}
-        disabled={ioBusy}
-        hitSlop={8}
+      <MobileGlassIconButton
         accessibilityLabel="Refresh source control"
-      >
-        <RefreshCw size={18} colorClassName="accent-muted-foreground" />
-      </Pressable>
+        disabled={ioBusy}
+        icon="refresh"
+        onPress={onRefresh}
+      />
     </View>
   )
 }

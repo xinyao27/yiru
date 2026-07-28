@@ -1,18 +1,9 @@
 import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Alert,
-  BackHandler,
-  Platform,
-  Pressable,
-  Text,
-  View,
-  useWindowDimensions
-} from 'react-native'
+import { Alert, BackHandler, Platform, Text, View, useWindowDimensions } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
-import { CaretLeft as ChevronLeft, FloppyDisk as Save } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { getWorktreeLabel } from '../session/worktree-label'
@@ -253,28 +244,22 @@ export function MobileFilePreviewScreen({ route }: Props) {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <Pressable
+                  <MobileGlassIconButton
                     accessibilityLabel="Back"
-                    className="h-9 w-9 items-center justify-center rounded-full"
+                    icon="back"
                     onPress={requestBack}
-                  >
-                    <ChevronLeft size={20} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 ),
           headerRight:
             Platform.OS === 'ios' || !isEditableTerminalArtifact
               ? undefined
               : () => (
-                  <Pressable
-                    className={cn(
-                      'h-9 w-9 items-center justify-center rounded-full bg-secondary',
-                      (!canSaveArtifact || saving) && 'opacity-40'
-                    )}
+                  <MobileGlassIconButton
+                    accessibilityLabel="Save terminal artifact"
                     disabled={!canSaveArtifact || saving}
+                    icon="save"
                     onPress={() => void saveArtifact()}
-                  >
-                    <Save size={18} colorClassName="accent-foreground" />
-                  </Pressable>
+                  />
                 )
         }}
       />
@@ -298,7 +283,7 @@ export function MobileFilePreviewScreen({ route }: Props) {
           />
         </Stack.Toolbar>
       ) : null}
-      <Text className="text-muted-foreground bg-card px-4 py-1 text-xs" numberOfLines={1}>
+      <Text className="text-muted-foreground px-4 py-1 text-xs" numberOfLines={1}>
         {meta}
       </Text>
       <MobileFilePreviewBody

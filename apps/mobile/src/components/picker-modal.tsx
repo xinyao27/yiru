@@ -5,6 +5,7 @@ import { Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassSection } from './glass/section'
 
 export type PickerOption<T extends string = string> = {
   value: T
@@ -67,7 +68,7 @@ function PickerModalContent<T extends string = string>({
   // Why: closed BottomDrawer instances return null, so keeping option rows in
   // this child avoids rebuilding hidden picker contents on every parent render.
   return (
-    <View className="bg-card overflow-hidden rounded-2xl">
+    <MobileGlassSection>
       {options.map((opt, i) => {
         const isSelected = opt.value === selected
         return (
@@ -115,6 +116,6 @@ function PickerModalContent<T extends string = string>({
           </View>
         )
       })}
-    </View>
+    </MobileGlassSection>
   )
 }

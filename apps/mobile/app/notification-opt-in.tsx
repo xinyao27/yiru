@@ -1,11 +1,12 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, BackHandler, ScrollView, Text, View } from 'react-native'
 
 import { BellRinging as BellRing } from '@/components/uniwind-icons'
 import { SafeAreaView } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
 
+import { MobileGlassSurface } from '../src/components/glass/surface'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { ensureNotificationPermissions } from '../src/notifications/notifications'
 import { savePushNotificationsEnabled } from '../src/storage/preferences'
@@ -60,9 +61,9 @@ export default function NotificationOptInScreen() {
         </View>
 
         <View className="grow items-center justify-center py-6">
-          <View className="bg-secondary mb-6 h-16 w-16 items-center justify-center rounded-3xl">
+          <MobileGlassSurface className="mb-6 h-16 w-16 items-center justify-center rounded-3xl">
             <BellRing size={30} colorClassName="accent-foreground" />
-          </View>
+          </MobileGlassSurface>
           <Text className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
             Notifications
           </Text>
@@ -83,41 +84,35 @@ export default function NotificationOptInScreen() {
               {error}
             </Text>
           ) : null}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Enable agent notifications"
-            disabled={busyChoice !== null}
-            className={cn(
-              'min-h-11 items-center justify-center rounded-2xl bg-primary py-2',
-              styles.buttonPressedActive,
-              busyChoice !== null && styles.buttonDisabled
-            )}
-            onPress={() => void choose('enable')}
-          >
-            {busyChoice === 'enable' ? (
+          {busyChoice === 'enable' ? (
+            <View className="min-h-11 items-center justify-center">
               <ActivityIndicator colorClassName="accent-primary-foreground" />
-            ) : (
-              <Text className="text-primary-foreground text-sm font-semibold">
-                Enable notifications
-              </Text>
-            )}
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            disabled={busyChoice !== null}
-            className={cn(
-              'mt-1 min-h-11 items-center justify-center rounded-2xl py-2',
-              styles.buttonPressedActive,
-              busyChoice !== null && styles.buttonDisabled
-            )}
-            onPress={() => void choose('skip')}
-          >
-            {busyChoice === 'skip' ? (
+            </View>
+          ) : (
+            <MobileGlassTextButton
+              accessibilityLabel="Enable agent notifications"
+              disabled={busyChoice !== null}
+              isFullWidth
+              isProminent
+              label="Enable notifications"
+              onPress={() => void choose('enable')}
+              size="large"
+            />
+          )}
+          {busyChoice === 'skip' ? (
+            <View className="mt-2 min-h-11 items-center justify-center">
               <ActivityIndicator colorClassName="accent-muted-foreground" />
-            ) : (
-              <Text className="text-muted-foreground text-sm font-medium">Not now</Text>
-            )}
-          </Pressable>
+            </View>
+          ) : (
+            <MobileGlassTextButton
+              className="mt-2"
+              disabled={busyChoice !== null}
+              isFullWidth
+              label="Not now"
+              onPress={() => void choose('skip')}
+              size="large"
+            />
+          )}
           <Text className="text-muted-foreground mt-2 text-center text-xs leading-5">
             You can change this any time in Settings.
           </Text>
@@ -126,8 +121,3 @@ export default function NotificationOptInScreen() {
     </SafeAreaView>
   )
 }
-
-const styles = {
-  buttonPressedActive: cn('active:bg-accent'),
-  buttonDisabled: cn('opacity-60')
-} as const

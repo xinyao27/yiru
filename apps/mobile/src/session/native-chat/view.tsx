@@ -10,11 +10,13 @@ import {
   Text,
   View
 } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
-import { MobileGlassSurface } from '../../components/glass/surface'
-import { ArrowDown } from '../../components/uniwind-icons'
+import { MobileGlassIconButton } from '../../components/glass/icon-button'
 import { GestureDetector, GestureHandlerRootView } from '../../components/uniwind-native-components'
 import { useSafeAreaInsets } from '../../components/uniwind-native-components'
+import { resolveCssNumber } from '../../style/resolve-css-variable'
+import type { MobileImageSource } from '../image-source-picker'
 import type { AskAnswerSelection, AskPrompt } from './ask'
 import { MobileNativeChatAsk } from './ask-wizard'
 import { MobileNativeChatComposer } from './composer'
@@ -56,7 +58,7 @@ type MobileNativeChatViewProps = {
   pending: { id: string; text: string }[]
   composerText: string
   onComposerTextChange: (text: string) => void
-  onAttachImage?: () => void
+  onAttachImage?: (source: MobileImageSource) => void
   isAttaching?: boolean
   inputLockReason?: MobileNativeChatInputLockReason | null
   filePaths?: string[]
@@ -112,8 +114,13 @@ export function MobileNativeChatView({
   keyboardInset = 0
 }: MobileNativeChatViewProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
+  const [transcriptClearanceValue, jumpButtonGapValue] = useCSSVariable([
+    '--spacing-6',
+    '--spacing-2'
+  ])
+  const transcriptClearance = resolveCssNumber(transcriptClearanceValue)
+  const jumpButtonGap = resolveCssNumber(jumpButtonGapValue)
   const listRef = useRef<FlatList<NativeChatMessage>>(null)
-  const [toolsExpanded, setToolsExpanded] = useState(false)
   // Dismiss the question card as soon as it's answered; the live status lingers
   // briefly (the agent emits a post-tool event with the same prompt), so hide it
   // until a genuinely different question arrives.
@@ -122,7 +129,11 @@ export function MobileNativeChatView({
   // never sits under the home indicator / nav bar (mirrors the terminal dock).
   const bottomPad = keyboardInset > 0 ? keyboardInset + insets.bottom : insets.bottom
   const [bottomChromeHeight, setBottomChromeHeight] = useState(88)
+  const bottomChromeHeightRef = useRef(bottomChromeHeight)
+  const hasMeasuredBottomChromeRef = useRef(false)
   const [atBottom, setAtBottom] = useState(true)
+  const atBottomRef = useRef(true)
+  const hasUserScrolledRef = useRef(false)
   const sendScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { fontScale, pinchGesture } = useMobileNativeChatPinchGesture()
   // Surface a rejected send inline above the composer — a bottom toast gets hidden
@@ -160,12 +171,12 @@ export function MobileNativeChatView({
   // we don't yank the user away while they read history. (Also fires on keyboard
   // close, which is harmless while atBottom.)
   useEffect(() => {
-    if (data.length === 0 || !atBottom) {
+    if (data.length === 0 || (hasUserScrolledRef.current && !atBottom)) {
       return
     }
     const t = setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 60)
     return () => clearTimeout(t)
-  }, [data.length, atBottom, keyboardInset])
+  }, [data.length, atBottom, keyboardInset, bottomChromeHeight])
 
   const handleSend = useCallback(
     async (text: string): Promise<boolean> => {
@@ -176,6 +187,8 @@ export function MobileNativeChatView({
       }
       setSendFailed(false)
       // Always jump to the newest message when the user sends.
+      hasUserScrolledRef.current = false
+      atBottomRef.current = true
       setAtBottom(true)
       if (sendScrollTimerRef.current) {
         clearTimeout(sendScrollTimerRef.current)
@@ -193,7 +206,9 @@ export function MobileNativeChatView({
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
       const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height)
-      setAtBottom(distanceFromBottom < 80)
+      const isAtBottom = distanceFromBottom < 80
+      atBottomRef.current = isAtBottom
+      setAtBottom(isAtBottom)
       // Near the top — page in older history.
       if (contentOffset.y < 60 && hasMore && !loadingEarlier) {
         onLoadEarlier?.()
@@ -202,24 +217,23 @@ export function MobileNativeChatView({
     [hasMore, loadingEarlier, onLoadEarlier]
   )
 
-  // Align a single message's top to the top of the viewport.
-  const onScrollToMessage = useCallback((index: number) => {
-    listRef.current?.scrollToIndex({ index, viewPosition: 0, animated: true })
+  const handleJumpToLatest = useCallback(() => {
+    hasUserScrolledRef.current = false
+    atBottomRef.current = true
+    setAtBottom(true)
+    listRef.current?.scrollToEnd({ animated: true })
   }, [])
 
   const renderItem = useCallback(
-    ({ item, index }: { item: NativeChatMessage; index: number }) => (
+    ({ item }: { item: NativeChatMessage }) => (
       <MobileNativeChatMessage
         message={item}
         queued={pendingIds.has(item.id)}
-        toolsExpanded={toolsExpanded}
         fontScale={fontScale}
-        messageIndex={index}
-        onScrollToMessage={onScrollToMessage}
         onOpenFile={onOpenFile}
       />
     ),
-    [pendingIds, toolsExpanded, fontScale, onScrollToMessage, onOpenFile]
+    [pendingIds, fontScale, onOpenFile]
   )
 
   const emptyState = mobileNativeChatEmptyState(status, agent ?? null, error)
@@ -239,20 +253,27 @@ export function MobileNativeChatView({
     return () => clearTimeout(timer)
   }, [rawLockReason])
   const lockReason = lockHeld ? rawLockReason : null
-  const transcriptContentStyle = useMemo(
-    () => ({ paddingBottom: bottomChromeHeight + bottomPad + 8 }),
-    [bottomChromeHeight, bottomPad]
-  )
-  const bottomChromeStyle = useMemo(() => ({ bottom: bottomPad }), [bottomPad])
-  const jumpToLatestStyle = useMemo(
-    () => ({ bottom: bottomChromeHeight + bottomPad + 8 }),
-    [bottomChromeHeight, bottomPad]
+  const transcriptFooterStyle = useMemo(
+    () => ({ height: bottomChromeHeight + bottomPad + transcriptClearance }),
+    [bottomChromeHeight, bottomPad, transcriptClearance]
   )
   const handleBottomChromeLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = Math.ceil(event.nativeEvent.layout.height)
-    setBottomChromeHeight((height) => (height === nextHeight ? height : nextHeight))
+    const shouldFollowTail =
+      !hasMeasuredBottomChromeRef.current || !hasUserScrolledRef.current || atBottomRef.current
+    hasMeasuredBottomChromeRef.current = true
+    if (bottomChromeHeightRef.current === nextHeight) {
+      if (shouldFollowTail) {
+        requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }))
+      }
+      return
+    }
+    bottomChromeHeightRef.current = nextHeight
+    setBottomChromeHeight(nextHeight)
+    if (shouldFollowTail) {
+      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }))
+    }
   }, [])
-
   return (
     <View className="bg-background relative flex-1">
       {showLoading ? (
@@ -268,28 +289,16 @@ export function MobileNativeChatView({
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
               contentContainerClassName="grow pt-2"
-              contentContainerStyle={transcriptContentStyle}
+              ListFooterComponent={data.length > 0 ? <View style={transcriptFooterStyle} /> : null}
               onScroll={onScroll}
+              onScrollBeginDrag={() => {
+                hasUserScrolledRef.current = true
+              }}
               scrollEventThrottle={32}
               onContentSizeChange={() => {
-                if (data.length > 0 && atBottom) {
+                if (data.length > 0 && (!hasUserScrolledRef.current || atBottomRef.current)) {
                   listRef.current?.scrollToEnd({ animated: false })
                 }
-              }}
-              // scrollToIndex can fail before an off-screen row is measured —
-              // fall back to an estimated offset, then retry once it's laid out.
-              onScrollToIndexFailed={(info) => {
-                listRef.current?.scrollToOffset({
-                  offset: info.averageItemLength * info.index,
-                  animated: true
-                })
-                setTimeout(() => {
-                  listRef.current?.scrollToIndex({
-                    index: info.index,
-                    viewPosition: 0,
-                    animated: true
-                  })
-                }, 120)
               }}
               ListHeaderComponent={
                 hasMore ? (
@@ -322,29 +331,25 @@ export function MobileNativeChatView({
               }
             />
           </GestureDetector>
-          {/* Jump-to-latest control. The scroll-to-top affordance now lives
-              per-message (the up-arrow in each agent message's controls). */}
           {!atBottom ? (
-            <MobileGlassSurface
-              className="absolute right-3 h-10 w-10 overflow-hidden rounded-full"
-              isInteractive
-              style={jumpToLatestStyle}
+            <View
+              className="absolute right-0 left-0 items-center"
+              pointerEvents="box-none"
+              style={{ bottom: bottomChromeHeight + bottomPad + jumpButtonGap }}
             >
-              <Pressable
+              <MobileGlassIconButton
                 accessibilityLabel="Scroll to latest"
-                className="active:bg-accent h-10 w-10 items-center justify-center rounded-full"
-                onPress={() => listRef.current?.scrollToEnd({ animated: true })}
-              >
-                <ArrowDown size={18} colorClassName="accent-foreground" />
-              </Pressable>
-            </MobileGlassSurface>
+                icon="down"
+                onPress={handleJumpToLatest}
+              />
+            </View>
           ) : null}
         </GestureHandlerRootView>
       )}
       <View
         className="absolute right-0 left-0"
         onLayout={handleBottomChromeLayout}
-        style={bottomChromeStyle}
+        style={{ bottom: bottomPad }}
       >
         {/* Pending agent prompt: a structured AskUserQuestion wins, then a
             heuristic permission, then a heuristic question. */}
@@ -398,8 +403,6 @@ export function MobileNativeChatView({
           onNeedFiles={onNeedFiles}
           agentWorking={agentWorking}
           onStop={onStop}
-          toolsExpanded={toolsExpanded}
-          onToggleToolsExpanded={() => setToolsExpanded((expanded) => !expanded)}
           sendFailureMessage={
             sendFailed
               ? rawLockReason === 'disconnected'

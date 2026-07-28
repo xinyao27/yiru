@@ -7,7 +7,7 @@ export const PR_SIDEBAR_DOCK_WIDTH = 320
 export const mobilePrSidebarStyles = {
   // The inline-docked column lives in the screen's flex row beside the diff.
   dockColumn: cn('border-l-hairline border-l-border bg-background w-80'),
-  section: cn('mx-3 mt-3 overflow-hidden rounded-2xl bg-card'),
+  section: cn('mx-3 mt-3'),
 
   sectionBody: cn('p-3 gap-2'),
 

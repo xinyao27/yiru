@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, Switch, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Switch, Text, TextInput, View } from 'react-native'
 
 import {
   ArrowRight,
   GitMerge,
   GitPullRequest as GitPullRequestArrow,
   Sparkle as Sparkles,
-  Warning as TriangleAlert,
-  X
+  Warning as TriangleAlert
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
@@ -25,6 +24,10 @@ import {
 } from '../../source-control/pr-create'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { RpcSuccess } from '../../transport/types'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassPressable } from '../glass/pressable'
+import { MobileGlassSurface } from '../glass/surface'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { MobilePrBasePicker } from '../pr-base-picker'
 import { mobilePrComposeFormStyles as styles } from './pr-compose-form-styles'
 
@@ -171,35 +174,30 @@ export function MobilePrComposeForm({
           <Text className="text-foreground text-sm font-bold">New {copy.reviewLabel}</Text>
         </View>
         <View className="flex-row items-center gap-1">
-          <Pressable
-            className={cn(
-              'border-hairline border-border bg-card min-h-8 flex-row items-center justify-center gap-1 rounded-xl px-2',
-              'active:bg-accent'
-            )}
+          <MobileGlassPressable
+            accessibilityLabel={`Generate ${copy.reviewLabel} details with AI`}
+            accessibilityRole="button"
+            className="min-h-8 rounded-full"
+            contentClassName="min-h-8 flex-row items-center justify-center gap-1 rounded-full px-3"
             disabled={generating || submitting}
             onPress={() => void generate()}
-            accessibilityRole="button"
-            accessibilityLabel={`Generate ${copy.reviewLabel} details with AI`}
           >
             {generating ? (
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : (
               <Sparkles size={13} colorClassName="accent-muted-foreground" />
             )}
-            <Text className="text-muted-foreground text-xs font-bold">
+            <Text className="text-muted-foreground text-xs">
               {generating ? 'Generating…' : 'Generate'}
             </Text>
-          </Pressable>
-          <Pressable
-            className="min-h-8 min-w-8 items-center justify-center"
-            onPress={onCancel}
-            disabled={submitting}
-            accessibilityRole="button"
+          </MobileGlassPressable>
+          <MobileGlassIconButton
             accessibilityLabel="Cancel"
-            hitSlop={8}
-          >
-            <X size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            disabled={submitting}
+            icon="close"
+            onPress={onCancel}
+            size="small"
+          />
         </View>
       </View>
 
@@ -219,26 +217,30 @@ export function MobilePrComposeForm({
       ) : null}
 
       <View className="gap-2">
-        <TextInput
-          className="bg-secondary text-foreground min-h-10 rounded-xl px-3 py-2 text-sm font-semibold"
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Title"
-          placeholderTextColorClassName="accent-muted-foreground"
-          editable={!fieldsLocked}
-          accessibilityLabel={`${copy.titleLabel} title`}
-        />
-        <TextInput
-          className="bg-secondary text-foreground min-h-30 rounded-xl px-3 py-2 text-sm"
-          style={{ textAlignVertical: 'top' }}
-          value={body}
-          onChangeText={setBody}
-          placeholder="Description (optional)"
-          placeholderTextColorClassName="accent-muted-foreground"
-          multiline
-          editable={!fieldsLocked}
-          accessibilityLabel={`${copy.titleLabel} description`}
-        />
+        <MobileGlassSurface className="min-h-10 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground min-h-10 px-3 py-2 text-sm"
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Title"
+            placeholderTextColorClassName="accent-muted-foreground"
+            editable={!fieldsLocked}
+            accessibilityLabel={`${copy.titleLabel} title`}
+          />
+        </MobileGlassSurface>
+        <MobileGlassSurface className="min-h-30 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground min-h-30 px-3 py-2 text-sm"
+            style={{ textAlignVertical: 'top' }}
+            value={body}
+            onChangeText={setBody}
+            placeholder="Description (optional)"
+            placeholderTextColorClassName="accent-muted-foreground"
+            multiline
+            editable={!fieldsLocked}
+            accessibilityLabel={`${copy.titleLabel} description`}
+          />
+        </MobileGlassSurface>
       </View>
 
       {generating ? (
@@ -261,8 +263,8 @@ export function MobilePrComposeForm({
         </View>
       </View>
 
-      <View className="border-hairline border-border bg-card min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2">
-        <Text className="text-foreground text-xs font-bold">Create as draft</Text>
+      <MobileGlassSurface className="min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2">
+        <Text className="text-foreground text-xs">Create as draft</Text>
         <Switch
           value={draft}
           onValueChange={setDraft}
@@ -272,7 +274,7 @@ export function MobilePrComposeForm({
           thumbColorClassName="accent-foreground disabled:accent-muted-foreground"
           ios_backgroundColorClassName="accent-secondary"
         />
-      </View>
+      </MobileGlassSurface>
       {error || submitDisabledReason ? (
         <View className={styles.notice}>
           <TriangleAlert size={13} colorClassName="accent-destructive" />
@@ -281,31 +283,29 @@ export function MobilePrComposeForm({
           </Text>
         </View>
       ) : null}
-      <Pressable
-        className={cn(
-          'mt-1 min-h-11 flex-row items-center justify-center gap-1 rounded-xl bg-primary',
-          (submitting || !canSubmit) && 'opacity-50',
-          'active:bg-accent'
-        )}
-        disabled={submitting || !canSubmit}
-        onPress={() => void submit()}
-        accessibilityRole="button"
-      >
-        {submitting ? (
-          <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-        ) : (
-          <ReviewIcon size={14} colorClassName="accent-primary-foreground" />
-        )}
-        <Text className="text-primary-foreground text-sm font-bold">
-          {pushBeforeCreate
-            ? draft
-              ? `Push & create draft ${copy.shortLabel}`
-              : `Push & create ${copy.shortLabel}`
-            : draft
-              ? `Create draft ${copy.shortLabel}`
-              : `Create ${copy.shortLabel}`}
-        </Text>
-      </Pressable>
+      {submitting ? (
+        <View className="mt-1 min-h-11 items-center justify-center">
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        </View>
+      ) : (
+        <MobileGlassTextButton
+          className="mt-1"
+          disabled={!canSubmit}
+          isFullWidth
+          isProminent
+          label={
+            pushBeforeCreate
+              ? draft
+                ? `Push & create draft ${copy.shortLabel}`
+                : `Push & create ${copy.shortLabel}`
+              : draft
+                ? `Create draft ${copy.shortLabel}`
+                : `Create ${copy.shortLabel}`
+          }
+          onPress={() => void submit()}
+          size="large"
+        />
+      )}
     </View>
   )
 }

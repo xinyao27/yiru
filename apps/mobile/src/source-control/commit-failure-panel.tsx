@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import {
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  Sparkle as Sparkles
-} from '@/components/uniwind-icons'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import type { MobileCommitFailureRecovery } from './commit-failure-recovery'
 import type { MobileCommitFailureRecoveryAction } from './use-commit-failure-recovery'
 
@@ -30,24 +27,18 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
             {action.summary ?? 'Commit failed.'}
           </Text>
         </View>
-        <Pressable
-          className={cn(
-            'min-h-9 px-3 bg-primary flex-row items-center justify-center gap-1',
-            action.launching && 'opacity-50',
-            'active:bg-accent'
-          )}
-          onPress={() => void action.launch()}
-          disabled={action.launching}
-          accessibilityRole="button"
-          accessibilityLabel="Fix commit failure with AI"
-        >
-          {action.launching ? (
-            <ActivityIndicator colorClassName="accent-primary-foreground" />
-          ) : (
-            <Sparkles size={14} colorClassName="accent-primary-foreground" />
-          )}
-          <Text className="text-primary-foreground text-xs font-bold">Fix</Text>
-        </Pressable>
+        {action.launching ? (
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
+        ) : (
+          <MobileGlassTextButton
+            accessibilityLabel="Fix commit failure with AI"
+            disabled={action.launching}
+            isProminent
+            label="Fix"
+            onPress={() => void action.launch()}
+            size="small"
+          />
+        )}
       </View>
       {action.hasDetails && detailsText ? (
         <>

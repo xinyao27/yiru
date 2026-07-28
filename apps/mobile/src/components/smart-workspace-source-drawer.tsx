@@ -1,6 +1,6 @@
 import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model/workspace'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, FlatList, Text, TextInput, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
@@ -21,6 +21,11 @@ import {
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
+import { MobileGlassGroup } from './glass/group'
+import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassSection } from './glass/section'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 import { SmartSourceModeIcon } from './smart-source-mode-icon'
 import { SmartWorkspaceSourceRow } from './smart-workspace-source-row'
 
@@ -148,139 +153,129 @@ export function SmartWorkspaceSourceDrawer({
     >
       <View className="flex-row items-center justify-between px-1 pb-2">
         <Text className="text-foreground text-sm font-semibold">Name or 'Create From'</Text>
-        <Pressable onPress={closeSoon} hitSlop={8}>
-          <Text className="text-primary text-sm font-semibold">Done</Text>
-        </Pressable>
+        <MobileGlassPressable
+          className="rounded-full"
+          contentClassName="min-h-8 items-center justify-center rounded-full px-3"
+          hitSlop={8}
+          onPress={closeSoon}
+        >
+          <Text className="text-foreground text-sm font-semibold">Done</Text>
+        </MobileGlassPressable>
       </View>
 
-      <TextInput
-        className="border-border bg-secondary text-foreground mb-2 rounded-xl border px-3 py-2 text-sm"
-        value={composer.name}
-        onChangeText={composer.setName}
-        placeholder="Type a name or search a source"
-        placeholderTextColorClassName="accent-muted-foreground"
-        autoCapitalize="none"
-        autoCorrect={false}
-        autoFocus
-      />
+      <MobileGlassSurface className="mb-2 min-h-10 overflow-hidden rounded-full" isInteractive>
+        <TextInput
+          className="text-foreground min-h-10 rounded-full px-4 text-sm"
+          value={composer.name}
+          onChangeText={composer.setName}
+          placeholder="Type a name or search a source"
+          placeholderTextColorClassName="accent-muted-foreground"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoFocus
+        />
+      </MobileGlassSurface>
 
-      <View className="mb-2 flex-row flex-wrap gap-1">
+      <MobileGlassGroup className="mb-2 flex-row flex-wrap gap-2" spacing={8}>
         {SMART_MODE_OPTIONS.filter((option: SmartModeOption) =>
           availableModes.includes(option.id)
         ).map((option) => {
           const selected = option.id === effectiveMode
           return (
-            <Pressable
+            <MobileGlassPressable
               key={option.id}
-              className={cn(
-                'border-border flex-row items-center gap-1 rounded-full border px-2.5 py-1.5',
-                selected && 'bg-card border-muted-foreground'
-              )}
+              className="rounded-full"
+              contentClassName="flex-row items-center gap-1 rounded-full px-3 py-2"
               onPress={() => setMode(option.id)}
+              tintColorClassName={selected ? 'accent-primary' : undefined}
             >
               <SmartSourceModeIcon
                 icon={option.icon}
                 colorClassName={selected ? 'accent-foreground' : 'accent-muted-foreground'}
               />
-              <Text
-                className={cn(
-                  'text-xs text-muted-foreground',
-                  selected && 'text-foreground font-semibold'
-                )}
-              >
+              <Text className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}>
                 {option.label}
               </Text>
-            </Pressable>
+            </MobileGlassPressable>
           )
         })}
-      </View>
+      </MobileGlassGroup>
 
       {effectiveMode === 'gitlab' ? (
-        <View className="mb-2 flex-row gap-1">
+        <MobileGlassGroup className="mb-2 flex-row gap-2" spacing={8}>
           {MR_STATE_FILTER_OPTIONS.map((option) => {
             const selected = option.id === mrStateFilter
             return (
-              <Pressable
+              <MobileGlassPressable
                 key={option.id}
-                className={cn(
-                  'border-border rounded-full border px-3 py-1',
-                  selected && 'bg-card border-muted-foreground'
-                )}
+                className="rounded-full"
+                contentClassName="rounded-full px-3 py-2"
                 onPress={() => setMrStateFilter(option.id)}
+                tintColorClassName={selected ? 'accent-primary' : undefined}
               >
                 <Text
-                  className={cn(
-                    'text-xs text-muted-foreground',
-                    selected && 'text-foreground font-semibold'
-                  )}
+                  className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}
                 >
                   {option.label}
                 </Text>
-              </Pressable>
+              </MobileGlassPressable>
             )
           })}
-        </View>
+        </MobileGlassGroup>
       ) : null}
 
       {crossRepoPrompt ? (
-        <View className="border-border bg-secondary mb-2 gap-2 rounded-2xl border p-3">
+        <MobileGlassSection className="mb-2 gap-2 p-3">
           <Text className="text-muted-foreground text-xs">
             This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
           </Text>
           <View className="flex-row justify-end gap-2">
-            <Pressable
-              className="border-border rounded-xl border px-3 py-1.5"
-              onPress={dismissCrossRepoPrompt}
-            >
-              <Text className="text-muted-foreground text-xs">Cancel</Text>
-            </Pressable>
-            <Pressable
-              className="border-muted-foreground bg-card rounded-xl border px-3 py-1.5"
+            <MobileGlassTextButton label="Cancel" onPress={dismissCrossRepoPrompt} size="small" />
+            <MobileGlassTextButton
+              isProminent
+              label={`Switch to ${crossRepoPrompt.matchingRepo.displayName}`}
               onPress={() => void handleAcceptCrossRepo()}
-            >
-              <Text className="text-foreground text-xs font-semibold">
-                Switch to {crossRepoPrompt.matchingRepo.displayName}
-              </Text>
-            </Pressable>
+              size="small"
+            />
           </View>
-        </View>
+        </MobileGlassSection>
       ) : null}
 
       {!sshReady && effectiveMode !== 'text' ? (
-        <Text className={styles.notice}>Connect the repository to search sources.</Text>
+        <Text className="text-muted-foreground px-1 pb-2 text-xs">
+          Connect the repository to search sources.
+        </Text>
       ) : needsGitHubRemote ? (
-        <Text className={styles.notice}>
+        <Text className="text-muted-foreground px-1 pb-2 text-xs">
           This SSH repo needs a GitHub remote to list pull requests.
         </Text>
       ) : error ? (
         <Text className="text-destructive px-1 pb-2 text-xs">{error}</Text>
       ) : null}
 
-      <FlatList
-        data={rows}
-        keyExtractor={(row) => row.value}
-        className="bg-card max-h-96 grow-0 overflow-hidden rounded-2xl"
-        keyboardShouldPersistTaps="handled"
-        nestedScrollEnabled
-        ListFooterComponent={
-          loading ? (
-            <View className="items-center py-4">
-              <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-            </View>
-          ) : showEmpty ? (
-            <Text className="text-muted-foreground py-4 text-center text-xs">
-              {emptyHint || 'No results found.'}
-            </Text>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <SmartWorkspaceSourceRow row={item} onPress={() => handleSelectRow(item)} />
-        )}
-      />
+      <MobileGlassSection className="max-h-96 grow-0">
+        <FlatList
+          className="max-h-96 grow-0"
+          data={rows}
+          keyExtractor={(row) => row.value}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+          ListFooterComponent={
+            loading ? (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+              </View>
+            ) : showEmpty ? (
+              <Text className="text-muted-foreground py-4 text-center text-xs">
+                {emptyHint || 'No results found.'}
+              </Text>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <SmartWorkspaceSourceRow row={item} onPress={() => handleSelectRow(item)} />
+          )}
+        />
+      </MobileGlassSection>
     </BottomDrawer>
   )
 }
-
-const styles = {
-  notice: cn('text-xs text-muted-foreground px-1 pb-2')
-} as const

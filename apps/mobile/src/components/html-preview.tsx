@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Linking, Pressable, Text, View } from 'react-native'
+import { Linking, View } from 'react-native'
 
-import { Code, Eye } from '@/components/uniwind-icons'
+import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
 import { UniwindWebView } from '@/components/uniwind-web-view'
-import { cn } from '@/style/class-names'
 
 type Props = {
   html: string
@@ -11,32 +11,29 @@ type Props = {
   renderSource: () => React.ReactNode
 }
 
+type MobileHtmlPreviewMode = 'preview' | 'source'
+
+const HTML_PREVIEW_MODES: MobileGlassSegmentOption<MobileHtmlPreviewMode>[] = [
+  { label: 'Preview', value: 'preview' },
+  { label: 'Source', value: 'source' }
+]
+
 // Renders an agent-produced HTML artifact in a sandboxed WebView, with a
 // Preview/Source toggle. Navigation is locked: only the initial inline document
 // loads in-place; any link tap opens externally so a page can't hijack the
 // review surface.
 export function MobileHtmlPreview({ html, renderSource }: Props) {
-  const [mode, setMode] = useState<'preview' | 'source'>('preview')
+  const [mode, setMode] = useState<MobileHtmlPreviewMode>('preview')
 
   return (
     <View className="flex-1">
-      <View className="border-b-border flex-row gap-2 border-b px-3 py-2">
-        <Pressable
-          className={cn(styles.toggle, mode === 'preview' && styles.toggleActive)}
-          onPress={() => setMode('preview')}
-          accessibilityLabel="Preview rendered HTML"
-        >
-          <Eye size={13} colorClassName="accent-muted-foreground" />
-          <Text className={styles.toggleText}>Preview</Text>
-        </Pressable>
-        <Pressable
-          className={cn(styles.toggle, mode === 'source' && styles.toggleActive)}
-          onPress={() => setMode('source')}
-          accessibilityLabel="View HTML source"
-        >
-          <Code size={13} colorClassName="accent-muted-foreground" />
-          <Text className={styles.toggleText}>Source</Text>
-        </Pressable>
+      <View className="mx-3 my-2">
+        <MobileGlassSegmentedControl
+          accessibilityLabel="HTML view"
+          options={HTML_PREVIEW_MODES}
+          value={mode}
+          onChange={setMode}
+        />
       </View>
       {mode === 'preview' ? (
         <UniwindWebView
@@ -61,9 +58,3 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
     </View>
   )
 }
-
-const styles = {
-  toggle: cn('flex-row items-center gap-1.5 rounded-lg bg-secondary px-2 py-1'),
-  toggleActive: cn('border-border border bg-card'),
-  toggleText: cn('text-muted-foreground text-xs')
-} as const

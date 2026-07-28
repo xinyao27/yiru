@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
+import { MobileGlassSurface } from '@/components/glass/surface'
 import { Code, Pencil } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
@@ -41,7 +42,10 @@ export function MobileFileMarkdownPreview({
 
   return (
     <View className="bg-editor-surface flex-1">
-      <View className="border-hairline border-border bg-card mx-3 my-2 flex-row self-start overflow-hidden rounded-xl p-px">
+      <MobileGlassSurface
+        className="mx-3 my-2 flex-row self-start overflow-hidden rounded-xl p-px"
+        isInteractive
+      >
         <Pressable
           className={cn(styles.modeToggle, sourceSelected && styles.modeToggleActive)}
           onPress={() => setMode('source')}
@@ -66,7 +70,7 @@ export function MobileFileMarkdownPreview({
             colorClassName={previewSelected ? 'accent-foreground' : 'accent-muted-foreground'}
           />
         </Pressable>
-      </View>
+      </MobileGlassSurface>
       {mode === 'preview' ? (
         <ScrollView className={styles.scroll} contentContainerClassName="p-3 pb-6">
           {truncated ? <MobileFilePreviewTruncatedNote byteLength={byteLength} /> : null}

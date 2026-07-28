@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 
+import { MobileGlassSection } from '../src/components/glass/section'
 import { LoadingIndicator } from '../src/components/loading-indicator'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
@@ -34,7 +35,7 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
         <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose the animation shown while agents are working on this device.
         </Text>
-        <View className="bg-card mt-2 overflow-hidden rounded-2xl">
+        <MobileGlassSection className="mt-2">
           <Pressable
             accessibilityRole="button"
             className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
@@ -51,7 +52,7 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
             </View>
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-        </View>
+        </MobileGlassSection>
       </ScrollView>
 
       <PickerModal<MobileLoaderStyle>

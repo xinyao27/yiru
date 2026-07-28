@@ -47,6 +47,9 @@ import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-workt
 import { MobileAgentIcon } from './agent-icon'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 import { BottomDrawerModalHost } from './bottom-drawer-modal-host'
+import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 import {
   NEW_WORKTREE_AGENT_OPTIONS as AGENT_OPTIONS,
   NEW_WORKTREE_BLANK_AGENT as BLANK_TERMINAL,
@@ -790,19 +793,20 @@ function NewWorktreeModalContent({
         </View>
 
         {loading ? (
-          <View className={styles.loadingContainer}>
+          <View className="items-center py-6">
             <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
           </View>
         ) : repos.length === 0 ? (
-          <View className={styles.loadingContainer}>
+          <View className="items-center py-6">
             <Text className="text-muted-foreground text-sm">No repositories found</Text>
           </View>
         ) : (
           <>
-            <View className={styles.field}>
-              <Text className={styles.label}>Repository</Text>
-              <Pressable
-                className={styles.fieldButton}
+            <View className="mb-3">
+              <Text className="text-muted-foreground mb-1 text-xs font-medium">Repository</Text>
+              <MobileGlassPressable
+                className="rounded-xl"
+                contentClassName="flex-row items-center gap-2 px-3 py-2.5"
                 onPress={() => {
                   prepareSelectionPickerOpen()
                   transitionDrawer('repo')
@@ -810,18 +814,21 @@ function NewWorktreeModalContent({
               >
                 {selectedRepo ? (
                   <View
-                    className={styles.repoDot}
-                    style={[{ backgroundColor: repoBadgeColor(selectedRepo) }]}
+                    className="h-2 w-2"
+                    style={{ backgroundColor: repoBadgeColor(selectedRepo) }}
                   />
                 ) : null}
                 <Text
-                  className={cn(styles.fieldButtonText, !selectedRepo && 'text-muted-foreground')}
+                  className={cn(
+                    'text-foreground flex-1 text-sm',
+                    !selectedRepo && 'text-muted-foreground'
+                  )}
                   numberOfLines={1}
                 >
                   {selectedRepo?.displayName ?? 'Select a repository'}
                 </Text>
                 <ChevronDown size={14} colorClassName="accent-muted-foreground" />
-              </Pressable>
+              </MobileGlassPressable>
             </View>
 
             <SmartWorkspaceSourceField
@@ -837,8 +844,10 @@ function NewWorktreeModalContent({
             ) : null}
 
             {selectedRepoConnectionId ? (
-              <View className={styles.field}>
-                <Text className={styles.label}>SSH Connection</Text>
+              <View className="mb-3">
+                <Text className="text-muted-foreground mb-1 text-xs font-medium">
+                  SSH Connection
+                </Text>
                 <View className="border-border bg-secondary gap-1 rounded-2xl border px-3 py-2">
                   <View className="flex-row items-center gap-2">
                     <View
@@ -860,18 +869,12 @@ function NewWorktreeModalContent({
                       </Text>
                     </View>
                     {sshGate.status === 'connected' ? null : (
-                      <Pressable
-                        className={cn(
-                          'border border-border px-2 py-1',
-                          sshGate.connectInProgress && styles.disabled
-                        )}
+                      <MobileGlassTextButton
                         disabled={sshGate.connectInProgress}
+                        label={sshGate.connectInProgress ? 'Connecting...' : 'Connect'}
                         onPress={() => void connectSelectedSshRepo()}
-                      >
-                        <Text className="text-foreground text-xs font-semibold">
-                          {sshGate.connectInProgress ? 'Connecting...' : 'Connect'}
-                        </Text>
-                      </Pressable>
+                        size="small"
+                      />
                     )}
                   </View>
                   {sshGate.error ? (
@@ -881,10 +884,11 @@ function NewWorktreeModalContent({
               </View>
             ) : null}
 
-            <View className={styles.field}>
-              <Text className={styles.label}>Agent</Text>
-              <Pressable
-                className={cn(styles.fieldButton, sshGate.requiresConnection && styles.disabled)}
+            <View className="mb-3">
+              <Text className="text-muted-foreground mb-1 text-xs font-medium">Agent</Text>
+              <MobileGlassPressable
+                className="rounded-xl"
+                contentClassName="flex-row items-center gap-2 px-3 py-2.5"
                 disabled={sshGate.requiresConnection}
                 onPress={() => {
                   prepareSelectionPickerOpen()
@@ -892,11 +896,11 @@ function NewWorktreeModalContent({
                 }}
               >
                 <MobileAgentIcon agentId={selectedAgent.id} size={16} />
-                <Text className={styles.fieldButtonText} numberOfLines={1}>
+                <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
                   {sshGate.requiresConnection ? 'Connect repository first' : selectedAgent.label}
                 </Text>
                 <ChevronDown size={14} colorClassName="accent-muted-foreground" />
-              </Pressable>
+              </MobileGlassPressable>
             </View>
 
             <Pressable
@@ -918,23 +922,27 @@ function NewWorktreeModalContent({
                   selectedRepoIsGit={selectedRepoIsGit}
                 />
 
-                <View className={styles.field}>
-                  <Text className={styles.label}>Note</Text>
-                  <TextInput
-                    className="border-border bg-secondary text-foreground ios:py-2.5 rounded-xl border px-3 py-2 text-sm"
-                    value={note}
-                    onChangeText={setNote}
-                    placeholder="Write a note"
-                    placeholderTextColorClassName="accent-muted-foreground"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
+                <View className="mb-3">
+                  <Text className="text-muted-foreground mb-1 text-xs font-medium">Note</Text>
+                  <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+                    <TextInput
+                      className="text-foreground px-3 py-2.5 text-sm"
+                      value={note}
+                      onChangeText={setNote}
+                      placeholder="Write a note"
+                      placeholderTextColorClassName="accent-muted-foreground"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </MobileGlassSurface>
                 </View>
 
                 {setupCommand ? (
-                  <View className={styles.field}>
+                  <View className="mb-3">
                     <View className="mb-1 flex-row items-center justify-between">
-                      <Text className={styles.label}>Setup script</Text>
+                      <Text className="text-muted-foreground text-xs font-medium">
+                        Setup script
+                      </Text>
                       {setupSource && (
                         <View className="bg-secondary rounded-md px-1.5 py-0.5">
                           <Text className="text-muted-foreground text-xs font-semibold tracking-wide">
@@ -946,24 +954,26 @@ function NewWorktreeModalContent({
                     <View className="border-border bg-secondary rounded-2xl border p-3">
                       {setupRunPolicy === 'ask' ? (
                         <View className="mb-2 flex-row gap-2">
-                          <Pressable
+                          <MobileGlassPressable
                             className={cn(
-                              styles.setupChoiceButton,
-                              setupDecisionChoice === 'run' && styles.setupChoiceButtonSelected
+                              'flex-1 rounded-full',
+                              setupDecisionChoice === 'run' && 'border-muted-foreground'
                             )}
+                            contentClassName="min-h-8 items-center justify-center rounded-full px-3"
                             onPress={() => setSetupDecisionChoice('run')}
                           >
-                            <Text className={styles.setupChoiceText}>Run</Text>
-                          </Pressable>
-                          <Pressable
+                            <Text className="text-foreground text-sm">Run</Text>
+                          </MobileGlassPressable>
+                          <MobileGlassPressable
                             className={cn(
-                              styles.setupChoiceButton,
-                              setupDecisionChoice === 'skip' && styles.setupChoiceButtonSelected
+                              'flex-1 rounded-full',
+                              setupDecisionChoice === 'skip' && 'border-muted-foreground'
                             )}
+                            contentClassName="min-h-8 items-center justify-center rounded-full px-3"
                             onPress={() => setSetupDecisionChoice('skip')}
                           >
-                            <Text className={styles.setupChoiceText}>Skip</Text>
-                          </Pressable>
+                            <Text className="text-foreground text-sm">Skip</Text>
+                          </MobileGlassPressable>
                         </View>
                       ) : (
                         <View className="mb-2 flex-row items-center justify-between">
@@ -990,23 +1000,18 @@ function NewWorktreeModalContent({
 
             {error ? <Text className="text-destructive mb-3 text-xs">{error}</Text> : null}
 
-            <View className="mt-2 flex-row justify-end">
-              <Pressable
-                className={cn(
-                  'bg-primary px-4 py-2 min-w-40 items-center',
-                  !canCreate && 'opacity-40'
-                )}
-                disabled={!canCreate}
-                onPress={() => void handleCreate()}
-              >
-                {creating ? (
-                  <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-                ) : (
-                  <Text className="text-primary-foreground text-sm font-semibold">
-                    {sshGate.requiresConnection ? 'Connect Repository' : 'Create Workspace'}
-                  </Text>
-                )}
-              </Pressable>
+            <View className="mt-2 items-end">
+              {creating ? (
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+              ) : (
+                <MobileGlassTextButton
+                  disabled={!canCreate}
+                  isProminent
+                  label={sshGate.requiresConnection ? 'Connect Repository' : 'Create Workspace'}
+                  onPress={() => void handleCreate()}
+                  size="regular"
+                />
+              )}
             </View>
           </>
         )}
@@ -1039,12 +1044,7 @@ function NewWorktreeModalContent({
         onSelect={(item) => handleRepoSelected(item.repo)}
         onClose={() => transitionDrawer('form')}
         renderIcon={(item) => {
-          return (
-            <View
-              className={styles.repoDot}
-              style={[{ backgroundColor: repoBadgeColor(item.repo) }]}
-            />
-          )
+          return <View className="h-2 w-2" style={{ backgroundColor: repoBadgeColor(item.repo) }} />
         }}
       />
 
@@ -1073,18 +1073,3 @@ function NewWorktreeModalContent({
     </BottomDrawerModalHost>
   )
 }
-
-const styles = {
-  loadingContainer: cn('py-6 items-center'),
-  field: cn('mb-3'),
-  label: cn('text-xs font-medium text-muted-foreground mb-1'),
-  fieldButton: cn(
-    'border-border flex-row items-center gap-2 rounded-xl border bg-secondary px-3 py-2 ios:py-2.5'
-  ),
-  fieldButtonText: cn('flex-1 text-sm text-foreground'),
-  repoDot: cn('w-2 h-2'),
-  disabled: cn('opacity-60'),
-  setupChoiceButton: cn('border-border flex-1 items-center rounded-xl border py-2'),
-  setupChoiceButtonSelected: cn('bg-card border-muted-foreground'),
-  setupChoiceText: cn('text-xs font-semibold text-foreground')
-} as const

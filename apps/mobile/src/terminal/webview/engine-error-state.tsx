@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
-import { ArrowClockwise as RefreshCw } from '../../components/uniwind-icons'
+import { MobileGlassTextButton } from '../../components/glass/text-button'
 
 export type NativeWebViewEngineEvent = {
   readonly nativeEvent?: object
@@ -84,14 +84,7 @@ export function TerminalWebViewEngineErrorOverlay({
       <Text className="text-muted-foreground text-center text-xs leading-5" numberOfLines={4}>
         {message}
       </Text>
-      <Pressable
-        accessibilityRole="button"
-        className="bg-primary min-h-9 flex-row items-center gap-2 px-3.5"
-        onPress={onReload}
-      >
-        <RefreshCw size={16} colorClassName="accent-primary-foreground" />
-        <Text className="text-primary-foreground text-sm font-bold">Reload</Text>
-      </Pressable>
+      <MobileGlassTextButton isProminent label="Reload" onPress={onReload} />
     </View>
   )
 }

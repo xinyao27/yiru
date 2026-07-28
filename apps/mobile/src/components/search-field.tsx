@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { InteractionManager, Pressable, TextInput, View, type TextInputProps } from 'react-native'
 
+import { MobileGlassSurface } from '@/components/glass/surface'
 import { MagnifyingGlass as Search, X } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
@@ -86,12 +87,12 @@ export function MobileSearchField({
 
   return (
     // Why: the raised fill makes search read as a control against base and panel surfaces.
-    <View
+    <MobileGlassSurface
       className={cn(
-        'border-border min-h-11 flex-row items-center gap-2 rounded-xl border bg-secondary py-1.5 pr-1 pl-3 ios:py-2',
-        focused && 'border-primary',
+        'min-h-11 flex-row items-center gap-2 overflow-hidden rounded-full py-1.5 pr-1 pl-3 ios:py-2',
         !editable && 'opacity-60'
       )}
+      isInteractive={editable}
     >
       <Search
         size={15}
@@ -140,6 +141,6 @@ export function MobileSearchField({
           </View>
         </Pressable>
       ) : null}
-    </View>
+    </MobileGlassSurface>
   )
 }

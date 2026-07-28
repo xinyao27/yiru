@@ -13,6 +13,9 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
+import { MobileGlassGroup } from '../src/components/glass/group'
+import { MobileGlassPressable } from '../src/components/glass/pressable'
+import { MobileGlassSection } from '../src/components/glass/section'
 import {
   startDiagnosticFetchTimeout,
   type DiagnosticFetchTimeout
@@ -173,42 +176,42 @@ export default function TroubleshootScreen() {
         contentContainerClassName="pb-6"
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          className={cn(
-            styles.diagnosticButton,
-            styles.diagnosticButtonPressedActive,
-            diagnosticStatus === 'running' && 'opacity-50'
-          )}
-          onPress={runDiagnostics}
-          disabled={diagnosticStatus === 'running'}
-        >
-          {diagnosticStatus === 'running' ? (
-            <ActivityIndicator size="small" colorClassName="accent-foreground" />
-          ) : (
-            <Activity size={16} colorClassName="accent-foreground" />
-          )}
-          <Text className={styles.diagnosticButtonLabel}>
-            {diagnosticStatus === 'running'
-              ? 'Running…'
-              : diagnosticStatus === 'done'
-                ? 'Run again'
-                : 'Run diagnostics'}
-          </Text>
-        </Pressable>
+        <MobileGlassGroup className="mb-4 gap-2" spacing={8}>
+          <MobileGlassPressable
+            className="rounded-full"
+            contentClassName="min-h-11 flex-row items-center justify-center gap-2 rounded-full px-4"
+            disabled={diagnosticStatus === 'running'}
+            onPress={runDiagnostics}
+          >
+            {diagnosticStatus === 'running' ? (
+              <ActivityIndicator size="small" colorClassName="accent-foreground" />
+            ) : (
+              <Activity size={18} colorClassName="accent-foreground" />
+            )}
+            <Text className="text-foreground text-sm">
+              {diagnosticStatus === 'running'
+                ? 'Running…'
+                : diagnosticStatus === 'done'
+                  ? 'Run again'
+                  : 'Run diagnostics'}
+            </Text>
+          </MobileGlassPressable>
 
-        <Pressable
-          className={cn(styles.diagnosticButton, styles.diagnosticButtonPressedActive)}
-          onPress={() => router.push('/connection-log')}
-        >
-          <ScrollText size={16} colorClassName="accent-foreground" />
-          <Text className={styles.diagnosticButtonLabel}>View connection log</Text>
-        </Pressable>
+          <MobileGlassPressable
+            className="rounded-full"
+            contentClassName="min-h-11 flex-row items-center justify-center gap-2 rounded-full px-4"
+            onPress={() => router.push('/connection-log')}
+          >
+            <ScrollText size={18} colorClassName="accent-foreground" />
+            <Text className="text-foreground text-sm">View connection log</Text>
+          </MobileGlassPressable>
+        </MobileGlassGroup>
 
         {checks.length > 0 && (
-          <View className={styles.section}>
+          <MobileGlassSection className="mb-4">
             {checks.map((check, i) => (
-              <View key={i}>
-                {i > 0 && <View className={styles.separator} />}
+              <View key={`${check.label}-${check.detail}`}>
+                {i > 0 && <View className="bg-border h-hairline mx-3" />}
                 <View className="flex-row items-center gap-2 px-3.5 py-2.5">
                   <StatusIcon status={check.status} />
                   <Text className="text-foreground text-sm font-medium">{check.label}</Text>
@@ -223,17 +226,17 @@ export default function TroubleshootScreen() {
                 </View>
               </View>
             ))}
-          </View>
+          </MobileGlassSection>
         )}
 
         <Text className="text-muted-foreground mt-2 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
           Common issues
         </Text>
 
-        <View className={styles.section}>
+        <MobileGlassSection className="mb-4">
           {troubleshootCommonIssues.map((section, i) => (
             <View key={section.id}>
-              {i > 0 && <View className={styles.separator} />}
+              {i > 0 && <View className="bg-border h-hairline mx-3" />}
               <Pressable
                 className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
                 onPress={() => toggleSection(section.id)}
@@ -248,8 +251,8 @@ export default function TroubleshootScreen() {
               </Pressable>
               {expandedId === section.id && (
                 <View className="gap-1.5 px-3.5 pb-3">
-                  {section.steps.map((step, j) => (
-                    <View key={j} className="flex-row gap-2">
+                  {section.steps.map((step) => (
+                    <View key={`${section.id}-${step}`} className="flex-row gap-2">
                       <Text className="text-muted-foreground text-xs leading-5">•</Text>
                       <Text className="text-muted-foreground flex-1 text-xs leading-5">{step}</Text>
                     </View>
@@ -258,20 +261,10 @@ export default function TroubleshootScreen() {
               )}
             </View>
           ))}
-        </View>
+        </MobileGlassSection>
 
         <View className="h-6" />
       </ScrollView>
     </View>
   )
 }
-
-const styles = {
-  diagnosticButton: cn(
-    'mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-secondary px-4 py-3'
-  ),
-  diagnosticButtonPressedActive: cn('active:bg-accent'),
-  diagnosticButtonLabel: cn('text-sm font-semibold text-foreground'),
-  section: cn('mb-4 overflow-hidden rounded-2xl bg-card'),
-  separator: cn('h-hairline bg-border mx-3')
-} as const

@@ -10,6 +10,8 @@ import { cn } from '@/style/class-names'
 
 import type { SmartNameSelection } from '../workspace-create/composer-source-types'
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
+import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassSurface } from './glass/surface'
 
 type Props = {
   composer: MobileComposerSource
@@ -52,7 +54,7 @@ export function SmartWorkspaceSourceField({
         {label} <Text className="text-muted-foreground font-normal">[Optional]</Text>
       </Text>
       {selection ? (
-        <View className="border-border bg-secondary flex-row items-center gap-2 rounded-xl border px-3 py-2">
+        <MobileGlassSurface className="flex-row items-center gap-2 rounded-xl px-3 py-2">
           <SelectionIcon kind={selection.kind} />
           <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
             {selection.label}
@@ -68,13 +70,11 @@ export function SmartWorkspaceSourceField({
           <Pressable hitSlop={6} onPress={composer.handleClearSmartNameSelection}>
             <X size={15} colorClassName="accent-muted-foreground" />
           </Pressable>
-        </View>
+        </MobileGlassSurface>
       ) : (
-        <Pressable
-          className={cn(
-            'border-border rounded-xl border bg-secondary px-3 py-2.5',
-            disabled && 'opacity-60'
-          )}
+        <MobileGlassPressable
+          className="rounded-xl"
+          contentClassName="rounded-xl px-3 py-2.5"
           disabled={disabled}
           onPress={openDrawer}
         >
@@ -84,7 +84,7 @@ export function SmartWorkspaceSourceField({
           >
             {composer.name || 'Type a name or search a source'}
           </Text>
-        </Pressable>
+        </MobileGlassPressable>
       )}
     </View>
   )

@@ -33,6 +33,8 @@ import { resolveCssNumber } from '@/style/resolve-css-variable'
 import { useResponsiveLayout } from '../layout/responsive-layout'
 import { useInsideBottomDrawerModalHost } from './bottom-drawer-modal-host'
 import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
+import { MobileGlassFallbackScope } from './glass/availability'
+import { MobileGlassSurface } from './glass/surface'
 
 const DISMISS_THRESHOLD = 80
 const SPRING_CONFIG = { damping: 28, stiffness: 400 }
@@ -312,80 +314,88 @@ function MountedBottomDrawer({
           className={cn('flex-1 justify-end', isWideLayout && 'items-center')}
           pointerEvents="box-none"
         >
-          <Animated.View
-            className="bg-background overflow-hidden rounded-t-3xl px-3"
-            style={[
-              {
-                width: '100%',
-                maxWidth: isWideLayout ? modalMaxWidth : undefined,
-                maxHeight: screenHeight - insets.top - spacing4,
-                paddingBottom: insets.bottom + spacing4
-              },
-              drawerStyle
-            ]}
-          >
-            {!contentScrollable ? (
-              <>
-                <GestureDetector gesture={handlePanGesture}>
-                  <Animated.View
-                    className={styles.handleHitArea}
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss drawer"
+          {/* Why: GlassView and SwiftUI glass controls cannot sample the screen
+              behind a transparent native Modal; keep this window on semantic fallbacks. */}
+          <MobileGlassFallbackScope>
+            <Animated.View
+              className="overflow-hidden rounded-t-3xl px-3"
+              style={[
+                {
+                  width: '100%',
+                  maxWidth: isWideLayout ? modalMaxWidth : undefined,
+                  maxHeight: screenHeight - insets.top - spacing4,
+                  paddingBottom: insets.bottom + spacing4
+                },
+                drawerStyle
+              ]}
+            >
+              <MobileGlassSurface className="absolute inset-0 rounded-t-3xl" pointerEvents="none" />
+              {!contentScrollable ? (
+                <>
+                  <GestureDetector gesture={handlePanGesture}>
+                    <Animated.View
+                      className="items-center pt-2 pb-3"
+                      accessibilityRole="button"
+                      accessibilityLabel="Dismiss drawer"
+                    >
+                      <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
+                    </Animated.View>
+                  </GestureDetector>
+                  <View className="min-h-0">{children}</View>
+                </>
+              ) : dragContentToDismiss ? (
+                <>
+                  <GestureDetector gesture={handlePanGesture}>
+                    <Animated.View
+                      className="items-center pt-2 pb-3"
+                      accessibilityRole="button"
+                      accessibilityLabel="Dismiss drawer"
+                    >
+                      <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
+                    </Animated.View>
+                  </GestureDetector>
+                  <GestureDetector gesture={contentPanGesture}>
+                    <Animated.View collapsable={false}>
+                      <GestureDetector gesture={scrollGesture}>
+                        <Animated.ScrollView
+                          bounces={false}
+                          keyboardShouldPersistTaps="handled"
+                          onScroll={scrollHandler}
+                          scrollEventThrottle={16}
+                          showsVerticalScrollIndicator={false}
+                        >
+                          {children}
+                        </Animated.ScrollView>
+                      </GestureDetector>
+                    </Animated.View>
+                  </GestureDetector>
+                </>
+              ) : (
+                <>
+                  <GestureDetector gesture={handlePanGesture}>
+                    <Animated.View
+                      className="items-center pt-2 pb-3"
+                      accessibilityRole="button"
+                      accessibilityLabel="Dismiss drawer"
+                    >
+                      <View className="bg-muted-foreground h-1 w-9 self-center rounded-full opacity-40" />
+                    </Animated.View>
+                  </GestureDetector>
+                  <ScrollView
+                    bounces={false}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
                   >
-                    <View className={styles.handle} />
-                  </Animated.View>
-                </GestureDetector>
-                <View className="min-h-0">{children}</View>
-              </>
-            ) : dragContentToDismiss ? (
-              <>
-                <GestureDetector gesture={handlePanGesture}>
-                  <Animated.View
-                    className={styles.handleHitArea}
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss drawer"
-                  >
-                    <View className={styles.handle} />
-                  </Animated.View>
-                </GestureDetector>
-                <GestureDetector gesture={contentPanGesture}>
-                  <Animated.View collapsable={false}>
-                    <GestureDetector gesture={scrollGesture}>
-                      <Animated.ScrollView
-                        bounces={false}
-                        keyboardShouldPersistTaps="handled"
-                        onScroll={scrollHandler}
-                        scrollEventThrottle={16}
-                        showsVerticalScrollIndicator={false}
-                      >
-                        {children}
-                      </Animated.ScrollView>
-                    </GestureDetector>
-                  </Animated.View>
-                </GestureDetector>
-              </>
-            ) : (
-              <>
-                <GestureDetector gesture={handlePanGesture}>
-                  <Animated.View
-                    className={styles.handleHitArea}
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss drawer"
-                  >
-                    <View className={styles.handle} />
-                  </Animated.View>
-                </GestureDetector>
-                <ScrollView
-                  bounces={false}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                >
-                  {children}
-                </ScrollView>
-              </>
-            )}
-            <View className="bg-background absolute top-full right-0 left-0 h-screen" />
-          </Animated.View>
+                    {children}
+                  </ScrollView>
+                </>
+              )}
+              <MobileGlassSurface
+                className="absolute top-full right-0 left-0 h-screen"
+                pointerEvents="none"
+              />
+            </Animated.View>
+          </MobileGlassFallbackScope>
         </View>
       </GestureHandlerRootView>
     </Animated.View>
@@ -404,8 +414,3 @@ function MountedBottomDrawer({
     </Modal>
   )
 }
-
-const styles = {
-  handle: cn('h-1 w-9 self-center rounded-full bg-muted-foreground opacity-40'),
-  handleHitArea: cn('items-center pt-2 pb-3')
-} as const

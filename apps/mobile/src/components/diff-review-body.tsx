@@ -1,9 +1,6 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import type { RefObject } from 'react'
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
-
-import { ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { ActivityIndicator, FlatList, Text, View } from 'react-native'
 
 import type { MobileDiffReviewQueueItem } from '../session/diff/review-queue'
 import type {
@@ -12,6 +9,7 @@ import type {
   ReviewScreenState
 } from '../session/diff/review-screen-model'
 import { MobileDiffReviewLine } from './diff-review-line'
+import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
   activeHunkIndex: number | null
@@ -154,18 +152,12 @@ function CenteredState({
       ) : null}
       <Text className="text-muted-foreground text-center text-sm leading-5">{text}</Text>
       {onRetry ? (
-        <Pressable
-          className={cn(
-            'min-h-11 flex-row items-center gap-1 rounded-xl bg-secondary px-3',
-            'active:bg-accent'
-          )}
-          onPress={onRetry}
-          accessibilityRole="button"
+        <MobileGlassTextButton
           accessibilityLabel="Retry loading review"
-        >
-          <RefreshCw size={14} colorClassName="accent-foreground" />
-          <Text className="text-foreground text-sm font-bold">Retry</Text>
-        </Pressable>
+          label="Retry"
+          onPress={onRetry}
+          size="large"
+        />
       ) : null}
     </View>
   )

@@ -2,9 +2,10 @@ import type { MobileRuntimeCompatVerdict as CompatVerdict } from '@yiru/runtime-
 import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
 import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import { router } from 'expo-router'
-import { Linking, Platform, Pressable, Text, View } from 'react-native'
+import { Linking, Platform, Text, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
   verdict: Extract<CompatVerdict, { kind: 'blocked' }>
@@ -29,37 +30,33 @@ export function ProtocolBlockScreen({ verdict }: Props) {
 
   return (
     <View className="bg-background flex-1 justify-center px-4">
-      <View className="border-border bg-card rounded-3xl border p-4">
+      <MobileGlassSurface className="rounded-3xl p-4">
         <Text className="text-foreground mb-2 text-sm font-bold">{title}</Text>
         <Text className="text-muted-foreground mb-4 text-sm leading-5">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
             updates continue to use the repository release page. */}
-        <Pressable
-          className={cn('mb-2 items-center rounded-2xl bg-primary py-2.5', styles.pressedActive)}
+        <MobileGlassTextButton
+          className="mb-2"
+          isFullWidth
+          isProminent
+          label={primaryAction.label}
           onPress={() => {
             void Linking.openURL(primaryAction.url)
           }}
-        >
-          <Text className="text-primary-foreground text-sm font-semibold">
-            {primaryAction.label}
-          </Text>
-        </Pressable>
-        <Pressable
-          className={cn('items-center rounded-2xl bg-secondary py-2.5', styles.pressedActive)}
+          size="large"
+        />
+        <MobileGlassTextButton
+          isFullWidth
+          label="Back to hosts"
           onPress={() => {
             // Why: route back to the host list so the user can pair a
             // different host instead of getting trapped on this screen.
             router.replace('/')
           }}
-        >
-          <Text className="text-foreground text-sm font-semibold">Back to hosts</Text>
-        </Pressable>
+          size="large"
+        />
         <Text className="text-muted-foreground mt-3 text-xs leading-5">{recoveryNote}</Text>
-      </View>
+      </MobileGlassSurface>
     </View>
   )
 }
-
-const styles = {
-  pressedActive: cn('active:bg-accent')
-} as const

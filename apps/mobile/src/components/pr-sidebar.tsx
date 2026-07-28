@@ -1,6 +1,4 @@
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
-
-import { ArrowsClockwise as RotateCw } from '@/components/uniwind-icons'
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 
 import { buildFixChecksPrompt, buildResolveConflictsPrompt } from '../session/pr/ai-triage-prompt'
 import type { PrSidebarState } from '../session/pr/sidebar-state'
@@ -15,6 +13,8 @@ import { useMobilePrTitleAction, type MobilePrTitleAction } from '../session/pr/
 import type { MobileGitStatusResult } from '../source-control/git-status'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 import { prSidebarRenderBranch } from './pr-sidebar-presentation'
 import { PrSidebarCreateEmptyState } from './pr-sidebar/create-empty-state'
 import { PRSidebarHeader } from './pr-sidebar/header'
@@ -179,15 +179,12 @@ function PrSidebarContent({
     return (
       <View className={styles.stateArea}>
         <Text className={styles.stateText}>{message}</Text>
-        <Pressable
-          className="bg-secondary min-h-11 flex-row items-center gap-1 rounded-xl px-3"
-          onPress={onRetry}
-          accessibilityRole="button"
+        <MobileGlassTextButton
           accessibilityLabel="Retry loading pull request"
-        >
-          <RotateCw size={14} colorClassName="accent-foreground" />
-          <Text className="text-foreground text-sm font-bold">Retry</Text>
-        </Pressable>
+          label="Retry"
+          onPress={onRetry}
+          size="large"
+        />
       </View>
     )
   }
@@ -294,7 +291,7 @@ function PrSidebarSections({
   // duplicate blocks (badge row, title, branches, then another action band).
   return (
     <>
-      <View className={styles.section}>
+      <MobileGlassSurface className={styles.section}>
         <View className={styles.sectionBody}>
           <PRSidebarHeader
             pr={data.pr}
@@ -311,7 +308,7 @@ function PrSidebarSections({
             onUnlinked={refetch}
           />
         </View>
-      </View>
+      </MobileGlassSurface>
       {/* Own titled section when present; null otherwise (no empty chrome). */}
       <PRConflictingFilesSection pr={data.pr} triage={conflictsTriage} />
       <PRReviewersSection

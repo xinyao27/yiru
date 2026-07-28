@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { View, Text, TextInput, Pressable, type KeyboardTypeOptions } from 'react-native'
-
-import { cn } from '@/style/class-names'
+import { View, Text, TextInput, type KeyboardTypeOptions } from 'react-native'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
   visible: boolean
@@ -63,46 +63,33 @@ export function TextInputModal({
         {message ? <Text className="text-muted-foreground mt-0.5 text-xs">{message}</Text> : null}
       </View>
 
-      {/* Why: the raised fill reads as an input surface instead of a recessed panel. */}
-      <TextInput
-        className="border-border bg-secondary text-foreground ios:py-2.5 rounded-xl border px-3 py-2 text-sm"
-        value={value}
-        onChangeText={setValue}
-        placeholder={placeholder}
-        placeholderTextColorClassName="accent-muted-foreground"
-        autoFocus
-        autoCapitalize="none"
-        autoCorrect={false}
-        selectTextOnFocus={selectTextOnFocus}
-        keyboardType={keyboardType}
-        returnKeyType="done"
-        onSubmitEditing={handleSubmit}
-        selectionColorClassName="accent-primary"
-      />
+      <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+        <TextInput
+          className="text-foreground min-h-10 rounded-full px-4 text-sm"
+          value={value}
+          onChangeText={setValue}
+          placeholder={placeholder}
+          placeholderTextColorClassName="accent-muted-foreground"
+          autoFocus
+          autoCapitalize="none"
+          autoCorrect={false}
+          selectTextOnFocus={selectTextOnFocus}
+          keyboardType={keyboardType}
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
+          selectionColorClassName="accent-primary"
+        />
+      </MobileGlassSurface>
 
       <View className="mt-3 flex-row justify-end gap-2">
-        <Pressable
-          className={cn('rounded-xl px-4 py-2', styles.buttonPressedActive)}
-          onPress={onCancel}
-        >
-          <Text className="text-muted-foreground text-sm font-medium">Cancel</Text>
-        </Pressable>
-        <Pressable
-          className={cn(
-            'rounded-xl bg-primary px-4 py-2',
-            styles.buttonPressedActive,
-            !canSubmit && 'opacity-40'
-          )}
+        <MobileGlassTextButton label="Cancel" onPress={onCancel} />
+        <MobileGlassTextButton
           disabled={!canSubmit}
+          isProminent
+          label={submitLabel}
           onPress={handleSubmit}
-        >
-          <Text className="text-primary-foreground text-sm font-semibold">{submitLabel}</Text>
-        </Pressable>
+        />
       </View>
     </BottomDrawer>
   )
 }
-
-const styles = {
-  buttonPressedActive: cn('active:bg-accent')
-} as const

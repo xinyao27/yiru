@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
@@ -204,13 +205,13 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
         <Text className={styles.stateText}>
           {view.kind === 'waiting' ? 'Waiting for desktop...' : view.message}
         </Text>
-        <Pressable
-          className="bg-secondary mt-3 rounded-xl px-4 py-2"
-          onPress={retry}
+        <MobileGlassTextButton
           accessibilityLabel="Retry"
-        >
-          <Text className="text-foreground text-sm font-semibold">Retry</Text>
-        </Pressable>
+          className="mt-3"
+          label="Retry"
+          onPress={retry}
+          size="large"
+        />
       </View>
     )
   }

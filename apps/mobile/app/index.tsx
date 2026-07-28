@@ -1,14 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, Pressable, FlatList, Alert, Platform } from 'react-native'
+import { View, Text, FlatList, Alert, Platform } from 'react-native'
 
 import {
-  QrCode,
-  Gear as Settings,
   CaretRight as ChevronRight,
   Terminal,
-  Plus,
   ArrowClockwise as RefreshCw,
   Power as PowerOff,
   PencilSimple as Edit3
@@ -29,6 +26,11 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
+import { MobileGlassGroup } from '../src/components/glass/group'
+import { MobileGlassIconButton } from '../src/components/glass/icon-button'
+import { MobileGlassPressable } from '../src/components/glass/pressable'
+import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
@@ -580,12 +582,11 @@ export default function HomeScreen() {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <Pressable
-                    className="h-9 w-9 items-center justify-center rounded-full"
+                  <MobileGlassIconButton
+                    accessibilityLabel="Settings"
+                    icon="settings"
                     onPress={() => router.push('/settings')}
-                  >
-                    <Settings size={18} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                  />
                 )
         }}
       />
@@ -617,17 +618,18 @@ export default function HomeScreen() {
               Pair with Yiru on your computer to check on your agents, jump into any terminal, and
               drive work from your phone.
             </Text>
-            <Pressable
-              className="bg-primary flex-row items-center gap-2.5 rounded-2xl px-7 py-3.5"
+            <MobileGlassTextButton
+              isProminent
+              label="Pair Desktop"
               onPress={() => router.push('/pair-scan')}
-            >
-              <QrCode size={17} colorClassName="accent-primary-foreground" />
-              <Text className="text-primary-foreground text-sm font-bold">Pair Desktop</Text>
-            </Pressable>
+              size="large"
+            />
           </View>
 
           <View className="px-6">
-            <Text className={styles.sectionHeading}>How it works</Text>
+            <Text className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+              How it works
+            </Text>
             {ONBOARDING_STEPS.map((step, i) => (
               <View
                 key={step.title}
@@ -636,9 +638,7 @@ export default function HomeScreen() {
                   i > 0 && 'border-t border-t-border'
                 )}
               >
-                <View className="border-border bg-secondary mt-px h-7 w-7 items-center justify-center rounded-full border">
-                  <Text className="text-muted-foreground text-xs font-bold">{i + 1}</Text>
-                </View>
+                <Text className="text-muted-foreground w-7 text-center text-sm">{i + 1}</Text>
                 <View className="flex-1">
                   <Text className="text-foreground mb-1 text-sm font-semibold">{step.title}</Text>
                   <Text className="text-muted-foreground text-xs leading-5">{step.desc}</Text>
@@ -664,35 +664,37 @@ export default function HomeScreen() {
           ListHeaderComponent={
             <View>
               <View className="pt-1 pb-3">
-                <Text className="text-foreground text-sm font-extrabold tracking-tight">
+                <Text className="text-foreground text-base font-semibold tracking-tight">
                   Welcome back
                 </Text>
               </View>
 
               {stats && (
                 <View className="mb-4 flex-row gap-2.5">
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
+                  <MobileGlassSection className="flex-1 px-3 py-2">
+                    <Text className="text-foreground text-sm">
                       {stats.totalAgentsSpawned.toLocaleString()}
                     </Text>
-                    <Text className={styles.statLabel}>Agents spawned</Text>
-                  </View>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">Agents spawned</Text>
+                  </MobileGlassSection>
+                  <MobileGlassSection className="flex-1 px-3 py-2">
+                    <Text className="text-foreground text-sm">
                       {formatDuration(stats.totalAgentTimeMs)}
                     </Text>
-                    <Text className={styles.statLabel}>Agent time</Text>
-                  </View>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">Agent time</Text>
+                  </MobileGlassSection>
+                  <MobileGlassSection className="flex-1 px-3 py-2">
+                    <Text className="text-foreground text-sm">
                       {stats.totalPRsCreated.toLocaleString()}
                     </Text>
-                    <Text className={styles.statLabel}>PRs created</Text>
-                  </View>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">PRs created</Text>
+                  </MobileGlassSection>
                 </View>
               )}
 
-              <Text className={styles.sectionHeading}>Desktops</Text>
+              <Text className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                Desktops
+              </Text>
             </View>
           }
           ItemSeparatorComponent={CardGap}
@@ -729,23 +731,23 @@ export default function HomeScreen() {
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
                 <>
-                  <Text className={cn(styles.sectionHeading, 'mt-4')}>Resume</Text>
-                  <Pressable
-                    className={cn(
-                      'border-border flex-row items-center rounded-2xl border bg-card py-3 pr-3 pl-3',
-                      styles.hostCardPressedActive
-                    )}
+                  <Text className="text-muted-foreground mt-4 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                    Resume
+                  </Text>
+                  <MobileGlassPressable
+                    className="rounded-2xl"
+                    contentClassName="flex-row items-center rounded-2xl px-3 py-3"
                     onPress={() =>
                       router.push(
                         `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
                       )
                     }
                   >
-                    <View className="bg-secondary mr-3.5 h-12 w-12 items-center justify-center rounded-xl">
-                      <Terminal size={18} colorClassName="accent-muted-foreground" />
+                    <View className="mr-3 h-11 w-11 items-center justify-center">
+                      <Terminal size={20} colorClassName="accent-muted-foreground" />
                     </View>
                     <View className="min-w-0 flex-1">
-                      <Text className="text-foreground text-xs font-semibold" numberOfLines={1}>
+                      <Text className="text-foreground text-sm" numberOfLines={1}>
                         {resumeWorktree.worktree.displayName}
                       </Text>
                       <View className="mt-1 flex-row items-center gap-1.5">
@@ -760,47 +762,41 @@ export default function HomeScreen() {
                         </Text>
                       </View>
                     </View>
-                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                    <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                  </MobileGlassPressable>
                 </>
               ) : null}
 
               {/* ─── Quick actions ─── */}
-              <Text className={cn(styles.sectionHeading, 'mt-6')}>Quick Actions</Text>
-              <View className="flex-row gap-2">
-                <Pressable
-                  className={cn(styles.quickAction, styles.hostCardPressedActive)}
+              <Text className="text-muted-foreground mt-6 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                Quick Actions
+              </Text>
+              <MobileGlassGroup className="flex-row gap-2" spacing={8}>
+                <MobileGlassTextButton
+                  className="flex-1"
+                  isFullWidth
+                  label="Pair Desktop"
                   onPress={() => router.push('/pair-scan')}
-                >
-                  <View className={styles.quickActionIcon}>
-                    <QrCode size={16} colorClassName="accent-muted-foreground" />
-                  </View>
-                  <Text className={styles.quickActionLabel}>Pair Desktop</Text>
-                </Pressable>
-                <Pressable
+                />
+                <MobileGlassTextButton
+                  className="flex-1"
                   disabled={!primaryConnectedHost}
-                  className={cn(
-                    styles.quickAction,
-                    !primaryConnectedHost && 'opacity-50',
-                    styles.hostCardPressedActive
-                  )}
+                  isFullWidth
+                  label="New Workspace"
                   onPress={() => {
                     if (primaryConnectedHost) {
                       router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
                     }
                   }}
-                >
-                  <View className={styles.quickActionIcon}>
-                    <Plus size={16} colorClassName="accent-muted-foreground" />
-                  </View>
-                  <Text className={styles.quickActionLabel}>New Workspace</Text>
-                </Pressable>
-              </View>
+                />
+              </MobileGlassGroup>
 
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
                 <>
-                  <Text className={cn(styles.sectionHeading, 'mt-6')}>Account usage</Text>
+                  <Text className="text-muted-foreground mt-6 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                    Account usage
+                  </Text>
                   {accountsHosts.map(({ host, snapshot }) => {
                     const claudeActiveId = snapshot.claude.activeAccountId
                     const claudeActive =
@@ -810,17 +806,15 @@ export default function HomeScreen() {
                       snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
                     const showHostName = accountsHosts.length > 1
                     return (
-                      <Pressable
+                      <MobileGlassPressable
                         key={host.id}
-                        className={cn(
-                          'border-border mb-2 gap-2 rounded-2xl border bg-card px-3 py-2.5',
-                          styles.hostCardPressedActive
-                        )}
+                        className="mb-2 rounded-2xl"
+                        contentClassName="gap-2 rounded-2xl px-3 py-2.5"
                         onPress={() => router.push(`/h/${host.id}/accounts`)}
                       >
                         {showHostName ? (
                           <Text
-                            className="text-muted-foreground text-xs font-medium tracking-wide uppercase"
+                            className="text-muted-foreground text-xs tracking-wide uppercase"
                             numberOfLines={1}
                           >
                             {host.name}
@@ -844,7 +838,7 @@ export default function HomeScreen() {
                           const weeklyBar = getUsageBarState(limits, 'weekly')
                           return (
                             <View key={provider} className="flex-row items-center gap-2.5">
-                              <View className="bg-secondary h-8 w-8 items-center justify-center rounded-lg">
+                              <View className="h-8 w-8 items-center justify-center">
                                 {provider === 'claude' ? (
                                   <ClaudeIcon size={18} />
                                 ) : (
@@ -852,10 +846,7 @@ export default function HomeScreen() {
                                 )}
                               </View>
                               <View className="min-w-0 flex-1 gap-0.5">
-                                <Text
-                                  className="text-foreground text-xs font-semibold"
-                                  numberOfLines={1}
-                                >
+                                <Text className="text-foreground text-xs" numberOfLines={1}>
                                   {active?.email ?? 'System default'}
                                 </Text>
                                 <View className="mt-1 flex-row gap-3">
@@ -876,7 +867,7 @@ export default function HomeScreen() {
                             </View>
                           )
                         })}
-                      </Pressable>
+                      </MobileGlassPressable>
                     )
                   })}
                 </>
@@ -980,20 +971,3 @@ const ONBOARDING_STEPS = [
     desc: 'Your desktop will appear here. Everything is encrypted end-to-end.'
   }
 ]
-
-const styles = {
-  statCard: cn('border-border flex-1 rounded-2xl border bg-card px-3 py-2'),
-  statValue: cn('text-foreground text-sm font-bold tracking-tight'),
-  statLabel: cn('text-muted-foreground text-xs font-medium mt-0.5'),
-  /* ─── Section heading ─── */
-  sectionHeading: cn(
-    'text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1'
-  ),
-  /* ─── Host cards ─── */
-  hostCardPressedActive: cn('active:bg-accent'),
-  quickAction: cn(
-    'border-border flex-1 flex-row items-center gap-2.5 rounded-2xl border bg-card px-3 py-2.5'
-  ),
-  quickActionIcon: cn('h-7 w-7 items-center justify-center rounded-lg bg-secondary'),
-  quickActionLabel: cn('text-xs font-semibold text-muted-foreground')
-} as const

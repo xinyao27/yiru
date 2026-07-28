@@ -5,6 +5,7 @@ import { Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
+import { MobileGlassSection } from './glass/section'
 
 type Props<T extends { id: string; label: string }> = {
   visible: boolean
@@ -71,33 +72,34 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
       <View className="px-1 pb-2">
         <Text className="text-muted-foreground text-xs font-medium">{title}</Text>
       </View>
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        className="bg-card max-h-96 grow-0 overflow-hidden rounded-2xl"
-        contentContainerClassName={cn(items.length === 0 ? 'min-h-6' : undefined)}
-        keyboardShouldPersistTaps="handled"
-        nestedScrollEnabled
-        ItemSeparatorComponent={PickerSeparator}
-        renderItem={({ item }) => {
-          const selected = item.id === selectedId
-          return (
-            <Pressable
-              className="active:bg-accent flex-row items-center gap-2 px-3.5 py-3"
-              onPress={() => closeThenSelect(item)}
-            >
-              {renderIcon?.(item)}
-              <Text
-                className={cn('flex-1 text-sm text-foreground', selected && 'font-semibold')}
-                numberOfLines={1}
+      <MobileGlassSection className="max-h-96 grow-0">
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          contentContainerClassName={cn(items.length === 0 ? 'min-h-6' : undefined)}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+          ItemSeparatorComponent={PickerSeparator}
+          renderItem={({ item }) => {
+            const selected = item.id === selectedId
+            return (
+              <Pressable
+                className="active:bg-accent flex-row items-center gap-2 px-3.5 py-3"
+                onPress={() => closeThenSelect(item)}
               >
-                {item.label}
-              </Text>
-              {selected && <Check size={14} colorClassName="accent-foreground" />}
-            </Pressable>
-          )
-        }}
-      />
+                {renderIcon?.(item)}
+                <Text
+                  className={cn('flex-1 text-sm text-foreground', selected && 'font-semibold')}
+                  numberOfLines={1}
+                >
+                  {item.label}
+                </Text>
+                {selected && <Check size={14} colorClassName="accent-foreground" />}
+              </Pressable>
+            )
+          }}
+        />
+      </MobileGlassSection>
     </BottomDrawer>
   )
 }

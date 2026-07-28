@@ -4,15 +4,15 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView
 } from 'react-native'
 
-import { cn } from '@/style/class-names'
-
+import { MobileGlassPressable } from '../../../src/components/glass/pressable'
+import { MobileGlassSurface } from '../../../src/components/glass/surface'
+import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { useForceReconnect, usePrimeHosts } from '../../../src/transport/client-context'
 import {
   displayHostEndpoint,
@@ -155,13 +155,16 @@ export default function EditHostScreen() {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <Pressable
-                    className={cn('rounded-xl px-3 py-1.5', !canSave && 'opacity-40')}
+                  <MobileGlassPressable
+                    accessibilityLabel="Save host"
+                    className="rounded-full"
+                    contentClassName="min-h-9 justify-center rounded-full px-3"
                     disabled={!canSave}
+                    hitSlop={4}
                     onPress={() => void handleSave()}
                   >
-                    <Text className="text-primary text-sm font-semibold">Save</Text>
-                  </Pressable>
+                    <Text className="text-primary text-sm">Save</Text>
+                  </MobileGlassPressable>
                 )
         }}
       />
@@ -180,13 +183,8 @@ export default function EditHostScreen() {
 
       {loadError ? (
         <View className="flex-1 gap-3 px-4 pt-6">
-          <Text className={styles.errorText}>{loadError}</Text>
-          <Pressable
-            className="bg-secondary self-start rounded-xl px-3 py-2"
-            onPress={() => router.back()}
-          >
-            <Text className="text-foreground text-sm font-medium">Go back</Text>
-          </Pressable>
+          <Text className="text-destructive mt-3 text-sm">{loadError}</Text>
+          <MobileGlassTextButton label="Go back" onPress={() => router.back()} />
         </View>
       ) : !host ? (
         <View className="flex-1 items-center justify-center">
@@ -207,44 +205,52 @@ export default function EditHostScreen() {
               different IP (for example home LAN vs Tailscale).
             </Text>
 
-            <Text className={styles.label}>Name</Text>
-            <TextInput
-              className={styles.input}
-              accessibilityLabel="Name"
-              value={name}
-              onChangeText={(value) => {
-                setName(value)
-                setSaveError(null)
-              }}
-              placeholder="Host name"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="next"
-            />
+            <Text className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase">
+              Name
+            </Text>
+            <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
+              <TextInput
+                className="text-foreground min-h-11 rounded-full px-4 text-sm"
+                accessibilityLabel="Name"
+                value={name}
+                onChangeText={(value) => {
+                  setName(value)
+                  setSaveError(null)
+                }}
+                placeholder="Host name"
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="next"
+              />
+            </MobileGlassSurface>
 
-            <Text className={styles.label}>Address</Text>
-            <TextInput
-              className={styles.input}
-              accessibilityLabel="Address"
-              value={address}
-              onChangeText={(value) => {
-                setAddress(value)
-                setSaveError(null)
-              }}
-              placeholder="192.168.1.10:6768"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="off"
-              keyboardType="url"
-              returnKeyType="done"
-              onSubmitEditing={() => {
-                if (canSave) {
-                  void handleSave()
-                }
-              }}
-            />
+            <Text className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase">
+              Address
+            </Text>
+            <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
+              <TextInput
+                className="text-foreground min-h-11 rounded-full px-4 text-sm"
+                accessibilityLabel="Address"
+                value={address}
+                onChangeText={(value) => {
+                  setAddress(value)
+                  setSaveError(null)
+                }}
+                placeholder="192.168.1.10:6768"
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="off"
+                keyboardType="url"
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  if (canSave) {
+                    void handleSave()
+                  }
+                }}
+              />
+            </MobileGlassSurface>
             <Text className="text-muted-foreground text-xs leading-4">
               Accepts IP, host:port, or ws:// / wss://. Missing port defaults to the current port
               (or 6768).
@@ -261,16 +267,10 @@ export default function EditHostScreen() {
               <Text className="text-destructive mt-2 text-sm">{normalizedEndpoint.error}</Text>
             ) : null}
 
-            {saveError ? <Text className={styles.errorText}>{saveError}</Text> : null}
+            {saveError ? <Text className="text-destructive mt-3 text-sm">{saveError}</Text> : null}
           </ScrollView>
         </KeyboardAvoidingView>
       )}
     </View>
   )
 }
-
-const styles = {
-  label: cn('text-muted-foreground text-xs font-medium mt-2 uppercase tracking-wide'),
-  input: cn('border-border bg-card text-foreground rounded-xl border px-3 py-2.5 text-sm ios:py-3'),
-  errorText: cn('text-destructive text-sm mt-3')
-} as const

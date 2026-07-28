@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 
-import {
-  GitPullRequest as GitPullRequestArrow,
-  LinkSimple as Link2,
-  ArrowClockwise as RefreshCw
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { GitPullRequest as GitPullRequestArrow } from '@/components/uniwind-icons'
 
 import { MobileCommitFailurePanel } from '../../source-control/commit-failure-panel'
 import {
@@ -25,6 +20,9 @@ import { fetchWorktreeLinkedPR } from '../../source-control/pr-link'
 import { useMobileCommitFailureRecovery } from '../../source-control/use-commit-failure-recovery'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { ConnectionState } from '../../transport/types'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassSection } from '../glass/section'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { openMobilePrUrl } from '../pr-compose-sheet'
 import { MobileLinkPrForm } from './link-pr-form'
 import { prCreateEmptyStateStyles as styles } from './pr-create-empty-state-styles'
@@ -162,7 +160,7 @@ export function PrSidebarCreateEmptyState({
 
   if (mode === 'link') {
     return (
-      <View className="bg-card mx-3 mt-3 rounded-2xl p-3">
+      <MobileGlassSection className="mx-3 mt-3 p-3">
         <MobileLinkPrForm
           client={client}
           worktreeId={worktreeId}
@@ -172,47 +170,36 @@ export function PrSidebarCreateEmptyState({
             refreshPrState()
           }}
         />
-      </View>
+      </MobileGlassSection>
     )
   }
 
   return (
-    <View className="bg-card mx-3 mt-3 overflow-hidden rounded-2xl">
+    <MobileGlassSection className="mx-3 mt-3">
       <View className="border-b-hairline border-b-border min-h-10 flex-row items-center justify-between gap-2 px-3 py-2">
         <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <GitPullRequestArrow size={14} colorClassName="accent-muted-foreground" />
           <Text className="text-foreground text-xs font-semibold">Pull request</Text>
         </View>
         <View className="flex-row items-center gap-1">
-          <Pressable
-            className={cn(
-              'min-h-8 min-w-8 items-center justify-center rounded-full',
-              'active:bg-accent'
-            )}
-            onPress={refreshPrState}
-            accessibilityRole="button"
+          <MobileGlassIconButton
             accessibilityLabel="Refresh pull request"
-            hitSlop={6}
-          >
-            <RefreshCw size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
-          <Pressable
-            className={cn(
-              'min-h-8 flex-row items-center justify-center gap-1 rounded-xl bg-primary px-2',
-              (!canCreate || loading) && 'opacity-50'
-            )}
-            onPress={() => void openComposer()}
-            disabled={!canCreate || loading}
-            accessibilityRole="button"
-            accessibilityLabel="Create pull request"
-          >
-            {loading ? (
-              <ActivityIndicator colorClassName="accent-primary-foreground" />
-            ) : (
-              <GitPullRequestArrow size={14} colorClassName="accent-primary-foreground" />
-            )}
-            <Text className="text-primary-foreground text-xs font-bold">Create PR</Text>
-          </Pressable>
+            icon="refresh"
+            onPress={refreshPrState}
+            size="small"
+          />
+          {loading ? (
+            <ActivityIndicator colorClassName="accent-muted-foreground" />
+          ) : (
+            <MobileGlassTextButton
+              accessibilityLabel="Create pull request"
+              disabled={!canCreate}
+              isProminent
+              label="Create PR"
+              onPress={() => void openComposer()}
+              size="small"
+            />
+          )}
         </View>
       </View>
       <View className="gap-2 p-3">
@@ -234,23 +221,15 @@ export function PrSidebarCreateEmptyState({
         ) : createWarning ? (
           <Text className={styles.bodyText}>{createWarning}</Text>
         ) : null}
-        <Pressable
-          className={cn(
-            'mt-1 min-h-8 flex-row items-center gap-1 self-start rounded-xl px-2',
-            !client && 'opacity-50',
-            'active:bg-accent'
-          )}
-          onPress={() => setMode('link')}
-          disabled={!client}
-          accessibilityRole="button"
+        <MobileGlassTextButton
           accessibilityLabel="Link an existing pull request"
-          accessibilityState={{ disabled: !client }}
-          hitSlop={6}
-        >
-          <Link2 size={14} colorClassName="accent-muted-foreground" />
-          <Text className="text-muted-foreground text-xs font-semibold">Link an existing PR</Text>
-        </Pressable>
+          className="mt-1 self-start"
+          disabled={!client}
+          label="Link an existing PR"
+          onPress={() => setMode('link')}
+          size="small"
+        />
       </View>
-    </View>
+    </MobileGlassSection>
   )
 }

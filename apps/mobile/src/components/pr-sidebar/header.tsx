@@ -2,14 +2,17 @@ import type { GitHubWorkItemDetails, PRInfo } from '@yiru/workbench-model/review
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
-import { ArrowRight, ArrowSquareOut as ExternalLink, Pencil } from '@/components/uniwind-icons'
+import { ArrowRight, Pencil } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { canEditPRTitle } from '../../session/pr/title-edit'
 import type { MobilePrTitleAction } from '../../session/pr/use-title-action'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassSection } from '../glass/section'
+import { MobileGlassSurface } from '../glass/surface'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { openMobilePrUrl } from '../pr-compose-sheet'
 import { prStateBadge } from './pr-checks-presentation'
-import { prCommentComposerStyles as composerStyles } from './pr-comment-composer-styles'
 import { statusColorClasses } from './status-color'
 import { mobilePrSidebarStyles as styles } from './styles'
 
@@ -71,15 +74,12 @@ export function PRSidebarHeader({
           {author ? <Text className="text-muted-foreground text-xs">· {author}</Text> : null}
         </View>
         {showOpenOnWeb && openPr ? (
-          <Pressable
-            onPress={openPr}
-            hitSlop={8}
-            accessibilityRole="link"
+          <MobileGlassIconButton
             accessibilityLabel={`Open pull request #${pr.number} in browser`}
-            className={cn(styles.iconButton, 'active:bg-accent')}
-          >
-            <ExternalLink size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            icon="external"
+            onPress={openPr}
+            size="small"
+          />
         ) : null}
       </View>
       <PRTitle title={title} editable={editable} titleAction={titleAction} />
@@ -101,9 +101,9 @@ export function PRSidebarHeader({
     return <View className="gap-2">{body}</View>
   }
   return (
-    <View className={styles.section}>
+    <MobileGlassSection className={styles.section}>
       <View className={styles.sectionBody}>{body}</View>
-    </View>
+    </MobileGlassSection>
   )
 }
 
@@ -139,42 +139,40 @@ function PRTitle({
 
   if (editing) {
     return (
-      <View className={composerStyles.container}>
-        <TextInput
-          className={composerStyles.input}
-          style={{ textAlignVertical: 'top' }}
-          value={draft}
-          onChangeText={setDraft}
-          placeholderTextColorClassName="accent-muted-foreground"
-          editable={!titleAction.saving}
-          autoFocus
-        />
+      <View className="gap-3">
+        <MobileGlassSurface className="min-h-16 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground min-h-16 px-3 py-2 text-sm"
+            style={{ textAlignVertical: 'top' }}
+            value={draft}
+            onChangeText={setDraft}
+            placeholderTextColorClassName="accent-muted-foreground"
+            editable={!titleAction.saving}
+            autoFocus
+          />
+        </MobileGlassSurface>
         {titleAction.error ? (
           <Text className="text-destructive text-xs">{titleAction.error}</Text>
         ) : null}
-        <View className={composerStyles.actions}>
-          <Pressable
-            className={cn(composerStyles.cancel, composerStyles.pressedActive)}
-            onPress={cancel}
-            disabled={titleAction.saving}
-            accessibilityRole="button"
+        <View className="flex-row justify-end gap-2">
+          <MobileGlassTextButton
             accessibilityLabel="Cancel editing title"
-          >
-            <Text className={composerStyles.cancelText}>Cancel</Text>
-          </Pressable>
-          <Pressable
-            className={cn(composerStyles.submit, composerStyles.pressedActive)}
-            onPress={() => void save()}
             disabled={titleAction.saving}
-            accessibilityRole="button"
-            accessibilityLabel="Save title"
-          >
-            {titleAction.saving ? (
-              <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-            ) : (
-              <Text className={composerStyles.submitText}>Save</Text>
-            )}
-          </Pressable>
+            label="Cancel"
+            onPress={cancel}
+            size="regular"
+          />
+          {titleAction.saving ? (
+            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+          ) : (
+            <MobileGlassTextButton
+              accessibilityLabel="Save title"
+              isProminent
+              label="Save"
+              onPress={() => void save()}
+              size="regular"
+            />
+          )}
         </View>
       </View>
     )

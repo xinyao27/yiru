@@ -1,8 +1,7 @@
-import { Pressable, Text } from 'react-native'
+import { View } from 'react-native'
 
-import { cn } from '@/style/class-names'
-
-import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassSegmentedControl } from '../components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '../components/glass/segmented-control-props'
 import {
   SOURCE_CONTROL_HUB_TABS,
   SOURCE_CONTROL_HUB_TAB_LABELS,
@@ -14,42 +13,23 @@ type Props = {
   onSelect: (tab: SourceControlHubTab) => void
 }
 
+const SOURCE_CONTROL_SEGMENTS: MobileGlassSegmentOption<SourceControlHubTab>[] =
+  SOURCE_CONTROL_HUB_TABS.map((value) => ({
+    label: SOURCE_CONTROL_HUB_TAB_LABELS[value],
+    value
+  }))
+
 // The hub's top-level lens switcher. Switching is local state (no route push) so
 // scroll position and the shared branch card persist across Changes/PR/History.
 export function MobileSourceControlSegments({ active, onSelect }: Props) {
   return (
-    <MobileGlassSurface
-      className="mx-4 mt-3 flex-row overflow-hidden rounded-2xl"
-      isInteractive
-      accessibilityRole="tablist"
-    >
-      {SOURCE_CONTROL_HUB_TABS.map((tab) => {
-        const isActive = tab === active
-        return (
-          <Pressable
-            key={tab}
-            className={cn(
-              'min-h-10 flex-1 items-center justify-center border-b-2 border-b-transparent px-1',
-              isActive && 'border-b-foreground bg-card',
-              !isActive && 'active:bg-accent'
-            )}
-            onPress={() => onSelect(tab)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: isActive }}
-            accessibilityLabel={SOURCE_CONTROL_HUB_TAB_LABELS[tab]}
-          >
-            <Text
-              className={cn(
-                'text-muted-foreground text-sm font-semibold',
-                isActive && 'text-foreground'
-              )}
-              numberOfLines={1}
-            >
-              {SOURCE_CONTROL_HUB_TAB_LABELS[tab]}
-            </Text>
-          </Pressable>
-        )
-      })}
-    </MobileGlassSurface>
+    <View className="mx-4 mt-3">
+      <MobileGlassSegmentedControl
+        accessibilityLabel="Source control view"
+        options={SOURCE_CONTROL_SEGMENTS}
+        value={active}
+        onChange={onSelect}
+      />
+    </View>
   )
 }

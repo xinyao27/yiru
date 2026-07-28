@@ -1,9 +1,8 @@
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
 import { useMemo, useRef, useState } from 'react'
-import { Alert, Pressable, Text, View } from 'react-native'
+import { Alert, Text, View } from 'react-native'
 
-import { CaretLeft } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import {
@@ -143,18 +142,17 @@ export function QuickCommandsSheet({
     <BottomDrawer visible={visible} onClose={onClose}>
       <View className="flex-row items-center pb-2">
         {view === 'list' ? (
-          <View className={styles.backSpacer} />
+          <View className="w-8" />
         ) : (
-          <Pressable
-            className="active:bg-accent h-8 w-8 items-center justify-center rounded-full"
-            onPress={() => setView(view === 'agent' ? 'editor' : 'list')}
+          <MobileGlassIconButton
             accessibilityLabel="Back"
-          >
-            <CaretLeft size={18} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            icon="back"
+            onPress={() => setView(view === 'agent' ? 'editor' : 'list')}
+            size="small"
+          />
         )}
         <Text className="text-foreground flex-1 text-center text-sm font-bold">{title}</Text>
-        <View className={styles.backSpacer} />
+        <View className="w-8" />
       </View>
       {view === 'editor' && draft ? (
         <Text className="text-muted-foreground px-1 pb-2 text-xs">
@@ -213,7 +211,3 @@ export function QuickCommandsSheet({
     </BottomDrawer>
   )
 }
-
-const styles = {
-  backSpacer: cn('w-8')
-} as const
