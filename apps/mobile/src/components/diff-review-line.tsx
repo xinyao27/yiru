@@ -42,18 +42,22 @@ export function MobileDiffReviewLine({
   return (
     <View
       className={cn(
-        styles.row,
-        line.kind === 'add' && styles.addedRow,
-        line.kind === 'delete' && styles.deletedRow,
-        active && styles.activeRow
+        'flex-row items-stretch border-b-hairline border-b-border',
+        line.kind === 'add' && 'bg-diff-inserted',
+        line.kind === 'delete' && 'bg-diff-removed',
+        active && 'border-l-2 border-l-primary'
       )}
       accessible
       accessibilityLabel={accessibilityLabelForLine(line)}
     >
-      <Text className={styles.prefix}>{mobileDiffLinePrefix(line.kind)}</Text>
-      <Text className={styles.lineNumber}>{lineNumber ? String(lineNumber) : ''}</Text>
+      <Text className="text-muted-foreground w-5 text-center font-mono text-xs leading-5">
+        {mobileDiffLinePrefix(line.kind)}
+      </Text>
+      <Text className="text-muted-foreground w-11 pr-1 text-right font-mono text-xs leading-5">
+        {lineNumber ? String(lineNumber) : ''}
+      </Text>
       <Pressable
-        className={cn(styles.code, canComment && styles.codePressedActive)}
+        className={cn('flex-1 min-w-0 px-2', canComment && 'active:bg-accent')}
         disabled={!canComment}
         onPress={() => {
           if (canComment && line.newLineNumber !== undefined) {
@@ -67,16 +71,16 @@ export function MobileDiffReviewLine({
             : accessibilityLabelForLine(line)
         }
       >
-        <Text className={styles.codeText}>
+        <Text className="text-foreground font-mono text-xs leading-5">
           <MobileSyntaxSegments segments={line.segments} />
         </Text>
       </Pressable>
       {comments.length > 0 ? (
-        <View className={styles.notes}>
+        <View className="w-10 items-center justify-center gap-0.5">
           {comments.map((comment) => (
             <Pressable
               key={comment.id}
-              className={cn(styles.noteButton, styles.noteButtonPressedActive)}
+              className="active:bg-accent min-h-7 min-w-8 items-center justify-center"
               onPress={() => onEditNote(comment)}
               accessibilityRole="button"
               accessibilityLabel={`Edit note on line ${comment.lineNumber}`}
@@ -94,22 +98,3 @@ export function MobileDiffReviewLine({
     </View>
   )
 }
-
-// Row height comes from the 18px code lineHeight alone (no vertical padding or
-// minHeight) so mobile diff density matches the desktop diff editor (STA-1239).
-const styles = {
-  row: cn('flex-row items-stretch border-b-hairline border-b-border'),
-  addedRow: cn('bg-[var(--editor-diff-inserted-line-background)]'),
-  deletedRow: cn('bg-[var(--editor-diff-removed-line-background)]'),
-  activeRow: cn('border-l-2 border-l-primary'),
-  prefix: cn('w-[18px] text-center text-muted-foreground/60 font-mono text-[12px] leading-[18px]'),
-  lineNumber: cn(
-    'w-11 pr-1 text-right text-muted-foreground/60 font-mono text-[12px] leading-[18px]'
-  ),
-  code: cn('flex-1 min-w-0 px-2'),
-  codePressedActive: cn('active:bg-secondary'),
-  codeText: cn('text-foreground font-mono text-[12px] leading-[18px]'),
-  notes: cn('w-10 items-center justify-center gap-[2px]'),
-  noteButton: cn('min-w-8 min-h-7 items-center justify-center'),
-  noteButtonPressedActive: cn('active:opacity-[0.72]')
-} as const

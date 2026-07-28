@@ -6,7 +6,7 @@ const { getActiveMultiplexerMock } = vi.hoisted(() => ({
   getActiveMultiplexerMock: vi.fn()
 }))
 
-vi.mock('../../../ipc/ssh', () => ({
+vi.mock('../../../ssh/ssh', () => ({
   getActiveMultiplexer: getActiveMultiplexerMock
 }))
 

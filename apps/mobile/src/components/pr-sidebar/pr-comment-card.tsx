@@ -1,16 +1,13 @@
 import type { GitHubReaction, GitHubReactionContent, PRComment } from '@yiru/workbench-model/review'
 import { memo, useState } from 'react'
-import { Image, Linking, Pressable, Text, View } from 'react-native'
+import { Image, Linking, Text, View } from 'react-native'
 
-import {
-  Check,
-  ArrowElbowDownRight as CornerDownRight,
-  ArrowSquareOut as ExternalLink,
-  ArrowCounterClockwise as Undo2
-} from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { isResolvableComment } from '../../session/pr/comment-actions'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassSection } from '../glass/section'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import { PRCommentComposer } from './pr-comment-composer'
 import { formatPrCommentRelativeTime } from './pr-comment-time'
@@ -42,11 +39,14 @@ function Reactions({ reactions }: { reactions?: GitHubReaction[] }) {
     return null
   }
   return (
-    <View className={styles.reactionsRow}>
+    <View className="mt-1 flex-row flex-wrap gap-1">
       {visible.map((r) => (
-        <View key={r.content} className={styles.reactionChip}>
+        <View
+          key={r.content}
+          className="border-hairline border-border bg-secondary h-6 flex-row items-center gap-1 rounded-full px-2"
+        >
           <Text>{REACTION_EMOJI[r.content]}</Text>
-          <Text className={styles.reactionText}>{r.count}</Text>
+          <Text className="text-foreground text-xs">{r.count}</Text>
         </View>
       ))}
     </View>
@@ -86,90 +86,70 @@ export const PRCommentCard = memo(function PRCommentCard({
   }
 
   return (
-    <View
-      className={cn(
-        styles.card,
-        isReply && styles.reply,
-        comment.isResolved && styles.cardResolved
-      )}
-    >
-      <View className={styles.header}>
+    <MobileGlassSection className={cn(isReply && 'ml-4', comment.isResolved && 'opacity-60')}>
+      <View className="border-b-hairline border-b-border flex-row items-center gap-2 px-3 py-2">
         {comment.authorAvatarUrl ? (
           <Image source={{ uri: comment.authorAvatarUrl }} className={styles.avatar} />
         ) : (
           <View className={styles.avatar} />
         )}
         <Text
-          className={cn(styles.author, comment.isResolved && styles.authorResolved)}
+          className={cn(
+            'text-foreground text-xs font-semibold shrink',
+            comment.isResolved && 'text-muted-foreground'
+          )}
           numberOfLines={1}
         >
           {comment.author}
         </Text>
-        <Text className={styles.time}>
+        <Text className="text-muted-foreground text-xs">
           · {formatPrCommentRelativeTime(comment.createdAt, Date.now())}
         </Text>
         {fileLabel ? (
-          <Text className={styles.path} numberOfLines={1}>
+          <Text className="text-muted-foreground shrink font-mono text-xs" numberOfLines={1}>
             {fileLabel}
           </Text>
         ) : null}
         {comment.isResolved ? (
-          <View className={styles.resolvedChip}>
-            <Text className={styles.resolvedChipText}>resolved</Text>
+          <View className="border-hairline border-border bg-secondary rounded-full px-2 py-px">
+            <Text className="text-muted-foreground text-xs">resolved</Text>
           </View>
         ) : null}
         {comment.url ? (
-          <Pressable
-            className={styles.openButton}
-            onPress={() => void Linking.openURL(comment.url).catch(() => {})}
-            hitSlop={8}
-            accessibilityRole="button"
+          <MobileGlassIconButton
             accessibilityLabel="Open comment on GitHub"
-          >
-            <ExternalLink size={14} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            icon="external"
+            onPress={() => void Linking.openURL(comment.url).catch(() => {})}
+            size="small"
+          />
         ) : null}
       </View>
-      <View className={styles.body}>
+      <View className="px-3 py-2">
         <CommentMarkdown content={comment.body} />
         <Reactions reactions={comment.reactions} />
       </View>
       {actions ? (
-        <View className={styles.actionsRow}>
-          <Pressable
-            className={cn(styles.actionButton, styles.actionButtonPressedActive)}
-            onPress={() => setReplyOpen((v) => !v)}
-            disabled={replyBusy}
-            hitSlop={6}
-            accessibilityRole="button"
+        <View className="flex-row gap-2 px-3 pt-1 pb-2">
+          <MobileGlassTextButton
             accessibilityLabel="Reply to comment"
-          >
-            <CornerDownRight size={13} colorClassName="accent-muted-foreground" />
-            <Text className={styles.actionButtonText}>Reply</Text>
-          </Pressable>
+            disabled={replyBusy}
+            label="Reply"
+            onPress={() => setReplyOpen((value) => !value)}
+            size="small"
+          />
           {canResolve ? (
-            <Pressable
-              className={cn(styles.actionButton, styles.actionButtonPressedActive)}
-              onPress={() => void actions.toggleResolve(comment)}
-              disabled={resolveBusy}
-              hitSlop={6}
-              accessibilityRole="button"
+            <MobileGlassTextButton
               accessibilityLabel={comment.isResolved ? 'Unresolve thread' : 'Resolve thread'}
-            >
-              {comment.isResolved ? (
-                <Undo2 size={13} colorClassName="accent-muted-foreground" />
-              ) : (
-                <Check size={13} colorClassName="accent-muted-foreground" />
-              )}
-              <Text className={styles.actionButtonText}>
-                {resolveBusy ? '…' : comment.isResolved ? 'Unresolve' : 'Resolve'}
-              </Text>
-            </Pressable>
+              disabled={resolveBusy}
+              label={resolveBusy ? '…' : comment.isResolved ? 'Unresolve' : 'Resolve'}
+              onPress={() => void actions.toggleResolve(comment)}
+              size="small"
+            />
           ) : null}
         </View>
       ) : null}
       {replyOpen && actions ? (
-        <View className={styles.composer}>
+        <View className="px-3 pb-3">
           <PRCommentComposer
             placeholder="Write a reply…"
             submitLabel="Reply"
@@ -180,6 +160,6 @@ export const PRCommentCard = memo(function PRCommentCard({
           />
         </View>
       ) : null}
-    </View>
+    </MobileGlassSection>
   )
 })

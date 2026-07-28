@@ -1,6 +1,7 @@
 import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { Pressable, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
 import {
   Bell,
@@ -10,9 +11,9 @@ import {
   GitPullRequest
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { triggerMediumImpact } from '../platform/haptics'
-import { spacing } from '../theme/uniwind-theme-values'
 import { AgentSpinner } from './agent-spinner'
 import { MobileRepoIcon } from './repo-icon'
 import { WorktreeAgentList } from './worktree-agent-list'
@@ -75,6 +76,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   onLongPress,
   onToggleLineage
 }: Props<T>) {
+  const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   const isFolderWorkspace = item.workspaceKind === 'folder-workspace'
   const folderMeta = item.comment?.trim() || item.path || 'Folder'
   const metaText = isFolderWorkspace ? folderMeta : displayBranch(item.branch)
@@ -84,12 +86,8 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
 
   return (
     <Pressable
-      className={cn(
-        styles.worktreeRow,
-        item.isActive && styles.worktreeRowActive,
-        styles.worktreeRowPressedActive
-      )}
-      style={lineageDepth > 0 ? { paddingLeft: spacing.lg + lineageDepth * 18 } : undefined}
+      className={cn('mx-3 flex-row items-start rounded-xl px-2 py-3', 'active:bg-accent')}
+      style={lineageDepth > 0 ? { paddingLeft: spacing4 * (lineageDepth + 1) } : undefined}
       disabled={isReadOnly}
       onPress={() => onPress(item)}
       onLongPress={
@@ -102,38 +100,34 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       }
       delayLongPress={400}
     >
-      <View className={styles.indicatorCol}>
-        <AgentSpinner status={status} />
-        {item.unread && (
-          <View className={styles.unreadBell}>
-            <Bell size={10} colorClassName="accent-amber-500" />
-          </View>
-        )}
+      <View className="mr-2 w-5">
+        <View className="h-6 items-center justify-center">
+          <AgentSpinner status={status} />
+        </View>
+        <View className="h-5 items-center justify-center">
+          {item.unread ? <Bell size={14} colorClassName="accent-amber-500" /> : null}
+        </View>
       </View>
 
-      <View className={styles.worktreeMain}>
-        <View className={styles.worktreeNameRow}>
+      <View className="mr-2 flex-1">
+        <View className="min-h-6 flex-row items-center gap-2">
           <Text
-            className={cn(
-              styles.worktreeName,
-              item.unread && styles.worktreeNameUnread,
-              isReadOnly && styles.textReadOnly
-            )}
+            className={cn('text-foreground shrink text-base', isReadOnly && 'opacity-50')}
             numberOfLines={1}
           >
             {item.displayName || item.repo}
           </Text>
           {item.linkedPR && (
-            <View className={styles.prBadge}>
-              <GitPullRequest size={10} colorClassName={linkedPrColors?.accent} />
-              <Text className={cn(styles.prNumber, linkedPrColors?.text)}>
+            <View className="bg-secondary flex-row items-center gap-1 rounded-full px-1.5 py-px">
+              <GitPullRequest size={14} colorClassName={linkedPrColors?.accent} />
+              <Text className={cn('text-muted-foreground text-sm', linkedPrColors?.text)}>
                 #{item.linkedPR.number}
               </Text>
             </View>
           )}
           {isFolderWorkspace && (
-            <View className={styles.folderBadge}>
-              <Text className={styles.folderBadgeText}>Folder</Text>
+            <View className="bg-secondary rounded-full px-1.5 py-px">
+              <Text className="text-muted-foreground text-xs">Folder</Text>
             </View>
           )}
           <WorktreeMetaGlyphs
@@ -142,11 +136,11 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             linkedGitLabMR={item.linkedGitLabMR}
           />
         </View>
-        <View className={styles.worktreeMetaRow}>
+        <View className="min-h-5 flex-row items-center gap-1">
           {lineageDepth > 0 && (
-            <View className={styles.childBadge}>
-              <GitMerge size={10} colorClassName="accent-muted-foreground" />
-              <Text className={styles.childBadgeText}>Child</Text>
+            <View className="bg-secondary flex-row items-center gap-1 rounded-full px-1.5 py-px">
+              <GitMerge size={14} colorClassName="accent-muted-foreground" />
+              <Text className="text-muted-foreground text-xs">Child</Text>
             </View>
           )}
           {/* Repo glyph+name only when not already grouped under this repo;
@@ -154,13 +148,13 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
               rather than a bare colored dot. */}
           {!hideRepo && (
             <>
-              <MobileRepoIcon repoIcon={repoIcon} size={11} color={repoColor} />
-              <Text className={styles.repoName} numberOfLines={1}>
+              <MobileRepoIcon repoIcon={repoIcon} size={14} color={repoColor} />
+              <Text className="text-muted-foreground max-w-24 text-sm" numberOfLines={1}>
                 {item.repo}
               </Text>
             </>
           )}
-          <Text className={styles.branchName} numberOfLines={1}>
+          <Text className="text-muted-foreground shrink text-sm" numberOfLines={1}>
             {metaText}
           </Text>
         </View>
@@ -171,7 +165,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
         ) : null}
         {lineageChildCount > 0 && onToggleLineage ? (
           <Pressable
-            className={styles.lineageToggle}
+            className="bg-secondary mt-1 flex-row items-center gap-1 self-start rounded-full px-2 py-1"
             onPress={(event) => {
               event.stopPropagation()
               onToggleLineage(item)
@@ -183,7 +177,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
               <ChevronDown size={12} colorClassName="accent-muted-foreground" />
             )}
             <GitMerge size={12} colorClassName="accent-muted-foreground" />
-            <Text className={styles.lineageToggleText}>
+            <Text className="text-muted-foreground text-xs">
               {lineageChildCount} {lineageChildCount === 1 ? 'child' : 'children'}
             </Text>
           </Pressable>
@@ -191,42 +185,10 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       </View>
 
       {item.liveTerminalCount > 0 && (
-        <Text className={styles.terminalCount}>{item.liveTerminalCount}</Text>
+        <View className="h-6 min-w-4 items-end justify-center">
+          <Text className="text-muted-foreground text-sm">{item.liveTerminalCount}</Text>
+        </View>
       )}
     </Pressable>
   )
 }
-
-const styles = {
-  // Reserve the active accent bar width so active/inactive rows align.
-  worktreeRow: cn('flex-row items-start py-2.5 pl-4 pr-4 border-l-2 border-l-transparent'),
-  worktreeRowPressedActive: cn('active:bg-secondary'),
-  // Highlight the worktree currently focused on the desktop, mirroring the
-  // desktop sidebar's selected-card treatment (raised fill + left accent).
-  // Neutral grey accent, matching the desktop's active-tab indicator rather
-  // than a blue line.
-  worktreeRowActive: cn('bg-card border-l-muted-foreground'),
-  // Why: the 12px status shell sits within the title's ~17px line box; 2px
-  // centers it on the first line instead of letting it drift toward metadata.
-  indicatorCol: cn('w-5 items-center pt-[2px] mr-2 gap-1'),
-  unreadBell: cn('mt-[2px]'),
-  worktreeMain: cn('flex-1 mr-2'),
-  worktreeNameRow: cn('flex-row items-center gap-2'),
-  worktreeName: cn('text-[14px] font-semibold text-foreground shrink'),
-  worktreeNameUnread: cn('font-bold'),
-  textReadOnly: cn('opacity-[0.5]'),
-  prBadge: cn('flex-row items-center gap-[3px] bg-secondary px-[5px] py-[1px] rounded-none'),
-  prNumber: cn('text-[10px] text-muted-foreground'),
-  folderBadge: cn('bg-secondary px-[5px] py-[1px] rounded-none'),
-  folderBadgeText: cn('text-[10px] text-muted-foreground'),
-  worktreeMetaRow: cn('flex-row items-center mt-[2px] gap-1'),
-  repoName: cn('text-[11px] text-muted-foreground max-w-[100px]'),
-  branchName: cn('text-[11px] text-muted-foreground/60 font-mono shrink'),
-  childBadge: cn('flex-row items-center gap-[3px] bg-secondary px-[5px] py-[1px] rounded-none'),
-  childBadgeText: cn('text-[10px] text-muted-foreground/60'),
-  lineageToggle: cn(
-    'self-start flex-row items-center gap-1 mt-1 bg-secondary px-2 py-1 rounded-none'
-  ),
-  lineageToggleText: cn('text-[11px] text-muted-foreground font-semibold'),
-  terminalCount: cn('text-[12px] text-muted-foreground/60 min-w-4 text-right pt-[3px]')
-} as const

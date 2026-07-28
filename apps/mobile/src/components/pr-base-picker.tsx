@@ -6,6 +6,7 @@ import { cn } from '@/style/class-names'
 
 import { searchBaseRefs } from '../source-control/base-ref-search'
 import type { RpcClient } from '../transport/rpc-client'
+import { MobileGlassSurface } from './glass/surface'
 
 type Props = {
   client: RpcClient | null
@@ -78,9 +79,15 @@ export function MobilePrBasePicker({
 
   return (
     <View>
-      <View className={cn(styles.inputShell, !editable && styles.inputShellDisabled)}>
+      <MobileGlassSurface
+        className={cn(
+          'min-h-10 flex-row items-center gap-1 overflow-hidden rounded-xl px-3 py-1',
+          !editable && 'opacity-60'
+        )}
+        isInteractive
+      >
         <TextInput
-          className={styles.input}
+          className="text-foreground min-w-0 flex-1 p-0 font-mono text-sm"
           value={value}
           onChangeText={(text) => {
             onChange(text)
@@ -95,38 +102,26 @@ export function MobilePrBasePicker({
           editable={editable}
         />
         <ChevronDown size={14} colorClassName="accent-muted-foreground" />
-      </View>
+      </MobileGlassSurface>
       {focused && results.length > 0 ? (
-        <View className={styles.results}>
+        <MobileGlassSurface className="mt-1 overflow-hidden rounded-xl">
           {results.map((ref) => (
             <Pressable
               key={ref}
-              className={cn(styles.resultRow, styles.resultRowPressedActive)}
+              className="border-b-hairline border-b-border active:bg-accent min-h-10 flex-row items-center justify-between gap-2 px-3"
               onPress={() => {
                 onChange(ref)
                 setResults([])
               }}
             >
-              <Text className={styles.resultText} numberOfLines={1}>
+              <Text className="text-foreground min-w-0 flex-1 font-mono text-sm" numberOfLines={1}>
                 {ref}
               </Text>
               {ref === value ? <Check size={14} colorClassName="accent-foreground" /> : null}
             </Pressable>
           ))}
-        </View>
+        </MobileGlassSurface>
       ) : null}
     </View>
   )
 }
-
-const styles = {
-  inputShell: cn('min-h-10 flex-row items-center gap-1 bg-secondary rounded-none px-3 py-1'),
-  inputShellDisabled: cn('opacity-[0.6]'),
-  input: cn('flex-1 min-w-0 p-0 text-foreground text-[14px] font-mono'),
-  results: cn('mt-1 border-hairline border-border rounded-none bg-card overflow-hidden'),
-  resultRow: cn(
-    'min-h-10 flex-row items-center justify-between gap-2 px-3 border-b-hairline border-b-border'
-  ),
-  resultRowPressedActive: cn('active:bg-secondary'),
-  resultText: cn('flex-1 min-w-0 text-foreground text-[14px] font-mono')
-} as const

@@ -7,19 +7,13 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "yiru",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#F5F5F5"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.xinyao27.yiru.mobile",
       "buildNumber": "1",
+      "deploymentTarget": "16.4",
       "infoPlist": {
         "NSLocalNetworkUsageDescription": "Yiru connects to the desktop app on your local network.",
-        "NSMicrophoneUsageDescription": "Allow Yiru to record voice dictation and transcribe it on your paired desktop.",
         "NSPhotoLibraryUsageDescription": "Allow Yiru to attach photos from your library to a terminal session on your paired desktop.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true,
@@ -71,9 +65,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5F5F5"
       },
-      "usesCleartextTraffic": true,
       "allowBackup": false,
-      "permissions": ["RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"],
       "package": "com.xinyao27.yiru.mobile",
       "versionCode": 1
     },
@@ -90,22 +82,23 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Yiru to use the camera for QR code scanning.",
-          "microphonePermission": "Allow Yiru to use your microphone for voice dictation sent to your paired desktop for transcription.",
+          "cameraPermission": "Allow Yiru to take photos and scan pairing codes.",
           "recordAudioAndroid": false
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Yiru to attach photos from your library to a terminal session on your paired desktop."
+          "cameraPermission": "Allow Yiru to take photos for agent and terminal attachments.",
+          "photosPermission": "Allow Yiru to attach photos from your library to an agent or terminal session on your paired desktop."
         }
       ],
       [
         "expo-build-properties",
         {
           "ios": {
-            "buildReactNativeFromSource": true
+            "useFrameworks": "dynamic",
+            "usePrecompiledModules": false
           },
           "android": {
             "usesCleartextTraffic": true

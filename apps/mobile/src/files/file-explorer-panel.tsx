@@ -1,17 +1,16 @@
-import { useRouter } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
-  Pressable,
+  Platform,
   Text,
   View,
   type ListRenderItem
 } from 'react-native'
 
-import { CaretLeft as ChevronLeft, X } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 
 import { getWorktreeLabel } from '../session/worktree-label'
 import { useHostClient, useForceReconnect } from '../transport/client-context'
@@ -289,31 +288,17 @@ export function MobileFileExplorerPanel(props: {
   }
 
   const headerBar = (
-    <View className={styles.topBar}>
-      {embedded ? (
-        <Pressable
-          className={cn(styles.backButton, styles.backButtonPressedActive)}
-          onPress={() => onRequestClose?.()}
-          hitSlop={8}
-          accessibilityLabel="Close files"
-        >
-          <X size={20} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      ) : (
-        <Pressable
-          className={cn(styles.backButton, styles.backButtonPressedActive)}
-          onPress={() => router.back()}
-          hitSlop={8}
-          accessibilityLabel="Back to session"
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      )}
-      <View className={styles.titleBlock}>
-        <Text className={styles.title} numberOfLines={1}>
+    <View className="min-h-15 flex-row items-center gap-2 px-3">
+      <MobileGlassIconButton
+        accessibilityLabel="Close files"
+        icon="close"
+        onPress={() => onRequestClose?.()}
+      />
+      <View className="min-w-0 flex-1">
+        <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Files
         </Text>
-        <Text className={styles.meta} numberOfLines={1}>
+        <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
           {worktreeLabel}
           {legacyListTruncated ? ' - Showing first 5000' : ''}
         </Text>
@@ -327,44 +312,58 @@ export function MobileFileExplorerPanel(props: {
     </View>
   ) : error ? (
     <View className={styles.state}>
-      <Text className={styles.errorText}>{error}</Text>
+      <Text className="text-destructive text-center text-sm">{error}</Text>
       {/* Why: while disconnected, re-sending the request is useless — revive
           the parked transport instead (issue #5049); loadDirectory re-runs via
           its effect once the new client connects. */}
-      <Pressable
-        className={styles.retryButton}
+      <MobileGlassTextButton
+        label="Retry"
         onPress={() =>
           connState !== 'connected' && hostId ? void forceReconnect(hostId) : void loadDirectory('')
         }
-      >
-        <Text className={styles.retryText}>Retry</Text>
-      </Pressable>
+      />
     </View>
   ) : rows.length === 0 ? (
     <View className={styles.state}>
-      <Text className={styles.emptyText}>No files found</Text>
+      <Text className="text-muted-foreground text-sm">No files found</Text>
     </View>
   ) : (
     <FlatList
       data={rows}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      contentContainerClassName={styles.listContent}
-      className={styles.list}
+      contentContainerClassName="py-2"
+      className="flex-1"
     />
   )
 
-  // Embedded: the dock column owns safe-area/layout, so render a plain View and
-  // a non-inset header. Full-screen: keep the SafeAreaView top inset + chrome.
   return (
-    <View className={styles.container}>
-      {embedded ? (
-        <View className={styles.header}>{headerBar}</View>
-      ) : (
-        <SafeAreaView className={styles.header} edges={['top']}>
-          {headerBar}
-        </SafeAreaView>
-      )}
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          title: `Files · ${worktreeLabel}`,
+          headerLeft:
+            !embedded && Platform.OS !== 'ios'
+              ? () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel="Back"
+                    icon="back"
+                    onPress={() => router.back()}
+                  />
+                )
+              : undefined
+        }}
+      />
+      {!embedded && Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Back"
+            icon="chevron.left"
+            onPress={() => router.back()}
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {embedded ? <View className={styles.header}>{headerBar}</View> : null}
       {body}
     </View>
   )

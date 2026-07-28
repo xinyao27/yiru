@@ -1,13 +1,12 @@
-import { useRouter } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, BackHandler, Pressable, Text, View, useWindowDimensions } from 'react-native'
+import { Alert, BackHandler, Platform, Text, View, useWindowDimensions } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
-import { CaretLeft as ChevronLeft, FloppyDisk as Save } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { getWorktreeLabel } from '../session/worktree-label'
-import { spacing } from '../theme/uniwind-theme-values'
 import { useForceReconnect, useHostClient } from '../transport/client-context'
 import { MobileFilePreviewBody } from './file-preview-body'
 import {
@@ -25,13 +24,13 @@ import {
 } from './file-preview-request'
 import { displayNameFromPreviewPath, type MobileFilePreviewRouteState } from './file-preview-route'
 import { previewSourceFromRoute, sourceKeyForPreview } from './file-preview-source'
-import { filePreviewStyles as styles } from './file-preview-styles'
 
 type Props = {
   route: MobileFilePreviewRouteState
 }
 
 export function MobileFilePreviewScreen({ route }: Props) {
+  const spacing3 = resolveCssNumber(useCSSVariable('--spacing-3'))
   const router = useRouter()
   const previewParams = route.ok ? route.params : null
   const { client, state: connState } = useHostClient(previewParams?.hostId)
@@ -236,40 +235,57 @@ export function MobileFilePreviewScreen({ route }: Props) {
   }, [requestBack])
 
   return (
-    <View className={styles.container}>
-      <SafeAreaView className={styles.header} edges={['top']}>
-        <View className={styles.topBar}>
-          <Pressable
-            className={cn(styles.backButton, styles.backButtonPressedActive)}
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          gestureEnabled: !hasUnsavedTerminalArtifactDraft,
+          title: title || 'Preview',
+          headerLeft:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel="Back"
+                    icon="back"
+                    onPress={requestBack}
+                  />
+                ),
+          headerRight:
+            Platform.OS === 'ios' || !isEditableTerminalArtifact
+              ? undefined
+              : () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel="Save terminal artifact"
+                    disabled={!canSaveArtifact || saving}
+                    icon="save"
+                    onPress={() => void saveArtifact()}
+                  />
+                )
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Back"
+            icon="chevron.left"
             onPress={requestBack}
-            hitSlop={8}
-            accessibilityLabel="Back to files"
-          >
-            <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-          </Pressable>
-          <View className={styles.titleBlock}>
-            <Text className={styles.title} numberOfLines={1}>
-              {title || 'Preview'}
-            </Text>
-            <Text className={styles.meta} numberOfLines={1}>
-              {meta}
-            </Text>
-          </View>
-          {isEditableTerminalArtifact ? (
-            <Pressable
-              className={cn(
-                styles.saveButton,
-                (!canSaveArtifact || saving) && styles.saveButtonDisabled
-              )}
-              onPress={() => void saveArtifact()}
-              disabled={!canSaveArtifact || saving}
-              accessibilityLabel="Save terminal artifact"
-            >
-              <Save size={18} colorClassName="accent-foreground" />
-            </Pressable>
-          ) : null}
-        </View>
-      </SafeAreaView>
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {Platform.OS === 'ios' && isEditableTerminalArtifact ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Save terminal artifact"
+            disabled={!canSaveArtifact || saving}
+            icon="square.and.arrow.down"
+            onPress={() => void saveArtifact()}
+            variant="prominent"
+          />
+        </Stack.Toolbar>
+      ) : null}
+      <Text className="text-muted-foreground px-4 py-1 text-xs" numberOfLines={1}>
+        {meta}
+      </Text>
       <MobileFilePreviewBody
         preview={preview}
         relativePath={displayPath}
@@ -278,7 +294,7 @@ export function MobileFilePreviewScreen({ route }: Props) {
         draftContent={draftContent}
         saveError={saveError}
         lineColumn={lineColumn}
-        imageWidth={Math.max(1, width - spacing.md * 2)}
+        imageWidth={Math.max(1, width - spacing3 * 2)}
         imageHeight={Math.max(240, height - 160)}
         onDraftChange={setDraftContent}
         onImageError={() =>

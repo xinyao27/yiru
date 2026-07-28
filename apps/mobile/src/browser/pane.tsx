@@ -10,23 +10,16 @@ import {
   Image,
   PanResponder,
   PixelRatio,
-  Platform,
-  Pressable,
   Text,
-  TextInput,
   View,
   type GestureResponderEvent,
   type PanResponderGestureState
 } from 'react-native'
 
-import {
-  ArrowUp,
-  CaretLeft as ChevronLeft,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
+import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import type {
   BrowserScreencastFrame,
   BrowserScreencastFrameMetadata
@@ -34,14 +27,13 @@ import type {
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcFailure, RpcSuccess } from '../transport/types'
 import { resolveMobileBrowserAddressSync } from './address-sync'
-import { MobileBrowserKeyRow } from './key-row'
-import { MobileBrowserPointerModifiers, type BrowserPointerModifier } from './pointer-modifiers'
+import { MobileBrowserKeyboardChrome, MobileBrowserTopChrome } from './chrome'
+import type { BrowserPointerModifier } from './pointer-modifiers'
 import {
   MOBILE_BROWSER_FRAME_MIN_INTERVAL_MS,
   buildMobileBrowserScreencastRequest,
   type MobileBrowserViewMode
 } from './screencast-request'
-import { MobileBrowserToolbarIconButton } from './toolbar-icon-button'
 import {
   clampBrowserZoomState,
   computeBrowserFrameGeometry,
@@ -55,7 +47,6 @@ import {
 } from './touch-geometry'
 import { displayBrowserUrl, normalizeBrowserUrl } from './url'
 import { getInitialMobileBrowserViewMode, saveMobileBrowserViewMode } from './view-mode-state'
-import { MobileBrowserViewModeSwitch } from './view-mode-switch'
 
 export type MobileBrowserTab = {
   type: 'browser'
@@ -1019,10 +1010,6 @@ export function MobileBrowserPane({
   )
 
   const controlsDisabled = !client || !tab.browserPageId || screencastSupported !== true
-  const addressSelection = useMemo(
-    () => (addressFocused ? undefined : { start: 0, end: 0 }),
-    [addressFocused]
-  )
   const goBack = useCallback(() => {
     if (controlsDisabled || !tab.canGoBack) {
       return
@@ -1058,8 +1045,8 @@ export function MobileBrowserPane({
     frameUriRef.current || frameUri ? { uri: frameUriRef.current ?? frameUri! } : null
   const frameLayerClassName = useCallback((layer: FrameLayer) => {
     return cn(
-      styles.browserImageLayer,
-      visibleFrameLayerRef.current !== layer && styles.browserImageLayerHidden
+      'absolute inset-0 items-center justify-center',
+      visibleFrameLayerRef.current !== layer && 'opacity-0'
     )
   }, [])
   const browserLayerRef = useCallback(
@@ -1082,57 +1069,9 @@ export function MobileBrowserPane({
   )
 
   return (
-    <View ref={setRootViewRef} className={styles.root}>
-      <View className={styles.toolbar}>
-        <MobileBrowserToolbarIconButton
-          disabled={controlsDisabled || !tab.canGoBack}
-          label="Back"
-          onPress={goBack}
-        >
-          <ChevronLeft size={15} colorClassName="accent-muted-foreground" />
-        </MobileBrowserToolbarIconButton>
-        <MobileBrowserToolbarIconButton
-          disabled={controlsDisabled || !tab.canGoForward}
-          label="Forward"
-          onPress={goForward}
-        >
-          <ChevronRight size={15} colorClassName="accent-muted-foreground" />
-        </MobileBrowserToolbarIconButton>
-        <MobileBrowserToolbarIconButton
-          disabled={controlsDisabled}
-          label="Reload"
-          onPress={reloadPage}
-        >
-          <RefreshCw size={15} colorClassName="accent-muted-foreground" />
-        </MobileBrowserToolbarIconButton>
-        <TextInput
-          className={styles.addressInput}
-          style={{ includeFontPadding: false, textAlignVertical: 'center' }}
-          value={addressValue}
-          onChangeText={setAddressValue}
-          onFocus={() => setAddressFocused(true)}
-          onBlur={() => setAddressFocused(false)}
-          onSubmitEditing={() => void navigateToAddress()}
-          selectTextOnFocus
-          selection={addressSelection}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
-          numberOfLines={1}
-          returnKeyType="go"
-          placeholder="URL"
-          placeholderTextColorClassName="accent-muted-foreground"
-          editable={!controlsDisabled}
-        />
-        <MobileBrowserViewModeSwitch
-          disabled={controlsDisabled}
-          value={browserViewMode}
-          onChange={selectBrowserViewMode}
-        />
-      </View>
-
+    <View ref={setRootViewRef} className="bg-background relative min-h-0 flex-1">
       <View
-        className={styles.viewport}
+        className="bg-background min-h-0 flex-1 overflow-hidden"
         onLayout={(event) => {
           const next = {
             width: event.nativeEvent.layout.width,
@@ -1148,11 +1087,11 @@ export function MobileBrowserPane({
         {...panResponder.panHandlers}
       >
         {renderedFrameSource ? (
-          <View className={styles.browserImageHost}>
+          <View className="absolute inset-0 items-center justify-center overflow-hidden">
             {frameGeometry ? (
               <View
                 pointerEvents="none"
-                className={styles.browserZoomOffset}
+                className="items-center justify-center"
                 style={[
                   {
                     width: frameGeometry.renderedWidth,
@@ -1162,7 +1101,7 @@ export function MobileBrowserPane({
                 ]}
               >
                 <View
-                  className={styles.browserFrameBox}
+                  className="items-center justify-center overflow-hidden"
                   style={[
                     {
                       width: frameGeometry.renderedWidth,
@@ -1185,7 +1124,7 @@ export function MobileBrowserPane({
                         fadeDuration={0}
                         onLoad={frameLayerLoadHandler(layer)}
                         onError={frameLayerErrorHandler(layer)}
-                        className={styles.browserImage}
+                        className="bg-background"
                         style={[
                           {
                             width: frameGeometry.renderedWidth,
@@ -1212,7 +1151,7 @@ export function MobileBrowserPane({
                     fadeDuration={0}
                     onLoad={frameLayerLoadHandler(layer)}
                     onError={frameLayerErrorHandler(layer)}
-                    className={styles.browserImageFill}
+                    className="h-full w-full"
                   />
                 </View>
               ))
@@ -1220,82 +1159,71 @@ export function MobileBrowserPane({
           </View>
         ) : null}
         {!renderedFrameSource || busy || error ? (
-          <View pointerEvents="none" className={styles.overlay}>
+          <View
+            pointerEvents="none"
+            className="bg-content-dimmer absolute inset-0 items-center justify-center gap-2 p-6"
+          >
             {busy || (!ready && !error) ? (
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
-            {error ? <Text className={styles.errorText}>{error}</Text> : null}
+            {error ? (
+              <MobileGlassSurface className="overflow-hidden rounded-xl px-3 py-2">
+                <Text className="text-foreground text-center text-xs">{error}</Text>
+              </MobileGlassSurface>
+            ) : null}
           </View>
         ) : null}
         {dialog ? (
-          <View className={styles.dialogOverlay}>
-            <View className={styles.dialogCard}>
-              <Text className={styles.dialogTitle}>Browser Dialog</Text>
-              <Text className={styles.dialogMessage}>{dialog.message}</Text>
-              <View className={styles.dialogActions}>
+          <View className="bg-modal-backdrop absolute inset-0 z-30 items-center justify-center p-6">
+            <MobileGlassSurface className="w-full max-w-sm rounded-3xl p-4">
+              <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
+              <Text className="text-muted-foreground mt-2 text-sm leading-5">{dialog.message}</Text>
+              <View className="mt-4 flex-row justify-end gap-2">
                 {dialog.dialogType !== 'alert' ? (
-                  <Pressable
-                    className={cn(styles.dialogButton, styles.dialogButtonPressedActive)}
+                  <MobileGlassTextButton
+                    label="Cancel"
                     onPress={() => void sendDialogCommand('browser.dialogDismiss')}
-                  >
-                    <Text className={styles.dialogButtonText}>Cancel</Text>
-                  </Pressable>
+                  />
                 ) : null}
-                <Pressable
-                  className={cn(
-                    styles.dialogButton,
-                    styles.dialogButtonPrimary,
-                    styles.dialogButtonPressedActive
-                  )}
+                <MobileGlassTextButton
+                  isProminent
+                  label="OK"
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
-                >
-                  <Text className={cn(styles.dialogButtonText, styles.dialogButtonPrimaryText)}>
-                    OK
-                  </Text>
-                </Pressable>
+                />
               </View>
-            </View>
+            </MobileGlassSurface>
           </View>
         ) : null}
       </View>
-
-      <View
-        className={styles.keyboardDock}
-        style={[{ paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }]}
-      >
-        <MobileBrowserPointerModifiers
+      <View className="absolute inset-x-0 top-0 z-20">
+        <MobileBrowserTopChrome
+          addressFocused={addressFocused}
+          addressValue={addressValue}
+          canGoBack={tab.canGoBack}
+          canGoForward={tab.canGoForward}
           disabled={controlsDisabled}
+          onAddressChange={setAddressValue}
+          onAddressFocusChange={setAddressFocused}
+          onAddressSubmit={() => void navigateToAddress()}
+          onBackPress={goBack}
+          onForwardPress={goForward}
+          onReloadPress={reloadPage}
+          onViewModeChange={selectBrowserViewMode}
+          viewMode={browserViewMode}
+        />
+      </View>
+      <View className="absolute inset-x-0 bottom-0 z-20">
+        <MobileBrowserKeyboardChrome
+          bottomInset={bottomInset}
+          disabled={controlsDisabled}
+          keyboardLift={keyboardLift}
+          keyboardValue={keyboardValue}
+          onKeyboardValueChange={setKeyboardValue}
+          onKeyPress={(key) => void sendKeypress(key)}
+          onModifierToggle={togglePointerModifier}
+          onSendPress={() => void sendKeyboardText()}
           selectedModifiers={pointerModifiers}
-          onToggle={togglePointerModifier}
         />
-        <MobileBrowserKeyRow
-          disabled={controlsDisabled}
-          onKeypress={(key) => void sendKeypress(key)}
-        />
-        <View className={styles.inputRow}>
-          <TextInput
-            className={styles.keyboardInput}
-            value={keyboardValue}
-            onChangeText={setKeyboardValue}
-            placeholder="Type on page…"
-            placeholderTextColorClassName="accent-muted-foreground"
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!controlsDisabled}
-            onSubmitEditing={() => void sendKeyboardText()}
-          />
-          <Pressable
-            className={cn(
-              styles.sendButton,
-              (controlsDisabled || !keyboardValue) && styles.disabled
-            )}
-            disabled={controlsDisabled || !keyboardValue}
-            onPress={() => void sendKeyboardText()}
-            accessibilityLabel="Send text to browser"
-          >
-            <ArrowUp size={18} colorClassName="accent-muted-foreground" />
-          </Pressable>
-        </View>
       </View>
     </View>
   )
@@ -1474,41 +1402,3 @@ function updatePinchZoom(
     MAX_ZOOM
   )
 }
-
-const styles = {
-  root: cn('flex-1 min-h-0 bg-background'),
-  toolbar: cn('min-h-8 flex-row items-center gap-1 px-2 py-[2px] border-b border-b-border bg-card'),
-  addressInput: cn(
-    'flex-1 min-w-0 h-7 rounded-none bg-secondary text-foreground px-2 py-0 text-[12px] leading-[16px] font-mono'
-  ),
-  viewport: cn('flex-1 min-h-0 overflow-hidden bg-background'),
-  browserImageHost: cn('absolute inset-0 items-center justify-center overflow-hidden'),
-  browserImageFill: cn('w-full h-full'),
-  browserImageLayer: cn('absolute inset-0 items-center justify-center'),
-  browserImageLayerHidden: cn('opacity-[0]'),
-  browserZoomOffset: cn('items-center justify-center'),
-  browserFrameBox: cn('items-center justify-center overflow-hidden'),
-  browserImage: cn('bg-background'),
-  overlay: cn('absolute inset-0 items-center justify-center p-6 gap-2 bg-black/20'),
-  errorText: cn(
-    'text-foreground bg-card border border-border rounded-none px-3 py-2 text-[13px] text-center overflow-hidden'
-  ),
-  dialogOverlay: cn('absolute inset-0 z-[30] items-center justify-center p-6 bg-black/50'),
-  dialogCard: cn('w-full max-w-[360px] rounded-none border border-border bg-card p-4'),
-  dialogTitle: cn('text-foreground text-[16px] font-semibold'),
-  dialogMessage: cn('text-muted-foreground text-[14px] leading-[20px] mt-2'),
-  dialogActions: cn('flex-row justify-end gap-2 mt-4'),
-  dialogButton: cn('min-h-[34px] rounded-none bg-secondary px-3 items-center justify-center'),
-  dialogButtonPrimary: cn('bg-foreground'),
-  dialogButtonPressedActive: cn('active:opacity-[0.75]'),
-  dialogButtonText: cn('text-muted-foreground text-[14px] font-semibold'),
-  dialogButtonPrimaryText: cn('text-background'),
-  keyboardDock: cn('z-[20] border-t border-t-border bg-card'),
-  inputRow: cn('flex-row items-center px-3 pt-1 pb-1.5'),
-  keyboardInput: cn(
-    'flex-1 h-[34px] bg-secondary text-foreground rounded-none px-3 text-[14px] font-mono mr-2'
-  ),
-  sendButton: cn('w-[34px] h-[34px] rounded-none items-center justify-center bg-secondary'),
-  disabled: cn('opacity-[0.35]'),
-  disabledText: cn('text-muted-foreground/60')
-} as const

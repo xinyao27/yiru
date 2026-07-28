@@ -1,12 +1,11 @@
-import type * as Monaco from 'monaco-editor'
-
 import {
   CURSOR_DARK_THEME_NAME,
   CURSOR_LIGHT_THEME_NAME,
   cursorDarkThemeSource,
   cursorLightThemeSource,
   type CursorThemeSource
-} from './cursor-theme-source'
+} from '@yiru/editor-themes/cursor'
+import type * as Monaco from 'monaco-editor'
 
 type MonacoThemeRegistrar = Pick<typeof Monaco.editor, 'defineTheme'>
 

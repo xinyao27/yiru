@@ -1,19 +1,18 @@
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
   Text,
   TextInput,
-  Pressable,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView
 } from 'react-native'
 
-import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
-
+import { MobileGlassPressable } from '../../../src/components/glass/pressable'
+import { MobileGlassSurface } from '../../../src/components/glass/surface'
+import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { useForceReconnect, usePrimeHosts } from '../../../src/transport/client-context'
 import {
   displayHostEndpoint,
@@ -149,143 +148,129 @@ export default function EditHostScreen() {
   }
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable
-          className={styles.backButton}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-        >
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className={styles.heading}>Edit host</Text>
-        <Pressable
-          className={cn(
-            styles.saveButton,
-            !canSave && styles.saveButtonDisabled,
-            styles.saveButtonDisabledActive
-          )}
-          onPress={() => void handleSave()}
-          disabled={!canSave}
-          accessibilityRole="button"
-          accessibilityLabel="Save host"
-        >
-          {saving ? (
-            <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-          ) : (
-            <Text className={styles.saveButtonText}>Save</Text>
-          )}
-        </Pressable>
-      </View>
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          headerRight:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <MobileGlassPressable
+                    accessibilityLabel="Save host"
+                    className="rounded-full"
+                    contentClassName="min-h-9 justify-center rounded-full px-3"
+                    disabled={!canSave}
+                    hitSlop={4}
+                    onPress={() => void handleSave()}
+                  >
+                    <Text className="text-primary text-sm">Save</Text>
+                  </MobileGlassPressable>
+                )
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Save host"
+            disabled={!canSave}
+            onPress={() => void handleSave()}
+            variant="prominent"
+          >
+            Save
+          </Stack.Toolbar.Button>
+        </Stack.Toolbar>
+      ) : null}
 
       {loadError ? (
-        <View className={styles.errorState}>
-          <Text className={styles.errorText}>{loadError}</Text>
-          <Pressable className={styles.secondaryButton} onPress={() => router.back()}>
-            <Text className={styles.secondaryButtonText}>Go back</Text>
-          </Pressable>
+        <View className="flex-1 gap-3 px-4 pt-6">
+          <Text className="text-destructive mt-3 text-sm">{loadError}</Text>
+          <MobileGlassTextButton label="Go back" onPress={() => router.back()} />
         </View>
       ) : !host ? (
-        <View className={styles.loadingState}>
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator colorClassName="accent-muted-foreground" />
         </View>
       ) : (
         <KeyboardAvoidingView
-          className={styles.flex}
+          className="flex-1"
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView
-            contentContainerClassName={cn(styles.form, 'pb-safe-offset-6')}
+            contentContainerClassName="px-4 gap-2 pb-safe-offset-6"
             keyboardShouldPersistTaps="handled"
           >
-            <Text className={styles.help}>
+            <Text className="text-muted-foreground mb-2 text-sm leading-5">
               Change the display name or connection address. Address edits only switch where this
               phone connects — they do not re-pair. Use this when the same desktop is reachable at a
               different IP (for example home LAN vs Tailscale).
             </Text>
 
-            <Text className={styles.label}>Name</Text>
-            <TextInput
-              className={styles.input}
-              accessibilityLabel="Name"
-              value={name}
-              onChangeText={(value) => {
-                setName(value)
-                setSaveError(null)
-              }}
-              placeholder="Host name"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="next"
-            />
+            <Text className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase">
+              Name
+            </Text>
+            <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
+              <TextInput
+                className="text-foreground min-h-11 rounded-full px-4 text-sm"
+                accessibilityLabel="Name"
+                value={name}
+                onChangeText={(value) => {
+                  setName(value)
+                  setSaveError(null)
+                }}
+                placeholder="Host name"
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="next"
+              />
+            </MobileGlassSurface>
 
-            <Text className={styles.label}>Address</Text>
-            <TextInput
-              className={styles.input}
-              accessibilityLabel="Address"
-              value={address}
-              onChangeText={(value) => {
-                setAddress(value)
-                setSaveError(null)
-              }}
-              placeholder="192.168.1.10:6768"
-              placeholderTextColorClassName="accent-muted-foreground"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="off"
-              keyboardType="url"
-              returnKeyType="done"
-              onSubmitEditing={() => {
-                if (canSave) {
-                  void handleSave()
-                }
-              }}
-            />
-            <Text className={styles.hint}>
+            <Text className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase">
+              Address
+            </Text>
+            <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
+              <TextInput
+                className="text-foreground min-h-11 rounded-full px-4 text-sm"
+                accessibilityLabel="Address"
+                value={address}
+                onChangeText={(value) => {
+                  setAddress(value)
+                  setSaveError(null)
+                }}
+                placeholder="192.168.1.10:6768"
+                placeholderTextColorClassName="accent-muted-foreground"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="off"
+                keyboardType="url"
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  if (canSave) {
+                    void handleSave()
+                  }
+                }}
+              />
+            </MobileGlassSurface>
+            <Text className="text-muted-foreground text-xs leading-4">
               Accepts IP, host:port, or ws:// / wss://. Missing port defaults to the current port
               (or 6768).
             </Text>
 
             {normalizedEndpoint.ok ? (
-              <Text className={styles.preview} numberOfLines={2}>
+              <Text
+                className="text-muted-foreground ios:font-mono mt-2 font-mono text-xs"
+                numberOfLines={2}
+              >
                 Connects to {normalizedEndpoint.endpoint}
               </Text>
             ) : address.trim().length > 0 ? (
-              <Text className={styles.previewError}>{normalizedEndpoint.error}</Text>
+              <Text className="text-destructive mt-2 text-sm">{normalizedEndpoint.error}</Text>
             ) : null}
 
-            {saveError ? <Text className={styles.errorText}>{saveError}</Text> : null}
+            {saveError ? <Text className="text-destructive mt-3 text-sm">{saveError}</Text> : null}
           </ScrollView>
         </KeyboardAvoidingView>
       )}
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background'),
-  flex: cn('flex-1'),
-  topRow: cn('flex-row items-center px-3 pb-3 gap-2'),
-  backButton: cn('w-9 h-9 items-center justify-center'),
-  heading: cn('flex-1 text-foreground text-[20px] font-bold'),
-  saveButton: cn('min-w-16 h-[34px] px-3 rounded-none bg-primary items-center justify-center'),
-  saveButtonDisabled: cn('opacity-[0.4]'),
-  saveButtonDisabledActive: cn('active:opacity-[0.4]'),
-  saveButtonText: cn('text-primary-foreground text-[14px] font-semibold'),
-  form: cn('px-4 gap-2'),
-  help: cn('text-muted-foreground text-[14px] leading-[20px] mb-2'),
-  label: cn('text-muted-foreground text-[12px] font-medium mt-2 uppercase tracking-[0.4px]'),
-  input: cn(
-    'bg-card border border-border rounded-none text-foreground text-[14px] px-3 py-2.5 ios:py-3'
-  ),
-  hint: cn('text-muted-foreground/60 text-[12px] leading-[16px]'),
-  preview: cn('mt-2 text-muted-foreground text-[12px] font-mono ios:font-mono'),
-  previewError: cn('mt-2 text-destructive text-[14px]'),
-  errorText: cn('text-destructive text-[14px] mt-3'),
-  errorState: cn('flex-1 px-4 pt-6 gap-3'),
-  loadingState: cn('flex-1 items-center justify-center'),
-  secondaryButton: cn('self-start px-3 py-2 rounded-none bg-secondary'),
-  secondaryButtonText: cn('text-foreground text-[14px] font-medium')
-} as const

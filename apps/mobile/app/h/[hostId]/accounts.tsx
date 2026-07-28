@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState, useCallback } from 'react'
 import {
   View,
@@ -10,13 +10,7 @@ import {
   Alert
 } from 'react-native'
 
-import {
-  CaretLeft as ChevronLeft,
-  Check,
-  ArrowClockwise as RefreshCw,
-  User
-} from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
+import { Check, User } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import {
@@ -30,14 +24,26 @@ import {
   UsageBar
 } from '../../../src/components/account-usage'
 import { ClaudeIcon, OpenAIIcon } from '../../../src/components/agent-icons'
+import { MobileGlassSection } from '../../../src/components/glass/section'
 import { useHostClient } from '../../../src/transport/client-context'
 import { loadHosts } from '../../../src/transport/host-store'
 import type { RpcSuccess } from '../../../src/transport/types'
-import { styles } from './accounts-screen-styles'
+
+const accountScreenClassNames = {
+  row: 'flex-row items-center px-3.5 py-3',
+  rowPressedActive: 'active:bg-accent',
+  rowMain: 'flex-1 gap-1',
+  // Why: fixed-width trailing slot keeps usage bars the same width whether
+  // the selected row is showing a checkmark or not.
+  rowTrailing: 'ml-2 w-6 items-end justify-center',
+  rowTitle: 'text-sm font-medium text-foreground',
+  usageRow: 'mt-1 flex-row gap-3',
+  errorText: 'text-xs text-destructive',
+  placeholder: 'items-center gap-2 py-12',
+  placeholderText: 'text-sm text-muted-foreground'
+} as const
 
 export default function AccountsScreen() {
-  const router = useRouter()
-
   const { hostId } = useLocalSearchParams<{ hostId: string }>()
 
   // Why: shared client per host. See docs/mobile-shared-client-per-host.md.
@@ -154,26 +160,28 @@ export default function AccountsScreen() {
     const activeWeeklyBar = getUsageBarState(activeUsage, 'weekly')
     const Icon = provider === 'claude' ? ClaudeIcon : OpenAIIcon
     return (
-      <View className={styles.section}>
-        <View className={styles.sectionHeader}>
+      <View className="mb-6">
+        <View className="mb-2 flex-row items-center gap-2">
           <Icon size={14} />
-          <Text className={styles.sectionHeading}>{title}</Text>
+          <Text className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+            {title}
+          </Text>
         </View>
-        <View className={styles.card}>
+        <MobileGlassSection>
           {/* System default row */}
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className={cn(accountScreenClassNames.row, accountScreenClassNames.rowPressedActive)}
             onPress={() => selectAccount(provider, null)}
             disabled={busyAccountId !== null || connState !== 'connected'}
           >
-            <View className={styles.rowMain}>
-              <Text className={styles.rowTitle}>System default</Text>
-              <Text className={styles.rowSubtitle}>Use the agent's own login</Text>
+            <View className={accountScreenClassNames.rowMain}>
+              <Text className={accountScreenClassNames.rowTitle}>System default</Text>
+              <Text className="text-muted-foreground text-xs">Use the agent's own login</Text>
               {/* Why: when system default is the active selection, activeUsage
                   holds the system-default login's rate limits — surface them
                   here so non-managed users still see their usage. */}
               {state.activeAccountId === null && hasActiveProviderUsage(activeUsage) ? (
-                <View className={styles.usageRow}>
+                <View className={accountScreenClassNames.usageRow}>
                   <UsageBar
                     label="5h"
                     usedPercent={activeSessionBar.usedPercent}
@@ -191,7 +199,7 @@ export default function AccountsScreen() {
                 </View>
               ) : null}
             </View>
-            <View className={styles.rowTrailing}>
+            <View className={accountScreenClassNames.rowTrailing}>
               {state.activeAccountId === null ? (
                 <Check size={16} colorClassName="accent-primary" />
               ) : busyAccountId === `${provider}:default` ? (
@@ -213,17 +221,20 @@ export default function AccountsScreen() {
             const weeklyBar = getUsageBarState(usage, 'weekly', isFetching)
             return (
               <View key={account.id}>
-                <View className={styles.separator} />
+                <View className="h-hairline bg-border mx-3" />
                 <Pressable
-                  className={cn(styles.row, styles.rowPressedActive)}
+                  className={cn(
+                    accountScreenClassNames.row,
+                    accountScreenClassNames.rowPressedActive
+                  )}
                   onPress={() => selectAccount(provider, account.id)}
                   disabled={busyAccountId !== null || connState !== 'connected' || isActive}
                 >
-                  <View className={styles.rowMain}>
-                    <Text className={styles.rowTitle} numberOfLines={1}>
+                  <View className={accountScreenClassNames.rowMain}>
+                    <Text className={accountScreenClassNames.rowTitle} numberOfLines={1}>
                       {account.email}
                     </Text>
-                    <View className={styles.usageRow}>
+                    <View className={accountScreenClassNames.usageRow}>
                       <UsageBar
                         label="5h"
                         usedPercent={sessionBar.usedPercent}
@@ -240,12 +251,12 @@ export default function AccountsScreen() {
                       />
                     </View>
                     {usage?.error ? (
-                      <Text className={styles.errorText} numberOfLines={1}>
+                      <Text className={accountScreenClassNames.errorText} numberOfLines={1}>
                         {usage.error}
                       </Text>
                     ) : null}
                   </View>
-                  <View className={styles.rowTrailing}>
+                  <View className={accountScreenClassNames.rowTrailing}>
                     {isActive ? (
                       <Check size={16} colorClassName="accent-primary" />
                     ) : busyAccountId === account.id ? (
@@ -256,40 +267,25 @@ export default function AccountsScreen() {
               </View>
             )
           })}
-        </View>
+        </MobileGlassSection>
       </View>
     )
   }
 
   return (
-    <SafeAreaView className={styles.container} edges={['top']}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-foreground" />
-        </Pressable>
-        <View className={styles.titleWrap}>
-          <Text className={styles.heading}>Accounts</Text>
-          {hostName ? (
-            <Text className={styles.subheading} numberOfLines={1}>
-              {hostName}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          className={styles.iconButton}
-          onPress={refresh}
+    <View className="bg-background flex-1">
+      <Stack.Screen options={{ title: hostName ? `Accounts · ${hostName}` : 'Accounts' }} />
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          accessibilityLabel="Refresh accounts"
           disabled={!client || refreshing || connState !== 'connected'}
-        >
-          {refreshing ? (
-            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-          ) : (
-            <RefreshCw size={18} colorClassName="accent-muted-foreground" />
-          )}
-        </Pressable>
-      </View>
+          icon="arrow.clockwise"
+          onPress={refresh}
+        />
+      </Stack.Toolbar>
 
       <ScrollView
-        contentContainerClassName={cn(styles.scroll, 'pb-safe-offset-6')}
+        contentContainerClassName={cn('px-4 pt-2', 'pb-safe-offset-6')}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -299,32 +295,34 @@ export default function AccountsScreen() {
         }
       >
         {connState !== 'connected' && !snapshot ? (
-          <View className={styles.placeholder}>
+          <View className={accountScreenClassNames.placeholder}>
             <ActivityIndicator colorClassName="accent-muted-foreground" />
-            <Text className={styles.placeholderText}>Connecting to {hostName || 'host'}…</Text>
+            <Text className={accountScreenClassNames.placeholderText}>
+              Connecting to {hostName || 'host'}…
+            </Text>
           </View>
         ) : error && !snapshot ? (
-          <View className={styles.placeholder}>
-            <Text className={styles.errorText}>{error}</Text>
+          <View className={accountScreenClassNames.placeholder}>
+            <Text className={accountScreenClassNames.errorText}>{error}</Text>
           </View>
         ) : !snapshot ? (
-          <View className={styles.placeholder}>
+          <View className={accountScreenClassNames.placeholder}>
             <ActivityIndicator colorClassName="accent-muted-foreground" />
-            <Text className={styles.placeholderText}>Loading accounts…</Text>
+            <Text className={accountScreenClassNames.placeholderText}>Loading accounts…</Text>
           </View>
         ) : (
           <>
             {renderProviderSection('claude', 'Claude')}
             {renderProviderSection('codex', 'Codex')}
-            <View className={styles.footerHint}>
+            <View className="flex-row items-start gap-2 px-2 pt-2">
               <User size={14} colorClassName="accent-muted-foreground" />
-              <Text className={styles.footerHintText}>
+              <Text className="text-muted-foreground flex-1 text-xs leading-5">
                 Add or re-authenticate accounts from desktop Settings → Accounts.
               </Text>
             </View>
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }

@@ -1,6 +1,6 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { useMemo } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native'
 
 import {
   Check,
@@ -11,7 +11,6 @@ import {
   Trash as Trash2,
   X
 } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { mobileReviewCountLabel } from '../session/diff/review-screen-model'
 import type { useMobileDiffReviewController } from '../session/diff/use-review-controller'
@@ -20,6 +19,9 @@ import { ActionSheetModal } from './action-sheet-modal'
 import { BottomDrawer } from './bottom-drawer'
 import { ConfirmModal } from './confirm-modal'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
+import { MobileGlassIconButton } from './glass/icon-button'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
   controller: ReturnType<typeof useMobileDiffReviewController>
@@ -175,7 +177,7 @@ function NoteComposerDrawer({ controller }: Props) {
   return (
     <BottomDrawer visible={composer !== null} onClose={controller.closeComposer}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View className={styles.composerHeader}>
+        <View className="mb-3 flex-row items-center justify-between gap-3">
           <View>
             <Text className={styles.drawerTitle}>
               {composer?.mode === 'edit' ? 'Edit Note' : 'Add Note'}
@@ -186,26 +188,25 @@ function NoteComposerDrawer({ controller }: Props) {
                 : 'File note'}
             </Text>
           </View>
-          <Pressable
-            className={cn(styles.iconButton, 'active:bg-secondary')}
-            onPress={controller.closeComposer}
-            accessibilityRole="button"
+          <MobileGlassIconButton
             accessibilityLabel="Cancel note"
-          >
-            <X size={18} colorClassName="accent-foreground" />
-          </Pressable>
+            icon="close"
+            onPress={controller.closeComposer}
+          />
         </View>
-        <TextInput
-          className={styles.composerInput}
-          style={{ textAlignVertical: 'top' }}
-          value={controller.composerBody}
-          onChangeText={controller.setComposerBody}
-          multiline
-          autoFocus
-          placeholder="Review note"
-          placeholderTextColorClassName="accent-muted-foreground"
-          accessibilityLabel={composerLabel(composer)}
-        />
+        <MobileGlassSurface className="min-h-28 overflow-hidden rounded-2xl" isInteractive>
+          <TextInput
+            className="text-foreground min-h-28 p-3 text-sm leading-5"
+            style={{ textAlignVertical: 'top' }}
+            value={controller.composerBody}
+            onChangeText={controller.setComposerBody}
+            multiline
+            autoFocus
+            placeholder="Review note"
+            placeholderTextColorClassName="accent-muted-foreground"
+            accessibilityLabel={composerLabel(composer)}
+          />
+        </MobileGlassSurface>
         <View className={styles.drawerButtonRow}>
           {composer?.mode === 'edit' ? (
             <DeleteNoteButton onPress={controller.deleteComment} />
@@ -227,15 +228,13 @@ function composerLabel(
 
 function DeleteNoteButton({ onPress }: { onPress: () => Promise<void> }) {
   return (
-    <Pressable
-      className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
-      onPress={() => void onPress()}
-      accessibilityRole="button"
+    <MobileGlassTextButton
       accessibilityLabel="Delete note"
-    >
-      <Trash2 size={14} colorClassName="accent-destructive" />
-      <Text className={styles.destructiveText}>Delete</Text>
-    </Pressable>
+      isDestructive
+      label="Delete"
+      onPress={() => void onPress()}
+      size="regular"
+    />
   )
 }
 
@@ -248,20 +247,14 @@ function SaveNoteButton({
 }) {
   const disabled = controller.composerBody.trim().length === 0
   return (
-    <Pressable
-      className={cn(
-        styles.primaryButton,
-        disabled && styles.buttonDisabled,
-        'active:opacity-[0.76]'
-      )}
-      disabled={disabled}
-      onPress={() => void controller.saveComposer()}
-      accessibilityRole="button"
+    <MobileGlassTextButton
       accessibilityLabel={composerLabel(composer)}
-    >
-      <Check size={14} colorClassName="accent-primary-foreground" />
-      <Text className={styles.primaryButtonText}>Save</Text>
-    </Pressable>
+      disabled={disabled}
+      isProminent
+      label="Save"
+      onPress={() => void controller.saveComposer()}
+      size="regular"
+    />
   )
 }
 
@@ -279,26 +272,21 @@ function CompletionDrawer({ controller }: Props) {
         {mobileReviewCountLabel(noteCount, 'note', 'notes')}
       </Text>
       <View className={styles.drawerButtonRow}>
-        <Pressable
-          className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
+        <MobileGlassTextButton
           disabled={controller.reviewedUnstagedCount === 0}
+          label="Stage Reviewed"
           onPress={() => void controller.stageReviewedFiles()}
-          accessibilityRole="button"
           accessibilityLabel="Stage reviewed files"
-        >
-          <Check size={14} colorClassName="accent-muted-foreground" />
-          <Text className={styles.secondaryButtonText}>Stage Reviewed</Text>
-        </Pressable>
-        <Pressable
-          className={cn(styles.primaryButton, 'active:opacity-[0.76]')}
+          size="regular"
+        />
+        <MobileGlassTextButton
           disabled={controller.unsentComments.length === 0}
+          isProminent
+          label="Send Notes"
           onPress={() => void controller.openSendSheet()}
-          accessibilityRole="button"
           accessibilityLabel="Send notes to agent"
-        >
-          <Send size={14} colorClassName="accent-primary-foreground" />
-          <Text className={styles.primaryButtonText}>Send Notes</Text>
-        </Pressable>
+          size="regular"
+        />
       </View>
     </BottomDrawer>
   )

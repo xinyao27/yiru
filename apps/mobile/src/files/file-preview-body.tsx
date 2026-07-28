@@ -1,5 +1,6 @@
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native'
 
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import { MobileFileMarkdownPreview } from './file-markdown-preview'
 import { MobileFilePreviewEditableSource } from './file-preview-editable-source'
 import type { MobileFilePreviewLineColumn } from './file-preview-line-column'
@@ -34,10 +35,8 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
   if (preview.status === 'error' || preview.status === 'waiting') {
     return (
       <View className={styles.state}>
-        <Text className={styles.errorText}>{preview.message}</Text>
-        <Pressable className={styles.retryButton} onPress={options.onRetry}>
-          <Text className={styles.retryText}>Retry</Text>
-        </Pressable>
+        <Text className="text-destructive text-center text-sm">{preview.message}</Text>
+        <MobileGlassTextButton label="Retry" onPress={options.onRetry} />
       </View>
     )
   }
@@ -52,17 +51,17 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
   }
   if (preview.kind === 'image') {
     return (
-      <View className={styles.imageContainer}>
+      <View className="bg-editor-surface flex-1">
         <ScrollView
           className={styles.scroll}
-          contentContainerClassName={styles.imageScrollContent}
+          contentContainerClassName="grow items-center justify-center p-3"
           maximumZoomScale={4}
           minimumZoomScale={1}
           centerContent
         >
           <Image
             source={{ uri: preview.dataUri }}
-            className={styles.image}
+            className="bg-editor-surface"
             style={[{ width: options.imageWidth, height: options.imageHeight }]}
             resizeMode="contain"
             onError={options.onImageError}

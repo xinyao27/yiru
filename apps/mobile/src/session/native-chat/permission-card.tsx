@@ -1,20 +1,19 @@
 import { memo, useRef, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text } from 'react-native'
 
-import { SealQuestion as ShieldQuestion } from '../../components/uniwind-icons'
-import { cn } from '../../style/class-names'
+import { MobileGlassSection } from '../../components/glass/section'
 import type { MobileChatPermission } from './permission'
+import { MobileNativeChatPermissionActions } from './permission-actions'
 
-// Renders a detected agent permission ask as a card with tappable options.
-// The first option is treated as the primary (allow) action and gets a filled
-// accent button so the affirmative choice reads as distinct from the rest.
+type MobileNativeChatPermissionProps = {
+  permission: MobileChatPermission
+  onRespond: (send: string) => Promise<boolean>
+}
+
 function MobileNativeChatPermissionImpl({
   permission,
   onRespond
-}: {
-  permission: MobileChatPermission
-  onRespond: (send: string) => Promise<boolean>
-}): React.JSX.Element {
+}: MobileNativeChatPermissionProps): React.JSX.Element {
   const [submitting, setSubmitting] = useState(false)
   const submittingRef = useRef(false)
   const respond = async (send: string): Promise<void> => {
@@ -30,50 +29,18 @@ function MobileNativeChatPermissionImpl({
     }
   }
   return (
-    <View className={styles.card}>
-      <View className={styles.header}>
-        <ShieldQuestion size={16} colorClassName="accent-primary" />
-        <Text className={styles.title}>{permission.title}</Text>
-      </View>
-      {permission.detail ? <Text className={styles.detail}>{permission.detail}</Text> : null}
-      <View className={styles.options}>
-        {permission.options.map((option, index) => {
-          const isPrimary = index === 0
-          return (
-            <Pressable
-              key={`${option.send}:${option.label}`}
-              className={cn(
-                styles.option,
-                isPrimary ? styles.optionPrimary : styles.optionSecondary,
-                !submitting && styles.optionPressedActive
-              )}
-              hitSlop={6}
-              onPress={() => respond(option.send)}
-              disabled={submitting}
-            >
-              <Text className={cn(styles.optionText, isPrimary && styles.optionTextPrimary)}>
-                {option.label}
-              </Text>
-            </Pressable>
-          )
-        })}
-      </View>
-    </View>
+    <MobileGlassSection className="mx-4 my-2 gap-2 p-3">
+      <Text className="text-foreground text-sm font-semibold">{permission.title}</Text>
+      {permission.detail ? (
+        <Text className="text-muted-foreground text-xs leading-5">{permission.detail}</Text>
+      ) : null}
+      <MobileNativeChatPermissionActions
+        disabled={submitting}
+        options={permission.options}
+        onRespond={(send) => void respond(send)}
+      />
+    </MobileGlassSection>
   )
 }
 
 export const MobileNativeChatPermission = memo(MobileNativeChatPermissionImpl)
-
-const styles = {
-  card: cn('mx-4 my-2 p-3 gap-2 rounded-none border-hairline border-border bg-card'),
-  header: cn('flex-row items-center gap-2'),
-  title: cn('text-foreground text-[14px] font-semibold'),
-  detail: cn('text-muted-foreground text-[12px] leading-[17px]'),
-  options: cn('flex-row flex-wrap gap-2'),
-  option: cn('min-h-11 justify-center px-3 py-2 rounded-none'),
-  optionPrimary: cn('bg-primary'),
-  optionSecondary: cn('bg-secondary border-hairline border-border'),
-  optionPressedActive: cn('active:opacity-[0.7]'),
-  optionText: cn('text-foreground text-[14px] font-semibold'),
-  optionTextPrimary: cn('text-primary-foreground')
-} as const

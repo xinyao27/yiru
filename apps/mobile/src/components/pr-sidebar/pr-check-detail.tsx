@@ -60,7 +60,7 @@ export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined })
               <Text className={styles.checkDetailGroupLabel}>Annotations</Text>
               {content.annotations.map((annotation, index) => (
                 <View key={index}>
-                  <Text className={styles.checkDetailLocator} numberOfLines={1}>
+                  <Text className="text-muted-foreground font-mono text-xs" numberOfLines={1}>
                     {annotation.locator}
                     {annotation.level ? ` · ${annotation.level}` : ''}
                   </Text>
@@ -110,8 +110,8 @@ function JobRow({ job }: { job: CheckDetailJob }) {
         </View>
       ))}
       {job.logTail ? (
-        <ScrollView className={styles.checkDetailLogScroll} nestedScrollEnabled>
-          <Text className={styles.checkDetailLogText}>{job.logTail}</Text>
+        <ScrollView className="bg-secondary max-h-40 rounded-xl px-2 py-1" nestedScrollEnabled>
+          <Text className="text-muted-foreground font-mono text-xs leading-4">{job.logTail}</Text>
         </ScrollView>
       ) : null}
     </View>

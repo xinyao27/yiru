@@ -2,141 +2,18 @@ import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/a
 import * as Clipboard from 'expo-clipboard'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
+import { MobileGlassIconButton } from '../../components/glass/icon-button'
 import { MobileMarkdown } from '../../components/markdown'
-import {
-  ArrowUp,
-  CaretDown as ChevronDown,
-  Copy,
-  ArrowSquareRight as SquareChevronRight
-} from '../../components/uniwind-icons'
+import { ImageSquare } from '../../components/uniwind-icons'
 import { cn } from '../../style/class-names'
-import {
-  isImageRefBlock,
-  isTextBlock,
-  pairToolBlocks,
-  splitNativeChatBlocks,
-  type ToolPair
-} from './blocks'
-import { diffFromText, diffFromToolCall, type DiffLine } from './diff'
-import { MAX_TOOL_RESULT_CHARS, styles, TEXT_SIZE } from './message-styles'
+import { resolveCssNumber } from '../../style/resolve-css-variable'
+import { isImageRefBlock, isTextBlock, splitNativeChatBlocks } from './blocks'
 import { nativeChatMessageText } from './message-text'
-import { summarizeToolInput, summarizeToolRun, toolFilePath } from './tool-summary'
-
-const MAX_VISIBLE_TOOL_PAIRS = 6
-const MAX_TOOL_RUN_DIFF_ROWS = 240
-
-function DiffView({ lines }: { lines: DiffLine[] }): React.JSX.Element {
-  return (
-    <View className={styles.diff}>
-      {lines.map((line, i) => (
-        <Text
-          key={i}
-          className={cn(
-            styles.diffLine,
-            line.kind === 'add' && styles.diffAdd,
-            line.kind === 'del' && styles.diffDel,
-            line.kind === 'meta' && styles.diffMeta
-          )}
-        >
-          {line.kind === 'add' ? '+' : line.kind === 'del' ? '-' : ' '}
-          {line.text}
-        </Text>
-      ))}
-    </View>
-  )
-}
-
-/** A single inline tool line — `▸ ToolName  preview` — that expands in place to
- *  show the call's diff/input or the result's body. Mirrors the reference design
- *  where tool calls read as flat lines in the conversation, not boxed blocks. */
-function ResultBody({
-  output,
-  isError,
-  diff
-}: {
-  output: string
-  isError?: boolean
-  diff: DiffLine[] | null
-}): React.JSX.Element {
-  if (diff) {
-    return <DiffView lines={diff} />
-  }
-  return (
-    <View className={cn(styles.toolResult, isError && styles.toolResultError)}>
-      <Text className={styles.mono}>
-        {output.length > MAX_TOOL_RESULT_CHARS
-          ? `${output.slice(0, MAX_TOOL_RESULT_CHARS)}…`
-          : output}
-      </Text>
-    </View>
-  )
-}
-
-/** One request: a tool call and its result rendered together as a single
- *  expandable line. `defaultExpanded` lets the group toggle open every line. */
-function ToolLine({
-  pair,
-  defaultExpanded,
-  diffLineLimit,
-  onOpenFile
-}: {
-  pair: ToolPair
-  defaultExpanded: boolean
-  diffLineLimit: number
-  onOpenFile?: (relativePath: string) => void
-}): React.JSX.Element {
-  const [expanded, setExpanded] = useState(defaultExpanded)
-  const { call, result } = pair
-  const name = call ? call.name : 'Result'
-  const preview = call
-    ? summarizeToolInput(call.input)
-    : (result?.output.split('\n')[0]?.slice(0, 80) ?? '')
-  // Why: collapsed tool rows are the common path; defer bounded diff parsing
-  // until the user asks to reveal the detail.
-  const callDiff = expanded && call ? diffFromToolCall(call.name, call.input, diffLineLimit) : null
-  const resultDiff = expanded && result ? diffFromText(result.output, diffLineLimit) : null
-  const hasDetail = callDiff !== null || result !== undefined || preview.length > 40
-  // A tool that targets a file (Read/Edit/Write…) renders its preview as a
-  // tappable link that opens the file, independent of the line's expand tap.
-  const filePath = call ? toolFilePath(call.input) : null
-  const openable = filePath !== null && onOpenFile !== undefined
-  return (
-    <View>
-      <Pressable
-        className={styles.toolLine}
-        onPress={() => hasDetail && setExpanded((v) => !v)}
-        hitSlop={6}
-      >
-        {expanded ? (
-          <ChevronDown size={15} colorClassName="accent-muted-foreground" />
-        ) : (
-          <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
-        )}
-        <Text className={styles.toolName}>{name}</Text>
-        {preview ? (
-          <Text
-            className={cn(styles.toolPreview, openable && styles.toolPreviewLink)}
-            numberOfLines={1}
-            onPress={openable ? () => onOpenFile!(filePath!) : undefined}
-            suppressHighlighting={!openable}
-          >
-            {preview}
-          </Text>
-        ) : null}
-      </Pressable>
-      {expanded ? (
-        <View className={styles.toolDetail}>
-          {callDiff ? <DiffView lines={callDiff} /> : null}
-          {!callDiff && call && preview ? <Text className={styles.mono}>{preview}</Text> : null}
-          {result ? (
-            <ResultBody output={result.output} isError={result.isError} diff={resultDiff} />
-          ) : null}
-        </View>
-      ) : null}
-    </View>
-  )
-}
+import { withOccurrenceKeys } from './occurrence-keys'
+import { MobileNativeChatToolDetailsDrawer } from './tool-details-drawer'
+import { summarizeMobileToolRun } from './tool-summary'
 
 function Prose({
   block,
@@ -149,120 +26,89 @@ function Prose({
   fontScale: number
   onOpenFile?: (relativePath: string) => void
 }): React.JSX.Element | null {
+  const textSize = resolveCssNumber(useCSSVariable('--text-base'))
   if (isTextBlock(block)) {
     // Inverted (user) bubbles use a fixed dark-on-light text rather than the
     // markdown renderer's light-on-dark palette.
     if (invert) {
       return (
-        <Text className={styles.userText} style={[{ fontSize: TEXT_SIZE * fontScale }]}>
+        <Text
+          className="text-primary-foreground text-sm leading-6 font-medium"
+          style={[{ fontSize: textSize * fontScale }]}
+        >
           {block.text}
         </Text>
       )
     }
-    return (
-      <MobileMarkdown content={block.text} textScale={1.25 * fontScale} onOpenFile={onOpenFile} />
-    )
+    return <MobileMarkdown content={block.text} textScale={fontScale} onOpenFile={onOpenFile} />
   }
   if (isImageRefBlock(block)) {
     return (
-      <Text className={styles.imageRef} style={[{ fontSize: TEXT_SIZE * fontScale }]}>
-        🖼 {block.alt ?? block.path ?? block.url ?? 'image'}
-      </Text>
+      <View className="flex-row items-center gap-1">
+        <ImageSquare
+          size={Math.round(textSize * fontScale)}
+          colorClassName="accent-muted-foreground"
+        />
+        <Text
+          className="text-muted-foreground flex-1 text-sm"
+          style={[{ fontSize: textSize * fontScale }]}
+        >
+          {block.alt ?? block.path ?? block.url ?? 'image'}
+        </Text>
+      </View>
     )
   }
   return null
 }
 
-/** A run of a message's tool calls/results, collapsed to a one-line summary that
- *  expands to the individual inline tool lines. `defaultExpanded` lets the global
- *  toolbar toggle drive every run at once while still allowing per-run override. */
-function ToolRun({
+function ToolRunSummary({
   blocks,
-  defaultExpanded,
-  trailing,
   onOpenFile
 }: {
   blocks: NativeChatBlock[]
-  defaultExpanded: boolean
-  trailing?: React.ReactNode
   onOpenFile?: (relativePath: string) => void
 }): React.JSX.Element {
-  const [open, setOpen] = useState(defaultExpanded)
-  const pairs = pairToolBlocks(blocks, MAX_VISIBLE_TOOL_PAIRS)
-  const diffLineLimit = Math.max(1, Math.floor(MAX_TOOL_RUN_DIFF_ROWS / (pairs.length * 2 || 1)))
-  let callCount = 0
-  for (const block of blocks) {
-    if (block.type === 'tool-call') {
-      callCount++
-    }
-  }
-  callCount ||= pairs.length
-  const summary = summarizeToolRun(blocks)
+  const [detailsVisible, setDetailsVisible] = useState(false)
+  const summary = summarizeMobileToolRun(blocks)
+
   return (
-    <View className={styles.toolRun}>
-      <View className={styles.toolRunHeader}>
-        <Pressable className={styles.toolRunToggle} onPress={() => setOpen((v) => !v)} hitSlop={6}>
-          {open ? (
-            <ChevronDown size={15} colorClassName="accent-muted-foreground" />
-          ) : (
-            <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
-          )}
-          <Text className={styles.toolRunCount}>{callCount}×</Text>
-          <Text className={styles.toolRunLabel} numberOfLines={1}>
-            {summary || `${callCount} tool ${callCount === 1 ? 'call' : 'calls'}`}
-          </Text>
-        </Pressable>
-        {trailing}
-      </View>
-      {open ? (
-        <View className={styles.toolRunBody}>
-          {pairs.map((pair, i) => (
-            <ToolLine
-              key={i}
-              pair={pair}
-              defaultExpanded={defaultExpanded}
-              diffLineLimit={diffLineLimit}
-              onOpenFile={onOpenFile}
-            />
-          ))}
-          {callCount > pairs.length ? (
-            <Text className={styles.toolPreview}>… {callCount - pairs.length} more tool calls</Text>
-          ) : null}
-        </View>
-      ) : null}
+    <View className="mt-1">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${summary}. Show details`}
+        className="min-w-0 py-1 active:opacity-60"
+        onPress={() => setDetailsVisible(true)}
+        hitSlop={8}
+      >
+        <Text className="text-muted-foreground text-sm leading-6" numberOfLines={1}>
+          {summary}
+        </Text>
+      </Pressable>
+      <MobileNativeChatToolDetailsDrawer
+        visible={detailsVisible}
+        blocks={blocks}
+        onClose={() => setDetailsVisible(false)}
+        onOpenFile={onOpenFile}
+      />
     </View>
   )
 }
 
-/** Subtle top-right controls for an agent message: copy its prose, or scroll so
- *  this message's top aligns to the top of the viewport. */
 function AgentControls({
-  onCopy,
-  onScrollToTop
+  copied,
+  onCopy
 }: {
+  copied: boolean
   onCopy: () => void
-  onScrollToTop?: () => void
 }): React.JSX.Element {
   return (
-    <View className={styles.controls}>
-      <Pressable
-        className={cn(styles.controlButton, styles.controlPressedActive)}
-        onPress={onCopy}
-        hitSlop={8}
+    <View className="mb-0.5 flex-row justify-start">
+      <MobileGlassIconButton
         accessibilityLabel="Copy message"
-      >
-        <Copy size={14} colorClassName="accent-muted-foreground" />
-      </Pressable>
-      {onScrollToTop ? (
-        <Pressable
-          className={cn(styles.controlButton, styles.controlPressedActive)}
-          onPress={onScrollToTop}
-          hitSlop={8}
-          accessibilityLabel="Scroll this message to top"
-        >
-          <ArrowUp size={14} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      ) : null}
+        icon={copied ? 'check' : 'copy'}
+        onPress={onCopy}
+        size="small"
+      />
     </View>
   )
 }
@@ -270,21 +116,13 @@ function AgentControls({
 function MobileNativeChatMessageImpl({
   message,
   queued,
-  toolsExpanded = false,
   fontScale = 1,
-  messageIndex,
-  onScrollToMessage,
   onOpenFile
 }: {
   message: NativeChatMessage
   queued?: boolean
-  toolsExpanded?: boolean
   /** Multiplies all chat text sizes for pinch-to-zoom (1 = no change). */
   fontScale?: number
-  /** This message's index in the list, paired with onScrollToMessage. */
-  messageIndex?: number
-  /** Ask the list to align this message's top to the top of the viewport. */
-  onScrollToMessage?: (index: number) => void
   onOpenFile?: (relativePath: string) => void
 }): React.JSX.Element {
   const isUser = message.role === 'user'
@@ -301,10 +139,21 @@ function MobileNativeChatMessageImpl({
     },
     []
   )
-  // Separate the agent's words from its tool activity: prose renders first, the
-  // tool calls fold into a collapsible run beneath. The user's own messages get
-  // an inverted (filled accent) bubble so they stand apart from agent prose.
+  // Why: tool activity belongs to its assistant turn, while user messages need
+  // a filled bubble to stay distinct from the transcript's unboxed agent prose.
   const { prose, tools } = splitNativeChatBlocks(message.blocks)
+  const keyedProse = withOccurrenceKeys(prose, (block) => {
+    switch (block.type) {
+      case 'text':
+        return `text:${block.text}`
+      case 'image-ref':
+        return `image:${block.path ?? ''}:${block.url ?? ''}:${block.alt ?? ''}`
+      case 'tool-call':
+        return `tool-call:${block.name}:${JSON.stringify(block.input)}`
+      case 'tool-result':
+        return `tool-result:${block.isError === true}:${block.output}`
+    }
+  })
 
   const handleCopy = (): void => {
     const text = nativeChatMessageText(message.blocks)
@@ -319,54 +168,33 @@ function MobileNativeChatMessageImpl({
     copyTimer.current = setTimeout(() => setCopied(false), 700)
   }
 
-  // Copy + scroll-to-top, shown inline with the first tool call (or after the
-  // prose when there are no tools).
-  const controls =
-    isAgent && !queued ? (
-      <AgentControls
-        onCopy={handleCopy}
-        onScrollToTop={
-          onScrollToMessage && messageIndex !== undefined
-            ? () => onScrollToMessage(messageIndex)
-            : undefined
-        }
-      />
-    ) : null
+  const controls = isAgent && !queued ? <AgentControls copied={copied} onCopy={handleCopy} /> : null
 
   return (
-    <View className={cn(styles.row, isUser && styles.rowUser)}>
-      {isUser && queued ? <Text className={styles.queuedTag}>Queued</Text> : null}
+    <View className={cn('px-4 py-2', isUser && 'items-end')}>
+      {isUser && queued ? (
+        <Text className="text-muted-foreground mb-0.5 text-xs font-semibold">Queued</Text>
+      ) : null}
       <View
         className={cn(
-          styles.content,
-          isUser && styles.userBubble,
-          isReasoning && styles.reasoning,
-          queued && styles.queued,
-          copied && styles.copied
+          'max-w-full gap-2',
+          isUser && 'max-w-7/8 rounded-2xl bg-primary px-3 py-2',
+          isReasoning && 'opacity-70',
+          queued && 'opacity-60',
+          copied && 'bg-diff-inserted'
         )}
       >
-        {prose.map((block, index) => (
+        {keyedProse.map(({ key, value: block }) => (
           <Prose
-            key={index}
+            key={key}
             block={block}
             invert={isUser}
             fontScale={fontScale}
             onOpenFile={onOpenFile}
           />
         ))}
-        {tools.length > 0 ? (
-          <ToolRun
-            // Why: a global toggle intentionally resets all per-run/per-line
-            // overrides in one remount, avoiding an effect-driven second render.
-            key={toolsExpanded ? 'expanded' : 'collapsed'}
-            blocks={tools}
-            defaultExpanded={toolsExpanded}
-            trailing={controls}
-            onOpenFile={onOpenFile}
-          />
-        ) : controls ? (
-          <View className={styles.controlsRow}>{controls}</View>
-        ) : null}
+        {tools.length > 0 ? <ToolRunSummary blocks={tools} onOpenFile={onOpenFile} /> : null}
+        {controls}
       </View>
     </View>
   )

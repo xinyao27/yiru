@@ -34,21 +34,27 @@
     "test": "vp test",
     "up": "taze major -Ir",
     "format:check": "pnpm --workspace-root exec vp fmt apps/mobile --check",
-    "start:emulator": "node scripts/start-emulator.mjs"
+    "start:emulator": "node scripts/start-emulator.mjs",
+    "start:ui": "node scripts/start-emulator.mjs --ui-lab"
   },
   "dependencies": {
+    "@expo/ui": "catalog:mobile",
     "@noble/hashes": "catalog:mobile",
     "@react-native-async-storage/async-storage": "catalog:mobile",
+    "@react-navigation/native": "catalog:mobile",
+    "@shikijs/core": "catalog:mobile",
+    "@shikijs/engine-oniguruma": "catalog:mobile",
+    "@shikijs/langs": "catalog:mobile",
     "@shopify/react-native-skia": "catalog:mobile",
     "@xterm/addon-unicode11": "catalog:mobile",
     "@xterm/addon-webgl": "catalog:mobile",
     "@xterm/xterm": "catalog:mobile",
-    "@yiru/expo-two-way-audio": "catalog:mobile",
+    "@yiru/editor-themes": "catalog:",
     "@yiru/mobile-relay-protocol": "catalog:",
     "@yiru/runtime-protocol": "catalog:",
     "@yiru/workbench-model": "catalog:",
     "buffer": "catalog:mobile",
-    "clsx": "catalog:mobile",
+    "cnfast": "catalog:",
     "expo": "catalog:mobile",
     "expo-build-properties": "catalog:mobile",
     "expo-camera": "catalog:mobile",
@@ -58,12 +64,12 @@
     "expo-dev-client": "catalog:mobile",
     "expo-document-picker": "catalog:mobile",
     "expo-file-system": "catalog:mobile",
+    "expo-glass-effect": "catalog:mobile",
     "expo-haptics": "catalog:mobile",
     "expo-image-manipulator": "catalog:mobile",
     "expo-image-picker": "catalog:mobile",
     "expo-keep-awake": "catalog:mobile",
     "expo-linking": "catalog:mobile",
-    "expo-modules-core": "catalog:mobile",
     "expo-network": "catalog:mobile",
     "expo-notifications": "catalog:mobile",
     "expo-router": "catalog:mobile",
@@ -71,20 +77,22 @@
     "expo-splash-screen": "catalog:mobile",
     "expo-status-bar": "catalog:mobile",
     "expo-thinking-orbs": "catalog:mobile",
+    "katex": "catalog:",
     "lowlight": "catalog:mobile",
     "phosphor-react-native": "catalog:mobile",
     "react": "catalog:mobile",
     "react-dom": "catalog:mobile",
     "react-native": "catalog:mobile",
+    "react-native-enriched-markdown": "catalog:mobile",
     "react-native-gesture-handler": "catalog:mobile",
     "react-native-reanimated": "catalog:mobile",
     "react-native-safe-area-context": "catalog:mobile",
     "react-native-screens": "catalog:mobile",
+    "react-native-shiki-engine": "catalog:mobile",
     "react-native-svg": "catalog:mobile",
     "react-native-web": "catalog:mobile",
     "react-native-webview": "catalog:mobile",
     "react-native-worklets": "catalog:mobile",
-    "tailwind-merge": "catalog:mobile",
     "tailwindcss": "catalog:mobile",
     "tweetnacl": "catalog:mobile",
     "uniwind": "catalog:mobile",
@@ -102,5 +110,12 @@
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@11.15.0"
+  "packageManager": "pnpm@11.15.0",
+  "expo": {
+    "install": {
+      "exclude": [
+        "@shopify/react-native-skia"
+      ]
+    }
+  }
 }

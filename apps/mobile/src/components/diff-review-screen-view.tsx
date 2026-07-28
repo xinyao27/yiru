@@ -1,7 +1,9 @@
+import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { Text, View, type LayoutChangeEvent } from 'react-native'
+import { Platform, Text, View, type LayoutChangeEvent } from 'react-native'
 
-import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
 import type { useMobileDiffReviewController } from '../session/diff/use-review-controller'
@@ -10,18 +12,21 @@ import { MobileDiffReviewDrawers } from './diff-review-drawers'
 import { MobileDiffReviewFileSummary } from './diff-review-file-summary'
 import { MobileDiffReviewFooter } from './diff-review-footer'
 import { MobileDiffReviewHeader } from './diff-review-header'
-import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
 import { MobilePRSidebar } from './pr-sidebar'
-import { canDockPrSidebar, resolvePresentationMode } from './pr-sidebar-presentation'
+import {
+  canDockPrSidebar,
+  resolvePresentationMode,
+  shouldShowTrigger
+} from './pr-sidebar-presentation'
 import { mobilePrSidebarStyles, PR_SIDEBAR_DOCK_WIDTH } from './pr-sidebar/styles'
 import { RightDrawer } from './right-drawer'
 
 type Props = {
   controller: ReturnType<typeof useMobileDiffReviewController>
-  onBack: () => void
 }
 
-export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
+export function MobileDiffReviewScreenView({ controller }: Props) {
+  const router = useRouter()
   const { isWideLayout } = useResponsiveLayout()
   const insets = useSafeAreaInsets()
   const [contentRowWidth, setContentRowWidth] = useState(0)
@@ -34,6 +39,11 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
   // Inline-dock the sidebar only when wide and the repo is GitHub; otherwise it
   // lives in the RightDrawer overlay toggled by showPRSidebar.
   const showInlineDock = presentationMode === 'inline' && controller.prSidebarIsGithubRepo
+  const showPRTrigger = shouldShowTrigger({
+    isGithubRepo: controller.prSidebarIsGithubRepo,
+    isWideLayout,
+    canDock: presentationMode === 'inline'
+  })
   const gitStatus = controller.screenState.kind === 'ready' ? controller.screenState.status : null
 
   // The docked sidebar has no trigger to tap, so load its PR data once it becomes
@@ -52,19 +62,70 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
   }, [])
 
   return (
-    <SafeAreaView className={styles.safeArea} edges={['top']}>
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          title: `Changes · ${controller.worktreeLabel}`,
+          headerLeft:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel="Back"
+                    icon="back"
+                    onPress={() => router.back()}
+                  />
+                ),
+          headerRight:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <View className="flex-row items-center gap-2">
+                    {showPRTrigger ? (
+                      <MobileGlassIconButton
+                        accessibilityLabel="Open pull request review"
+                        icon="checks"
+                        onPress={controller.openPRSidebar}
+                      />
+                    ) : null}
+                    <MobileGlassIconButton
+                      accessibilityLabel="More review actions"
+                      icon="more"
+                      onPress={() => controller.setShowOverflow(true)}
+                    />
+                  </View>
+                )
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="left">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Back"
+            icon="chevron.left"
+            onPress={() => router.back()}
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Open pull request sidebar"
+            hidden={!showPRTrigger}
+            icon="checklist"
+            onPress={controller.openPRSidebar}
+          />
+          <Stack.Toolbar.Button
+            accessibilityLabel="Open review actions"
+            icon="ellipsis"
+            onPress={() => controller.setShowOverflow(true)}
+          />
+        </Stack.Toolbar>
+      ) : null}
       <MobileDiffReviewHeader
         filter={controller.filter}
-        isWideLayout={isWideLayout}
-        prSidebarIsGithubRepo={controller.prSidebarIsGithubRepo}
-        prSidebarCanDock={presentationMode === 'inline'}
         queueLength={controller.queue.length}
         reviewedCount={controller.reviewedCount}
         unsentCount={controller.unsentComments.length}
-        worktreeLabel={controller.worktreeLabel}
-        onBack={onBack}
-        onOpenActions={() => controller.setShowOverflow(true)}
-        onOpenPRSidebar={controller.openPRSidebar}
         onSelectFilter={controller.selectFilter}
       />
       <View className="flex-1 flex-row" onLayout={handleContentRowLayout}>
@@ -84,8 +145,8 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
             />
           ) : null}
           {controller.actionError ? (
-            <View className={styles.actionError}>
-              <Text className={styles.actionErrorText}>{controller.actionError}</Text>
+            <View className="border-hairline bg-secondary mx-4 mt-2 rounded-xl border-amber-500 px-3 py-2">
+              <Text className="text-foreground text-xs">{controller.actionError}</Text>
             </View>
           ) : null}
           <MobileDiffReviewBody
@@ -151,6 +212,6 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
           />
         </RightDrawer>
       ) : null}
-    </SafeAreaView>
+    </View>
   )
 }

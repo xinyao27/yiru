@@ -5,6 +5,10 @@ import { CaretDown, CaretRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
+import { MobileGlassGroup } from '../components/glass/group'
+import { MobileGlassPressable } from '../components/glass/pressable'
+import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import {
   getQuickCommandAgentLabel,
   MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH,
@@ -36,29 +40,26 @@ function ChoiceToggle({
   onChange: (value: string) => void
 }) {
   return (
-    <View className={styles.toggleGroup}>
+    <MobileGlassGroup className="flex-row gap-2" spacing={8}>
       {options.map((option) => {
         const selected = value === option.value
         return (
-          <Pressable
+          <MobileGlassPressable
             key={option.value}
-            className={cn(
-              styles.toggleItem,
-              selected && styles.toggleItemSelected,
-              option.disabled && styles.disabled
-            )}
-            disabled={option.disabled}
-            onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected, disabled: option.disabled }}
+            className={cn('h-10 flex-1 rounded-full', selected && 'border-muted-foreground')}
+            contentClassName="h-full items-center justify-center rounded-full px-3"
+            disabled={option.disabled}
+            onPress={() => onChange(option.value)}
           >
-            <Text className={cn(styles.toggleText, selected && styles.toggleTextSelected)}>
+            <Text className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}>
               {option.label}
             </Text>
-          </Pressable>
+          </MobileGlassPressable>
         )
       })}
-    </View>
+    </MobileGlassGroup>
   )
 }
 
@@ -78,23 +79,25 @@ export function QuickCommandEditorForm({
   const isAgent = draft.action === 'agent-prompt'
   const canSave = isQuickCommandDraftValid(draft) && !saving
   return (
-    <View className={styles.form}>
-      <View className={styles.field}>
-        <Text className={styles.label}>Label</Text>
-        <TextInput
-          className={styles.input}
-          value={draft.label}
-          onChangeText={(label) => onChange({ label })}
-          placeholder="Start dev server"
-          placeholderTextColorClassName="accent-muted-foreground"
-          autoCapitalize="none"
-          autoCorrect={false}
-          maxLength={MAX_QUICK_COMMAND_LABEL_LENGTH}
-          selectionColorClassName="accent-primary"
-        />
+    <View className="gap-3 pt-1 pb-2">
+      <View className="gap-2">
+        <Text className="text-muted-foreground text-xs">Label</Text>
+        <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground px-3 py-2.5 text-sm"
+            value={draft.label}
+            onChangeText={(label) => onChange({ label })}
+            placeholder="Start dev server"
+            placeholderTextColorClassName="accent-muted-foreground"
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={MAX_QUICK_COMMAND_LABEL_LENGTH}
+            selectionColorClassName="accent-primary"
+          />
+        </MobileGlassSurface>
       </View>
-      <View className={styles.field}>
-        <Text className={styles.label}>Action</Text>
+      <View className="gap-2">
+        <Text className="text-muted-foreground text-xs">Action</Text>
         <ChoiceToggle
           options={[
             { value: 'terminal-command', label: 'Terminal Command' },
@@ -105,47 +108,57 @@ export function QuickCommandEditorForm({
         />
       </View>
       {isAgent ? (
-        <View className={styles.field}>
-          <Text className={styles.label}>Agent</Text>
-          <Pressable className={styles.select} onPress={onOpenAgentPicker}>
+        <View className="gap-2">
+          <Text className="text-muted-foreground text-xs">Agent</Text>
+          <MobileGlassPressable
+            className="rounded-xl"
+            contentClassName="flex-row items-center justify-between px-3 py-2.5"
+            onPress={onOpenAgentPicker}
+          >
             {draft.agent ? (
-              <View className={styles.selectValue}>
+              <View className="flex-row items-center gap-2">
                 <MobileAgentIcon agentId={draft.agent} size={16} />
-                <Text className={styles.selectValueText}>
+                <Text className="text-foreground text-sm">
                   {getQuickCommandAgentLabel(draft.agent)}
                 </Text>
               </View>
             ) : (
-              <Text className={styles.selectPlaceholder}>Choose agent</Text>
+              <Text className="text-muted-foreground text-sm">Choose agent</Text>
             )}
             <CaretDown size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
+          </MobileGlassPressable>
         </View>
       ) : null}
-      <View className={styles.field}>
-        <Text className={styles.label}>{isAgent ? 'Prompt' : 'Command Text'}</Text>
-        <TextInput
-          className={cn(styles.input, styles.textarea, !isAgent && styles.mono)}
-          style={{ textAlignVertical: 'top' }}
-          value={isAgent ? draft.prompt : draft.command}
-          onChangeText={(text) => onChange(isAgent ? { prompt: text } : { command: text })}
-          placeholder={isAgent ? 'Ask the agent to investigate this workspace' : 'pnpm dev'}
-          placeholderTextColorClassName="accent-muted-foreground"
-          autoCapitalize="none"
-          autoCorrect={false}
-          multiline
-          maxLength={
-            isAgent ? MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH : MAX_QUICK_COMMAND_TERMINAL_TEXT_LENGTH
-          }
-          selectionColorClassName="accent-primary"
-        />
+      <View className="gap-2">
+        <Text className="text-muted-foreground text-xs">{isAgent ? 'Prompt' : 'Command Text'}</Text>
+        <MobileGlassSurface className="min-h-24 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className={cn('text-foreground min-h-24 px-3 py-2.5 text-sm', !isAgent && 'font-mono')}
+            style={{ textAlignVertical: 'top' }}
+            value={isAgent ? draft.prompt : draft.command}
+            onChangeText={(text) => onChange(isAgent ? { prompt: text } : { command: text })}
+            placeholder={isAgent ? 'Ask the agent to investigate this workspace' : 'pnpm dev'}
+            placeholderTextColorClassName="accent-muted-foreground"
+            autoCapitalize="none"
+            autoCorrect={false}
+            multiline
+            maxLength={
+              isAgent
+                ? MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH
+                : MAX_QUICK_COMMAND_TERMINAL_TEXT_LENGTH
+            }
+            selectionColorClassName="accent-primary"
+          />
+        </MobileGlassSurface>
         {isAgent ? (
-          <Text className={styles.hint}>Supports skills, file paths, and built-in commands.</Text>
+          <Text className="text-muted-foreground text-xs">
+            Supports skills, file paths, and built-in commands.
+          </Text>
         ) : null}
       </View>
-      <View className={styles.field}>
+      <View className="gap-2">
         <Pressable
-          className={styles.advancedToggle}
+          className="active:bg-accent flex-row items-center gap-1 py-1"
           onPress={() => setAdvancedOpen((open) => !open)}
           accessibilityState={{ expanded: advancedOpen }}
         >
@@ -154,15 +167,15 @@ export function QuickCommandEditorForm({
           ) : (
             <CaretRight size={16} colorClassName="accent-muted-foreground" />
           )}
-          <Text className={styles.advancedText}>Advanced</Text>
+          <Text className="text-muted-foreground text-xs font-semibold">Advanced</Text>
         </Pressable>
         {advancedOpen ? (
-          <View className={styles.advancedBody}>
+          <View className="gap-3 pt-1">
             {!isAgent ? (
-              <View className={styles.switchRow}>
-                <View className={styles.switchText}>
-                  <Text className={styles.switchTitle}>Append Enter</Text>
-                  <Text className={styles.switchDesc}>
+              <View className="flex-row items-center gap-3">
+                <View className="flex-1">
+                  <Text className="text-foreground text-sm">Append Enter</Text>
+                  <Text className="text-muted-foreground mt-px text-xs">
                     Submit immediately instead of only inserting text.
                   </Text>
                 </View>
@@ -176,8 +189,8 @@ export function QuickCommandEditorForm({
                 />
               </View>
             ) : null}
-            <View className={styles.field}>
-              <Text className={styles.label}>Scope</Text>
+            <View className="gap-2">
+              <Text className="text-muted-foreground text-xs">Scope</Text>
               <ChoiceToggle
                 options={[
                   { value: 'global', label: 'Global' },
@@ -192,61 +205,31 @@ export function QuickCommandEditorForm({
                 }
               />
               {draft.scope.type === 'repo' && repoName ? (
-                <Text className={styles.scopeRepoName}>{repoName}</Text>
+                <Text className="text-muted-foreground px-1 font-mono text-xs">{repoName}</Text>
               ) : null}
             </View>
           </View>
         ) : null}
       </View>
-      {error ? <Text className={styles.error}>{error}</Text> : null}
-      <View className={styles.footer}>
-        <Pressable className={styles.cancelButton} onPress={onCancel}>
-          <Text className={styles.cancelText}>Cancel</Text>
-        </Pressable>
-        <Pressable
-          className={cn(styles.saveButton, !canSave && styles.disabled)}
+      {error ? <Text className="text-destructive mt-1 text-xs">{error}</Text> : null}
+      <View className="mt-2 flex-row gap-2">
+        <MobileGlassTextButton
+          className="flex-1"
+          isFullWidth
+          label="Cancel"
+          onPress={onCancel}
+          size="large"
+        />
+        <MobileGlassTextButton
+          className="flex-1"
           disabled={!canSave}
+          isFullWidth
+          isProminent
+          label={mode === 'edit' ? 'Save' : 'Add Quick Command'}
           onPress={onSave}
-        >
-          <Text className={styles.saveText}>{mode === 'edit' ? 'Save' : 'Add Quick Command'}</Text>
-        </Pressable>
+          size="large"
+        />
       </View>
     </View>
   )
 }
-
-const styles = {
-  form: cn('gap-3 pt-1 pb-2'),
-  field: cn('gap-2'),
-  label: cn('text-[12px] font-semibold text-muted-foreground'),
-  input: cn('border border-border bg-card px-3 py-2.5 text-[14px] text-foreground'),
-  textarea: cn('min-h-[92px]'),
-  mono: cn('font-mono'),
-  hint: cn('text-[12px] text-muted-foreground'),
-  error: cn('mt-1 text-[13px] text-destructive'),
-  disabled: cn('opacity-[0.4]'),
-  toggleGroup: cn('flex-row gap-2'),
-  toggleItem: cn('h-10 flex-1 items-center justify-center border border-border bg-card'),
-  toggleItemSelected: cn('border-muted-foreground bg-accent'),
-  toggleText: cn('text-[13px] font-medium text-muted-foreground'),
-  toggleTextSelected: cn('text-foreground'),
-  select: cn(
-    'flex-row items-center justify-between border border-border bg-card px-3 py-2.5 active:bg-accent'
-  ),
-  selectValue: cn('flex-row items-center gap-2'),
-  selectValueText: cn('text-[14px] text-foreground'),
-  selectPlaceholder: cn('text-[14px] text-muted-foreground'),
-  scopeRepoName: cn('px-1 font-mono text-[13px] text-muted-foreground'),
-  advancedToggle: cn('flex-row items-center gap-1 py-1 active:bg-accent'),
-  advancedText: cn('text-[13px] font-semibold text-muted-foreground'),
-  advancedBody: cn('gap-3 pt-1'),
-  switchRow: cn('flex-row items-center gap-3'),
-  switchText: cn('flex-1'),
-  switchTitle: cn('text-[14px] text-foreground'),
-  switchDesc: cn('mt-px text-[12px] text-muted-foreground'),
-  footer: cn('mt-2 flex-row gap-2'),
-  cancelButton: cn('flex-1 items-center border border-border py-3 active:bg-accent'),
-  cancelText: cn('text-[14px] font-semibold text-foreground'),
-  saveButton: cn('flex-1 items-center bg-foreground py-3 active:opacity-[0.7]'),
-  saveText: cn('text-[14px] font-bold text-background')
-} as const

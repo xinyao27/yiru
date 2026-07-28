@@ -3,7 +3,6 @@ import type { SectionListRenderItem } from 'react-native'
 
 import {
   CaretRight as ChevronRight,
-  FileText,
   Minus,
   Plus,
   Trash as Trash2
@@ -43,11 +42,12 @@ export function makeRenderFileRow(
     const rowDisabled =
       !item.canOpen || busyAction !== null || openingPath !== null || openingBranchPath !== null
     const ioBusy = busyAction !== null || openingPath !== null || openingBranchPath !== null
+    const hasInlineActions = item.area === 'staged' || item.canStage || item.canDiscard
     return (
       <Pressable
         className={cn(
           styles.fileRow,
-          item.canOpen && 'active:bg-card',
+          item.canOpen && 'active:bg-accent',
           rowDisabled && styles.fileRowDisabled,
           !item.canOpen && styles.fileRowUnavailable
         )}
@@ -60,7 +60,6 @@ export function makeRenderFileRow(
             {MOBILE_GIT_STATUS_LABELS[item.status]}
           </Text>
         </View>
-        <FileText size={16} colorClassName="accent-muted-foreground" />
         <View className={styles.fileTextBlock}>
           <Text
             className={cn(styles.filePath, !item.canOpen && styles.filePathDisabled)}
@@ -85,7 +84,7 @@ export function makeRenderFileRow(
             className={cn(
               styles.iconButton,
               ioBusy && styles.iconButtonDisabled,
-              'active:bg-secondary'
+              'active:bg-accent'
             )}
             disabled={ioBusy}
             onPress={() =>
@@ -97,13 +96,13 @@ export function makeRenderFileRow(
             <Minus size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
         ) : item.canStage || item.canDiscard ? (
-          <View className={styles.rowActions}>
+          <View className="flex-row items-center gap-1">
             {item.canStage ? (
               <Pressable
                 className={cn(
                   styles.iconButton,
                   ioBusy && styles.iconButtonDisabled,
-                  'active:bg-secondary'
+                  'active:bg-accent'
                 )}
                 disabled={ioBusy}
                 onPress={() =>
@@ -120,7 +119,7 @@ export function makeRenderFileRow(
                 className={cn(
                   styles.iconButton,
                   ioBusy && styles.iconButtonDisabled,
-                  'active:bg-secondary'
+                  'active:bg-accent'
                 )}
                 disabled={ioBusy}
                 onPress={() => setDiscardTarget(item)}
@@ -132,7 +131,7 @@ export function makeRenderFileRow(
             ) : null}
           </View>
         ) : null}
-        {!rowBusy && item.canOpen ? (
+        {!rowBusy && item.canOpen && !hasInlineActions ? (
           <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         ) : null}
       </Pressable>
@@ -170,12 +169,12 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
   }
 
   return (
-    <View className={styles.branchCompareBlock}>
+    <View className="pb-2">
       <View className={styles.sectionHeader}>
-        <View className={styles.branchSectionTitleBlock}>
+        <View className="min-w-0 flex-1">
           <Text className={styles.sectionTitle}>Committed on Branch</Text>
           {branchCompareSummaryText ? (
-            <Text className={styles.branchSectionSubtitle} numberOfLines={1}>
+            <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
               {branchCompareSummaryText}
             </Text>
           ) : null}
@@ -211,7 +210,7 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
               key={`${entry.path}:${entry.oldPath ?? ''}`}
               className={cn(
                 styles.fileRow,
-                entry.canOpen && 'active:bg-card',
+                entry.canOpen && 'active:bg-accent',
                 rowDisabled && styles.fileRowDisabled,
                 !entry.canOpen && styles.fileRowUnavailable
               )}
@@ -224,7 +223,6 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
                   {MOBILE_GIT_STATUS_LABELS[entry.status]}
                 </Text>
               </View>
-              <FileText size={16} colorClassName="accent-muted-foreground" />
               <View className={styles.fileTextBlock}>
                 <Text
                   className={cn(styles.filePath, !entry.canOpen && styles.filePathDisabled)}

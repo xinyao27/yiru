@@ -1,8 +1,8 @@
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Linking, Pressable, ScrollView, View } from 'react-native'
 import type WebView from 'react-native-webview'
 import type { WebViewMessageEvent } from 'react-native-webview'
-import { useUniwind } from 'uniwind'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
 import {
   TextB as Bold,
@@ -24,16 +24,22 @@ import {
 } from '@/components/uniwind-icons'
 import { UniwindWebView } from '@/components/uniwind-web-view'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber, resolveCssString } from '@/style/resolve-css-variable'
 
-import { useThemeColors } from '../theme/uniwind-theme-values'
+import { MobileGlassSurface } from './glass/surface'
 import {
   buildMobileRichMarkdownEditorHtml,
   escapeInjectedJavaScriptString
 } from './rich-markdown-editor-html'
 import { normalizeMobileRichMarkdownKeyboardInset } from './rich-markdown-editor-keyboard-inset-script'
+import {
+  buildMobileRichMarkdownEditorThemeInjection,
+  type MobileRichMarkdownEditorTheme
+} from './rich-markdown-editor-theme'
 
 const EDITOR_DOCUMENT_ORIGIN = 'https://yiru-mobile-editor.invalid'
 const EDITOR_DOCUMENT_URL = `${EDITOR_DOCUMENT_ORIGIN}/rich-markdown-editor`
+const EDITOR_ORIGIN_WHITELIST = [EDITOR_DOCUMENT_ORIGIN, 'about:blank']
 
 function normalizeExternalEditorUrl(value: string): string | null {
   const url = value.trim()
@@ -120,16 +126,55 @@ function MobileRichMarkdownEditorInner({
   onChange,
   onKeyboardInsetChange
 }: Props) {
-  const colors = useThemeColors()
   const { theme } = useUniwind()
+  const themeValues = useCSSVariable([
+    '--color-background',
+    '--color-border',
+    '--color-foreground',
+    '--color-muted',
+    '--color-muted-foreground',
+    '--color-primary',
+    '--text-base',
+    '--text-base--line-height',
+    '--text-sm',
+    '--font-mono',
+    '--radius-sm',
+    '--radius-md',
+    '--spacing-1',
+    '--spacing-2',
+    '--spacing-3',
+    '--spacing-4'
+  ])
+  const editorTheme = useMemo<MobileRichMarkdownEditorTheme>(
+    () => ({
+      background: resolveCssString(themeValues[0]),
+      bodyFontSize: resolveCssNumber(themeValues[6]),
+      bodyLineHeight: resolveCssNumber(themeValues[7]),
+      border: resolveCssString(themeValues[1]),
+      codeFontSize: resolveCssNumber(themeValues[8]),
+      colorScheme: theme === 'light' ? 'light' : 'dark',
+      foreground: resolveCssString(themeValues[2]),
+      monoFamily: resolveCssString(themeValues[9]),
+      muted: resolveCssString(themeValues[3]),
+      mutedForeground: resolveCssString(themeValues[4]),
+      primary: resolveCssString(themeValues[5]),
+      radiusMedium: resolveCssNumber(themeValues[11]),
+      radiusSmall: resolveCssNumber(themeValues[10]),
+      spacing1: resolveCssNumber(themeValues[12]),
+      spacing2: resolveCssNumber(themeValues[13]),
+      spacing3: resolveCssNumber(themeValues[14]),
+      spacing4: resolveCssNumber(themeValues[15])
+    }),
+    [theme, themeValues]
+  )
   const webViewRef = useRef<WebView>(null)
   const readyRef = useRef(false)
   const documentGenerationRef = useRef(0)
   const currentWebViewContentRef = useRef<string | null>(null)
-  const colorScheme = theme === 'light' ? 'light' : 'dark'
-  const html = useMemo(
-    () => buildMobileRichMarkdownEditorHtml(colors, colorScheme),
-    [colorScheme, colors]
+  const [initialHtml] = useState(() => buildMobileRichMarkdownEditorHtml(editorTheme))
+  const webViewSource = useMemo(
+    () => ({ html: initialHtml, baseUrl: EDITOR_DOCUMENT_URL }),
+    [initialHtml]
   )
 
   const inject = useCallback((script: string) => {
@@ -156,6 +201,13 @@ function MobileRichMarkdownEditorInner({
     [inject]
   )
 
+  const applyTheme = useCallback(
+    (nextTheme: MobileRichMarkdownEditorTheme) => {
+      inject(buildMobileRichMarkdownEditorThemeInjection(nextTheme))
+    },
+    [inject]
+  )
+
   useEffect(() => {
     if (!readyRef.current) {
       return
@@ -170,6 +222,12 @@ function MobileRichMarkdownEditorInner({
       applyEditable(editable)
     }
   }, [applyEditable, editable])
+
+  useEffect(() => {
+    if (readyRef.current) {
+      applyTheme(editorTheme)
+    }
+  }, [applyTheme, editorTheme])
 
   // Clear any reported keyboard inset when the editor unmounts so a lifted
   // Save/Discard bar settles back once the tab closes.
@@ -191,6 +249,7 @@ function MobileRichMarkdownEditorInner({
       const editorMessage = message as Partial<EditorWebViewMessage>
       if ('type' in message && message.type === 'ready') {
         readyRef.current = true
+        applyTheme(editorTheme)
         applyContent(content)
         applyEditable(editable)
         return
@@ -218,7 +277,16 @@ function MobileRichMarkdownEditorInner({
         }
       }
     },
-    [applyContent, applyEditable, content, editable, onChange, onKeyboardInsetChange]
+    [
+      applyContent,
+      applyEditable,
+      applyTheme,
+      content,
+      editable,
+      editorTheme,
+      onChange,
+      onKeyboardInsetChange
+    ]
   )
 
   const handleShouldStartLoadWithRequest = useCallback((request: { url?: string }) => {
@@ -241,12 +309,12 @@ function MobileRichMarkdownEditorInner({
   )
 
   return (
-    <View className={styles.container}>
-      <View className={styles.toolbar}>
+    <View className="bg-background min-h-0 flex-1">
+      <MobileGlassSurface className="min-h-11" isInteractive>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName={styles.toolbarContent}
+          contentContainerClassName="items-center gap-1.5 px-2 py-1.5"
           keyboardShouldPersistTaps="handled"
         >
           {TOOLBAR_ITEMS.map((item) => {
@@ -259,9 +327,9 @@ function MobileRichMarkdownEditorInner({
                 accessibilityLabel={item.label}
                 onPress={() => runCommand(item.command)}
                 className={cn(
-                  styles.toolbarButton,
-                  editable && styles.toolbarButtonPressedActive,
-                  !editable ? styles.toolbarButtonDisabled : null
+                  'min-w-8 h-8 items-center justify-center px-1',
+                  editable && 'active:bg-accent',
+                  !editable ? 'opacity-60' : null
                 )}
               >
                 <Icon
@@ -272,18 +340,18 @@ function MobileRichMarkdownEditorInner({
             )
           })}
         </ScrollView>
-      </View>
+      </MobileGlassSurface>
       <UniwindWebView
         ref={webViewRef}
-        source={{ html, baseUrl: EDITOR_DOCUMENT_URL }}
-        originWhitelist={[EDITOR_DOCUMENT_ORIGIN, 'about:blank']}
+        source={webViewSource}
+        originWhitelist={EDITOR_ORIGIN_WHITELIST}
         javaScriptEnabled
         domStorageEnabled={false}
         hideKeyboardAccessoryView
         keyboardDisplayRequiresUserAction={false}
         onMessage={handleMessage}
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
-        className={styles.webView}
+        className="bg-background min-h-0 flex-1"
         scrollEnabled
         bounces={false}
         nestedScrollEnabled
@@ -295,13 +363,3 @@ function MobileRichMarkdownEditorInner({
 }
 
 export const MobileRichMarkdownEditor = memo(MobileRichMarkdownEditorInner)
-
-const styles = {
-  container: cn('flex-1 min-h-0 bg-background'),
-  toolbar: cn('min-h-[42px] border-b-hairline border-b-border bg-card'),
-  toolbarContent: cn('items-center gap-1.5 px-2 py-1.5'),
-  toolbarButton: cn('min-w-[30px] h-[30px] items-center justify-center rounded-none px-1'),
-  toolbarButtonPressedActive: cn('active:bg-secondary'),
-  toolbarButtonDisabled: cn('opacity-[0.55]'),
-  webView: cn('flex-1 min-h-0 bg-background')
-} as const

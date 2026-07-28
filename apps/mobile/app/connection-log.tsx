@@ -1,13 +1,14 @@
 import * as Clipboard from 'expo-clipboard'
 import Constants from 'expo-constants'
-import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { View, Text, Pressable, Platform } from 'react-native'
+import { View, Text, Platform } from 'react-native'
 
-import { CaretLeft as ChevronLeft, Copy, Check } from '@/components/uniwind-icons'
+import { Copy, Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { ConnectionLog } from '../src/components/connection-log'
+import { MobileGlassGroup } from '../src/components/glass/group'
+import { MobileGlassPressable } from '../src/components/glass/pressable'
 import { buildConnectionDiagnosticsReport } from '../src/diagnostics/connection-diagnostics-report'
 import { useHostClient } from '../src/transport/client-context'
 import {
@@ -26,8 +27,6 @@ const EMPTY_ENTRIES: readonly ConnectionLogEntry[] = []
 // screen also *acquires* the host client — opening it kicks a dial and the
 // log fills live instead of showing a stale tail.
 export default function ConnectionLogScreen() {
-  const router = useRouter()
-
   const [hosts, setHosts] = useState<HostProfile[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -82,82 +81,63 @@ export default function ConnectionLogScreen() {
   }, [selected, state, reconnectAttempts, lastConnectedAt, entries])
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className={styles.heading}>Connection log</Text>
-      </View>
-
+    <View className="bg-background flex-1 p-4">
       {hosts.length > 1 && (
-        <View className={styles.hostPicker}>
+        <MobileGlassGroup className="mb-3 flex-row flex-wrap gap-2" spacing={8}>
           {hosts.map((host) => (
-            <Pressable
+            <MobileGlassPressable
               key={host.id}
-              className={cn(styles.hostChip, host.id === selectedId && styles.hostChipActive)}
+              className={cn('rounded-full', host.id === selectedId && 'border-primary')}
+              contentClassName="rounded-full px-3 py-2"
               onPress={() => setSelectedId(host.id)}
             >
               <Text
                 className={cn(
-                  styles.hostChipText,
-                  host.id === selectedId && styles.hostChipTextActive
+                  'text-muted-foreground max-w-40 text-xs',
+                  host.id === selectedId && 'text-foreground'
                 )}
                 numberOfLines={1}
               >
                 {host.name}
               </Text>
-            </Pressable>
+            </MobileGlassPressable>
           ))}
-        </View>
+        </MobileGlassGroup>
       )}
 
       {selected ? (
         <>
-          <View className={styles.statusRow}>
-            <Text className={styles.statusText}>
+          <View className="mb-2 flex-row items-center justify-between">
+            <Text className="text-muted-foreground text-xs">
               {state}
               {reconnectAttempts > 0 ? ` · attempt ${reconnectAttempts}` : ''}
             </Text>
-            <Pressable className={styles.copyButton} onPress={() => void copyDiagnostics()}>
+            <MobileGlassPressable
+              className="rounded-full"
+              contentClassName="min-h-8 flex-row items-center gap-1.5 rounded-full px-3"
+              onPress={() => void copyDiagnostics()}
+            >
               {copied ? (
-                <Check size={14} colorClassName="accent-green-500" />
+                <Check size={16} colorClassName="accent-green-500" />
               ) : (
-                <Copy size={14} colorClassName="accent-muted-foreground" />
+                <Copy size={16} colorClassName="accent-muted-foreground" />
               )}
-              <Text className={styles.copyButtonText}>
+              <Text className="text-foreground text-xs">
                 {copied ? 'Copied' : 'Copy diagnostics'}
               </Text>
-            </Pressable>
+            </MobileGlassPressable>
           </View>
           {entries.length > 0 ? (
             <ConnectionLog entries={[...entries]} title={selected.name} />
           ) : (
-            <Text className={styles.emptyText}>
+            <Text className="text-muted-foreground text-xs leading-5">
               No connection events yet this session. Events appear as the app dials this host.
             </Text>
           )}
         </>
       ) : (
-        <Text className={styles.emptyText}>No paired hosts.</Text>
+        <Text className="text-muted-foreground text-xs leading-5">No paired hosts.</Text>
       )}
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  topRow: cn('flex-row items-center mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  hostPicker: cn('flex-row flex-wrap gap-2 mb-3'),
-  hostChip: cn('py-1.5 px-3 rounded-none bg-secondary'),
-  hostChipActive: cn('bg-card border border-border'),
-  hostChipText: cn('text-[12px] text-muted-foreground max-w-40'),
-  hostChipTextActive: cn('text-foreground font-semibold'),
-  statusRow: cn('flex-row items-center justify-between mb-2'),
-  statusText: cn('text-[12px] text-muted-foreground'),
-  copyButton: cn('flex-row items-center gap-1.5 py-1.5 px-3 rounded-none bg-secondary'),
-  copyButtonText: cn('text-[12px] font-semibold text-foreground'),
-  emptyText: cn('text-[12px] text-muted-foreground/60 leading-[18px]')
-} as const

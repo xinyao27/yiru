@@ -1,10 +1,9 @@
 import { useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
-
-import { cn } from '@/style/class-names'
+import { ActivityIndicator, TextInput, View } from 'react-native'
 
 import { isSubmittableCommentBody } from '../../session/pr/comment-actions'
-import { prCommentComposerStyles as styles } from './pr-comment-composer-styles'
+import { MobileGlassSurface } from '../glass/surface'
+import { MobileGlassTextButton } from '../glass/text-button'
 
 type Props = {
   // Plain-text composer shared by the reply affordance, the root-comment box, and
@@ -51,43 +50,42 @@ export function PRCommentComposer({
   }
 
   return (
-    <View className={styles.container}>
-      <TextInput
-        className={styles.input}
-        style={{ textAlignVertical: 'top' }}
-        value={body}
-        onChangeText={setBody}
-        placeholder={placeholder}
-        placeholderTextColorClassName="accent-muted-foreground"
-        multiline
-        editable={!submitting}
-        autoFocus={autoFocus}
-      />
-      <View className={styles.actions}>
+    <View className="gap-3">
+      <MobileGlassSurface className="min-h-16 overflow-hidden rounded-xl" isInteractive>
+        <TextInput
+          className="text-foreground min-h-16 px-3 py-2 text-sm"
+          style={{ textAlignVertical: 'top' }}
+          value={body}
+          onChangeText={setBody}
+          placeholder={placeholder}
+          placeholderTextColorClassName="accent-muted-foreground"
+          multiline
+          editable={!submitting}
+          autoFocus={autoFocus}
+        />
+      </MobileGlassSurface>
+      <View className="flex-row justify-end gap-2">
         {onCancel ? (
-          <Pressable
-            className={cn(styles.cancel, styles.pressedActive)}
-            onPress={onCancel}
-            disabled={submitting}
-            accessibilityRole="button"
+          <MobileGlassTextButton
             accessibilityLabel="Cancel"
-          >
-            <Text className={styles.cancelText}>Cancel</Text>
-          </Pressable>
+            disabled={submitting}
+            label="Cancel"
+            onPress={onCancel}
+            size="regular"
+          />
         ) : null}
-        <Pressable
-          className={cn(styles.submit, !canSubmit && styles.submitDisabled, styles.pressedActive)}
-          onPress={() => void submit()}
-          disabled={!canSubmit}
-          accessibilityRole="button"
-          accessibilityLabel={submitLabel}
-        >
-          {submitting ? (
-            <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-          ) : (
-            <Text className={styles.submitText}>{submitLabel}</Text>
-          )}
-        </Pressable>
+        {submitting ? (
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        ) : (
+          <MobileGlassTextButton
+            accessibilityLabel={submitLabel}
+            disabled={!canSubmit}
+            isProminent
+            label={submitLabel}
+            onPress={() => void submit()}
+            size="regular"
+          />
+        )}
       </View>
     </View>
   )

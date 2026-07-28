@@ -137,17 +137,17 @@ export function formatBranchLabel(branch: string | undefined, head: string | und
 export function statusColorClassName(status: MobileGitFileStatus): string {
   switch (status) {
     case 'added':
-      return 'text-[var(--git-decoration-added)]'
+      return 'text-git-added'
     case 'copied':
-      return 'text-[var(--git-decoration-copied)]'
+      return 'text-git-copied'
     case 'deleted':
-      return 'text-[var(--git-decoration-deleted)]'
+      return 'text-git-deleted'
     case 'renamed':
-      return 'text-[var(--git-decoration-renamed)]'
+      return 'text-git-renamed'
     case 'untracked':
-      return 'text-[var(--git-decoration-untracked)]'
+      return 'text-git-untracked'
     case 'modified':
     default:
-      return 'text-[var(--git-decoration-modified)]'
+      return 'text-git-modified'
   }
 }

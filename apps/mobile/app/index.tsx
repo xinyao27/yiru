@@ -1,19 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useRouter, useFocusEffect } from 'expo-router'
+import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, Pressable, FlatList, Alert } from 'react-native'
+import { View, Text, FlatList, Alert, Platform } from 'react-native'
 
 import {
-  QrCode,
-  Gear as Settings,
   CaretRight as ChevronRight,
   Terminal,
-  Plus,
   ArrowClockwise as RefreshCw,
   Power as PowerOff,
   PencilSimple as Edit3
 } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
 import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
@@ -30,23 +26,24 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
+import { MobileGlassGroup } from '../src/components/glass/group'
+import { MobileGlassIconButton } from '../src/components/glass/icon-button'
+import { MobileGlassPressable } from '../src/components/glass/pressable'
+import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
-import { YiruLogo } from '../src/components/yiru-logo'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
 import { triggerMediumImpact } from '../src/platform/haptics'
-import {
-  useAllHostClients,
-  useCloseHost,
-  useForceReconnect,
-  usePrimeHosts
-} from '../src/transport/client-context'
+import { useAllHostClients } from '../src/transport/all-host-clients'
+import { useCloseHost, useForceReconnect, usePrimeHosts } from '../src/transport/client-context'
 import { classifyConnection } from '../src/transport/connection-health'
 import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycle'
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'
 import type { ConnectionState, HostProfile } from '../src/transport/types'
+import { repoColor } from '../src/worktree/repo-color'
 import { pickResumeWorktree } from '../src/worktree/resume-worktree'
 
 function endpointLabel(endpoint: string): string {
@@ -219,17 +216,6 @@ function fetchAccountsSnapshot(
       }
     })
     .catch(() => {})
-}
-
-// Why: repo names get a stable color derived from hashing, matching the
-// host detail page's colored dots for visual consistency.
-const REPO_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4']
-function repoColor(name: string): string {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) | 0
-  }
-  return REPO_COLORS[Math.abs(hash) % REPO_COLORS.length]
 }
 
 export default function HomeScreen() {
@@ -589,55 +575,73 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className={styles.container} edges={['top']}>
-      {/* ─── Top bar ─── */}
-      <View className={styles.topBar}>
-        <View className={styles.brandLockup}>
-          <View className={styles.logoMark}>
-            <YiruLogo size={18} />
-          </View>
-          <Text className={styles.brandName}>Yiru</Text>
-        </View>
-        <Pressable
-          className={cn(styles.iconButton, styles.iconButtonPressedActive)}
-          onPress={() => router.push('/settings')}
-        >
-          <Settings size={18} colorClassName="accent-muted-foreground" />
-        </Pressable>
-      </View>
+    <View className="bg-background flex-1">
+      <Stack.Screen
+        options={{
+          headerRight:
+            Platform.OS === 'ios'
+              ? undefined
+              : () => (
+                  <MobileGlassIconButton
+                    accessibilityLabel="Settings"
+                    icon="settings"
+                    onPress={() => router.push('/settings')}
+                  />
+                )
+        }}
+      />
+      {Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel="Settings"
+            icon="gearshape"
+            onPress={() => router.push('/settings')}
+          />
+        </Stack.Toolbar>
+      ) : null}
 
       {hosts.length === 0 ? (
         /* ─── Empty state: onboarding ─── */
         <View
-          className={cn(styles.emptyContainer, 'pb-safe')}
+          className="pb-safe flex-1"
           style={
             isWideLayout
               ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
               : undefined
           }
         >
-          <View className={styles.emptyHero}>
-            <Text className={styles.emptyTitle}>Connect your desktop</Text>
-            <Text className={styles.emptyBody}>
+          <View className="flex-1 items-center justify-center px-8 pb-10">
+            <Text className="text-foreground mb-2.5 text-center text-sm font-bold">
+              Connect your desktop
+            </Text>
+            <Text className="text-muted-foreground mb-8 text-center text-sm leading-6">
               Pair with Yiru on your computer to check on your agents, jump into any terminal, and
               drive work from your phone.
             </Text>
-            <Pressable className={styles.primaryButton} onPress={() => router.push('/pair-scan')}>
-              <QrCode size={17} colorClassName="accent-primary-foreground" />
-              <Text className={styles.primaryButtonText}>Pair Desktop</Text>
-            </Pressable>
+            <MobileGlassTextButton
+              isProminent
+              label="Pair Desktop"
+              onPress={() => router.push('/pair-scan')}
+              size="large"
+            />
           </View>
 
-          <View className={styles.stepsSection}>
-            <Text className={styles.sectionHeading}>How it works</Text>
+          <View className="px-6">
+            <Text className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+              How it works
+            </Text>
             {ONBOARDING_STEPS.map((step, i) => (
-              <View key={step.title} className={cn(styles.stepRow, i > 0 && styles.stepRowBorder)}>
-                <View className={styles.stepNum}>
-                  <Text className={styles.stepNumText}>{i + 1}</Text>
-                </View>
-                <View className={styles.stepText}>
-                  <Text className={styles.stepTitle}>{step.title}</Text>
-                  <Text className={styles.stepDesc}>{step.desc}</Text>
+              <View
+                key={step.title}
+                className={cn(
+                  'flex-row items-start gap-3.5 py-4',
+                  i > 0 && 'border-t border-t-border'
+                )}
+              >
+                <Text className="text-muted-foreground w-7 text-center text-sm">{i + 1}</Text>
+                <View className="flex-1">
+                  <Text className="text-foreground mb-1 text-sm font-semibold">{step.title}</Text>
+                  <Text className="text-muted-foreground text-xs leading-5">{step.desc}</Text>
                 </View>
               </View>
             ))}
@@ -651,7 +655,7 @@ export default function HomeScreen() {
           // Why: edge-to-edge — let the list scroll under the system nav bar
           // but reserve insets.bottom so the last row stays reachable above
           // the Samsung 3-button nav / iOS home indicator.
-          contentContainerClassName={cn(styles.list, 'pb-safe-offset-6')}
+          contentContainerClassName="px-4 pb-6 pb-safe-offset-6"
           contentContainerStyle={
             isWideLayout
               ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
@@ -659,34 +663,38 @@ export default function HomeScreen() {
           }
           ListHeaderComponent={
             <View>
-              <View className={styles.hero}>
-                <Text className={styles.heroTitle}>Welcome back</Text>
+              <View className="pt-1 pb-3">
+                <Text className="text-foreground text-base font-semibold tracking-tight">
+                  Welcome back
+                </Text>
               </View>
 
               {stats && (
-                <View className={styles.statsRow}>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
+                <View className="mb-4 flex-row gap-2.5">
+                  <MobileGlassSection className="flex-1 px-3 py-2">
+                    <Text className="text-foreground text-sm">
                       {stats.totalAgentsSpawned.toLocaleString()}
                     </Text>
-                    <Text className={styles.statLabel}>Agents spawned</Text>
-                  </View>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">Agents spawned</Text>
+                  </MobileGlassSection>
+                  <MobileGlassSection className="flex-1 px-3 py-2">
+                    <Text className="text-foreground text-sm">
                       {formatDuration(stats.totalAgentTimeMs)}
                     </Text>
-                    <Text className={styles.statLabel}>Agent time</Text>
-                  </View>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">Agent time</Text>
+                  </MobileGlassSection>
+                  <MobileGlassSection className="flex-1 px-3 py-2">
+                    <Text className="text-foreground text-sm">
                       {stats.totalPRsCreated.toLocaleString()}
                     </Text>
-                    <Text className={styles.statLabel}>PRs created</Text>
-                  </View>
+                    <Text className="text-muted-foreground mt-0.5 text-xs">PRs created</Text>
+                  </MobileGlassSection>
                 </View>
               )}
 
-              <Text className={styles.sectionHeading}>Desktops</Text>
+              <Text className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                Desktops
+              </Text>
             </View>
           }
           ItemSeparatorComponent={CardGap}
@@ -723,77 +731,72 @@ export default function HomeScreen() {
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
                 <>
-                  <Text className={cn(styles.sectionHeading, styles.sectionHeadingTightTop)}>
+                  <Text className="text-muted-foreground mt-4 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
                     Resume
                   </Text>
-                  <Pressable
-                    className={cn(styles.resumeCard, styles.hostCardPressedActive)}
+                  <MobileGlassPressable
+                    className="rounded-2xl"
+                    contentClassName="flex-row items-center rounded-2xl px-3 py-3"
                     onPress={() =>
                       router.push(
                         `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
                       )
                     }
                   >
-                    <View className={styles.resumeIcon}>
-                      <Terminal size={18} colorClassName="accent-muted-foreground" />
+                    <View className="mr-3 h-11 w-11 items-center justify-center">
+                      <Terminal size={20} colorClassName="accent-muted-foreground" />
                     </View>
-                    <View className={styles.resumeMain}>
-                      <Text className={styles.resumeTitle} numberOfLines={1}>
+                    <View className="min-w-0 flex-1">
+                      <Text className="text-foreground text-sm" numberOfLines={1}>
                         {resumeWorktree.worktree.displayName}
                       </Text>
-                      <View className={styles.resumeSub}>
+                      <View className="mt-1 flex-row items-center gap-1.5">
                         <View
-                          className={styles.repoDot}
+                          className="h-2 w-2"
                           style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
                         />
-                        <Text className={styles.resumeSubText} numberOfLines={1}>
+                        <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
                           {resumeWorktree.worktree.repo}
                           {'  ·  '}
                           {resumeWorktree.worktree.branch}
                         </Text>
                       </View>
                     </View>
-                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-                  </Pressable>
+                    <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                  </MobileGlassPressable>
                 </>
               ) : null}
 
               {/* ─── Quick actions ─── */}
-              <Text className={cn(styles.sectionHeading, 'mt-6')}>Quick Actions</Text>
-              <View className={styles.quickActions}>
-                <Pressable
-                  className={cn(styles.quickAction, styles.hostCardPressedActive)}
+              <Text className="text-muted-foreground mt-6 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                Quick Actions
+              </Text>
+              <MobileGlassGroup className="flex-row gap-2" spacing={8}>
+                <MobileGlassTextButton
+                  className="flex-1"
+                  isFullWidth
+                  label="Pair Desktop"
                   onPress={() => router.push('/pair-scan')}
-                >
-                  <View className={styles.quickActionIcon}>
-                    <QrCode size={16} colorClassName="accent-muted-foreground" />
-                  </View>
-                  <Text className={styles.quickActionLabel}>Pair Desktop</Text>
-                </Pressable>
-                <Pressable
+                />
+                <MobileGlassTextButton
+                  className="flex-1"
                   disabled={!primaryConnectedHost}
-                  className={cn(
-                    styles.quickAction,
-                    !primaryConnectedHost && styles.quickActionDisabled,
-                    styles.hostCardPressedActive
-                  )}
+                  isFullWidth
+                  label="New Workspace"
                   onPress={() => {
                     if (primaryConnectedHost) {
                       router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
                     }
                   }}
-                >
-                  <View className={styles.quickActionIcon}>
-                    <Plus size={16} weight="regular" colorClassName="accent-muted-foreground" />
-                  </View>
-                  <Text className={styles.quickActionLabel}>New Workspace</Text>
-                </Pressable>
-              </View>
+                />
+              </MobileGlassGroup>
 
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
                 <>
-                  <Text className={cn(styles.sectionHeading, 'mt-6')}>Account usage</Text>
+                  <Text className="text-muted-foreground mt-6 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+                    Account usage
+                  </Text>
                   {accountsHosts.map(({ host, snapshot }) => {
                     const claudeActiveId = snapshot.claude.activeAccountId
                     const claudeActive =
@@ -803,13 +806,17 @@ export default function HomeScreen() {
                       snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
                     const showHostName = accountsHosts.length > 1
                     return (
-                      <Pressable
+                      <MobileGlassPressable
                         key={host.id}
-                        className={cn(styles.accountsCard, styles.hostCardPressedActive)}
+                        className="mb-2 rounded-2xl"
+                        contentClassName="gap-2 rounded-2xl px-3 py-2.5"
                         onPress={() => router.push(`/h/${host.id}/accounts`)}
                       >
                         {showHostName ? (
-                          <Text className={styles.accountsHostLabel} numberOfLines={1}>
+                          <Text
+                            className="text-muted-foreground text-xs tracking-wide uppercase"
+                            numberOfLines={1}
+                          >
                             {host.name}
                           </Text>
                         ) : null}
@@ -830,19 +837,19 @@ export default function HomeScreen() {
                           const sessionBar = getUsageBarState(limits, 'session')
                           const weeklyBar = getUsageBarState(limits, 'weekly')
                           return (
-                            <View key={provider} className={styles.accountsRow}>
-                              <View className={styles.accountsIcon}>
+                            <View key={provider} className="flex-row items-center gap-2.5">
+                              <View className="h-8 w-8 items-center justify-center">
                                 {provider === 'claude' ? (
                                   <ClaudeIcon size={18} />
                                 ) : (
                                   <OpenAIIcon size={18} colorClassName="accent-foreground" />
                                 )}
                               </View>
-                              <View className={styles.accountsInfo}>
-                                <Text className={styles.accountsEmail} numberOfLines={1}>
+                              <View className="min-w-0 flex-1 gap-0.5">
+                                <Text className="text-foreground text-xs" numberOfLines={1}>
                                   {active?.email ?? 'System default'}
                                 </Text>
-                                <View className={styles.accountsBars}>
+                                <View className="mt-1 flex-row gap-3">
                                   <UsageBar
                                     label="5h"
                                     usedPercent={sessionBar.usedPercent}
@@ -860,7 +867,7 @@ export default function HomeScreen() {
                             </View>
                           )
                         })}
-                      </Pressable>
+                      </MobileGlassPressable>
                     )
                   })}
                 </>
@@ -942,12 +949,12 @@ export default function HomeScreen() {
         onConfirm={() => void handleRemove()}
         onCancel={() => setConfirmRemove(null)}
       />
-    </SafeAreaView>
+    </View>
   )
 }
 
 function CardGap() {
-  return <View className={styles.cardGap} />
+  return <View className="h-2" />
 }
 
 const ONBOARDING_STEPS = [
@@ -964,77 +971,3 @@ const ONBOARDING_STEPS = [
     desc: 'Your desktop will appear here. Everything is encrypted end-to-end.'
   }
 ]
-
-const styles = {
-  container: cn('flex-1 bg-background'),
-  /* ─── Top bar ─── */
-  topBar: cn('flex-row items-center justify-between px-4 pt-2 pb-3'),
-  brandLockup: cn('flex-row items-center min-w-0'),
-  logoMark: cn('mr-2'),
-  brandName: cn('text-foreground text-[17px] font-bold'),
-  iconButton: cn('w-9 h-9 rounded-none items-center justify-center'),
-  iconButtonPressedActive: cn('active:bg-secondary'),
-  /* ─── Hero / greeting ─── */
-  hero: cn('pt-1 pb-3'),
-  heroTitle: cn('text-foreground text-[24px] font-extrabold tracking-[-0.3px]'),
-  /* ─── Stat cards ─── */
-  statsRow: cn('flex-row gap-2.5 mb-4'),
-  statCard: cn('flex-1 bg-card/60 border border-border rounded-none py-2 px-3'),
-  statValue: cn('text-foreground text-[18px] font-bold tracking-[-0.3px]'),
-  statLabel: cn('text-muted-foreground/60 text-[11px] font-medium mt-[2px]'),
-  /* ─── Section heading ─── */
-  sectionHeading: cn(
-    'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.6px] mb-2 px-1'
-  ),
-  sectionHeadingTightTop: cn('mt-4'),
-  /* ─── List ─── */
-  list: cn('px-4 pb-6'),
-  cardGap: cn('h-2'),
-  /* ─── Host cards ─── */
-  hostCardPressedActive: cn('active:bg-secondary'),
-  /* ─── Resume card ─── */
-  resumeCard: cn('flex-row items-center bg-card border border-border rounded-none pl-3 pr-3 py-3'),
-  resumeIcon: cn('w-[46px] h-[46px] rounded-none bg-secondary items-center justify-center mr-3.5'),
-  resumeMain: cn('flex-1 min-w-0'),
-  resumeTitle: cn('text-[13px] font-semibold text-foreground'),
-  resumeSub: cn('flex-row items-center gap-1.5 mt-[3px]'),
-  repoDot: cn('w-[7px] h-[7px] rounded-none'),
-  resumeSubText: cn('text-[12px] text-muted-foreground flex-1'),
-  /* ─── Account usage ─── */
-  accountsCard: cn('bg-card border border-border rounded-none px-3 py-2.5 gap-2 mb-2'),
-  accountsHostLabel: cn(
-    'text-[11px] text-muted-foreground/60 font-medium uppercase tracking-[0.4px]'
-  ),
-  accountsRow: cn('flex-row items-center gap-2.5'),
-  accountsIcon: cn('w-8 h-8 rounded-none bg-secondary items-center justify-center'),
-  accountsInfo: cn('flex-1 min-w-0 gap-[2px]'),
-  accountsEmail: cn('text-[13px] font-semibold text-foreground'),
-  accountsBars: cn('flex-row gap-3 mt-1'),
-  /* ─── Quick actions ─── */
-  quickActions: cn('flex-row gap-2'),
-  quickAction: cn(
-    'flex-1 flex-row bg-card border border-border rounded-none py-2.5 px-3 items-center gap-2.5'
-  ),
-  quickActionDisabled: cn('opacity-[0.45]'),
-  quickActionIcon: cn('w-7 h-7 rounded-none bg-white/[0.04] items-center justify-center'),
-  quickActionLabel: cn('text-[12px] font-semibold text-muted-foreground'),
-  /* ─── Empty state ─── */
-  emptyContainer: cn('flex-1'),
-  emptyGreeting: cn('px-4 pt-3 pb-2'),
-  emptyHero: cn('flex-1 items-center justify-center px-8 pb-10'),
-  emptyTitle: cn('text-[22px] font-bold text-foreground text-center mb-2.5'),
-  emptyBody: cn('text-[15px] text-muted-foreground text-center leading-[22px] mb-8'),
-  primaryButton: cn('flex-row items-center gap-2.5 bg-foreground px-7 py-3.5 rounded-none'),
-  primaryButtonText: cn('text-background text-[15px] font-bold'),
-  /* ─── Onboarding steps ─── */
-  stepsSection: cn('px-6'),
-  stepRow: cn('flex-row items-start gap-3.5 py-4'),
-  stepRowBorder: cn('border-t border-t-border'),
-  stepNum: cn(
-    'w-7 h-7 rounded-none bg-white/[0.04] border border-border items-center justify-center mt-[1px]'
-  ),
-  stepNumText: cn('text-[12px] font-bold text-muted-foreground'),
-  stepText: cn('flex-1'),
-  stepTitle: cn('text-[14px] font-semibold text-foreground mb-[3px]'),
-  stepDesc: cn('text-[12px] text-muted-foreground/60 leading-[17px]')
-} as const

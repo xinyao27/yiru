@@ -1,14 +1,13 @@
 import type { PRInfo } from '@yiru/workbench-model/review'
 import * as Clipboard from 'expo-clipboard'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 
-import { Check, Copy, FileX as FileWarning, Sparkle as Sparkles } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { FileX as FileWarning } from '@/components/uniwind-icons'
 
+import { MobileGlassTextButton } from '../glass/text-button'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { resolveConflictDisplay } from './pr-conflict-presentation'
-import { prConflictStyles as styles } from './pr-conflict-styles'
 import { PRSection } from './pr-section'
 
 // Launches the "Resolve conflicts with AI" agent. Absent for display-only usages.
@@ -76,39 +75,33 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
   return (
     <PRSection title="Conflicts">
       {conflict.commitsBehind !== null && conflict.baseCommit !== null ? (
-        <Text className={styles.meta}>
+        <Text className="text-muted-foreground text-xs">
           {conflict.commitsBehind} commit{conflict.commitsBehind === 1 ? '' : 's'} behind (base
-          commit: <Text className={styles.metaMono}>{conflict.baseCommit}</Text>)
+          commit:{' '}
+          <Text className="text-muted-foreground font-mono text-xs">{conflict.baseCommit}</Text>)
         </Text>
       ) : null}
 
       {conflict.fileDetailsUnavailable ? (
         <View>
-          <Text className={styles.noticeTitle}>
+          <Text className="text-foreground text-xs font-semibold">
             This branch has conflicts that must be resolved
           </Text>
-          <Text className={styles.noticeBody}>{noticeBody}</Text>
+          <Text className="text-muted-foreground mt-1 text-xs">{noticeBody}</Text>
           {conflict.mergeabilityRefreshCommands ? (
-            <View className={styles.commandBox}>
-              <View className={styles.commandHeader}>
-                <Text className={styles.commandLabel}>Run from this worktree</Text>
-                <Pressable
-                  className={cn(styles.copyCommandButton, styles.copyCommandButtonPressedActive)}
-                  onPress={() => void copyRefreshCommands()}
-                  accessibilityRole="button"
+            <View className="border-hairline border-border bg-secondary mt-2 rounded-xl p-2">
+              <View className="flex-row items-center justify-between gap-2">
+                <Text className="text-muted-foreground text-xs font-semibold">
+                  Run from this worktree
+                </Text>
+                <MobileGlassTextButton
                   accessibilityLabel="Copy mergeability refresh commands"
-                >
-                  {commandsCopied ? (
-                    <Check size={13} colorClassName="accent-foreground" />
-                  ) : (
-                    <Copy size={13} colorClassName="accent-foreground" />
-                  )}
-                  <Text className={styles.copyCommandText}>
-                    {commandsCopied ? 'Copied' : 'Copy commands'}
-                  </Text>
-                </Pressable>
+                  label={commandsCopied ? 'Copied' : 'Copy commands'}
+                  onPress={() => void copyRefreshCommands()}
+                  size="small"
+                />
               </View>
-              <Text selectable className={styles.commandText}>
+              <Text selectable className="text-foreground mt-2 font-mono text-xs leading-4">
                 {conflict.mergeabilityRefreshCommands}
               </Text>
             </View>
@@ -116,19 +109,22 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
         </View>
       ) : (
         <View>
-          <View className={styles.filesHeader}>
+          <View className="mt-2 flex-row items-center gap-2">
             <FileWarning size={14} colorClassName="accent-muted-foreground" />
-            <Text className={styles.filesHeaderText}>Conflicting files</Text>
+            <Text className="text-muted-foreground text-xs">Conflicting files</Text>
           </View>
           <ScrollView
-            className={styles.fileList}
-            contentContainerClassName={styles.fileListContent}
+            className="mt-2 max-h-44"
+            contentContainerClassName="gap-1"
             nestedScrollEnabled
             showsVerticalScrollIndicator={false}
           >
             {conflict.files.map((filePath) => (
-              <View key={filePath} className={styles.fileRow}>
-                <Text className={styles.filePath}>{filePath}</Text>
+              <View
+                key={filePath}
+                className="border-hairline border-border bg-secondary rounded-lg px-2 py-1"
+              >
+                <Text className="text-foreground font-mono text-xs">{filePath}</Text>
               </View>
             ))}
           </ScrollView>
@@ -138,21 +134,15 @@ export function PRConflictingFilesSection({ pr, isRefreshing = false, triage }: 
       {/* "Resolve conflicts with AI" — mirrors desktop's PRTriageStrip. Launches an
           agent that brings the base branch in and completes the merge. */}
       {triage ? (
-        <View className={triageStyles.triageArea}>
-          <Pressable
-            className={cn(triageStyles.triageButton, triageStyles.triageButtonPressedActive)}
-            onPress={triage.resolveConflicts}
-            disabled={triage.isBusy}
-            accessibilityRole="button"
+        <View className="gap-1">
+          <MobileGlassTextButton
             accessibilityLabel="Resolve conflicts with AI"
-          >
-            {triage.isBusy ? (
-              <ActivityIndicator colorClassName="accent-muted-foreground" />
-            ) : (
-              <Sparkles size={14} colorClassName="accent-muted-foreground" />
-            )}
-            <Text className={triageStyles.triageButtonText}>Resolve conflicts with AI</Text>
-          </Pressable>
+            disabled={triage.isBusy}
+            isFullWidth
+            label={triage.isBusy ? 'Resolving…' : 'Resolve conflicts with AI'}
+            onPress={triage.resolveConflicts}
+            size="regular"
+          />
           {triage.error ? <Text className={triageStyles.triageError}>{triage.error}</Text> : null}
         </View>
       ) : null}

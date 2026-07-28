@@ -1,4 +1,6 @@
-import { colors } from '../../theme/uniwind-theme-values'
+// Why: the native WebView surface already paints the active mobile canvas;
+// transparency avoids an opposite-theme flash before React delivers the live theme.
+export const TERMINAL_BOOTSTRAP_BACKGROUND = 'transparent'
 
 // Theme normalization and page-surface painting injected into the WebView IIFE.
 export const TERMINAL_WEBVIEW_THEME_JS = `
@@ -19,7 +21,7 @@ export const TERMINAL_WEBVIEW_THEME_JS = `
   function applyTerminalTheme(input) {
     terminalThemeInput = input;
     terminalTheme = normalizeTerminalTheme(input);
-    var background = terminalTheme.background || '${colors.terminalBg}';
+    var background = terminalTheme.background || '${TERMINAL_BOOTSTRAP_BACKGROUND}';
     document.documentElement.style.background = background;
     document.body.style.background = background;
     if (term) term.options.theme = terminalTheme;

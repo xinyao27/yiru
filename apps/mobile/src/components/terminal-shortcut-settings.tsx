@@ -18,6 +18,8 @@ import {
 } from '../terminal/accessory-layout'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
+import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassSurface } from './glass/surface'
 
 // Why: DragReorderList absolutely positions rows, so every row in a
 // reorderable section must share one fixed height.
@@ -218,11 +220,11 @@ export function TerminalShortcutSettings({
   return (
     <>
       <Text className={cn(styles.groupHeading, styles.groupTopGap)}>SHORTCUT BAR</Text>
-      <Text className={styles.groupDescription}>
+      <Text className="text-muted-foreground px-1 text-xs leading-5">
         Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on
         the terminal shortcut bar.
       </Text>
-      <View className={cn(styles.section, styles.sectionTopGap)}>
+      <MobileGlassSurface className={cn(styles.section, styles.sectionTopGap)}>
         <DragReorderList
           items={orderedAccessoryKeys}
           itemKey={(shortcutKey) => shortcutKey.id}
@@ -248,16 +250,18 @@ export function TerminalShortcutSettings({
             </Text>
           </View>
         </Pressable>
-      </View>
+      </MobileGlassSurface>
 
       <Text className={cn(styles.groupHeading, styles.groupTopGap)}>CUSTOM SHORTCUTS</Text>
-      <View className={cn(styles.section, styles.sectionTopGap)}>
+      <MobileGlassSurface className={cn(styles.section, styles.sectionTopGap)}>
         {customKeys.length === 0 ? (
           <>
-            <View className={styles.emptyContainer}>
-              <Text className={styles.emptyText}>No custom shortcuts defined yet.</Text>
+            <View className="items-center justify-center p-3">
+              <Text className="text-muted-foreground p-3 text-sm">
+                No custom shortcuts defined yet.
+              </Text>
             </View>
-            <View className={styles.separator} />
+            <View className="h-hairline bg-border mx-3" />
           </>
         ) : (
           <DragReorderList
@@ -280,12 +284,14 @@ export function TerminalShortcutSettings({
                     {key.bytes.replace(/\r/g, ' ↵')}
                   </Text>
                 </View>
-                <Pressable
-                  className={cn(styles.deleteButton, styles.deleteButtonPressedActive)}
+                <MobileGlassPressable
+                  accessibilityLabel={`Delete ${key.label}`}
+                  className="h-8 w-8 rounded-full"
+                  contentClassName="h-full w-full items-center justify-center rounded-full"
                   onPress={() => handleDeleteCustomKey(key)}
                 >
                   <X size={16} colorClassName="accent-destructive" />
-                </Pressable>
+                </MobileGlassPressable>
               </View>
             )}
           />
@@ -300,7 +306,7 @@ export function TerminalShortcutSettings({
           </View>
           <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </Pressable>
-      </View>
+      </MobileGlassSurface>
 
       <CustomKeyModal
         visible={showCustomKeyModal}
@@ -317,24 +323,18 @@ export function TerminalShortcutSettings({
 }
 
 const styles = {
-  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
+  groupHeading: cn('text-xs font-semibold text-muted-foreground tracking-wide mb-1 px-1'),
   groupTopGap: cn('mt-6'),
-  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
-  section: cn('bg-card rounded-none overflow-hidden'),
+  section: cn('overflow-hidden rounded-2xl'),
   sectionTopGap: cn('mt-2'),
   row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
+  rowPressedActive: cn('active:bg-accent'),
   // Why: rows inside DragReorderList get a fixed height and a trailing grip
   // handle from the list itself, so content only pads on the left.
   reorderRowContent: cn('flex-1 h-full flex-row items-center gap-2.5 pl-3.5'),
   rowContent: cn('flex-1'),
-  rowLabel: cn('text-[14px] font-medium text-foreground'),
-  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]'),
-  keycap: cn('min-w-[62px] items-center bg-secondary rounded-none px-2 py-1'),
-  keycapText: cn('text-muted-foreground text-[12px] font-mono'),
-  separator: cn('h-hairline bg-border mx-3'),
-  emptyContainer: cn('p-3 items-center justify-center'),
-  emptyText: cn('text-[14px] text-muted-foreground p-3'),
-  deleteButton: cn('w-8 h-8 rounded-none items-center justify-center bg-red-500/10'),
-  deleteButtonPressedActive: cn('active:bg-red-500/20')
+  rowLabel: cn('text-sm font-medium text-foreground'),
+  rowSublabel: cn('text-xs text-muted-foreground mt-0.5'),
+  keycap: cn('min-w-16 items-center rounded-lg bg-secondary px-2 py-1'),
+  keycapText: cn('text-muted-foreground text-xs font-mono')
 } as const

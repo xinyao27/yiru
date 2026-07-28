@@ -1,9 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Linking, Text, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
-
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { extractPairingCodeFromUrl } from '../src/transport/pairing'
 
 export default function PairRedirectScreen() {
@@ -44,13 +43,13 @@ export default function PairRedirectScreen() {
   }, [params.code, router])
 
   return (
-    <View className={styles.container}>
+    <View className="bg-background flex-1 items-center justify-center p-4">
       {missingCode ? (
         <>
-          <Text className={styles.errorText}>Missing pairing code</Text>
-          <Pressable className={styles.primaryButton} onPress={goHome}>
-            <Text className={styles.primaryButtonText}>Back to home</Text>
-          </Pressable>
+          <Text className="text-destructive mb-6 text-center text-sm leading-5">
+            Missing pairing code
+          </Text>
+          <MobileGlassTextButton isProminent label="Back to home" onPress={goHome} size="large" />
         </>
       ) : (
         <ActivityIndicator size="large" colorClassName="accent-muted-foreground" />
@@ -58,10 +57,3 @@ export default function PairRedirectScreen() {
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 items-center justify-center bg-background p-4'),
-  errorText: cn('text-destructive text-[14px] leading-[20px] mb-6 text-center'),
-  primaryButton: cn('items-center bg-foreground rounded-none px-6 py-2.5'),
-  primaryButtonText: cn('text-background text-[14px] font-semibold')
-} as const

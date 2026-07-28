@@ -73,6 +73,7 @@
     "@phosphor-icons/react": "catalog:",
     "@xterm/addon-serialize": "catalog:",
     "@xterm/headless": "catalog:",
+    "@yiru/editor-themes": "catalog:",
     "@yiru/mobile-relay-protocol": "catalog:",
     "@yiru/runtime-protocol": "catalog:",
     "@yiru/workbench-model": "catalog:",

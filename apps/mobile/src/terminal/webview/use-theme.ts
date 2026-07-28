@@ -1,24 +1,31 @@
 import { useMemo } from 'react'
-import { useUniwind } from 'uniwind'
+import { useCSSVariable, useUniwind } from 'uniwind'
 
-import { useThemeColors } from '../../theme/uniwind-theme-values'
+import { resolveCssString } from '../../style/resolve-css-variable'
 import type { MobileTerminalTheme } from './contract'
 
 // Why: xterm cannot consume Uniwind classes, so theme changes are translated
 // into the runtime message shape without reloading the terminal document.
 export function useTerminalWebViewTheme(terminalTheme?: MobileTerminalTheme) {
-  const colors = useThemeColors()
   const { theme } = useUniwind()
+  const [backgroundValue, foregroundValue] = useCSSVariable([
+    '--color-terminal-surface',
+    '--color-foreground'
+  ])
+  const terminalBackground = resolveCssString(backgroundValue)
+  const terminalForeground = resolveCssString(foregroundValue)
   const effectiveTerminalTheme = useMemo(
     () => ({
       mode: terminalTheme?.mode ?? (theme === 'light' ? 'light' : 'dark'),
       theme: {
-        background: colors.terminalBg,
-        cursorAccent: colors.terminalBg,
-        ...terminalTheme?.theme
+        ...terminalTheme?.theme,
+        foreground: terminalForeground,
+        cursor: terminalForeground,
+        background: terminalBackground,
+        cursorAccent: terminalBackground
       }
     }),
-    [colors.terminalBg, terminalTheme, theme]
+    [terminalBackground, terminalForeground, terminalTheme, theme]
   )
   return effectiveTerminalTheme
 }

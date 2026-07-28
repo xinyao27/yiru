@@ -18,12 +18,12 @@ export function MobileSyntaxSegments({ segments }: { segments: MobileSyntaxSegme
 
 const syntaxTokenStyles: Record<MobileSyntaxTokenKind, string> = {
   plain: cn('text-foreground'),
-  comment: cn('text-[var(--syntax-comment)]'),
-  keyword: cn('text-[var(--syntax-keyword)]'),
-  string: cn('text-[var(--syntax-string)]'),
-  number: cn('text-[var(--syntax-number)]'),
-  type: cn('text-[var(--syntax-type)]'),
-  function: cn('text-[var(--syntax-function)]'),
-  variable: cn('text-[var(--syntax-variable)]'),
-  meta: cn('text-[var(--syntax-meta)]')
+  comment: cn('text-syntax-comment'),
+  keyword: cn('text-syntax-keyword'),
+  string: cn('text-syntax-string'),
+  number: cn('text-syntax-number'),
+  type: cn('text-syntax-type'),
+  function: cn('text-syntax-function'),
+  variable: cn('text-syntax-variable'),
+  meta: cn('text-syntax-meta')
 } as const

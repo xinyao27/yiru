@@ -1,4 +1,5 @@
 import { loader } from '@monaco-editor/react'
+import { resolveCursorThemeName } from '@yiru/editor-themes/cursor'
 import * as monaco from 'monaco-editor'
 import { typescript as monacoTS } from 'monaco-editor'
 
@@ -98,4 +99,4 @@ registerCursorMonacoThemes(monaco.editor)
 
 // Re-export for convenience
 export { monaco }
-export { resolveCursorThemeName } from './cursor-theme-source'
+export { resolveCursorThemeName }

@@ -4,6 +4,7 @@ import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import { attachMobileImageToTerminal } from './image-attachment'
 import {
+  CameraPermissionError,
   ImageLibraryPermissionError,
   pickMobileImage,
   type MobileImageSource
@@ -108,6 +109,10 @@ export function useMobileImageAttachment({
         }
         if (error instanceof ImageLibraryPermissionError) {
           showToast('Photo permission denied', 1500)
+          return
+        }
+        if (error instanceof CameraPermissionError) {
+          showToast('Camera permission denied', 1500)
           return
         }
         if (getErrorMessage(error) === 'Clipboard image is too large') {

@@ -1,10 +1,9 @@
-import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
-import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 
+import { MobileGlassSection } from '../src/components/glass/section'
 import { LoadingIndicator } from '../src/components/loading-indicator'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
@@ -15,7 +14,6 @@ import {
 import { useMobileLoaderStyle } from '../src/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
-  const router = useRouter()
   const [pickerOpen, setPickerOpen] = useState(false)
   const { loaderStyle, setLoaderStyle } = useMobileLoaderStyle()
   const options = useMemo<PickerOption<MobileLoaderStyle>[]>(
@@ -29,38 +27,32 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
   )
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className={styles.heading}>Appearance</Text>
-      </View>
-
-      <ScrollView
-        contentContainerClassName={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text className={styles.groupHeading}>LOADING</Text>
-        <Text className={styles.groupDescription}>
+    <View className="bg-background flex-1 px-4 pt-4">
+      <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
+        <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
+          LOADING
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose the animation shown while agents are working on this device.
         </Text>
-        <View className={cn(styles.section, styles.sectionTopGap)}>
+        <MobileGlassSection className="mt-2">
           <Pressable
             accessibilityRole="button"
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
             onPress={() => setPickerOpen(true)}
           >
-            <View className={styles.preview}>
+            <View className="w-6 items-center">
               <LoadingIndicator size={20} />
             </View>
-            <View className={styles.rowContent}>
-              <Text className={styles.rowLabel}>Loader</Text>
-              <Text className={styles.rowSublabel}>{getMobileLoaderStyleLabel(loaderStyle)}</Text>
+            <View className="flex-1">
+              <Text className="text-foreground text-sm font-medium">Loader</Text>
+              <Text className="text-muted-foreground mt-0.5 text-xs">
+                {getMobileLoaderStyleLabel(loaderStyle)}
+              </Text>
             </View>
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-        </View>
+        </MobileGlassSection>
       </ScrollView>
 
       <PickerModal<MobileLoaderStyle>
@@ -74,21 +66,3 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background px-4 pt-0'),
-  topRow: cn('flex-row items-center mt-2 mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  scrollContent: cn('pb-6'),
-  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
-  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
-  section: cn('bg-card rounded-none overflow-hidden'),
-  sectionTopGap: cn('mt-2'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  preview: cn('w-[22px] items-center'),
-  rowContent: cn('flex-1'),
-  rowLabel: cn('text-[14px] font-medium text-foreground'),
-  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]')
-} as const
