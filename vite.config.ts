@@ -258,7 +258,9 @@ const yiruRootToolingConfig = defineConfig({
             ]
           },
   define: {
-    YIRU_FEATURE_WALL_ENABLED: 'true'
+    YIRU_BUILD_IDENTITY: 'null',
+    YIRU_FEATURE_WALL_ENABLED: 'true',
+    YIRU_POSTHOG_WRITE_KEY: 'null'
   },
   resolve: {
     alias: {
