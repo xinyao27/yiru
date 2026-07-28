@@ -17,32 +17,22 @@ import { getFileTypeIcon } from '../../../lib/file-type-icons'
 import { basename, dirname, joinPath } from '../../../lib/path'
 import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../ui/tooltip'
-import { isSubmoduleWorktreeOnlyChange } from '../discard-all-sequence'
+import { isStageableStatusEntry, isSubmoduleWorktreeOnlyChange } from '../discard-all-sequence'
 import { STATUS_COLORS, STATUS_LABELS } from '../status-display'
+import { ActionButton } from './action-button'
 import { getLocalizedConflictKindLabel } from './diff-comments-inline-list'
-import { ActionButton } from './empty-state'
-import { canDiscardStatusEntry, canStageStatusEntry, canUnstageStatusEntry } from './entry-actions'
 import { SourceControlEntryContextMenu } from './entry-context-menu'
 import { DiffLineCounts } from './entry-details'
-import {
-  SOURCE_CONTROL_ROW_ACTION_OVERLAY_CLASS,
-  SOURCE_CONTROL_TREE_FILE_PADDING_PX,
-  SOURCE_CONTROL_TREE_INDENT_PX,
-  SUBMODULE_WORKTREE_ONLY_LABEL,
-  SUBMODULE_WORKTREE_ONLY_TOOLTIP
-} from './panel-constants'
+import { SUBMODULE_WORKTREE_ONLY_LABEL, SUBMODULE_WORKTREE_ONLY_TOOLTIP } from './panel-constants'
 import { toPermanentSourceControlRowOpenEvent, type SourceControlRowOpenEvent } from './split-open'
+import { SourceControlRowActions, SourceControlTreeRow } from './tree-row'
 
 export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
-  entryKey,
   entry,
   currentWorktreeId,
   worktreePath,
   depth = 0,
-  selected,
   isOpenFile = false,
-  onSelect,
-  onContextMenu,
   onRevealInExplorer,
   connectionId,
   onOpen,
@@ -54,15 +44,11 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
   isSubmoduleExpanded,
   onToggleSubmodule
 }: {
-  entryKey: string
   entry: GitStatusEntry
   currentWorktreeId: string
   worktreePath: string
   depth?: number
-  selected?: boolean
   isOpenFile?: boolean
-  onSelect?: (e: React.MouseEvent, key: string, entry: GitStatusEntry) => void
-  onContextMenu?: (key: string) => void
   onRevealInExplorer: (worktreeId: string, absolutePath: string) => void
   connectionId?: string | null
   onOpen: (entry: GitStatusEntry, event?: SourceControlRowOpenEvent) => void
@@ -90,11 +76,15 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
     : null
   // Why: unresolved rows cannot stage before review, and all conflict rows hide
   // discard because it can erase resolution work or recreate the conflict.
-  const canDiscard = canDiscardStatusEntry(entry)
-  const canStage = canStageStatusEntry(entry)
+  const canDiscard =
+    entry.conflictStatus !== 'unresolved' &&
+    entry.conflictStatus !== 'resolved_locally' &&
+    !entry.submoduleRoot &&
+    (entry.area === 'unstaged' || entry.area === 'untracked')
+  const canStage = isStageableStatusEntry(entry)
   // Why: a submodule-internal staged row is read-only from the parent worktree,
   // so the parent repo's Unstage must not be offered (mirrors bulk unstage).
-  const canUnstage = canUnstageStatusEntry(entry)
+  const canUnstage = entry.area === 'staged' && !entry.submoduleRoot
 
   return (
     <SourceControlEntryContextMenu
@@ -103,27 +93,14 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
       connectionId={connectionId}
       onView={() => onOpen(entry)}
       onRevealInExplorer={onRevealInExplorer}
-      onOpenChange={(open) => {
-        if (open && onContextMenu) {
-          onContextMenu(entryKey)
-        }
-      }}
     >
-      <div
+      <SourceControlTreeRow
+        depth={depth}
+        rowType="file"
+        isCurrent={isOpenFile}
         data-testid="source-control-entry"
         data-source-control-path={entry.path}
         data-source-control-area={entry.area}
-        // Why: the open-file accent must outrank bulk selection so the active
-        // editor row remains visually unambiguous.
-        data-current={isOpenFile ? 'true' : undefined}
-        className={cn(
-          'group relative flex cursor-pointer items-center gap-1 pr-3 py-1 transition-colors',
-          isOpenFile ? 'bg-accent hover:bg-accent' : 'hover:bg-accent/40',
-          !isOpenFile && selected && 'bg-accent/60'
-        )}
-        style={{
-          paddingLeft: `${depth * SOURCE_CONTROL_TREE_INDENT_PX + SOURCE_CONTROL_TREE_FILE_PADDING_PX}px`
-        }}
         draggable
         onDragStart={(e) => {
           if (isUnresolvedConflict && entry.status === 'deleted') {
@@ -144,11 +121,7 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
             onToggleSubmodule(entry)
             return
           }
-          if (onSelect) {
-            onSelect(e, entryKey, entry)
-          } else {
-            onOpen(entry, e)
-          }
+          onOpen(entry, e)
         }}
         onDoubleClick={(e) => {
           if (onToggleSubmodule) {
@@ -216,12 +189,11 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
             </span>
           </>
         )}
-        <div className={SOURCE_CONTROL_ROW_ACTION_OVERLAY_CLASS}>
+        <SourceControlRowActions>
           {canDiscard && (
             <ActionButton
               surface="row"
               icon={entry.area === 'untracked' ? Trash : Undo2}
-              iconWeight={entry.area === 'untracked' ? undefined : 'regular'}
               title={
                 entry.area === 'untracked'
                   ? translate(
@@ -266,8 +238,8 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
               }}
             />
           )}
-        </div>
-      </div>
+        </SourceControlRowActions>
+      </SourceControlTreeRow>
     </SourceControlEntryContextMenu>
   )
 })

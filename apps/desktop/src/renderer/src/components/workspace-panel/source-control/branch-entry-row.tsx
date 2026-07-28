@@ -9,11 +9,8 @@ import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
 import { STATUS_COLORS, STATUS_LABELS } from '../status-display'
 import { SourceControlEntryContextMenu } from './entry-context-menu'
 import { DiffLineCounts } from './entry-details'
-import {
-  SOURCE_CONTROL_TREE_FILE_PADDING_PX,
-  SOURCE_CONTROL_TREE_INDENT_PX
-} from './panel-constants'
 import { toPermanentSourceControlRowOpenEvent, type SourceControlRowOpenEvent } from './split-open'
+import { SourceControlTreeRow } from './tree-row'
 
 export function BranchEntryRow({
   entry,
@@ -49,11 +46,9 @@ export function BranchEntryRow({
       onView={() => onOpen()}
       onRevealInExplorer={onRevealInExplorer}
     >
-      <div
-        className="group hover:bg-accent/40 flex cursor-pointer items-center gap-1 py-1 pr-3 transition-colors"
-        style={{
-          paddingLeft: `${depth * SOURCE_CONTROL_TREE_INDENT_PX + SOURCE_CONTROL_TREE_FILE_PADDING_PX}px`
-        }}
+      <SourceControlTreeRow
+        depth={depth}
+        rowType="file"
         draggable
         onDragStart={(e) => {
           const absolutePath = joinPath(worktreePath, entry.path)
@@ -90,7 +85,7 @@ export function BranchEntryRow({
         >
           {STATUS_LABELS[entry.status]}
         </span>
-      </div>
+      </SourceControlTreeRow>
     </SourceControlEntryContextMenu>
   )
 }

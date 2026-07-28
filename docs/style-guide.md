@@ -180,6 +180,7 @@ Every primitive part carries `data-slot="<name>"` — don't strip it. Merge clas
 | `outline-transparent` | Titlebar controls whose vertical separators reveal host material |
 | `ghost` | Icon buttons, row triggers — anywhere chrome should disappear |
 | `quiet` | Muted icon/toolbar controls resting quieter than `ghost` |
+| `row-action` | Actions revealed over an accent-highlighted list row |
 | `picker-row` | Command and listbox rows, including the selected-state border |
 | `popover-outline` | Inline actions floating above an editor, on opaque popover paint |
 | `status-bar` / `status-bar-icon` / `status-bar-quiet` | Full-height footer actions, icons, labels |
@@ -246,7 +247,7 @@ Pass the trigger through `render` so Base UI merges accessibility props onto the
 Icons come from `@phosphor-icons/react`; don't add a second library.
 
 - **Size:** `size-4` is the default and `Button` applies it automatically to a bare `<svg>` child, so most call sites set nothing. `size-3` / `size-3.5` for metadata and dense rows; `size-7`+ for empty-state heroes only.
-- **Weight:** the renderer-wide `IconContext` defaults to `duotone`. `regular` is correct for arrows and carets (including aliases like `ChevronDown`, `ExternalLink`, `RefreshCw`), standalone `X`/close glyphs, and deliberately quiet compact chrome (new-workspace, new-tab, tab-strip overflow, terminal-tab chrome, project headers). Scope a composite with `<PhosphorIconContextProvider weight="regular">` rather than annotating each icon.
+- **Weight:** the renderer-wide `IconContext` defaults to `duotone`. `regular` is correct for arrows and carets (including aliases like `ChevronDown`, `ExternalLink`, `RefreshCw`), standalone `X`/close glyphs, and deliberately quiet compact chrome (new-workspace, new-tab, tab-strip overflow, terminal-tab chrome, project headers). Pass `weight="regular"` directly to each exceptional icon. `PhosphorIconContextProvider` is root infrastructure, not a local styling tool.
 - **Color** inherits from surrounding text — don't set a token on the SVG when the parent already carries it.
 - **Loading** is `<LoadingIndicator className="size-4" />`. It follows the user's Appearance setting and always paints `foreground`, so call sites set size and layout only. Never import a one-off spinner.
 

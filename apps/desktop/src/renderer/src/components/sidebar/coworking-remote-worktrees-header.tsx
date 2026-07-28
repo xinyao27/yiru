@@ -23,7 +23,7 @@ export function CoworkingRemoteWorktreesHeader({
         tabIndex={0}
         aria-expanded={expanded}
         paddingLeft={WORKTREE_SECTION_HEADER_PADDING_LEFT}
-        icon={<Cloudy aria-hidden="true" className="size-3.5" />}
+        icon={<Cloudy aria-hidden="true" weight="regular" className="size-3.5" />}
         iconClassName="text-muted-foreground"
         label={label}
         className="cursor-pointer"

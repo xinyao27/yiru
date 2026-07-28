@@ -31,7 +31,6 @@ type SourceControlEntryContextMenuProps = {
   connectionId?: string | null
   onView?: () => void
   onRevealInExplorer: (worktreeId: string, absolutePath: string) => void
-  onOpenChange?: (open: boolean) => void
   // Base UI's ContextMenuTrigger `render` needs a single element, not arbitrary ReactNode.
   children: React.ReactElement
 }
@@ -42,7 +41,6 @@ export function SourceControlEntryContextMenu({
   connectionId,
   onView,
   onRevealInExplorer,
-  onOpenChange,
   children
 }: SourceControlEntryContextMenuProps): React.JSX.Element {
   const openInApplications = useAppStore((s) => s.settings?.openInApplications ?? [])
@@ -87,7 +85,7 @@ export function SourceControlEntryContextMenu({
   )
 
   return (
-    <ContextMenu onOpenChange={onOpenChange}>
+    <ContextMenu>
       <ContextMenuTrigger render={children} />
       <ContextMenuContent className="w-52">
         <ContextMenuItem onClick={onView} disabled={!onView}>

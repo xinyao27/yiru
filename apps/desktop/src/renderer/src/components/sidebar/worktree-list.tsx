@@ -897,7 +897,7 @@ function FolderPathStatusIndicator({
             )}
             aria-label={title}
           >
-            <FolderX className="size-3.5" />
+            <FolderX weight="regular" className="size-3.5" />
           </span>
         }
       />
@@ -4375,7 +4375,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             iconClassName="size-3.5"
                           />
                         ) : (
-                          <row.icon className="size-3" />
+                          <row.icon weight="regular" className="size-3" />
                         )
                       ) : undefined
                     }

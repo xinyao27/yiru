@@ -27,6 +27,10 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
+        // Why: actions revealed over an accent row need contrast from the row
+        // surface while remaining transparent at rest.
+        'row-action':
+          'text-muted-foreground hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground',
         // Why: command/listbox rows share selected-state chrome, including a
         // border that remains legible while the user types.
         'picker-row':

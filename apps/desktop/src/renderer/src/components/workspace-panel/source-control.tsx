@@ -39,7 +39,7 @@ export {
   OperationBanner,
   TooManyChangesBanner
 } from './source-control/conflict-summary'
-export { ActionButton } from './source-control/empty-state'
+export { ActionButton } from './source-control/action-button'
 export { BRANCH_REFRESH_INTERVAL_MS } from './source-control/panel-constants'
 export {
   normalizeSourceControlViewMode,
