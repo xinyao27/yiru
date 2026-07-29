@@ -11,6 +11,18 @@ export type RuntimeStatsDailyTokens = {
   tokens: number
 }
 
+export type RuntimeStatsDailyValue = {
+  day: string
+  valueUsd: number
+}
+
+export type RuntimeStatsModelUsage = {
+  key: string
+  label: string
+  tokens: number
+  valueUsd: number | null
+}
+
 export type RuntimeStatsSummary = {
   totalAgentsSpawned: number
   totalPRsCreated: number
@@ -21,6 +33,10 @@ export type RuntimeStatsSummary = {
   dailyTokens?: RuntimeStatsDailyTokens[]
   tokenDataAvailable?: boolean
   tokenUnavailableAgents?: AiVaultAgent[]
+  dailyValues?: RuntimeStatsDailyValue[]
+  modelUsage?: RuntimeStatsModelUsage[]
+  usageValueAvailable?: boolean
+  hasUnpricedUsage?: boolean
 }
 
 export type TerminalColorOverrides = {

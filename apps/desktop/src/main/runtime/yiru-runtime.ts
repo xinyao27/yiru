@@ -528,7 +528,7 @@ import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../spee
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
-import { buildStatsSummary } from '../stats/summary'
+import { buildStatsSummary, type StatsUsageStores } from '../stats/summary'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
@@ -2046,6 +2046,7 @@ export class YiruRuntimeService {
   // teardown so dead agents don't linger. See RuntimeAgentRowSnapshot.
   private latestAgentStatusByPaneKey = new Map<string, RuntimeAgentRowSnapshot>()
   private stats: StatsCollector | null = null
+  private readonly statsUsageStores: StatsUsageStores | null
   // Why (§3.3 + §7.1): the renderer-create path and coordinator
   // `probeWorktreeDrift` share this cache so a create that already fetched
   // `origin` within the last 30s does not re-fetch during dispatch, and
@@ -2122,6 +2123,7 @@ export class YiruRuntimeService {
       ) => Promise<readonly string[]>
       buildAgentHookPtyEnv?: () => Record<string, string>
       getDesktopWindowStatus?: () => RuntimeDesktopWindowStatus
+      statsUsageStores?: StatsUsageStores
     }
   ) {
     this.store = store
@@ -2140,6 +2142,7 @@ export class YiruRuntimeService {
       this.stats = stats
       this.agentDetector = new AgentDetector(stats)
     }
+    this.statsUsageStores = deps?.statsUsageStores ?? null
     this.getAgentStatusSnapshotFn = deps?.getAgentStatusSnapshot ?? null
     // Why: both managed-provider root resolvers must work without desktop IPC registration.
     if (deps?.getAdditionalAiVaultCodexHomePaths || deps?.resolveAiVaultClaudeProjectsDirs) {
@@ -2215,7 +2218,7 @@ export class YiruRuntimeService {
   }
 
   async getStatsSummary(): Promise<StatsSummary | null> {
-    return this.stats ? buildStatsSummary(this.stats) : null
+    return this.stats ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined) : null
   }
 
   getMemorySnapshot(): Promise<MemorySnapshot> {

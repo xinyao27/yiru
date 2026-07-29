@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron'
 
 import type { StatsCollector } from './collector'
-import { buildStatsSummary } from './summary'
+import { buildStatsSummary, type StatsUsageStores } from './summary'
 
-export function registerStatsHandlers(stats: StatsCollector): void {
+export function registerStatsHandlers(stats: StatsCollector, usageStores?: StatsUsageStores): void {
   ipcMain.handle('stats:summary', async () => {
-    return buildStatsSummary(stats)
+    return buildStatsSummary(stats, usageStores)
   })
 }

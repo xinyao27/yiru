@@ -32,7 +32,7 @@ import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
 import { MobileHostCard } from '../src/components/host-card'
 import { YiruLogo } from '../src/components/yiru-logo'
-import { MobileContributionCard } from '../src/home/contribution-card'
+import { MobileHomeDashboard } from '../src/home/dashboard'
 import {
   aggregateHomeStats,
   parseRuntimeStatsSummary,
@@ -82,21 +82,6 @@ type HostWorktreeInfo = {
   totalWorktrees: number
   activeCount: number
   lastActiveWorktree: WorktreeSummary | null
-}
-
-function formatDuration(ms: number): string {
-  const totalMinutes = Math.floor(ms / 60_000)
-  const totalHours = Math.floor(totalMinutes / 60)
-  const days = Math.floor(totalHours / 24)
-  const hours = totalHours % 24
-  if (days > 0) {
-    return `${days}d ${hours}h`
-  }
-  const minutes = totalMinutes % 60
-  if (totalHours > 0) {
-    return `${totalHours}h ${minutes}m`
-  }
-  return `${totalMinutes}m`
 }
 
 // Why: derive a stable per-instance identity for RpcClient so the wireUp
@@ -246,6 +231,7 @@ export default function HomeScreen() {
   // edge-to-edge on iPad; on phones isWideLayout is false and layout is unchanged.
   const { isWideLayout, contentMaxWidth } = useResponsiveLayout()
   const [hosts, setHosts] = useState<HostProfile[]>([])
+  const [hasLoadedHosts, setHasLoadedHosts] = useState(false)
   const [actionTarget, setActionTarget] = useState<HostProfile | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<HostProfile | null>(null)
   const [hostStates, setHostStates] = useState<Record<string, ConnectionState>>({})
@@ -342,20 +328,27 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       let stale = false
-      void loadHosts().then(async (h) => {
-        if (stale) {
-          return
-        }
-        setHosts(h)
-        if (h.length === 0 || notificationOptInCheckedRef.current) {
-          return
-        }
-        notificationOptInCheckedRef.current = true
-        const showNotificationOptIn = await shouldPresentNotificationOptIn()
-        if (!stale && showNotificationOptIn) {
-          router.replace('/notification-opt-in')
-        }
-      })
+      void loadHosts()
+        .then(async (h) => {
+          if (stale) {
+            return
+          }
+          setHosts(h)
+          setHasLoadedHosts(true)
+          if (h.length === 0 || notificationOptInCheckedRef.current) {
+            return
+          }
+          notificationOptInCheckedRef.current = true
+          const showNotificationOptIn = await shouldPresentNotificationOptIn()
+          if (!stale && showNotificationOptIn) {
+            router.replace('/notification-opt-in')
+          }
+        })
+        .catch(() => {
+          if (!stale) {
+            setHasLoadedHosts(true)
+          }
+        })
       void AsyncStorage.getItem('yiru:last-visited-worktree').then((raw) => {
         if (stale || !raw) {
           return
@@ -610,7 +603,6 @@ export default function HomeScreen() {
           <View className={styles.logoMark}>
             <YiruLogo size={18} />
           </View>
-          <Text className={styles.brandName}>Yiru</Text>
         </View>
         <Pressable
           className={cn(styles.iconButton, styles.iconButtonPressedActive)}
@@ -620,7 +612,7 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {hosts.length === 0 ? (
+      {hasLoadedHosts && hosts.length === 0 ? (
         /* ─── Empty state: onboarding ─── */
         <View
           className={cn(styles.emptyContainer, 'pb-safe')}
@@ -673,34 +665,7 @@ export default function HomeScreen() {
           }
           ListHeaderComponent={
             <View>
-              <View className={styles.hero}>
-                <Text className={styles.heroTitle}>Welcome back</Text>
-              </View>
-
-              {stats ? <MobileContributionCard summary={stats} /> : null}
-
-              {stats && (
-                <View className={styles.statsRow}>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
-                      {stats.totalAgentsSpawned.toLocaleString()}
-                    </Text>
-                    <Text className={styles.statLabel}>Agents spawned</Text>
-                  </View>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
-                      {formatDuration(stats.totalAgentTimeMs)}
-                    </Text>
-                    <Text className={styles.statLabel}>Agent time</Text>
-                  </View>
-                  <View className={styles.statCard}>
-                    <Text className={styles.statValue}>
-                      {stats.totalPRsCreated.toLocaleString()}
-                    </Text>
-                    <Text className={styles.statLabel}>PRs created</Text>
-                  </View>
-                </View>
-              )}
+              <MobileHomeDashboard summary={stats} />
 
               <Text className={styles.sectionHeading}>Desktops</Text>
             </View>
@@ -986,18 +951,9 @@ const styles = {
   /* ─── Top bar ─── */
   topBar: cn('flex-row items-center justify-between px-4 pt-2 pb-3'),
   brandLockup: cn('flex-row items-center min-w-0'),
-  logoMark: cn('mr-2'),
-  brandName: cn('text-foreground text-[17px] font-bold'),
+  logoMark: cn('items-center justify-center'),
   iconButton: cn('w-9 h-9 rounded-none items-center justify-center'),
   iconButtonPressedActive: cn('active:bg-secondary'),
-  /* ─── Hero / greeting ─── */
-  hero: cn('pt-1 pb-3'),
-  heroTitle: cn('text-foreground text-[24px] font-extrabold tracking-[-0.3px]'),
-  /* ─── Stat cards ─── */
-  statsRow: cn('flex-row gap-2.5 mb-4'),
-  statCard: cn('flex-1 bg-card/60 border border-border rounded-none py-2 px-3'),
-  statValue: cn('text-foreground text-[18px] font-bold tracking-[-0.3px]'),
-  statLabel: cn('text-muted-foreground/60 text-[11px] font-medium mt-[2px]'),
   /* ─── Section heading ─── */
   sectionHeading: cn(
     'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.6px] mb-2 px-1'

@@ -2047,7 +2047,12 @@ app.whenReady().then(async () => {
     resolveAiVaultClaudeProjectsDirs: (target) =>
       claudeRuntimeAuth!.resolveSessionProjectRoots(target),
     buildAgentHookPtyEnv: () =>
-      isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {}
+      isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {},
+    statsUsageStores: {
+      claude: claudeUsage,
+      codex: codexUsage,
+      openCode: openCodeUsage
+    }
   })
   runtime = runtimeService
   friday = new FridayService(store, runtimeService, getCanonicalUserDataPath())

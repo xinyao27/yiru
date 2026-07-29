@@ -144,7 +144,11 @@ export function registerCoreHandlers(
     registerCrashReportingHandlers(crashReports)
   }
   registerExportHandlers()
-  registerStatsHandlers(stats)
+  registerStatsHandlers(stats, {
+    claude: claudeUsage,
+    codex: codexUsage,
+    openCode: openCodeUsage
+  })
   registerMemoryHandlers(store)
   registerNotificationHandlers(store, runtime)
   registerNotebookHandlers(store)

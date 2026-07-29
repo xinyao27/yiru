@@ -1,21 +1,16 @@
 import type { RuntimeStatsSummary } from '@yiru/runtime-protocol/mobile-runtime-types'
-import { aiVaultAgentLabel } from '@yiru/workbench-model/agent'
-import type {
-  ContributionCalendarDay,
-  ContributionMetric,
-  ContributionPoint
-} from '@yiru/workbench-model/ui'
+import type { ContributionCalendarDay, ContributionPoint } from '@yiru/workbench-model/ui'
 import { buildContributionCalendar, getContributionTotals } from '@yiru/workbench-model/ui'
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
+import { translate } from '../i18n/translate'
 import { cn } from '../style/class-names'
 import {
-  getContributionMetric,
-  loadContributionMetric,
-  setContributionMetric,
-  subscribeContributionMetric
-} from './contribution-metric-preference'
+  type ContributionDisplayMetric,
+  formatMetricValue,
+  nextTokenValueMetric
+} from './chart-data'
 
 const INTENSITY_CLASS: Record<ContributionCalendarDay['intensity'], string> = {
   0: 'border-border bg-muted',
@@ -28,6 +23,8 @@ const INTENSITY_LEVELS = [0, 1, 2, 3, 4] as const
 
 type MobileContributionCardProps = {
   summary: RuntimeStatsSummary
+  metric: ContributionDisplayMetric
+  onMetricChange: (metric: ContributionDisplayMetric) => void
 }
 
 type MetricButtonProps = {
@@ -43,23 +40,16 @@ type ContributionCellProps = {
 }
 
 type TokenCoverageProps = MobileContributionCardProps & {
-  metric: ContributionMetric
+  hasTokens: boolean
 }
 
 export function MobileContributionCard({
-  summary
+  summary,
+  metric,
+  onMetricChange
 }: MobileContributionCardProps): React.JSX.Element {
-  const metric = useSyncExternalStore(
-    subscribeContributionMetric,
-    getContributionMetric,
-    getContributionMetric
-  )
   const [selectedDay, setSelectedDay] = useState<ContributionCalendarDay | null>(null)
   const scrollRef = useRef<ScrollView>(null)
-
-  useEffect(() => {
-    loadContributionMetric()
-  }, [])
 
   const activityPoints = useMemo<ContributionPoint[]>(
     () =>
@@ -73,7 +63,12 @@ export function MobileContributionCard({
     () => (summary.dailyTokens ?? []).map((entry) => ({ day: entry.day, value: entry.tokens })),
     [summary.dailyTokens]
   )
-  const points = metric === 'activity' ? activityPoints : tokenPoints
+  const valuePoints = useMemo<ContributionPoint[]>(
+    () => (summary.dailyValues ?? []).map((entry) => ({ day: entry.day, value: entry.valueUsd })),
+    [summary.dailyValues]
+  )
+  const points =
+    metric === 'activity' ? activityPoints : metric === 'tokens' ? tokenPoints : valuePoints
   const calendar = useMemo(() => buildContributionCalendar(points), [points])
   const totals = useMemo(() => getContributionTotals(points), [points])
   const monthLabels = new Map(calendar.monthLabels.map((entry) => [entry.weekIndex, entry.date]))
@@ -81,31 +76,44 @@ export function MobileContributionCard({
     weekday % 2 === 1 ? day.date.toLocaleDateString(undefined, { weekday: 'narrow' }) : ''
   )
 
-  const chooseMetric = (nextMetric: ContributionMetric): void => {
+  const chooseMetric = (nextMetric: ContributionDisplayMetric): void => {
     setSelectedDay(null)
-    setContributionMetric(nextMetric)
+    onMetricChange(nextMetric)
   }
 
   return (
     <View className="border-hairline border-border bg-card mb-4 p-4">
       <View className="mb-4 flex-row items-start justify-between gap-3">
         <View className="min-w-0 flex-1">
-          <Text className="text-foreground text-sm font-semibold">Contribution history</Text>
+          <Text className="text-foreground text-sm font-semibold">
+            {translate('mobile.home.contributions.title', 'Contribution history')}
+          </Text>
           <Text className="text-muted-foreground mt-1 text-xs">
             {metric === 'activity'
-              ? 'Agent starts and pull requests across your desktops.'
-              : 'Tokens recorded in local agent histories.'}
+              ? translate(
+                  'mobile.home.contributions.activityDescription',
+                  'Agent starts and pull requests completed through Yiru.'
+                )
+              : metric === 'tokens'
+                ? translate(
+                    'mobile.home.contributions.tokenDescription',
+                    'Provider-reported token usage attributed to Yiru worktrees.'
+                  )
+                : translate(
+                    'mobile.home.contributions.valueDescription',
+                    'Standard global API-equivalent value calculated per request.'
+                  )}
           </Text>
         </View>
         <View className="border-hairline border-border flex-row">
           <MetricButton
-            label="Activity"
+            label={translate('mobile.home.activity', 'Activity')}
             isActive={metric === 'activity'}
             onPress={() => chooseMetric('activity')}
           />
           <MetricButton
-            label="Tokens"
-            isActive={metric === 'tokens'}
+            label={translate('mobile.home.tokensTitle', 'Tokens')}
+            isActive={metric !== 'activity'}
             onPress={() => chooseMetric('tokens')}
           />
         </View>
@@ -143,7 +151,11 @@ export function MobileContributionCard({
                       key={day.day}
                       day={day}
                       isSelected={selectedDay?.day === day.day}
-                      onPress={() => setSelectedDay(day)}
+                      onPress={() =>
+                        metric === 'activity'
+                          ? setSelectedDay(day)
+                          : chooseMetric(nextTokenValueMetric(metric))
+                      }
                     />
                   ))}
                 </View>
@@ -158,18 +170,27 @@ export function MobileContributionCard({
           {selectedDay ? formatSelectedDay(selectedDay, metric) : formatYearTotal(totals, metric)}
         </Text>
         <View className="flex-row items-center gap-1">
-          <Text className="text-muted-foreground text-[10px]">Less</Text>
+          <Text className="text-muted-foreground text-[11px]">
+            {translate('mobile.home.less', 'Less')}
+          </Text>
           {INTENSITY_LEVELS.map((intensity) => (
             <View
               key={intensity}
               className={cn('size-2 border-hairline', INTENSITY_CLASS[intensity])}
             />
           ))}
-          <Text className="text-muted-foreground text-[10px]">More</Text>
+          <Text className="text-muted-foreground text-[11px]">
+            {translate('mobile.home.more', 'More')}
+          </Text>
         </View>
       </View>
 
-      <TokenCoverage summary={summary} metric={metric} />
+      <TokenCoverage
+        summary={summary}
+        metric={metric}
+        onMetricChange={onMetricChange}
+        hasTokens={tokenPoints.some((point) => point.value > 0)}
+      />
     </View>
   )
 }
@@ -201,7 +222,10 @@ function ContributionCell({ day, isSelected, onPress }: ContributionCellProps): 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${day.day}: ${day.value.toLocaleString()}`}
+      accessibilityLabel={translate('mobile.home.contributionCell', '{{day}}: {{value}}', {
+        day: day.day,
+        value: day.value.toLocaleString()
+      })}
       hitSlop={4}
       onPress={onPress}
       className={cn(
@@ -213,40 +237,89 @@ function ContributionCell({ day, isSelected, onPress }: ContributionCellProps): 
   )
 }
 
-function TokenCoverage({ summary, metric }: TokenCoverageProps): React.JSX.Element | null {
-  if (metric !== 'tokens') {
+function TokenCoverage({
+  summary,
+  metric,
+  hasTokens
+}: TokenCoverageProps): React.JSX.Element | null {
+  if (metric === 'activity') {
     return null
   }
-  if (summary.tokenDataAvailable !== true) {
+  if (!hasTokens) {
     return (
       <Text className="text-muted-foreground mt-3 text-[11px]">
-        Token history is unavailable for one or more desktops.
+        {translate(
+          'mobile.home.tokensUnavailable',
+          'No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.'
+        )}
       </Text>
     )
   }
-  const unavailable = (summary.tokenUnavailableAgents ?? []).map(aiVaultAgentLabel)
-  return unavailable.length > 0 ? (
+  if (metric === 'value') {
+    return (
+      <Text className="text-muted-foreground mt-3 text-[11px]">
+        {summary.usageValueAvailable === true
+          ? translate(
+              'mobile.home.valueCoverage',
+              'API-equivalent value uses authoritative per-request model pricing. Unpriced categories are excluded; this is not a bill.'
+            )
+          : translate(
+              'mobile.home.valueUnavailable',
+              'No known model pricing is available for this estimate yet.'
+            )}
+      </Text>
+    )
+  }
+  return (
     <Text className="text-muted-foreground mt-3 text-[11px]">
-      Excludes {unavailable.join(', ')} because their histories do not report tokens.
+      {translate(
+        'mobile.home.tokenCoverage',
+        'Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees.'
+      )}
+      {summary.hasUnpricedUsage === true
+        ? ` ${translate(
+            'mobile.home.unpricedCoverage',
+            'Tokens without authoritative pricing are excluded from value totals.'
+          )}`
+        : ''}
     </Text>
-  ) : null
+  )
 }
 
-function formatSelectedDay(day: ContributionCalendarDay, metric: ContributionMetric): string {
+function formatSelectedDay(
+  day: ContributionCalendarDay,
+  metric: ContributionDisplayMetric
+): string {
   const date = day.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-  return `${date}: ${formatValue(day.value, metric)}`
+  return translate('mobile.home.selectedDay', '{{date}}: {{value}}', {
+    date,
+    value: formatValue(day.value, metric)
+  })
 }
 
 function formatYearTotal(
   totals: ReturnType<typeof getContributionTotals>,
-  metric: ContributionMetric
+  metric: ContributionDisplayMetric
 ): string {
-  return `${formatValue(totals.visibleTotal, metric)} · ${totals.currentStreak} day streak`
+  return metric === 'activity'
+    ? translate('mobile.home.yearTotal', '{{value}} · {{days}} day streak', {
+        value: formatValue(totals.visibleTotal, metric),
+        days: totals.currentStreak
+      })
+    : formatValue(totals.visibleTotal, metric)
 }
 
-function formatValue(value: number, metric: ContributionMetric): string {
+function formatValue(value: number, metric: ContributionDisplayMetric): string {
   if (metric === 'activity') {
-    return `${value.toLocaleString()} activities`
+    return translate('mobile.home.activities', '{{value}} activities', {
+      value: value.toLocaleString()
+    })
   }
-  return `${Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value)} tokens`
+  return metric === 'tokens'
+    ? translate('mobile.home.tokenValue', '{{value}} tokens', {
+        value: formatMetricValue(value, metric)
+      })
+    : translate('mobile.home.apiValueAmount', '{{value}} API value', {
+        value: formatMetricValue(value, metric)
+      })
 }

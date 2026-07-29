@@ -35,6 +35,33 @@ export function parseRuntimeStatsSummary(value: unknown): RuntimeStatsSummary | 
           : []
       })
     : undefined
+  const dailyValues = Array.isArray(record.dailyValues)
+    ? record.dailyValues.flatMap((entry) => {
+        const item = recordValue(entry)
+        return item && typeof item.day === 'string' && typeof item.valueUsd === 'number'
+          ? [{ day: item.day, valueUsd: item.valueUsd }]
+          : []
+      })
+    : undefined
+  const modelUsage = Array.isArray(record.modelUsage)
+    ? record.modelUsage.flatMap((entry) => {
+        const item = recordValue(entry)
+        return item &&
+          typeof item.key === 'string' &&
+          typeof item.label === 'string' &&
+          typeof item.tokens === 'number' &&
+          (item.valueUsd === null || typeof item.valueUsd === 'number')
+          ? [
+              {
+                key: item.key,
+                label: item.label,
+                tokens: item.tokens,
+                valueUsd: item.valueUsd
+              }
+            ]
+          : []
+      })
+    : undefined
   const tokenUnavailableAgents = Array.isArray(record.tokenUnavailableAgents)
     ? record.tokenUnavailableAgents.filter(isAiVaultAgent)
     : undefined
@@ -45,9 +72,15 @@ export function parseRuntimeStatsSummary(value: unknown): RuntimeStatsSummary | 
     firstEventAt: record.firstEventAt,
     dailyActivity,
     dailyTokens,
+    dailyValues,
+    modelUsage,
     tokenDataAvailable:
       typeof record.tokenDataAvailable === 'boolean' ? record.tokenDataAvailable : undefined,
-    tokenUnavailableAgents
+    tokenUnavailableAgents,
+    usageValueAvailable:
+      typeof record.usageValueAvailable === 'boolean' ? record.usageValueAvailable : undefined,
+    hasUnpricedUsage:
+      typeof record.hasUnpricedUsage === 'boolean' ? record.hasUnpricedUsage : undefined
   }
 }
 
@@ -58,6 +91,11 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
   }
   const dailyActivity = new Map<string, { agentStarts: number; prsCreated: number }>()
   const dailyTokens = new Map<string, number>()
+  const dailyValues = new Map<string, number>()
+  const models = new Map<
+    string,
+    { key: string; label: string; tokens: number; valueUsd: number | null }
+  >()
   const unavailableAgents = new Set<
     NonNullable<RuntimeStatsSummary['tokenUnavailableAgents']>[number]
   >()
@@ -77,6 +115,23 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
     for (const entry of summary.dailyTokens ?? []) {
       dailyTokens.set(entry.day, (dailyTokens.get(entry.day) ?? 0) + entry.tokens)
     }
+    for (const entry of summary.dailyValues ?? []) {
+      dailyValues.set(entry.day, (dailyValues.get(entry.day) ?? 0) + entry.valueUsd)
+    }
+    for (const entry of summary.modelUsage ?? []) {
+      const key = entry.label.trim().toLowerCase() || entry.key
+      const current = models.get(key) ?? {
+        key,
+        label: entry.label,
+        tokens: 0,
+        valueUsd: null
+      }
+      current.tokens += entry.tokens
+      if (entry.valueUsd !== null) {
+        current.valueUsd = (current.valueUsd ?? 0) + entry.valueUsd
+      }
+      models.set(key, current)
+    }
     for (const agent of summary.tokenUnavailableAgents ?? []) {
       unavailableAgents.add(agent)
     }
@@ -93,8 +148,16 @@ export function aggregateHomeStats(statsByHost: HomeStatsByHost): RuntimeStatsSu
     dailyTokens: [...dailyTokens.entries()]
       .map(([day, tokens]) => ({ day, tokens }))
       .sort((left, right) => left.day.localeCompare(right.day)),
+    dailyValues: [...dailyValues.entries()]
+      .map(([day, valueUsd]) => ({ day, valueUsd }))
+      .sort((left, right) => left.day.localeCompare(right.day)),
+    modelUsage: [...models.values()].sort((left, right) => right.tokens - left.tokens),
     tokenDataAvailable: summaries.every((entry) => entry.tokenDataAvailable === true),
-    tokenUnavailableAgents: [...unavailableAgents]
+    tokenUnavailableAgents: [...unavailableAgents],
+    usageValueAvailable: summaries.some((entry) => entry.usageValueAvailable === true),
+    hasUnpricedUsage:
+      summaries.some((entry) => entry.hasUnpricedUsage === true) ||
+      summaries.some((entry) => entry.usageValueAvailable !== true)
   }
 }
 

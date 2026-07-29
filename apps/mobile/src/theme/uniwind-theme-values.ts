@@ -30,6 +30,21 @@ export const colors = {
   get accentBlue() {
     return color('--color-primary', '#599ce7')
   },
+  get chart1() {
+    return color('--color-chart-1', '#7bafe9')
+  },
+  get chart2() {
+    return color('--color-chart-2', '#3fa266')
+  },
+  get chart3() {
+    return color('--color-chart-3', '#f1b467')
+  },
+  get chart4() {
+    return color('--color-chart-4', '#b48ead')
+  },
+  get chart5() {
+    return color('--color-chart-5', '#9386f2')
+  },
   get terminalBg() {
     return color('--terminal-background', '#1a1b26')
   }
@@ -43,6 +58,11 @@ const THEME_COLOR_VARIABLES: string[] = [
   '--color-foreground',
   '--color-muted-foreground',
   '--color-primary',
+  '--color-chart-1',
+  '--color-chart-2',
+  '--color-chart-3',
+  '--color-chart-4',
+  '--color-chart-5',
   '--terminal-background'
 ]
 
@@ -67,7 +87,12 @@ export function useThemeColors(): ThemeColors {
       textPrimary: resolvedColor(values[4], '#f0f0f0'),
       textSecondary: resolvedColor(values[5], 'rgba(240, 240, 240, 0.6)'),
       accentBlue: resolvedColor(values[6], '#599ce7'),
-      terminalBg: resolvedColor(values[7], '#1a1b26')
+      chart1: resolvedColor(values[7], '#7bafe9'),
+      chart2: resolvedColor(values[8], '#3fa266'),
+      chart3: resolvedColor(values[9], '#f1b467'),
+      chart4: resolvedColor(values[10], '#b48ead'),
+      chart5: resolvedColor(values[11], '#9386f2'),
+      terminalBg: resolvedColor(values[12], '#1a1b26')
     }),
     [values]
   )
