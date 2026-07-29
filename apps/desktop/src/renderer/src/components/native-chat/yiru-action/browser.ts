@@ -1,5 +1,6 @@
 import type { YiruAction } from './action'
-import { yiruFlag, yiruResultString, type ParsedYiruResult } from './command'
+import { readFlag } from './command'
+import { readPayloadString, type ParsedResult } from './result'
 
 type BrowserActionDescription = Pick<YiruAction, 'verb' | 'object' | 'target' | 'outcome'>
 
@@ -42,9 +43,9 @@ const USE_COMMANDS = new Set([
   'wait'
 ])
 
-export function describeYiruBrowserAction(
+export function describeBrowserAction(
   tokens: readonly string[],
-  result: ParsedYiruResult
+  result: ParsedResult
 ): BrowserActionDescription | null {
   const command = tokens[1] ?? ''
   if (command === 'tab') {
@@ -54,7 +55,9 @@ export function describeYiruBrowserAction(
     return action(
       'navigated',
       'browser',
-      resultString(result, 'url') ?? resultString(result, 'title') ?? yiruFlag(tokens, 'url')
+      readPayloadString(result, 'url') ??
+        readPayloadString(result, 'title') ??
+        readFlag(tokens, 'url')
     )
   }
   if (CAPTURE_COMMANDS.has(command)) {
@@ -71,15 +74,15 @@ export function describeYiruBrowserAction(
 
 function describeTab(
   tokens: readonly string[],
-  result: ParsedYiruResult
+  result: ParsedResult
 ): BrowserActionDescription | null {
   const operation = tokens[2] ?? ''
   const target =
-    resultString(result, 'tab', 'title') ??
-    resultString(result, 'browserPageId') ??
-    yiruFlag(tokens, 'url') ??
-    yiruFlag(tokens, 'page') ??
-    yiruFlag(tokens, 'index')
+    readPayloadString(result, 'tab', 'title') ??
+    readPayloadString(result, 'browserPageId') ??
+    readFlag(tokens, 'url') ??
+    readFlag(tokens, 'page') ??
+    readFlag(tokens, 'index')
   if (operation === 'create') {
     return action('created', 'browser-tab', target)
   }
@@ -97,12 +100,8 @@ function describeTab(
 
 function browserTarget(tokens: readonly string[], command: string): string {
   const detail =
-    yiruFlag(tokens, 'element') ?? yiruFlag(tokens, 'page') ?? yiruFlag(tokens, 'worktree')
+    readFlag(tokens, 'element') ?? readFlag(tokens, 'page') ?? readFlag(tokens, 'worktree')
   return [command, detail].filter(Boolean).join(' ')
-}
-
-function resultString(result: ParsedYiruResult, ...path: readonly string[]): string | null {
-  return yiruResultString(result.record, 'result', ...path)
 }
 
 function action(

@@ -5,6 +5,7 @@ import {
   findTerminalHandleTarget
 } from '@/components/terminal-pane/terminal-handle-links'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
@@ -12,7 +13,7 @@ import { useAppStore } from '@/store'
 
 import { findTerminalTabWorktreeId } from '../file-link'
 import type { YiruAction } from './action'
-import { yiruActionSummary } from './summary'
+import { actionSummary } from './summary'
 
 type ActionCardProps = {
   action: YiruAction
@@ -32,7 +33,7 @@ export function ActionCard(props: ActionCardProps): React.JSX.Element {
     return tab?.customTitle?.trim() || tab?.title?.trim() || null
   })
   const target = action.object === 'terminal' ? (terminalTitle ?? action.target) : action.target
-  const summary = yiruActionSummary(action, target)
+  const summary = actionSummary(action, target)
   const canJump = Object.values(action.jumpTarget).some(Boolean)
   const content = (
     <>
@@ -60,16 +61,24 @@ export function ActionCard(props: ActionCardProps): React.JSX.Element {
 
   if (canJump) {
     return (
-      <Button
-        variant="outline"
-        size="list-row"
-        type="button"
-        onClick={() => jumpToAction(action)}
-        title={translate('components.native-chat.tool.yiru.openTarget', 'Open action target')}
-        className="w-full justify-start gap-2 whitespace-normal"
-      >
-        {content}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="outline"
+              size="list-row"
+              type="button"
+              onClick={() => jumpToAction(action)}
+              className="w-full justify-start gap-2 whitespace-normal"
+            >
+              {content}
+            </Button>
+          }
+        />
+        <TooltipContent side="top" sideOffset={4}>
+          {translate('components.native-chat.tool.yiru.openTarget', 'Open action target')}
+        </TooltipContent>
+      </Tooltip>
     )
   }
   return (

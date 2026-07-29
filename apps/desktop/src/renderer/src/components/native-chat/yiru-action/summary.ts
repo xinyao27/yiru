@@ -1,8 +1,8 @@
 import { translate } from '@/i18n/i18n'
 
-import type { YiruAction, YiruActionObject, YiruActionVerb } from './action'
+import type { ActionObject, ActionVerb, YiruAction } from './action'
 
-export function yiruActionSummary(action: YiruAction, target: string | null): string {
+export function actionSummary(action: YiruAction, target: string | null): string {
   if (action.status === 'running') {
     return translate('components.native-chat.tool.yiru.running', 'Running {{value0}}', {
       value0: action.commandLabel
@@ -38,7 +38,7 @@ export function yiruActionSummary(action: YiruAction, target: string | null): st
   })
 }
 
-function actionVerb(verb: YiruActionVerb): string {
+function actionVerb(verb: ActionVerb): string {
   switch (verb) {
     case 'captured':
       return translate('components.native-chat.tool.yiru.verb.captured', 'Captured')
@@ -79,7 +79,7 @@ function actionVerb(verb: YiruActionVerb): string {
   }
 }
 
-function actionObject(object: YiruActionObject): string {
+function actionObject(object: ActionObject): string {
   switch (object) {
     case 'automation':
       return translate('components.native-chat.tool.yiru.object.automation', 'automation')

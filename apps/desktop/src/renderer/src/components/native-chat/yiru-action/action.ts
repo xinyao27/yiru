@@ -3,17 +3,11 @@ import type {
   NativeChatToolResultBlock
 } from '@yiru/workbench-model/agent'
 
-import {
-  parseYiruCommand,
-  parseYiruResult,
-  yiruFirstResultString,
-  yiruFlag,
-  yiruResultString,
-  type ParsedYiruResult
-} from './command'
-import { describeYiruAction } from './description'
+import { parseCommands, readFlag } from './command'
+import { describeAction } from './description'
+import { parseResult, readFirstResultString, readResultString, type ParsedResult } from './result'
 
-export type YiruActionVerb =
+export type ActionVerb =
   | 'captured'
   | 'changed'
   | 'closed'
@@ -33,7 +27,7 @@ export type YiruActionVerb =
   | 'used'
   | 'waited'
 
-export type YiruActionObject =
+export type ActionObject =
   | 'automation'
   | 'automations'
   | 'browser'
@@ -53,11 +47,11 @@ export type YiruActionObject =
 
 export type YiruAction = {
   commandLabel: string
-  verb: YiruActionVerb | null
-  object: YiruActionObject | null
+  verb: ActionVerb | null
+  object: ActionObject | null
   target: string | null
   outcome: { kind: 'spawned'; value: string } | { kind: 'to'; value: string } | null
-  status: ParsedYiruResult['status']
+  status: ParsedResult['status']
   errorMessage: string | null
   jumpTarget: {
     worktreeId: string | null
@@ -67,47 +61,50 @@ export type YiruAction = {
   }
 }
 
-export function recognizeYiruAction(
+export function recognizeYiruActions(
   call: NativeChatToolCallBlock,
   result: NativeChatToolResultBlock | undefined
-): YiruAction | null {
-  const command = parseYiruCommand(call)
-  if (!command) {
-    return null
-  }
-  const parsedResult = parseYiruResult(result)
-  const tokens = command.tokens
+): YiruAction[] {
+  const commands = parseCommands(call)
+  const parsedResult = parseResult(result)
+  // Why: one shell result cannot reliably identify which chained invocation
+  // produced its JSON, so multi-card metadata comes only from each segment.
+  const actionResult = commands.length === 1 ? parsedResult : { ...parsedResult, record: null }
+  return commands.map((command) => buildAction(command.tokens, actionResult))
+}
+
+function buildAction(tokens: readonly string[], parsedResult: ParsedResult): YiruAction {
   const payload = parsedResult.record
   const terminalHandle =
-    yiruResultString(payload, 'result', 'agentTerminalHandle') ??
-    yiruResultString(payload, 'result', 'startupTerminal', 'handle') ??
-    yiruFirstResultString(
+    readResultString(payload, 'result', 'agentTerminalHandle') ??
+    readResultString(payload, 'result', 'startupTerminal', 'handle') ??
+    readFirstResultString(
       payload,
       ['terminal', 'send', 'focus', 'rename', 'split', 'close'],
       'handle'
     ) ??
-    yiruFlag(tokens, 'terminal')
+    readFlag(tokens, 'terminal')
   return {
     commandLabel: `yiru ${tokens.slice(1, commandLabelEnd(tokens)).join(' ')}`.trim(),
-    ...describeYiruAction(tokens, parsedResult),
+    ...describeAction(tokens, parsedResult),
     status: parsedResult.status,
     errorMessage: parsedResult.errorMessage,
     jumpTarget: {
       worktreeId:
-        yiruResultString(payload, 'result', 'worktree', 'id') ??
-        yiruFirstResultString(payload, ['terminal', 'focus', 'tab'], 'worktreeId') ??
-        yiruResultString(payload, 'result', 'worktreeId'),
+        readResultString(payload, 'result', 'worktree', 'id') ??
+        readFirstResultString(payload, ['terminal', 'focus', 'tab'], 'worktreeId') ??
+        readResultString(payload, 'result', 'worktreeId'),
       tabId:
-        yiruFirstResultString(
+        readFirstResultString(
           payload,
           ['terminal', 'focus', 'rename', 'split', 'close'],
           'tabId'
-        ) ?? yiruResultString(payload, 'result', 'tabId'),
+        ) ?? readResultString(payload, 'result', 'tabId'),
       terminalHandle,
       browserPageId:
-        yiruResultString(payload, 'result', 'browserPageId') ??
-        yiruResultString(payload, 'result', 'tab', 'browserPageId') ??
-        yiruFlag(tokens, 'page')
+        readResultString(payload, 'result', 'browserPageId') ??
+        readResultString(payload, 'result', 'tab', 'browserPageId') ??
+        readFlag(tokens, 'page')
     }
   }
 }

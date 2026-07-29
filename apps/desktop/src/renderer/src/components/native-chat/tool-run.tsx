@@ -21,7 +21,7 @@ import {
   summarizeToolInput,
   summarizeToolRun
 } from './tool-summary'
-import { recognizeYiruAction, type YiruAction } from './yiru-action/action'
+import { recognizeYiruActions, type YiruAction } from './yiru-action/action'
 import { ActionCard } from './yiru-action/card'
 
 const MAX_TOOL_RESULT_CHARS = 4000
@@ -229,19 +229,21 @@ function buildToolRunItems(blocks: readonly NativeChatBlock[]): ToolRunItem[] {
   }
 
   for (const pair of pairToolBlocks(blocks)) {
-    const action = pair.call ? recognizeYiruAction(pair.call, pair.result) : null
-    if (!action) {
+    const actions = pair.call ? recognizeYiruActions(pair.call, pair.result) : []
+    if (actions.length === 0) {
       genericBlocks.push(...pairBlocks(pair.call, pair.result))
       continue
     }
     flushGeneric()
-    const ordinal = (actionOrdinals.get(action.commandLabel) ?? 0) + 1
-    actionOrdinals.set(action.commandLabel, ordinal)
-    items.push({
-      key: `action:${action.commandLabel}:${ordinal}`,
-      kind: 'action',
-      action
-    })
+    for (const action of actions) {
+      const ordinal = (actionOrdinals.get(action.commandLabel) ?? 0) + 1
+      actionOrdinals.set(action.commandLabel, ordinal)
+      items.push({
+        key: `action:${action.commandLabel}:${ordinal}`,
+        kind: 'action',
+        action
+      })
+    }
   }
   flushGeneric()
   return items

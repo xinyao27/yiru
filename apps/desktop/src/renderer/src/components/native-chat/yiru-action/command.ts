@@ -1,18 +1,7 @@
-import type {
-  NativeChatToolCallBlock,
-  NativeChatToolResultBlock
-} from '@yiru/workbench-model/agent'
+import type { NativeChatToolCallBlock } from '@yiru/workbench-model/agent'
 
-export type YiruJsonRecord = Record<string, unknown>
-
-export type ParsedYiruCommand = {
+export type ParsedCommand = {
   tokens: string[]
-}
-
-export type ParsedYiruResult = {
-  record: YiruJsonRecord | null
-  status: 'running' | 'success' | 'error'
-  errorMessage: string | null
 }
 
 const SHELL_TOOL_NAMES = new Set([
@@ -29,56 +18,47 @@ const SHELL_TOOL_NAMES = new Set([
   'terminal'
 ])
 
-export function parseYiruCommand(call: NativeChatToolCallBlock): ParsedYiruCommand | null {
+export function parseCommands(call: NativeChatToolCallBlock): ParsedCommand[] {
   if (!SHELL_TOOL_NAMES.has(call.name.replaceAll(/[^a-z0-9]/gi, '').toLowerCase())) {
-    return null
+    return []
   }
   const command = shellCommandFromInput(call.input)
   if (!command) {
-    return null
+    return []
   }
-  const tokens = tokenizeShellCommand(command)
-  const executable = tokens[0]?.toLowerCase()
-  // Why: the PTY owner constrains YIRU_CLI_COMMAND to these names, so the
-  // renderer can recognize the exported value without a new process contract.
-  if (executable !== 'yiru' && executable !== 'yiru-dev') {
-    return null
+  const parsed: ParsedCommand[] = []
+  for (const tokens of tokenizeShellSegments(command)) {
+    const invocationStart = findInvocationStart(tokens)
+    if (invocationStart !== null) {
+      parsed.push({ tokens: tokens.slice(invocationStart) })
+    }
   }
-  return { tokens }
+  return parsed
 }
 
-export function parseYiruResult(result: NativeChatToolResultBlock | undefined): ParsedYiruResult {
-  if (!result) {
-    return { record: null, status: 'running', errorMessage: null }
-  }
-  const record = findJsonRecord(result.output)
-  const errorRecord = isRecord(record?.error) ? record.error : null
-  const isError = result.isError === true || record?.ok === false
-  return {
-    record,
-    status: isError ? 'error' : 'success',
-    errorMessage: isError
-      ? (readString(errorRecord, 'message') ?? firstUsefulOutputLine(result.output))
-      : null
-  }
-}
-
-export function yiruFlag(tokens: readonly string[], name: string): string | null {
+export function readFlag(tokens: readonly string[], name: string): string | null {
   const prefix = `--${name}=`
+  const shortName = name === 'terminal' ? '-t' : null
   for (let index = 1; index < tokens.length; index += 1) {
     const token = tokens[index]!
+    if (token === '--') {
+      return null
+    }
     if (token.startsWith(prefix)) {
       return token.slice(prefix.length)
     }
-    if (token === `--${name}`) {
+    if (token === `--${name}` || token === shortName) {
       const value = tokens[index + 1]
-      return value && !value.startsWith('--') ? value : null
+      return value && value !== '--' && !value.startsWith('--') ? value : null
+    }
+    if (shortName && token.startsWith(`${shortName}=`)) {
+      return token.slice(shortName.length + 1)
     }
   }
   return null
 }
 
-export function yiruPositional(tokens: readonly string[], startIndex: number): string | null {
+export function readPositional(tokens: readonly string[], startIndex: number): string | null {
   for (let index = startIndex; index < tokens.length; index += 1) {
     const token = tokens[index]!
     if (!token.startsWith('-')) {
@@ -88,40 +68,12 @@ export function yiruPositional(tokens: readonly string[], startIndex: number): s
   return null
 }
 
-export function yiruResultString(
-  record: YiruJsonRecord | null,
-  ...path: readonly string[]
-): string | null {
-  let value: unknown = record
-  for (const segment of path) {
-    if (!isRecord(value)) {
-      return null
-    }
-    value = value[segment]
-  }
-  return typeof value === 'string' && value.trim() ? value.trim() : null
-}
-
-export function yiruFirstResultString(
-  record: YiruJsonRecord | null,
-  parents: readonly string[],
-  field: string
-): string | null {
-  for (const parent of parents) {
-    const value = yiruResultString(record, 'result', parent, field)
-    if (value) {
-      return value
-    }
-  }
-  return null
-}
-
 function shellCommandFromInput(input: unknown): string | null {
   if (typeof input === 'string') {
-    const parsed = parseJson(input)
+    const parsed = parseInputJson(input)
     return parsed === null ? input : shellCommandFromInput(parsed)
   }
-  if (!isRecord(input)) {
+  if (!isInputRecord(input)) {
     return null
   }
   for (const key of ['command', 'cmd', 'CommandLine']) {
@@ -133,29 +85,50 @@ function shellCommandFromInput(input: unknown): string | null {
   return shellCommandFromInput(input.action)
 }
 
-function tokenizeShellCommand(command: string): string[] {
-  const tokens: string[] = []
+function tokenizeShellSegments(command: string): string[][] {
+  const segments: string[][] = []
+  let tokens: string[] = []
   let token = ''
   let quote: 'single' | 'double' | null = null
   let escaping = false
-  const commit = (): void => {
+  const commitToken = (): void => {
     if (token) {
       tokens.push(token)
       token = ''
     }
   }
-  for (const character of command.trim()) {
+  const commitSegment = (): void => {
+    commitToken()
+    if (tokens.length > 0) {
+      segments.push(tokens)
+      tokens = []
+    }
+  }
+  for (let index = 0; index < command.length; index += 1) {
+    const character = command[index]!
     if (escaping) {
       token += character
       escaping = false
-    } else if (character === '\\' && quote !== 'single') {
+    } else if (
+      character === '\\' &&
+      quote !== 'single' &&
+      shouldEscapeBackslash(token, command[index + 1], quote)
+    ) {
       escaping = true
     } else if (character === "'" && quote !== 'double') {
       quote = quote === 'single' ? null : 'single'
     } else if (character === '"' && quote !== 'single') {
       quote = quote === 'double' ? null : 'double'
     } else if (/\s/.test(character) && quote === null) {
-      commit()
+      commitToken()
+    } else if (quote === null && (character === ';' || character === '|')) {
+      commitSegment()
+      if (command[index + 1] === character) {
+        index += 1
+      }
+    } else if (quote === null && character === '&' && command[index + 1] === '&') {
+      commitSegment()
+      index += 1
     } else {
       token += character
     }
@@ -163,48 +136,78 @@ function tokenizeShellCommand(command: string): string[] {
   if (escaping) {
     token += '\\'
   }
-  commit()
-  return tokens
+  commitSegment()
+  return segments
 }
 
-function findJsonRecord(output: string): YiruJsonRecord | null {
-  const direct = parseJson(output.trim())
-  if (isRecord(direct)) {
-    return direct
+function shouldEscapeBackslash(
+  token: string,
+  nextCharacter: string | undefined,
+  quote: 'single' | 'double' | null
+): boolean {
+  if (nextCharacter === undefined || /^[A-Za-z]:/.test(token) || token.startsWith('\\')) {
+    return false
   }
-  for (let start = output.indexOf('{'); start !== -1; start = output.indexOf('{', start + 1)) {
-    let depth = 0
-    let inString = false
-    let escaping = false
-    for (let index = start; index < output.length; index += 1) {
-      const character = output[index]!
-      if (inString) {
-        if (escaping) {
-          escaping = false
-        } else if (character === '\\') {
-          escaping = true
-        } else if (character === '"') {
-          inString = false
-        }
-        continue
-      }
-      if (character === '"') {
-        inString = true
-      } else if (character === '{') {
-        depth += 1
-      } else if (character === '}' && --depth === 0) {
-        const candidate = parseJson(output.slice(start, index + 1))
-        if (isRecord(candidate)) {
-          return candidate
-        }
-        break
-      }
+  if (quote === 'double') {
+    return ['"', '$', '\\', '`', '\n'].includes(nextCharacter)
+  }
+  return true
+}
+
+function findInvocationStart(tokens: readonly string[]): number | null {
+  let index = 0
+  while (isEnvironmentAssignment(tokens[index])) {
+    index += 1
+  }
+  if (executableBasename(tokens[index]) === 'env') {
+    index = skipEnvironmentPrefix(tokens, index + 1)
+  }
+  return isYiruExecutable(tokens[index]) ? index : null
+}
+
+function skipEnvironmentPrefix(tokens: readonly string[], startIndex: number): number {
+  let index = startIndex
+  while (index < tokens.length) {
+    const token = tokens[index]!
+    if (token === '--') {
+      index += 1
+      continue
     }
+    if (isEnvironmentAssignment(token)) {
+      index += 1
+      continue
+    }
+    if (['-u', '--unset', '-C', '--chdir', '-S', '--split-string'].includes(token)) {
+      index += 2
+      continue
+    }
+    if (token.startsWith('-')) {
+      index += 1
+      continue
+    }
+    return index
   }
-  return null
+  return index
 }
 
-function parseJson(value: string): unknown | null {
+function isEnvironmentAssignment(token: string | undefined): boolean {
+  return token !== undefined && /^[A-Za-z_][A-Za-z0-9_]*=/.test(token)
+}
+
+function isYiruExecutable(token: string | undefined): boolean {
+  if (token === '$YIRU_CLI_COMMAND') {
+    return true
+  }
+  const executable = executableBasename(token)
+  return executable === 'yiru' || executable === 'yiru-dev'
+}
+
+function executableBasename(token: string | undefined): string | null {
+  const basename = token?.split(/[\\/]/).at(-1)?.toLowerCase()
+  return basename || null
+}
+
+function parseInputJson(value: string): unknown | null {
   try {
     const parsed: unknown = JSON.parse(value)
     return parsed
@@ -213,22 +216,6 @@ function parseJson(value: string): unknown | null {
   }
 }
 
-function isRecord(value: unknown): value is YiruJsonRecord {
+function isInputRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function readString(record: YiruJsonRecord | null, key: string): string | null {
-  const value = record?.[key]
-  return typeof value === 'string' && value.trim() ? value.trim() : null
-}
-
-function firstUsefulOutputLine(output: string): string | null {
-  const line = output
-    .split('\n')
-    .map((candidate) => candidate.trim())
-    .find(
-      (candidate) =>
-        candidate && !/^(Chunk ID|Wall time|Process exited|Final output):?/i.test(candidate)
-    )
-  return line ? (line.length > 180 ? `${line.slice(0, 179)}…` : line) : null
 }
