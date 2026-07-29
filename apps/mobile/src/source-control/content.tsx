@@ -1,22 +1,10 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  SectionList,
-  Text,
-  TextInput,
-  View
-} from 'react-native'
+import { ActivityIndicator, ScrollView, SectionList, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
-import {
-  Minus,
-  DotsThree as MoreHorizontal,
-  Plus,
-  Sparkle as Sparkles
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
-import { spacing } from '../theme/uniwind-theme-values'
+import { MobileSourceControlBulkActions } from './bulk-actions'
+import { MobileSourceControlCommitBar } from './commit-bar'
 import { MobileCommitFailurePanel } from './commit-failure-panel'
 import { MobileSourceControlCreatePrEntry } from './create-pr-entry'
 import { makeRenderFileRow, BranchCompareFooter } from './file-rows'
@@ -32,6 +20,7 @@ type Props = {
 // Changes tab: local file changes only — uncommitted (staged/unstaged) plus
 // committed-on-branch vs base. PR conflicts and push status live elsewhere.
 export function MobileSourceControlContent({ state }: Props) {
+  const spacing3 = resolveCssNumber(useCSSVariable('--spacing-3'))
   const {
     insets,
     connState,
@@ -88,72 +77,35 @@ export function MobileSourceControlContent({ state }: Props) {
         // Why: once data has loaded the screen looks alive even when the
         // desktop link is down, so taps appear to do nothing (STA-1511).
         // Surface the reconnect state where the user is looking.
-        <View className={styles.reconnectBanner}>
+        <View className="border-hairline bg-secondary mx-4 mt-4 -mb-2 flex-row items-center gap-2 rounded-xl border-amber-500 px-3 py-2">
           <ActivityIndicator size="small" colorClassName="accent-amber-500" />
-          <Text className={styles.reconnectBannerText}>Reconnecting to desktop...</Text>
+          <Text className="text-foreground text-xs">Reconnecting to desktop...</Text>
         </View>
       ) : null}
-      <View className={hubStyles.changesControls}>
+      <View className="mt-1 px-4">
         {commitFailureRecovery ? (
           <MobileCommitFailurePanel
             failure={commitFailureRecovery}
             action={commitFailureRecoveryAction}
           />
         ) : actionError ? (
-          <View className={styles.actionError}>
-            <Text className={styles.actionErrorText} numberOfLines={2}>
+          <View className="border-hairline border-destructive bg-secondary mt-2 rounded-xl px-3 py-2">
+            <Text className="text-foreground text-xs leading-4" numberOfLines={2}>
               {actionError}
             </Text>
           </View>
         ) : null}
         <MobileSourceControlCreatePrEntry action={createPrAction} />
-        <View className={styles.bulkRow}>
-          <Pressable
-            className={cn(
-              styles.bulkButton,
-              (stageablePaths.length === 0 || ioBusy) && styles.bulkButtonDisabled,
-              'active:opacity-[0.75]'
-            )}
-            onPress={() => void stageAll()}
-            disabled={ioBusy || stageablePaths.length === 0}
-          >
-            {busyAction === 'stage-all' ? (
-              <ActivityIndicator size="small" colorClassName="accent-foreground" />
-            ) : (
-              <Plus size={15} colorClassName="accent-foreground" />
-            )}
-            <Text className={styles.bulkButtonText}>Stage All</Text>
-          </Pressable>
-          <Pressable
-            className={cn(
-              styles.bulkButton,
-              (unstageablePaths.length === 0 || ioBusy) && styles.bulkButtonDisabled,
-              'active:opacity-[0.75]'
-            )}
-            onPress={() => void unstageAll()}
-            disabled={ioBusy || unstageablePaths.length === 0}
-          >
-            {busyAction === 'unstage-all' ? (
-              <ActivityIndicator size="small" colorClassName="accent-foreground" />
-            ) : (
-              <Minus size={15} colorClassName="accent-foreground" />
-            )}
-            <Text className={styles.bulkButtonText}>Unstage All</Text>
-          </Pressable>
-          <Pressable
-            className={cn(
-              styles.bulkMenuButton,
-              'active:opacity-[0.75]',
-              ioBusy && styles.bulkButtonDisabled
-            )}
-            onPress={() => setShowActionSheet(true)}
-            disabled={ioBusy}
-            hitSlop={8}
-            accessibilityLabel="Open source control actions"
-          >
-            <MoreHorizontal size={18} colorClassName="accent-foreground" />
-          </Pressable>
-        </View>
+        <MobileSourceControlBulkActions
+          actionsDisabled={ioBusy}
+          onMore={() => setShowActionSheet(true)}
+          onStageAll={() => void stageAll()}
+          onUnstageAll={() => void unstageAll()}
+          stageDisabled={ioBusy || stageablePaths.length === 0}
+          stageLoading={busyAction === 'stage-all'}
+          unstageDisabled={ioBusy || unstageablePaths.length === 0}
+          unstageLoading={busyAction === 'unstage-all'}
+        />
       </View>
 
       {!hasVisibleChanges ? (
@@ -193,93 +145,33 @@ export function MobileSourceControlContent({ state }: Props) {
       )}
 
       <View
-        className={styles.commitBar}
+        className="absolute right-0 left-0 px-3 pt-2"
         style={[
           {
             bottom: keyboardLift > 0 ? keyboardLift + KEYBOARD_COMMIT_BAR_CLEARANCE : keyboardLift,
-            paddingBottom: keyboardLift > 0 ? spacing.md : spacing.md + insets.bottom
+            paddingBottom: keyboardLift > 0 ? spacing3 : spacing3 + insets.bottom
           }
         ]}
       >
-        <View className={styles.commitRow}>
-          {stagedCount === 0 ? (
-            <View
-              className={cn(styles.commitInput, styles.commitInputDisabled)}
-              accessibilityRole="text"
-              accessibilityState={{ disabled: true }}
-              accessibilityLabel="Commit message disabled. No staged files."
-            >
-              <Text className={styles.commitInputDisabledText}>No staged files</Text>
-            </View>
-          ) : (
-            <TextInput
-              className={styles.commitInput}
-              value={commitMessage}
-              onChangeText={setCommitMessage}
-              placeholder="Commit message"
-              placeholderTextColorClassName="accent-muted-foreground"
-              editable={busyAction === null && openingPath === null && openingBranchPath === null}
-              returnKeyType="done"
-              onSubmitEditing={primaryAction.onPress}
-            />
-          )}
-          {shouldShowGenerateButton ? (
-            <Pressable
-              className={cn(
-                styles.generateButton,
-                busyAction !== null && styles.commitButtonDisabled,
-                'active:opacity-[0.75]'
-              )}
-              // Why: commit-message AI belongs to the commit path; hiding it
-              // during Stage All keeps the quick action visually unambiguous.
-              disabled={busyAction !== null}
-              onPress={() =>
-                generatingMessage ? cancelGenerateCommitMessage() : void generateCommitMessage()
-              }
-              accessibilityLabel={
-                generatingMessage
-                  ? 'Cancel commit message generation'
-                  : 'Generate commit message with AI'
-              }
-            >
-              {generatingMessage ? (
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              ) : (
-                <Sparkles size={16} colorClassName="accent-muted-foreground" />
-              )}
-            </Pressable>
-          ) : null}
-          <Pressable
-            className={cn(
-              styles.commitButton,
-              createPrHeroActive && styles.commitButtonSecondary,
-              primaryAction.disabled && styles.commitButtonDisabled,
-              'active:opacity-[0.75]'
-            )}
-            onPress={primaryAction.onPress}
-            disabled={primaryAction.disabled}
-            accessibilityLabel={primaryAction.accessibilityLabel}
-            accessibilityHint={primaryAction.accessibilityHint}
-          >
-            {primaryAction.loading ? (
-              <ActivityIndicator
-                size="small"
-                colorClassName={
-                  createPrHeroActive ? 'accent-foreground' : 'accent-primary-foreground'
-                }
-              />
-            ) : (
-              <Text
-                className={cn(
-                  styles.commitButtonText,
-                  createPrHeroActive && styles.commitButtonSecondaryText
-                )}
-              >
-                {primaryAction.label}
-              </Text>
-            )}
-          </Pressable>
-        </View>
+        <MobileSourceControlCommitBar
+          commitMessage={commitMessage}
+          generateDisabled={busyAction !== null}
+          generatingMessage={generatingMessage}
+          hasStagedFiles={stagedCount > 0}
+          inputDisabled={ioBusy}
+          isCreatePrAction={createPrHeroActive}
+          onChangeText={setCommitMessage}
+          onGenerate={() =>
+            generatingMessage ? cancelGenerateCommitMessage() : void generateCommitMessage()
+          }
+          onPrimaryAction={primaryAction.onPress}
+          primaryAccessibilityHint={primaryAction.accessibilityHint}
+          primaryAccessibilityLabel={primaryAction.accessibilityLabel}
+          primaryDisabled={primaryAction.disabled}
+          primaryLabel={primaryAction.label}
+          primaryLoading={primaryAction.loading}
+          showGenerateButton={shouldShowGenerateButton}
+        />
       </View>
     </>
   )

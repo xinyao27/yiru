@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
-import logo from '../../../../resources/logo.svg'
+import logo from '../../../../resources/yiru-wordmark.png?url'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'
 import { cn } from '../lib/class-names'
@@ -324,7 +324,7 @@ export default function Landing(): React.JSX.Element {
             <img
               src={logo}
               alt={translate('auto.components.Landing.520304a067', 'Yiru logo')}
-              className="size-12"
+              className="h-auto w-16"
             />
           </div>
           {preflightIssues.length > 0 && <PreflightBanner issues={preflightIssues} repos={repos} />}

@@ -26,22 +26,24 @@ export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
   const ts = formatTimeAgo(agent.stateStartedAt, now)
 
   return (
-    <View className={styles.row} style={[{ paddingLeft: depth * INDENT_PER_DEPTH }]}>
+    <View
+      className="mt-1 flex-row items-center gap-1"
+      style={[{ paddingLeft: depth * INDENT_PER_DEPTH }]}
+    >
       <AgentStateDot state={dotState} />
       {/* Agent identity logo (Claude/Codex/…), matching the desktop sidebar's
           agent icons instead of a two-letter text code. */}
       {agent.agentType ? <MobileAgentIcon agentId={agent.agentType} size={13} /> : null}
-      <Text className={cn(styles.label, unvisited && styles.labelUnvisited)} numberOfLines={1}>
+      <Text
+        className={cn(
+          'flex-1 text-xs text-muted-foreground',
+          unvisited && 'text-foreground font-semibold'
+        )}
+        numberOfLines={1}
+      >
         {label}
       </Text>
-      <Text className={styles.time}>{ts}</Text>
+      <Text className="text-muted-foreground text-xs">{ts}</Text>
     </View>
   )
 }
-
-const styles = {
-  row: cn('flex-row items-center gap-1 mt-[3px]'),
-  label: cn('flex-1 text-[11px] text-muted-foreground/60'),
-  labelUnvisited: cn('text-foreground font-semibold'),
-  time: cn('text-[10px] text-muted-foreground/60')
-} as const

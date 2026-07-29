@@ -1,12 +1,11 @@
 import { registerCustomTheme, type ThemeRegistration } from '@pierre/diffs'
-
 import {
   CURSOR_DARK_THEME_NAME,
   CURSOR_LIGHT_THEME_NAME,
   cursorDarkThemeSource,
   cursorLightThemeSource,
   type CursorThemeSource
-} from './cursor-theme-source'
+} from '@yiru/editor-themes/cursor'
 
 let cursorThemesRegistered = false
 

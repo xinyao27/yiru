@@ -1,5 +1,3 @@
-import { spacing } from '../theme/uniwind-theme-values'
-
 // Use actual window size so narrow iPad splits keep phone-like layouts.
 const WIDE_LAYOUT_MIN_WIDTH = 700
 
@@ -26,7 +24,12 @@ export type ResponsiveLayoutMetrics = {
   horizontalPadding: number
 }
 
-export function getResponsiveLayoutMetrics(width: number, height: number): ResponsiveLayoutMetrics {
+export function getResponsiveLayoutMetrics(
+  width: number,
+  height: number,
+  regularHorizontalPadding: number,
+  wideHorizontalPadding: number
+): ResponsiveLayoutMetrics {
   const isTabletLayout = Math.min(width, height) >= TABLET_LAYOUT_MIN_SHORT_SIDE
   const isWideLayout = width >= WIDE_LAYOUT_MIN_WIDTH && isTabletLayout
 
@@ -39,6 +42,6 @@ export function getResponsiveLayoutMetrics(width: number, height: number): Respo
     contentMaxWidth: CONTENT_MAX_WIDTH,
     modalMaxWidth: MODAL_MAX_WIDTH,
     // Roomier gutters once content is capped so it isn't glued to the edges.
-    horizontalPadding: isWideLayout ? spacing.xl : spacing.lg
+    horizontalPadding: isWideLayout ? wideHorizontalPadding : regularHorizontalPadding
   }
 }

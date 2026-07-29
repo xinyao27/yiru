@@ -94,7 +94,7 @@ export function useTerminalLiveInputCommit<TTabType extends string>({
         clearPendingLiveInputCommit()
         return waitForPendingLiveInputFlush()
       }
-      // Why: external bytes (dictation/paste) land after the field's echo on the
+      // Why: externally pasted bytes land after the field's echo on the
       // PTY; the field session must fully end or later diffs would erase them.
       if (pendingHandle === handle) {
         return flushPendingLiveInputText(handle)
@@ -110,7 +110,7 @@ export function useTerminalLiveInputCommit<TTabType extends string>({
         clearPendingLiveInputCommit()
         return
       }
-      // Why: iOS kills an active dictation/IME session when JS writes a value
+      // Why: iOS can reset active IME composition when JS writes a value
       // that differs from the native field text, so the controlled capture must
       // echo the field verbatim; only the PTY mirror sees normalized text.
       setLiveInputCapture(text)

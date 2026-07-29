@@ -1,14 +1,15 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
-import { View, Text, Pressable, ActivityIndicator, BackHandler } from 'react-native'
+import { View, Text, ActivityIndicator, BackHandler } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
-import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { ConnectionLog } from '../src/components/connection-log'
+import { MobileGlassIconButton } from '../src/components/glass/icon-button'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { spacing } from '../src/theme/uniwind-theme-values'
 import { useCloseHost } from '../src/transport/client-context'
 import { resolvePairConfirmRouteState } from '../src/transport/pair-confirm-state'
 import {
@@ -30,6 +31,7 @@ export default function PairConfirmScreen() {
   const router = useRouter()
   const closeHost = useCloseHost()
   const insets = useSafeAreaInsets()
+  const spacing2 = resolveCssNumber(useCSSVariable('--spacing-2'))
   const params = useLocalSearchParams<{ code?: string }>()
   const [status, setStatus] = useState<Status>('awaiting-confirm')
   const [errorMessage, setErrorMessage] = useState('')
@@ -145,28 +147,35 @@ export default function PairConfirmScreen() {
     }
   }
 
-  const containerPadding = { paddingTop: insets.top + spacing.sm }
+  const containerPadding = { paddingTop: insets.top + spacing2 }
 
   return (
-    <View ref={setPairConfirmRootRef} className={styles.container} style={[containerPadding]}>
-      <Pressable className={styles.backButton} onPress={cancel}>
-        <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-      </Pressable>
+    <View
+      ref={setPairConfirmRootRef}
+      className="bg-background flex-1 p-4"
+      style={[containerPadding]}
+    >
+      <MobileGlassIconButton accessibilityLabel="Cancel pairing" icon="back" onPress={cancel} />
 
-      <View className={styles.content}>
+      {/* Why: the bottom padding makes the group look centered above the home indicator. */}
+      <View className="flex-1 justify-center px-2 pb-12">
         {offer && resolvedStatus === 'awaiting-confirm' && (
           <>
-            <Text className={styles.title}>Pair with this desktop?</Text>
-            <Text className={styles.subtitle}>
+            <Text className="text-foreground mb-2 text-center text-sm font-semibold">
+              Pair with this desktop?
+            </Text>
+            <Text className="text-muted-foreground mb-6 max-w-lg self-center text-center text-sm leading-5">
               You opened a pairing link from your desktop. Confirm to add it to your hosts.
             </Text>
-            <View className={styles.actionStack}>
-              <Pressable className={styles.primaryButton} onPress={() => void confirm()}>
-                <Text className={styles.primaryButtonText}>Pair</Text>
-              </Pressable>
-              <Pressable className={styles.secondaryButton} onPress={cancel}>
-                <Text className={styles.secondaryButtonText}>Cancel</Text>
-              </Pressable>
+            <View className="w-full max-w-sm gap-2 self-center">
+              <MobileGlassTextButton
+                isFullWidth
+                isProminent
+                label="Pair"
+                onPress={() => void confirm()}
+                size="large"
+              />
+              <MobileGlassTextButton isFullWidth label="Cancel" onPress={cancel} size="large" />
             </View>
           </>
         )}
@@ -174,8 +183,8 @@ export default function PairConfirmScreen() {
         {resolvedStatus === 'connecting' && (
           <>
             <ActivityIndicator size="large" colorClassName="accent-muted-foreground" />
-            <Text className={styles.connectingText}>Connecting…</Text>
-            <View className={styles.logSlot}>
+            <Text className="text-muted-foreground mt-4 text-center text-sm">Connecting…</Text>
+            <View className="mt-4 mb-3 w-full">
               <ConnectionLog entries={logs} title="Pairing log" />
             </View>
           </>
@@ -183,16 +192,22 @@ export default function PairConfirmScreen() {
 
         {resolvedStatus === 'error' && (
           <>
-            <Text className={styles.errorText}>{resolvedErrorMessage}</Text>
+            <Text className="text-destructive mb-6 text-center text-sm leading-5">
+              {resolvedErrorMessage}
+            </Text>
             {logs.length > 0 && (
-              <View className={styles.logSlot}>
+              <View className="mt-4 mb-3 w-full">
                 <ConnectionLog entries={logs} title="Pairing log" />
               </View>
             )}
-            <View className={styles.actionStack}>
-              <Pressable className={styles.primaryButton} onPress={cancel}>
-                <Text className={styles.primaryButtonText}>Back to home</Text>
-              </Pressable>
+            <View className="w-full max-w-sm self-center">
+              <MobileGlassTextButton
+                isFullWidth
+                isProminent
+                label="Back to home"
+                onPress={cancel}
+                size="large"
+              />
             </View>
           </>
         )}
@@ -200,24 +215,3 @@ export default function PairConfirmScreen() {
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mb-2'),
-  // Why: nudges the centered group slightly above the geometric
-  // middle so the eye reads it as visually centered above the home
-  // indicator / nav bar.
-  content: cn('flex-1 justify-center px-2 pb-12'),
-  title: cn('text-[18px] font-semibold text-foreground mb-2 text-center'),
-  subtitle: cn(
-    'text-[14px] text-muted-foreground leading-[20px] mb-6 text-center max-w-[520px] self-center'
-  ),
-  actionStack: cn('w-full max-w-[360px] self-center'),
-  primaryButton: cn('w-full bg-foreground px-6 py-2.5 rounded-none items-center mb-2'),
-  primaryButtonText: cn('text-background text-[14px] font-semibold'),
-  secondaryButton: cn('w-full px-6 py-2.5 rounded-none items-center'),
-  secondaryButtonText: cn('text-muted-foreground text-[14px] font-medium'),
-  connectingText: cn('text-muted-foreground text-[14px] mt-4 text-center'),
-  logSlot: cn('w-full mt-4 mb-3'),
-  errorText: cn('text-destructive text-[14px] text-center mb-6 leading-[20px]')
-} as const

@@ -17,9 +17,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
   const {
     activeRepoSettings,
     activeWorktreeId,
-    bulkStagePaths,
-    bulkUnstagePaths,
-    clearSelection,
     createPrHeaderAction,
     grouped,
     handleActionInvoke,
@@ -33,68 +30,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
     setIsExecutingBulk,
     worktreePath
   } = scope
-  const handleBulkStage = useCallback(async () => {
-    if (!worktreePath || bulkStagePaths.length === 0) {
-      return
-    }
-    setIsExecutingBulk(true)
-    try {
-      const connectionId = getConnectionId(activeWorktreeId ?? null) ?? undefined
-      await bulkStageRuntimeGitPaths(
-        {
-          // Why: route staging by the repo OWNER host, not the focused runtime.
-          settings: activeRepoSettings,
-          worktreeId: activeWorktreeId,
-          worktreePath,
-          connectionId
-        },
-        bulkStagePaths
-      )
-      await refreshActiveGitStatusAfterMutation()
-      clearSelection()
-    } finally {
-      setIsExecutingBulk(false)
-    }
-  }, [
-    activeRepoSettings,
-    worktreePath,
-    bulkStagePaths,
-    clearSelection,
-    activeWorktreeId,
-    refreshActiveGitStatusAfterMutation,
-    setIsExecutingBulk
-  ])
-  const handleBulkUnstage = useCallback(async () => {
-    if (!worktreePath || bulkUnstagePaths.length === 0) {
-      return
-    }
-    setIsExecutingBulk(true)
-    try {
-      const connectionId = getConnectionId(activeWorktreeId ?? null) ?? undefined
-      await bulkUnstageRuntimeGitPaths(
-        {
-          // Why: route unstaging by the repo OWNER host, not the focused runtime.
-          settings: activeRepoSettings,
-          worktreeId: activeWorktreeId,
-          worktreePath,
-          connectionId
-        },
-        bulkUnstagePaths
-      )
-      await refreshActiveGitStatusAfterMutation()
-      clearSelection()
-    } finally {
-      setIsExecutingBulk(false)
-    }
-  }, [
-    activeRepoSettings,
-    worktreePath,
-    bulkUnstagePaths,
-    clearSelection,
-    activeWorktreeId,
-    refreshActiveGitStatusAfterMutation,
-    setIsExecutingBulk
-  ])
   const handleStageAllPaths = useCallback(
     async (paths: readonly string[]) => {
       if (!worktreePath || isExecutingBulk || paths.length === 0) {
@@ -114,7 +49,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
           [...paths]
         )
         await refreshActiveGitStatusAfterMutation()
-        clearSelection()
       } finally {
         setIsExecutingBulk(false)
       }
@@ -122,7 +56,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
     [
       activeRepoSettings,
       activeWorktreeId,
-      clearSelection,
       isExecutingBulk,
       refreshActiveGitStatusAfterMutation,
       setIsExecutingBulk,
@@ -148,7 +81,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
           [...paths]
         )
         await refreshActiveGitStatusAfterMutation()
-        clearSelection()
       } finally {
         setIsExecutingBulk(false)
       }
@@ -156,7 +88,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
     [
       activeRepoSettings,
       activeWorktreeId,
-      clearSelection,
       isExecutingBulk,
       refreshActiveGitStatusAfterMutation,
       setIsExecutingBulk,
@@ -188,7 +119,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
         filePaths
       )
       await refreshActiveGitStatusAfterMutation()
-      clearSelection()
     } finally {
       setIsExecutingBulk(false)
     }
@@ -198,7 +128,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
     isExecutingBulk,
     grouped,
     activeWorktreeId,
-    clearSelection,
     refreshActiveGitStatusAfterMutation,
     setIsExecutingBulk
   ])
@@ -253,8 +182,6 @@ export function useSourceControlBulkActions(scope: SourceControlFileOpenControll
   const branchCompareRemoteStatusRef = useRef<BranchCompareRemoteStatusSnapshot | null>(null)
   return {
     ...scope,
-    handleBulkStage,
-    handleBulkUnstage,
     handleStageAllPaths,
     handleUnstagePaths,
     handleStageAllPrimary,

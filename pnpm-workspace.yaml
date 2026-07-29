@@ -52,6 +52,7 @@ catalog:
   '@xterm/addon-serialize': 0.15.0-beta.287
   '@xterm/addon-web-links': 0.13.0-beta.287
   '@xterm/headless': 6.1.0-beta.287
+  '@yiru/editor-themes': 0.0.1
   '@yiru/mobile-relay-protocol': 0.0.1
   '@yiru/runtime-protocol': 0.0.1
   '@yiru/workbench-model': 0.0.1
@@ -97,6 +98,7 @@ catalog:
   node-pty: ^1.1.0
   oxlint-plugin-react-doctor: 0.2.10
   pdfjs-dist: ^6.1.200
+  pngjs: ^7.0.0
   posthog-node: ^5.45.2
   qrcode: ^1.5.4
   react-colorful: ^5.8.0
@@ -164,61 +166,67 @@ catalogs:
     react: '*'
     react-native: '*'
   mobile:
-    '@noble/hashes': 1.8.0
+    '@expo/ui': 57.0.7
+    '@noble/hashes': 2.2.0
     '@react-native-async-storage/async-storage': 2.2.0
+    '@react-navigation/native': 7.3.14
+    '@shikijs/core': 4.3.1
+    '@shikijs/engine-oniguruma': 4.3.1
+    '@shikijs/langs': 4.3.1
     '@shopify/react-native-skia': 2.10.0
-    '@types/react': 19.2.14
+    '@types/react': 19.2.17
     '@types/ws': 8.18.1
     '@xterm/addon-unicode11': 0.10.0-beta.285
     '@xterm/addon-webgl': 0.20.0-beta.284
     '@xterm/xterm': 6.1.0-beta.285
-    '@yiru/expo-two-way-audio': 0.0.1
     buffer: 6.0.3
     clsx: 2.1.1
-    expo: 55.0.27
-    expo-build-properties: 55.0.13
-    expo-camera: 55.0.18
-    expo-clipboard: 55.0.13
-    expo-constants: 55.0.16
-    expo-crypto: 55.0.14
-    expo-dev-client: 55.0.35
-    expo-document-picker: 55.0.13
-    expo-file-system: 55.0.19
-    expo-haptics: 55.0.14
-    expo-image-manipulator: 55.0.17
-    expo-image-picker: 55.0.20
-    expo-keep-awake: 55.0.8
-    expo-linking: 55.0.15
-    expo-module-scripts: 55.0.2
-    expo-modules-core: 55.0.25
-    expo-network: 55.0.14
-    expo-notifications: 55.0.22
-    expo-router: 55.0.14
-    expo-secure-store: 55.0.13
-    expo-splash-screen: 55.0.20
-    expo-status-bar: 55.0.6
+    expo: 57.0.8
+    expo-build-properties: 57.0.7
+    expo-camera: 57.0.3
+    expo-clipboard: 57.0.1
+    expo-constants: 57.0.7
+    expo-crypto: 57.0.1
+    expo-dev-client: 57.0.9
+    expo-document-picker: 57.0.1
+    expo-file-system: 57.0.1
+    expo-glass-effect: 57.0.1
+    expo-haptics: 57.0.1
+    expo-image-manipulator: 57.0.6
+    expo-image-picker: 57.0.6
+    expo-keep-awake: 57.0.1
+    expo-linking: 57.0.4
+    expo-module-scripts: 56.0.3
+    expo-network: 57.0.1
+    expo-notifications: 57.0.7
+    expo-router: 57.0.8
+    expo-secure-store: 57.0.1
+    expo-splash-screen: 57.0.5
+    expo-status-bar: 57.0.1
     expo-thinking-orbs: 0.1.0
     lowlight: 3.3.0
-    react: 19.2.6
-    react-dom: 19.2.6
-    react-native: 0.83.9
-    react-native-gesture-handler: 2.31.2
-    react-native-reanimated: 4.3.0
+    react: 19.2.3
+    react-dom: 19.2.3
+    react-native: 0.86.0
+    react-native-enriched-markdown: 0.7.4
+    react-native-gesture-handler: 2.32.0
+    react-native-reanimated: 4.5.0
     react-native-safe-area-context: 5.7.0
-    react-native-screens: 4.24.0
+    react-native-screens: 4.26.2
+    react-native-shiki-engine: 0.3.12
     react-native-svg: 15.15.4
     react-native-web: 0.21.2
     react-native-webview: 13.16.1
-    react-native-worklets: 0.8.3
+    react-native-worklets: 0.10.0
     phosphor-react-native: 3.0.6
     tailwind-merge: 3.5.0
     tailwindcss: 4.3.3
     tweetnacl: 1.0.3
     typescript: 6.0.3
     uniwind: 1.10.0
-    ws: 8.21.0
+    ws: 8.21.1
     zod: 4.4.3
-    zustand: 5.0.13
+    zustand: 5.0.14
   overrides:
     dompurify: 3.4.11
 cleanupUnusedCatalogs: false

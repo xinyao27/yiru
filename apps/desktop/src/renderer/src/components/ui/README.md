@@ -1,6 +1,6 @@
 # Yiru UI Component Library
 
-This catalog defines what belongs in Yiru's reusable UI layer and where higher-level UI should live. Visual rules and token policy remain canonical in [`style-guide.md`](../../../../../docs/style-guide.md).
+This catalog defines what belongs in Yiru's reusable UI layer and where higher-level UI should live. The binding desktop visual contract is [`apps/desktop/DESIGN.md`](../../../../../DESIGN.md); [`style-guide.md`](../../../../../../../docs/style-guide.md) is the detailed shared reference.
 
 **First principle (from the style guide):** screens must reuse these primitives before writing native controls or hand-rolled class recipes. If a primitive is close but missing a size or variant, extend the primitive here — do not copy its styles into call sites.
 

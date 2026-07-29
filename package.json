@@ -1,6 +1,6 @@
 {
   "name": "@yiru/workspace",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "private": true,
   "description": "Yiru monorepo workspace",
   "homepage": "https://github.com/xinyao27/yiru#readme",
@@ -24,7 +24,7 @@
     "dev:mobile": "pnpm --filter yiru-mobile run dev",
     "start": "pnpm --filter yiru run start",
     "build": "vp run --filter './packages/*' build && vp run --filter yiru build",
-    "build:cross-client-packages": "pnpm --filter @yiru/workbench-model --filter @yiru/runtime-protocol --filter @yiru/mobile-relay-protocol run build",
+    "build:cross-client-packages": "pnpm --filter @yiru/editor-themes --filter @yiru/workbench-model --filter @yiru/runtime-protocol --filter @yiru/mobile-relay-protocol run build",
     "build:desktop": "pnpm --filter yiru run build:desktop",
     "build:relay": "pnpm --filter yiru run build:relay",
     "build:computer-macos": "pnpm --filter yiru run build:computer-macos",

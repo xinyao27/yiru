@@ -5,15 +5,15 @@ import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
 import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  ArrowSquareOut as ExternalLink,
-  ArrowsClockwise as RotateCw,
-  Sparkle as Sparkles
+  ArrowSquareOut as ExternalLink
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { fetchPRCheckDetails, type GitHubPrRepoSlug } from '../../session/github-pr-rpc'
 import type { MobilePrActions } from '../../session/pr/use-actions'
 import type { RpcClient } from '../../transport/rpc-client'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { prAiTriageStyles as triageStyles } from './pr-ai-triage-styles'
 import { PRCheckDetailView, type DetailEntry } from './pr-check-detail'
 import {
@@ -145,22 +145,19 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
       title="Checks"
       trailing={
         <>
-          <Text className={cn(styles.summaryLabel, summaryColors.text)}>{summary.label}</Text>
+          <Text className={cn('text-sm font-bold', summaryColors.text)}>{summary.label}</Text>
           {/* Rerun is offered only when something failed; spinner-in-place while in-flight. */}
           {actions && summary.failed > 0 ? (
-            <Pressable
-              className={styles.iconButton}
-              onPress={() => actions.rerunFailingChecks()}
-              disabled={rerunBusy}
-              accessibilityRole="button"
-              accessibilityLabel="Rerun failing checks"
-            >
-              {rerunBusy ? (
-                <ActivityIndicator colorClassName="accent-muted-foreground" />
-              ) : (
-                <RotateCw size={14} colorClassName="accent-muted-foreground" />
-              )}
-            </Pressable>
+            rerunBusy ? (
+              <ActivityIndicator colorClassName="accent-muted-foreground" />
+            ) : (
+              <MobileGlassIconButton
+                accessibilityLabel="Rerun failing checks"
+                icon="refresh"
+                onPress={() => actions.rerunFailingChecks()}
+                size="small"
+              />
+            )
           ) : null}
         </>
       }
@@ -168,29 +165,23 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
       {/* Triage strip at the top of the section (desktop PRTriageStrip): a failing
           summary + a Fix action, so the most actionable state leads the list. */}
       {triage && summary.failed > 0 ? (
-        <View className={triageStyles.triageStrip}>
-          <View className={triageStyles.triageStripText}>
-            <Text className={triageStyles.triageStripTitle} numberOfLines={1}>
+        <View className="border-hairline border-destructive bg-diff-removed flex-row items-center gap-2 rounded-xl p-2">
+          <View className="min-w-0 flex-1">
+            <Text className="text-foreground text-xs font-bold" numberOfLines={1}>
               {summary.failed} failing check{summary.failed === 1 ? '' : 's'}
             </Text>
-            <Text className={triageStyles.triageStripSubtitle} numberOfLines={1}>
+            <Text className="text-muted-foreground text-xs" numberOfLines={1}>
               Inspect details or start an AI fix pass.
             </Text>
           </View>
-          <Pressable
-            className={cn(triageStyles.triageStripButton, 'active:opacity-[0.7]')}
-            onPress={triage.fixChecks}
+          <MobileGlassTextButton
             disabled={triage.isBusy}
-            accessibilityRole="button"
             accessibilityLabel="Fix failing checks with AI"
-          >
-            {triage.isBusy ? (
-              <ActivityIndicator colorClassName="accent-muted-foreground" />
-            ) : (
-              <Sparkles size={13} colorClassName="accent-muted-foreground" />
-            )}
-            <Text className={triageStyles.triageStripButtonText}>Fix</Text>
-          </Pressable>
+            isProminent
+            label={triage.isBusy ? 'Fixing…' : 'Fix'}
+            onPress={triage.fixChecks}
+            size="small"
+          />
         </View>
       ) : null}
       {triage?.error ? <Text className={triageStyles.triageError}>{triage.error}</Text> : null}
@@ -210,7 +201,7 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
               accessibilityLabel={`${check.name} check details`}
             >
               <Chevron size={14} colorClassName="accent-muted-foreground" />
-              <View className={cn(styles.statusDot, statusColors.background)} />
+              <View className={cn('h-2 w-2 rounded-full', statusColors.background)} />
               <View className={styles.rowMain}>
                 <Text className={styles.rowTitle} numberOfLines={1}>
                   {check.name}

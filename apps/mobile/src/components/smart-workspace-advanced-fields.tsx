@@ -1,8 +1,7 @@
 import { Switch, Text, TextInput, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
-
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
+import { MobileGlassSurface } from './glass/surface'
 
 type Props = {
   composer: MobileComposerSource
@@ -18,39 +17,43 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
   return (
     <>
       {selection ? (
-        <View className={styles.field}>
-          <Text className={styles.label}>Name</Text>
-          <TextInput
-            className={styles.input}
-            value={composer.name}
-            onChangeText={composer.setName}
-            placeholder="Workspace name"
-            placeholderTextColorClassName="accent-muted-foreground"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+        <View className="mb-3">
+          <Text className="text-muted-foreground mb-1 text-xs font-medium">Name</Text>
+          <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+            <TextInput
+              className="text-foreground min-h-10 rounded-full px-4 text-sm"
+              value={composer.name}
+              onChangeText={composer.setName}
+              placeholder="Workspace name"
+              placeholderTextColorClassName="accent-muted-foreground"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </MobileGlassSurface>
         </View>
       ) : null}
 
       {showBranchOverride ? (
-        <View className={styles.field}>
-          <Text className={styles.label}>Branch name</Text>
-          <TextInput
-            className={styles.input}
-            value={composer.branchNameOverride ?? ''}
-            onChangeText={composer.handleBranchNameOverrideChange}
-            placeholder="Derived from name"
-            placeholderTextColorClassName="accent-muted-foreground"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+        <View className="mb-3">
+          <Text className="text-muted-foreground mb-1 text-xs font-medium">Branch name</Text>
+          <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+            <TextInput
+              className="text-foreground min-h-10 rounded-full px-4 text-sm"
+              value={composer.branchNameOverride ?? ''}
+              onChangeText={composer.handleBranchNameOverrideChange}
+              placeholder="Derived from name"
+              placeholderTextColorClassName="accent-muted-foreground"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </MobileGlassSurface>
         </View>
       ) : null}
 
       {composer.reuseEligibleBranch ? (
-        <View className={styles.field}>
-          <View className={styles.reuseRow}>
-            <Text className={styles.reuseLabel} numberOfLines={1}>
+        <View className="mb-3">
+          <View className="flex-row items-center justify-between gap-2">
+            <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
               Reuse branch “{composer.reuseEligibleBranch}”
             </Text>
             <Switch
@@ -68,13 +71,3 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
     </>
   )
 }
-
-const styles = {
-  field: cn('mb-3'),
-  label: cn('text-[13px] font-medium text-muted-foreground mb-1'),
-  input: cn(
-    'bg-secondary text-foreground rounded-none px-3 py-2 ios:py-2.5 text-[14px] border border-border'
-  ),
-  reuseRow: cn('flex-row items-center justify-between gap-2'),
-  reuseLabel: cn('flex-1 text-[13px] text-muted-foreground')
-} as const

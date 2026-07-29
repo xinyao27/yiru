@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, Switch, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Switch, Text, TextInput, View } from 'react-native'
 
 import {
   ArrowRight,
   GitMerge,
   GitPullRequest as GitPullRequestArrow,
   Sparkle as Sparkles,
-  Warning as TriangleAlert,
-  X
+  Warning as TriangleAlert
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
@@ -25,6 +24,10 @@ import {
 } from '../../source-control/pr-create'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { RpcSuccess } from '../../transport/types'
+import { MobileGlassIconButton } from '../glass/icon-button'
+import { MobileGlassPressable } from '../glass/pressable'
+import { MobileGlassSurface } from '../glass/surface'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { MobilePrBasePicker } from '../pr-base-picker'
 import { mobilePrComposeFormStyles as styles } from './pr-compose-form-styles'
 
@@ -164,48 +167,48 @@ export function MobilePrComposeForm({
   ])
 
   return (
-    <View className={styles.root}>
-      <View className={styles.headingRow}>
-        <View className={styles.headingTitle}>
+    <View className="gap-2">
+      <View className="mb-1 flex-row items-center justify-between gap-2">
+        <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <ReviewIcon size={14} colorClassName="accent-muted-foreground" />
-          <Text className={styles.heading}>New {copy.reviewLabel}</Text>
+          <Text className="text-foreground text-sm font-bold">New {copy.reviewLabel}</Text>
         </View>
-        <View className={styles.headingActions}>
-          <Pressable
-            className={cn(styles.genButton, styles.genButtonPressedActive)}
+        <View className="flex-row items-center gap-1">
+          <MobileGlassPressable
+            accessibilityLabel={`Generate ${copy.reviewLabel} details with AI`}
+            accessibilityRole="button"
+            className="min-h-8 rounded-full"
+            contentClassName="min-h-8 flex-row items-center justify-center gap-1 rounded-full px-3"
             disabled={generating || submitting}
             onPress={() => void generate()}
-            accessibilityRole="button"
-            accessibilityLabel={`Generate ${copy.reviewLabel} details with AI`}
           >
             {generating ? (
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : (
               <Sparkles size={13} colorClassName="accent-muted-foreground" />
             )}
-            <Text className={styles.genButtonText}>{generating ? 'Generating…' : 'Generate'}</Text>
-          </Pressable>
-          <Pressable
-            className={styles.iconButton}
-            onPress={onCancel}
-            disabled={submitting}
-            accessibilityRole="button"
+            <Text className="text-muted-foreground text-xs">
+              {generating ? 'Generating…' : 'Generate'}
+            </Text>
+          </MobileGlassPressable>
+          <MobileGlassIconButton
             accessibilityLabel="Cancel"
-            hitSlop={8}
-          >
-            <X size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            disabled={submitting}
+            icon="close"
+            onPress={onCancel}
+            size="small"
+          />
         </View>
       </View>
 
       {head ? (
-        <View className={styles.branchFlow}>
+        <View className="min-h-7 flex-row items-center gap-1">
           <Text className={styles.branchToken} numberOfLines={1}>
             {head}
           </Text>
           <ArrowRight size={12} colorClassName="accent-muted-foreground" />
           <Text
-            className={cn(styles.branchToken, baseConflict && styles.branchTokenError)}
+            className={cn(styles.branchToken, baseConflict && 'text-destructive')}
             numberOfLines={1}
           >
             {base || 'base'}
@@ -213,27 +216,31 @@ export function MobilePrComposeForm({
         </View>
       ) : null}
 
-      <View className={styles.fieldStack}>
-        <TextInput
-          className={styles.titleInput}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Title"
-          placeholderTextColorClassName="accent-muted-foreground"
-          editable={!fieldsLocked}
-          accessibilityLabel={`${copy.titleLabel} title`}
-        />
-        <TextInput
-          className={styles.bodyInput}
-          style={{ textAlignVertical: 'top' }}
-          value={body}
-          onChangeText={setBody}
-          placeholder="Description (optional)"
-          placeholderTextColorClassName="accent-muted-foreground"
-          multiline
-          editable={!fieldsLocked}
-          accessibilityLabel={`${copy.titleLabel} description`}
-        />
+      <View className="gap-2">
+        <MobileGlassSurface className="min-h-10 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground min-h-10 px-3 py-2 text-sm"
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Title"
+            placeholderTextColorClassName="accent-muted-foreground"
+            editable={!fieldsLocked}
+            accessibilityLabel={`${copy.titleLabel} title`}
+          />
+        </MobileGlassSurface>
+        <MobileGlassSurface className="min-h-30 overflow-hidden rounded-xl" isInteractive>
+          <TextInput
+            className="text-foreground min-h-30 px-3 py-2 text-sm"
+            style={{ textAlignVertical: 'top' }}
+            value={body}
+            onChangeText={setBody}
+            placeholder="Description (optional)"
+            placeholderTextColorClassName="accent-muted-foreground"
+            multiline
+            editable={!fieldsLocked}
+            accessibilityLabel={`${copy.titleLabel} description`}
+          />
+        </MobileGlassSurface>
       </View>
 
       {generating ? (
@@ -243,9 +250,9 @@ export function MobilePrComposeForm({
         </View>
       ) : null}
 
-      <View className={styles.baseRow}>
-        <Text className={styles.baseLabel}>Base</Text>
-        <View className={styles.baseControl}>
+      <View className="min-h-10 flex-row items-center gap-2">
+        <Text className="text-muted-foreground w-9 text-xs">Base</Text>
+        <View className="min-w-0 flex-1">
           <MobilePrBasePicker
             client={client}
             worktreeId={worktreeId}
@@ -256,8 +263,8 @@ export function MobilePrComposeForm({
         </View>
       </View>
 
-      <View className={styles.draftRow}>
-        <Text className={styles.draftText}>Create as draft</Text>
+      <MobileGlassSurface className="min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2">
+        <Text className="text-foreground text-xs">Create as draft</Text>
         <Switch
           value={draft}
           onValueChange={setDraft}
@@ -267,40 +274,38 @@ export function MobilePrComposeForm({
           thumbColorClassName="accent-foreground disabled:accent-muted-foreground"
           ios_backgroundColorClassName="accent-secondary"
         />
-      </View>
+      </MobileGlassSurface>
       {error || submitDisabledReason ? (
         <View className={styles.notice}>
           <TriangleAlert size={13} colorClassName="accent-destructive" />
-          <Text className={cn(styles.noticeText, styles.errorText)}>
+          <Text className={cn(styles.noticeText, 'text-destructive')}>
             {error ?? submitDisabledReason}
           </Text>
         </View>
       ) : null}
-      <Pressable
-        className={cn(
-          styles.submit,
-          (submitting || !canSubmit) && styles.submitDisabled,
-          styles.submitPressedActive
-        )}
-        disabled={submitting || !canSubmit}
-        onPress={() => void submit()}
-        accessibilityRole="button"
-      >
-        {submitting ? (
-          <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-        ) : (
-          <ReviewIcon size={14} colorClassName="accent-primary-foreground" />
-        )}
-        <Text className={styles.submitText}>
-          {pushBeforeCreate
-            ? draft
-              ? `Push & create draft ${copy.shortLabel}`
-              : `Push & create ${copy.shortLabel}`
-            : draft
-              ? `Create draft ${copy.shortLabel}`
-              : `Create ${copy.shortLabel}`}
-        </Text>
-      </Pressable>
+      {submitting ? (
+        <View className="mt-1 min-h-11 items-center justify-center">
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        </View>
+      ) : (
+        <MobileGlassTextButton
+          className="mt-1"
+          disabled={!canSubmit}
+          isFullWidth
+          isProminent
+          label={
+            pushBeforeCreate
+              ? draft
+                ? `Push & create draft ${copy.shortLabel}`
+                : `Push & create ${copy.shortLabel}`
+              : draft
+                ? `Create draft ${copy.shortLabel}`
+                : `Create ${copy.shortLabel}`
+          }
+          onPress={() => void submit()}
+          size="large"
+        />
+      )}
     </View>
   )
 }

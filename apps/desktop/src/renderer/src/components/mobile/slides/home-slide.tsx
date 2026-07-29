@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
+import logo from '../../../../../../resources/yiru-wordmark.png?url'
 import { cn } from '../../../lib/class-names'
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
 import { mobileHomePreviewStyles } from '../home-preview-tailwind'
@@ -236,16 +237,7 @@ function UsageBar({ label, pct }: { label: string; pct: number }): React.JSX.Ele
 }
 
 function YiruLogo(): React.JSX.Element {
-  return (
-    <svg
-      className={mobileHomePreviewStyles.logo}
-      viewBox="0 0 612 621"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M0 0h118l188 192L494 0h118v62L374 304v317H241V304L0 62Z" />
-    </svg>
-  )
+  return <img src={logo} alt="" aria-hidden className={mobileHomePreviewStyles.logo} />
 }
 
 function SettingsIcon(): React.JSX.Element {

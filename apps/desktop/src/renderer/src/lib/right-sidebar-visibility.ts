@@ -7,7 +7,6 @@ type ActiveView = AppState['activeView']
 const RIGHT_SIDEBAR_SUPPRESSED_VIEWS = new Set<ActiveView>([
   'home',
   'settings',
-  'activity',
   'automations',
   'space',
   'skills',

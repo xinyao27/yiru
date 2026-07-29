@@ -35,13 +35,11 @@ export type TerminalWorktreeColdParkCandidate = {
   terminalTabs: readonly ColdParkableTerminalTab[]
   isVisible: boolean
   shouldMeasureHiddenWorktree: boolean
-  hasActivityTerminalPortal: boolean
   hiddenSinceMs: number | null
 }
 
 export type TerminalTabColdParkCandidate = ColdParkableTerminalTab & {
   isVisible: boolean
-  hasActivityTerminalPortal: boolean
   hiddenSinceMs: number | null
 }
 
@@ -78,7 +76,6 @@ export function canParkTerminalWorktreeRenderers(args: {
   parkingEnabled: boolean
   isVisible: boolean
   shouldMeasureHiddenWorktree: boolean
-  hasActivityTerminalPortal: boolean
   hiddenSinceMs: number | null
   nowMs: number
   coldParkDelayMs?: number
@@ -87,7 +84,6 @@ export function canParkTerminalWorktreeRenderers(args: {
     !args.parkingEnabled ||
     args.isVisible ||
     args.shouldMeasureHiddenWorktree ||
-    args.hasActivityTerminalPortal ||
     args.hiddenSinceMs === null
   ) {
     return false
@@ -118,12 +114,7 @@ export function canParkTerminalTabRenderer(args: {
   coldParkDelayMs?: number
 }): boolean {
   const tab = args.terminalTab
-  if (
-    !args.parkingEnabled ||
-    tab.isVisible ||
-    tab.hasActivityTerminalPortal ||
-    tab.hiddenSinceMs === null
-  ) {
+  if (!args.parkingEnabled || tab.isVisible || tab.hiddenSinceMs === null) {
     return false
   }
   if (args.nowMs - tab.hiddenSinceMs < (args.coldParkDelayMs ?? TERMINAL_TAB_COLD_PARK_DELAY_MS)) {

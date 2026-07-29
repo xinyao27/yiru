@@ -1,7 +1,9 @@
+import { Stack } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
-import { SafeAreaView } from '@/components/uniwind-native-components'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { cn } from '@/style/class-names'
 
 import { openMobilePrUrl } from '../components/pr-compose-sheet'
@@ -291,8 +293,9 @@ export function MobileSourceControlPanel({
         </Text>
         <Text className={styles.stateText}>{screenState.message}</Text>
         {screenState.kind === 'error' ? (
-          <Pressable
-            className={styles.retryButton}
+          <MobileGlassTextButton
+            className="mt-3"
+            label="Retry"
             onPress={() => {
               // Why: retrying the request is useless while the transport's
               // reconnect loop is parked at its give-up cap — revive the
@@ -304,9 +307,8 @@ export function MobileSourceControlPanel({
               }
               void loadStatus()
             }}
-          >
-            <Text className={styles.retryText}>Retry</Text>
-          </Pressable>
+            size="large"
+          />
         ) : null}
       </View>
     ) : null
@@ -325,14 +327,55 @@ export function MobileSourceControlPanel({
   const conflictAborting = isMobileConflictAborting(busyAction, conflictOperation)
 
   return (
-    <View ref={setRootRef} className={styles.container}>
-      {embedded ? (
-        <View className={styles.header}>{header}</View>
-      ) : (
-        <SafeAreaView className={styles.header} edges={['top']}>
-          {header}
-        </SafeAreaView>
-      )}
+    <View ref={setRootRef} className="bg-background flex-1">
+      {!embedded ? (
+        <Stack.Screen
+          options={{
+            title: `Source Control · ${worktreeLabel}`,
+            headerRight:
+              Platform.OS === 'ios'
+                ? undefined
+                : () => (
+                    <View className="flex-row items-center gap-2">
+                      {prWebUrl ? (
+                        <MobileGlassIconButton
+                          accessibilityLabel="Open pull request on the web"
+                          icon="external"
+                          onPress={() => openMobilePrUrl(prWebUrl)}
+                        />
+                      ) : null}
+                      <MobileGlassIconButton
+                        accessibilityLabel="Refresh source control"
+                        disabled={ioBusy}
+                        icon="refresh"
+                        onPress={onRefresh}
+                      />
+                    </View>
+                  )
+          }}
+        />
+      ) : null}
+      {!embedded && Platform.OS === 'ios' ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            accessibilityLabel={
+              prWebNumber != null
+                ? `Open pull request #${prWebNumber} on the web`
+                : 'Open pull request on the web'
+            }
+            hidden={!prWebUrl}
+            icon="arrow.up.right.square"
+            onPress={prWebUrl ? () => openMobilePrUrl(prWebUrl) : undefined}
+          />
+          <Stack.Toolbar.Button
+            accessibilityLabel="Refresh source control"
+            disabled={ioBusy}
+            icon="arrow.clockwise"
+            onPress={onRefresh}
+          />
+        </Stack.Toolbar>
+      ) : null}
+      {embedded ? <View className="bg-background">{header}</View> : null}
 
       <MobileSourceControlSegments active={activeTab} onSelect={selectTab} />
 

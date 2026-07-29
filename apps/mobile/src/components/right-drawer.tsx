@@ -10,6 +10,7 @@ import Animated, {
   interpolate,
   Extrapolation
 } from 'react-native-reanimated'
+import { useCSSVariable } from 'uniwind'
 
 import {
   Gesture,
@@ -17,10 +18,9 @@ import {
   GestureHandlerRootView
 } from '@/components/uniwind-native-components'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
-import { spacing } from '../theme/uniwind-theme-values'
 // Why: mount-before-commit logic is anchor-agnostic, so the X-axis drawer reuses
 // the exact same gate as BottomDrawer rather than duplicating it.
 import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
@@ -88,6 +88,9 @@ function MountedRightDrawer({
   const scrollOffsetY = useSharedValue(0)
   const { width: screenWidth } = useWindowDimensions()
   const insets = useSafeAreaInsets()
+  const [spacing3Value, spacing4Value] = useCSSVariable(['--spacing-3', '--spacing-4'])
+  const spacing3 = resolveCssNumber(spacing3Value)
+  const spacing4 = resolveCssNumber(spacing4Value)
   const { isWideLayout } = useResponsiveLayout()
   const panelWidth = resolveRightDrawerPanelWidth(screenWidth, isWideLayout, widthPx)
 
@@ -170,25 +173,25 @@ function MountedRightDrawer({
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
-      className={styles.overlay}
+      className="absolute inset-0 z-50"
       style={[{ zIndex }]}
       accessibilityViewIsModal
       aria-modal
     >
-      <GestureHandlerRootView className={styles.root}>
-        <Animated.View className={styles.backdrop} style={[backdropStyle]}>
+      <GestureHandlerRootView className="flex-1">
+        <Animated.View className="bg-modal-backdrop absolute inset-0" style={[backdropStyle]}>
           <Pressable className="absolute inset-0" onPress={dismiss} />
         </Animated.View>
 
-        <View className={styles.anchor} pointerEvents="box-none">
+        <View className="flex-1 flex-row justify-end" pointerEvents="box-none">
           <GestureDetector gesture={panGesture}>
             <Animated.View
-              className={styles.drawer}
+              className="border-l-hairline border-l-border bg-background h-full overflow-hidden rounded-l-3xl px-3"
               style={[
                 {
                   width: panelWidth,
-                  paddingTop: insets.top + spacing.md,
-                  paddingBottom: insets.bottom + spacing.lg,
+                  paddingTop: insets.top + spacing3,
+                  paddingBottom: insets.bottom + spacing4,
                   paddingRight: insets.right
                 },
                 drawerStyle
@@ -212,11 +215,3 @@ function MountedRightDrawer({
     </Animated.View>
   )
 }
-
-const styles = {
-  overlay: cn('absolute inset-0 z-[1000]'),
-  root: cn('flex-1'),
-  backdrop: cn('absolute inset-0 bg-black/50'),
-  anchor: cn('flex-1 flex-row justify-end'),
-  drawer: cn('h-full bg-background rounded-none px-3 border-l-hairline border-l-border')
-} as const

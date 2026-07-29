@@ -1,11 +1,10 @@
 import { Stack, useGlobalSearchParams, usePathname } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { View, PanResponder, type ViewStyle } from 'react-native'
+import { View, PanResponder, type TextStyle, type ViewStyle } from 'react-native'
 import { useResolveClassNames } from 'uniwind'
 
-import { cn } from '@/style/class-names'
-
 import { useResponsiveLayout } from '../../src/layout/responsive-layout'
+import { shouldUseNativeSessionHeader } from '../../src/session/header-mode'
 import {
   HOST_SIDEBAR_DEFAULT_WIDTH,
   HOST_SIDEBAR_MAX_WIDTH,
@@ -28,12 +27,28 @@ function clampSidebarToWindow(width: number, windowWidth: number): number {
   return Math.min(hardMax, Math.max(HOST_SIDEBAR_MIN_WIDTH, Math.round(width)))
 }
 
-function HostStack({ animation }: { animation: 'none' | 'default' }) {
+type HostStackProps = {
+  animation: 'none' | 'default'
+  showSessionHeader: boolean
+}
+
+function HostStack({ animation, showSessionHeader }: HostStackProps): React.JSX.Element {
+  // Why: this nested native Stack needs its own live token resolution; inheriting only the root
+  // navigation theme can leave a mounted host header on its previous system appearance.
   const contentStyle = useResolveClassNames('bg-background') as ViewStyle
+  const headerTitleStyle = useResolveClassNames('text-foreground text-base font-semibold') as Pick<
+    TextStyle,
+    'color' | 'fontFamily' | 'fontSize' | 'fontWeight'
+  >
   return (
     <Stack
       screenOptions={{
+        headerBackButtonDisplayMode: 'minimal',
+        headerShadowVisible: false,
         headerShown: false,
+        headerStyle: contentStyle,
+        headerTintColor: headerTitleStyle.color,
+        headerTitleStyle,
         contentStyle,
         // In the tablet split view the detail pane should swap instantly like
         // a desktop master-detail; the default slide animates the outgoing
@@ -42,18 +57,32 @@ function HostStack({ animation }: { animation: 'none' | 'default' }) {
       }}
     >
       <Stack.Screen name="[hostId]/index" options={{ title: 'Host' }} />
-      <Stack.Screen name="[hostId]/edit" options={{ title: 'Edit host' }} />
-      <Stack.Screen name="[hostId]/accounts" options={{ title: 'Accounts' }} />
-      <Stack.Screen name="[hostId]/session/[worktreeId]" options={{ title: 'Terminal' }} />
+      <Stack.Screen name="[hostId]/edit" options={{ headerShown: true, title: 'Edit host' }} />
+      <Stack.Screen name="[hostId]/accounts" options={{ headerShown: true, title: 'Accounts' }} />
+      <Stack.Screen
+        name="[hostId]/session/[worktreeId]"
+        options={{ headerShown: showSessionHeader, title: 'Terminal' }}
+      />
       <Stack.Screen
         name="[hostId]/source-control/[worktreeId]"
-        options={{ title: 'Source Control' }}
+        options={{ headerShown: true, title: 'Source Control' }}
       />
       <Stack.Screen
         name="[hostId]/agent-history/[worktreeId]"
-        options={{ title: 'Agent Session History' }}
+        options={{ headerShown: true, title: 'Agent Session History' }}
       />
-      <Stack.Screen name="[hostId]/review/[worktreeId]" options={{ title: 'Changes' }} />
+      <Stack.Screen
+        name="[hostId]/files/[worktreeId]"
+        options={{ headerShown: true, title: 'Files' }}
+      />
+      <Stack.Screen
+        name="[hostId]/files/preview/[worktreeId]"
+        options={{ headerShown: true, title: 'Preview' }}
+      />
+      <Stack.Screen
+        name="[hostId]/review/[worktreeId]"
+        options={{ headerShown: true, title: 'Changes' }}
+      />
       <Stack.Screen name="[hostId]/pr/[worktreeId]" options={{ title: 'Pull Request' }} />
     </Stack>
   )
@@ -140,35 +169,30 @@ export default function HostGroupLayout() {
   // changes so a fold/rotation doesn't remount the navigator and reset the
   // navigation stack — only the sidebar pane toggles in and out.
   return (
-    <View className={styles.row}>
+    <View className="bg-background flex-1 flex-row">
       {showSidebar && sidebarOpen ? (
-        <View className={styles.sidebar} style={[{ width: sidebarWidth }]}>
+        <View className="border-r-border border-r" style={[{ width: sidebarWidth }]}>
           <HostScreen
             embedded
             hostId={hostId}
             action={action}
             onHideSidebar={canCollapseSidebar ? hideSidebar : undefined}
           />
-          {/* Dedicated drag handle straddling the right border — see resizer note. */}
+          {/* Why: the invisible, elevated strip straddles the border so it owns
+              the drag above the worktree list on Android. */}
           <View
-            className={styles.resizeHandle}
+            className="absolute top-0 right-0 bottom-0 z-20 w-6"
             style={{ elevation: 20 }}
             {...resizer.panHandlers}
           />
         </View>
       ) : null}
-      <View className={styles.detail}>
-        <HostStack animation={showSidebar ? 'none' : 'default'} />
+      <View className="min-w-0 flex-1">
+        <HostStack
+          animation={showSidebar ? 'none' : 'default'}
+          showSessionHeader={shouldUseNativeSessionHeader(isWideLayout)}
+        />
       </View>
     </View>
   )
 }
-
-const styles = {
-  row: cn('flex-1 flex-row bg-background'),
-  sidebar: cn('border-r border-r-border'),
-  // Invisible grab strip over the sidebar's right edge. Absolute + elevated so it
-  // sits above the worktree list and reliably owns the drag on Android.
-  resizeHandle: cn('absolute top-0 bottom-0 right-0 w-6 z-[20]'),
-  detail: cn('flex-1 min-w-0')
-} as const

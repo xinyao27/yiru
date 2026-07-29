@@ -431,7 +431,6 @@ const TOP_LEVEL_VIEW_LOOKUP: Record<TopLevelView, true> = {
   home: true,
   terminal: true,
   settings: true,
-  activity: true,
   automations: true,
   space: true,
   skills: true,
@@ -439,21 +438,17 @@ const TOP_LEVEL_VIEW_LOOKUP: Record<TopLevelView, true> = {
 }
 const KNOWN_TOP_LEVEL_VIEWS = new Set<string>(Object.keys(TOP_LEVEL_VIEW_LOOKUP))
 
-function sanitizeHydratedActiveView(
-  value: PersistedUIState['activeView'],
-  experimentalActivityEnabled: boolean
-): TopLevelView {
-  // Why: older or invalid navigation state should land on the durable overview.
-  if (typeof value !== 'string' || !KNOWN_TOP_LEVEL_VIEWS.has(value)) {
+function isTopLevelView(value: unknown): value is TopLevelView {
+  return typeof value === 'string' && KNOWN_TOP_LEVEL_VIEWS.has(value)
+}
+
+function sanitizeHydratedActiveView(value: unknown): TopLevelView {
+  // Why: older data (pre-activeView) or a view a different build doesn't have
+  // should land on the durable overview instead of rendering nothing.
+  if (!isTopLevelView(value)) {
     return 'home'
   }
-  // Why: activity is hidden when its setting is off, so restoring it lands on a
-  // hidden page (same guard as closeSettingsPage). mobile/automations stay
-  // functional when hidden, so only activity is gated here.
-  if (value === 'activity' && !experimentalActivityEnabled) {
-    return 'terminal'
-  }
-  return value as TopLevelView
+  return value
 }
 
 let agentSendTargetModeInstanceCounter = 0
@@ -488,54 +483,11 @@ export type UISlice = {
   acknowledgeAgents: (paneKeys: string[]) => void
   unacknowledgeAgents: (paneKeys: string[]) => void
   activeView: TopLevelView
-  previousViewBeforeSettings:
-    | 'home'
-    | 'terminal'
-    | 'activity'
-    | 'automations'
-    | 'space'
-    | 'skills'
-    | 'mobile'
-  previousViewBeforeActivity:
-    | 'home'
-    | 'terminal'
-    | 'settings'
-    | 'automations'
-    | 'space'
-    | 'skills'
-    | 'mobile'
-  previousViewBeforeAutomations:
-    | 'home'
-    | 'terminal'
-    | 'settings'
-    | 'activity'
-    | 'space'
-    | 'skills'
-    | 'mobile'
-  previousViewBeforeSpace:
-    | 'home'
-    | 'terminal'
-    | 'settings'
-    | 'activity'
-    | 'automations'
-    | 'skills'
-    | 'mobile'
-  previousViewBeforeSkills:
-    | 'home'
-    | 'terminal'
-    | 'settings'
-    | 'activity'
-    | 'automations'
-    | 'space'
-    | 'mobile'
-  previousViewBeforeMobile:
-    | 'home'
-    | 'terminal'
-    | 'settings'
-    | 'activity'
-    | 'automations'
-    | 'space'
-    | 'skills'
+  previousViewBeforeSettings: Exclude<TopLevelView, 'settings'>
+  previousViewBeforeAutomations: Exclude<TopLevelView, 'automations'>
+  previousViewBeforeSpace: Exclude<TopLevelView, 'space'>
+  previousViewBeforeSkills: Exclude<TopLevelView, 'skills'>
+  previousViewBeforeMobile: Exclude<TopLevelView, 'mobile'>
   setActiveView: (view: UISlice['activeView']) => void
   openHomePage: () => void
   newWorkspaceDraft: {
@@ -568,8 +520,6 @@ export type UISlice = {
     // Control must compare against the provider target branch.
     compareBaseRef?: string
   } | null
-  openActivityPage: () => void
-  closeActivityPage: () => void
   selectedAutomationId: string | null
   setSelectedAutomationId: (id: string | null) => void
   pendingAutomationRunNavigation: {
@@ -1074,27 +1024,12 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
 
   activeView: 'home',
   previousViewBeforeSettings: 'terminal',
-  previousViewBeforeActivity: 'terminal',
   previousViewBeforeAutomations: 'terminal',
   previousViewBeforeSpace: 'terminal',
   previousViewBeforeSkills: 'terminal',
   previousViewBeforeMobile: 'terminal',
   setActiveView: (view) => set({ activeView: view }),
   openHomePage: () => set({ activeView: 'home' }),
-  openActivityPage: () => {
-    if (get().settings?.experimentalActivity !== true) {
-      return
-    }
-    set((state) => ({
-      activeView: 'activity',
-      previousViewBeforeActivity:
-        state.activeView === 'activity' ? state.previousViewBeforeActivity : state.activeView
-    }))
-  },
-  closeActivityPage: () =>
-    set((state) => ({
-      activeView: state.previousViewBeforeActivity
-    })),
   newWorkspaceDraft: null,
   selectedAutomationId: null,
   setSelectedAutomationId: (id) => set({ selectedAutomationId: id }),
@@ -1173,14 +1108,9 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     }))
   },
   closeSettingsPage: () =>
-    set((state) => {
-      const previousView =
-        state.previousViewBeforeSettings === 'activity' &&
-        state.settings?.experimentalActivity !== true
-          ? 'terminal'
-          : state.previousViewBeforeSettings
-      return { activeView: previousView }
-    }),
+    set((state) => ({
+      activeView: state.previousViewBeforeSettings
+    })),
   settingsNavigationTarget: null,
   openSettingsTarget: (target) => set({ settingsNavigationTarget: target }),
   clearSettingsTarget: () => set({ settingsNavigationTarget: null }),
@@ -2182,10 +2112,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         // runs on every cross-window ui:stateChanged broadcast (source 'sync', the
         // default); re-applying activeView there would yank the user's current
         // per-window view (navigation state, not a synced preference).
-        activeView:
-          source === 'startup'
-            ? sanitizeHydratedActiveView(ui.activeView, s.settings?.experimentalActivity === true)
-            : s.activeView,
+        activeView: source === 'startup' ? sanitizeHydratedActiveView(ui.activeView) : s.activeView,
         persistedUIReady: true
       }
       // Why: main rebroadcasts UI written by any client. Identical hydration must

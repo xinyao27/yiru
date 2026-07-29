@@ -4,6 +4,7 @@ import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { Text, View } from 'react-native'
 
+import { MobileContentSection } from '../components/content-section'
 import { translate } from '../i18n/translate'
 import type { ContributionDisplayMetric } from './chart-data'
 import { formatMetricValue } from './chart-data'
@@ -73,7 +74,7 @@ export function MobileHomeDashboard({ summary }: MobileHomeDashboardProps): Reac
         </Text>
       </View>
 
-      <View className="border-hairline border-border bg-border mb-4 gap-px">
+      <MobileContentSection className="bg-border mb-4 gap-px">
         <View className="flex-row gap-px">
           <SummaryMetric
             label={translate('mobile.home.agentsSpawned', 'Agents spawned')}
@@ -104,7 +105,7 @@ export function MobileHomeDashboard({ summary }: MobileHomeDashboardProps): Reac
             }
           />
         </View>
-      </View>
+      </MobileContentSection>
 
       <MobileContributionCard summary={stats} metric={metric} onMetricChange={selectMetric} />
       <ContributionCharts points={points} metric={metric} onMetricChange={selectMetric} />

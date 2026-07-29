@@ -1,10 +1,12 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useMemo } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import Svg, { Defs, LinearGradient, Line, Path, Stop } from 'react-native-svg'
+import { useCSSVariable } from 'uniwind'
 
+import { MobileGlassGroup } from '../components/glass/group'
 import { translate } from '../i18n/translate'
-import { useThemeColors } from '../theme/uniwind-theme-values'
+import { resolveCssString } from '../style/resolve-css-variable'
 import {
   buildContributionTrend,
   buildWeekdayRhythm,
@@ -13,6 +15,7 @@ import {
   nextTokenValueMetric,
   type TokenValueMetric
 } from './chart-data'
+import { HomeGlassChartPressable } from './glass-chart-pressable'
 
 const CHART_WIDTH = 320
 const CHART_HEIGHT = 132
@@ -35,14 +38,14 @@ export function ContributionCharts({
   const nextMetric = nextTokenValueMetric(metric)
 
   return (
-    <View className="mb-4 gap-3">
-      <Pressable
-        accessibilityRole="button"
+    <MobileGlassGroup className="mb-4 gap-3" spacing={12}>
+      <HomeGlassChartPressable
         accessibilityLabel={chartActivationLabel(
           translate('mobile.home.trend.title', '30-day momentum'),
           nextMetric
         )}
-        className="border-hairline border-border bg-card active:bg-accent p-4"
+        className="rounded-2xl"
+        contentClassName="p-4"
         onPress={() => onMetricChange(nextMetric)}
       >
         <Text className="text-foreground text-sm font-semibold">
@@ -57,15 +60,15 @@ export function ContributionCharts({
         <View className="mt-4">
           <AreaPlot points={trend.map((point) => point.value)} />
         </View>
-      </Pressable>
+      </HomeGlassChartPressable>
 
-      <Pressable
-        accessibilityRole="button"
+      <HomeGlassChartPressable
         accessibilityLabel={chartActivationLabel(
           translate('mobile.home.rhythm.title', 'Weekly rhythm'),
           nextMetric
         )}
-        className="border-hairline border-border bg-card active:bg-accent p-4"
+        className="rounded-2xl"
+        contentClassName="p-4"
         onPress={() => onMetricChange(nextMetric)}
       >
         <Text className="text-foreground text-sm font-semibold">
@@ -96,13 +99,15 @@ export function ContributionCharts({
             </View>
           ))}
         </View>
-      </Pressable>
-    </View>
+      </HomeGlassChartPressable>
+    </MobileGlassGroup>
   )
 }
 
 function AreaPlot({ points }: { points: number[] }): React.JSX.Element {
-  const colors = useThemeColors()
+  const [chartValue, borderValue] = useCSSVariable(['--color-chart-1', '--color-border'])
+  const chartColor = resolveCssString(chartValue)
+  const borderColor = resolveCssString(borderValue)
   const coordinates = chartCoordinates(points)
   const linePath = coordinates
     .map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x} ${y}`)
@@ -113,8 +118,8 @@ function AreaPlot({ points }: { points: number[] }): React.JSX.Element {
     <Svg width="100%" height={CHART_HEIGHT} viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}>
       <Defs>
         <LinearGradient id="homeTrendFill" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={colors.chart1} stopOpacity={0.34} />
-          <Stop offset="1" stopColor={colors.chart1} stopOpacity={0.02} />
+          <Stop offset="0" stopColor={chartColor} stopOpacity={0.34} />
+          <Stop offset="1" stopColor={chartColor} stopOpacity={0.02} />
         </LinearGradient>
       </Defs>
       {[0, 1, 2, 3].map((line) => {
@@ -126,13 +131,13 @@ function AreaPlot({ points }: { points: number[] }): React.JSX.Element {
             x2={CHART_WIDTH}
             y1={y}
             y2={y}
-            stroke={colors.borderSubtle}
+            stroke={borderColor}
             strokeWidth="1"
           />
         )
       })}
       <Path d={areaPath} fill="url(#homeTrendFill)" />
-      <Path d={linePath} fill="none" stroke={colors.chart1} strokeWidth="2" />
+      <Path d={linePath} fill="none" stroke={chartColor} strokeWidth="2" />
     </Svg>
   )
 }

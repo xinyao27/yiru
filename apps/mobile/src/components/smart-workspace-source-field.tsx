@@ -10,6 +10,8 @@ import { cn } from '@/style/class-names'
 
 import type { SmartNameSelection } from '../workspace-create/composer-source-types'
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
+import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassSurface } from './glass/surface'
 
 type Props = {
   composer: MobileComposerSource
@@ -47,14 +49,17 @@ export function SmartWorkspaceSourceField({
   }
 
   return (
-    <View className={styles.field}>
-      <Text className={styles.label}>
-        {label} <Text className={styles.labelHint}>[Optional]</Text>
+    <View className="mb-3">
+      <Text className="text-muted-foreground mb-1 text-xs font-medium">
+        {label} <Text className="text-muted-foreground font-normal">[Optional]</Text>
       </Text>
       {selection ? (
-        <View className={styles.pill}>
+        <MobileGlassSurface
+          className="flex-row items-center gap-2 rounded-xl px-3 py-2"
+          isFunctional
+        >
           <SelectionIcon kind={selection.kind} />
-          <Text className={styles.pillLabel} numberOfLines={1}>
+          <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
             {selection.label}
           </Text>
           {selection.url ? (
@@ -68,33 +73,22 @@ export function SmartWorkspaceSourceField({
           <Pressable hitSlop={6} onPress={composer.handleClearSmartNameSelection}>
             <X size={15} colorClassName="accent-muted-foreground" />
           </Pressable>
-        </View>
+        </MobileGlassSurface>
       ) : (
-        <Pressable
-          className={cn(styles.input, disabled && styles.disabled)}
+        <MobileGlassPressable
+          className="rounded-xl"
+          contentClassName="rounded-xl px-3 py-3"
           disabled={disabled}
           onPress={openDrawer}
         >
           <Text
-            className={cn(styles.inputText, !composer.name && styles.inputPlaceholder)}
+            className={cn('text-sm text-foreground', !composer.name && 'text-muted-foreground')}
             numberOfLines={1}
           >
             {composer.name || 'Type a name or search a source'}
           </Text>
-        </Pressable>
+        </MobileGlassPressable>
       )}
     </View>
   )
 }
-
-const styles = {
-  field: cn('mb-3'),
-  label: cn('text-[13px] font-medium text-muted-foreground mb-1'),
-  labelHint: cn('font-normal text-muted-foreground/60'),
-  input: cn('bg-secondary rounded-none px-3 py-2.5 border border-border'),
-  disabled: cn('opacity-[0.55]'),
-  inputText: cn('text-[14px] text-foreground'),
-  inputPlaceholder: cn('text-muted-foreground/60'),
-  pill: cn('flex-row items-center gap-2 bg-secondary rounded-none px-3 py-2 border border-border'),
-  pillLabel: cn('flex-1 text-[14px] text-foreground')
-} as const

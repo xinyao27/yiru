@@ -2,7 +2,7 @@
 
 Yiru is an Electron desktop app — plus an Expo mobile companion — for running coding agents across many git worktrees, on local, WSL, SSH, and relay-connected hosts.
 
-This file is the contract for every agent writing code here: structure, naming, cohesion, code quality. For anything visual, [docs/style-guide.md](./docs/style-guide.md) is canonical and this file defers to it.
+This file is the contract for every agent writing code here: structure, naming, cohesion, code quality. For visual work, the platform contract is canonical: [`apps/desktop/DESIGN.md`](./apps/desktop/DESIGN.md) for desktop and [`apps/mobile/DESIGN.md`](./apps/mobile/DESIGN.md) for mobile. [`docs/style-guide.md`](./docs/style-guide.md) is the detailed shared reference.
 
 **The organizing principle.** Tailwind won because the style lives next to the markup: one place to look, one place to change. Apply that to all code. A feature's directory, filenames, and module boundaries exist so an agent can find the code from the feature name alone and change it without touching the rest of the tree. Optimize for *"where does this live?"* being answerable in one guess.
 
@@ -41,7 +41,7 @@ apps/desktop/src/
   cli/        the `yiru` CLI
 apps/mobile/  Expo app: app/ = routes, src/ = features
 packages/     cross-client contracts: workbench-model, runtime-protocol,
-              mobile-relay-protocol, expo-two-way-audio
+              mobile-relay-protocol
 ```
 
 **Import direction is one-way.** `renderer` never imports `main`. `shared` never imports `main`, `renderer`, or `electron` — Node built-ins are fine. `relay` and `cli` may reuse `main` modules. The renderer reaches the main process only through the preload contract. A type used only inside `apps/desktop` belongs in `src/shared/`, not in a package.

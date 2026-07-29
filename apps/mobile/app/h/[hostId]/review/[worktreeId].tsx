@@ -52,5 +52,5 @@ export default function MobileDiffReviewScreen() {
     onReconnect: forceReconnect
   })
 
-  return <MobileDiffReviewScreenView controller={controller} onBack={() => router.back()} />
+  return <MobileDiffReviewScreenView controller={controller} />
 }

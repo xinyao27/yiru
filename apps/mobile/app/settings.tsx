@@ -4,22 +4,22 @@ import { useCallback, useRef, useState } from 'react'
 import { View, Text, Pressable, Linking, ActivityIndicator, ScrollView } from 'react-native'
 
 import {
-  CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
   Info,
   Bell,
   Wrench,
   Shield,
   Lifebuoy as LifeBuoy,
-  Microphone as Mic,
   Globe,
   Palette,
+  Shapes,
   Chat as MessageSquare,
   Terminal as TerminalIcon,
   Key as KeyRound
 } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
+import { MobileContentSection } from '../src/components/content-section'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import {
   loadPendingHostCredentialCleanup,
   subscribePendingHostCredentialCleanup
@@ -88,96 +88,129 @@ export default function SettingsScreen() {
   const showCredentialCleanup = pendingCredentialCount > 0 || credentialStorageUnreadable
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className={styles.heading}>Settings</Text>
-      </View>
-
+    <View className="bg-background flex-1 px-4 pt-4">
       <ScrollView contentContainerClassName="pb-safe-offset-4" showsVerticalScrollIndicator={false}>
-        <View className={styles.section}>
+        <MobileContentSection>
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/appearance-settings')}
+            accessibilityLabel="Appearance"
+            accessibilityRole="button"
           >
-            <Palette size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Appearance</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Palette size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Appearance</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/native-chat-settings')}
+            accessibilityLabel="Chat UI"
+            accessibilityRole="button"
           >
-            <MessageSquare size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Chat UI</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <MessageSquare size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Chat UI</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/terminal-settings')}
+            accessibilityLabel="Terminal"
+            accessibilityRole="button"
           >
-            <TerminalIcon size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Terminal</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <TerminalIcon size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Terminal</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/browser-settings')}
+            accessibilityLabel="Browser"
+            accessibilityRole="button"
           >
-            <Globe size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Browser</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Globe size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Browser</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
-            onPress={() => router.push('/voice-settings')}
-          >
-            <Mic size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Voice</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
-          <View className={styles.separator} />
-          <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/notifications')}
+            accessibilityLabel="Notifications"
+            accessibilityRole="button"
           >
-            <Bell size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Notifications</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Bell size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Notifications</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/troubleshoot')}
+            accessibilityLabel="Troubleshooting"
+            accessibilityRole="button"
           >
-            <Wrench size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Troubleshooting</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Wrench size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Troubleshooting</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => router.push('/about')}
+            accessibilityLabel="About"
+            accessibilityRole="button"
           >
-            <Info size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>About</Text>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Info size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">About</Text>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-        </View>
+        </MobileContentSection>
 
         {showCredentialCleanup ? (
-          <View className={cn(styles.section, styles.sectionSpacer)}>
-            <View className={styles.credentialCleanupRow}>
-              <KeyRound size={16} colorClassName="accent-amber-500" />
-              <View className={styles.credentialCleanupCopy}>
-                <Text className={styles.credentialCleanupTitle}>Pairing credential cleanup</Text>
-                <Text accessibilityLiveRegion="polite" className={styles.rowHint}>
+          <MobileContentSection className="mt-3">
+            <View className="flex-row items-center gap-2 px-3 py-3">
+              <View className="w-5 items-center">
+                <KeyRound size={16} colorClassName="accent-amber-500" />
+              </View>
+              <View className="flex-1 gap-1">
+                <Text className="text-foreground text-sm font-medium">
+                  Pairing credential cleanup
+                </Text>
+                <Text
+                  accessibilityLiveRegion="polite"
+                  className="text-muted-foreground text-xs leading-5"
+                >
                   {credentialRetryFailed
                     ? "Cleanup still couldn't be confirmed. Try again later."
                     : pendingCredentialCount > 0
@@ -185,68 +218,68 @@ export default function SettingsScreen() {
                       : "Couldn't check cleanup status on this device. Retry to be safe."}
                 </Text>
               </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Retry clearing pairing credentials"
-                accessibilityState={{
-                  busy: retryingCredentialCleanup,
-                  disabled: retryingCredentialCleanup
-                }}
-                disabled={retryingCredentialCleanup}
-                hitSlop={8}
-                className={cn(
-                  styles.retryButton,
-                  !retryingCredentialCleanup && styles.rowPressedActive
-                )}
-                onPress={() => void retryCredentialCleanup()}
-              >
-                {retryingCredentialCleanup ? (
+              {retryingCredentialCleanup ? (
+                <View className="h-8 min-w-16 items-center justify-center">
                   <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-                ) : (
-                  <Text className={styles.retryButtonText}>Retry</Text>
-                )}
-              </Pressable>
+                </View>
+              ) : (
+                <MobileGlassTextButton
+                  accessibilityLabel="Retry clearing pairing credentials"
+                  label="Retry"
+                  onPress={() => void retryCredentialCleanup()}
+                  size="small"
+                />
+              )}
             </View>
-          </View>
+          </MobileContentSection>
         ) : null}
 
-        <View className={cn(styles.section, styles.sectionSpacer)}>
+        {__DEV__ ? (
+          <MobileContentSection className="mt-3">
+            <Pressable
+              accessibilityLabel="Open UI Lab"
+              accessibilityRole="button"
+              className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
+              onPress={() => router.push('/ui-lab')}
+            >
+              <View className="w-5 items-center">
+                <Shapes size={16} colorClassName="accent-muted-foreground" />
+              </View>
+              <Text className="text-foreground flex-1 text-sm">UI Lab</Text>
+              <Text className="text-muted-foreground text-xs">DEV ONLY</Text>
+              <View className="w-5 items-center">
+                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              </View>
+            </Pressable>
+          </MobileContentSection>
+        ) : null}
+
+        <MobileContentSection className="mt-3">
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => void Linking.openURL('https://yiru.ai/privacy')}
+            accessibilityLabel="Privacy Policy"
+            accessibilityRole="link"
           >
-            <Shield size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Privacy Policy</Text>
+            <View className="w-5 items-center">
+              <Shield size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Privacy Policy</Text>
           </Pressable>
-          <View className={styles.separator} />
+          <View className="bg-border h-hairline mx-3" />
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => void Linking.openURL(YIRU_GITHUB_ISSUES_URL)}
+            accessibilityLabel="Support"
+            accessibilityRole="link"
           >
-            <LifeBuoy size={16} colorClassName="accent-muted-foreground" />
-            <Text className={styles.rowLabel}>Support</Text>
+            <View className="w-5 items-center">
+              <LifeBuoy size={16} colorClassName="accent-muted-foreground" />
+            </View>
+            <Text className="text-foreground flex-1 text-sm">Support</Text>
           </Pressable>
-        </View>
+        </MobileContentSection>
       </ScrollView>
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background px-4'),
-  topRow: cn('flex-row items-center mb-6'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  section: cn('bg-card rounded-none overflow-hidden'),
-  sectionSpacer: cn('mt-3'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowLabel: cn('flex-1 text-[14px] font-medium text-foreground'),
-  credentialCleanupRow: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  credentialCleanupCopy: cn('flex-1 gap-1'),
-  credentialCleanupTitle: cn('text-[14px] font-medium text-foreground'),
-  rowHint: cn('text-[12px] text-muted-foreground leading-[17px]'),
-  retryButton: cn('w-18 h-8 rounded-none bg-secondary items-center justify-center'),
-  retryButtonText: cn('text-[12px] font-semibold text-foreground'),
-  separator: cn('h-hairline bg-border mx-3')
-} as const

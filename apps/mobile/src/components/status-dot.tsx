@@ -10,7 +10,7 @@ const stateColorClasses: Record<ConnectionState, string> = {
   connecting: 'bg-amber-500',
   handshaking: 'bg-amber-500',
   reconnecting: 'bg-amber-500',
-  disconnected: 'bg-neutral-500/40',
+  disconnected: 'bg-status-neutral',
   'auth-failed': 'bg-red-500'
 }
 
@@ -31,10 +31,6 @@ export function StatusDot({
       ? 'bg-red-500'
       : verdict?.kind === 'warning'
         ? 'bg-amber-500'
-        : (stateColorClasses[state] ?? 'bg-neutral-500/40')
-  return <View className={cn(styles.dot, colorClassName)} />
+        : (stateColorClasses[state] ?? 'bg-status-neutral')
+  return <View className={cn('h-2 w-2 rounded-full', colorClassName)} />
 }
-
-const styles = {
-  dot: cn('w-2 h-2 rounded-none mr-2')
-} as const

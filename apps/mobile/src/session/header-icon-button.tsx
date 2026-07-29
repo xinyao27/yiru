@@ -1,9 +1,6 @@
 import type { ComponentType } from 'react'
-import { Pressable } from 'react-native'
 
-import { cn } from '@/style/class-names'
-
-import { styles } from '../../app/h/[hostId]/session/styles'
+import { MobileGlassPressable } from '@/components/glass/pressable'
 
 type HeaderIconProps = {
   size?: number
@@ -25,13 +22,15 @@ export function MobileSessionHeaderIconButton({
   onPress
 }: MobileSessionHeaderIconButtonProps) {
   return (
-    <Pressable
-      className={cn(styles.filesButton, 'active:bg-secondary', active && styles.filesButtonActive)}
-      onPress={onPress}
-      hitSlop={8}
+    <MobileGlassPressable
       accessibilityLabel={accessibilityLabel}
+      className="h-9 w-9 rounded-full"
+      contentClassName="h-full w-full items-center justify-center rounded-full"
+      hitSlop={4}
+      onPress={onPress}
+      tintColorClassName={active ? 'accent-secondary' : undefined}
     >
       <Icon size={18} colorClassName="accent-muted-foreground" />
-    </Pressable>
+    </MobileGlassPressable>
   )
 }

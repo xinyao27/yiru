@@ -1,11 +1,13 @@
 import type { GitBranchChangeEntry } from '@yiru/workbench-model/review'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
+import { useCSSVariable } from 'uniwind'
 
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
+import { resolveCssNumber } from '@/style/resolve-css-variable'
 
-import { spacing } from '../theme/uniwind-theme-values'
 import { useForceReconnect } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState, RpcSuccess } from '../transport/types'
@@ -35,6 +37,7 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
   bottomInset,
   refreshNonce = 0
 }: Props) {
+  const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   const forceReconnect = useForceReconnect()
   const [rows, setRows] = useState<MobileCommitRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -139,40 +142,47 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
       const files = filesById[item.id]
       const isOpen = expanded === item.id
       return (
-        <View className={styles.commit}>
+        <View className="border-b-border border-b">
           <Pressable
-            className={cn(styles.commitHeader, styles.commitHeaderPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => toggleCommit(item)}
           >
-            {isOpen ? (
-              <ChevronDown size={14} colorClassName="accent-muted-foreground" />
-            ) : (
-              <ChevronRight size={14} colorClassName="accent-muted-foreground" />
-            )}
-            <View className={styles.commitMain}>
-              <Text className={styles.commitSubject} numberOfLines={1}>
+            <View className="min-w-0 flex-1">
+              <Text className="text-foreground text-sm" numberOfLines={1}>
                 {item.subject}
               </Text>
-              <Text className={styles.commitMeta} numberOfLines={1}>
+              <Text className="text-muted-foreground mt-1 font-mono text-xs" numberOfLines={1}>
                 {item.shortId} · {item.author} · {item.relativeTime}
               </Text>
             </View>
+            <View className="w-5 items-center">
+              {isOpen ? (
+                <ChevronDown size={14} colorClassName="accent-muted-foreground" />
+              ) : (
+                <ChevronRight size={14} colorClassName="accent-muted-foreground" />
+              )}
+            </View>
           </Pressable>
           {isOpen ? (
-            <View className={styles.files}>
+            <View className="gap-1 px-4 pb-2">
               {files === 'loading' || files === undefined ? (
                 <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : files.length === 0 ? (
-                <Text className={styles.empty}>No file changes</Text>
+                <Text className="text-muted-foreground text-xs">No file changes</Text>
               ) : (
                 files.map((file) => (
-                  <View key={file.path} className={styles.fileRow}>
-                    <Text className={styles.filePath} numberOfLines={1}>
+                  <View key={file.path} className="flex-row items-center gap-2">
+                    <Text
+                      className="text-muted-foreground flex-1 font-mono text-xs"
+                      numberOfLines={1}
+                    >
                       {file.path}
                     </Text>
-                    <Text className={styles.fileStat}>
-                      {file.added ? <Text className={styles.add}>+{file.added} </Text> : null}
-                      {file.removed ? <Text className={styles.del}>-{file.removed}</Text> : null}
+                    <Text className="font-mono text-xs">
+                      {file.added ? <Text className="text-git-added">+{file.added} </Text> : null}
+                      {file.removed ? (
+                        <Text className="text-git-deleted">-{file.removed}</Text>
+                      ) : null}
                     </Text>
                   </View>
                 ))
@@ -197,9 +207,13 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
         <Text className={styles.stateText}>
           {view.kind === 'waiting' ? 'Waiting for desktop...' : view.message}
         </Text>
-        <Pressable className={styles.retryButton} onPress={retry} accessibilityLabel="Retry">
-          <Text className={styles.retryText}>Retry</Text>
-        </Pressable>
+        <MobileGlassTextButton
+          accessibilityLabel="Retry"
+          className="mt-3"
+          label="Retry"
+          onPress={retry}
+          size="large"
+        />
       </View>
     )
   }
@@ -222,27 +236,12 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
       data={view.rows}
       renderItem={renderCommit}
       keyExtractor={(row) => row.id}
-      contentContainerStyle={{ paddingBottom: spacing.lg + bottomInset }}
+      contentContainerStyle={{ paddingBottom: spacing4 + bottomInset }}
     />
   )
 })
 
 const styles = {
   state: cn('flex-1 items-center justify-center p-4'),
-  stateText: cn('text-muted-foreground/60 text-[14px]'),
-  retryButton: cn('mt-3 px-4 py-2 rounded-none bg-secondary'),
-  retryText: cn('text-foreground text-[14px] font-semibold'),
-  commit: cn('border-b border-b-border'),
-  commitHeader: cn('flex-row items-center gap-2 px-3 py-2.5'),
-  commitHeaderPressedActive: cn('active:bg-secondary'),
-  commitMain: cn('flex-1 min-w-0'),
-  commitSubject: cn('text-foreground text-[14px]'),
-  commitMeta: cn('text-muted-foreground/60 text-[12px] font-mono mt-[2px]'),
-  files: cn('px-4 pb-2 gap-1'),
-  fileRow: cn('flex-row items-center gap-2'),
-  filePath: cn('flex-1 text-muted-foreground text-[12px] font-mono'),
-  fileStat: cn('text-[12px] font-mono'),
-  add: cn('text-[var(--git-decoration-added)]'),
-  del: cn('text-[var(--git-decoration-deleted)]'),
-  empty: cn('text-muted-foreground/60 text-[12px]')
+  stateText: cn('text-muted-foreground text-sm')
 } as const

@@ -10,7 +10,7 @@ import { requestFriday } from '@/lib/friday'
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { useAppStore } from '@/store'
 
-import logo from '../../../../../resources/logo.svg'
+import logo from '../../../../../resources/yiru-wordmark.png?url'
 import { getKeybindingDefinition, type KeybindingActionId } from '../../../../shared/keybindings'
 
 type WorkspacePanelShortcutHint = {
@@ -131,7 +131,7 @@ export function WorkspacePanelEditorEmptyState({
           src={logo}
           alt=""
           aria-hidden
-          className="mx-auto mb-7 size-12 opacity-15 brightness-0 dark:invert"
+          className="mx-auto mb-7 h-auto w-28 opacity-15 brightness-0 dark:invert"
         />
         <ul className="space-y-2 text-xs">
           {hints.map((hint) => (

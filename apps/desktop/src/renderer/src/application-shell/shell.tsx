@@ -56,7 +56,7 @@ import {
   canGoForwardWorktreeHistory
 } from '@/store/slices/worktree-nav-history'
 
-import logo from '../../../../resources/logo.svg'
+import logo from '../../../../resources/yiru-wordmark.png?url'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import {
   keybindingMatchesAction,
@@ -71,7 +71,6 @@ import {
 import { supportsNativeSidebarMaterial } from '../../../shared/native-sidebar-material-support'
 import type { RemoteWorkspacePatchResult } from '../../../shared/remote-workspace-types'
 import type { OnboardingState, UpdateStatus } from '../../../shared/types'
-import { ActivityTitlebarControls } from '../components/activity/titlebar-controls'
 import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
 import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'
@@ -106,7 +105,6 @@ import { useFridayFloatingTab } from '../components/floating-terminal/use-friday
 import { shouldShowOnboarding } from '../components/onboarding/should-show-onboarding'
 import { onOnboardingReopened } from '../components/onboarding/show-onboarding-event'
 import { shouldRenderPetOverlay } from '../components/pet/overlay-visibility'
-import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
 import { WorkspacePortScanner } from '../components/ports/workspace-port-scanner'
 import { installRendererCommandToasts } from '../components/renderer-command-toasts'
 import Sidebar from '../components/sidebar/panel'
@@ -344,7 +342,6 @@ const Landing = lazy(() => import('./landing-page'))
 const HomePage = lazy(() => import('../components/home/page'))
 const WorktreeCreationPanel = lazy(() => import('../components/worktree-creation/panel'))
 const AutomationsPage = lazy(() => import('../components/automations/page'))
-const ActivityPrototypePage = lazy(() => import('../components/activity/prototype-page'))
 const Settings = lazy(() => import('../components/settings/page'))
 const SkillsPage = lazy(() => import('../components/skills/page'))
 const WorkspaceSpacePage = lazy(() => import('../components/workspace-space/page'))
@@ -1613,13 +1610,9 @@ function App(): React.JSX.Element {
     !hasActiveCoworkingWorkspace &&
     !hasTabBar &&
     effectiveActiveTabExpanded
-  // Why: Activity and Space are full-page navigation surfaces — same
-  // treatment as Settings — so the worktree sidebar is removed for those views.
-  const showSidebar =
-    activeView !== 'settings' &&
-    activeView !== 'activity' &&
-    activeView !== 'space' &&
-    activeView !== 'skills'
+  // Why: Space and Skills are full-page navigation surfaces, so they remove the
+  // worktree sidebar just like Settings does.
+  const showSidebar = activeView !== 'settings' && activeView !== 'space' && activeView !== 'skills'
   const settingsChromeOverlayActive = activeView === 'settings'
   const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
   // Why: Landing keep the full titlebar only when the sidebar is
@@ -2238,55 +2231,53 @@ function App(): React.JSX.Element {
               <SidebarWorkspaceSearchButton variant={titlebarControlVariant} stretch />
             ) : null}
             {/* Why: compact history arrows use the quieter regular-weight chrome treatment. */}
-            <PhosphorIconContextProvider weight="regular">
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant={titlebarControlVariant}
-                      size="icon-titlebar"
-                      className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
-                      onClick={() => useAppStore.getState().goBackWorktree()}
-                      disabled={!canGoBackWorktree}
-                      aria-label={translate('auto.App.064bd07810', 'Go back')}
-                    >
-                      <ArrowLeft weight="regular" />
-                    </Button>
-                  }
-                />
-                <TooltipContent side="bottom" sideOffset={6}>
-                  {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
-                    value0: historyBackShortcutLabel
-                  })}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant={titlebarControlVariant}
-                      size="icon-titlebar"
-                      // Why: titlebar-left owns the right seam against the tab strip
-                      // in both open and floating chrome; a trailing control border
-                      // doubles that hairline (and looks faint when disabled).
-                      className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
-                      onClick={() => useAppStore.getState().goForwardWorktree()}
-                      disabled={!canGoForwardWorktree}
-                      aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
-                    >
-                      <ArrowRight weight="regular" />
-                    </Button>
-                  }
-                />
-                <TooltipContent side="bottom" sideOffset={6}>
-                  {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
-                    value0: historyForwardShortcutLabel
-                  })}
-                </TooltipContent>
-              </Tooltip>
-            </PhosphorIconContextProvider>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={titlebarControlVariant}
+                    size="icon-titlebar"
+                    className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
+                    onClick={() => useAppStore.getState().goBackWorktree()}
+                    disabled={!canGoBackWorktree}
+                    aria-label={translate('auto.App.064bd07810', 'Go back')}
+                  >
+                    <ArrowLeft weight="regular" />
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
+                  value0: historyBackShortcutLabel
+                })}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={titlebarControlVariant}
+                    size="icon-titlebar"
+                    // Why: titlebar-left owns the right seam against the tab strip
+                    // in both open and floating chrome; a trailing control border
+                    // doubles that hairline (and looks faint when disabled).
+                    className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
+                    onClick={() => useAppStore.getState().goForwardWorktree()}
+                    disabled={!canGoForwardWorktree}
+                    aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
+                  >
+                    <ArrowRight weight="regular" />
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
+                  value0: historyForwardShortcutLabel
+                })}
+              </TooltipContent>
+            </Tooltip>
           </ButtonGroup>
         </div>
       )}
@@ -2295,9 +2286,7 @@ function App(): React.JSX.Element {
 
   const titlebarMainStrip = (
     <>
-      {activeView === 'activity' ? (
-        <ActivityTitlebarControls />
-      ) : creationLayoutActive ? null : (
+      {creationLayoutActive ? null : (
         <div
           id="titlebar-tabs"
           className={cn(
@@ -2584,7 +2573,6 @@ function App(): React.JSX.Element {
                               {activeView === 'home' ? <HomePage /> : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
-                              {activeView === 'activity' ? <ActivityPrototypePage /> : null}
                               {activeView === 'space' ? <WorkspaceSpacePage /> : null}
                               {activeView === 'mobile' ? <MobilePage /> : null}
                               {hasActiveCoworkingWorkspace ? <CoworkingWorkspaceSurface /> : null}

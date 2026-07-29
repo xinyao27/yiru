@@ -1,0 +1,31 @@
+{
+  "name": "@yiru/editor-themes",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Cross-client editor and syntax-highlighting themes",
+  "type": "commonjs",
+  "sideEffects": false,
+  "exports": {
+    "./cursor": {
+      "types": "./src/cursor.ts",
+      "react-native": "./src/cursor.ts",
+      "browser": "./src/cursor.ts",
+      "development": "./src/cursor.ts",
+      "import": "./dist/esm/cursor.mjs",
+      "require": "./dist/cursor.js",
+      "default": "./dist/cursor.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
+    "fmt": "pnpm --workspace-root exec vp fmt packages/editor-themes",
+    "lint": "pnpm --workspace-root exec vp lint packages/editor-themes --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:desktop",
+    "vite": "catalog:"
+  },
+  "packageManager": "pnpm@11.15.0"
+}

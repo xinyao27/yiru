@@ -1,16 +1,13 @@
 import type { GitHubPRMergeMethod, PRInfo } from '@yiru/workbench-model/review'
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
-
-import { GitMerge, LinkBreak as Link2Off } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { ActivityIndicator, Switch, Text, View } from 'react-native'
 
 import type { MobilePrActions } from '../../session/pr/use-actions'
 import { unlinkMobilePr } from '../../source-control/pr-link'
 import type { RpcClient } from '../../transport/rpc-client'
 import { ConfirmModal } from '../confirm-modal'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { resolveMobilePrMergeMethod, resolvePrActionAvailability } from './pr-actions-state'
-import { prActionsStyles as styles } from './pr-actions-styles'
 import { canShowMobilePRAutoMergeControl } from './pr-auto-merge-availability'
 
 type Props = {
@@ -111,110 +108,91 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
   const copy = confirmCopy()
 
   return (
-    <View className={styles.actionsBlock}>
+    <View className="gap-2">
       {avail.canMerge ? (
-        <Pressable
-          className={cn(
-            styles.actionButton,
-            styles.actionButtonMerge,
-            mergeBusy && styles.actionButtonDisabled
-          )}
-          onPress={() => {
-            setUnlinkError(null)
-            setConfirm({ kind: 'merge', method: effectiveMethod })
-          }}
-          disabled={mergeBusy}
-          accessibilityRole="button"
-          accessibilityLabel="Merge pull request"
-        >
-          {mergeBusy ? (
-            <ActivityIndicator colorClassName="accent-white" />
-          ) : (
-            <GitMerge size={16} colorClassName="accent-white" />
-          )}
-          <Text className={cn(styles.actionButtonText, styles.actionButtonTextMerge)}>
-            Merge pull request
-          </Text>
-        </Pressable>
+        mergeBusy ? (
+          <View className="min-h-11 items-center justify-center">
+            <ActivityIndicator colorClassName="accent-muted-foreground" />
+          </View>
+        ) : (
+          <MobileGlassTextButton
+            isFullWidth
+            isProminent
+            label="Merge pull request"
+            onPress={() => {
+              setUnlinkError(null)
+              setConfirm({ kind: 'merge', method: effectiveMethod })
+            }}
+            accessibilityLabel="Merge pull request"
+            size="large"
+          />
+        )
       ) : null}
 
       {showAutoMerge ? (
-        <View className={styles.toggleRow}>
-          <Text className={styles.toggleLabel}>Auto-merge when ready</Text>
-          <Pressable
-            className={cn(styles.togglePill, autoMerge && styles.togglePillOn)}
-            onPress={() => {
-              setUnlinkError(null)
-              actions.setAutoMerge(!autoMerge, effectiveMethod)
-            }}
-            disabled={autoMergeBusy}
-            accessibilityRole="switch"
-            accessibilityState={{ checked: autoMerge }}
-            accessibilityLabel="Toggle auto-merge"
-          >
-            {autoMergeBusy ? (
-              <ActivityIndicator colorClassName="accent-muted-foreground" />
-            ) : (
-              <Text className={cn(styles.togglePillText, autoMerge && styles.togglePillTextOn)}>
-                {autoMerge ? 'On' : 'Off'}
-              </Text>
-            )}
-          </Pressable>
+        <View className="min-h-11 flex-row items-center justify-between gap-2">
+          <Text className="text-foreground shrink text-sm">Auto-merge when ready</Text>
+          {autoMergeBusy ? (
+            <ActivityIndicator colorClassName="accent-muted-foreground" />
+          ) : (
+            <Switch
+              value={autoMerge}
+              onValueChange={(enabled) => {
+                setUnlinkError(null)
+                actions.setAutoMerge(enabled, effectiveMethod)
+              }}
+              disabled={autoMergeBusy}
+              accessibilityLabel="Toggle auto-merge"
+              trackColorOffClassName="accent-secondary"
+              trackColorOnClassName="accent-muted-foreground"
+              thumbColorClassName="accent-foreground"
+              ios_backgroundColorClassName="accent-secondary"
+            />
+          )}
         </View>
       ) : null}
 
       {showSecondary ? (
-        <View className={styles.secondaryRow}>
+        <View className="flex-row items-stretch gap-2">
           {avail.canClose || avail.canReopen ? (
-            <Pressable
-              className={cn(
-                styles.actionButton,
-                styles.secondaryButton,
-                stateBusy && styles.actionButtonDisabled
-              )}
-              onPress={() => {
-                setUnlinkError(null)
-                setConfirm({ kind: 'state', state: avail.canClose ? 'closed' : 'open' })
-              }}
-              disabled={stateBusy}
-              accessibilityRole="button"
-              accessibilityLabel={avail.canClose ? 'Close pull request' : 'Reopen pull request'}
-            >
-              {stateBusy ? <ActivityIndicator colorClassName="accent-muted-foreground" /> : null}
-              <Text
-                className={cn(
-                  styles.actionButtonText,
-                  avail.canClose && styles.actionButtonDestructiveText
-                )}
-              >
-                {avail.canClose ? 'Close' : 'Reopen'}
-              </Text>
-            </Pressable>
+            stateBusy ? (
+              <ActivityIndicator colorClassName="accent-muted-foreground" />
+            ) : (
+              <MobileGlassTextButton
+                className="flex-1"
+                isDestructive={avail.canClose}
+                isFullWidth
+                label={avail.canClose ? 'Close' : 'Reopen'}
+                onPress={() => {
+                  setUnlinkError(null)
+                  setConfirm({ kind: 'state', state: avail.canClose ? 'closed' : 'open' })
+                }}
+                accessibilityLabel={avail.canClose ? 'Close pull request' : 'Reopen pull request'}
+                size="regular"
+              />
+            )
           ) : null}
           {avail.canUnlink ? (
-            <Pressable
-              className={cn(
-                styles.actionButton,
-                styles.secondaryButton,
-                unlinkBusy && styles.actionButtonDisabled
-              )}
-              onPress={() => void unlink()}
-              disabled={unlinkBusy}
-              accessibilityRole="button"
-              accessibilityLabel="Unlink pull request"
-            >
-              {unlinking ? (
-                <ActivityIndicator colorClassName="accent-muted-foreground" />
-              ) : (
-                <Link2Off size={16} colorClassName="accent-muted-foreground" />
-              )}
-              <Text className={styles.actionButtonText}>Unlink</Text>
-            </Pressable>
+            unlinking ? (
+              <ActivityIndicator colorClassName="accent-muted-foreground" />
+            ) : (
+              <MobileGlassTextButton
+                accessibilityLabel="Unlink pull request"
+                className="flex-1"
+                disabled={unlinkBusy}
+                isFullWidth
+                label="Unlink"
+                onPress={() => void unlink()}
+                size="regular"
+              />
+            )
           ) : null}
         </View>
       ) : null}
 
-      {actionError ? <Text className={styles.actionError}>{actionError}</Text> : null}
+      {actionError ? (
+        <Text className="text-destructive text-xs leading-5">{actionError}</Text>
+      ) : null}
 
       <ConfirmModal
         visible={confirm !== null}

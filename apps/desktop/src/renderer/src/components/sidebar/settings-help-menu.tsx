@@ -32,7 +32,7 @@ import { translate } from '@/i18n/i18n'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 import { useAppStore } from '@/store'
 
-import logo from '../../../../../resources/logo.svg'
+import logo from '../../../../../resources/yiru-wordmark.png?url'
 import { showOnboardingFromRenderer } from '../onboarding/show-onboarding-event'
 import { SetupGuideProgressRing } from '../setup-guide/progress-ring'
 import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'
@@ -238,7 +238,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                   src={logo}
                   alt=""
                   aria-hidden="true"
-                  className="size-3.5 object-contain opacity-55 invert dark:invert-0"
+                  className="h-3.5 w-6 object-contain opacity-55 invert dark:invert-0"
                 />
                 {translate(
                   'auto.components.sidebar.SidebarSettingsHelpMenu.f8a2c91d4e',

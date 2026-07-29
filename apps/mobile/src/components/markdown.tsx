@@ -1,279 +1,257 @@
-import { Fragment, memo, useMemo, type ReactNode } from 'react'
-import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
-
-import { cn } from '@/style/class-names'
-
+import { useCallback, useMemo } from 'react'
+import { Linking, StyleSheet, Text, type ViewStyle } from 'react-native'
 import {
-  detectFilePathSegments,
-  isFilePathCodeSpan,
-  normalizeFilePath
-} from './markdown-file-path-detection'
-import { parseMobileMarkdown } from './markdown-parser'
-import { normalizeMobileMarkdownPreviewHtml } from './markdown-preview-html'
-import { styles } from './markdown-styles'
+  EnrichedMarkdownText,
+  type LinkPressEvent,
+  type MarkdownStyle,
+  type Md4cFlags
+} from 'react-native-enriched-markdown'
+import { useCSSVariable } from 'uniwind'
 
-type Props = {
+import { resolveCssNumber, resolveCssString } from '../style/resolve-css-variable'
+import { filePathFromMarkdownUrl, linkifyMarkdownFilePaths } from './markdown-file-links'
+import { normalizeMobileMarkdownPreviewHtml } from './markdown-preview-html'
+
+type MobileMarkdownProps = {
   content?: string
   fallback?: string
-  /** Multiplier for prose font size (paragraphs, lists, quotes). Defaults to 1;
-   *  the chat view passes >1 so agent prose reads larger than the compact base. */
   textScale?: number
-  /** When provided, detected file-path tokens render as tappable and invoke this
-   *  with the worktree-relative path. Omitted on screens with no file viewer, where
-   *  paths render as plain text (no behavior change). */
   onOpenFile?: (relativePath: string) => void
 }
 
-const MAX_TABLE_ROWS = 40
-const MAX_TABLE_COLUMNS = 8
+const MARKDOWN_CONTAINER_STYLE = {
+  maxWidth: '100%',
+  minWidth: 0
+} satisfies ViewStyle
+const MD4C_FLAGS: Md4cFlags = {
+  latexMath: true,
+  underline: false
+}
 
-function openMarkdownUrl(url: string): void {
+function openMarkdownUrl(url: string, onOpenFile?: (relativePath: string) => void): void {
   const trimmed = url.trim()
-  if (/^(https?:|mailto:)/i.test(trimmed)) {
-    void Linking.openURL(trimmed).catch(() => {})
+  const filePath = filePathFromMarkdownUrl(trimmed)
+  if (onOpenFile && filePath) {
+    onOpenFile(filePath)
+    return
+  }
+  if (/^(https?:\/\/|mailto:)/i.test(trimmed)) {
+    void Linking.openURL(trimmed).catch(() => undefined)
   }
 }
 
-// Render a plain (non-token) text run, splitting out tappable file paths when
-// onOpenFile is provided. Without it, paths stay plain text.
-function renderTextRun(
-  text: string,
-  keyPrefix: string,
-  onOpenFile?: (relativePath: string) => void
-): ReactNode {
-  if (!onOpenFile) {
-    return text
+type MarkdownTheme = {
+  background: string
+  border: string
+  card: string
+  foreground: string
+  mutedForeground: string
+  primary: string
+  bodySize: number
+  bodyLineHeight: number
+  codeSize: number
+  codeLineHeight: number
+  radius: number
+  spacing1: number
+  spacing2: number
+  spacing3: number
+  spacing4: number
+  monoFamily: string
+}
+
+function createMarkdownStyle(theme: MarkdownTheme, textScale: number): MarkdownStyle {
+  const bodySize = theme.bodySize * textScale
+  const bodyLineHeight = theme.bodyLineHeight * textScale
+  const blockGap = theme.spacing2 * textScale
+  const body = {
+    color: theme.foreground,
+    fontSize: bodySize,
+    lineHeight: bodyLineHeight
   }
-  const segments = detectFilePathSegments(text)
-  if (segments.length === 1 && segments[0]!.type === 'text') {
-    return text
-  }
-  return segments.map((segment, segmentIndex) => {
-    if (segment.type === 'file') {
-      return (
-        <Text
-          key={`${keyPrefix}:${segmentIndex}`}
-          className={styles.link}
-          onPress={() => onOpenFile(segment.path)}
-        >
-          {segment.value}
-        </Text>
-      )
-    }
-    return <Fragment key={`${keyPrefix}:${segmentIndex}`}>{segment.value}</Fragment>
+  const heading = (size: number): NonNullable<MarkdownStyle['h1']> => ({
+    color: theme.foreground,
+    fontSize: size * textScale,
+    fontWeight: '700',
+    lineHeight: (size + 6) * textScale,
+    marginBottom: blockGap,
+    marginTop: blockGap
   })
+
+  return {
+    blockquote: {
+      ...body,
+      backgroundColor: 'transparent',
+      borderColor: theme.border,
+      borderWidth: 2,
+      gapWidth: theme.spacing2,
+      marginBottom: blockGap,
+      marginTop: blockGap
+    },
+    code: {
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      color: theme.foreground,
+      fontFamily: theme.monoFamily,
+      fontSize: theme.codeSize * textScale
+    },
+    codeBlock: {
+      ...body,
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      borderRadius: theme.radius,
+      borderWidth: StyleSheet.hairlineWidth,
+      fontFamily: theme.monoFamily,
+      fontSize: theme.codeSize * textScale,
+      lineHeight: theme.codeLineHeight * textScale,
+      marginBottom: blockGap,
+      marginTop: blockGap,
+      padding: theme.spacing2
+    },
+    em: { color: theme.foreground, fontStyle: 'italic' },
+    h1: heading(theme.bodySize),
+    h2: heading(theme.bodySize),
+    h3: heading(theme.bodySize),
+    h4: heading(theme.bodySize),
+    h5: heading(theme.bodySize),
+    h6: { ...heading(theme.bodySize), color: theme.mutedForeground },
+    image: { borderRadius: theme.radius, height: 180, marginBottom: blockGap, marginTop: blockGap },
+    inlineImage: { size: bodySize },
+    link: { color: theme.primary, underline: true },
+    linkVariants: {
+      '^yiru-file://': { color: theme.primary, underline: true }
+    },
+    list: {
+      ...body,
+      bulletColor: theme.mutedForeground,
+      gapWidth: theme.spacing2,
+      markerColor: theme.mutedForeground,
+      markerFontWeight: '600',
+      markerMinWidth: 0,
+      marginBottom: blockGap,
+      marginLeft: theme.spacing3,
+      marginTop: 0
+    },
+    math: {
+      backgroundColor: 'transparent',
+      color: theme.foreground,
+      fontSize: bodySize,
+      marginBottom: blockGap,
+      marginTop: blockGap
+    },
+    inlineMath: { color: theme.foreground },
+    paragraph: { ...body, marginBottom: blockGap, marginTop: 0 },
+    strikethrough: { color: theme.foreground },
+    strong: { color: theme.foreground, fontWeight: 'bold' },
+    table: {
+      ...body,
+      borderColor: theme.border,
+      borderRadius: theme.radius,
+      borderWidth: StyleSheet.hairlineWidth,
+      cellPaddingHorizontal: theme.spacing2,
+      cellPaddingVertical: theme.spacing1,
+      headerBackgroundColor: theme.card,
+      headerTextColor: theme.foreground,
+      marginBottom: blockGap,
+      marginTop: blockGap,
+      rowEvenBackgroundColor: theme.card,
+      rowOddBackgroundColor: 'transparent'
+    },
+    taskList: {
+      borderColor: theme.foreground,
+      checkboxBorderRadius: 4,
+      checkboxSize: theme.spacing4,
+      checkedColor: theme.primary,
+      checkedStrikethrough: false,
+      checkedTextColor: theme.foreground,
+      checkmarkColor: theme.background
+    },
+    thematicBreak: {
+      color: theme.border,
+      height: StyleSheet.hairlineWidth,
+      marginBottom: blockGap,
+      marginTop: blockGap
+    },
+    underline: { color: theme.foreground }
+  }
 }
 
-function renderInline(text: string, onOpenFile?: (relativePath: string) => void): ReactNode[] {
-  const parts: ReactNode[] = []
-  const pattern =
-    /(!\[[^\]]*\]\([^)]+\)|`[^`]+`|~~[^~]+~~|\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|_[^_\n]+_|\[[^\]]+\]\([^)]+\)|https?:\/\/[^\s<]+)/g
-  let lastIndex = 0
-  let match: RegExpExecArray | null
+export function MobileMarkdown({
+  content,
+  fallback = '',
+  textScale = 1,
+  onOpenFile
+}: MobileMarkdownProps): React.JSX.Element | null {
+  const values = useCSSVariable([
+    '--color-background',
+    '--color-border',
+    '--color-card',
+    '--color-foreground',
+    '--color-muted-foreground',
+    '--color-primary',
+    '--text-base',
+    '--text-base--line-height',
+    '--text-sm',
+    '--text-sm--line-height',
+    '--radius-md',
+    '--spacing-1',
+    '--spacing-2',
+    '--spacing-3',
+    '--spacing-4',
+    '--font-mono'
+  ])
+  const theme = useMemo<MarkdownTheme>(
+    () => ({
+      background: resolveCssString(values[0]),
+      border: resolveCssString(values[1]),
+      card: resolveCssString(values[2]),
+      foreground: resolveCssString(values[3]),
+      mutedForeground: resolveCssString(values[4]),
+      primary: resolveCssString(values[5]),
+      bodySize: resolveCssNumber(values[6]),
+      bodyLineHeight: resolveCssNumber(values[7]),
+      codeSize: resolveCssNumber(values[8]),
+      codeLineHeight: resolveCssNumber(values[9]),
+      radius: resolveCssNumber(values[10]),
+      spacing1: resolveCssNumber(values[11]),
+      spacing2: resolveCssNumber(values[12]),
+      spacing3: resolveCssNumber(values[13]),
+      spacing4: resolveCssNumber(values[14]),
+      monoFamily: resolveCssString(values[15])
+    }),
+    [values]
+  )
+  const text = content?.trim() || fallback
+  const markdown = useMemo(() => {
+    const normalized = normalizeMobileMarkdownPreviewHtml(text)
+    return onOpenFile ? linkifyMarkdownFilePaths(normalized) : normalized
+  }, [onOpenFile, text])
+  const markdownStyle = useMemo(() => createMarkdownStyle(theme, textScale), [textScale, theme])
+  const handleLinkPress = useCallback(
+    (event: LinkPressEvent) => openMarkdownUrl(event.url, onOpenFile),
+    [onOpenFile]
+  )
 
-  while ((match = pattern.exec(text))) {
-    if (match.index > lastIndex) {
-      parts.push(renderTextRun(text.slice(lastIndex, match.index), `t${lastIndex}`, onOpenFile))
-    }
-    const token = match[0]
-    const key = `${match.index}:${token}`
-    const image = token.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
-    const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
-    if (image) {
-      parts.push(
-        <Text key={key} className={styles.link} onPress={() => openMarkdownUrl(image[2]!)}>
-          {image[1] || 'image'}
-        </Text>
-      )
-    } else if (link) {
-      parts.push(
-        <Text key={key} className={styles.link} onPress={() => openMarkdownUrl(link[2]!)}>
-          {link[1]}
-        </Text>
-      )
-    } else if (/^https?:\/\//i.test(token)) {
-      parts.push(
-        <Text key={key} className={styles.link} onPress={() => openMarkdownUrl(token)}>
-          {token}
-        </Text>
-      )
-    } else if (token.startsWith('`')) {
-      const code = token.slice(1, -1)
-      if (onOpenFile && isFilePathCodeSpan(code)) {
-        parts.push(
-          <Text
-            key={key}
-            className={cn(styles.inlineCode, styles.inlineCodeLink)}
-            onPress={() => onOpenFile(normalizeFilePath(code.trim()))}
-          >
-            {code}
-          </Text>
-        )
-      } else {
-        parts.push(
-          <Text key={key} className={styles.inlineCode}>
-            {code}
-          </Text>
-        )
-      }
-    } else if (token.startsWith('~~')) {
-      parts.push(
-        <Text key={key} className={styles.strike}>
-          {token.slice(2, -2)}
-        </Text>
-      )
-    } else if (token.startsWith('**') || token.startsWith('__')) {
-      parts.push(
-        <Text key={key} className={styles.bold}>
-          {token.slice(2, -2)}
-        </Text>
-      )
-    } else {
-      parts.push(
-        <Text key={key} className={styles.italic}>
-          {token.slice(1, -1)}
-        </Text>
-      )
-    }
-    lastIndex = pattern.lastIndex
-  }
-
-  if (lastIndex < text.length) {
-    parts.push(renderTextRun(text.slice(lastIndex), `t${lastIndex}`, onOpenFile))
-  }
-  return parts
-}
-
-function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile }: Props) {
-  const text = content?.trim() ?? ''
-  const previewText = useMemo(() => normalizeMobileMarkdownPreviewHtml(text), [text])
-  const blocks = useMemo(() => parseMobileMarkdown(previewText), [previewText])
-  // Scale prose sizes; inline spans inherit fontSize from the wrapping Text.
-  const scaled = (size: number): { fontSize: number; lineHeight: number } | null =>
-    textScale !== 1 ? { fontSize: size * textScale, lineHeight: (size + 6) * textScale } : null
-  const proseScale = scaled(13)
-  const listScale = scaled(14)
   if (!text) {
-    return fallback ? <Text className={styles.paragraph}>{fallback}</Text> : null
+    return null
+  }
+
+  if (!markdown) {
+    return (
+      <Text style={{ color: theme.foreground, fontSize: theme.bodySize * textScale }}>{text}</Text>
+    )
   }
 
   return (
-    <View className={styles.root}>
-      {blocks.map((block, index) => {
-        if (block.type === 'heading') {
-          return (
-            <Text
-              key={index}
-              className={cn(styles.heading, block.level <= 2 ? styles.headingLarge : null)}
-            >
-              {renderInline(block.text, onOpenFile)}
-            </Text>
-          )
-        }
-        if (block.type === 'quote') {
-          return (
-            <View key={index} className={styles.quote}>
-              <Text className={styles.quoteText}>{renderInline(block.text, onOpenFile)}</Text>
-            </View>
-          )
-        }
-        if (block.type === 'code') {
-          return (
-            <View key={index} className={styles.codeBlock}>
-              {block.language ? (
-                <Text className={styles.codeLanguage}>{block.language}</Text>
-              ) : null}
-              <Text className={styles.codeText}>{block.text}</Text>
-            </View>
-          )
-        }
-        if (block.type === 'image') {
-          return (
-            <Pressable
-              key={index}
-              className={styles.imageFrame}
-              onPress={() => openMarkdownUrl(block.url)}
-            >
-              <Text className={styles.link}>{block.alt || 'Open image'}</Text>
-              <Text className={styles.imageCaption} numberOfLines={1}>
-                {block.url}
-              </Text>
-            </Pressable>
-          )
-        }
-        if (block.type === 'table') {
-          const visibleHeaders = block.headers.slice(0, MAX_TABLE_COLUMNS)
-          const visibleRows = block.rows.slice(0, MAX_TABLE_ROWS)
-          const hiddenRows = Math.max(0, block.rows.length - visibleRows.length)
-          const hiddenColumns = Math.max(0, block.headers.length - visibleHeaders.length)
-          return (
-            <ScrollView key={index} horizontal showsHorizontalScrollIndicator={false}>
-              <View className={styles.table}>
-                <View className={styles.tableRow}>
-                  {visibleHeaders.map((header, cellIndex) => (
-                    <Text key={cellIndex} className={cn(styles.tableCell, styles.tableHeader)}>
-                      {renderInline(header, onOpenFile)}
-                    </Text>
-                  ))}
-                </View>
-                {visibleRows.map((row, rowIndex) => (
-                  <View key={rowIndex} className={styles.tableRow}>
-                    {visibleHeaders.map((_, cellIndex) => (
-                      <Text key={cellIndex} className={styles.tableCell}>
-                        {renderInline(row[cellIndex] ?? '', onOpenFile)}
-                      </Text>
-                    ))}
-                  </View>
-                ))}
-                {hiddenRows > 0 || hiddenColumns > 0 ? (
-                  <Text className={styles.tableTruncated}>
-                    {hiddenRows > 0 ? `${hiddenRows} more rows` : ''}
-                    {hiddenRows > 0 && hiddenColumns > 0 ? ' · ' : ''}
-                    {hiddenColumns > 0 ? `${hiddenColumns} more columns` : ''}
-                  </Text>
-                ) : null}
-              </View>
-            </ScrollView>
-          )
-        }
-        if (block.type === 'list') {
-          return (
-            <View key={index} className={styles.list}>
-              {block.items.map((item, itemIndex) => (
-                <View key={itemIndex} className={styles.listItem}>
-                  <Text className={styles.listMarker}>
-                    {item.checked == null
-                      ? block.ordered
-                        ? `${itemIndex + 1}.`
-                        : '-'
-                      : item.checked
-                        ? '[x]'
-                        : '[ ]'}
-                  </Text>
-                  <Text className={styles.listText} style={[listScale]}>
-                    {renderInline(item.text, onOpenFile)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )
-        }
-        if (block.type === 'rule') {
-          return <View key={index} className={styles.rule} />
-        }
-        return (
-          <Text key={index} className={styles.paragraph} style={[proseScale]}>
-            {block.text.split('\n').map((line, lineIndex) => (
-              <Fragment key={lineIndex}>
-                {lineIndex > 0 ? '\n' : null}
-                {renderInline(line, onOpenFile)}
-              </Fragment>
-            ))}
-          </Text>
-        )
-      })}
-    </View>
+    <EnrichedMarkdownText
+      allowTrailingMargin={false}
+      containerStyle={MARKDOWN_CONTAINER_STYLE}
+      enableLinkPreview={false}
+      flavor="github"
+      markdown={markdown}
+      markdownStyle={markdownStyle}
+      md4cFlags={MD4C_FLAGS}
+      onLinkPress={handleLinkPress}
+      selectable={false}
+    />
   )
 }
-
-export const MobileMarkdown = memo(MobileMarkdownInner)

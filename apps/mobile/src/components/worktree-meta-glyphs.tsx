@@ -17,14 +17,14 @@ type Props = {
 
 export function WorktreeMetaGlyphs({ comment, linkedPR, linkedGitLabMR }: Props) {
   const hasNotes = Boolean(comment?.trim())
-  const hasReview = linkedPR != null || linkedGitLabMR != null
+  const hasReview = linkedPR == null && linkedGitLabMR != null
   if (!hasNotes && !hasReview) {
     return null
   }
   return (
-    <View className="flex-row items-center gap-[5px]">
-      {hasNotes && <MessageSquare size={11} colorClassName="accent-muted-foreground" />}
-      {hasReview && <GitMerge size={11} colorClassName="accent-muted-foreground" />}
+    <View className="flex-row items-center gap-2">
+      {hasNotes && <MessageSquare size={14} colorClassName="accent-muted-foreground" />}
+      {hasReview && <GitMerge size={14} colorClassName="accent-muted-foreground" />}
     </View>
   )
 }

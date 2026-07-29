@@ -4,6 +4,8 @@ import { buildContributionCalendar, getContributionTotals } from '@yiru/workbenc
 import { useMemo, useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
+import { MobileContentSection } from '../components/content-section'
+import { MobileGlassSegmentedControl } from '../components/glass/segmented-control'
 import { translate } from '../i18n/translate'
 import { cn } from '../style/class-names'
 import {
@@ -20,17 +22,15 @@ const INTENSITY_CLASS: Record<ContributionCalendarDay['intensity'], string> = {
   4: 'border-border bg-foreground/80'
 }
 const INTENSITY_LEVELS = [0, 1, 2, 3, 4] as const
+const CONTRIBUTION_METRIC_OPTIONS = [
+  { label: translate('mobile.home.activity', 'Activity'), value: 'activity' },
+  { label: translate('mobile.home.tokensTitle', 'Tokens'), value: 'tokens' }
+] as const
 
 type MobileContributionCardProps = {
   summary: RuntimeStatsSummary
   metric: ContributionDisplayMetric
   onMetricChange: (metric: ContributionDisplayMetric) => void
-}
-
-type MetricButtonProps = {
-  label: string
-  isActive: boolean
-  onPress: () => void
 }
 
 type ContributionCellProps = {
@@ -82,7 +82,7 @@ export function MobileContributionCard({
   }
 
   return (
-    <View className="border-hairline border-border bg-card mb-4 p-4">
+    <MobileContentSection className="mb-4 p-4">
       <View className="mb-4 flex-row items-start justify-between gap-3">
         <View className="min-w-0 flex-1">
           <Text className="text-foreground text-sm font-semibold">
@@ -105,16 +105,13 @@ export function MobileContributionCard({
                   )}
           </Text>
         </View>
-        <View className="border-hairline border-border flex-row">
-          <MetricButton
-            label={translate('mobile.home.activity', 'Activity')}
-            isActive={metric === 'activity'}
-            onPress={() => chooseMetric('activity')}
-          />
-          <MetricButton
-            label={translate('mobile.home.tokensTitle', 'Tokens')}
-            isActive={metric !== 'activity'}
-            onPress={() => chooseMetric('tokens')}
+        <View className="w-36">
+          <MobileGlassSegmentedControl
+            accessibilityLabel={translate('mobile.home.metricSelector', 'Contribution metric')}
+            onChange={chooseMetric}
+            options={CONTRIBUTION_METRIC_OPTIONS}
+            size="small"
+            value={metric === 'activity' ? 'activity' : 'tokens'}
           />
         </View>
       </View>
@@ -191,27 +188,7 @@ export function MobileContributionCard({
         onMetricChange={onMetricChange}
         hasTokens={tokenPoints.some((point) => point.value > 0)}
       />
-    </View>
-  )
-}
-
-function MetricButton({ label, isActive, onPress }: MetricButtonProps): React.JSX.Element {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: isActive }}
-      onPress={onPress}
-      className={cn('px-2.5 py-1.5', isActive ? 'bg-accent' : 'bg-transparent')}
-    >
-      <Text
-        className={cn(
-          'text-xs font-medium',
-          isActive ? 'text-foreground' : 'text-muted-foreground'
-        )}
-      >
-        {label}
-      </Text>
-    </Pressable>
+    </MobileContentSection>
   )
 }
 

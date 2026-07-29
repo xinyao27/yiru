@@ -1,6 +1,7 @@
 import { Copy, SelectionAll } from '@phosphor-icons/react'
 import { DIFFS_TAG_NAME, type FileDiffOptions } from '@pierre/diffs'
 import { MultiFileDiff, type DiffLineAnnotation, type SelectedLineRange } from '@pierre/diffs/react'
+import { CURSOR_DARK_THEME_NAME, CURSOR_LIGHT_THEME_NAME } from '@yiru/editor-themes/cursor'
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import type { DecoratedDiffComment } from '@/components/diff-comments/use-diff-comment-decorator'
@@ -8,10 +9,6 @@ import {
   CURSOR_PIERRE_UNSAFE_CSS,
   registerCursorPierreThemes
 } from '@/components/editor/cursor-pierre-theme'
-import {
-  CURSOR_DARK_THEME_NAME,
-  CURSOR_LIGHT_THEME_NAME
-} from '@/components/editor/cursor-theme-source'
 import { buildEditorFontFamily } from '@/components/editor/font-family'
 import { setWithLRU } from '@/components/editor/scroll-cache'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'

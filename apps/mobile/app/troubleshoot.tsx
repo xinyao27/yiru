@@ -3,7 +3,6 @@ import { useState, useCallback, useRef } from 'react'
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from 'react-native'
 
 import {
-  CaretLeft as ChevronLeft,
   CaretDown as ChevronDown,
   CaretUp as ChevronUp,
   Pulse as Activity,
@@ -14,6 +13,9 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
+import { MobileContentSection } from '../src/components/content-section'
+import { MobileGlassGroup } from '../src/components/glass/group'
+import { MobileGlassPressable } from '../src/components/glass/pressable'
 import {
   startDiagnosticFetchTimeout,
   type DiagnosticFetchTimeout
@@ -168,62 +170,57 @@ export default function TroubleshootScreen() {
   }, [])
 
   return (
-    <View ref={setTroubleshootRootRef} className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className={styles.heading}>Troubleshooting</Text>
-      </View>
-
+    <View ref={setTroubleshootRootRef} className="bg-background flex-1 p-4">
       <ScrollView
-        className={styles.scroll}
-        contentContainerClassName={styles.scrollContent}
+        className="flex-1"
+        contentContainerClassName="pb-6"
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          className={cn(
-            styles.diagnosticButton,
-            styles.diagnosticButtonPressedActive,
-            diagnosticStatus === 'running' && styles.diagnosticButtonDisabled
-          )}
-          onPress={runDiagnostics}
-          disabled={diagnosticStatus === 'running'}
-        >
-          {diagnosticStatus === 'running' ? (
-            <ActivityIndicator size="small" colorClassName="accent-foreground" />
-          ) : (
-            <Activity size={16} colorClassName="accent-foreground" />
-          )}
-          <Text className={styles.diagnosticButtonLabel}>
-            {diagnosticStatus === 'running'
-              ? 'Running…'
-              : diagnosticStatus === 'done'
-                ? 'Run again'
-                : 'Run diagnostics'}
-          </Text>
-        </Pressable>
+        <MobileGlassGroup className="mb-4 gap-2" spacing={8}>
+          <MobileGlassPressable
+            className="rounded-full"
+            contentClassName="min-h-11 flex-row items-center justify-center gap-2 rounded-full px-4"
+            disabled={diagnosticStatus === 'running'}
+            onPress={runDiagnostics}
+          >
+            {diagnosticStatus === 'running' ? (
+              <ActivityIndicator size="small" colorClassName="accent-foreground" />
+            ) : (
+              <Activity size={18} colorClassName="accent-foreground" />
+            )}
+            <Text className="text-foreground text-sm">
+              {diagnosticStatus === 'running'
+                ? 'Running…'
+                : diagnosticStatus === 'done'
+                  ? 'Run again'
+                  : 'Run diagnostics'}
+            </Text>
+          </MobileGlassPressable>
 
-        <Pressable
-          className={cn(styles.diagnosticButton, styles.diagnosticButtonPressedActive)}
-          onPress={() => router.push('/connection-log')}
-        >
-          <ScrollText size={16} colorClassName="accent-foreground" />
-          <Text className={styles.diagnosticButtonLabel}>View connection log</Text>
-        </Pressable>
+          <MobileGlassPressable
+            className="rounded-full"
+            contentClassName="min-h-11 flex-row items-center justify-center gap-2 rounded-full px-4"
+            onPress={() => router.push('/connection-log')}
+          >
+            <ScrollText size={18} colorClassName="accent-foreground" />
+            <Text className="text-foreground text-sm">View connection log</Text>
+          </MobileGlassPressable>
+        </MobileGlassGroup>
 
         {checks.length > 0 && (
-          <View className={styles.section}>
+          <MobileContentSection className="mb-4">
             {checks.map((check, i) => (
-              <View key={i}>
-                {i > 0 && <View className={styles.separator} />}
-                <View className={styles.checkRow}>
-                  <StatusIcon status={check.status} />
-                  <Text className={styles.checkLabel}>{check.label}</Text>
+              <View key={`${check.label}-${check.detail}`}>
+                {i > 0 && <View className="bg-border h-hairline mx-3" />}
+                <View className="flex-row items-center gap-2 px-3 py-3">
+                  <View className="w-5 items-center">
+                    <StatusIcon status={check.status} />
+                  </View>
+                  <Text className="text-foreground text-sm font-medium">{check.label}</Text>
                   <Text
                     className={cn(
-                      styles.checkDetail,
-                      check.status === 'fail' && styles.checkDetailFail
+                      'flex-1 text-right text-xs text-muted-foreground',
+                      check.status === 'fail' && 'text-destructive'
                     )}
                   >
                     {check.detail}
@@ -231,74 +228,47 @@ export default function TroubleshootScreen() {
                 </View>
               </View>
             ))}
-          </View>
+          </MobileContentSection>
         )}
 
-        <Text className={styles.sectionHeading}>Common issues</Text>
+        <Text className="text-muted-foreground mt-2 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+          Common issues
+        </Text>
 
-        <View className={styles.section}>
+        <MobileContentSection className="mb-4">
           {troubleshootCommonIssues.map((section, i) => (
             <View key={section.id}>
-              {i > 0 && <View className={styles.separator} />}
+              {i > 0 && <View className="bg-border h-hairline mx-3" />}
               <Pressable
-                className={cn(styles.accordionHeader, styles.rowPressedActive)}
+                className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
                 onPress={() => toggleSection(section.id)}
               >
-                {section.icon}
-                <Text className={styles.accordionTitle}>{section.title}</Text>
-                {expandedId === section.id ? (
-                  <ChevronUp size={16} colorClassName="accent-muted-foreground" />
-                ) : (
-                  <ChevronDown size={16} colorClassName="accent-muted-foreground" />
-                )}
+                <View className="w-5 items-center">{section.icon}</View>
+                <Text className="text-foreground flex-1 text-sm font-medium">{section.title}</Text>
+                <View className="w-5 items-center">
+                  {expandedId === section.id ? (
+                    <ChevronUp size={16} colorClassName="accent-muted-foreground" />
+                  ) : (
+                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
+                  )}
+                </View>
               </Pressable>
               {expandedId === section.id && (
-                <View className={styles.accordionBody}>
-                  {section.steps.map((step, j) => (
-                    <View key={j} className={styles.stepRow}>
-                      <Text className={styles.bullet}>•</Text>
-                      <Text className={styles.stepText}>{step}</Text>
+                <View className="gap-2 px-3 pb-3">
+                  {section.steps.map((step) => (
+                    <View key={`${section.id}-${step}`} className="flex-row gap-2">
+                      <Text className="text-muted-foreground text-xs leading-5">•</Text>
+                      <Text className="text-muted-foreground flex-1 text-xs leading-5">{step}</Text>
                     </View>
                   ))}
                 </View>
               )}
             </View>
           ))}
-        </View>
+        </MobileContentSection>
 
         <View className="h-6" />
       </ScrollView>
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background p-4'),
-  topRow: cn('flex-row items-center mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  scroll: cn('flex-1'),
-  scrollContent: cn('pb-6'),
-  diagnosticButton: cn(
-    'flex-row items-center justify-center gap-2 bg-secondary rounded-none py-3 px-4 mb-4'
-  ),
-  diagnosticButtonPressedActive: cn('active:opacity-[0.7]'),
-  diagnosticButtonDisabled: cn('opacity-[0.5]'),
-  diagnosticButtonLabel: cn('text-[14px] font-semibold text-foreground'),
-  checkRow: cn('flex-row items-center gap-2 py-2.5 px-3.5'),
-  checkLabel: cn('text-[14px] font-medium text-foreground'),
-  checkDetail: cn('flex-1 text-right text-[12px] text-muted-foreground/60'),
-  checkDetailFail: cn('text-destructive'),
-  sectionHeading: cn(
-    'text-[12px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px] mb-2 mt-2 px-1'
-  ),
-  section: cn('bg-card rounded-none overflow-hidden mb-4'),
-  separator: cn('h-hairline bg-border mx-3'),
-  rowPressedActive: cn('active:bg-secondary'),
-  accordionHeader: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  accordionTitle: cn('flex-1 text-[14px] font-medium text-foreground'),
-  accordionBody: cn('px-3.5 pb-3 gap-1.5'),
-  stepRow: cn('flex-row gap-2'),
-  bullet: cn('text-[12px] text-muted-foreground/60 leading-[18px]'),
-  stepText: cn('flex-1 text-[12px] text-muted-foreground/60 leading-[18px]')
-} as const

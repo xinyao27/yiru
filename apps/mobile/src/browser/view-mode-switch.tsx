@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from 'react-native'
+import { View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
 
 import type { MobileBrowserViewMode } from './screencast-request'
 
@@ -10,10 +11,13 @@ type Props = {
   onChange: (mode: MobileBrowserViewMode) => void
 }
 
-const VIEW_MODES: { id: MobileBrowserViewMode; label: string }[] = [
+export const MOBILE_BROWSER_VIEW_MODES: { id: MobileBrowserViewMode; label: string }[] = [
   { id: 'web', label: 'Web' },
   { id: 'mobile', label: 'Mobile' }
 ]
+
+const MOBILE_BROWSER_VIEW_MODE_SEGMENTS: MobileGlassSegmentOption<MobileBrowserViewMode>[] =
+  MOBILE_BROWSER_VIEW_MODES.map((mode) => ({ label: mode.label, value: mode.id }))
 
 export function MobileBrowserViewModeSwitch({
   disabled,
@@ -21,56 +25,15 @@ export function MobileBrowserViewModeSwitch({
   onChange
 }: Props): React.JSX.Element {
   return (
-    <View className={styles.switch}>
-      {VIEW_MODES.map((mode) => (
-        <ViewModeButton
-          key={mode.id}
-          label={mode.label}
-          selected={value === mode.id}
-          disabled={disabled}
-          onPress={() => onChange(mode.id)}
-        />
-      ))}
+    <View className="w-28">
+      <MobileGlassSegmentedControl
+        accessibilityLabel="Website view"
+        disabled={disabled}
+        options={MOBILE_BROWSER_VIEW_MODE_SEGMENTS}
+        size="small"
+        value={value}
+        onChange={onChange}
+      />
     </View>
   )
 }
-
-function ViewModeButton({
-  disabled,
-  label,
-  onPress,
-  selected
-}: {
-  disabled?: boolean
-  label: string
-  onPress: () => void
-  selected: boolean
-}) {
-  return (
-    <Pressable
-      className={cn(
-        styles.button,
-        selected && styles.buttonSelected,
-        !disabled && !selected && styles.buttonPressedActive,
-        disabled && styles.disabled
-      )}
-      disabled={disabled}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected, disabled }}
-      accessibilityLabel={`Show ${label.toLowerCase()} website view`}
-    >
-      <Text className={cn(styles.buttonText, selected && styles.buttonTextSelected)}>{label}</Text>
-    </Pressable>
-  )
-}
-
-const styles = {
-  switch: cn('min-h-7 flex-row items-center rounded-none bg-secondary p-[2px]'),
-  button: cn('min-h-6 min-w-[52px] items-center justify-center rounded-none px-2'),
-  buttonPressedActive: cn('active:bg-border'),
-  buttonSelected: cn('bg-foreground'),
-  buttonText: cn('text-muted-foreground text-[12px] font-semibold'),
-  buttonTextSelected: cn('text-background'),
-  disabled: cn('opacity-[0.35]')
-} as const

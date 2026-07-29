@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import type { GitStatusEntry } from '../../../../../../shared/types'
 import { detectLanguage } from '../../../../lib/language-detect'
 import { joinPath } from '../../../../lib/path'
 import { useAppStore } from '../../../../store'
-import { isStageableStatusEntry } from '../../discard-all-sequence'
 import { buildActiveOpenFileSignature, buildActiveOpenRowKeys } from '../active-open-file-keys'
 import type { DropdownActionKind } from '../dropdown-items'
 import { getNextSourceControlViewMode } from '../header-toolbar'
@@ -13,7 +12,6 @@ import {
   shouldOpenSourceControlRowAsPreview,
   type SourceControlRowOpenEvent
 } from '../split-open'
-import { useSourceControlSelection, type FlatEntry } from '../use-selection'
 import type { SourceControlActionModelController } from './action-model'
 
 export function useSourceControlFileOpen(scope: SourceControlActionModelController) {
@@ -33,17 +31,15 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
     openDiff,
     openFile,
     prGenerating,
-    rightSidebarTab,
     runCompoundCommitAction,
     runCreatePrIntent,
     runRemoteAction,
     setEditorViewMode,
     settings,
-    sourceControlRef,
     sourceControlViewMode,
     trackConflictPath,
     updateSettings,
-    visibleSelectionEntries,
+    visibleFileRowKeys,
     workspacePanelTabId,
     worktreePath
   } = scope
@@ -131,16 +127,9 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
     }
     return buildActiveOpenFileSignature(activeFile.diffSource, activeFile.relativePath)
   })
-  const activeOpenAvailableRowKeys = useMemo(() => {
-    const keys = new Set<string>()
-    for (const entry of visibleSelectionEntries) {
-      keys.add(entry.key)
-    }
-    return keys
-  }, [visibleSelectionEntries])
   const activeOpenRowKeys = useMemo(
-    () => buildActiveOpenRowKeys(activeOpenFileSignature, activeOpenAvailableRowKeys),
-    [activeOpenAvailableRowKeys, activeOpenFileSignature]
+    () => buildActiveOpenRowKeys(activeOpenFileSignature, visibleFileRowKeys),
+    [activeOpenFileSignature, visibleFileRowKeys]
   )
   const handleOpenDiff = useCallback(
     (entry: GitStatusEntry, event?: SourceControlRowOpenEvent) => {
@@ -197,16 +186,6 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
       workspacePanelTabId
     ]
   )
-  const { selectedKeys, handleSelect, handleContextMenu, clearSelection } =
-    useSourceControlSelection({
-      flatEntries: visibleSelectionEntries,
-      onOpenDiff: handleOpenDiff,
-      shouldOpenAsSplit: (event) => isSourceControlSplitOpenModifier(event, isMac),
-      containerRef: sourceControlRef
-    })
-  useEffect(() => {
-    clearSelection()
-  }, [sourceControlViewMode, clearSelection])
   const handleToggleSourceControlViewMode = useCallback(() => {
     if (!settings) {
       return
@@ -215,54 +194,14 @@ export function useSourceControlFileOpen(scope: SourceControlActionModelControll
       sourceControlViewMode: getNextSourceControlViewMode(sourceControlViewMode)
     })
   }, [settings, sourceControlViewMode, updateSettings])
-  useEffect(() => {
-    clearSelection()
-  }, [activeWorktreeId, rightSidebarTab, clearSelection])
-  const flatEntriesByKey = useMemo(
-    () => new Map(visibleSelectionEntries.map((entry) => [entry.key, entry])),
-    [visibleSelectionEntries]
-  )
-  const selectedEntries = useMemo(
-    () =>
-      Array.from(selectedKeys)
-        .map((key) => flatEntriesByKey.get(key))
-        .filter((entry): entry is FlatEntry => Boolean(entry)),
-    [selectedKeys, flatEntriesByKey]
-  )
-  const bulkStagePaths = useMemo(
-    () =>
-      selectedEntries
-        .filter((entry) => isStageableStatusEntry(entry.entry))
-        .map((entry) => entry.entry.path),
-    [selectedEntries]
-  )
-  const bulkUnstagePaths = useMemo(
-    () =>
-      selectedEntries
-        // Why: submodule-internal rows are read-only from the parent worktree.
-        .filter((entry) => entry.area === 'staged' && !entry.entry.submoduleRoot)
-        .map((entry) => entry.entry.path),
-    [selectedEntries]
-  )
-  const selectedKeySet = selectedKeys
   return {
     ...scope,
     handleActionInvoke,
     resolveSplitTargetGroupId,
     activeOpenFileSignature,
-    activeOpenAvailableRowKeys,
     activeOpenRowKeys,
     handleOpenDiff,
-    selectedKeys,
-    handleSelect,
-    handleContextMenu,
-    clearSelection,
-    handleToggleSourceControlViewMode,
-    flatEntriesByKey,
-    selectedEntries,
-    bulkStagePaths,
-    bulkUnstagePaths,
-    selectedKeySet
+    handleToggleSourceControlViewMode
   }
 }
 

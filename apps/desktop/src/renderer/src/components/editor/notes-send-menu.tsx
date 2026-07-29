@@ -211,7 +211,10 @@ export function NotesSendMenu<TNote>({
                 >
                   {triggerLabel ? (
                     <>
-                      <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
+                      <Sparkles
+                        className="size-3 text-violet-500 dark:text-violet-400"
+                        weight="duotone"
+                      />
                       <span className="whitespace-nowrap">{triggerLabel}</span>
                       {triggerCount !== undefined ? (
                         <span className="bg-background/80 text-muted-foreground px-1 text-[10px] tabular-nums">
@@ -221,7 +224,7 @@ export function NotesSendMenu<TNote>({
                       <span className="bg-border/70 mx-0.5 h-3 w-px" aria-hidden />
                     </>
                   ) : null}
-                  <Send className={iconClassName} />
+                  <Send className={iconClassName} weight="duotone" />
                   {actionLabel ? <span className="whitespace-nowrap">{actionLabel}</span> : null}
                 </Button>
               }

@@ -5171,7 +5171,7 @@ function BrowserPagePane({
                 <span className="inline-flex">
                   <Button
                     size="icon"
-                    variant={grab.state !== 'idle' && grabIntent === 'copy' ? 'default' : 'ghost'}
+                    variant="ghost"
                     className={cn(
                       'h-8 w-8',
                       grab.state !== 'idle' &&
@@ -5210,9 +5210,7 @@ function BrowserPagePane({
                 <span className="inline-flex">
                   <Button
                     size="icon"
-                    variant={
-                      grab.state !== 'idle' && grabIntent === 'annotate' ? 'default' : 'ghost'
-                    }
+                    variant="ghost"
                     className={cn(
                       'relative h-8 w-8',
                       grab.state !== 'idle' &&

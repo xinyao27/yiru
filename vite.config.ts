@@ -258,13 +258,14 @@ const yiruRootToolingConfig = defineConfig({
             ]
           },
   define: {
-    YIRU_FEATURE_WALL_ENABLED: 'true'
+    YIRU_BUILD_IDENTITY: 'null',
+    YIRU_FEATURE_WALL_ENABLED: 'true',
+    YIRU_POSTHOG_WRITE_KEY: 'null'
   },
   resolve: {
     alias: {
       '@renderer': resolve(desktopRoot, 'src/renderer/src'),
-      '@': resolve(desktopRoot, 'src/renderer/src'),
-      '@yiru/expo-two-way-audio': resolve(import.meta.dirname, 'packages/expo-two-way-audio/src')
+      '@': resolve(desktopRoot, 'src/renderer/src')
     }
   },
   test: {

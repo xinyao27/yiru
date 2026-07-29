@@ -1,6 +1,6 @@
 {
   "name": "yiru",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "description": "Next-gen IDE for parallel agentic development",
   "homepage": "https://github.com/xinyao27/yiru#readme",
   "bugs": {
@@ -73,6 +73,7 @@
     "@phosphor-icons/react": "catalog:",
     "@xterm/addon-serialize": "catalog:",
     "@xterm/headless": "catalog:",
+    "@yiru/editor-themes": "catalog:",
     "@yiru/mobile-relay-protocol": "catalog:",
     "@yiru/runtime-protocol": "catalog:",
     "@yiru/workbench-model": "catalog:",
@@ -155,6 +156,7 @@
     "monaco-editor": "catalog:",
     "oxlint-plugin-react-doctor": "catalog:",
     "pdfjs-dist": "catalog:",
+    "pngjs": "catalog:",
     "react": "catalog:desktop",
     "react-colorful": "catalog:",
     "react-dom": "catalog:desktop",

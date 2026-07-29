@@ -1,14 +1,12 @@
-import type { ThemeColors } from '../theme/uniwind-theme-values'
 import { MOBILE_RICH_MARKDOWN_KEYBOARD_INSET_SCRIPT } from './rich-markdown-editor-keyboard-inset-script'
+import type { MobileRichMarkdownEditorTheme } from './rich-markdown-editor-theme'
+import { MOBILE_RICH_MARKDOWN_EDITOR_THEME_SCRIPT } from './rich-markdown-editor-theme-script'
 
 export function escapeInjectedJavaScriptString(value: string): string {
   return JSON.stringify(value).replace(/<\/script/gi, '<\\/script')
 }
 
-export function buildMobileRichMarkdownEditorHtml(
-  colors: ThemeColors,
-  colorScheme: 'light' | 'dark'
-): string {
+export function buildMobileRichMarkdownEditorHtml(theme: MobileRichMarkdownEditorTheme): string {
   return `<!doctype html>
 <html>
 <head>
@@ -16,22 +14,30 @@ export function buildMobileRichMarkdownEditorHtml(
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     :root {
-      color-scheme: ${colorScheme};
-      --background: ${colors.bgBase};
-      --editor-surface: ${colors.bgBase};
-      --foreground: ${colors.textPrimary};
-      --muted-foreground: ${colors.textSecondary};
-      --muted: ${colors.bgRaised};
-      --border: ${colors.borderSubtle};
-      --primary: ${colors.textPrimary};
-      --primary-foreground: ${colors.bgBase};
-      --accent-link: ${colors.accentBlue};
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --font-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: ${theme.colorScheme};
+      --background: ${theme.background};
+      --editor-surface: ${theme.background};
+      --foreground: ${theme.foreground};
+      --muted-foreground: ${theme.mutedForeground};
+      --muted: ${theme.muted};
+      --border: ${theme.border};
+      --primary: ${theme.foreground};
+      --primary-foreground: ${theme.background};
+      --accent-link: ${theme.primary};
+      --body-font-size: ${theme.bodyFontSize}px;
+      --body-line-height: ${theme.bodyLineHeight}px;
+      --code-font-size: ${theme.codeFontSize}px;
+      --font-mono: ${theme.monoFamily};
+      --font-sans: system-ui, sans-serif;
+      --radius-sm: ${theme.radiusSmall}px;
+      --radius-md: ${theme.radiusMedium}px;
+      --spacing-1: ${theme.spacing1}px;
+      --spacing-2: ${theme.spacing2}px;
+      --spacing-3: ${theme.spacing3}px;
+      --spacing-4: ${theme.spacing4}px;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
-      width: 100%;
       min-height: 100%;
       margin: 0;
       background: var(--editor-surface);
@@ -39,20 +45,17 @@ export function buildMobileRichMarkdownEditorHtml(
       font-family: var(--font-sans);
       overscroll-behavior: contain;
     }
-    body { overflow: auto; }
     #editor {
       min-height: 100vh;
-      padding: 18px 16px 112px;
+      padding: var(--spacing-4) var(--spacing-4) calc(var(--spacing-4) * 7);
       outline: none;
-      font-size: 14px;
-      line-height: 1.7;
+      font-size: var(--body-font-size);
+      line-height: var(--body-line-height);
       word-wrap: break-word;
       overflow-wrap: anywhere;
       caret-color: var(--foreground);
     }
-    #editor[contenteditable="false"] {
-      opacity: 0.78;
-    }
+    #editor[contenteditable="false"] { opacity: 0.78; }
     #editor:empty::before,
     #editor p.is-empty:first-child::before {
       content: attr(data-placeholder);
@@ -64,7 +67,6 @@ export function buildMobileRichMarkdownEditorHtml(
       margin: 1.5em 0 0.5em;
       font-weight: 600;
       line-height: 1.3;
-      letter-spacing: 0;
     }
     h1 { font-size: 1.85em; font-weight: 700; }
     h2 { font-size: 1.4em; }
@@ -82,7 +84,7 @@ export function buildMobileRichMarkdownEditorHtml(
     ul[data-type="taskList"] > li {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
+      gap: var(--spacing-2);
     }
     ul[data-type="taskList"] > li > label {
       flex-shrink: 0;
@@ -93,11 +95,11 @@ export function buildMobileRichMarkdownEditorHtml(
     }
     ul[data-type="taskList"] input[type="checkbox"] {
       appearance: none;
-      width: 16px;
-      height: 16px;
+      width: var(--spacing-4);
+      height: var(--spacing-4);
       margin: 0;
       border: 1.5px solid color-mix(in srgb, var(--foreground) 55%, transparent);
-      border-radius: 0;
+      border-radius: calc(var(--radius-sm) / 2);
       background: transparent;
       position: relative;
     }
@@ -116,32 +118,29 @@ export function buildMobileRichMarkdownEditorHtml(
       border-width: 0 2px 2px 0;
       transform: rotate(45deg);
     }
-    ul[data-type="taskList"] input[type="checkbox"]:disabled {
-      opacity: 0.65;
-    }
-    ul[data-type="taskList"] > li > div {
-      flex: 1;
-      min-width: 0;
-    }
+    ul[data-type="taskList"] input[type="checkbox"]:disabled { opacity: 0.65; }
+    ul[data-type="taskList"] > li > div { flex: 1; min-width: 0; }
     ul[data-type="taskList"] > li[data-checked="true"] > div {
-      text-decoration: line-through;
-      color: var(--muted-foreground);
+      text-decoration: line-through; color: var(--muted-foreground);
     }
     blockquote {
       padding: 0.5em 1em;
       border-left: 3px solid var(--border);
-      border-radius: 0;
+      border-radius: var(--radius-md);
       color: var(--muted-foreground);
       background: color-mix(in srgb, var(--foreground) 2%, transparent);
     }
     table {
       width: 100%;
       margin: 1em 0;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
       font-size: 0.95em;
     }
     th, td {
-      padding: 8px 14px;
+      padding: var(--spacing-2) var(--spacing-4);
       border: 1px solid var(--border);
       text-align: left;
       vertical-align: top;
@@ -155,15 +154,15 @@ export function buildMobileRichMarkdownEditorHtml(
     }
     code {
       padding: 0.2em 0.4em;
-      border-radius: 0;
+      border-radius: var(--radius-sm);
       background: color-mix(in srgb, var(--foreground) 8%, transparent);
       font-size: 0.88em;
       font-family: var(--font-mono);
     }
     pre {
       margin: 0.75em 0;
-      padding: 14px 18px;
-      border-radius: 0;
+      padding: var(--spacing-3) var(--spacing-4);
+      border-radius: var(--radius-md);
       border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
       overflow-x: auto;
       line-height: 1.55;
@@ -174,10 +173,10 @@ export function buildMobileRichMarkdownEditorHtml(
     pre::before {
       content: attr(data-language);
       display: block;
-      min-height: 13px;
-      margin-bottom: 4px;
+      min-height: var(--code-font-size);
+      margin-bottom: var(--spacing-1);
       color: var(--muted-foreground);
-      font-size: 11px;
+      font-size: var(--code-font-size);
       text-transform: uppercase;
     }
     pre code {
@@ -202,7 +201,7 @@ export function buildMobileRichMarkdownEditorHtml(
       display: block;
       max-width: 100%;
       margin: 0.75em 0;
-      border-radius: 0;
+      border-radius: var(--radius-md);
     }
   </style>
 </head>
@@ -216,6 +215,7 @@ export function buildMobileRichMarkdownEditorHtml(
       var documentGeneration = 0;
       var editable = true;
       var suppressInput = false;
+${MOBILE_RICH_MARKDOWN_EDITOR_THEME_SCRIPT}
 
       function post(message) {
         window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify(message));
@@ -673,7 +673,7 @@ export function buildMobileRichMarkdownEditorHtml(
         }
       });
 
-      window.__yiruRichMarkdown = { setMarkdown: setMarkdown, setEditable: setEditable, runCommand: runCommand, currentMarkdown: currentMarkdown };
+      window.__yiruRichMarkdown = { setMarkdown: setMarkdown, setEditable: setEditable, setTheme: setTheme, runCommand: runCommand, currentMarkdown: currentMarkdown };
 ${MOBILE_RICH_MARKDOWN_KEYBOARD_INSET_SCRIPT}
       post({ type: 'ready' });
     })();

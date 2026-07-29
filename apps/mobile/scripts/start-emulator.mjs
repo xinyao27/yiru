@@ -12,6 +12,7 @@
  *   --port <port>      Metro port (default: first available from 8081)
  *   --no-open          Don't open the app URL automatically
  *   --no-pair          Don't create a temporary paired desktop runtime
+ *   --ui-lab           Skip pairing and open the development-only UI Lab
  *   --wait-for-ready   Wait for Metro to be ready before opening URL
  *   --screenshot       Take a screenshot after opening
  */
@@ -42,6 +43,7 @@ const options = {
   port: null,
   open: true,
   pair: true,
+  uiLab: false,
   waitForReady: false,
   screenshot: false
 }
@@ -58,6 +60,9 @@ for (let i = 0; i < args.length; i++) {
     options.open = false
   } else if (arg === '--no-pair') {
     options.pair = false
+  } else if (arg === '--ui-lab') {
+    options.pair = false
+    options.uiLab = true
   } else if (arg === '--wait-for-ready') {
     options.waitForReady = true
   } else if (arg === '--screenshot') {
@@ -71,6 +76,7 @@ Options:
   --port <port>      Metro port (default: first available from 8081)
   --no-open          Don't open the app URL automatically
   --no-pair          Don't create a temporary paired desktop runtime
+  --ui-lab           Skip pairing and open the development-only UI Lab
   --wait-for-ready   Wait for Metro to be ready before opening URL
   --screenshot       Take a screenshot after opening
   --help, -h         Show this help message
@@ -181,6 +187,13 @@ async function attachEmulator(worktree, device, runtime) {
     logError(`Failed to attach to emulator: ${error.message}`)
     throw error
   }
+}
+
+async function bootUiLabSimulator(device) {
+  logStep('1', `Booting simulator: ${device.name}`)
+  await execFileAsync('xcrun', ['simctl', 'bootstatus', device.udid, '-b'], { timeout: 120000 })
+  await execFileAsync('open', ['-a', 'Simulator', '--args', '-CurrentDeviceUDID', device.udid])
+  logSuccess(`Booted ${device.name}`)
 }
 
 // List available simulators
@@ -363,6 +376,9 @@ async function startMetro(worktree) {
     const env = {
       ...process.env,
       EXPO_NO_TELEMETRY: '1'
+    }
+    if (options.uiLab) {
+      env.EXPO_PUBLIC_YIRU_UI_LAB = '1'
     }
 
     // Use local expo CLI directly instead of pnpm start to avoid workspace issues
@@ -598,7 +614,9 @@ async function main() {
 
     // Why: emulator helpers are worktree-scoped in Yiru; attach is idempotent
     // for the active worktree, while a global helper list cannot prove that.
-    await attachEmulator(worktree, device, pairingRuntime)
+    await (options.uiLab
+      ? bootUiLabSimulator(device)
+      : attachEmulator(worktree, device, pairingRuntime))
 
     // Start Metro
     const metro = await startMetro(worktree)
@@ -627,11 +645,14 @@ async function main() {
         pairingRuntime,
         worktree
       )
+      if (options.uiLab) {
+        logSuccess('Opened UI Lab without pairing')
+      }
 
       // Take screenshot if requested
       if (options.screenshot) {
         // Wait a moment for the app to load
-        await new Promise((r) => setTimeout(r, 3000))
+        await new Promise((r) => setTimeout(r, options.uiLab ? 8000 : 3000))
         await takeScreenshot(device.udid)
       }
     } else {
@@ -641,7 +662,7 @@ async function main() {
     }
 
     log(`${colors.bright}\nSetup complete!${colors.reset}`)
-    logInfo('Press Ctrl+C to stop Metro and the temporary desktop runtime')
+    logInfo(options.uiLab ? 'Press Ctrl+C to stop Metro' : 'Press Ctrl+C to stop Metro and runtime')
 
     // Keep running until Metro exits
     await new Promise((resolve) => {

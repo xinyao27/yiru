@@ -1,14 +1,9 @@
-import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
-import {
-  CaretLeft as ChevronLeft,
-  CaretRight as ChevronRight,
-  Globe
-} from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { CaretRight as ChevronRight, Globe } from '@/components/uniwind-icons'
 
+import { MobileContentSection } from '../src/components/content-section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
   loadTerminalLinkOpenMode,
@@ -36,8 +31,6 @@ function linkModeLabel(mode: MobileTerminalLinkOpenMode): string {
 }
 
 export default function BrowserSettingsScreen(): React.JSX.Element {
-  const router = useRouter()
-
   const [linkMode, setLinkMode] = useState<MobileTerminalLinkOpenMode>('yiru-browser')
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -51,35 +44,31 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
   }, [])
 
   return (
-    <View className={cn(styles.container, 'pt-safe-offset-2')}>
-      <View className={styles.topRow}>
-        <Pressable className={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
-        </Pressable>
-        <Text className={styles.heading}>Browser</Text>
-      </View>
-
-      <ScrollView
-        contentContainerClassName={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text className={styles.groupHeading}>LINKS</Text>
-        <Text className={styles.groupDescription}>
+    <View className="bg-background flex-1 px-4 pt-4">
+      <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
+        <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
+          LINKS
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose where HTTP(S) links tapped in terminal output open.
         </Text>
-        <View className={cn(styles.section, styles.sectionTopGap)}>
+        <MobileContentSection className="mt-2">
           <Pressable
-            className={cn(styles.row, styles.rowPressedActive)}
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setPickerOpen(true)}
           >
-            <Globe size={16} colorClassName="accent-muted-foreground" />
-            <View className={styles.rowContent}>
-              <Text className={styles.rowLabel}>Open terminal links</Text>
-              <Text className={styles.rowSublabel}>{linkModeLabel(linkMode)}</Text>
+            <View className="w-5 items-center">
+              <Globe size={16} colorClassName="accent-muted-foreground" />
             </View>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="flex-1">
+              <Text className="text-foreground text-sm font-medium">Open terminal links</Text>
+              <Text className="text-muted-foreground mt-1 text-xs">{linkModeLabel(linkMode)}</Text>
+            </View>
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-        </View>
+        </MobileContentSection>
       </ScrollView>
 
       <PickerModal<MobileTerminalLinkOpenMode>
@@ -93,20 +82,3 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background px-4 pt-0'),
-  topRow: cn('flex-row items-center mt-2 mb-4'),
-  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
-  heading: cn('text-[20px] font-bold text-foreground'),
-  scrollContent: cn('pb-6'),
-  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
-  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
-  section: cn('bg-card rounded-none overflow-hidden'),
-  sectionTopGap: cn('mt-2'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  rowContent: cn('flex-1'),
-  rowLabel: cn('text-[14px] font-medium text-foreground'),
-  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]')
-} as const

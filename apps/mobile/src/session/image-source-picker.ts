@@ -5,7 +5,7 @@ import { Buffer } from 'buffer'
 import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 
-export type MobileImageSource = 'library' | 'files'
+export type MobileImageSource = 'camera' | 'library' | 'files'
 
 export type PickedMobileImage = {
   // Raw base64 (no data: prefix); fed straight into the existing upload pipeline.
@@ -16,6 +16,13 @@ export class ImageLibraryPermissionError extends Error {
   constructor() {
     super('Photo library permission denied')
     this.name = 'ImageLibraryPermissionError'
+  }
+}
+
+export class CameraPermissionError extends Error {
+  constructor() {
+    super('Camera permission denied')
+    this.name = 'CameraPermissionError'
   }
 }
 
@@ -54,6 +61,27 @@ async function pickFromLibrary(
   return { base64 }
 }
 
+async function pickFromCamera(
+  requestPermission: typeof ImagePicker.requestCameraPermissionsAsync = ImagePicker.requestCameraPermissionsAsync,
+  launch: typeof ImagePicker.launchCameraAsync = ImagePicker.launchCameraAsync
+): Promise<PickedMobileImage | null> {
+  const permission = await requestPermission()
+  if (!permission.granted) {
+    throw new CameraPermissionError()
+  }
+  const result = await launch({
+    mediaTypes: ['images'],
+    base64: true,
+    quality: 1
+  })
+  if (result.canceled) {
+    return null
+  }
+  const asset = result.assets[0]
+  const base64 = asset?.base64 ?? (asset?.uri ? await readUriAsBase64(asset.uri) : null)
+  return base64 ? { base64 } : null
+}
+
 async function pickFromFiles(
   launch: typeof DocumentPicker.getDocumentAsync = DocumentPicker.getDocumentAsync
 ): Promise<PickedMobileImage | null> {
@@ -75,11 +103,16 @@ async function pickFromFiles(
 export async function pickMobileImage(
   source: MobileImageSource,
   deps?: {
+    readonly requestCameraPermission?: typeof ImagePicker.requestCameraPermissionsAsync
+    readonly launchCamera?: typeof ImagePicker.launchCameraAsync
     readonly requestLibraryPermission?: typeof ImagePicker.requestMediaLibraryPermissionsAsync
     readonly launchLibrary?: typeof ImagePicker.launchImageLibraryAsync
     readonly launchFiles?: typeof DocumentPicker.getDocumentAsync
   }
 ): Promise<PickedMobileImage | null> {
+  if (source === 'camera') {
+    return pickFromCamera(deps?.requestCameraPermission, deps?.launchCamera)
+  }
   if (source === 'library') {
     return pickFromLibrary(deps?.requestLibraryPermission, deps?.launchLibrary)
   }

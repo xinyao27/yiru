@@ -7,7 +7,7 @@ const {
   realpathSync,
   rmSync
 } = require('node:fs')
-const { dirname, join, resolve } = require('node:path')
+const { dirname, join, posix, resolve } = require('node:path')
 const { builtinModules, createRequire } = require('node:module')
 
 const projectDir = resolve(__dirname, '..')
@@ -16,6 +16,10 @@ const requireFromProject = createRequire(join(projectDir, 'package.json'))
 const PACKAGED_RUNTIME_PACKAGE_ROOTS = [
   '@electron-toolkit/utils',
   '@parcel/watcher',
+  // Why: the plain-tsc CLI preserves these workspace imports as bare requires.
+  '@yiru/mobile-relay-protocol',
+  '@yiru/runtime-protocol',
+  '@yiru/workbench-model',
   'electron-updater',
   'i18next',
   'jsonc-parser',
@@ -197,20 +201,46 @@ function findAsarEntry(entries, expectedPath) {
   return entries.find((entry) => normalizeAsarEntryPath(entry) === expectedPath)
 }
 
-function verifyPackagedMainRuntimeDeps(resourcesDir, asar = require('@electron/asar')) {
+function findRelativeAsarModule(entries, fromFile, specifier) {
+  const basePath = posix.normalize(posix.join(posix.dirname(fromFile), specifier))
+  const candidates = [basePath, `${basePath}.js`, posix.join(basePath, 'index.js')]
+  return candidates.map((candidate) => findAsarEntry(entries, candidate)).find(Boolean) ?? null
+}
+
+function verifyPackagedRuntimeDeps(resourcesDir, asar = require('@electron/asar')) {
   const asarPath = join(resourcesDir, 'app.asar')
   if (!existsSync(asarPath)) {
     return
   }
 
-  const mainFiles = ['out/main/index.js', 'out/main/agent-hooks/managed-agent-hook-controls.js']
   const entries = asar.listPackage(asarPath)
+  const runtimeFiles = new Set([
+    'out/main/index.js',
+    'out/main/agent-hooks/managed-agent-hook-controls.js'
+  ])
+  for (const entry of entries) {
+    const normalizedPath = normalizeAsarEntryPath(entry)
+    if (
+      normalizedPath.startsWith('out/cli/') &&
+      normalizedPath.endsWith('.js') &&
+      !normalizedPath.endsWith('.test.js')
+    ) {
+      runtimeFiles.add(normalizedPath)
+    }
+  }
   const missing = new Set()
+  const pendingFiles = [...runtimeFiles]
+  const inspectedFiles = new Set()
 
-  for (const file of mainFiles) {
+  while (pendingFiles.length > 0) {
+    const file = pendingFiles.pop()
+    if (!file || inspectedFiles.has(file)) {
+      continue
+    }
+    inspectedFiles.add(file)
     const entry = findAsarEntry(entries, file)
     if (!entry) {
-      throw new Error(`Packaged main file ${file} was not found in ${asarPath}`)
+      throw new Error(`Packaged runtime file ${file} was not found in ${asarPath}`)
     }
 
     // Why: @electron/asar lists entries with host separators; Windows returns
@@ -219,6 +249,13 @@ function verifyPackagedMainRuntimeDeps(resourcesDir, asar = require('@electron/a
     const source = asar.extractFile(asarPath, internalPath).toString('utf8')
     for (const match of source.matchAll(/require\(["']([^"']+)["']\)/g)) {
       const specifier = match[1]
+      if (specifier.startsWith('.')) {
+        const relativeEntry = findRelativeAsarModule(entries, file, specifier)
+        if (relativeEntry) {
+          pendingFiles.push(normalizeAsarEntryPath(relativeEntry))
+        }
+        continue
+      }
       if (!isPackagedExternalSpecifier(specifier)) {
         continue
       }
@@ -231,9 +268,9 @@ function verifyPackagedMainRuntimeDeps(resourcesDir, asar = require('@electron/a
 
   if (missing.size > 0) {
     throw new Error(
-      `Packaged main bundle has bare runtime imports without copied node_modules: ${[
-        ...missing
-      ].join(', ')}`
+      `Packaged runtime files have bare imports without copied node_modules: ${[...missing].join(
+        ', '
+      )}`
     )
   }
 }
@@ -418,5 +455,5 @@ module.exports = {
   prunePackagedSherpaOnnx,
   prunePackagedRuntimeTypeDeclarations,
   prunePackagedZodSources,
-  verifyPackagedMainRuntimeDeps
+  verifyPackagedRuntimeDeps
 }

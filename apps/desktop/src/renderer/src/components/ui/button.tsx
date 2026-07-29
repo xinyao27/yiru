@@ -6,7 +6,7 @@ import { cn } from '@/lib/class-names'
 
 const buttonVariants = cva(
   // Why: every button suppresses the UA ring locally and replaces it with a flat border focus state.
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent cursor-pointer text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent cursor-pointer text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring disabled:pointer-events-none disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -17,6 +17,10 @@ const buttonVariants = cva(
         // Why: toolbar controls must keep an opaque resting surface in both themes.
         outline:
           'border border-border bg-background text-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
+        // Why: right-sidebar toolbar controls need the standard outline interaction
+        // states without painting a main-canvas background over the sidebar.
+        'sidebar-outline':
+          'border border-border bg-sidebar text-muted-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-sidebar dark:hover:bg-accent',
         // Why: titlebar chrome shares the row seams, so controls only draw vertical separators.
         'outline-transparent':
           'border border-y-0 border-border bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-border focus-visible:bg-accent focus-visible:text-accent-foreground dark:border-input dark:hover:bg-accent dark:focus-visible:border-input',
@@ -29,6 +33,10 @@ const buttonVariants = cva(
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
         // Why: data visualizations use the whole plot as the activation target without button chrome.
         chart: 'text-foreground',
+        // Why: actions revealed over an accent row need contrast from the row
+        // surface while remaining transparent at rest.
+        'row-action':
+          'text-muted-foreground hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground',
         // Why: command/listbox rows share selected-state chrome, including a
         // border that remains legible while the user types.
         'picker-row':
@@ -54,6 +62,8 @@ const buttonVariants = cva(
         'chart-plot': 'h-48 w-full p-0 whitespace-normal',
         'sidebar-row':
           'h-auto w-full justify-start gap-2 px-2 py-1.5 text-left text-sm whitespace-normal',
+        'row-trigger':
+          "h-auto gap-1 p-0 text-left text-xs font-normal whitespace-normal [&_svg:not([class*='size-'])]:size-3",
         'popover-hint': 'h-auto gap-2 px-3 py-1.5 text-left',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         // Why: status actions fill the footer while their content retains compact spacing.

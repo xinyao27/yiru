@@ -1,11 +1,12 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, BackHandler, ScrollView, Text, View } from 'react-native'
 
 import { BellRinging as BellRing } from '@/components/uniwind-icons'
 import { SafeAreaView } from '@/components/uniwind-native-components'
-import { cn } from '@/style/class-names'
 
+import { MobileGlassSurface } from '../src/components/glass/surface'
+import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { ensureNotificationPermissions } from '../src/notifications/notifications'
 import { savePushNotificationsEnabled } from '../src/storage/preferences'
@@ -50,94 +51,73 @@ export default function NotificationOptInScreen() {
   )
 
   return (
-    <SafeAreaView className={styles.container}>
-      <ScrollView
-        contentContainerClassName={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className={styles.brandRow}>
-          <YiruLogo size={22} />
-          <Text className={styles.brandName}>Yiru</Text>
+    <SafeAreaView className="bg-background flex-1 px-6">
+      {/* Why: this screen cannot be dismissed with Back, so scrolling keeps
+          every decision reachable in landscape and at large text sizes. */}
+      <ScrollView contentContainerClassName="grow" showsVerticalScrollIndicator={false}>
+        <View className="min-h-13 flex-row items-center gap-2">
+          <YiruLogo size={22} colorClassName="accent-foreground" />
+          <Text className="text-foreground text-sm font-bold">Yiru</Text>
         </View>
 
-        <View className={styles.content}>
-          <View className={styles.iconSurface}>
+        <View className="grow items-center justify-center py-6">
+          <MobileGlassSurface className="mb-6 h-16 w-16 items-center justify-center rounded-3xl">
             <BellRing size={30} colorClassName="accent-foreground" />
-          </View>
-          <Text className={styles.eyebrow}>Notifications</Text>
-          <Text className={styles.title}>Stay updated while away</Text>
-          <Text className={styles.body}>
+          </MobileGlassSurface>
+          <Text className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
+            Notifications
+          </Text>
+          <Text className="text-foreground max-w-md text-center text-sm font-bold tracking-tight">
+            Stay updated while away
+          </Text>
+          <Text className="text-muted-foreground mt-3 max-w-md text-center text-sm leading-5">
             Get notified on this device when an agent needs your input or finishes a task.
           </Text>
         </View>
 
-        <View className={styles.footer}>
+        <View className="w-full max-w-md self-center pb-4">
           {error ? (
-            <Text className={styles.error} accessibilityRole="alert">
+            <Text
+              className="text-destructive mb-2 text-center text-xs leading-5"
+              accessibilityRole="alert"
+            >
               {error}
             </Text>
           ) : null}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Enable agent notifications"
-            disabled={busyChoice !== null}
-            className={cn(
-              styles.primaryButton,
-              styles.buttonPressedActive,
-              busyChoice !== null && styles.buttonDisabled
-            )}
-            onPress={() => void choose('enable')}
-          >
-            {busyChoice === 'enable' ? (
+          {busyChoice === 'enable' ? (
+            <View className="min-h-11 items-center justify-center">
               <ActivityIndicator colorClassName="accent-primary-foreground" />
-            ) : (
-              <Text className={styles.primaryButtonText}>Enable notifications</Text>
-            )}
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            disabled={busyChoice !== null}
-            className={cn(
-              styles.secondaryButton,
-              styles.buttonPressedActive,
-              busyChoice !== null && styles.buttonDisabled
-            )}
-            onPress={() => void choose('skip')}
-          >
-            {busyChoice === 'skip' ? (
+            </View>
+          ) : (
+            <MobileGlassTextButton
+              accessibilityLabel="Enable agent notifications"
+              disabled={busyChoice !== null}
+              isFullWidth
+              isProminent
+              label="Enable notifications"
+              onPress={() => void choose('enable')}
+              size="large"
+            />
+          )}
+          {busyChoice === 'skip' ? (
+            <View className="mt-2 min-h-11 items-center justify-center">
               <ActivityIndicator colorClassName="accent-muted-foreground" />
-            ) : (
-              <Text className={styles.secondaryButtonText}>Not now</Text>
-            )}
-          </Pressable>
-          <Text className={styles.footerNote}>You can change this any time in Settings.</Text>
+            </View>
+          ) : (
+            <MobileGlassTextButton
+              className="mt-2"
+              disabled={busyChoice !== null}
+              isFullWidth
+              label="Not now"
+              onPress={() => void choose('skip')}
+              size="large"
+            />
+          )}
+          <Text className="text-muted-foreground mt-2 text-center text-xs leading-5">
+            You can change this any time in Settings.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background px-6'),
-  // Why: this decision screen cannot be dismissed with Back, so every action
-  // must remain reachable in landscape and with accessibility text scaling.
-  scrollContent: cn('grow'),
-  brandRow: cn('min-h-[52px] flex-row items-center gap-2'),
-  brandName: cn('text-foreground text-[17px] font-bold'),
-  content: cn('grow items-center justify-center py-6'),
-  iconSurface: cn('w-16 h-16 rounded-none items-center justify-center bg-secondary mb-6'),
-  eyebrow: cn(
-    'text-muted-foreground/60 text-[11px] font-semibold tracking-[0.55px] uppercase mb-2'
-  ),
-  title: cn('max-w-[420px] text-foreground text-[26px] font-bold tracking-[-0.3px] text-center'),
-  body: cn('max-w-[420px] text-muted-foreground text-[14px] leading-[21px] text-center mt-3'),
-  footer: cn('w-full max-w-[420px] self-center pb-4'),
-  primaryButton: cn('min-h-11 items-center justify-center rounded-none bg-primary py-2'),
-  primaryButtonText: cn('text-primary-foreground text-[14px] font-semibold'),
-  secondaryButton: cn('min-h-11 items-center justify-center rounded-none mt-1 py-2'),
-  secondaryButtonText: cn('text-muted-foreground text-[14px] font-medium'),
-  buttonPressedActive: cn('active:opacity-[0.72]'),
-  buttonDisabled: cn('opacity-[0.58]'),
-  footerNote: cn('text-muted-foreground/60 text-[12px] leading-[18px] text-center mt-2'),
-  error: cn('text-destructive text-[12px] leading-[18px] text-center mb-2')
-} as const

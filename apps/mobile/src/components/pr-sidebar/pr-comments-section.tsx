@@ -2,12 +2,14 @@ import type { GitHubWorkItemDetails, PRState } from '@yiru/workbench-model/revie
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
+import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
 import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { canAddRootComment } from '../../session/pr/comment-actions'
 import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
 import type { MobilePrCommentActions } from '../../session/pr/use-comment-actions'
+import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import {
   PR_COMMENT_AUDIENCE_FILTERS,
@@ -85,6 +87,14 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
     () => getPRCommentAudienceCounts(comments, botAuthorOverrides),
     [botAuthorOverrides, comments]
   )
+  const audienceOptions = useMemo<MobileGlassSegmentOption<PRCommentAudienceFilter>[]>(
+    () =>
+      PR_COMMENT_AUDIENCE_FILTERS.map((option) => ({
+        label: `${option.label} ${counts[option.value]}`,
+        value: option.value
+      })),
+    [counts]
+  )
   const visible = useMemo(
     () => filterPRCommentsByAudience(comments, filter, botAuthorOverrides),
     [botAuthorOverrides, comments, filter]
@@ -125,8 +135,8 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         title="Comments"
         trailing={
           comments.length > 0 ? (
-            <View className={styles.countChip}>
-              <Text className={styles.countChipText}>{comments.length}</Text>
+            <View className="border-hairline border-border bg-secondary rounded-full px-2 py-1">
+              <Text className="text-muted-foreground text-xs font-semibold">{comments.length}</Text>
             </View>
           ) : undefined
         }
@@ -136,43 +146,19 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         ) : detailsFailed ? (
           <Text className={styles.empty}>Could not load comments. Tap refresh to try again.</Text>
         ) : (
-          <View className={styles.list}>
+          <View className="gap-2">
             {comments.length === 0 ? (
               <Text className={styles.empty}>No comments yet.</Text>
             ) : (
               <>
                 {isPr ? (
-                  <View className={styles.audienceTabs}>
-                    {PR_COMMENT_AUDIENCE_FILTERS.map((tab) => {
-                      const active = tab.value === filter
-                      return (
-                        <Pressable
-                          key={tab.value}
-                          className={cn(styles.audienceTab, active && styles.audienceTabActive)}
-                          onPress={() => selectFilter(tab.value)}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: active }}
-                        >
-                          <Text
-                            className={cn(
-                              styles.audienceTabText,
-                              active && styles.audienceTabTextActive
-                            )}
-                          >
-                            {tab.label}
-                          </Text>
-                          <Text
-                            className={cn(
-                              styles.audienceTabText,
-                              active && styles.audienceTabTextActive
-                            )}
-                          >
-                            {counts[tab.value]}
-                          </Text>
-                        </Pressable>
-                      )
-                    })}
-                  </View>
+                  <MobileGlassSegmentedControl
+                    accessibilityLabel="Comment audience"
+                    options={audienceOptions}
+                    size="small"
+                    value={filter}
+                    onChange={selectFilter}
+                  />
                 ) : null}
                 {visible.length === 0 ? (
                   <Text className={styles.empty}>{getPRCommentAudienceEmptyLabel(filter)}</Text>
@@ -186,24 +172,24 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                       />
                     ))}
                     {remaining > 0 ? (
-                      <Pressable
-                        className={styles.showMore}
+                      <MobileGlassTextButton
+                        isFullWidth
+                        label={`Show ${Math.min(remaining, COMMENT_PAGE)} more${
+                          remaining > COMMENT_PAGE ? ` of ${remaining}` : ''
+                        }`}
                         onPress={() => setLimit((l) => l + COMMENT_PAGE)}
-                        accessibilityRole="button"
-                      >
-                        <Text className={styles.showMoreText}>
-                          Show {Math.min(remaining, COMMENT_PAGE)} more
-                          {remaining > COMMENT_PAGE ? ` of ${remaining}` : ''}
-                        </Text>
-                      </Pressable>
+                        size="regular"
+                      />
                     ) : null}
                   </>
                 )}
               </>
             )}
-            {actions?.error ? <Text className={styles.actionError}>{actions.error}</Text> : null}
+            {actions?.error ? (
+              <Text className="text-destructive text-xs">{actions.error}</Text>
+            ) : null}
             {canComment && actions ? (
-              <View className={styles.rootComposer}>
+              <View className="gap-2">
                 <PRCommentComposer
                   placeholder="Add a comment…"
                   submitLabel="Comment"
@@ -248,15 +234,17 @@ function CommentGroupView({
   return (
     <View className={styles.group}>
       <Pressable
-        className={styles.resolvedHeader}
-        onPress={() => setExpanded((v) => !v)}
         accessibilityRole="button"
+        className="active:bg-accent min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-2"
+        onPress={() => setExpanded((value) => !value)}
       >
-        <Chevron size={14} colorClassName="accent-muted-foreground" />
-        <Text className={styles.resolvedHeaderText} numberOfLines={1}>
+        <Text className="text-muted-foreground min-w-0 flex-1 text-xs" numberOfLines={1}>
           Resolved {group.kind === 'thread' ? 'thread' : 'comment'} by {root.author}
           {count > 1 ? ` (${count})` : ''}
         </Text>
+        <View className="w-5 items-center">
+          <Chevron size={14} colorClassName="accent-muted-foreground" />
+        </View>
       </Pressable>
       {expanded ? <View className={shared.sectionBody}>{cards}</View> : null}
     </View>

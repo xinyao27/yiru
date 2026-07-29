@@ -2,9 +2,10 @@ import type { MobileRuntimeCompatVerdict as CompatVerdict } from '@yiru/runtime-
 import { YIRU_ANDROID_LATEST_APK_URL, YIRU_IOS_TESTFLIGHT_URL } from '@yiru/workbench-model/product'
 import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import { router } from 'expo-router'
-import { Linking, Platform, Pressable, Text, View } from 'react-native'
+import { Linking, Platform, Text, View } from 'react-native'
 
-import { cn } from '@/style/class-names'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
   verdict: Extract<CompatVerdict, { kind: 'blocked' }>
@@ -28,46 +29,34 @@ export function ProtocolBlockScreen({ verdict }: Props) {
     'Already updated? Go back to Hosts and refresh the connection. If this message stays, remove this host and pair it again.'
 
   return (
-    <View className={styles.container}>
-      <View className={styles.card}>
-        <Text className={styles.title}>{title}</Text>
-        <Text className={styles.body}>{body}</Text>
+    <View className="bg-background flex-1 justify-center px-4">
+      <MobileGlassSurface className="rounded-3xl p-4">
+        <Text className="text-foreground mb-2 text-sm font-bold">{title}</Text>
+        <Text className="text-muted-foreground mb-4 text-sm leading-5">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
             updates continue to use the repository release page. */}
-        <Pressable
-          className={cn(styles.primaryButton, styles.pressedActive)}
+        <MobileGlassTextButton
+          className="mb-2"
+          isFullWidth
+          isProminent
+          label={primaryAction.label}
           onPress={() => {
             void Linking.openURL(primaryAction.url)
           }}
-        >
-          <Text className={styles.primaryButtonText}>{primaryAction.label}</Text>
-        </Pressable>
-        <Pressable
-          className={cn(styles.secondaryButton, styles.pressedActive)}
+          size="large"
+        />
+        <MobileGlassTextButton
+          isFullWidth
+          label="Back to hosts"
           onPress={() => {
             // Why: route back to the host list so the user can pair a
             // different host instead of getting trapped on this screen.
             router.replace('/')
           }}
-        >
-          <Text className={styles.secondaryButtonText}>Back to hosts</Text>
-        </Pressable>
-        <Text className={styles.recoveryNote}>{recoveryNote}</Text>
-      </View>
+          size="large"
+        />
+        <Text className="text-muted-foreground mt-3 text-xs leading-5">{recoveryNote}</Text>
+      </MobileGlassSurface>
     </View>
   )
 }
-
-const styles = {
-  container: cn('flex-1 bg-background justify-center px-4'),
-  card: cn('bg-card rounded-none p-4 border border-border'),
-  title: cn('text-[18px] font-bold text-foreground mb-2'),
-  body: cn('text-[14px] text-muted-foreground leading-[20px] mb-4'),
-  primaryButton: cn('bg-foreground py-2.5 rounded-none items-center mb-2'),
-  primaryButtonText: cn('text-[14px] font-semibold text-background'),
-  secondaryButton: cn('bg-secondary py-2.5 rounded-none items-center'),
-  secondaryButtonText: cn('text-[14px] font-semibold text-foreground'),
-  recoveryNote: cn('text-[12px] text-muted-foreground/60 leading-[17px] mt-3'),
-  pressed: cn('opacity-[0.7]'),
-  pressedActive: cn('active:opacity-[0.7]')
-} as const

@@ -1,10 +1,10 @@
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 
+import { MobileGlassPressable } from '@/components/glass/pressable'
 import { GitPullRequest as GitPullRequestArrow } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import type { MobileCreatePrAction } from './create-pr-action'
-import { styles } from './styles'
 
 type Props = {
   action: MobileCreatePrAction
@@ -16,18 +16,17 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
   }
   const enabled = !action.disabled
   return (
-    <View className={styles.createPrBlock}>
-      <Pressable
-        className={cn(
-          styles.createPrButton,
-          !enabled && styles.createPrButtonDisabled,
-          enabled && 'active:opacity-[0.78]'
-        )}
-        disabled={action.disabled}
-        onPress={action.onPress}
-        accessibilityRole="button"
-        accessibilityLabel={action.label}
+    <View className="mt-3 gap-1">
+      <MobileGlassPressable
         accessibilityHint={action.hint}
+        accessibilityLabel={action.label}
+        accessibilityRole="button"
+        className="min-h-11 rounded-full"
+        contentClassName="min-h-11 flex-row items-center justify-center gap-1 rounded-full px-3"
+        disabled={action.disabled}
+        fallbackClassName={enabled ? 'border-transparent bg-primary' : 'bg-secondary'}
+        onPress={action.onPress}
+        tintColorClassName={enabled ? 'accent-primary' : undefined}
       >
         {action.loading ? (
           <ActivityIndicator
@@ -41,13 +40,16 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
           />
         )}
         <Text
-          className={cn(styles.createPrButtonText, !enabled && styles.createPrButtonTextDisabled)}
+          className={cn(
+            'text-primary-foreground text-sm font-semibold',
+            !enabled && 'text-muted-foreground'
+          )}
         >
           {action.label}
         </Text>
-      </Pressable>
+      </MobileGlassPressable>
       {action.hint ? (
-        <Text className={styles.createPrHint} numberOfLines={2}>
+        <Text className="text-muted-foreground text-xs leading-4" numberOfLines={2}>
           {action.hint}
         </Text>
       ) : null}

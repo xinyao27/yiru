@@ -54,7 +54,7 @@ export type WorkspacePanelTitlebarModel = {
   resolveItemIcon: (item: WorkspaceTitlebarStripItem, active: boolean) => ActivityBarItem['icon']
   itemIconWeight: (item: WorkspaceTitlebarStripItem) => IconProps['weight'] | undefined
   shortcutFor: (id: ActiveRightSidebarTab) => ShortcutKeyComboDetails | null
-  openPanel: (id: ActiveRightSidebarTab) => void
+  togglePanel: (id: ActiveRightSidebarTab) => void
   activateItem: (item: WorkspaceTitlebarStripItem) => void
   handleItemPointerDown: (
     event: React.PointerEvent,
@@ -165,17 +165,28 @@ export function useWorkspacePanelTitlebarModel(
     }
   )
 
-  const openPanel = useCallback(
+  const togglePanel = useCallback(
     (id: ActiveRightSidebarTab) => {
-      openWorkspacePanelTab({ panel: id, worktreeId })
+      const state = useAppStore.getState()
+      const activeTabId = (state.groupsByWorktree[worktreeId] ?? []).find(
+        (group) => group.id === groupId
+      )?.activeTabId
+      const activeTab = (state.unifiedTabsByWorktree[worktreeId] ?? []).find(
+        (tab) => tab.id === activeTabId
+      )
+      if (activeTab?.contentType === id) {
+        state.closeUnifiedTab(activeTab.id)
+        return
+      }
+      openWorkspacePanelTab({ panel: id, worktreeId, groupId })
     },
-    [worktreeId]
+    [groupId, worktreeId]
   )
 
   const activateItem = useCallback(
     (item: WorkspaceTitlebarStripItem) => {
       if (item.kind === 'panel') {
-        openPanel(item.id)
+        togglePanel(item.id)
         return
       }
       if (item.kind === 'commands') {
@@ -204,7 +215,7 @@ export function useWorkspacePanelTitlebarModel(
     [
       lastOpenInTargetKey,
       openInApplications,
-      openPanel,
+      togglePanel,
       repoConnectionId,
       runtimeEnvironmentId,
       worktree,
@@ -228,7 +239,7 @@ export function useWorkspacePanelTitlebarModel(
     resolveItemIcon,
     itemIconWeight,
     shortcutFor,
-    openPanel,
+    togglePanel,
     activateItem,
     handleItemPointerDown
   }

@@ -1253,7 +1253,7 @@ function remapAcknowledgedAgentPaneKeys(
     try {
       // Why: UI acks are keyed by paneKey just like hook rows. When a legacy
       // numeric/pane:* leaf is promoted to a UUID, carry the read marker over
-      // so already-seen Activity/sidebar rows do not come back unread.
+      // so already-seen sidebar rows do not come back unread.
       setAcknowledgement(makePaneKey(tabId, remappedLeafId), acknowledgedAt)
       changed = true
     } catch {

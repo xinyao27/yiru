@@ -3,8 +3,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, SectionList, Text, View } from 'react-native'
 
-import { Play } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import type { MobileAgentHistorySection } from './sections'
@@ -68,7 +67,7 @@ export function MobileAgentSessionHistoryList({
       sections={sections}
       keyExtractor={(card) => card.id}
       stickySectionHeadersEnabled={false}
-      contentContainerClassName={styles.list}
+      contentContainerClassName="px-3 pt-2 pb-6"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -77,11 +76,11 @@ export function MobileAgentSessionHistoryList({
         />
       }
       renderSectionHeader={({ section }) => (
-        <View className={styles.groupHeader}>
-          <Text className={styles.groupHeaderText} numberOfLines={1}>
+        <View className="flex-row items-center gap-2 py-2">
+          <Text className="text-muted-foreground text-xs uppercase" numberOfLines={1}>
             {section.label}
           </Text>
-          <Text className={styles.groupHeaderCount}>{section.data.length}</Text>
+          <Text className="text-muted-foreground text-xs">{section.data.length}</Text>
         </View>
       )}
       renderItem={renderItem}
@@ -112,61 +111,61 @@ function AgentHistoryCardRow({
   )
 
   return (
-    <Pressable className={cn(styles.card, styles.cardPressedActive)} onPress={onPress}>
-      <View className={styles.cardTopRow}>
+    <Pressable className="active:bg-accent border-border border-b-hairline py-3" onPress={onPress}>
+      <View className="flex-row items-center gap-2">
         <MobileAgentIcon agentId={card.agent} size={16} />
-        <Text className={styles.cardTitle} numberOfLines={1}>
+        <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
           {card.title}
         </Text>
-        {card.timeAgo ? <Text className={styles.cardTimeAgo}>{card.timeAgo}</Text> : null}
+        {card.timeAgo ? (
+          <Text className="text-muted-foreground text-xs">{card.timeAgo}</Text>
+        ) : null}
       </View>
       {card.lastMessage ? (
-        <Text className={styles.cardLastMessage} numberOfLines={expanded ? undefined : 2}>
+        <Text
+          className="text-muted-foreground mt-1 text-xs"
+          numberOfLines={expanded ? undefined : 2}
+        >
           {card.lastMessage}
         </Text>
       ) : null}
-      <View className={styles.cardMetaRow}>
+      <View className="mt-1 flex-row flex-wrap items-center gap-2">
         <Text className={styles.cardMetaText}>{card.agentLabel}</Text>
         <Text className={styles.cardMetaText}>
           {card.messageCount} {card.messageCount === 1 ? 'message' : 'messages'}
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
-          <View className={styles.currentBadge}>
-            <Text className={styles.currentBadgeText}>current worktree</Text>
+          <View className="bg-secondary rounded-full px-2 py-1">
+            <Text className="text-primary text-xs">current worktree</Text>
           </View>
         ) : null}
         {session && onResume ? (
-          <Pressable
-            className={cn(
-              styles.resumeButton,
-              resumeActionState?.disabled && styles.resumeButtonDisabled,
-              !resumeActionState?.disabled && styles.resumeButtonPressedActive
-            )}
-            onPress={(event) => {
-              event.stopPropagation()
-              if (!resumeActionState?.disabled) {
-                void onResume(session)
-              }
-            }}
-            disabled={resumeActionState?.disabled}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel="Resume agent session"
-          >
+          <View className="ml-auto h-8 w-8 items-center justify-center">
             {resumeActionState?.loading ? (
               <ActivityIndicator size="small" colorClassName="accent-foreground" />
             ) : (
-              <Play size={17} colorClassName="accent-foreground" />
+              <MobileGlassIconButton
+                accessibilityLabel="Resume agent session"
+                disabled={resumeActionState?.disabled}
+                icon="play"
+                onPress={(event) => {
+                  event.stopPropagation()
+                  if (!resumeActionState?.disabled) {
+                    void onResume(session)
+                  }
+                }}
+                size="small"
+              />
             )}
-          </Pressable>
+          </View>
         ) : null}
       </View>
       {expanded && previewTurns.length > 0 ? (
-        <View className={styles.preview}>
+        <View className="border-t-border mt-2 gap-2 border-t pt-2">
           {previewTurns.map((turn, index) => (
-            <View key={`${card.id}-turn-${index}`} className={styles.previewTurn}>
-              <Text className={styles.previewRole}>{turn.role}</Text>
-              <Text className={styles.previewText}>{turn.text}</Text>
+            <View key={`${card.id}-turn-${index}`} className="gap-1">
+              <Text className="text-muted-foreground text-xs uppercase">{turn.role}</Text>
+              <Text className="text-muted-foreground text-xs">{turn.text}</Text>
             </View>
           ))}
         </View>

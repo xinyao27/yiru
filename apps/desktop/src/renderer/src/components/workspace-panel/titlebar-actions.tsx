@@ -23,7 +23,7 @@ export function WorkspacePanelTitlebarActions({
     dropTarget,
     resolvePanelIcon,
     shortcutFor,
-    openPanel,
+    togglePanel,
     handleItemPointerDown
   } = model
   const visibleCount = visibleItems.length
@@ -87,7 +87,7 @@ export function WorkspacePanelTitlebarActions({
                   )}
                   aria-label={label}
                   aria-current={active ? 'page' : undefined}
-                  onClick={() => openPanel(item.id)}
+                  onClick={() => togglePanel(item.id)}
                   onPointerDown={(event) => handleItemPointerDown(event, item.id, 'visible')}
                 >
                   <Icon className="size-3.5" weight={item.panel.iconWeight} />

@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
-
-import { cn } from '@/style/class-names'
+import { ActivityIndicator, Text, TextInput, View } from 'react-native'
 
 import { triggerError, triggerSuccess } from '../../platform/haptics'
 import { parseGitHubPrReference } from '../../source-control/github-pr-link-parse'
 import { linkMobilePr } from '../../source-control/pr-link'
 import type { RpcClient } from '../../transport/rpc-client'
+import { MobileGlassSurface } from '../glass/surface'
+import { MobileGlassTextButton } from '../glass/text-button'
 
 type Props = {
   client: RpcClient | null
@@ -47,60 +47,44 @@ export function MobileLinkPrForm({ client, worktreeId, onCancel, onLinked }: Pro
 
   return (
     <View>
-      <View className={styles.headingRow}>
-        <Text className={styles.heading}>Link existing pull request</Text>
-        <Pressable
-          onPress={onCancel}
+      <View className="mb-2 flex-row items-center justify-between">
+        <Text className="text-foreground text-sm font-bold">Link existing pull request</Text>
+        <MobileGlassTextButton
           disabled={submitting}
-          accessibilityRole="button"
-          accessibilityLabel="Cancel"
-          hitSlop={8}
-        >
-          <Text className={styles.cancelText}>Cancel</Text>
-        </Pressable>
+          label="Cancel"
+          onPress={onCancel}
+          size="small"
+        />
       </View>
-      <Text className={styles.label}>PR number or GitHub URL</Text>
-      <TextInput
-        className={styles.input}
-        value={input}
-        onChangeText={setInput}
-        placeholder="#123 or https://github.com/owner/repo/pull/123"
-        placeholderTextColorClassName="accent-muted-foreground"
-        autoCapitalize="none"
-        autoCorrect={false}
-        editable={!submitting}
-      />
-      {error ? <Text className={styles.error}>{error}</Text> : null}
-      <Pressable
-        className={cn(
-          styles.submit,
-          (submitting || parsed === null) && styles.submitDisabled,
-          styles.submitPressedActive
-        )}
-        disabled={submitting || parsed === null}
-        onPress={() => void submit()}
-      >
-        {submitting ? (
-          <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
-        ) : (
-          <Text className={styles.submitText}>
-            {parsed ? `Link #${parsed}` : 'Link pull request'}
-          </Text>
-        )}
-      </Pressable>
+      <Text className="text-muted-foreground mt-2 mb-1 text-xs">PR number or GitHub URL</Text>
+      <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
+        <TextInput
+          className="text-foreground px-3 py-2 text-sm"
+          value={input}
+          onChangeText={setInput}
+          placeholder="#123 or https://github.com/owner/repo/pull/123"
+          placeholderTextColorClassName="accent-muted-foreground"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!submitting}
+        />
+      </MobileGlassSurface>
+      {error ? <Text className="text-destructive mt-3 text-xs">{error}</Text> : null}
+      {submitting ? (
+        <View className="mt-4 min-h-11 items-center justify-center">
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        </View>
+      ) : (
+        <MobileGlassTextButton
+          className="mt-4"
+          disabled={parsed === null}
+          isFullWidth
+          isProminent
+          label={parsed ? `Link #${parsed}` : 'Link pull request'}
+          onPress={() => void submit()}
+          size="large"
+        />
+      )}
     </View>
   )
 }
-
-const styles = {
-  headingRow: cn('flex-row items-center justify-between mb-2'),
-  heading: cn('text-foreground text-[14px] font-bold'),
-  cancelText: cn('text-muted-foreground text-[12px] font-semibold'),
-  label: cn('text-muted-foreground text-[12px] mt-2 mb-1'),
-  input: cn('bg-secondary rounded-none px-3 py-2 text-foreground text-[14px]'),
-  error: cn('text-destructive text-[12px] mt-3'),
-  submit: cn('mt-4 min-h-[46px] rounded-none bg-foreground items-center justify-center'),
-  submitDisabled: cn('opacity-[0.45]'),
-  submitPressedActive: cn('active:opacity-[0.8]'),
-  submitText: cn('text-background text-[14px] font-semibold')
-} as const

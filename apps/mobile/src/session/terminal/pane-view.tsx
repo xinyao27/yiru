@@ -65,12 +65,12 @@ export function TerminalPaneView({
       // Why: inactive terminal WebViews stay mounted to preserve xterm state,
       // while touch and visibility are disabled until the tab is active again.
       pointerEvents={active ? 'auto' : 'none'}
-      className={cn(styles.terminalPane, !active && styles.terminalPaneHidden)}
+      className={cn('absolute inset-0', !active && 'opacity-0')}
       style={[keyboardLift > 0 && { transform: [{ translateY: -keyboardLift }] }]}
     >
       <TerminalWebView
         ref={setRef}
-        className={styles.terminalWebView}
+        className="flex-1"
         terminalTheme={terminalTheme}
         textScale={textScale}
         onWebReady={() => onWebReady(handle)}
@@ -90,9 +90,3 @@ export function TerminalPaneView({
     </View>
   )
 }
-
-const styles = {
-  terminalPane: cn('absolute inset-0'),
-  terminalPaneHidden: cn('opacity-[0]'),
-  terminalWebView: cn('flex-1')
-} as const

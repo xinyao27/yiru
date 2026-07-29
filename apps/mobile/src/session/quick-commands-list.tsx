@@ -2,10 +2,12 @@ import type { TuiAgent } from '@yiru/workbench-model/agent'
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { Check, Pencil, Play, Plus, Trash } from '@/components/uniwind-icons'
+import { Check, Play, Plus } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
+import { MobileContentSection } from '../components/content-section'
+import { MobileGlassIconButton } from '../components/glass/icon-button'
 import { MobileSearchField } from '../components/search-field'
 import {
   getQuickCommandDisplayPreview,
@@ -54,7 +56,7 @@ export function QuickCommandsList(props: ListProps) {
   const hasVisible = repoCommands.length + globalCommands.length > 0
   const showSearch = totalCount > 1 || query.length > 0
   return (
-    <View className={styles.listBody}>
+    <View className="gap-2 pb-2">
       {showSearch ? (
         <MobileSearchField
           value={query.slice(0, QUICK_COMMAND_SEARCH_QUERY_MAX_LENGTH)}
@@ -65,7 +67,7 @@ export function QuickCommandsList(props: ListProps) {
           editable={!disabled}
         />
       ) : null}
-      {error ? <Text className={styles.error}>{error}</Text> : null}
+      {error ? <Text className="text-destructive px-1 text-xs">{error}</Text> : null}
       {loading && !hasVisible ? (
         <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
       ) : null}
@@ -96,13 +98,16 @@ export function QuickCommandsList(props: ListProps) {
         />
       ) : null}
       <Pressable
-        className={cn(styles.addRow, (disabled || !canAdd) && styles.disabled)}
+        accessibilityRole="button"
+        className={cn(
+          'mt-1 min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-3 active:bg-accent',
+          (disabled || !canAdd) && 'opacity-40'
+        )}
         disabled={disabled || !canAdd}
         onPress={onAdd}
-        accessibilityRole="button"
       >
         <Plus size={18} colorClassName="accent-muted-foreground" />
-        <Text className={styles.addText}>
+        <Text className="text-foreground text-sm">
           {canAdd ? 'New quick command' : 'Quick command limit reached'}
         </Text>
       </Pressable>
@@ -127,8 +132,10 @@ function QuickCommandGroup({
 }) {
   return (
     <View>
-      <Text className={styles.groupLabel}>{label}</Text>
-      <View className={styles.group}>
+      <Text className="text-muted-foreground px-1 pt-1 pb-1 text-xs font-semibold tracking-wider uppercase">
+        {label}
+      </Text>
+      <MobileContentSection>
         {commands.map((command, index) => (
           <QuickCommandRow
             key={command.id}
@@ -140,7 +147,7 @@ function QuickCommandGroup({
             onDelete={onDelete}
           />
         ))}
-      </View>
+      </MobileContentSection>
     </View>
   )
 }
@@ -162,9 +169,15 @@ function QuickCommandRow({
 }) {
   const isAgent = isAgentQuickCommand(command)
   return (
-    <View className={cn(styles.row, !first && styles.rowBorder, disabled && styles.disabled)}>
+    <View
+      className={cn(
+        'flex-row items-center',
+        !first && styles.rowBorder,
+        disabled && styles.disabled
+      )}
+    >
       <Pressable
-        className={styles.rowMain}
+        className="active:bg-accent min-w-0 flex-1 flex-row items-center gap-3 py-3 pl-3"
         disabled={disabled}
         onPress={() => onLaunch(command)}
         accessibilityRole="button"
@@ -174,34 +187,38 @@ function QuickCommandRow({
           {isAgent ? (
             <MobileAgentIcon agentId={command.agent} size={16} />
           ) : (
-            <Play size={14} weight="fill" colorClassName="accent-foreground" />
+            <Play size={14} colorClassName="accent-foreground" />
           )}
         </View>
-        <View className={styles.rowText}>
-          <Text className={styles.rowLabel} numberOfLines={1}>
+        <View className="min-w-0 flex-1">
+          <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
             {command.label}
           </Text>
-          <Text className={cn(styles.rowPreview, !isAgent && styles.mono)} numberOfLines={1}>
+          <Text
+            className={cn('mt-1 text-xs text-muted-foreground', !isAgent && 'font-mono')}
+            numberOfLines={1}
+          >
             {getQuickCommandDisplayPreview(command)}
           </Text>
         </View>
       </Pressable>
-      <Pressable
-        className={styles.rowAction}
-        disabled={disabled}
-        onPress={() => onEdit(command)}
+      <MobileGlassIconButton
         accessibilityLabel={`Edit ${command.label}`}
-      >
-        <Pencil size={15} colorClassName="accent-muted-foreground" />
-      </Pressable>
-      <Pressable
-        className={styles.rowAction}
         disabled={disabled}
-        onPress={() => onDelete(command)}
-        accessibilityLabel={`Delete ${command.label}`}
-      >
-        <Trash size={15} colorClassName="accent-destructive" />
-      </Pressable>
+        icon="edit"
+        onPress={() => onEdit(command)}
+        size="small"
+      />
+      <View className="mr-2">
+        <MobileGlassIconButton
+          accessibilityLabel={`Delete ${command.label}`}
+          disabled={disabled}
+          icon="delete"
+          isDestructive
+          onPress={() => onDelete(command)}
+          size="small"
+        />
+      </View>
     </View>
   )
 }
@@ -214,11 +231,14 @@ export function QuickCommandAgentPicker({
   onSelect: (agent: TuiAgent) => void
 }) {
   return (
-    <View className={styles.group}>
+    <MobileContentSection>
       {QUICK_COMMAND_SUPPORTED_AGENTS.map((agent, index) => (
         <Pressable
           key={agent.id}
-          className={cn(styles.agentRow, index > 0 && styles.rowBorder)}
+          className={cn(
+            'flex-row items-center gap-3 px-3 py-3 active:bg-accent',
+            index > 0 && styles.rowBorder
+          )}
           onPress={() => onSelect(agent.id)}
           accessibilityRole="button"
           accessibilityState={{ selected: selected === agent.id }}
@@ -226,36 +246,17 @@ export function QuickCommandAgentPicker({
           <View className={styles.rowIcon}>
             <MobileAgentIcon agentId={agent.id} size={16} />
           </View>
-          <Text className={styles.agentLabel}>{agent.label}</Text>
+          <Text className="text-foreground flex-1 text-sm">{agent.label}</Text>
           {selected === agent.id ? <Check size={16} colorClassName="accent-foreground" /> : null}
         </Pressable>
       ))}
-    </View>
+    </MobileContentSection>
   )
 }
 
 const styles = {
-  listBody: cn('gap-2 pb-2'),
-  disabled: cn('opacity-[0.45]'),
-  error: cn('px-1 text-[13px] text-destructive'),
-  empty: cn('py-4 text-center text-[14px] text-muted-foreground'),
-  groupLabel: cn(
-    'px-1 pt-1 pb-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground'
-  ),
-  group: cn('overflow-hidden border border-border bg-card'),
-  row: cn('flex-row items-center'),
+  disabled: cn('opacity-50'),
+  empty: cn('py-4 text-center text-sm text-muted-foreground'),
   rowBorder: cn('border-t border-t-border'),
-  rowMain: cn('min-w-0 flex-1 flex-row items-center gap-3 py-3 pl-3 active:bg-accent'),
-  rowIcon: cn('h-7 w-7 items-center justify-center bg-muted'),
-  rowText: cn('min-w-0 flex-1'),
-  rowLabel: cn('text-[14px] font-semibold text-foreground'),
-  rowPreview: cn('mt-px text-[12px] text-muted-foreground'),
-  mono: cn('font-mono'),
-  rowAction: cn('h-11 w-10 items-center justify-center active:bg-accent'),
-  agentRow: cn('flex-row items-center gap-3 px-3 py-3 active:bg-accent'),
-  agentLabel: cn('flex-1 text-[14px] text-foreground'),
-  addRow: cn(
-    'mt-1 flex-row items-center gap-2 border border-dashed border-border bg-card px-3 py-3 active:bg-accent'
-  ),
-  addText: cn('text-[14px] font-semibold text-foreground')
+  rowIcon: cn('h-7 w-7 items-center justify-center bg-muted')
 } as const

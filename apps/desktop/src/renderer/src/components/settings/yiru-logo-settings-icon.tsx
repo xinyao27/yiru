@@ -3,7 +3,7 @@ import { createElement } from 'react'
 
 import { cn } from '@/lib/class-names'
 
-import logo from '../../../../../resources/logo.svg'
+import logo from '../../../../../resources/yiru-wordmark.png?url'
 
 export function YiruLogoSettingsIcon({ className }: IconProps): React.JSX.Element {
   return createElement('img', {

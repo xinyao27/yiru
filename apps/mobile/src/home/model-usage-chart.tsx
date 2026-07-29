@@ -1,11 +1,14 @@
 import type { RuntimeStatsModelUsage } from '@yiru/runtime-protocol/mobile-runtime-types'
 import { useMemo } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
+import { useCSSVariable } from 'uniwind'
 
+import { MobileContentSection } from '../components/content-section'
 import { translate } from '../i18n/translate'
-import { useThemeColors } from '../theme/uniwind-theme-values'
+import { resolveCssString } from '../style/resolve-css-variable'
 import { formatMetricValue, nextTokenValueMetric, type TokenValueMetric } from './chart-data'
+import { HomeGlassChartPressable } from './glass-chart-pressable'
 
 const VISIBLE_MODEL_COUNT = 4
 const DONUT_SIZE = 168
@@ -30,14 +33,22 @@ export function ModelUsageChart({
   models,
   onMetricChange
 }: ModelUsageChartProps): React.JSX.Element {
-  const colors = useThemeColors()
-  const palette = [colors.chart1, colors.chart2, colors.chart3, colors.chart4, colors.chart5]
+  const values = useCSSVariable([
+    '--color-chart-1',
+    '--color-chart-2',
+    '--color-chart-3',
+    '--color-chart-4',
+    '--color-chart-5',
+    '--color-border'
+  ])
+  const palette = values.slice(0, 5).map(resolveCssString)
+  const borderColor = resolveCssString(values[5])
   const data = useMemo(() => buildPieData(models, metric), [metric, models])
   const total = data.reduce((sum, point) => sum + point.value, 0)
   const nextMetric = nextTokenValueMetric(metric)
 
   return (
-    <View className="border-hairline border-border bg-card mb-4 p-4">
+    <MobileContentSection className="mb-4 p-4">
       <Text className="text-foreground text-sm font-semibold">
         {translate('mobile.home.modelMix.title', 'Model mix')}
       </Text>
@@ -55,10 +66,10 @@ export function ModelUsageChart({
 
       {data.length > 0 ? (
         <>
-          <Pressable
-            accessibilityRole="button"
+          <HomeGlassChartPressable
             accessibilityLabel={activationLabel(nextMetric)}
-            className="active:bg-accent mt-3 items-center"
+            className="mt-3 rounded-2xl"
+            contentClassName="items-center"
             onPress={() => onMetricChange(nextMetric)}
           >
             <View className="items-center justify-center">
@@ -72,7 +83,7 @@ export function ModelUsageChart({
                   cy={DONUT_CENTER}
                   r={DONUT_RADIUS}
                   fill="none"
-                  stroke={colors.borderSubtle}
+                  stroke={borderColor}
                   strokeWidth="24"
                 />
                 {buildSegments(data).map((segment, index) => (
@@ -102,7 +113,7 @@ export function ModelUsageChart({
                 </Text>
               </View>
             </View>
-          </Pressable>
+          </HomeGlassChartPressable>
 
           <View className="border-border mt-2 border-t pt-2">
             {data.map((point, index) => (
@@ -122,10 +133,10 @@ export function ModelUsageChart({
           </View>
         </>
       ) : (
-        <Pressable
-          accessibilityRole="button"
+        <HomeGlassChartPressable
           accessibilityLabel={activationLabel(nextMetric)}
-          className="border-hairline border-border active:bg-accent mt-4 px-4 py-8"
+          className="mt-4 rounded-2xl"
+          contentClassName="px-4 py-8"
           onPress={() => onMetricChange(nextMetric)}
         >
           <Text className="text-muted-foreground text-center text-xs">
@@ -139,9 +150,9 @@ export function ModelUsageChart({
                   'No known model pricing is available for comparison yet.'
                 )}
           </Text>
-        </Pressable>
+        </HomeGlassChartPressable>
       )}
-    </View>
+    </MobileContentSection>
   )
 }
 

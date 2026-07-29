@@ -2,7 +2,6 @@ import type { SmartWorkspaceSourceRow as SourceRow } from '@yiru/workbench-model
 import { Pressable, Text, View } from 'react-native'
 
 import { TextAa as CaseSensitive, GitMerge, Sparkle as Sparkles } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { SourceProviderLogo } from './source-provider-logo'
 
@@ -75,21 +74,24 @@ function resolveRowContent(row: SourceRow): RowContent {
 export function SmartWorkspaceSourceRow({ row, onPress }: Props) {
   const content = resolveRowContent(row)
   return (
-    <Pressable className={cn(styles.row, styles.rowPressedActive)} onPress={onPress}>
-      <View className={styles.icon}>{content.icon}</View>
-      <View className={styles.copy}>
-        <Text className={styles.title} numberOfLines={1}>
+    <Pressable className="active:bg-accent flex-row items-center gap-2 px-3 py-3" onPress={onPress}>
+      <View className="w-5 items-center">{content.icon}</View>
+      <View className="min-w-0 flex-1">
+        <Text className="text-foreground text-sm" numberOfLines={1}>
           {content.title}
         </Text>
         {content.subtitle ? (
-          <Text className={styles.subtitle} numberOfLines={1}>
+          <Text className="text-muted-foreground mt-1 text-xs" numberOfLines={1}>
             {content.subtitle}
           </Text>
         ) : null}
       </View>
       {content.status ? (
-        <View className={styles.pill}>
-          <Text className={styles.pillText} numberOfLines={1}>
+        <View className="bg-secondary rounded-full px-2 py-1">
+          <Text
+            className="text-muted-foreground text-xs font-semibold capitalize"
+            numberOfLines={1}
+          >
             {content.status}
           </Text>
         </View>
@@ -97,14 +99,3 @@ export function SmartWorkspaceSourceRow({ row, onPress }: Props) {
     </Pressable>
   )
 }
-
-const styles = {
-  row: cn('flex-row items-center gap-2 py-3 px-3.5'),
-  rowPressedActive: cn('active:bg-secondary'),
-  icon: cn('w-[18px] items-center'),
-  copy: cn('flex-1 min-w-0'),
-  title: cn('text-[14px] text-foreground'),
-  subtitle: cn('text-[12px] text-muted-foreground/60 mt-[1px]'),
-  pill: cn('bg-secondary rounded-none px-2 py-[2px]'),
-  pillText: cn('text-[11px] font-semibold text-muted-foreground capitalize')
-} as const

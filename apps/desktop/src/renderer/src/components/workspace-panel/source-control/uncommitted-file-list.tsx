@@ -22,9 +22,7 @@ export function SourceControlUncommittedFileList({
     diffCommentCountByPath,
     expandedSubmoduleKeys,
     fileListScrollElement,
-    handleContextMenu,
     handleOpenDiff,
-    handleSelect,
     handleStage,
     handleStageAllPaths,
     handleUnstage,
@@ -33,7 +31,6 @@ export function SourceControlUncommittedFileList({
     normalizedFilter,
     requestDiscardEntry,
     revealInExplorer,
-    selectedKeySet,
     setPendingDiscard,
     sourceControlViewMode,
     toggleSubmodule,
@@ -86,15 +83,11 @@ export function SourceControlUncommittedFileList({
           return (
             <UncommittedEntryRow
               key={node.key}
-              entryKey={node.key}
               entry={node.entry}
               currentWorktreeId={currentWorktreeId}
               worktreePath={worktreePath}
               depth={node.depth}
-              selected={selectedKeySet.has(node.key)}
               isOpenFile={activeOpenRowKeys.has(node.key)}
-              onSelect={handleSelect}
-              onContextMenu={handleContextMenu}
               onRevealInExplorer={revealInExplorer}
               connectionId={activeConnectionId}
               onOpen={handleOpenDiff}
@@ -140,15 +133,11 @@ export function SourceControlUncommittedFileList({
         return (
           <UncommittedEntryRow
             key={key}
-            entryKey={key}
             entry={entry}
             currentWorktreeId={currentWorktreeId}
             worktreePath={worktreePath}
             depth={entry.submoduleRoot ? 1 : 0}
-            selected={selectedKeySet.has(key)}
             isOpenFile={activeOpenRowKeys.has(key)}
-            onSelect={handleSelect}
-            onContextMenu={handleContextMenu}
             onRevealInExplorer={revealInExplorer}
             connectionId={activeConnectionId}
             onOpen={handleOpenDiff}

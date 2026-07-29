@@ -5,6 +5,7 @@ import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '@/components/
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileContentSection } from './content-section'
 
 export type ActionSheetAction = {
   label: string
@@ -48,28 +49,28 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
   return (
     <>
       {(title || message) && (
-        <View className={styles.header}>
+        <View className="px-1 pb-2">
           {title ? (
-            <Text className={styles.title} numberOfLines={1}>
+            <Text className="text-muted-foreground text-xs font-medium" numberOfLines={1}>
               {title}
             </Text>
           ) : null}
-          {message ? <Text className={styles.message}>{message}</Text> : null}
+          {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
         </View>
       )}
 
-      <View className={styles.actionGroup}>
+      <MobileContentSection>
         {actions.map((action, i) => {
           const Icon = iconForAction(action.label, action.destructive, action.icon)
           const customIcon = action.renderIcon?.()
           return (
             <View key={action.label}>
-              {i > 0 && <View className={styles.separator} />}
+              {i > 0 && <View className="h-hairline bg-border mx-3" />}
               <Pressable
                 className={cn(
-                  styles.action,
-                  action.disabled && styles.actionDisabled,
-                  !action.disabled && !action.loading && styles.actionPressedActive
+                  'flex-row items-center gap-2 py-3 px-3',
+                  action.disabled && 'opacity-60',
+                  !action.disabled && !action.loading && 'active:bg-accent'
                 )}
                 disabled={action.disabled || action.loading}
                 onPress={() => {
@@ -87,17 +88,19 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
                     }
                   />
                 )}
-                <View className={styles.actionTextBlock}>
+                <View className="min-w-0 flex-1">
                   <Text
                     className={cn(
-                      styles.actionText,
-                      action.destructive && styles.actionTextDestructive,
-                      action.disabled && styles.actionTextDisabled
+                      'text-sm font-medium text-foreground',
+                      action.destructive && 'text-destructive',
+                      action.disabled && 'text-muted-foreground'
                     )}
                   >
                     {action.label}
                   </Text>
-                  {action.hint ? <Text className={styles.actionHint}>{action.hint}</Text> : null}
+                  {action.hint ? (
+                    <Text className="text-muted-foreground mt-1 text-xs">{action.hint}</Text>
+                  ) : null}
                 </View>
                 {action.loading ? (
                   <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
@@ -106,7 +109,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
             </View>
           )
         })}
-      </View>
+      </MobileContentSection>
     </>
   )
 }
@@ -146,19 +149,3 @@ export function ActionSheetModal({ visible, title, message, actions, onClose }: 
     </BottomDrawer>
   )
 }
-
-const styles = {
-  header: cn('px-1 pb-2'),
-  title: cn('text-[13px] font-medium text-muted-foreground/60'),
-  message: cn('text-[12px] text-muted-foreground/60 mt-[2px]'),
-  actionGroup: cn('bg-card rounded-none overflow-hidden'),
-  separator: cn('h-hairline bg-border mx-3'),
-  action: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
-  actionDisabled: cn('opacity-[0.58]'),
-  actionPressedActive: cn('active:bg-secondary'),
-  actionTextBlock: cn('flex-1 min-w-0'),
-  actionText: cn('text-[14px] font-medium text-foreground'),
-  actionTextDisabled: cn('text-muted-foreground'),
-  actionTextDestructive: cn('text-destructive'),
-  actionHint: cn('mt-[2px] text-[12px] text-muted-foreground/60')
-} as const

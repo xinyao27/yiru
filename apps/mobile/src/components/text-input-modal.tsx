@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { View, Text, TextInput, Pressable, type KeyboardTypeOptions } from 'react-native'
-
-import { cn } from '@/style/class-names'
+import { View, Text, TextInput, type KeyboardTypeOptions } from 'react-native'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassSurface } from './glass/surface'
+import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
   visible: boolean
@@ -58,66 +58,38 @@ export function TextInputModal({
 
   return (
     <BottomDrawer visible={visible} onClose={onCancel}>
-      <View className={styles.header}>
-        <Text className={styles.title}>{title}</Text>
-        {message ? <Text className={styles.message}>{message}</Text> : null}
+      <View className="px-1 pb-2">
+        <Text className="text-foreground text-sm font-semibold">{title}</Text>
+        {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
       </View>
 
-      <TextInput
-        className={styles.input}
-        value={value}
-        onChangeText={setValue}
-        placeholder={placeholder}
-        placeholderTextColorClassName="accent-muted-foreground"
-        autoFocus
-        autoCapitalize="none"
-        autoCorrect={false}
-        selectTextOnFocus={selectTextOnFocus}
-        keyboardType={keyboardType}
-        returnKeyType="done"
-        onSubmitEditing={handleSubmit}
-        selectionColorClassName="accent-primary"
-      />
+      <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>
+        <TextInput
+          className="text-foreground min-h-10 rounded-full px-4 text-sm"
+          value={value}
+          onChangeText={setValue}
+          placeholder={placeholder}
+          placeholderTextColorClassName="accent-muted-foreground"
+          autoFocus
+          autoCapitalize="none"
+          autoCorrect={false}
+          selectTextOnFocus={selectTextOnFocus}
+          keyboardType={keyboardType}
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
+          selectionColorClassName="accent-primary"
+        />
+      </MobileGlassSurface>
 
-      <View className={styles.actions}>
-        <Pressable
-          className={cn(styles.cancelButton, styles.buttonPressedActive)}
-          onPress={onCancel}
-        >
-          <Text className={styles.cancelText}>Cancel</Text>
-        </Pressable>
-        <Pressable
-          className={cn(
-            styles.submitButton,
-            styles.buttonPressedActive,
-            !canSubmit && styles.submitButtonDisabled
-          )}
+      <View className="mt-3 flex-row justify-end gap-2">
+        <MobileGlassTextButton label="Cancel" onPress={onCancel} />
+        <MobileGlassTextButton
           disabled={!canSubmit}
+          isProminent
+          label={submitLabel}
           onPress={handleSubmit}
-        >
-          <Text className={styles.submitText}>{submitLabel}</Text>
-        </Pressable>
+        />
       </View>
     </BottomDrawer>
   )
 }
-
-const styles = {
-  header: cn('px-1 pb-2'),
-  title: cn('text-[15px] font-semibold text-foreground'),
-  message: cn('text-[13px] text-muted-foreground/60 mt-[2px]'),
-  // Why: matches NewWorktreeModal's input — bgRaised on the modal
-  // background reads as a tappable surface (brighter than the wrapper)
-  // rather than a recessed pit (darker than the wrapper, which is what
-  // bgBase looked like inside a bgPanel group).
-  input: cn(
-    'bg-secondary text-foreground rounded-none px-3 py-2 ios:py-2.5 text-[14px] border border-border'
-  ),
-  actions: cn('flex-row justify-end gap-2 mt-3'),
-  cancelButton: cn('px-4 py-2 rounded-none'),
-  submitButton: cn('bg-foreground px-4 py-2 rounded-none'),
-  buttonPressedActive: cn('active:opacity-[0.7]'),
-  submitButtonDisabled: cn('opacity-[0.4]'),
-  cancelText: cn('text-muted-foreground text-[14px] font-medium'),
-  submitText: cn('text-background text-[14px] font-semibold')
-} as const

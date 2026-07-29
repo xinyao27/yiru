@@ -50,7 +50,6 @@ import {
   getFitOverrideForPty,
   onOverrideChange
 } from '@/lib/pane-manager/mobile-fit-overrides'
-import { resolvePaneKeyForManager } from '@/lib/pane-manager/pane-key-resolution'
 import type {
   ManagedPane,
   PaneExternalDropTarget,
@@ -115,12 +114,7 @@ import type { AgentSessionContinuationRequest } from './agent/session-continuati
 import CloseTerminalDialog, { type CloseTerminalDialogCopyKind } from './close-terminal-dialog'
 import { applyDesktopFitFallbackAfterReplay } from './desktop-fit-fallback'
 import { handleInternalTerminalFileDrop } from './drop/handler'
-import {
-  applyExpandedLayoutTo,
-  cancelPendingPaneSizeRefreshFrames,
-  createExpandCollapseActions,
-  restoreExpandedLayoutFrom
-} from './expand-collapse'
+import { cancelPendingPaneSizeRefreshFrames, createExpandCollapseActions } from './expand-collapse'
 import TerminalPaneHeaderOverlay from './header-overlay'
 import { useTerminalKeyboardShortcuts, type SearchState } from './keyboard-handlers'
 import {
@@ -235,12 +229,6 @@ type TerminalPaneProps = {
   isActive: boolean
   isVisible?: boolean
   isWorktreeActive?: boolean
-  // Why: when set (Activity portal), this pane visually isolates the given
-  // split pane so only that leaf is shown. Implemented as a transient layout
-  // override (separate snapshot ref) — does NOT touch expandedPaneId state
-  // or persist to the layout snapshot, so returning to the workspace shows
-  // the original split layout unchanged.
-  isolatedPaneKey?: string | null
   // Why: ephemeral one-off command terminals don't need the regular pane header's
   // prominent split affordance, though standard split shortcuts remain available.
   showSplitButton?: boolean
@@ -309,7 +297,6 @@ export default function TerminalPane({
   isActive,
   isVisible = true,
   isWorktreeActive = isVisible,
-  isolatedPaneKey = null,
   showSplitButton = true,
   onPtyExit,
   onCloseTab
@@ -322,14 +309,6 @@ export default function TerminalPane({
     new Map()
   )
   const pendingPaneSizeRefreshFrameIdsRef = useRef<number[]>([])
-  // Why (separate from expandedStyleSnapshotRef): Activity isolation is a
-  // transient view override that must not collide with the user-facing
-  // expanded-pane state or the layout snapshot. Keeping its own snapshot
-  // map means applyExpandedLayoutTo's internal restore (which targets the
-  // ref it was passed) only clears Activity's overlay, not the user's.
-  const activityIsolationSnapshotRef = useRef<Map<HTMLElement, { display: string; flex: string }>>(
-    new Map()
-  )
   const paneTransportsRef = useRef<Map<number, PtyTransport>>(new Map())
   // Why: per-pane live cwd tracked via OSC 7 for split-pane cwd inheritance.
   // See docs/ssh-split-pane-inherit-cwd.md. The OSC 7 handler is installed
@@ -1661,78 +1640,8 @@ export default function TerminalPane({
     }
   }, [isActive, paneCount, persistLayoutSnapshot, restoredLayout])
 
-  // Why (Activity-only pane isolation): when this TerminalPane is being
-  // portaled into the Activity page for a specific agent pane, hide the
-  // other split siblings so the user only sees that agent's pane. Uses
-  // applyExpandedLayoutTo with a separate snapshot ref so the override is
-  // independent of the user-facing expanded-pane state and the persisted
-  // layout snapshot — closing Activity restores the original split layout.
-  // useLayoutEffect: layout style writes must land before paint to avoid
-  // a flash of all panes. paneCount is in deps so the effect re-applies
-  // after splits/closes change the manager's pane list.
-  useLayoutEffect(() => {
-    const snapshots = activityIsolationSnapshotRef.current
-    // Why: refit on rAF so xterm measures the post-layout DOM, not the
-    // pre-toggle one. Mirrors expand-collapse.refreshPaneSizes. Both the
-    // apply and restore paths must refit — restoring without a fit leaves
-    // xterm sized for the isolated single-pane geometry, so the workspace
-    // view (or staging slot) renders at the wrong cols/rows until some
-    // unrelated event triggers another fit.
-    const scheduleRefit = (): number =>
-      requestAnimationFrame(() => {
-        const manager = managerRef.current
-        if (!manager) {
-          return
-        }
-        for (const pane of manager.getPanes()) {
-          safeFit(pane)
-        }
-      })
-    if (isolatedPaneKey === null) {
-      restoreExpandedLayoutFrom(snapshots)
-      const frame = scheduleRefit()
-      return () => {
-        cancelAnimationFrame(frame)
-      }
-    }
-    const manager = managerRef.current
-    const resolution = resolvePaneKeyForManager(tabId, isolatedPaneKey, manager)
-    const resolvedPaneId = resolution.status === 'resolved' ? resolution.numericPaneId : null
-    const applied =
-      resolvedPaneId !== null &&
-      ((manager?.getPanes().length ?? 0) <= 1 ||
-        applyExpandedLayoutTo(resolvedPaneId, {
-          managerRef,
-          containerRef,
-          expandedStyleSnapshotRef: activityIsolationSnapshotRef
-        }))
-    if (!applied) {
-      restoreExpandedLayoutFrom(snapshots)
-      const root = containerRef.current?.firstElementChild
-      if (root instanceof HTMLElement) {
-        // Why: Activity requested an exact pane. If it cannot be resolved, fail
-        // closed instead of showing the whole split terminal as a fallback.
-        snapshots.set(root, { display: root.style.display, flex: root.style.flex })
-        root.style.display = 'none'
-      }
-      const frame = scheduleRefit()
-      return () => {
-        cancelAnimationFrame(frame)
-      }
-    }
-    const frame = scheduleRefit()
-    return () => {
-      cancelAnimationFrame(frame)
-    }
-  }, [isolatedPaneKey, paneCount, tabId])
-
-  // Why: belt-and-suspenders unmount cleanup. If the component unmounts
-  // while isolation is active (e.g. tab closed mid-Activity-view), restore
-  // sibling display/flex so the captured DOM doesn't leak inline styles.
   useEffect(() => {
-    const snapshots = activityIsolationSnapshotRef.current
     return () => {
-      restoreExpandedLayoutFrom(snapshots)
       cancelPendingPaneSizeRefreshFrames({ pendingPaneSizeRefreshFrameIdsRef })
     }
   }, [])
@@ -2507,7 +2416,6 @@ export default function TerminalPane({
     }
   }, [
     expandedPaneId,
-    isolatedPaneKey,
     isVisible,
     paneCount,
     paneLayoutRevision,

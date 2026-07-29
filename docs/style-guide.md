@@ -1,15 +1,27 @@
 # Yiru Style Guide
 
-How Yiru looks and behaves: components, tokens, geometry, typography, interaction states. `AGENTS.md` owns code structure and quality — rules there are not repeated here.
+Detailed cross-client reference for Yiru components, tokens, geometry, typography, and interaction
+states. Start with the binding platform contract:
+
+- [`apps/desktop/DESIGN.md`](../apps/desktop/DESIGN.md) for desktop.
+- [`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md) for mobile.
+
+This guide expands those contracts with component inventory and implementation detail. If it
+disagrees with a platform contract, resolve both documents in the same change; do not choose a
+one-off implementation. `AGENTS.md` owns code structure and quality, so those rules are not repeated
+here.
 
 Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic token vocabulary.
 
-| Canonical source | File |
+| Source | File |
 | --- | --- |
+| Desktop visual contract | `apps/desktop/DESIGN.md` |
+| Mobile visual contract | `apps/mobile/DESIGN.md` |
 | Tokens, base layer, global chrome | `apps/desktop/src/renderer/src/assets/main.css` |
 | Primitives | `apps/desktop/src/renderer/src/components/ui/` |
 | Primitive catalog and layering | `components/ui/README.md` |
 | Mobile token mirror (Uniwind) | `apps/mobile/global.css` |
+| Mobile headers, controls, and tabs | §12 of this guide |
 
 ---
 
@@ -18,7 +30,7 @@ Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic
 Yiru hosts other tools — Monaco, xterm, Markdown, embedded browsers — so its own chrome must recede and frame, never compete. Three commitments follow, and everything below is a consequence of them:
 
 1. **Monochrome.** Neutral grays carry the chrome. Color means *state* — selection, destructive, git status, diff — never decoration.
-2. **Rectilinear.** No radius, no shadows. Surfaces separate with a hairline border and an opaque background.
+2. **Platform-native geometry.** Desktop stays rectilinear. Mobile follows the system's concentric rounded geometry, grouped surfaces, and Liquid Glass materials.
 3. **Dense but breathable.** 14px body, 12px chrome, compact rows, real spacing around the primary workflow.
 
 When something isn't covered here, pick the option that makes Yiru quieter.
@@ -94,7 +106,12 @@ Git status colors mirror VS Code; diff colors mirror Cursor. The two families ar
 
 ## 4. Geometry
 
-**Radius is zero.** `--radius: 0`, and `main.css` holds every element and pseudo-element to `border-radius: 0 !important` so legacy utilities, inline values, and third-party components comply. `rounded-*` is a no-op that signals copy-paste drift, and CI flags it.
+**Desktop radius is zero.** `--radius: 0`, and `main.css` holds every desktop element and pseudo-element to `border-radius: 0 !important` so legacy utilities, inline values, and third-party components comply. Desktop `rounded-*` is a no-op that signals copy-paste drift, and CI flags it.
+
+**Mobile follows the device.** Mobile does not inherit desktop's zero-radius rule. Navigation bars, grouped controls, message bubbles, form sections, floating composers, sheets, and floating actions use concentric system geometry. Terminals, editors, and diff bodies may stay rectangular when rounding would clip or waste working content. Prefer the shared mobile Glass components so material availability and the opaque fallback stay one decision; features keep their role-specific geometry beside the markup.
+
+The concise mobile contract lives in [`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md); §12 keeps
+the extended header, control-size, grouping, and tab recipes.
 
 **No shadows, no outlines.** Separation is `border` plus an opaque background. No `shadow-*`, `drop-shadow-*`, `box-shadow`, `text-shadow`, or stroke-drawing outline — delete legacy declarations at the source rather than overriding them. A local `outline-none` is allowed only to suppress the UA ring on a component that supplies its own focus state.
 
@@ -123,7 +140,9 @@ Sidebar section headers are 11px + `font-semibold` + `uppercase` + `tracking-[0.
 
 **Floating and modal.** Recipes live in `floating-surface-styles.ts` and apply through the rendered wrappers: popovers, menus, hover cards, and selects get `bg-popover text-popover-foreground border border-border`; dialogs, command dialogs, and sheets get `bg-background text-foreground border-border` over a `bg-black/50` backdrop.
 
-Foreground floating surfaces are **opaque while visible** — no `/NN` alpha, translucent `rgba`, `color-mix(…, transparent)`, resting opacity below 1, or backdrop blur. Enter/exit opacity motion is fine. Transparency stays correct where revealing context is the point: modal backdrops, transcript fade masks, drag and selection affordances, hover tints.
+Desktop foreground floating surfaces are **opaque while visible** — no `/NN` alpha, translucent `rgba`, `color-mix(…, transparent)`, resting opacity below 1, or backdrop blur. Enter/exit opacity motion is fine. Transparency stays correct where revealing context is the point: modal backdrops, transcript fade masks, drag and selection affordances, hover tints.
+
+On mobile, native Liquid Glass is a functional layer for navigation and controls, not a card treatment. Use it only above content: headers, tab rails, toolbars, composers, and related control groups. Never apply it to scrolling rows, messages, terminal/editor surfaces, diffs, or error content. Unsupported platforms and Reduce Transparency render the same geometry with an opaque semantic background and border.
 
 **Menu rows.** `menu-item-styles.ts` is the grammar for dropdown and context menus alike: 12px `font-medium` rows at `leading-5`, `data-highlighted:bg-accent`, 3.5 icons in `muted-foreground`, destructive rows in `destructive` with a 10% wash on highlight. Labels 11px `font-semibold muted-foreground`; separators `h-px bg-border/70`; shortcuts right-aligned 11px.
 
@@ -149,7 +168,7 @@ Cohesion beats indirection — a reader should see a component's appearance in t
 
 `assets/main.css` is global-only: imports, `@font-face`, custom variants, `@theme inline`, `:root`/`.dark` tokens, `@layer base`, scrollbar utilities, titlebar and layout chrome. Feature CSS does not go there. The feature-wall, feature-tour, and diff-comment blocks currently sitting in it predate this rule — move them into their feature folder when you next touch them; don't add to them.
 
-Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no primitive layer; its shared components live in `apps/mobile/src/components/`.
+Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no desktop-style primitive layer; its shared components live in `apps/mobile/src/components/`. Native Glass imports stay inside `apps/mobile/src/components/glass/`, whose components own availability checks, grouping, interaction, and fallback paint. Business features consume those wrappers and keep layout classes at the TSX call site.
 
 ---
 
@@ -170,17 +189,19 @@ Every primitive part carries `data-slot="<name>"` — don't strip it. Merge clas
 | `default` | The one affirmative action in a flow |
 | `secondary` | Lower-emphasis sibling beside a `default` |
 | `outline` | Toolbar and standalone actions where a filled button reads heavy |
+| `sidebar-outline` | Outline toolbar actions resting on a sidebar surface |
 | `outline-transparent` | Titlebar controls whose vertical separators reveal host material |
 | `ghost` | Icon buttons, row triggers — anywhere chrome should disappear |
 | `quiet` | Muted icon/toolbar controls resting quieter than `ghost` |
 | `chart` | Full-plot activation targets without button chrome |
+| `row-action` | Actions revealed over an accent-highlighted list row |
 | `picker-row` | Command and listbox rows, including the selected-state border |
 | `popover-outline` | Inline actions floating above an editor, on opaque popover paint |
 | `status-bar` / `status-bar-icon` / `status-bar-quiet` | Full-height footer actions, icons, labels |
 | `link` | Inline text action inside a paragraph |
 | `destructive` | Delete, discard, irreversible. Never Cancel. |
 
-Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `popover-hint` · `chart` · `chart-plot`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
+Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `row-trigger` · `popover-hint` · `chart` · `chart-plot`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
 
 ### Forms
 
@@ -240,7 +261,7 @@ Pass the trigger through `render` so Base UI merges accessibility props onto the
 Icons come from `@phosphor-icons/react`; don't add a second library.
 
 - **Size:** `size-4` is the default and `Button` applies it automatically to a bare `<svg>` child, so most call sites set nothing. `size-3` / `size-3.5` for metadata and dense rows; `size-7`+ for empty-state heroes only.
-- **Weight:** the renderer-wide `IconContext` defaults to `duotone`. `regular` is correct for arrows and carets (including aliases like `ChevronDown`, `ExternalLink`, `RefreshCw`), standalone `X`/close glyphs, and deliberately quiet compact chrome (new-workspace, new-tab, tab-strip overflow, terminal-tab chrome, project headers). Scope a composite with `<PhosphorIconContextProvider weight="regular">` rather than annotating each icon.
+- **Weight:** the renderer-wide `IconContext` defaults to `duotone`. `regular` is correct for arrows and carets (including aliases like `ChevronDown`, `ExternalLink`, `RefreshCw`), standalone `X`/close glyphs, and deliberately quiet compact chrome (new-workspace, new-tab, tab-strip overflow, terminal-tab chrome, project headers). Pass `weight="regular"` directly to each exceptional icon. `PhosphorIconContextProvider` is root infrastructure, not a local styling tool.
 - **Color** inherits from surrounding text — don't set a token on the SVG when the parent already carries it.
 - **Loading** is `<LoadingIndicator className="size-4" />`. It follows the user's Appearance setting and always paints `foreground`, so call sites set size and layout only. Never import a one-off spinner.
 
@@ -303,3 +324,136 @@ Every change holds up on macOS, Linux, and Windows, in light and dark mode.
 ## 11. When this guide is silent
 
 Check `components/ui/README.md` for a primitive that already encodes the pattern, then the closest sibling in `components/` — provided it uses primitives correctly. For color, stay inside the shadcn roles or the Tailwind palette. If none of that resolves it, **ask** — don't add a token, invent a visual rule, or ship a native control on your own judgment.
+
+---
+
+## 12. Mobile chrome
+
+These rules are canonical for mobile headers, toolbars, tabs, segmented selectors, and Liquid
+Glass controls. Use platform controls before reproducing their appearance:
+
+1. Expo Router native headers and `Stack.Toolbar` for route navigation.
+2. Expo UI SwiftUI controls on iOS: `Button`, `ControlGroup`, `Picker`, `Menu`, and their semantic
+   `controlSize` and `buttonStyle` modifiers.
+3. Shared wrappers in `apps/mobile/src/components/glass/` for custom chrome and non-iOS fallback.
+4. Feature-local layout only after the choices above are exhausted.
+
+This hierarchy follows Apple's guidance to keep custom toolbars consistent with system behavior,
+use tab bars for navigation rather than actions, and give buttons a 44×44pt hit region. Expo UI's
+native Button exposes `small`, `regular`, and `large` control sizes plus `glass` and
+`glassProminent`; glass styles require iOS 26 and an Xcode 26 build. `GlassEffectContainer` groups
+related glass shapes, and its spacing controls when neighboring shapes begin to merge.
+
+References:
+
+- [Apple Human Interface Guidelines: Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars)
+- [Apple Human Interface Guidelines: Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)
+- [Apple Human Interface Guidelines: Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)
+- [Apple: Applying Liquid Glass to custom views](https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views)
+- [Expo UI: Button](https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/button/)
+- [Expo UI: Picker](https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/picker/)
+- [Expo GlassEffect](https://docs.expo.dev/versions/latest/sdk/glass-effect/)
+
+### Control sizes
+
+The semantic size is the API. Numeric dimensions below define Yiru's opaque fallback and stabilize
+custom circular geometry; feature code must not invent another visible diameter.
+
+| Size | Visible control | Glyph | Use |
+| --- | ---: | ---: | --- |
+| `large` | 44pt | 20pt | FAB and standalone primary actions |
+| `regular` | 36pt | 18pt | All header actions, document-tab actions, ordinary toolbar controls |
+| `small` | 32pt | 16pt | Space-constrained toolbars, composer accessories, filter and key rails |
+
+Every control still has a minimum 44pt hit region. A 36pt or 32pt visible control expands its hit
+region without making the glass shape larger. Use `controlSize(...)` on iOS and the matching shared
+component size elsewhere; don't put a second fixed height, width, padding, or glyph size at the call
+site.
+
+### Spacing and grouping
+
+- **8pt is the only gap between sibling chrome controls.** Use `gap-2`, `HStack(spacing={8})`, and
+  `GlassEffectContainer(spacing={8})` together. Matching layout and glass-container spacing gives
+  every group the same system-controlled blend and morph threshold.
+- Page chrome uses 12pt horizontal insets (`px-3`). Chrome immediately above working content uses
+  8pt vertical separation (`gap-2`, `py-2`, or the nearest semantic safe-area utility).
+- Put controls that act on the same scope in one glass container. Do not wrap the entire header or
+  tab region in another painted card.
+- Native Liquid Glass supplies its own edge and interaction state. Do not add a border, shadow,
+  opacity wash, or nested background on top of available native glass. The unsupported-platform and
+  Reduce Transparency fallback uses `bg-card` plus `border-border` while preserving geometry.
+- Use `glassProminent` only for the primary action or current selection. Ordinary header actions use
+  `glass`.
+
+### Headers
+
+Prefer the native route header. It owns safe areas, title placement, back behavior, control geometry,
+and the iOS material. A custom header is justified only for an embedded panel or a working surface
+whose layout cannot use route chrome.
+
+#### Custom page header
+
+- One line: leading navigation, `text-base font-semibold` title, trailing actions.
+- `regular` controls with a 44pt hit region, 8pt gaps, 12pt horizontal inset.
+- Only the page title is emphasized. Status, account, host, and action labels remain regular.
+- Keep at most two visible trailing actions; overflow the rest into a native menu.
+
+#### Embedded or panel header
+
+- A 60pt minimum row supports a two-line title without shrinking controls.
+- `regular` controls, 8pt gaps, 12pt horizontal inset.
+- Primary label is `text-sm font-semibold`; secondary context is `text-xs` regular and muted.
+- A selected panel action changes glass tint, not size, shadow, or font weight.
+
+### Tabs and adjacent controls
+
+“Tab” describes navigation, not a visual shape. Choose the category first.
+
+#### App tab bar
+
+Use the native `TabView` or Expo Router native tabs for top-level app sections. Keep labels visible,
+use familiar platform symbols, and never place commands such as Add or Refresh in the tab bar.
+
+#### Document tab rail
+
+Terminals, files, Markdown documents, and browser documents use a horizontally scrollable document
+rail because the set is dynamic and closable.
+
+- Every tab is a `regular` capsule in one glass container; tabs are separated by 8pt.
+- Show a 16pt symbol and a `text-sm` regular label. Truncate; don't shrink below `text-sm`.
+- The selected tab uses prominent or tinted glass and foreground color. Feature code does not add
+  bold text, an underline, a shadow, or a different height.
+- New-tab and overflow commands are separate `regular` circular toolbar buttons after the rail,
+  separated from it and each other by 8pt. They are not tabs.
+
+#### Segmented selector
+
+Use a segmented selector for a small fixed set of mutually exclusive local views, such as Changes /
+Pull Request / History or Preview / Source.
+
+- On iOS use SwiftUI `Picker` with `pickerStyle('segmented')`; use the shared opaque equivalent on
+  other platforms.
+- Render one grouped control, not several independent glass pills.
+- Use visible `text-sm` regular labels. Feature code does not add an underline or bold text; the
+  native control owns its selection emphasis.
+- A segmented selector is `regular` by default. Use `small` only inside a space-constrained toolbar.
+
+#### Filter and shortcut rail
+
+A scrollable set of filters, modifier keys, or terminal shortcuts is a toolbar rail, not navigation.
+Use `small` controls with 8pt gaps. Selection may use prominent glass, but accessibility role remains
+button or switch rather than tab.
+
+### Implementation rules
+
+- `apps/mobile/src/components/glass/` owns availability, native and fallback paint, control
+  dimensions, glyph dimensions, hit regions, grouping, and segmented-control selection treatment.
+- Features own placement and product copy. Their TSX may specify flex behavior, safe-area placement,
+  width, and the standard 8pt gap; it must not restyle a shared control.
+- Keep one-off layout utilities directly on the TSX element. Do not create `const styles = { ... }`
+  for strings used once.
+- Use regular-weight mobile icons. Use SF Symbols through Expo UI on iOS and the shared icon mapping
+  elsewhere.
+- Verify every new chrome variant in UI Lab in light and dark appearance, with native glass and the
+  opaque fallback. Check title centering, 44pt hit regions, selected state, long labels, and a
+  horizontally crowded rail.
