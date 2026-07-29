@@ -52,7 +52,7 @@ type PrimaryEventSuppression = { failureKey: string; error: unknown }
 type UpdateCheckVariant = 'default' | 'prerelease' | 'perf'
 type ReleaseFeedPreflightResult = 'ready' | 'not-available'
 
-const AUTO_UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000
+const AUTO_UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
 const AUTO_UPDATE_RETRY_INTERVAL_MS = 60 * 60 * 1000
 // Why: a persistently-failing feed (blocked domain, proxy, GHE mirror) used
 // to re-arm the retry at an exact 1h cadence forever — the recurring hourly
@@ -1204,7 +1204,7 @@ function runBackgroundUpdateCheck(
   // Setting it here, before any updater events or rejected promises can arrive,
   // prevents later ordinary checks from inheriting an older campaign id. Use
   // the persisted pending id for ordinary background checks so a nudge-driven
-  // card can still be dismissed correctly after relaunch or a later 24h check.
+  // card can still be dismissed correctly after relaunch or a later automatic check.
   activeUpdateNudgeId = nudgeId
   // Why: autoUpdater.checkForUpdates() is async and 'checking-for-update'
   // arrives on a later tick, so a second focus/resume event can slip in before
@@ -1497,7 +1497,7 @@ export function setupAutoUpdater(
     }
   })
 
-  const checkDailyOnWake = () => {
+  const checkForDueUpdate = () => {
     if (
       backgroundCheckLaunchPending ||
       currentStatus.state === 'checking' ||
@@ -1513,8 +1513,8 @@ export function setupAutoUpdater(
     }
   }
 
-  powerMonitor.on('resume', checkDailyOnWake)
-  app.on('browser-window-focus', checkDailyOnWake)
+  powerMonitor.on('resume', checkForDueUpdate)
+  app.on('browser-window-focus', checkForDueUpdate)
 
   const lastUpdateCheckAt = opts?.getLastUpdateCheckAt?.() ?? null
   const msSinceLastCheck =
