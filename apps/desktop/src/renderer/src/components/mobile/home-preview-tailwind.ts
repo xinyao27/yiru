@@ -3,7 +3,7 @@ export const mobileHomePreviewStyles = {
     'flex size-full flex-col bg-neutral-950 font-sans text-[13px] text-neutral-200 [zoom:1.08]',
   topbar: 'flex items-center justify-between px-4 pb-3 pt-[26px]',
   brand: 'flex items-center gap-2',
-  logo: 'size-[22px] text-neutral-200',
+  logo: 'h-[22px] w-[36px] object-contain',
   brandName: 'text-[17px] font-bold text-neutral-200',
   iconButton:
     'grid size-9 place-items-center bg-transparent text-neutral-400 [&>svg]:size-[18px] [&>svg]:stroke-[1.75]',

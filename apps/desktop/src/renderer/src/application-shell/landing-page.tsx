@@ -14,7 +14,7 @@ import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 
-import logo from '../../../../resources/logo.svg'
+import logo from '../../../../resources/yiru-wordmark.png?url'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'
 import { ShortcutKeyCombo } from '../components/shortcut-key-combo'
@@ -342,7 +342,7 @@ export default function Landing(): React.JSX.Element {
             <img
               src={logo}
               alt={translate('auto.components.Landing.520304a067', 'Yiru logo')}
-              className="size-12"
+              className="h-auto w-16"
             />
           </div>
           <h1 className="text-foreground text-4xl font-bold tracking-tight">

@@ -225,6 +225,9 @@ catalogs:
     pdfjs-dist:
       specifier: ^6.1.200
       version: 6.1.200
+    pngjs:
+      specifier: ^7.0.0
+      version: 7.0.0
     posthog-node:
       specifier: ^5.45.2
       version: 5.45.2
@@ -859,6 +862,9 @@ importers:
       pdfjs-dist:
         specifier: 'catalog:'
         version: 6.1.200
+      pngjs:
+        specifier: 'catalog:'
+        version: 7.0.0
       react:
         specifier: catalog:desktop
         version: 19.2.7

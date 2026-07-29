@@ -7,6 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "yiru",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.xinyao27.yiru.mobile",
@@ -63,7 +66,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F5F5F5"
+        "backgroundImage": "./assets/adaptive-icon-background.png",
+        "backgroundColor": "#1687EC",
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png"
       },
       "allowBackup": false,
       "package": "com.xinyao27.yiru.mobile",
@@ -76,7 +81,16 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
-          "backgroundColor": "#F5F5F5"
+          "imageWidth": 280,
+          "backgroundColor": "#1687EC"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1687EC",
+          "defaultChannel": "yiru-desktop"
         }
       ],
       [

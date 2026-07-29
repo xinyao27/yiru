@@ -7,7 +7,7 @@ import { cn } from '@/lib/class-names'
 import { isEditableTarget } from '@/lib/editable-target'
 import { getScreenSubmitModifierLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
 
-import logo from '../../../../../resources/logo.svg'
+import logo from '../../../../../resources/yiru-wordmark.png?url'
 import type { OnboardingState } from '../../../../shared/types'
 import { AgentStep } from './agent-step'
 import { shouldRequestOnboardingSkipConfirmation } from './dismiss-target'

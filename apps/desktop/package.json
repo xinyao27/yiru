@@ -156,6 +156,7 @@
     "monaco-editor": "catalog:",
     "oxlint-plugin-react-doctor": "catalog:",
     "pdfjs-dist": "catalog:",
+    "pngjs": "catalog:",
     "react": "catalog:desktop",
     "react-colorful": "catalog:",
     "react-dom": "catalog:desktop",

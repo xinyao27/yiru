@@ -56,7 +56,7 @@ import {
   canGoForwardWorktreeHistory
 } from '@/store/slices/worktree-nav-history'
 
-import logo from '../../../../resources/logo.svg'
+import logo from '../../../../resources/yiru-wordmark.png?url'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import {
   keybindingMatchesAction,

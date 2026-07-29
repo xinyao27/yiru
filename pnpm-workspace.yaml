@@ -98,6 +98,7 @@ catalog:
   node-pty: ^1.1.0
   oxlint-plugin-react-doctor: 0.2.10
   pdfjs-dist: ^6.1.200
+  pngjs: ^7.0.0
   posthog-node: ^5.45.2
   qrcode: ^1.5.4
   react-colorful: ^5.8.0

@@ -2,14 +2,12 @@ import { Menu, Tray, nativeImage, nativeTheme, type NativeImage } from 'electron
 
 import menuBarIconPath from '../../../resources/tray/yiru-menu-barTemplate.png?asset&asarUnpack'
 import menuBarIconRetinaPath from '../../../resources/tray/yiru-menu-barTemplate@2x.png?asset&asarUnpack'
-import { createAppIconImage } from '../app-icon'
+import windowsTrayIconPath from '../../../resources/tray/yiru-windows-tray.png?asset'
 import { translateMain } from '../i18n/main-i18n'
 import { composeTrayAttentionIcon, tintTrayTemplateForAttention } from './attention-icon'
 import { stampTrayDevBadge } from './dev-badge'
 
 export type SystemTrayOptions = {
-  /** App icon id from settings; the tray reuses the app icon image. */
-  appIcon: unknown
   /** True for development instances, which need to remain distinct from production. */
   isDevInstance: boolean
   /** Worktree or branch label identifying this development instance. */
@@ -208,7 +206,7 @@ export function createSystemTray(opts: SystemTrayOptions): Tray | null {
       baseTrayImage = stampMacDevBadge(baseTrayImage)
     }
   } else {
-    baseTrayImage = createAppIconImage(opts.appIcon).resize({
+    baseTrayImage = nativeImage.createFromPath(windowsTrayIconPath).resize({
       width: TRAY_ICON_SIZE,
       height: TRAY_ICON_SIZE
     })
