@@ -1,6 +1,6 @@
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { getContributionTotals } from '@yiru/workbench-model/ui'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ContributionHeatmap } from '@/components/contribution-heatmap/heatmap'
@@ -42,7 +42,9 @@ export default function HomePage(): React.JSX.Element {
   useTranslation()
   const liveStats = useAppStore((state) => state.statsSummary)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
-  const [cachedSnapshot] = useState(loadHomeDataSnapshot)
+  const [initialCachedSnapshot] = useState(loadHomeDataSnapshot)
+  const cachedSnapshotRef = useRef(initialCachedSnapshot)
+  const cachedSnapshot = cachedSnapshotRef.current
   const [metric, setMetric] = useState<ContributionDisplayMetric>(loadContributionMetric)
   const liveUsageValue = useUsageValue()
   const stats = liveStats ?? cachedSnapshot?.stats ?? null
@@ -64,7 +66,7 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (liveStats !== null && liveUsageValue.isReady) {
-      saveHomeDataSnapshot(liveStats, liveUsageValue)
+      cachedSnapshotRef.current = saveHomeDataSnapshot(liveStats, liveUsageValue)
     }
   }, [liveStats, liveUsageValue])
 

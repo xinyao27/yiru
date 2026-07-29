@@ -33,27 +33,30 @@ export function loadHomeDataSnapshot(): HomeDataSnapshot | null {
   }
 }
 
-export function saveHomeDataSnapshot(stats: StatsSummary, usage: UsageValue): void {
+export function saveHomeDataSnapshot(stats: StatsSummary, usage: UsageValue): HomeDataSnapshot {
+  const snapshot: HomeDataSnapshot = {
+    stats: {
+      totalAgentsSpawned: stats.totalAgentsSpawned,
+      totalPRsCreated: stats.totalPRsCreated,
+      totalAgentTimeMs: stats.totalAgentTimeMs,
+      firstEventAt: stats.firstEventAt,
+      dailyActivity: stats.dailyActivity ?? []
+    },
+    usage: {
+      dailyTokens: usage.dailyTokens,
+      dailyValues: usage.dailyValues,
+      hasUnpricedUsage: usage.hasUnpricedUsage,
+      hasValue: usage.hasValue,
+      models: usage.models
+    }
+  }
   try {
     if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
-      return
+      return snapshot
     }
     const persisted = JSON.stringify({
       schemaVersion: HOME_DATA_CACHE_SCHEMA_VERSION,
-      stats: {
-        totalAgentsSpawned: stats.totalAgentsSpawned,
-        totalPRsCreated: stats.totalPRsCreated,
-        totalAgentTimeMs: stats.totalAgentTimeMs,
-        firstEventAt: stats.firstEventAt,
-        dailyActivity: stats.dailyActivity ?? []
-      },
-      usage: {
-        dailyTokens: usage.dailyTokens,
-        dailyValues: usage.dailyValues,
-        hasUnpricedUsage: usage.hasUnpricedUsage,
-        hasValue: usage.hasValue,
-        models: usage.models
-      }
+      ...snapshot
     })
     if (window.localStorage.getItem(HOME_DATA_CACHE_KEY) !== persisted) {
       window.localStorage.setItem(HOME_DATA_CACHE_KEY, persisted)
@@ -61,6 +64,7 @@ export function saveHomeDataSnapshot(stats: StatsSummary, usage: UsageValue): vo
   } catch {
     // Why: a failed cache write must not affect the authoritative live data.
   }
+  return snapshot
 }
 
 function parseHomeDataSnapshot(value: unknown): HomeDataSnapshot | null {
