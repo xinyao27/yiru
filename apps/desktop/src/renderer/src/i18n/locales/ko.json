@@ -11972,7 +11972,54 @@
       },
       "tool": {
         "running": "실행 중…",
-        "result": "결과"
+        "result": "결과",
+        "yiru": {
+          "running": "{{value0}} 실행 중",
+          "failed": "{{value0}} 실패",
+          "summary": "{{value1}} {{value0}}",
+          "summaryTarget": "{{value1}} {{value2}} {{value0}}",
+          "summaryOutcome": "{{value1}} {{value2}} {{value0}}, {{value3}}",
+          "openTarget": "작업 대상 열기",
+          "verb": {
+            "captured": "캡처함",
+            "changed": "변경함",
+            "closed": "닫음",
+            "created": "생성함",
+            "dispatched": "배정함",
+            "focused": "포커스함",
+            "inspected": "확인함",
+            "navigated": "이동함",
+            "read": "읽음",
+            "removed": "제거함",
+            "replied": "회신함",
+            "ran": "실행함",
+            "sentTo": "전송함",
+            "started": "시작함",
+            "stopped": "중지함",
+            "updated": "업데이트함",
+            "used": "사용함",
+            "waited": "대기함"
+          },
+          "object": {
+            "automation": "자동화",
+            "automations": "자동화",
+            "browser": "브라우저",
+            "browserTab": "브라우저 탭",
+            "computer": "컴퓨터",
+            "message": "메시지",
+            "orchestration": "오케스트레이션",
+            "task": "작업",
+            "tasks": "작업",
+            "terminal": "터미널",
+            "terminals": "터미널",
+            "worktree": "워크트리",
+            "worktrees": "워크트리"
+          },
+          "outcome": {
+            "spawned": "{{value0}} 시작함",
+            "to": "{{value0}}에 전송함"
+          }
+        }
       },
       "status": {
         "responding": "Agent이 응답 중입니다."

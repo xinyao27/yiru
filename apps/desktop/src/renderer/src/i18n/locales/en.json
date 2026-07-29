@@ -11995,7 +11995,54 @@
       },
       "tool": {
         "running": "Running…",
-        "result": "Result"
+        "result": "Result",
+        "yiru": {
+          "running": "Running {{value0}}",
+          "failed": "{{value0}} failed",
+          "summary": "{{value0}} {{value1}}",
+          "summaryTarget": "{{value0}} {{value1}} {{value2}}",
+          "summaryOutcome": "{{value0}} {{value1}} {{value2}}, {{value3}}",
+          "openTarget": "Open action target",
+          "verb": {
+            "captured": "Captured",
+            "changed": "Changed",
+            "closed": "Closed",
+            "created": "Created",
+            "dispatched": "Dispatched",
+            "focused": "Focused",
+            "inspected": "Inspected",
+            "navigated": "Navigated",
+            "read": "Read",
+            "removed": "Removed",
+            "replied": "Replied to",
+            "ran": "Ran",
+            "sentTo": "Sent to",
+            "started": "Started",
+            "stopped": "Stopped",
+            "updated": "Updated",
+            "used": "Used",
+            "waited": "Waited for"
+          },
+          "object": {
+            "automation": "automation",
+            "automations": "automations",
+            "browser": "browser",
+            "browserTab": "browser tab",
+            "computer": "computer",
+            "message": "message",
+            "orchestration": "orchestration",
+            "task": "task",
+            "tasks": "tasks",
+            "terminal": "terminal",
+            "terminals": "terminals",
+            "worktree": "worktree",
+            "worktrees": "worktrees"
+          },
+          "outcome": {
+            "spawned": "spawned {{value0}}",
+            "to": "to {{value0}}"
+          }
+        }
       },
       "status": {
         "responding": "Agent is responding"

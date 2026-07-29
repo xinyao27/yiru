@@ -2,7 +2,9 @@ import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import {
   isToolCallBlock,
   isToolResultBlock,
-  type NativeChatBlock
+  type NativeChatBlock,
+  type NativeChatToolCallBlock,
+  type NativeChatToolResultBlock
 } from '@yiru/workbench-model/agent'
 import { useEffect, useState } from 'react'
 
@@ -12,12 +14,15 @@ import { cn } from '@/lib/class-names'
 
 import { diffFromText, diffFromToolCall, type DiffLine } from './diff'
 import { NativeChatDiffView } from './diff-view'
+import { pairToolBlocks } from './tool-fold'
 import {
   countToolCalls,
   formatToolInput,
   summarizeToolInput,
   summarizeToolRun
 } from './tool-summary'
+import { recognizeYiruAction, type YiruAction } from './yiru-action'
+import { NativeChatYiruActionCard } from './yiru-action-card'
 
 const MAX_TOOL_RESULT_CHARS = 4000
 
@@ -122,7 +127,7 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
 /** A run of a message's tool calls/results, collapsed to a one-line summary that
  *  expands to the individual inline tool lines. `expandSignal` lets the global
  *  toolbar toggle drive every run at once while still allowing per-run override. */
-export function NativeChatToolRun({
+function GenericToolRun({
   blocks,
   expandSignal
 }: {
@@ -143,9 +148,7 @@ export function NativeChatToolRun({
   )
 
   return (
-    // Extra top margin sets the tool run apart from the assistant prose above it
-    // so the turn's activity doesn't crowd the message text.
-    <div className="mt-2">
+    <div>
       <Button
         variant="ghost"
         size="xs"
@@ -178,4 +181,76 @@ export function NativeChatToolRun({
       ) : null}
     </div>
   )
+}
+
+type ToolRunItem =
+  | { key: string; kind: 'action'; action: YiruAction }
+  | { key: string; kind: 'generic'; blocks: NativeChatBlock[] }
+
+/** Replace paired yiru shell calls/results while preserving ordinary tool activity. */
+export function NativeChatToolRun({
+  blocks,
+  expandSignal
+}: {
+  blocks: NativeChatBlock[]
+  expandSignal: boolean
+}): React.JSX.Element {
+  const items = buildToolRunItems(blocks)
+  return (
+    // Extra top margin sets tool activity apart from the assistant prose above it.
+    <div className="mt-2 space-y-1.5">
+      {items.map((item) =>
+        item.kind === 'action' ? (
+          <NativeChatYiruActionCard key={item.key} action={item.action} />
+        ) : (
+          <GenericToolRun key={item.key} blocks={item.blocks} expandSignal={expandSignal} />
+        )
+      )}
+    </div>
+  )
+}
+
+function buildToolRunItems(blocks: readonly NativeChatBlock[]): ToolRunItem[] {
+  const items: ToolRunItem[] = []
+  let genericBlocks: NativeChatBlock[] = []
+  let genericOrdinal = 0
+  const actionOrdinals = new Map<string, number>()
+  const flushGeneric = (): void => {
+    if (genericBlocks.length === 0) {
+      return
+    }
+    const firstCall = genericBlocks.find(isToolCallBlock)?.name ?? 'result'
+    genericOrdinal += 1
+    items.push({
+      key: `generic:${firstCall}:${genericOrdinal}`,
+      kind: 'generic',
+      blocks: genericBlocks
+    })
+    genericBlocks = []
+  }
+
+  for (const pair of pairToolBlocks(blocks)) {
+    const action = pair.call ? recognizeYiruAction(pair.call, pair.result) : null
+    if (!action) {
+      genericBlocks.push(...pairBlocks(pair.call, pair.result))
+      continue
+    }
+    flushGeneric()
+    const ordinal = (actionOrdinals.get(action.commandLabel) ?? 0) + 1
+    actionOrdinals.set(action.commandLabel, ordinal)
+    items.push({
+      key: `action:${action.commandLabel}:${ordinal}`,
+      kind: 'action',
+      action
+    })
+  }
+  flushGeneric()
+  return items
+}
+
+function pairBlocks(
+  call: NativeChatToolCallBlock | undefined,
+  result: NativeChatToolResultBlock | undefined
+): NativeChatBlock[] {
+  return [...(call ? [call] : []), ...(result ? [result] : [])]
 }

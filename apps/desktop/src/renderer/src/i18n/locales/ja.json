@@ -11972,7 +11972,54 @@
       },
       "tool": {
         "running": "実行中…",
-        "result": "結果"
+        "result": "結果",
+        "yiru": {
+          "running": "{{value0}} を実行中",
+          "failed": "{{value0}} が失敗しました",
+          "summary": "{{value1}}を{{value0}}",
+          "summaryTarget": "{{value1}} {{value2}}を{{value0}}",
+          "summaryOutcome": "{{value1}} {{value2}}を{{value0}}、{{value3}}",
+          "openTarget": "操作対象を開く",
+          "verb": {
+            "captured": "キャプチャしました",
+            "changed": "変更しました",
+            "closed": "閉じました",
+            "created": "作成しました",
+            "dispatched": "ディスパッチしました",
+            "focused": "フォーカスしました",
+            "inspected": "確認しました",
+            "navigated": "移動しました",
+            "read": "読み取りました",
+            "removed": "削除しました",
+            "replied": "返信しました",
+            "ran": "実行しました",
+            "sentTo": "送信しました",
+            "started": "開始しました",
+            "stopped": "停止しました",
+            "updated": "更新しました",
+            "used": "操作しました",
+            "waited": "待機しました"
+          },
+          "object": {
+            "automation": "オートメーション",
+            "automations": "オートメーション",
+            "browser": "ブラウザ",
+            "browserTab": "ブラウザタブ",
+            "computer": "コンピュータ",
+            "message": "メッセージ",
+            "orchestration": "オーケストレーション",
+            "task": "タスク",
+            "tasks": "タスク",
+            "terminal": "ターミナル",
+            "terminals": "ターミナル",
+            "worktree": "worktree",
+            "worktrees": "worktree"
+          },
+          "outcome": {
+            "spawned": "{{value0}}を起動しました",
+            "to": "{{value0}}へ送信しました"
+          }
+        }
       },
       "status": {
         "responding": "Agent が応答中です"

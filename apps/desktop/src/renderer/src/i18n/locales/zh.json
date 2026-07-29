@@ -11972,7 +11972,54 @@
       },
       "tool": {
         "running": "正在运行…",
-        "result": "结果"
+        "result": "结果",
+        "yiru": {
+          "running": "正在运行 {{value0}}",
+          "failed": "{{value0}} 失败",
+          "summary": "{{value0}}{{value1}}",
+          "summaryTarget": "{{value0}}{{value1}} {{value2}}",
+          "summaryOutcome": "{{value0}}{{value1}} {{value2}}，{{value3}}",
+          "openTarget": "打开操作目标",
+          "verb": {
+            "captured": "捕获了",
+            "changed": "更改了",
+            "closed": "关闭了",
+            "created": "创建了",
+            "dispatched": "分派了",
+            "focused": "聚焦了",
+            "inspected": "检查了",
+            "navigated": "导航了",
+            "read": "读取了",
+            "removed": "移除了",
+            "replied": "回复了",
+            "ran": "运行了",
+            "sentTo": "发送至",
+            "started": "启动了",
+            "stopped": "停止了",
+            "updated": "更新了",
+            "used": "使用了",
+            "waited": "等待了"
+          },
+          "object": {
+            "automation": "自动化",
+            "automations": "自动化",
+            "browser": "浏览器",
+            "browserTab": "浏览器标签页",
+            "computer": "电脑",
+            "message": "消息",
+            "orchestration": "编排",
+            "task": "任务",
+            "tasks": "任务",
+            "terminal": "终端",
+            "terminals": "终端",
+            "worktree": "工作树",
+            "worktrees": "工作树"
+          },
+          "outcome": {
+            "spawned": "启动了 {{value0}}",
+            "to": "发送给 {{value0}}"
+          }
+        }
       },
       "status": {
         "responding": "Agent 正在回复"

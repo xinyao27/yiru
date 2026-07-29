@@ -11972,7 +11972,54 @@
       },
       "tool": {
         "running": "Ejecutando…",
-        "result": "Resultado"
+        "result": "Resultado",
+        "yiru": {
+          "running": "Ejecutando {{value0}}",
+          "failed": "{{value0}} falló",
+          "summary": "{{value0}} {{value1}}",
+          "summaryTarget": "{{value0}} {{value1}} {{value2}}",
+          "summaryOutcome": "{{value0}} {{value1}} {{value2}}, {{value3}}",
+          "openTarget": "Abrir destino de la acción",
+          "verb": {
+            "captured": "Capturó",
+            "changed": "Cambió",
+            "closed": "Cerró",
+            "created": "Creó",
+            "dispatched": "Asignó",
+            "focused": "Enfocó",
+            "inspected": "Inspeccionó",
+            "navigated": "Navegó",
+            "read": "Leyó",
+            "removed": "Eliminó",
+            "replied": "Respondió a",
+            "ran": "Ejecutó",
+            "sentTo": "Envió a",
+            "started": "Inició",
+            "stopped": "Detuvo",
+            "updated": "Actualizó",
+            "used": "Usó",
+            "waited": "Esperó a"
+          },
+          "object": {
+            "automation": "automatización",
+            "automations": "automatizaciones",
+            "browser": "navegador",
+            "browserTab": "pestaña del navegador",
+            "computer": "computadora",
+            "message": "mensaje",
+            "orchestration": "orquestación",
+            "task": "tarea",
+            "tasks": "tareas",
+            "terminal": "terminal",
+            "terminals": "terminales",
+            "worktree": "worktree",
+            "worktrees": "worktrees"
+          },
+          "outcome": {
+            "spawned": "inició {{value0}}",
+            "to": "a {{value0}}"
+          }
+        }
       },
       "status": {
         "responding": "El agente está respondiendo"
