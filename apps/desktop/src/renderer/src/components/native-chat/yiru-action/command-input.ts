@@ -1,6 +1,6 @@
 export function readShellCommand(input: unknown): string | null {
   if (typeof input === 'string') {
-    const parsed = parseInputJson(input)
+    const parsed = parseCommandInputJson(input)
     return parsed === null ? input : readShellCommand(parsed)
   }
   if (!isInputRecord(input)) {
@@ -35,17 +35,13 @@ export function readEmbeddedExecCommands(source: string): string[] {
       cursor = objectStart + 1
       continue
     }
-    const command = readShellCommand(parseInputJson(objectSource))
+    const command = readShellCommand(parseCommandInputJson(objectSource))
     if (command) {
       commands.push(command)
     }
     cursor = objectStart + objectSource.length
   }
   return commands
-}
-
-export function parseCommandInputJson(value: string): unknown | null {
-  return parseInputJson(value)
 }
 
 function balancedObjectAt(source: string, start: number): string | null {
@@ -82,7 +78,7 @@ function balancedObjectAt(source: string, start: number): string | null {
   return null
 }
 
-function parseInputJson(value: string): unknown | null {
+export function parseCommandInputJson(value: string): unknown | null {
   try {
     const parsed: unknown = JSON.parse(value)
     return parsed
