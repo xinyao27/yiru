@@ -16,6 +16,7 @@ export type OpenCodeUsageSlice = {
   openCodeUsageScope: OpenCodeUsageScope
   openCodeUsageRange: OpenCodeUsageRange
   openCodeUsageScanState: OpenCodeUsageScanState | null
+  openCodeUsageSnapshotReady: boolean
   openCodeUsageSummary: OpenCodeUsageSummary | null
   openCodeUsageDaily: OpenCodeUsageDailyPoint[]
   openCodeUsageModelBreakdown: OpenCodeUsageBreakdownRow[]
@@ -24,7 +25,7 @@ export type OpenCodeUsageSlice = {
   setOpenCodeUsageEnabled: (enabled: boolean) => Promise<void>
   setOpenCodeUsageScope: (scope: OpenCodeUsageScope) => Promise<void>
   setOpenCodeUsageRange: (range: OpenCodeUsageRange) => Promise<void>
-  fetchOpenCodeUsage: (opts?: { forceRefresh?: boolean }) => Promise<void>
+  fetchOpenCodeUsage: (opts?: { forceRefresh?: boolean }) => Promise<true | undefined>
   enableOpenCodeUsage: () => Promise<void>
   refreshOpenCodeUsage: () => Promise<void>
 }
@@ -36,6 +37,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   openCodeUsageScope: 'yiru',
   openCodeUsageRange: 'all',
   openCodeUsageScanState: null,
+  openCodeUsageSnapshotReady: false,
   openCodeUsageSummary: null,
   openCodeUsageDaily: [],
   openCodeUsageModelBreakdown: [],
@@ -61,6 +63,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
               lastScanError: null
             }
           : nextScanState,
+        openCodeUsageSnapshotReady: false,
         openCodeUsageSummary: null,
         openCodeUsageDaily: [],
         openCodeUsageModelBreakdown: [],
@@ -86,6 +89,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   },
 
   fetchOpenCodeUsage: async (opts) => {
+    set({ openCodeUsageSnapshotReady: false })
     try {
       const scanState = (await window.api.openCodeUsage.getScanState()) as
         | OpenCodeUsageScanState
@@ -155,14 +159,18 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
 
       set({
         openCodeUsageScanState: refreshedSnapshot.scanState,
+        openCodeUsageSnapshotReady: refreshedSnapshot.scanState.lastScanError === null,
         openCodeUsageSummary: refreshedSnapshot.summary,
         openCodeUsageDaily: refreshedSnapshot.daily,
         openCodeUsageModelBreakdown: refreshedSnapshot.modelBreakdown,
         openCodeUsageProjectBreakdown: refreshedSnapshot.projectBreakdown,
         openCodeUsageRecentSessions: refreshedSnapshot.recentSessions
       })
+      return refreshedSnapshot.scanState.lastScanError === null ? true : undefined
     } catch (error) {
+      set({ openCodeUsageSnapshotReady: false })
       console.error('Failed to fetch OpenCode usage:', error)
+      return undefined
     }
   },
 

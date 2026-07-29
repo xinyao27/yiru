@@ -16,6 +16,7 @@ export type CodexUsageSlice = {
   codexUsageScope: CodexUsageScope
   codexUsageRange: CodexUsageRange
   codexUsageScanState: CodexUsageScanState | null
+  codexUsageSnapshotReady: boolean
   codexUsageSummary: CodexUsageSummary | null
   codexUsageDaily: CodexUsageDailyPoint[]
   codexUsageModelBreakdown: CodexUsageBreakdownRow[]
@@ -24,7 +25,7 @@ export type CodexUsageSlice = {
   setCodexUsageEnabled: (enabled: boolean) => Promise<void>
   setCodexUsageScope: (scope: CodexUsageScope) => Promise<void>
   setCodexUsageRange: (range: CodexUsageRange) => Promise<void>
-  fetchCodexUsage: (opts?: { forceRefresh?: boolean }) => Promise<void>
+  fetchCodexUsage: (opts?: { forceRefresh?: boolean }) => Promise<true | undefined>
   enableCodexUsage: () => Promise<void>
   refreshCodexUsage: () => Promise<void>
 }
@@ -36,6 +37,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   codexUsageScope: 'yiru',
   codexUsageRange: 'all',
   codexUsageScanState: null,
+  codexUsageSnapshotReady: false,
   codexUsageSummary: null,
   codexUsageDaily: [],
   codexUsageModelBreakdown: [],
@@ -61,6 +63,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
               lastScanError: null
             }
           : nextScanState,
+        codexUsageSnapshotReady: false,
         codexUsageSummary: null,
         codexUsageDaily: [],
         codexUsageModelBreakdown: [],
@@ -86,6 +89,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   },
 
   fetchCodexUsage: async (opts) => {
+    set({ codexUsageSnapshotReady: false })
     try {
       const scanState = (await window.api.codexUsage.getScanState()) as
         | CodexUsageScanState
@@ -155,14 +159,18 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
 
       set({
         codexUsageScanState: refreshedSnapshot.scanState,
+        codexUsageSnapshotReady: refreshedSnapshot.scanState.lastScanError === null,
         codexUsageSummary: refreshedSnapshot.summary,
         codexUsageDaily: refreshedSnapshot.daily,
         codexUsageModelBreakdown: refreshedSnapshot.modelBreakdown,
         codexUsageProjectBreakdown: refreshedSnapshot.projectBreakdown,
         codexUsageRecentSessions: refreshedSnapshot.recentSessions
       })
+      return refreshedSnapshot.scanState.lastScanError === null ? true : undefined
     } catch (error) {
+      set({ codexUsageSnapshotReady: false })
       console.error('Failed to fetch Codex usage:', error)
+      return undefined
     }
   },
 

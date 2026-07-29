@@ -19,6 +19,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
+import { loadHomeDataSnapshot, saveHomeDataSnapshot } from './cache'
 import { chartActivationLabel } from './chart-activation'
 import { ContributionCharts } from './charts'
 import { ModelUsageChart } from './model-usage-chart'
@@ -39,14 +40,33 @@ type SummaryMetricProps = {
 
 export default function HomePage(): React.JSX.Element {
   useTranslation()
-  const stats = useAppStore((state) => state.statsSummary)
+  const liveStats = useAppStore((state) => state.statsSummary)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
+  const [cachedSnapshot] = useState(loadHomeDataSnapshot)
   const [metric, setMetric] = useState<ContributionDisplayMetric>(loadContributionMetric)
-  const usageValue = useUsageValue()
+  const liveUsageValue = useUsageValue()
+  const stats = liveStats ?? cachedSnapshot?.stats ?? null
+  const usageValue = useMemo(
+    () =>
+      liveUsageValue.isReady || cachedSnapshot === null
+        ? liveUsageValue
+        : {
+            ...cachedSnapshot.usage,
+            isReady: false,
+            isScanning: liveUsageValue.isScanning
+          },
+    [cachedSnapshot, liveUsageValue]
+  )
 
   useEffect(() => {
     void fetchStatsSummary()
   }, [fetchStatsSummary])
+
+  useEffect(() => {
+    if (liveStats !== null && liveUsageValue.isReady) {
+      saveHomeDataSnapshot(liveStats, liveUsageValue)
+    }
+  }, [liveStats, liveUsageValue])
 
   const activityPoints = useMemo<ContributionPoint[]>(
     () =>

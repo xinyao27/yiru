@@ -16,6 +16,7 @@ export type ClaudeUsageSlice = {
   claudeUsageScope: ClaudeUsageScope
   claudeUsageRange: ClaudeUsageRange
   claudeUsageScanState: ClaudeUsageScanState | null
+  claudeUsageSnapshotReady: boolean
   claudeUsageSummary: ClaudeUsageSummary | null
   claudeUsageDaily: ClaudeUsageDailyPoint[]
   claudeUsageModelBreakdown: ClaudeUsageBreakdownRow[]
@@ -24,7 +25,7 @@ export type ClaudeUsageSlice = {
   setClaudeUsageEnabled: (enabled: boolean) => Promise<void>
   setClaudeUsageScope: (scope: ClaudeUsageScope) => Promise<void>
   setClaudeUsageRange: (range: ClaudeUsageRange) => Promise<void>
-  fetchClaudeUsage: (opts?: { forceRefresh?: boolean }) => Promise<void>
+  fetchClaudeUsage: (opts?: { forceRefresh?: boolean }) => Promise<true | undefined>
   enableClaudeUsage: () => Promise<void>
   refreshClaudeUsage: () => Promise<void>
 }
@@ -36,6 +37,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   claudeUsageScope: 'yiru',
   claudeUsageRange: 'all',
   claudeUsageScanState: null,
+  claudeUsageSnapshotReady: false,
   claudeUsageSummary: null,
   claudeUsageDaily: [],
   claudeUsageModelBreakdown: [],
@@ -64,6 +66,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
               lastScanError: null
             }
           : nextScanState,
+        claudeUsageSnapshotReady: false,
         claudeUsageSummary: null,
         claudeUsageDaily: [],
         claudeUsageModelBreakdown: [],
@@ -89,6 +92,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   },
 
   fetchClaudeUsage: async (opts) => {
+    set({ claudeUsageSnapshotReady: false })
     try {
       const scanState = (await window.api.claudeUsage.getScanState()) as
         | ClaudeUsageScanState
@@ -158,14 +162,18 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
 
       set({
         claudeUsageScanState: refreshedSnapshot.scanState,
+        claudeUsageSnapshotReady: refreshedSnapshot.scanState.lastScanError === null,
         claudeUsageSummary: refreshedSnapshot.summary,
         claudeUsageDaily: refreshedSnapshot.daily,
         claudeUsageModelBreakdown: refreshedSnapshot.modelBreakdown,
         claudeUsageProjectBreakdown: refreshedSnapshot.projectBreakdown,
         claudeUsageRecentSessions: refreshedSnapshot.recentSessions
       })
+      return refreshedSnapshot.scanState.lastScanError === null ? true : undefined
     } catch (error) {
+      set({ claudeUsageSnapshotReady: false })
       console.error('Failed to fetch Claude usage:', error)
+      return undefined
     }
   },
 
