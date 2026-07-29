@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
 import {
@@ -29,12 +29,14 @@ import { ConfirmModal } from '../src/components/confirm-modal'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
-import { MobileHomeDashboard } from '../src/home/dashboard'
 import {
-  aggregateHomeStats,
-  parseRuntimeStatsSummary,
-  type HomeStatsByHost
-} from '../src/home/stats-summary'
+  getHomeStatsByHost,
+  hydrateHomeStatsByHost,
+  subscribeHomeStatsByHost,
+  updateHomeStatsByHost
+} from '../src/home/stats-state'
+import { parseRuntimeStatsSummary } from '../src/home/stats-summary'
+import { translate } from '../src/i18n/translate'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
@@ -93,12 +95,7 @@ function clientKey(client: RpcClient): number {
   return id
 }
 
-function fetchStats(
-  client: RpcClient,
-  hostId: string,
-  setStatsByHost: (updater: (previous: HomeStatsByHost) => HomeStatsByHost) => void,
-  disposed: () => boolean
-) {
+function fetchStats(client: RpcClient, hostId: string, disposed: () => boolean) {
   client
     .sendRequest('stats.summary')
     .then((response) => {
@@ -110,7 +107,7 @@ function fetchStats(
         if (!summary) {
           return
         }
-        setStatsByHost((previous) => ({
+        updateHomeStatsByHost((previous) => ({
           ...previous,
           [hostId]: summary
         }))
@@ -220,7 +217,11 @@ export default function HomeScreen() {
   const [hostStates, setHostStates] = useState<Record<string, ConnectionState>>({})
   const [hostAttempts, setHostAttempts] = useState<Record<string, number>>({})
   const [hostLastConnected, setHostLastConnected] = useState<Record<string, number | null>>({})
-  const [statsByHost, setStatsByHost] = useState<HomeStatsByHost>({})
+  const statsByHost = useSyncExternalStore(
+    subscribeHomeStatsByHost,
+    getHomeStatsByHost,
+    getHomeStatsByHost
+  )
   const [worktreeInfo, setWorktreeInfo] = useState<Record<string, HostWorktreeInfo>>({})
   const [accountsByHost, setAccountsByHost] = useState<Record<string, AccountsSnapshot>>({})
   const [lastVisited, setLastVisited] = useState<{ hostId: string; worktreeId: string } | null>(
@@ -274,7 +275,7 @@ export default function HomeScreen() {
       }
       setWorktreeInfo((prev) => (Object.keys(prev).length > 0 ? prev : snap.worktreeInfo))
       setAccountsByHost((prev) => (Object.keys(prev).length > 0 ? prev : snap.accountsByHost))
-      setStatsByHost((prev) => (Object.keys(prev).length > 0 ? prev : (snap.statsByHost ?? {})))
+      hydrateHomeStatsByHost(snap.statsByHost ?? {})
       for (const [hostId, info] of Object.entries(snap.worktreeInfo)) {
         const wt = info.lastActiveWorktree
         if (wt) {
@@ -342,7 +343,7 @@ export default function HomeScreen() {
       })
       for (const entry of allClientsRef.current) {
         if (entry.client.getState() === 'connected') {
-          fetchStats(entry.client, entry.hostId, setStatsByHost, () => stale)
+          fetchStats(entry.client, entry.hostId, () => stale)
           fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => stale)
           fetchAccountsSnapshot(entry.client, entry.hostId, setAccountsByHost, () => stale)
         }
@@ -357,8 +358,6 @@ export default function HomeScreen() {
     () => [...hosts].sort((a, b) => b.lastConnected - a.lastConnected),
     [hosts]
   )
-  const stats = useMemo(() => aggregateHomeStats(statsByHost), [statsByHost])
-
   // Why: mirror per-host connection state into hostStates so existing
   // render code (status dots, connecting indicators) keeps working.
   useEffect(() => {
@@ -458,7 +457,7 @@ export default function HomeScreen() {
           }
           if (!statsFetched) {
             statsFetched = true
-            fetchStats(entry.client, entry.hostId, setStatsByHost, () => false)
+            fetchStats(entry.client, entry.hostId, () => false)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
           }
         } else {
@@ -665,7 +664,11 @@ export default function HomeScreen() {
           }
           ListHeaderComponent={
             <View className="gap-6 pt-2 pb-2">
-              <MobileHomeDashboard summary={stats} />
+              <MobileGlassTextButton
+                isFullWidth
+                label={translate('mobile.home.openInsights', 'View activity insights')}
+                onPress={() => router.push('/activity-insights')}
+              />
 
               <SectionHeading>Desktops</SectionHeading>
             </View>

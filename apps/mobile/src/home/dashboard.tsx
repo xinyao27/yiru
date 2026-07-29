@@ -18,7 +18,7 @@ import {
 } from './contribution-metric-preference'
 import { ModelUsageChart } from './model-usage-chart'
 
-type MobileHomeDashboardProps = {
+type MobileActivityInsightsDashboardProps = {
   summary: RuntimeStatsSummary | null
 }
 
@@ -27,7 +27,9 @@ type SummaryMetricProps = {
   value: string
 }
 
-export function MobileHomeDashboard({ summary }: MobileHomeDashboardProps): React.JSX.Element {
+export function MobileActivityInsightsDashboard({
+  summary
+}: MobileActivityInsightsDashboardProps): React.JSX.Element {
   const stats = summary ?? EMPTY_SUMMARY
   const metric = useSyncExternalStore(
     subscribeContributionMetric,
@@ -65,14 +67,9 @@ export function MobileHomeDashboard({ summary }: MobileHomeDashboardProps): Reac
 
   return (
     <View>
-      <View className="pb-4">
-        <Text className="text-foreground text-sm font-semibold">
-          {translate('mobile.home.title', 'Home')}
-        </Text>
-        <Text className="text-muted-foreground mt-1 text-sm">
-          {translate('mobile.home.description', 'A year of agent work, with today in context.')}
-        </Text>
-      </View>
+      <Text className="text-muted-foreground mb-4 text-sm">
+        {translate('mobile.home.description', 'A year of agent work, with today in context.')}
+      </Text>
 
       <MobileContentSection className="bg-border mb-4 gap-px">
         <View className="flex-row gap-px">
