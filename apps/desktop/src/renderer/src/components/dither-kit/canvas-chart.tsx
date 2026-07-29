@@ -44,7 +44,7 @@ export function DitherCanvasChart({
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="h-full w-full [image-rendering:pixelated]"
+        className="h-[calc(100%-20px)] w-full [image-rendering:pixelated]"
       />
       <div
         className="absolute inset-0"
@@ -81,7 +81,13 @@ type ChartLabelsProps = {
 function ChartLabels({ data, kind }: ChartLabelsProps): React.JSX.Element {
   const indexes = kind === 'bar' ? data.map((_, index) => index) : trendLabelIndexes(data.length)
   return (
-    <div className="text-muted-foreground pointer-events-none absolute inset-x-0 bottom-0 flex justify-between text-[10px]">
+    <div
+      className={
+        kind === 'bar'
+          ? 'text-muted-foreground pointer-events-none absolute inset-x-0 bottom-0 grid auto-cols-fr grid-flow-col text-center text-[10px]'
+          : 'text-muted-foreground pointer-events-none absolute inset-x-0 bottom-0 flex justify-between text-[10px]'
+      }
+    >
       {indexes.map((index) => (
         <span key={`${index}-${data[index]?.label ?? ''}`}>{data[index]?.label}</span>
       ))}
