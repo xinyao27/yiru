@@ -27,6 +27,8 @@ const buttonVariants = cva(
         // call sites repeating text-muted-foreground + hover/focus overrides.
         quiet:
           'text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground dark:hover:bg-accent',
+        // Why: data visualizations use the whole plot as the activation target without button chrome.
+        chart: 'text-foreground',
         // Why: command/listbox rows share selected-state chrome, including a
         // border that remains legible while the user types.
         'picker-row':
@@ -48,6 +50,8 @@ const buttonVariants = cva(
         // Why: multi-line list actions need content-driven height without bypassing Button chrome.
         'list-row': 'h-auto px-3 py-2',
         'picker-row': 'h-auto gap-2 px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
+        chart: 'h-auto w-full p-0 whitespace-normal',
+        'chart-plot': 'h-48 w-full p-0 whitespace-normal',
         'sidebar-row':
           'h-auto w-full justify-start gap-2 px-2 py-1.5 text-left text-sm whitespace-normal',
         'popover-hint': 'h-auto gap-2 px-3 py-1.5 text-left',

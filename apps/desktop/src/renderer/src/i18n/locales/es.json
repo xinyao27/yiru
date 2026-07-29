@@ -2176,7 +2176,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "Resumen de uso",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -11879,10 +11879,12 @@
           "friday": "Fri",
           "activityLabel": "Daily agent activity over the past year",
           "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "Valor API estimado diario durante el último año",
           "less": "Less",
           "more": "More",
           "activityCell": "{{value0}}: {{value1}} activities",
-          "tokenCell": "{{value0}}: {{value1}} tokens"
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}: {{value1}} de valor API estimado"
         }
       },
       "home": {
@@ -11894,17 +11896,36 @@
           "tokenDescription": "Tokens recorded in local agent session histories.",
           "activity": "Activity",
           "tokens": "Tokens",
+          "apiValue": "Valor API",
+          "valueDescription": "Valor equivalente de API estimado con la tarifa combinada de tus modelos conocidos.",
           "today": "Today",
           "todayActivity": "recorded activity",
           "todayTokens": "recorded tokens",
+          "todayValue": "valor API estimado",
           "currentStreak": "Current streak",
           "streakDays": "{{value0}} days",
           "longestStreak": "Longest this year: {{value0}} days",
           "pastYear": "Past year",
           "totalActivity": "total recorded activity",
           "totalTokens": "total recorded tokens",
+          "totalValue": "valor API estimado total",
+          "valueUnavailable": "Aún no hay precios de modelos conocidos para esta estimación.",
+          "valueCoverage": "El valor API es una estimación basada en proveedores habilitados con precios de modelo conocidos, no una factura real.",
+          "calculatingValue": "Calculando…",
+          "valueNotAvailable": "No disponible",
+          "lifetime": "Histórico",
+          "peakDay": "Día máximo",
+          "longestStreakLabel": "Racha más larga",
           "tokensUnavailable": "Token history is unavailable right now.",
           "tokenCoverage": "Token totals exclude {{value0}} because their session histories do not report usage."
+        },
+        "activitySummary": {
+          "agentsSpawned": "Agentes iniciados",
+          "agentTime": "Tiempo de trabajo de los agentes",
+          "prsCreated": "PR creadas",
+          "durationMinutes": "{{value0}} min",
+          "durationDaysHours": "{{value0}} d {{value1}} h",
+          "durationHoursMinutes": "{{value0}} h {{value1}} min"
         },
         "charts": {
           "trendTitle": "30-day momentum",
@@ -11913,8 +11934,24 @@
           "rhythmTitle": "Weekly rhythm",
           "rhythmDescription": "Past-year totals reveal which days carry the most work.",
           "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}. Haz clic para mostrar {{value1}}.",
           "activities": "{{value0}} activities",
-          "tokens": "{{value0}} tokens"
+          "tokens": "{{value0}} tokens",
+          "value": "{{value0}} de valor API"
+        },
+        "modelChart": {
+          "title": "Distribución por modelo",
+          "tokenDescription": "Uso de tokens agrupado por modelo.",
+          "valueDescription": "Valor API estimado del historial local para modelos con precios conocidos.",
+          "tokenAriaLabel": "Uso de tokens por modelo",
+          "valueAriaLabel": "Valor API estimado por modelo",
+          "tokensTotal": "tokens totales",
+          "valueTotal": "valor API",
+          "tokenUnavailable": "Aún no hay datos de tokens por modelo.",
+          "valueUnavailable": "Aún no hay precios de modelos conocidos para comparar.",
+          "other": "Otros",
+          "refreshAriaLabel": "Actualizar estadísticas de uso local",
+          "refresh": "Actualizar uso"
         }
       }
     },

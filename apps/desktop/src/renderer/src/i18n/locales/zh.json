@@ -2176,7 +2176,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "用量概览",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -11879,10 +11879,12 @@
           "friday": "Fri",
           "activityLabel": "Daily agent activity over the past year",
           "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "过去一年的每日预估 API 价值",
           "less": "Less",
           "more": "More",
           "activityCell": "{{value0}}: {{value1}} activities",
-          "tokenCell": "{{value0}}: {{value1}} tokens"
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}：预估 API 价值 {{value1}}"
         }
       },
       "home": {
@@ -11894,17 +11896,36 @@
           "tokenDescription": "Tokens recorded in local agent session histories.",
           "activity": "Activity",
           "tokens": "Tokens",
+          "apiValue": "API 价值",
+          "valueDescription": "使用已知模型的混合费率估算 API 等价价值。",
           "today": "Today",
           "todayActivity": "recorded activity",
           "todayTokens": "recorded tokens",
+          "todayValue": "预估 API 价值",
           "currentStreak": "Current streak",
           "streakDays": "{{value0}} days",
           "longestStreak": "Longest this year: {{value0}} days",
           "pastYear": "Past year",
           "totalActivity": "total recorded activity",
           "totalTokens": "total recorded tokens",
+          "totalValue": "预估 API 总价值",
+          "valueUnavailable": "暂时没有可用于估算的已知模型价格。",
+          "valueCoverage": "API 价值基于已启用且有已知模型价格的提供商估算，并非实际账单。",
+          "calculatingValue": "计算中…",
+          "valueNotAvailable": "暂不可用",
+          "lifetime": "累计",
+          "peakDay": "峰值日",
+          "longestStreakLabel": "最长连续",
           "tokensUnavailable": "Token history is unavailable right now.",
           "tokenCoverage": "Token totals exclude {{value0}} because their session histories do not report usage."
+        },
+        "activitySummary": {
+          "agentsSpawned": "启动的 Agent",
+          "agentTime": "Agent 工作时长",
+          "prsCreated": "创建的 PR",
+          "durationMinutes": "{{value0}} 分钟",
+          "durationDaysHours": "{{value0}} 天 {{value1}} 小时",
+          "durationHoursMinutes": "{{value0}} 小时 {{value1}} 分钟"
         },
         "charts": {
           "trendTitle": "30-day momentum",
@@ -11913,8 +11934,24 @@
           "rhythmTitle": "Weekly rhythm",
           "rhythmDescription": "Past-year totals reveal which days carry the most work.",
           "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}。点击切换为{{value1}}。",
           "activities": "{{value0}} activities",
-          "tokens": "{{value0}} tokens"
+          "tokens": "{{value0}} tokens",
+          "value": "API 价值 {{value0}}"
+        },
+        "modelChart": {
+          "title": "模型分布",
+          "tokenDescription": "按模型汇总 Token 用量。",
+          "valueDescription": "按已知价格的模型估算本地历史 API 价值。",
+          "tokenAriaLabel": "各模型的 Token 用量",
+          "valueAriaLabel": "各模型的预估 API 价值",
+          "tokensTotal": "Token 总数",
+          "valueTotal": "API 价值",
+          "tokenUnavailable": "暂时没有可用的模型 Token 数据。",
+          "valueUnavailable": "暂时没有可用于比较的已知模型价格。",
+          "other": "其他",
+          "refreshAriaLabel": "刷新本地用量统计",
+          "refresh": "刷新用量"
         }
       }
     },

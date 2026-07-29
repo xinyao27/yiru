@@ -105,7 +105,7 @@ function getDefaultState(): CodexUsagePersistedState {
     sessions: [],
     dailyAggregates: [],
     scanState: {
-      enabled: false,
+      enabled: true,
       lastScanStartedAt: null,
       lastScanCompletedAt: null,
       lastScanError: null
@@ -119,19 +119,23 @@ export function normalizePersistedState(state: CodexUsagePersistedState): CodexU
     // Reusing an older cache would silently serve wrong model/session rows
     // until the next forced rescan, so schema changes must invalidate stale
     // persisted analytics instead of best-effort patching partial data.
-    // Preserve scanState.enabled so existing users keep tracking on across
-    // schema bumps; the next refresh will repopulate the analytics.
+    // Usage analytics is local and always available on Home. Schema bumps
+    // migrate older opt-in state to the current always-on behavior.
     const defaults = getDefaultState()
     return {
       ...defaults,
       scanState: {
         ...defaults.scanState,
-        enabled: state.scanState?.enabled ?? defaults.scanState.enabled
+        enabled: true
       }
     }
   }
   return {
     ...state,
+    scanState: {
+      ...state.scanState,
+      enabled: true
+    },
     sessions: state.sessions.map((session) => ({
       ...session,
       locationModelBreakdown: session.locationModelBreakdown ?? []

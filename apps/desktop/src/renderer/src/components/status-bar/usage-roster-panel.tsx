@@ -225,10 +225,7 @@ export function UsageRosterPanel({
       })}
       <DropdownMenuSeparator className="my-0" />
       <DropdownMenuItem onClick={onUsageDetails} className="w-full justify-between">
-        {translate(
-          'auto.components.status.bar.UsageRosterPanel.usageDetails',
-          'Usage details & history'
-        )}
+        {translate('auto.components.status.bar.UsageRosterPanel.usageDetails', 'Usage overview')}
         <CaretRight weight="regular" className="text-muted-foreground" />
       </DropdownMenuItem>
       <DropdownMenuItem onClick={onManageAccounts} className="w-full justify-between">

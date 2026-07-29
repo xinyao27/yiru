@@ -1,15 +1,14 @@
-import type {
-  ContributionCalendarDay,
-  ContributionMetric,
-  ContributionPoint
-} from '@yiru/workbench-model/ui'
+import type { ContributionCalendarDay, ContributionPoint } from '@yiru/workbench-model/ui'
 import { buildContributionCalendar } from '@yiru/workbench-model/ui'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+
+import type { ContributionDisplayMetric } from './metric'
 
 const INTENSITY_CLASS: Record<ContributionCalendarDay['intensity'], string> = {
   0: 'border-border/60 bg-muted/40',
@@ -22,21 +21,27 @@ const INTENSITY_LEVELS = [0, 1, 2, 3, 4] as const
 
 type ContributionHeatmapProps = {
   points: readonly ContributionPoint[]
-  metric: ContributionMetric
+  metric: ContributionDisplayMetric
+  activationLabel?: string
   anchorDate?: Date
+  onActivate?: () => void
 }
 
 type ContributionCellProps = {
   day: ContributionCalendarDay
-  metric: ContributionMetric
+  hasGridSemantics: boolean
+  metric: ContributionDisplayMetric
 }
 
 export function ContributionHeatmap({
   points,
   metric,
-  anchorDate
+  activationLabel,
+  anchorDate,
+  onActivate
 }: ContributionHeatmapProps): React.JSX.Element {
   useTranslation()
+  const isInteractive = activationLabel !== undefined && onActivate !== undefined
   const calendar = useMemo(
     () => buildContributionCalendar(points, anchorDate),
     [anchorDate, points]
@@ -60,6 +65,9 @@ export function ContributionHeatmap({
     },
     { day: 'saturday', label: '' }
   ]
+  const cells = days.map((day) => (
+    <ContributionCell key={day.day} day={day} hasGridSemantics={!isInteractive} metric={metric} />
+  ))
 
   return (
     <div className="mx-auto w-max min-w-[610px]">
@@ -82,25 +90,25 @@ export function ContributionHeatmap({
             <span key={entry.day}>{entry.label}</span>
           ))}
         </div>
-        <div
-          className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
-          role="grid"
-          aria-label={
-            metric === 'activity'
-              ? translate(
-                  'auto.components.contribution.heatmap.activityLabel',
-                  'Daily agent activity over the past year'
-                )
-              : translate(
-                  'auto.components.contribution.heatmap.tokensLabel',
-                  'Daily token usage over the past year'
-                )
-          }
-        >
-          {days.map((day) => (
-            <ContributionCell key={day.day} day={day} metric={metric} />
-          ))}
-        </div>
+        {activationLabel !== undefined && onActivate !== undefined ? (
+          <Button
+            variant="chart"
+            size="chart"
+            className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
+            aria-label={activationLabel}
+            onClick={onActivate}
+          >
+            {cells}
+          </Button>
+        ) : (
+          <div
+            className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
+            role="grid"
+            aria-label={formatGridLabel(metric)}
+          >
+            {cells}
+          </div>
+        )}
       </div>
 
       <div className="text-muted-foreground mt-3 flex items-center justify-center gap-2 text-[11px]">
@@ -116,15 +124,19 @@ export function ContributionHeatmap({
   )
 }
 
-function ContributionCell({ day, metric }: ContributionCellProps): React.JSX.Element {
+function ContributionCell({
+  day,
+  hasGridSemantics,
+  metric
+}: ContributionCellProps): React.JSX.Element {
   const cell = (
-    <div
+    <span
       className={cn(
         'size-2.5 border',
         day.isFuture ? 'border-transparent bg-transparent' : INTENSITY_CLASS[day.intensity]
       )}
-      role="gridcell"
-      aria-label={day.isFuture ? undefined : formatCellLabel(day, metric)}
+      role={hasGridSemantics ? 'gridcell' : undefined}
+      aria-label={!hasGridSemantics || day.isFuture ? undefined : formatCellLabel(day, metric)}
     />
   )
   if (day.isFuture) {
@@ -140,20 +152,62 @@ function ContributionCell({ day, metric }: ContributionCellProps): React.JSX.Ele
   )
 }
 
-function formatCellLabel(day: ContributionCalendarDay, metric: ContributionMetric): string {
+function formatGridLabel(metric: ContributionDisplayMetric): string {
+  switch (metric) {
+    case 'activity':
+      return translate(
+        'auto.components.contribution.heatmap.activityLabel',
+        'Daily agent activity over the past year'
+      )
+    case 'tokens':
+      return translate(
+        'auto.components.contribution.heatmap.tokensLabel',
+        'Daily token usage over the past year'
+      )
+    case 'value':
+      return translate(
+        'auto.components.contribution.heatmap.valueLabel',
+        'Daily estimated API value over the past year'
+      )
+  }
+}
+
+function formatCellLabel(day: ContributionCalendarDay, metric: ContributionDisplayMetric): string {
   const date = day.date.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   })
-  return metric === 'activity'
-    ? translate(
+  switch (metric) {
+    case 'activity':
+      return translate(
         'auto.components.contribution.heatmap.activityCell',
         '{{value0}}: {{value1}} activities',
         { value0: date, value1: day.value.toLocaleString() }
       )
-    : translate('auto.components.contribution.heatmap.tokenCell', '{{value0}}: {{value1}} tokens', {
-        value0: date,
-        value1: day.value.toLocaleString()
-      })
+    case 'tokens':
+      return translate(
+        'auto.components.contribution.heatmap.tokenCell',
+        '{{value0}}: {{value1}} tokens',
+        {
+          value0: date,
+          value1: day.value.toLocaleString()
+        }
+      )
+    case 'value':
+      return translate(
+        'auto.components.contribution.heatmap.valueCell',
+        '{{value0}}: {{value1}} estimated API value',
+        { value0: date, value1: formatCurrency(day.value) }
+      )
+  }
+}
+
+function formatCurrency(value: number): string {
+  return Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(value)
 }

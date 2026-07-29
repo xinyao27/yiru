@@ -2199,7 +2199,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "Usage overview",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -11902,10 +11902,12 @@
           "friday": "Fri",
           "activityLabel": "Daily agent activity over the past year",
           "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "Daily estimated API value over the past year",
           "less": "Less",
           "more": "More",
           "activityCell": "{{value0}}: {{value1}} activities",
-          "tokenCell": "{{value0}}: {{value1}} tokens"
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}: {{value1}} estimated API value"
         }
       },
       "home": {
@@ -11917,17 +11919,36 @@
           "tokenDescription": "Tokens recorded in local agent session histories.",
           "activity": "Activity",
           "tokens": "Tokens",
+          "apiValue": "API value",
+          "valueDescription": "Estimated API-equivalent value using your known-model blended rate.",
           "today": "Today",
           "todayActivity": "recorded activity",
           "todayTokens": "recorded tokens",
+          "todayValue": "estimated API value",
           "currentStreak": "Current streak",
           "streakDays": "{{value0}} days",
           "longestStreak": "Longest this year: {{value0}} days",
           "pastYear": "Past year",
           "totalActivity": "total recorded activity",
           "totalTokens": "total recorded tokens",
+          "totalValue": "total estimated API value",
+          "valueUnavailable": "No known model pricing is available for this estimate yet.",
+          "valueCoverage": "API value is an estimate based on enabled providers with known model pricing, not an actual bill.",
+          "calculatingValue": "Calculating…",
+          "valueNotAvailable": "Not available",
+          "lifetime": "Lifetime",
+          "peakDay": "Peak day",
+          "longestStreakLabel": "Longest streak",
           "tokensUnavailable": "Token history is unavailable right now.",
           "tokenCoverage": "Token totals exclude {{value0}} because their session histories do not report usage."
+        },
+        "activitySummary": {
+          "agentsSpawned": "Agents spawned",
+          "agentTime": "Time agents worked",
+          "prsCreated": "PRs created",
+          "durationMinutes": "{{value0}}m",
+          "durationDaysHours": "{{value0}}d {{value1}}h",
+          "durationHoursMinutes": "{{value0}}h {{value1}}m"
         },
         "charts": {
           "trendTitle": "30-day momentum",
@@ -11936,8 +11957,24 @@
           "rhythmTitle": "Weekly rhythm",
           "rhythmDescription": "Past-year totals reveal which days carry the most work.",
           "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}. Click to show {{value1}}.",
           "activities": "{{value0}} activities",
-          "tokens": "{{value0}} tokens"
+          "tokens": "{{value0}} tokens",
+          "value": "{{value0}} API value"
+        },
+        "modelChart": {
+          "title": "Model mix",
+          "tokenDescription": "Token usage grouped by model.",
+          "valueDescription": "Estimated local-history API value for models with known pricing.",
+          "tokenAriaLabel": "Token usage by model",
+          "valueAriaLabel": "Estimated API value by model",
+          "tokensTotal": "total tokens",
+          "valueTotal": "API value",
+          "tokenUnavailable": "No model token data is available yet.",
+          "valueUnavailable": "No known model pricing is available for comparison yet.",
+          "other": "Other",
+          "refreshAriaLabel": "Refresh local usage statistics",
+          "refresh": "Refresh usage"
         }
       }
     },

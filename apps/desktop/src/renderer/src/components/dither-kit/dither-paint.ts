@@ -9,6 +9,10 @@ const BAYER_MATRIX = [
   [15, 7, 13, 5]
 ].map((row) => row.map((value) => (value + 0.5) / 16))
 
+export function ditherThreshold(x: number, y: number): number {
+  return BAYER_MATRIX[y & 3]?.[x & 3] ?? 0
+}
+
 type DitherVariant = 'gradient' | 'hatched'
 
 type PaintColumnOptions = {
@@ -38,7 +42,7 @@ export function paintDitherColumn(
     if (options.variant === 'hatched' && ((x + y) & 3) >= 2) {
       continue
     }
-    const threshold = BAYER_MATRIX[y & 3]?.[x & 3] ?? 0
+    const threshold = ditherThreshold(x, y)
     const isLit = density > threshold - options.intensity * 0.1
     const alpha = Math.min(1, (0.3 + density * 0.7) * (isLit ? 1 : 0.4))
     context.fillStyle = ditherColor(seed.fill, alpha)

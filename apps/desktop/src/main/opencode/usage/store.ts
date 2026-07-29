@@ -35,7 +35,7 @@ function getDefaultState(): OpenCodeUsagePersistedState {
     sessions: [],
     dailyAggregates: [],
     scanState: {
-      enabled: false,
+      enabled: true,
       lastScanStartedAt: null,
       lastScanCompletedAt: null,
       lastScanError: null
@@ -51,6 +51,10 @@ export function normalizePersistedState(
   }
   return {
     ...state,
+    scanState: {
+      ...state.scanState,
+      enabled: true
+    },
     processedDatabases: (state.processedDatabases ?? []).map((database) => ({
       ...database,
       sessions: (database.sessions ?? []).map(normalizeSessionCost),

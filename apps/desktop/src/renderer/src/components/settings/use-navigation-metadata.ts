@@ -2,7 +2,6 @@
 // Cmd+J and Settings visibility cannot drift. Keep it free of Settings pane UI
 // imports; the boundary is enforced by a focused architecture test.
 import {
-  ChartBar as BarChart3,
   Bell,
   Stack as Blocks,
   Robot as Bot,
@@ -54,7 +53,6 @@ import {
 import { getShortcutsPaneSearchEntries } from '@/components/settings/shortcuts-search'
 import { getVoicePaneSearchEntries } from '@/components/settings/voice-pane-search'
 import { YiruLogoSettingsIcon } from '@/components/settings/yiru-logo-settings-icon'
-import { getStatsPaneSearchEntries } from '@/components/stats/search'
 import { isMacUserAgent, isWindowsUserAgent } from '@/components/terminal-pane/pane-helpers'
 import { translate } from '@/i18n/i18n'
 import type { SettingsNavSection } from '@/lib/settings-navigation-types'
@@ -182,17 +180,6 @@ export function buildSettingsNavigationMetadata({
       ),
       icon: Keyboard,
       searchEntries: getShortcutsPaneSearchEntries(),
-      group: 'interface'
-    },
-    {
-      id: 'stats',
-      title: translate('auto.hooks.useSettingsNavigationMetadata.d72a58b5b9', 'Stats & Usage'),
-      description: translate(
-        'auto.hooks.useSettingsNavigationMetadata.b351014180',
-        'Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.'
-      ),
-      icon: BarChart3,
-      searchEntries: getStatsPaneSearchEntries(),
       group: 'interface'
     },
     {

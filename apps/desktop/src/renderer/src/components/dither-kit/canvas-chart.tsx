@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
+
 import { ditherBackingSize, paintDitherColumn, resampleDitherValues } from './dither-paint'
 import { MONOCHROME_DITHER_SEED } from './palette'
 import { useChartDimensions } from './use-chart-dimensions'
@@ -14,15 +16,17 @@ export type DitherCanvasChartProps = {
   data: DitherChartPoint[]
   formatValue: (value: number) => string
   kind: 'area' | 'bar'
+  onActivate: () => void
 }
 
 export function DitherCanvasChart({
   ariaLabel,
   data,
   formatValue,
-  kind
+  kind,
+  onActivate
 }: DitherCanvasChartProps): React.JSX.Element {
-  const { ref, size } = useChartDimensions<HTMLDivElement>()
+  const { ref, size } = useChartDimensions<HTMLElement>()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
@@ -40,13 +44,20 @@ export function DitherCanvasChart({
     hoverIndex === null || data.length <= 1 ? 50 : (hoverIndex / (data.length - 1)) * 100
 
   return (
-    <div ref={ref} className="relative h-48 w-full" role="img" aria-label={ariaLabel}>
+    <Button
+      variant="chart"
+      size="chart-plot"
+      ref={ref}
+      className="relative block"
+      aria-label={ariaLabel}
+      onClick={onActivate}
+    >
       <canvas
         ref={canvasRef}
         aria-hidden="true"
         className="h-[calc(100%-20px)] w-full [image-rendering:pixelated]"
       />
-      <div
+      <span
         className="absolute inset-0"
         onPointerMove={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect()
@@ -58,18 +69,18 @@ export function DitherCanvasChart({
         onPointerLeave={() => setHoverIndex(null)}
       />
       {hoveredPoint ? (
-        <div
-          className="bg-popover pointer-events-none absolute top-2 z-10 -translate-x-1/2 border px-2 py-1 shadow-sm"
+        <span
+          className="bg-popover pointer-events-none absolute top-2 z-10 -translate-x-1/2 border px-2 py-1"
           style={{ left: `${hoverLeft}%` }}
         >
-          <p className="text-muted-foreground text-[10px]">{hoveredPoint.label}</p>
-          <p className="text-foreground text-[11px] font-medium tabular-nums">
+          <span className="text-muted-foreground block text-[10px]">{hoveredPoint.label}</span>
+          <span className="text-foreground block text-[11px] font-medium tabular-nums">
             {formatValue(hoveredPoint.value)}
-          </p>
-        </div>
+          </span>
+        </span>
       ) : null}
       <ChartLabels data={data} kind={kind} />
-    </div>
+    </Button>
   )
 }
 
@@ -81,7 +92,7 @@ type ChartLabelsProps = {
 function ChartLabels({ data, kind }: ChartLabelsProps): React.JSX.Element {
   const indexes = kind === 'bar' ? data.map((_, index) => index) : trendLabelIndexes(data.length)
   return (
-    <div
+    <span
       className={
         kind === 'bar'
           ? 'text-muted-foreground pointer-events-none absolute inset-x-0 bottom-0 grid auto-cols-fr grid-flow-col text-center text-[10px]'
@@ -91,7 +102,7 @@ function ChartLabels({ data, kind }: ChartLabelsProps): React.JSX.Element {
       {indexes.map((index) => (
         <span key={`${index}-${data[index]?.label ?? ''}`}>{data[index]?.label}</span>
       ))}
-    </div>
+    </span>
   )
 }
 

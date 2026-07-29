@@ -117,7 +117,7 @@ function getDefaultState(): ClaudeUsagePersistedState {
     sessions: [],
     dailyAggregates: [],
     scanState: {
-      enabled: false,
+      enabled: true,
       lastScanStartedAt: null,
       lastScanCompletedAt: null,
       lastScanError: null
@@ -335,14 +335,14 @@ export class ClaudeUsageStore {
       if (parsed.schemaVersion !== SCHEMA_VERSION) {
         // Why: scanner semantics affect persisted totals, so old Claude caches
         // must be rebuilt after parser/source changes instead of reused briefly.
-        // Preserve scanState.enabled so existing users keep tracking on across
-        // schema bumps; the next refresh will repopulate the analytics.
+        // Usage analytics is local and always available on Home. Schema bumps
+        // migrate older opt-in state to the current always-on behavior.
         const defaults = getDefaultState()
         return {
           ...defaults,
           scanState: {
             ...defaults.scanState,
-            enabled: parsed.scanState?.enabled ?? defaults.scanState.enabled
+            enabled: true
           }
         }
       }
@@ -351,7 +351,8 @@ export class ClaudeUsageStore {
         ...parsed,
         scanState: {
           ...getDefaultState().scanState,
-          ...parsed.scanState
+          ...parsed.scanState,
+          enabled: true
         }
       }
     } catch (error) {

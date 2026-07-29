@@ -4,6 +4,7 @@ export type BarChartProps = {
   ariaLabel: string
   data: DitherChartPoint[]
   formatValue: (value: number) => string
+  onActivate: () => void
 }
 
 export function BarChart(props: BarChartProps): React.JSX.Element {
