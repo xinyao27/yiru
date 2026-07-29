@@ -11,13 +11,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
-import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 
 import logo from '../../../../resources/logo.svg'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'
-import { ShortcutKeyCombo } from '../components/shortcut-key-combo'
 import { cn } from '../lib/class-names'
 import { useAppStore } from '../store'
 import {
@@ -30,12 +28,7 @@ import {
   hasGitHubBackedProject,
   type PreflightIssue
 } from './landing-preflight-issues'
-
-type ShortcutItem = {
-  id: string
-  shortcut: ShortcutKeyComboDetails
-  action: string
-}
+import { LandingShortcuts } from './landing-shortcuts'
 
 type StarState = 'loading' | 'starred' | 'not-starred' | 'web-fallback' | 'hidden'
 
@@ -316,20 +309,9 @@ export default function Landing(): React.JSX.Element {
     }
   }, [hasGitHubProject, preflightIssues.length])
 
-  const createWorktreeShortcut = useShortcutKeyDetails('workspace.create')
-  const previousWorktreeShortcut = useShortcutKeyDetails('worktree.navigateUp')
-  const nextWorktreeShortcut = useShortcutKeyDetails('worktree.navigateDown')
-  const shortcuts = useMemo<ShortcutItem[]>(() => {
-    return [
-      {
-        id: 'create',
-        shortcut: createWorktreeShortcut,
-        action: `Create ${createTargetLabel.toLowerCase()}`
-      },
-      { id: 'up', shortcut: previousWorktreeShortcut, action: 'Move up workspace' },
-      { id: 'down', shortcut: nextWorktreeShortcut, action: 'Move down workspace' }
-    ]
-  }, [createTargetLabel, createWorktreeShortcut, nextWorktreeShortcut, previousWorktreeShortcut])
+  const handleCreateWorkspace = (): void => {
+    openModal('new-workspace-composer', { telemetrySource: 'unknown' })
+  }
 
   return (
     <div className="bg-background absolute inset-0 flex items-center justify-center">
@@ -345,10 +327,6 @@ export default function Landing(): React.JSX.Element {
               className="size-12"
             />
           </div>
-          <h1 className="text-foreground text-4xl font-bold tracking-tight">
-            {translate('auto.components.Landing.6ca6ff404e', 'YIRU')}
-          </h1>
-
           {preflightIssues.length > 0 && <PreflightBanner issues={preflightIssues} repos={repos} />}
 
           <p className="text-muted-foreground text-center text-sm">
@@ -381,7 +359,7 @@ export default function Landing(): React.JSX.Element {
                   ? translate('auto.components.Landing.f05d237049', 'Add a project first')
                   : undefined
               }
-              onClick={() => openModal('new-workspace-composer', { telemetrySource: 'unknown' })}
+              onClick={handleCreateWorkspace}
             >
               <GitMerge className="size-3.5" />
               {translate('auto.components.Landing.76a95f7f47', 'Create')}{' '}
@@ -389,18 +367,11 @@ export default function Landing(): React.JSX.Element {
             </Button>
           </div>
 
-          <div className="mt-6 w-full max-w-xs space-y-2">
-            {shortcuts.map((shortcut) => (
-              <div key={shortcut.id} className="grid grid-cols-[1fr_auto] items-center gap-3">
-                <span className="text-muted-foreground text-sm">{shortcut.action}</span>
-                <ShortcutKeyCombo
-                  keys={shortcut.shortcut.keys}
-                  doubleTap={shortcut.shortcut.doubleTap}
-                  separatorClassName="mx-0.5 text-[10px] text-muted-foreground"
-                />
-              </div>
-            ))}
-          </div>
+          <LandingShortcuts
+            canCreateWorktree={canCreateWorktree}
+            createTargetLabel={createTargetLabel}
+            onCreate={handleCreateWorkspace}
+          />
         </div>
       </div>
 

@@ -821,7 +821,10 @@
         "ec43b38ba7": "Con estrella en GitHub",
         "157bb5ecbb": "Abrir GitHub",
         "preflightDismiss": "Descartar",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "Crear {{value0}}",
+        "previousWorkspace": "Subir espacio de trabajo",
+        "nextWorkspace": "Bajar espacio de trabajo"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "Solo disponible para proyectos Git locales.",

@@ -821,7 +821,10 @@
         "ec43b38ba7": "GitHub でスター済み",
         "157bb5ecbb": "GitHub を開く",
         "preflightDismiss": "閉じる",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "{{value0}}を作成",
+        "previousWorkspace": "ワークスペースを上へ移動",
+        "nextWorkspace": "ワークスペースを下へ移動"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "ローカル Git プロジェクトでのみ使用できます。",

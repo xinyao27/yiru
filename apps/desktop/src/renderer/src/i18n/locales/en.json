@@ -844,7 +844,10 @@
         "ec43b38ba7": "Starred on GitHub",
         "157bb5ecbb": "Open GitHub",
         "preflightDismiss": "Dismiss",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "Create {{value0}}",
+        "previousWorkspace": "Move up workspace",
+        "nextWorkspace": "Move down workspace"
       },
       "NewWorkspaceComposerCard": {
         "reuseExistingBranch": "Reuse branch",
