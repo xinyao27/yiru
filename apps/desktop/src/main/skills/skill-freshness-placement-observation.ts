@@ -89,7 +89,8 @@ export async function observeSkillFreshnessInstallation(args: {
       status: 'inaccessible',
       installedReleaseRevision: null,
       installedAppVersion: null,
-      observedPackageDigest: null
+      observedPackageDigest: null,
+      observedGitTreeSha: null
     }
   }
 
@@ -116,7 +117,8 @@ export async function observeSkillFreshnessInstallation(args: {
           : (args.artifacts.releasedAppVersions[args.current.name]?.[snapshot.releaseRevision] ??
             null)
         : null,
-      observedPackageDigest: observed.observedDigest
+      observedPackageDigest: observed.observedDigest,
+      observedGitTreeSha: observed.observedGitTreeSha
     }
   } catch (error) {
     return {
@@ -125,6 +127,7 @@ export async function observeSkillFreshnessInstallation(args: {
       installedReleaseRevision: null,
       installedAppVersion: null,
       observedPackageDigest: null,
+      observedGitTreeSha: null,
       errorCategory: errorCategory(error, 'skill-package-read-failed')
     }
   }

@@ -352,6 +352,7 @@
           "0708ed89f1": "Claude",
           "fc80296033": "Devin",
           "da41abbdd4": "Ante",
+          "060d152fb5": "Trae",
           "mimo_code_label": "MiMo Code"
         },
         "skill": {
@@ -662,7 +663,8 @@
         "2fe88c2e06": "Remote workspace sync unavailable",
         "2ec42e1c52": "No remote workspace yet",
         "88214a785b": "Workspace sync waited for local session hydration and timed out",
-        "4f78ba5885": "Workspace synced"
+        "4f78ba5885": "Workspace synced",
+        "workspaceChangedOnAnotherDevice": "Workspace changed on another device"
       },
       "useSettingsNavigationMetadata": {
         "4a728cd56b": "New features that are still taking shape. Give them a try.",
@@ -2035,6 +2037,12 @@
             "failedOne": "1 server update failed",
             "updatedOne": "1 server updated"
           },
+          "SkillUpdateStatusSegment": {
+            "stoppingLabel": "Stopping skill update",
+            "runningLabel": "Updating skills",
+            "successLabel": "Skills updated",
+            "errorLabel": "Skill update failed"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "Updated",
             "9be86c46a0": "Freeable",
@@ -2619,6 +2627,23 @@
           "tipPluginCache": "This copy is managed by a plugin."
         },
         "SkillFreshnessUpdateDialog": {
+          "showLog": "Show log",
+          "stoppingHeadline": "Stopping the update…",
+          "runningOne": "Updating 1 skill…",
+          "runningMany": "Updating {{value0}} skills…",
+          "updatedOne": "Updated 1 skill",
+          "updatedMany": "Updated {{value0}} skills",
+          "updatedPartial": "Updated {{value0}} of {{value1}} skills",
+          "runningDescription": "You can close this window — it keeps running in the background.",
+          "errorTitle": "The update didn't finish",
+          "stopping": "Stopping…",
+          "stop": "Stop",
+          "copied": "Copied",
+          "copyCommand": "Copy command",
+          "retry": "Retry",
+          "done": "Done",
+          "updateActionOne": "Update 1 skill",
+          "updateActionMany": "Update {{value0}} skills",
           "title": "Update skills",
           "checking": "Checking installed Yiru skills…",
           "none": "No installed Yiru skills found.",
@@ -2632,7 +2657,12 @@
           "terminalDescription": "Review the pre-filled command, then press Enter to run it.",
           "terminalAria": "Yiru skill update terminal",
           "checkNow": "Re-check",
-          "close": "Close"
+          "close": "Close",
+          "unsafeCommandPath": "Could not run {{value0}} safely from this location.",
+          "launchFailed": "The update command could not start: {{value0}}",
+          "commandExitedUnknown": "The update command stopped unexpectedly.",
+          "commandExited": "The update command exited with code {{value0}}.",
+          "incomplete": "Some skills could not be updated."
         },
         "SkillFreshnessStatusPill": {
           "updateAvailable": "Update available",
@@ -8166,6 +8196,21 @@
           "commandPlaceholder": "clangd",
           "argumentsPlaceholder": "--stdio\n--background-index",
           "languagesPlaceholder": "c, cpp"
+        },
+        "VoiceSpeechModelSection": {
+          "parakeetV3Description": "Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.",
+          "parakeetV2Description": "English only. Faster than v3 with similar accuracy. Punctuation and capitalization.",
+          "zipformerBilingualDescription": "Chinese + English with code-switching. Low-latency real-time streaming.",
+          "paraformerBilingualDescription": "Chinese (Mandarin + dialects) + English. Strong on accented and regional Chinese.",
+          "zipformerEnglishDescription": "English only. Lightweight 20M-param model, good balance of speed and size.",
+          "zipformerChineseDescription": "Chinese only. Ultra-lightweight 14M-param model, ideal for low-resource devices.",
+          "zipformerKoreanDescription": "Korean only. Low-latency real-time streaming.",
+          "parakeetJapaneseDescription": "Japanese only. Trained on 35k+ hours of natural speech. Punctuation included.",
+          "whisperDescription": "90+ languages. Lower accuracy than Parakeet but broadest language coverage.",
+          "senseVoiceDescription": "Chinese, English, Japanese, Korean, and Cantonese with automatic language detection.",
+          "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
+          "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
+          "genericDescription": "Speech recognition model."
         }
       },
       "right": {
@@ -12163,6 +12208,20 @@
       "startError": "Friday could not start.",
       "newConversation": "New conversation",
       "starting": "Starting assistant…"
+    }
+  },
+  "worktree": {
+    "includeCopy": {
+      "morePaths": "{{value0}} and {{value1}} more",
+      "notCopiedOne": ".worktreeinclude entry {{value0}} was not copied into the new workspace",
+      "notCopiedMany": ".worktreeinclude entries {{value0}} were not copied into the new workspace",
+      "sizingBudget": "{{value0}}: earlier entries used up the budget for measuring what to copy.",
+      "overBudgetOne": "{{value0}}: copying it would exceed the {{value1}} / {{value2}} file limit that keeps workspace creation responsive.",
+      "overBudgetMany": "{{value0}}: copying them would exceed the {{value1}} / {{value2}} file limit that keeps workspace creation responsive.",
+      "partialOne": "{{value0}} may hold a partial copy from the interrupted attempt — check it before reusing this workspace.",
+      "partialMany": "{{value0}} may hold a partial copy from the interrupted attempt — check them before reusing this workspace.",
+      "manualOne": "Copy it in manually if this workspace needs it.",
+      "manualMany": "Copy them in manually if this workspace needs them."
     }
   }
 }

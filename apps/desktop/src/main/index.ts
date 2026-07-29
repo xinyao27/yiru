@@ -12,6 +12,8 @@ import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'electron'
 import * as QRCode from 'qrcode'
 
+import { resolveEnvironment } from '../shared/runtime-environment-store'
+import { getPreferredPairingOffer } from '../shared/runtime-environments'
 import {
   HEADLESS_RUNTIME_WINDOW_ID,
   type RuntimeDesktopWindowStatus
@@ -135,8 +137,13 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import { callRuntimeEnvironment } from './runtime/environment-transport-routing'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
 import { registerMobileHandlers } from './runtime/mobile'
+import {
+  fingerprintOrchestrationPeer,
+  type OrchestrationEnvironmentTransport
+} from './runtime/orchestration/environment-transport'
 import { configureRemoteServerUpdater } from './runtime/remote-server-updater'
 import { YiruRuntimeRpcServer } from './runtime/rpc'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
@@ -2014,6 +2021,21 @@ app.whenReady().then(async () => {
       .filter((account) => !activeIds.has(account.id))
       .map((account) => ({ id: account.id, managedHomePath: account.managedHomePath }))
   })
+  const orchestrationEnvironmentTransport: OrchestrationEnvironmentTransport = {
+    resolve: (selector) => {
+      const environment = resolveEnvironment(app.getPath('userData'), selector)
+      const pairing = getPreferredPairingOffer(environment)
+      return {
+        environmentId: environment.id,
+        name: environment.name,
+        peerFingerprint: fingerprintOrchestrationPeer(pairing.publicKeyB64)
+      }
+    },
+    call: (selector, method, params, timeoutMs, envelope) =>
+      callRuntimeEnvironment(app.getPath('userData'), selector, method, params, timeoutMs, {
+        envelope
+      })
+  }
   const runtimeService = new YiruRuntimeService(store, stats, {
     // Why: resolve the PTY provider lazily. initDaemonPtyProvider() runs later
     // inside attachMainWindowServices and calls setLocalPtyProvider(routedAdapter)
@@ -2047,6 +2069,7 @@ app.whenReady().then(async () => {
       claudeRuntimeAuth!.resolveSessionProjectRoots(target),
     buildAgentHookPtyEnv: () =>
       isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {},
+    orchestrationEnvironmentTransport,
     statsUsageStores: {
       claude: claudeUsage,
       codex: codexUsage,

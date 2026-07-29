@@ -39,6 +39,76 @@ type VoiceSpeechModelSectionProps = {
   onRefreshModelStates: () => void
 }
 
+function describeSpeechModel(modelId: string): string {
+  switch (modelId) {
+    case 'parakeet-tdt-0.6b-v3-int8':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.parakeetV3Description',
+        'Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.'
+      )
+    case 'parakeet-tdt-0.6b-v2-int8':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.parakeetV2Description',
+        'English only. Faster than v3 with similar accuracy. Punctuation and capitalization.'
+      )
+    case 'zipformer-bilingual-zh-en':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.zipformerBilingualDescription',
+        'Chinese + English with code-switching. Low-latency real-time streaming.'
+      )
+    case 'paraformer-bilingual-zh-en':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.paraformerBilingualDescription',
+        'Chinese (Mandarin + dialects) + English. Strong on accented and regional Chinese.'
+      )
+    case 'zipformer-streaming-en-20m':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.zipformerEnglishDescription',
+        'English only. Lightweight 20M-param model, good balance of speed and size.'
+      )
+    case 'zipformer-streaming-zh-14m':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.zipformerChineseDescription',
+        'Chinese only. Ultra-lightweight 14M-param model, ideal for low-resource devices.'
+      )
+    case 'zipformer-streaming-korean':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.zipformerKoreanDescription',
+        'Korean only. Low-latency real-time streaming.'
+      )
+    case 'parakeet-tdt-ctc-0.6b-ja-int8':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.parakeetJapaneseDescription',
+        'Japanese only. Trained on 35k+ hours of natural speech. Punctuation included.'
+      )
+    case 'whisper-tiny':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.whisperDescription',
+        '90+ languages. Lower accuracy than Parakeet but broadest language coverage.'
+      )
+    case 'sense-voice-zh-en-ja-ko-yue':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.senseVoiceDescription',
+        'Chinese, English, Japanese, Korean, and Cantonese with automatic language detection.'
+      )
+    case 'openai-gpt-4o-mini-transcribe':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.gpt4oMiniDescription',
+        'Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.'
+      )
+    case 'openai-gpt-4o-transcribe':
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.gpt4oDescription',
+        'Cloud transcription with higher accuracy. Requires an OpenAI API key.'
+      )
+    default:
+      return translate(
+        'auto.components.settings.VoiceSpeechModelSection.genericDescription',
+        'Speech recognition model.'
+      )
+  }
+}
+
 export function VoiceSpeechModelSection({
   voiceSettings,
   catalog,
@@ -63,7 +133,7 @@ export function VoiceSpeechModelSection({
         <Label>{translate('auto.components.settings.VoicePane.43fd4f454b', 'Speech Model')}</Label>
         <p className="text-muted-foreground text-xs">
           {selectedModel && selectedIsReady
-            ? `${selectedModel.label} — ${selectedModel.description}`
+            ? `${selectedModel.label} — ${describeSpeechModel(selectedModel.id)}`
             : translate(
                 'auto.components.settings.VoicePane.e24f7d43d2',
                 'Select a speech model. Local models run offline; cloud models require an API key.'
@@ -170,7 +240,7 @@ export function VoiceSpeechModelSection({
                     </span>
                   </div>
                   <p className="text-muted-foreground mt-0.5 text-[11px] leading-snug">
-                    {manifest.description}
+                    {describeSpeechModel(manifest.id)}
                   </p>
                 </div>
                 {!isCloud && isReady ? (

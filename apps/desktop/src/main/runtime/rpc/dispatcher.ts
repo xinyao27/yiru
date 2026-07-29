@@ -1,6 +1,5 @@
 import type { FeatureInteractionId } from '../../../shared/feature-interactions'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
-import { isBrowserPaneUiRuntimeRpcParams } from '../../../shared/runtime-rpc-feature-interaction-source'
 import type { TerminalStreamFrame } from '../../../shared/terminal/stream-protocol'
 import { emulatorProbe, emulatorProbeError } from '../../emulator/probe'
 import type { YiruRuntimeService } from '../yiru-runtime'
@@ -29,6 +28,13 @@ import {
   mapRuntimeError,
   successResponse
 } from './errors'
+import { getRuntimeFeatureInteractionId } from './feature-interaction'
+import { orchestrationMigrationFence } from './orchestration-contract-fence'
+import {
+  authenticatedCallerFingerprint,
+  OrchestrationMutationExecutor,
+  type DurableMutationInvocation
+} from './orchestration-mutation-executor'
 
 export type DispatcherOptions = {
   runtime: YiruRuntimeService
@@ -39,10 +45,12 @@ export class RpcDispatcher {
   private readonly runtime: YiruRuntimeService
   private readonly registry: RpcRegistry
   private readonly moduleContext: RpcContext
+  private readonly orchestrationMutations: OrchestrationMutationExecutor
 
   constructor({ runtime, methods }: DispatcherOptions) {
     this.runtime = runtime
     this.registry = buildRegistry(methods)
+    this.orchestrationMutations = new OrchestrationMutationExecutor(runtime)
     this.moduleContext = {
       runtime,
       fileCommands: runtime.fileCommands,
@@ -69,6 +77,11 @@ export class RpcDispatcher {
       )
     }
 
+    const migrationFence = orchestrationMigrationFence(request, meta)
+    if (migrationFence) {
+      return migrationFence
+    }
+
     const parsedParams = this.parseParams(request, method, meta)
     if (parsedParams.error) {
       return parsedParams.error
@@ -91,10 +104,17 @@ export class RpcDispatcher {
       emulatorProbe(`rpc ${request.method}`, request.params)
     }
     try {
-      const result = await method.handler(parsedParams.value, {
-        ...this.moduleContext,
-        signal: options?.signal
-      })
+      const invoke = (mutation?: DurableMutationInvocation): Promise<unknown> | unknown =>
+        method.handler(parsedParams.value, {
+          ...this.moduleContext,
+          signal: options?.signal,
+          requestId: request.id,
+          orchestrationCapability: request.orchestrationCapability,
+          authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
+          recordMutationReceipt: mutation?.recordReceipt,
+          orchestrationMutation: mutation?.identity
+        })
+      const result = await this.orchestrationMutations.run(request, parsedParams.value, invoke)
       this.recordRuntimeFeatureInteraction(request.method, result, undefined, request.params)
       return successResponse(request.id, meta, result)
     } catch (error) {
@@ -135,6 +155,12 @@ export class RpcDispatcher {
       return
     }
 
+    const migrationFence = orchestrationMigrationFence(request, meta)
+    if (migrationFence) {
+      reply(JSON.stringify(migrationFence))
+      return
+    }
+
     const parsedParams = this.parseParams(request, method, meta)
     if (parsedParams.error) {
       reply(JSON.stringify(parsedParams.error))
@@ -143,17 +169,23 @@ export class RpcDispatcher {
 
     if (!isStreamingMethod(method)) {
       try {
-        const result = await method.handler(parsedParams.value, {
-          ...this.moduleContext,
-          signal: options?.signal,
-          requestId: request.id,
-          connectionId: options?.connectionId,
-          clientId: options?.clientId,
-          clientKind: options?.clientKind,
-          principal: options?.principal,
-          sendBinary: options?.sendBinary,
-          registerBinaryStreamHandler: options?.registerBinaryStreamHandler
-        })
+        const invoke = (mutation?: DurableMutationInvocation): Promise<unknown> | unknown =>
+          method.handler(parsedParams.value, {
+            ...this.moduleContext,
+            signal: options?.signal,
+            requestId: request.id,
+            connectionId: options?.connectionId,
+            clientId: options?.clientId,
+            clientKind: options?.clientKind,
+            principal: options?.principal,
+            orchestrationCapability: request.orchestrationCapability,
+            authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
+            recordMutationReceipt: mutation?.recordReceipt,
+            orchestrationMutation: mutation?.identity,
+            sendBinary: options?.sendBinary,
+            registerBinaryStreamHandler: options?.registerBinaryStreamHandler
+          })
+        const result = await this.orchestrationMutations.run(request, parsedParams.value, invoke)
         this.recordRuntimeFeatureInteraction(request.method, result, undefined, request.params)
         reply(JSON.stringify(successResponse(request.id, meta, result)))
       } catch (error) {
@@ -186,6 +218,8 @@ export class RpcDispatcher {
           clientId: options?.clientId,
           clientKind: options?.clientKind,
           principal: options?.principal,
+          orchestrationCapability: request.orchestrationCapability,
+          authenticatedCallerFingerprint: authenticatedCallerFingerprint(request),
           sendBinary: options?.sendBinary,
           registerBinaryStreamHandler: options?.registerBinaryStreamHandler
         },
@@ -279,51 +313,4 @@ export class RpcDispatcher {
       // Best-effort education state must not break runtime tools.
     }
   }
-}
-
-function getRuntimeFeatureInteractionId(
-  method: string,
-  result: unknown,
-  rawParams?: unknown
-): FeatureInteractionId | null {
-  if (method === 'browser.profileImportFromBrowser') {
-    return hasBooleanResult(result, 'ok') ? 'cookie-import' : null
-  }
-  if (method === 'browser.profileClearDefaultCookies') {
-    return hasBooleanResult(result, 'cleared') ? 'cookie-import' : null
-  }
-  if (method === 'browser.screencast.unsubscribe') {
-    return null
-  }
-  if (method.startsWith('browser.') && isBrowserPaneUiRuntimeRpcParams(rawParams)) {
-    return null
-  }
-  if (method.startsWith('browser.') && !method.startsWith('browser.profile')) {
-    return 'agent-browser-use'
-  }
-  if (method.startsWith('emulator.')) {
-    // Emulator commands are allowed from terminal/CLI (workspace-scoped, like other automation).
-    // Return null to indicate no special feature-interaction restriction (or add 'emulator-use' later).
-    return null
-  }
-  if (method === 'computer.permissions') {
-    return 'computer-use-setup'
-  }
-  if (
-    method.startsWith('computer.') &&
-    method !== 'computer.capabilities' &&
-    method !== 'computer.permissionsStatus'
-  ) {
-    return 'computer-use'
-  }
-  if (method.startsWith('orchestration.')) {
-    return 'agent-orchestration'
-  }
-  return null
-}
-
-function hasBooleanResult(value: unknown, key: string): boolean {
-  return (
-    value !== null && typeof value === 'object' && (value as Record<string, unknown>)[key] === true
-  )
 }

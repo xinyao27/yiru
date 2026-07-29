@@ -15,6 +15,9 @@ import {
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
+import { directSshAuthoritiesEqual } from '@/store/slices/direct-ssh-terminal-authority-ledger'
+import type { DirectSshPaneRetryAttempt } from '@/store/slices/direct-ssh-terminal-recovery'
+
 import {
   AGENT_INTERRUPT_SETTLE_MS,
   type AgentInterruptInputIntent
@@ -276,6 +279,7 @@ import { createIpcPtyTransport } from './transport'
 
 const pendingSpawnByPaneKey = new Map<string, Promise<string | null>>()
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
+const DIRECT_SSH_PANE_RETRY_SETTLEMENT_TIMEOUT_MS = 31_000
 const REMOTE_PTY_ID_PREFIX = 'remote:'
 const COMMAND_CODE_OUTPUT_DONE_SETTLE_MS = 1500
 const SSH_SHELL_READY_STARTUP_FALLBACK_MS = 1500
@@ -1068,7 +1072,6 @@ export function connectPanePty(
   const clearRegisteredStartupLaunchConfig = (): void => {
     useAppStore.getState().clearAgentLaunchConfig(cacheKey)
   }
-  const pendingSpawnKey = cacheKey
   const neutralTerminalTitle = (): string => {
     const state = useAppStore.getState()
     const tab = (state.tabsByWorktree[deps.worktreeId] ?? []).find(
@@ -2558,9 +2561,13 @@ export function connectPanePty(
     options: {
       seedInitialAgentStatus?: boolean
       updateTabPtyId?: 'always' | 'if-missing'
+      replacePtyId?: string
       sampleVisibleForegroundAgent?: boolean
     } = {}
   ): void => {
+    if (!claimCapturedDirectSshRetryPty(ptyId)) {
+      return
+    }
     if (activePanePtyBinding && activePanePtyBinding !== ptyId) {
       reportPanePtyVisibility(activePanePtyBinding, false)
     }
@@ -2574,8 +2581,12 @@ export function connectPanePty(
     syncHiddenRendererPtyDelivery()
     deps.syncPanePtyLayoutBinding(pane.id, ptyId)
     const tabPtyIds = useAppStore.getState().ptyIdsByTabId?.[deps.tabId] ?? []
-    if (options.updateTabPtyId !== 'if-missing' || !tabPtyIds.includes(ptyId)) {
-      deps.updateTabPtyId(deps.tabId, ptyId)
+    const retryAttemptId =
+      capturedDirectSshRetryPtyAccepted && directSshRetryAttempt
+        ? directSshRetryAttempt.attemptId
+        : undefined
+    if (retryAttemptId || options.updateTabPtyId !== 'if-missing' || !tabPtyIds.includes(ptyId)) {
+      deps.updateTabPtyId(deps.tabId, ptyId, options.replacePtyId, retryAttemptId)
     }
     if (options.seedInitialAgentStatus) {
       applyInitialAgentStatus()
@@ -2949,6 +2960,85 @@ export function connectPanePty(
   const worktree = getWorktreeMapFromState(state).get(deps.worktreeId)
   const connectionId = getConnectionId(deps.worktreeId) ?? null
   const tab = (state.tabsByWorktree[deps.worktreeId] ?? []).find((t) => t.id === deps.tabId)
+  type DirectSshRetryLease = Pick<
+    DirectSshPaneRetryAttempt,
+    'attemptId' | 'authority' | 'tabGeneration'
+  >
+  const directSshRetryAttempt: DirectSshRetryLease | undefined = (() => {
+    const pendingAttempt = state.directSshPaneRetryByTabId[deps.tabId]
+    const liveBinding = state.directSshLivePtyBindingByTabId[deps.tabId]
+    if (
+      pendingAttempt?.authority.targetId === connectionId &&
+      pendingAttempt.tabGeneration === (tab?.generation ?? 0)
+    ) {
+      return pendingAttempt
+    }
+    if (
+      liveBinding?.authority.targetId === connectionId &&
+      liveBinding.tabGeneration === (tab?.generation ?? 0)
+    ) {
+      return liveBinding
+    }
+    return undefined
+  })()
+  const pendingSpawnKey = directSshRetryAttempt
+    ? JSON.stringify([cacheKey, directSshRetryAttempt.attemptId])
+    : cacheKey
+  let capturedDirectSshRetryPtyAccepted = false
+  const capturedDirectSshRetryLeaseMatches = (): boolean => {
+    if (!directSshRetryAttempt) {
+      return true
+    }
+    const currentState = useAppStore.getState()
+    const currentConnection = currentState.sshConnectionStates.get(
+      directSshRetryAttempt.authority.targetId
+    )
+    const currentTab = (currentState.tabsByWorktree[deps.worktreeId] ?? []).find(
+      (candidate) => candidate.id === deps.tabId
+    )
+    if (
+      currentConnection?.status !== 'connected' ||
+      currentConnection.providerEpoch !== directSshRetryAttempt.authority.providerEpoch ||
+      currentConnection.connectionGeneration !==
+        directSshRetryAttempt.authority.connectionGeneration ||
+      (currentTab?.generation ?? 0) !== directSshRetryAttempt.tabGeneration
+    ) {
+      return false
+    }
+    const pendingAttempt = currentState.directSshPaneRetryByTabId[deps.tabId]
+    const liveBinding = currentState.directSshLivePtyBindingByTabId[deps.tabId]
+    return Boolean(
+      (pendingAttempt?.attemptId === directSshRetryAttempt.attemptId &&
+        directSshAuthoritiesEqual(pendingAttempt.authority, directSshRetryAttempt.authority)) ||
+      (liveBinding?.attemptId === directSshRetryAttempt.attemptId &&
+        directSshAuthoritiesEqual(liveBinding.authority, directSshRetryAttempt.authority))
+    )
+  }
+  const claimCapturedDirectSshRetryPty = (ptyId: string): boolean => {
+    if (!directSshRetryAttempt) {
+      return true
+    }
+    if (
+      parseAppSshPtyId(ptyId)?.connectionId !== directSshRetryAttempt.authority.targetId ||
+      !capturedDirectSshRetryLeaseMatches()
+    ) {
+      return false
+    }
+    capturedDirectSshRetryPtyAccepted = true
+    return true
+  }
+  if (directSshRetryAttempt) {
+    const retryAttempt = directSshRetryAttempt
+    setTimeout(() => {
+      useAppStore.getState().settleDirectSshPaneRetry({
+        status: 'timed-out',
+        tabId: deps.tabId,
+        attemptId: retryAttempt.attemptId,
+        authority: retryAttempt.authority,
+        tabGeneration: retryAttempt.tabGeneration
+      })
+    }, DIRECT_SSH_PANE_RETRY_SETTLEMENT_TIMEOUT_MS)
+  }
   const shellOverride = tab?.shellOverride
   // Why: a serve/remote-runtime pane has no SSH connectionId and a Linux cwd, so
   // the native-Windows ConPTY heuristic misfires on a Windows client and wrongly

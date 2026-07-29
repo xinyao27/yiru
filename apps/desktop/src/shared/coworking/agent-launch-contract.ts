@@ -11,6 +11,7 @@ export const COWORKING_AGENT_LAUNCH_IDS = [
   'codex',
   'autohand',
   'ante',
+  'trae',
   'opencode',
   'mimo-code',
   'pi',

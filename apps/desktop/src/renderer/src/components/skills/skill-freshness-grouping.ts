@@ -63,9 +63,11 @@ function locationChip(installation: SkillFreshnessInstallation): SkillLocationCh
  */
 export function groupSkillFreshness(
   installations: readonly SkillFreshnessInstallation[],
-  eligibleUpdateNames: readonly string[]
+  eligibleUpdateNames: readonly string[],
+  alwaysIncludeNames: readonly string[] = []
 ): SkillFreshnessGroupModel[] {
   const eligible = new Set(eligibleUpdateNames)
+  const pinned = new Set(alwaysIncludeNames)
   const byName = new Map<string, SkillFreshnessInstallation[]>()
   for (const installation of installations) {
     const entries = byName.get(installation.name) ?? []
@@ -74,7 +76,7 @@ export function groupSkillFreshness(
   }
   const groups: SkillFreshnessGroupModel[] = []
   for (const [name, entries] of byName) {
-    if (!entries.some((entry) => entry.status === 'outdated')) {
+    if (!pinned.has(name) && !entries.some((entry) => entry.status === 'outdated')) {
       continue
     }
     const locations = entries

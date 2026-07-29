@@ -13,6 +13,7 @@ import type { Store } from '../persistence'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import { listRepoWorktrees } from '../repo-worktrees'
 import type { StatsCollector } from '../stats/collector'
+import { getWorktreeSharedLinkPaths } from '../worktree/shared-directories'
 import { getHostedReviewForBranch } from './hosted-review'
 import { createHostedReview, getHostedReviewCreationEligibility } from './hosted-review-creation'
 
@@ -108,11 +109,15 @@ export function registerHostedReviewHandlers(store: Store, stats: StatsCollector
       const repo = assertRegisteredRepo(args.repoPath, store, args.repoId)
       const worktreePath = await resolveHostedReviewWorktreePath(repo, store, args.worktreePath)
       const localGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
+      const sharedLinkPaths = repo.connectionId ? [] : getWorktreeSharedLinkPaths(repo)
       return getHostedReviewCreationEligibility({
         ...args,
         repoPath: worktreePath,
         connectionId: repo.connectionId ?? null,
-        ...(Object.keys(localGitOptions).length > 0 ? { localGitExecOptions: localGitOptions } : {})
+        ...(Object.keys(localGitOptions).length > 0
+          ? { localGitExecOptions: localGitOptions }
+          : {}),
+        ...(sharedLinkPaths.length > 0 ? { sharedLinkPaths } : {})
       })
     }
   )
@@ -121,8 +126,16 @@ export function registerHostedReviewHandlers(store: Store, stats: StatsCollector
     const repo = assertRegisteredRepo(args.repoPath, store, args.repoId)
     const worktreePath = await resolveHostedReviewWorktreePath(repo, store, args.worktreePath)
     const localGitOptions = getLocalProjectWorktreeGitOptions(store, repo)
+    const sharedLinkPaths = repo.connectionId ? [] : getWorktreeSharedLinkPaths(repo)
     const executionOptions =
-      Object.keys(localGitOptions).length > 0 ? { localGitExecOptions: localGitOptions } : undefined
+      Object.keys(localGitOptions).length > 0 || sharedLinkPaths.length > 0
+        ? {
+            ...(Object.keys(localGitOptions).length > 0
+              ? { localGitExecOptions: localGitOptions }
+              : {}),
+            ...(sharedLinkPaths.length > 0 ? { sharedLinkPaths } : {})
+          }
+        : undefined
     const input = {
       provider: args.provider,
       base: args.base,

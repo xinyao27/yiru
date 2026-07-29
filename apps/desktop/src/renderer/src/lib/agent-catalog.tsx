@@ -107,6 +107,14 @@ export const getAgentCatalog = createLocalizedCatalog((): AgentCatalogEntry[] =>
     homepageUrl: 'https://github.com/AntigmaLabs/ante-preview'
   },
   {
+    id: 'trae',
+    label: translate('auto.lib.agent.catalog.060d152fb5', 'Trae'),
+    // Why: this must match the unambiguous executable used by TUI_AGENT_CONFIG.trae.
+    cmd: 'traecli',
+    faviconDomain: 'www.trae.cn',
+    homepageUrl: 'https://docs.trae.cn/cli_get-started-with-trae-cli'
+  },
+  {
     id: 'pi',
     label: translate('auto.lib.agent.catalog.302934c5d9', 'Pi'),
     cmd: 'pi',

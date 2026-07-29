@@ -11,6 +11,7 @@ import {
 } from '@yiru/workbench-model/platform'
 import {
   getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
@@ -26,6 +27,10 @@ import { z } from 'zod'
 import { DEFAULT_REPO_BADGE_COLOR } from '../../shared/constants'
 import type { FolderWorkspacePathStatusRequest } from '../../shared/folder-workspace-path-status'
 import { getGitCloneFailureMessage } from '../../shared/git/clone-failure-message'
+import type {
+  HostRepoCatalogSnapshot,
+  ListReposForExecutionHostArgs
+} from '../../shared/host-repo-catalog-contract'
 import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
 import { normalizeRepoBadgeColor } from '../../shared/repo-badge-color'
 import { isFolderRepo } from '../../shared/repo-kind'
@@ -87,6 +92,7 @@ import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identit
 import { enrichRepoGitUsernames } from '../repo-git-username-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
 import { normalizeSparseDirectories } from '../sparse-checkout-directories'
+import { isCurrentSshProviderAuthority } from '../ssh/provider-authority'
 import { joinRemotePath } from '../ssh/remote/platform'
 import { getActiveMultiplexer } from '../ssh/ssh'
 import { track } from '../telemetry/client'
@@ -133,6 +139,62 @@ function emitRepoAdded(method: RepoMethod, alreadyExisted: boolean, isGitRepo?: 
     ...getCohortAtEmit()
   }
   track('repo_added', props)
+}
+
+async function listReposForExecutionHost(
+  store: Store,
+  args: ListReposForExecutionHostArgs
+): Promise<HostRepoCatalogSnapshot> {
+  const parsedHost = parseExecutionHostId(args.executionHostId)
+  const rejected = (
+    reason: Extract<HostRepoCatalogSnapshot, { authoritative: false }>['reason']
+  ): HostRepoCatalogSnapshot => ({
+    authoritative: false,
+    executionHostId: args.executionHostId,
+    reason
+  })
+  if (!parsedHost || parsedHost.kind === 'runtime') {
+    return rejected('rejected')
+  }
+  const repos = store.getRepos().filter((repo) => getRepoExecutionHostId(repo) === parsedHost.id)
+  if (parsedHost.kind === 'local') {
+    if ('expectedAuthority' in args) {
+      return rejected('rejected')
+    }
+    return {
+      authoritative: true,
+      authority: { kind: 'local', executionHostId: LOCAL_EXECUTION_HOST_ID },
+      repos: structuredClone(repos)
+    }
+  }
+  if (
+    !('expectedAuthority' in args) ||
+    args.expectedAuthority.targetId !== parsedHost.targetId ||
+    !isCurrentSshProviderAuthority(args.expectedAuthority)
+  ) {
+    return rejected('stale')
+  }
+  const provider = getSshGitProvider(parsedHost.targetId)
+  if (!provider) {
+    return rejected('unavailable')
+  }
+  const snapshot = structuredClone(repos)
+  await Promise.resolve()
+  if (
+    provider !== getSshGitProvider(parsedHost.targetId) ||
+    !isCurrentSshProviderAuthority(args.expectedAuthority)
+  ) {
+    return rejected('stale')
+  }
+  return {
+    authoritative: true,
+    authority: {
+      kind: 'direct-ssh',
+      executionHostId: parsedHost.id,
+      ...args.expectedAuthority
+    },
+    repos: snapshot
+  }
 }
 
 function buildProjectHostSetupResult(store: Store, repo: Repo): ProjectHostSetupResult {
@@ -1120,6 +1182,7 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
   // Remove any previously registered handlers so we can re-register them
   // (e.g. when macOS re-activates the app and creates a new window).
   ipcMain.removeHandler('repos:list')
+  ipcMain.removeHandler('repos:listForExecutionHost')
   ipcMain.removeHandler('repos:add')
   ipcMain.removeHandler('repos:remove')
   ipcMain.removeHandler('repos:removeForHost')
@@ -1177,6 +1240,12 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
     })
     return store.getRepos()
   })
+
+  ipcMain.handle(
+    'repos:listForExecutionHost',
+    (_event, args: ListReposForExecutionHostArgs): Promise<HostRepoCatalogSnapshot> =>
+      listReposForExecutionHost(store, args)
+  )
 
   ipcMain.handle('projects:list', () => {
     enrichMissingRepoGitRemoteIdentities(store, {

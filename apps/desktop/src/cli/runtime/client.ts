@@ -1,11 +1,20 @@
+import { randomUUID } from 'node:crypto'
+
 import {
   describeRuntimeCompatBlock,
   evaluateRuntimeCompat,
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
+  ORCHESTRATION_CONTRACT_RUNTIME_CAPABILITY,
+  ORCHESTRATION_CONTRACT_VERSION,
   RUNTIME_PROTOCOL_VERSION
 } from '@yiru/runtime-protocol/capabilities'
+import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
 
-import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
+import {
+  isOrchestrationMutation,
+  orchestrationMigrationData
+} from '../../shared/orchestration-rpc-contract'
+import type { PairingOffer } from '../../shared/pairing'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
@@ -13,7 +22,14 @@ import type {
 } from '../../shared/runtime-method-contract'
 import { STATUS_GET_CONTRACT } from '../../shared/runtime-method-contracts/runtime-control-contracts'
 import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
-import { markEnvironmentUsed, resolveEnvironmentPairingOffer } from './environments'
+import {
+  attachMutationRecovery,
+  delay,
+  isOpenYiruReady,
+  resolveRemotePairing,
+  throwDesktopActivationBlocked
+} from './client-lifecycle'
+import { markEnvironmentUsed } from './environments'
 import { launchYiruApp } from './launch'
 import { getDefaultUserDataPath, readMetadata } from './metadata'
 import { getCliStatus, resolveDesktopWindowStatus } from './status'
@@ -28,6 +44,7 @@ import { sendWebSocketRequest } from './websocket-transport'
 // emit its terminal frame. The 10 s grace absorbs round-trip + one final
 // keepalive window. See design doc §3.1.
 const LONG_POLL_CLIENT_GRACE_MS = 10_000
+type RuntimeClientCallOptions = { timeoutMs?: number } & RuntimeOrchestrationEnvelope
 
 export class RuntimeClient {
   private readonly userDataPath: string
@@ -35,6 +52,7 @@ export class RuntimeClient {
   private readonly remotePairing: PairingOffer | null
   private readonly environmentSelector: string | null
   private remoteCompatChecked = false
+  private orchestrationContractCheck: Promise<void> | null = null
 
   // Why: browser commands trigger first-time session init (agent-browser connect +
   // CDP proxy setup) which can take 15-30s. 60s accommodates cold start without
@@ -58,32 +76,50 @@ export class RuntimeClient {
   async call<TResult>(
     contract: string,
     params?: unknown,
-    options?: {
-      timeoutMs?: number
-    }
+    options?: RuntimeClientCallOptions
   ): Promise<RuntimeRpcSuccess<TResult>>
   async call<TContract extends RuntimeMethodContract>(
     contract: TContract,
     params: RuntimeMethodParams<TContract>,
-    options?: { timeoutMs?: number }
+    options?: RuntimeClientCallOptions
   ): Promise<RuntimeRpcSuccess<RuntimeMethodResult<TContract>>>
   async call<TResult>(
     contract: string | RuntimeMethodContract,
     params?: unknown,
-    options?: { timeoutMs?: number }
+    options?: RuntimeClientCallOptions
   ): Promise<RuntimeRpcSuccess<TResult>> {
     const method = typeof contract === 'string' ? contract : contract.name
     const effectiveTimeoutMs = options?.timeoutMs ?? this.resolveMethodTimeoutMs(method, params)
+    const orchestrationMutation = isOrchestrationMutation(method, params)
+    if (orchestrationMutation) {
+      await this.ensureOrchestrationContractCompatible(effectiveTimeoutMs)
+    }
+    const orchestrationRequestId = orchestrationMutation
+      ? (options?.orchestrationRequestId ?? randomUUID())
+      : undefined
+    const envelope: RuntimeOrchestrationEnvelope = {
+      orchestrationCapability: options?.orchestrationCapability,
+      orchestrationContractVersion: method.startsWith('orchestration.')
+        ? ORCHESTRATION_CONTRACT_VERSION
+        : undefined,
+      orchestrationRequestId
+    }
     if (this.remotePairing) {
       if (method !== STATUS_GET_CONTRACT.name) {
         await this.ensureRemoteRuntimeCompatible(effectiveTimeoutMs)
       }
-      const response = await sendWebSocketRequest<TResult>(
-        this.remotePairing,
-        method,
-        params,
-        effectiveTimeoutMs
-      )
+      let response
+      try {
+        response = await sendWebSocketRequest<TResult>(
+          this.remotePairing,
+          method,
+          params,
+          effectiveTimeoutMs,
+          envelope
+        )
+      } catch (error) {
+        throw attachMutationRecovery(error, orchestrationRequestId)
+      }
       if (response.ok === false) {
         throw new RuntimeRpcFailureError(response)
       }
@@ -95,7 +131,12 @@ export class RuntimeClient {
       return response
     }
     const metadata = readMetadata(this.userDataPath)
-    const response = await sendRequest<TResult>(metadata, method, params, effectiveTimeoutMs)
+    let response
+    try {
+      response = await sendRequest<TResult>(metadata, method, params, effectiveTimeoutMs, envelope)
+    } catch (error) {
+      throw attachMutationRecovery(error, orchestrationRequestId)
+    }
     if (response.ok === false) {
       throw new RuntimeRpcFailureError(response)
     }
@@ -184,6 +225,28 @@ export class RuntimeClient {
     }
   }
 
+  private async ensureOrchestrationContractCompatible(timeoutMs: number): Promise<void> {
+    if (!this.orchestrationContractCheck) {
+      this.orchestrationContractCheck = this.checkOrchestrationContractCompatibility(timeoutMs)
+    }
+    await this.orchestrationContractCheck
+  }
+
+  private async checkOrchestrationContractCompatibility(timeoutMs: number): Promise<void> {
+    const response = await this.call(STATUS_GET_CONTRACT, undefined, { timeoutMs })
+    if (this.remotePairing) {
+      this.assertRemoteRuntimeStatusCompatible(response.result)
+      this.remoteCompatChecked = true
+    }
+    if (!response.result.capabilities?.includes(ORCHESTRATION_CONTRACT_RUNTIME_CAPABILITY)) {
+      throw new RuntimeClientError(
+        'orchestration_migration_required',
+        'The connected Yiru runtime does not support the current orchestration contract. No effects were applied.',
+        orchestrationMigrationData('runtime_capability_missing')
+      )
+    }
+  }
+
   private assertRemoteRuntimeStatusCompatible(status: RuntimeStatus): void {
     const verdict = evaluateRuntimeCompat({
       clientProtocolVersion: RUNTIME_PROTOCOL_VERSION,
@@ -230,53 +293,6 @@ export class RuntimeClient {
         : 'Timed out waiting for a ready Yiru desktop window. The runtime may still be running headlessly.'
     )
   }
-}
-
-function isOpenYiruReady(status: RuntimeRpcSuccess<CliStatusResult>, remote: boolean): boolean {
-  // Why: desktop availability can precede renderer graph/store attachment on a
-  // cold launch; follow-up workspace RPCs are safe only once both are ready.
-  return (
-    status.result.graph.state === 'ready' &&
-    (remote || status.result.app.desktopWindowStatus === 'available')
-  )
-}
-
-function throwDesktopActivationBlocked(): never {
-  throw new RuntimeClientError(
-    'desktop_activation_blocked',
-    'Yiru is running headlessly, but it cannot open a desktop window safely because the persistent terminal provider is unavailable. Quit Yiru normally and start the app again; do not use open -n.'
-  )
-}
-
-function resolveRemotePairing(
-  userDataPath: string,
-  pairingCode: string | null,
-  environmentSelector: string | null
-): PairingOffer | null {
-  if (pairingCode && environmentSelector) {
-    throw new RuntimeClientError(
-      'invalid_argument',
-      'Use either --pairing-code or --environment, not both.'
-    )
-  }
-  if (environmentSelector) {
-    return resolveEnvironmentPairingOffer(userDataPath, environmentSelector)
-  }
-  if (!pairingCode) {
-    return null
-  }
-  const pairing = parsePairingCode(pairingCode)
-  if (!pairing) {
-    throw new RuntimeClientError(
-      'invalid_argument',
-      'Invalid remote pairing code. Expected a yiru://pair?... URL or bare pairing payload.'
-    )
-  }
-  return pairing
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function isWaitingCheck(params: unknown): boolean {

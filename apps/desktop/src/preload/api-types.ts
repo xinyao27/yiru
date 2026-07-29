@@ -76,6 +76,11 @@ import type {
   ReactErrorBoundaryReportResult
 } from '../shared/crash-reporting'
 import type {
+  HostQualifiedDetectedWorktreeResult,
+  ListDetectedWorktreesArgs,
+  ProviderRequestId
+} from '../shared/detected-worktree-provider-contract'
+import type {
   EphemeralVmRecipeDoctorResult,
   EphemeralVmRecipeResultWarning
 } from '../shared/ephemeral-vm/recipes'
@@ -88,6 +93,14 @@ import type {
 } from '../shared/folder-workspace-path-status'
 import type { FridaySession } from '../shared/friday-types'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git/history'
+import type {
+  HostLineageSnapshot,
+  ListDesktopLineageForHostArgs
+} from '../shared/host-lineage-contract'
+import type {
+  HostRepoCatalogSnapshot,
+  ListReposForExecutionHostArgs
+} from '../shared/host-repo-catalog-contract'
 import type {
   LanguageServerDocumentUriArgs,
   LanguageServerDocumentUriResult,
@@ -136,7 +149,11 @@ import type {
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
 } from '../shared/shell-open-types'
-import type { SkillFreshnessInventory } from '../shared/skill-freshness'
+import type {
+  SkillFreshnessInventory,
+  SkillUpdateRun,
+  SkillUpdateStartResult
+} from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type { ResolvedSourceControlAiGenerationParams } from '../shared/source-control/ai'
 import type { SourceControlAiSettings } from '../shared/source-control/ai-types'
@@ -902,6 +919,7 @@ export type PreloadApi = {
   }
   repos: {
     list: () => Promise<Repo[]>
+    listForExecutionHost: (args: ListReposForExecutionHostArgs) => Promise<HostRepoCatalogSnapshot>
     // Why: error union matches the IPC handler's return shape; renderer callers branch on `'error' in result`.
     add: (args: {
       path: string
@@ -1089,6 +1107,10 @@ export type PreloadApi = {
   worktrees: {
     list: (args: { repoId: string }) => Promise<Worktree[]>
     listDetected: (args: { repoId: string }) => Promise<DetectedWorktreeListResult>
+    listDetectedForHost: (
+      args: ListDetectedWorktreesArgs
+    ) => Promise<HostQualifiedDetectedWorktreeResult>
+    cancelListDetected: (args: { providerRequestId: ProviderRequestId }) => Promise<void>
     listAll: () => Promise<Worktree[]>
     create: (args: CreateWorktreeArgs) => Promise<CreateWorktreeResult>
     /** Two-phase progress for a background `create`, correlated by
@@ -1141,6 +1163,7 @@ export type PreloadApi = {
       lineage: Record<string, WorktreeLineage>
       workspaceLineage?: Record<string, WorkspaceLineage>
     }>
+    listLineageForHost: (args: ListDesktopLineageForHostArgs) => Promise<HostLineageSnapshot>
     updateLineage: (args: {
       worktreeId: string
       parentWorktreeId?: string
@@ -1925,6 +1948,11 @@ export type PreloadApi = {
   skills: {
     discover: (target?: SkillDiscoveryTarget) => Promise<SkillDiscoveryResult>
     freshnessInventory: () => Promise<SkillFreshnessInventory>
+    startUpdateRun: (names: string[]) => Promise<SkillUpdateStartResult>
+    cancelUpdateRun: () => Promise<void>
+    acknowledgeUpdateRun: () => Promise<void>
+    getUpdateRun: () => Promise<SkillUpdateRun>
+    onUpdateRun: (callback: (run: SkillUpdateRun) => void) => () => void
   }
   pet: {
     import: () => Promise<CustomPet | null>

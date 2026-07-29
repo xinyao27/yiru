@@ -3,6 +3,7 @@ import { parseWorkspaceKey } from '../../../shared/workspace/scope'
 
 export type WorkspaceSessionHydrationOptions = {
   additionalValidWorkspaceKeys?: readonly WorkspaceKey[]
+  replaceWorkspaceKeys?: readonly string[]
 }
 
 const WORKSPACE_KEYED_SESSION_FIELDS = [

@@ -5,6 +5,7 @@ import type { EventProps } from '../../../../../shared/telemetry-events'
 import type { TerminalColorSchemeMode } from '../../../../../shared/terminal/color-scheme-protocol'
 import type { TerminalKittyKeyboardModeTracker } from '../../../../../shared/terminal/kitty-keyboard-mode-tracker'
 import type { SetupSplitDirection, TuiAgent } from '../../../../../shared/types'
+import type { DirectSshPaneRetryAttemptId } from '../../../store/slices/direct-ssh-terminal-recovery'
 import type { AgentCompletionStatusSnapshot } from '../agent/completion-coordinator-types'
 import type { ReplayingPanesRef } from '../replay-guard'
 import type { RestoredViewportBlankingPanesRef } from '../terminal-restored-viewport'
@@ -56,7 +57,12 @@ export type PtyConnectionDeps = {
   updateTabTitle: (tabId: string, title: string) => void
   setRuntimePaneTitle: (tabId: string, paneId: number, title: string) => void
   clearRuntimePaneTitle: (tabId: string, paneId: number) => void
-  updateTabPtyId: (tabId: string, ptyId: string) => void
+  updateTabPtyId: (
+    tabId: string,
+    ptyId: string,
+    replacedPtyId?: string,
+    directSshRetryAttemptId?: DirectSshPaneRetryAttemptId
+  ) => void
   markWorktreeUnread: (worktreeId: string) => void
   markTerminalTabUnread: (tabId: string) => void
   markTerminalPaneUnread: (paneKey: string) => void

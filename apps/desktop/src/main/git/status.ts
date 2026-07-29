@@ -47,6 +47,7 @@ import type {
   GitUpstreamStatus
 } from '../../shared/types'
 import { resolveWorktreeAddBaseRef } from '../../shared/workspace/worktree-base-ref'
+import { findExistingWorktreeSymlinkPaths } from '../worktree/symlink-detection'
 import { describeMaxBufferOverflowError, isMaxBufferOverflowError } from './max-buffer-overflow'
 import {
   gitExecFileAsync,
@@ -184,6 +185,7 @@ export type GetStatusOptions = GitRuntimeOptions & {
    */
   limit?: number
   bypassEffectiveUpstreamNegativeCache?: boolean
+  sharedLinkPaths?: readonly string[]
 }
 
 /**
@@ -228,8 +230,26 @@ function getStatusReadKey(worktreePath: string, options: GetStatusOptions): stri
     options.includeIgnored === true,
     options.reuseLineStats === true,
     options.bypassEffectiveUpstreamNegativeCache === true,
-    limit
+    limit,
+    (options.sharedLinkPaths ?? []).join('\u0001')
   ].join('\0')
+}
+
+async function dropSharedSymlinkUntrackedEntries(
+  worktreePath: string,
+  entries: GitStatusEntry[],
+  sharedLinkPaths: readonly string[]
+): Promise<void> {
+  if (sharedLinkPaths.length === 0 || !entries.some((entry) => entry.area === 'untracked')) {
+    return
+  }
+  const sharedLinks = new Set(await findExistingWorktreeSymlinkPaths(worktreePath, sharedLinkPaths))
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index]
+    if (entry.area === 'untracked' && sharedLinks.has(entry.path)) {
+      entries.splice(index, 1)
+    }
+  }
 }
 
 async function runGetStatus(
@@ -314,6 +334,8 @@ async function runGetStatus(
       }
     }
   }
+
+  await dropSharedSymlinkUntrackedEntries(worktreePath, entries, options.sharedLinkPaths ?? [])
 
   if (statusSucceeded && !didHitLimit && shouldProbeEffectiveUpstreamStatus(branch, upstreamName)) {
     const branchName = getShortBranchName(branch)

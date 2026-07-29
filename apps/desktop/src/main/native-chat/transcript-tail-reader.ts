@@ -41,6 +41,8 @@ export async function readNativeChatTranscriptTailFile(
   consumedTo: number
   hasMore: boolean
   beforeOffset: number
+  malformedRecordCount?: number
+  oversizedRecordCount?: number
 }> {
   const end = Math.min((await stat(filePath)).size, endOffset ?? Number.MAX_SAFE_INTEGER)
   if (end === 0) {
@@ -50,6 +52,9 @@ export async function readNativeChatTranscriptTailFile(
   const lineParts: Buffer[] = []
   let lineBytes = 0
   let lineOversized = false
+  let malformedRecordCount = 0
+  let oversizedRecordCount = 0
+  let ignoreNextMalformedRecord = false
   try {
     const consumedTo = includeTrailingLine ? end : await findLastCompleteLineEnd(handle, end)
     if (consumedTo === 0) {
@@ -58,6 +63,7 @@ export async function readNativeChatTranscriptTailFile(
     const newestFirst: { message: NativeChatMessage; offset: number }[] = []
     const finalByte = Buffer.allocUnsafe(1)
     await handle.read(finalByte, 0, 1, consumedTo - 1)
+    ignoreNextMalformedRecord = finalByte[0] !== 0x0a
     let cursor = consumedTo - (finalByte[0] === 0x0a ? 1 : 0)
     while (cursor > 0 && newestFirst.length <= limit) {
       const start = Math.max(0, cursor - TAIL_CHUNK_BYTES)
@@ -91,7 +97,9 @@ export async function readNativeChatTranscriptTailFile(
       messages: selected.map((entry) => entry.message),
       consumedTo,
       hasMore: limit > 0 && chronological.length > limit,
-      beforeOffset: selected[0]?.offset ?? end
+      beforeOffset: selected[0]?.offset ?? end,
+      ...(malformedRecordCount > 0 ? { malformedRecordCount } : {}),
+      ...(oversizedRecordCount > 0 ? { oversizedRecordCount } : {})
     }
   } finally {
     await handle.close()
@@ -105,6 +113,7 @@ export async function readNativeChatTranscriptTailFile(
     if (lineBytes > MAX_NATIVE_CHAT_TRANSCRIPT_RECORD_BYTES) {
       lineParts.length = 0
       lineOversized = true
+      oversizedRecordCount++
       return
     }
     lineParts.push(part)
@@ -127,6 +136,17 @@ export async function readNativeChatTranscriptTailFile(
     if (!line) {
       return
     }
+    try {
+      JSON.parse(line)
+    } catch {
+      if (ignoreNextMalformedRecord) {
+        ignoreNextMalformedRecord = false
+        return
+      }
+      malformedRecordCount++
+      return
+    }
+    ignoreNextMalformedRecord = false
     const message = decode(line, transcriptFallbackId(filePath, lineOffset))
     if (message) {
       messages.push({ message, offset: lineOffset })

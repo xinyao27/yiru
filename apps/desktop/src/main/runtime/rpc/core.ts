@@ -48,6 +48,9 @@ export type RpcRequest = {
   authToken: string
   method: string
   params?: unknown
+  orchestrationCapability?: string
+  orchestrationContractVersion?: number
+  orchestrationRequestId?: string
 }
 
 export type RpcContext = {
@@ -57,6 +60,15 @@ export type RpcContext = {
   browserCommands: RuntimeBrowserCommands
   emulatorCommands: RuntimeEmulatorCommands
   mobileNotifications: MobileNotificationChannel
+  orchestrationCapability?: string
+  recordMutationReceipt?: (receipt: unknown) => void
+  orchestrationMutation?: {
+    callerFingerprint: string
+    requestId: string
+    method: string
+    payloadHash: string
+  }
+  authenticatedCallerFingerprint?: string
   /** Immutable identity established by the encrypted transport, when present. */
   principal?: AuthenticatedRpcPrincipal
   // Why: long-poll handlers (e.g. orchestration.check with wait=true) need to

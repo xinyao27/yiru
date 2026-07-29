@@ -82,6 +82,7 @@ import {
   type GeneratePullRequestFieldsResult
 } from '../text-generation/commit-message-text-generation'
 import { getPullRequestDraftContext } from '../text-generation/pull-request-context'
+import { getWorktreeSharedLinkPaths } from '../worktree/shared-directories'
 import { normalizeRuntimeRelativePath } from './relative-paths'
 
 export type ResolvedRuntimeGitWorktree = Worktree & { git: GitWorktreeInfo }
@@ -193,9 +194,11 @@ export class RuntimeGitCommands {
         : provider.getStatus(target.worktree.path)
     }
     const gitOptions = localGitOptionsForTarget(target)
+    const sharedLinkPaths = target.repo ? getWorktreeSharedLinkPaths(target.repo) : []
+    const sharedOptions = sharedLinkPaths.length > 0 ? { sharedLinkPaths } : {}
     return options
-      ? getGitStatus(target.worktree.path, { ...options, ...gitOptions })
-      : getGitStatus(target.worktree.path, gitOptions)
+      ? getGitStatus(target.worktree.path, { ...options, ...gitOptions, ...sharedOptions })
+      : getGitStatus(target.worktree.path, { ...gitOptions, ...sharedOptions })
   }
 
   async getRuntimeGitSubmoduleStatus(

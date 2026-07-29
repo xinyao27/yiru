@@ -21,6 +21,35 @@ const DEFAULT_TAB_COLOR_RE = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/
 export const YIRU_VM_RECIPE_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/
 export const YIRU_VM_RECIPE_ID_RULE =
   'Use 1-64 lowercase letters, numbers, dots, underscores, or hyphens, starting with a letter or number.'
+const MAX_SHARED_DIRECTORIES = 100
+
+function normalizeSharedDirectories(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+  const seen = new Set<string>()
+  for (const entry of value.slice(0, MAX_SHARED_DIRECTORIES)) {
+    const raw = asTrimmedString(entry)
+    if (!raw) {
+      continue
+    }
+    const normalized = raw.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '')
+    const segments = normalized.split('/')
+    if (
+      !normalized ||
+      normalized.startsWith('/') ||
+      /^[a-zA-Z]:/.test(normalized) ||
+      segments.includes('..') ||
+      segments.includes('.') ||
+      segments.includes('') ||
+      segments.includes('.git')
+    ) {
+      continue
+    }
+    seen.add(normalized)
+  }
+  return Array.from(seen)
+}
 
 function normalizeDefaultTabs(value: unknown): YiruDefaultTabTemplate[] {
   if (!Array.isArray(value)) {
@@ -146,13 +175,18 @@ export function parseYiruYaml(content: string): YiruHooks | null {
   const environmentRecipeParse = normalizeVmRecipes(record.environmentRecipes)
   const environmentRecipes = environmentRecipeParse.recipes
   const environmentRecipeDiagnostics = environmentRecipeParse.diagnostics
+  const worktreeRecord = asRecord(record.worktree)
+  const sharedDirectories = worktreeRecord
+    ? normalizeSharedDirectories(worktreeRecord.sharedDirectories)
+    : []
 
   if (
     !setup &&
     !archive &&
     defaultTabs.length === 0 &&
     environmentRecipes.length === 0 &&
-    environmentRecipeDiagnostics.length === 0
+    environmentRecipeDiagnostics.length === 0 &&
+    sharedDirectories.length === 0
   ) {
     return null
   }
@@ -164,6 +198,7 @@ export function parseYiruYaml(content: string): YiruHooks | null {
     },
     ...(defaultTabs.length > 0 ? { defaultTabs } : {}),
     ...(environmentRecipes.length > 0 ? { environmentRecipes } : {}),
-    ...(environmentRecipeDiagnostics.length > 0 ? { environmentRecipeDiagnostics } : {})
+    ...(environmentRecipeDiagnostics.length > 0 ? { environmentRecipeDiagnostics } : {}),
+    ...(sharedDirectories.length > 0 ? { worktree: { sharedDirectories } } : {})
   }
 }
