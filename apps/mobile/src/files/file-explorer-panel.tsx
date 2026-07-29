@@ -1,13 +1,6 @@
 import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  Text,
-  View,
-  type ListRenderItem
-} from 'react-native'
+import { ActivityIndicator, FlatList, Text, View, type ListRenderItem } from 'react-native'
 
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassTextButton } from '@/components/glass/text-button'
@@ -298,7 +291,7 @@ export function MobileFileExplorerPanel(props: {
         <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Files
         </Text>
-        <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground mt-1 text-xs" numberOfLines={1}>
           {worktreeLabel}
           {legacyListTruncated ? ' - Showing first 5000' : ''}
         </Text>
@@ -339,30 +332,7 @@ export function MobileFileExplorerPanel(props: {
 
   return (
     <View className="bg-background flex-1">
-      <Stack.Screen
-        options={{
-          title: `Files · ${worktreeLabel}`,
-          headerLeft:
-            !embedded && Platform.OS !== 'ios'
-              ? () => (
-                  <MobileGlassIconButton
-                    accessibilityLabel="Back"
-                    icon="back"
-                    onPress={() => router.back()}
-                  />
-                )
-              : undefined
-        }}
-      />
-      {!embedded && Platform.OS === 'ios' ? (
-        <Stack.Toolbar placement="left">
-          <Stack.Toolbar.Button
-            accessibilityLabel="Back"
-            icon="chevron.left"
-            onPress={() => router.back()}
-          />
-        </Stack.Toolbar>
-      ) : null}
+      <Stack.Screen options={{ title: `Files · ${worktreeLabel}` }} />
       {embedded ? <View className={styles.header}>{headerBar}</View> : null}
       {body}
     </View>

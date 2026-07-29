@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { ScrollView, View } from 'react-native'
 
 import { MobileGlassGroup } from '@/components/glass/group'
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { Plus } from '@/components/uniwind-icons'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 import { QuickCommandsTabButton } from './quick-commands-tab-button'
 import type { MobileSessionTab } from './screen-state'
@@ -104,16 +103,12 @@ export function MobileSessionTabStrip({
           ))}
         </ScrollView>
       </View>
-      <MobileGlassPressable
+      <MobileGlassIconButton
         accessibilityLabel="New tab"
-        className="h-9 w-9 rounded-full"
-        contentClassName="h-full w-full items-center justify-center rounded-full"
         disabled={disabled}
-        hitSlop={4}
+        icon="plus"
         onPress={onNewTabPress}
-      >
-        <Plus size={18} colorClassName="accent-muted-foreground" />
-      </MobileGlassPressable>
+      />
       {showQuickCommands ? (
         <QuickCommandsTabButton disabled={disabled} onPress={onQuickCommandsPress} />
       ) : null}

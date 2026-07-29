@@ -153,7 +153,7 @@ function TreeRow(props: {
           {item.name}
         </Text>
         {disabled ? (
-          <Text className="text-muted-foreground mt-px text-xs">Unavailable on mobile</Text>
+          <Text className="text-muted-foreground mt-1 text-xs">Unavailable on mobile</Text>
         ) : null}
       </View>
     </Pressable>

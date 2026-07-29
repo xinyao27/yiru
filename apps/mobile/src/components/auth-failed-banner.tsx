@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native'
 
-import { MobileGlassSection } from './glass/section'
+import { MobileContentSection } from './content-section'
 import { MobileGlassTextButton } from './glass/text-button'
 
 // Why: auth-failed is no longer necessarily terminal (issue #5200) — a
@@ -19,7 +19,7 @@ export function AuthFailedBanner({
   onRemove: () => void
 }) {
   return (
-    <MobileGlassSection className="mx-3 mt-2 px-4 py-2">
+    <MobileContentSection className="mx-3 mt-2 px-4 py-2">
       <Text className="text-destructive mb-2 text-xs">
         Authentication failed — try reconnecting first; if it keeps failing, re-pair from desktop.
       </Text>
@@ -28,6 +28,6 @@ export function AuthFailedBanner({
         <MobileGlassTextButton label="Re-pair" onPress={onRepair} size="small" />
         <MobileGlassTextButton isDestructive label="Remove" onPress={onRemove} size="small" />
       </View>
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }

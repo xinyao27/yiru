@@ -24,13 +24,13 @@ import {
   UsageBar
 } from '../../../src/components/account-usage'
 import { ClaudeIcon, OpenAIIcon } from '../../../src/components/agent-icons'
-import { MobileGlassSection } from '../../../src/components/glass/section'
+import { MobileContentSection } from '../../../src/components/content-section'
 import { useHostClient } from '../../../src/transport/client-context'
 import { loadHosts } from '../../../src/transport/host-store'
 import type { RpcSuccess } from '../../../src/transport/types'
 
 const accountScreenClassNames = {
-  row: 'flex-row items-center px-3.5 py-3',
+  row: 'flex-row items-center px-3 py-3',
   rowPressedActive: 'active:bg-accent',
   rowMain: 'flex-1 gap-1',
   // Why: fixed-width trailing slot keeps usage bars the same width whether
@@ -167,7 +167,7 @@ export default function AccountsScreen() {
             {title}
           </Text>
         </View>
-        <MobileGlassSection>
+        <MobileContentSection>
           {/* System default row */}
           <Pressable
             className={cn(accountScreenClassNames.row, accountScreenClassNames.rowPressedActive)}
@@ -267,7 +267,7 @@ export default function AccountsScreen() {
               </View>
             )
           })}
-        </MobileGlassSection>
+        </MobileContentSection>
       </View>
     )
   }

@@ -22,7 +22,7 @@ export function WorktreeMetaGlyphs({ comment, linkedPR, linkedGitLabMR }: Props)
     return null
   }
   return (
-    <View className="flex-row items-center gap-1.5">
+    <View className="flex-row items-center gap-2">
       {hasNotes && <MessageSquare size={14} colorClassName="accent-muted-foreground" />}
       {hasReview && <GitMerge size={14} colorClassName="accent-muted-foreground" />}
     </View>

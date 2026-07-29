@@ -1,6 +1,6 @@
 import { ScrollView, Switch, Text, View } from 'react-native'
 
-import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileContentSection } from '../src/components/content-section'
 import { useMobileDefaultSessionViewPreference } from '../src/session/use-default-session-view-preference'
 
 export default function NativeChatSettingsScreen() {
@@ -18,11 +18,11 @@ export default function NativeChatSettingsScreen() {
           UI shows a chat interface like the desktop app. You can still switch any individual
           session from its long-press menu.
         </Text>
-        <MobileGlassSection className="mt-2">
-          <View className="flex-row items-center gap-2.5 px-3.5 py-3">
+        <MobileContentSection className="mt-2">
+          <View className="flex-row items-center gap-2 px-3 py-3">
             <View className="flex-1">
               <Text className="text-foreground text-sm font-medium">Open sessions in Chat UI</Text>
-              <Text className="text-muted-foreground mt-0.5 text-xs">
+              <Text className="text-muted-foreground mt-1 text-xs">
                 {chatDefault ? 'On' : 'Off'}
               </Text>
             </View>
@@ -36,7 +36,7 @@ export default function NativeChatSettingsScreen() {
               ios_backgroundColorClassName="accent-accent"
             />
           </View>
-        </MobileGlassSection>
+        </MobileContentSection>
       </ScrollView>
     </View>
   )

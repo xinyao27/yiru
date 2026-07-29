@@ -2,12 +2,12 @@ import type { TuiAgent } from '@yiru/workbench-model/agent'
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { Check, Pencil, Play, Plus, Trash } from '@/components/uniwind-icons'
+import { Check, Play, Plus } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
-import { MobileGlassPressable } from '../components/glass/pressable'
-import { MobileGlassSection } from '../components/glass/section'
+import { MobileContentSection } from '../components/content-section'
+import { MobileGlassIconButton } from '../components/glass/icon-button'
 import { MobileSearchField } from '../components/search-field'
 import {
   getQuickCommandDisplayPreview,
@@ -97,10 +97,12 @@ export function QuickCommandsList(props: ListProps) {
           onDelete={onDelete}
         />
       ) : null}
-      <MobileGlassPressable
+      <Pressable
         accessibilityRole="button"
-        className="mt-1 rounded-2xl border-dashed"
-        contentClassName="flex-row items-center gap-2 px-3 py-3"
+        className={cn(
+          'mt-1 min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-3 active:bg-accent',
+          (disabled || !canAdd) && 'opacity-40'
+        )}
         disabled={disabled || !canAdd}
         onPress={onAdd}
       >
@@ -108,7 +110,7 @@ export function QuickCommandsList(props: ListProps) {
         <Text className="text-foreground text-sm">
           {canAdd ? 'New quick command' : 'Quick command limit reached'}
         </Text>
-      </MobileGlassPressable>
+      </Pressable>
     </View>
   )
 }
@@ -133,7 +135,7 @@ function QuickCommandGroup({
       <Text className="text-muted-foreground px-1 pt-1 pb-1 text-xs font-semibold tracking-wider uppercase">
         {label}
       </Text>
-      <MobileGlassSection>
+      <MobileContentSection>
         {commands.map((command, index) => (
           <QuickCommandRow
             key={command.id}
@@ -145,7 +147,7 @@ function QuickCommandGroup({
             onDelete={onDelete}
           />
         ))}
-      </MobileGlassSection>
+      </MobileContentSection>
     </View>
   )
 }
@@ -193,31 +195,30 @@ function QuickCommandRow({
             {command.label}
           </Text>
           <Text
-            className={cn('mt-px text-xs text-muted-foreground', !isAgent && 'font-mono')}
+            className={cn('mt-1 text-xs text-muted-foreground', !isAgent && 'font-mono')}
             numberOfLines={1}
           >
             {getQuickCommandDisplayPreview(command)}
           </Text>
         </View>
       </Pressable>
-      <MobileGlassPressable
+      <MobileGlassIconButton
         accessibilityLabel={`Edit ${command.label}`}
-        className="h-8 w-8 rounded-full"
-        contentClassName="h-full w-full items-center justify-center rounded-full"
         disabled={disabled}
+        icon="edit"
         onPress={() => onEdit(command)}
-      >
-        <Pencil size={15} colorClassName="accent-muted-foreground" />
-      </MobileGlassPressable>
-      <MobileGlassPressable
-        accessibilityLabel={`Delete ${command.label}`}
-        className="mr-2 h-8 w-8 rounded-full"
-        contentClassName="h-full w-full items-center justify-center rounded-full"
-        disabled={disabled}
-        onPress={() => onDelete(command)}
-      >
-        <Trash size={15} colorClassName="accent-destructive" />
-      </MobileGlassPressable>
+        size="small"
+      />
+      <View className="mr-2">
+        <MobileGlassIconButton
+          accessibilityLabel={`Delete ${command.label}`}
+          disabled={disabled}
+          icon="delete"
+          isDestructive
+          onPress={() => onDelete(command)}
+          size="small"
+        />
+      </View>
     </View>
   )
 }
@@ -230,7 +231,7 @@ export function QuickCommandAgentPicker({
   onSelect: (agent: TuiAgent) => void
 }) {
   return (
-    <MobileGlassSection>
+    <MobileContentSection>
       {QUICK_COMMAND_SUPPORTED_AGENTS.map((agent, index) => (
         <Pressable
           key={agent.id}
@@ -249,7 +250,7 @@ export function QuickCommandAgentPicker({
           {selected === agent.id ? <Check size={16} colorClassName="accent-foreground" /> : null}
         </Pressable>
       ))}
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }
 

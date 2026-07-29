@@ -48,10 +48,11 @@ function ChoiceToggle({
             key={option.value}
             accessibilityRole="button"
             accessibilityState={{ selected, disabled: option.disabled }}
-            className={cn('h-10 flex-1 rounded-full', selected && 'border-muted-foreground')}
+            className="h-10 flex-1 rounded-full"
             contentClassName="h-full items-center justify-center rounded-full px-3"
             disabled={option.disabled}
             onPress={() => onChange(option.value)}
+            tintColorClassName={selected ? 'accent-primary' : undefined}
           >
             <Text className={cn('text-muted-foreground text-xs', selected && 'text-foreground')}>
               {option.label}
@@ -84,7 +85,7 @@ export function QuickCommandEditorForm({
         <Text className="text-muted-foreground text-xs">Label</Text>
         <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
           <TextInput
-            className="text-foreground px-3 py-2.5 text-sm"
+            className="text-foreground px-3 py-3 text-sm"
             value={draft.label}
             onChangeText={(label) => onChange({ label })}
             placeholder="Start dev server"
@@ -112,7 +113,7 @@ export function QuickCommandEditorForm({
           <Text className="text-muted-foreground text-xs">Agent</Text>
           <MobileGlassPressable
             className="rounded-xl"
-            contentClassName="flex-row items-center justify-between px-3 py-2.5"
+            contentClassName="flex-row items-center justify-between px-3 py-3"
             onPress={onOpenAgentPicker}
           >
             {draft.agent ? (
@@ -133,7 +134,7 @@ export function QuickCommandEditorForm({
         <Text className="text-muted-foreground text-xs">{isAgent ? 'Prompt' : 'Command Text'}</Text>
         <MobileGlassSurface className="min-h-24 overflow-hidden rounded-xl" isInteractive>
           <TextInput
-            className={cn('text-foreground min-h-24 px-3 py-2.5 text-sm', !isAgent && 'font-mono')}
+            className={cn('text-foreground min-h-24 px-3 py-3 text-sm', !isAgent && 'font-mono')}
             style={{ textAlignVertical: 'top' }}
             value={isAgent ? draft.prompt : draft.command}
             onChangeText={(text) => onChange(isAgent ? { prompt: text } : { command: text })}
@@ -175,7 +176,7 @@ export function QuickCommandEditorForm({
               <View className="flex-row items-center gap-3">
                 <View className="flex-1">
                   <Text className="text-foreground text-sm">Append Enter</Text>
-                  <Text className="text-muted-foreground mt-px text-xs">
+                  <Text className="text-muted-foreground mt-1 text-xs">
                     Submit immediately instead of only inserting text.
                   </Text>
                 </View>

@@ -87,9 +87,10 @@ export default function ConnectionLogScreen() {
           {hosts.map((host) => (
             <MobileGlassPressable
               key={host.id}
-              className={cn('rounded-full', host.id === selectedId && 'border-primary')}
+              className="rounded-full"
               contentClassName="rounded-full px-3 py-2"
               onPress={() => setSelectedId(host.id)}
+              tintColorClassName={host.id === selectedId ? 'accent-primary' : undefined}
             >
               <Text
                 className={cn(
@@ -114,7 +115,7 @@ export default function ConnectionLogScreen() {
             </Text>
             <MobileGlassPressable
               className="rounded-full"
-              contentClassName="min-h-8 flex-row items-center gap-1.5 rounded-full px-3"
+              contentClassName="min-h-8 flex-row items-center gap-2 rounded-full px-3"
               onPress={() => void copyDiagnostics()}
             >
               {copied ? (

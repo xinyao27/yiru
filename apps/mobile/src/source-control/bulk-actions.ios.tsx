@@ -5,6 +5,7 @@ import {
   disabled as disabledModifier,
   font,
   frame,
+  lineLimit,
   type ViewModifier
 } from '@expo/ui/swift-ui/modifiers'
 import { useMemo } from 'react'
@@ -35,29 +36,27 @@ function MobileSourceControlBulkAction({
   const isGlassAvailable = useMobileGlassAvailable()
   const modifiers = useMemo<ViewModifier[]>(
     () => [
-      controlSize('regular'),
+      controlSize('large'),
       mobileSwiftUiGlassButtonStyle(isGlassAvailable),
       buttonBorderShape('capsule'),
-      frame({ maxWidth: Infinity, minHeight: 36 }),
       disabledModifier(disabled)
     ],
     [disabled, isGlassAvailable]
   )
   const labelModifiers = useMemo<ViewModifier[]>(
-    () => [font({ textStyle: 'subheadline', weight: 'regular' })],
+    () => [font({ textStyle: 'caption', weight: 'regular' }), lineLimit(1)],
     []
   )
-
   return (
     <Button modifiers={modifiers} onPress={onPress}>
-      {loading ? (
-        <HStack spacing={8}>
-          <ProgressView />
-          <Label title={label} modifiers={labelModifiers} />
-        </HStack>
-      ) : (
-        <Label title={label} systemImage={systemImage} modifiers={labelModifiers} />
-      )}
+      <HStack spacing={6}>
+        {loading ? <ProgressView /> : null}
+        <Label
+          title={label}
+          systemImage={loading ? undefined : systemImage}
+          modifiers={labelModifiers}
+        />
+      </HStack>
     </Button>
   )
 }
@@ -99,9 +98,9 @@ export function MobileSourceControlBulkActions({
           />
           <MobileSwiftUiGlassCircleButton
             disabled={actionsDisabled}
-            label="Open source control actions"
+            label="More"
             onPress={onMore}
-            size="regular"
+            size="large"
             systemImage="ellipsis"
           />
         </HStack>

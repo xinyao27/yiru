@@ -17,10 +17,8 @@ import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   Moon,
-  Check,
-  SidebarSimple as PanelLeftClose
+  Check
 } from '@/components/uniwind-icons'
-import { SafeAreaView } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
 import { buildWorktreeNavigationActions } from '../../../src/agent-history/worktree-navigation-actions'
@@ -30,9 +28,7 @@ import { ActionSheetContent } from '../../../src/components/action-sheet-modal'
 import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
-import { MobileGlassIconButton } from '../../../src/components/glass/icon-button'
-import { MobileGlassPressable } from '../../../src/components/glass/pressable'
-import { MobileGlassSection } from '../../../src/components/glass/section'
+import { MobileContentSection } from '../../../src/components/content-section'
 import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
@@ -73,11 +69,9 @@ import type { RpcClient } from '../../../src/transport/rpc-client'
 import type { RpcSuccess } from '../../../src/transport/types'
 import { useWorktreeResync } from '../../../src/transport/use-worktree-resync'
 import type { RepoSummary } from '../../../src/worktree/host-worktree-rpc-types'
+import { MobileWorkspaceListChrome } from '../../../src/worktree/list-chrome'
 import { areWorktreeListsEqual } from '../../../src/worktree/list-snapshot'
-import {
-  MobileWorkspaceListHeaderActions,
-  MobileWorkspaceListToolbar
-} from '../../../src/worktree/list-toolbar'
+import { MobileWorkspaceListToolbar } from '../../../src/worktree/list-toolbar'
 import { repoColor } from '../../../src/worktree/repo-color'
 import { useWorkspaceSections } from '../../../src/worktree/use-workspace-sections'
 import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/workspace-lineage'
@@ -703,6 +697,20 @@ export function HostScreen({
     [embedded, hostId, pathname, router]
   )
 
+  const openAccounts = useCallback(() => {
+    navigateFromHostList(`/h/${hostId}/accounts`)
+  }, [hostId, navigateFromHostList])
+
+  const reconnectHost = useCallback(() => {
+    if (hostId) {
+      void forceReconnectHost(hostId)
+    }
+  }, [forceReconnectHost, hostId])
+
+  const toggleSearch = useCallback(() => {
+    setShowSearch((current) => !current)
+  }, [])
+
   const openFloatingWorkspace = useCallback(() => {
     // Why: the sentinel has no worktree record; session.tabs.list hydrates its host-owned tabs.
     navigateFromHostList(floatingWorkspaceSessionPath(hostId))
@@ -865,73 +873,35 @@ export function HostScreen({
 
   return (
     <View className="bg-background flex-1">
-      <SafeAreaView className="bg-background" edges={['top']}>
-        <View className="gap-2 px-3 pt-1 pb-2">
-          <View className="min-h-10 flex-row items-center gap-2">
-            <MobileGlassIconButton
-              accessibilityLabel="Back to hosts"
-              icon="back"
-              onPress={leaveHost}
-            />
-            <View className="min-w-0 flex-1">
-              <Text className="text-foreground flex-1 text-base font-semibold" numberOfLines={1}>
-                {hostName || 'Host'}
-              </Text>
-            </View>
-            {showReconnectButton ? (
-              <MobileGlassPressable
-                accessibilityRole="button"
-                className="rounded-full"
-                contentClassName="min-h-9 justify-center rounded-full px-3"
-                hitSlop={8}
-                onPress={() => {
-                  if (hostId) {
-                    void forceReconnectHost(hostId)
-                  }
-                }}
-              >
-                <Text className="text-foreground text-sm">Reconnect</Text>
-              </MobileGlassPressable>
-            ) : null}
-            {!embedded ? (
-              <MobileWorkspaceListHeaderActions
-                canUseHost={connState === 'connected'}
-                showSearch={showSearch}
-                onAccounts={() => navigateFromHostList(`/h/${hostId}/accounts`)}
-                onSearch={() => setShowSearch((current) => !current)}
-              />
-            ) : null}
-            {embedded && onHideSidebar ? (
-              <MobileGlassPressable
-                accessibilityLabel="Hide sidebar"
-                accessibilityRole="button"
-                className="h-9 w-9 rounded-full"
-                contentClassName="h-full w-full items-center justify-center rounded-full"
-                hitSlop={4}
-                onPress={onHideSidebar}
-              >
-                <PanelLeftClose size={18} colorClassName="accent-muted-foreground" />
-              </MobileGlassPressable>
-            ) : null}
-          </View>
-          <MobileWorkspaceListToolbar
-            activeFilterCount={activeFilterCount}
-            canUseHost={connState === 'connected'}
-            embedded={embedded}
-            floatingWorkspaceEnabled={floatingWorkspaceEnabled}
-            groupLabel={groupLabel}
-            showSearch={showSearch}
-            sortLabel={selectedSortLabel}
-            onAccounts={() => navigateFromHostList(`/h/${hostId}/accounts`)}
-            onFilter={() => setShowFilterModal(true)}
-            onFloatingWorkspace={openFloatingWorkspace}
-            onGroup={() => setShowGroupPicker(true)}
-            onNewWorkspace={openNewWorktreeModal}
-            onSearch={() => setShowSearch((current) => !current)}
-            onSort={() => setShowSortPicker(true)}
-          />
-        </View>
-      </SafeAreaView>
+      <MobileWorkspaceListChrome
+        canUseHost={connState === 'connected'}
+        embedded={embedded}
+        hostName={hostName}
+        onAccounts={openAccounts}
+        onBack={leaveHost}
+        onHideSidebar={onHideSidebar}
+        onReconnect={reconnectHost}
+        onSearch={toggleSearch}
+        showReconnect={showReconnectButton}
+        showSearch={showSearch}
+      >
+        <MobileWorkspaceListToolbar
+          activeFilterCount={activeFilterCount}
+          canUseHost={connState === 'connected'}
+          embedded={embedded}
+          floatingWorkspaceEnabled={floatingWorkspaceEnabled}
+          groupLabel={groupLabel}
+          showSearch={showSearch}
+          sortLabel={selectedSortLabel}
+          onAccounts={openAccounts}
+          onFilter={() => setShowFilterModal(true)}
+          onFloatingWorkspace={openFloatingWorkspace}
+          onGroup={() => setShowGroupPicker(true)}
+          onNewWorkspace={openNewWorktreeModal}
+          onSearch={toggleSearch}
+          onSort={() => setShowSortPicker(true)}
+        />
+      </MobileWorkspaceListChrome>
 
       {/* Auth failed banner */}
       {connState === 'auth-failed' && (
@@ -1016,34 +986,34 @@ export function HostScreen({
             return (
               <Pressable
                 accessibilityRole="button"
-                className="mx-3 mt-3 min-h-9 flex-row items-center px-2"
+                className="mx-3 mt-3 min-h-9 flex-row items-center gap-2 px-2"
                 onPress={() => toggleCollapsed(section.key)}
               >
-                {isCollapsed ? (
-                  <View className="mr-1">
-                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-                  </View>
-                ) : (
-                  <View className="mr-1">
-                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
-                  </View>
-                )}
-                {section.icon === 'pin' && (
-                  <View className="mr-1">
+                <View className="h-9 w-5 items-center justify-center">
+                  {section.icon === 'pin' ? (
                     <Pin size={16} colorClassName="accent-muted-foreground" />
-                  </View>
-                )}
-                {groupMode === 'repo' && section.icon !== 'pin' ? (
-                  <View className="mr-1">
+                  ) : null}
+                  {groupMode === 'repo' && section.icon !== 'pin' ? (
                     <MobileRepoIcon
                       repoIcon={repoSectionIcon}
                       size={16}
                       color={repoSectionColor ?? undefined}
                     />
-                  </View>
-                ) : null}
-                <Text className="text-foreground text-sm">{section.title}</Text>
-                <Text className="text-muted-foreground ml-1 text-sm">{count}</Text>
+                  ) : null}
+                </View>
+                <View className="min-w-0 flex-1 flex-row items-center gap-1">
+                  <Text className="text-foreground shrink text-sm" numberOfLines={1}>
+                    {section.title}
+                  </Text>
+                  <Text className="text-muted-foreground text-sm">{count}</Text>
+                </View>
+                <View className="h-9 w-5 items-center justify-center">
+                  {isCollapsed ? (
+                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+                  ) : (
+                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
+                  )}
+                </View>
               </Pressable>
             )
           }}
@@ -1111,10 +1081,12 @@ export function HostScreen({
         </View>
 
         <Text className="text-muted-foreground mb-1 px-1 text-sm">Workspaces</Text>
-        <MobileGlassSection className="mb-3">
+        <MobileContentSection className="mb-3">
           <Pressable className="flex-row items-center gap-2 px-3 py-3" onPress={toggleHideSleeping}>
             <Text className="text-foreground flex-1 text-sm">Hide sleeping</Text>
-            {filters.hideSleeping && <Check size={14} colorClassName="accent-foreground" />}
+            <View className="w-5 items-center">
+              {filters.hideSleeping ? <Check size={14} colorClassName="accent-foreground" /> : null}
+            </View>
           </Pressable>
           <View className="bg-border h-hairline mx-3" />
           <Pressable
@@ -1122,14 +1094,18 @@ export function HostScreen({
             onPress={toggleHideDefaultBranch}
           >
             <Text className="text-foreground flex-1 text-sm">Hide default branch</Text>
-            {filters.hideDefaultBranch && <Check size={14} colorClassName="accent-foreground" />}
+            <View className="w-5 items-center">
+              {filters.hideDefaultBranch ? (
+                <Check size={14} colorClassName="accent-foreground" />
+              ) : null}
+            </View>
           </Pressable>
-        </MobileGlassSection>
+        </MobileContentSection>
 
         {uniqueRepos.length > 1 && (
           <>
             <Text className="text-muted-foreground mb-1 px-1 text-sm">Repositories</Text>
-            <MobileGlassSection className="mb-3">
+            <MobileContentSection className="mb-3">
               {uniqueRepos.map((repo, i) => (
                 <View key={repo.id}>
                   {i > 0 && <View className="bg-border h-hairline mx-3" />}
@@ -1137,17 +1113,21 @@ export function HostScreen({
                     className="flex-row items-center gap-2 px-3 py-3"
                     onPress={() => toggleRepoFilter(repo.id)}
                   >
-                    <View className="h-2 w-2" style={[{ backgroundColor: repo.color }]} />
+                    <View className="w-5 items-center">
+                      <View className="h-2 w-2" style={[{ backgroundColor: repo.color }]} />
+                    </View>
                     <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
                       {repo.name}
                     </Text>
-                    {filters.filterRepoIds.has(repo.id) && (
-                      <Check size={14} colorClassName="accent-foreground" />
-                    )}
+                    <View className="w-5 items-center">
+                      {filters.filterRepoIds.has(repo.id) ? (
+                        <Check size={14} colorClassName="accent-foreground" />
+                      ) : null}
+                    </View>
                   </Pressable>
                 </View>
               ))}
-            </MobileGlassSection>
+            </MobileContentSection>
           </>
         )}
       </BottomDrawer>

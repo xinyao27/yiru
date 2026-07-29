@@ -88,6 +88,7 @@ export function MobileBrowserTopChrome({
         ) : null}
         <MobileGlassSurface
           className="h-8 min-w-0 flex-1 overflow-hidden rounded-full"
+          isFunctional
           isInteractive={!disabled}
         >
           <TextInput
@@ -136,6 +137,7 @@ export function MobileBrowserKeyboardChrome({
   return (
     <MobileGlassSurface
       className="z-20 overflow-hidden rounded-t-3xl"
+      isFunctional
       style={[{ paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }]}
     >
       <MobileBrowserPointerModifiers
@@ -144,7 +146,7 @@ export function MobileBrowserKeyboardChrome({
         onToggle={onModifierToggle}
       />
       <MobileBrowserKeyRow disabled={disabled} onKeypress={onKeyPress} />
-      <MobileGlassGroup className="flex-row items-center gap-2 px-3 pt-1 pb-1.5" spacing={8}>
+      <MobileGlassGroup className="flex-row items-center gap-2 px-3 pt-1 pb-2" spacing={8}>
         <MobileGlassSurface className="h-9 flex-1 overflow-hidden rounded-full" isInteractive>
           <TextInput
             className="text-foreground h-full flex-1 px-3 font-mono text-sm"

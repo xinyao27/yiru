@@ -5,7 +5,7 @@ import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '@/components/
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
-import { MobileGlassSection } from './glass/section'
+import { MobileContentSection } from './content-section'
 
 export type ActionSheetAction = {
   label: string
@@ -55,11 +55,11 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
               {title}
             </Text>
           ) : null}
-          {message ? <Text className="text-muted-foreground mt-0.5 text-xs">{message}</Text> : null}
+          {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
         </View>
       )}
 
-      <MobileGlassSection>
+      <MobileContentSection>
         {actions.map((action, i) => {
           const Icon = iconForAction(action.label, action.destructive, action.icon)
           const customIcon = action.renderIcon?.()
@@ -68,7 +68,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
               {i > 0 && <View className="h-hairline bg-border mx-3" />}
               <Pressable
                 className={cn(
-                  'flex-row items-center gap-2.5 py-3 px-3.5',
+                  'flex-row items-center gap-2 py-3 px-3',
                   action.disabled && 'opacity-60',
                   !action.disabled && !action.loading && 'active:bg-accent'
                 )}
@@ -99,7 +99,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
                     {action.label}
                   </Text>
                   {action.hint ? (
-                    <Text className="text-muted-foreground mt-0.5 text-xs">{action.hint}</Text>
+                    <Text className="text-muted-foreground mt-1 text-xs">{action.hint}</Text>
                   ) : null}
                 </View>
                 {action.loading ? (
@@ -109,7 +109,7 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
             </View>
           )
         })}
-      </MobileGlassSection>
+      </MobileContentSection>
     </>
   )
 }

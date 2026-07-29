@@ -7,7 +7,7 @@ import { View, Text, Pressable, Linking, Platform } from 'react-native'
 
 import { GithubLogo, Globe } from '@/components/uniwind-icons'
 
-import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileContentSection } from '../src/components/content-section'
 import { YiruLogo } from '../src/components/yiru-logo'
 
 // Why: read version + native build identifier from expo-constants at
@@ -34,25 +34,29 @@ export default function AboutScreen() {
         </Text>
       </View>
 
-      <MobileGlassSection>
+      <MobileContentSection>
         <Pressable
-          className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+          className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
           onPress={() => void Linking.openURL('https://yiru.ai')}
         >
-          <Globe size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <Globe size={16} colorClassName="accent-muted-foreground" />
+          </View>
           <Text className="text-muted-foreground flex-1 text-right text-sm">yiru.ai</Text>
         </Pressable>
         <View className="h-hairline bg-border mx-3" />
         <Pressable
-          className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+          className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
           onPress={() => void Linking.openURL(YIRU_GITHUB_REPOSITORY_URL)}
         >
-          <GithubLogo size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <GithubLogo size={16} colorClassName="accent-muted-foreground" />
+          </View>
           <Text className="text-muted-foreground flex-1 text-right text-sm">
             {YIRU_GITHUB_REPOSITORY_SLUG}
           </Text>
         </Pressable>
-      </MobileGlassSection>
+      </MobileContentSection>
 
       <Text className="text-muted-foreground mt-4 text-center text-xs">{getVersionLabel()}</Text>
     </View>

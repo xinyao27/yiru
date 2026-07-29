@@ -1,5 +1,5 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
 import { cn } from '@/style/class-names'
 
@@ -12,7 +12,6 @@ import {
 import { MOBILE_GIT_STATUS_LABELS } from '../source-control/git-status'
 import { MobileDiffReviewHunkNavigation } from './diff-review-hunk-navigation'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
-import { MobileGlassPressable } from './glass/pressable'
 
 type Props = {
   currentIndex: number
@@ -91,15 +90,14 @@ export function MobileDiffReviewFileSummary({
       {fileNotes.length > 0 ? (
         <View className="mt-2 gap-1">
           {fileNotes.map((note) => (
-            <MobileGlassPressable
+            <Pressable
               key={note.id}
               className={cn(
-                'min-h-11 rounded-xl',
-                staleCommentIds.has(note.id) && 'border-amber-500'
+                'min-h-11 rounded-xl p-2 active:bg-accent',
+                staleCommentIds.has(note.id) && 'border-hairline border-amber-500'
               )}
               accessibilityLabel="Edit file note"
               accessibilityRole="button"
-              contentClassName="min-h-11 p-2"
               onPress={() => onEditNote(note)}
             >
               <Text className="text-muted-foreground text-xs leading-5" numberOfLines={2}>
@@ -108,7 +106,7 @@ export function MobileDiffReviewFileSummary({
               {staleCommentIds.has(note.id) ? (
                 <Text className={styles.staleText}>Stale</Text>
               ) : null}
-            </MobileGlassPressable>
+            </Pressable>
           ))}
         </View>
       ) : null}

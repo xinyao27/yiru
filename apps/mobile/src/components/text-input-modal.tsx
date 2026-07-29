@@ -60,7 +60,7 @@ export function TextInputModal({
     <BottomDrawer visible={visible} onClose={onCancel}>
       <View className="px-1 pb-2">
         <Text className="text-foreground text-sm font-semibold">{title}</Text>
-        {message ? <Text className="text-muted-foreground mt-0.5 text-xs">{message}</Text> : null}
+        {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
       </View>
 
       <MobileGlassSurface className="min-h-10 overflow-hidden rounded-full" isInteractive>

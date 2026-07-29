@@ -1,6 +1,6 @@
 import { Stack, useGlobalSearchParams, usePathname } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { View, PanResponder, type ViewStyle } from 'react-native'
+import { View, PanResponder, type TextStyle, type ViewStyle } from 'react-native'
 import { useResolveClassNames } from 'uniwind'
 
 import { useResponsiveLayout } from '../../src/layout/responsive-layout'
@@ -33,11 +33,22 @@ type HostStackProps = {
 }
 
 function HostStack({ animation, showSessionHeader }: HostStackProps): React.JSX.Element {
+  // Why: this nested native Stack needs its own live token resolution; inheriting only the root
+  // navigation theme can leave a mounted host header on its previous system appearance.
   const contentStyle = useResolveClassNames('bg-background') as ViewStyle
+  const headerTitleStyle = useResolveClassNames('text-foreground text-base font-semibold') as Pick<
+    TextStyle,
+    'color' | 'fontFamily' | 'fontSize' | 'fontWeight'
+  >
   return (
     <Stack
       screenOptions={{
+        headerBackButtonDisplayMode: 'minimal',
+        headerShadowVisible: false,
         headerShown: false,
+        headerStyle: contentStyle,
+        headerTintColor: headerTitleStyle.color,
+        headerTitleStyle,
         contentStyle,
         // In the tablet split view the detail pane should swap instantly like
         // a desktop master-detail; the default slide animates the outgoing

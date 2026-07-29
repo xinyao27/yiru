@@ -787,7 +787,7 @@ function NewWorktreeModalContent({
       <BottomDrawer visible={visible && drawerView === 'form'} onClose={onClose}>
         <View className="mb-3 px-1">
           <Text className="text-foreground text-sm font-semibold">Create Workspace</Text>
-          <Text className="text-muted-foreground mt-0.5 text-xs">
+          <Text className="text-muted-foreground mt-1 text-xs">
             Pick a repository and agent to spin up a new workspace.
           </Text>
         </View>
@@ -806,7 +806,7 @@ function NewWorktreeModalContent({
               <Text className="text-muted-foreground mb-1 text-xs font-medium">Repository</Text>
               <MobileGlassPressable
                 className="rounded-xl"
-                contentClassName="flex-row items-center gap-2 px-3 py-2.5"
+                contentClassName="flex-row items-center gap-2 px-3 py-3"
                 onPress={() => {
                   prepareSelectionPickerOpen()
                   transitionDrawer('repo')
@@ -864,7 +864,7 @@ function NewWorktreeModalContent({
                       <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
                         {selectedRepo?.displayName ?? 'Remote repository'}
                       </Text>
-                      <Text className="text-muted-foreground mt-px text-xs">
+                      <Text className="text-muted-foreground mt-1 text-xs">
                         {workspaceSshStatusLabel(sshGate.status)}
                       </Text>
                     </View>
@@ -888,7 +888,7 @@ function NewWorktreeModalContent({
               <Text className="text-muted-foreground mb-1 text-xs font-medium">Agent</Text>
               <MobileGlassPressable
                 className="rounded-xl"
-                contentClassName="flex-row items-center gap-2 px-3 py-2.5"
+                contentClassName="flex-row items-center gap-2 px-3 py-3"
                 disabled={sshGate.requiresConnection}
                 onPress={() => {
                   prepareSelectionPickerOpen()
@@ -926,7 +926,7 @@ function NewWorktreeModalContent({
                   <Text className="text-muted-foreground mb-1 text-xs font-medium">Note</Text>
                   <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
                     <TextInput
-                      className="text-foreground px-3 py-2.5 text-sm"
+                      className="text-foreground px-3 py-3 text-sm"
                       value={note}
                       onChangeText={setNote}
                       placeholder="Write a note"
@@ -944,7 +944,7 @@ function NewWorktreeModalContent({
                         Setup script
                       </Text>
                       {setupSource && (
-                        <View className="bg-secondary rounded-md px-1.5 py-0.5">
+                        <View className="bg-secondary rounded-md px-2 py-1">
                           <Text className="text-muted-foreground text-xs font-semibold tracking-wide">
                             {setupSource === 'yiru.yaml' ? 'YIRU.YAML' : 'HOOKS'}
                           </Text>
@@ -955,22 +955,22 @@ function NewWorktreeModalContent({
                       {setupRunPolicy === 'ask' ? (
                         <View className="mb-2 flex-row gap-2">
                           <MobileGlassPressable
-                            className={cn(
-                              'flex-1 rounded-full',
-                              setupDecisionChoice === 'run' && 'border-muted-foreground'
-                            )}
+                            className="flex-1 rounded-full"
                             contentClassName="min-h-8 items-center justify-center rounded-full px-3"
                             onPress={() => setSetupDecisionChoice('run')}
+                            tintColorClassName={
+                              setupDecisionChoice === 'run' ? 'accent-primary' : undefined
+                            }
                           >
                             <Text className="text-foreground text-sm">Run</Text>
                           </MobileGlassPressable>
                           <MobileGlassPressable
-                            className={cn(
-                              'flex-1 rounded-full',
-                              setupDecisionChoice === 'skip' && 'border-muted-foreground'
-                            )}
+                            className="flex-1 rounded-full"
                             contentClassName="min-h-8 items-center justify-center rounded-full px-3"
                             onPress={() => setSetupDecisionChoice('skip')}
+                            tintColorClassName={
+                              setupDecisionChoice === 'skip' ? 'accent-primary' : undefined
+                            }
                           >
                             <Text className="text-foreground text-sm">Skip</Text>
                           </MobileGlassPressable>
@@ -989,7 +989,7 @@ function NewWorktreeModalContent({
                           />
                         </View>
                       )}
-                      <View className="bg-background rounded-xl px-2.5 py-2">
+                      <View className="bg-background rounded-xl px-3 py-2">
                         <Text className="text-foreground font-mono text-xs">{setupCommand}</Text>
                       </View>
                     </View>

@@ -30,11 +30,9 @@ export function MobileSourceControlCommitBar({
   return (
     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
       <MobileGlassSurface
-        className={cn(
-          'min-h-11 flex-1 overflow-hidden rounded-full',
-          !hasStagedFiles && 'opacity-60'
-        )}
+        className="min-h-11 flex-1 overflow-hidden rounded-full"
         fallbackClassName="bg-secondary"
+        isFunctional
         isInteractive={hasStagedFiles}
         tintColorClassName="accent-accent"
       >
@@ -60,35 +58,13 @@ export function MobileSourceControlCommitBar({
           </View>
         )}
       </MobileGlassSurface>
-      {showGenerateButton ? (
-        <MobileGlassPressable
-          accessibilityLabel={
-            generatingMessage
-              ? 'Cancel commit message generation'
-              : 'Generate commit message with AI'
-          }
-          className="h-9 w-9 rounded-full"
-          contentClassName="h-full w-full items-center justify-center rounded-full"
-          disabled={generateDisabled}
-          fallbackClassName="bg-secondary"
-          hitSlop={4}
-          onPress={onGenerate}
-          tintColorClassName="accent-accent"
-        >
-          {generatingMessage ? (
-            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-          ) : (
-            <Sparkles size={16} colorClassName="accent-muted-foreground" />
-          )}
-        </MobileGlassPressable>
-      ) : null}
       <MobileGlassPressable
         accessibilityHint={primaryAccessibilityHint}
         accessibilityLabel={primaryAccessibilityLabel}
         className="min-h-11 min-w-24 rounded-full"
         contentClassName="min-h-11 min-w-24 items-center justify-center rounded-full px-4"
         disabled={primaryDisabled}
-        fallbackClassName={isPrimaryProminent ? 'border-primary bg-primary' : 'bg-secondary'}
+        fallbackClassName={isPrimaryProminent ? 'border-transparent bg-primary' : 'bg-secondary'}
         onPress={onPrimaryAction}
         tintColorClassName={isPrimaryProminent ? 'accent-primary' : 'accent-accent'}
       >
@@ -110,6 +86,28 @@ export function MobileSourceControlCommitBar({
           </Text>
         )}
       </MobileGlassPressable>
+      {showGenerateButton ? (
+        <MobileGlassPressable
+          accessibilityLabel={
+            generatingMessage
+              ? 'Cancel commit message generation'
+              : 'Generate commit message with AI'
+          }
+          className="h-11 w-11 rounded-full"
+          contentClassName="h-full w-full items-center justify-center rounded-full"
+          disabled={generateDisabled}
+          fallbackClassName="bg-secondary"
+          hitSlop={4}
+          onPress={onGenerate}
+          tintColorClassName="accent-accent"
+        >
+          {generatingMessage ? (
+            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+          ) : (
+            <Sparkles size={16} colorClassName="accent-muted-foreground" />
+          )}
+        </MobileGlassPressable>
+      ) : null}
     </MobileGlassGroup>
   )
 }

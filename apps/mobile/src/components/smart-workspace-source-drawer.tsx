@@ -21,9 +21,9 @@ import {
 import type { MobileComposerSource } from '../workspace-create/use-composer-source'
 import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
+import { MobileContentSection } from './content-section'
 import { MobileGlassGroup } from './glass/group'
 import { MobileGlassPressable } from './glass/pressable'
-import { MobileGlassSection } from './glass/section'
 import { MobileGlassSurface } from './glass/surface'
 import { MobileGlassTextButton } from './glass/text-button'
 import { SmartSourceModeIcon } from './smart-source-mode-icon'
@@ -225,7 +225,7 @@ export function SmartWorkspaceSourceDrawer({
       ) : null}
 
       {crossRepoPrompt ? (
-        <MobileGlassSection className="mb-2 gap-2 p-3">
+        <MobileContentSection className="mb-2 gap-2 p-3">
           <Text className="text-muted-foreground text-xs">
             This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
           </Text>
@@ -238,7 +238,7 @@ export function SmartWorkspaceSourceDrawer({
               size="small"
             />
           </View>
-        </MobileGlassSection>
+        </MobileContentSection>
       ) : null}
 
       {!sshReady && effectiveMode !== 'text' ? (
@@ -253,7 +253,7 @@ export function SmartWorkspaceSourceDrawer({
         <Text className="text-destructive px-1 pb-2 text-xs">{error}</Text>
       ) : null}
 
-      <MobileGlassSection className="max-h-96 grow-0">
+      <MobileContentSection className="max-h-96 grow-0">
         <FlatList
           className="max-h-96 grow-0"
           data={rows}
@@ -275,7 +275,7 @@ export function SmartWorkspaceSourceDrawer({
             <SmartWorkspaceSourceRow row={item} onPress={() => handleSelectRow(item)} />
           )}
         />
-      </MobileGlassSection>
+      </MobileContentSection>
     </BottomDrawer>
   )
 }

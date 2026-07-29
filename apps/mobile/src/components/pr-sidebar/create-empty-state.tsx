@@ -20,8 +20,8 @@ import { fetchWorktreeLinkedPR } from '../../source-control/pr-link'
 import { useMobileCommitFailureRecovery } from '../../source-control/use-commit-failure-recovery'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { ConnectionState } from '../../transport/types'
+import { MobileContentSection } from '../content-section'
 import { MobileGlassIconButton } from '../glass/icon-button'
-import { MobileGlassSection } from '../glass/section'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { openMobilePrUrl } from '../pr-compose-sheet'
 import { MobileLinkPrForm } from './link-pr-form'
@@ -160,7 +160,7 @@ export function PrSidebarCreateEmptyState({
 
   if (mode === 'link') {
     return (
-      <MobileGlassSection className="mx-3 mt-3 p-3">
+      <MobileContentSection className="mx-3 mt-3 p-3">
         <MobileLinkPrForm
           client={client}
           worktreeId={worktreeId}
@@ -170,12 +170,12 @@ export function PrSidebarCreateEmptyState({
             refreshPrState()
           }}
         />
-      </MobileGlassSection>
+      </MobileContentSection>
     )
   }
 
   return (
-    <MobileGlassSection className="mx-3 mt-3">
+    <MobileContentSection className="mx-3 mt-3">
       <View className="border-b-hairline border-b-border min-h-10 flex-row items-center justify-between gap-2 px-3 py-2">
         <View className="min-w-0 flex-1 flex-row items-center gap-1">
           <GitPullRequestArrow size={14} colorClassName="accent-muted-foreground" />
@@ -230,6 +230,6 @@ export function PrSidebarCreateEmptyState({
           size="small"
         />
       </View>
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }

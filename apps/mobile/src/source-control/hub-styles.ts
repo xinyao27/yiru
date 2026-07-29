@@ -3,7 +3,8 @@ import { cn } from '@/style/class-names'
 // Styles for the hub's segmented control and the branch-card PR chip. Split from
 // mobile-source-control-styles.ts so neither file crosses the line limit.
 export const hubStyles = {
-  // Pushes the chevron to the trailing edge without a fixed-width spacer.
+  // Why: flexible status content absorbs the middle while the chevron keeps its
+  // own fixed trailing column in the row.
   chipSpacer: cn('flex-1 min-w-2'),
 
   chipMutedText: cn('flex-1 text-muted-foreground text-xs'),

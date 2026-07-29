@@ -54,7 +54,10 @@ export function SmartWorkspaceSourceField({
         {label} <Text className="text-muted-foreground font-normal">[Optional]</Text>
       </Text>
       {selection ? (
-        <MobileGlassSurface className="flex-row items-center gap-2 rounded-xl px-3 py-2">
+        <MobileGlassSurface
+          className="flex-row items-center gap-2 rounded-xl px-3 py-2"
+          isFunctional
+        >
           <SelectionIcon kind={selection.kind} />
           <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
             {selection.label}
@@ -74,7 +77,7 @@ export function SmartWorkspaceSourceField({
       ) : (
         <MobileGlassPressable
           className="rounded-xl"
-          contentClassName="rounded-xl px-3 py-2.5"
+          contentClassName="rounded-xl px-3 py-3"
           disabled={disabled}
           onPress={openDrawer}
         >

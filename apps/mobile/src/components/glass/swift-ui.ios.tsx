@@ -54,6 +54,7 @@ type MobileSwiftUiGlassInputShellProps = {
   alignment?: 'bottom' | 'center'
   children: ReactNode
   hasTrailingAction: boolean
+  minHeight?: number
 }
 
 export type MobileSwiftUiGlassAccessoryButtonProps = Omit<
@@ -61,6 +62,7 @@ export type MobileSwiftUiGlassAccessoryButtonProps = Omit<
   'children' | 'disabled'
 > & {
   disabled?: boolean
+  appearance?: 'destructive' | 'normal'
   iconSize?: number
   isSelected?: boolean
   label?: string
@@ -84,7 +86,8 @@ export function MobileSwiftUiGlassGroup({
 export function MobileSwiftUiGlassInputShell({
   alignment = 'center',
   children,
-  hasTrailingAction
+  hasTrailingAction,
+  minHeight = 40
 }: MobileSwiftUiGlassInputShellProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
   const [inputValue, borderValue] = useCSSVariable(['--color-input', '--color-border'])
@@ -92,7 +95,7 @@ export function MobileSwiftUiGlassInputShell({
   const borderColor = resolveCssString(borderValue)
   const modifiers = useMemo<ViewModifier[]>(
     () => [
-      frame({ minWidth: 160, maxWidth: Infinity, minHeight: 40, alignment: 'center' }),
+      frame({ minWidth: 160, maxWidth: Infinity, minHeight, alignment: 'center' }),
       padding({ leading: 16, trailing: hasTrailingAction ? 4 : 16, vertical: 2 }),
       ...(isGlassAvailable
         ? mobileSwiftUiGlassEffect(true)
@@ -102,7 +105,7 @@ export function MobileSwiftUiGlassInputShell({
             strokeBorder({ color: borderColor, style: { lineWidth: 1 }, shape: 'capsule' })
           ])
     ],
-    [borderColor, hasTrailingAction, inputColor, isGlassAvailable]
+    [borderColor, hasTrailingAction, inputColor, isGlassAvailable, minHeight]
   )
 
   return (
@@ -143,6 +146,7 @@ export function MobileSwiftUiGlassCircleButton({
 
 export function MobileSwiftUiGlassAccessoryButton({
   accessibilityLabel: accessibilityLabelText,
+  appearance = 'normal',
   disabled = false,
   iconSize: iconSizeOverride,
   isSelected = false,
@@ -154,13 +158,19 @@ export function MobileSwiftUiGlassAccessoryButton({
 }: MobileSwiftUiGlassAccessoryButtonProps): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
   const { theme } = useUniwind()
-  const [mutedForegroundValue, primaryValue, primaryForegroundValue] = useCSSVariable([
-    '--color-muted-foreground',
-    '--color-primary',
-    '--color-primary-foreground'
-  ])
+  const [destructiveValue, mutedForegroundValue, primaryValue, primaryForegroundValue] =
+    useCSSVariable([
+      '--color-destructive',
+      '--color-muted-foreground',
+      '--color-primary',
+      '--color-primary-foreground'
+    ])
   const foregroundColor = resolveCssString(
-    isSelected ? primaryForegroundValue : mutedForegroundValue
+    appearance === 'destructive'
+      ? destructiveValue
+      : isSelected
+        ? primaryForegroundValue
+        : mutedForegroundValue
   )
   const primaryColor = resolveCssString(primaryValue)
   const circleSize = size === 'large' ? 44 : size === 'small' ? 32 : 36
@@ -173,18 +183,24 @@ export function MobileSwiftUiGlassAccessoryButton({
       ...(shape === 'circle'
         ? [frame({ width: circleSize, height: circleSize, alignment: 'center' })]
         : [frame({ height: circleSize, alignment: 'center' })]),
-      ...(isSelected ? [tint(primaryColor)] : []),
+      ...(appearance === 'destructive'
+        ? [tint(foregroundColor)]
+        : isSelected
+          ? [tint(primaryColor)]
+          : []),
       accessibilityLabel(accessibilityLabelText ?? label ?? systemImage ?? ''),
       disabledModifier(disabled)
     ],
     [
       accessibilityLabelText,
+      appearance,
       disabled,
       circleSize,
       isGlassAvailable,
       isSelected,
       label,
       primaryColor,
+      foregroundColor,
       shape,
       size,
       systemImage

@@ -1,11 +1,22 @@
 # Yiru Style Guide
 
-How Yiru looks and behaves: components, tokens, geometry, typography, interaction states. `AGENTS.md` owns code structure and quality — rules there are not repeated here.
+Detailed cross-client reference for Yiru components, tokens, geometry, typography, and interaction
+states. Start with the binding platform contract:
+
+- [`apps/desktop/DESIGN.md`](../apps/desktop/DESIGN.md) for desktop.
+- [`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md) for mobile.
+
+This guide expands those contracts with component inventory and implementation detail. If it
+disagrees with a platform contract, resolve both documents in the same change; do not choose a
+one-off implementation. `AGENTS.md` owns code structure and quality, so those rules are not repeated
+here.
 
 Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic token vocabulary.
 
-| Canonical source | File |
+| Source | File |
 | --- | --- |
+| Desktop visual contract | `apps/desktop/DESIGN.md` |
+| Mobile visual contract | `apps/mobile/DESIGN.md` |
 | Tokens, base layer, global chrome | `apps/desktop/src/renderer/src/assets/main.css` |
 | Primitives | `apps/desktop/src/renderer/src/components/ui/` |
 | Primitive catalog and layering | `components/ui/README.md` |
@@ -99,9 +110,8 @@ Git status colors mirror VS Code; diff colors mirror Cursor. The two families ar
 
 **Mobile follows the device.** Mobile does not inherit desktop's zero-radius rule. Navigation bars, grouped controls, message bubbles, form sections, floating composers, sheets, and floating actions use concentric system geometry. Terminals, editors, and diff bodies may stay rectangular when rounding would clip or waste working content. Prefer the shared mobile Glass components so material availability and the opaque fallback stay one decision; features keep their role-specific geometry beside the markup.
 
-Exact mobile header, control-size, grouping, and tab recipes live in
-[`docs/mobile-chrome.md`](./mobile-chrome.md). Those recipes are part of this guide, not examples to
-reinterpret per screen.
+The concise mobile contract lives in [`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md); §12 keeps
+the extended header, control-size, grouping, and tab recipes.
 
 **No shadows, no outlines.** Separation is `border` plus an opaque background. No `shadow-*`, `drop-shadow-*`, `box-shadow`, `text-shadow`, or stroke-drawing outline — delete legacy declarations at the source rather than overriding them. A local `outline-none` is allowed only to suppress the UA ring on a component that supplies its own focus state.
 

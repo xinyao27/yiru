@@ -1,8 +1,9 @@
 import { ActivityIndicator, Text } from 'react-native'
 
 import { MobileGlassGroup } from '@/components/glass/group'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassPressable } from '@/components/glass/pressable'
-import { Minus, DotsThree as MoreHorizontal, Plus, type Icon } from '@/components/uniwind-icons'
+import { Minus, Plus, type Icon } from '@/components/uniwind-icons'
 
 import type { MobileSourceControlBulkActionsProps } from './bulk-actions-props'
 
@@ -23,7 +24,7 @@ function MobileSourceControlBulkAction({
     <MobileGlassPressable
       accessibilityLabel={label}
       className="flex-1 rounded-full"
-      contentClassName="min-h-9 flex-row items-center justify-center gap-1 rounded-full px-3"
+      contentClassName="min-h-11 flex-row items-center justify-center gap-1 rounded-full px-3"
       disabled={disabled}
       fallbackClassName="bg-secondary"
       hitSlop={4}
@@ -66,18 +67,13 @@ export function MobileSourceControlBulkActions({
         loading={unstageLoading}
         onPress={onUnstageAll}
       />
-      <MobileGlassPressable
-        accessibilityLabel="Open source control actions"
-        className="h-9 w-9 rounded-full"
-        contentClassName="h-full w-full items-center justify-center rounded-full"
+      <MobileGlassIconButton
+        accessibilityLabel="More source control actions"
         disabled={actionsDisabled}
-        fallbackClassName="bg-secondary"
-        hitSlop={4}
+        icon="more"
         onPress={onMore}
-        tintColorClassName="accent-accent"
-      >
-        <MoreHorizontal size={18} colorClassName="accent-muted-foreground" />
-      </MobileGlassPressable>
+        size="large"
+      />
     </MobileGlassGroup>
   )
 }

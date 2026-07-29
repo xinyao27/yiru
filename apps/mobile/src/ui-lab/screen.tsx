@@ -1,8 +1,8 @@
 import { Redirect, Stack, useRouter } from 'expo-router'
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native'
 
+import { MobileContentSection } from '../components/content-section'
 import { MobileGlassIconButton } from '../components/glass/icon-button'
-import { MobileGlassSection } from '../components/glass/section'
 import { CaretRight as ChevronRight } from '../components/uniwind-icons'
 import { updateSessionViewOverride } from '../storage/session-view-preferences'
 import {
@@ -157,7 +157,7 @@ export function MobileUiLabScreen(): React.JSX.Element {
           Exercise the production session shell with deterministic terminal, chat, file, and browser
           states.
         </Text>
-        <MobileGlassSection className="mt-3">
+        <MobileContentSection className="mt-3">
           {UI_LAB_SCENARIOS.map((scenario, index) => (
             <Pressable
               key={scenario.id}
@@ -171,19 +171,21 @@ export function MobileUiLabScreen(): React.JSX.Element {
                   {scenario.description}
                 </Text>
               </View>
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              <View className="w-5 items-center">
+                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              </View>
               {index < UI_LAB_SCENARIOS.length - 1 ? (
                 <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
               ) : null}
             </Pressable>
           ))}
-        </MobileGlassSection>
+        </MobileContentSection>
 
         <Text className="text-foreground mt-5 text-sm font-semibold">Workspace surfaces</Text>
         <Text className="text-muted-foreground mt-1 text-xs leading-5">
           Inspect production data-heavy routes without pairing a desktop.
         </Text>
-        <MobileGlassSection className="mt-3">
+        <MobileContentSection className="mt-3">
           {UI_LAB_WORKSPACE_SCREENS.map((screen, index) => (
             <Pressable
               key={screen.id}
@@ -197,16 +199,18 @@ export function MobileUiLabScreen(): React.JSX.Element {
                   {screen.description}
                 </Text>
               </View>
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              <View className="w-5 items-center">
+                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              </View>
               {index < UI_LAB_WORKSPACE_SCREENS.length - 1 ? (
                 <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
               ) : null}
             </Pressable>
           ))}
-        </MobileGlassSection>
+        </MobileContentSection>
 
         <Text className="text-foreground mt-5 text-sm font-semibold">System screens</Text>
-        <MobileGlassSection className="mt-3">
+        <MobileContentSection className="mt-3">
           {UI_LAB_SYSTEM_SCREENS.map((screen, index) => (
             <Pressable
               key={screen.href}
@@ -220,13 +224,15 @@ export function MobileUiLabScreen(): React.JSX.Element {
                   {screen.description}
                 </Text>
               </View>
-              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              <View className="w-5 items-center">
+                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+              </View>
               {index < UI_LAB_SYSTEM_SCREENS.length - 1 ? (
                 <View className="h-hairline bg-border absolute right-3 bottom-0 left-3" />
               ) : null}
             </Pressable>
           ))}
-        </MobileGlassSection>
+        </MobileContentSection>
 
         <MobileUiLabGlassCatalog />
       </ScrollView>

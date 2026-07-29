@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, FlatList, Alert, Platform } from 'react-native'
+import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
 import {
   CaretRight as ChevronRight,
@@ -26,10 +26,7 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
-import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
-import { MobileGlassPressable } from '../src/components/glass/pressable'
-import { MobileGlassSection } from '../src/components/glass/section'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
@@ -611,10 +608,8 @@ export default function HomeScreen() {
           }
         >
           <View className="flex-1 items-center justify-center px-8 pb-10">
-            <Text className="text-foreground mb-2.5 text-center text-sm font-bold">
-              Connect your desktop
-            </Text>
-            <Text className="text-muted-foreground mb-8 text-center text-sm leading-6">
+            <Text className="text-foreground mb-3 text-center font-bold">Connect your desktop</Text>
+            <Text className="text-muted-foreground mb-8 text-center leading-6">
               Pair with Yiru on your computer to check on your agents, jump into any terminal, and
               drive work from your phone.
             </Text>
@@ -627,21 +622,21 @@ export default function HomeScreen() {
           </View>
 
           <View className="px-6">
-            <Text className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
+            <Text className="text-muted-foreground mb-2 px-1 font-semibold tracking-wide uppercase">
               How it works
             </Text>
             {ONBOARDING_STEPS.map((step, i) => (
               <View
                 key={step.title}
                 className={cn(
-                  'flex-row items-start gap-3.5 py-4',
+                  'flex-row items-start gap-3 py-4',
                   i > 0 && 'border-t border-t-border'
                 )}
               >
-                <Text className="text-muted-foreground w-7 text-center text-sm">{i + 1}</Text>
+                <Text className="text-muted-foreground w-7 text-center">{i + 1}</Text>
                 <View className="flex-1">
-                  <Text className="text-foreground mb-1 text-sm font-semibold">{step.title}</Text>
-                  <Text className="text-muted-foreground text-xs leading-5">{step.desc}</Text>
+                  <Text className="text-foreground mb-1 font-semibold">{step.title}</Text>
+                  <Text className="text-muted-foreground leading-5">{step.desc}</Text>
                 </View>
               </View>
             ))}
@@ -662,39 +657,40 @@ export default function HomeScreen() {
               : undefined
           }
           ListHeaderComponent={
-            <View>
-              <View className="pt-1 pb-3">
-                <Text className="text-foreground text-base font-semibold tracking-tight">
-                  Welcome back
-                </Text>
-              </View>
-
+            <View className="gap-6 pt-2 pb-2">
               {stats && (
-                <View className="mb-4 flex-row gap-2.5">
-                  <MobileGlassSection className="flex-1 px-3 py-2">
-                    <Text className="text-foreground text-sm">
-                      {stats.totalAgentsSpawned.toLocaleString()}
-                    </Text>
-                    <Text className="text-muted-foreground mt-0.5 text-xs">Agents spawned</Text>
-                  </MobileGlassSection>
-                  <MobileGlassSection className="flex-1 px-3 py-2">
-                    <Text className="text-foreground text-sm">
-                      {formatDuration(stats.totalAgentTimeMs)}
-                    </Text>
-                    <Text className="text-muted-foreground mt-0.5 text-xs">Agent time</Text>
-                  </MobileGlassSection>
-                  <MobileGlassSection className="flex-1 px-3 py-2">
-                    <Text className="text-foreground text-sm">
-                      {stats.totalPRsCreated.toLocaleString()}
-                    </Text>
-                    <Text className="text-muted-foreground mt-0.5 text-xs">PRs created</Text>
-                  </MobileGlassSection>
+                <View className="gap-2">
+                  <SectionHeading>Overview</SectionHeading>
+                  <View className="border-border border-t-hairline border-b-hairline flex-row py-3">
+                    <View className="flex-1 gap-1 px-2">
+                      <Text className="text-foreground font-semibold">
+                        {stats.totalAgentsSpawned.toLocaleString()}
+                      </Text>
+                      <Text className="text-muted-foreground" numberOfLines={1}>
+                        Agents spawned
+                      </Text>
+                    </View>
+                    <View className="border-l-hairline border-border flex-1 gap-1 px-3">
+                      <Text className="text-foreground font-semibold">
+                        {formatDuration(stats.totalAgentTimeMs)}
+                      </Text>
+                      <Text className="text-muted-foreground" numberOfLines={1}>
+                        Agent time
+                      </Text>
+                    </View>
+                    <View className="border-l-hairline border-border flex-1 gap-1 px-3">
+                      <Text className="text-foreground font-semibold">
+                        {stats.totalPRsCreated.toLocaleString()}
+                      </Text>
+                      <Text className="text-muted-foreground" numberOfLines={1}>
+                        PRs created
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               )}
 
-              <Text className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
-                Desktops
-              </Text>
+              <SectionHeading>Desktops</SectionHeading>
             </View>
           }
           ItemSeparatorComponent={CardGap}
@@ -727,150 +723,147 @@ export default function HomeScreen() {
             )
           }}
           ListFooterComponent={
-            <View>
+            <View className="gap-6 pt-6">
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
-                <>
-                  <Text className="text-muted-foreground mt-4 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
-                    Resume
-                  </Text>
-                  <MobileGlassPressable
-                    className="rounded-2xl"
-                    contentClassName="flex-row items-center rounded-2xl px-3 py-3"
+                <View className="gap-2">
+                  <SectionHeading>Resume</SectionHeading>
+                  <Pressable
+                    accessibilityRole="button"
+                    className="active:bg-accent flex-row items-center gap-2 rounded-xl px-2 py-3"
                     onPress={() =>
                       router.push(
                         `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
                       )
                     }
                   >
-                    <View className="mr-3 h-11 w-11 items-center justify-center">
+                    <View className="h-8 w-5 items-center justify-center">
                       <Terminal size={20} colorClassName="accent-muted-foreground" />
                     </View>
                     <View className="min-w-0 flex-1">
-                      <Text className="text-foreground text-sm" numberOfLines={1}>
+                      <Text className="text-foreground" numberOfLines={1}>
                         {resumeWorktree.worktree.displayName}
                       </Text>
-                      <View className="mt-1 flex-row items-center gap-1.5">
+                      <View className="mt-1 flex-row items-center gap-2">
                         <View
                           className="h-2 w-2"
                           style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
                         />
-                        <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
+                        <Text className="text-muted-foreground flex-1" numberOfLines={1}>
                           {resumeWorktree.worktree.repo}
                           {'  ·  '}
                           {resumeWorktree.worktree.branch}
                         </Text>
                       </View>
                     </View>
-                    <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-                  </MobileGlassPressable>
-                </>
+                    <View className="h-6 w-5 items-center justify-center">
+                      <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                    </View>
+                  </Pressable>
+                </View>
               ) : null}
 
               {/* ─── Quick actions ─── */}
-              <Text className="text-muted-foreground mt-6 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
-                Quick Actions
-              </Text>
-              <MobileGlassGroup className="flex-row gap-2" spacing={8}>
-                <MobileGlassTextButton
-                  className="flex-1"
-                  isFullWidth
-                  label="Pair Desktop"
-                  onPress={() => router.push('/pair-scan')}
-                />
-                <MobileGlassTextButton
-                  className="flex-1"
-                  disabled={!primaryConnectedHost}
-                  isFullWidth
-                  label="New Workspace"
-                  onPress={() => {
-                    if (primaryConnectedHost) {
-                      router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
-                    }
-                  }}
-                />
-              </MobileGlassGroup>
+              <View className="gap-2">
+                <SectionHeading>Quick Actions</SectionHeading>
+                <View className="flex-row gap-2 px-2">
+                  <MobileGlassTextButton
+                    label="Pair Desktop"
+                    onPress={() => router.push('/pair-scan')}
+                  />
+                  <MobileGlassTextButton
+                    disabled={!primaryConnectedHost}
+                    isProminent
+                    label="New Workspace"
+                    onPress={() => {
+                      if (primaryConnectedHost) {
+                        router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
+                      }
+                    }}
+                  />
+                </View>
+              </View>
 
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
-                <>
-                  <Text className="text-muted-foreground mt-6 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
-                    Account usage
-                  </Text>
-                  {accountsHosts.map(({ host, snapshot }) => {
-                    const claudeActiveId = snapshot.claude.activeAccountId
-                    const claudeActive =
-                      snapshot.claude.accounts.find((a) => a.id === claudeActiveId) ?? null
-                    const codexActiveId = snapshot.codex.activeAccountId
-                    const codexActive =
-                      snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
-                    const showHostName = accountsHosts.length > 1
-                    return (
-                      <MobileGlassPressable
-                        key={host.id}
-                        className="mb-2 rounded-2xl"
-                        contentClassName="gap-2 rounded-2xl px-3 py-2.5"
-                        onPress={() => router.push(`/h/${host.id}/accounts`)}
-                      >
-                        {showHostName ? (
-                          <Text
-                            className="text-muted-foreground text-xs tracking-wide uppercase"
-                            numberOfLines={1}
-                          >
-                            {host.name}
-                          </Text>
-                        ) : null}
-                        {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
-                          const active = provider === 'claude' ? claudeActive : codexActive
-                          const accounts =
-                            provider === 'claude'
-                              ? snapshot.claude.accounts
-                              : snapshot.codex.accounts
-                          const limits = getActiveProviderRateLimits(snapshot, provider)
-                          // Why: with no managed accounts, still render a
-                          // "System default" row when the active target has
-                          // live usage data; the row label already falls back
-                          // to "System default" below.
-                          if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
-                            return null
-                          }
-                          const sessionBar = getUsageBarState(limits, 'session')
-                          const weeklyBar = getUsageBarState(limits, 'weekly')
-                          return (
-                            <View key={provider} className="flex-row items-center gap-2.5">
-                              <View className="h-8 w-8 items-center justify-center">
-                                {provider === 'claude' ? (
-                                  <ClaudeIcon size={18} />
-                                ) : (
-                                  <OpenAIIcon size={18} colorClassName="accent-foreground" />
-                                )}
-                              </View>
-                              <View className="min-w-0 flex-1 gap-0.5">
-                                <Text className="text-foreground text-xs" numberOfLines={1}>
-                                  {active?.email ?? 'System default'}
-                                </Text>
-                                <View className="mt-1 flex-row gap-3">
-                                  <UsageBar
-                                    label="5h"
-                                    usedPercent={sessionBar.usedPercent}
-                                    unavailable={sessionBar.unavailable}
-                                    loading={sessionBar.loading}
-                                  />
-                                  <UsageBar
-                                    label="7d"
-                                    usedPercent={weeklyBar.usedPercent}
-                                    unavailable={weeklyBar.unavailable}
-                                    loading={weeklyBar.loading}
-                                  />
+                <View className="gap-2">
+                  <SectionHeading>Account usage</SectionHeading>
+                  <View className="gap-2">
+                    {accountsHosts.map(({ host, snapshot }) => {
+                      const claudeActiveId = snapshot.claude.activeAccountId
+                      const claudeActive =
+                        snapshot.claude.accounts.find((a) => a.id === claudeActiveId) ?? null
+                      const codexActiveId = snapshot.codex.activeAccountId
+                      const codexActive =
+                        snapshot.codex.accounts.find((a) => a.id === codexActiveId) ?? null
+                      const showHostName = accountsHosts.length > 1
+                      return (
+                        <Pressable
+                          key={host.id}
+                          accessibilityRole="button"
+                          className="active:bg-accent gap-3 rounded-xl px-2 py-3"
+                          onPress={() => router.push(`/h/${host.id}/accounts`)}
+                        >
+                          {showHostName ? (
+                            <Text
+                              className="text-muted-foreground tracking-wide uppercase"
+                              numberOfLines={1}
+                            >
+                              {host.name}
+                            </Text>
+                          ) : null}
+                          {(['claude', 'codex'] as ProviderKey[]).map((provider) => {
+                            const active = provider === 'claude' ? claudeActive : codexActive
+                            const accounts =
+                              provider === 'claude'
+                                ? snapshot.claude.accounts
+                                : snapshot.codex.accounts
+                            const limits = getActiveProviderRateLimits(snapshot, provider)
+                            // Why: with no managed accounts, still render a
+                            // "System default" row when the active target has
+                            // live usage data; the row label already falls back
+                            // to "System default" below.
+                            if (accounts.length === 0 && !hasActiveProviderUsage(limits)) {
+                              return null
+                            }
+                            const sessionBar = getUsageBarState(limits, 'session')
+                            const weeklyBar = getUsageBarState(limits, 'weekly')
+                            return (
+                              <View key={provider} className="flex-row items-start gap-3">
+                                <View className="h-6 w-8 items-center justify-center">
+                                  {provider === 'claude' ? (
+                                    <ClaudeIcon size={18} />
+                                  ) : (
+                                    <OpenAIIcon size={18} colorClassName="accent-foreground" />
+                                  )}
+                                </View>
+                                <View className="min-w-0 flex-1 gap-1">
+                                  <Text className="text-foreground" numberOfLines={1}>
+                                    {active?.email ?? 'System default'}
+                                  </Text>
+                                  <View className="gap-1">
+                                    <UsageBar
+                                      label="5h"
+                                      usedPercent={sessionBar.usedPercent}
+                                      unavailable={sessionBar.unavailable}
+                                      loading={sessionBar.loading}
+                                    />
+                                    <UsageBar
+                                      label="7d"
+                                      usedPercent={weeklyBar.usedPercent}
+                                      unavailable={weeklyBar.unavailable}
+                                      loading={weeklyBar.loading}
+                                    />
+                                  </View>
                                 </View>
                               </View>
-                            </View>
-                          )
-                        })}
-                      </MobileGlassPressable>
-                    )
-                  })}
-                </>
+                            )
+                          })}
+                        </Pressable>
+                      )
+                    })}
+                  </View>
+                </View>
               ) : null}
             </View>
           }
@@ -954,7 +947,15 @@ export default function HomeScreen() {
 }
 
 function CardGap() {
-  return <View className="h-2" />
+  return <View className="h-1" />
+}
+
+function SectionHeading({ children }: { children: string }): React.JSX.Element {
+  return (
+    <Text className="text-muted-foreground px-2 font-semibold tracking-wide uppercase">
+      {children}
+    </Text>
+  )
 }
 
 const ONBOARDING_STEPS = [

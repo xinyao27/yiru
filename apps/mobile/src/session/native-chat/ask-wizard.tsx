@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ScrollView, Text, TextInput, View } from 'react-native'
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
 import { MobileGlassPressable } from '../../components/glass/pressable'
 import { MobileGlassSurface } from '../../components/glass/surface'
@@ -107,9 +107,10 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           {prompt.questions.map((qq, questionIndex) => (
             <MobileGlassPressable
               key={`${qq.header}:${qq.question}`}
-              className={cn('rounded-full', questionIndex === index && 'border-green-500')}
+              className="rounded-full"
               contentClassName="min-h-8 flex-row items-center gap-1 rounded-full px-3 py-1"
               onPress={() => setIndex(questionIndex)}
+              tintColorClassName={questionIndex === index ? 'accent-primary' : undefined}
             >
               <Text
                 className={cn(
@@ -210,21 +211,22 @@ function OptionRow({
   onPress: () => void
 }): React.JSX.Element {
   return (
-    <MobileGlassPressable
-      className={cn('mb-1 rounded-xl', selected && 'border-green-500')}
-      contentClassName="flex-row gap-2 p-2"
+    <Pressable
+      accessibilityRole={multi ? 'checkbox' : 'radio'}
+      accessibilityState={multi ? { checked: selected } : { selected }}
+      className={cn('mb-1 flex-row gap-2 rounded-xl p-2 active:bg-accent', selected && 'bg-accent')}
       onPress={onPress}
     >
       <View
         className={cn(
-          'border-border mt-px h-5 w-5 items-center justify-center border-2',
+          'border-border mt-1 h-5 w-5 items-center justify-center border-2',
           multi ? 'rounded-md' : 'rounded-full',
           selected && 'border-green-500 bg-green-500'
         )}
       >
         {selected ? <Check size={12} colorClassName="accent-primary-foreground" /> : null}
       </View>
-      <View className="flex-1 gap-0.5">
+      <View className="flex-1 gap-1">
         <Text className="text-foreground text-sm">{label}</Text>
         {description ? (
           <Text className="text-muted-foreground text-xs" numberOfLines={3}>
@@ -232,6 +234,6 @@ function OptionRow({
           </Text>
         ) : null}
       </View>
-    </MobileGlassPressable>
+    </Pressable>
   )
 }

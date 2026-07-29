@@ -47,7 +47,7 @@ function ReviewFooterButton({
         label ? 'gap-1 px-3' : 'w-9'
       )}
       disabled={disabled}
-      fallbackClassName={prominent ? 'border-primary bg-primary' : 'bg-secondary'}
+      fallbackClassName={prominent ? 'border-transparent bg-primary' : 'bg-secondary'}
       hitSlop={label ? 4 : 8}
       onPress={onPress}
       tintColorClassName={prominent ? 'accent-primary' : undefined}

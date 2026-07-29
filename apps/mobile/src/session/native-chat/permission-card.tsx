@@ -1,7 +1,7 @@
 import { memo, useRef, useState } from 'react'
 import { Text } from 'react-native'
 
-import { MobileGlassSection } from '../../components/glass/section'
+import { MobileContentSection } from '../../components/content-section'
 import type { MobileChatPermission } from './permission'
 import { MobileNativeChatPermissionActions } from './permission-actions'
 
@@ -29,7 +29,7 @@ function MobileNativeChatPermissionImpl({
     }
   }
   return (
-    <MobileGlassSection className="mx-4 my-2 gap-2 p-3">
+    <MobileContentSection className="mx-4 my-2 gap-2 p-3">
       <Text className="text-foreground text-sm font-semibold">{permission.title}</Text>
       {permission.detail ? (
         <Text className="text-muted-foreground text-xs leading-5">{permission.detail}</Text>
@@ -39,7 +39,7 @@ function MobileNativeChatPermissionImpl({
         options={permission.options}
         onRespond={(send) => void respond(send)}
       />
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }
 

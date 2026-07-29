@@ -16,7 +16,8 @@ export function MobileGlassSegmentedControl<Value extends string>({
     <MobileGlassSurface
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="tablist"
-      className={cn('flex-row overflow-hidden rounded-full', size === 'regular' ? 'p-1' : 'p-0.5')}
+      className="flex-row overflow-hidden rounded-full p-1"
+      isFunctional
       isInteractive={!disabled}
     >
       {options.map((option) => {
@@ -28,7 +29,8 @@ export function MobileGlassSegmentedControl<Value extends string>({
             accessibilityRole="tab"
             accessibilityState={{ disabled, selected: isSelected }}
             className={cn(
-              'min-h-7 flex-1 items-center justify-center rounded-full px-3',
+              'flex-1 items-center justify-center rounded-full px-3',
+              size === 'regular' ? 'min-h-7' : 'min-h-6',
               isSelected ? 'bg-accent' : 'active:bg-accent',
               disabled && 'opacity-40'
             )}
@@ -37,7 +39,10 @@ export function MobileGlassSegmentedControl<Value extends string>({
             onPress={() => onChange(option.value)}
           >
             <Text
-              className={cn('text-sm', isSelected ? 'text-foreground' : 'text-muted-foreground')}
+              className={cn(
+                size === 'regular' ? 'text-sm' : 'text-xs',
+                isSelected ? 'text-foreground' : 'text-muted-foreground'
+              )}
               numberOfLines={1}
             >
               {option.label}

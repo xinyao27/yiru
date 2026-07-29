@@ -49,19 +49,23 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
         <>
           <Text className="text-primary text-sm font-semibold">Create pull request</Text>
           <View className={hubStyles.chipSpacer} />
-          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </View>
         </>
       ) : summary.kind === 'unavailable' ? (
         <>
           <Text className={hubStyles.chipMutedText} numberOfLines={1}>
             {summary.message}
           </Text>
-          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </View>
         </>
       ) : (
         <>
           <Text className="text-foreground text-sm font-bold">#{summary.number}</Text>
-          <View className={cn('px-2 py-px border-hairline', stateColors?.border)}>
+          <View className={cn('px-2 py-1 border-hairline', stateColors?.border)}>
             <Text className={cn('text-xs font-bold', stateColors?.text)}>{summary.stateLabel}</Text>
           </View>
           <ChipRollup rollup={summary.rollup} />
@@ -74,7 +78,9 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
             </View>
           ) : null}
           <View className={hubStyles.chipSpacer} />
-          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </View>
         </>
       )}
     </Pressable>

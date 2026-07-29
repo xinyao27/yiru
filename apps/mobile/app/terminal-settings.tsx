@@ -13,7 +13,7 @@ import {
 } from '@/components/uniwind-icons'
 import { GestureHandlerRootView } from '@/components/uniwind-native-components'
 
-import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileContentSection } from '../src/components/content-section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import { TerminalShortcutSettings } from '../src/components/terminal-shortcut-settings'
 import {
@@ -109,16 +109,20 @@ function HostFitRow({
 }): React.JSX.Element {
   return (
     <Pressable
-      className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+      className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
       onPress={onPress}
       disabled={!client}
     >
-      <Smartphone size={16} colorClassName="accent-muted-foreground" />
+      <View className="w-5 items-center">
+        <Smartphone size={16} colorClassName="accent-muted-foreground" />
+      </View>
       <View className="flex-1">
         <Text className="text-foreground text-sm">{hostName}</Text>
-        <Text className="text-muted-foreground mt-0.5 text-xs">{autoRestoreSummary(ms)}</Text>
+        <Text className="text-muted-foreground mt-1 text-xs">{autoRestoreSummary(ms)}</Text>
       </View>
-      <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+      <View className="w-5 items-center">
+        <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+      </View>
     </Pressable>
   )
 }
@@ -278,13 +282,13 @@ export default function TerminalSettingsScreen() {
         </Text>
 
         {hosts.length === 0 ? (
-          <MobileGlassSection className="mt-2">
+          <MobileContentSection className="mt-2">
             <Text className="text-muted-foreground p-3 text-sm">
               No paired desktops yet. Pair one to control terminal behavior.
             </Text>
-          </MobileGlassSection>
+          </MobileContentSection>
         ) : (
-          <MobileGlassSection className="mt-2">
+          <MobileContentSection className="mt-2">
             {hosts.map((host, idx) => {
               const client = hostClientsById.get(host.id) ?? null
               return (
@@ -299,7 +303,7 @@ export default function TerminalSettingsScreen() {
                 </View>
               )
             })}
-          </MobileGlassSection>
+          </MobileContentSection>
         )}
 
         <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
@@ -311,21 +315,25 @@ export default function TerminalSettingsScreen() {
           itself, which updates this setting. Per-device display only; doesn&apos;t change the
           desktop terminal.
         </Text>
-        <MobileGlassSection className="mt-2">
+        <MobileContentSection className="mt-2">
           <Pressable
-            className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setTextSizePickerOpen(true)}
           >
-            <Type size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Type size={16} colorClassName="accent-muted-foreground" />
+            </View>
             <View className="flex-1">
               <Text className="text-foreground text-sm">Text size</Text>
-              <Text className="text-muted-foreground mt-0.5 text-xs">
+              <Text className="text-muted-foreground mt-1 text-xs">
                 {textSizeSummary(textScale)}
               </Text>
             </View>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-        </MobileGlassSection>
+        </MobileContentSection>
 
         <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
           KEYBOARD INPUT
@@ -336,11 +344,11 @@ export default function TerminalSettingsScreen() {
           Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes,
           so suggestions don&apos;t apply there.
         </Text>
-        <MobileGlassSection className="mt-2">
-          <View className="flex-row items-center gap-2.5 px-3.5 py-3">
+        <MobileContentSection className="mt-2">
+          <View className="flex-row items-center gap-2 px-3 py-3">
             <View className="flex-1">
               <Text className="text-foreground text-sm">Autocomplete &amp; autocorrect</Text>
-              <Text className="text-muted-foreground mt-0.5 text-xs">
+              <Text className="text-muted-foreground mt-1 text-xs">
                 {autocompleteEnabled ? 'On' : 'Off'}
               </Text>
             </View>
@@ -353,7 +361,7 @@ export default function TerminalSettingsScreen() {
               ios_backgroundColorClassName="accent-accent"
             />
           </View>
-        </MobileGlassSection>
+        </MobileContentSection>
 
         <TerminalShortcutSettings
           scrollRef={scrollRef}

@@ -145,7 +145,7 @@ export function MobileSourceControlCommitBar({
     >
       <MobileSwiftUiGlassGroup modifiers={fullWidthModifiers} spacing={8}>
         <HStack spacing={8} modifiers={fullWidthModifiers}>
-          <MobileSwiftUiGlassInputShell hasTrailingAction={false}>
+          <MobileSwiftUiGlassInputShell hasTrailingAction={false} minHeight={44}>
             {hasStagedFiles ? (
               <TextField
                 placeholder="Commit message"
@@ -160,6 +160,13 @@ export function MobileSourceControlCommitBar({
               <Text modifiers={emptyTextModifiers}>No staged files</Text>
             )}
           </MobileSwiftUiGlassInputShell>
+          <Button modifiers={primaryModifiers} onPress={onPrimaryAction}>
+            {primaryLoading ? (
+              <ProgressView />
+            ) : (
+              <Text modifiers={primaryTextModifiers}>{primaryLabel}</Text>
+            )}
+          </Button>
           {showGenerateButton ? (
             <MobileSwiftUiGlassCircleButton
               disabled={generateDisabled}
@@ -169,17 +176,10 @@ export function MobileSourceControlCommitBar({
                   : 'Generate commit message with AI'
               }
               onPress={onGenerate}
-              size="regular"
+              size="large"
               systemImage={generatingMessage ? 'xmark' : 'sparkles'}
             />
           ) : null}
-          <Button modifiers={primaryModifiers} onPress={onPrimaryAction}>
-            {primaryLoading ? (
-              <ProgressView />
-            ) : (
-              <Text modifiers={primaryTextModifiers}>{primaryLabel}</Text>
-            )}
-          </Button>
         </HStack>
       </MobileSwiftUiGlassGroup>
     </Host>

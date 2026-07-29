@@ -1,4 +1,4 @@
-import { Stack, useRouter } from 'expo-router'
+import { Stack } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Text, View, type LayoutChangeEvent } from 'react-native'
 
@@ -26,7 +26,6 @@ type Props = {
 }
 
 export function MobileDiffReviewScreenView({ controller }: Props) {
-  const router = useRouter()
   const { isWideLayout } = useResponsiveLayout()
   const insets = useSafeAreaInsets()
   const [contentRowWidth, setContentRowWidth] = useState(0)
@@ -66,16 +65,6 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
       <Stack.Screen
         options={{
           title: `Changes · ${controller.worktreeLabel}`,
-          headerLeft:
-            Platform.OS === 'ios'
-              ? undefined
-              : () => (
-                  <MobileGlassIconButton
-                    accessibilityLabel="Back"
-                    icon="back"
-                    onPress={() => router.back()}
-                  />
-                ),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
@@ -97,15 +86,6 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
                 )
         }}
       />
-      {Platform.OS === 'ios' ? (
-        <Stack.Toolbar placement="left">
-          <Stack.Toolbar.Button
-            accessibilityLabel="Back"
-            icon="chevron.left"
-            onPress={() => router.back()}
-          />
-        </Stack.Toolbar>
-      ) : null}
       {Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button

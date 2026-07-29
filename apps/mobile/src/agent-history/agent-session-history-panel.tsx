@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
-import { MobileGlassPressable } from '@/components/glass/pressable'
 import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
 import { MobileGlassSurface } from '@/components/glass/surface'
+import { MobileGlassTextButton } from '@/components/glass/text-button'
 
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import {
@@ -237,16 +237,6 @@ export function MobileAgentSessionHistoryPanel({
       <Stack.Screen
         options={{
           title: `History · ${worktreeLabel}`,
-          headerLeft:
-            Platform.OS === 'ios'
-              ? undefined
-              : () => (
-                  <MobileGlassIconButton
-                    accessibilityLabel="Back"
-                    icon="back"
-                    onPress={() => router.back()}
-                  />
-                ),
           headerRight:
             Platform.OS === 'ios'
               ? undefined
@@ -259,15 +249,6 @@ export function MobileAgentSessionHistoryPanel({
                 )
         }}
       />
-      {Platform.OS === 'ios' ? (
-        <Stack.Toolbar placement="left">
-          <Stack.Toolbar.Button
-            accessibilityLabel="Back"
-            icon="chevron.left"
-            onPress={() => router.back()}
-          />
-        </Stack.Toolbar>
-      ) : null}
       {Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
@@ -293,14 +274,7 @@ export function MobileAgentSessionHistoryPanel({
         <View className={styles.state}>
           <Text className={styles.stateTitle}>Unable to Load</Text>
           <Text className={styles.stateText}>{screenState.message}</Text>
-          <MobileGlassPressable
-            className="mt-2 rounded-full"
-            contentClassName="rounded-full px-4 py-2"
-            fallbackClassName="bg-secondary"
-            onPress={retry}
-          >
-            <Text className="text-foreground text-sm">Retry</Text>
-          </MobileGlassPressable>
+          <MobileGlassTextButton className="mt-2" label="Retry" onPress={retry} />
         </View>
       ) : (
         <>

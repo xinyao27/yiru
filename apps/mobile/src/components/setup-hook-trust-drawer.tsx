@@ -4,7 +4,7 @@ import { Check } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from './bottom-drawer'
-import { MobileGlassSection } from './glass/section'
+import { MobileContentSection } from './content-section'
 
 export type SetupTrustPrompt = {
   repoId: string
@@ -46,7 +46,7 @@ export function SetupHookTrustDrawer({
                 ? `${prompt.repoName}'s setup script changed`
                 : `Run setup from ${prompt.repoName}?`}
             </Text>
-            <Text className="text-muted-foreground mt-0.5 text-xs">
+            <Text className="text-muted-foreground mt-1 text-xs">
               This repository's yiru.yaml runs before the workspace starts. Only run it if you trust
               this repository.
             </Text>
@@ -59,7 +59,7 @@ export function SetupHookTrustDrawer({
             <Text className="text-foreground font-mono text-xs">{prompt.scriptContent}</Text>
           </View>
 
-          <MobileGlassSection>
+          <MobileContentSection>
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
               <Check size={16} colorClassName="accent-foreground" />
               <Text className={styles.trustActionText}>Run hooks</Text>
@@ -73,7 +73,7 @@ export function SetupHookTrustDrawer({
             <Pressable className={styles.trustActionRow} disabled={busy} onPress={onDontRun}>
               <Text className={styles.trustActionText}>Don't run</Text>
             </Pressable>
-          </MobileGlassSection>
+          </MobileContentSection>
         </View>
       ) : null}
     </BottomDrawer>

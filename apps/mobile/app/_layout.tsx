@@ -83,7 +83,9 @@ export default function RootLayout() {
     }),
     [background, baseNavigationTheme, border, foreground, notification, primary]
   )
-  const headerTitleStyle = useResolveClassNames('text-sm font-semibold') as Pick<
+  // Why: native Stack chrome does not inherit Uniwind classes from route content, so both must
+  // resolve the same live theme tokens when system appearance changes while the app is mounted.
+  const headerTitleStyle = useResolveClassNames('text-foreground text-base font-semibold') as Pick<
     TextStyle,
     'fontFamily' | 'fontSize' | 'fontWeight'
   > & { color?: string }
@@ -223,6 +225,8 @@ export default function RootLayout() {
                   <ThemeProvider value={navigationTheme}>
                     <Stack
                       screenOptions={{
+                        headerBackButtonDisplayMode: 'minimal',
+                        headerStyle: contentStyle,
                         headerTintColor: foreground,
                         headerTitleStyle,
                         contentStyle,
@@ -237,6 +241,7 @@ export default function RootLayout() {
                       <Stack.Screen
                         name="index"
                         options={{
+                          headerBackVisible: false,
                           title: 'Yiru',
                           headerShown: true,
                           headerTitle: () => (
@@ -255,10 +260,7 @@ export default function RootLayout() {
                           gestureEnabled: false
                         }}
                       />
-                      <Stack.Screen
-                        name="settings"
-                        options={{ title: 'Settings', headerBackTitle: 'Yiru' }}
-                      />
+                      <Stack.Screen name="settings" options={{ title: 'Settings' }} />
                       <Stack.Screen name="appearance-settings" options={{ title: 'Appearance' }} />
                       <Stack.Screen name="native-chat-settings" options={{ title: 'Chat UI' }} />
                       <Stack.Screen name="terminal-settings" options={{ title: 'Terminal' }} />

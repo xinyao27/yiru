@@ -135,7 +135,7 @@ function AgentHistoryCardRow({
           {card.messageCount} {card.messageCount === 1 ? 'message' : 'messages'}
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
-          <View className="bg-secondary rounded-full px-2 py-0.5">
+          <View className="bg-secondary rounded-full px-2 py-1">
             <Text className="text-primary text-xs">current worktree</Text>
           </View>
         ) : null}
@@ -163,7 +163,7 @@ function AgentHistoryCardRow({
       {expanded && previewTurns.length > 0 ? (
         <View className="border-t-border mt-2 gap-2 border-t pt-2">
           {previewTurns.map((turn, index) => (
-            <View key={`${card.id}-turn-${index}`} className="gap-0.5">
+            <View key={`${card.id}-turn-${index}`} className="gap-1">
               <Text className="text-muted-foreground text-xs uppercase">{turn.role}</Text>
               <Text className="text-muted-foreground text-xs">{turn.text}</Text>
             </View>
