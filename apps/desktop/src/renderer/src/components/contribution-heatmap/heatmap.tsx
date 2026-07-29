@@ -62,7 +62,7 @@ export function ContributionHeatmap({
   ]
 
   return (
-    <div className="min-w-[610px]">
+    <div className="mx-auto w-max min-w-[610px]">
       <div className="text-muted-foreground mb-1 grid grid-cols-[24px_repeat(53,10px)] gap-x-1 text-[11px]">
         <span />
         {calendar.monthLabels.map((label) => (
@@ -103,7 +103,7 @@ export function ContributionHeatmap({
         </div>
       </div>
 
-      <div className="text-muted-foreground mt-3 flex items-center justify-end gap-2 text-[11px]">
+      <div className="text-muted-foreground mt-3 flex items-center justify-center gap-2 text-[11px]">
         <span>{translate('auto.components.contribution.heatmap.less', 'Less')}</span>
         <div className="flex items-center gap-1" aria-hidden>
           {INTENSITY_LEVELS.map((intensity) => (
