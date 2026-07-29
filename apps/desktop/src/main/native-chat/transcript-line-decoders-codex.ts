@@ -61,7 +61,11 @@ function codexResponseItem(
       source: 'transcript'
     }
   }
-  if (payload.type === 'function_call' || payload.type === 'local_shell_call') {
+  if (
+    payload.type === 'function_call' ||
+    payload.type === 'local_shell_call' ||
+    payload.type === 'custom_tool_call'
+  ) {
     const name = extractString(payload.name) ?? 'tool'
     return {
       id,
@@ -71,7 +75,7 @@ function codexResponseItem(
       source: 'transcript'
     }
   }
-  if (payload.type === 'function_call_output') {
+  if (payload.type === 'function_call_output' || payload.type === 'custom_tool_call_output') {
     return {
       id,
       role: 'tool',

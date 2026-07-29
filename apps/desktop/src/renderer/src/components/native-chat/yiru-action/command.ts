@@ -1,5 +1,7 @@
 import type { NativeChatToolCallBlock } from '@yiru/workbench-model/agent'
 
+import { parseCommandInputJson, readEmbeddedExecCommands, readShellCommand } from './command-input'
+
 export type ParsedCommand = {
   tokens: string[]
 }
@@ -19,18 +21,17 @@ const SHELL_TOOL_NAMES = new Set([
 ])
 
 export function parseCommands(call: NativeChatToolCallBlock): ParsedCommand[] {
-  if (!SHELL_TOOL_NAMES.has(call.name.replaceAll(/[^a-z0-9]/gi, '').toLowerCase())) {
-    return []
-  }
-  const command = shellCommandFromInput(call.input)
-  if (!command) {
+  const commands = shellCommandsFromCall(call)
+  if (commands.length === 0) {
     return []
   }
   const parsed: ParsedCommand[] = []
-  for (const tokens of tokenizeShellSegments(command)) {
-    const invocationStart = findInvocationStart(tokens)
-    if (invocationStart !== null) {
-      parsed.push({ tokens: tokens.slice(invocationStart) })
+  for (const command of commands) {
+    for (const tokens of tokenizeShellSegments(command)) {
+      const invocationStart = findInvocationStart(tokens)
+      if (invocationStart !== null) {
+        parsed.push({ tokens: tokens.slice(invocationStart) })
+      }
     }
   }
   return parsed
@@ -68,21 +69,28 @@ export function readPositional(tokens: readonly string[], startIndex: number): s
   return null
 }
 
-function shellCommandFromInput(input: unknown): string | null {
-  if (typeof input === 'string') {
-    const parsed = parseInputJson(input)
-    return parsed === null ? input : shellCommandFromInput(parsed)
+function shellCommandsFromCall(call: NativeChatToolCallBlock): string[] {
+  const toolName = call.name.replaceAll(/[^a-z0-9]/gi, '').toLowerCase()
+  if (SHELL_TOOL_NAMES.has(toolName)) {
+    const command = readShellCommand(call.input)
+    return command ? [command] : []
   }
-  if (!isInputRecord(input)) {
-    return null
+  if (toolName !== 'exec') {
+    return []
   }
-  for (const key of ['command', 'cmd', 'CommandLine']) {
-    const value = input[key]
-    if (typeof value === 'string' && value.trim()) {
-      return value
-    }
+  const directCommand = typeof call.input === 'string' ? null : readShellCommand(call.input)
+  if (directCommand) {
+    return [directCommand]
   }
-  return shellCommandFromInput(input.action)
+  if (typeof call.input !== 'string') {
+    return []
+  }
+  const parsedInput = parseCommandInputJson(call.input)
+  if (parsedInput !== null) {
+    const command = readShellCommand(parsedInput)
+    return command ? [command] : []
+  }
+  return readEmbeddedExecCommands(call.input)
 }
 
 function tokenizeShellSegments(command: string): string[][] {
@@ -205,17 +213,4 @@ function isYiruExecutable(token: string | undefined): boolean {
 function executableBasename(token: string | undefined): string | null {
   const basename = token?.split(/[\\/]/).at(-1)?.toLowerCase()
   return basename || null
-}
-
-function parseInputJson(value: string): unknown | null {
-  try {
-    const parsed: unknown = JSON.parse(value)
-    return parsed
-  } catch {
-    return null
-  }
-}
-
-function isInputRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
