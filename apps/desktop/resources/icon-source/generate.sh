@@ -6,6 +6,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 ICON_SOURCE="$SCRIPT_DIR/icon.icon"
+MASTER_ICON="$PROJECT_DIR/resources/brand/yiru-app-icon-master.png"
+ICON_COMPOSER_ASSET="$ICON_SOURCE/Assets/logo.png"
 BUILD_DIR="$PROJECT_DIR/resources/build"
 RESOURCES_DIR="$PROJECT_DIR/resources"
 TMP_DIR=$(mktemp -d)
@@ -15,6 +17,11 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 MAGICK_BIN=$(command -v magick || true)
 
 echo "Compiling icon from $ICON_SOURCE..."
+
+# Why: the reviewed brand master is the single source for Icon Composer and the
+# mobile icon pipeline, so platform builds cannot silently drift apart.
+sips -s format png --resampleHeightWidth 1024 1024 "$MASTER_ICON" \
+  --out "$ICON_COMPOSER_ASSET" >/dev/null
 
 # Generate .icns using actool (requires Xcode)
 xcrun actool \

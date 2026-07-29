@@ -17,7 +17,7 @@
 <h3 align="center"><a href="https://yiru.ai/download"><ins>Download Yiru</ins></a></h3>
 
 <p align="center">
-  <img src="docs/assets/yiru-hero.svg" alt="Yiru desktop workspace" width="960" />
+  <img src="docs/assets/yiru-hero.png" alt="Yiru desktop workspace" width="960" />
 </p>
 
 ## What is Yiru?

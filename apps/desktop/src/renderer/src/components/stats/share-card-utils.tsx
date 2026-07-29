@@ -2,6 +2,7 @@ import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '@yiru/workbench-model/product'
 
 import { translate } from '@/i18n/i18n'
 
+import logo from '../../../../../resources/yiru-wordmark.png?url'
 import type {
   ClaudeUsageDailyPoint,
   ClaudeUsageSummary
@@ -132,15 +133,14 @@ export function getLegendItems(provider: 'claude' | 'codex') {
 
 export function YiruLogo(): React.JSX.Element {
   return (
-    <svg
-      width={26}
+    <img
+      src={logo}
+      alt=""
+      aria-hidden
+      width={44}
       height={26}
-      viewBox="0 0 612 621"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ opacity: 0.9, verticalAlign: 'middle' }}
-    >
-      <path fill="#fff" d="M0 0h118l188 192L494 0h118v62L374 304v317H241V304L0 62Z" />
-    </svg>
+      style={{ objectFit: 'contain', opacity: 0.9, verticalAlign: 'middle' }}
+    />
   )
 }
 
