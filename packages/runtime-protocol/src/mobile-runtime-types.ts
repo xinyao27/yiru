@@ -11,11 +11,6 @@ export type RuntimeStatsDailyTokens = {
   tokens: number
 }
 
-export type RuntimeStatsModelTokens = {
-  model: string
-  tokens: number
-}
-
 export type RuntimeStatsSummary = {
   totalAgentsSpawned: number
   totalPRsCreated: number
@@ -24,7 +19,6 @@ export type RuntimeStatsSummary = {
   // Why: optional fields preserve compatibility with older runtime hosts.
   dailyActivity?: RuntimeStatsDailyActivity[]
   dailyTokens?: RuntimeStatsDailyTokens[]
-  modelTokens?: RuntimeStatsModelTokens[]
   tokenDataAvailable?: boolean
   tokenUnavailableAgents?: AiVaultAgent[]
 }

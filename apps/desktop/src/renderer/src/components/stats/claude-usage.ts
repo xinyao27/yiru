@@ -34,7 +34,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   get
 ) => ({
   claudeUsageScope: 'yiru',
-  claudeUsageRange: '30d',
+  claudeUsageRange: 'all',
   claudeUsageScanState: null,
   claudeUsageSummary: null,
   claudeUsageDaily: [],

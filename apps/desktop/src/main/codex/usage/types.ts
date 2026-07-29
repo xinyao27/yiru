@@ -81,6 +81,8 @@ export type CodexUsageDailyAggregate = {
   reasoningOutputTokens: number
   totalTokens: number
   hasInferredPricing: boolean
+  estimatedCostUsd: number | null
+  unpricedTokens: number
 }
 
 export type CodexUsagePersistedFile = CodexUsageProcessedFile & {
@@ -122,6 +124,7 @@ export type CodexUsageParsedEvent = {
   hasInferredPricing: boolean
   inputTokens: number
   cachedInputTokens: number
+  cacheWriteTokens: number
   outputTokens: number
   reasoningOutputTokens: number
   totalTokens: number

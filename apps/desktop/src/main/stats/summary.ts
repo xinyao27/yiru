@@ -22,7 +22,6 @@ export async function buildStatsSummary(stats: StatsCollector): Promise<StatsSum
     return {
       ...activitySummary,
       dailyTokens: aggregateDailyTokens(result.sessions),
-      modelTokens: aggregateModelTokens(result.sessions),
       tokenDataAvailable: true,
       tokenUnavailableAgents: [...TOKEN_UNAVAILABLE_AGENTS]
     }
@@ -31,27 +30,10 @@ export async function buildStatsSummary(stats: StatsCollector): Promise<StatsSum
     return {
       ...activitySummary,
       dailyTokens: [],
-      modelTokens: [],
       tokenDataAvailable: false,
       tokenUnavailableAgents: [...TOKEN_UNAVAILABLE_AGENTS]
     }
   }
-}
-
-function aggregateModelTokens(
-  sessions: AiVaultSession[]
-): NonNullable<StatsSummary['modelTokens']> {
-  const byModel = new Map<string, number>()
-  for (const session of sessions) {
-    const model = session.model?.trim()
-    if (!model || model === '<synthetic>') {
-      continue
-    }
-    byModel.set(model, (byModel.get(model) ?? 0) + session.totalTokens)
-  }
-  return [...byModel.entries()]
-    .map(([model, tokens]) => ({ model, tokens }))
-    .sort((left, right) => right.tokens - left.tokens)
 }
 
 function aggregateDailyTokens(

@@ -4,8 +4,8 @@ import { useMemo } from 'react'
 import type { TokenValueMetric } from '@/components/contribution-heatmap/metric'
 import { nextTokenValueMetric } from '@/components/contribution-heatmap/metric'
 import { DitherPieChart, type DitherPieChartPoint } from '@/components/dither-kit/pie-chart'
-import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
@@ -31,8 +31,8 @@ export function ModelUsageChart({
     metric === 'tokens' ? formatTokens(value) : formatCurrency(value)
 
   return (
-    <section className="border-border bg-card border p-4">
-      <div className="flex items-start justify-between gap-4">
+    <Card size="compact">
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <h2 className="text-foreground text-sm font-semibold">
             {translate('auto.components.home.modelChart.title', 'Model mix')}
@@ -41,19 +41,19 @@ export function ModelUsageChart({
             {metric === 'tokens'
               ? translate(
                   'auto.components.home.modelChart.tokenDescription',
-                  'Token usage grouped by model.'
+                  'Token usage attributed to Yiru worktrees, grouped by model.'
                 )
               : translate(
                   'auto.components.home.modelChart.valueDescription',
-                  'Estimated local-history API value for models with known pricing.'
+                  'Standard global API-equivalent value for token categories with authoritative pricing.'
                 )}
           </p>
         </div>
         <UsageRefreshButton />
-      </div>
+      </CardHeader>
 
       {data.length > 0 ? (
-        <div className="mt-3">
+        <CardContent className="mt-3">
           <DitherPieChart
             ariaLabel={chartActivationLabel(
               metric === 'tokens'
@@ -76,32 +76,33 @@ export function ModelUsageChart({
                 : translate('auto.components.home.modelChart.valueTotal', 'API value')
             }
           />
-        </div>
+        </CardContent>
       ) : (
-        <Button
-          variant="chart"
-          size="chart"
-          className="mt-4"
-          aria-label={chartActivationLabel(
-            translate('auto.components.home.modelChart.title', 'Model mix'),
-            metric
-          )}
-          onClick={() => onMetricChange(nextTokenValueMetric(metric))}
-        >
-          <span className="border-border text-muted-foreground w-full border border-dashed px-4 py-8 text-center text-sm">
-            {metric === 'tokens'
-              ? translate(
-                  'auto.components.home.modelChart.tokenUnavailable',
-                  'No model token data is available yet.'
-                )
-              : translate(
-                  'auto.components.home.modelChart.valueUnavailable',
-                  'No known model pricing is available for comparison yet.'
-                )}
-          </span>
-        </Button>
+        <CardContent className="mt-4">
+          <Button
+            variant="chart"
+            size="chart"
+            aria-label={chartActivationLabel(
+              translate('auto.components.home.modelChart.title', 'Model mix'),
+              metric
+            )}
+            onClick={() => onMetricChange(nextTokenValueMetric(metric))}
+          >
+            <span className="border-border text-muted-foreground w-full border border-dashed px-4 py-8 text-center text-sm">
+              {metric === 'tokens'
+                ? translate(
+                    'auto.components.home.modelChart.tokenUnavailable',
+                    'No model token data is available yet.'
+                  )
+                : translate(
+                    'auto.components.home.modelChart.valueUnavailable',
+                    'No known model pricing is available for comparison yet.'
+                  )}
+            </span>
+          </Button>
+        </CardContent>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -140,7 +141,7 @@ function UsageRefreshButton(): React.JSX.Element {
             )}
             onClick={refreshUsage}
           >
-            {isScanning ? <LoadingIndicator className="size-3" /> : <RefreshCw weight="regular" />}
+            <RefreshCw weight="regular" />
           </Button>
         }
       />

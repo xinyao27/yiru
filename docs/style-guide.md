@@ -159,6 +159,8 @@ Full inventory and layering: `components/ui/README.md`.
 
 Every primitive part carries `data-slot="<name>"` — don't strip it. Merge classes with `cn()`, user `className` last. Multiple appearances → `class-variance-authority`. Headless behavior comes from Base UI (`command` wraps `cmdk`, `sonner` wraps Sonner) — never reimplement keyboard or focus behavior, extend the wrapper. A primitive must stay useful if every Yiru domain type is deleted, which is why a searchable repo picker lives in `components/repo/`.
 
+`Card` uses `size="compact"` for dense dashboard panels. The size owns the card gap and the vertical and horizontal padding of its direct primitive parts; call sites own only the layout between those parts.
+
 ### Buttons
 
 `Button` — never a raw `<button>` for app chrome.
@@ -171,13 +173,14 @@ Every primitive part carries `data-slot="<name>"` — don't strip it. Merge clas
 | `outline-transparent` | Titlebar controls whose vertical separators reveal host material |
 | `ghost` | Icon buttons, row triggers — anywhere chrome should disappear |
 | `quiet` | Muted icon/toolbar controls resting quieter than `ghost` |
+| `chart` | Full-plot activation targets without button chrome |
 | `picker-row` | Command and listbox rows, including the selected-state border |
 | `popover-outline` | Inline actions floating above an editor, on opaque popover paint |
 | `status-bar` / `status-bar-icon` / `status-bar-quiet` | Full-height footer actions, icons, labels |
 | `link` | Inline text action inside a paragraph |
 | `destructive` | Delete, discard, irreversible. Never Cancel. |
 
-Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `popover-hint`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
+Sizes — match the surrounding row height instead of overriding it in `className`. Text: `xs` 24 · `sm` 32 · `default` 36 · `lg` 40. Icon: `icon-xs` 24 · `icon-sm` 32 · `icon` 36 · `icon-lg` 40. Content-driven: `list-row` · `picker-row` · `popover-hint` · `chart` · `chart-plot`. Footer: `status-bar` · `icon-status-bar` 20 · `icon-status-bar-wide` 24. Titlebar: `icon-titlebar` 28 · `-compact` 24 · `-wide` 32 · `-extra-wide` 36. Prefer `xs`/`icon-xs` for dense chrome; never drop a `default` button into a 28px toolbar.
 
 ### Forms
 

@@ -1,3 +1,4 @@
+import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo } from 'react'
 
 import { useAppStore } from '@/store'
@@ -10,9 +11,12 @@ export type ModelUsageValue = {
 }
 
 export type UsageValue = {
+  dailyTokens: ContributionPoint[]
+  dailyValues: ContributionPoint[]
+  hasUnpricedUsage: boolean
+  hasValue: boolean
   isScanning: boolean
   models: ModelUsageValue[]
-  usdPerToken: number | null
 }
 
 type ModelUsageAccumulator = {
@@ -23,19 +27,25 @@ type ModelUsageAccumulator = {
   hasKnownValue: boolean
 }
 
-type LocalModelTokens = {
-  model: string
+type DailyUsagePoint = {
+  day: string
   tokens: number
+  valueUsd: number | null
+  unpricedTokens: number
 }
 
-const EMPTY_LOCAL_MODEL_TOKENS: readonly LocalModelTokens[] = []
-
-export function useUsageValue(localModelTokens?: readonly LocalModelTokens[]): UsageValue {
+export function useUsageValue(): UsageValue {
   const claudeScanState = useAppStore((state) => state.claudeUsageScanState)
+  const claudeRange = useAppStore((state) => state.claudeUsageRange)
+  const claudeDaily = useAppStore((state) => state.claudeUsageDaily)
   const claudeModels = useAppStore((state) => state.claudeUsageModelBreakdown)
   const codexScanState = useAppStore((state) => state.codexUsageScanState)
+  const codexRange = useAppStore((state) => state.codexUsageRange)
+  const codexDaily = useAppStore((state) => state.codexUsageDaily)
   const codexModels = useAppStore((state) => state.codexUsageModelBreakdown)
   const openCodeScanState = useAppStore((state) => state.openCodeUsageScanState)
+  const openCodeRange = useAppStore((state) => state.openCodeUsageRange)
+  const openCodeDaily = useAppStore((state) => state.openCodeUsageDaily)
   const openCodeModels = useAppStore((state) => state.openCodeUsageModelBreakdown)
   const fetchClaudeUsage = useAppStore((state) => state.fetchClaudeUsage)
   const fetchCodexUsage = useAppStore((state) => state.fetchCodexUsage)
@@ -43,25 +53,36 @@ export function useUsageValue(localModelTokens?: readonly LocalModelTokens[]): U
   const enableClaudeUsage = useAppStore((state) => state.enableClaudeUsage)
   const enableCodexUsage = useAppStore((state) => state.enableCodexUsage)
   const enableOpenCodeUsage = useAppStore((state) => state.enableOpenCodeUsage)
+  const setClaudeUsageRange = useAppStore((state) => state.setClaudeUsageRange)
+  const setCodexUsageRange = useAppStore((state) => state.setCodexUsageRange)
+  const setOpenCodeUsageRange = useAppStore((state) => state.setOpenCodeUsageRange)
 
   useEffect(() => {
-    if (claudeScanState === null) {
+    if (claudeRange !== 'all') {
+      void setClaudeUsageRange('all')
+    } else if (claudeScanState === null) {
       void fetchClaudeUsage()
     } else if (!claudeScanState.enabled) {
       void enableClaudeUsage()
     }
-    if (codexScanState === null) {
+    if (codexRange !== 'all') {
+      void setCodexUsageRange('all')
+    } else if (codexScanState === null) {
       void fetchCodexUsage()
     } else if (!codexScanState.enabled) {
       void enableCodexUsage()
     }
-    if (openCodeScanState === null) {
+    if (openCodeRange !== 'all') {
+      void setOpenCodeUsageRange('all')
+    } else if (openCodeScanState === null) {
       void fetchOpenCodeUsage()
     } else if (!openCodeScanState.enabled) {
       void enableOpenCodeUsage()
     }
   }, [
     claudeScanState,
+    claudeRange,
+    codexRange,
     codexScanState,
     enableClaudeUsage,
     enableCodexUsage,
@@ -69,10 +90,14 @@ export function useUsageValue(localModelTokens?: readonly LocalModelTokens[]): U
     fetchClaudeUsage,
     fetchCodexUsage,
     fetchOpenCodeUsage,
-    openCodeScanState
+    openCodeScanState,
+    openCodeRange,
+    setClaudeUsageRange,
+    setCodexUsageRange,
+    setOpenCodeUsageRange
   ])
 
-  const trackedModels = useMemo(
+  const models = useMemo(
     () =>
       mergeModelUsage([
         ...claudeModels.map((model) => ({
@@ -92,58 +117,74 @@ export function useUsageValue(localModelTokens?: readonly LocalModelTokens[]): U
           key: model.key,
           label: model.label,
           tokens: model.totalTokens,
-          valueUsd: model.estimatedCostUsd
+          valueUsd: null
         }))
       ]),
     [claudeModels, codexModels, openCodeModels]
   )
-  const fallbackModels = localModelTokens ?? EMPTY_LOCAL_MODEL_TOKENS
-  const models = useMemo(
-    () => alignLocalModelUsage(fallbackModels, trackedModels),
-    [fallbackModels, trackedModels]
+  const dailyUsage = useMemo(
+    () =>
+      mergeDailyUsage([
+        ...claudeDaily.map((point) => ({
+          day: point.day,
+          tokens:
+            point.inputTokens + point.outputTokens + point.cacheReadTokens + point.cacheWriteTokens,
+          valueUsd: point.estimatedCostUsd,
+          unpricedTokens: point.unpricedTokens
+        })),
+        ...codexDaily.map((point) => ({
+          day: point.day,
+          tokens: point.totalTokens,
+          valueUsd: point.estimatedCostUsd,
+          unpricedTokens: point.unpricedTokens
+        })),
+        ...openCodeDaily.map((point) => ({
+          day: point.day,
+          tokens: point.totalTokens,
+          valueUsd: null,
+          unpricedTokens: point.totalTokens
+        }))
+      ]),
+    [claudeDaily, codexDaily, openCodeDaily]
   )
-  const knownValueModels = trackedModels.filter(
-    (model) => model.valueUsd !== null && model.tokens > 0
-  )
-  const knownTokens = knownValueModels.reduce((sum, model) => sum + model.tokens, 0)
-  const knownValueUsd = knownValueModels.reduce((sum, model) => sum + (model.valueUsd ?? 0), 0)
+  const hasValue =
+    dailyUsage.some((point) => point.valueUsd !== null) ||
+    models.some((model) => model.valueUsd !== null)
 
   return {
+    dailyTokens: dailyUsage.map((point) => ({ day: point.day, value: point.tokens })),
+    dailyValues: dailyUsage.flatMap((point) =>
+      point.valueUsd === null ? [] : [{ day: point.day, value: point.valueUsd }]
+    ),
+    hasUnpricedUsage:
+      dailyUsage.some((point) => point.unpricedTokens > 0) ||
+      models.some((model) => model.tokens > 0 && model.valueUsd === null),
+    hasValue,
     isScanning:
       claudeScanState?.isScanning === true ||
       codexScanState?.isScanning === true ||
       openCodeScanState?.isScanning === true,
-    models,
-    usdPerToken: knownTokens > 0 ? knownValueUsd / knownTokens : null
+    models
   }
 }
 
-function alignLocalModelUsage(
-  localModels: readonly LocalModelTokens[],
-  trackedModels: ModelUsageValue[]
-): ModelUsageValue[] {
-  if (localModels.length === 0) {
-    return trackedModels
+function mergeDailyUsage(points: DailyUsagePoint[]): DailyUsagePoint[] {
+  const byDay = new Map<string, DailyUsagePoint>()
+  for (const point of points) {
+    const current = byDay.get(point.day) ?? {
+      day: point.day,
+      tokens: 0,
+      valueUsd: null,
+      unpricedTokens: 0
+    }
+    current.tokens += point.tokens
+    current.unpricedTokens += point.unpricedTokens
+    if (point.valueUsd !== null) {
+      current.valueUsd = (current.valueUsd ?? 0) + point.valueUsd
+    }
+    byDay.set(point.day, current)
   }
-  const trackedByModel = new Map(
-    trackedModels.map((model) => [normalizedModelKey(model.label, model.key), model])
-  )
-  return mergeModelUsage(
-    localModels.map((model) => {
-      const key = normalizedModelKey(model.model, model.model)
-      const tracked = trackedByModel.get(key)
-      const trackedRate =
-        tracked !== undefined && tracked.valueUsd !== null && tracked.tokens > 0
-          ? tracked.valueUsd / tracked.tokens
-          : null
-      return {
-        key,
-        label: model.model,
-        tokens: model.tokens,
-        valueUsd: trackedRate === null ? null : model.tokens * trackedRate
-      }
-    })
-  )
+  return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
 }
 
 function mergeModelUsage(models: ModelUsageValue[]): ModelUsageValue[] {

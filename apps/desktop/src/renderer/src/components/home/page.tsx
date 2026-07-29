@@ -1,4 +1,3 @@
-import { aiVaultAgentLabel } from '@yiru/workbench-model/agent'
 import type { ContributionPoint } from '@yiru/workbench-model/ui'
 import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useState } from 'react'
@@ -15,21 +14,22 @@ import {
   saveContributionMetric
 } from '@/components/contribution-heatmap/preference'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
-import type { StatsSummary } from '../../../../shared/types'
 import { chartActivationLabel } from './chart-activation'
 import { ContributionCharts } from './charts'
 import { ModelUsageChart } from './model-usage-chart'
 import { useUsageValue } from './usage-value'
 
 type MetricDisclosureProps = {
+  hasTokens: boolean
+  hasUnpricedUsage: boolean
   hasValue: boolean
   isValueScanning: boolean
   metric: ContributionDisplayMetric
-  stats: StatsSummary | null
 }
 
 type SummaryMetricProps = {
@@ -42,7 +42,7 @@ export default function HomePage(): React.JSX.Element {
   const stats = useAppStore((state) => state.statsSummary)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
   const [metric, setMetric] = useState<ContributionDisplayMetric>(loadContributionMetric)
-  const usageValue = useUsageValue(stats?.modelTokens)
+  const usageValue = useUsageValue()
 
   useEffect(() => {
     void fetchStatsSummary()
@@ -56,32 +56,13 @@ export default function HomePage(): React.JSX.Element {
       })),
     [stats?.dailyActivity]
   )
-  const tokenPoints = useMemo<ContributionPoint[]>(
-    () => (stats?.dailyTokens ?? []).map((entry) => ({ day: entry.day, value: entry.tokens })),
-    [stats?.dailyTokens]
-  )
-  const usdPerToken = usageValue.usdPerToken
-  const valuePoints = useMemo<ContributionPoint[]>(
-    () =>
-      usdPerToken === null
-        ? []
-        : tokenPoints.map((point) => ({
-            day: point.day,
-            value: point.value * usdPerToken
-          })),
-    [tokenPoints, usdPerToken]
-  )
+  const tokenPoints = usageValue.dailyTokens
+  const valuePoints = usageValue.dailyValues
   const points = selectPoints(metric, activityPoints, tokenPoints, valuePoints)
-  const streakTotals = useMemo(
-    () => getContributionTotals(metric === 'value' ? tokenPoints : points),
-    [metric, points, tokenPoints]
-  )
+  const streakTotals = useMemo(() => getContributionTotals(activityPoints), [activityPoints])
   const lifetimeTotal = useMemo(() => points.reduce((sum, point) => sum + point.value, 0), [points])
-  const peakDay = useMemo(
-    () => points.reduce((peak, point) => Math.max(peak, point.value), 0),
-    [points]
-  )
-  const hasValue = usdPerToken !== null
+  const hasTokens = tokenPoints.some((point) => point.value > 0)
+  const hasValue = usageValue.hasValue
 
   const selectMetric = (nextMetric: ContributionDisplayMetric): void => {
     setMetric(nextMetric)
@@ -113,55 +94,36 @@ export default function HomePage(): React.JSX.Element {
         </header>
 
         <div className="border-border bg-border grid gap-px border sm:grid-cols-2 lg:grid-cols-4">
-          {metric === 'activity' ? (
-            <>
-              <SummaryMetric
-                label={translate(
-                  'auto.components.home.activitySummary.agentsSpawned',
-                  'Agents spawned'
-                )}
-                value={stats?.totalAgentsSpawned.toLocaleString() ?? '—'}
-              />
-              <SummaryMetric
-                label={translate(
-                  'auto.components.home.activitySummary.agentTime',
-                  'Time agents worked'
-                )}
-                value={stats === null ? '—' : formatDuration(stats.totalAgentTimeMs)}
-              />
-              <SummaryMetric
-                label={translate('auto.components.home.activitySummary.prsCreated', 'PRs created')}
-                value={stats?.totalPRsCreated.toLocaleString() ?? '—'}
-              />
-              <SummaryMetric
-                label={translate('auto.components.home.page.currentStreak', 'Current streak')}
-                value={formatStreak(streakTotals.currentStreak)}
-              />
-            </>
-          ) : (
-            <>
-              <SummaryMetric
-                label={translate('auto.components.home.page.lifetime', 'Lifetime')}
-                value={formatMetricValue(lifetimeTotal, metric, hasValue)}
-              />
-              <SummaryMetric
-                label={translate('auto.components.home.page.peakDay', 'Peak day')}
-                value={formatMetricValue(peakDay, metric, hasValue)}
-              />
-              <SummaryMetric
-                label={translate('auto.components.home.page.currentStreak', 'Current streak')}
-                value={formatStreak(streakTotals.currentStreak)}
-              />
-              <SummaryMetric
-                label={translate('auto.components.home.page.longestStreakLabel', 'Longest streak')}
-                value={formatStreak(streakTotals.longestStreak)}
-              />
-            </>
-          )}
+          <SummaryMetric
+            label={translate(
+              'auto.components.home.activitySummary.agentsSpawned',
+              'Agents spawned'
+            )}
+            value={stats?.totalAgentsSpawned.toLocaleString() ?? '—'}
+          />
+          <SummaryMetric
+            label={translate(
+              'auto.components.home.activitySummary.agentTime',
+              'Time agents worked'
+            )}
+            value={stats === null ? '—' : formatDuration(stats.totalAgentTimeMs)}
+          />
+          <SummaryMetric
+            label={translate('auto.components.home.activitySummary.prsCreated', 'PRs created')}
+            value={stats?.totalPRsCreated.toLocaleString() ?? '—'}
+          />
+          <SummaryMetric
+            label={metricSummaryLabel(metric)}
+            value={
+              metric === 'activity'
+                ? formatStreak(streakTotals.currentStreak)
+                : formatMetricValue(lifetimeTotal, metric, hasValue)
+            }
+          />
         </div>
 
-        <section className="border-border bg-card border p-5">
-          <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+        <Card size="compact">
+          <CardHeader className="mb-5 flex flex-row flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-foreground text-sm font-semibold">
                 {translate('auto.components.home.page.contributions', 'Contribution history')}
@@ -188,27 +150,30 @@ export default function HomePage(): React.JSX.Element {
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
-          </div>
+          </CardHeader>
 
-          <div className="scrollbar-sleek scrollbar-sleek-lg overflow-x-auto pb-1">
-            <ContributionHeatmap
-              activationLabel={chartActivationLabel(
-                translate('auto.components.home.page.contributions', 'Contribution history'),
-                metric
-              )}
-              points={points}
+          <CardContent>
+            <div className="scrollbar-sleek scrollbar-sleek-lg overflow-x-auto pb-1">
+              <ContributionHeatmap
+                activationLabel={chartActivationLabel(
+                  translate('auto.components.home.page.contributions', 'Contribution history'),
+                  metric
+                )}
+                points={points}
+                metric={metric}
+                onActivate={switchChartMetric}
+              />
+            </div>
+
+            <MetricDisclosure
+              hasTokens={hasTokens}
+              hasUnpricedUsage={usageValue.hasUnpricedUsage}
+              hasValue={hasValue}
+              isValueScanning={usageValue.isScanning}
               metric={metric}
-              onActivate={switchChartMetric}
             />
-          </div>
-
-          <MetricDisclosure
-            hasValue={hasValue}
-            isValueScanning={usageValue.isScanning}
-            metric={metric}
-            stats={stats}
-          />
-        </section>
+          </CardContent>
+        </Card>
 
         <ContributionCharts
           points={points}
@@ -229,21 +194,24 @@ export default function HomePage(): React.JSX.Element {
 }
 
 function MetricDisclosure({
+  hasTokens,
+  hasUnpricedUsage,
   hasValue,
   isValueScanning,
-  metric,
-  stats
+  metric
 }: MetricDisclosureProps): React.JSX.Element | null {
   if (metric === 'activity') {
     return null
   }
-  if (stats?.tokenDataAvailable !== true) {
+  if (!hasTokens) {
     return (
       <p className="text-muted-foreground mt-4 text-xs">
-        {translate(
-          'auto.components.home.page.tokensUnavailable',
-          'Token history is unavailable right now.'
-        )}
+        {isValueScanning
+          ? translate('auto.components.home.page.calculatingValue', 'Calculating…')
+          : translate(
+              'auto.components.home.page.tokensUnavailable',
+              'No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.'
+            )}
       </p>
     )
   }
@@ -255,7 +223,7 @@ function MetricDisclosure({
           : hasValue
             ? translate(
                 'auto.components.home.page.valueCoverage',
-                'API value is an estimate based on enabled providers with known model pricing, not an actual bill.'
+                'Standard global API-equivalent value sums authoritative per-request model pricing for usage attributed to Yiru worktrees. Unpriced token categories and session totals without request attribution are excluded; this is not a bill.'
               )
             : translate(
                 'auto.components.home.page.valueUnavailable',
@@ -264,17 +232,18 @@ function MetricDisclosure({
       </p>
     )
   }
-  const unavailableAgents = (stats.tokenUnavailableAgents ?? []).map(aiVaultAgentLabel)
-  if (unavailableAgents.length === 0) {
-    return null
-  }
   return (
     <p className="text-muted-foreground mt-4 text-xs">
       {translate(
         'auto.components.home.page.tokenCoverage',
-        'Token totals exclude {{value0}} because their session histories do not report usage.',
-        { value0: unavailableAgents.join(', ') }
+        'Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees; cached input is not counted twice, and session totals without request attribution are excluded.'
       )}
+      {hasUnpricedUsage
+        ? ` ${translate(
+            'auto.components.home.page.unpricedCoverage',
+            'Tokens without authoritative pricing details are excluded from value totals.'
+          )}`
+        : null}
     </p>
   )
 }
@@ -350,13 +319,24 @@ function metricDescription(metric: ContributionDisplayMetric): string {
     case 'tokens':
       return translate(
         'auto.components.home.page.tokenDescription',
-        'Tokens recorded in local agent session histories.'
+        'Provider-reported token usage attributed to Yiru worktrees.'
       )
     case 'value':
       return translate(
         'auto.components.home.page.valueDescription',
-        'Estimated API-equivalent value using your known-model blended rate.'
+        'Standard global API-equivalent value calculated per request from its model and token categories.'
       )
+  }
+}
+
+function metricSummaryLabel(metric: ContributionDisplayMetric): string {
+  switch (metric) {
+    case 'activity':
+      return translate('auto.components.home.page.currentStreak', 'Current streak')
+    case 'tokens':
+      return translate('auto.components.home.page.totalTokens', 'Total tokens')
+    case 'value':
+      return translate('auto.components.home.page.apiValue', 'API value')
   }
 }
 

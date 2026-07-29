@@ -70,7 +70,7 @@ export function DitherCanvasChart({
       />
       {hoveredPoint ? (
         <span
-          className="bg-popover pointer-events-none absolute top-2 z-10 -translate-x-1/2 border px-2 py-1"
+          className="border-border bg-popover text-popover-foreground pointer-events-none absolute top-2 z-10 -translate-x-1/2 border px-2 py-1"
           style={{ left: `${hoverLeft}%` }}
         >
           <span className="text-muted-foreground block text-[10px]">{hoveredPoint.label}</span>

@@ -34,7 +34,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   get
 ) => ({
   openCodeUsageScope: 'yiru',
-  openCodeUsageRange: '30d',
+  openCodeUsageRange: 'all',
   openCodeUsageScanState: null,
   openCodeUsageSummary: null,
   openCodeUsageDaily: [],

@@ -8,6 +8,7 @@ import type {
 import { nextTokenValueMetric } from '@/components/contribution-heatmap/metric'
 import { AreaChart } from '@/components/dither-kit/area-chart'
 import { BarChart } from '@/components/dither-kit/bar-chart'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { translate } from '@/i18n/i18n'
 
 import { chartActivationLabel } from './chart-activation'
@@ -30,8 +31,8 @@ export function ContributionCharts({
 
   return (
     <div className="grid gap-3 lg:grid-cols-2">
-      <section className="border-border bg-card border p-4">
-        <div>
+      <Card size="compact">
+        <CardHeader>
           <div>
             <h2 className="text-foreground text-sm font-semibold">
               {translate('auto.components.home.charts.trendTitle', '30-day momentum')}
@@ -43,8 +44,8 @@ export function ContributionCharts({
               )}
             </p>
           </div>
-        </div>
-        <div className="mt-4">
+        </CardHeader>
+        <CardContent className="mt-4">
           <AreaChart
             ariaLabel={chartActivationLabel(
               translate(
@@ -57,11 +58,11 @@ export function ContributionCharts({
             formatValue={formatValue}
             onActivate={() => onMetricChange(nextTokenValueMetric(metric))}
           />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section className="border-border bg-card border p-4">
-        <div>
+      <Card size="compact">
+        <CardHeader>
           <div>
             <h2 className="text-foreground text-sm font-semibold">
               {translate('auto.components.home.charts.rhythmTitle', 'Weekly rhythm')}
@@ -73,8 +74,8 @@ export function ContributionCharts({
               )}
             </p>
           </div>
-        </div>
-        <div className="mt-4">
+        </CardHeader>
+        <CardContent className="mt-4">
           <BarChart
             ariaLabel={chartActivationLabel(
               translate(
@@ -87,8 +88,8 @@ export function ContributionCharts({
             formatValue={formatValue}
             onActivate={() => onMetricChange(nextTokenValueMetric(metric))}
           />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </div>
   )
 }

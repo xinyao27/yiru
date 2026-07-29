@@ -34,7 +34,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   get
 ) => ({
   codexUsageScope: 'yiru',
-  codexUsageRange: '30d',
+  codexUsageRange: 'all',
   codexUsageScanState: null,
   codexUsageSummary: null,
   codexUsageDaily: [],

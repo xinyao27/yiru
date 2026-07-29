@@ -6,6 +6,7 @@ import { join, basename } from 'node:path'
 import { createInterface } from 'node:readline'
 
 import type { Repo } from '../../../shared/types'
+import { priceClaudeUsage } from './pricing'
 import type {
   ClaudeUsageAttributedTurn,
   ClaudeUsageDailyAggregate,
@@ -42,6 +43,10 @@ type ClaudeUsageSourceRecord = {
       output_tokens?: number
       cache_read_input_tokens?: number
       cache_creation_input_tokens?: number
+      cache_creation?: {
+        ephemeral_5m_input_tokens?: number
+        ephemeral_1h_input_tokens?: number
+      }
     }
   }
 }
@@ -50,8 +55,13 @@ const CLAUDE_PROJECTS_DIR = join(homedir(), '.claude', 'projects')
 const CLAUDE_TRANSCRIPTS_DIR = join(homedir(), '.claude', 'transcripts')
 const FILE_SCAN_BATCH_SIZE = 4
 
-type ClaudeUsageParsedSourceTurn = ClaudeUsageParsedTurn & {
+type ClaudeUsageParsedSourceTurn = Omit<
+  ClaudeUsageParsedTurn,
+  'estimatedCostUsd' | 'unpricedTokens'
+> & {
   dedupeKey: string | null
+  cacheWrite5mTokens: number
+  cacheWrite1hTokens: number
 }
 
 type ClaudeUsageWorktreeEntry = [string, ClaudeUsageWorktreeRef]
@@ -199,6 +209,16 @@ async function getProcessedFileStat(
 }
 
 function stripClaudeSourceMetadata(turn: ClaudeUsageParsedSourceTurn): ClaudeUsageParsedTurn {
+  const price = priceClaudeUsage({
+    model: turn.model,
+    timestamp: turn.timestamp,
+    inputTokens: turn.inputTokens,
+    outputTokens: turn.outputTokens,
+    cacheReadTokens: turn.cacheReadTokens,
+    cacheWriteTokens: turn.cacheWriteTokens,
+    cacheWrite5mTokens: turn.cacheWrite5mTokens,
+    cacheWrite1hTokens: turn.cacheWrite1hTokens
+  })
   return {
     sessionId: turn.sessionId,
     timestamp: turn.timestamp,
@@ -208,7 +228,8 @@ function stripClaudeSourceMetadata(turn: ClaudeUsageParsedSourceTurn): ClaudeUsa
     inputTokens: turn.inputTokens,
     outputTokens: turn.outputTokens,
     cacheReadTokens: turn.cacheReadTokens,
-    cacheWriteTokens: turn.cacheWriteTokens
+    cacheWriteTokens: turn.cacheWriteTokens,
+    ...price
   }
 }
 
@@ -229,6 +250,8 @@ function dedupeClaudeUsageTurns(
         existing.outputTokens = Math.max(existing.outputTokens, turn.outputTokens)
         existing.cacheReadTokens = Math.max(existing.cacheReadTokens, turn.cacheReadTokens)
         existing.cacheWriteTokens = Math.max(existing.cacheWriteTokens, turn.cacheWriteTokens)
+        existing.cacheWrite5mTokens = Math.max(existing.cacheWrite5mTokens, turn.cacheWrite5mTokens)
+        existing.cacheWrite1hTokens = Math.max(existing.cacheWrite1hTokens, turn.cacheWrite1hTokens)
         continue
       }
     }
@@ -266,6 +289,8 @@ function parseClaudeUsageSourceRecord(
   const outputTokens = usage?.output_tokens ?? 0
   const cacheReadTokens = usage?.cache_read_input_tokens ?? 0
   const cacheWriteTokens = usage?.cache_creation_input_tokens ?? 0
+  const cacheWrite5mTokens = usage?.cache_creation?.ephemeral_5m_input_tokens ?? 0
+  const cacheWrite1hTokens = usage?.cache_creation?.ephemeral_1h_input_tokens ?? 0
 
   if (inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens <= 0) {
     return null
@@ -284,7 +309,9 @@ function parseClaudeUsageSourceRecord(
     inputTokens,
     outputTokens,
     cacheReadTokens,
-    cacheWriteTokens
+    cacheWriteTokens,
+    cacheWrite5mTokens,
+    cacheWrite1hTokens
   }
 }
 
@@ -490,7 +517,13 @@ function mergeClaudeDailyAggregates(
     existing.outputTokens += aggregate.outputTokens
     existing.cacheReadTokens += aggregate.cacheReadTokens
     existing.cacheWriteTokens += aggregate.cacheWriteTokens
+    existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, aggregate.estimatedCostUsd)
+    existing.unpricedTokens += aggregate.unpricedTokens
   }
+}
+
+function addKnownCost(left: number | null, right: number | null): number | null {
+  return left === null && right === null ? null : (left ?? 0) + (right ?? 0)
 }
 
 function finalizeClaudeSessions(
@@ -591,6 +624,11 @@ export function aggregateClaudeUsage(turns: ClaudeUsageAttributedTurn[]): {
       existingDaily.outputTokens += turn.outputTokens
       existingDaily.cacheReadTokens += turn.cacheReadTokens
       existingDaily.cacheWriteTokens += turn.cacheWriteTokens
+      existingDaily.estimatedCostUsd = addKnownCost(
+        existingDaily.estimatedCostUsd,
+        turn.estimatedCostUsd
+      )
+      existingDaily.unpricedTokens += turn.unpricedTokens
     } else {
       dailyByKey.set(dailyKey, {
         day: turn.day,
@@ -604,7 +642,9 @@ export function aggregateClaudeUsage(turns: ClaudeUsageAttributedTurn[]): {
         inputTokens: turn.inputTokens,
         outputTokens: turn.outputTokens,
         cacheReadTokens: turn.cacheReadTokens,
-        cacheWriteTokens: turn.cacheWriteTokens
+        cacheWriteTokens: turn.cacheWriteTokens,
+        estimatedCostUsd: turn.estimatedCostUsd,
+        unpricedTokens: turn.unpricedTokens
       })
     }
   }
