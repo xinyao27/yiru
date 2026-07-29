@@ -21,8 +21,8 @@ import {
   summarizeToolInput,
   summarizeToolRun
 } from './tool-summary'
-import { recognizeYiruAction, type YiruAction } from './yiru-action'
-import { NativeChatYiruActionCard } from './yiru-action-card'
+import { recognizeYiruAction, type YiruAction } from './yiru-action/action'
+import { ActionCard } from './yiru-action/card'
 
 const MAX_TOOL_RESULT_CHARS = 4000
 
@@ -187,7 +187,6 @@ type ToolRunItem =
   | { key: string; kind: 'action'; action: YiruAction }
   | { key: string; kind: 'generic'; blocks: NativeChatBlock[] }
 
-/** Replace paired yiru shell calls/results while preserving ordinary tool activity. */
 export function NativeChatToolRun({
   blocks,
   expandSignal
@@ -201,7 +200,7 @@ export function NativeChatToolRun({
     <div className="mt-2 space-y-1.5">
       {items.map((item) =>
         item.kind === 'action' ? (
-          <NativeChatYiruActionCard key={item.key} action={item.action} />
+          <ActionCard key={item.key} action={item.action} />
         ) : (
           <GenericToolRun key={item.key} blocks={item.blocks} expandSignal={expandSignal} />
         )

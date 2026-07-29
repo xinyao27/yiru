@@ -1,6 +1,12 @@
-import type { YiruAction, YiruActionObject, YiruActionVerb } from './yiru-action'
-import { describeYiruBrowserAction } from './yiru-browser-action'
-import { yiruFlag, yiruPositional, yiruResultString, type ParsedYiruResult } from './yiru-command'
+import type { YiruAction, YiruActionObject, YiruActionVerb } from './action'
+import { describeYiruBrowserAction } from './browser-action'
+import {
+  yiruFirstResultString,
+  yiruFlag,
+  yiruPositional,
+  yiruResultString,
+  type ParsedYiruResult
+} from './command'
 
 type ActionDescription = Pick<YiruAction, 'verb' | 'object' | 'target' | 'outcome'>
 
@@ -22,17 +28,6 @@ const COMPUTER_USE_COMMANDS = new Set([
   'set-value',
   'type-text'
 ])
-const ORCHESTRATION_USE_COMMANDS = new Set([
-  'ask',
-  'check',
-  'dispatch-show',
-  'gate-create',
-  'gate-list',
-  'gate-resolve',
-  'inbox',
-  'reset'
-])
-
 export function describeYiruAction(
   tokens: readonly string[],
   result: ParsedYiruResult
@@ -100,8 +95,8 @@ function describeTerminal(
   result: ParsedYiruResult
 ): ActionDescription {
   const handle =
-    firstResultString(
-      result,
+    yiruFirstResultString(
+      result.record,
       ['terminal', 'send', 'focus', 'rename', 'split', 'close'],
       'handle'
     ) ?? yiruFlag(tokens, 'terminal')
@@ -178,6 +173,12 @@ function describeOrchestration(
   if (operation === 'reply') {
     return action('replied', 'message', yiruFlag(tokens, 'id'))
   }
+  if (operation === 'ask') {
+    return action('sent-to', 'terminal', yiruFlag(tokens, 'to'))
+  }
+  if (operation === 'check' || operation === 'inbox') {
+    return action('inspected', 'messages', yiruFlag(tokens, 'terminal'))
+  }
   if (operation === 'task-create') {
     return action(
       'created',
@@ -201,33 +202,42 @@ function describeOrchestration(
       recipient ? { kind: 'to', value: recipient } : null
     )
   }
+  if (operation === 'dispatch-show') {
+    return action(
+      'inspected',
+      'task',
+      resultString(result, 'dispatch', 'task_id') ?? yiruFlag(tokens, 'task')
+    )
+  }
   if (operation === 'run') {
     return action('started', 'orchestration', resultString(result, 'runId'))
   }
   if (operation === 'run-stop') {
     return action('stopped', 'orchestration', resultString(result, 'runId'))
   }
-  return ORCHESTRATION_USE_COMMANDS.has(operation)
-    ? action('used', 'orchestration', operation)
-    : action(null, null, null)
+  if (operation === 'gate-create') {
+    const taskId = resultString(result, 'gate', 'task_id') ?? yiruFlag(tokens, 'task')
+    return action(
+      'created',
+      'gate',
+      resultString(result, 'gate', 'id'),
+      taskId ? { kind: 'to', value: taskId } : null
+    )
+  }
+  if (operation === 'gate-resolve') {
+    return action('updated', 'gate', resultString(result, 'gate', 'id') ?? yiruFlag(tokens, 'id'))
+  }
+  if (operation === 'gate-list') {
+    return action('inspected', 'gates', yiruFlag(tokens, 'task'))
+  }
+  if (operation === 'reset') {
+    return action('changed', 'orchestration', resultString(result, 'reset'))
+  }
+  return action(null, null, null)
 }
 
 function resultString(result: ParsedYiruResult, ...path: readonly string[]): string | null {
   return yiruResultString(result.record, 'result', ...path)
-}
-
-function firstResultString(
-  result: ParsedYiruResult,
-  parents: readonly string[],
-  field: string
-): string | null {
-  for (const parent of parents) {
-    const value = resultString(result, parent, field)
-    if (value) {
-      return value
-    }
-  }
-  return null
 }
 
 function action(

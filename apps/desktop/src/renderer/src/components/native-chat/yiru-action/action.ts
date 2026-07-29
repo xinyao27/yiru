@@ -3,14 +3,15 @@ import type {
   NativeChatToolResultBlock
 } from '@yiru/workbench-model/agent'
 
-import { describeYiruAction } from './yiru-action-description'
 import {
   parseYiruCommand,
   parseYiruResult,
+  yiruFirstResultString,
   yiruFlag,
   yiruResultString,
   type ParsedYiruResult
-} from './yiru-command'
+} from './command'
+import { describeYiruAction } from './description'
 
 export type YiruActionVerb =
   | 'captured'
@@ -38,7 +39,10 @@ export type YiruActionObject =
   | 'browser'
   | 'browser-tab'
   | 'computer'
+  | 'gate'
+  | 'gates'
   | 'message'
+  | 'messages'
   | 'orchestration'
   | 'task'
   | 'tasks'
@@ -59,6 +63,7 @@ export type YiruAction = {
     worktreeId: string | null
     tabId: string | null
     terminalHandle: string | null
+    browserPageId: string | null
   }
 }
 
@@ -76,7 +81,7 @@ export function recognizeYiruAction(
   const terminalHandle =
     yiruResultString(payload, 'result', 'agentTerminalHandle') ??
     yiruResultString(payload, 'result', 'startupTerminal', 'handle') ??
-    firstResultString(
+    yiruFirstResultString(
       payload,
       ['terminal', 'send', 'focus', 'rename', 'split', 'close'],
       'handle'
@@ -90,28 +95,21 @@ export function recognizeYiruAction(
     jumpTarget: {
       worktreeId:
         yiruResultString(payload, 'result', 'worktree', 'id') ??
-        firstResultString(payload, ['terminal', 'focus', 'tab'], 'worktreeId') ??
+        yiruFirstResultString(payload, ['terminal', 'focus', 'tab'], 'worktreeId') ??
         yiruResultString(payload, 'result', 'worktreeId'),
       tabId:
-        firstResultString(payload, ['terminal', 'focus', 'rename', 'split', 'close'], 'tabId') ??
-        yiruResultString(payload, 'result', 'tabId'),
-      terminalHandle
+        yiruFirstResultString(
+          payload,
+          ['terminal', 'focus', 'rename', 'split', 'close'],
+          'tabId'
+        ) ?? yiruResultString(payload, 'result', 'tabId'),
+      terminalHandle,
+      browserPageId:
+        yiruResultString(payload, 'result', 'browserPageId') ??
+        yiruResultString(payload, 'result', 'tab', 'browserPageId') ??
+        yiruFlag(tokens, 'page')
     }
   }
-}
-
-function firstResultString(
-  record: ParsedYiruResult['record'],
-  parents: readonly string[],
-  field: string
-): string | null {
-  for (const parent of parents) {
-    const value = yiruResultString(record, 'result', parent, field)
-    if (value) {
-      return value
-    }
-  }
-  return null
 }
 
 function commandLabelEnd(tokens: readonly string[]): number {

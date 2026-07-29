@@ -1,5 +1,5 @@
-import type { YiruAction } from './yiru-action'
-import { yiruFlag, yiruResultString, type ParsedYiruResult } from './yiru-command'
+import type { YiruAction } from './action'
+import { yiruFlag, yiruResultString, type ParsedYiruResult } from './command'
 
 type BrowserActionDescription = Pick<YiruAction, 'verb' | 'object' | 'target' | 'outcome'>
 

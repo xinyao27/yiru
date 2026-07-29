@@ -1,77 +1,8 @@
-import { ArrowSquareOut, TerminalWindow, WarningCircle } from '@phosphor-icons/react'
-
-import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { useAppStore } from '@/store'
 
-import {
-  focusRendererTerminalHandle,
-  findTerminalHandleTarget
-} from '../terminal-pane/terminal-handle-links'
-import { findTerminalTabWorktreeId } from './file-link'
-import type { YiruAction, YiruActionObject, YiruActionVerb } from './yiru-action'
+import type { YiruAction, YiruActionObject, YiruActionVerb } from './action'
 
-export function NativeChatYiruActionCard({ action }: { action: YiruAction }): React.JSX.Element {
-  const terminalTitle = useAppStore((state) => {
-    const handle = action.jumpTarget.terminalHandle
-    if (!handle) {
-      return null
-    }
-    const target = findTerminalHandleTarget(handle, state)
-    const tab = target
-      ? state.tabsByWorktree[target.worktreeId]?.find((candidate) => candidate.id === target.tabId)
-      : null
-    return tab?.customTitle?.trim() || tab?.title?.trim() || null
-  })
-  const target = terminalTitle ?? action.target
-  const summary = actionSummary(action, target)
-  const canJump = Object.values(action.jumpTarget).some(Boolean)
-  const content = (
-    <>
-      {action.status === 'error' ? (
-        <WarningCircle className="text-destructive mt-0.5 size-4 shrink-0" />
-      ) : (
-        <TerminalWindow className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-      )}
-      <span className="min-w-0 flex-1">
-        <span className="text-foreground block text-left text-xs font-medium">{summary}</span>
-        <code className="text-muted-foreground block truncate text-left font-mono text-[11px]">
-          {action.commandLabel}
-        </code>
-        {action.errorMessage ? (
-          <span className="text-destructive mt-0.5 block text-left text-[11px]">
-            {action.errorMessage}
-          </span>
-        ) : null}
-      </span>
-      {canJump ? <ArrowSquareOut className="text-muted-foreground size-3.5 shrink-0" /> : null}
-    </>
-  )
-
-  if (canJump) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        type="button"
-        onClick={() => jumpToAction(action)}
-        title={translate('components.native-chat.tool.yiru.openTarget', 'Open action target')}
-        className="h-auto w-full justify-start gap-2 whitespace-normal"
-      >
-        {content}
-      </Button>
-    )
-  }
-  return (
-    <div className="border-border bg-card flex w-full items-start gap-2 border px-3 py-2">
-      {content}
-    </div>
-  )
-}
-
-function actionSummary(action: YiruAction, target: string | null): string {
+export function yiruActionSummary(action: YiruAction, target: string | null): string {
   if (action.status === 'running') {
     return translate('components.native-chat.tool.yiru.running', 'Running {{value0}}', {
       value0: action.commandLabel
@@ -160,8 +91,14 @@ function actionObject(object: YiruActionObject): string {
       return translate('components.native-chat.tool.yiru.object.browserTab', 'browser tab')
     case 'computer':
       return translate('components.native-chat.tool.yiru.object.computer', 'computer')
+    case 'gate':
+      return translate('components.native-chat.tool.yiru.object.gate', 'gate')
+    case 'gates':
+      return translate('components.native-chat.tool.yiru.object.gates', 'gates')
     case 'message':
       return translate('components.native-chat.tool.yiru.object.message', 'message')
+    case 'messages':
+      return translate('components.native-chat.tool.yiru.object.messages', 'messages')
     case 'orchestration':
       return translate('components.native-chat.tool.yiru.object.orchestration', 'orchestration')
     case 'task':
@@ -188,24 +125,4 @@ function actionOutcome(outcome: NonNullable<YiruAction['outcome']>): string {
   return translate('components.native-chat.tool.yiru.outcome.to', 'to {{value0}}', {
     value0: outcome.value
   })
-}
-
-function jumpToAction(action: YiruAction): void {
-  const { terminalHandle, tabId } = action.jumpTarget
-  if (terminalHandle && focusRendererTerminalHandle(terminalHandle)) {
-    return
-  }
-  const state = useAppStore.getState()
-  const worktreeId =
-    action.jumpTarget.worktreeId ??
-    (tabId ? findTerminalTabWorktreeId(state.tabsByWorktree, tabId) : null)
-  if (!worktreeId || !activateAndRevealWorktree(worktreeId)) {
-    return
-  }
-  if (tabId) {
-    const nextState = useAppStore.getState()
-    nextState.setActiveTab(tabId)
-    nextState.setActiveTabType('terminal')
-    focusTerminalTabSurface(tabId)
-  }
 }

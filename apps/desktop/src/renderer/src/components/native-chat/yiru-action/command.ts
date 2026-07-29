@@ -102,6 +102,20 @@ export function yiruResultString(
   return typeof value === 'string' && value.trim() ? value.trim() : null
 }
 
+export function yiruFirstResultString(
+  record: YiruJsonRecord | null,
+  parents: readonly string[],
+  field: string
+): string | null {
+  for (const parent of parents) {
+    const value = yiruResultString(record, 'result', parent, field)
+    if (value) {
+      return value
+    }
+  }
+  return null
+}
+
 function shellCommandFromInput(input: unknown): string | null {
   if (typeof input === 'string') {
     const parsed = parseJson(input)
