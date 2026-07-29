@@ -25,7 +25,7 @@ export type CodexUsageSlice = {
   setCodexUsageEnabled: (enabled: boolean) => Promise<void>
   setCodexUsageScope: (scope: CodexUsageScope) => Promise<void>
   setCodexUsageRange: (range: CodexUsageRange) => Promise<void>
-  fetchCodexUsage: (opts?: { forceRefresh?: boolean }) => Promise<true | undefined>
+  fetchCodexUsage: (opts?: { forceRefresh?: boolean }) => Promise<void>
   enableCodexUsage: () => Promise<void>
   refreshCodexUsage: () => Promise<void>
 }
@@ -166,11 +166,9 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
         codexUsageProjectBreakdown: refreshedSnapshot.projectBreakdown,
         codexUsageRecentSessions: refreshedSnapshot.recentSessions
       })
-      return refreshedSnapshot.scanState.lastScanError === null ? true : undefined
     } catch (error) {
       set({ codexUsageSnapshotReady: false })
       console.error('Failed to fetch Codex usage:', error)
-      return undefined
     }
   },
 

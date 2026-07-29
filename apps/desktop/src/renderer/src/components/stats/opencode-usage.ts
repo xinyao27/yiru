@@ -25,7 +25,7 @@ export type OpenCodeUsageSlice = {
   setOpenCodeUsageEnabled: (enabled: boolean) => Promise<void>
   setOpenCodeUsageScope: (scope: OpenCodeUsageScope) => Promise<void>
   setOpenCodeUsageRange: (range: OpenCodeUsageRange) => Promise<void>
-  fetchOpenCodeUsage: (opts?: { forceRefresh?: boolean }) => Promise<true | undefined>
+  fetchOpenCodeUsage: (opts?: { forceRefresh?: boolean }) => Promise<void>
   enableOpenCodeUsage: () => Promise<void>
   refreshOpenCodeUsage: () => Promise<void>
 }
@@ -166,11 +166,9 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
         openCodeUsageProjectBreakdown: refreshedSnapshot.projectBreakdown,
         openCodeUsageRecentSessions: refreshedSnapshot.recentSessions
       })
-      return refreshedSnapshot.scanState.lastScanError === null ? true : undefined
     } catch (error) {
       set({ openCodeUsageSnapshotReady: false })
       console.error('Failed to fetch OpenCode usage:', error)
-      return undefined
     }
   },
 

@@ -25,7 +25,7 @@ export type ClaudeUsageSlice = {
   setClaudeUsageEnabled: (enabled: boolean) => Promise<void>
   setClaudeUsageScope: (scope: ClaudeUsageScope) => Promise<void>
   setClaudeUsageRange: (range: ClaudeUsageRange) => Promise<void>
-  fetchClaudeUsage: (opts?: { forceRefresh?: boolean }) => Promise<true | undefined>
+  fetchClaudeUsage: (opts?: { forceRefresh?: boolean }) => Promise<void>
   enableClaudeUsage: () => Promise<void>
   refreshClaudeUsage: () => Promise<void>
 }
@@ -169,11 +169,9 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
         claudeUsageProjectBreakdown: refreshedSnapshot.projectBreakdown,
         claudeUsageRecentSessions: refreshedSnapshot.recentSessions
       })
-      return refreshedSnapshot.scanState.lastScanError === null ? true : undefined
     } catch (error) {
       set({ claudeUsageSnapshotReady: false })
       console.error('Failed to fetch Claude usage:', error)
-      return undefined
     }
   },
 

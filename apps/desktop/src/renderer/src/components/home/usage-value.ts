@@ -150,7 +150,7 @@ async function prepareUsageSnapshots(): Promise<void> {
   await Promise.all([prepareClaudeUsage(), prepareCodexUsage(), prepareOpenCodeUsage()])
 }
 
-async function prepareClaudeUsage(): Promise<boolean> {
+async function prepareClaudeUsage(): Promise<void> {
   let state = useAppStore.getState()
   if (state.claudeUsageRange !== 'all') {
     await state.setClaudeUsageRange('all')
@@ -159,10 +159,10 @@ async function prepareClaudeUsage(): Promise<boolean> {
   if (state.claudeUsageScanState?.enabled === false) {
     await state.enableClaudeUsage()
   }
-  return (await useAppStore.getState().fetchClaudeUsage()) === true
+  await useAppStore.getState().fetchClaudeUsage()
 }
 
-async function prepareCodexUsage(): Promise<boolean> {
+async function prepareCodexUsage(): Promise<void> {
   let state = useAppStore.getState()
   if (state.codexUsageRange !== 'all') {
     await state.setCodexUsageRange('all')
@@ -171,10 +171,10 @@ async function prepareCodexUsage(): Promise<boolean> {
   if (state.codexUsageScanState?.enabled === false) {
     await state.enableCodexUsage()
   }
-  return (await useAppStore.getState().fetchCodexUsage()) === true
+  await useAppStore.getState().fetchCodexUsage()
 }
 
-async function prepareOpenCodeUsage(): Promise<boolean> {
+async function prepareOpenCodeUsage(): Promise<void> {
   let state = useAppStore.getState()
   if (state.openCodeUsageRange !== 'all') {
     await state.setOpenCodeUsageRange('all')
@@ -183,7 +183,7 @@ async function prepareOpenCodeUsage(): Promise<boolean> {
   if (state.openCodeUsageScanState?.enabled === false) {
     await state.enableOpenCodeUsage()
   }
-  return (await useAppStore.getState().fetchOpenCodeUsage()) === true
+  await useAppStore.getState().fetchOpenCodeUsage()
 }
 
 function mergeDailyUsage(points: DailyUsagePoint[]): DailyUsagePoint[] {
