@@ -1,4 +1,27 @@
-import type { AgentStatusState, AgentType } from '@yiru/workbench-model/agent'
+import type { AgentStatusState, AgentType, AiVaultAgent } from '@yiru/workbench-model/agent'
+
+export type RuntimeStatsDailyActivity = {
+  day: string
+  agentStarts: number
+  prsCreated: number
+}
+
+export type RuntimeStatsDailyTokens = {
+  day: string
+  tokens: number
+}
+
+export type RuntimeStatsSummary = {
+  totalAgentsSpawned: number
+  totalPRsCreated: number
+  totalAgentTimeMs: number
+  firstEventAt: number | null
+  // Why: optional fields preserve compatibility with older runtime hosts.
+  dailyActivity?: RuntimeStatsDailyActivity[]
+  dailyTokens?: RuntimeStatsDailyTokens[]
+  tokenDataAvailable?: boolean
+  tokenUnavailableAgents?: AiVaultAgent[]
+}
 
 export type TerminalColorOverrides = {
   foreground?: string

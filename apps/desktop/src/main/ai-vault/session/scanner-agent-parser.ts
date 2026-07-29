@@ -8,14 +8,14 @@ import { parseGeminiSessionFile } from './scanner-gemini-parsers'
 import { parseMessageGraphSessionFile, parseRovoSessionFile } from './scanner-graph-parsers'
 import { parseGrokSessionFile } from './scanner-grok-parser'
 import { parseKimiSessionFile } from './scanner-kimi-parser'
+import { parseOpenCodeSessionFile } from './scanner-opencode-parser'
 import { parseOpenCodeSqliteSession } from './scanner-opencode-sqlite'
 import { splitOpenCodeSqliteCandidate } from './scanner-opencode-sqlite-paths'
 import { parseClaudeSessionFile } from './scanner-primary-parsers'
 import {
   parseCopilotSessionFile,
   parseCursorSessionFile,
-  parseHermesSessionFile,
-  parseOpenCodeSessionFile
+  parseHermesSessionFile
 } from './scanner-secondary-parsers'
 import type { SessionFileCandidate } from './scanner-types'
 

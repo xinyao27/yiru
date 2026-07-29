@@ -528,6 +528,7 @@ import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../spee
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
+import { buildStatsSummary } from '../stats/summary'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
@@ -2213,8 +2214,8 @@ export class YiruRuntimeService {
     }
   }
 
-  getStatsSummary(): StatsSummary | null {
-    return this.stats?.getSummary() ?? null
+  async getStatsSummary(): Promise<StatsSummary | null> {
+    return this.stats ? buildStatsSummary(this.stats) : null
   }
 
   getMemorySnapshot(): Promise<MemorySnapshot> {

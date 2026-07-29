@@ -4,6 +4,7 @@
 // this, Resume and Account-usage cards flash empty for ~1s while the
 // WebSocket reconnects and the first responses come back.
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import type { RuntimeStatsSummary } from '@yiru/runtime-protocol/mobile-runtime-types'
 
 import type { AccountsSnapshot } from '../components/account-usage'
 
@@ -28,6 +29,7 @@ type HostWorktreeInfo = {
 export type HomeSnapshot = {
   worktreeInfo: Record<string, HostWorktreeInfo>
   accountsByHost: Record<string, AccountsSnapshot>
+  statsByHost?: Record<string, RuntimeStatsSummary>
   savedAt: number
 }
 

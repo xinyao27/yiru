@@ -4,6 +4,7 @@ import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { getWslHomeAsync, listWslDistrosAsync } from '../wsl'
 import { getConfiguredAiVaultAdditionalCodexSessionsDirs } from './session/root-configuration'
 import { scanAiVaultSessions } from './session/scanner'
+import type { AiVaultScanOptions } from './session/scanner-types'
 
 // Why: ONE module owns the scan cache so the desktop IPC handler AND the runtime
 // RPC method share a single cache instance — opening the desktop panel and the
@@ -23,13 +24,18 @@ type CachedAiVaultList = {
   expiresAt: number
 }
 
+type CachedAiVaultListArgs = AiVaultListArgs & Pick<AiVaultScanOptions, 'limitPerAgent'>
+
 let cachedList: CachedAiVaultList | null = null
 let inflightList: Promise<AiVaultListResult> | null = null
 let inflightKey: string | null = null
-export async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListResult> {
+export async function listAiVaultSessions(
+  args?: CachedAiVaultListArgs
+): Promise<AiVaultListResult> {
   // Scope paths change the result set, so they must be part of the cache key.
   const key = JSON.stringify({
     limit: args?.limit ?? 'default',
+    limitPerAgent: args?.limitPerAgent ?? 'default',
     scopePaths: args?.scopePaths ?? []
   })
   const now = Date.now()
@@ -47,6 +53,7 @@ export async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVau
   inflightList = (async () =>
     scanAiVaultSessions({
       limit: args?.limit,
+      limitPerAgent: args?.limitPerAgent,
       scopePaths: args?.scopePaths,
       additionalCodexSessionsDirs,
       wslHomeDirs: await getAiVaultWslHomeDirs(),

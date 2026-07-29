@@ -48,6 +48,8 @@ const buttonVariants = cva(
         // Why: multi-line list actions need content-driven height without bypassing Button chrome.
         'list-row': 'h-auto px-3 py-2',
         'picker-row': 'h-auto gap-2 px-2 py-1.5 text-left text-sm font-normal whitespace-normal',
+        'sidebar-row':
+          'h-auto w-full justify-start gap-2 px-2 py-1.5 text-left text-sm whitespace-normal',
         'popover-hint': 'h-auto gap-2 px-3 py-1.5 text-left',
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         // Why: status actions fill the footer while their content retains compact spacing.

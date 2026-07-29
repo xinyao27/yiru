@@ -2311,6 +2311,7 @@ export type ManualRepoOrderEntry = {
 
 /** The active top-level section shown in the main content area. */
 export type TopLevelView =
+  | 'home'
   | 'terminal'
   | 'settings'
   | 'activity'
@@ -2793,14 +2794,7 @@ export type SearchOptions = {
 
 // ─── Stats ──────────────────────────────────────────────────────────
 
-export type StatsSummary = {
-  totalAgentsSpawned: number
-  totalPRsCreated: number
-  totalAgentTimeMs: number
-  // For display formatting — sourced from aggregates, not the event log,
-  // so it survives event trimming.
-  firstEventAt: number | null // timestamp of first-ever event, for "tracking since..."
-}
+export type StatsSummary = RuntimeMobileTypes.RuntimeStatsSummary
 
 // ─── Memory dashboard ──────────────────────────────────────────────
 // Resource-metrics snapshot shared across main, preload, and renderer so

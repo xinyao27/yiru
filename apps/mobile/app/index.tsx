@@ -32,6 +32,12 @@ import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
 import { MobileHostCard } from '../src/components/host-card'
 import { YiruLogo } from '../src/components/yiru-logo'
+import { MobileContributionCard } from '../src/home/contribution-card'
+import {
+  aggregateHomeStats,
+  parseRuntimeStatsSummary,
+  type HomeStatsByHost
+} from '../src/home/stats-summary'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
@@ -56,13 +62,6 @@ function endpointLabel(endpoint: string): string {
   } catch {
     return endpoint
   }
-}
-
-type StatsSummary = {
-  totalAgentsSpawned: number
-  totalPRsCreated: number
-  totalAgentTimeMs: number
-  firstEventAt: number | null
 }
 
 type WorktreeSummary = {
@@ -117,7 +116,8 @@ function clientKey(client: RpcClient): number {
 
 function fetchStats(
   client: RpcClient,
-  setStats: (s: StatsSummary) => void,
+  hostId: string,
+  setStatsByHost: (updater: (previous: HomeStatsByHost) => HomeStatsByHost) => void,
   disposed: () => boolean
 ) {
   client
@@ -127,7 +127,14 @@ function fetchStats(
         return
       }
       if (response.ok) {
-        setStats(response.result as StatsSummary)
+        const summary = parseRuntimeStatsSummary(response.result)
+        if (!summary) {
+          return
+        }
+        setStatsByHost((previous) => ({
+          ...previous,
+          [hostId]: summary
+        }))
       }
     })
     .catch(() => {})
@@ -244,7 +251,7 @@ export default function HomeScreen() {
   const [hostStates, setHostStates] = useState<Record<string, ConnectionState>>({})
   const [hostAttempts, setHostAttempts] = useState<Record<string, number>>({})
   const [hostLastConnected, setHostLastConnected] = useState<Record<string, number | null>>({})
-  const [stats, setStats] = useState<StatsSummary | null>(null)
+  const [statsByHost, setStatsByHost] = useState<HomeStatsByHost>({})
   const [worktreeInfo, setWorktreeInfo] = useState<Record<string, HostWorktreeInfo>>({})
   const [accountsByHost, setAccountsByHost] = useState<Record<string, AccountsSnapshot>>({})
   const [lastVisited, setLastVisited] = useState<{ hostId: string; worktreeId: string } | null>(
@@ -298,6 +305,7 @@ export default function HomeScreen() {
       }
       setWorktreeInfo((prev) => (Object.keys(prev).length > 0 ? prev : snap.worktreeInfo))
       setAccountsByHost((prev) => (Object.keys(prev).length > 0 ? prev : snap.accountsByHost))
+      setStatsByHost((prev) => (Object.keys(prev).length > 0 ? prev : (snap.statsByHost ?? {})))
       for (const [hostId, info] of Object.entries(snap.worktreeInfo)) {
         const wt = info.lastActiveWorktree
         if (wt) {
@@ -312,19 +320,24 @@ export default function HomeScreen() {
     }
   }, [])
 
-  // Why: persist the merged snapshot whenever either piece updates so the
+  // Why: persist the merged snapshot whenever any home-page data updates so the
   // next cold-start has fresh seed data. The cache module debounces writes
   // internally so a flurry of streamed updates doesn't hammer disk.
   useEffect(() => {
-    if (Object.keys(worktreeInfo).length === 0 && Object.keys(accountsByHost).length === 0) {
+    if (
+      Object.keys(worktreeInfo).length === 0 &&
+      Object.keys(accountsByHost).length === 0 &&
+      Object.keys(statsByHost).length === 0
+    ) {
       return
     }
     saveHomeSnapshot({
       worktreeInfo,
       accountsByHost,
+      statsByHost,
       savedAt: Date.now()
     })
-  }, [worktreeInfo, accountsByHost])
+  }, [worktreeInfo, accountsByHost, statsByHost])
 
   useFocusEffect(
     useCallback(() => {
@@ -353,7 +366,7 @@ export default function HomeScreen() {
       })
       for (const entry of allClientsRef.current) {
         if (entry.client.getState() === 'connected') {
-          fetchStats(entry.client, setStats, () => stale)
+          fetchStats(entry.client, entry.hostId, setStatsByHost, () => stale)
           fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => stale)
           fetchAccountsSnapshot(entry.client, entry.hostId, setAccountsByHost, () => stale)
         }
@@ -368,6 +381,7 @@ export default function HomeScreen() {
     () => [...hosts].sort((a, b) => b.lastConnected - a.lastConnected),
     [hosts]
   )
+  const stats = useMemo(() => aggregateHomeStats(statsByHost), [statsByHost])
 
   // Why: mirror per-host connection state into hostStates so existing
   // render code (status dots, connecting indicators) keeps working.
@@ -468,7 +482,7 @@ export default function HomeScreen() {
           }
           if (!statsFetched) {
             statsFetched = true
-            fetchStats(entry.client, setStats, () => false)
+            fetchStats(entry.client, entry.hostId, setStatsByHost, () => false)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
           }
         } else {
@@ -662,6 +676,8 @@ export default function HomeScreen() {
               <View className={styles.hero}>
                 <Text className={styles.heroTitle}>Welcome back</Text>
               </View>
+
+              {stats ? <MobileContributionCard summary={stats} /> : null}
 
               {stats && (
                 <View className={styles.statsRow}>

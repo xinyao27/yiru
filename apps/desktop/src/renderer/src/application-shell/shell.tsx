@@ -341,6 +341,7 @@ function WindowControls(): React.JSX.Element {
 }
 
 const Landing = lazy(() => import('./landing-page'))
+const HomePage = lazy(() => import('../components/home/page'))
 const WorktreeCreationPanel = lazy(() => import('../components/worktree-creation/panel'))
 const AutomationsPage = lazy(() => import('../components/automations/page'))
 const ActivityPrototypePage = lazy(() => import('../components/activity/prototype-page'))
@@ -2580,6 +2581,7 @@ function App(): React.JSX.Element {
                               {activeView === 'settings' ? (
                                 <Settings sidebarAppearanceStyle={leftSidebarStyle} />
                               ) : null}
+                              {activeView === 'home' ? <HomePage /> : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
                               {activeView === 'activity' ? <ActivityPrototypePage /> : null}

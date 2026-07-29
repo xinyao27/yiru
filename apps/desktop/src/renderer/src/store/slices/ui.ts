@@ -428,6 +428,7 @@ function hydratedUIPartialMatchesState(state: AppState, hydrated: Partial<UISlic
 
 // Record keys are exhaustive over TopLevelView, so a new view can't be silently missed.
 const TOP_LEVEL_VIEW_LOOKUP: Record<TopLevelView, true> = {
+  home: true,
   terminal: true,
   settings: true,
   activity: true,
@@ -442,10 +443,9 @@ function sanitizeHydratedActiveView(
   value: PersistedUIState['activeView'],
   experimentalActivityEnabled: boolean
 ): TopLevelView {
-  // Why: older data (pre-activeView) or a view a different build doesn't have
-  // falls back to terminal rather than rendering nothing.
+  // Why: older or invalid navigation state should land on the durable overview.
   if (typeof value !== 'string' || !KNOWN_TOP_LEVEL_VIEWS.has(value)) {
-    return 'terminal'
+    return 'home'
   }
   // Why: activity is hidden when its setting is off, so restoring it lands on a
   // hidden page (same guard as closeSettingsPage). mobile/automations stay
@@ -489,6 +489,7 @@ export type UISlice = {
   unacknowledgeAgents: (paneKeys: string[]) => void
   activeView: TopLevelView
   previousViewBeforeSettings:
+    | 'home'
     | 'terminal'
     | 'activity'
     | 'automations'
@@ -496,6 +497,7 @@ export type UISlice = {
     | 'skills'
     | 'mobile'
   previousViewBeforeActivity:
+    | 'home'
     | 'terminal'
     | 'settings'
     | 'automations'
@@ -503,6 +505,7 @@ export type UISlice = {
     | 'skills'
     | 'mobile'
   previousViewBeforeAutomations:
+    | 'home'
     | 'terminal'
     | 'settings'
     | 'activity'
@@ -510,6 +513,7 @@ export type UISlice = {
     | 'skills'
     | 'mobile'
   previousViewBeforeSpace:
+    | 'home'
     | 'terminal'
     | 'settings'
     | 'activity'
@@ -517,6 +521,7 @@ export type UISlice = {
     | 'skills'
     | 'mobile'
   previousViewBeforeSkills:
+    | 'home'
     | 'terminal'
     | 'settings'
     | 'activity'
@@ -524,6 +529,7 @@ export type UISlice = {
     | 'space'
     | 'mobile'
   previousViewBeforeMobile:
+    | 'home'
     | 'terminal'
     | 'settings'
     | 'activity'
@@ -531,6 +537,7 @@ export type UISlice = {
     | 'space'
     | 'skills'
   setActiveView: (view: UISlice['activeView']) => void
+  openHomePage: () => void
   newWorkspaceDraft: {
     repoId: string | null
     // Why: project-first workspace creation resolves through these when present,
@@ -1065,7 +1072,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       return next ? { acknowledgedAgentsByPaneKey: next } : s
     }),
 
-  activeView: 'terminal',
+  activeView: 'home',
   previousViewBeforeSettings: 'terminal',
   previousViewBeforeActivity: 'terminal',
   previousViewBeforeAutomations: 'terminal',
@@ -1073,6 +1080,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
   previousViewBeforeSkills: 'terminal',
   previousViewBeforeMobile: 'terminal',
   setActiveView: (view) => set({ activeView: view }),
+  openHomePage: () => set({ activeView: 'home' }),
   openActivityPage: () => {
     if (get().settings?.experimentalActivity !== true) {
       return

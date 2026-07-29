@@ -24,7 +24,7 @@ import {
 } from './usage-overview-model'
 import { DailyIntensityGrid, ProviderUsageRow, TokenMixBar } from './usage-overview-sections'
 
-const RECENT_DAY_COUNT = 42
+const RECENT_DAY_COUNT = 371
 
 function formatPercent(value: number | null): string {
   if (value === null) {

@@ -4,9 +4,10 @@ import { join, dirname } from 'node:path'
 import { app } from 'electron'
 
 import type { StatsSummary } from '../../shared/types'
-import type { StatsEvent, StatsAggregates, StatsFile } from './types'
+import { addEventToDailyActivity, buildDailyActivity } from './daily-activity'
+import type { StatsEvent, StatsAggregates, StatsDailyActivity, StatsFile } from './types'
 
-const STATS_SCHEMA_VERSION = 1
+const STATS_SCHEMA_VERSION = 2
 const MAX_EVENTS = 10_000
 // Why: countedPRs is a deduplication registry that grows with every PR created
 // through Yiru. Without a cap, a heavily-used instance accumulates thousands of
@@ -48,13 +49,15 @@ function getDefaultStatsFile(): StatsFile {
   return {
     schemaVersion: STATS_SCHEMA_VERSION,
     events: [],
-    aggregates: getDefaultAggregates()
+    aggregates: getDefaultAggregates(),
+    dailyActivity: []
   }
 }
 
 export class StatsCollector {
   private events: StatsEvent[]
   private aggregates: StatsAggregates
+  private dailyActivity: StatsDailyActivity[]
   private liveAgents = new Map<string, number>() // ptyId → startTimestamp
   private writeTimer: ReturnType<typeof setTimeout> | null = null
   // Why: star-nag lives in its own service but needs to observe the running
@@ -66,6 +69,7 @@ export class StatsCollector {
     const data = this.load()
     this.events = data.events
     this.aggregates = data.aggregates
+    this.dailyActivity = data.dailyActivity
   }
 
   onAgentStarted(listener: (totalAgentsSpawned: number) => void): () => void {
@@ -84,6 +88,7 @@ export class StatsCollector {
   record(event: StatsEvent): void {
     this.events.push(event)
     this.updateAggregates(event)
+    addEventToDailyActivity(this.dailyActivity, event)
     this.scheduleSave()
   }
 
@@ -128,7 +133,8 @@ export class StatsCollector {
       totalAgentsSpawned: this.aggregates.totalAgentsSpawned,
       totalPRsCreated: this.aggregates.totalPRsCreated,
       totalAgentTimeMs: this.aggregates.totalAgentTimeMs,
-      firstEventAt: this.aggregates.firstEventAt
+      firstEventAt: this.aggregates.firstEventAt,
+      dailyActivity: this.dailyActivity.map((entry) => ({ ...entry }))
     }
   }
 
@@ -163,7 +169,7 @@ export class StatsCollector {
         const raw = readFileSync(statsFile, 'utf-8')
         const parsed = JSON.parse(raw) as StatsFile
         // Merge with defaults for forward compatibility
-        return {
+        const loaded = {
           ...getDefaultStatsFile(),
           ...parsed,
           aggregates: {
@@ -171,6 +177,11 @@ export class StatsCollector {
             ...parsed.aggregates
           }
         }
+        if ((parsed.schemaVersion ?? 0) < STATS_SCHEMA_VERSION) {
+          loaded.dailyActivity = buildDailyActivity(loaded.events)
+          loaded.schemaVersion = STATS_SCHEMA_VERSION
+        }
+        return loaded
       }
     } catch (err) {
       // Why "start fresh" instead of crashing: lifetime aggregates are lost
@@ -258,7 +269,8 @@ export class StatsCollector {
     const data: StatsFile = {
       schemaVersion: STATS_SCHEMA_VERSION,
       events: this.events,
-      aggregates: this.aggregates
+      aggregates: this.aggregates,
+      dailyActivity: this.dailyActivity
     }
 
     // Why unique temp file: same race-safe pattern as persistence.ts:120 —

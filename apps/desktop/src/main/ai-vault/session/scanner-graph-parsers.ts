@@ -10,6 +10,7 @@ import {
   accumulatorFoldResumeState,
   addPreviewContent,
   addPreviewMessage,
+  addSessionTokens,
   createAccumulator,
   finalizeSession,
   sessionIdFromFileName,
@@ -225,7 +226,7 @@ function consumeMessageGraphRecordLine(accumulator: SessionAccumulator, line: st
       accumulator.title ??= extractMessageText(message)
     } else {
       accumulator.model = extractString(message?.model) ?? accumulator.model
-      accumulator.totalTokens += tokenTotal(message?.usage)
+      addSessionTokens(accumulator, tokenTotal(message?.usage), record.timestamp)
     }
     addPreviewContent(accumulator, role, message?.content, record.timestamp)
   }

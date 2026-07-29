@@ -196,6 +196,7 @@ import type {
   FloatingTerminalCwdRequest,
   MarkdownDocument,
   SearchResult,
+  StatsSummary,
   TuiAgent,
   UpdateStatus,
   WorktreeBaseStatusEvent,
@@ -3533,13 +3534,8 @@ const api = {
   } satisfies PreloadApi['ui'],
 
   stats: {
-    getSummary: (): Promise<{
-      totalAgentsSpawned: number
-      totalPRsCreated: number
-      totalAgentTimeMs: number
-      firstEventAt: number | null
-    }> => ipcRenderer.invoke('stats:summary')
-  },
+    getSummary: (): Promise<StatsSummary> => ipcRenderer.invoke('stats:summary')
+  } satisfies PreloadApi['stats'],
 
   memory: {
     getSnapshot: (): Promise<MemorySnapshot> => ipcRenderer.invoke('memory:getSnapshot')

@@ -87,6 +87,11 @@ export type AiVaultSessionSubagentInfo = {
   status: AiVaultSubagentRunStatus | null
 }
 
+export type AiVaultSessionDayTokens = {
+  day: string
+  tokens: number
+}
+
 export type AiVaultSession = {
   id: string
   executionHostId: ExecutionHostId
@@ -104,6 +109,8 @@ export type AiVaultSession = {
   modifiedAt: string
   messageCount: number
   totalTokens: number
+  // Why: attributing totalTokens to updatedAt would collapse multi-day sessions into one cell.
+  tokensByDay?: AiVaultSessionDayTokens[]
   previewMessages: AiVaultSessionPreviewMessage[]
   /** Latest provider-authenticated user prompt; absent when the transcript has no trustworthy signal. */
   lastUserPrompt?: string | null
