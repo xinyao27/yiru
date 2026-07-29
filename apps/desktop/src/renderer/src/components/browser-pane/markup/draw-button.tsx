@@ -61,7 +61,7 @@ export function MarkupDrawButton({
   const button = (
     <Button
       size="icon"
-      variant={active ? 'default' : 'outline'}
+      variant="ghost"
       className={cn(
         className ?? 'h-8 w-8',
         active && 'bg-foreground text-background hover:bg-foreground'

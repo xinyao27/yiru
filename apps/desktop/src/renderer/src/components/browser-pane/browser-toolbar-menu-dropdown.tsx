@@ -74,14 +74,14 @@ export function BrowserToolbarMenuDropdown({
         render={
           <Button
             size="icon"
-            variant="outline"
+            variant="ghost"
             className="h-8 w-8"
             title={translate(
               'auto.components.browser.pane.BrowserToolbarMenu.7b838540c7',
               'Browser menu'
             )}
           >
-            <Ellipsis className="size-4" />
+            <Ellipsis weight="regular" className="size-4" />
           </Button>
         }
       />
