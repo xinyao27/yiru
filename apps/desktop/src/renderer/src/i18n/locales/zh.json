@@ -12063,6 +12063,7 @@
         "yiru": {
           "running": "正在运行 {{value0}}",
           "failed": "{{value0}} 失败",
+          "completedUnknown": "已执行 {{value0}}，结果未关联",
           "summary": "{{value0}}{{value1}}",
           "summaryTarget": "{{value0}}{{value1}} {{value2}}",
           "summaryOutcome": "{{value0}}{{value1}} {{value2}}，{{value3}}",

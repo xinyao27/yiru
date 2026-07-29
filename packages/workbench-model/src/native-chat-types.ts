@@ -40,6 +40,8 @@ export type NativeChatToolCallBlock = {
   type: 'tool-call'
   name: string
   input: unknown
+  // Why: legacy provider transcripts omit tool identities.
+  callId?: string
 }
 
 /** The result returned to the agent for a prior tool call. */
@@ -47,6 +49,9 @@ export type NativeChatToolResultBlock = {
   type: 'tool-result'
   output: string
   isError?: boolean
+  // Why: legacy provider transcripts omit tool identities.
+  callId?: string
+  outputSegments?: string[]
 }
 
 /** A reference to an image, by local path or remote URL. Exactly the field

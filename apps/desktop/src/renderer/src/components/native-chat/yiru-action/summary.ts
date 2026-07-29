@@ -13,6 +13,13 @@ export function actionSummary(action: YiruAction, target: string | null): string
       value0: action.commandLabel
     })
   }
+  if (action.status === 'unknown') {
+    return translate(
+      'components.native-chat.tool.yiru.completedUnknown',
+      'Finished {{value0}}; result unavailable',
+      { value0: action.commandLabel }
+    )
+  }
   if (!action.verb || !action.object) {
     return action.commandLabel
   }

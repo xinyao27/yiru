@@ -4,22 +4,66 @@ export type JsonRecord = Record<string, unknown>
 
 export type ParsedResult = {
   record: JsonRecord | null
-  status: 'running' | 'success' | 'error'
+  status: 'running' | 'success' | 'error' | 'unknown'
   errorMessage: string | null
 }
 
-export function parseResult(result: NativeChatToolResultBlock | undefined): ParsedResult {
-  if (!result) {
-    return { record: null, status: 'running', errorMessage: null }
+export function parseResults(
+  result: NativeChatToolResultBlock | undefined,
+  resultIndexes: readonly (number | null)[]
+): ParsedResult[] {
+  if (resultIndexes.length === 0) {
+    return []
   }
-  const record = findJsonRecord(result.output)
+  if (!result) {
+    return resultIndexes.map(() => ({
+      record: null,
+      status: 'running',
+      errorMessage: null
+    }))
+  }
+  const records = findJsonRecords(result.output)
+  return resultIndexes.map((resultIndex) => {
+    const output = resultIndex === null ? null : result.outputSegments?.[resultIndex]
+    const record = result.outputSegments
+      ? output
+        ? (findJsonRecords(output)[0] ?? null)
+        : null
+      : (records[resultIndex ?? -1] ?? null)
+    const hasLinkedResult =
+      resultIndex !== null && (result.outputSegments === undefined || output !== undefined)
+    return parsedResult(
+      result,
+      record,
+      resultIndexes.length === 1,
+      output ?? result.output,
+      hasLinkedResult
+    )
+  })
+}
+
+function parsedResult(
+  result: NativeChatToolResultBlock,
+  record: JsonRecord | null,
+  useGlobalError: boolean,
+  output: string,
+  hasLinkedResult: boolean
+): ParsedResult {
   const errorRecord = isRecord(record?.error) ? record.error : null
-  const isError = result.isError === true || record?.ok === false
+  const isError =
+    (useGlobalError && result.isError === true) ||
+    record?.ok === false ||
+    (typeof record?.exit_code === 'number' && record.exit_code !== 0)
   return {
     record,
-    status: isError ? 'error' : 'success',
+    status: isError
+      ? 'error'
+      : !hasLinkedResult || (result.outputSegments !== undefined && record === null)
+        ? 'unknown'
+        : 'success',
     errorMessage: isError
-      ? (readString(errorRecord, 'message') ?? firstUsefulOutputLine(result.output))
+      ? (readString(errorRecord, 'message') ??
+        firstUsefulOutputLine(readString(record, 'output') ?? output))
       : null
   }
 }
@@ -56,41 +100,64 @@ export function readPayloadString(result: ParsedResult, ...path: readonly string
   return readResultString(result.record, 'result', ...path)
 }
 
-function findJsonRecord(output: string): JsonRecord | null {
+function findJsonRecords(output: string): JsonRecord[] {
   const direct = parseJson(output.trim())
   if (isRecord(direct)) {
-    return direct
+    return recordsFromEnvelope(direct)
   }
-  for (let start = output.indexOf('{'); start !== -1; start = output.indexOf('{', start + 1)) {
-    let depth = 0
-    let inString = false
-    let escaping = false
-    for (let index = start; index < output.length; index += 1) {
-      const character = output[index]!
-      if (inString) {
-        if (escaping) {
-          escaping = false
-        } else if (character === '\\') {
-          escaping = true
-        } else if (character === '"') {
-          inString = false
-        }
-        continue
+  const records: JsonRecord[] = []
+  let cursor = 0
+  while (cursor < output.length) {
+    const start = output.indexOf('{', cursor)
+    if (start === -1) {
+      break
+    }
+    const candidate = jsonRecordAt(output, start)
+    if (!candidate) {
+      cursor = start + 1
+      continue
+    }
+    records.push(...recordsFromEnvelope(candidate.record))
+    cursor = candidate.end + 1
+  }
+  return records
+}
+
+function jsonRecordAt(output: string, start: number): { record: JsonRecord; end: number } | null {
+  let depth = 0
+  let inString = false
+  let escaping = false
+  for (let index = start; index < output.length; index += 1) {
+    const character = output[index]!
+    if (inString) {
+      if (escaping) {
+        escaping = false
+      } else if (character === '\\') {
+        escaping = true
+      } else if (character === '"') {
+        inString = false
       }
-      if (character === '"') {
-        inString = true
-      } else if (character === '{') {
-        depth += 1
-      } else if (character === '}' && --depth === 0) {
-        const candidate = parseJson(output.slice(start, index + 1))
-        if (isRecord(candidate)) {
-          return candidate
-        }
-        break
-      }
+      continue
+    }
+    if (character === '"') {
+      inString = true
+    } else if (character === '{') {
+      depth += 1
+    } else if (character === '}' && --depth === 0) {
+      const record = parseJson(output.slice(start, index + 1))
+      return isRecord(record) ? { record, end: index } : null
     }
   }
   return null
+}
+
+function recordsFromEnvelope(record: JsonRecord): JsonRecord[] {
+  const nestedOutput = readString(record, 'output')
+  if (typeof record.exit_code !== 'number' || !nestedOutput) {
+    return [record]
+  }
+  const nestedRecords = findJsonRecords(nestedOutput)
+  return nestedRecords.length > 0 ? nestedRecords : [record]
 }
 
 function parseJson(value: string): unknown | null {

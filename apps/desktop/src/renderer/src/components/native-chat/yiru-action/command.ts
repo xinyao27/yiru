@@ -1,9 +1,15 @@
 import type { NativeChatToolCallBlock } from '@yiru/workbench-model/agent'
 
-import { parseCommandInputJson, readEmbeddedExecCommands, readShellCommand } from './command-input'
+import {
+  parseCommandInputJson,
+  readEmbeddedExecCommands,
+  readShellCommand,
+  type IndexedShellCommand
+} from './command-input'
 
 export type ParsedCommand = {
   tokens: string[]
+  resultIndex: number | null
 }
 
 const SHELL_TOOL_NAMES = new Set([
@@ -27,11 +33,18 @@ export function parseCommands(call: NativeChatToolCallBlock): ParsedCommand[] {
   }
   const parsed: ParsedCommand[] = []
   for (const command of commands) {
-    for (const tokens of tokenizeShellSegments(command)) {
+    const commandTokens: string[][] = []
+    for (const tokens of tokenizeShellSegments(command.command)) {
       const invocationStart = findInvocationStart(tokens)
       if (invocationStart !== null) {
-        parsed.push({ tokens: tokens.slice(invocationStart) })
+        commandTokens.push(tokens.slice(invocationStart))
       }
+    }
+    for (const tokens of commandTokens) {
+      parsed.push({
+        tokens,
+        resultIndex: commandTokens.length === 1 ? command.resultIndex : null
+      })
     }
   }
   return parsed
@@ -69,18 +82,18 @@ export function readPositional(tokens: readonly string[], startIndex: number): s
   return null
 }
 
-function shellCommandsFromCall(call: NativeChatToolCallBlock): string[] {
+function shellCommandsFromCall(call: NativeChatToolCallBlock): IndexedShellCommand[] {
   const toolName = call.name.replaceAll(/[^a-z0-9]/gi, '').toLowerCase()
   if (SHELL_TOOL_NAMES.has(toolName)) {
     const command = readShellCommand(call.input)
-    return command ? [command] : []
+    return command ? [{ command, resultIndex: 0 }] : []
   }
   if (toolName !== 'exec') {
     return []
   }
   const directCommand = typeof call.input === 'string' ? null : readShellCommand(call.input)
   if (directCommand) {
-    return [directCommand]
+    return [{ command: directCommand, resultIndex: 0 }]
   }
   if (typeof call.input !== 'string') {
     return []
@@ -88,7 +101,7 @@ function shellCommandsFromCall(call: NativeChatToolCallBlock): string[] {
   const parsedInput = parseCommandInputJson(call.input)
   if (parsedInput !== null) {
     const command = readShellCommand(parsedInput)
-    return command ? [command] : []
+    return command ? [{ command, resultIndex: 0 }] : []
   }
   return readEmbeddedExecCommands(call.input)
 }

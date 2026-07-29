@@ -12086,6 +12086,7 @@
         "yiru": {
           "running": "Running {{value0}}",
           "failed": "{{value0}} failed",
+          "completedUnknown": "Finished {{value0}}; result unavailable",
           "summary": "{{value0}} {{value1}}",
           "summaryTarget": "{{value0}} {{value1}} {{value2}}",
           "summaryOutcome": "{{value0}} {{value1}} {{value2}}, {{value3}}",

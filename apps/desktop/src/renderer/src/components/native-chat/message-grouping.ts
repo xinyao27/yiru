@@ -9,6 +9,7 @@
 import {
   isToolCallBlock,
   isToolResultBlock,
+  pairToolBlocks,
   type NativeChatBlock,
   type NativeChatMessage,
   type NativeChatToolCallBlock,
@@ -51,34 +52,30 @@ export function orderNativeChatMessages(messages: NativeChatMessage[]): NativeCh
   return [...messages].sort(compareMessages)
 }
 
-/** Collect every tool-result across the whole conversation in document order so
- *  a call can find its answer even when the result lands in a later message (the
- *  common transcript shape: assistant emits the call, a following tool message
- *  carries the result). Results carry no originating name in our model, so they
- *  are handed out FIFO to calls. */
-function collectToolResults(messages: NativeChatMessage[]): NativeChatToolResultBlock[] {
-  const results: NativeChatToolResultBlock[] = []
+function pairResultsByCall(
+  messages: NativeChatMessage[]
+): Map<NativeChatToolCallBlock, NativeChatToolResultBlock | null> {
+  const toolBlocks: NativeChatBlock[] = []
   for (const message of messages) {
     for (const block of message.blocks) {
-      if (isToolResultBlock(block)) {
-        results.push(block)
+      if (isToolCallBlock(block) || isToolResultBlock(block)) {
+        toolBlocks.push(block)
       }
     }
   }
-  return results
+  const resultsByCall = new Map<NativeChatToolCallBlock, NativeChatToolResultBlock | null>()
+  for (const pair of pairToolBlocks(toolBlocks)) {
+    if (pair.call) {
+      resultsByCall.set(pair.call, pair.result ?? null)
+    }
+  }
+  return resultsByCall
 }
 
-/**
- * Flatten ordered messages into render items, pairing tool calls with results.
- * Result pairing is FIFO across the conversation: tool results in our model
- * carry no back-reference to a call id, so we match the Nth call to the Nth
- * result in document order — the order both providers emit them. A call with no
- * remaining result renders as in-flight (`result: null`).
- */
+// Why: older transcripts without call IDs retain FIFO result pairing.
 export function buildNativeChatRenderItems(messages: NativeChatMessage[]): NativeChatRenderItem[] {
   const ordered = orderNativeChatMessages(messages)
-  const resultQueue = collectToolResults(ordered)
-  let resultCursor = 0
+  const resultsByCall = pairResultsByCall(ordered)
 
   const items: NativeChatRenderItem[] = []
   for (const message of ordered) {
@@ -87,10 +84,7 @@ export function buildNativeChatRenderItems(messages: NativeChatMessage[]): Nativ
 
     for (const block of message.blocks) {
       if (isToolCallBlock(block)) {
-        const result = resultQueue[resultCursor] ?? null
-        if (result) {
-          resultCursor += 1
-        }
+        const result = resultsByCall.get(block) ?? null
         steps.push({ call: block, result })
       } else if (isToolResultBlock(block)) {
         // Results are emitted as steps from the call side; skip standalone ones.

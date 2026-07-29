@@ -5,7 +5,7 @@ import type {
 
 import { parseCommands, readFlag } from './command'
 import { describeAction } from './description'
-import { parseResult, readFirstResultString, readResultString, type ParsedResult } from './result'
+import { parseResults, readFirstResultString, readResultString, type ParsedResult } from './result'
 
 export type ActionVerb =
   | 'captured'
@@ -66,11 +66,11 @@ export function recognizeYiruActions(
   result: NativeChatToolResultBlock | undefined
 ): YiruAction[] {
   const commands = parseCommands(call)
-  const parsedResult = parseResult(result)
-  // Why: one shell result cannot reliably identify which chained invocation
-  // produced its JSON, so multi-card metadata comes only from each segment.
-  const actionResult = commands.length === 1 ? parsedResult : { ...parsedResult, record: null }
-  return commands.map((command) => buildAction(command.tokens, actionResult))
+  const results = parseResults(
+    result,
+    commands.map((command) => command.resultIndex)
+  )
+  return commands.map((command, index) => buildAction(command.tokens, results[index]!))
 }
 
 function buildAction(tokens: readonly string[], parsedResult: ParsedResult): YiruAction {
