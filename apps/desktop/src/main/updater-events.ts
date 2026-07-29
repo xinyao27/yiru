@@ -14,7 +14,7 @@ import {
   resetMacInstallState
 } from './updater-mac-install'
 
-const AUTO_UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000
+const AUTO_UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
 const AUTO_UPDATE_RETRY_INTERVAL_MS = 60 * 60 * 1000
 
 type UpdaterHandlerContext = {
@@ -225,7 +225,7 @@ export function registerAutoUpdaterHandlers({
     if (missingManifestFallback || publishingWindowLastGoodCheck) {
       // Why: the primary/newest release manifest/assets were missing, so a
       // last-good not-available result is still a transient release-transition
-      // outcome and must not suppress the next retry for 24 hours.
+      // outcome and must not suppress the next regular check interval.
       scheduleAutomaticUpdateCheck(AUTO_UPDATE_RETRY_INTERVAL_MS)
     } else {
       recordCompletedUpdateCheck()
