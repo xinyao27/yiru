@@ -26,6 +26,7 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
+import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
@@ -585,18 +586,33 @@ export default function HomeScreen() {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <MobileGlassIconButton
-                    accessibilityLabel="Settings"
-                    icon="settings"
-                    onPress={() => router.push('/settings')}
-                  />
+                  <MobileGlassGroup className="flex-row gap-2" spacing={8}>
+                    <MobileGlassIconButton
+                      accessibilityLabel={translate(
+                        'mobile.home.openInsights',
+                        'Open activity insights'
+                      )}
+                      icon="insights"
+                      onPress={() => router.push('/activity-insights')}
+                    />
+                    <MobileGlassIconButton
+                      accessibilityLabel={translate('mobile.settings.title', 'Settings')}
+                      icon="settings"
+                      onPress={() => router.push('/settings')}
+                    />
+                  </MobileGlassGroup>
                 )
         }}
       />
       {Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
-            accessibilityLabel="Settings"
+            accessibilityLabel={translate('mobile.home.openInsights', 'Open activity insights')}
+            icon="chart.bar.xaxis"
+            onPress={() => router.push('/activity-insights')}
+          />
+          <Stack.Toolbar.Button
+            accessibilityLabel={translate('mobile.settings.title', 'Settings')}
             icon="gearshape"
             onPress={() => router.push('/settings')}
           />
@@ -663,13 +679,7 @@ export default function HomeScreen() {
               : undefined
           }
           ListHeaderComponent={
-            <View className="gap-6 pt-2 pb-2">
-              <MobileGlassTextButton
-                isFullWidth
-                label={translate('mobile.home.openInsights', 'View activity insights')}
-                onPress={() => router.push('/activity-insights')}
-              />
-
+            <View className="pt-2 pb-2">
               <SectionHeading>Desktops</SectionHeading>
             </View>
           }

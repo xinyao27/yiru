@@ -13,6 +13,7 @@ function systemImageForIcon(
   | 'arrow.down'
   | 'arrow.up'
   | 'checkmark.circle'
+  | 'chart.bar.xaxis'
   | 'ellipsis'
   | 'gearshape'
   | 'play'
@@ -40,6 +41,8 @@ function systemImageForIcon(
       return 'arrow.up.right.square'
     case 'edit':
       return 'pencil'
+    case 'insights':
+      return 'chart.bar.xaxis'
     case 'more':
       return 'ellipsis'
     case 'play':

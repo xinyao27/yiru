@@ -5,6 +5,7 @@ import {
   ArrowUp,
   ArrowSquareOut,
   CaretLeft,
+  ChartBar,
   Check,
   Copy,
   Pencil,
@@ -42,6 +43,8 @@ function iconForName(name: MobileGlassIconName): Icon {
       return ArrowSquareOut
     case 'edit':
       return Pencil
+    case 'insights':
+      return ChartBar
     case 'more':
       return DotsThree
     case 'play':
