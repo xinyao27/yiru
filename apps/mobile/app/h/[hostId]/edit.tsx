@@ -10,7 +10,6 @@ import {
   ScrollView
 } from 'react-native'
 
-import { MobileGlassPressable } from '../../../src/components/glass/pressable'
 import { MobileGlassSurface } from '../../../src/components/glass/surface'
 import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { useForceReconnect, usePrimeHosts } from '../../../src/transport/client-context'
@@ -155,16 +154,13 @@ export default function EditHostScreen() {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <MobileGlassPressable
+                  <MobileGlassTextButton
                     accessibilityLabel="Save host"
-                    className="rounded-full"
-                    contentClassName="min-h-9 justify-center rounded-full px-3"
                     disabled={!canSave}
-                    hitSlop={4}
+                    isProminent
+                    label="Save"
                     onPress={() => void handleSave()}
-                  >
-                    <Text className="text-primary text-sm">Save</Text>
-                  </MobileGlassPressable>
+                  />
                 )
         }}
       />

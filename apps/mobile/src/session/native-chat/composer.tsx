@@ -21,7 +21,7 @@ import {
 } from 'react-native-reanimated'
 import { useCSSVariable } from 'uniwind'
 
-import { MobileGlassSection } from '../../components/glass/section'
+import { MobileContentSection } from '../../components/content-section'
 import { useMobileLoaderStyle } from '../../loading/loader-style-context'
 import { resolveCssNumber, resolveCssString } from '../../style/resolve-css-variable'
 import type { MobileImageSource } from '../image-source-picker'
@@ -240,7 +240,7 @@ export function MobileNativeChatComposer({
   return (
     <View className="px-3 pb-2">
       {suggestions.length > 0 ? (
-        <MobileGlassSection className="mb-2 max-h-44">
+        <MobileContentSection className="mb-2 max-h-44">
           <ScrollView keyboardShouldPersistTaps="always" className="max-h-44">
             {suggestions.map((s) => (
               <Pressable
@@ -254,7 +254,7 @@ export function MobileNativeChatComposer({
               </Pressable>
             ))}
           </ScrollView>
-        </MobileGlassSection>
+        </MobileContentSection>
       ) : null}
       {agentWorking ? <MobileAgentWorkingStatus /> : null}
       {sendFailureMessage ? (

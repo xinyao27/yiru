@@ -34,7 +34,7 @@ export function MobileSourceControlHeader({
         <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
           Source Control
         </Text>
-        <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground mt-1 text-xs" numberOfLines={1}>
           {worktreeLabel}
         </Text>
       </View>

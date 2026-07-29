@@ -5,8 +5,8 @@ import { Image, Linking, Text, View } from 'react-native'
 import { cn } from '@/style/class-names'
 
 import { isResolvableComment } from '../../session/pr/comment-actions'
+import { MobileContentSection } from '../content-section'
 import { MobileGlassIconButton } from '../glass/icon-button'
-import { MobileGlassSection } from '../glass/section'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import { PRCommentComposer } from './pr-comment-composer'
@@ -86,7 +86,7 @@ export const PRCommentCard = memo(function PRCommentCard({
   }
 
   return (
-    <MobileGlassSection className={cn(isReply && 'ml-4', comment.isResolved && 'opacity-60')}>
+    <MobileContentSection className={cn(isReply && 'ml-4', comment.isResolved && 'opacity-60')}>
       <View className="border-b-hairline border-b-border flex-row items-center gap-2 px-3 py-2">
         {comment.authorAvatarUrl ? (
           <Image source={{ uri: comment.authorAvatarUrl }} className={styles.avatar} />
@@ -111,7 +111,7 @@ export const PRCommentCard = memo(function PRCommentCard({
           </Text>
         ) : null}
         {comment.isResolved ? (
-          <View className="border-hairline border-border bg-secondary rounded-full px-2 py-px">
+          <View className="border-hairline border-border bg-secondary rounded-full px-2 py-1">
             <Text className="text-muted-foreground text-xs">resolved</Text>
           </View>
         ) : null}
@@ -160,6 +160,6 @@ export const PRCommentCard = memo(function PRCommentCard({
           />
         </View>
       ) : null}
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 })

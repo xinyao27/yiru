@@ -74,23 +74,20 @@ function resolveRowContent(row: SourceRow): RowContent {
 export function SmartWorkspaceSourceRow({ row, onPress }: Props) {
   const content = resolveRowContent(row)
   return (
-    <Pressable
-      className="active:bg-accent flex-row items-center gap-2 px-3.5 py-3"
-      onPress={onPress}
-    >
+    <Pressable className="active:bg-accent flex-row items-center gap-2 px-3 py-3" onPress={onPress}>
       <View className="w-5 items-center">{content.icon}</View>
       <View className="min-w-0 flex-1">
         <Text className="text-foreground text-sm" numberOfLines={1}>
           {content.title}
         </Text>
         {content.subtitle ? (
-          <Text className="text-muted-foreground mt-px text-xs" numberOfLines={1}>
+          <Text className="text-muted-foreground mt-1 text-xs" numberOfLines={1}>
             {content.subtitle}
           </Text>
         ) : null}
       </View>
       {content.status ? (
-        <View className="bg-secondary rounded-full px-2 py-0.5">
+        <View className="bg-secondary rounded-full px-2 py-1">
           <Text
             className="text-muted-foreground text-xs font-semibold capitalize"
             numberOfLines={1}

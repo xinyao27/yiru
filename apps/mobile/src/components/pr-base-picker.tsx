@@ -80,14 +80,15 @@ export function MobilePrBasePicker({
   return (
     <View>
       <MobileGlassSurface
-        className={cn(
-          'min-h-10 flex-row items-center gap-1 overflow-hidden rounded-xl px-3 py-1',
-          !editable && 'opacity-60'
-        )}
-        isInteractive
+        className="min-h-10 flex-row items-center gap-1 overflow-hidden rounded-xl px-3 py-1"
+        isFunctional
+        isInteractive={editable}
       >
         <TextInput
-          className="text-foreground min-w-0 flex-1 p-0 font-mono text-sm"
+          className={cn(
+            'text-foreground min-w-0 flex-1 p-0 font-mono text-sm',
+            !editable && 'opacity-60'
+          )}
           value={value}
           onChangeText={(text) => {
             onChange(text)

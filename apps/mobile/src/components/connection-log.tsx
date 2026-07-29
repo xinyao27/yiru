@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from 'react-native'
 import { cn } from '@/style/class-names'
 
 import type { ConnectionLogEntry } from '../transport/types'
-import { MobileGlassSection } from './glass/section'
+import { MobileContentSection } from './content-section'
 
 type Props = {
   entries: ConnectionLogEntry[]
@@ -49,7 +49,7 @@ export function ConnectionLog({ entries, title }: Props) {
   const baseTs = entries[0]!.ts
 
   return (
-    <MobileGlassSection className="max-h-60 w-full px-3 py-2">
+    <MobileContentSection className="max-h-60 w-full px-3 py-2">
       {title && (
         <Text className="text-muted-foreground mb-1 font-mono text-xs tracking-wider uppercase">
           {title}
@@ -58,18 +58,18 @@ export function ConnectionLog({ entries, title }: Props) {
       <ScrollView
         ref={scrollRef}
         className="max-h-50"
-        contentContainerClassName="gap-1.5"
+        contentContainerClassName="gap-2"
         showsVerticalScrollIndicator={false}
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
       >
         {entries.map((entry) => (
           <View key={entry.id} className="flex-row items-start gap-2">
-            <Text className="text-muted-foreground w-14 pt-px font-mono text-xs">
+            <Text className="text-muted-foreground w-14 pt-1 font-mono text-xs">
               {formatTime(entry.ts, baseTs)}
             </Text>
             <Text
               className={cn(
-                'font-mono text-xs w-3 text-center pt-px',
+                'font-mono text-xs w-3 text-center pt-1',
                 LEVEL_COLOR_CLASS[entry.level]
               )}
             >
@@ -81,7 +81,7 @@ export function ConnectionLog({ entries, title }: Props) {
               </Text>
               {entry.detail && (
                 <Text
-                  className="text-muted-foreground mt-px font-mono text-xs leading-4"
+                  className="text-muted-foreground mt-1 font-mono text-xs leading-4"
                   numberOfLines={2}
                 >
                   {entry.detail}
@@ -91,6 +91,6 @@ export function ConnectionLog({ entries, title }: Props) {
           </View>
         ))}
       </ScrollView>
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }

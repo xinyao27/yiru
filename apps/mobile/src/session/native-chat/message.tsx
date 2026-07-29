@@ -102,7 +102,7 @@ function AgentControls({
   onCopy: () => void
 }): React.JSX.Element {
   return (
-    <View className="mb-0.5 flex-row justify-start">
+    <View className="mb-1 flex-row justify-start">
       <MobileGlassIconButton
         accessibilityLabel="Copy message"
         icon={copied ? 'check' : 'copy'}
@@ -173,7 +173,7 @@ function MobileNativeChatMessageImpl({
   return (
     <View className={cn('px-4 py-2', isUser && 'items-end')}>
       {isUser && queued ? (
-        <Text className="text-muted-foreground mb-0.5 text-xs font-semibold">Queued</Text>
+        <Text className="text-muted-foreground mb-1 text-xs font-semibold">Queued</Text>
       ) : null}
       <View
         className={cn(

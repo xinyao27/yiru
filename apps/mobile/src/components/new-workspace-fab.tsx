@@ -1,5 +1,6 @@
-import { MobileGlassPressable } from '@/components/glass/pressable'
-import { Plus } from '@/components/uniwind-icons'
+import { View } from 'react-native'
+
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 type NewWorkspaceFabProps = {
   onPress: () => void
@@ -8,17 +9,14 @@ type NewWorkspaceFabProps = {
 
 export function NewWorkspaceFab({ onPress, disabled }: NewWorkspaceFabProps): React.JSX.Element {
   return (
-    <MobileGlassPressable
-      accessibilityLabel="New workspace"
-      accessibilityRole="button"
-      className="bottom-safe-offset-6 absolute right-4 h-12 w-12 rounded-full"
-      contentClassName="h-full w-full items-center justify-center"
-      disabled={disabled}
-      hitSlop={8}
-      onPress={onPress}
-      tintColorClassName="accent-accent"
-    >
-      <Plus size={24} colorClassName="accent-foreground" />
-    </MobileGlassPressable>
+    <View className="bottom-safe-offset-6 absolute right-4">
+      <MobileGlassIconButton
+        accessibilityLabel="New workspace"
+        disabled={disabled}
+        icon="plus"
+        onPress={onPress}
+        size="large"
+      />
+    </View>
   )
 }

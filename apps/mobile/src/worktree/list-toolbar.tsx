@@ -156,7 +156,7 @@ export function MobileWorkspaceListToolbar({
           onPress={onFloatingWorkspace}
         />
       ) : null}
-      <MobileGlassSurface className="flex-1 overflow-hidden rounded-full">
+      <MobileGlassSurface className="flex-1 overflow-hidden rounded-full" isFunctional>
         <View className="flex-row items-center">
           <ToolbarButton
             accessibilityLabel={`Filter workspaces${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}

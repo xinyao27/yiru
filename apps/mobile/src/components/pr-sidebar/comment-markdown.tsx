@@ -146,7 +146,7 @@ function BlockView({ block, variant }: { block: MarkdownBlock; variant: CommentM
               <Text className={cn('text-muted-foreground', bodyTextClassName(variant))}>
                 {block.ordered ? `${i + 1}.` : '•'}
               </Text>
-              <Text className={cn(styles.paragraph, 'flex-1 mb-0.5', bodyTextClassName(variant))}>
+              <Text className={cn(styles.paragraph, 'flex-1 mb-1', bodyTextClassName(variant))}>
                 <Inline text={item} variant={variant} />
               </Text>
             </View>

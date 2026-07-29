@@ -11,6 +11,6 @@ export const mobileDiffReviewControlStyles = {
   secondaryButtonText: cn('text-muted-foreground text-sm'),
   destructiveText: cn('text-destructive text-sm'),
   drawerTitle: cn('text-foreground text-sm font-semibold'),
-  drawerSubtitle: cn('text-muted-foreground text-xs mt-0.5'),
+  drawerSubtitle: cn('text-muted-foreground text-xs mt-1'),
   drawerButtonRow: cn('flex-row gap-2 mt-3')
 } as const

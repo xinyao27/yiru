@@ -7,11 +7,15 @@ import {
   CaretLeft,
   Check,
   Copy,
+  Pencil,
   DotsThree,
   FloppyDisk,
   Gear,
   ListChecks,
   Play,
+  Plus,
+  SidebarSimple,
+  Trash,
   X,
   type Icon
 } from '../uniwind-icons'
@@ -30,14 +34,20 @@ function iconForName(name: MobileGlassIconName): Icon {
       return X
     case 'copy':
       return Copy
+    case 'delete':
+      return Trash
     case 'down':
       return ArrowDown
     case 'external':
       return ArrowSquareOut
+    case 'edit':
+      return Pencil
     case 'more':
       return DotsThree
     case 'play':
       return Play
+    case 'plus':
+      return Plus
     case 'refresh':
       return ArrowClockwise
     case 'save':
@@ -46,6 +56,8 @@ function iconForName(name: MobileGlassIconName): Icon {
       return ArrowUp
     case 'settings':
       return Gear
+    case 'sidebar':
+      return SidebarSimple
   }
 }
 
@@ -53,6 +65,8 @@ export function MobileGlassIconButton({
   accessibilityLabel,
   disabled = false,
   icon,
+  isDestructive = false,
+  isSelected = false,
   onPress,
   size = 'regular'
 }: MobileGlassIconButtonProps): React.JSX.Element {
@@ -70,10 +84,17 @@ export function MobileGlassIconButton({
       disabled={disabled}
       hitSlop={8}
       onPress={onPress}
+      tintColorClassName={isSelected ? 'accent-primary' : undefined}
     >
       <Icon
         size={size === 'large' ? 20 : size === 'small' ? 16 : 18}
-        colorClassName="accent-muted-foreground"
+        colorClassName={
+          isDestructive
+            ? 'accent-destructive'
+            : isSelected
+              ? 'accent-primary-foreground'
+              : 'accent-muted-foreground'
+        }
       />
     </MobileGlassPressable>
   )

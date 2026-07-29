@@ -1,9 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
-import { Text, TextInput, View } from 'react-native'
+import { Pressable, Text, TextInput, View } from 'react-native'
 
+import { MobileContentSection } from '../../components/content-section'
 import { MobileGlassIconButton } from '../../components/glass/icon-button'
-import { MobileGlassPressable } from '../../components/glass/pressable'
-import { MobileGlassSection } from '../../components/glass/section'
 import { MobileGlassSurface } from '../../components/glass/surface'
 import { MobileGlassTextButton } from '../../components/glass/text-button'
 import { Check, Question as CircleHelp } from '../../components/uniwind-icons'
@@ -82,7 +81,7 @@ export function MobileNativeChatQuestion({
   )
 
   return (
-    <MobileGlassSection className="mx-4 my-2 gap-2 p-3">
+    <MobileContentSection className="mx-4 my-2 gap-2 p-3">
       <View className="flex-row items-center gap-2">
         <CircleHelp size={15} colorClassName="accent-primary" />
         <Text className="text-foreground flex-1 text-sm leading-5 font-semibold">
@@ -95,12 +94,16 @@ export function MobileNativeChatQuestion({
           {optionRows.map(({ label, key }) => {
             const isSelected = selected.includes(label)
             return (
-              <MobileGlassPressable
+              <Pressable
                 key={key}
                 accessibilityRole={question.multiSelect ? 'checkbox' : 'button'}
-                accessibilityState={question.multiSelect ? { checked: isSelected } : undefined}
-                className={cn('rounded-xl', isSelected && 'border-primary')}
-                contentClassName="min-h-11 flex-row items-center gap-2 px-3 py-2"
+                accessibilityState={
+                  question.multiSelect ? { checked: isSelected } : { selected: isSelected }
+                }
+                className={cn(
+                  'min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-2 active:bg-accent',
+                  isSelected && 'bg-accent'
+                )}
                 onPress={() => (question.multiSelect ? toggle(label) : answerSingle(label))}
               >
                 {question.multiSelect ? (
@@ -116,7 +119,7 @@ export function MobileNativeChatQuestion({
                   </View>
                 ) : null}
                 <Text className="text-foreground flex-1 text-sm">{label}</Text>
-              </MobileGlassPressable>
+              </Pressable>
             )
           })}
         </View>
@@ -159,6 +162,6 @@ export function MobileNativeChatQuestion({
           size="regular"
         />
       </View>
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }

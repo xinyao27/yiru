@@ -2,7 +2,7 @@ import { useFocusEffect } from 'expo-router'
 import { useState, useCallback, useEffect } from 'react'
 import { AppState, Linking, View, Text, Switch } from 'react-native'
 
-import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileContentSection } from '../src/components/content-section'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import {
   ensureNotificationPermissions,
@@ -72,8 +72,8 @@ export default function NotificationsScreen() {
 
   return (
     <View className="bg-background flex-1 p-4">
-      <MobileGlassSection>
-        <View className="flex-row items-center gap-2.5 px-3.5 py-3">
+      <MobileContentSection>
+        <View className="flex-row items-center gap-2 px-3 py-3">
           <Text className="text-foreground flex-1 text-sm font-medium">Agent notifications</Text>
           <Switch
             value={switchEnabled}
@@ -85,16 +85,16 @@ export default function NotificationsScreen() {
             ios_backgroundColorClassName="accent-secondary"
           />
         </View>
-        <Text className="text-muted-foreground px-3.5 pb-3 text-xs leading-5">{hint}</Text>
+        <Text className="text-muted-foreground px-3 pb-3 text-xs leading-5">{hint}</Text>
         {notificationsBlocked && (
           <MobileGlassTextButton
-            className="mx-3.5 mb-3 self-start"
+            className="mx-3 mb-3 self-start"
             label="Open Settings"
             onPress={() => void Linking.openSettings()}
             size="small"
           />
         )}
-      </MobileGlassSection>
+      </MobileContentSection>
     </View>
   )
 }

@@ -7,8 +7,8 @@ import { cn } from '@/style/class-names'
 
 import { canEditPRTitle } from '../../session/pr/title-edit'
 import type { MobilePrTitleAction } from '../../session/pr/use-title-action'
+import { MobileContentSection } from '../content-section'
 import { MobileGlassIconButton } from '../glass/icon-button'
-import { MobileGlassSection } from '../glass/section'
 import { MobileGlassSurface } from '../glass/surface'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { openMobilePrUrl } from '../pr-compose-sheet'
@@ -56,7 +56,7 @@ export function PRSidebarHeader({
             accessibilityRole="link"
             accessibilityLabel={`Open pull request #${pr.number} on the web`}
             className={cn(
-              'border-hairline self-start rounded-full bg-secondary px-2 py-0.5',
+              'border-hairline self-start rounded-full bg-secondary px-2 py-1',
               badgeColors.border,
               'active:bg-accent'
             )}
@@ -101,9 +101,9 @@ export function PRSidebarHeader({
     return <View className="gap-2">{body}</View>
   }
   return (
-    <MobileGlassSection className={styles.section}>
+    <MobileContentSection className={styles.section}>
       <View className={styles.sectionBody}>{body}</View>
-    </MobileGlassSection>
+    </MobileContentSection>
   )
 }
 

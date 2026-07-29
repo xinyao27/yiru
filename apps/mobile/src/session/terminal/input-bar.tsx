@@ -69,6 +69,7 @@ export function MobileTerminalInputBar({
       />
       <MobileGlassSurface
         className="h-10 flex-1 overflow-hidden rounded-full"
+        isFunctional
         tintColorClassName="accent-secondary"
       >
         <View className="h-10 flex-row items-center">

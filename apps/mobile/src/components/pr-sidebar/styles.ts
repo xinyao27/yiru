@@ -11,12 +11,10 @@ export const mobilePrSidebarStyles = {
 
   sectionBody: cn('p-3 gap-2'),
 
-  branchPill: cn(
-    'text-foreground shrink rounded-full bg-secondary px-1.5 py-0.5 font-mono text-xs'
-  ),
+  branchPill: cn('text-foreground shrink rounded-full bg-secondary px-2 py-1 font-mono text-xs'),
   // Generic list row, mirroring the diff-review row rhythm (44dp min target).
   row: cn('min-h-11 flex-row items-center gap-2 py-1'),
-  rowMain: cn('flex-1 min-w-0 gap-0.5'),
+  rowMain: cn('flex-1 min-w-0 gap-1'),
   rowTitle: cn('text-foreground text-sm'),
   rowStatus: cn('text-xs font-bold'),
 

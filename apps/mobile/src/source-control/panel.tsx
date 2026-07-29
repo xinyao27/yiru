@@ -332,16 +332,6 @@ export function MobileSourceControlPanel({
         <Stack.Screen
           options={{
             title: `Source Control · ${worktreeLabel}`,
-            headerLeft:
-              Platform.OS === 'ios'
-                ? undefined
-                : () => (
-                    <MobileGlassIconButton
-                      accessibilityLabel="Back"
-                      icon="back"
-                      onPress={() => router.back()}
-                    />
-                  ),
             headerRight:
               Platform.OS === 'ios'
                 ? undefined
@@ -364,15 +354,6 @@ export function MobileSourceControlPanel({
                   )
           }}
         />
-      ) : null}
-      {!embedded && Platform.OS === 'ios' ? (
-        <Stack.Toolbar placement="left">
-          <Stack.Toolbar.Button
-            accessibilityLabel="Back"
-            icon="chevron.left"
-            onPress={() => router.back()}
-          />
-        </Stack.Toolbar>
       ) : null}
       {!embedded && Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">

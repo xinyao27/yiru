@@ -144,21 +144,23 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
       return (
         <View className="border-b-border border-b">
           <Pressable
-            className="active:bg-accent flex-row items-center gap-2 px-3 py-2.5"
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => toggleCommit(item)}
           >
-            {isOpen ? (
-              <ChevronDown size={14} colorClassName="accent-muted-foreground" />
-            ) : (
-              <ChevronRight size={14} colorClassName="accent-muted-foreground" />
-            )}
             <View className="min-w-0 flex-1">
               <Text className="text-foreground text-sm" numberOfLines={1}>
                 {item.subject}
               </Text>
-              <Text className="text-muted-foreground mt-0.5 font-mono text-xs" numberOfLines={1}>
+              <Text className="text-muted-foreground mt-1 font-mono text-xs" numberOfLines={1}>
                 {item.shortId} · {item.author} · {item.relativeTime}
               </Text>
+            </View>
+            <View className="w-5 items-center">
+              {isOpen ? (
+                <ChevronDown size={14} colorClassName="accent-muted-foreground" />
+              ) : (
+                <ChevronRight size={14} colorClassName="accent-muted-foreground" />
+              )}
             </View>
           </Pressable>
           {isOpen ? (

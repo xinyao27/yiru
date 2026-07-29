@@ -43,7 +43,7 @@ export function MobileFileMarkdownPreview({
   return (
     <View className="bg-editor-surface flex-1">
       <MobileGlassSurface
-        className="mx-3 my-2 flex-row self-start overflow-hidden rounded-xl p-px"
+        className="mx-3 my-2 flex-row self-start overflow-hidden rounded-xl p-1"
         isInteractive
       >
         <Pressable

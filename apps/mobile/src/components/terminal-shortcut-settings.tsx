@@ -4,7 +4,7 @@ import { AppState, View, Text, Pressable, Switch, type AppStateStatus } from 're
 import type Animated from 'react-native-reanimated'
 import type { AnimatedRef, SharedValue } from 'react-native-reanimated'
 
-import { CaretRight as ChevronRight, X } from '@/components/uniwind-icons'
+import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { TERMINAL_ACCESSORY_KEYS, type TerminalAccessoryKey } from '../terminal/accessory-keys'
@@ -18,7 +18,7 @@ import {
 } from '../terminal/accessory-layout'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
-import { MobileGlassPressable } from './glass/pressable'
+import { MobileGlassIconButton } from './glass/icon-button'
 import { MobileGlassSurface } from './glass/surface'
 
 // Why: DragReorderList absolutely positions rows, so every row in a
@@ -284,14 +284,13 @@ export function TerminalShortcutSettings({
                     {key.bytes.replace(/\r/g, ' ↵')}
                   </Text>
                 </View>
-                <MobileGlassPressable
+                <MobileGlassIconButton
                   accessibilityLabel={`Delete ${key.label}`}
-                  className="h-8 w-8 rounded-full"
-                  contentClassName="h-full w-full items-center justify-center rounded-full"
+                  icon="delete"
+                  isDestructive
                   onPress={() => handleDeleteCustomKey(key)}
-                >
-                  <X size={16} colorClassName="accent-destructive" />
-                </MobileGlassPressable>
+                  size="small"
+                />
               </View>
             )}
           />
@@ -304,7 +303,9 @@ export function TerminalShortcutSettings({
             <Text className={styles.rowLabel}>Add Custom Shortcut…</Text>
             <Text className={styles.rowSublabel}>Create key combo or text macro</Text>
           </View>
-          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </View>
         </Pressable>
       </MobileGlassSurface>
 
@@ -327,14 +328,14 @@ const styles = {
   groupTopGap: cn('mt-6'),
   section: cn('overflow-hidden rounded-2xl'),
   sectionTopGap: cn('mt-2'),
-  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  row: cn('flex-row items-center gap-2 py-3 px-3'),
   rowPressedActive: cn('active:bg-accent'),
   // Why: rows inside DragReorderList get a fixed height and a trailing grip
   // handle from the list itself, so content only pads on the left.
-  reorderRowContent: cn('flex-1 h-full flex-row items-center gap-2.5 pl-3.5'),
+  reorderRowContent: cn('flex-1 h-full flex-row items-center gap-2 pl-3'),
   rowContent: cn('flex-1'),
   rowLabel: cn('text-sm font-medium text-foreground'),
-  rowSublabel: cn('text-xs text-muted-foreground mt-0.5'),
+  rowSublabel: cn('text-xs text-muted-foreground mt-1'),
   keycap: cn('min-w-16 items-center rounded-lg bg-secondary px-2 py-1'),
   keycapText: cn('text-muted-foreground text-xs font-mono')
 } as const

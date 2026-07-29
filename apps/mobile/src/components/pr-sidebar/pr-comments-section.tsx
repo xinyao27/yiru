@@ -1,6 +1,6 @@
 import type { GitHubWorkItemDetails, PRState } from '@yiru/workbench-model/review'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
 import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
 import type { MobileGlassSegmentOption } from '@/components/glass/segmented-control-props'
@@ -9,7 +9,6 @@ import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/componen
 import { canAddRootComment } from '../../session/pr/comment-actions'
 import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
 import type { MobilePrCommentActions } from '../../session/pr/use-comment-actions'
-import { MobileGlassPressable } from '../glass/pressable'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
 import {
@@ -136,7 +135,7 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         title="Comments"
         trailing={
           comments.length > 0 ? (
-            <View className="border-hairline border-border bg-secondary rounded-full px-2 py-px">
+            <View className="border-hairline border-border bg-secondary rounded-full px-2 py-1">
               <Text className="text-muted-foreground text-xs font-semibold">{comments.length}</Text>
             </View>
           ) : undefined
@@ -234,18 +233,19 @@ function CommentGroupView({
   const Chevron = expanded ? ChevronDown : ChevronRight
   return (
     <View className={styles.group}>
-      <MobileGlassPressable
+      <Pressable
         accessibilityRole="button"
-        className="rounded-2xl"
-        contentClassName="flex-row items-center gap-2 px-3 py-2"
+        className="active:bg-accent min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-2"
         onPress={() => setExpanded((value) => !value)}
       >
-        <Chevron size={14} colorClassName="accent-muted-foreground" />
-        <Text className="text-muted-foreground shrink text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground min-w-0 flex-1 text-xs" numberOfLines={1}>
           Resolved {group.kind === 'thread' ? 'thread' : 'comment'} by {root.author}
           {count > 1 ? ` (${count})` : ''}
         </Text>
-      </MobileGlassPressable>
+        <View className="w-5 items-center">
+          <Chevron size={14} colorClassName="accent-muted-foreground" />
+        </View>
+      </Pressable>
       {expanded ? <View className={shared.sectionBody}>{cards}</View> : null}
     </View>
   )

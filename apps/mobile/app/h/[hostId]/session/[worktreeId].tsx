@@ -57,7 +57,6 @@ import {
 } from '../../../../src/components/custom-key-modal'
 import { MobileGlassGroup } from '../../../../src/components/glass/group'
 import { MobileGlassIconButton } from '../../../../src/components/glass/icon-button'
-import { MobileGlassPressable } from '../../../../src/components/glass/pressable'
 import { MobileGlassSurface } from '../../../../src/components/glass/surface'
 import { MobileGlassTextButton } from '../../../../src/components/glass/text-button'
 import { MobileHtmlPreview } from '../../../../src/components/html-preview'
@@ -457,7 +456,7 @@ function DiffLineRow({
         <View className="mt-1 mr-2 ml-11 gap-1">
           {comments.map((comment) => (
             <MobileGlassSurface key={comment.id} className="rounded-xl px-2 py-1">
-              <View className="mb-0.5 flex-row items-center gap-1">
+              <View className="mb-1 flex-row items-center gap-1">
                 <MessageSquare size={12} colorClassName="accent-muted-foreground" />
                 <Text className="text-muted-foreground flex-1 text-xs font-semibold">
                   Line {comment.lineNumber}
@@ -4504,11 +4503,11 @@ export default function SessionScreen() {
               />
 
               <View className="min-w-0 flex-1">
-                <Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
+                <Text className="text-foreground text-base font-semibold" numberOfLines={1}>
                   {worktreeName || 'Terminal'}
                 </Text>
                 <Pressable
-                  className="mt-0.5 flex-row items-center"
+                  className="mt-1 flex-row items-center gap-2"
                   disabled={!showConnectionRetry}
                   onPress={() => {
                     if (hostId) {
@@ -4553,11 +4552,10 @@ export default function SessionScreen() {
         ) : null}
 
         {useNativeSessionHeader && connState !== 'connected' ? (
-          <MobileGlassPressable
+          <Pressable
             accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
             accessibilityRole={showConnectionRetry ? 'button' : undefined}
-            className="mx-3 mt-2 rounded-xl"
-            contentClassName="flex-row items-center gap-2 px-3 py-2"
+            className="border-hairline border-border bg-card active:bg-accent mx-3 mt-2 flex-row items-center gap-2 rounded-xl px-3 py-2"
             disabled={!showConnectionRetry}
             onPress={() => {
               if (hostId) {
@@ -4569,7 +4567,7 @@ export default function SessionScreen() {
             <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
               {terminalSummary}
             </Text>
-          </MobileGlassPressable>
+          </Pressable>
         ) : null}
 
         {visibleTabs.length > 0 ? (

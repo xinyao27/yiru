@@ -2,9 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, TextInput, Switch } from 'react-native'
 
+import { MobileContentSection } from '@/components/content-section'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassPressable } from '@/components/glass/pressable'
-import { MobileGlassSection } from '@/components/glass/section'
 import { MobileGlassSurface } from '@/components/glass/surface'
 import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { cn } from '@/style/class-names'
@@ -212,33 +212,33 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       </View>
 
       {step === 'choose-type' && (
-        <MobileGlassSection>
+        <MobileContentSection>
           <Pressable
-            className="active:bg-accent px-3.5 py-3"
+            className="active:bg-accent px-3 py-3"
             onPress={() => setStep('shortcut-combo')}
           >
-            <Text className="text-foreground mb-px text-sm">Shortcut Combo</Text>
+            <Text className="text-foreground mb-1 text-sm">Shortcut Combo</Text>
             <Text className="text-muted-foreground text-xs">
               Build Ctrl, Alt, and Shift key chords
             </Text>
           </Pressable>
           <View className="h-hairline bg-border mx-3" />
-          <Pressable className="active:bg-accent px-3.5 py-3" onPress={() => setStep('text-macro')}>
-            <Text className="text-foreground mb-px text-sm">Text Macro</Text>
+          <Pressable className="active:bg-accent px-3 py-3" onPress={() => setStep('text-macro')}>
+            <Text className="text-foreground mb-1 text-sm">Text Macro</Text>
             <Text className="text-muted-foreground text-xs">Send custom text command</Text>
           </Pressable>
           {onManageShortcuts ? (
             <>
               <View className="h-hairline bg-border mx-3" />
-              <Pressable className="active:bg-accent px-3.5 py-3" onPress={onManageShortcuts}>
-                <Text className="text-foreground mb-px text-sm">Manage Shortcuts</Text>
+              <Pressable className="active:bg-accent px-3 py-3" onPress={onManageShortcuts}>
+                <Text className="text-foreground mb-1 text-sm">Manage Shortcuts</Text>
                 <Text className="text-muted-foreground text-xs">
                   Show, hide, or reorder shortcut keys
                 </Text>
               </Pressable>
             </>
           ) : null}
-        </MobileGlassSection>
+        </MobileContentSection>
       )}
 
       {step === 'shortcut-combo' && (
@@ -275,7 +275,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           </View>
 
           <View className="mt-3">
-            <Text className="text-muted-foreground mb-2 pl-0.5 text-xs tracking-wider uppercase">
+            <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
               Modifiers
             </Text>
             <View className="flex-row gap-2">
@@ -284,11 +284,12 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                 return (
                   <MobileGlassPressable
                     key={modifier.id}
-                    className={cn('h-10 flex-1 rounded-xl', selected && 'border-muted-foreground')}
+                    className="h-10 flex-1 rounded-xl"
                     contentClassName="h-full flex-row items-center justify-center gap-1 rounded-xl"
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                     onPress={() => toggleShortcutModifier(modifier.id)}
+                    tintColorClassName={selected ? 'accent-primary' : undefined}
                   >
                     <Text
                       className={cn('text-muted-foreground text-sm', selected && 'text-foreground')}
@@ -307,7 +308,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
           </View>
 
           <View className="mt-3">
-            <Text className="text-muted-foreground mb-2 pl-0.5 text-xs tracking-wider uppercase">
+            <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
               Key
             </Text>
             <MobileGlassSurface className="h-14 w-full overflow-hidden rounded-xl" isInteractive>
@@ -346,10 +347,10 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
         <View className="gap-3 pt-1 pb-3">
           {SPECIAL_KEY_GROUPS.map((group) => (
             <View key={group.title} className="gap-1">
-              <Text className="text-muted-foreground mb-1 pl-0.5 text-xs tracking-wider uppercase">
+              <Text className="text-muted-foreground mb-1 pl-1 text-xs tracking-wider uppercase">
                 {group.title}
               </Text>
-              <View className="-mx-0.5 flex-row flex-wrap">
+              <View className="-mx-1 flex-row flex-wrap">
                 {group.ids.map((id) => {
                   const key = SPECIAL_KEY_BY_ID[id]
                   if (!key) {
@@ -358,13 +359,14 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   const selected = shortcutKey === id
                   const flexBasis = `${100 / group.columns}%` as const
                   return (
-                    <View key={id} className="px-0.5 py-0.5" style={[{ flexBasis }]}>
+                    <View key={id} className="px-1 py-1" style={[{ flexBasis }]}>
                       <MobileGlassPressable
-                        className={cn('h-10 rounded-xl', selected && 'border-muted-foreground')}
+                        className="h-10 rounded-xl"
                         contentClassName="h-full items-center justify-center rounded-xl"
                         accessibilityLabel={key.accessibilityLabel}
                         accessibilityState={{ selected }}
                         onPress={() => handleSpecialKeyPick(id)}
+                        tintColorClassName={selected ? 'accent-primary' : undefined}
                       >
                         <Text className="text-foreground font-mono text-xs">{key.label}</Text>
                       </MobileGlassPressable>
@@ -378,7 +380,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'text-macro' && (
-        <MobileGlassSection>
+        <MobileContentSection>
           <View className="gap-2 p-3">
             <Text className="text-muted-foreground text-xs">Label</Text>
             <MobileGlassSurface className="overflow-hidden rounded-xl" isInteractive>
@@ -425,7 +427,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
               size="large"
             />
           </View>
-        </MobileGlassSection>
+        </MobileContentSection>
       )}
     </BottomDrawer>
   )

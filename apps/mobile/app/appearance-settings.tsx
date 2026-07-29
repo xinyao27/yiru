@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 
-import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileContentSection } from '../src/components/content-section'
 import { LoadingIndicator } from '../src/components/loading-indicator'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
@@ -35,24 +35,26 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
         <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose the animation shown while agents are working on this device.
         </Text>
-        <MobileGlassSection className="mt-2">
+        <MobileContentSection className="mt-2">
           <Pressable
             accessibilityRole="button"
-            className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setPickerOpen(true)}
           >
-            <View className="w-6 items-center">
+            <View className="w-5 items-center">
               <LoadingIndicator size={20} />
             </View>
             <View className="flex-1">
               <Text className="text-foreground text-sm font-medium">Loader</Text>
-              <Text className="text-muted-foreground mt-0.5 text-xs">
+              <Text className="text-muted-foreground mt-1 text-xs">
                 {getMobileLoaderStyleLabel(loaderStyle)}
               </Text>
             </View>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-        </MobileGlassSection>
+        </MobileContentSection>
       </ScrollView>
 
       <PickerModal<MobileLoaderStyle>

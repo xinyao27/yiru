@@ -157,6 +157,6 @@ function buildHtml(source: string, theme: MermaidTheme, colorScheme: 'light' | '
 
 const styles = {
   frame: cn('border-hairline border-border mb-2 overflow-hidden rounded-xl bg-secondary'),
-  label: cn('px-2 py-0.5 border-b-hairline border-b-border bg-card'),
+  label: cn('px-2 py-1 border-b-hairline border-b-border bg-card'),
   labelText: cn('text-muted-foreground text-xs font-mono')
 } as const

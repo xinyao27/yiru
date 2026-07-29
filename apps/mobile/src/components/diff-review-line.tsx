@@ -76,7 +76,7 @@ export function MobileDiffReviewLine({
         </Text>
       </Pressable>
       {comments.length > 0 ? (
-        <View className="w-10 items-center justify-center gap-0.5">
+        <View className="w-10 items-center justify-center gap-1">
           {comments.map((comment) => (
             <Pressable
               key={comment.id}

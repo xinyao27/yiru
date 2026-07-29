@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 import { useMobileGlassAvailable } from '../components/glass/availability'
 import { MobileGlassGroup } from '../components/glass/group'
+import { MobileGlassIconButton } from '../components/glass/icon-button'
 import { MobileGlassSurface } from '../components/glass/surface'
-import { ArrowUp, Plus } from '../components/uniwind-icons'
 
 export function MobileUiLabGlassCatalog(): React.JSX.Element {
   const isGlassAvailable = useMobileGlassAvailable()
@@ -27,31 +27,22 @@ export function MobileUiLabGlassCatalog(): React.JSX.Element {
           <Text className="text-muted-foreground text-xs">{previewPresses} preview taps</Text>
         </View>
         <MobileGlassGroup className="absolute right-3 bottom-3 flex-row gap-2" spacing={8}>
-          <MobileGlassSurface className="h-11 w-11 overflow-hidden rounded-full" isInteractive>
-            <Pressable
-              accessibilityLabel="Preview secondary glass action"
-              className="active:bg-accent h-11 w-11 items-center justify-center rounded-full"
-              onPress={() => setPreviewPresses((count) => count + 1)}
-            >
-              <Plus size={18} colorClassName="accent-foreground" />
-            </Pressable>
-          </MobileGlassSurface>
-          <MobileGlassSurface
-            className="h-11 w-11 overflow-hidden rounded-full"
-            isInteractive
-            tintColorClassName="accent-primary"
-          >
-            <Pressable
-              accessibilityLabel="Preview prominent glass action"
-              className="h-11 w-11 items-center justify-center rounded-full"
-              onPress={() => setPreviewPresses((count) => count + 1)}
-            >
-              <ArrowUp size={18} colorClassName="accent-primary-foreground" />
-            </Pressable>
-          </MobileGlassSurface>
+          <MobileGlassIconButton
+            accessibilityLabel="Preview secondary glass action"
+            icon="plus"
+            onPress={() => setPreviewPresses((count) => count + 1)}
+            size="large"
+          />
+          <MobileGlassIconButton
+            accessibilityLabel="Preview prominent glass action"
+            icon="send"
+            isSelected
+            onPress={() => setPreviewPresses((count) => count + 1)}
+            size="large"
+          />
         </MobileGlassGroup>
       </View>
-      <MobileGlassSurface className="mt-2 overflow-hidden rounded-2xl px-3 py-2.5" forceFallback>
+      <MobileGlassSurface className="mt-2 overflow-hidden rounded-2xl px-3 py-3" forceFallback>
         <Text className="text-foreground text-xs font-semibold">Opaque fallback preview</Text>
       </MobileGlassSurface>
     </View>

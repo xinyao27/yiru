@@ -13,9 +13,9 @@ import {
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
+import { MobileContentSection } from '../src/components/content-section'
 import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassPressable } from '../src/components/glass/pressable'
-import { MobileGlassSection } from '../src/components/glass/section'
 import {
   startDiagnosticFetchTimeout,
   type DiagnosticFetchTimeout
@@ -208,12 +208,14 @@ export default function TroubleshootScreen() {
         </MobileGlassGroup>
 
         {checks.length > 0 && (
-          <MobileGlassSection className="mb-4">
+          <MobileContentSection className="mb-4">
             {checks.map((check, i) => (
               <View key={`${check.label}-${check.detail}`}>
                 {i > 0 && <View className="bg-border h-hairline mx-3" />}
-                <View className="flex-row items-center gap-2 px-3.5 py-2.5">
-                  <StatusIcon status={check.status} />
+                <View className="flex-row items-center gap-2 px-3 py-3">
+                  <View className="w-5 items-center">
+                    <StatusIcon status={check.status} />
+                  </View>
                   <Text className="text-foreground text-sm font-medium">{check.label}</Text>
                   <Text
                     className={cn(
@@ -226,31 +228,33 @@ export default function TroubleshootScreen() {
                 </View>
               </View>
             ))}
-          </MobileGlassSection>
+          </MobileContentSection>
         )}
 
         <Text className="text-muted-foreground mt-2 mb-2 px-1 text-xs font-semibold tracking-wide uppercase">
           Common issues
         </Text>
 
-        <MobileGlassSection className="mb-4">
+        <MobileContentSection className="mb-4">
           {troubleshootCommonIssues.map((section, i) => (
             <View key={section.id}>
               {i > 0 && <View className="bg-border h-hairline mx-3" />}
               <Pressable
-                className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+                className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
                 onPress={() => toggleSection(section.id)}
               >
-                {section.icon}
+                <View className="w-5 items-center">{section.icon}</View>
                 <Text className="text-foreground flex-1 text-sm font-medium">{section.title}</Text>
-                {expandedId === section.id ? (
-                  <ChevronUp size={16} colorClassName="accent-muted-foreground" />
-                ) : (
-                  <ChevronDown size={16} colorClassName="accent-muted-foreground" />
-                )}
+                <View className="w-5 items-center">
+                  {expandedId === section.id ? (
+                    <ChevronUp size={16} colorClassName="accent-muted-foreground" />
+                  ) : (
+                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
+                  )}
+                </View>
               </Pressable>
               {expandedId === section.id && (
-                <View className="gap-1.5 px-3.5 pb-3">
+                <View className="gap-2 px-3 pb-3">
                   {section.steps.map((step) => (
                     <View key={`${section.id}-${step}`} className="flex-row gap-2">
                       <Text className="text-muted-foreground text-xs leading-5">•</Text>
@@ -261,7 +265,7 @@ export default function TroubleshootScreen() {
               )}
             </View>
           ))}
-        </MobileGlassSection>
+        </MobileContentSection>
 
         <View className="h-6" />
       </ScrollView>

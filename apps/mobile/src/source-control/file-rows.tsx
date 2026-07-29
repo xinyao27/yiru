@@ -78,7 +78,9 @@ export function makeRenderFileRow(
           ) : null}
         </View>
         {rowBusy ? (
-          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+          </View>
         ) : item.area === 'staged' ? (
           <Pressable
             className={cn(
@@ -132,7 +134,9 @@ export function makeRenderFileRow(
           </View>
         ) : null}
         {!rowBusy && item.canOpen && !hasInlineActions ? (
-          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          <View className="w-5 items-center">
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+          </View>
         ) : null}
       </Pressable>
     )
@@ -174,7 +178,7 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
         <View className="min-w-0 flex-1">
           <Text className={styles.sectionTitle}>Committed on Branch</Text>
           {branchCompareSummaryText ? (
-            <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
+            <Text className="text-muted-foreground mt-1 text-xs" numberOfLines={1}>
               {branchCompareSummaryText}
             </Text>
           ) : null}
@@ -236,11 +240,13 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
                   </Text>
                 ) : null}
               </View>
-              {rowBusy ? (
-                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-              ) : entry.canOpen ? (
-                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
-              ) : null}
+              <View className="w-5 items-center">
+                {rowBusy ? (
+                  <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+                ) : entry.canOpen ? (
+                  <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+                ) : null}
+              </View>
             </Pressable>
           )
         })

@@ -14,6 +14,7 @@ type MobileGlassSurfaceProps = Omit<
   className?: string
   fallbackClassName?: string
   forceFallback?: boolean
+  isFunctional?: boolean
   isInteractive?: boolean
   tintColor?: string
   tintColorClassName?: string
@@ -23,12 +24,13 @@ export function MobileGlassSurface({
   className,
   fallbackClassName,
   forceFallback = false,
+  isFunctional = false,
   isInteractive = false,
   tintColor,
   tintColorClassName,
   ...viewProps
 }: MobileGlassSurfaceProps): React.JSX.Element {
-  const isAvailable = useMobileGlassAvailable() && !forceFallback
+  const isAvailable = useMobileGlassAvailable() && !forceFallback && (isFunctional || isInteractive)
   const { theme } = useUniwind()
 
   if (!isAvailable) {

@@ -32,5 +32,5 @@ export function StatusDot({
       : verdict?.kind === 'warning'
         ? 'bg-amber-500'
         : (stateColorClasses[state] ?? 'bg-status-neutral')
-  return <View className={cn('mr-2 h-2 w-2 rounded-full', colorClassName)} />
+  return <View className={cn('h-2 w-2 rounded-full', colorClassName)} />
 }

@@ -46,7 +46,7 @@ function MobileTerminalAccessoryIconView({
       return (
         <View className="relative h-5 w-5 items-center justify-start">
           <KeyboardIcon size={15} colorClassName="accent-muted-foreground" />
-          <View className="absolute -bottom-0.5">
+          <View className="absolute -bottom-1">
             <ChevronDown size={10} colorClassName="accent-muted-foreground" />
           </View>
         </View>

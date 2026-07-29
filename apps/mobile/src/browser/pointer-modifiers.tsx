@@ -32,13 +32,14 @@ export function MobileBrowserPointerModifiers({
         return (
           <MobileGlassPressable
             key={modifier.id}
-            className={cn('min-h-8 min-w-11 rounded-full', selected && 'border-muted-foreground')}
+            className="min-h-8 min-w-11 rounded-full"
             contentClassName="min-h-8 items-center justify-center rounded-full px-3"
             disabled={disabled}
             accessibilityLabel={`${modifier.label} click modifier`}
             accessibilityRole="button"
             accessibilityState={{ selected, disabled }}
             onPress={() => onToggle(modifier.id)}
+            tintColorClassName={selected ? 'accent-primary' : undefined}
           >
             <Text
               className={cn(

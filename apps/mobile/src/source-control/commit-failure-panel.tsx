@@ -23,7 +23,7 @@ export function MobileCommitFailurePanel({ failure, action }: Props) {
       <View className="flex-row items-center gap-2">
         <View className="min-w-0 flex-1">
           <Text className="text-foreground text-sm font-bold">Commit failed</Text>
-          <Text className="text-muted-foreground mt-0.5 text-xs leading-4" numberOfLines={2}>
+          <Text className="text-muted-foreground mt-1 text-xs leading-4" numberOfLines={2}>
             {action.summary ?? 'Commit failed.'}
           </Text>
         </View>

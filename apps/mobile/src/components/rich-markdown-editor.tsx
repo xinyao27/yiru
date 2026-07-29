@@ -314,7 +314,7 @@ function MobileRichMarkdownEditorInner({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="items-center gap-1.5 px-2 py-1.5"
+          contentContainerClassName="items-center gap-2 px-2 py-2"
           keyboardShouldPersistTaps="handled"
         >
           {TOOLBAR_ITEMS.map((item) => {

@@ -31,7 +31,7 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
           <Text className="text-foreground text-sm font-bold" numberOfLines={1}>
             {entry.path}
           </Text>
-          <Text className="text-muted-foreground mt-0.5 text-xs" numberOfLines={1}>
+          <Text className="text-muted-foreground mt-1 text-xs" numberOfLines={1}>
             {branchDiffPreview.kind === 'ready'
               ? `${branchDiffPreview.summary.baseRef}..HEAD`
               : 'Committed on branch'}
@@ -63,7 +63,7 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
             <View
               key={`${index}:${line.kind}:${line.oldLineNumber ?? ''}:${line.newLineNumber ?? ''}`}
               className={cn(
-                'flex-row items-start gap-1 py-0.5 px-1',
+                'flex-row items-start gap-1 py-1 px-1',
                 line.kind === 'add' && 'bg-diff-inserted',
                 line.kind === 'delete' && 'bg-diff-removed'
               )}

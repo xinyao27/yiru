@@ -51,9 +51,9 @@ export function UsageBar({
           ? 'bg-amber-500'
           : 'bg-green-500'
   return (
-    <View className="flex-1 gap-0.5">
+    <View className="flex-1 gap-1">
       <View className="flex-row items-center gap-1">
-        <Text className="text-muted-foreground w-6 text-xs">{label}</Text>
+        <Text className="text-muted-foreground w-6">{label}</Text>
         <View className="bg-secondary h-1.5 flex-1 overflow-hidden rounded-full">
           <View
             className={cn('h-full', unavailable ? 'bg-muted' : barColorClassName)}
@@ -67,14 +67,14 @@ export function UsageBar({
             className="w-9"
           />
         ) : (
-          <Text className="text-muted-foreground w-9 text-right text-xs">
+          <Text className="text-muted-foreground w-9 text-right">
             {unavailable || used == null ? '—' : `${used}%`}
           </Text>
         )}
       </View>
       {resetText ? (
         // Why: the indent aligns the countdown with the usage track above it.
-        <Text className="text-muted-foreground ml-7 text-xs" numberOfLines={1}>
+        <Text className="text-muted-foreground ml-7" numberOfLines={1}>
           {resetText}
         </Text>
       ) : null}

@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretRight as ChevronRight, Globe } from '@/components/uniwind-icons'
 
-import { MobileGlassSection } from '../src/components/glass/section'
+import { MobileContentSection } from '../src/components/content-section'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
   loadTerminalLinkOpenMode,
@@ -52,21 +52,23 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
         <Text className="text-muted-foreground px-1 text-xs leading-5">
           Choose where HTTP(S) links tapped in terminal output open.
         </Text>
-        <MobileGlassSection className="mt-2">
+        <MobileContentSection className="mt-2">
           <Pressable
-            className="active:bg-accent flex-row items-center gap-2.5 px-3.5 py-3"
+            className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
             onPress={() => setPickerOpen(true)}
           >
-            <Globe size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <Globe size={16} colorClassName="accent-muted-foreground" />
+            </View>
             <View className="flex-1">
               <Text className="text-foreground text-sm font-medium">Open terminal links</Text>
-              <Text className="text-muted-foreground mt-0.5 text-xs">
-                {linkModeLabel(linkMode)}
-              </Text>
+              <Text className="text-muted-foreground mt-1 text-xs">{linkModeLabel(linkMode)}</Text>
             </View>
-            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            <View className="w-5 items-center">
+              <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+            </View>
           </Pressable>
-        </MobileGlassSection>
+        </MobileContentSection>
       </ScrollView>
 
       <PickerModal<MobileTerminalLinkOpenMode>

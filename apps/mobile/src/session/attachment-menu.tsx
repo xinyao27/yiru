@@ -4,7 +4,6 @@ import { View } from 'react-native'
 import { MobileGlassSurface } from '../components/glass/surface'
 import { LoadingIndicator } from '../components/loading-indicator'
 import { Plus } from '../components/uniwind-icons'
-import { cn } from '../style/class-names'
 import type { MobileImageSource } from './image-source-picker'
 
 const ATTACHMENT_ACTIONS = [
@@ -32,25 +31,32 @@ export function MobileAttachmentMenu({
   onSelect
 }: MobileAttachmentMenuProps): React.JSX.Element {
   const trigger = (
-    <MobileGlassSurface
-      className={cn('h-10 w-10 overflow-hidden rounded-full', disabled && 'opacity-40')}
-      isInteractive={!disabled}
-      tintColorClassName="accent-secondary"
-    >
-      <View
-        accessible
-        accessibilityRole="button"
-        accessibilityLabel={pending ? 'Adding attachment' : 'Add attachment'}
-        accessibilityState={{ disabled }}
-        className="h-full w-full items-center justify-center rounded-full"
+    <View className="h-11 w-11 items-center justify-center">
+      <MobileGlassSurface
+        className="h-9 w-9 overflow-hidden rounded-full"
+        isFunctional
+        isInteractive={!disabled}
+        tintColorClassName="accent-secondary"
       >
-        {pending ? (
-          <LoadingIndicator size={20} />
-        ) : (
-          <Plus size={22} colorClassName="accent-muted-foreground" />
-        )}
-      </View>
-    </MobileGlassSurface>
+        <View
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={pending ? 'Adding attachment' : 'Add attachment'}
+          accessibilityState={{ disabled }}
+          className={
+            disabled
+              ? 'h-full w-full items-center justify-center opacity-40'
+              : 'h-full w-full items-center justify-center'
+          }
+        >
+          {pending ? (
+            <LoadingIndicator size={18} />
+          ) : (
+            <Plus size={18} colorClassName="accent-muted-foreground" />
+          )}
+        </View>
+      </MobileGlassSurface>
+    </View>
   )
 
   if (disabled) {

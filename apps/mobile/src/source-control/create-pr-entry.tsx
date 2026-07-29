@@ -24,7 +24,7 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
         className="min-h-11 rounded-full"
         contentClassName="min-h-11 flex-row items-center justify-center gap-1 rounded-full px-3"
         disabled={action.disabled}
-        fallbackClassName={enabled ? 'border-primary bg-primary' : 'bg-secondary'}
+        fallbackClassName={enabled ? 'border-transparent bg-primary' : 'bg-secondary'}
         onPress={action.onPress}
         tintColorClassName={enabled ? 'accent-primary' : undefined}
       >
