@@ -5,6 +5,7 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import {
   addPreviewContent,
+  addSessionTokens,
   createAccumulator,
   finalizeSession,
   sessionIdFromFileName,
@@ -64,7 +65,11 @@ export function parseDevinSessionContent(
     const metrics = asRecord(metadata?.metrics)
     accumulator.model ??=
       extractString(metadata?.generation_model) ?? extractString(metrics?.generation_model)
-    accumulator.totalTokens += devinStepTokenTotal(metadata, metrics)
+    addSessionTokens(
+      accumulator,
+      devinStepTokenTotal(metadata, metrics),
+      extractString(metadata?.created_at)
+    )
     const isUser = metadata?.is_user_input === true
     if (isUser) {
       accumulator.messageCount++

@@ -34,6 +34,8 @@ export type CodexUsageDailyPoint = {
   outputTokens: number
   reasoningOutputTokens: number
   totalTokens: number
+  estimatedCostUsd: number | null
+  unpricedTokens: number
 }
 
 export type CodexUsageBreakdownRow = {

@@ -7,6 +7,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import {
   accumulatorFoldResumeState,
   addPreviewContent,
+  addSessionTokens,
   createAccumulator,
   finalizeSession,
   sessionIdFromFileName,
@@ -153,6 +154,6 @@ export function consumeGeminiMessage(
     if (model) {
       accumulator.model = model
     }
-    accumulator.totalTokens += tokenTotal(record.tokens)
+    addSessionTokens(accumulator, tokenTotal(record.tokens), record.timestamp)
   }
 }

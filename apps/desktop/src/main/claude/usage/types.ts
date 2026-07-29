@@ -47,6 +47,8 @@ export type ClaudeUsageDailyAggregate = {
   outputTokens: number
   cacheReadTokens: number
   cacheWriteTokens: number
+  estimatedCostUsd: number | null
+  unpricedTokens: number
 }
 
 export type ClaudeUsagePersistedState = {
@@ -86,6 +88,8 @@ export type ClaudeUsageParsedTurn = {
   outputTokens: number
   cacheReadTokens: number
   cacheWriteTokens: number
+  estimatedCostUsd: number | null
+  unpricedTokens: number
 }
 
 export type ClaudeUsageAttributedTurn = ClaudeUsageParsedTurn & {

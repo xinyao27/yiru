@@ -7,6 +7,7 @@ import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 
+import type { SessionOptionValue } from '../../../../shared/native-chat/session-options'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '../../../../shared/tui-agent/config'
 import { isTuiAgentEnabled } from '../../../../shared/tui-agent/selection'
@@ -20,6 +21,9 @@ type LaunchAgentSessionContinuationArgs = {
   workspacePath: string
   initialCwd?: string | null
   launchSource: LaunchSource
+  /** Model and option picks for the new session. Some agents only accept these
+   *  as launch flags, so a relaunch is the only way to change them. */
+  sessionOptions?: Record<string, SessionOptionValue>
 }
 
 export async function detectAgentSessionContinuationAgents(
@@ -97,7 +101,8 @@ export async function launchAgentSessionContinuation({
   groupId,
   workspacePath,
   initialCwd,
-  launchSource
+  launchSource,
+  sessionOptions
 }: LaunchAgentSessionContinuationArgs): Promise<boolean> {
   if (!(await ensureAgentAvailable(agent, worktreeId))) {
     return false
@@ -115,6 +120,7 @@ export async function launchAgentSessionContinuation({
     promptDelivery: 'submit-after-ready',
     launchSource,
     ...(initialCwd ? { initialCwd } : {}),
+    ...(sessionOptions ? { sessionOptions } : {}),
     onPromptDelivered: () =>
       toast.success(
         translate(

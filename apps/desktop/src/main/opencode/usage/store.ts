@@ -20,9 +20,9 @@ import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usag
 import { createWorktreeRefs, scanOpenCodeUsageDatabases } from './scanner'
 import type { OpenCodeUsageDailyAggregate, OpenCodeUsagePersistedState } from './types'
 
-// Why: v2 adds per-database session ownership (stale sibling-copy dedupe).
-// Older caches were built without it and can carry doubled sessions (#8006).
-const SCHEMA_VERSION = 2
+// Why: v3 prefers request-level message rows so model and day attribution are
+// retained. Older caches collapsed those records into one session-level row.
+const SCHEMA_VERSION = 3
 const STALE_MS = 5 * 60_000
 
 let _openCodeUsageFile: string | null = null
@@ -35,7 +35,7 @@ function getDefaultState(): OpenCodeUsagePersistedState {
     sessions: [],
     dailyAggregates: [],
     scanState: {
-      enabled: false,
+      enabled: true,
       lastScanStartedAt: null,
       lastScanCompletedAt: null,
       lastScanError: null
@@ -51,6 +51,10 @@ export function normalizePersistedState(
   }
   return {
     ...state,
+    scanState: {
+      ...state.scanState,
+      enabled: true
+    },
     processedDatabases: (state.processedDatabases ?? []).map((database) => ({
       ...database,
       sessions: (database.sessions ?? []).map(normalizeSessionCost),
@@ -354,13 +358,19 @@ export class OpenCodeUsageStore {
         cachedInputTokens: 0,
         outputTokens: 0,
         reasoningOutputTokens: 0,
-        totalTokens: 0
+        totalTokens: 0,
+        estimatedCostUsd: null,
+        unpricedTokens: 0
       }
       existing.inputTokens += row.inputTokens
       existing.cachedInputTokens += row.cachedInputTokens
       existing.outputTokens += row.outputTokens
       existing.reasoningOutputTokens += row.reasoningOutputTokens
       existing.totalTokens += row.totalTokens
+      existing.estimatedCostUsd = addCost(existing.estimatedCostUsd, row.estimatedCostUsd)
+      if (row.estimatedCostUsd === null) {
+        existing.unpricedTokens += row.totalTokens
+      }
       byDay.set(row.day, existing)
     }
     return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))

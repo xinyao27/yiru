@@ -116,7 +116,7 @@ import { createCommandCodeOutputStatusDetector } from '../../shared/command-code
 import {
   DEFAULT_REPO_BADGE_COLOR,
   FLOATING_TERMINAL_WORKTREE_ID,
-  GLOBAL_ASSISTANT_WORKTREE_ID,
+  FRIDAY_WORKTREE_ID,
   getDefaultVoiceSettings
 } from '../../shared/constants'
 import type {
@@ -528,6 +528,7 @@ import { deleteLocalSpeechModel, getSpeechModelDeletionErrorCode } from '../spee
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
+import { buildStatsSummary, type StatsUsageStores } from '../stats/summary'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
@@ -1217,7 +1218,7 @@ type RuntimeNotifier = {
       launchToken?: string
       launchAgent?: TuiAgent
       viewMode?: 'terminal' | 'chat'
-      isGlobalAssistant?: boolean
+      isFriday?: boolean
       activate?: boolean
       presentation?: RuntimeTerminalPresentation
       tabId?: string
@@ -2045,6 +2046,7 @@ export class YiruRuntimeService {
   // teardown so dead agents don't linger. See RuntimeAgentRowSnapshot.
   private latestAgentStatusByPaneKey = new Map<string, RuntimeAgentRowSnapshot>()
   private stats: StatsCollector | null = null
+  private readonly statsUsageStores: StatsUsageStores | null
   // Why (§3.3 + §7.1): the renderer-create path and coordinator
   // `probeWorktreeDrift` share this cache so a create that already fetched
   // `origin` within the last 30s does not re-fetch during dispatch, and
@@ -2121,6 +2123,7 @@ export class YiruRuntimeService {
       ) => Promise<readonly string[]>
       buildAgentHookPtyEnv?: () => Record<string, string>
       getDesktopWindowStatus?: () => RuntimeDesktopWindowStatus
+      statsUsageStores?: StatsUsageStores
     }
   ) {
     this.store = store
@@ -2139,6 +2142,7 @@ export class YiruRuntimeService {
       this.stats = stats
       this.agentDetector = new AgentDetector(stats)
     }
+    this.statsUsageStores = deps?.statsUsageStores ?? null
     this.getAgentStatusSnapshotFn = deps?.getAgentStatusSnapshot ?? null
     // Why: both managed-provider root resolvers must work without desktop IPC registration.
     if (deps?.getAdditionalAiVaultCodexHomePaths || deps?.resolveAiVaultClaudeProjectsDirs) {
@@ -2213,8 +2217,8 @@ export class YiruRuntimeService {
     }
   }
 
-  getStatsSummary(): StatsSummary | null {
-    return this.stats?.getSummary() ?? null
+  async getStatsSummary(): Promise<StatsSummary | null> {
+    return this.stats ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined) : null
   }
 
   getMemorySnapshot(): Promise<MemorySnapshot> {
@@ -5355,12 +5359,12 @@ export class YiruRuntimeService {
     this.terminalSessions.mutatePtyOutputState(ptyId, ({ pty, leaves, graphReady }) => {
       for (const leaf of leaves) {
         const paneKey = this.makeRuntimePaneKey(leaf)
-        const preservesGlobalAssistantOwner =
-          pty?.worktreeId === GLOBAL_ASSISTANT_WORKTREE_ID &&
+        const preservesFridayOwner =
+          pty?.worktreeId === FRIDAY_WORKTREE_ID &&
           leaf.worktreeId === FLOATING_TERMINAL_WORKTREE_ID
         this.terminalSessions.recordLivePtyBinding(ptyId, {
           worktreeId: leaf.worktreeId,
-          preserveExistingWorktree: preservesGlobalAssistantOwner,
+          preserveExistingWorktree: preservesFridayOwner,
           lastOutputAt: pty?.lastOutputAt ?? at,
           preview: pty?.preview ?? leaf.preview,
           tabId: leaf.tabId,
@@ -17871,10 +17875,10 @@ export class YiruRuntimeService {
     return { handle, tabId: leaf.tabId, worktreeId: leaf.worktreeId }
   }
 
-  async revealGlobalAssistantChat(handle: string): Promise<string> {
+  async revealFridayChat(handle: string): Promise<string> {
     const pty = this.getRuntimeOwnedPtyForHandle(handle)
-    if (!pty || pty.pty.worktreeId !== GLOBAL_ASSISTANT_WORKTREE_ID) {
-      throw new Error('global_assistant_terminal_not_found')
+    if (!pty || pty.pty.worktreeId !== FRIDAY_WORKTREE_ID) {
+      throw new Error('friday_terminal_not_found')
     }
     if (!pty.pty.connected) {
       throw new Error('terminal_exited')
@@ -17889,7 +17893,7 @@ export class YiruRuntimeService {
       ptyId: pty.pty.ptyId,
       // Why: agent OSC titles change during startup; the app-owned tab should
       // keep its stable product identity rather than becoming "Claude Code".
-      title: 'Yiru Assistant',
+      title: 'Friday',
       ...(pty.pty.launchConfig
         ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
         : {}),
@@ -17898,7 +17902,7 @@ export class YiruRuntimeService {
       ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
       ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {}),
       viewMode: 'chat',
-      isGlobalAssistant: true,
+      isFriday: true,
       activate: false,
       presentation: 'background'
     })
@@ -18477,13 +18481,13 @@ export class YiruRuntimeService {
       }
     }
 
-    const globalAssistantSelector =
-      selector === GLOBAL_ASSISTANT_WORKTREE_ID || selector === `id:${GLOBAL_ASSISTANT_WORKTREE_ID}`
-    if (globalAssistantSelector) {
+    const fridaySelector =
+      selector === FRIDAY_WORKTREE_ID || selector === `id:${FRIDAY_WORKTREE_ID}`
+    if (fridaySelector) {
       // Why: the assistant is local even while the user is browsing an SSH
       // workspace; its synthetic owner must never inherit a remote connection.
       return {
-        id: GLOBAL_ASSISTANT_WORKTREE_ID,
+        id: FRIDAY_WORKTREE_ID,
         path: homedir(),
         connectionId: null,
         repo: null,
@@ -19470,12 +19474,11 @@ export class YiruRuntimeService {
       return pty
     }
 
-    const preservesGlobalAssistantOwner =
-      pty.worktreeId === GLOBAL_ASSISTANT_WORKTREE_ID &&
-      worktreeId === FLOATING_TERMINAL_WORKTREE_ID
+    const preservesFridayOwner =
+      pty.worktreeId === FRIDAY_WORKTREE_ID && worktreeId === FLOATING_TERMINAL_WORKTREE_ID
     // Why: the floating workspace is only the assistant's presentation host;
     // its runtime-owned PTY must retain the synthetic assistant owner.
-    if (pty.worktreeId !== worktreeId && !preservesGlobalAssistantOwner) {
+    if (pty.worktreeId !== worktreeId && !preservesFridayOwner) {
       pty.worktreeId = worktreeId
       // Why: path/controller inference can relocate a PTY but cannot attest a new instance.
       pty.worktreeInstanceId = null

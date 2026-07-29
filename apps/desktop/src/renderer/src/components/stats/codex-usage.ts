@@ -16,6 +16,7 @@ export type CodexUsageSlice = {
   codexUsageScope: CodexUsageScope
   codexUsageRange: CodexUsageRange
   codexUsageScanState: CodexUsageScanState | null
+  codexUsageSnapshotReady: boolean
   codexUsageSummary: CodexUsageSummary | null
   codexUsageDaily: CodexUsageDailyPoint[]
   codexUsageModelBreakdown: CodexUsageBreakdownRow[]
@@ -34,8 +35,9 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   get
 ) => ({
   codexUsageScope: 'yiru',
-  codexUsageRange: '30d',
+  codexUsageRange: 'all',
   codexUsageScanState: null,
+  codexUsageSnapshotReady: false,
   codexUsageSummary: null,
   codexUsageDaily: [],
   codexUsageModelBreakdown: [],
@@ -61,6 +63,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
               lastScanError: null
             }
           : nextScanState,
+        codexUsageSnapshotReady: false,
         codexUsageSummary: null,
         codexUsageDaily: [],
         codexUsageModelBreakdown: [],
@@ -86,6 +89,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   },
 
   fetchCodexUsage: async (opts) => {
+    set({ codexUsageSnapshotReady: false })
     try {
       const scanState = (await window.api.codexUsage.getScanState()) as
         | CodexUsageScanState
@@ -155,6 +159,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
 
       set({
         codexUsageScanState: refreshedSnapshot.scanState,
+        codexUsageSnapshotReady: refreshedSnapshot.scanState.lastScanError === null,
         codexUsageSummary: refreshedSnapshot.summary,
         codexUsageDaily: refreshedSnapshot.daily,
         codexUsageModelBreakdown: refreshedSnapshot.modelBreakdown,
@@ -162,6 +167,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
         codexUsageRecentSessions: refreshedSnapshot.recentSessions
       })
     } catch (error) {
+      set({ codexUsageSnapshotReady: false })
       console.error('Failed to fetch Codex usage:', error)
     }
   },

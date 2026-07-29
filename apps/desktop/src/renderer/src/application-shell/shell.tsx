@@ -101,7 +101,7 @@ import {
   trackYiruCliFeatureTipShown
 } from '../components/feature-tips/feature-tip-telemetry'
 import { FloatingTerminalToggleButton } from '../components/floating-terminal/toggle-button'
-import { useGlobalAssistantFloatingTab } from '../components/floating-terminal/use-global-assistant-floating-tab'
+import { useFridayFloatingTab } from '../components/floating-terminal/use-friday-floating-tab'
 import { shouldShowOnboarding } from '../components/onboarding/should-show-onboarding'
 import { onOnboardingReopened } from '../components/onboarding/show-onboarding-event'
 import { shouldRenderPetOverlay } from '../components/pet/overlay-visibility'
@@ -339,6 +339,7 @@ function WindowControls(): React.JSX.Element {
 }
 
 const Landing = lazy(() => import('./landing-page'))
+const HomePage = lazy(() => import('../components/home/page'))
 const WorktreeCreationPanel = lazy(() => import('../components/worktree-creation/panel'))
 const AutomationsPage = lazy(() => import('../components/automations/page'))
 const Settings = lazy(() => import('../components/settings/page'))
@@ -545,7 +546,7 @@ function App(): React.JSX.Element {
   const floatingVisibleTabCount = useAppStore(selectFloatingVisibleTabCount)
   const hasFloatingAssistantTab = useAppStore((state) =>
     (state.unifiedTabsByWorktree[FLOATING_TERMINAL_WORKTREE_ID] ?? []).some(
-      (tab) => tab.isGlobalAssistant === true
+      (tab) => tab.isFriday === true
     )
   )
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
@@ -672,12 +673,11 @@ function App(): React.JSX.Element {
     [floatingTerminalOpen, rememberFloatingTerminalReturnFocus, restoreFloatingTerminalReturnFocus]
   )
 
-  const { assistantPending, assistantLoadingVisible, openAssistant } =
-    useGlobalAssistantFloatingTab({
-      floatingWorkspaceOpen: floatingTerminalOpen,
-      setFloatingWorkspaceOpen: setFloatingTerminalOpenWithFocus
-    })
-  // Why: Global Assistant owns the same floating tab surface even when ordinary
+  const { assistantPending, assistantLoadingVisible, openAssistant } = useFridayFloatingTab({
+    floatingWorkspaceOpen: floatingTerminalOpen,
+    setFloatingWorkspaceOpen: setFloatingTerminalOpenWithFocus
+  })
+  // Why: Friday owns the same floating tab surface even when ordinary
   // floating terminals are disabled; pending startup also needs its loading UI.
   const shouldMountFloatingTerminalPanel =
     (floatingTerminalEnabled || assistantPending || hasFloatingAssistantTab) &&
@@ -2570,6 +2570,7 @@ function App(): React.JSX.Element {
                               {activeView === 'settings' ? (
                                 <Settings sidebarAppearanceStyle={leftSidebarStyle} />
                               ) : null}
+                              {activeView === 'home' ? <HomePage /> : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
                               {activeView === 'space' ? <WorkspaceSpacePage /> : null}

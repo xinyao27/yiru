@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { View, Text, FlatList, Alert, Platform, Pressable } from 'react-native'
 
 import {
@@ -26,9 +26,18 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
+import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
+import {
+  getHomeStatsByHost,
+  hydrateHomeStatsByHost,
+  subscribeHomeStatsByHost,
+  updateHomeStatsByHost
+} from '../src/home/stats-state'
+import { parseRuntimeStatsSummary } from '../src/home/stats-summary'
+import { translate } from '../src/i18n/translate'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { subscribeToDesktopNotifications } from '../src/notifications/notifications'
@@ -52,13 +61,6 @@ function endpointLabel(endpoint: string): string {
   }
 }
 
-type StatsSummary = {
-  totalAgentsSpawned: number
-  totalPRsCreated: number
-  totalAgentTimeMs: number
-  firstEventAt: number | null
-}
-
 type WorktreeSummary = {
   worktreeId: string
   repo: string
@@ -79,21 +81,6 @@ type HostWorktreeInfo = {
   lastActiveWorktree: WorktreeSummary | null
 }
 
-function formatDuration(ms: number): string {
-  const totalMinutes = Math.floor(ms / 60_000)
-  const totalHours = Math.floor(totalMinutes / 60)
-  const days = Math.floor(totalHours / 24)
-  const hours = totalHours % 24
-  if (days > 0) {
-    return `${days}d ${hours}h`
-  }
-  const minutes = totalMinutes % 60
-  if (totalHours > 0) {
-    return `${totalHours}h ${minutes}m`
-  }
-  return `${totalMinutes}m`
-}
-
 // Why: derive a stable per-instance identity for RpcClient so the wireUp
 // effect's dep key changes when forceReconnect swaps the underlying client
 // for a host (without this, listeners stay attached to the closed client
@@ -109,11 +96,7 @@ function clientKey(client: RpcClient): number {
   return id
 }
 
-function fetchStats(
-  client: RpcClient,
-  setStats: (s: StatsSummary) => void,
-  disposed: () => boolean
-) {
+function fetchStats(client: RpcClient, hostId: string, disposed: () => boolean) {
   client
     .sendRequest('stats.summary')
     .then((response) => {
@@ -121,7 +104,14 @@ function fetchStats(
         return
       }
       if (response.ok) {
-        setStats(response.result as StatsSummary)
+        const summary = parseRuntimeStatsSummary(response.result)
+        if (!summary) {
+          return
+        }
+        updateHomeStatsByHost((previous) => ({
+          ...previous,
+          [hostId]: summary
+        }))
       }
     })
     .catch(() => {})
@@ -222,12 +212,17 @@ export default function HomeScreen() {
   // edge-to-edge on iPad; on phones isWideLayout is false and layout is unchanged.
   const { isWideLayout, contentMaxWidth } = useResponsiveLayout()
   const [hosts, setHosts] = useState<HostProfile[]>([])
+  const [hasLoadedHosts, setHasLoadedHosts] = useState(false)
   const [actionTarget, setActionTarget] = useState<HostProfile | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<HostProfile | null>(null)
   const [hostStates, setHostStates] = useState<Record<string, ConnectionState>>({})
   const [hostAttempts, setHostAttempts] = useState<Record<string, number>>({})
   const [hostLastConnected, setHostLastConnected] = useState<Record<string, number | null>>({})
-  const [stats, setStats] = useState<StatsSummary | null>(null)
+  const statsByHost = useSyncExternalStore(
+    subscribeHomeStatsByHost,
+    getHomeStatsByHost,
+    getHomeStatsByHost
+  )
   const [worktreeInfo, setWorktreeInfo] = useState<Record<string, HostWorktreeInfo>>({})
   const [accountsByHost, setAccountsByHost] = useState<Record<string, AccountsSnapshot>>({})
   const [lastVisited, setLastVisited] = useState<{ hostId: string; worktreeId: string } | null>(
@@ -281,6 +276,7 @@ export default function HomeScreen() {
       }
       setWorktreeInfo((prev) => (Object.keys(prev).length > 0 ? prev : snap.worktreeInfo))
       setAccountsByHost((prev) => (Object.keys(prev).length > 0 ? prev : snap.accountsByHost))
+      hydrateHomeStatsByHost(snap.statsByHost ?? {})
       for (const [hostId, info] of Object.entries(snap.worktreeInfo)) {
         const wt = info.lastActiveWorktree
         if (wt) {
@@ -295,37 +291,49 @@ export default function HomeScreen() {
     }
   }, [])
 
-  // Why: persist the merged snapshot whenever either piece updates so the
+  // Why: persist the merged snapshot whenever any home-page data updates so the
   // next cold-start has fresh seed data. The cache module debounces writes
   // internally so a flurry of streamed updates doesn't hammer disk.
   useEffect(() => {
-    if (Object.keys(worktreeInfo).length === 0 && Object.keys(accountsByHost).length === 0) {
+    if (
+      Object.keys(worktreeInfo).length === 0 &&
+      Object.keys(accountsByHost).length === 0 &&
+      Object.keys(statsByHost).length === 0
+    ) {
       return
     }
     saveHomeSnapshot({
       worktreeInfo,
       accountsByHost,
+      statsByHost,
       savedAt: Date.now()
     })
-  }, [worktreeInfo, accountsByHost])
+  }, [worktreeInfo, accountsByHost, statsByHost])
 
   useFocusEffect(
     useCallback(() => {
       let stale = false
-      void loadHosts().then(async (h) => {
-        if (stale) {
-          return
-        }
-        setHosts(h)
-        if (h.length === 0 || notificationOptInCheckedRef.current) {
-          return
-        }
-        notificationOptInCheckedRef.current = true
-        const showNotificationOptIn = await shouldPresentNotificationOptIn()
-        if (!stale && showNotificationOptIn) {
-          router.replace('/notification-opt-in')
-        }
-      })
+      void loadHosts()
+        .then(async (h) => {
+          if (stale) {
+            return
+          }
+          setHosts(h)
+          setHasLoadedHosts(true)
+          if (h.length === 0 || notificationOptInCheckedRef.current) {
+            return
+          }
+          notificationOptInCheckedRef.current = true
+          const showNotificationOptIn = await shouldPresentNotificationOptIn()
+          if (!stale && showNotificationOptIn) {
+            router.replace('/notification-opt-in')
+          }
+        })
+        .catch(() => {
+          if (!stale) {
+            setHasLoadedHosts(true)
+          }
+        })
       void AsyncStorage.getItem('yiru:last-visited-worktree').then((raw) => {
         if (stale || !raw) {
           return
@@ -336,7 +344,7 @@ export default function HomeScreen() {
       })
       for (const entry of allClientsRef.current) {
         if (entry.client.getState() === 'connected') {
-          fetchStats(entry.client, setStats, () => stale)
+          fetchStats(entry.client, entry.hostId, () => stale)
           fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => stale)
           fetchAccountsSnapshot(entry.client, entry.hostId, setAccountsByHost, () => stale)
         }
@@ -351,7 +359,6 @@ export default function HomeScreen() {
     () => [...hosts].sort((a, b) => b.lastConnected - a.lastConnected),
     [hosts]
   )
-
   // Why: mirror per-host connection state into hostStates so existing
   // render code (status dots, connecting indicators) keeps working.
   useEffect(() => {
@@ -451,7 +458,7 @@ export default function HomeScreen() {
           }
           if (!statsFetched) {
             statsFetched = true
-            fetchStats(entry.client, setStats, () => false)
+            fetchStats(entry.client, entry.hostId, () => false)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
           }
         } else {
@@ -579,25 +586,40 @@ export default function HomeScreen() {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <MobileGlassIconButton
-                    accessibilityLabel="Settings"
-                    icon="settings"
-                    onPress={() => router.push('/settings')}
-                  />
+                  <MobileGlassGroup className="flex-row gap-2" spacing={8}>
+                    <MobileGlassIconButton
+                      accessibilityLabel={translate(
+                        'mobile.home.openInsights',
+                        'Open activity insights'
+                      )}
+                      icon="insights"
+                      onPress={() => router.push('/activity-insights')}
+                    />
+                    <MobileGlassIconButton
+                      accessibilityLabel={translate('mobile.settings.title', 'Settings')}
+                      icon="settings"
+                      onPress={() => router.push('/settings')}
+                    />
+                  </MobileGlassGroup>
                 )
         }}
       />
       {Platform.OS === 'ios' ? (
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
-            accessibilityLabel="Settings"
+            accessibilityLabel={translate('mobile.home.openInsights', 'Open activity insights')}
+            icon="chart.bar.xaxis"
+            onPress={() => router.push('/activity-insights')}
+          />
+          <Stack.Toolbar.Button
+            accessibilityLabel={translate('mobile.settings.title', 'Settings')}
             icon="gearshape"
             onPress={() => router.push('/settings')}
           />
         </Stack.Toolbar>
       ) : null}
 
-      {hosts.length === 0 ? (
+      {hasLoadedHosts && hosts.length === 0 ? (
         /* ─── Empty state: onboarding ─── */
         <View
           className="pb-safe flex-1"
@@ -657,39 +679,7 @@ export default function HomeScreen() {
               : undefined
           }
           ListHeaderComponent={
-            <View className="gap-6 pt-2 pb-2">
-              {stats && (
-                <View className="gap-2">
-                  <SectionHeading>Overview</SectionHeading>
-                  <View className="border-border border-t-hairline border-b-hairline flex-row py-3">
-                    <View className="flex-1 gap-1 px-2">
-                      <Text className="text-foreground font-semibold">
-                        {stats.totalAgentsSpawned.toLocaleString()}
-                      </Text>
-                      <Text className="text-muted-foreground" numberOfLines={1}>
-                        Agents spawned
-                      </Text>
-                    </View>
-                    <View className="border-l-hairline border-border flex-1 gap-1 px-3">
-                      <Text className="text-foreground font-semibold">
-                        {formatDuration(stats.totalAgentTimeMs)}
-                      </Text>
-                      <Text className="text-muted-foreground" numberOfLines={1}>
-                        Agent time
-                      </Text>
-                    </View>
-                    <View className="border-l-hairline border-border flex-1 gap-1 px-3">
-                      <Text className="text-foreground font-semibold">
-                        {stats.totalPRsCreated.toLocaleString()}
-                      </Text>
-                      <Text className="text-muted-foreground" numberOfLines={1}>
-                        PRs created
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-
+            <View className="pt-2 pb-2">
               <SectionHeading>Desktops</SectionHeading>
             </View>
           }

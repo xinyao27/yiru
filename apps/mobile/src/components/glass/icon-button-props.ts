@@ -10,6 +10,7 @@ export type MobileGlassIconName =
   | 'down'
   | 'edit'
   | 'external'
+  | 'insights'
   | 'more'
   | 'play'
   | 'plus'

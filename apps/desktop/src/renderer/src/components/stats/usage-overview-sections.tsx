@@ -1,5 +1,6 @@
 import { WarningCircle as AlertCircle } from '@phosphor-icons/react'
 
+import { ContributionHeatmap } from '@/components/contribution-heatmap/heatmap'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -12,14 +13,6 @@ import {
   type UsageOverviewModel,
   type UsageProviderOverview
 } from './usage-overview-model'
-
-const INTENSITY_CLASS: Record<UsageOverviewDailyPoint['intensity'], string> = {
-  0: 'border-border/60 bg-muted/40',
-  1: 'border-border/60 bg-muted-foreground/20',
-  2: 'border-border/60 bg-muted-foreground/35',
-  3: 'border-border/60 bg-muted-foreground/55',
-  4: 'border-border/60 bg-foreground/75'
-}
 
 function translateActivityLabel(label: UsageProviderOverview['activityLabel']): string {
   if (label === 'turns') {
@@ -144,7 +137,7 @@ export function DailyIntensityGrid({
           <p className="text-muted-foreground text-xs">
             {translate(
               'auto.components.stats.usage.overview.sections.f28ff1f852',
-              'Recent combined Claude, Codex, and OpenCode token activity.'
+              'A year of combined Claude, Codex, and OpenCode token activity.'
             )}
           </p>
         </div>
@@ -156,42 +149,11 @@ export function DailyIntensityGrid({
         ) : null}
       </div>
 
-      <div
-        className="grid grid-cols-[repeat(14,minmax(0,1fr))] gap-1 sm:grid-cols-[repeat(21,minmax(0,1fr))]"
-        aria-label={translate(
-          'auto.components.stats.usage.overview.sections.52d9221dc0',
-          'Recent token activity heatmap'
-        )}
-      >
-        {days.map((day) => (
-          <div
-            key={day.day}
-            className={cn('aspect-square min-h-3 border', INTENSITY_CLASS[day.intensity])}
-            aria-label={translate(
-              'auto.components.stats.usage.overview.sections.32330a6e66',
-              '{{value0}}: {{value1}} tokens',
-              { value0: day.day, value1: day.totalTokens.toLocaleString() }
-            )}
-          />
-        ))}
-      </div>
-
-      <div className="text-muted-foreground mt-3 flex items-center justify-between gap-3 text-xs">
-        <span>{formatDayLabel(days[0]?.day ?? '')}</span>
-        <span>{translate('auto.components.stats.usage.overview.sections.1dd166c920', 'Less')}</span>
-        <div className="flex items-center gap-1" aria-hidden>
-          {[0, 1, 2, 3, 4].map((intensity) => (
-            <span
-              key={intensity}
-              className={cn(
-                'size-2 border',
-                INTENSITY_CLASS[intensity as UsageOverviewDailyPoint['intensity']]
-              )}
-            />
-          ))}
-        </div>
-        <span>{translate('auto.components.stats.usage.overview.sections.f6df0d7d6d', 'More')}</span>
-        <span>{formatDayLabel(days.at(-1)?.day ?? '')}</span>
+      <div className="scrollbar-sleek scrollbar-sleek-lg overflow-x-auto pb-1">
+        <ContributionHeatmap
+          metric="tokens"
+          points={days.map((day) => ({ day: day.day, value: day.totalTokens }))}
+        />
       </div>
     </section>
   )

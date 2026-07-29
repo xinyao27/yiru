@@ -20,8 +20,8 @@ import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
-import { registerGlobalAssistantHandlers } from '../global-assistant/ipc'
-import type { GlobalAssistantService } from '../global-assistant/service'
+import { registerFridayHandlers } from '../friday/ipc'
+import type { FridayService } from '../friday/service'
 import { hydrateLocalPtyRegistryAtBoot } from '../memory/hydrate-local-pty-registry'
 import type { Store } from '../persistence'
 import { registerRepoHandlers } from '../project-groups/repos'
@@ -82,7 +82,7 @@ export function attachMainWindowServices(
     // Why: lets the PTY orphan sweep skip the one crash-recovery reload (#5787).
     isRecoveryReloadInFlight?: (webContentsId: number) => boolean
     onBeforeUpdateQuit?: () => void | Promise<void>
-    globalAssistant?: GlobalAssistantService
+    friday?: FridayService
   }
 ): void {
   registerAppReloadHandler(mainWindow, options?.onBeforeRendererReload)
@@ -104,8 +104,8 @@ export function attachMainWindowServices(
       isRecoveryReloadInFlight: options?.isRecoveryReloadInFlight
     }
   )
-  if (options?.globalAssistant) {
-    registerGlobalAssistantHandlers(mainWindow, options.globalAssistant)
+  if (options?.friday) {
+    registerFridayHandlers(mainWindow, options.friday)
   }
   // Why: the Manage Sessions settings panel (docs/daemon-staleness-ux.md §Phase 1)
   // uses a narrow `pty:management:*` IPC surface that reads the live
@@ -336,7 +336,7 @@ function registerRuntimeWindowLifecycle(
           ...(opts.launchToken ? { launchToken: opts.launchToken } : {}),
           ...(opts.launchAgent ? { launchAgent: opts.launchAgent } : {}),
           ...(opts.viewMode ? { viewMode: opts.viewMode } : {}),
-          ...(opts.isGlobalAssistant ? { isGlobalAssistant: true } : {}),
+          ...(opts.isFriday ? { isFriday: true } : {}),
           activate: opts.activate !== false,
           ...(opts.presentation ? { presentation: opts.presentation } : {}),
           // Why: pre-minted tabId from main keeps the renderer's tab id aligned

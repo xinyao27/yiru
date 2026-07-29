@@ -18,31 +18,19 @@ import type {
 } from '../../../shared/claude-usage-types'
 import type { Store } from '../../persistence'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usage-worktree-metadata'
+import { priceClaudeUsage } from './pricing'
 import { createWorktreeRefs, getSessionProjectLabel, scanClaudeUsageFiles } from './scanner'
 import type { ClaudeUsagePersistedState } from './types'
 
-// Why: v5 widens Claude ownership keys (message-id / uuid fallbacks). Older
-// caches either lack ownership or used narrower keys and can under/over-count
-// after fork reclaim (#8006).
-const SCHEMA_VERSION = 5
+// Why: v6 persists per-request value and unpriced coverage after Claude's
+// cache-TTL split. Older aggregates cannot reconstruct those categories.
+const SCHEMA_VERSION = 6
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
 // Why: capture the path after configureDevUserDataPath() but before app.setName()
 // mutates Electron's derived userData location, matching the persistence/store pattern.
 let _claudeUsageFile: string | null = null
-
-type ClaudeModelPricing = {
-  input: number
-  output: number
-  cacheRead: number
-  cacheWrite: number
-  thresholdTokens?: number
-  inputAboveThreshold?: number
-  outputAboveThreshold?: number
-  cacheReadAboveThreshold?: number
-  cacheWriteAboveThreshold?: number
-}
 
 type AutomationUsageLookupInput = {
   worktreeId: string | null
@@ -51,62 +39,25 @@ type AutomationUsageLookupInput = {
   completedAt: number | null
 }
 
-const LONG_CONTEXT_THRESHOLD_TOKENS = 200_000
-const SONNET_LONG_CONTEXT_PRICING = {
-  thresholdTokens: LONG_CONTEXT_THRESHOLD_TOKENS,
-  inputAboveThreshold: 6,
-  outputAboveThreshold: 22.5,
-  cacheReadAboveThreshold: 0.6,
-  cacheWriteAboveThreshold: 7.5
-} satisfies Partial<ClaudeModelPricing>
-
-const MODEL_PRICING: Record<string, ClaudeModelPricing> = {
-  'claude-opus-4-8': { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
-  'claude-opus-4-7': { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
-  'claude-opus-4-6': { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
-  'claude-opus-4-5': { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
-  'claude-opus-4-1': { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 },
-  'claude-opus-4': { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 },
-  'claude-sonnet-4-6': {
-    input: 3,
-    output: 15,
-    cacheRead: 0.3,
-    cacheWrite: 3.75,
-    ...SONNET_LONG_CONTEXT_PRICING
-  },
-  'claude-sonnet-4-5': {
-    input: 3,
-    output: 15,
-    cacheRead: 0.3,
-    cacheWrite: 3.75,
-    ...SONNET_LONG_CONTEXT_PRICING
-  },
-  'claude-sonnet-4': {
-    input: 3,
-    output: 15,
-    cacheRead: 0.3,
-    cacheWrite: 3.75,
-    ...SONNET_LONG_CONTEXT_PRICING
-  },
-  'claude-sonnet-3-7': { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
-  'claude-sonnet-3-5': { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
-  'claude-haiku-4-5': { input: 1, output: 5, cacheRead: 0.1, cacheWrite: 1.25 },
-  'claude-haiku-3-5': { input: 0.8, output: 4, cacheRead: 0.08, cacheWrite: 1 },
-  'claude-haiku-3': { input: 0.25, output: 1.25, cacheRead: 0.03, cacheWrite: 0.3 }
+function estimateCostUsd(
+  model: string | null,
+  inputTokens: number,
+  outputTokens: number,
+  cacheReadTokens: number,
+  cacheWriteTokens: number
+): number | null {
+  const price = priceClaudeUsage({
+    model,
+    inputTokens,
+    outputTokens,
+    cacheReadTokens,
+    cacheWriteTokens
+  })
+  return price.unpricedTokens === 0 ? price.estimatedCostUsd : null
 }
 
-const MODEL_ALIASES: Record<string, string> = {
-  model_placeholder_m26: 'claude-opus-4-6',
-  model_placeholder_m35: 'claude-sonnet-4-6',
-  'claude-opus-4.8': 'claude-opus-4-8',
-  'claude-opus-4.6': 'claude-opus-4-6',
-  'claude-sonnet-4.6': 'claude-sonnet-4-6',
-  'claude-opus-4.8-thinking': 'claude-opus-4-8',
-  'claude-opus-4.6-thinking': 'claude-opus-4-6',
-  'claude-sonnet-4.6-thinking': 'claude-sonnet-4-6',
-  'claude-opus-4-8-thinking': 'claude-opus-4-8',
-  'claude-opus-4-6-thinking': 'claude-opus-4-6',
-  'claude-sonnet-4-6-thinking': 'claude-sonnet-4-6'
+function addKnownCost(left: number | null, right: number | null): number | null {
+  return left === null && right === null ? null : (left ?? 0) + (right ?? 0)
 }
 
 function getDefaultState(): ClaudeUsagePersistedState {
@@ -117,7 +68,7 @@ function getDefaultState(): ClaudeUsagePersistedState {
     sessions: [],
     dailyAggregates: [],
     scanState: {
-      enabled: false,
+      enabled: true,
       lastScanStartedAt: null,
       lastScanCompletedAt: null,
       lastScanError: null
@@ -134,144 +85,6 @@ function getClaudeUsageFile(): string {
     _claudeUsageFile = join(app.getPath('userData'), 'yiru-claude-usage.json')
   }
   return _claudeUsageFile
-}
-
-function hasClaudeModelVersion(model: string, family: string, version: string): boolean {
-  const normalized = model.replace(/\./g, '-')
-  return new RegExp(`${family}-${version}(?:$|[^0-9])`).test(normalized)
-}
-
-function isLegacyBaseOpus4Model(model: string): boolean {
-  const normalized = model.replace(/\./g, '-')
-  return /opus-4(?:$|-thinking$|-20\d{6}(?:-thinking)?$|@20\d{6}$)/.test(normalized)
-}
-
-function normalizeModelForPricing(model: string | null): string | null {
-  if (!model) {
-    return null
-  }
-  const lower = model
-    .toLowerCase()
-    .trim()
-    .replace(/^anthropic[/:]/, '')
-  const alias = MODEL_ALIASES[lower]
-  if (alias) {
-    return alias
-  }
-  if (hasClaudeModelVersion(lower, 'opus', '4-8')) {
-    return 'claude-opus-4-8'
-  }
-  if (hasClaudeModelVersion(lower, 'opus', '4-7')) {
-    return 'claude-opus-4-7'
-  }
-  if (hasClaudeModelVersion(lower, 'opus', '4-6')) {
-    return 'claude-opus-4-6'
-  }
-  if (hasClaudeModelVersion(lower, 'opus', '4-5')) {
-    return 'claude-opus-4-5'
-  }
-  if (hasClaudeModelVersion(lower, 'opus', '4-1')) {
-    return 'claude-opus-4-1'
-  }
-  if (isLegacyBaseOpus4Model(lower)) {
-    return 'claude-opus-4'
-  }
-  if (lower.includes('opus-4')) {
-    // Why: new Opus 4 point releases now share the current low Opus pricing;
-    // avoid overbilling unknown future Claude Code model IDs as legacy Opus 4.
-    return 'claude-opus-4-8'
-  }
-  if (hasClaudeModelVersion(lower, 'sonnet', '4-6')) {
-    return 'claude-sonnet-4-6'
-  }
-  if (hasClaudeModelVersion(lower, 'sonnet', '4-5')) {
-    return 'claude-sonnet-4-5'
-  }
-  if (lower.includes('sonnet-4')) {
-    return 'claude-sonnet-4-6'
-  }
-  if (lower.includes('sonnet-3-7') || lower.includes('sonnet-3.7')) {
-    return 'claude-sonnet-3-7'
-  }
-  // Why: legacy version-first IDs like `claude-3-5-sonnet-20241022` are still
-  // present in historical Claude Code/SDK logs read off disk. Match them so
-  // their cost is not silently dropped from the breakdown.
-  if (
-    lower.includes('sonnet-3-5') ||
-    lower.includes('sonnet-3.5') ||
-    lower.includes('3-5-sonnet') ||
-    lower.includes('3.5-sonnet')
-  ) {
-    return 'claude-sonnet-3-5'
-  }
-  if (lower.includes('haiku-4-5')) {
-    return 'claude-haiku-4-5'
-  }
-  if (lower.includes('haiku-3-5') || lower.includes('haiku-3.5')) {
-    return 'claude-haiku-3-5'
-  }
-  if (lower.includes('3-5-haiku') || lower.includes('3.5-haiku')) {
-    return 'claude-haiku-3-5'
-  }
-  if (lower.includes('haiku-3')) {
-    return 'claude-haiku-3'
-  }
-  return null
-}
-
-function calculateTieredCost(
-  tokens: number,
-  basePrice: number,
-  abovePrice?: number,
-  threshold?: number
-): number {
-  if (threshold === undefined || abovePrice === undefined) {
-    return tokens * basePrice
-  }
-  const belowTokens = Math.min(tokens, threshold)
-  const aboveTokens = Math.max(tokens - threshold, 0)
-  return belowTokens * basePrice + aboveTokens * abovePrice
-}
-
-function estimateCostUsd(
-  model: string | null,
-  inputTokens: number,
-  outputTokens: number,
-  cacheReadTokens: number,
-  cacheWriteTokens: number
-): number | null {
-  const normalized = normalizeModelForPricing(model)
-  if (!normalized) {
-    return null
-  }
-  const pricing = MODEL_PRICING[normalized]
-  return (
-    (calculateTieredCost(
-      inputTokens,
-      pricing.input,
-      pricing.inputAboveThreshold,
-      pricing.thresholdTokens
-    ) +
-      calculateTieredCost(
-        outputTokens,
-        pricing.output,
-        pricing.outputAboveThreshold,
-        pricing.thresholdTokens
-      ) +
-      calculateTieredCost(
-        cacheReadTokens,
-        pricing.cacheRead,
-        pricing.cacheReadAboveThreshold,
-        pricing.thresholdTokens
-      ) +
-      calculateTieredCost(
-        cacheWriteTokens,
-        pricing.cacheWrite,
-        pricing.cacheWriteAboveThreshold,
-        pricing.thresholdTokens
-      )) /
-    1_000_000
-  )
 }
 
 function getRangeCutoff(range: ClaudeUsageRange): string | null {
@@ -335,14 +148,14 @@ export class ClaudeUsageStore {
       if (parsed.schemaVersion !== SCHEMA_VERSION) {
         // Why: scanner semantics affect persisted totals, so old Claude caches
         // must be rebuilt after parser/source changes instead of reused briefly.
-        // Preserve scanState.enabled so existing users keep tracking on across
-        // schema bumps; the next refresh will repopulate the analytics.
+        // Usage analytics is local and always available on Home. Schema bumps
+        // migrate older opt-in state to the current always-on behavior.
         const defaults = getDefaultState()
         return {
           ...defaults,
           scanState: {
             ...defaults.scanState,
-            enabled: parsed.scanState?.enabled ?? defaults.scanState.enabled
+            enabled: true
           }
         }
       }
@@ -351,7 +164,8 @@ export class ClaudeUsageStore {
         ...parsed,
         scanState: {
           ...getDefaultState().scanState,
-          ...parsed.scanState
+          ...parsed.scanState,
+          enabled: true
         }
       }
     } catch (error) {
@@ -491,13 +305,7 @@ export class ClaudeUsageStore {
         row.projectLabel,
         (byProject.get(row.projectLabel) ?? 0) + row.inputTokens + row.outputTokens
       )
-      const cost = estimateCostUsd(
-        row.model,
-        row.inputTokens,
-        row.outputTokens,
-        row.cacheReadTokens,
-        row.cacheWriteTokens
-      )
+      const cost = row.estimatedCostUsd
       if (cost !== null) {
         hasAnyBillableCost = true
         estimatedCostUsd += cost
@@ -549,12 +357,16 @@ export class ClaudeUsageStore {
         inputTokens: 0,
         outputTokens: 0,
         cacheReadTokens: 0,
-        cacheWriteTokens: 0
+        cacheWriteTokens: 0,
+        estimatedCostUsd: null,
+        unpricedTokens: 0
       }
       existing.inputTokens += row.inputTokens
       existing.outputTokens += row.outputTokens
       existing.cacheReadTokens += row.cacheReadTokens
       existing.cacheWriteTokens += row.cacheWriteTokens
+      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, row.estimatedCostUsd)
+      existing.unpricedTokens += row.unpricedTokens
       byDay.set(row.day, existing)
     }
     return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
@@ -597,6 +409,7 @@ export class ClaudeUsageStore {
       existing.outputTokens += daily.outputTokens
       existing.cacheReadTokens += daily.cacheReadTokens
       existing.cacheWriteTokens += daily.cacheWriteTokens
+      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
       rows.set(key, existing)
     }
 
@@ -622,18 +435,6 @@ export class ClaudeUsageStore {
         if (row) {
           row.sessions++
         }
-      }
-    }
-
-    for (const row of rows.values()) {
-      if (kind === 'model') {
-        row.estimatedCostUsd = estimateCostUsd(
-          row.key,
-          row.inputTokens,
-          row.outputTokens,
-          row.cacheReadTokens,
-          row.cacheWriteTokens
-        )
       }
     }
 

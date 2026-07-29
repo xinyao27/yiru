@@ -16,6 +16,7 @@ export type OpenCodeUsageSlice = {
   openCodeUsageScope: OpenCodeUsageScope
   openCodeUsageRange: OpenCodeUsageRange
   openCodeUsageScanState: OpenCodeUsageScanState | null
+  openCodeUsageSnapshotReady: boolean
   openCodeUsageSummary: OpenCodeUsageSummary | null
   openCodeUsageDaily: OpenCodeUsageDailyPoint[]
   openCodeUsageModelBreakdown: OpenCodeUsageBreakdownRow[]
@@ -34,8 +35,9 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   get
 ) => ({
   openCodeUsageScope: 'yiru',
-  openCodeUsageRange: '30d',
+  openCodeUsageRange: 'all',
   openCodeUsageScanState: null,
+  openCodeUsageSnapshotReady: false,
   openCodeUsageSummary: null,
   openCodeUsageDaily: [],
   openCodeUsageModelBreakdown: [],
@@ -61,6 +63,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
               lastScanError: null
             }
           : nextScanState,
+        openCodeUsageSnapshotReady: false,
         openCodeUsageSummary: null,
         openCodeUsageDaily: [],
         openCodeUsageModelBreakdown: [],
@@ -86,6 +89,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   },
 
   fetchOpenCodeUsage: async (opts) => {
+    set({ openCodeUsageSnapshotReady: false })
     try {
       const scanState = (await window.api.openCodeUsage.getScanState()) as
         | OpenCodeUsageScanState
@@ -155,6 +159,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
 
       set({
         openCodeUsageScanState: refreshedSnapshot.scanState,
+        openCodeUsageSnapshotReady: refreshedSnapshot.scanState.lastScanError === null,
         openCodeUsageSummary: refreshedSnapshot.summary,
         openCodeUsageDaily: refreshedSnapshot.daily,
         openCodeUsageModelBreakdown: refreshedSnapshot.modelBreakdown,
@@ -162,6 +167,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
         openCodeUsageRecentSessions: refreshedSnapshot.recentSessions
       })
     } catch (error) {
+      set({ openCodeUsageSnapshotReady: false })
       console.error('Failed to fetch OpenCode usage:', error)
     }
   },

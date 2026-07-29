@@ -584,9 +584,9 @@ function createWebPreloadApi(): Partial<PreloadApi> {
     },
     runtime: createRuntimeApi(),
     nativeChat: createNativeChatApi(),
-    globalAssistant: {
-      getOrCreate: () => Promise.reject(new Error('Global Assistant is available on desktop.')),
-      restart: () => Promise.reject(new Error('Global Assistant is available on desktop.'))
+    friday: {
+      getOrCreate: () => Promise.reject(new Error('Friday is available on desktop.')),
+      restart: () => Promise.reject(new Error('Friday is available on desktop.'))
     },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
     repos: createReposApi(),

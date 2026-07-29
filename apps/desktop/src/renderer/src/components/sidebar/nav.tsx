@@ -1,7 +1,12 @@
-import { CalendarDots as CalendarClock, DeviceMobile as Smartphone } from '@phosphor-icons/react'
+import {
+  CalendarDots as CalendarClock,
+  DeviceMobile as Smartphone,
+  House
+} from '@phosphor-icons/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { getSelectableControlStateClasses } from '@/components/selectable-control-state-classes'
 import { Button } from '@/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { translate } from '@/i18n/i18n'
@@ -34,12 +39,14 @@ const SidebarNav = React.memo(function SidebarNav() {
   // Why: this memo boundary needs its own language subscription, while
   // translate() preserves Yiru's pseudo-localization behavior.
   useTranslation()
+  const openHomePage = useAppStore((s) => s.openHomePage)
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
   const openMobilePage = useAppStore((s) => s.openMobilePage)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const activeView = useAppStore((s) => s.activeView)
   const showAutomationsButton = useAppStore((s) => shouldShowAutomationsButton(s.settings))
   const showMobileButton = useAppStore((s) => shouldShowMobileButton(s.settings))
+  const homeActive = activeView === 'home'
   const automationsActive = activeView === 'automations'
   const mobileActive = activeView === 'mobile'
   const mobileOnboardingBadge = useMobileSidebarOnboardingBadge(showMobileButton)
@@ -55,6 +62,19 @@ const SidebarNav = React.memo(function SidebarNav() {
       className="flex flex-col gap-0.5 px-2 pt-2 pb-1"
       data-contextual-tour-target="sidebar-navigation"
     >
+      <Button
+        variant="ghost"
+        size="sidebar-row"
+        type="button"
+        onClick={openHomePage}
+        aria-current={homeActive ? 'page' : undefined}
+        className={getSelectableControlStateClasses(homeActive)}
+      >
+        <House className="size-4 shrink-0" strokeWidth={1.75} />
+        <span className="flex-1">
+          {translate('auto.components.sidebar.SidebarNav.home', 'Home')}
+        </span>
+      </Button>
       <SetupGuideSidebarEntry />
       {showAutomationsButton ? (
         <ContextMenu>

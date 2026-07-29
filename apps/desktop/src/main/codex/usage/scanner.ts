@@ -10,6 +10,7 @@ import { areWorktreePathsEqual } from '../../worktree/logic'
 import { getCodexAccountHomeSessionDirectories } from '../account-home-discovery'
 import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from '../home-paths'
 import { getLegacyCopiedCodexSessionBridgeScanPreference } from '../session-bridge'
+import { priceCodexUsage } from './pricing'
 import type {
   CodexUsageAttributedEvent,
   CodexUsageDailyAggregate,
@@ -38,6 +39,7 @@ type CodexUsageRawRecord = {
 type CodexUsageRawUsage = {
   inputTokens: number
   cachedInputTokens: number
+  cacheWriteTokens: number
   outputTokens: number
   reasoningOutputTokens: number
   totalTokens: number
@@ -259,6 +261,9 @@ function normalizeRawUsage(value: unknown): CodexUsageRawUsage | null {
   const cachedInputTokens = ensureNumber(
     record.cached_input_tokens ?? record.cache_read_input_tokens
   )
+  const cacheWriteTokens = ensureNumber(
+    record.cache_write_input_tokens ?? record.cache_write_tokens
+  )
   const outputTokens = ensureNumber(record.output_tokens)
   const reasoningOutputTokens = ensureNumber(record.reasoning_output_tokens)
   const totalTokens = ensureNumber(record.total_tokens)
@@ -266,6 +271,7 @@ function normalizeRawUsage(value: unknown): CodexUsageRawUsage | null {
   return {
     inputTokens,
     cachedInputTokens,
+    cacheWriteTokens,
     outputTokens,
     reasoningOutputTokens,
     // Why: legacy Codex logs can omit total_tokens. Reasoning is already billed
@@ -282,6 +288,7 @@ function subtractRawUsage(
   return {
     inputTokens: Math.max(current.inputTokens - (previous?.inputTokens ?? 0), 0),
     cachedInputTokens: Math.max(current.cachedInputTokens - (previous?.cachedInputTokens ?? 0), 0),
+    cacheWriteTokens: Math.max(current.cacheWriteTokens - (previous?.cacheWriteTokens ?? 0), 0),
     outputTokens: Math.max(current.outputTokens - (previous?.outputTokens ?? 0), 0),
     reasoningOutputTokens: Math.max(
       current.reasoningOutputTokens - (previous?.reasoningOutputTokens ?? 0),
@@ -295,6 +302,7 @@ function addRawUsage(left: CodexUsageRawUsage, right: CodexUsageRawUsage): Codex
   return {
     inputTokens: left.inputTokens + right.inputTokens,
     cachedInputTokens: left.cachedInputTokens + right.cachedInputTokens,
+    cacheWriteTokens: left.cacheWriteTokens + right.cacheWriteTokens,
     outputTokens: left.outputTokens + right.outputTokens,
     reasoningOutputTokens: left.reasoningOutputTokens + right.reasoningOutputTokens,
     totalTokens: left.totalTokens + right.totalTokens
@@ -305,6 +313,7 @@ function rawUsageEquals(left: CodexUsageRawUsage, right: CodexUsageRawUsage): bo
   return (
     left.inputTokens === right.inputTokens &&
     left.cachedInputTokens === right.cachedInputTokens &&
+    left.cacheWriteTokens === right.cacheWriteTokens &&
     left.outputTokens === right.outputTokens &&
     left.reasoningOutputTokens === right.reasoningOutputTokens
   )
@@ -314,6 +323,7 @@ function rawUsageIsMonotonic(current: CodexUsageRawUsage, previous: CodexUsageRa
   return (
     current.inputTokens >= previous.inputTokens &&
     current.cachedInputTokens >= previous.cachedInputTokens &&
+    current.cacheWriteTokens >= previous.cacheWriteTokens &&
     current.outputTokens >= previous.outputTokens &&
     current.reasoningOutputTokens >= previous.reasoningOutputTokens
   )
@@ -321,7 +331,11 @@ function rawUsageIsMonotonic(current: CodexUsageRawUsage, previous: CodexUsageRa
 
 function rawUsageMagnitude(usage: CodexUsageRawUsage): number {
   return (
-    usage.inputTokens + usage.cachedInputTokens + usage.outputTokens + usage.reasoningOutputTokens
+    usage.inputTokens +
+    usage.cachedInputTokens +
+    usage.cacheWriteTokens +
+    usage.outputTokens +
+    usage.reasoningOutputTokens
   )
 }
 
@@ -406,6 +420,7 @@ function buildCodexUsageEventKey(
       ? [
           usage.inputTokens,
           usage.cachedInputTokens,
+          usage.cacheWriteTokens,
           usage.outputTokens,
           usage.reasoningOutputTokens,
           usage.totalTokens
@@ -606,7 +621,9 @@ function createEmptyDailyAggregate(event: CodexUsageAttributedEvent): CodexUsage
     outputTokens: 0,
     reasoningOutputTokens: 0,
     totalTokens: 0,
-    hasInferredPricing: false
+    hasInferredPricing: false,
+    estimatedCostUsd: null,
+    unpricedTokens: 0
   }
 }
 
@@ -747,6 +764,19 @@ function aggregateCodexUsage(events: CodexUsageAttributedEvent[]): {
     daily.reasoningOutputTokens += event.reasoningOutputTokens
     daily.totalTokens += event.totalTokens
     daily.hasInferredPricing ||= event.hasInferredPricing
+    const estimatedCostUsd = event.hasInferredPricing
+      ? null
+      : priceCodexUsage(
+          event.model,
+          event.inputTokens,
+          event.cachedInputTokens,
+          event.cacheWriteTokens,
+          event.outputTokens
+        )
+    daily.estimatedCostUsd = addKnownCost(daily.estimatedCostUsd, estimatedCostUsd)
+    if (estimatedCostUsd === null) {
+      daily.unpricedTokens += event.totalTokens
+    }
   }
 
   return {
@@ -891,7 +921,13 @@ function mergeDailyAggregates(
     existing.reasoningOutputTokens += aggregate.reasoningOutputTokens
     existing.totalTokens += aggregate.totalTokens
     existing.hasInferredPricing ||= aggregate.hasInferredPricing
+    existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, aggregate.estimatedCostUsd)
+    existing.unpricedTokens += aggregate.unpricedTokens
   }
+}
+
+function addKnownCost(left: number | null, right: number | null): number | null {
+  return left === null && right === null ? null : (left ?? 0) + (right ?? 0)
 }
 
 export function parseCodexUsageRecord(
@@ -967,6 +1003,7 @@ export function parseCodexUsageRecord(
   if (
     delta.inputTokens === 0 &&
     delta.cachedInputTokens === 0 &&
+    delta.cacheWriteTokens === 0 &&
     delta.outputTokens === 0 &&
     delta.reasoningOutputTokens === 0 &&
     delta.totalTokens === 0
@@ -988,6 +1025,7 @@ export function parseCodexUsageRecord(
     hasInferredPricing,
     inputTokens: delta.inputTokens,
     cachedInputTokens: delta.cachedInputTokens,
+    cacheWriteTokens: delta.cacheWriteTokens,
     outputTokens: delta.outputTokens,
     reasoningOutputTokens: delta.reasoningOutputTokens,
     totalTokens: delta.totalTokens

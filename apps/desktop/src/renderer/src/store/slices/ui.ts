@@ -428,6 +428,7 @@ function hydratedUIPartialMatchesState(state: AppState, hydrated: Partial<UISlic
 
 // Record keys are exhaustive over TopLevelView, so a new view can't be silently missed.
 const TOP_LEVEL_VIEW_LOOKUP: Record<TopLevelView, true> = {
+  home: true,
   terminal: true,
   settings: true,
   automations: true,
@@ -443,9 +444,9 @@ function isTopLevelView(value: unknown): value is TopLevelView {
 
 function sanitizeHydratedActiveView(value: unknown): TopLevelView {
   // Why: older data (pre-activeView) or a view a different build doesn't have
-  // falls back to terminal rather than rendering nothing.
+  // should land on the durable overview instead of rendering nothing.
   if (!isTopLevelView(value)) {
-    return 'terminal'
+    return 'home'
   }
   return value
 }
@@ -488,6 +489,7 @@ export type UISlice = {
   previousViewBeforeSkills: Exclude<TopLevelView, 'skills'>
   previousViewBeforeMobile: Exclude<TopLevelView, 'mobile'>
   setActiveView: (view: UISlice['activeView']) => void
+  openHomePage: () => void
   newWorkspaceDraft: {
     repoId: string | null
     // Why: project-first workspace creation resolves through these when present,
@@ -1020,13 +1022,14 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       return next ? { acknowledgedAgentsByPaneKey: next } : s
     }),
 
-  activeView: 'terminal',
+  activeView: 'home',
   previousViewBeforeSettings: 'terminal',
   previousViewBeforeAutomations: 'terminal',
   previousViewBeforeSpace: 'terminal',
   previousViewBeforeSkills: 'terminal',
   previousViewBeforeMobile: 'terminal',
   setActiveView: (view) => set({ activeView: view }),
+  openHomePage: () => set({ activeView: 'home' }),
   newWorkspaceDraft: null,
   selectedAutomationId: null,
   setSelectedAutomationId: (id) => set({ selectedAutomationId: id }),

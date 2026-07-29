@@ -61,21 +61,34 @@ function codexResponseItem(
       source: 'transcript'
     }
   }
-  if (payload.type === 'function_call' || payload.type === 'local_shell_call') {
+  if (
+    payload.type === 'function_call' ||
+    payload.type === 'local_shell_call' ||
+    payload.type === 'custom_tool_call'
+  ) {
     const name = extractString(payload.name) ?? 'tool'
+    const callId = extractString(payload.call_id)
     return {
       id,
       role: 'assistant',
-      blocks: [{ type: 'tool-call', name, input: codexCallInput(payload) }],
+      blocks: [
+        {
+          type: 'tool-call',
+          name,
+          input: codexCallInput(payload),
+          ...(callId ? { callId } : {})
+        }
+      ],
       timestamp,
       source: 'transcript'
     }
   }
-  if (payload.type === 'function_call_output') {
+  if (payload.type === 'function_call_output' || payload.type === 'custom_tool_call_output') {
+    const callId = extractString(payload.call_id)
     return {
       id,
       role: 'tool',
-      blocks: [codexToolResult(payload.output)],
+      blocks: [codexToolResult(payload.output, callId)],
       timestamp,
       source: 'transcript'
     }
@@ -110,14 +123,62 @@ function codexCallInput(payload: Record<string, unknown>): unknown {
   return payload.input ?? payload.action ?? null
 }
 
-function codexToolResult(output: unknown): NativeChatBlock {
+function codexToolResult(output: unknown, callId: string | null): NativeChatBlock {
   const record = asRecord(output)
-  const isError = record?.success === false || record?.is_error === true
+  const outputSegments = codexOutputSegments(output)
+  const isError =
+    record?.success === false || record?.is_error === true || hasFailedExecution(output)
   return {
     type: 'tool-result',
     output: toolResultOutput(record?.content ?? record?.output ?? output),
-    ...(isError ? { isError: true } : {})
+    ...(isError ? { isError: true } : {}),
+    ...(callId ? { callId } : {}),
+    ...(outputSegments.length > 0 ? { outputSegments } : {})
   }
+}
+
+function codexOutputSegments(output: unknown): string[] {
+  if (!Array.isArray(output)) {
+    return []
+  }
+  const segments: string[] = []
+  for (const item of output) {
+    const record = asRecord(item)
+    const text = extractString(record?.text) ?? extractString(record?.content)
+    if (text) {
+      segments.push(text)
+    }
+  }
+  return /^Script (?:completed|failed)\b/.test(segments[0] ?? '') ? segments.slice(1) : segments
+}
+
+function hasFailedExecution(value: unknown): boolean {
+  if (typeof value === 'string') {
+    if (/^Script failed\b/m.test(value) || /Process exited[^\n]*\b[1-9]\d*\b/i.test(value)) {
+      return true
+    }
+    try {
+      const parsed: unknown = JSON.parse(value)
+      return parsed !== value && hasFailedExecution(parsed)
+    } catch {
+      return /["']exit_code["']\s*:\s*[1-9]\d*/.test(value)
+    }
+  }
+  if (Array.isArray(value)) {
+    return value.some(hasFailedExecution)
+  }
+  const record = asRecord(value)
+  if (!record) {
+    return false
+  }
+  if (typeof record.exit_code === 'number' && record.exit_code !== 0) {
+    return true
+  }
+  return (
+    hasFailedExecution(record.text) ||
+    hasFailedExecution(record.content) ||
+    hasFailedExecution(record.output)
+  )
 }
 
 function codexSummaryText(summary: unknown): string | null {

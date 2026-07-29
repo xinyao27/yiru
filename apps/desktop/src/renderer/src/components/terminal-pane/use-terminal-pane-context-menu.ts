@@ -99,6 +99,7 @@ type TerminalMenuState = {
   onClearScreen: () => void
   onForkAgentSession: () => Promise<void>
   onContinueAgentSessionInNewSession: () => void
+  onRelaunchAgentSession: () => void
   onCopyAgentSessionContext: () => Promise<void>
   onQuickCommand: (command: TerminalQuickCommand) => void
   onToggleExpand: () => void
@@ -426,6 +427,28 @@ export function useTerminalPaneContextMenu({
     }
   }
 
+  // Why: the composer's Agent/model switch reuses this dialog, but a model
+  // change is valid before the session has produced anything to hand off.
+  const onRelaunchAgentSession = (): void => {
+    const pane = resolveMenuPane()
+    if (!pane) {
+      return
+    }
+    const initialCwd = paneCwdRef.current.get(pane.id)?.cwd || fallbackCwd
+    const request = prepareAgentSessionContinuationFromPane({
+      pane,
+      tabId,
+      worktreeId,
+      groupId,
+      workspacePath: fallbackCwd,
+      initialCwd,
+      requireContext: false
+    })
+    if (request) {
+      onAgentSessionContinuationReady(request)
+    }
+  }
+
   // Why: the captured session transcript is often wanted on its own — to paste
   // into another tool — so copy the bounded transcript directly, without the
   // fork prompt's framing or the fork dialog detour (issue #5020).
@@ -581,6 +604,7 @@ export function useTerminalPaneContextMenu({
     onClearScreen,
     onForkAgentSession,
     onContinueAgentSessionInNewSession,
+    onRelaunchAgentSession,
     onCopyAgentSessionContext,
     onQuickCommand,
     onToggleExpand,

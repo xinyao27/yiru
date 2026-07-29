@@ -10,6 +10,8 @@ import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-m
 
 import {
   addPreviewContent,
+  addSessionTokens,
+  cloneSessionAccumulator,
   createAccumulator,
   finalizeSession,
   sessionIdFromFileName,
@@ -58,10 +60,7 @@ export function cloneClaudeSessionParseState(
   state: ClaudeSessionParseState
 ): ClaudeSessionParseState {
   return {
-    accumulator: {
-      ...state.accumulator,
-      previewMessages: [...state.accumulator.previewMessages]
-    },
+    accumulator: cloneSessionAccumulator(state.accumulator),
     metaTitle: state.metaTitle,
     generatedTitle: state.generatedTitle,
     firstUserTitle: state.firstUserTitle
@@ -150,7 +149,7 @@ export function consumeClaudeSessionLine(state: ClaudeSessionParseState, line: s
     if (model) {
       accumulator.model = model
     }
-    accumulator.totalTokens += claudeUsageTotal(message?.usage)
+    addSessionTokens(accumulator, claudeUsageTotal(message?.usage), record.timestamp)
   }
 }
 

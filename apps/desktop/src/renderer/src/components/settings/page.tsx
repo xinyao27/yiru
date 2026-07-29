@@ -63,7 +63,6 @@ import type { GlobalSettings, YiruHooks, ProjectHostSetup, Repo } from '../../..
 import { useAppStore } from '../../store'
 import { getProjectHostSetupProjectionFromState } from '../../store/selectors'
 import { getRepoHostIdentity } from '../../store/slices/repo-host-identity'
-import { StatsPane } from '../stats/pane'
 import { registerWindowCloseGuard } from '../window-close-request-coordinator'
 import { AccountsPane } from './accounts-pane'
 import { AdvancedPane } from './advanced-pane'
@@ -1581,18 +1580,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                   }
                 >
                   {isSectionMounted('shortcuts') ? <ShortcutsPane /> : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="stats"
-                  title={translate('auto.components.settings.Settings.954a8f5aef', 'Stats & Usage')}
-                  description={translate(
-                    'auto.components.settings.Settings.8acf3f22e0',
-                    'Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.'
-                  )}
-                  searchEntries={getSectionSearchEntries('stats')}
-                >
-                  {isSectionMounted('stats') ? <StatsPane /> : null}
                 </SettingsSection>
 
                 <SettingsSection

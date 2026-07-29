@@ -5,8 +5,10 @@ import {
   buildAiVaultResumeCommand,
   type AiVaultAgent,
   type AiVaultSession,
+  type AiVaultSessionDayTokens,
   type AiVaultSessionPreviewMessage
 } from '@yiru/workbench-model/agent'
+import { localCalendarDayKey } from '@yiru/workbench-model/ui'
 import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { FileWithMtime, ResumableSessionParseState, SessionAccumulator } from './scanner-types'
@@ -38,6 +40,7 @@ export function createAccumulator(args: {
     modifiedAt: args.file.modifiedAt,
     messageCount: 0,
     totalTokens: 0,
+    tokensByDay: new Map(),
     previewMessages: [],
     lastUserPrompt: null,
     queuedMessageCount: 0,
@@ -47,7 +50,42 @@ export function createAccumulator(args: {
 }
 
 export function cloneSessionAccumulator(accumulator: SessionAccumulator): SessionAccumulator {
-  return { ...accumulator, previewMessages: [...accumulator.previewMessages] }
+  return {
+    ...accumulator,
+    previewMessages: [...accumulator.previewMessages],
+    tokensByDay: new Map(accumulator.tokensByDay)
+  }
+}
+
+// Why: one write path keeps session totals and their calendar-day buckets from diverging.
+export function addSessionTokens(
+  accumulator: SessionAccumulator,
+  tokens: number,
+  timestamp?: unknown
+): void {
+  if (!Number.isFinite(tokens) || tokens <= 0) {
+    return
+  }
+  accumulator.totalTokens += tokens
+
+  const parsed = timestamp === undefined ? Number.NaN : timestampMs(timestamp)
+  const at = Number.isFinite(parsed)
+    ? parsed
+    : accumulator.latestTimestampMs > 0
+      ? accumulator.latestTimestampMs
+      : Number.NaN
+  if (!Number.isFinite(at)) {
+    // Why: keep the known total, but never fabricate a heatmap day without a trustworthy time.
+    return
+  }
+  const day = localCalendarDayKey(at)
+  accumulator.tokensByDay.set(day, (accumulator.tokensByDay.get(day) ?? 0) + tokens)
+}
+
+function tokensByDayList(accumulator: SessionAccumulator): AiVaultSessionDayTokens[] {
+  return [...accumulator.tokensByDay.entries()]
+    .map(([day, tokens]) => ({ day, tokens }))
+    .sort((left, right) => left.day.localeCompare(right.day))
 }
 
 // Resumable fold for parsers whose only parse state is the accumulator itself
@@ -110,6 +148,7 @@ export function finalizeSession(
     modifiedAt: accumulator.modifiedAt,
     messageCount: accumulator.messageCount,
     totalTokens: accumulator.totalTokens,
+    ...(accumulator.tokensByDay.size > 0 ? { tokensByDay: tokensByDayList(accumulator) } : {}),
     previewMessages: accumulator.previewMessages,
     ...(accumulator.lastUserPrompt ? { lastUserPrompt: accumulator.lastUserPrompt } : {}),
     queuedMessageCount: accumulator.queuedMessageCount,

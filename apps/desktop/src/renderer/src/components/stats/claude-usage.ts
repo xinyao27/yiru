@@ -16,6 +16,7 @@ export type ClaudeUsageSlice = {
   claudeUsageScope: ClaudeUsageScope
   claudeUsageRange: ClaudeUsageRange
   claudeUsageScanState: ClaudeUsageScanState | null
+  claudeUsageSnapshotReady: boolean
   claudeUsageSummary: ClaudeUsageSummary | null
   claudeUsageDaily: ClaudeUsageDailyPoint[]
   claudeUsageModelBreakdown: ClaudeUsageBreakdownRow[]
@@ -34,8 +35,9 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   get
 ) => ({
   claudeUsageScope: 'yiru',
-  claudeUsageRange: '30d',
+  claudeUsageRange: 'all',
   claudeUsageScanState: null,
+  claudeUsageSnapshotReady: false,
   claudeUsageSummary: null,
   claudeUsageDaily: [],
   claudeUsageModelBreakdown: [],
@@ -64,6 +66,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
               lastScanError: null
             }
           : nextScanState,
+        claudeUsageSnapshotReady: false,
         claudeUsageSummary: null,
         claudeUsageDaily: [],
         claudeUsageModelBreakdown: [],
@@ -89,6 +92,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   },
 
   fetchClaudeUsage: async (opts) => {
+    set({ claudeUsageSnapshotReady: false })
     try {
       const scanState = (await window.api.claudeUsage.getScanState()) as
         | ClaudeUsageScanState
@@ -158,6 +162,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
 
       set({
         claudeUsageScanState: refreshedSnapshot.scanState,
+        claudeUsageSnapshotReady: refreshedSnapshot.scanState.lastScanError === null,
         claudeUsageSummary: refreshedSnapshot.summary,
         claudeUsageDaily: refreshedSnapshot.daily,
         claudeUsageModelBreakdown: refreshedSnapshot.modelBreakdown,
@@ -165,6 +170,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
         claudeUsageRecentSessions: refreshedSnapshot.recentSessions
       })
     } catch (error) {
+      set({ claudeUsageSnapshotReady: false })
       console.error('Failed to fetch Claude usage:', error)
     }
   },

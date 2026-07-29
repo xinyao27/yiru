@@ -820,7 +820,10 @@
         "ec43b38ba7": "已在 GitHub 上加星标",
         "157bb5ecbb": "打开 GitHub",
         "preflightDismiss": "关闭",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "创建 {{value0}}",
+        "previousWorkspace": "向上切换工作区",
+        "nextWorkspace": "向下切换工作区"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "仅适用于本地 Git 项目。",
@@ -2172,7 +2175,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "用量概览",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -2916,7 +2919,8 @@
           "c86d83b5c3": "新建",
           "1b5c41caee": "Yiru 手机端",
           "f323383e9a": "自动化",
-          "d599269755": "从侧边栏隐藏"
+          "d599269755": "从侧边栏隐藏",
+          "home": "Home"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "清除",
@@ -11819,6 +11823,89 @@
       "WorkspacePanelEditorEmptyState": {
         "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
         "agentLaunchFailed": "Could not start {{value0}}."
+      },
+      "contribution": {
+        "heatmap": {
+          "monday": "Mon",
+          "wednesday": "Wed",
+          "friday": "Fri",
+          "activityLabel": "Daily agent activity over the past year",
+          "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "过去一年的每日预估 API 价值",
+          "less": "Less",
+          "more": "More",
+          "activityCell": "{{value0}}: {{value1}} activities",
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}：预估 API 价值 {{value1}}"
+        }
+      },
+      "home": {
+        "page": {
+          "title": "Home",
+          "description": "A year of agent work, with today in context.",
+          "contributions": "Contribution history",
+          "activityDescription": "Agent starts and pull requests completed through Yiru.",
+          "tokenDescription": "归因到 Yiru 工作树的 Provider 上报 Token 用量。",
+          "activity": "Activity",
+          "tokens": "Tokens",
+          "apiValue": "API 价值",
+          "valueDescription": "按每次请求的模型与 Token 类别计算标准全球 API 等价价值。",
+          "today": "Today",
+          "todayActivity": "recorded activity",
+          "todayTokens": "recorded tokens",
+          "todayValue": "预估 API 价值",
+          "currentStreak": "Current streak",
+          "streakDays": "{{value0}} days",
+          "longestStreak": "Longest this year: {{value0}} days",
+          "pastYear": "Past year",
+          "totalActivity": "total recorded activity",
+          "totalTokens": "Token 总数",
+          "totalValue": "预估 API 总价值",
+          "valueUnavailable": "暂时没有可用于估算的已知模型价格。",
+          "valueCoverage": "标准全球 API 等价价值按每次请求的权威模型价格汇总，仅包含归因到 Yiru 工作树的用量。未定价 Token 类别以及缺少请求级归因的会话汇总会被排除；这不是实际账单。",
+          "calculatingValue": "计算中…",
+          "valueNotAvailable": "暂不可用",
+          "lifetime": "累计",
+          "peakDay": "峰值日",
+          "longestStreakLabel": "最长连续",
+          "tokensUnavailable": "暂时没有归因到 Yiru 工作树的 Claude、Codex 或 OpenCode Token 用量。",
+          "tokenCoverage": "Token 总数使用 Yiru 工作树中可归因到请求的 Claude、Codex 与 OpenCode 记录；缓存输入不会重复计算，缺少请求级归因的会话汇总会被排除。",
+          "unpricedCoverage": "缺少权威定价明细的 Token 不会计入价值总额。"
+        },
+        "activitySummary": {
+          "agentsSpawned": "启动的 Agent",
+          "agentTime": "Agent 工作时长",
+          "prsCreated": "创建的 PR",
+          "durationMinutes": "{{value0}} 分钟",
+          "durationDaysHours": "{{value0}} 天 {{value1}} 小时",
+          "durationHoursMinutes": "{{value0}} 小时 {{value1}} 分钟"
+        },
+        "charts": {
+          "trendTitle": "30-day momentum",
+          "trendDescription": "Daily pace makes accelerations and quiet stretches visible.",
+          "trendAriaLabel": "Daily contributions over the past 30 days",
+          "rhythmTitle": "Weekly rhythm",
+          "rhythmDescription": "Past-year totals reveal which days carry the most work.",
+          "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}。点击切换为{{value1}}。",
+          "activities": "{{value0}} activities",
+          "tokens": "{{value0}} tokens",
+          "value": "API 价值 {{value0}}"
+        },
+        "modelChart": {
+          "title": "模型分布",
+          "tokenDescription": "按模型汇总归因到 Yiru 工作树的 Token 用量。",
+          "valueDescription": "仅对具有权威定价明细的 Token 类别汇总标准全球 API 等价价值。",
+          "tokenAriaLabel": "各模型的 Token 用量",
+          "valueAriaLabel": "各模型的预估 API 价值",
+          "tokensTotal": "Token 总数",
+          "valueTotal": "API 价值",
+          "tokenUnavailable": "暂时没有可用的模型 Token 数据。",
+          "valueUnavailable": "暂时没有可用于比较的已知模型价格。",
+          "other": "其他",
+          "refreshAriaLabel": "刷新本地用量统计",
+          "refresh": "刷新用量"
+        }
       }
     },
     "i18n": {
@@ -11861,7 +11948,8 @@
       "agentUnavailable": "未在此工作区主机上检测到 {{agent}}。",
       "sent": "已将会话上下文发送到新的 {{agent}} 会话。",
       "deliveryFailed": "新的 {{agent}} 会话已启动，但无法发送上下文。",
-      "launchFailed": "无法启动新的 {{agent}} 会话。"
+      "launchFailed": "无法启动新的 {{agent}} 会话。",
+      "launchOptions": "启动选项"
     },
     "native-chat": {
       "composer": {
@@ -11918,11 +12006,63 @@
           "high": "高",
           "xhigh": "极高",
           "max": "最大"
-        }
+        },
+        "relaunchWithOtherAgent": "更换 Agent 或模型…"
       },
       "tool": {
         "running": "正在运行…",
-        "result": "结果"
+        "result": "结果",
+        "yiru": {
+          "running": "正在运行 {{value0}}",
+          "failed": "{{value0}} 失败",
+          "completedUnknown": "已执行 {{value0}}，结果未关联",
+          "summary": "{{value0}}{{value1}}",
+          "summaryTarget": "{{value0}}{{value1}} {{value2}}",
+          "summaryOutcome": "{{value0}}{{value1}} {{value2}}，{{value3}}",
+          "openTarget": "打开操作目标",
+          "verb": {
+            "captured": "捕获了",
+            "changed": "更改了",
+            "closed": "关闭了",
+            "created": "创建了",
+            "dispatched": "分派了",
+            "focused": "聚焦了",
+            "inspected": "检查了",
+            "navigated": "导航了",
+            "read": "读取了",
+            "removed": "移除了",
+            "replied": "回复了",
+            "ran": "运行了",
+            "sentTo": "发送至",
+            "started": "启动了",
+            "stopped": "停止了",
+            "updated": "更新了",
+            "used": "使用了",
+            "waited": "等待了"
+          },
+          "object": {
+            "automation": "自动化",
+            "automations": "自动化",
+            "browser": "浏览器",
+            "browserTab": "浏览器标签页",
+            "computer": "电脑",
+            "gate": "决策门",
+            "gates": "决策门",
+            "message": "消息",
+            "messages": "消息",
+            "orchestration": "编排",
+            "task": "任务",
+            "tasks": "任务",
+            "terminal": "终端",
+            "terminals": "终端",
+            "worktree": "工作树",
+            "worktrees": "工作树"
+          },
+          "outcome": {
+            "spawned": "启动了 {{value0}}",
+            "to": "发送给 {{value0}}"
+          }
+        }
       },
       "status": {
         "responding": "Agent 正在回复"
@@ -11995,7 +12135,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "打开助理",
       "startError": "全局助理无法启动。",
       "newConversation": "新建对话",

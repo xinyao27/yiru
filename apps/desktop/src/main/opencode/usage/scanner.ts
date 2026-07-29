@@ -40,22 +40,6 @@ type OpenCodeUsageRow = {
   session_model: string | null
 }
 
-type OpenCodeSessionUsageRow = {
-  id: string
-  session_id: string
-  time_created: number
-  time_updated: number | null
-  directory: string | null
-  title: string | null
-  worktree: string | null
-  session_model: string | null
-  cost: number
-  tokens_input: number
-  tokens_output: number
-  tokens_reasoning: number
-  tokens_cache_read: number
-}
-
 const YIELD_EVERY_DATABASES = 2
 
 function ensureNumber(value: unknown): number {
@@ -172,67 +156,19 @@ function getAssistantSessionMessageCount(db: Database.Database): number {
   return row?.count ?? 0
 }
 
-function canReadSessionUsageRows(db: Database.Database): boolean {
-  if (!tableExists(db, 'session')) {
-    return false
-  }
-  return ['cost', 'tokens_input', 'tokens_output', 'tokens_reasoning', 'tokens_cache_read'].every(
-    (columnName) => columnExists(db, 'session', columnName)
-  )
-}
-
-function getSessionUsageRowCount(db: Database.Database): number {
-  if (!canReadSessionUsageRows(db)) {
+function getAssistantMessageCount(db: Database.Database): number {
+  if (!tableExists(db, 'message')) {
     return 0
   }
   const row = db
     .prepare(
       `SELECT COUNT(*) AS count
-       FROM session
-       WHERE tokens_input + tokens_output + tokens_reasoning + tokens_cache_read > 0`
+       FROM message
+       WHERE json_extract(data, '$.role') = 'assistant'
+         AND json_extract(data, '$.tokens.input') IS NOT NULL`
     )
     .get() as { count?: number } | undefined
   return row?.count ?? 0
-}
-
-function selectSessionUsageRows(db: Database.Database): OpenCodeUsageRow[] {
-  const projectJoin = getProjectJoin(db)
-  const sessionModelSelect = getSessionModelSelect(db)
-  const rows = db
-    .prepare(
-      `SELECT s.id, s.id AS session_id, s.time_created, s.time_updated,
-              s.directory, s.title, p.worktree, ${sessionModelSelect},
-              s.cost, s.tokens_input, s.tokens_output, s.tokens_reasoning, s.tokens_cache_read
-       FROM session s
-       ${projectJoin}
-       WHERE s.tokens_input + s.tokens_output + s.tokens_reasoning + s.tokens_cache_read > 0
-       ORDER BY s.time_created, s.id`
-    )
-    .all() as OpenCodeSessionUsageRow[]
-
-  return rows.map((row) => ({
-    id: row.id,
-    session_id: row.session_id,
-    time_created: row.time_created,
-    time_updated: row.time_updated,
-    directory: row.directory,
-    title: row.title,
-    worktree: row.worktree,
-    session_model: row.session_model,
-    data: JSON.stringify({
-      cost: row.cost,
-      tokens: {
-        input: row.tokens_input,
-        output: row.tokens_output,
-        reasoning: row.tokens_reasoning,
-        total: row.tokens_input + row.tokens_output + row.tokens_reasoning,
-        cache: {
-          read: row.tokens_cache_read,
-          write: 0
-        }
-      }
-    })
-  }))
 }
 
 function selectUsageRows(db: Database.Database): OpenCodeUsageRow[] {
@@ -240,20 +176,15 @@ function selectUsageRows(db: Database.Database): OpenCodeUsageRow[] {
     return []
   }
 
-  // Why: newer OpenCode DBs maintain session-level token/cost totals. Reading
-  // one aggregate row per session is faster than parsing every message blob.
-  if (getSessionUsageRowCount(db) > 0) {
-    return selectSessionUsageRows(db)
-  }
-
   const projectJoin = getProjectJoin(db)
   const sessionModelSelect = getSessionModelSelect(db)
 
+  let detailedRows: OpenCodeUsageRow[] = []
   if (getAssistantSessionMessageCount(db) > 0) {
     const assistantPredicate = columnExists(db, 'session_message', 'type')
       ? "sm.type = 'assistant'"
       : "json_extract(sm.data, '$.tokens.input') IS NOT NULL"
-    return db
+    detailedRows = db
       .prepare(
         `SELECT sm.id, sm.session_id, sm.time_created, sm.time_updated, sm.data,
                 s.directory, s.title, p.worktree, ${sessionModelSelect}
@@ -265,22 +196,28 @@ function selectUsageRows(db: Database.Database): OpenCodeUsageRow[] {
       )
       .all() as OpenCodeUsageRow[]
   }
-
-  if (!tableExists(db, 'message')) {
-    return []
+  if (getAssistantMessageCount(db) > 0) {
+    const modernSessionIds = new Set(detailedRows.map((row) => row.session_id))
+    const legacyRows = db
+      .prepare(
+        `SELECT m.id, m.session_id, m.time_created, m.time_updated, m.data,
+                s.directory, s.title, p.worktree, ${sessionModelSelect}
+         FROM message m
+         JOIN session s ON s.id = m.session_id
+         ${projectJoin}
+         WHERE json_extract(m.data, '$.role') = 'assistant'
+           AND json_extract(m.data, '$.tokens.input') IS NOT NULL
+         ORDER BY m.time_created, m.id`
+      )
+      .all() as OpenCodeUsageRow[]
+    detailedRows.push(...legacyRows.filter((row) => !modernSessionIds.has(row.session_id)))
   }
 
-  return db
-    .prepare(
-      `SELECT m.id, m.session_id, m.time_created, m.time_updated, m.data,
-              s.directory, s.title, p.worktree, ${sessionModelSelect}
-       FROM message m
-       JOIN session s ON s.id = m.session_id
-       ${projectJoin}
-       WHERE json_extract(m.data, '$.role') = 'assistant'
-       ORDER BY m.time_created, m.id`
-    )
-    .all() as OpenCodeUsageRow[]
+  // Why: session totals lack request-level model and day attribution. Exclude
+  // them instead of manufacturing precise-looking chart distributions.
+  return detailedRows.sort(
+    (left, right) => left.time_created - right.time_created || left.id.localeCompare(right.id)
+  )
 }
 
 function parseJsonObject(value: unknown): Record<string, unknown> | null {

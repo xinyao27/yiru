@@ -7,6 +7,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 import {
   addPreviewContent,
   addPreviewMessage,
+  addSessionTokens,
   createAccumulator,
   finalizeSession,
   updateTimeline
@@ -101,7 +102,11 @@ async function consumeKimiWireTranscript(
           break
         case 'usage.record':
           accumulator.model = extractString(record.model) ?? accumulator.model
-          accumulator.totalTokens += kimiUsageTotal(record.usage, record.usageScope)
+          addSessionTokens(
+            accumulator,
+            kimiUsageTotal(record.usage, record.usageScope),
+            record.timestamp
+          )
           break
         case 'context.append_message':
           consumeKimiUserMessage(accumulator, record.message)

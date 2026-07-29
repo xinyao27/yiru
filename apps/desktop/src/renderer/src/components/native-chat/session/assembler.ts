@@ -64,9 +64,9 @@ function nonTextBlockDigest(message: NativeChatMessage): string {
   const parts: string[] = []
   for (const block of message.blocks) {
     if (block.type === 'tool-call') {
-      parts.push(`call:${block.name}:${stableStringify(block.input)}`)
+      parts.push(`call:${block.callId ?? ''}:${block.name}:${stableStringify(block.input)}`)
     } else if (block.type === 'tool-result') {
-      parts.push(`result:${block.output}`)
+      parts.push(`result:${block.callId ?? ''}:${block.output}`)
     } else if (block.type === 'image-ref') {
       parts.push(`image:${block.path ?? block.url ?? block.alt ?? ''}`)
     }

@@ -260,6 +260,10 @@ export default function RootLayout() {
                           gestureEnabled: false
                         }}
                       />
+                      <Stack.Screen
+                        name="activity-insights"
+                        options={{ headerBackVisible: false, presentation: 'fullScreenModal' }}
+                      />
                       <Stack.Screen name="settings" options={{ title: 'Settings' }} />
                       <Stack.Screen name="appearance-settings" options={{ title: 'Appearance' }} />
                       <Stack.Screen name="native-chat-settings" options={{ title: 'Chat UI' }} />

@@ -139,7 +139,7 @@ export const FEATURE_INTERACTIONS = [
   { id: 'tab-splits', interaction: 'workspace tab split into another pane' },
   {
     id: 'usage-tracking',
-    interaction: 'Stats & Usage or provider usage details opened or configured'
+    interaction: 'Home usage analytics or provider usage details opened or refreshed'
   },
   { id: 'voice-dictation', interaction: 'dictation session started' },
   {

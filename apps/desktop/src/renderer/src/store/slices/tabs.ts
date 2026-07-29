@@ -124,7 +124,7 @@ export type TabsSlice = {
   /** Set a tab's view mode (terminal vs native chat). Patches only that tab. */
   setTabViewMode: (tabId: string, mode: 'terminal' | 'chat') => void
   /** Stamp the app-owned assistant identity onto an adopted terminal tab. */
-  markTabAsGlobalAssistant: (tabId: string) => void
+  markTabAsFriday: (tabId: string) => void
   /** Flip a tab between the terminal and native chat renderings. The live
    *  TerminalPane stays mounted — this only changes which surface is shown. */
   toggleTabViewMode: (tabId: string) => void
@@ -1093,7 +1093,7 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
     mirrorTabViewModeToHost(get(), tabId, mode)
   },
 
-  markTabAsGlobalAssistant: (tabId) => {
+  markTabAsFriday: (tabId) => {
     set((state) => {
       const found = findTabAndWorktree(state.unifiedTabsByWorktree, tabId)
       if (!found || found.tab.contentType !== 'terminal') {
@@ -1105,13 +1105,13 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
         unifiedTabsByWorktree: {
           ...state.unifiedTabsByWorktree,
           [found.worktreeId]: (state.unifiedTabsByWorktree[found.worktreeId] ?? []).map((tab) =>
-            tab.id === tabId ? { ...tab, isGlobalAssistant: true } : tab
+            tab.id === tabId ? { ...tab, isFriday: true } : tab
           )
         },
         tabsByWorktree: {
           ...state.tabsByWorktree,
           [found.worktreeId]: (state.tabsByWorktree[found.worktreeId] ?? []).map((tab) =>
-            tab.id === found.tab.entityId ? { ...tab, isGlobalAssistant: true } : tab
+            tab.id === found.tab.entityId ? { ...tab, isFriday: true } : tab
           )
         }
       }

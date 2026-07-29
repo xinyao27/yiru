@@ -7,6 +7,7 @@ import type { AiVaultSession } from '@yiru/workbench-model/agent'
 
 import {
   addPreviewMessage,
+  addSessionTokens,
   createAccumulator,
   finalizeSession,
   sessionIdFromFileName,
@@ -48,7 +49,39 @@ export async function parseGrokSessionFile(
   updateTimeline(accumulator, extractString(record.updated_at))
   updateTimeline(accumulator, extractString(record.last_active_at))
   await consumeGrokChatHistory(accumulator, dirname(file.path))
+  await consumeGrokTokenUpdates(accumulator, dirname(file.path))
   return finalizeSession(accumulator, platform)
+}
+
+// Why: Grok totals are cumulative and reset on compaction, so only positive deltas are spend.
+async function consumeGrokTokenUpdates(
+  accumulator: SessionAccumulator,
+  sessionDir: string
+): Promise<void> {
+  let previousTotal = 0
+  try {
+    const lines = createInterface({
+      input: createReadStream(join(sessionDir, 'updates.jsonl'), { encoding: 'utf-8' }),
+      crlfDelay: Infinity
+    })
+    for await (const line of lines) {
+      // Why: most update lines are large streamed payloads with no usage, so avoid parsing them.
+      if (!line.includes('"totalTokens"')) {
+        continue
+      }
+      const meta = asRecord(asRecord(parseJsonObject(line)?.params)?._meta)
+      if (!meta) {
+        continue
+      }
+      const total = numberValue(meta.totalTokens)
+      if (total > previousTotal) {
+        addSessionTokens(accumulator, total - previousTotal, meta.agentTimestampMs)
+      }
+      if (total > 0) {
+        previousTotal = total
+      }
+    }
+  } catch {}
 }
 
 async function consumeGrokChatHistory(

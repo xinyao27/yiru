@@ -6,7 +6,7 @@ export const STATS_METHODS: RpcMethod[] = [
     mobile: true,
     params: null,
     handler: async (_params, { runtime }) => {
-      return runtime.getStatsSummary() ?? {}
+      return (await runtime.getStatsSummary()) ?? {}
     }
   })
 ]

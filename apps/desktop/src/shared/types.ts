@@ -735,7 +735,7 @@ export type Tab = {
   viewMode?: 'terminal' | 'chat'
   /** App-owned assistant tabs remain ordinary terminal tabs so every existing
    * tab-group, persistence, and close path continues to apply. */
-  isGlobalAssistant?: boolean
+  isFriday?: boolean
 }
 
 export type TabGroup = {
@@ -793,7 +793,7 @@ export type TerminalTab = {
    *  and manually-started agents omit it. */
   launchAgent?: TuiAgent
   /** Identifies the app-owned assistant without inventing a new content type. */
-  isGlobalAssistant?: boolean
+  isFriday?: boolean
   /** Why: when `setActiveWorktree` bumps generation on all-dead tabs to drive a
    *  TerminalPane remount, the fresh PTY that results is caused by navigation,
    *  not by the user doing work. Without this flag the resulting
@@ -2304,7 +2304,14 @@ export type ManualRepoOrderEntry = {
 }
 
 /** The active top-level section shown in the main content area. */
-export type TopLevelView = 'terminal' | 'settings' | 'automations' | 'space' | 'skills' | 'mobile'
+export type TopLevelView =
+  | 'home'
+  | 'terminal'
+  | 'settings'
+  | 'automations'
+  | 'space'
+  | 'skills'
+  | 'mobile'
 
 export type PersistedUIState = {
   lastActiveRepoId: string | null
@@ -2780,14 +2787,7 @@ export type SearchOptions = {
 
 // ─── Stats ──────────────────────────────────────────────────────────
 
-export type StatsSummary = {
-  totalAgentsSpawned: number
-  totalPRsCreated: number
-  totalAgentTimeMs: number
-  // For display formatting — sourced from aggregates, not the event log,
-  // so it survives event trimming.
-  firstEventAt: number | null // timestamp of first-ever event, for "tracking since..."
-}
+export type StatsSummary = RuntimeMobileTypes.RuntimeStatsSummary
 
 // ─── Memory dashboard ──────────────────────────────────────────────
 // Resource-metrics snapshot shared across main, preload, and renderer so

@@ -35,10 +35,17 @@ export type StatsAggregates = {
   firstEventAt: number | null
 }
 
+export type StatsDailyActivity = {
+  day: string
+  agentStarts: number
+  prsCreated: number
+}
+
 // ─── Persisted File Shape ───────────────────────────────────────────
 
 export type StatsFile = {
   schemaVersion: number
   events: StatsEvent[]
   aggregates: StatsAggregates
+  dailyActivity: StatsDailyActivity[]
 }

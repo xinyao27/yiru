@@ -34,6 +34,8 @@ export type ClaudeUsageDailyPoint = {
   outputTokens: number
   cacheReadTokens: number
   cacheWriteTokens: number
+  estimatedCostUsd: number | null
+  unpricedTokens: number
 }
 
 export type ClaudeUsageBreakdownRow = {

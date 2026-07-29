@@ -7,6 +7,7 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import {
   accumulatorFoldResumeState,
   addPreviewMessage,
+  addSessionTokens,
   createAccumulator,
   sessionIdFromFileName,
   updateTimeline
@@ -76,7 +77,7 @@ function consumeDroidRecordLine(accumulator: SessionAccumulator, line: string): 
     consumeDroidMessage(accumulator, record)
   } else if (record.type === 'completion') {
     accumulator.messageCount++
-    accumulator.totalTokens += tokenTotal(record.usage)
+    addSessionTokens(accumulator, tokenTotal(record.usage), record.timestamp)
     addPreviewMessage(accumulator, {
       role: 'assistant',
       text: extractString(record.finalText),

@@ -820,7 +820,10 @@
         "ec43b38ba7": "GitHub でスター済み",
         "157bb5ecbb": "GitHub を開く",
         "preflightDismiss": "閉じる",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "{{value0}}を作成",
+        "previousWorkspace": "ワークスペースを上へ移動",
+        "nextWorkspace": "ワークスペースを下へ移動"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "ローカル Git プロジェクトでのみ使用できます。",
@@ -2172,7 +2175,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "使用状況の概要",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -2916,7 +2919,8 @@
           "c86d83b5c3": "新規",
           "1b5c41caee": "Yiru モバイル",
           "f323383e9a": "自動化",
-          "d599269755": "サイドバーから隠す"
+          "d599269755": "サイドバーから隠す",
+          "home": "Home"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "クリア",
@@ -11819,6 +11823,89 @@
       "WorkspacePanelEditorEmptyState": {
         "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
         "agentLaunchFailed": "Could not start {{value0}}."
+      },
+      "contribution": {
+        "heatmap": {
+          "monday": "Mon",
+          "wednesday": "Wed",
+          "friday": "Fri",
+          "activityLabel": "Daily agent activity over the past year",
+          "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "過去1年間の日別推定 API 価値",
+          "less": "Less",
+          "more": "More",
+          "activityCell": "{{value0}}: {{value1}} activities",
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}：推定 API 価値 {{value1}}"
+        }
+      },
+      "home": {
+        "page": {
+          "title": "Home",
+          "description": "A year of agent work, with today in context.",
+          "contributions": "Contribution history",
+          "activityDescription": "Agent starts and pull requests completed through Yiru.",
+          "tokenDescription": "Yiru ワークツリーに帰属する、プロバイダー報告のトークン使用量です。",
+          "activity": "Activity",
+          "tokens": "Tokens",
+          "apiValue": "API 価値",
+          "valueDescription": "各リクエストのモデルとトークン区分から算出した標準グローバル API 相当価値です。",
+          "today": "Today",
+          "todayActivity": "recorded activity",
+          "todayTokens": "recorded tokens",
+          "todayValue": "推定 API 価値",
+          "currentStreak": "Current streak",
+          "streakDays": "{{value0}} days",
+          "longestStreak": "Longest this year: {{value0}} days",
+          "pastYear": "Past year",
+          "totalActivity": "total recorded activity",
+          "totalTokens": "合計トークン",
+          "totalValue": "推定 API 価値の合計",
+          "valueUnavailable": "この推定に使える既知のモデル価格はまだありません。",
+          "valueCoverage": "標準グローバル API 相当価値は、Yiru ワークツリーに帰属する使用量について、正式なリクエスト単位のモデル価格を合算します。価格不明のトークン区分とリクエスト単位で帰属できないセッション合計は除外され、実際の請求額ではありません。",
+          "calculatingValue": "計算中…",
+          "valueNotAvailable": "利用できません",
+          "lifetime": "累計",
+          "peakDay": "ピーク日",
+          "longestStreakLabel": "最長連続日数",
+          "tokensUnavailable": "Yiru ワークツリーに帰属する Claude、Codex、OpenCode のトークン使用量はまだありません。",
+          "tokenCoverage": "トークン合計には Yiru ワークツリー内でリクエスト単位に帰属できる Claude、Codex、OpenCode の記録を使います。キャッシュ入力は重複計上せず、リクエスト単位で帰属できないセッション合計は除外します。",
+          "unpricedCoverage": "正式な価格情報がないトークンは価値合計から除外されます。"
+        },
+        "activitySummary": {
+          "agentsSpawned": "起動したエージェント",
+          "agentTime": "エージェントの稼働時間",
+          "prsCreated": "作成した PR",
+          "durationMinutes": "{{value0}}分",
+          "durationDaysHours": "{{value0}}日 {{value1}}時間",
+          "durationHoursMinutes": "{{value0}}時間 {{value1}}分"
+        },
+        "charts": {
+          "trendTitle": "30-day momentum",
+          "trendDescription": "Daily pace makes accelerations and quiet stretches visible.",
+          "trendAriaLabel": "Daily contributions over the past 30 days",
+          "rhythmTitle": "Weekly rhythm",
+          "rhythmDescription": "Past-year totals reveal which days carry the most work.",
+          "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}。クリックして{{value1}}を表示します。",
+          "activities": "{{value0}} activities",
+          "tokens": "{{value0}} tokens",
+          "value": "API 価値 {{value0}}"
+        },
+        "modelChart": {
+          "title": "モデル別内訳",
+          "tokenDescription": "Yiru ワークツリーに帰属するトークン使用量をモデル別に表示します。",
+          "valueDescription": "正式な価格情報があるトークン区分の標準グローバル API 相当価値です。",
+          "tokenAriaLabel": "モデル別トークン使用量",
+          "valueAriaLabel": "モデル別推定 API 価値",
+          "tokensTotal": "トークン合計",
+          "valueTotal": "API 価値",
+          "tokenUnavailable": "モデル別のトークンデータはまだありません。",
+          "valueUnavailable": "比較に使える既知のモデル価格はまだありません。",
+          "other": "その他",
+          "refreshAriaLabel": "ローカル使用統計を更新",
+          "refresh": "使用状況を更新"
+        }
       }
     },
     "i18n": {
@@ -11861,7 +11948,8 @@
       "agentUnavailable": "このワークスペースホストで {{agent}} が検出されませんでした。",
       "sent": "セッションコンテキストを新しい {{agent}} セッションに送信しました。",
       "deliveryFailed": "新しい {{agent}} セッションは開始しましたが、コンテキストを送信できませんでした。",
-      "launchFailed": "新しい {{agent}} セッションを開始できませんでした。"
+      "launchFailed": "新しい {{agent}} セッションを開始できませんでした。",
+      "launchOptions": "起動オプション"
     },
     "native-chat": {
       "composer": {
@@ -11918,11 +12006,63 @@
           "high": "高",
           "xhigh": "最高",
           "max": "最大"
-        }
+        },
+        "relaunchWithOtherAgent": "Agent やモデルを変更…"
       },
       "tool": {
         "running": "実行中…",
-        "result": "結果"
+        "result": "結果",
+        "yiru": {
+          "running": "{{value0}} を実行中",
+          "failed": "{{value0}} が失敗しました",
+          "completedUnknown": "{{value0}} は完了しましたが、結果を確認できません",
+          "summary": "{{value1}}を{{value0}}",
+          "summaryTarget": "{{value1}} {{value2}}を{{value0}}",
+          "summaryOutcome": "{{value1}} {{value2}}を{{value0}}、{{value3}}",
+          "openTarget": "操作対象を開く",
+          "verb": {
+            "captured": "キャプチャしました",
+            "changed": "変更しました",
+            "closed": "閉じました",
+            "created": "作成しました",
+            "dispatched": "ディスパッチしました",
+            "focused": "フォーカスしました",
+            "inspected": "確認しました",
+            "navigated": "移動しました",
+            "read": "読み取りました",
+            "removed": "削除しました",
+            "replied": "返信しました",
+            "ran": "実行しました",
+            "sentTo": "送信しました",
+            "started": "開始しました",
+            "stopped": "停止しました",
+            "updated": "更新しました",
+            "used": "操作しました",
+            "waited": "待機しました"
+          },
+          "object": {
+            "automation": "オートメーション",
+            "automations": "オートメーション",
+            "browser": "ブラウザ",
+            "browserTab": "ブラウザタブ",
+            "computer": "コンピュータ",
+            "gate": "ゲート",
+            "gates": "ゲート",
+            "message": "メッセージ",
+            "messages": "メッセージ",
+            "orchestration": "オーケストレーション",
+            "task": "タスク",
+            "tasks": "タスク",
+            "terminal": "ターミナル",
+            "terminals": "ターミナル",
+            "worktree": "worktree",
+            "worktrees": "worktree"
+          },
+          "outcome": {
+            "spawned": "{{value0}}を起動しました",
+            "to": "{{value0}}へ送信しました"
+          }
+        }
       },
       "status": {
         "responding": "Agent が応答中です"
@@ -11995,7 +12135,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "アシスタントを開く",
       "startError": "グローバルアシスタントを起動できませんでした。",
       "newConversation": "新しい会話",

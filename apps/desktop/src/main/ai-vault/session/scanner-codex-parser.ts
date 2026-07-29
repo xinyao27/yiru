@@ -6,6 +6,7 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import {
   addPreviewContent,
+  addSessionTokens,
   cloneSessionAccumulator,
   createAccumulator,
   finalizeSession,
@@ -220,7 +221,7 @@ export function consumeCodexSessionLine(state: CodexSessionParseState, line: str
       : lastUsage
   }
   if (delta) {
-    accumulator.totalTokens += delta.totalTokens
+    addSessionTokens(accumulator, delta.totalTokens, record.timestamp)
   }
   const model = extractModel(payload)
   if (model) {

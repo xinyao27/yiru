@@ -18,27 +18,17 @@ import type {
 } from '../../../shared/codex-usage-types'
 import type { Store } from '../../persistence'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usage-worktree-metadata'
+import { priceCodexAggregateUsage } from './pricing'
 import { createWorktreeRefs, scanCodexUsageFiles } from './scanner'
 import type { CodexUsagePersistedState } from './types'
 
-// Why: v5 keys Codex ownership on raw token_count identity without session id
-// so forks that rewrite session_meta still match. Older caches used session-
-// scoped keys and can double-count after fork/resume (#8006).
-const SCHEMA_VERSION = 5
+// Why: v6 persists request-level value so full-request long-context pricing is
+// selected before daily/model aggregation. Older aggregates cannot recover it.
+const SCHEMA_VERSION = 6
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
 let _codexUsageFile: string | null = null
-
-type TieredPrice = { threshold: number; price: number }
-type CodexModelPricing = {
-  input: number
-  cachedInput: number
-  output: number
-  inputTiers?: TieredPrice[]
-  cachedInputTiers?: TieredPrice[]
-  outputTiers?: TieredPrice[]
-}
 
 type AutomationUsageLookupInput = {
   worktreeId: string | null
@@ -47,55 +37,9 @@ type AutomationUsageLookupInput = {
   completedAt: number | null
 }
 
-const LONG_CONTEXT_THRESHOLD_TOKENS = 272_000
-
-const MODEL_PRICING: Record<string, CodexModelPricing> = {
-  'gpt-5': { input: 1.25, cachedInput: 0.125, output: 10 },
-  'gpt-5.1': { input: 1.25, cachedInput: 0.125, output: 10 },
-  'gpt-5.1-codex': { input: 1.25, cachedInput: 0.125, output: 10 },
-  'gpt-5.1-codex-max': { input: 1.25, cachedInput: 0.125, output: 10 },
-  'gpt-5.2': { input: 1.75, cachedInput: 0.175, output: 14 },
-  'gpt-5.2-codex': { input: 1.75, cachedInput: 0.175, output: 14 },
-  'gpt-5.3': { input: 1.75, cachedInput: 0.175, output: 14 },
-  'gpt-5.3-codex': { input: 1.75, cachedInput: 0.175, output: 14 },
-  'gpt-5.3-codex-spark': { input: 1.75, cachedInput: 0.175, output: 14 },
-  'gpt-5.4-mini': { input: 0.75, cachedInput: 0.075, output: 4.5 },
-  'gpt-5.4-nano': { input: 0.2, cachedInput: 0.02, output: 1.25 },
-  'gpt-5.4-pro': {
-    input: 30,
-    cachedInput: 30,
-    output: 180,
-    inputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 60 }],
-    cachedInputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 60 }],
-    outputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 270 }]
-  },
-  'gpt-5.4': {
-    input: 2.5,
-    cachedInput: 0.25,
-    output: 15,
-    inputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 5 }],
-    cachedInputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 0.5 }],
-    outputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 22.5 }]
-  },
-  'gpt-5.5-pro': {
-    input: 30,
-    cachedInput: 30,
-    output: 180,
-    inputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 60 }],
-    cachedInputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 60 }],
-    outputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 270 }]
-  },
-  'gpt-5.5': {
-    input: 5,
-    cachedInput: 0.5,
-    output: 30,
-    inputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 10 }],
-    cachedInputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 1 }],
-    outputTiers: [{ threshold: LONG_CONTEXT_THRESHOLD_TOKENS, price: 45 }]
-  }
+function addKnownCost(left: number | null, right: number | null): number | null {
+  return left === null && right === null ? null : (left ?? 0) + (right ?? 0)
 }
-
-const REASONING_TIER_SUFFIXES = ['minimal', 'low', 'medium', 'high', 'xhigh', 'auto', 'none']
 
 function getDefaultState(): CodexUsagePersistedState {
   return {
@@ -105,7 +49,7 @@ function getDefaultState(): CodexUsagePersistedState {
     sessions: [],
     dailyAggregates: [],
     scanState: {
-      enabled: false,
+      enabled: true,
       lastScanStartedAt: null,
       lastScanCompletedAt: null,
       lastScanError: null
@@ -115,23 +59,26 @@ function getDefaultState(): CodexUsagePersistedState {
 
 export function normalizePersistedState(state: CodexUsagePersistedState): CodexUsagePersistedState {
   if (state.schemaVersion !== SCHEMA_VERSION) {
-    // Why: Yiru-scoped Codex projections now depend on locationModelBreakdown.
-    // Reusing an older cache would silently serve wrong model/session rows
-    // until the next forced rescan, so schema changes must invalidate stale
-    // persisted analytics instead of best-effort patching partial data.
-    // Preserve scanState.enabled so existing users keep tracking on across
-    // schema bumps; the next refresh will repopulate the analytics.
+    // Why: schema changes affect dedupe, attribution, or request-level pricing.
+    // Reusing an older cache would silently serve wrong analytics until a
+    // forced scan, so invalidate it instead of patching partial data.
+    // Usage analytics is local and always available on Home. Schema bumps
+    // migrate older opt-in state to the current always-on behavior.
     const defaults = getDefaultState()
     return {
       ...defaults,
       scanState: {
         ...defaults.scanState,
-        enabled: state.scanState?.enabled ?? defaults.scanState.enabled
+        enabled: true
       }
     }
   }
   return {
     ...state,
+    scanState: {
+      ...state.scanState,
+      enabled: true
+    },
     sessions: state.sessions.map((session) => ({
       ...session,
       locationModelBreakdown: session.locationModelBreakdown ?? []
@@ -148,128 +95,6 @@ function getCodexUsageFile(): string {
     _codexUsageFile = join(app.getPath('userData'), 'yiru-codex-usage.json')
   }
   return _codexUsageFile
-}
-
-function stripParenthesizedReasoningTier(model: string): string | null {
-  const match = model.match(/^(.*)\(([^()]*)\)$/)
-  if (!match) {
-    return model
-  }
-  const tier = match[2].trim().toLowerCase()
-  if (!REASONING_TIER_SUFFIXES.includes(tier)) {
-    return null
-  }
-  return match[1]
-}
-
-function stripDashReasoningTiers(model: string): string {
-  let current = model
-  for (let index = 0; index < 4; index++) {
-    const suffix = REASONING_TIER_SUFFIXES.find((tier) => current.endsWith(`-${tier}`))
-    if (!suffix) {
-      return current
-    }
-    current = current.slice(0, -suffix.length - 1)
-  }
-  return current
-}
-
-function normalizeModelForPricing(model: string | null): string | null {
-  if (!model) {
-    return null
-  }
-
-  const lower = stripParenthesizedReasoningTier(model.toLowerCase().trim())
-  if (!lower) {
-    return null
-  }
-
-  const normalized = stripDashReasoningTiers(lower)
-  if (normalized === 'gpt-5' || normalized === 'gpt-5-codex') {
-    return 'gpt-5'
-  }
-  if (normalized === 'gpt-5.1-codex-max' || normalized.startsWith('gpt-5.1-codex-max-')) {
-    return 'gpt-5.1-codex-max'
-  }
-  if (normalized === 'gpt-5.1-codex' || normalized.startsWith('gpt-5.1-codex-')) {
-    return 'gpt-5.1-codex'
-  }
-  if (normalized === 'gpt-5.1' || normalized.startsWith('gpt-5.1-')) {
-    return 'gpt-5.1'
-  }
-  if (normalized === 'gpt-5.2-codex' || normalized.startsWith('gpt-5.2-codex-')) {
-    return 'gpt-5.2-codex'
-  }
-  if (normalized === 'gpt-5.2' || normalized.startsWith('gpt-5.2-')) {
-    return 'gpt-5.2'
-  }
-  if (normalized === 'gpt-5.3-codex-spark' || normalized.startsWith('gpt-5.3-codex-spark-')) {
-    return 'gpt-5.3-codex-spark'
-  }
-  if (normalized === 'gpt-5.3-codex' || normalized.startsWith('gpt-5.3-codex-')) {
-    return 'gpt-5.3-codex'
-  }
-  if (normalized === 'gpt-5.3' || normalized.startsWith('gpt-5.3-')) {
-    return 'gpt-5.3'
-  }
-  if (normalized === 'gpt-5.4-mini' || normalized.startsWith('gpt-5.4-mini-')) {
-    return 'gpt-5.4-mini'
-  }
-  if (normalized === 'gpt-5.4-nano' || normalized.startsWith('gpt-5.4-nano-')) {
-    return 'gpt-5.4-nano'
-  }
-  if (normalized === 'gpt-5.4-pro' || normalized.startsWith('gpt-5.4-pro-')) {
-    return 'gpt-5.4-pro'
-  }
-  if (normalized === 'gpt-5.4' || normalized.startsWith('gpt-5.4-')) {
-    return 'gpt-5.4'
-  }
-  if (normalized === 'gpt-5.5-pro' || normalized.startsWith('gpt-5.5-pro-')) {
-    return 'gpt-5.5-pro'
-  }
-  if (normalized === 'gpt-5.5' || normalized.startsWith('gpt-5.5-')) {
-    return 'gpt-5.5'
-  }
-  return null
-}
-
-function calculateTieredCost(tokens: number, basePrice: number, tiers: TieredPrice[] = []): number {
-  let cost = 0
-  let lowerBound = 0
-  let activePrice = basePrice
-  for (const tier of tiers) {
-    if (tokens <= tier.threshold) {
-      return cost + Math.max(tokens - lowerBound, 0) * activePrice
-    }
-    cost += (tier.threshold - lowerBound) * activePrice
-    lowerBound = tier.threshold
-    activePrice = tier.price
-  }
-  return cost + Math.max(tokens - lowerBound, 0) * activePrice
-}
-
-function estimateCostUsd(
-  model: string | null,
-  inputTokens: number,
-  cachedInputTokens: number,
-  outputTokens: number
-): number | null {
-  const normalized = normalizeModelForPricing(model)
-  if (!normalized) {
-    return null
-  }
-  const pricing = MODEL_PRICING[normalized]
-  const clampedCached = Math.min(cachedInputTokens, inputTokens)
-  // Why: Codex cached tokens are part of the input bucket. Charge uncached
-  // input on (input-cached) so cached tokens are not billed once at full input
-  // price and again at cache-read price.
-  const nonCachedInputTokens = Math.max(inputTokens - clampedCached, 0)
-  return (
-    (calculateTieredCost(nonCachedInputTokens, pricing.input, pricing.inputTiers) +
-      calculateTieredCost(clampedCached, pricing.cachedInput, pricing.cachedInputTiers) +
-      calculateTieredCost(outputTokens, pricing.output, pricing.outputTiers)) /
-    1_000_000
-  )
 }
 
 function getRangeCutoff(range: CodexUsageRange): string | null {
@@ -480,12 +305,7 @@ export class CodexUsageStore {
         (byModel.get(row.model ?? 'Unknown model') ?? 0) + row.totalTokens
       )
       byProject.set(row.projectLabel, (byProject.get(row.projectLabel) ?? 0) + row.totalTokens)
-      const cost = estimateCostUsd(
-        row.model,
-        row.inputTokens,
-        row.cachedInputTokens,
-        row.outputTokens
-      )
+      const cost = row.estimatedCostUsd
       if (cost !== null) {
         hasAnyBillableCost = true
         estimatedCostUsd += cost
@@ -528,13 +348,17 @@ export class CodexUsageStore {
         cachedInputTokens: 0,
         outputTokens: 0,
         reasoningOutputTokens: 0,
-        totalTokens: 0
+        totalTokens: 0,
+        estimatedCostUsd: null,
+        unpricedTokens: 0
       }
       existing.inputTokens += row.inputTokens
       existing.cachedInputTokens += row.cachedInputTokens
       existing.outputTokens += row.outputTokens
       existing.reasoningOutputTokens += row.reasoningOutputTokens
       existing.totalTokens += row.totalTokens
+      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, row.estimatedCostUsd)
+      existing.unpricedTokens += row.unpricedTokens
       byDay.set(row.day, existing)
     }
     return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
@@ -581,6 +405,7 @@ export class CodexUsageStore {
       existing.reasoningOutputTokens += daily.reasoningOutputTokens
       existing.totalTokens += daily.totalTokens
       existing.hasInferredPricing ||= daily.hasInferredPricing
+      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
       rows.set(key, existing)
     }
 
@@ -613,15 +438,6 @@ export class CodexUsageStore {
           row.sessions++
         }
       }
-    }
-
-    for (const row of rows.values()) {
-      row.estimatedCostUsd = estimateCostUsd(
-        kind === 'model' ? row.key : null,
-        row.inputTokens,
-        row.cachedInputTokens,
-        row.outputTokens
-      )
     }
 
     return [...rows.values()].sort((left, right) => right.totalTokens - left.totalTokens)
@@ -794,7 +610,7 @@ export class CodexUsageStore {
     let hasKnownCost = false
     if (scopedModelRows.length > 0) {
       for (const modelRow of scopedModelRows) {
-        const cost = estimateCostUsd(
+        const cost = priceCodexAggregateUsage(
           modelRow.modelKey,
           modelRow.inputTokens,
           modelRow.cachedInputTokens,
@@ -806,7 +622,7 @@ export class CodexUsageStore {
         }
       }
     } else if (!session.hasMixedModels) {
-      const cost = estimateCostUsd(
+      const cost = priceCodexAggregateUsage(
         session.primaryModel,
         totals.inputTokens,
         totals.cachedInputTokens,

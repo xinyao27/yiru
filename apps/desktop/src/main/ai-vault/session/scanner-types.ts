@@ -104,6 +104,8 @@ export type SessionAccumulator = {
   modifiedAt: string
   messageCount: number
   totalTokens: number
+  // Why: all parsers write through addSessionTokens so long sessions split consistently.
+  tokensByDay: Map<string, number>
   previewMessages: AiVaultSessionPreviewMessage[]
   lastUserPrompt: string | null
   // Recoverable signal for a zero-turn transcript (see AiVaultSession).

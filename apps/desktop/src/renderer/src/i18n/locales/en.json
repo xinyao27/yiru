@@ -843,7 +843,10 @@
         "ec43b38ba7": "Starred on GitHub",
         "157bb5ecbb": "Open GitHub",
         "preflightDismiss": "Dismiss",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "Create {{value0}}",
+        "previousWorkspace": "Move up workspace",
+        "nextWorkspace": "Move down workspace"
       },
       "NewWorkspaceComposerCard": {
         "reuseExistingBranch": "Reuse branch",
@@ -2195,7 +2198,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "Usage overview",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -2973,7 +2976,8 @@
           "c86d83b5c3": "New",
           "1b5c41caee": "Yiru Mobile",
           "f323383e9a": "Automations",
-          "d599269755": "Hide from sidebar"
+          "d599269755": "Hide from sidebar",
+          "home": "Home"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "Clear",
@@ -11842,6 +11846,89 @@
       "WorkspacePanelEditorEmptyState": {
         "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
         "agentLaunchFailed": "Could not start {{value0}}."
+      },
+      "contribution": {
+        "heatmap": {
+          "monday": "Mon",
+          "wednesday": "Wed",
+          "friday": "Fri",
+          "activityLabel": "Daily agent activity over the past year",
+          "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "Daily estimated API value over the past year",
+          "less": "Less",
+          "more": "More",
+          "activityCell": "{{value0}}: {{value1}} activities",
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}: {{value1}} estimated API value"
+        }
+      },
+      "home": {
+        "page": {
+          "title": "Home",
+          "description": "A year of agent work, with today in context.",
+          "contributions": "Contribution history",
+          "activityDescription": "Agent starts and pull requests completed through Yiru.",
+          "tokenDescription": "Provider-reported token usage attributed to Yiru worktrees.",
+          "activity": "Activity",
+          "tokens": "Tokens",
+          "apiValue": "API value",
+          "valueDescription": "Standard global API-equivalent value calculated per request from its model and token categories.",
+          "today": "Today",
+          "todayActivity": "recorded activity",
+          "todayTokens": "recorded tokens",
+          "todayValue": "estimated API value",
+          "currentStreak": "Current streak",
+          "streakDays": "{{value0}} days",
+          "longestStreak": "Longest this year: {{value0}} days",
+          "pastYear": "Past year",
+          "totalActivity": "total recorded activity",
+          "totalTokens": "Total tokens",
+          "totalValue": "total estimated API value",
+          "valueUnavailable": "No known model pricing is available for this estimate yet.",
+          "valueCoverage": "Standard global API-equivalent value sums authoritative per-request model pricing for usage attributed to Yiru worktrees. Unpriced token categories and session totals without request attribution are excluded; this is not a bill.",
+          "calculatingValue": "Calculating…",
+          "valueNotAvailable": "Not available",
+          "lifetime": "Lifetime",
+          "peakDay": "Peak day",
+          "longestStreakLabel": "Longest streak",
+          "tokensUnavailable": "No Claude, Codex, or OpenCode token usage attributed to Yiru worktrees is available yet.",
+          "tokenCoverage": "Token totals use request-attributed Claude, Codex, and OpenCode records from Yiru worktrees; cached input is not counted twice, and session totals without request attribution are excluded.",
+          "unpricedCoverage": "Tokens without authoritative pricing details are excluded from value totals."
+        },
+        "activitySummary": {
+          "agentsSpawned": "Agents spawned",
+          "agentTime": "Time agents worked",
+          "prsCreated": "PRs created",
+          "durationMinutes": "{{value0}}m",
+          "durationDaysHours": "{{value0}}d {{value1}}h",
+          "durationHoursMinutes": "{{value0}}h {{value1}}m"
+        },
+        "charts": {
+          "trendTitle": "30-day momentum",
+          "trendDescription": "Daily pace makes accelerations and quiet stretches visible.",
+          "trendAriaLabel": "Daily contributions over the past 30 days",
+          "rhythmTitle": "Weekly rhythm",
+          "rhythmDescription": "Past-year totals reveal which days carry the most work.",
+          "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}. Click to show {{value1}}.",
+          "activities": "{{value0}} activities",
+          "tokens": "{{value0}} tokens",
+          "value": "{{value0}} API value"
+        },
+        "modelChart": {
+          "title": "Model mix",
+          "tokenDescription": "Token usage attributed to Yiru worktrees, grouped by model.",
+          "valueDescription": "Standard global API-equivalent value for token categories with authoritative pricing.",
+          "tokenAriaLabel": "Token usage by model",
+          "valueAriaLabel": "Estimated API value by model",
+          "tokensTotal": "total tokens",
+          "valueTotal": "API value",
+          "tokenUnavailable": "No model token data is available yet.",
+          "valueUnavailable": "No known model pricing is available for comparison yet.",
+          "other": "Other",
+          "refreshAriaLabel": "Refresh local usage statistics",
+          "refresh": "Refresh usage"
+        }
       }
     },
     "i18n": {
@@ -11884,7 +11971,8 @@
       "agentUnavailable": "{{agent}} was not detected on this workspace host.",
       "sent": "Session context sent to {{agent}} in a new session.",
       "deliveryFailed": "The new {{agent}} session started, but its context could not be sent.",
-      "launchFailed": "Could not start a new {{agent}} session."
+      "launchFailed": "Could not start a new {{agent}} session.",
+      "launchOptions": "Launch options"
     },
     "native-chat": {
       "composer": {
@@ -11941,11 +12029,63 @@
           "high": "High",
           "xhigh": "Extra high",
           "max": "Max"
-        }
+        },
+        "relaunchWithOtherAgent": "Switch Agent or model…"
       },
       "tool": {
         "running": "Running…",
-        "result": "Result"
+        "result": "Result",
+        "yiru": {
+          "running": "Running {{value0}}",
+          "failed": "{{value0}} failed",
+          "completedUnknown": "Finished {{value0}}; result unavailable",
+          "summary": "{{value0}} {{value1}}",
+          "summaryTarget": "{{value0}} {{value1}} {{value2}}",
+          "summaryOutcome": "{{value0}} {{value1}} {{value2}}, {{value3}}",
+          "openTarget": "Open action target",
+          "verb": {
+            "captured": "Captured",
+            "changed": "Changed",
+            "closed": "Closed",
+            "created": "Created",
+            "dispatched": "Dispatched",
+            "focused": "Focused",
+            "inspected": "Inspected",
+            "navigated": "Navigated",
+            "read": "Read",
+            "removed": "Removed",
+            "replied": "Replied to",
+            "ran": "Ran",
+            "sentTo": "Sent to",
+            "started": "Started",
+            "stopped": "Stopped",
+            "updated": "Updated",
+            "used": "Used",
+            "waited": "Waited for"
+          },
+          "object": {
+            "automation": "automation",
+            "automations": "automations",
+            "browser": "browser",
+            "browserTab": "browser tab",
+            "computer": "computer",
+            "gate": "gate",
+            "gates": "gates",
+            "message": "message",
+            "messages": "messages",
+            "orchestration": "orchestration",
+            "task": "task",
+            "tasks": "tasks",
+            "terminal": "terminal",
+            "terminals": "terminals",
+            "worktree": "worktree",
+            "worktrees": "worktrees"
+          },
+          "outcome": {
+            "spawned": "spawned {{value0}}",
+            "to": "to {{value0}}"
+          }
+        }
       },
       "status": {
         "responding": "Agent is responding"
@@ -12018,9 +12158,9 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "Open Assistant",
-      "startError": "Global Assistant could not start.",
+      "startError": "Friday could not start.",
       "newConversation": "New conversation",
       "starting": "Starting assistant…"
     }

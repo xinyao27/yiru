@@ -414,10 +414,10 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
   },
   {
     id: 'assistant.toggle',
-    title: 'Toggle Global Assistant',
+    title: 'Toggle Friday',
     group: 'Global',
     scope: 'global',
-    searchKeywords: ['shortcut', 'assistant', 'chat', 'global assistant'],
+    searchKeywords: ['shortcut', 'assistant', 'chat', 'friday'],
     defaultBindings: platformBindings(['Mod+Shift+A']),
     allowInTerminal: true
   },

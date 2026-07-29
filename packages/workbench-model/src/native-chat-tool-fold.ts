@@ -44,37 +44,72 @@ export type NativeChatToolPair = {
   result?: NativeChatToolResultBlock
 }
 
-/** Pair calls and results by FIFO ordinal because transcript blocks carry no tool ids. */
+// Why: older transcripts without provider IDs still require FIFO result pairing.
 export function pairToolBlocks(
   blocks: readonly NativeChatBlock[],
   limit = Infinity
 ): NativeChatToolPair[] {
   const pairs: NativeChatToolPair[] = []
-  const callSlots: (number | null)[] = []
-  let resultOrdinal = 0
+  const calls: {
+    pairIndex: number | null
+    hasResult: boolean
+  }[] = []
+  const callIndexById = new Map<string, number>()
+  const results: NativeChatToolResultBlock[] = []
   for (const block of blocks) {
     if (block.type === 'tool-call') {
+      const pairIndex = pairs.length < limit ? pairs.length : null
+      const callIndex = calls.length
       if (pairs.length < limit) {
-        callSlots.push(pairs.length)
         pairs.push({ call: block })
-      } else {
-        callSlots.push(null)
+      }
+      calls.push({ pairIndex, hasResult: false })
+      if (block.callId && !callIndexById.has(block.callId)) {
+        callIndexById.set(block.callId, callIndex)
       }
       continue
     }
-    if (block.type !== 'tool-result') {
+    if (block.type === 'tool-result') {
+      results.push(block)
+    }
+  }
+
+  for (const result of results) {
+    if (!result.callId) {
       continue
     }
-    const slot = callSlots[resultOrdinal]
-    if (slot === undefined) {
-      if (pairs.length < limit) {
-        pairs.push({ result: block })
+    const callIndex = callIndexById.get(result.callId)
+    const call = callIndex === undefined ? undefined : calls[callIndex]
+    if (!call || call.hasResult) {
+      continue
+    }
+    call.hasResult = true
+    if (call.pairIndex !== null) {
+      pairs[call.pairIndex]!.result = result
+    }
+  }
+
+  let fallbackCallIndex = 0
+  for (const result of results) {
+    if (result.callId && callIndexById.has(result.callId)) {
+      continue
+    }
+    if (!result.callId) {
+      while (calls[fallbackCallIndex]?.hasResult) {
+        fallbackCallIndex += 1
       }
-    } else {
-      resultOrdinal += 1
-      if (slot !== null) {
-        pairs[slot]!.result = block
+      const call = calls[fallbackCallIndex]
+      if (call) {
+        call.hasResult = true
+        fallbackCallIndex += 1
+        if (call.pairIndex !== null) {
+          pairs[call.pairIndex]!.result = result
+        }
+        continue
       }
+    }
+    if (pairs.length < limit) {
+      pairs.push({ result })
     }
   }
   return pairs

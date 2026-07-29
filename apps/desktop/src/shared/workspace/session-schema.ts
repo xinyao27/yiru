@@ -89,7 +89,7 @@ const terminalTabSchema = z.object({
     .custom<TuiAgent>((v) => isTuiAgent(v))
     .optional()
     .catch(undefined),
-  isGlobalAssistant: z.boolean().optional()
+  isFriday: z.boolean().optional()
 })
 
 // ─── Unified tab model ──────────────────────────────────────────────
@@ -127,7 +127,7 @@ const tabSchema = z.object({
   // default instead of failing the whole-session parse. Legacy/missing stays
   // undefined → 'terminal' in the renderer.
   viewMode: z.enum(['terminal', 'chat']).catch('terminal').optional(),
-  isGlobalAssistant: z.boolean().optional()
+  isFriday: z.boolean().optional()
 })
 
 const retiredSidebarTabContentTypes = new Set([

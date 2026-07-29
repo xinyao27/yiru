@@ -1784,6 +1784,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const rateLimits = useAppStore((s) => s.rateLimits)
   const settings = useAppStore((s) => s.settings)
   const refreshRateLimits = useAppStore((s) => s.refreshRateLimits)
+  const openHomePage = useAppStore((s) => s.openHomePage)
   const openSettingsTarget = useAppStore((s) => s.openSettingsTarget)
   const openSettingsPage = useAppStore((s) => s.openSettingsPage)
   const usagePercentageDisplay = normalizeUsagePercentageDisplay(
@@ -1890,9 +1891,8 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
 
   const handleUsageDetails = useCallback((): void => {
     setUsageMenuOpen(false)
-    openSettingsTarget({ pane: 'stats', repoId: null })
-    openSettingsPage()
-  }, [openSettingsPage, openSettingsTarget])
+    openHomePage()
+  }, [openHomePage])
 
   const handleOpenProviderAccounts = useCallback(
     (provider: ProviderRateLimits['provider']): void => {

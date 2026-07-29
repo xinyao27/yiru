@@ -820,7 +820,10 @@
         "ec43b38ba7": "GitHub에 별표 표시됨",
         "157bb5ecbb": "GitHub 열기",
         "preflightDismiss": "닫기",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "{{value0}} 만들기",
+        "previousWorkspace": "워크스페이스 위로 이동",
+        "nextWorkspace": "워크스페이스 아래로 이동"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "로컬 Git 프로젝트에만 사용할 수 있습니다.",
@@ -2172,7 +2175,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "사용량 개요",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -2916,7 +2919,8 @@
           "c86d83b5c3": "새로 만들기",
           "1b5c41caee": "Yiru 모바일",
           "f323383e9a": "자동화",
-          "d599269755": "사이드바에서 숨기기"
+          "d599269755": "사이드바에서 숨기기",
+          "home": "Home"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "지우기",
@@ -11819,6 +11823,89 @@
       "WorkspacePanelEditorEmptyState": {
         "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
         "agentLaunchFailed": "Could not start {{value0}}."
+      },
+      "contribution": {
+        "heatmap": {
+          "monday": "Mon",
+          "wednesday": "Wed",
+          "friday": "Fri",
+          "activityLabel": "Daily agent activity over the past year",
+          "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "지난 1년간의 일별 예상 API 가치",
+          "less": "Less",
+          "more": "More",
+          "activityCell": "{{value0}}: {{value1}} activities",
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}: 예상 API 가치 {{value1}}"
+        }
+      },
+      "home": {
+        "page": {
+          "title": "Home",
+          "description": "A year of agent work, with today in context.",
+          "contributions": "Contribution history",
+          "activityDescription": "Agent starts and pull requests completed through Yiru.",
+          "tokenDescription": "Yiru 워크트리에 귀속된 제공업체 보고 토큰 사용량입니다.",
+          "activity": "Activity",
+          "tokens": "Tokens",
+          "apiValue": "API 가치",
+          "valueDescription": "각 요청의 모델과 토큰 범주로 계산한 표준 글로벌 API 환산 가치입니다.",
+          "today": "Today",
+          "todayActivity": "recorded activity",
+          "todayTokens": "recorded tokens",
+          "todayValue": "예상 API 가치",
+          "currentStreak": "Current streak",
+          "streakDays": "{{value0}} days",
+          "longestStreak": "Longest this year: {{value0}} days",
+          "pastYear": "Past year",
+          "totalActivity": "total recorded activity",
+          "totalTokens": "총 토큰",
+          "totalValue": "총 예상 API 가치",
+          "valueUnavailable": "이 추정에 사용할 수 있는 알려진 모델 가격이 아직 없습니다.",
+          "valueCoverage": "표준 글로벌 API 환산 가치는 Yiru 워크트리에 귀속된 사용량의 공식 요청별 모델 가격을 합산합니다. 가격이 없는 토큰 범주와 요청 단위로 귀속할 수 없는 세션 합계는 제외되며 실제 청구액이 아닙니다.",
+          "calculatingValue": "계산 중…",
+          "valueNotAvailable": "사용할 수 없음",
+          "lifetime": "누적",
+          "peakDay": "최고 기록일",
+          "longestStreakLabel": "최장 연속 기록",
+          "tokensUnavailable": "Yiru 워크트리에 귀속된 Claude, Codex 또는 OpenCode 토큰 사용량이 아직 없습니다.",
+          "tokenCoverage": "토큰 합계는 Yiru 워크트리에서 요청 단위로 귀속할 수 있는 Claude, Codex, OpenCode 기록을 사용합니다. 캐시 입력은 중복 계산하지 않으며 요청 단위로 귀속할 수 없는 세션 합계는 제외합니다.",
+          "unpricedCoverage": "공식 가격 세부 정보가 없는 토큰은 가치 합계에서 제외됩니다."
+        },
+        "activitySummary": {
+          "agentsSpawned": "시작한 에이전트",
+          "agentTime": "에이전트 작업 시간",
+          "prsCreated": "생성한 PR",
+          "durationMinutes": "{{value0}}분",
+          "durationDaysHours": "{{value0}}일 {{value1}}시간",
+          "durationHoursMinutes": "{{value0}}시간 {{value1}}분"
+        },
+        "charts": {
+          "trendTitle": "30-day momentum",
+          "trendDescription": "Daily pace makes accelerations and quiet stretches visible.",
+          "trendAriaLabel": "Daily contributions over the past 30 days",
+          "rhythmTitle": "Weekly rhythm",
+          "rhythmDescription": "Past-year totals reveal which days carry the most work.",
+          "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}. 클릭하여 {{value1}}을 표시합니다.",
+          "activities": "{{value0}} activities",
+          "tokens": "{{value0}} tokens",
+          "value": "API 가치 {{value0}}"
+        },
+        "modelChart": {
+          "title": "모델별 분포",
+          "tokenDescription": "Yiru 워크트리에 귀속된 토큰 사용량을 모델별로 표시합니다.",
+          "valueDescription": "공식 가격 정보가 있는 토큰 범주의 표준 글로벌 API 환산 가치입니다.",
+          "tokenAriaLabel": "모델별 토큰 사용량",
+          "valueAriaLabel": "모델별 예상 API 가치",
+          "tokensTotal": "총 토큰",
+          "valueTotal": "API 가치",
+          "tokenUnavailable": "아직 모델별 토큰 데이터가 없습니다.",
+          "valueUnavailable": "비교에 사용할 수 있는 알려진 모델 가격이 아직 없습니다.",
+          "other": "기타",
+          "refreshAriaLabel": "로컬 사용량 통계 새로 고침",
+          "refresh": "사용량 새로 고침"
+        }
       }
     },
     "i18n": {
@@ -11861,7 +11948,8 @@
       "agentUnavailable": "이 워크스페이스 호스트에서 {{agent}}을(를) 찾지 못했습니다.",
       "sent": "세션 컨텍스트를 새 {{agent}} 세션으로 보냈습니다.",
       "deliveryFailed": "새 {{agent}} 세션은 시작되었지만 컨텍스트를 보내지 못했습니다.",
-      "launchFailed": "새 {{agent}} 세션을 시작할 수 없습니다."
+      "launchFailed": "새 {{agent}} 세션을 시작할 수 없습니다.",
+      "launchOptions": "실행 옵션"
     },
     "native-chat": {
       "composer": {
@@ -11918,11 +12006,63 @@
           "high": "높음",
           "xhigh": "매우 높음",
           "max": "최대"
-        }
+        },
+        "relaunchWithOtherAgent": "Agent 또는 모델 변경…"
       },
       "tool": {
         "running": "실행 중…",
-        "result": "결과"
+        "result": "결과",
+        "yiru": {
+          "running": "{{value0}} 실행 중",
+          "failed": "{{value0}} 실패",
+          "completedUnknown": "{{value0}} 실행 완료; 결과를 확인할 수 없음",
+          "summary": "{{value1}} {{value0}}",
+          "summaryTarget": "{{value1}} {{value2}} {{value0}}",
+          "summaryOutcome": "{{value1}} {{value2}} {{value0}}, {{value3}}",
+          "openTarget": "작업 대상 열기",
+          "verb": {
+            "captured": "캡처함",
+            "changed": "변경함",
+            "closed": "닫음",
+            "created": "생성함",
+            "dispatched": "배정함",
+            "focused": "포커스함",
+            "inspected": "확인함",
+            "navigated": "이동함",
+            "read": "읽음",
+            "removed": "제거함",
+            "replied": "회신함",
+            "ran": "실행함",
+            "sentTo": "전송함",
+            "started": "시작함",
+            "stopped": "중지함",
+            "updated": "업데이트함",
+            "used": "사용함",
+            "waited": "대기함"
+          },
+          "object": {
+            "automation": "자동화",
+            "automations": "자동화",
+            "browser": "브라우저",
+            "browserTab": "브라우저 탭",
+            "computer": "컴퓨터",
+            "gate": "게이트",
+            "gates": "게이트",
+            "message": "메시지",
+            "messages": "메시지",
+            "orchestration": "오케스트레이션",
+            "task": "작업",
+            "tasks": "작업",
+            "terminal": "터미널",
+            "terminals": "터미널",
+            "worktree": "워크트리",
+            "worktrees": "워크트리"
+          },
+          "outcome": {
+            "spawned": "{{value0}} 시작함",
+            "to": "{{value0}}에 전송함"
+          }
+        }
       },
       "status": {
         "responding": "Agent이 응답 중입니다."
@@ -11995,7 +12135,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "어시스턴트 열기",
       "startError": "글로벌 어시스턴트를 시작할 수 없습니다.",
       "newConversation": "새 대화",

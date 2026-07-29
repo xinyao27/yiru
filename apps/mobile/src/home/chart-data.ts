@@ -1,0 +1,93 @@
+import type { ContributionMetric, ContributionPoint } from '@yiru/workbench-model/ui'
+import { localCalendarDayKey } from '@yiru/workbench-model/ui'
+
+const TREND_DAY_COUNT = 30
+const YEAR_DAY_COUNT = 366
+const WEEKDAY_COUNT = 7
+
+export type ContributionDisplayMetric = ContributionMetric | 'value'
+export type TokenValueMetric = Exclude<ContributionDisplayMetric, 'activity'>
+
+export type HomeChartPoint = {
+  label: string
+  value: number
+}
+
+export function nextTokenValueMetric(metric: ContributionDisplayMetric): TokenValueMetric {
+  return metric === 'tokens' ? 'value' : 'tokens'
+}
+
+export function buildContributionTrend(
+  points: readonly ContributionPoint[],
+  anchorDate = new Date()
+): HomeChartPoint[] {
+  const valuesByDay = contributionValuesByDay(points)
+  const anchor = startOfLocalDay(anchorDate)
+  const trend: HomeChartPoint[] = []
+  for (let offset = TREND_DAY_COUNT - 1; offset >= 0; offset--) {
+    const date = addLocalDays(anchor, -offset)
+    trend.push({
+      label: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      value: valuesByDay.get(localCalendarDayKey(date)) ?? 0
+    })
+  }
+  return trend
+}
+
+export function buildWeekdayRhythm(
+  points: readonly ContributionPoint[],
+  anchorDate = new Date()
+): HomeChartPoint[] {
+  const valuesByDay = contributionValuesByDay(points)
+  const anchor = startOfLocalDay(anchorDate)
+  const totals = Array.from({ length: WEEKDAY_COUNT }, () => 0)
+  for (let offset = 0; offset < YEAR_DAY_COUNT; offset++) {
+    const date = addLocalDays(anchor, -offset)
+    totals[date.getDay()] =
+      (totals[date.getDay()] ?? 0) + (valuesByDay.get(localCalendarDayKey(date)) ?? 0)
+  }
+  return totals.map((value, weekday) => ({
+    label: new Date(2024, 0, 7 + weekday).toLocaleDateString(undefined, { weekday: 'short' }),
+    value
+  }))
+}
+
+export function formatMetricValue(value: number, metric: ContributionDisplayMetric): string {
+  if (metric === 'value') {
+    return Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(value)
+  }
+  if (metric === 'tokens') {
+    return Intl.NumberFormat(undefined, {
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(value)
+  }
+  return value.toLocaleString()
+}
+
+function contributionValuesByDay(points: readonly ContributionPoint[]): Map<string, number> {
+  const values = new Map<string, number>()
+  for (const point of points) {
+    if (Number.isFinite(point.value) && point.value > 0) {
+      values.set(point.day, (values.get(point.day) ?? 0) + point.value)
+    }
+  }
+  return values
+}
+
+function startOfLocalDay(value: Date): Date {
+  const date = new Date(value)
+  date.setHours(0, 0, 0, 0)
+  return date
+}
+
+function addLocalDays(value: Date, amount: number): Date {
+  const date = new Date(value)
+  date.setDate(date.getDate() + amount)
+  return date
+}

@@ -173,7 +173,7 @@ export function useNativeChatContextMenu({
           {onNewConversation ? (
             <DropdownMenuItem onClick={onNewConversation}>
               <ArrowClockwise weight="regular" />
-              {translate('components.global-assistant.newConversation', 'New conversation')}
+              {translate('components.friday.newConversation', 'New conversation')}
             </DropdownMenuItem>
           ) : null}
           {onSwitchToTerminal ? (

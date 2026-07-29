@@ -268,6 +268,10 @@ import {
   pruneWorktreeSelection,
   updateWorktreeSelection
 } from './worktree-multi-selection'
+import {
+  setHasWorktreeNavigationTargets,
+  subscribeToWorktreeNavigationRequests
+} from './worktree-navigation-request'
 import { getEligibleWorktreeParents } from './worktree-parent-candidates'
 import {
   getWorktreeSidebarDragAutoscroll,
@@ -2654,7 +2658,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         return
       }
 
-      let nextIndex = 0
+      let nextIndex = direction === 'up' ? worktreeRows.length - 1 : 0
       const currentIndex = worktreeRows.findIndex((r) => r.worktree.id === activeWorktreeId)
 
       if (currentIndex !== -1) {
@@ -2708,6 +2712,23 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     ]
   )
 
+  const handleDirectWorktreeNavigation = useCallback(
+    (direction: 'up' | 'down') => {
+      markDirectScrollInput()
+      navigateWorktree(direction)
+    },
+    [markDirectScrollInput, navigateWorktree]
+  )
+
+  useEffect(() => {
+    setHasWorktreeNavigationTargets(worktrees.length > 0)
+    return () => setHasWorktreeNavigationTargets(false)
+  }, [worktrees.length])
+
+  useEffect(() => {
+    return subscribeToWorktreeNavigationRequests(handleDirectWorktreeNavigation)
+  }, [handleDirectWorktreeNavigation])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (activeModal !== 'none' || isEditableTarget(e.target)) {
@@ -2727,15 +2748,14 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
           ? 'down'
           : null
       if (direction) {
-        markDirectScrollInput()
-        navigateWorktree(direction)
+        handleDirectWorktreeNavigation(direction)
         e.preventDefault()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown, { capture: true })
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true })
-  }, [activeModal, keybindings, markDirectScrollInput, navigateWorktree])
+  }, [activeModal, handleDirectWorktreeNavigation, keybindings])
 
   const handleContainerKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -2743,8 +2763,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         if (e.target !== e.currentTarget) {
           return
         }
-        markDirectScrollInput()
-        navigateWorktree(e.key === 'ArrowUp' ? 'up' : 'down')
+        handleDirectWorktreeNavigation(e.key === 'ArrowUp' ? 'up' : 'down')
         e.preventDefault()
       } else if (e.key === 'Enter') {
         const helper = document.querySelector(
@@ -2758,7 +2777,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         markDirectScrollInput()
       }
     },
-    [markDirectScrollInput, navigateWorktree]
+    [handleDirectWorktreeNavigation, markDirectScrollInput]
   )
 
   const handleScrollPointerDown = useCallback(

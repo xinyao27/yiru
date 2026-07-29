@@ -3,11 +3,13 @@ import type { AiVaultSession, AiVaultSessionPreviewMessage } from '@yiru/workben
 import { columnExists, tableExists } from '../../opencode/usage/schema-helpers'
 import SyncDatabase from '../../sqlite/sync-database'
 import {
+  addSessionTokens,
   addPreviewMessage,
   createAccumulator,
   finalizeSession,
   updateTimeline
 } from './scanner-accumulator'
+import { consumeOpenCodeSqliteUsage } from './scanner-opencode-sqlite-usage'
 import { normalizeTitleText } from './scanner-values'
 
 // Why: OpenCode 1.17.x migrated session storage from per-session JSON files
@@ -221,8 +223,15 @@ export async function parseOpenCodeSqliteSession(args: {
     accumulator.title = normalizeTitleText(row.title ?? '')
     accumulator.cwd = row.directory
     accumulator.model = extractModelId(row.model_json)
-    accumulator.totalTokens =
-      (row.tokens_input ?? 0) + (row.tokens_output ?? 0) + (row.tokens_reasoning ?? 0)
+    const hasDailyUsage = consumeOpenCodeSqliteUsage(db, sessionId, accumulator)
+    if (!hasDailyUsage) {
+      // Why: transitional schemas expose only session totals, so retain them on the update day.
+      addSessionTokens(
+        accumulator,
+        (row.tokens_input ?? 0) + (row.tokens_output ?? 0) + (row.tokens_reasoning ?? 0),
+        row.time_updated
+      )
+    }
     accumulator.messageCount = row.message_count ?? 0
     updateTimeline(accumulator, row.time_created)
     updateTimeline(accumulator, row.time_updated)

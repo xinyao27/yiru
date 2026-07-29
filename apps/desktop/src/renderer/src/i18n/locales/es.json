@@ -820,7 +820,10 @@
         "ec43b38ba7": "Con estrella en GitHub",
         "157bb5ecbb": "Abrir GitHub",
         "preflightDismiss": "Descartar",
-        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks."
+        "73e1ad4282": "Yiru uses the GitHub CLI (gh) to show pull requests and checks.",
+        "createShortcut": "Crear {{value0}}",
+        "previousWorkspace": "Subir espacio de trabajo",
+        "nextWorkspace": "Bajar espacio de trabajo"
       },
       "NewWorkspaceComposerCard": {
         "cbb47ee0dc": "Solo disponible para proyectos Git locales.",
@@ -2172,7 +2175,7 @@
             "openDetails": "Open usage details",
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
-            "usageDetails": "Usage details & history",
+            "usageDetails": "Resumen de uso",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",
@@ -2935,7 +2938,8 @@
           "c86d83b5c3": "Nuevo",
           "1b5c41caee": "Yiru Móvil",
           "f323383e9a": "Automatizaciones",
-          "d599269755": "Ocultar de la barra lateral"
+          "d599269755": "Ocultar de la barra lateral",
+          "home": "Home"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "Limpiar",
@@ -11819,6 +11823,89 @@
       "WorkspacePanelEditorEmptyState": {
         "noAgent": "No agent CLI detected — install one or pick a default agent in Settings.",
         "agentLaunchFailed": "Could not start {{value0}}."
+      },
+      "contribution": {
+        "heatmap": {
+          "monday": "Mon",
+          "wednesday": "Wed",
+          "friday": "Fri",
+          "activityLabel": "Daily agent activity over the past year",
+          "tokensLabel": "Daily token usage over the past year",
+          "valueLabel": "Valor API estimado diario durante el último año",
+          "less": "Less",
+          "more": "More",
+          "activityCell": "{{value0}}: {{value1}} activities",
+          "tokenCell": "{{value0}}: {{value1}} tokens",
+          "valueCell": "{{value0}}: {{value1}} de valor API estimado"
+        }
+      },
+      "home": {
+        "page": {
+          "title": "Home",
+          "description": "A year of agent work, with today in context.",
+          "contributions": "Contribution history",
+          "activityDescription": "Agent starts and pull requests completed through Yiru.",
+          "tokenDescription": "Uso de tokens informado por el proveedor y atribuido a worktrees de Yiru.",
+          "activity": "Activity",
+          "tokens": "Tokens",
+          "apiValue": "Valor API",
+          "valueDescription": "Valor equivalente de API global estándar calculado por solicitud según su modelo y categorías de tokens.",
+          "today": "Today",
+          "todayActivity": "recorded activity",
+          "todayTokens": "recorded tokens",
+          "todayValue": "valor API estimado",
+          "currentStreak": "Current streak",
+          "streakDays": "{{value0}} days",
+          "longestStreak": "Longest this year: {{value0}} days",
+          "pastYear": "Past year",
+          "totalActivity": "total recorded activity",
+          "totalTokens": "Tokens totales",
+          "totalValue": "valor API estimado total",
+          "valueUnavailable": "Aún no hay precios de modelos conocidos para esta estimación.",
+          "valueCoverage": "El valor equivalente de API global estándar suma precios autorizados por modelo y solicitud para el uso atribuido a worktrees de Yiru. Se excluyen las categorías sin precio y los totales de sesión sin atribución por solicitud; no es una factura.",
+          "calculatingValue": "Calculando…",
+          "valueNotAvailable": "No disponible",
+          "lifetime": "Histórico",
+          "peakDay": "Día máximo",
+          "longestStreakLabel": "Racha más larga",
+          "tokensUnavailable": "Aún no hay uso de tokens de Claude, Codex u OpenCode atribuido a worktrees de Yiru.",
+          "tokenCoverage": "Los totales usan registros de Claude, Codex y OpenCode atribuibles por solicitud en worktrees de Yiru; la entrada en caché no se cuenta dos veces y se excluyen los totales de sesión sin esa atribución.",
+          "unpricedCoverage": "Los tokens sin detalles de precios autorizados se excluyen de los totales de valor."
+        },
+        "activitySummary": {
+          "agentsSpawned": "Agentes iniciados",
+          "agentTime": "Tiempo de trabajo de los agentes",
+          "prsCreated": "PR creadas",
+          "durationMinutes": "{{value0}} min",
+          "durationDaysHours": "{{value0}} d {{value1}} h",
+          "durationHoursMinutes": "{{value0}} h {{value1}} min"
+        },
+        "charts": {
+          "trendTitle": "30-day momentum",
+          "trendDescription": "Daily pace makes accelerations and quiet stretches visible.",
+          "trendAriaLabel": "Daily contributions over the past 30 days",
+          "rhythmTitle": "Weekly rhythm",
+          "rhythmDescription": "Past-year totals reveal which days carry the most work.",
+          "rhythmAriaLabel": "Contributions grouped by weekday over the past year",
+          "activationLabel": "{{value0}}. Haz clic para mostrar {{value1}}.",
+          "activities": "{{value0}} activities",
+          "tokens": "{{value0}} tokens",
+          "value": "{{value0}} de valor API"
+        },
+        "modelChart": {
+          "title": "Distribución por modelo",
+          "tokenDescription": "Uso de tokens atribuido a worktrees de Yiru, agrupado por modelo.",
+          "valueDescription": "Valor equivalente de API global estándar para categorías de tokens con precios autorizados.",
+          "tokenAriaLabel": "Uso de tokens por modelo",
+          "valueAriaLabel": "Valor API estimado por modelo",
+          "tokensTotal": "tokens totales",
+          "valueTotal": "valor API",
+          "tokenUnavailable": "Aún no hay datos de tokens por modelo.",
+          "valueUnavailable": "Aún no hay precios de modelos conocidos para comparar.",
+          "other": "Otros",
+          "refreshAriaLabel": "Actualizar estadísticas de uso local",
+          "refresh": "Actualizar uso"
+        }
       }
     },
     "i18n": {
@@ -11861,7 +11948,8 @@
       "agentUnavailable": "No se detectó {{agent}} en el host de este espacio de trabajo.",
       "sent": "El contexto de la sesión se envió a {{agent}} en una sesión nueva.",
       "deliveryFailed": "La nueva sesión de {{agent}} se inició, pero no se pudo enviar su contexto.",
-      "launchFailed": "No se pudo iniciar una sesión nueva de {{agent}}."
+      "launchFailed": "No se pudo iniciar una sesión nueva de {{agent}}.",
+      "launchOptions": "Opciones de inicio"
     },
     "native-chat": {
       "composer": {
@@ -11918,11 +12006,63 @@
           "high": "Alto",
           "xhigh": "Muy alto",
           "max": "Máximo"
-        }
+        },
+        "relaunchWithOtherAgent": "Cambiar de Agent o modelo…"
       },
       "tool": {
         "running": "Ejecutando…",
-        "result": "Resultado"
+        "result": "Resultado",
+        "yiru": {
+          "running": "Ejecutando {{value0}}",
+          "failed": "{{value0}} falló",
+          "completedUnknown": "{{value0}} finalizó; resultado no disponible",
+          "summary": "{{value0}} {{value1}}",
+          "summaryTarget": "{{value0}} {{value1}} {{value2}}",
+          "summaryOutcome": "{{value0}} {{value1}} {{value2}}, {{value3}}",
+          "openTarget": "Abrir destino de la acción",
+          "verb": {
+            "captured": "Capturó",
+            "changed": "Cambió",
+            "closed": "Cerró",
+            "created": "Creó",
+            "dispatched": "Asignó",
+            "focused": "Enfocó",
+            "inspected": "Inspeccionó",
+            "navigated": "Navegó",
+            "read": "Leyó",
+            "removed": "Eliminó",
+            "replied": "Respondió a",
+            "ran": "Ejecutó",
+            "sentTo": "Envió a",
+            "started": "Inició",
+            "stopped": "Detuvo",
+            "updated": "Actualizó",
+            "used": "Usó",
+            "waited": "Esperó a"
+          },
+          "object": {
+            "automation": "automatización",
+            "automations": "automatizaciones",
+            "browser": "navegador",
+            "browserTab": "pestaña del navegador",
+            "computer": "computadora",
+            "gate": "puerta de decisión",
+            "gates": "puertas de decisión",
+            "message": "mensaje",
+            "messages": "mensajes",
+            "orchestration": "orquestación",
+            "task": "tarea",
+            "tasks": "tareas",
+            "terminal": "terminal",
+            "terminals": "terminales",
+            "worktree": "worktree",
+            "worktrees": "worktrees"
+          },
+          "outcome": {
+            "spawned": "inició {{value0}}",
+            "to": "a {{value0}}"
+          }
+        }
       },
       "status": {
         "responding": "El agente está respondiendo"
@@ -11995,7 +12135,7 @@
         }
       }
     },
-    "global-assistant": {
+    "friday": {
       "open": "Abrir el asistente",
       "startError": "No se pudo iniciar el Asistente global.",
       "newConversation": "Nueva conversación",
