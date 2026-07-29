@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/class-names'
 
 import { ditherBackingSize, ditherThreshold } from './dither-paint'
 import { ditherColor, MONOCHROME_DITHER_SEED } from './palette'
 import { useChartDimensions } from './use-chart-dimensions'
 
 const FULL_CIRCLE = Math.PI * 2
+const LEGEND_SWATCH_SIZE = 8
 
 export type DitherPieChartPoint = {
   key: string
@@ -20,6 +22,10 @@ type DitherPieChartProps = {
   formatValue: (value: number) => string
   onActivate: () => void
   totalLabel: string
+}
+
+type DitherLegendSwatchProps = {
+  index: number
 }
 
 export function DitherPieChart({
@@ -92,15 +98,15 @@ export function DitherPieChart({
         {chartData.map((point, index) => (
           <span
             key={point.key}
-            className="text-muted-foreground flex min-w-0 items-center gap-2 text-xs"
+            className={cn(
+              'text-muted-foreground flex min-w-0 items-center gap-2 text-xs transition-opacity motion-reduce:transition-none',
+              hoverIndex === index && 'text-foreground',
+              hoverIndex !== null && hoverIndex !== index && 'opacity-40'
+            )}
             onPointerEnter={() => setHoverIndex(index)}
             onPointerLeave={() => setHoverIndex(null)}
           >
-            <span
-              className="border-border bg-muted-foreground size-2.5 shrink-0 border"
-              style={{ opacity: legendOpacity(index) }}
-              aria-hidden
-            />
+            <DitherLegendSwatch index={index} />
             <span className="min-w-0 flex-1 truncate">{point.label}</span>
             <span className="text-foreground shrink-0 tabular-nums">
               {formatValue(point.value)}
@@ -112,6 +118,35 @@ export function DitherPieChart({
         ))}
       </span>
     </Button>
+  )
+}
+
+function DitherLegendSwatch({ index }: DitherLegendSwatchProps): React.JSX.Element {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const context = canvasRef.current?.getContext('2d')
+    if (!context) {
+      return
+    }
+    context.clearRect(0, 0, LEGEND_SWATCH_SIZE, LEGEND_SWATCH_SIZE)
+    for (let y = 0; y < LEGEND_SWATCH_SIZE; y++) {
+      for (let x = 0; x < LEGEND_SWATCH_SIZE; x++) {
+        const isLit = slicePatternIsLit(index, x, y, 0.76, ditherThreshold(x + index, y))
+        context.fillStyle = ditherColor(MONOCHROME_DITHER_SEED.fill, isLit ? 0.9 : 0.1)
+        context.fillRect(x, y, 1, 1)
+      }
+    }
+  }, [index])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={LEGEND_SWATCH_SIZE}
+      height={LEGEND_SWATCH_SIZE}
+      className="border-border size-3.5 shrink-0 border [image-rendering:pixelated]"
+      aria-hidden="true"
+    />
   )
 }
 
@@ -200,6 +235,9 @@ function paintPiePixel(
   if (sliceIndex === null) {
     return
   }
+  if (isSliceBoundary(state.data, state.total, angle / FULL_CIRCLE, distance, sliceIndex)) {
+    return
+  }
   const localOuterRadius =
     sliceIndex === state.hoverIndex ? state.outerRadius + 2 : state.outerRadius
   if (distance > localOuterRadius) {
@@ -209,9 +247,31 @@ function paintPiePixel(
   const threshold = ditherThreshold(x + sliceIndex, y)
   const isLit = slicePatternIsLit(sliceIndex, x, y, density, threshold)
   const isRim = localOuterRadius - distance < 1.2 || distance - state.innerRadius < 1
-  const alpha = isRim ? 0.82 : isLit ? legendOpacity(sliceIndex) : 0.12
+  const hoverOpacity = state.hoverIndex === null || sliceIndex === state.hoverIndex ? 1 : 0.18
+  const alpha = (isRim ? 0.9 : isLit ? 0.86 : 0.08) * hoverOpacity
   context.fillStyle = ditherColor(MONOCHROME_DITHER_SEED.fill, alpha)
   context.fillRect(x, y, 1, 1)
+}
+
+function isSliceBoundary(
+  data: readonly DitherPieChartPoint[],
+  total: number,
+  fraction: number,
+  distance: number,
+  sliceIndex: number
+): boolean {
+  const halfGap = 0.4 / (FULL_CIRCLE * Math.max(distance, 1))
+  return (
+    sliceAtFraction(data, total, normalizeFraction(fraction - halfGap)) !== sliceIndex ||
+    sliceAtFraction(data, total, normalizeFraction(fraction + halfGap)) !== sliceIndex
+  )
+}
+
+function normalizeFraction(fraction: number): number {
+  if (fraction < 0) {
+    return fraction + 1
+  }
+  return fraction >= 1 ? fraction - 1 : fraction
 }
 
 function sliceAtFraction(
@@ -236,21 +296,26 @@ function slicePatternIsLit(
   density: number,
   threshold: number
 ): boolean {
-  const pattern = index % 4
-  if (pattern === 1 && ((x + y) & 3) >= 2) {
+  if (density <= threshold - 0.16) {
     return false
   }
-  if (pattern === 2 && ((x - y) & 3) >= 2) {
-    return false
+  const pattern = index % 6
+  if (pattern === 0) {
+    return true
   }
-  if (pattern === 3 && (x & 1) === 1) {
-    return false
+  if (pattern === 1) {
+    return ((x + y) & 3) < 2
   }
-  return density > threshold - 0.16
-}
-
-function legendOpacity(index: number): number {
-  return 0.42 + (index % 4) * 0.14
+  if (pattern === 2) {
+    return ((x - y) & 3) < 2
+  }
+  if (pattern === 3) {
+    return (x & 3) < 2
+  }
+  if (pattern === 4) {
+    return (y & 3) < 2
+  }
+  return (((x >> 1) + (y >> 1)) & 1) === 0
 }
 
 function formatPercentage(value: number, total: number): string {
