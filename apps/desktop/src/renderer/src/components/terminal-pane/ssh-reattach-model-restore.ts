@@ -1,18 +1,19 @@
 import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
+import type { PtyBufferSnapshot } from './pty/transport-types'
 
-export type SshReattachModelSnapshot = {
-  data: string
-  source?: 'headless' | 'renderer'
-  scrollbackAnsi?: string
-  pendingEscapeTailAnsi?: string
+export type SshReattachModelReplay = {
+  snapshot: PtyBufferSnapshot
+  modelData: string
+  replayWrites: readonly string[]
+  dimensions: { cols: number; rows: number } | null
 }
 
-export const SSH_REATTACH_MODEL_SNAPSHOT_TIMEOUT_MS = 750
+const SSH_REATTACH_MODEL_SNAPSHOT_TIMEOUT_MS = 750
 
-export async function resolveSshReattachModelSnapshotWithTimeout<T>(
-  snapshot: Promise<T>,
+async function resolveSnapshotWithTimeout(
+  snapshot: Promise<PtyBufferSnapshot | null>,
   timeoutMs = SSH_REATTACH_MODEL_SNAPSHOT_TIMEOUT_MS
-): Promise<T | null> {
+): Promise<PtyBufferSnapshot | null> {
   let timer: ReturnType<typeof setTimeout> | null = null
   try {
     return await Promise.race([
@@ -31,33 +32,63 @@ export async function resolveSshReattachModelSnapshotWithTimeout<T>(
 // Why: a parked pane no longer has a renderer serializer. Only a non-empty
 // headless model is authoritative; a dangling escape tail alone is not visible
 // content, so it must fall back to relay replay rather than paint a blank pane.
-export function shouldPaintSshReattachModelSnapshot(args: {
-  ptyId: string
-  sshParkingEnabled: boolean
-  snapshot: SshReattachModelSnapshot | null
-}): boolean {
-  if (!args.sshParkingEnabled || parseAppSshPtyId(args.ptyId) === null) {
-    return false
-  }
-  if (!args.snapshot || args.snapshot.source !== 'headless') {
-    return false
-  }
-  return (args.snapshot.scrollbackAnsi?.length ?? 0) + args.snapshot.data.length > 0
+function hasVisibleModel(snapshot: PtyBufferSnapshot | null): snapshot is PtyBufferSnapshot {
+  return (
+    snapshot?.source === 'headless' &&
+    (snapshot.scrollbackAnsi?.length ?? 0) + snapshot.data.length > 0
+  )
 }
 
-export function shouldFetchSshReattachModelSnapshot(args: {
-  ptyId: string
-  sshParkingEnabled: boolean
-}): boolean {
-  return args.sshParkingEnabled && parseAppSshPtyId(args.ptyId) !== null
+function resolveDimensions(snapshot: PtyBufferSnapshot): { cols: number; rows: number } | null {
+  if (
+    !Number.isFinite(snapshot.cols) ||
+    !Number.isFinite(snapshot.rows) ||
+    snapshot.cols <= 0 ||
+    snapshot.rows <= 0
+  ) {
+    return null
+  }
+  return { cols: snapshot.cols, rows: snapshot.rows }
 }
 
-export function memoizeSshReattachModelSnapshotProbe<T>(
-  probe: () => Promise<T | null>
-): () => Promise<T | null> {
-  let inFlight: Promise<T | null> | null = null
+function buildReplayWrites(snapshot: PtyBufferSnapshot): readonly string[] {
+  if (!snapshot.alternateScreen) {
+    return ['\x1b[2J\x1b[3J\x1b[H', snapshot.data]
+  }
+  if (snapshot.scrollbackAnsi !== undefined) {
+    return [
+      '\x1b[?1049l\x1b[2J\x1b[3J\x1b[H',
+      snapshot.scrollbackAnsi,
+      '\x1b[0m\x1b[?1049h\x1b[2J\x1b[H',
+      snapshot.data
+    ]
+  }
+  return ['\x1b[0m\x1b[?1049h\x1b[2J\x1b[H', snapshot.data]
+}
+
+export function createSshReattachModelReplayProbe(args: {
+  ptyId: string
+  isParkingEnabled: () => boolean
+  readSnapshot: () => Promise<PtyBufferSnapshot | null>
+  timeoutMs?: number
+}): () => Promise<SshReattachModelReplay | null> {
+  let inFlight: Promise<SshReattachModelReplay | null> | null = null
   return () => {
-    inFlight ??= probe()
+    inFlight ??= (async () => {
+      if (!args.isParkingEnabled() || parseAppSshPtyId(args.ptyId) === null) {
+        return null
+      }
+      const snapshot = await resolveSnapshotWithTimeout(args.readSnapshot(), args.timeoutMs)
+      if (!hasVisibleModel(snapshot)) {
+        return null
+      }
+      return {
+        snapshot,
+        modelData: `${snapshot.scrollbackAnsi ?? ''}${snapshot.data}`,
+        replayWrites: buildReplayWrites(snapshot),
+        dimensions: resolveDimensions(snapshot)
+      }
+    })()
     return inFlight
   }
 }

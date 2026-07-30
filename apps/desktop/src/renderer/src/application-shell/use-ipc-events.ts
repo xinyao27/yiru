@@ -1,10 +1,8 @@
-import type { DirectSshAuthority, SshConnectionState } from '@yiru/runtime-protocol/ssh-connection'
 import {
   normalizeAgentStatusPayload,
   type AgentStatusIpcPayload,
   type ParsedAgentStatusPayload
 } from '@yiru/workbench-model/agent'
-import { toSshExecutionHostId } from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines -- Why: this App-level IPC bridge intentionally keeps the renderer's main-process event contract in one place so shortcut, runtime, updater, and agent-status wiring do not drift across files. */
 import { useEffect } from 'react'
 import { toast } from 'sonner'
@@ -88,7 +86,6 @@ import {
 import { getWorktreeMapFromState, getRepoMapFromState } from '@/store/selectors'
 import { resolveAgentPaneAuthorityKey } from '@/store/slices/agent-pane-authority'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
-import { acquireDirectSshDetectedWorktreeRefresh } from '@/store/slices/worktrees'
 
 import { titleHasAgentName } from '../../../shared/agent/detection'
 import {
@@ -110,28 +107,10 @@ import type {
   UpdateStatus
 } from '../../../shared/types'
 import { isWslHookRelayConnectionId } from '../../../shared/wsl-hook-relay-contract'
+import { isDirectSshRemoteWorkspaceApplyInProgress } from '../components/direct-ssh/remote-workspace/target-sync'
+import { createDirectSshRuntimeController } from '../components/direct-ssh/runtime-controller'
 import { runWorktreeDelete } from '../components/sidebar/delete-worktree/flow'
 import { resolveAgentStatusTerminalTitle } from '../components/terminal-pane/agent/status-terminal-title'
-import { createDirectSshHostHydration } from '../hooks/direct-ssh-host-hydration'
-import {
-  createDirectSshReconnectCoordinator,
-  type DirectSshPreparationInput,
-  type DirectSshPreparationReason
-} from '../hooks/direct-ssh-reconnect-coordinator'
-import { isDirectSshReconnectCoordinatorRoutingEnabled } from '../hooks/direct-ssh-reconnect-rollout'
-import { directSshAuthoritiesEqual } from '../hooks/direct-ssh-reconnect-tokens'
-import {
-  registerDirectSshWakeRouting,
-  routeDirectSshConnectedState,
-  type DirectSshConnectedStateOrigin
-} from '../hooks/direct-ssh-state-routing'
-import { createDirectSshWorktreeRefreshScheduler } from '../hooks/direct-ssh-worktree-refresh-scheduler'
-import {
-  createRemoteWorkspaceTargetSync,
-  isDirectSshRemoteWorkspaceApplyInProgress,
-  type RemoteWorkspaceTargetSync
-} from '../hooks/remote-workspace-target-sync'
-import { createDirectSshReconnectProductTelemetryAdapter } from '../lib/direct-ssh-reconnect-product-telemetry'
 import { useAppStore } from '../store'
 import { guardPinnedTabClose, resolvePinnedTabLabel } from '../store/pinned-tab-close-guard'
 import type { AppState } from '../store/types'
@@ -580,134 +559,7 @@ function getWorktreeRuntimeEnvironmentId(worktreeId: string | null | undefined):
 export function useIpcEvents(): void {
   useEffect(() => {
     const unsubs: (() => void)[] = []
-    const reconnectAuthorityByTarget = new Map<string, DirectSshAuthority>()
-    const authorityReconciliationDeadlines = new Set<{
-      timer: ReturnType<typeof setTimeout>
-      settle: () => void
-    }>()
-    let directSshEffectStopped = false
-    const currentDirectSshAuthority = (targetId: string): DirectSshAuthority | null => {
-      const state = useAppStore.getState().sshConnectionStates.get(targetId)
-      if (
-        state?.status !== 'connected' ||
-        state.targetId !== targetId ||
-        !state.providerEpoch ||
-        state.connectionGeneration === undefined
-      ) {
-        return null
-      }
-      return {
-        targetId,
-        providerEpoch: state.providerEpoch,
-        connectionGeneration: state.connectionGeneration
-      }
-    }
-    const directSshRefreshScheduler = createDirectSshWorktreeRefreshScheduler({
-      startAttempt: (key) => {
-        const acquired = acquireDirectSshDetectedWorktreeRefresh(useAppStore, {
-          repoId: key.repoId,
-          executionHostId: key.executionHostId,
-          authority: {
-            targetId: key.targetId,
-            providerEpoch: key.providerEpoch,
-            connectionGeneration: key.connectionGeneration
-          },
-          requireAuthoritative: key.authorityRequirement === 'required'
-        })
-        return {
-          providerRequestId: acquired.providerRequestId,
-          result: acquired.result.then((result) => acquired.merge(result)),
-          cancel: acquired.release
-        }
-      }
-    })
-    const directSshHostHydration = createDirectSshHostHydration({
-      store: useAppStore,
-      isCurrentAuthority: (authority) =>
-        directSshAuthoritiesEqual(currentDirectSshAuthority(authority.targetId), authority),
-      listRepos: (authority) =>
-        window.api.repos.listForExecutionHost({
-          executionHostId: toSshExecutionHostId(authority.targetId),
-          expectedAuthority: authority
-        }),
-      listLineage: (authority) =>
-        window.api.worktrees.listLineageForHost({
-          executionHostId: toSshExecutionHostId(authority.targetId),
-          expectedAuthority: authority
-        })
-    })
-    type DirectSshTerminalActions = Pick<
-      AppState,
-      'invalidateStaleDirectSshTargetPtyBindings' | 'retryDirectSshTargetPanes'
-    >
-    const directSshTerminalActions = (): DirectSshTerminalActions => useAppStore.getState()
-    let remoteWorkspaceTargetSync: RemoteWorkspaceTargetSync | null = null
-    const directSshReconnectCoordinator = createDirectSshReconnectCoordinator({
-      scheduler: directSshRefreshScheduler,
-      isCurrentConnectedAuthority: (authority) =>
-        directSshAuthoritiesEqual(currentDirectSshAuthority(authority.targetId), authority),
-      capturePreparationInput: directSshHostHydration.capturePreparationInput,
-      readHostScopedLineage: directSshHostHydration.readHostScopedLineage,
-      invalidateStaleTerminalBindings: (authority) =>
-        directSshTerminalActions().invalidateStaleDirectSshTargetPtyBindings(authority),
-      retryTargetPanes: (authority) =>
-        directSshTerminalActions().retryDirectSshTargetPanes(authority),
-      finalizeHydratedTerminalPanes: (authority) =>
-        directSshTerminalActions().retryDirectSshTargetPanes(authority),
-      correctUnboundTerminalPanes: (authority) =>
-        directSshTerminalActions().retryDirectSshTargetPanes(authority),
-      syncRemoteWorkspaceAfterConnect: (token) =>
-        remoteWorkspaceTargetSync?.syncAfterConnect(token),
-      onTelemetry: createDirectSshReconnectProductTelemetryAdapter()
-    })
-    if (window.api.remoteWorkspace) {
-      remoteWorkspaceTargetSync = createRemoteWorkspaceTargetSync({
-        store: useAppStore,
-        remoteWorkspace: window.api.remoteWorkspace,
-        getCurrentAuthority: currentDirectSshAuthority,
-        isPreparationTokenCurrent: directSshHostHydration.isPreparationTokenCurrent,
-        capturePreparationInput: (authority, reason, snapshotRevision) =>
-          directSshHostHydration.capturePreparationInput(authority, reason, snapshotRevision),
-        prepareOnly: directSshReconnectCoordinator.prepareOnly,
-        finalizeHydratedTerminals: (authority) =>
-          directSshAuthoritiesEqual(reconnectAuthorityByTarget.get(authority.targetId), authority)
-            ? directSshReconnectCoordinator.finalizeHydratedTerminals(authority)
-            : 0
-      })
-    }
-    const prepareAndSyncDirectSshTarget = async (
-      authority: DirectSshAuthority,
-      reason: DirectSshPreparationReason,
-      options?: { authorityAlreadyReplaced?: boolean }
-    ): Promise<void> => {
-      try {
-        if (!options?.authorityAlreadyReplaced) {
-          directSshReconnectCoordinator.replaceAuthority(authority)
-        }
-        const input: DirectSshPreparationInput | null =
-          await directSshHostHydration.capturePreparationInput(authority, reason)
-        if (!input) {
-          return
-        }
-        const prepared = await directSshReconnectCoordinator.prepareOnly(input)
-        if (prepared.token && directSshHostHydration.isPreparationTokenCurrent(prepared.token)) {
-          await remoteWorkspaceTargetSync?.syncAfterConnect(prepared.token)
-        }
-      } catch (error) {
-        if (directSshAuthoritiesEqual(currentDirectSshAuthority(authority.targetId), authority)) {
-          useAppStore.getState().setRemoteWorkspaceSyncStatus(authority.targetId, {
-            phase: 'error',
-            message:
-              error instanceof Error
-                ? error.message
-                : translate(
-                    'auto.hooks.useIpcEvents.2fe88c2e06',
-                    'Remote workspace sync unavailable'
-                  )
-          })
-        }
-      }
-    }
+    const directSshRuntimeController = createDirectSshRuntimeController()
     const backgroundSleepingAgentWakeDispatcher = createBackgroundSleepingAgentWakeDispatcher()
     unsubs.push(backgroundSleepingAgentWakeDispatcher.dispose)
     type AgentStatusApplyResult = 'applied' | 'pending' | 'dropped'
@@ -860,11 +712,6 @@ export function useIpcEvents(): void {
       }
     })
 
-    // Assigned later in this effect, next to the ssh.onStateChanged wiring;
-    // events can't fire before that because subscriptions attach asynchronously.
-    let handleSshStateChangedEvent: ((data: { targetId: string; state: unknown }) => void) | null =
-      null
-
     const handleRuntimeClientEvent = (environmentId: string, event: RuntimeClientEvent): void => {
       if (event.type === 'reposChanged') {
         runtimeProjectRefreshScheduler.request(environmentId)
@@ -876,7 +723,10 @@ export function useIpcEvents(): void {
         // client owns a local SSH surface those maps must keep describing, so a
         // remote host's state goes into that environment's own bucket instead.
         if (isPairedWebClientWindow()) {
-          handleSshStateChangedEvent?.({ targetId: event.targetId, state: event.state })
+          directSshRuntimeController.handleStateChangedEvent({
+            targetId: event.targetId,
+            state: event.state
+          })
         } else {
           applyRuntimeEnvironmentSshStateChanged(environmentId, event.targetId, event.state)
         }
@@ -2556,339 +2406,7 @@ export function useIpcEvents(): void {
       unsubs.push(unsubscribeWorkspaceSpaceProgress)
     }
 
-    const sshStateWatermarkByTargetId = new Map<string, number>()
-    let applySshConnectionStateChange!: (
-      targetId: string,
-      state: SshConnectionState,
-      origin: DirectSshConnectedStateOrigin
-    ) => void
-
-    // Why: hydrate initial state for all known targets so worktree cards
-    // reflect the correct connected/disconnected state on app launch.
-    void (async () => {
-      try {
-        const targets = await window.api.ssh.listTargets()
-        if (directSshEffectStopped) {
-          return
-        }
-        useAppStore.getState().setSshTargetsMetadata(targets)
-        // Why: ghost-host UI (removed target still referenced by a workspace)
-        // shows a friendly name from the removal tombstones instead of the raw id.
-        try {
-          const removedLabels = await window.api.ssh.listRemovedTargetLabels()
-          if (directSshEffectStopped) {
-            return
-          }
-          useAppStore.getState().setRemovedSshTargetLabels(removedLabels)
-        } catch {
-          // Best-effort — a missing map just falls back to the raw target id.
-        }
-        for (const target of targets) {
-          const hydrationWatermark = sshStateWatermarkByTargetId.get(target.id) ?? 0
-          const state = await window.api.ssh.getState({ targetId: target.id })
-          if (
-            !directSshEffectStopped &&
-            state &&
-            (sshStateWatermarkByTargetId.get(target.id) ?? 0) === hydrationWatermark
-          ) {
-            applySshConnectionStateChange(target.id, state, 'initial-hydration')
-            // Why: if the renderer reattaches while an SSH session is alive
-            // (e.g. window re-creation or reload), forwarded and detected ports
-            // are only populated via push events. Fetch current snapshots so the
-            // Ports panel doesn't show empty for an active session.
-            if (state.status === 'connected') {
-              const authority = currentDirectSshAuthority(target.id)
-              const [forwards, detected] = await Promise.all([
-                window.api.ssh.listPortForwards({ targetId: target.id }),
-                window.api.ssh.listDetectedPorts({ targetId: target.id })
-              ])
-              // Why: if the session disconnected while we were awaiting the
-              // snapshot, the disconnect handler already cleared port state.
-              // Applying stale data here would resurrect a dead session's ports.
-              if (
-                !directSshEffectStopped &&
-                authority &&
-                directSshAuthoritiesEqual(currentDirectSshAuthority(target.id), authority)
-              ) {
-                useAppStore.getState().setPortForwards(target.id, forwards)
-                useAppStore.getState().setDetectedPorts(target.id, detected)
-              }
-            }
-          }
-        }
-      } catch {
-        // SSH may not be configured
-      }
-    })()
-
-    unsubs.push(
-      window.api.ssh.onCredentialRequest((data) => {
-        useAppStore.getState().enqueueSshCredentialRequest(data)
-      })
-    )
-
-    unsubs.push(
-      window.api.ssh.onCredentialResolved(({ requestId }) => {
-        useAppStore.getState().removeSshCredentialRequest(requestId)
-      })
-    )
-
-    unsubs.push(
-      window.api.ssh.onPortForwardsChanged(({ targetId, forwards }) => {
-        useAppStore.getState().setPortForwards(targetId, forwards)
-      })
-    )
-
-    unsubs.push(
-      window.api.ssh.onDetectedPortsChanged(({ targetId, ports }) => {
-        useAppStore.getState().setDetectedPorts(targetId, ports)
-      })
-    )
-
-    const reconcileSshAuthority = (
-      targetId: string,
-      initiatingState: SshConnectionState,
-      origin: DirectSshConnectedStateOrigin,
-      watermark: number
-    ): void => {
-      let pendingDeadline: { timer: ReturnType<typeof setTimeout>; settle: () => void } | undefined
-      const deadline = new Promise<null>((resolve) => {
-        const settle = (): void => resolve(null)
-        const timer = setTimeout(settle, 5_000)
-        pendingDeadline = { timer, settle }
-        authorityReconciliationDeadlines.add(pendingDeadline)
-      })
-      void Promise.race([window.api.ssh.getState({ targetId }).catch(() => null), deadline])
-        .then((latest) => {
-          if (
-            directSshEffectStopped ||
-            latest?.targetId !== targetId ||
-            !latest.providerEpoch ||
-            latest.connectionGeneration === undefined ||
-            sshStateWatermarkByTargetId.get(targetId) !== watermark
-          ) {
-            return
-          }
-          const current = useAppStore.getState().sshConnectionStates.get(targetId)
-          if (
-            current?.status !== initiatingState.status ||
-            latest.status !== initiatingState.status ||
-            current.providerEpoch !== initiatingState.providerEpoch ||
-            current.connectionGeneration !== initiatingState.connectionGeneration ||
-            (current.providerEpoch != null && current.providerEpoch !== latest.providerEpoch) ||
-            (current.connectionGeneration !== undefined &&
-              current.connectionGeneration !== latest.connectionGeneration)
-          ) {
-            return
-          }
-          applySshConnectionStateChange(
-            targetId,
-            {
-              ...current,
-              providerEpoch: latest.providerEpoch,
-              connectionGeneration: latest.connectionGeneration
-            },
-            origin
-          )
-        })
-        .catch(() => undefined)
-        .finally(() => {
-          if (pendingDeadline) {
-            clearTimeout(pendingDeadline.timer)
-            authorityReconciliationDeadlines.delete(pendingDeadline)
-          }
-        })
-    }
-
-    applySshConnectionStateChange = (
-      targetId: string,
-      state: SshConnectionState,
-      origin: DirectSshConnectedStateOrigin
-    ): void => {
-      const store = useAppStore.getState()
-      const previous = store.sshConnectionStates.get(targetId)
-      store.setSshConnectionState(targetId, state)
-
-      if (['disconnected', 'auth-failed', 'reconnection-failed', 'error'].includes(state.status)) {
-        reconnectAuthorityByTarget.delete(targetId)
-        directSshReconnectCoordinator.invalidate(targetId)
-        // Why: the remote agent list is tied to a live SSH connection. On
-        // disconnect the relay is gone, so clear the cached list and dedup
-        // promise. When the user reconnects and opens the quick-launch menu,
-        // ensureRemoteDetectedAgents will re-detect against the new relay.
-        store.clearRemoteDetectedAgents(targetId)
-
-        // Why: defensive — clear port forward and detected port state in case
-        // the broadcast from removeAllForwards races with the state change.
-        store.clearPortForwards(targetId)
-        store.setDetectedPorts(targetId, [])
-
-        store.clearDirectSshTargetPtyBindings(targetId)
-        return
-      }
-
-      if (state.status !== 'connected') {
-        return
-      }
-      const authority = currentDirectSshAuthority(targetId)
-      if (!authority) {
-        reconcileSshAuthority(
-          targetId,
-          state,
-          origin,
-          sshStateWatermarkByTargetId.get(targetId) ?? 0
-        )
-        return
-      }
-      const previousAuthority =
-        previous?.status === 'connected' &&
-        previous.providerEpoch &&
-        previous.connectionGeneration !== undefined
-          ? {
-              targetId,
-              providerEpoch: previous.providerEpoch,
-              connectionGeneration: previous.connectionGeneration
-            }
-          : null
-      routeDirectSshConnectedState(
-        {
-          coordinator: directSshReconnectCoordinator,
-          coordinatorRoutingEnabled: isDirectSshReconnectCoordinatorRoutingEnabled(),
-          invalidateStaleTerminalBindings: (nextAuthority) =>
-            directSshTerminalActions().invalidateStaleDirectSshTargetPtyBindings(nextAuthority),
-          retryTargetPanes: (nextAuthority) =>
-            directSshTerminalActions().retryDirectSshTargetPanes(nextAuthority),
-          prepareAndSync: prepareAndSyncDirectSshTarget,
-          rememberReconnectAuthority: (nextAuthority) => {
-            if (nextAuthority) {
-              reconnectAuthorityByTarget.set(targetId, nextAuthority)
-            } else {
-              reconnectAuthorityByTarget.delete(targetId)
-            }
-          }
-        },
-        { authority, previousAuthority, origin }
-      )
-    }
-
-    let sshTargetStateEventId = 0
-    const latestSshTargetStateEventByTargetId = new Map<string, number>()
-
-    handleSshStateChangedEvent = (data: { targetId: string; state: unknown }): void => {
-      const store = useAppStore.getState()
-      const state = data.state as SshConnectionState
-      const stateEventId = ++sshTargetStateEventId
-      sshStateWatermarkByTargetId.set(
-        data.targetId,
-        (sshStateWatermarkByTargetId.get(data.targetId) ?? 0) + 1
-      )
-      latestSshTargetStateEventByTargetId.set(data.targetId, stateEventId)
-      if (!store.sshTargetLabels.has(data.targetId)) {
-        // Why: targets added after boot aren't in the labels map, while
-        // removed targets can still race a final disconnect event. Confirm
-        // with main before mutating renderer state for an unknown target id.
-        window.api.ssh
-          .listTargets()
-          // Why: this refresh is now a deletion guard, not just a label fetch.
-          // Retry once so a transient IPC failure does not drop a real added-target event.
-          .catch(() => window.api.ssh.listTargets())
-          .then((targets) => {
-            if (latestSshTargetStateEventByTargetId.get(data.targetId) !== stateEventId) {
-              return
-            }
-            latestSshTargetStateEventByTargetId.delete(data.targetId)
-            if (directSshEffectStopped) {
-              return
-            }
-            const latestStore = useAppStore.getState()
-            if (!targets.some((target) => target.id === data.targetId)) {
-              // Why: disconnect/state events can race after target removal.
-              // Treat absence from main's target list as deletion, not a new target.
-              latestStore.clearRemovedSshTargetState(data.targetId)
-              return
-            }
-            latestStore.setSshTargetsMetadata(targets)
-            applySshConnectionStateChange(data.targetId, state, 'push')
-          })
-          .catch(() => {
-            if (
-              !directSshEffectStopped &&
-              latestSshTargetStateEventByTargetId.get(data.targetId) === stateEventId
-            ) {
-              latestSshTargetStateEventByTargetId.delete(data.targetId)
-              applySshConnectionStateChange(data.targetId, state, 'push')
-            }
-          })
-        return
-      }
-
-      latestSshTargetStateEventByTargetId.delete(data.targetId)
-      applySshConnectionStateChange(data.targetId, state, 'push')
-    }
-
-    unsubs.push(window.api.ssh.onStateChanged(handleSshStateChangedEvent))
-    unsubs.push(
-      registerDirectSshWakeRouting({
-        getConnectionStates: () => useAppStore.getState().sshConnectionStates,
-        wakeAuthority: (authority) => {
-          directSshReconnectCoordinator.correctUnboundTerminals(authority, 'wake-refresh')
-          void prepareAndSyncDirectSshTarget(authority, 'wake-refresh')
-        },
-        ...(typeof window.api.ui.onSystemResumed === 'function'
-          ? { onSystemResumed: window.api.ui.onSystemResumed }
-          : {})
-      })
-    )
-
-    let remoteWorkspaceClientId: string | null = null
-    let remoteWorkspaceClientIdPromise: Promise<string | null> | null = null
-    const getRemoteWorkspaceClientId = (): Promise<string | null> => {
-      const remoteWorkspace = window.api.remoteWorkspace
-      if (!remoteWorkspace) {
-        return Promise.resolve(null)
-      }
-      if (remoteWorkspaceClientId) {
-        return Promise.resolve(remoteWorkspaceClientId)
-      }
-      remoteWorkspaceClientIdPromise ??= remoteWorkspace
-        .clientId()
-        .then((id) => {
-          remoteWorkspaceClientId = id
-          return id
-        })
-        .catch(() => null)
-      return remoteWorkspaceClientIdPromise
-    }
-    if (window.api.remoteWorkspace) {
-      void getRemoteWorkspaceClientId()
-      unsubs.push(
-        window.api.remoteWorkspace.onChanged((event) => {
-          void (async () => {
-            // Why: relay notifications can race the initial client-id IPC.
-            // Self-originated writes must never bounce back into restore.
-            const clientId = await getRemoteWorkspaceClientId()
-            if (event.sourceClientId && clientId && event.sourceClientId === clientId) {
-              return
-            }
-            await remoteWorkspaceTargetSync
-              ?.applyUnsolicitedSnapshot(event.targetId, event.snapshot)
-              .catch((error) => {
-                useAppStore.getState().setRemoteWorkspaceSyncStatus(event.targetId, {
-                  phase: 'error',
-                  revision: event.snapshot.revision,
-                  message:
-                    error instanceof Error
-                      ? error.message
-                      : translate(
-                          'auto.hooks.useIpcEvents.2fe88c2e06',
-                          'Remote workspace sync unavailable'
-                        )
-                })
-              })
-          })()
-        })
-      )
-    }
+    directSshRuntimeController.start()
 
     // Zoom handling for menu accelerators and keyboard fallback paths.
     unsubs.push(
@@ -3464,17 +2982,8 @@ export function useIpcEvents(): void {
       pendingAgentStatusEvents.length = 0
       mobileStateHydrationDisposed = true
       pendingMobileStateEvents.length = 0
-      directSshEffectStopped = true
+      directSshRuntimeController.stop()
       unsubs.forEach((fn) => fn())
-      for (const deadline of authorityReconciliationDeadlines) {
-        clearTimeout(deadline.timer)
-        deadline.settle()
-      }
-      authorityReconciliationDeadlines.clear()
-      remoteWorkspaceTargetSync?.stop()
-      directSshHostHydration.stop()
-      directSshReconnectCoordinator.stop()
-      reconnectAuthorityByTarget.clear()
       resetAgentHookCompletionNotificationCoordinators()
     }
   }, [])

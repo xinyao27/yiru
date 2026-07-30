@@ -15,8 +15,8 @@ import {
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
-import { directSshAuthoritiesEqual } from '@/store/slices/direct-ssh-terminal-authority-ledger'
-import type { DirectSshPaneRetryAttempt } from '@/store/slices/direct-ssh-terminal-recovery'
+import { directSshAuthoritiesEqual } from '@/components/direct-ssh/terminal-recovery/authority-ledger'
+import type { DirectSshPaneRetryAttempt } from '@/components/direct-ssh/terminal-recovery/binding-state'
 
 import {
   AGENT_INTERRUPT_SETTLE_MS,
@@ -226,16 +226,10 @@ import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence
 } from '../sleeping-agent-pane-ownership'
-import {
-  buildMainModelSnapshotReplayWrites,
-  hasPositiveTerminalDimensions
-} from '../snapshot-replay-paint'
 import { resolveSshPaneConnectGate } from '../ssh-pane-connect-gate'
 import {
-  memoizeSshReattachModelSnapshotProbe,
-  resolveSshReattachModelSnapshotWithTimeout,
-  shouldFetchSshReattachModelSnapshot,
-  shouldPaintSshReattachModelSnapshot
+  createSshReattachModelReplayProbe,
+  type SshReattachModelReplay
 } from '../ssh-reattach-model-restore'
 import {
   isDocumentVisibilityProvenStale,
@@ -7163,34 +7157,25 @@ export function connectPanePty(
       const hasStructuralReplay = Boolean(
         connectResult?.snapshot || connectResult?.replay || connectResult?.coldRestore
       )
-      const fetchSshMainModelReattachSnapshot = memoizeSshReattachModelSnapshotProbe(
-        async (): Promise<PtyBufferSnapshot | null> => {
-          const sshParkingEnabled =
-            useAppStore.getState().settings?.terminalSshViewParking !== false
-          if (!shouldFetchSshReattachModelSnapshot({ ptyId, sshParkingEnabled })) {
-            return null
-          }
-          const snapshot = await resolveSshReattachModelSnapshotWithTimeout(
-            window.api.pty.getMainBufferSnapshot(ptyId, {
-              scrollbackRows: resolveHiddenRestoreScrollbackRows(pane.terminal.options.scrollback)
-            })
-          )
-          return shouldPaintSshReattachModelSnapshot({ ptyId, sshParkingEnabled, snapshot })
-            ? snapshot
-            : null
-        }
-      )
+      const fetchSshMainModelReattachReplay = createSshReattachModelReplayProbe({
+        ptyId,
+        isParkingEnabled: () => useAppStore.getState().settings?.terminalSshViewParking !== false,
+        readSnapshot: () =>
+          window.api.pty.getMainBufferSnapshot(ptyId, {
+            scrollbackRows: resolveHiddenRestoreScrollbackRows(pane.terminal.options.scrollback)
+          })
+      })
       const revealFollowsTerminalPark =
         mountFollowsTerminalPark && connectResult?.isReattach === true
       mountFollowsTerminalPark = false
-      let prefetchedSshModelSnapshot: PtyBufferSnapshot | null = null
+      let prefetchedSshModelReplay: SshReattachModelReplay | null = null
       if (revealFollowsTerminalPark && !hasStructuralReplay) {
-        prefetchedSshModelSnapshot = await fetchSshMainModelReattachSnapshot()
+        prefetchedSshModelReplay = await fetchSshMainModelReattachReplay()
         if (!isCurrentReattachPayload()) {
           return false
         }
       }
-      let reattachPayloadApplied = !hasStructuralReplay && prefetchedSshModelSnapshot === null
+      let reattachPayloadApplied = !hasStructuralReplay && prefetchedSshModelReplay === null
       const applyReattachPayload = async (): Promise<void> => {
         if (!isCurrentReattachPayload()) {
           return
@@ -7248,38 +7233,37 @@ export function connectPanePty(
               window.api.pty.ackColdRestore(ptyId)
             }
           }
-        } else if (connectResult?.replay || prefetchedSshModelSnapshot) {
-          const modelSnapshot = revealFollowsTerminalPark
-            ? (prefetchedSshModelSnapshot ?? (await fetchSshMainModelReattachSnapshot()))
+        } else if (connectResult?.replay || prefetchedSshModelReplay) {
+          const modelReplay = revealFollowsTerminalPark
+            ? (prefetchedSshModelReplay ?? (await fetchSshMainModelReattachReplay()))
             : null
           if (!isCurrentReattachPayload()) {
             return
           }
-          if (modelSnapshot) {
-            const modelData = `${modelSnapshot.scrollbackAnsi ?? ''}${modelSnapshot.data}`
-            rememberReattachPayloadAgentSignal(modelData, { fullScreenReplay: true })
+          if (modelReplay) {
+            rememberReattachPayloadAgentSignal(modelReplay.modelData, { fullScreenReplay: true })
             if (
-              hasPositiveTerminalDimensions(modelSnapshot.cols, modelSnapshot.rows) &&
-              (pane.terminal.cols !== modelSnapshot.cols ||
-                pane.terminal.rows !== modelSnapshot.rows)
+              modelReplay.dimensions &&
+              (pane.terminal.cols !== modelReplay.dimensions.cols ||
+                pane.terminal.rows !== modelReplay.dimensions.rows)
             ) {
               suppressSnapshotReplayPtyResize = true
               try {
-                pane.terminal.resize(modelSnapshot.cols, modelSnapshot.rows)
+                pane.terminal.resize(modelReplay.dimensions.cols, modelReplay.dimensions.rows)
               } finally {
                 suppressSnapshotReplayPtyResize = false
               }
             }
-            kittyKeyboardModes.scanReplay(modelData)
-            for (const replayChunk of buildMainModelSnapshotReplayWrites(modelSnapshot)) {
+            kittyKeyboardModes.scanReplay(modelReplay.modelData)
+            for (const replayChunk of modelReplay.replayWrites) {
               writeReplayData(replayChunk)
             }
-            writeReplayData(reattachReplayResetSequence(modelData))
-            if (modelSnapshot.pendingEscapeTailAnsi) {
-              writeReplayData(modelSnapshot.pendingEscapeTailAnsi)
+            writeReplayData(reattachReplayResetSequence(modelReplay.modelData))
+            if (modelReplay.snapshot.pendingEscapeTailAnsi) {
+              writeReplayData(modelReplay.snapshot.pendingEscapeTailAnsi)
             }
-            setRestoredSnapshotBaseline(ptyId, modelSnapshot)
-            recordRendererOrderedSeq(modelSnapshot)
+            setRestoredSnapshotBaseline(ptyId, modelReplay.snapshot)
+            recordRendererOrderedSeq(modelReplay.snapshot)
             sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
             if (connectResult?.coldRestore && !isRemoteRuntimePtyId(ptyId)) {
               window.api.pty.ackColdRestore(ptyId)
@@ -7327,7 +7311,7 @@ export function connectPanePty(
             schedulePendingStartupCommandDelivery()
           }
         }
-        if (hasStructuralReplay || prefetchedSshModelSnapshot) {
+        if (hasStructuralReplay || prefetchedSshModelReplay) {
           await waitForTerminalReplayWritesParsed(pane.terminal)
           if (!isCurrentReattachPayload()) {
             return
@@ -7378,7 +7362,7 @@ export function connectPanePty(
           window.api.pty.signal(reattachPtyId, 'SIGWINCH')
         }
       }
-      if (hasStructuralReplay || prefetchedSshModelSnapshot) {
+      if (hasStructuralReplay || prefetchedSshModelReplay) {
         await structuralReplayCoordinator.run(applyReattachPayload, {
           shouldRestore: isCurrentReattachPayload,
           afterRestore: fitAfterReattachRestore

@@ -18,8 +18,8 @@ import {
 } from '../terminal-pane/terminal-hidden-view-parking'
 import { warnTerminalLifecycleAnomaly } from '../terminal-pane/terminal-lifecycle-diagnostics'
 import { canWatcherCoverParkedTerminalTab } from '../terminal-pane/terminal-parked-tab-watchers'
-import { captureForceParkedWorktreeBuffers } from './force-park-buffer-capture'
 import {
+  captureRetentionForceParkedWorktreeBuffers,
   selectRetentionForceParkedTerminalWorktrees,
   TERMINAL_HIDDEN_WORKTREE_RETENTION_TTL_MS
 } from './hidden-retention'
@@ -214,7 +214,13 @@ export function useTerminalColdParking({
             reason: `exemptTabs=${tabs.length}`
           })
         }
-        if (captureForceParkedWorktreeBuffers({ worktreeId, tabIds: evictableTabIds, repos })) {
+        if (
+          captureRetentionForceParkedWorktreeBuffers({
+            worktreeId,
+            tabIds: evictableTabIds,
+            repos
+          })
+        ) {
           forceParkedCaptureDoneRef.current.add(worktreeId)
         }
       }

@@ -70,6 +70,7 @@ import {
   parseLegacyNumericPaneKey,
   parsePaneKey
 } from '../../../../shared/stable-pane-id'
+import type { CodexRestartNotice } from '../../../../shared/terminal/codex-restart-notice'
 import { isValidHostTerminalTabId, isValidTerminalTabId } from '../../../../shared/terminal/tab-id'
 import type {
   Repo,
@@ -87,6 +88,24 @@ import {
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace/scope'
+import {
+  directSshAuthoritiesEqual,
+  settleDirectSshPaneRetryState
+} from '../../components/direct-ssh/terminal-recovery/authority-ledger'
+import {
+  retryDirectSshTerminalPanes,
+  retrySettledDirectSshTerminalPane
+} from '../../components/direct-ssh/terminal-recovery/pane-retry-ledger'
+import {
+  clearDirectSshTerminalBindings,
+  invalidateStaleDirectSshTerminalBindings,
+  type DirectSshLivePtyBinding,
+  type DirectSshPaneRetryAttempt,
+  type DirectSshPaneRetryAttemptId,
+  type DirectSshPaneRetryHistory,
+  type DirectSshPaneRetryResult
+} from '../../components/direct-ssh/terminal-recovery/recovery'
+import { resolveDirectSshTerminalWorkspaceKeys } from '../../components/direct-ssh/terminal-recovery/workspace-scope'
 import { forgetAgentHibernationTabOutput } from '../../components/terminal-pane/agent/hibernation-output-activity'
 import { forgetAgentStartupDeliveriesForTabs } from '../../components/terminal-pane/agent/startup-delivery-guards'
 import type { AgentStartedTelemetry } from '../../lib/agent-started-telemetry'
@@ -97,24 +116,6 @@ import {
   removeSleepingRecordsReplacedByManualWorktreeSleep,
   type AgentStatusWorktreeShutdownReason
 } from './agent-status'
-import {
-  retryDirectSshTerminalPanes,
-  retrySettledDirectSshTerminalPane
-} from './direct-ssh-pane-retry-ledger'
-import {
-  directSshAuthoritiesEqual,
-  settleDirectSshPaneRetryState
-} from './direct-ssh-terminal-authority-ledger'
-import {
-  clearDirectSshTerminalBindings,
-  invalidateStaleDirectSshTerminalBindings,
-  type DirectSshLivePtyBinding,
-  type DirectSshPaneRetryAttempt,
-  type DirectSshPaneRetryAttemptId,
-  type DirectSshPaneRetryHistory,
-  type DirectSshPaneRetryResult
-} from './direct-ssh-terminal-recovery'
-import { resolveDirectSshTerminalWorkspaceKeys } from './direct-ssh-terminal-workspace-scope'
 import { pushClosedTerminalTabSnapshot, pushRecentlyClosedTabKind } from './recently-closed-tabs'
 import {
   dedupeTabOrder,
@@ -127,13 +128,16 @@ import {
 import { clearTransientTerminalState, emptyLayoutSnapshot } from './terminal-helpers'
 import { buildOrphanTerminalCleanupPatch, getOrphanTerminalIds } from './terminal-orphan-helpers'
 import {
+  buildTerminalSessionOwnerIndexes,
+  buildTerminalSessionTabIndex
+} from './terminal-session-index'
+import {
   buildTerminalTabRetirementPlan,
   isTerminalTabPresent,
   removeSleepingAgentSessionsForTab,
   type TerminalTabCloseReason,
   type TerminalTabRetirementPlan
 } from './terminal-tab-retirement'
-import { buildByIdIndex, buildWorktreeByIdIndex } from './worktree-by-id-index'
 
 function getNextTerminalOrdinal(tabs: TerminalTab[]): number {
   const usedOrdinals = new Set<number>()
@@ -501,11 +505,6 @@ export type AutomaticAgentResumeClaim = {
   worktreeId: string
   launchAgent: TuiAgent
   providerSession: AgentProviderSessionMetadata
-}
-
-export type CodexRestartNotice = {
-  previousAccountLabel: string
-  nextAccountLabel: string
 }
 
 export type TerminalSlice = {
@@ -3330,10 +3329,11 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         worktreesByRepo: s.worktreesByRepo
       })
       const placeholderWorktrees = Object.values(runtimeSessionPlaceholders.worktreesByRepo).flat()
-      const placeholderWorktreeById = buildWorktreeByIdIndex(
-        runtimeSessionPlaceholders.worktreesByRepo
-      )
-      const placeholderRepoById = buildByIdIndex(runtimeSessionPlaceholders.repos)
+      const { worktreeById: placeholderWorktreeById, repoById: placeholderRepoById } =
+        buildTerminalSessionOwnerIndexes(
+          runtimeSessionPlaceholders.worktreesByRepo,
+          runtimeSessionPlaceholders.repos
+        )
       const validWorktreeIds = new Set(placeholderWorktrees.map((worktree) => worktree.id))
       const knownRepoIds = new Set(runtimeSessionPlaceholders.repos.map((r) => r.id))
       const repoIdsWithLoadedWorktrees = new Set(
@@ -3418,7 +3418,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       )
 
       const allTabs = Object.values(tabsByWorktree).flat()
-      const tabById = buildByIdIndex(allTabs)
+      const tabById = buildTerminalSessionTabIndex(allTabs)
       const validTabIds = new Set(allTabs.map((tab) => tab.id))
       const sleepingAgentSessionsByPaneKey = Object.fromEntries(
         Object.entries(session.sleepingAgentSessionsByPaneKey ?? {}).filter(([, record]) =>
@@ -3702,8 +3702,10 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     // ptyId as a sentinel so connectPanePty knows to reattach.
     let reconnectedTabsByWorktree: Record<string, TerminalTab[]> | null = null
     let reconnectedPtyIdsByTabId: Record<string, string[]> | null = null
-    const worktreeById = buildWorktreeByIdIndex(get().worktreesByRepo)
-    const repoById = buildByIdIndex(get().repos)
+    const { worktreeById, repoById } = buildTerminalSessionOwnerIndexes(
+      get().worktreesByRepo,
+      get().repos
+    )
     for (const worktreeId of ids) {
       const tabs = tabsByWorktree[worktreeId] ?? []
       const worktree = worktreeById.get(worktreeId)

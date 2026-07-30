@@ -1,3 +1,9 @@
+import { captureTerminalShutdownBuffersBestEffort } from '@/runtime/terminal-shutdown-buffer-captures'
+
+import {
+  shouldPreserveTerminalScrollbackBuffers,
+  type RepoConnection
+} from '../../../../shared/workspace/session-terminal-buffers'
 import {
   selectIdsBeyondHotRetain,
   TERMINAL_WORKTREE_COLD_PARK_DELAY_MS,
@@ -77,4 +83,18 @@ export function selectRetentionForceParkedTerminalWorktrees(
     }
   }
   return forceParkedIds
+}
+
+export function captureRetentionForceParkedWorktreeBuffers(args: {
+  worktreeId: string
+  tabIds: readonly string[]
+  repos: readonly RepoConnection[]
+}): boolean {
+  if (!shouldPreserveTerminalScrollbackBuffers(args.worktreeId, args.repos)) {
+    return true
+  }
+  const { requested, captured } = captureTerminalShutdownBuffersBestEffort(args.tabIds, {
+    includeLocalBuffers: false
+  })
+  return captured === requested
 }

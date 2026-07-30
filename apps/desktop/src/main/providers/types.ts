@@ -26,27 +26,16 @@ import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/s
 import type { CoworkingVerifiedRemoteFilesystem } from './coworking-verified-filesystem-types'
 import type { IGitMutationProvider } from './git-provider-mutation-contract'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
-import type { PtyBackgroundStreamEvent } from './pty-background-events'
+import type { PtyBackgroundStreamEvent, PtyProviderBufferSnapshot } from './pty-background-stream'
 
 export type { GitProviderMutationOptions } from './git-provider-mutation-contract'
-export type { PtyBackgroundStreamEvent, PtyTransientFact } from './pty-background-events'
+export type {
+  PtyBackgroundStreamEvent,
+  PtyProviderBufferSnapshot,
+  PtyTransientFact
+} from './pty-background-stream'
 
 // ─── PTY Provider ───────────────────────────────────────────────────
-
-export type PtyProviderBufferSnapshot = {
-  data: string
-  /** Authoritative normal buffer captured beside an alternate-screen frame. */
-  scrollbackAnsi?: string
-  cols: number
-  rows: number
-  cwd?: string | null
-  lastTitle?: string
-  seq: number
-  source: 'headless'
-  oscLinks?: TerminalOscLinkRange[]
-  alternateScreen?: boolean
-  pendingEscapeTailAnsi?: string
-}
 
 export type PtySpawnOptions = {
   cols: number
