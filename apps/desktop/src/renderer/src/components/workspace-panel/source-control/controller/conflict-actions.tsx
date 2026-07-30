@@ -180,7 +180,11 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
         resolveSupportedHostedReviewCopyProvider(result.provider)
       )
       if (openChecks) {
-        openWorkspacePanelTab({ panel: 'checks', worktreeId })
+        openWorkspacePanelTab({
+          panel: 'source-control',
+          worktreeId,
+          sourceControlView: 'review'
+        })
       }
       try {
         if (worktreeId && result.provider === 'github') {
@@ -269,7 +273,11 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
     ]
   )
   const openHostedReviewInChecks = useCallback(() => {
-    openWorkspacePanelTab({ panel: 'checks', worktreeId: activeWorktreeId })
+    openWorkspacePanelTab({
+      panel: 'source-control',
+      worktreeId: activeWorktreeId,
+      sourceControlView: 'review'
+    })
   }, [activeWorktreeId])
   const handleBranchChangedByPullRequestGeneration = useCallback(async (): Promise<void> => {
     // Why: AI PR detail generation may rebase before summarizing; if HEAD moved,

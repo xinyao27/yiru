@@ -118,7 +118,11 @@ export function useChecksPanelReviewCreation(context: useChecksPanelReviewMutati
       if (!repo || !branch) {
         return
       }
-      openWorkspacePanelTab({ panel: 'checks', worktreeId: activeWorktreeId })
+      openWorkspacePanelTab({
+        panel: 'source-control',
+        worktreeId: activeWorktreeId,
+        sourceControlView: 'review'
+      })
       try {
         if (activeWorktreeId && result.provider === 'github') {
           await updateWorktreeMeta(activeWorktreeId, { linkedPR: result.number })

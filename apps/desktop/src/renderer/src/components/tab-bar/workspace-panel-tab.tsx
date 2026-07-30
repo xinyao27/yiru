@@ -42,7 +42,6 @@ function WorkspacePanelIcon({
     case 'workspaces':
       return <Workflow weight="regular" className={className} />
     case 'pr-checks':
-    case 'checks':
       return <ListChecks className={className} />
     case 'source-control':
       return <GitMerge className={className} />

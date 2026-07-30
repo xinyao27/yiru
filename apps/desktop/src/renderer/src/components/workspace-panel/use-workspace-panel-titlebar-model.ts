@@ -97,7 +97,6 @@ export function useWorkspacePanelTitlebarModel(
   }, [repos, worktreeId])
   const explorerShortcut = useShortcutKeyDetails('sidebar.explorer.toggle')
   const sourceControlShortcut = useShortcutKeyDetails('sidebar.sourceControl.toggle')
-  const checksShortcut = useShortcutKeyDetails('sidebar.checks.toggle')
   const portsShortcut = useShortcutKeyDetails('sidebar.ports.toggle')
 
   const catalogItems = useMemo<WorkspaceTitlebarStripItem[]>(() => {
@@ -136,8 +135,6 @@ export function useWorkspacePanelTitlebarModel(
           return explorerShortcut
         case 'source-control':
           return sourceControlShortcut
-        case 'checks':
-          return checksShortcut
         case 'ports':
           return portsShortcut
         case 'vault':
@@ -146,7 +143,7 @@ export function useWorkspacePanelTitlebarModel(
           return null
       }
     },
-    [checksShortcut, explorerShortcut, portsShortcut, sourceControlShortcut]
+    [explorerShortcut, portsShortcut, sourceControlShortcut]
   )
 
   const commitPinned = useCallback(

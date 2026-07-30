@@ -697,7 +697,6 @@ export type WorkspacePanelTabContentType =
   | 'workspaces'
   | 'pr-checks'
   | 'source-control'
-  | 'checks'
   | 'ports'
 
 export type TabContentType =

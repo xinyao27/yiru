@@ -16,7 +16,6 @@ export function useRightSidebarActivityItems(worktreeId: string | null): {
 } {
   const explorerShortcut = useShortcutLabel('sidebar.explorer.toggle')
   const sourceControlShortcut = useShortcutLabel('sidebar.sourceControl.toggle')
-  const checksShortcut = useShortcutLabel('sidebar.checks.toggle')
   const portsShortcut = useShortcutLabel('sidebar.ports.toggle')
   const worktree = useAppStore((state) =>
     worktreeId ? (state.getKnownWorktreeById(worktreeId) ?? null) : null
@@ -36,13 +35,11 @@ export function useRightSidebarActivityItems(worktreeId: string | null): {
       createRightSidebarActivityItems({
         explorer: explorerShortcut,
         sourceControl: sourceControlShortcut,
-        checks: checksShortcut,
         ports: portsShortcut
       }),
       { isFolder, isFolderWorkspace, isSshRepo }
     )
   }, [
-    checksShortcut,
     explorerShortcut,
     isFolder,
     isFolderWorkspace,

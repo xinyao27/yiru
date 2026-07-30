@@ -1043,6 +1043,8 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
       }
     })
 
+    get().clearSourceControlPanelView(tabId)
+
     if (opts?.recordInteraction !== false) {
       get().recordFeatureInteraction?.('terminal-tabs')
     }

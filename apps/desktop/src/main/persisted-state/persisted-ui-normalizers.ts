@@ -111,12 +111,14 @@ export function normalizePersistedProjectOrderBy(
 export function normalizePersistedRightSidebarTab(
   tab: unknown
 ): PersistedState['ui']['rightSidebarTab'] {
+  if (tab === 'checks') {
+    return 'source-control'
+  }
   return tab === 'explorer' ||
     tab === 'search' ||
     tab === 'vault' ||
     tab === 'workspaces' ||
     tab === 'source-control' ||
-    tab === 'checks' ||
     tab === 'ports'
     ? tab
     : getDefaultUIState().rightSidebarTab

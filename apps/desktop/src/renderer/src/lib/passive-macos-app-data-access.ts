@@ -33,8 +33,7 @@ export function hasInteractiveActiveGitStatusConsumer(args: ActiveGitStatusPolli
   if (
     args.rightSidebarOpen &&
     (args.rightSidebarTab === 'source-control' ||
-      (args.rightSidebarTab === 'explorer' && args.rightSidebarExplorerView !== 'search') ||
-      args.rightSidebarTab === 'checks')
+      (args.rightSidebarTab === 'explorer' && args.rightSidebarExplorerView !== 'search'))
   ) {
     return true
   }

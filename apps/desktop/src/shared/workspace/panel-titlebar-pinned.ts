@@ -10,7 +10,6 @@ export const WORKSPACE_TITLEBAR_COMMANDS_ACTION_ID = 'commands' as const
 export const DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS: readonly WorkspaceTitlebarActionId[] = [
   'explorer',
   'source-control',
-  'checks',
   'vault',
   WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID
 ]
@@ -28,8 +27,14 @@ export function normalizeWorkspacePanelTitlebarPinnedIds(
 ): WorkspaceTitlebarActionId[] {
   const source = ids ?? DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS
   const normalized: WorkspaceTitlebarActionId[] = []
-  for (const id of source) {
-    if (typeof id !== 'string' || !isWorkspaceTitlebarActionId(id)) {
+  for (const value of source) {
+    if (typeof value !== 'string') {
+      continue
+    }
+    // Why: Checks used to be a standalone titlebar panel. Preserve its pin
+    // position while migrating it to the combined Changes & Review panel.
+    const id = value === 'checks' ? 'source-control' : value
+    if (!isWorkspaceTitlebarActionId(id)) {
       continue
     }
     if (normalized.includes(id)) {

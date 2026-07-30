@@ -14,7 +14,7 @@ export type EntryRefreshInput = {
 }
 
 /**
- * Decide whether entering the Checks tab should trigger a force refresh.
+ * Decide whether entering the Review view should trigger a force refresh.
  *
  * Rules:
  * - Missing PR cache timestamp is stale (cold start, never fetched).

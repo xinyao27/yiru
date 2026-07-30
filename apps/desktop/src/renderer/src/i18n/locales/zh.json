@@ -1338,6 +1338,20 @@
         "panel": {
           "titlebar": {
             "openIn": "Open in editor"
+          },
+          "sourceControl": {
+            "title": "Changes & Review"
+          },
+          "source": {
+            "control": {
+              "workspace": {
+                "panel": {
+                  "changes": "更改",
+                  "review": "评审",
+                  "views": "更改与评审"
+                }
+              }
+            }
           }
         }
       },

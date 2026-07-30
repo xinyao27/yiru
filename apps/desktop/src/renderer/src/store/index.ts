@@ -23,6 +23,7 @@ import { createPinnedTabCloseConfirmSlice } from '../components/terminal-pane/pi
 import { createWorkspaceCleanupSlice } from '../components/workspace-cleanup/state'
 import { createCommitMessageGenerationSlice } from '../components/workspace-panel/commit-message-generation-state'
 import { createPullRequestGenerationSlice } from '../components/workspace-panel/pull-request-generation-state'
+import { createSourceControlPanelViewSlice } from '../components/workspace-panel/source-control/workspace-panel/state'
 import { createWorkspaceSpaceSlice } from '../components/workspace-space/state'
 import { createYiruProfilesSlice } from '../components/yiru-profiles/state'
 import './slice-contracts'
@@ -80,6 +81,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createRuntimeStatusSlice(...a),
   ...createPullRequestGenerationSlice(...a),
   ...createCommitMessageGenerationSlice(...a),
+  ...createSourceControlPanelViewSlice(...a),
   ...createPinnedTabCloseConfirmSlice(...a),
   ...createRecentlyClosedTabsSlice(...a),
   ...createYiruProfilesSlice(...a),

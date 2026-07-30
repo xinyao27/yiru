@@ -17,13 +17,15 @@ export function normalizeRightSidebarRoute(
   if (tab === 'search') {
     return { rightSidebarTab: 'explorer', rightSidebarExplorerView: 'search' }
   }
+  if (tab === 'checks') {
+    return { rightSidebarTab: 'source-control', rightSidebarExplorerView: 'files' }
+  }
   if (
     tab === 'explorer' ||
     tab === 'vault' ||
     tab === 'workspaces' ||
     tab === 'pr-checks' ||
     tab === 'source-control' ||
-    tab === 'checks' ||
     tab === 'ports'
   ) {
     return {

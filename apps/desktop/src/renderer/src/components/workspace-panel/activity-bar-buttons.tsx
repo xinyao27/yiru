@@ -56,7 +56,7 @@ export function TopActivityOverflowMenu({
   checksStatus?: CheckStatus | null
 }): React.JSX.Element {
   const hiddenChecksStatus =
-    checksStatus && checksStatus !== 'neutral' && items.some((item) => item.id === 'checks')
+    checksStatus && checksStatus !== 'neutral' && items.some((item) => item.id === 'source-control')
       ? checksStatus
       : null
 

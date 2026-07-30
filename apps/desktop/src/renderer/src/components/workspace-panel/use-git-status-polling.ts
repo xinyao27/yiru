@@ -95,7 +95,7 @@ export function useGitStatusPolling(options: { enabled?: boolean } = {}): void {
   const activeStatusPollScope = shouldPollActiveWorktreeGitStatus
     ? `${activeExecutionHostId}\0${activeWorktreeId}\0${worktreePath}`
     : null
-  // Why: opening any git-status consumer (Source Control, Files, Checks, or an
+  // Why: opening any git-status consumer (Changes, Files, Review, or an
   // editor file) must refresh promptly, matching the pre-scheduler behavior
   // where the interactive interval flip re-ran an immediate poll.
   const interactiveConsumerVisible = hasInteractiveActiveGitStatusConsumer(

@@ -1338,6 +1338,20 @@
         "panel": {
           "titlebar": {
             "openIn": "Open in editor"
+          },
+          "sourceControl": {
+            "title": "Changes & Review"
+          },
+          "source": {
+            "control": {
+              "workspace": {
+                "panel": {
+                  "changes": "Changes",
+                  "review": "Review",
+                  "views": "Changes and review"
+                }
+              }
+            }
           }
         }
       },

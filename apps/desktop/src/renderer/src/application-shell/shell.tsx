@@ -823,7 +823,7 @@ function App(): React.JSX.Element {
   useGitStatusPolling({ enabled: workspaceSessionReady })
   // Why: the editor must hear external filesystem changes regardless of
   // which workspace-panel tab is visible (Explorer unmounts when the user
-  // switches to Source Control or Checks). Wiring this at App level mirrors
+  // switches between Changes and Review). Wiring this at App level mirrors
   // VSCode's workbench-scoped `TextFileEditorModelManager`, which reloads
   // clean models from a single always-on file-change subscription instead
   // of tying reloads to the Explorer UI lifecycle.
@@ -1951,12 +1951,14 @@ function App(): React.JSX.Element {
           }
           input.preventDefault()
           notifyTerminalCapture('sidebar.sourceControl.toggle')
+          state.requestSourceControlPanelView('changes')
           state.setRightSidebarTab('source-control')
           state.setRightSidebarOpen(true)
         } else if (matchShortcut('sidebar.checks.toggle')) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.checks.toggle')
-          state.setRightSidebarTab('checks')
+          state.requestSourceControlPanelView('review')
+          state.setRightSidebarTab('source-control')
           state.setRightSidebarOpen(true)
         } else if (matchShortcut('sidebar.ports.toggle')) {
           input.preventDefault()
@@ -1997,7 +1999,7 @@ function App(): React.JSX.Element {
         return
       }
 
-      // Cmd/Ctrl+Shift+G — open Source Control in a workspace tab.
+      // Cmd/Ctrl+Shift+G — open Changes & Review in a workspace tab.
       // Skip when terminal search is open — Cmd+Shift+G means "find previous"
       // in that context (handled by keyboard-handlers.ts). Both listeners share
       // the window capture phase and registration order can vary with React
@@ -2015,7 +2017,7 @@ function App(): React.JSX.Element {
       if (matchShortcut('sidebar.checks.toggle')) {
         input.preventDefault()
         notifyTerminalCapture('sidebar.checks.toggle')
-        openWorkspacePanelTab({ panel: 'checks' })
+        openWorkspacePanelTab({ panel: 'source-control', sourceControlView: 'review' })
         return
       }
 

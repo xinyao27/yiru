@@ -15,6 +15,7 @@ import type { PinnedTabCloseConfirmSlice } from '../components/terminal-pane/pin
 import type { WorkspaceCleanupSlice } from '../components/workspace-cleanup/state'
 import type { CommitMessageGenerationSlice } from '../components/workspace-panel/commit-message-generation-state'
 import type { PullRequestGenerationSlice } from '../components/workspace-panel/pull-request-generation-state'
+import type { SourceControlPanelViewSlice } from '../components/workspace-panel/source-control/workspace-panel/state'
 import type { WorkspaceSpaceSlice } from '../components/workspace-space/state'
 import type { YiruProfilesSlice } from '../components/yiru-profiles/state'
 import type { AgentStatusSlice } from './slices/agent-status'
@@ -73,6 +74,7 @@ declare module './types' {
       RuntimeStatusSlice,
       PullRequestGenerationSlice,
       CommitMessageGenerationSlice,
+      SourceControlPanelViewSlice,
       PinnedTabCloseConfirmSlice,
       RecentlyClosedTabsSlice,
       YiruProfilesSlice,

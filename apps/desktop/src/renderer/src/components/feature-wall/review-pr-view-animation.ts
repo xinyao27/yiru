@@ -67,8 +67,8 @@ export function useReviewPrViewAnimation(
     const prCard = root.querySelector<HTMLDivElement>('[data-pr-view-card]')
     const cursor = root.querySelector<HTMLDivElement>('[data-cursor]')
     const explorerTab = root.querySelector<HTMLSpanElement>('[data-explorer-tab]')
-    const checksTab = root.querySelector<HTMLSpanElement>('[data-checks-tab]')
-    const checksTooltip = root.querySelector<HTMLSpanElement>('[data-checks-tooltip]')
+    const reviewTab = root.querySelector<HTMLSpanElement>('[data-review-tab]')
+    const reviewTooltip = root.querySelector<HTMLSpanElement>('[data-review-tooltip]')
     const checksBlock = root.querySelector<HTMLDivElement>('[data-checks-block]')
     const commentsBlock = root.querySelector<HTMLDivElement>('[data-comments-block]')
     const comments = Array.from(root.querySelectorAll<HTMLDivElement>('[data-comment-card]'))
@@ -84,8 +84,8 @@ export function useReviewPrViewAnimation(
       !prCard ||
       !cursor ||
       !explorerTab ||
-      !checksTab ||
-      !checksTooltip ||
+      !reviewTab ||
+      !reviewTooltip ||
       !checksBlock ||
       !commentsBlock ||
       !commentsCount ||
@@ -104,8 +104,8 @@ export function useReviewPrViewAnimation(
     const prCardEl: HTMLDivElement = prCard
     const cursorEl: HTMLDivElement = cursor
     const explorerTabEl: HTMLSpanElement = explorerTab
-    const checksTabEl: HTMLSpanElement = checksTab
-    const checksTooltipEl: HTMLSpanElement = checksTooltip
+    const reviewTabEl: HTMLSpanElement = reviewTab
+    const reviewTooltipEl: HTMLSpanElement = reviewTooltip
     const checksBlockEl: HTMLDivElement = checksBlock
     const commentsBlockEl: HTMLDivElement = commentsBlock
     const commentsCountEl: HTMLSpanElement = commentsCount
@@ -129,8 +129,8 @@ export function useReviewPrViewAnimation(
       sidebarPeekEl.classList.remove('is-hiding')
       prCardEl.classList.remove('is-visible')
       explorerTabEl.classList.add('is-active')
-      checksTabEl.classList.remove('is-active', 'is-hovered')
-      checksTooltipEl.classList.remove('is-visible')
+      reviewTabEl.classList.remove('is-active', 'is-hovered')
+      reviewTooltipEl.classList.remove('is-visible')
       cursorEl.classList.remove('is-visible', 'is-clicking')
       cursorEl.style.transition = 'none'
       cursorEl.style.transform = 'translate(-30px, 220px)'
@@ -181,13 +181,13 @@ export function useReviewPrViewAnimation(
         }
 
         cursorEl.classList.add('is-visible')
-        moveCursor(rootEl, cursorEl, checksTabEl, 5, 6)
-        checksTabEl.classList.add('is-hovered')
+        moveCursor(rootEl, cursorEl, reviewTabEl, 5, 6)
+        reviewTabEl.classList.add('is-hovered')
         await wait(260)
         if (cancelled) {
           return
         }
-        checksTooltipEl.classList.add('is-visible')
+        reviewTooltipEl.classList.add('is-visible')
         await wait(1300)
         if (cancelled) {
           return
@@ -199,10 +199,10 @@ export function useReviewPrViewAnimation(
           return
         }
         cursorEl.classList.remove('is-clicking')
-        checksTooltipEl.classList.remove('is-visible')
-        checksTabEl.classList.remove('is-hovered')
+        reviewTooltipEl.classList.remove('is-visible')
+        reviewTabEl.classList.remove('is-hovered')
         explorerTabEl.classList.remove('is-active')
-        checksTabEl.classList.add('is-active')
+        reviewTabEl.classList.add('is-active')
         await wait(420)
         if (cancelled) {
           return

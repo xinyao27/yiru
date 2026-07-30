@@ -356,7 +356,7 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
   },
   {
     id: 'sidebar.sourceControl.toggle',
-    title: 'Show Source Control',
+    title: 'Show Changes & Review',
     group: 'Global',
     scope: 'global',
     searchKeywords: ['shortcut', 'sidebar', 'source control', 'git'],
@@ -364,7 +364,7 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
   },
   {
     id: 'sidebar.checks.toggle',
-    title: 'Show Checks',
+    title: 'Show Review',
     group: 'Global',
     scope: 'global',
     searchKeywords: ['shortcut', 'sidebar', 'checks', 'ci'],

@@ -7,10 +7,10 @@ import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
   type RightSidebarPanelSource
 } from './right-sidebar-panel-source'
+import type { SourceControlPanelView } from './source-control/workspace-panel/state'
 
 const FileExplorer = lazy(() => import('./file-explorer'))
-const SourceControl = lazy(() => import('./source-control'))
-const ChecksPanel = lazy(() => import('./checks-panel'))
+const SourceControlWorkspacePanel = lazy(() => import('./source-control/workspace-panel/panel'))
 const PortsPanel = lazy(() => import('./ports-panel'))
 const AiVaultPanel = lazy(() => import('./ai-vault/panel'))
 const FolderWorkspaceWorktreesPanel = lazy(() => import('./folder-workspace-worktrees-panel'))
@@ -22,6 +22,8 @@ type RightSidebarPanelContentProps = {
   isVisible?: boolean
   source?: RightSidebarPanelSource
   workspacePanelTabId?: string
+  sourceControlView?: SourceControlPanelView
+  onSourceControlViewChange?: (view: SourceControlPanelView) => void
 }
 
 export function RightSidebarPanelContent({
@@ -29,7 +31,9 @@ export function RightSidebarPanelContent({
   rightSidebarOpen,
   isVisible,
   source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
-  workspacePanelTabId
+  workspacePanelTabId,
+  sourceControlView,
+  onSourceControlViewChange
 }: RightSidebarPanelContentProps): React.JSX.Element {
   const panelVisible = isVisible ?? rightSidebarOpen
   return (
@@ -43,13 +47,14 @@ export function RightSidebarPanelContent({
           />
         )}
         {effectiveTab === 'source-control' && (
-          <SourceControl
+          <SourceControlWorkspacePanel
             source={source}
             isVisible={panelVisible}
             workspacePanelTabId={workspacePanelTabId}
+            view={sourceControlView}
+            onViewChange={onSourceControlViewChange}
           />
         )}
-        {effectiveTab === 'checks' && <ChecksPanel source={source} isVisible={panelVisible} />}
         {/* Why: SSH port forwarding still depends on the raw ports.detect data,
             which the workspace-scoped status bar popover intentionally does not
             expose. Keep this panel reachable only for SSH worktrees. */}

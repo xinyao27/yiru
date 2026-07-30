@@ -78,7 +78,9 @@ function CoworkingWorkspaceSurfaceContent({
     items: panelItems,
     openItems: openPanelItems,
     openPanel,
-    selectSession: selectSessionPanel
+    selectSession: selectSessionPanel,
+    setSourceControlView,
+    sourceControlView
   } = useCoworkingWorkspacePanelTabs({ route, connected, supportsGit })
   const { sessions, retainMissingSession, recordCreatedSession } = useCoworkingCreatedSessionTabs({
     catalogSessions,
@@ -234,6 +236,8 @@ function CoworkingWorkspaceSurfaceContent({
               sessions={sessions}
               catalogStatus={workspace.worktree.sessionCatalog.status}
               checksState={checksState}
+              sourceControlView={sourceControlView}
+              onSourceControlViewChange={setSourceControlView}
             />
           ) : sessionRoute ? (
             <CoworkingSessionPane

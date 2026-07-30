@@ -202,7 +202,7 @@ export function useChecksPanelStatusEffects(context: useChecksPanelGenerationFie
         !stale &&
         shouldCommitChecksPanelGitStatusSnapshot(panelContextKeyRef.current, requestContextKey)
       ) {
-        // Why: the Checks tab can be the only visible git surface; commit
+        // Why: the Review view can be the only visible git surface; commit
         // branch identity before branch-scoped upstream refresh can fail.
         updateWorktreeGitIdentity(activeWorktreeId, {
           head: status.head,

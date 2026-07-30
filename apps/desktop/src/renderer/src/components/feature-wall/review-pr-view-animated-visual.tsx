@@ -1,7 +1,6 @@
 import {
   Files,
   GitMerge,
-  ListChecks,
   Chat as MessageSquare,
   MagnifyingGlass as Search
 } from '@phosphor-icons/react'
@@ -18,7 +17,7 @@ import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-style
 import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'
 import { useReviewPrViewAnimation } from './review-pr-view-animation'
 
-type SidebarTabId = 'explorer' | 'search' | 'source-control' | 'checks'
+type SidebarTabId = 'explorer' | 'search' | 'source-control'
 
 const SIDEBAR_TABS: readonly {
   id: SidebarTabId
@@ -49,28 +48,20 @@ const SIDEBAR_TABS: readonly {
     id: 'source-control',
     icon: GitMerge,
     get label() {
-      return translate(
-        'auto.components.feature.wall.ReviewPRViewAnimatedVisual.d7f80060ca',
-        'Source Control'
-      )
-    }
-  },
-  {
-    id: 'checks',
-    icon: ListChecks,
-    get label() {
-      return translate(
-        'auto.components.feature.wall.ReviewPRViewAnimatedVisual.ab2901bce6',
-        'Checks'
-      )
+      return translate('auto.components.workspace.panel.sourceControl.title', 'Changes & Review')
     }
   }
 ]
 
-function SidebarTabs(props: { active: SidebarTabId; interactiveChecks?: boolean }): JSX.Element {
-  const checksShortcutLabel = useShortcutLabel('sidebar.checks.toggle')
-  const checksTooltip =
-    checksShortcutLabel === 'Unassigned' ? 'Checks' : `Checks (${checksShortcutLabel})`
+function SidebarTabs(props: { active: SidebarTabId; interactiveReview?: boolean }): JSX.Element {
+  const sourceControlShortcutLabel = useShortcutLabel('sidebar.sourceControl.toggle')
+  const reviewTooltip =
+    sourceControlShortcutLabel === 'Unassigned'
+      ? translate('auto.components.workspace.panel.sourceControl.title', 'Changes & Review')
+      : `${translate(
+          'auto.components.workspace.panel.sourceControl.title',
+          'Changes & Review'
+        )} (${sourceControlShortcutLabel})`
 
   return (
     <div className="ravpr-tabs">
@@ -83,16 +74,18 @@ function SidebarTabs(props: { active: SidebarTabId; interactiveChecks?: boolean 
             key={tab.id}
             className={className}
             aria-label={tab.label}
-            data-checks-tab={props.interactiveChecks && tab.id === 'checks' ? '' : undefined}
-            data-explorer-tab={props.interactiveChecks && tab.id === 'explorer' ? '' : undefined}
+            data-review-tab={
+              props.interactiveReview && tab.id === 'source-control' ? '' : undefined
+            }
+            data-explorer-tab={props.interactiveReview && tab.id === 'explorer' ? '' : undefined}
           >
             <Icon size={16} aria-hidden />
           </span>
         )
       })}
-      {props.interactiveChecks ? (
-        <span className="ravpr-tooltip" data-checks-tooltip>
-          {checksTooltip}
+      {props.interactiveReview ? (
+        <span className="ravpr-tooltip" data-review-tooltip>
+          {reviewTooltip}
         </span>
       ) : null}
     </div>
@@ -133,9 +126,8 @@ function CommentCard(props: { index: number; path: string; children: ReactNode }
   )
 }
 
-// Why: the Review PR visual follows the approved HTML mock beat-for-beat. The
-// real app keeps Explorer / Checks in one right-sidebar surface, so the
-// animation selects Checks before the PR status content appears.
+// Why: the Review PR visual mirrors the real combined panel: the workspace
+// opens Changes & Review before selecting its Review view.
 export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): JSX.Element {
   const { reducedMotion } = props
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -146,7 +138,7 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
     <div ref={rootRef} className="ravpr-stage" data-page="pr-view">
       <div className="ravpr-stack">
         <div className="ravpr-sidebar is-visible" data-checks-sidebar-peek>
-          <SidebarTabs active="explorer" interactiveChecks />
+          <SidebarTabs active="explorer" interactiveReview />
           <div className="ravpr-explorer">
             <div className="ravpr-heading">
               {translate(
@@ -164,7 +156,21 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
         </div>
 
         <div className="ravpr-card" data-pr-view-card>
-          <SidebarTabs active="checks" />
+          <SidebarTabs active="source-control" />
+          <div className="border-border flex h-7 shrink-0 border-y text-xs font-medium">
+            <span className="text-muted-foreground flex flex-1 items-center justify-center">
+              {translate(
+                'auto.components.workspace.panel.source.control.workspace.panel.changes',
+                'Changes'
+              )}
+            </span>
+            <span className="border-foreground text-foreground flex flex-1 items-center justify-center border-b-2">
+              {translate(
+                'auto.components.workspace.panel.source.control.workspace.panel.review',
+                'Review'
+              )}
+            </span>
+          </div>
           <div className="ravpr-body">
             <div className="ravpr-number-row">
               <span className="ravpr-number">#2351</span>

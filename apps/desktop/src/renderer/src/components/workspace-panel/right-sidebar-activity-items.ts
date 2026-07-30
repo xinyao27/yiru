@@ -8,7 +8,6 @@ import { AgentSessionHistoryIcon } from './agent-session-history-icon'
 export type RightSidebarActivityShortcuts = {
   explorer: string
   sourceControl: string
-  checks: string
   ports: string
 }
 
@@ -43,15 +42,8 @@ export function createRightSidebarActivityItems(
     {
       id: 'source-control',
       icon: GitMerge,
-      title: translate('auto.components.right.sidebar.index.0314901467', 'Source Control'),
+      title: translate('auto.components.workspace.panel.sourceControl.title', 'Changes & Review'),
       shortcut: assignedShortcut(shortcuts.sourceControl),
-      gitOnly: true
-    },
-    {
-      id: 'checks',
-      icon: ListChecks,
-      title: translate('auto.components.right.sidebar.index.83a10e3c44', 'Checks'),
-      shortcut: assignedShortcut(shortcuts.checks),
       gitOnly: true
     },
     {

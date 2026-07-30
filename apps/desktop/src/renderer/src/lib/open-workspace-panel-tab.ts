@@ -2,6 +2,7 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import type { WorkspacePanelTabContentType } from '../../../shared/types'
+import type { SourceControlPanelView } from '../components/workspace-panel/source-control/workspace-panel/state'
 
 type ExplorerDestination =
   | { view: 'files' }
@@ -22,9 +23,7 @@ const getWorkspacePanelTabLabel = (panel: WorkspacePanelTabContentType): string 
     case 'pr-checks':
       return translate('auto.components.right.sidebar.index.parentPrChecks', 'PR Checks')
     case 'source-control':
-      return translate('auto.components.right.sidebar.index.0314901467', 'Source Control')
-    case 'checks':
-      return translate('auto.components.right.sidebar.index.83a10e3c44', 'Checks')
+      return translate('auto.components.workspace.panel.sourceControl.title', 'Changes & Review')
     case 'ports':
       return translate('auto.components.right.sidebar.index.441733b630', 'Ports')
   }
@@ -34,12 +33,14 @@ export function openWorkspacePanelTab({
   panel,
   worktreeId,
   groupId,
-  explorerDestination
+  explorerDestination,
+  sourceControlView = 'changes'
 }: {
   panel: WorkspacePanelTabContentType
   worktreeId?: string | null
   groupId?: string | null
   explorerDestination?: ExplorerDestination
+  sourceControlView?: SourceControlPanelView
 }): void {
   const state = useAppStore.getState()
   const resolvedWorktreeId = worktreeId ?? state.activeWorktreeId
@@ -72,6 +73,10 @@ export function openWorkspacePanelTab({
   } else {
     state.setRightSidebarTab(panel)
     state.setRightSidebarOpen(true)
+  }
+
+  if (panel === 'source-control') {
+    state.setSourceControlPanelView(tab.id, sourceControlView)
   }
 
   state.focusGroup(resolvedWorktreeId, tab.groupId)

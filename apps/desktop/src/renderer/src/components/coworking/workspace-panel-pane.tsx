@@ -8,7 +8,9 @@ import type {
   CoworkingSessionCatalogPageState
 } from '../../../../shared/coworking/catalog-contract'
 import type { WorkspacePanelTabContentType } from '../../../../shared/types'
+import type { SourceControlPanelView } from '../workspace-panel/source-control/workspace-panel/state'
 import type { CoworkingChecksReadState } from './checks-pane'
+import { getCoworkingWorkspacePanelTabId } from './workspace-panel-tab'
 
 export function CoworkingWorkspacePanelPane({
   panel,
@@ -16,7 +18,9 @@ export function CoworkingWorkspacePanelPane({
   supportsGit,
   sessions,
   catalogStatus,
-  checksState
+  checksState,
+  sourceControlView,
+  onSourceControlViewChange
 }: {
   panel: WorkspacePanelTabContentType
   route: CoworkingWorkspaceRoute
@@ -24,12 +28,17 @@ export function CoworkingWorkspacePanelPane({
   sessions: readonly CoworkingSessionCatalogEntry[]
   catalogStatus: CoworkingSessionCatalogPageState['status']
   checksState: CoworkingChecksReadState
+  sourceControlView: SourceControlPanelView
+  onSourceControlViewChange: (view: SourceControlPanelView) => void
 }): React.JSX.Element {
   return (
     <RightSidebarPanelContent
       effectiveTab={panel}
       rightSidebarOpen
       isVisible
+      workspacePanelTabId={getCoworkingWorkspacePanelTabId(panel)}
+      sourceControlView={sourceControlView}
+      onSourceControlViewChange={onSourceControlViewChange}
       source={{
         kind: 'coworking',
         route,

@@ -55,8 +55,8 @@ export function HostedReviewHeaderLink({
         className={cn('p-0 h-auto w-auto focus-visible:bg-accent', className)}
         onClick={(e) => {
           e.stopPropagation()
-          // Why: GitHub PR and GitLab MR details live in Yiru's Checks tab; keep
-          // the sidebar workflow in-app instead of opening the browser.
+          // Why: GitHub PR and GitLab MR details live in the Review view; keep
+          // the workspace workflow in-app instead of opening the browser.
           onOpenHostedReviewInChecks()
         }}
       >

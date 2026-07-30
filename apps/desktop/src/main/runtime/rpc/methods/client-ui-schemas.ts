@@ -142,7 +142,10 @@ export const UiUpdate = z
     sidebarWidth: z.number().finite().optional(),
     rightSidebarOpen: z.boolean().optional(),
     rightSidebarTab: z
-      .enum(['explorer', 'search', 'vault', 'source-control', 'checks', 'ports'])
+      .preprocess(
+        (value) => (value === 'checks' ? 'source-control' : value),
+        z.enum(['explorer', 'search', 'vault', 'source-control', 'ports'])
+      )
       .optional(),
     rightSidebarExplorerView: z.enum(['files', 'search']).optional(),
     rightSidebarWidth: z.number().finite().optional(),
