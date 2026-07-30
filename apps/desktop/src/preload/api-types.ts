@@ -395,6 +395,7 @@ import type {
 } from '../shared/opencode-usage-types'
 import type {
   CodexRateLimitResetResult,
+  CursorRateLimitRefreshContext,
   GrokAccountStatus,
   RateLimitRuntimeTarget,
   RateLimitState
@@ -2758,7 +2759,7 @@ export type PreloadApi = {
   }
   rateLimits: {
     get: () => Promise<RateLimitState>
-    refresh: () => Promise<RateLimitState>
+    refresh: (cursorContext?: CursorRateLimitRefreshContext) => Promise<RateLimitState>
     refreshCodexForTarget: (target: RateLimitRuntimeTarget) => Promise<RateLimitState>
     consumeCodexResetCredit: () => Promise<CodexRateLimitResetResult>
     refreshClaudeForTarget: (target: RateLimitRuntimeTarget) => Promise<RateLimitState>

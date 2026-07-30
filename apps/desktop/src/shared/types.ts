@@ -2289,6 +2289,7 @@ export type AgentActivityDisplayMode = 'compact' | 'full'
 export type StatusBarItem =
   | 'claude'
   | 'codex'
+  | 'cursor'
   | 'gemini'
   | 'antigravity'
   | 'opencode-go'

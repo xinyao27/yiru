@@ -1,11 +1,16 @@
 import { ipcMain } from 'electron'
 
-import type { RateLimitRuntimeTarget } from '../../shared/rate-limit-types'
+import type {
+  CursorRateLimitRefreshContext,
+  RateLimitRuntimeTarget
+} from '../../shared/rate-limit-types'
 import type { RateLimitService } from './service'
 
 export function registerRateLimitHandlers(rateLimits: RateLimitService): void {
   ipcMain.handle('rateLimits:get', () => rateLimits.getState())
-  ipcMain.handle('rateLimits:refresh', () => rateLimits.refresh())
+  ipcMain.handle('rateLimits:refresh', (_event, cursorContext?: CursorRateLimitRefreshContext) =>
+    rateLimits.refresh(cursorContext)
+  )
   ipcMain.handle('rateLimits:refreshCodexForTarget', (_event, target: RateLimitRuntimeTarget) =>
     rateLimits.refreshCodexForTarget(target)
   )

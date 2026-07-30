@@ -14,7 +14,7 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 
 | Never | Enforced by |
 | --- | --- |
-| Write a test. Any test. | Section 9 |
+| Write or retain any test. No test files or test suites are allowed. | Section 9 |
 | Add an `eslint-disable`/`oxlint-disable max-lines`, or a per-file `max-lines` bump in `apps/mobile/config/mobile-max-lines-ratchets.ts` | `check-max-lines-ratchet.mjs` |
 | Add a project-owned `.d.ts` under `src/preload` or `src/shared` | PR workflow guard |
 | Add a variable to the `@theme inline` block in `main.css` | `check-design-token-budget.mjs` |
@@ -158,19 +158,17 @@ Yiru shells out to **the user's** git binary, whose version differs across nativ
 - Check when every subcommand and option was introduced. Newer behavior needs a baseline-compatible fallback, or must degrade safely.
 - Route the preferred/fallback pair through `GitCapabilityCache` (`shared/git/capability-cache.ts`) with a narrow unsupported-error predicate, so a known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and `simple-git` doesn't paper over host differences.
 - Preserve global options that precede the subcommand (`git -c …`), including auto-maintenance suppression on worktree-create fetches.
-- PR CI runs the compatibility test against real git 2.25.5, 2.38.1, and 2.54.0. Adopting a newer feature means adding its version boundary there so both paths get exercised.
+- PR CI verifies compatibility against real git 2.25.5, 2.38.1, and 2.54.0. Adopting a newer feature means adding its version boundary to the compatibility check so both paths get exercised.
 
 GitHub, GitLab, Bitbucket, Gitea, and Azure DevOps are all supported: keep provider-specific behavior behind explicit checks, and don't give a generic source-control concept a GitHub-only name. The user's `gh` rate limit is a shared resource — batch requests and skip calls you don't need.
 
 ---
 
-## 9. Do not write tests
+## 9. No tests
 
-**Do not author unit tests, integration tests, or any other tests** — not proactively, not for safety, not as a bonus alongside a fix. Agent-written tests are unreviewed by definition here: they lock in whatever the agent assumed, slow every later change, and cost tokens without buying confidence. If a change seems risky enough to need one, say so in your summary and move on.
+**Do not write any tests. Do not retain any tests.**
 
-Existing tests stay — don't bulk-delete them. If your change breaks one, fix the code when the test caught a real bug, or update that single test minimally when the behavior legitimately changed. Never add a test file, and never grow one with new cases.
-
-Verify by building, typechecking, linting, and running the app.
+Delete existing unit, integration, snapshot, and end-to-end tests instead of repairing, updating, or expanding them. The repository must contain no test files or test suites, and CI must not run tests. Verify behavior through builds, typechecking, linting, repository-contract checks, and running the app.
 
 ---
 

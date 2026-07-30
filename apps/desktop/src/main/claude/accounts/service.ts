@@ -13,9 +13,9 @@ import type {
   ClaudeManagedAccountSummary,
   ClaudeRateLimitAccountsState
 } from '../../../shared/types'
-import { resolveClaudeCommand } from '../../codex/cli/command'
 import type { Store } from '../../persistence'
 import type { RateLimitService } from '../../rate-limits/service'
+import { resolveClaudeCommand } from '../../runtime/cli-command'
 import { toWindowsWslPath } from '../../wsl'
 import { buildEncodedWslBashCommand } from '../../wsl-bash-command'
 import { findDuplicateClaudeAccount } from './claude-duplicate-account'

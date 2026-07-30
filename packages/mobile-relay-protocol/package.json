@@ -65,8 +65,7 @@
     "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
     "fmt": "pnpm --workspace-root exec vp fmt packages/mobile-relay-protocol",
     "lint": "pnpm --workspace-root exec vp lint packages/mobile-relay-protocol --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "pnpm --workspace-root exec vp test packages/mobile-relay-protocol"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "tweetnacl": "catalog:",

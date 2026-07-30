@@ -24,6 +24,7 @@ import { NATIVE_CHAT_METHODS } from './native-chat'
 import { NOTIFICATION_METHODS } from './notifications'
 import { ORCHESTRATION_METHODS } from './orchestration/methods'
 import { PREFLIGHT_METHODS } from './preflight'
+import { PROVIDER_USAGE_METHODS } from './provider-usage'
 import { REPO_METHODS } from './repo'
 import { SESSION_TAB_METHODS } from './session-tabs'
 import { SKILL_METHODS } from './skills'
@@ -58,6 +59,7 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...DIAGNOSTICS_METHODS,
   ...ACCOUNT_METHODS,
   ...PREFLIGHT_METHODS,
+  ...PROVIDER_USAGE_METHODS,
   ...COMPUTER_METHODS,
   ...SESSION_TAB_METHODS,
   ...NATIVE_CHAT_METHODS,

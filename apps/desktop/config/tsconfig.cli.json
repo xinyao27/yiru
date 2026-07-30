@@ -40,7 +40,7 @@
     "../src/main/codex/hook-trust-promotion.ts",
     "../src/main/codex/accounts/fs-utils.ts",
     "../src/main/codex/accounts/wsl-codex-command.ts",
-    "../src/main/codex/cli/command.ts",
+    "../src/main/runtime/cli-command.ts",
     "../src/main/command-code/managed-script.ts",
     "../src/main/command-code/hook-service.ts",
     "../src/main/copilot/hook-service.ts",

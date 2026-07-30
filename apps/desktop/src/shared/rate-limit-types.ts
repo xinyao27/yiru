@@ -47,6 +47,7 @@ export type ProviderRateLimits = {
   provider:
     | 'claude'
     | 'codex'
+    | 'cursor'
     | 'gemini'
     | 'opencode-go'
     | 'kimi'
@@ -59,9 +60,9 @@ export type ProviderRateLimits = {
   weekly: RateLimitWindow | null
   /** Claude Fable 7-day weekly window, null if not available. */
   fableWeekly?: RateLimitWindow | null
-  /** 30-day monthly window (OpenCode Go, Grok unified billing), null if not available. */
+  /** Monthly billing or plan window, null if not available. */
   monthly?: RateLimitWindow | null
-  /** Named per-model buckets (Gemini only). */
+  /** Named provider-specific usage buckets. */
   buckets?: RateLimitBucket[]
   /** Available earned Codex rate-limit reset credits, if reported. */
   rateLimitResetCredits?: {
@@ -98,6 +99,11 @@ export type RateLimitRuntimeTarget = {
   wslDistro: string | null
 }
 
+export type CursorRateLimitRefreshContext = {
+  executionHostId: string
+  workspaceId: string | null
+}
+
 export type InactiveAccountUsage = {
   accountId: string
   rateLimits: ProviderRateLimits | null
@@ -116,6 +122,7 @@ export type GrokAccountStatus = {
 export type RateLimitState = {
   claude: ProviderRateLimits | null
   codex: ProviderRateLimits | null
+  cursor: ProviderRateLimits | null
   gemini: ProviderRateLimits | null
   opencodeGo: ProviderRateLimits | null
   kimi: ProviderRateLimits | null

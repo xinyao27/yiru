@@ -21,12 +21,18 @@ import {
   type UsageSection
 } from './usage-roster-windows'
 
-// Why: only the primary Gemini buckets earn space in compact usage surfaces;
-// the remaining model buckets stay available in the detailed usage panel.
-const STATUS_BAR_BUCKET_NAMES = new Set(['Flash', 'Pro', '1.5 Pro'])
+// Why: only primary provider buckets earn space in compact usage surfaces;
+// secondary model buckets stay available in the detailed usage panel.
+const STATUS_BAR_BUCKET_NAMES: Partial<
+  Record<ProviderRateLimits['provider'], ReadonlySet<string>>
+> = {
+  cursor: new Set(['Included', 'Auto', 'API']),
+  gemini: new Set(['Flash', 'Pro', '1.5 Pro'])
+}
 const PROVIDER_LETTERS: Record<ProviderRateLimits['provider'], string> = {
   claude: 'C',
   codex: 'X',
+  cursor: 'U',
   gemini: 'G',
   'opencode-go': 'O',
   kimi: 'K',
@@ -69,9 +75,10 @@ export function UsageWindowMeter({
 
 function getStatusBarUsageSections(limits: ProviderRateLimits): UsageSection[] {
   if (limits.buckets && limits.buckets.length > 0) {
-    const visibleBuckets = limits.buckets.filter((bucket) =>
-      STATUS_BAR_BUCKET_NAMES.has(bucket.name)
-    )
+    const visibleBucketNames = STATUS_BAR_BUCKET_NAMES[limits.provider]
+    const visibleBuckets = visibleBucketNames
+      ? limits.buckets.filter((bucket) => visibleBucketNames.has(bucket.name))
+      : []
     if (visibleBuckets.length > 0) {
       return visibleBuckets.map((bucket) => ({ label: bucket.name, window: bucket }))
     }

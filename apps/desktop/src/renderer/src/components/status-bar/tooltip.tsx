@@ -79,6 +79,9 @@ export function ProviderIcon({ provider }: { provider: string }): React.JSX.Elem
   if (provider === 'codex') {
     return <OpenAIIcon size={13} />
   }
+  if (provider === 'cursor') {
+    return <AgentIcon agent="cursor" size={14} />
+  }
   if (provider === 'gemini') {
     return <GeminiIcon size={13} />
   }

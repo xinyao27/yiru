@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { resolveCliCommands } from '../codex/cli/command'
+import { resolveCliCommands } from '../runtime/cli-command'
 
 // Why: local agent detection may run before shell-PATH hydration, but the
 // fallback must stay bounded because it runs on the main process.

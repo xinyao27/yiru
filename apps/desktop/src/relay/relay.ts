@@ -39,6 +39,7 @@ import { resolveSetupAgentSequenceLaunchCommand } from '../shared/setup/agent-se
 import { AgentExecHandler } from './agent-exec-handler'
 import { endpointDirForRelaySocket, RelayAgentHookServer } from './agent-hook-server'
 import { RelayContext } from './context'
+import { ProviderUsageHandler } from './cursor-usage/handler'
 import { relayLogLine } from './diagnostic-log'
 import { RelayDispatcher } from './dispatcher'
 import { ExternalAutomationsHandler } from './external-automations-handler'
@@ -478,8 +479,10 @@ async function main(): Promise<void> {
   const gitHandler = new GitHandler(dispatcher, context, watchRegistry)
 
   const _preflightHandler = new PreflightHandler(dispatcher)
+  const _providerUsageHandler = new ProviderUsageHandler(dispatcher)
   const _externalAutomationsHandler = new ExternalAutomationsHandler(dispatcher)
   void _preflightHandler
+  void _providerUsageHandler
   void _externalAutomationsHandler
 
   const _portScanHandler = new PortScanHandler(dispatcher)

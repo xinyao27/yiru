@@ -30,7 +30,8 @@
         "resourceUsageToggleDescription": "显示资源管理器。点击可查看 CPU、内存、会话、守护进程控制和工作区磁盘扫描。",
         "portsToggleDescription": "显示实时工作区端口。单击可查看工作区范围的端口和外部监听器。",
         "antigravityToggleDescription": "显示当前工作区的 Antigravity 订阅使用量。",
-        "grokToggleDescription": "通过 Grok CLI 登录后显示 Grok 订阅额度使用量。"
+        "grokToggleDescription": "通过 Grok CLI 登录后显示 Grok 订阅额度使用量。",
+        "cursorToggleDescription": "显示 Cursor Agent 报告的 Cursor 套餐用量。"
       },
       "menuBarIcon": {
         "title": "显示菜单栏图标",
@@ -1984,7 +1985,8 @@
             "antigravityUsage": "Antigravity 使用量",
             "antigravityUsageDetails": "打开 Antigravity 使用详情",
             "grokUsageAria": "打开 Grok 使用详情",
-            "grokUsageMenu": "Grok 使用量"
+            "grokUsageMenu": "Grok 使用量",
+            "cursorUsage": "Cursor 使用量"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "连接账户",
@@ -6430,7 +6432,9 @@
             "showPinnedWorktreesInGroups": {
               "title": "也在原来的列表中显示已固定的工作树",
               "description": "已固定的工作树会保留在 Pinned 中，同时也显示在全部、项目、状态和评审中。"
-            }
+            },
+            "cursorUsage": "Cursor 使用量",
+            "cursorUsageDescription": "在状态栏中显示 Cursor 套餐用量。"
           }
         },
         "auto": {

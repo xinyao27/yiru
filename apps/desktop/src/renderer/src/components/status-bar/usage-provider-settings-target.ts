@@ -8,6 +8,9 @@ export function getUsageProviderAccountsSectionId(
       return 'accounts-claude'
     case 'codex':
       return 'accounts-codex'
+    case 'cursor':
+      // Why: Cursor owns its CLI sign-in lifecycle; Yiru only reads /usage.
+      return null
     case 'gemini':
     case 'antigravity':
       // Why: Antigravity usage currently shares Gemini's OAuth configuration.

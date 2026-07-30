@@ -12,6 +12,11 @@ import {
   CaretRight as ChevronRight,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  toRuntimeExecutionHostId
+} from '@yiru/workbench-model/workspace'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/icon-context-menu'
@@ -39,6 +44,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useDetectedAgents, type AgentDetectionTarget } from '@/hooks/use-detected-agents'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
@@ -50,6 +56,7 @@ import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
 } from '@/lib/windows-terminal-capabilities'
+import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import {
   fetchProviderAccountsSnapshot,
   selectClaudeProviderAccount,
@@ -58,6 +65,7 @@ import {
 import { getActiveRuntimeTarget } from '@/runtime/rpc-client'
 
 import type {
+  CursorRateLimitRefreshContext,
   ProviderRateLimits,
   RateLimitRuntimeTarget
 } from '../../../../shared/rate-limit-types'
@@ -1810,8 +1818,34 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   // install showing "Gemini Usage" with no Gemini CLI installed). We gate
   // the per-CLI bars on detection so the surface stays self-pruning, and
   // re-show automatically once the agent appears on PATH.
-  const detectedAgentIds = useAppStore((s) => s.detectedAgentIds)
-  const ensureDetectedAgents = useAppStore((s) => s.ensureDetectedAgents)
+  const usageExecutionHostId = useAppStore((state) => {
+    if (state.activeWorktreeId) {
+      return getExecutionHostIdForWorktree(state, state.activeWorktreeId)
+    }
+    const activeRepo = state.repos.find((repo) => repo.id === state.activeRepoId)
+    if (activeRepo) {
+      return getRepoExecutionHostId(activeRepo)
+    }
+    const environmentId = state.settings?.activeRuntimeEnvironmentId?.trim()
+    return environmentId ? toRuntimeExecutionHostId(environmentId) : 'local'
+  })
+  const usageWorkspaceId = useAppStore((state) => state.activeWorktreeId)
+  const cursorRefreshContext = useMemo<CursorRateLimitRefreshContext>(
+    () => ({ executionHostId: usageExecutionHostId, workspaceId: usageWorkspaceId }),
+    [usageExecutionHostId, usageWorkspaceId]
+  )
+  const agentDetectionTarget = useMemo<AgentDetectionTarget>(() => {
+    const target = parseExecutionHostId(usageExecutionHostId)
+    if (target?.kind === 'ssh') {
+      return { kind: 'ssh', connectionId: target.targetId }
+    }
+    if (target?.kind === 'runtime') {
+      return { kind: 'runtime', environmentId: target.environmentId }
+    }
+    return { kind: 'local' }
+  }, [usageExecutionHostId])
+  const { detectedIds: detectedAgentIds } = useDetectedAgents(agentDetectionTarget)
+  const previousCursorRefreshContextRef = useRef(cursorRefreshContext)
   // Why: pet segment intentionally does NOT participate in statusBarItems
   // (see design doc — gating with both the experimental flag and a
   // statusBarItems checkbox would double-toggle the surface). It is driven
@@ -1836,18 +1870,22 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   }, [])
 
   useEffect(() => {
+    const previous = previousCursorRefreshContextRef.current
+    if (
+      previous.executionHostId === cursorRefreshContext.executionHostId &&
+      previous.workspaceId === cursorRefreshContext.workspaceId
+    ) {
+      return
+    }
+    previousCursorRefreshContextRef.current = cursorRefreshContext
+    void refreshRateLimits(cursorRefreshContext)
+  }, [cursorRefreshContext, refreshRateLimits])
+
+  useEffect(() => {
     const closeMenu = (): void => setMenuOpen(false)
     window.addEventListener(CLOSE_ALL_CONTEXT_MENUS_EVENT, closeMenu)
     return () => window.removeEventListener(CLOSE_ALL_CONTEXT_MENUS_EVENT, closeMenu)
   }, [])
-
-  // Why: trigger PATH-based agent detection on mount so the per-CLI usage
-  // bars (Claude/Codex/Gemini) can hide themselves when the user doesn't
-  // have those CLIs installed. The slice deduplicates concurrent callers,
-  // so this is safe even if other surfaces also call it.
-  useEffect(() => {
-    void ensureDetectedAgents()
-  }, [ensureDetectedAgents])
 
   const containerRefCallback = useCallback((node: HTMLDivElement | null) => {
     if (resizeObserverRef.current) {
@@ -1868,6 +1906,10 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   }, [])
 
   const refreshDetectedAgents = useAppStore((s) => s.refreshDetectedAgents)
+  const clearRuntimeDetectedAgents = useAppStore((s) => s.clearRuntimeDetectedAgents)
+  const ensureRuntimeDetectedAgents = useAppStore((s) => s.ensureRuntimeDetectedAgents)
+  const clearRemoteDetectedAgents = useAppStore((s) => s.clearRemoteDetectedAgents)
+  const ensureRemoteDetectedAgents = useAppStore((s) => s.ensureRemoteDetectedAgents)
   const handleRefresh = useCallback(async () => {
     if (isRefreshing) {
       return
@@ -1876,13 +1918,34 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     try {
       // Why: also re-run PATH detection so a freshly-installed CLI's bar
       // appears (and a removed CLI's bar hides) without restarting Yiru.
-      await Promise.all([refreshRateLimits(), refreshDetectedAgents()])
+      if (agentDetectionTarget.kind === 'runtime') {
+        clearRuntimeDetectedAgents(agentDetectionTarget.environmentId)
+      } else if (agentDetectionTarget.kind === 'ssh') {
+        clearRemoteDetectedAgents(agentDetectionTarget.connectionId)
+      }
+      const detectedAgentsRefresh =
+        agentDetectionTarget.kind === 'runtime'
+          ? ensureRuntimeDetectedAgents(agentDetectionTarget.environmentId)
+          : agentDetectionTarget.kind === 'ssh'
+            ? ensureRemoteDetectedAgents(agentDetectionTarget.connectionId)
+            : refreshDetectedAgents()
+      await Promise.all([refreshRateLimits(cursorRefreshContext), detectedAgentsRefresh])
     } finally {
       if (mountedRef.current) {
         setIsRefreshing(false)
       }
     }
-  }, [isRefreshing, refreshRateLimits, refreshDetectedAgents])
+  }, [
+    agentDetectionTarget,
+    clearRemoteDetectedAgents,
+    clearRuntimeDetectedAgents,
+    cursorRefreshContext,
+    ensureRemoteDetectedAgents,
+    ensureRuntimeDetectedAgents,
+    isRefreshing,
+    refreshRateLimits,
+    refreshDetectedAgents
+  ])
 
   const handleManageAccounts = useCallback((): void => {
     setUsageMenuOpen(false)
@@ -1923,7 +1986,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     return null
   }
 
-  const { claude, codex, gemini, opencodeGo, kimi, antigravity, minimax, grok } = rateLimits
+  const { claude, codex, cursor, gemini, opencodeGo, kimi, antigravity, minimax, grok } = rateLimits
 
   // Why: a provider earns a bar from either a usable live snapshot or durable
   // setup in Settings. The durable path keeps account switchers visible while
@@ -1948,6 +2011,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   }
   const visibleClaude = getVisibleUsageProvider('claude', claude, usageSettings)
   const visibleCodex = getVisibleUsageProvider('codex', codex, usageSettings)
+  const visibleCursor = getVisibleUsageProvider('cursor', cursor, usageSettings)
   const visibleGemini = getVisibleUsageProvider('gemini', gemini, usageSettings)
   const visibleKimi = getVisibleUsageProvider('kimi', kimi, usageSettings)
   const visibleAntigravity = getVisibleUsageProvider('antigravity', antigravity, usageSettings)
@@ -1961,6 +2025,10 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     visibleCodex !== null &&
     statusBarItems.includes('codex') &&
     isStatusBarItemAvailable('codex', detectedAgentIds)
+  const showCursor =
+    visibleCursor !== null &&
+    statusBarItems.includes('cursor') &&
+    isStatusBarItemAvailable('cursor', detectedAgentIds)
   const showGemini =
     visibleGemini !== null &&
     statusBarItems.includes('gemini') &&
@@ -1995,6 +2063,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const hasVisibleUsageMeters =
     showClaude ||
     showCodex ||
+    showCursor ||
     showGemini ||
     showOpencodeGo ||
     showKimi ||
@@ -2006,7 +2075,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   // included because managed accounts are durable even when live usage
   // snapshots are still hydrating or unavailable after an update.
   const isEmptyUsageState = isUsageEmptyState(
-    { claude, codex, gemini, opencodeGo, kimi, antigravity, minimax, grok },
+    { claude, codex, cursor, gemini, opencodeGo, kimi, antigravity, minimax, grok },
     usageSettings
   )
   // Why: the teaching CTA is a one-time nudge — once the user hides it, keep it
@@ -2016,6 +2085,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const anyFetching =
     claude?.status === 'fetching' ||
     codex?.status === 'fetching' ||
+    cursor?.status === 'fetching' ||
     gemini?.status === 'fetching' ||
     opencodeGo?.status === 'fetching' ||
     kimi?.status === 'fetching' ||
@@ -2030,6 +2100,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const rosterProviders = [
     showClaude ? visibleClaude : null,
     showCodex ? visibleCodex : null,
+    showCursor ? visibleCursor : null,
     showGemini ? visibleGemini : null,
     showAntigravity ? visibleAntigravity : null,
     showOpencodeGo ? visibleOpencodeGo : null,
@@ -2270,6 +2341,18 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             >
               <OpenAIIcon size={14} />
               {translate('auto.components.status.bar.StatusBar.c0909c686e', 'Codex Usage')}
+            </DropdownMenuCheckboxItem>
+          )}
+          {isStatusBarItemAvailable('cursor', detectedAgentIds) && (
+            <DropdownMenuCheckboxItem
+              checked={statusBarItems.includes('cursor')}
+              onCheckedChange={() => {
+                recordFeatureInteraction('usage-tracking')
+                toggleStatusBarItem('cursor')
+              }}
+            >
+              <AgentIcon agent="cursor" size={14} />
+              {translate('auto.components.status.bar.StatusBar.cursorUsage', 'Cursor Usage')}
             </DropdownMenuCheckboxItem>
           )}
           {isStatusBarItemAvailable('gemini', detectedAgentIds) && (
