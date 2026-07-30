@@ -28,6 +28,8 @@ WORKSPACE = File.join(MOBILE_ROOT, "ios", "Yiru.xcworkspace")
 BUILD_OUTPUT_DIRECTORY = File.join(MOBILE_ROOT, "build")
 SCHEME = "Yiru"
 BUNDLE_ID = "com.xinyao27.yiru.mobile"
+WIDGET_TARGET = "ExpoWidgetsTarget"
+WIDGET_BUNDLE_ID = "#{BUNDLE_ID}.#{WIDGET_TARGET}"
 TESTFLIGHT_GROUPS = ["peeps"].freeze
 DEFAULT_TESTFLIGHT_CHANGELOG = "Latest Yiru Mobile updates and fixes.".freeze
 
@@ -167,8 +169,9 @@ platform :ios do
 
     team_id = ENV.fetch("APPLE_TEAM_ID")
 
-    # Fetch (or create) the App Store distribution profile via the API key and
-    # install it locally, then feed its name to the manual archive + export.
+    # Fetch (or create) both App Store distribution profiles via the API key
+    # and install them locally, then feed their names to the manual archive +
+    # export. App extensions are signed independently from their containing app.
     get_provisioning_profile(
       api_key: api_key,
       app_identifier: BUNDLE_ID,
@@ -176,11 +179,17 @@ platform :ios do
     )
     # sigh exposes the chosen profile's name in SIGH_NAME (SIGH_PROFILE_MAPPING
     # doesn't exist in this fastlane version).
-    profile_name = lane_context[SharedValues::SIGH_NAME]
+    app_profile_name = lane_context[SharedValues::SIGH_NAME]
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: WIDGET_BUNDLE_ID,
+      force: true,
+    )
+    widget_profile_name = lane_context[SharedValues::SIGH_NAME]
 
     # Why: xcodebuild command-line signing settings apply to every workspace
-    # target. Dynamic Pods reject the app's provisioning profile, so configure
-    # manual signing only on Yiru's generated Release target.
+    # target. Dynamic Pods reject app provisioning profiles, so configure
+    # manual signing only on the two app-owned Release targets.
     update_code_signing_settings(
       path: PROJECT,
       use_automatic_signing: false,
@@ -188,7 +197,16 @@ platform :ios do
       targets: [SCHEME],
       build_configurations: ["Release"],
       code_sign_identity: "Apple Distribution",
-      profile_name: profile_name,
+      profile_name: app_profile_name,
+    )
+    update_code_signing_settings(
+      path: PROJECT,
+      use_automatic_signing: false,
+      team_id: team_id,
+      targets: [WIDGET_TARGET],
+      build_configurations: ["Release"],
+      code_sign_identity: "Apple Distribution",
+      profile_name: widget_profile_name,
     )
 
     build_app(
@@ -200,7 +218,8 @@ platform :ios do
         teamID: team_id,
         signingStyle: "manual",
         provisioningProfiles: {
-          BUNDLE_ID => profile_name,
+          BUNDLE_ID => app_profile_name,
+          WIDGET_BUNDLE_ID => widget_profile_name,
         },
       },
       output_directory: BUILD_OUTPUT_DIRECTORY,

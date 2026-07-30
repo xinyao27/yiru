@@ -11,6 +11,7 @@
       "favicon": "./assets/favicon.png"
     },
     "ios": {
+      "appleTeamId": "8H6Q2YA365",
       "supportsTablet": true,
       "bundleIdentifier": "com.xinyao27.yiru.mobile",
       "buildNumber": "1",
@@ -114,6 +115,7 @@
       [
         "expo-widgets",
         {
+          "bundleIdentifier": "com.xinyao27.yiru.mobile.ExpoWidgetsTarget",
           "groupIdentifier": "group.com.xinyao27.yiru.mobile",
           "widgets": [
             {
