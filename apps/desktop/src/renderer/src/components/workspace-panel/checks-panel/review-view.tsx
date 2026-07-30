@@ -22,10 +22,14 @@ import type { useChecksPanelCreateReviewState } from './create-review'
 import { ChecksPanelReviewHeader } from './review-header'
 import { ChecksPanelUpdatedAtMetadata } from './updated-at-metadata'
 
-type ChecksPanelReviewViewProps = { context: useChecksPanelCreateReviewState }
+type ChecksPanelReviewViewProps = {
+  context: useChecksPanelCreateReviewState
+  workspacePanelTabId?: string
+}
 
 export function ChecksPanelReviewView({
-  context
+  context,
+  workspacePanelTabId
 }: ChecksPanelReviewViewProps): React.JSX.Element | null {
   const {
     activeConflictReview,
@@ -216,6 +220,7 @@ export function ChecksPanelReviewView({
           checksLoading={checksLoading}
           checkDetailsContextKey={stateRequestKey}
           onLoadCheckDetails={handleLoadCheckDetails}
+          workspacePanelTabId={workspacePanelTabId}
         />
       )}
       <PRCommentsList

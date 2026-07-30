@@ -79,7 +79,11 @@ export default function SourceControlWorkspacePanel({
         />
       </TabsContent>
       <TabsContent value="review" className="min-h-0 overflow-hidden">
-        <ChecksPanel source={source} isVisible={isVisible && view === 'review'} />
+        <ChecksPanel
+          source={source}
+          isVisible={isVisible && view === 'review'}
+          workspacePanelTabId={workspacePanelTabId}
+        />
       </TabsContent>
     </Tabs>
   )

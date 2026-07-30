@@ -285,7 +285,7 @@ export type OpenFile = {
   /** Why: terminal/agent links can be the user's manual recovery path when a
    * remote watcher misses an external write. Bumping this refetches clean tabs. */
   fileContentReloadNonce?: number
-  /** Why: CI check full-details tabs are virtual editor tabs backed by fetched
+  /** Why: CI check full-details views are virtual editor items backed by fetched
    *  PR check-run metadata instead of a file on disk. */
   checkRunDetails?: OpenCheckRunDetailsState
   /** Why: on the web client an editor tab can either be mirrored from the host
@@ -597,7 +597,8 @@ export type EditorSlice = {
     worktreeId: string,
     contextKey: string,
     check: OpenCheckRunDetailsState['check'],
-    state: Pick<OpenCheckRunDetailsState, 'details' | 'loading' | 'error'>
+    state: Pick<OpenCheckRunDetailsState, 'details' | 'loading' | 'error'>,
+    options?: EditorOpenTargetOptions
   ) => void
   patchOpenCheckRunDetails: (
     worktreeId: string,
@@ -3305,11 +3306,13 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     void openWorkspaceEditorItem(get(), id, worktreeId, 'Conflict Review', 'conflict-review')
   },
 
-  // Why: the checks sidebar only has room for inline summaries; full logs and
-  // annotations belong in the center editor pane like diff tabs.
-  openCheckRunDetails: (worktreeId, contextKey, check, state) => {
+  // Why: the checks panel only has room for inline summaries; full logs and
+  // annotations belong in its embedded editor when available, or a normal tab otherwise.
+  openCheckRunDetails: (worktreeId, contextKey, check, state, options) => {
     const id = buildCheckRunDetailsTabId(worktreeId, check)
     const label = getCheckRunDetailsTabLabel(check)
+    const workspacePanelTabId = options?.workspacePanelTabId
+    const isPreview = options?.preview ?? false
     const checkRunDetails: OpenCheckRunDetailsState = {
       contextKey,
       check,
@@ -3320,6 +3323,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     set((s) => {
       const existing = s.openFiles.find((f) => f.id === id)
       if (existing) {
+        const updatedPreview = isPreview ? existing.isPreview : false
         return {
           openFiles: s.openFiles.map((f) =>
             f.id === id
@@ -3328,6 +3332,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
                   mode: 'check-details' as const,
                   relativePath: label,
                   language: 'plaintext',
+                  isPreview: updatedPreview,
                   checkRunDetails
                 }
               : f
@@ -3346,8 +3351,33 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         worktreeId,
         language: 'plaintext',
         isDirty: false,
+        isPreview: isPreview || undefined,
         mode: 'check-details',
         checkRunDetails
+      }
+
+      if (isPreview) {
+        const replaceablePreviewId = getReplaceablePreviewFileId(
+          s,
+          worktreeId,
+          options?.targetGroupId,
+          workspacePanelTabId
+        )
+        const replaceablePreviewIndex = s.openFiles.findIndex(
+          (file) => file.id === replaceablePreviewId
+        )
+        if (replaceablePreviewIndex !== -1) {
+          return {
+            openFiles: s.openFiles.map((file, index) =>
+              index === replaceablePreviewIndex ? newFile : file
+            ),
+            ...removeEditorStateForReplacedPreview(s, s.openFiles[replaceablePreviewIndex], id),
+            activeFileId: id,
+            activeTabType: 'editor',
+            activeFileIdByWorktree: { ...s.activeFileIdByWorktree, [worktreeId]: id },
+            activeTabTypeByWorktree: { ...s.activeTabTypeByWorktree, [worktreeId]: 'editor' }
+          }
+        }
       }
 
       return {
@@ -3358,10 +3388,21 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         activeTabTypeByWorktree: { ...s.activeTabTypeByWorktree, [worktreeId]: 'editor' }
       }
     })
-    void openWorkspaceEditorItem(get(), id, worktreeId, label, 'check-details')
+    if (setWorkspacePanelEditorTarget(set, workspacePanelTabId, id)) {
+      return
+    }
+    void openWorkspaceEditorItem(
+      get(),
+      id,
+      worktreeId,
+      label,
+      'check-details',
+      isPreview,
+      options?.targetGroupId
+    )
   },
 
-  // Why: sidebar detail fetches can finish after a full-details tab is already
+  // Why: sidebar detail fetches can finish after a full-details view is already
   // open; this updates the tab snapshot without stealing focus from the user.
   patchOpenCheckRunDetails: (worktreeId, contextKey, check, state) => {
     const id = buildCheckRunDetailsTabId(worktreeId, check)

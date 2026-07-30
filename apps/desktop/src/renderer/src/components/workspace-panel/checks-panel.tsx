@@ -28,7 +28,13 @@ import {
 
 export { ChecksPanelReviewHeader } from './checks-panel/review-header'
 
-function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Element | null {
+function LocalChecksPanel({
+  isVisible,
+  workspacePanelTabId
+}: {
+  isVisible: boolean
+  workspacePanelTabId?: string
+}): React.JSX.Element | null {
   const core = useChecksPanelStateCore(isVisible)
   const reviewIdentity = useChecksPanelReviewIdentity(core)
   const reviewContext = useChecksPanelReviewContext(reviewIdentity)
@@ -50,18 +56,20 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
   if (!context.activeWorktree || context.isFolder || !context.activeReview) {
     return <ChecksPanelEmptyStateView context={context} />
   }
-  return <ChecksPanelReviewView context={context} />
+  return <ChecksPanelReviewView context={context} workspacePanelTabId={workspacePanelTabId} />
 }
 
 export default function ChecksPanel({
   source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
-  isVisible = true
+  isVisible = true,
+  workspacePanelTabId
 }: {
   source?: RightSidebarPanelSource
   isVisible?: boolean
+  workspacePanelTabId?: string
 }): React.JSX.Element | null {
   if (source.kind === 'coworking') {
     return source.supportsGit ? <CoworkingChecksPane state={source.checksState} /> : null
   }
-  return <LocalChecksPanel isVisible={isVisible} />
+  return <LocalChecksPanel isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }

@@ -33,7 +33,10 @@ export function SourceControlSectionHeader({
         >
           <ChevronDown
             weight="regular"
-            className={cn('size-3.5 shrink-0 transition-transform', isCollapsed && '-rotate-90')}
+            className={cn(
+              'text-muted-foreground group-hover/section:text-accent-foreground size-3.5 shrink-0 transition-transform',
+              isCollapsed && '-rotate-90'
+            )}
           />
           <span>{label}</span>
           <span className="text-[11px] font-medium tabular-nums">{count}</span>

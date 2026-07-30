@@ -45,13 +45,15 @@ export function CheckRunDetails({
   state,
   checkDetailsContextKey,
   worktreeId,
-  detailsStickySurface = 'sidebar'
+  detailsStickySurface = 'sidebar',
+  workspacePanelTabId
 }: {
   check: PRCheckDetail
   state: CheckDetailsLoadState | undefined
   checkDetailsContextKey: string
   worktreeId: string | null
   detailsStickySurface?: CheckDetailsStickySurface
+  workspacePanelTabId?: string
 }): React.JSX.Element {
   const openCheckRunDetails = useAppStore((s) => s.openCheckRunDetails)
   const details = state?.details
@@ -83,20 +85,29 @@ export function CheckRunDetails({
           'View full details'
         )
 
-  const openFullDetailsTab = (): void => {
+  const openFullDetailsView = (): void => {
     if (!worktreeId) {
       return
     }
-    openCheckRunDetails(worktreeId, checkDetailsContextKey, check, {
-      details: state?.details ?? null,
-      loading: state?.loading ?? false,
-      error: state?.error ?? null
-    })
+    openCheckRunDetails(
+      worktreeId,
+      checkDetailsContextKey,
+      check,
+      {
+        details: state?.details ?? null,
+        loading: state?.loading ?? false,
+        error: state?.error ?? null
+      },
+      {
+        workspacePanelTabId,
+        preview: Boolean(workspacePanelTabId)
+      }
+    )
   }
 
   const handleOpenFullDetails = (event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation()
-    openFullDetailsTab()
+    openFullDetailsView()
   }
 
   return (

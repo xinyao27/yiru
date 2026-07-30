@@ -34,7 +34,8 @@ export function ChecksList({
   onLoadCheckDetails,
   worktreeId: worktreeIdOverride,
   persistDetails = true,
-  detailsStickySurface = 'sidebar'
+  detailsStickySurface = 'sidebar',
+  workspacePanelTabId
 }: {
   checks: PRCheckDetail[]
   checksLoading: boolean
@@ -44,6 +45,7 @@ export function ChecksList({
   worktreeId?: string
   persistDetails?: boolean
   detailsStickySurface?: CheckDetailsStickySurface
+  workspacePanelTabId?: string
 }): React.JSX.Element {
   const activeWorktree = useActiveWorktree()
   // Why: projection-only remote checks must not write details into the local Worktree cache.
@@ -355,6 +357,7 @@ export function ChecksList({
                       checkDetailsContextKey={checkDetailsContextKey}
                       worktreeId={resolvedWorktreeId}
                       detailsStickySurface={detailsStickySurface}
+                      workspacePanelTabId={workspacePanelTabId}
                     />
                   )}
                 </div>

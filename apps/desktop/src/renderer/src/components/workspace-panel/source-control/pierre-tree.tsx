@@ -1,6 +1,6 @@
 import { CONTEXT_MENU_TRIGGER_TYPE, type FileTreeRowDecoration } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 
 import { translate } from '../../../i18n/i18n'
 import { joinPath } from '../../../lib/path'
@@ -19,8 +19,22 @@ import type { SourceControlDisplaySectionId } from './section-order'
 import { toPermanentSourceControlRowOpenEvent } from './split-open'
 import { getSubmoduleExpansionKey } from './submodule-expansion'
 
-const SOURCE_CONTROL_PIERRE_TREE_MAX_VISIBLE_ROWS = 16
 const SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX = 26
+
+type SourceControlPierreTreeStyle = CSSProperties & {
+  '--trees-icon-nudge-override': string
+  '--trees-icon-width-override': string
+  '--trees-item-padding-x-override': string
+  '--trees-item-row-gap-override': string
+}
+
+const SOURCE_CONTROL_PIERRE_TREE_STYLE: SourceControlPierreTreeStyle = {
+  ...PIERRE_FILE_TREE_STYLE,
+  '--trees-icon-nudge-override': '0px',
+  '--trees-icon-width-override': '14px',
+  '--trees-item-padding-x-override': '6px',
+  '--trees-item-row-gap-override': '4px'
+}
 
 const SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS = `${PIERRE_FILE_TREE_UNSAFE_CSS}
   :host {
@@ -33,6 +47,12 @@ const SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS = `${PIERRE_FILE_TREE_UNSAFE_CSS}
      the transient context-menu action push it inward. */
   [data-item-section="action"] { order: 1; }
   [data-item-section="git"] { order: 2; }
+  /* Why: disclosure arrows align with the 14px source-control section caret. */
+  [data-icon-name="file-tree-icon-chevron"] {
+    color: var(--trees-fg-muted);
+    height: 14px;
+    width: 14px;
+  }
 `
 
 function findTreeItemPath(event: React.SyntheticEvent<HTMLElement>): string | null {
@@ -233,7 +253,6 @@ function SourceControlPierreTree({
       ),
     unsafeCSS: SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS
   })
-
   useLayoutEffect(() => {
     resettingRef.current = true
     model.resetPaths(data.paths, { initialExpandedPaths: data.expandedPaths })
@@ -287,15 +306,15 @@ function SourceControlPierreTree({
     [model]
   )
 
-  const height =
-    Math.max(1, Math.min(countVisibleRows(data), SOURCE_CONTROL_PIERRE_TREE_MAX_VISIBLE_ROWS)) *
-    SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX
+  // Why: every source-control section shares the panel scroller; sizing the
+  // tree to all visible rows prevents each section from gaining its own scroll.
+  const height = Math.max(1, countVisibleRows(data)) * SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX
 
   return (
     <FileTree
       model={model}
       className="yiru-pierre-file-tree bg-sidebar block w-full"
-      style={{ ...PIERRE_FILE_TREE_STYLE, height }}
+      style={{ ...SOURCE_CONTROL_PIERRE_TREE_STYLE, height }}
       onClickCapture={(event) => {
         const path = findTreeItemPath(event)
         const target = path ? data.targetByCanonicalPath.get(path) : undefined
