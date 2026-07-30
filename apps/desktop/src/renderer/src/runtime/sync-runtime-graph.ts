@@ -70,6 +70,15 @@ type TabsProjectionCache = {
   entries: Map<string, TabsProjectionCacheEntry>
   projection: string
 }
+type AgentStatusProjectionCacheEntry = {
+  entry: AppState['agentStatusByPaneKey'][string]
+  projection: string
+}
+type AgentStatusProjectionCache = {
+  source: AppState['agentStatusByPaneKey']
+  entries: Map<string, AgentStatusProjectionCacheEntry>
+  projection: string
+}
 
 const registeredTabs = new Map<string, RegisteredTerminalTab>()
 // Why: track when each tab was registered so we can suppress the "no live
@@ -94,6 +103,7 @@ let syncTimer: ReturnType<typeof setTimeout> | null = null
 let getStoreState: (() => AppState) | null = null
 let mobileSessionSnapshotVersion = 0
 let cachedTabsProjection: TabsProjectionCache | null = null
+let cachedAgentStatusProjection: AgentStatusProjectionCache | null = null
 let cachedOpenFileIndexesSource: AppState['openFiles'] | null = null
 let cachedOpenFileIndexes: OpenFileIndexes | null = null
 let cachedEditorDraftsSource: AppState['editorDrafts'] | null = null
@@ -475,36 +485,59 @@ function buildRuntimeMobileEditorDraftsProjection(editorDrafts: AppState['editor
   )
 }
 
+function serializeRuntimeMobileAgentStatusEntry(
+  paneKey: string,
+  entry: AppState['agentStatusByPaneKey'][string]
+): string {
+  return JSON.stringify({
+    paneKey,
+    entryPaneKey: entry.paneKey,
+    state: entry.state,
+    prompt: entry.prompt,
+    updatedAtBucket: Math.floor(entry.updatedAt / AGENT_STATUS_SYNC_UPDATED_AT_BUCKET_MS),
+    stateStartedAt: entry.stateStartedAt,
+    agentType: entry.agentType ?? null,
+    terminalTitle: entry.terminalTitle ?? null,
+    stateHistory: entry.stateHistory.map((history) => ({
+      state: history.state,
+      prompt: history.prompt,
+      startedAt: history.startedAt,
+      interrupted: history.interrupted ?? null
+    })),
+    toolName: entry.toolName ?? null,
+    toolInput: entry.toolInput ?? null,
+    interactivePrompt: entry.interactivePrompt ?? null,
+    lastAssistantMessage: entry.lastAssistantMessage ?? null,
+    interrupted: entry.interrupted ?? null
+  })
+}
+
 function buildRuntimeMobileAgentStatusProjection(
   agentStatusByPaneKey: AppState['agentStatusByPaneKey']
 ): string {
-  return JSON.stringify(
-    Object.entries(agentStatusByPaneKey)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([paneKey, entry]) => ({
-        paneKey,
-        entryPaneKey: entry.paneKey,
-        state: entry.state,
-        prompt: entry.prompt,
-        updatedAtBucket: Math.floor(entry.updatedAt / AGENT_STATUS_SYNC_UPDATED_AT_BUCKET_MS),
-        stateStartedAt: entry.stateStartedAt,
-        agentType: entry.agentType ?? null,
-        terminalTitle: entry.terminalTitle ?? null,
-        stateHistory: entry.stateHistory.map((history) => ({
-          state: history.state,
-          prompt: history.prompt,
-          startedAt: history.startedAt,
-          interrupted: history.interrupted ?? null
-        })),
-        toolName: entry.toolName ?? null,
-        toolInput: entry.toolInput ?? null,
-        // Why: include so a newly-captured AskUserQuestion prompt re-fires the
-        // mobile session republish even when no other field changed.
-        interactivePrompt: entry.interactivePrompt ?? null,
-        lastAssistantMessage: entry.lastAssistantMessage ?? null,
-        interrupted: entry.interrupted ?? null
-      }))
-  )
+  if (cachedAgentStatusProjection?.source === agentStatusByPaneKey) {
+    return cachedAgentStatusProjection.projection
+  }
+
+  // Why: one status update re-spreads the map but preserves every unrelated
+  // entry, so cache those serialized rows instead of rebuilding all histories.
+  const previousEntries = cachedAgentStatusProjection?.entries
+  const entries = new Map<string, AgentStatusProjectionCacheEntry>()
+  const parts: string[] = []
+  for (const [paneKey, entry] of Object.entries(agentStatusByPaneKey).sort(([left], [right]) =>
+    left.localeCompare(right)
+  )) {
+    const previous = previousEntries?.get(paneKey)
+    const cached =
+      previous?.entry === entry
+        ? previous
+        : { entry, projection: serializeRuntimeMobileAgentStatusEntry(paneKey, entry) }
+    entries.set(paneKey, cached)
+    parts.push(cached.projection)
+  }
+  const projection = `[${parts.join(',')}]`
+  cachedAgentStatusProjection = { source: agentStatusByPaneKey, entries, projection }
+  return projection
 }
 
 export function runtimeMobileSessionSyncKeysEqual(

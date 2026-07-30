@@ -1,5 +1,4 @@
-import { buildAgentNameRe } from '@yiru/workbench-model/agent'
-import { isCursorAgentTitle } from '@yiru/workbench-model/agent'
+import { buildAgentNameRe, isCursorAgentTitle } from '@yiru/workbench-model/agent'
 
 import type { RuntimeTerminalSummary } from '../../../shared/runtime-types'
 

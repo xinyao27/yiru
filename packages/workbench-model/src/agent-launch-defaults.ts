@@ -24,7 +24,8 @@ export const DEFAULT_TUI_AGENT_ARGS: Partial<Record<TuiAgent, string>> = {
   'mistral-vibe': '--agent auto-approve',
   openclaude: '--dangerously-skip-permissions',
   'qwen-code': '--approval-mode yolo',
-  rovo: '--yolo'
+  rovo: '--yolo',
+  trae: '--yolo'
 }
 
 export const DEFAULT_TUI_AGENT_ENV: Partial<Record<TuiAgent, Record<string, string>>> = {

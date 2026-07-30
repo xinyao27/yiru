@@ -13,6 +13,7 @@ import {
   type AgentHibernationPlannerSnapshot
 } from '../components/settings/agent/hibernation-planner'
 import { getAgentHibernationOutputSignature } from '../components/terminal-pane/agent/hibernation-output-activity'
+import { mergePendingTerminalInputActivity } from '../components/terminal-pane/input-activity-coalescing'
 import {
   getForegroundTerminalTabIds,
   getForegroundTerminalTabLastSeenAtById
@@ -73,7 +74,9 @@ function snapshotFromState(
       .map(([ptyId]) => ptyId),
     agentStatusByPaneKey: state.agentStatusByPaneKey,
     sleepingAgentSessionsByPaneKey: state.sleepingAgentSessionsByPaneKey,
-    lastTerminalInputAtByPaneKey: state.lastTerminalInputAtByPaneKey,
+    lastTerminalInputAtByPaneKey: mergePendingTerminalInputActivity(
+      state.lastTerminalInputAtByPaneKey
+    ),
     foregroundTerminalLastSeenAtByTabId: getForegroundTerminalTabLastSeenAtById(),
     now
   }

@@ -26,6 +26,9 @@ export type TrackedClaudeSubagent = {
    *  removes it even when teammate-shaped, so it can't gate the pane
    *  'working' forever. Cleared once live activity re-tracks the id. */
   backgroundTasksAuthoritative?: boolean
+  /** Why: an idle parent may never emit the inventory needed to reap a
+   *  persisted phantom, so liveness cleanup needs to distinguish unconfirmed rows. */
+  restoredFromSnapshot?: boolean
   /** A subagent-typed background task listed this lifecycle id id-exact
    *  (workflow/named lanes) — proof the task list tracks this id, so a later
    *  complete list omitting it means finished/killed even though the id is
@@ -73,6 +76,7 @@ export function upsertWorkingClaudeSubagent(
     // background_tasks omission must stop reaping it (teammate-shaped ids
     // never appear there). The fold re-tags its own recreations after this.
     existing.backgroundTasksAuthoritative = undefined
+    existing.restoredFromSnapshot = undefined
     return
   }
   // Why: beyond the wire cap extra rows would be invisible anyway; with only
@@ -186,6 +190,7 @@ export function foldClaudeBackgroundTasksIntoRoster(
       existing.agentType = task.agentType ?? existing.agentType
       existing.description = task.description ?? existing.description
       existing.listedAsSubagentTask = true
+      existing.restoredFromSnapshot = undefined
       continue
     }
     if (!task.running) {
@@ -240,6 +245,31 @@ export function foldClaudeBackgroundTasksIntoRoster(
       created.listedAsSubagentTask = true
     }
   }
+}
+
+export function reapRestoredClaudeSubagentsWithoutLiveAgent(roster: ClaudeSubagentRoster): boolean {
+  let changed = false
+  for (const [id, tracked] of roster) {
+    if (tracked.restoredFromSnapshot === true) {
+      roster.delete(id)
+      changed = true
+    }
+  }
+  return changed
+}
+
+export function claudeRosterHasRestoredSnapshotSubagent(
+  roster: ClaudeSubagentRoster | undefined
+): boolean {
+  if (!roster) {
+    return false
+  }
+  for (const tracked of roster.values()) {
+    if (tracked.restoredFromSnapshot === true) {
+      return true
+    }
+  }
+  return false
 }
 
 /** Whether a lifecycle agent id belongs to the named teammate. Teammate ids

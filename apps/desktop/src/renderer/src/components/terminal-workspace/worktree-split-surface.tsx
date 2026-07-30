@@ -20,6 +20,7 @@ type WorktreeSplitSurfaceProps = {
   isVisible: boolean
   shouldMeasureHiddenWorktree: boolean
   shouldColdParkTerminalPanes: boolean
+  forceParkTerminalPanes: boolean
   backgroundMountTabIds: ReadonlySet<string> | null
   activationDeferredMountTabIds: ReadonlySet<string> | null
 }
@@ -45,6 +46,7 @@ export const WorktreeSplitSurface = React.memo(function WorktreeSplitSurface({
   isVisible,
   shouldMeasureHiddenWorktree,
   shouldColdParkTerminalPanes,
+  forceParkTerminalPanes,
   backgroundMountTabIds,
   activationDeferredMountTabIds
 }: WorktreeSplitSurfaceProps): React.JSX.Element {
@@ -86,6 +88,7 @@ export const WorktreeSplitSurface = React.memo(function WorktreeSplitSurface({
         worktreePath={worktreePath}
         isWorktreeActive={isVisible}
         coldParkTerminalPanes={shouldColdParkTerminalPanes}
+        forceParkTerminalPanes={forceParkTerminalPanes}
         shouldMeasureHiddenWorktree={shouldMeasureHiddenWorktree}
         backgroundMountTabIds={backgroundMountTabIds}
         activationDeferredMountTabIds={activationDeferredMountTabIds}

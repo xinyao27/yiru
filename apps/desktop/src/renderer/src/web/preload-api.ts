@@ -97,7 +97,11 @@ import {
 } from '../../../shared/runtime-method-contracts/workspace-contracts'
 import { RuntimeRpcCallQueuePool } from '../../../shared/runtime-rpc-call-queue'
 import type { RuntimeStatus, RuntimeSyncWindowGraph } from '../../../shared/runtime-types'
-import type { SkillFreshnessInventory } from '../../../shared/skill-freshness'
+import type {
+  SkillFreshnessInventory,
+  SkillUpdateRun,
+  SkillUpdateStartResult
+} from '../../../shared/skill-freshness'
 import type { SkillDiscoveryResult } from '../../../shared/skills'
 import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
 import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal/cursor-style-settings'
@@ -1231,6 +1235,11 @@ function webAiVaultUnavailableResult(executionHostId: ExecutionHostId): AiVaultL
 function createReposApi(): NonNullable<Partial<PreloadApi>['repos']> {
   return {
     list: async () => (await callRuntimeResult(REPO_LIST_CONTRACT, undefined)).repos,
+    listForExecutionHost: async (args) => ({
+      authoritative: false,
+      executionHostId: args.executionHostId,
+      reason: 'unavailable'
+    }),
     add: async ({ path, kind }) => {
       invalidateRuntimeWorktreeCaches()
       return callRuntimeResult(REPO_ADD_CONTRACT, { path, kind })
@@ -1334,6 +1343,17 @@ function createWorktreesApi(): NonNullable<Partial<PreloadApi>['worktrees']> {
         })
       ).worktrees,
     listDetected: async ({ repoId }) => callRuntimeDetectedWorktrees(repoId),
+    listDetectedForHost: async (args) => ({
+      providerRequestId: args.providerRequestId,
+      executionHostId: args.executionHostId,
+      status: 'rejected'
+    }),
+    cancelListDetected: () => Promise.resolve(),
+    listLineageForHost: async (args) => ({
+      authoritative: false,
+      executionHostId: args.executionHostId,
+      reason: 'unavailable'
+    }),
     listAll: () => listAllRuntimeWorktrees(),
     create: async (args) => {
       invalidateRuntimeWorktreeCaches()
@@ -2558,7 +2578,13 @@ function createSkillsApi(): NonNullable<Partial<PreloadApi>['skills']> {
         installations: [],
         eligibleUpdateNames: [],
         scannedAt: Date.now()
-      })
+      }),
+    startUpdateRun: (): Promise<SkillUpdateStartResult> =>
+      Promise.resolve({ started: false, reason: 'unsafe-command-path' }),
+    cancelUpdateRun: () => Promise.resolve(),
+    acknowledgeUpdateRun: () => Promise.resolve(),
+    getUpdateRun: (): Promise<SkillUpdateRun> => Promise.resolve({ state: 'idle' }),
+    onUpdateRun: () => () => undefined
   }
 }
 

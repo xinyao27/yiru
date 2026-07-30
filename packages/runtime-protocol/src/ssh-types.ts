@@ -108,16 +108,35 @@ export type SshConnectionStatus =
 
 export type SshRemotePlatform = 'linux' | 'darwin' | 'win32'
 
+export type SshProviderEpoch = string & { readonly __sshProviderEpoch: unique symbol }
+
+export type DirectSshAuthority = {
+  targetId: string
+  providerEpoch: SshProviderEpoch
+  connectionGeneration: number
+}
+
 export type SshConnectionState = {
   targetId: string
   status: SshConnectionStatus
   error: string | null
   /** Number of reconnection attempts since last disconnect. */
   reconnectAttempt: number
+  /** Opaque provider-incarnation token issued by main. */
+  providerEpoch?: SshProviderEpoch | null
+  /** Non-secret owner token used to reject mutations captured for an obsolete SSH session. */
+  connectionGeneration?: number
   /** Recursive downloads require ssh2 SFTP on a direct SSH host. */
   supportsFolderDownload?: boolean
   /** Remote OS detected by the SSH relay once available. */
   remotePlatform?: SshRemotePlatform
+}
+
+/** Non-secret mutation provenance. Both fields are required when an SSH provider is selected. */
+export type SshMutationExpectation = {
+  expectedExecutionHostId?: 'local' | `ssh:${string}`
+  expectedSshTargetId?: string
+  expectedSshConnectionGeneration?: number
 }
 
 export type SshRemotePtyLeaseState = 'attached' | 'detached' | 'terminated' | 'expired'

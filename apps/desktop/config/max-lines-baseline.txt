@@ -88,7 +88,6 @@ inline apps/desktop/src/main/runtime/orchestration/coordinator.ts
 inline apps/desktop/src/main/runtime/orchestration/db.ts
 inline apps/desktop/src/main/runtime/rpc/methods/files.ts
 inline apps/desktop/src/main/runtime/rpc/methods/git.ts
-inline apps/desktop/src/main/runtime/rpc/methods/orchestration.ts
 inline apps/desktop/src/main/runtime/rpc/methods/terminal.ts
 inline apps/desktop/src/main/runtime/rpc.ts
 inline apps/desktop/src/main/runtime/yiru-runtime-browser.ts

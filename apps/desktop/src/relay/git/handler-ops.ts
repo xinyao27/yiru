@@ -7,6 +7,7 @@
  */
 import * as path from 'node:path'
 
+import { readBranchCompareHead } from '../../shared/git/branch-compare-head'
 import { isGitBufferOverflowError } from './buffer-overflow'
 import { buildDiffResult } from './diff-result'
 import { bufferToBlob, parseBranchDiff } from './handler-output-parser'
@@ -155,27 +156,31 @@ export async function branchCompare(
     status: 'loading'
   }
 
-  try {
-    const { stdout: branchOut } = await git(['branch', '--show-current'], worktreePath)
-    const branch = branchOut.trim()
-    if (branch) {
-      summary.compareRef = branch
-    }
-  } catch {
-    /* keep HEAD */
-  }
-
-  let headOid: string
-  let baseOid = ''
-  try {
-    const { stdout } = await git(['rev-parse', '--verify', 'HEAD'], worktreePath)
-    headOid = stdout.trim()
-    summary.headOid = headOid
-  } catch {
+  const readCompareRef = async (): Promise<string> => {
     try {
-      const { stdout } = await git(['rev-parse', '--verify', baseRef], worktreePath)
-      baseOid = stdout.trim()
-      summary.baseOid = baseOid
+      const { stdout } = await git(['branch', '--show-current'], worktreePath)
+      return stdout.trim() || 'HEAD'
+    } catch {
+      return 'HEAD'
+    }
+  }
+  const { compareRef, headOidResult, baseOidResult } = await readBranchCompareHead({
+    readCompareRef,
+    resolveBaseRef: async () => baseRef,
+    readHeadOid: async () => {
+      const { stdout } = await git(['rev-parse', '--verify', 'HEAD'], worktreePath)
+      return stdout.trim()
+    },
+    readBaseOid: async (resolvedBaseRef) => {
+      const { stdout } = await git(['rev-parse', '--verify', resolvedBaseRef], worktreePath)
+      return stdout.trim()
+    }
+  })
+  summary.compareRef = compareRef
+
+  if (!headOidResult.ok) {
+    if (baseOidResult.ok) {
+      summary.baseOid = baseOidResult.oid
       // Why: new remote worktrees can be on an unborn branch until the first
       // commit. There are no committed branch changes yet; surfacing this as a
       // compare error makes the source-control panel look broken.
@@ -183,9 +188,6 @@ export async function branchCompare(
       summary.commitsAhead = 0
       summary.status = 'ready'
       return { summary, entries: [] }
-    } catch {
-      // Preserve the existing unborn-head message when even the base is not
-      // resolvable; callers cannot compare or present a useful empty state.
     }
     summary.status = 'unborn-head'
     summary.errorMessage =
@@ -193,15 +195,15 @@ export async function branchCompare(
     return { summary, entries: [] }
   }
 
-  try {
-    const { stdout } = await git(['rev-parse', '--verify', baseRef], worktreePath)
-    baseOid = stdout.trim()
-    summary.baseOid = baseOid
-  } catch {
+  const headOid = headOidResult.oid
+  summary.headOid = headOid
+  if (!baseOidResult.ok) {
     summary.status = 'invalid-base'
     summary.errorMessage = `Base ref ${baseRef} could not be resolved in this repository.`
     return { summary, entries: [] }
   }
+  const baseOid = baseOidResult.oid
+  summary.baseOid = baseOid
 
   let mergeBase: string
   try {
@@ -215,11 +217,10 @@ export async function branchCompare(
   }
 
   try {
-    const entries = await loadBranchChanges(mergeBase, headOid)
-    const { stdout: countOut } = await git(
-      ['rev-list', '--count', `${baseOid}..${headOid}`],
-      worktreePath
-    )
+    const [entries, { stdout: countOut }] = await Promise.all([
+      loadBranchChanges(mergeBase, headOid),
+      git(['rev-list', '--count', `${baseOid}..${headOid}`], worktreePath)
+    ])
     summary.changedFiles = entries.length
     summary.commitsAhead = Number.parseInt(countOut.trim(), 10) || 0
     summary.status = 'ready'

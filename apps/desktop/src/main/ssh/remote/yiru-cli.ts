@@ -1,8 +1,3 @@
-import type {
-  RuntimeMethodContract,
-  RuntimeMethodParams,
-  RuntimeMethodResult
-} from '../../../shared/runtime-method-contract'
 import { STATUS_GET_CONTRACT } from '../../../shared/runtime-method-contracts/runtime-control-contracts'
 import type { CliStatusResult } from '../../../shared/runtime-types'
 import type { RpcResponse } from '../../runtime/rpc/core'
@@ -10,6 +5,7 @@ import { RpcDispatcher } from '../../runtime/rpc/dispatcher'
 import { ALL_RPC_METHODS } from '../../runtime/rpc/methods'
 import type { YiruRuntimeService } from '../../runtime/yiru-runtime'
 import { RemoteCliArgumentError, type ParsedRemoteCli } from './cli-argument-error'
+import { buildRemoteCliError } from './cli-error-response'
 import { formatRemoteCli } from './cli-format'
 import {
   HostCliUnavailableError,
@@ -17,6 +13,7 @@ import {
   type RemoteYiruCliRequest,
   type RemoteYiruCliResult
 } from './cli-host-passthrough'
+import { callRemoteRpc } from './cli-rpc-dispatch'
 import {
   getRemoteOrchestrationPayload,
   hasRemoteLifecycleRejection,
@@ -67,7 +64,7 @@ export async function runRemoteYiruCli(
   if (interactiveMessage) {
     if (json) {
       return {
-        stdout: `${JSON.stringify(buildLocalError(interactiveMessage, 'unsupported_over_ssh'), null, 2)}\n`,
+        stdout: `${JSON.stringify(buildRemoteCliError(interactiveMessage, 'unsupported_over_ssh'), null, 2)}\n`,
         stderr: '',
         exitCode: 1
       }
@@ -127,7 +124,7 @@ async function runLegacyRemoteYiruCli(
           : 'runtime_error'
     if (json) {
       return {
-        stdout: `${JSON.stringify(buildLocalError(message, code), null, 2)}\n`,
+        stdout: `${JSON.stringify(buildRemoteCliError(message, code), null, 2)}\n`,
         stderr: '',
         exitCode: 1
       }
@@ -145,7 +142,7 @@ async function dispatchRemoteCli(
   const command = parsed.commandPath.join(' ')
   switch (command) {
     case 'status': {
-      const response = await call(dispatcher, STATUS_GET_CONTRACT, undefined)
+      const response = await callRemoteRpc(dispatcher, STATUS_GET_CONTRACT, undefined)
       if (!response.ok) {
         return response
       }
@@ -166,28 +163,36 @@ async function dispatchRemoteCli(
       return { ...response, result: cliStatus }
     }
     case 'terminal list':
-      return await call(dispatcher, 'terminal.list', {
+      return await callRemoteRpc(dispatcher, 'terminal.list', {
         worktree: optionalString(parsed.flags, 'worktree'),
         limit: optionalNumber(parsed.flags, 'limit')
       })
     case 'orchestration send': {
       const type = optionalString(parsed.flags, 'type')
-      return await call(dispatcher, 'orchestration.send', {
-        from: resolveRemoteOrchestrationSender(parsed.flags, env, type),
-        to: requiredString(parsed.flags, 'to'),
-        subject: requiredString(parsed.flags, 'subject'),
-        body: optionalString(parsed.flags, 'body'),
-        type,
-        priority: optionalString(parsed.flags, 'priority'),
-        threadId: optionalString(parsed.flags, 'thread-id'),
-        payload: getRemoteOrchestrationPayload(parsed.flags),
-        // Why: the legacy in-process bridge must preserve the same pane
-        // authority as the full host CLI passthrough.
-        senderPaneKey: env.YIRU_PANE_KEY || undefined
-      })
+      return await callRemoteRpc(
+        dispatcher,
+        'orchestration.send',
+        {
+          from: resolveRemoteOrchestrationSender(parsed.flags, env, type),
+          to: optionalString(parsed.flags, 'to'),
+          subject: requiredString(parsed.flags, 'subject'),
+          body: optionalString(parsed.flags, 'body'),
+          type,
+          priority: optionalString(parsed.flags, 'priority'),
+          threadId: optionalString(parsed.flags, 'thread-id'),
+          payload: getRemoteOrchestrationPayload(parsed.flags),
+          // Why: the legacy in-process bridge must preserve the same pane
+          // authority as the full host CLI passthrough.
+          senderPaneKey: env.YIRU_PANE_KEY || undefined
+        },
+        {
+          orchestrationCapability: optionalString(parsed.flags, 'dispatch-capability'),
+          orchestrationRequestId: optionalString(parsed.flags, 'retry-request')
+        }
+      )
     }
     case 'orchestration check':
-      return await call(dispatcher, 'orchestration.check', {
+      return await callRemoteRpc(dispatcher, 'orchestration.check', {
         terminal: resolveHandle(parsed.flags, env, 'terminal'),
         unread: parsed.flags.has('unread') ? true : undefined,
         all: parsed.flags.has('all') ? true : undefined,
@@ -197,13 +202,13 @@ async function dispatchRemoteCli(
         timeoutMs: optionalNumber(parsed.flags, 'timeout-ms')
       })
     case 'orchestration reply':
-      return await call(dispatcher, 'orchestration.reply', {
+      return await callRemoteRpc(dispatcher, 'orchestration.reply', {
         id: requiredString(parsed.flags, 'id'),
         body: requiredString(parsed.flags, 'body'),
         from: resolveHandle(parsed.flags, env, 'from')
       })
     case 'orchestration inbox':
-      return await call(dispatcher, 'orchestration.inbox', {
+      return await callRemoteRpc(dispatcher, 'orchestration.inbox', {
         limit: optionalNumber(parsed.flags, 'limit'),
         terminal: optionalString(parsed.flags, 'terminal')
       })
@@ -215,24 +220,6 @@ async function dispatchRemoteCli(
         `Unsupported SSH Yiru CLI command: ${command} (full Yiru CLI bridge unavailable: ${passthroughFailureReason})`
       )
   }
-}
-
-type RpcCallResult<TContract extends string | RuntimeMethodContract> =
-  TContract extends RuntimeMethodContract ? RuntimeMethodResult<TContract> : unknown
-
-async function call<TContract extends string | RuntimeMethodContract>(
-  dispatcher: RpcDispatcher,
-  contract: TContract,
-  params?: TContract extends RuntimeMethodContract
-    ? RuntimeMethodParams<TContract>
-    : Record<string, unknown>
-): Promise<RpcResponse<RpcCallResult<TContract>>> {
-  return (await dispatcher.dispatch({
-    id: `remote-cli-${Date.now()}`,
-    authToken: 'remote-cli',
-    method: typeof contract === 'string' ? contract : contract.name,
-    params: params as Record<string, unknown> | undefined
-  })) as RpcResponse<RpcCallResult<TContract>>
 }
 
 function parseRemoteCliArgs(argv: string[]): ParsedRemoteCli {
@@ -313,13 +300,4 @@ function optionalNumber(flags: Map<string, string | boolean>, name: string): num
     throw new RemoteCliArgumentError('invalid_argument', `Invalid numeric value for --${name}`)
   }
   return parsed
-}
-
-function buildLocalError(message: string, code = 'runtime_error'): RpcResponse {
-  return {
-    id: 'remote-cli-local',
-    ok: false,
-    error: { code, message },
-    _meta: { runtimeId: 'unknown' }
-  }
 }

@@ -84,6 +84,7 @@ import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from 
 import { ProviderLetterBadge, ProviderUsageSegment } from './provider-usage-segment'
 import { getVisibleUsageProvider, isUsageEmptyState } from './provider-visibility'
 import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-segment'
+import { SkillUpdateStatusSegment } from './skill-update-status-segment'
 import { ProviderPanel, barColor, clampUsedPercent, formatResetCreditExpiry } from './tooltip'
 import { UpdateStatusSegment } from './update-status-segment'
 import { StatusBarUsageEmptyCta } from './usage-empty-cta'
@@ -2179,6 +2180,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
       {/* Why: workspace panel toggles moved to the titlebar; the trailing status
           edge now owns system icons (resource usage, ports, floating workspace). */}
       <div className="flex h-full shrink-0 items-center gap-0.5">
+        <SkillUpdateStatusSegment />
         <RemoteServerUpdateStatusSegment iconOnly />
         <UpdateStatusSegment compact={compact} iconOnly />
         <React.Suspense fallback={null}>

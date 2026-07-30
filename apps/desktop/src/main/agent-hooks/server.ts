@@ -45,6 +45,7 @@ import {
   readRequestBody,
   resolveHookSource,
   preparePendingGrokResultDiscovery,
+  reapRestoredClaudeSubagentsForDeadPane,
   seedClaudeSubagentRosterFromSnapshots,
   seedCodexStateFromSnapshot,
   warnOnHookEnvOrVersionMismatch,
@@ -62,6 +63,11 @@ import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../shared/agent/status-identity'
+import {
+  claudeRosterHasRestoredSnapshotSubagent,
+  claudeRosterHasWorkingSubagent,
+  claudeRosterToSnapshots
+} from '../../shared/claude-subagent-roster'
 import { isCommandCodeNewTurnWhileWorking } from '../../shared/command-code-turn-boundary'
 import { parseLegacyNumericPaneKey, parsePaneKey } from '../../shared/stable-pane-id'
 import { AGENT_KIND_VALUES, type AgentKind } from '../../shared/telemetry-events'
@@ -1780,6 +1786,75 @@ export class AgentHookServer {
       this.notifyStatusChangeListeners()
       this.onPaneStatusCleared?.(resolvedPaneKey)
     }
+  }
+
+  async reapRestoredClaudeSubagentsWithoutLiveAgent(
+    isLocalExecutionHost: (worktreeId: string | undefined) => boolean,
+    isLocalPaneAgentLive: (paneKey: string) => Promise<boolean>,
+    isLocalPaneLivenessEvidenceCurrent: (paneKey: string) => boolean
+  ): Promise<number> {
+    const candidates: { paneKey: string; entry: EnrichedAgentHookEventPayload }[] = []
+    for (const [paneKey, entry] of this.state.lastStatusByPaneKey) {
+      const enriched = entry as EnrichedAgentHookEventPayload
+      if (
+        enriched.payload.agentType === 'claude' &&
+        enriched.connectionId === null &&
+        isLocalExecutionHost(enriched.worktreeId) &&
+        claudeRosterHasRestoredSnapshotSubagent(
+          this.state.claudeSubagentRosterByPaneKey.get(paneKey)
+        ) &&
+        !this.runtimeObservedStatusPaneKeys.has(paneKey)
+      ) {
+        candidates.push({ paneKey, entry: enriched })
+      }
+    }
+    const liveness = await Promise.all(
+      candidates.map(async (candidate) => {
+        try {
+          return await isLocalPaneAgentLive(candidate.paneKey)
+        } catch {
+          return true
+        }
+      })
+    )
+    let changedPanes = 0
+    for (const [index, candidate] of candidates.entries()) {
+      const { paneKey, entry } = candidate
+      if (
+        liveness[index] ||
+        !isLocalPaneLivenessEvidenceCurrent(paneKey) ||
+        this.state.lastStatusByPaneKey.get(paneKey) !== entry ||
+        this.runtimeObservedStatusPaneKeys.has(paneKey) ||
+        !isLocalExecutionHost(entry.worktreeId)
+      ) {
+        continue
+      }
+      if (!reapRestoredClaudeSubagentsForDeadPane(this.state, paneKey)) {
+        continue
+      }
+      changedPanes += 1
+      const roster = this.state.claudeSubagentRosterByPaneKey.get(paneKey)
+      const state =
+        entry.payload.state === 'working' && !claudeRosterHasWorkingSubagent(roster)
+          ? 'done'
+          : entry.payload.state
+      const stateChanged = state !== entry.payload.state
+      const reconciledAt = stateChanged
+        ? Math.max(Date.now(), entry.receivedAt + 1)
+        : entry.receivedAt
+      const reconciled: EnrichedAgentHookEventPayload = {
+        ...entry,
+        receivedAt: reconciledAt,
+        stateStartedAt: stateChanged ? reconciledAt : entry.stateStartedAt,
+        payload: { ...entry.payload, state, subagents: claudeRosterToSnapshots(roster) }
+      }
+      this.state.lastStatusByPaneKey.set(paneKey, reconciled)
+    }
+    if (changedPanes > 0) {
+      this.scheduleStatusPersist()
+      this.notifyStatusChangeListeners()
+    }
+    return changedPanes
   }
 
   buildPtyEnv(): Record<string, string> {

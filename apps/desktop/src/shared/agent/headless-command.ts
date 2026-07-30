@@ -1,12 +1,17 @@
 import { isAnteHeadlessOneShotCommand } from '../ante-headless-command'
-import { isClaudeHeadlessOneShotCommand } from '../claude-headless-command'
+import { isPrintModeHeadlessOneShotCommand } from '../print-mode-headless-command'
 import type { TuiAgent } from '../types'
 
+const HEADLESS_ONE_SHOT_MATCHERS: Partial<
+  Record<TuiAgent, (tokens: readonly string[]) => boolean>
+> = {
+  ante: isAnteHeadlessOneShotCommand,
+  claude: isPrintModeHeadlessOneShotCommand,
+  trae: isPrintModeHeadlessOneShotCommand
+}
+
 export function isHeadlessOneShotAgentCommand(agent: TuiAgent, tokens: readonly string[]): boolean {
-  if (agent === 'claude') {
-    return isClaudeHeadlessOneShotCommand(tokens)
-  }
-  return agent === 'ante' && isAnteHeadlessOneShotCommand(tokens)
+  return HEADLESS_ONE_SHOT_MATCHERS[agent]?.(tokens) ?? false
 }
 
 type AgentCommandRecognition = { agent: TuiAgent } | null

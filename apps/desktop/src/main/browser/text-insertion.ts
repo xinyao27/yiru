@@ -1,4 +1,4 @@
-import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
+import { measureClipboardTextByteLength, yieldToEventLoop } from '@yiru/workbench-model/ui'
 
 import type { CdpCommandSender } from './snapshot-engine'
 
@@ -72,7 +72,7 @@ export async function insertTextThroughCdp(
     // process responsive between bounded CDP payloads.
     chunk = chunks.next()
     if (options?.yieldBetweenChunks !== false && !chunk.done) {
-      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      await yieldToEventLoop()
     }
   }
 }

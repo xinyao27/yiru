@@ -4,11 +4,11 @@ type GitExecOptions = {
   wslDistro?: string
 }
 
-export async function hasWorktreeBaseCommitRef(
+export async function resolveWorktreeBaseCommitOid(
   repoPath: string,
   qualifiedRef: string,
   options: GitExecOptions = {}
-): Promise<boolean> {
+): Promise<string | null> {
   try {
     const { stdout } = await gitExecFileAsync(
       ['rev-parse', '--verify', '--quiet', `${qualifiedRef}^{commit}`],
@@ -17,8 +17,17 @@ export async function hasWorktreeBaseCommitRef(
         ...options
       }
     )
-    return stdout.trim().length > 0
+    const oid = stdout.trim()
+    return oid.length > 0 ? oid : null
   } catch {
-    return false
+    return null
   }
+}
+
+export async function hasWorktreeBaseCommitRef(
+  repoPath: string,
+  qualifiedRef: string,
+  options: GitExecOptions = {}
+): Promise<boolean> {
+  return (await resolveWorktreeBaseCommitOid(repoPath, qualifiedRef, options)) !== null
 }

@@ -81,6 +81,7 @@ export type SkillFreshnessInstallation = {
   currentPackageDigest: string
   currentAppVersion: string
   observedPackageDigest: string | null
+  observedGitTreeSha?: string | null
   errorCategory: string | null
 }
 
@@ -91,12 +92,39 @@ export type SkillFreshnessInventory = {
   scannedAt: number
 }
 
-export function buildTargetedSkillUpdateCommand(names: readonly string[]): string | null {
+export function canonicalizeSkillUpdateNames(names: readonly string[]): string[] | null {
   const canonicalNames = [...new Set(names)].sort((left, right) => left.localeCompare(right, 'en'))
   // Why: names become editable shell input. Official manifests use this
   // restricted package-name grammar so no entry can introduce shell syntax.
   if (canonicalNames.some((name) => !/^[a-z0-9][a-z0-9._-]*$/.test(name))) {
     return null
   }
-  return canonicalNames.length > 0 ? `npx skills update ${canonicalNames.join(' ')} --global` : null
+  return canonicalNames.length > 0 ? canonicalNames : null
 }
+
+export function buildTargetedSkillUpdateCommand(names: readonly string[]): string | null {
+  const canonicalNames = canonicalizeSkillUpdateNames(names)
+  return canonicalNames ? `npx skills update ${canonicalNames.join(' ')} --global` : null
+}
+
+export type SkillUpdateFailure =
+  | { kind: 'unsafe-command-path'; command: string }
+  | { kind: 'launch-failed'; detail: string }
+  | { kind: 'command-exited'; exitCode: number | null }
+  | { kind: 'incomplete' }
+
+export type SkillUpdateRun =
+  | { state: 'idle' }
+  | { state: 'running'; names: string[]; startedAt: number; output: string; stopping?: boolean }
+  | { state: 'success'; names: string[]; finishedAt: number; output: string }
+  | ({
+      state: 'error'
+      names: string[]
+      finishedAt: number
+      output: string
+      failedNames: string[]
+    } & SkillUpdateFailure)
+
+export type SkillUpdateStartResult =
+  | { started: true }
+  | { started: false; reason: 'already-running' | 'invalid-names' | 'unsafe-command-path' }

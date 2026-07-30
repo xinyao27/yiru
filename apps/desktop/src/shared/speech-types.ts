@@ -1,4 +1,10 @@
-export type SpeechModelType = 'transducer' | 'paraformer' | 'whisper' | 'openai'
+export type SpeechModelType =
+  | 'transducer'
+  | 'paraformer'
+  | 'whisper'
+  | 'senseVoice'
+  | 'nemo-ctc'
+  | 'openai'
 export type SpeechModelProvider = 'local' | 'openai'
 
 export type ModelingUnit = 'bpe' | 'cjkchar' | 'cjkchar+bpe'
@@ -6,7 +12,6 @@ export type ModelingUnit = 'bpe' | 'cjkchar' | 'cjkchar+bpe'
 export type SpeechModelManifest = {
   id: string
   label: string
-  description: string
   type: SpeechModelType
   provider: SpeechModelProvider
   language: string

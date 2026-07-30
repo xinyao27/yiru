@@ -20,6 +20,7 @@ import {
 } from '../../shared/hosted-review-refs'
 import type { GitUpstreamStatus } from '../../shared/types'
 import { isAzureDevOpsReviewCreationAuthenticated } from '../azure-devops/pull-request-creation'
+import { parsePorcelainV1Records, type PorcelainV1Record } from '../git/porcelain-v1-records'
 import { resolveDefaultBaseRefViaExec } from '../git/repo'
 import { gitOptionalLocksDisabledEnv } from '../git/runner'
 import { getUpstreamStatus } from '../git/upstream'
@@ -34,6 +35,7 @@ import {
   release as releaseGlab
 } from '../gitlab/gl-utils'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
+import { findExistingWorktreeSymlinkPaths } from '../worktree/symlink-detection'
 import { detectHostedReviewProvider, getForgeProviderForRepository } from './forge-provider'
 import { getHostedReviewForBranch } from './hosted-review'
 import {
@@ -214,14 +216,30 @@ async function hasUncommittedChanges(
     // structured status RPC for SSH dirty checks instead of raw `git status`.
     return (await provider.getStatus(repoPath)).entries.length > 0
   }
-  const { stdout } = await gitExecFileAsync(['status', '--porcelain'], {
+  const { stdout } = await gitExecFileAsync(['status', '--porcelain', '-z'], {
     cwd: repoPath,
     ...getHostedReviewLocalGitOptions(options),
     // Why: create-PR validation should not take Git's optional index lock while
     // the user may be running fetch/pull/rebase from a terminal.
     env: gitOptionalLocksDisabledEnv()
   })
-  return stdout.trim().length > 0
+  const records = parsePorcelainV1Records(stdout)
+  if (records.length === 0) {
+    return false
+  }
+  return anyRecordIsUserDirt(repoPath, records, options.sharedLinkPaths ?? [])
+}
+
+async function anyRecordIsUserDirt(
+  worktreePath: string,
+  records: readonly PorcelainV1Record[],
+  sharedLinkPaths: readonly string[]
+): Promise<boolean> {
+  if (sharedLinkPaths.length === 0 || !records.some((record) => record.xy === '??')) {
+    return true
+  }
+  const sharedLinks = new Set(await findExistingWorktreeSymlinkPaths(worktreePath, sharedLinkPaths))
+  return records.some((record) => record.xy !== '??' || !sharedLinks.has(record.path))
 }
 
 async function getHostedReviewUpstreamStatus(

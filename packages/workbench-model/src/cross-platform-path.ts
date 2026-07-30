@@ -67,6 +67,16 @@ export function isPathInsideOrEqual(rootPath: string, candidatePath: string): bo
   return candidate.startsWith(rootWithBoundary)
 }
 
+export function createNormalizedPathInsideOrEqualMatcher(
+  rootPath: string
+): (normalizedCandidatePath: string) => boolean {
+  const root = normalizeRuntimePathForComparison(rootPath)
+  const rootWithBoundary =
+    root === '/' || /^[a-z]:\/$/i.test(root) ? root : `${root.replace(/\/+$/, '')}/`
+  return (normalizedCandidatePath) =>
+    normalizedCandidatePath === root || normalizedCandidatePath.startsWith(rootWithBoundary)
+}
+
 export function relativePathInsideRoot(rootPath: string, candidatePath: string): string | null {
   const normalizedCandidate = trimRuntimePathTrailingSlash(
     isWindowsAbsolutePathLike(candidatePath)

@@ -15,6 +15,9 @@ import {
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { isRuntimeOwnedSshTargetId } from '@yiru/workbench-model/workspace'
 
+import { directSshAuthoritiesEqual } from '@/components/direct-ssh/terminal-recovery/authority-ledger'
+import type { DirectSshPaneRetryAttempt } from '@/components/direct-ssh/terminal-recovery/binding-state'
+
 import {
   AGENT_INTERRUPT_SETTLE_MS,
   type AgentInterruptInputIntent
@@ -142,6 +145,7 @@ import {
 import type { PtyDataMeta } from '../../../runtime/pty-data-meta'
 import { scheduleRuntimeGraphSync } from '../../../runtime/sync-runtime-graph'
 import { inspectRuntimeTerminalProcess } from '../../../runtime/terminal-inspection'
+import { isTerminalTabParked } from '../../../runtime/terminal-parked-watcher-registry'
 import { getRemoteRuntimePtyEnvironmentId } from '../../../runtime/terminal-stream'
 import { isWebTerminalSurfaceTabId } from '../../../runtime/web-terminal-surface-id'
 import { useAppStore } from '../../../store'
@@ -181,6 +185,11 @@ import {
   shouldSuppressCodexAutoApprovalStatus
 } from '../codex-auto-approval-notification-suppression'
 import {
+  cancelCommandCodeDoneSettle,
+  openCommandCodeDoneSettle,
+  setCommandCodeDoneSettleExecutor
+} from '../command-code-done-settle'
+import {
   cancelScheduledHiddenOutputRestore,
   scheduleHiddenOutputRestore
 } from '../hidden-output-restore-scheduler'
@@ -218,6 +227,10 @@ import {
   isPassiveCompletedHibernationEvidence
 } from '../sleeping-agent-pane-ownership'
 import { resolveSshPaneConnectGate } from '../ssh-pane-connect-gate'
+import {
+  createSshReattachModelReplayProbe,
+  type SshReattachModelReplay
+} from '../ssh-reattach-model-restore'
 import {
   isDocumentVisibilityProvenStale,
   registerStaleDocumentVisibilityRecovery
@@ -276,8 +289,8 @@ import { createIpcPtyTransport } from './transport'
 
 const pendingSpawnByPaneKey = new Map<string, Promise<string | null>>()
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
+const DIRECT_SSH_PANE_RETRY_SETTLEMENT_TIMEOUT_MS = 31_000
 const REMOTE_PTY_ID_PREFIX = 'remote:'
-const COMMAND_CODE_OUTPUT_DONE_SETTLE_MS = 1500
 const SSH_SHELL_READY_STARTUP_FALLBACK_MS = 1500
 const MANUAL_AGENT_COMMAND_MAX_CHARS = 4096
 const STARTUP_DRAFT_PASTE_QUIET_MS = 1500
@@ -818,6 +831,7 @@ export function connectPanePty(
   // settles after remount must not remount its already-replaced successor.
   const terminalRecoveryGeneration = captureTerminalPaneRecoveryGeneration(deps.tabId)
   const terminalRecoveryInstance = registerTerminalPaneRecoveryInstance(deps.tabId)
+  let mountFollowsTerminalPark = isTerminalTabParked(deps.tabId)
   let disposed = false
   const structuralReplayCoordinator = createTerminalStructuralReplayCoordinator(pane.terminal)
   let connectFrame: number | null = null
@@ -1068,7 +1082,6 @@ export function connectPanePty(
   const clearRegisteredStartupLaunchConfig = (): void => {
     useAppStore.getState().clearAgentLaunchConfig(cacheKey)
   }
-  const pendingSpawnKey = cacheKey
   const neutralTerminalTitle = (): string => {
     const state = useAppStore.getState()
     const tab = (state.tabsByWorktree[deps.worktreeId] ?? []).find(
@@ -2479,7 +2492,7 @@ export function connectPanePty(
   }
 
   const seedCommandCodeOutputWorkingStatus = (prompt: string): void => {
-    clearCommandCodeOutputDoneTimer()
+    cancelCommandCodeDoneSettle(cacheKey)
     const currentState = useAppStore.getState()
     const currentEntry = currentState.agentStatusByPaneKey[cacheKey]
     const currentTitle = currentState.runtimePaneTitlesByTabId?.[deps.tabId]?.[pane.id]
@@ -2502,46 +2515,38 @@ export function connectPanePty(
     )
   }
 
-  let commandCodeOutputDoneTimer: ReturnType<typeof setTimeout> | null = null
-  const clearCommandCodeOutputDoneTimer = (): void => {
-    if (commandCodeOutputDoneTimer !== null) {
-      clearTimeout(commandCodeOutputDoneTimer)
-      commandCodeOutputDoneTimer = null
-    }
-  }
-  const scheduleCommandCodeOutputDoneStatus = (prompt: string): void => {
-    clearCommandCodeOutputDoneTimer()
-    const normalizedPrompt = prompt.trim()
-    if (!normalizedPrompt) {
+  const settleCommandCodeOutputDoneStatus = (normalizedPrompt: string): void => {
+    const currentState = useAppStore.getState()
+    const currentEntry = currentState.agentStatusByPaneKey[cacheKey]
+    if (currentEntry?.agentType !== 'command-code' || currentEntry.state !== 'working') {
       return
     }
-    // Why: Command Code keeps rendering the composer while tools run. Only
-    // complete the row if no active status repaint arrives during this window.
-    commandCodeOutputDoneTimer = setTimeout(() => {
-      commandCodeOutputDoneTimer = null
-      if (disposed) {
-        return
-      }
-      const currentState = useAppStore.getState()
-      const currentEntry = currentState.agentStatusByPaneKey[cacheKey]
-      if (currentEntry?.agentType !== 'command-code' || currentEntry.state !== 'working') {
-        return
-      }
-      const currentPrompt = currentEntry.prompt.trim()
-      if (currentPrompt && currentPrompt !== normalizedPrompt) {
-        return
-      }
-      const currentTitle = currentState.runtimePaneTitlesByTabId?.[deps.tabId]?.[pane.id]
-      currentState.setAgentStatus(
-        cacheKey,
-        {
-          state: 'done',
-          prompt: currentPrompt || normalizedPrompt,
-          agentType: 'command-code'
-        },
-        currentTitle
-      )
-    }, COMMAND_CODE_OUTPUT_DONE_SETTLE_MS)
+    const currentPrompt = currentEntry.prompt.trim()
+    if (currentPrompt && currentPrompt !== normalizedPrompt) {
+      return
+    }
+    const currentTitle = currentState.runtimePaneTitlesByTabId?.[deps.tabId]?.[pane.id]
+    currentState.setAgentStatus(
+      cacheKey,
+      {
+        state: 'done',
+        prompt: currentPrompt || normalizedPrompt,
+        agentType: 'command-code'
+      },
+      currentTitle
+    )
+  }
+  const releaseCommandCodeDoneSettleExecutor = setCommandCodeDoneSettleExecutor(
+    cacheKey,
+    settleCommandCodeOutputDoneStatus
+  )
+  const scheduleCommandCodeOutputDoneStatus = (prompt: string): void => {
+    const normalizedPrompt = prompt.trim()
+    if (!normalizedPrompt) {
+      cancelCommandCodeDoneSettle(cacheKey)
+      return
+    }
+    openCommandCodeDoneSettle(cacheKey, normalizedPrompt)
   }
 
   const observeTerminalGitHubPRLink = createTerminalGitHubPRLinkDetector()
@@ -2558,9 +2563,13 @@ export function connectPanePty(
     options: {
       seedInitialAgentStatus?: boolean
       updateTabPtyId?: 'always' | 'if-missing'
+      replacePtyId?: string
       sampleVisibleForegroundAgent?: boolean
     } = {}
   ): void => {
+    if (!claimCapturedDirectSshRetryPty(ptyId)) {
+      return
+    }
     if (activePanePtyBinding && activePanePtyBinding !== ptyId) {
       reportPanePtyVisibility(activePanePtyBinding, false)
     }
@@ -2574,8 +2583,12 @@ export function connectPanePty(
     syncHiddenRendererPtyDelivery()
     deps.syncPanePtyLayoutBinding(pane.id, ptyId)
     const tabPtyIds = useAppStore.getState().ptyIdsByTabId?.[deps.tabId] ?? []
-    if (options.updateTabPtyId !== 'if-missing' || !tabPtyIds.includes(ptyId)) {
-      deps.updateTabPtyId(deps.tabId, ptyId)
+    const retryAttemptId =
+      capturedDirectSshRetryPtyAccepted && directSshRetryAttempt
+        ? directSshRetryAttempt.attemptId
+        : undefined
+    if (retryAttemptId || options.updateTabPtyId !== 'if-missing' || !tabPtyIds.includes(ptyId)) {
+      deps.updateTabPtyId(deps.tabId, ptyId, options.replacePtyId, retryAttemptId)
     }
     if (options.seedInitialAgentStatus) {
       applyInitialAgentStatus()
@@ -2949,6 +2962,85 @@ export function connectPanePty(
   const worktree = getWorktreeMapFromState(state).get(deps.worktreeId)
   const connectionId = getConnectionId(deps.worktreeId) ?? null
   const tab = (state.tabsByWorktree[deps.worktreeId] ?? []).find((t) => t.id === deps.tabId)
+  type DirectSshRetryLease = Pick<
+    DirectSshPaneRetryAttempt,
+    'attemptId' | 'authority' | 'tabGeneration'
+  >
+  const directSshRetryAttempt: DirectSshRetryLease | undefined = (() => {
+    const pendingAttempt = state.directSshPaneRetryByTabId[deps.tabId]
+    const liveBinding = state.directSshLivePtyBindingByTabId[deps.tabId]
+    if (
+      pendingAttempt?.authority.targetId === connectionId &&
+      pendingAttempt.tabGeneration === (tab?.generation ?? 0)
+    ) {
+      return pendingAttempt
+    }
+    if (
+      liveBinding?.authority.targetId === connectionId &&
+      liveBinding.tabGeneration === (tab?.generation ?? 0)
+    ) {
+      return liveBinding
+    }
+    return undefined
+  })()
+  const pendingSpawnKey = directSshRetryAttempt
+    ? JSON.stringify([cacheKey, directSshRetryAttempt.attemptId])
+    : cacheKey
+  let capturedDirectSshRetryPtyAccepted = false
+  const capturedDirectSshRetryLeaseMatches = (): boolean => {
+    if (!directSshRetryAttempt) {
+      return true
+    }
+    const currentState = useAppStore.getState()
+    const currentConnection = currentState.sshConnectionStates.get(
+      directSshRetryAttempt.authority.targetId
+    )
+    const currentTab = (currentState.tabsByWorktree[deps.worktreeId] ?? []).find(
+      (candidate) => candidate.id === deps.tabId
+    )
+    if (
+      currentConnection?.status !== 'connected' ||
+      currentConnection.providerEpoch !== directSshRetryAttempt.authority.providerEpoch ||
+      currentConnection.connectionGeneration !==
+        directSshRetryAttempt.authority.connectionGeneration ||
+      (currentTab?.generation ?? 0) !== directSshRetryAttempt.tabGeneration
+    ) {
+      return false
+    }
+    const pendingAttempt = currentState.directSshPaneRetryByTabId[deps.tabId]
+    const liveBinding = currentState.directSshLivePtyBindingByTabId[deps.tabId]
+    return Boolean(
+      (pendingAttempt?.attemptId === directSshRetryAttempt.attemptId &&
+        directSshAuthoritiesEqual(pendingAttempt.authority, directSshRetryAttempt.authority)) ||
+      (liveBinding?.attemptId === directSshRetryAttempt.attemptId &&
+        directSshAuthoritiesEqual(liveBinding.authority, directSshRetryAttempt.authority))
+    )
+  }
+  const claimCapturedDirectSshRetryPty = (ptyId: string): boolean => {
+    if (!directSshRetryAttempt) {
+      return true
+    }
+    if (
+      parseAppSshPtyId(ptyId)?.connectionId !== directSshRetryAttempt.authority.targetId ||
+      !capturedDirectSshRetryLeaseMatches()
+    ) {
+      return false
+    }
+    capturedDirectSshRetryPtyAccepted = true
+    return true
+  }
+  if (directSshRetryAttempt) {
+    const retryAttempt = directSshRetryAttempt
+    setTimeout(() => {
+      useAppStore.getState().settleDirectSshPaneRetry({
+        status: 'timed-out',
+        tabId: deps.tabId,
+        attemptId: retryAttempt.attemptId,
+        authority: retryAttempt.authority,
+        tabGeneration: retryAttempt.tabGeneration
+      })
+    }, DIRECT_SSH_PANE_RETRY_SETTLEMENT_TIMEOUT_MS)
+  }
   const shellOverride = tab?.shellOverride
   // Why: a serve/remote-runtime pane has no SSH connectionId and a Linux cwd, so
   // the native-Windows ConPTY heuristic misfires on a Windows client and wrongly
@@ -7065,7 +7157,25 @@ export function connectPanePty(
       const hasStructuralReplay = Boolean(
         connectResult?.snapshot || connectResult?.replay || connectResult?.coldRestore
       )
-      let reattachPayloadApplied = !hasStructuralReplay
+      const fetchSshMainModelReattachReplay = createSshReattachModelReplayProbe({
+        ptyId,
+        isParkingEnabled: () => useAppStore.getState().settings?.terminalSshViewParking !== false,
+        readSnapshot: () =>
+          window.api.pty.getMainBufferSnapshot(ptyId, {
+            scrollbackRows: resolveHiddenRestoreScrollbackRows(pane.terminal.options.scrollback)
+          })
+      })
+      const revealFollowsTerminalPark =
+        mountFollowsTerminalPark && connectResult?.isReattach === true
+      mountFollowsTerminalPark = false
+      let prefetchedSshModelReplay: SshReattachModelReplay | null = null
+      if (revealFollowsTerminalPark && !hasStructuralReplay) {
+        prefetchedSshModelReplay = await fetchSshMainModelReattachReplay()
+        if (!isCurrentReattachPayload()) {
+          return false
+        }
+      }
+      let reattachPayloadApplied = !hasStructuralReplay && prefetchedSshModelReplay === null
       const applyReattachPayload = async (): Promise<void> => {
         if (!isCurrentReattachPayload()) {
           return
@@ -7123,22 +7233,50 @@ export function connectPanePty(
               window.api.pty.ackColdRestore(ptyId)
             }
           }
-        } else if (connectResult?.replay) {
-          rememberReattachPayloadAgentSignal(connectResult.replay, { fullScreenReplay: true })
-          // Relay replay holds the last 100 KB of raw output. The xterm may
-          // already hold pre-disconnect content; clear first to avoid
-          // duplication. The reattach reset clears renderer-owned state without
-          // tearing down the still-running TUI's live modes.
-          writeReplayData('\x1b[2J\x1b[3J\x1b[H')
-          // Why: raw relay replay contains the application's own kitty pushes
-          // when they fall inside the retained window; re-arm the mirror with
-          // replay (set) semantics so redelivery cannot grow the stack.
-          kittyKeyboardModes.scanReplay(connectResult.replay)
-          writeReplayData(connectResult.replay)
-          writeReplayData(reattachReplayResetSequence(connectResult.replay))
-          sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
-          if (connectResult.coldRestore) {
-            if (!isRemoteRuntimePtyId(ptyId)) {
+        } else if (connectResult?.replay || prefetchedSshModelReplay) {
+          const modelReplay = revealFollowsTerminalPark
+            ? (prefetchedSshModelReplay ?? (await fetchSshMainModelReattachReplay()))
+            : null
+          if (!isCurrentReattachPayload()) {
+            return
+          }
+          if (modelReplay) {
+            rememberReattachPayloadAgentSignal(modelReplay.modelData, { fullScreenReplay: true })
+            if (
+              modelReplay.dimensions &&
+              (pane.terminal.cols !== modelReplay.dimensions.cols ||
+                pane.terminal.rows !== modelReplay.dimensions.rows)
+            ) {
+              suppressSnapshotReplayPtyResize = true
+              try {
+                pane.terminal.resize(modelReplay.dimensions.cols, modelReplay.dimensions.rows)
+              } finally {
+                suppressSnapshotReplayPtyResize = false
+              }
+            }
+            kittyKeyboardModes.scanReplay(modelReplay.modelData)
+            for (const replayChunk of modelReplay.replayWrites) {
+              writeReplayData(replayChunk)
+            }
+            writeReplayData(reattachReplayResetSequence(modelReplay.modelData))
+            if (modelReplay.snapshot.pendingEscapeTailAnsi) {
+              writeReplayData(modelReplay.snapshot.pendingEscapeTailAnsi)
+            }
+            setRestoredSnapshotBaseline(ptyId, modelReplay.snapshot)
+            recordRendererOrderedSeq(modelReplay.snapshot)
+            sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
+            if (connectResult?.coldRestore && !isRemoteRuntimePtyId(ptyId)) {
+              window.api.pty.ackColdRestore(ptyId)
+            }
+          } else if (connectResult?.replay) {
+            rememberReattachPayloadAgentSignal(connectResult.replay, { fullScreenReplay: true })
+            // Why: relay replay is only the fallback for a missing/stalled model.
+            writeReplayData('\x1b[2J\x1b[3J\x1b[H')
+            kittyKeyboardModes.scanReplay(connectResult.replay)
+            writeReplayData(connectResult.replay)
+            writeReplayData(reattachReplayResetSequence(connectResult.replay))
+            sendFocusedReattachFocusInAfterReplay(ptyId, attemptGeneration)
+            if (connectResult.coldRestore && !isRemoteRuntimePtyId(ptyId)) {
               window.api.pty.ackColdRestore(ptyId)
             }
           }
@@ -7173,7 +7311,7 @@ export function connectPanePty(
             schedulePendingStartupCommandDelivery()
           }
         }
-        if (hasStructuralReplay) {
+        if (hasStructuralReplay || prefetchedSshModelReplay) {
           await waitForTerminalReplayWritesParsed(pane.terminal)
           if (!isCurrentReattachPayload()) {
             return
@@ -7224,7 +7362,7 @@ export function connectPanePty(
           window.api.pty.signal(reattachPtyId, 'SIGWINCH')
         }
       }
-      if (hasStructuralReplay) {
+      if (hasStructuralReplay || prefetchedSshModelReplay) {
         await structuralReplayCoordinator.run(applyReattachPayload, {
           shouldRestore: isCurrentReattachPayload,
           afterRestore: fitAfterReattachRestore
@@ -8055,7 +8193,7 @@ export function connectPanePty(
       pendingTerminalInputWrite = null
       interruptInference.dispose()
       clearTitleOnlyInterruptTimer()
-      clearCommandCodeOutputDoneTimer()
+      releaseCommandCodeDoneSettleExecutor()
       if (shiftEnterReconfirmTimer !== null) {
         clearTimeout(shiftEnterReconfirmTimer)
         shiftEnterReconfirmTimer = null

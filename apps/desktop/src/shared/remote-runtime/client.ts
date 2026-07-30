@@ -8,6 +8,7 @@ import { createWsOutboundBackpressureQueue } from '@yiru/mobile-relay-protocol/o
 import {
   isKeepaliveFrame,
   RuntimeRpcEnvelopeSchema,
+  type RuntimeOrchestrationEnvelope,
   type RuntimeRpcResponse
 } from '@yiru/runtime-protocol/rpc-envelope'
 import WebSocket from 'ws'
@@ -76,21 +77,21 @@ export function sendRemoteRuntimeRequest<TContract extends RuntimeMethodContract
   contract: TContract,
   params: RuntimeMethodParams<TContract>,
   timeoutMs: number,
-  options?: { beforeSend?: () => void | Promise<void> }
+  options?: { beforeSend?: () => void | Promise<void> } & RuntimeOrchestrationEnvelope
 ): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
 export function sendRemoteRuntimeRequest<TResult>(
   pairing: PairingOffer,
   method: string,
   params: unknown,
   timeoutMs: number,
-  options?: { beforeSend?: () => void | Promise<void> }
+  options?: { beforeSend?: () => void | Promise<void> } & RuntimeOrchestrationEnvelope
 ): Promise<RuntimeRpcResponse<TResult>>
 export async function sendRemoteRuntimeRequest<TResult>(
   pairing: PairingOffer,
   contract: string | RuntimeMethodContract,
   params: unknown,
   timeoutMs: number,
-  options: { beforeSend?: () => void | Promise<void> } = {}
+  options: { beforeSend?: () => void | Promise<void> } & RuntimeOrchestrationEnvelope = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
   const method = typeof contract === 'string' ? contract : contract.name
   return await new Promise((resolve, reject) => {
@@ -339,7 +340,10 @@ export async function sendRemoteRuntimeRequest<TResult>(
             id: requestId,
             deviceToken: pairing.deviceToken,
             method,
-            params
+            params,
+            orchestrationCapability: options.orchestrationCapability,
+            orchestrationContractVersion: options.orchestrationContractVersion,
+            orchestrationRequestId: options.orchestrationRequestId
           }),
           sharedKey
         )

@@ -49,6 +49,7 @@ import {
   finishClaudeSubagent,
   foldClaudeBackgroundTasksIntoRoster,
   readClaudeBackgroundAgentTasks,
+  reapRestoredClaudeSubagentsWithoutLiveAgent,
   removeClaudeTeammateByName,
   upsertWorkingClaudeSubagent,
   type ClaudeSubagentRoster
@@ -908,6 +909,7 @@ function extractToolResponseText(toolResponse: unknown): string | undefined {
 
 const TRANSCRIPT_CHUNK_BYTES = 64 * 1024
 const TRANSCRIPT_MAX_SCAN_BYTES = 4 * 1024 * 1024
+const EMPTY_TRANSCRIPT_REGION = Buffer.alloc(0)
 const AMP_THREAD_ID_MAX_LENGTH = 256
 const AMP_MAX_SCOPED_THREAD_CACHE_KEYS = 32
 const GROK_SESSION_CWD_MAX_LENGTH = 4096
@@ -1374,11 +1376,13 @@ function readLastTextFromTranscriptOnce(
     }
     const fd = openSync(transcriptPath, 'r')
     try {
-      let carryBytes: Buffer = Buffer.alloc(0)
+      // Why: joining a partial oversized line on every block is quadratic.
+      let carryChunks: Buffer[] = []
       let bytesRead = 0
-      while (bytesRead < size && bytesRead < TRANSCRIPT_MAX_SCAN_BYTES) {
-        const chunkSize = Math.min(size - bytesRead, TRANSCRIPT_CHUNK_BYTES)
-        const position = size - bytesRead - chunkSize
+      let scanEnd = size
+      while (scanEnd > 0 && bytesRead < TRANSCRIPT_MAX_SCAN_BYTES) {
+        const chunkSize = Math.min(scanEnd, TRANSCRIPT_CHUNK_BYTES)
+        const position = scanEnd - chunkSize
         const buffer = Buffer.alloc(chunkSize)
         let filled = 0
         while (filled < chunkSize) {
@@ -1388,25 +1392,26 @@ function readLastTextFromTranscriptOnce(
           }
           filled += n
         }
-        const n = filled
-        bytesRead += n
-        if (n === 0) {
+        if (filled < chunkSize) {
           break
         }
-        const combined = Buffer.concat([buffer.subarray(0, n), carryBytes])
-        const atStart = bytesRead >= size
-        const firstNewline = combined.indexOf(0x0a)
+        bytesRead += filled
+        scanEnd = position
+        const firstNewline = buffer.indexOf(0x0a)
+        const atStart = position === 0
         let completeRegion: Buffer
-        let nextCarry: Buffer
         if (atStart) {
-          completeRegion = combined
-          nextCarry = Buffer.alloc(0)
+          completeRegion =
+            carryChunks.length === 0 ? buffer : Buffer.concat([buffer, ...carryChunks])
+          carryChunks = []
         } else if (firstNewline === -1) {
-          completeRegion = Buffer.alloc(0)
-          nextCarry = combined
+          completeRegion = EMPTY_TRANSCRIPT_REGION
+          carryChunks.unshift(buffer)
         } else {
-          nextCarry = combined.subarray(0, firstNewline)
-          completeRegion = combined.subarray(firstNewline + 1)
+          const afterNewline = buffer.subarray(firstNewline + 1)
+          completeRegion =
+            carryChunks.length === 0 ? afterNewline : Buffer.concat([afterNewline, ...carryChunks])
+          carryChunks = [buffer.subarray(0, firstNewline)]
         }
         if (completeRegion.length > 0) {
           const extracted = findLastExtractedTranscriptLineText(
@@ -1417,7 +1422,6 @@ function readLastTextFromTranscriptOnce(
             return extracted
           }
         }
-        carryBytes = nextCarry
       }
       return undefined
     } finally {
@@ -2533,9 +2537,24 @@ export function seedClaudeSubagentRosterFromSnapshots(
       // Why: the seed can be a phantom (child finished while Yiru was down,
       // its SubagentStop lost). Let a PRESENT background_tasks list that
       // omits the id remove it instead of gating the pane 'working' forever.
-      backgroundTasksAuthoritative: true
+      backgroundTasksAuthoritative: true,
+      restoredFromSnapshot: true
     })
   }
+}
+
+export function reapRestoredClaudeSubagentsForDeadPane(
+  state: HookListenerState,
+  paneKey: string
+): boolean {
+  const roster = state.claudeSubagentRosterByPaneKey.get(paneKey)
+  if (!roster || !reapRestoredClaudeSubagentsWithoutLiveAgent(roster)) {
+    return false
+  }
+  if (roster.size === 0) {
+    state.claudeSubagentRosterByPaneKey.delete(paneKey)
+  }
+  return true
 }
 
 /** Drop a child-owned waiting state when that child stops/idles, restoring

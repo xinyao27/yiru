@@ -1,3 +1,4 @@
+export * from './cross-platform-path'
 export * from './execution-host'
 export * from './fork-push-warning'
 export * from './pty-session-id-format'

@@ -329,6 +329,7 @@
           "0708ed89f1": "Claude",
           "fc80296033": "Devin",
           "da41abbdd4": "Ante",
+          "060d152fb5": "Trae",
           "mimo_code_label": "MiMo Code"
         },
         "skill": {
@@ -639,7 +640,8 @@
         "2fe88c2e06": "La sincronización del espacio de trabajo remoto no está disponible",
         "2ec42e1c52": "Aún no hay espacio de trabajo remoto",
         "88214a785b": "La sincronización del espacio de trabajo esperó a que la sesión local terminara de cargarse y agotó el tiempo de espera",
-        "4f78ba5885": "Espacio de trabajo sincronizado"
+        "4f78ba5885": "Espacio de trabajo sincronizado",
+        "workspaceChangedOnAnotherDevice": "Workspace changed on another device"
       },
       "useSettingsNavigationMetadata": {
         "4a728cd56b": "Nuevas funciones que aún están tomando forma. Pruébalas.",
@@ -2012,6 +2014,12 @@
             "failedOne": "Falló 1 actualización de servidor",
             "updatedOne": "1 servidor actualizado"
           },
+          "SkillUpdateStatusSegment": {
+            "stoppingLabel": "Stopping skill update",
+            "runningLabel": "Updating skills",
+            "successLabel": "Skills updated",
+            "errorLabel": "Skill update failed"
+          },
           "WorkspaceSpaceCompactPanel": {
             "a471aa9c24": "Actualizado",
             "9be86c46a0": "Liberable",
@@ -2596,6 +2604,23 @@
           "skippedReasonBrokenLink": "This copy is a shortcut to something that no longer exists, so Yiru left it out — you can safely delete it."
         },
         "SkillFreshnessUpdateDialog": {
+          "showLog": "Show log",
+          "stoppingHeadline": "Stopping the update…",
+          "runningOne": "Updating 1 skill…",
+          "runningMany": "Updating {{value0}} skills…",
+          "updatedOne": "Updated 1 skill",
+          "updatedMany": "Updated {{value0}} skills",
+          "updatedPartial": "Updated {{value0}} of {{value1}} skills",
+          "runningDescription": "You can close this window — it keeps running in the background.",
+          "errorTitle": "The update didn't finish",
+          "stopping": "Stopping…",
+          "stop": "Stop",
+          "copied": "Copied",
+          "copyCommand": "Copy command",
+          "retry": "Retry",
+          "done": "Done",
+          "updateActionOne": "Update 1 skill",
+          "updateActionMany": "Update {{value0}} skills",
           "title": "Actualizar skills",
           "checking": "Comprobando las skills de Yiru instaladas…",
           "none": "No se encontraron skills de Yiru instaladas.",
@@ -2609,7 +2634,12 @@
           "terminalDescription": "Revisa el comando pre-rellenado y pulsa Intro para ejecutarlo.",
           "terminalAria": "Terminal de actualización de skills de Yiru",
           "checkNow": "Comprobar ahora",
-          "close": "Cerrar"
+          "close": "Cerrar",
+          "unsafeCommandPath": "Could not run {{value0}} safely from this location.",
+          "launchFailed": "The update command could not start: {{value0}}",
+          "commandExitedUnknown": "The update command stopped unexpectedly.",
+          "commandExited": "The update command exited with code {{value0}}.",
+          "incomplete": "Some skills could not be updated."
         },
         "SkillFreshnessStatusPill": {
           "updateAvailable": "Actualización disponible",
@@ -8143,6 +8173,21 @@
           "commandPlaceholder": "clangd",
           "argumentsPlaceholder": "--stdio\n--background-index",
           "languagesPlaceholder": "c, cpp"
+        },
+        "VoiceSpeechModelSection": {
+          "parakeetV3Description": "Highest accuracy for 25 European languages. Punctuation, capitalization, and word-level timestamps.",
+          "parakeetV2Description": "English only. Faster than v3 with similar accuracy. Punctuation and capitalization.",
+          "zipformerBilingualDescription": "Chinese + English with code-switching. Low-latency real-time streaming.",
+          "paraformerBilingualDescription": "Chinese (Mandarin + dialects) + English. Strong on accented and regional Chinese.",
+          "zipformerEnglishDescription": "English only. Lightweight 20M-param model, good balance of speed and size.",
+          "zipformerChineseDescription": "Chinese only. Ultra-lightweight 14M-param model, ideal for low-resource devices.",
+          "zipformerKoreanDescription": "Korean only. Low-latency real-time streaming.",
+          "parakeetJapaneseDescription": "Japanese only. Trained on 35k+ hours of natural speech. Punctuation included.",
+          "whisperDescription": "90+ languages. Lower accuracy than Parakeet but broadest language coverage.",
+          "senseVoiceDescription": "Chinese, English, Japanese, Korean, and Cantonese with automatic language detection.",
+          "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
+          "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
+          "genericDescription": "Speech recognition model."
         }
       },
       "right": {
@@ -12163,6 +12208,20 @@
       "certificateChallengeChanged": "The certificate request changed. Retry the page and review the new warning.",
       "certificateChallengeUnavailable": "This certificate request is no longer available. Retry the page to request a new one.",
       "certificateProceedFailed": "Yiru could not approve this certificate request. Retry the page and try again."
+    }
+  },
+  "worktree": {
+    "includeCopy": {
+      "morePaths": "{{value0}} and {{value1}} more",
+      "notCopiedOne": ".worktreeinclude entry {{value0}} was not copied into the new workspace",
+      "notCopiedMany": ".worktreeinclude entries {{value0}} were not copied into the new workspace",
+      "sizingBudget": "{{value0}}: earlier entries used up the budget for measuring what to copy.",
+      "overBudgetOne": "{{value0}}: copying it would exceed the {{value1}} / {{value2}} file limit that keeps workspace creation responsive.",
+      "overBudgetMany": "{{value0}}: copying them would exceed the {{value1}} / {{value2}} file limit that keeps workspace creation responsive.",
+      "partialOne": "{{value0}} may hold a partial copy from the interrupted attempt — check it before reusing this workspace.",
+      "partialMany": "{{value0}} may hold a partial copy from the interrupted attempt — check them before reusing this workspace.",
+      "manualOne": "Copy it in manually if this workspace needs it.",
+      "manualMany": "Copy them in manually if this workspace needs them."
     }
   }
 }

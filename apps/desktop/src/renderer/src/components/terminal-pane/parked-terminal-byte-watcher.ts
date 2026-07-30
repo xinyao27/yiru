@@ -18,17 +18,23 @@ import { useAppStore } from '@/store'
  * docs/reference/terminal-side-effect-authority.md.
  */
 import { isClaudeAgent } from '../../../../shared/agent/detection'
+import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode
 } from '../../../../shared/terminal/color-scheme-protocol'
 import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal/github-pr-link-detector'
+import { createOsc133CommandFinishedScanner } from '../../../../shared/terminal/osc133-command-finished'
 import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,
   isAgentTaskCompleteTrackingEnabledFromState
 } from './agent/task-complete-policy'
+import {
+  createParkedTerminalCommandStatusPolicy,
+  readInFlightCommandCodeTurn
+} from './parked-command-status'
 import { startParkedTerminalMode2031Responder } from './parked-terminal-mode2031-responder'
 import { subscribeToPtyData } from './pty/data-sidecar-subscriptions'
 import { acquireHiddenRendererPtyDeliveryClaim } from './pty/renderer-delivery-claims'
@@ -224,8 +230,15 @@ export function startParkedTerminalByteWatcher(
     }
   }
 
-  // Why: parking eligibility excludes remote-runtime and SSH PTYs, so every
-  // watched PTY's bytes transit local main — when the authority switch is on,
+  const commandStatusPolicy = createParkedTerminalCommandStatusPolicy({
+    ptyId,
+    worktreeId,
+    tabId,
+    paneId,
+    paneKey
+  })
+
+  // Why: watched PTY bytes transit local main, including direct SSH — when the authority switch is on,
   // the watcher must NOT register byte parsers (the fact consumer below is
   // the single policy consumer; double registration would double-fire bells).
   const mainSideEffectAuthority = isMainTerminalSideEffectAuthorityForPty({
@@ -263,6 +276,16 @@ export function startParkedTerminalByteWatcher(
   const observeTerminalGitHubPRLink = mainSideEffectAuthority
     ? null
     : createTerminalGitHubPRLinkDetector()
+  const commandFinishedScanner = mainSideEffectAuthority
+    ? null
+    : createOsc133CommandFinishedScanner(commandStatusPolicy.onCommandFinished)
+  const commandCodeOutputStatusDetector = mainSideEffectAuthority
+    ? null
+    : createCommandCodeOutputStatusDetector({
+        inFlightTurn: readInFlightCommandCodeTurn(paneKey),
+        onWorking: commandStatusPolicy.onCommandCodeWorking,
+        onDone: commandStatusPolicy.onCommandCodeDone
+      })
   const unregisterFactConsumer = mainSideEffectAuthority
     ? registerTerminalSideEffectFactConsumer({
         ptyId,
@@ -270,6 +293,9 @@ export function startParkedTerminalByteWatcher(
         // activation flag below requests a snapshot only when no pane did.
         callbacks: {
           ...sideEffectCallbacks,
+          onCommandFinished: commandStatusPolicy.onCommandFinished,
+          onCommandCodeWorking: commandStatusPolicy.onCommandCodeWorking,
+          onCommandCodeDone: commandStatusPolicy.onCommandCodeDone,
           onPrLink: (link) =>
             useAppStore.getState().observeTerminalGitHubPullRequestLink(worktreeId, link),
           // Why (gate mode only): bytes never arrive while gated, so the 2031
@@ -311,6 +337,8 @@ export function startParkedTerminalByteWatcher(
           // Why: empty pane callbacks — the watcher wants only the parser
           // side effects; there is no xterm to deliver bytes to.
           processor.processData(data, {})
+          commandFinishedScanner?.scan(data)
+          commandCodeOutputStatusDetector?.observe(data)
           if (observeTerminalGitHubPRLink) {
             for (const link of observeTerminalGitHubPRLink(data)) {
               useAppStore.getState().observeTerminalGitHubPullRequestLink(worktreeId, link)
@@ -334,6 +362,8 @@ export function startParkedTerminalByteWatcher(
     // tracker/bell-detector state so the watcher cannot fire after the
     // revealed pane's live parsers take over.
     processor?.clearAccumulatedState()
+    commandFinishedScanner?.reset()
+    commandStatusPolicy.dispose()
     clearBellNotificationTimer()
     clearAgentTaskCompleteTimer()
     pendingBellNotification = false

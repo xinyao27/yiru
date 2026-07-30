@@ -20,6 +20,7 @@ import { CLIENT_PLATFORM } from '../../../lib/new-workspace'
 import { buildAgentResumeStartupPlan } from '../../../lib/tui-agent-startup'
 import { getExecutionHostIdForWorktree } from '../../../lib/worktree-runtime-owner'
 import type { AppState } from '../../../store/types'
+import { getIndexedWorktreeMap } from '../../../store/worktree-repo-index'
 
 type AiVaultResumeCommandSession = Pick<
   AiVaultSession,
@@ -205,9 +206,5 @@ function getAiVaultResumeWorkspacePath(
   }
   const targetWorktreeId =
     workspaceScope?.type === 'worktree' ? workspaceScope.worktreeId : worktreeId
-  return (
-    Object.values(state.worktreesByRepo ?? {})
-      .flat()
-      .find((candidate) => candidate.id === targetWorktreeId)?.path ?? null
-  )
+  return getIndexedWorktreeMap(state.worktreesByRepo ?? {}).get(targetWorktreeId)?.path ?? null
 }

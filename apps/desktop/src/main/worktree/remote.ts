@@ -67,6 +67,8 @@ import type { ForgeProviderId } from '../source-control/forge-provider'
 import { getHostedReviewForBranch } from '../source-control/hosted-review'
 import { resolveWorktreeCreateBase } from '../worktree-create-base'
 import { runWorktreeChangeInvalidators } from './change-invalidators'
+import { formatWorktreeIncludeCopyWarning } from './include-copy-budget'
+import { resolveWorktreeIncludePaths } from './include-file'
 import {
   registerOptionalSshWorktreeCreateRoots,
   registerRequiredSshWorktreeCreateRoots
@@ -128,7 +130,12 @@ import {
   configureCreatedWorktreePushTargetWithExec,
   prepareWorktreePushTargetWithExec
 } from './push-target-setup'
-import { createWorktreeLinkedPaths } from './symlinks'
+import { resolveWorktreeSharedDirectories } from './shared-directories'
+import {
+  createWorktreeCopiedPaths,
+  createWorktreeLinkedPaths,
+  createWorktreeSharedPaths
+} from './symlinks'
 
 const SSH_WORKTREE_CREATE_FETCH_FRESHNESS_MS = 30_000
 const SSH_WORKTREE_CREATE_FETCH_CACHE_MAX = 512
@@ -2547,6 +2554,23 @@ export async function createLocalWorktree(
     })
   }
 
+  const sharedDirectories = await timing.time('resolve_shared_directories', () =>
+    resolveWorktreeSharedDirectories(repo.path, localWorktreeGitOptions)
+  )
+  if (sharedDirectories.length > 0) {
+    await timing.time('create_shared_directories', async () => {
+      await createWorktreeSharedPaths(repo.path, created.path, sharedDirectories)
+    })
+  }
+
+  const includePaths = await timing.time('resolve_worktreeinclude', () =>
+    resolveWorktreeIncludePaths(repo.path, localWorktreeGitOptions)
+  )
+  const skippedIncludePaths = await timing.time('copy_worktreeinclude', () =>
+    createWorktreeCopiedPaths(repo.path, created.path, includePaths)
+  )
+  const worktreeIncludeWarning = formatWorktreeIncludeCopyWarning(skippedIncludePaths)
+
   // Why: the worktree's own `yiru.yaml` (at the tip of the base branch) is
   // authoritative for what runs post-creation. The repo-level trust already
   // granted by the user in the pre-create flow covers execution of that
@@ -2636,7 +2660,9 @@ export async function createLocalWorktree(
       ? { localBaseRefUpdateSuggestion: addResult.localBaseRefUpdateSuggestion }
       : {}),
     ...(stagedStartup.startupTerminal ? { startupTerminal: stagedStartup.startupTerminal } : {}),
-    ...(stagedStartup.warning ? { warning: stagedStartup.warning } : {}),
+    ...([worktreeIncludeWarning, stagedStartup.warning].filter(Boolean).join(' ')
+      ? { warning: [worktreeIncludeWarning, stagedStartup.warning].filter(Boolean).join(' ') }
+      : {}),
     timing: timing.finish()
   }
 }

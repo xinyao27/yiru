@@ -20,3 +20,24 @@ export const shutdownBufferCaptures = new Map<
   string,
   (options?: ShutdownBufferCaptureOptions) => void
 >()
+
+export function captureTerminalShutdownBuffersBestEffort(
+  tabIds: readonly string[],
+  options?: ShutdownBufferCaptureOptions
+): { requested: number; captured: number } {
+  let captured = 0
+  for (const tabId of tabIds) {
+    const capture = shutdownBufferCaptures.get(tabId)
+    if (!capture) {
+      continue
+    }
+    try {
+      capture(options)
+      captured += 1
+    } catch {
+      // Why: scrollback is recovery evidence; one serializer failure must not
+      // prevent the retention budget from releasing every other pane.
+    }
+  }
+  return { requested: tabIds.length, captured }
+}

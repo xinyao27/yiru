@@ -1,14 +1,32 @@
 import { randomUUID } from 'node:crypto'
 import { readFile, stat } from 'node:fs/promises'
 
-import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
+import {
+  getRepoExecutionHostId,
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId,
+  toSshExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
 /* oxlint-disable max-lines */
 import type { BrowserWindow } from 'electron'
 import { ipcMain } from 'electron'
 
+import type {
+  DirectSshDetectedWorktreeRequest,
+  HostQualifiedDetectedWorktreeResult,
+  ListDetectedWorktreesArgs,
+  ProviderRequestId
+} from '../../shared/detected-worktree-provider-contract'
+import { PROVIDER_REQUEST_ID_MAX_UTF8_BYTES } from '../../shared/detected-worktree-provider-contract'
+import type {
+  HostLineageSnapshot,
+  ListDesktopLineageForHostArgs
+} from '../../shared/host-lineage-contract'
 import { getProjectHostSetupWorktreeMeta } from '../../shared/project-host-setup-projection'
 import { isFolderRepo } from '../../shared/repo-kind'
 import { inspectSetupScriptImportCandidates } from '../../shared/setup/script-imports'
+import { isAdmissibleDirectSshAuthority } from '../../shared/ssh-retained-payload-admission'
 import { workspaceSourceSchema, type WorkspaceSource } from '../../shared/telemetry-events'
 import type {
   AutomationWorkspaceProvenance,
@@ -78,6 +96,10 @@ import { listRepoWorktrees } from '../repo-worktrees'
 import { joinWorktreeRelativePath } from '../runtime/relative-paths'
 import { killAllProcessesForWorktree } from '../runtime/worktree-teardown'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import {
+  isCurrentSshProviderAuthority,
+  registerSshProviderRequestAbort
+} from '../ssh/provider-authority'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
@@ -100,6 +122,7 @@ import {
   cleanupUnusedWorktreePushTargetRemoteSsh,
   notifyWorktreesChanged
 } from './remote'
+import { getWorktreeSharedLinkPaths } from './shared-directories'
 import { findExistingWorktreeSymlinkPaths, removeWorktreeLinkedPaths } from './symlinks'
 
 type CreateWorktreeArgsWithSystemProvenance = CreateWorktreeArgs & {
@@ -480,9 +503,226 @@ function getPreservedBranchCleanupTarget(
 const loggedUnavailableSshGitProviders = new Set<string>()
 const loggedWorktreeListFailures = new Set<string>()
 const loggedMalformedWorktreeMetaKeys = new Set<string>()
+const detectedWorktreeProviderAborts = new Map<ProviderRequestId, AbortController>()
+const DETECTED_WORKTREE_PROVIDER_TIMEOUT_MS = 30_000
 // Why: absorb renderer polling bursts while keeping external worktree-change
 // lag bounded to one short refresh window.
 const DETECTED_WORKTREE_SCAN_CACHE_TTL_MS = 5_000
+
+function rejectedDetectedWorktreeResult(
+  args: ListDetectedWorktreesArgs,
+  status: Extract<
+    HostQualifiedDetectedWorktreeResult,
+    { executionHostId: ExecutionHostId }
+  >['status']
+): HostQualifiedDetectedWorktreeResult {
+  return {
+    providerRequestId: args.providerRequestId,
+    executionHostId: args.executionHostId,
+    status
+  }
+}
+
+function hasValidProviderRequestId(value: string): value is ProviderRequestId {
+  return value.length > 0 && Buffer.byteLength(value, 'utf8') <= PROVIDER_REQUEST_ID_MAX_UTF8_BYTES
+}
+
+async function listDirectSshDetectedWorktrees(
+  store: Store,
+  args: DirectSshDetectedWorktreeRequest
+): Promise<HostQualifiedDetectedWorktreeResult> {
+  const parsedHost = parseExecutionHostId(args.executionHostId)
+  if (
+    !hasValidProviderRequestId(args.providerRequestId) ||
+    parsedHost?.kind !== 'ssh' ||
+    parsedHost.targetId !== args.expectedAuthority.targetId ||
+    !isAdmissibleDirectSshAuthority(args.expectedAuthority)
+  ) {
+    return rejectedDetectedWorktreeResult(args, 'rejected')
+  }
+  if (!isCurrentSshProviderAuthority(args.expectedAuthority)) {
+    return rejectedDetectedWorktreeResult(args, 'stale')
+  }
+  const repos = store
+    .getRepos()
+    .filter(
+      (repo) => repo.id === args.repoId && getRepoExecutionHostId(repo) === args.executionHostId
+    )
+  if (repos.length !== 1) {
+    return rejectedDetectedWorktreeResult(args, 'ambiguous-owner')
+  }
+  const repo = repos[0]
+  if (repo.connectionId !== args.expectedAuthority.targetId) {
+    return rejectedDetectedWorktreeResult(args, 'rejected')
+  }
+  const provider = getSshGitProvider(repo.connectionId)
+  if (!provider) {
+    return rejectedDetectedWorktreeResult(args, 'authority-unknown')
+  }
+
+  const controller = new AbortController()
+  let abortStatus: 'canceled' | 'timed-out' = 'canceled'
+  const unregisterAbort = registerSshProviderRequestAbort(args.expectedAuthority, controller)
+  detectedWorktreeProviderAborts.set(args.providerRequestId, controller)
+  const timeout = setTimeout(() => {
+    abortStatus = 'timed-out'
+    controller.abort()
+  }, DETECTED_WORKTREE_PROVIDER_TIMEOUT_MS)
+  try {
+    const gitWorktrees = await provider.listWorktrees(repo.path, { signal: controller.signal })
+    if (controller.signal.aborted) {
+      return rejectedDetectedWorktreeResult(args, abortStatus)
+    }
+    const currentRepo = store
+      .getRepos()
+      .filter(
+        (candidate) =>
+          candidate.id === repo.id && getRepoExecutionHostId(candidate) === args.executionHostId
+      )
+    if (
+      currentRepo.length !== 1 ||
+      currentRepo[0].path !== repo.path ||
+      getSshGitProvider(repo.connectionId) !== provider ||
+      !isCurrentSshProviderAuthority(args.expectedAuthority)
+    ) {
+      return rejectedDetectedWorktreeResult(args, 'stale')
+    }
+    return {
+      status: 'complete',
+      providerRequestId: args.providerRequestId,
+      repoId: repo.id,
+      authority: {
+        kind: 'direct-ssh',
+        executionHostId: args.executionHostId,
+        ...args.expectedAuthority
+      },
+      result: {
+        repoId: repo.id,
+        authoritative: true,
+        source: 'git',
+        worktrees: buildDetectedGitWorktrees(store, repo, gitWorktrees)
+      }
+    }
+  } catch {
+    if (controller.signal.aborted) {
+      return rejectedDetectedWorktreeResult(args, abortStatus)
+    }
+    if (!isCurrentSshProviderAuthority(args.expectedAuthority)) {
+      return rejectedDetectedWorktreeResult(args, 'stale')
+    }
+    const worktrees = listDisconnectedSshWorktrees(
+      store,
+      repo,
+      createSshWorktreeMetaIndex(Object.entries(store.getAllWorktreeMeta()))
+    )
+    return {
+      status: 'non-authoritative',
+      providerRequestId: args.providerRequestId,
+      repoId: repo.id,
+      authority: {
+        kind: 'direct-ssh',
+        executionHostId: args.executionHostId,
+        ...args.expectedAuthority
+      },
+      result: {
+        repoId: repo.id,
+        authoritative: false,
+        source: 'metadata-fallback',
+        worktrees: buildDisconnectedDetectedWorktrees(store, repo, worktrees)
+      }
+    }
+  } finally {
+    clearTimeout(timeout)
+    unregisterAbort()
+    if (detectedWorktreeProviderAborts.get(args.providerRequestId) === controller) {
+      detectedWorktreeProviderAborts.delete(args.providerRequestId)
+    }
+  }
+}
+
+function listLineageForHost(
+  store: Store,
+  args: ListDesktopLineageForHostArgs
+): HostLineageSnapshot {
+  const parsedHost = parseExecutionHostId(args.executionHostId)
+  const rejected = (
+    reason: Extract<HostLineageSnapshot, { authoritative: false }>['reason']
+  ): HostLineageSnapshot => ({
+    authoritative: false,
+    executionHostId: args.executionHostId,
+    reason
+  })
+  if (!parsedHost || parsedHost.kind === 'runtime') {
+    return rejected('rejected')
+  }
+  if (parsedHost.kind === 'ssh') {
+    if (
+      !('expectedAuthority' in args) ||
+      args.expectedAuthority.targetId !== parsedHost.targetId ||
+      !isAdmissibleDirectSshAuthority(args.expectedAuthority) ||
+      !isCurrentSshProviderAuthority(args.expectedAuthority)
+    ) {
+      return rejected('stale')
+    }
+  } else if ('expectedAuthority' in args) {
+    return rejected('rejected')
+  }
+
+  const ownsWorktree = (worktreeId: string): boolean => {
+    let repoId: string
+    try {
+      repoId = parseWorktreeId(worktreeId).repoId
+    } catch {
+      return false
+    }
+    const owners = store
+      .getRepos()
+      .filter((repo) => repo.id === repoId && getRepoExecutionHostId(repo) === parsedHost.id)
+    return owners.length === 1
+  }
+  const worktreeLineageById = Object.fromEntries(
+    Object.entries(store.getAllWorktreeLineage()).filter(([worktreeId]) => ownsWorktree(worktreeId))
+  )
+  const workspaceLineageByChildKey = Object.fromEntries(
+    Object.entries(store.getAllWorkspaceLineage?.() ?? {}).filter(([workspaceKey]) => {
+      const scope = parseWorkspaceKey(workspaceKey)
+      if (scope?.type === 'worktree') {
+        return ownsWorktree(scope.worktreeId)
+      }
+      if (scope?.type === 'folder') {
+        return store
+          .getFolderWorkspaces()
+          .some(
+            (folder) =>
+              folder.id === scope.folderWorkspaceId &&
+              toSshExecutionHostId(folder.connectionId ?? '') === parsedHost.id
+          )
+      }
+      return false
+    })
+  )
+  if (parsedHost.kind === 'local') {
+    return {
+      authoritative: true,
+      authority: { kind: 'local', executionHostId: LOCAL_EXECUTION_HOST_ID },
+      worktreeLineageById,
+      workspaceLineageByChildKey
+    }
+  }
+  if (!('expectedAuthority' in args)) {
+    return rejected('rejected')
+  }
+  return {
+    authoritative: true,
+    authority: {
+      kind: 'direct-ssh',
+      executionHostId: parsedHost.id,
+      ...args.expectedAuthority
+    },
+    worktreeLineageById,
+    workspaceLineageByChildKey
+  }
+}
 
 type DetectedWorktreeScanCacheEntry = {
   expiresAt: number
@@ -964,6 +1204,7 @@ export function registerWorktreeHandlers(
   ipcMain.removeHandler('worktrees:listAll')
   ipcMain.removeHandler('worktrees:list')
   ipcMain.removeHandler('worktrees:listDetected')
+  ipcMain.removeHandler('worktrees:cancelListDetected')
   ipcMain.removeHandler('worktrees:create')
   ipcMain.removeHandler('worktrees:prefetchCreateBase')
   ipcMain.removeHandler('worktrees:resolvePrBase')
@@ -973,6 +1214,7 @@ export function registerWorktreeHandlers(
   ipcMain.removeHandler('worktrees:forceDeletePreservedBranch')
   ipcMain.removeHandler('worktrees:updateMeta')
   ipcMain.removeHandler('worktrees:listLineage')
+  ipcMain.removeHandler('worktrees:listLineageForHost')
   ipcMain.removeHandler('worktrees:updateLineage')
   ipcMain.removeHandler('worktrees:persistSortOrder')
   ipcMain.removeHandler('worktrees:getBranchRenameFailureOutput')
@@ -1113,7 +1355,16 @@ export function registerWorktreeHandlers(
 
   ipcMain.handle(
     'worktrees:listDetected',
-    async (_event, args: { repoId: string }): Promise<DetectedWorktreeListResult> => {
+    async (
+      _event,
+      args: { repoId: string } | ListDetectedWorktreesArgs
+    ): Promise<DetectedWorktreeListResult | HostQualifiedDetectedWorktreeResult> => {
+      if ('providerRequestId' in args) {
+        if (args.executionHostId !== 'local') {
+          return listDirectSshDetectedWorktrees(store, args)
+        }
+        return rejectedDetectedWorktreeResult(args, 'rejected')
+      }
       const repo = store.getRepo(args.repoId)
       if (!repo) {
         return {
@@ -1183,6 +1434,13 @@ export function registerWorktreeHandlers(
         }
         return { repoId: repo.id, authoritative: false, source: 'metadata-fallback', worktrees: [] }
       }
+    }
+  )
+
+  ipcMain.handle(
+    'worktrees:cancelListDetected',
+    (_event, args: { providerRequestId: ProviderRequestId }): void => {
+      detectedWorktreeProviderAborts.get(args.providerRequestId)?.abort()
     }
   )
 
@@ -1756,7 +2014,7 @@ export function registerWorktreeHandlers(
           )
         }
 
-        const linkedPaths = repo.symlinkPaths ?? []
+        const linkedPaths = getWorktreeSharedLinkPaths(repo)
         const ignoredLinkedPaths = args.force
           ? []
           : await findExistingWorktreeSymlinkPaths(canonicalWorktreePath, linkedPaths)
@@ -2084,6 +2342,12 @@ export function registerWorktreeHandlers(
       workspaceLineage: store.getAllWorkspaceLineage()
     }
   })
+
+  ipcMain.handle(
+    'worktrees:listLineageForHost',
+    (_event, args: ListDesktopLineageForHostArgs): HostLineageSnapshot =>
+      listLineageForHost(store, args)
+  )
 
   ipcMain.handle(
     'worktrees:updateLineage',

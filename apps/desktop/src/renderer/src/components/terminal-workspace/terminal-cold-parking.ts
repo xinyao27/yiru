@@ -9,17 +9,21 @@ import {
 
 import type { TabGroupLayoutNode } from '../../../../shared/types'
 import { useAppStore } from '../../store'
+import { getTerminalWorktreeColdParkRecheckDelayMs } from '../terminal-pane/cold-park-deadlines'
+import { selectEvictionExemptTerminalTabIds } from '../terminal-pane/eviction-exempt-tabs'
 import {
-  getTerminalWorktreeColdParkRecheckDelayMs,
   selectColdParkedTerminalWorktrees,
+  TERMINAL_WORKTREE_COLD_PARK_DELAY_MS,
   type TerminalWorktreeColdParkCandidate
 } from '../terminal-pane/terminal-hidden-view-parking'
+import { warnTerminalLifecycleAnomaly } from '../terminal-pane/terminal-lifecycle-diagnostics'
+import { canWatcherCoverParkedTerminalTab } from '../terminal-pane/terminal-parked-tab-watchers'
 import {
-  canWatcherCoverParkedTerminalTab,
-  disposeAllParkedTerminalWatchers,
-  pruneParkedTerminalWatchers,
-  syncParkedTerminalTabWatchers
-} from '../terminal-pane/terminal-parked-tab-watchers'
+  captureRetentionForceParkedWorktreeBuffers,
+  selectRetentionForceParkedTerminalWorktrees,
+  TERMINAL_HIDDEN_WORKTREE_RETENTION_TTL_MS
+} from './hidden-retention'
+import { useLegacyColdParkingWatchers } from './legacy-cold-parking-watchers'
 import { haveSameWorktreeIds } from './tab-model-lookup'
 
 type WorkspaceSurface = { id: string; path: string }
@@ -32,6 +36,11 @@ type TerminalColdParkingArgs = {
   backgroundMountRevision: number
   anyMountedWorktreeHasLayout: boolean
   getEffectiveLayoutForWorktree: (worktreeId: string) => TabGroupLayoutNode | undefined
+}
+
+type TerminalColdParkingSnapshot = {
+  parkedTerminalWorktreeIds: ReadonlySet<string>
+  forceParkedTerminalWorktreeIds: ReadonlySet<string>
 }
 
 // Why: worktree-level cold-park policy for *hidden* worktrees — hiddenSince
@@ -47,25 +56,31 @@ export function useTerminalColdParking({
   backgroundMountRevision,
   anyMountedWorktreeHasLayout,
   getEffectiveLayoutForWorktree
-}: TerminalColdParkingArgs): { parkedTerminalWorktreeIds: ReadonlySet<string> } {
+}: TerminalColdParkingArgs): TerminalColdParkingSnapshot {
   const activeView = useAppStore((s) => s.activeView)
   const activeWorktreeId = useAppStore((s) => s.activeWorktreeId)
   const tabsByWorktree = useAppStore((s) => s.tabsByWorktree)
   const pendingStartupByTabId = useAppStore((s) => s.pendingStartupByTabId)
-  const activeTabId = useAppStore((s) => s.activeTabId)
-  const activeTabIdByWorktree = useAppStore((s) => s.activeTabIdByWorktree)
-  const groupsByWorktree = useAppStore((s) => s.groupsByWorktree)
-  const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
   const terminalParkingEnabled = useAppStore((s) => s.settings?.terminalHiddenViewParking !== false)
+  const terminalSshParkingEnabled = useAppStore((s) => s.settings?.terminalSshViewParking !== false)
+  const retentionBudgetEnabled = useAppStore(
+    (s) => s.settings?.terminalHiddenWorktreeRetentionBudget !== false
+  )
 
   const terminalWorktreeHiddenSinceRef = useRef(new Map<string, number>())
+  const measuringTerminalWorktreeIdsRef = useRef(new Set<string>())
+  const terminalWorktreeParkCooldownUntilRef = useRef(new Map<string, number>())
   const terminalWorktreeParkingTimersRef = useRef(new Map<string, number>())
+  const forceParkedCaptureDoneRef = useRef(new Set<string>())
   const [terminalParkingRevision, setTerminalParkingRevision] = useState(0)
   // Why: the parked-id set is published from a timer-driven reconciliation
   // effect, not from a prop/state change, so it is modeled as an external
   // store instead of useState — publishing it from the effect would otherwise
   // read as seeding state from an effect on every recheck.
-  const parkedTerminalWorktreeIdsRef = useRef<ReadonlySet<string>>(new Set())
+  const terminalColdParkingSnapshotRef = useRef<TerminalColdParkingSnapshot>({
+    parkedTerminalWorktreeIds: new Set(),
+    forceParkedTerminalWorktreeIds: new Set()
+  })
   const parkedTerminalWorktreeIdsListenersRef = useRef(new Set<() => void>())
   const subscribeToParkedTerminalWorktreeIds = useCallback((listener: () => void): (() => void) => {
     parkedTerminalWorktreeIdsListenersRef.current.add(listener)
@@ -74,13 +89,14 @@ export function useTerminalColdParking({
     }
   }, [])
   const getParkedTerminalWorktreeIdsSnapshot = useCallback(
-    (): ReadonlySet<string> => parkedTerminalWorktreeIdsRef.current,
+    (): TerminalColdParkingSnapshot => terminalColdParkingSnapshotRef.current,
     []
   )
-  const parkedTerminalWorktreeIds = useSyncExternalStore(
+  const terminalColdParkingSnapshot = useSyncExternalStore(
     subscribeToParkedTerminalWorktreeIds,
     getParkedTerminalWorktreeIdsSnapshot
   )
+  const { parkedTerminalWorktreeIds, forceParkedTerminalWorktreeIds } = terminalColdParkingSnapshot
 
   useEffect(() => {
     const timers = terminalWorktreeParkingTimersRef.current
@@ -107,6 +123,8 @@ export function useTerminalColdParking({
     for (const worktreeId of Array.from(terminalWorktreeHiddenSinceRef.current.keys())) {
       if (!currentWorktreeIds.has(worktreeId) || !mountedWorktreeIdsRef.current.has(worktreeId)) {
         terminalWorktreeHiddenSinceRef.current.delete(worktreeId)
+        measuringTerminalWorktreeIdsRef.current.delete(worktreeId)
+        terminalWorktreeParkCooldownUntilRef.current.delete(worktreeId)
       }
     }
 
@@ -115,14 +133,30 @@ export function useTerminalColdParking({
       const worktreeId = workspace.id
       if (!mountedWorktreeIdsRef.current.has(worktreeId)) {
         terminalWorktreeHiddenSinceRef.current.delete(worktreeId)
+        measuringTerminalWorktreeIdsRef.current.delete(worktreeId)
+        terminalWorktreeParkCooldownUntilRef.current.delete(worktreeId)
         continue
       }
       const isVisible = activeView === 'terminal' && activeWorktreeId === worktreeId
       const shouldMeasureHiddenWorktree =
         !isVisible && measurableBackgroundWorktreeIdsRef.current.has(worktreeId)
-      if (isVisible || shouldMeasureHiddenWorktree) {
+      if (shouldMeasureHiddenWorktree) {
+        measuringTerminalWorktreeIdsRef.current.add(worktreeId)
+      } else {
+        if (measuringTerminalWorktreeIdsRef.current.delete(worktreeId)) {
+          terminalWorktreeParkCooldownUntilRef.current.set(
+            worktreeId,
+            nowMs + TERMINAL_WORKTREE_COLD_PARK_DELAY_MS
+          )
+        }
+      }
+      if (isVisible) {
         terminalWorktreeHiddenSinceRef.current.delete(worktreeId)
-      } else if (!terminalWorktreeHiddenSinceRef.current.has(worktreeId)) {
+        terminalWorktreeParkCooldownUntilRef.current.delete(worktreeId)
+      } else if (
+        !shouldMeasureHiddenWorktree &&
+        !terminalWorktreeHiddenSinceRef.current.has(worktreeId)
+      ) {
         terminalWorktreeHiddenSinceRef.current.set(worktreeId, nowMs)
       }
 
@@ -131,7 +165,8 @@ export function useTerminalColdParking({
         terminalTabs: tabsByWorktree[worktreeId] ?? [],
         isVisible,
         shouldMeasureHiddenWorktree,
-        hiddenSinceMs: terminalWorktreeHiddenSinceRef.current.get(worktreeId) ?? null
+        hiddenSinceMs: terminalWorktreeHiddenSinceRef.current.get(worktreeId) ?? null,
+        parkCooldownUntilMs: terminalWorktreeParkCooldownUntilRef.current.get(worktreeId) ?? null
       })
     }
 
@@ -139,7 +174,8 @@ export function useTerminalColdParking({
       worktrees: retentionCandidates,
       pendingStartupByTabId,
       parkingEnabled: terminalParkingEnabled,
-      nowMs
+      nowMs,
+      restorePolicy: { sshParkingEnabled: terminalSshParkingEnabled }
     })
     // Why: a worktree with any tab the byte watchers cannot cover (no
     // capture, no layout snapshot, legacy leaf ids) must never park — it
@@ -151,8 +187,60 @@ export function useTerminalColdParking({
         nextParkedTerminalWorktreeIds.delete(worktreeId)
       }
     }
-    if (!haveSameWorktreeIds(parkedTerminalWorktreeIdsRef.current, nextParkedTerminalWorktreeIds)) {
-      parkedTerminalWorktreeIdsRef.current = nextParkedTerminalWorktreeIds
+    const nextForceParkedTerminalWorktreeIds = selectRetentionForceParkedTerminalWorktrees({
+      worktrees: retentionCandidates.map((candidate) => ({
+        ...candidate,
+        ordinaryParkingCovers: nextParkedTerminalWorktreeIds.has(candidate.worktreeId)
+      })),
+      pendingStartupByTabId,
+      parkingEnabled: terminalParkingEnabled,
+      retentionBudgetEnabled,
+      nowMs
+    })
+    for (const worktreeId of Array.from(forceParkedCaptureDoneRef.current)) {
+      if (!nextForceParkedTerminalWorktreeIds.has(worktreeId)) {
+        forceParkedCaptureDoneRef.current.delete(worktreeId)
+      }
+    }
+    const repos = useAppStore.getState().repos
+    for (const worktreeId of nextForceParkedTerminalWorktreeIds) {
+      if (!forceParkedCaptureDoneRef.current.has(worktreeId)) {
+        const tabs = tabsByWorktree[worktreeId] ?? []
+        const exemptTabIds = selectEvictionExemptTerminalTabIds(worktreeId, tabs)
+        const evictableTabIds = tabs.filter((tab) => !exemptTabIds.has(tab.id)).map((tab) => tab.id)
+        if (evictableTabIds.length === 0 && tabs.length > 0) {
+          warnTerminalLifecycleAnomaly('retention force-park freed no panes', {
+            worktreeId,
+            reason: `exemptTabs=${tabs.length}`
+          })
+        }
+        if (
+          captureRetentionForceParkedWorktreeBuffers({
+            worktreeId,
+            tabIds: evictableTabIds,
+            repos
+          })
+        ) {
+          forceParkedCaptureDoneRef.current.add(worktreeId)
+        }
+      }
+      nextParkedTerminalWorktreeIds.add(worktreeId)
+    }
+    const previousSnapshot = terminalColdParkingSnapshotRef.current
+    if (
+      !haveSameWorktreeIds(
+        previousSnapshot.parkedTerminalWorktreeIds,
+        nextParkedTerminalWorktreeIds
+      ) ||
+      !haveSameWorktreeIds(
+        previousSnapshot.forceParkedTerminalWorktreeIds,
+        nextForceParkedTerminalWorktreeIds
+      )
+    ) {
+      terminalColdParkingSnapshotRef.current = {
+        parkedTerminalWorktreeIds: nextParkedTerminalWorktreeIds,
+        forceParkedTerminalWorktreeIds: nextForceParkedTerminalWorktreeIds
+      }
       for (const listener of parkedTerminalWorktreeIdsListenersRef.current) {
         listener()
       }
@@ -169,7 +257,9 @@ export function useTerminalColdParking({
       const delayMs = getTerminalWorktreeColdParkRecheckDelayMs({
         parkingEnabled: terminalParkingEnabled,
         hiddenSinceMs: candidate.hiddenSinceMs,
-        nowMs
+        nowMs,
+        retentionTtlMs: TERMINAL_HIDDEN_WORKTREE_RETENTION_TTL_MS,
+        parkCooldownUntilMs: candidate.parkCooldownUntilMs
       })
       if (delayMs !== null && delayMs > 0) {
         const worktreeId = candidate.worktreeId
@@ -187,92 +277,25 @@ export function useTerminalColdParking({
     measurableBackgroundWorktreeIdsRef,
     mountedWorktreeIdsRef,
     pendingStartupByTabId,
+    retentionBudgetEnabled,
     tabsByWorktree,
     terminalParkingEnabled,
+    terminalSshParkingEnabled,
     terminalParkingRevision,
     workspaceSurfaces
   ])
 
-  // Why: parked byte-watcher reconciliation for the legacy (non-split)
-  // terminal host, which renders TerminalPanes directly. In split mode each
-  // TerminalPaneOverlayLayer owns its worktree's watchers, so here we only
-  // dispose worktrees that render no overlay layer (no layout / unmounted)
-  // and prune watchers for deleted worktrees.
-  useEffect(() => {
-    pruneParkedTerminalWatchers(new Set(workspaceSurfaces.map((workspace) => workspace.id)))
-    for (const workspace of workspaceSurfaces) {
-      if (
-        anyMountedWorktreeHasLayout &&
-        mountedWorktreeIdsRef.current.has(workspace.id) &&
-        getEffectiveLayoutForWorktree(workspace.id)
-      ) {
-        continue
-      }
-      const tabs = tabsByWorktree[workspace.id] ?? []
-      const parkedTabIds = new Set<string>()
-      let deferredTabIds: ReadonlySet<string> | null = null
-      if (!anyMountedWorktreeHasLayout && mountedWorktreeIdsRef.current.has(workspace.id)) {
-        const isVisible = activeView === 'terminal' && workspace.id === activeWorktreeId
-        const shouldMeasureHiddenWorktree =
-          !isVisible && measurableBackgroundWorktreeIdsRef.current.has(workspace.id)
-        const parked =
-          !isVisible && !shouldMeasureHiddenWorktree && parkedTerminalWorktreeIds.has(workspace.id)
-        if (parked) {
-          for (const tab of tabs) {
-            parkedTabIds.add(tab.id)
-          }
-        }
-        // Why: activation-deferred tabs are unmounted like parked ones; the
-        // same byte watchers own their side effects until first reveal.
-        // Targeted restrictions keep their existing delayed parking policy.
-        deferredTabIds =
-          activationDeferredMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null
-        for (const tab of tabs) {
-          if (
-            deferredTabIds?.has(tab.id) &&
-            !parkedTabIds.has(tab.id) &&
-            canWatcherCoverParkedTerminalTab(workspace.id, tab)
-          ) {
-            parkedTabIds.add(tab.id)
-          }
-        }
-      }
-      syncParkedTerminalTabWatchers({
-        worktreeId: workspace.id,
-        tabs,
-        parkedTabIds,
-        // Why: activation-deferred tabs never mounted a pane to restore their
-        // title, unlike ordinary parked tabs whose live pane populated it.
-        ...(deferredTabIds ? { restoreTitleOnStartTabIds: deferredTabIds } : {})
-      })
-    }
-  }, [
-    // Why activeTabId: revealing a deferred tab mutates the mount restriction
-    // during the same render; the watcher sync must re-run in that flush so
-    // the revealed tab's watcher disposes before its pane attaches.
-    activeTabId,
-    activeView,
-    activeWorktreeId,
-    activationDeferredMountTabIdsByWorktreeRef,
-    activeTabIdByWorktree,
-    anyMountedWorktreeHasLayout,
-    backgroundMountRevision,
-    getEffectiveLayoutForWorktree,
-    groupsByWorktree,
-    measurableBackgroundWorktreeIdsRef,
+  useLegacyColdParkingWatchers({
+    workspaceSurfaces,
     mountedWorktreeIdsRef,
+    measurableBackgroundWorktreeIdsRef,
+    activationDeferredMountTabIdsByWorktreeRef,
+    backgroundMountRevision,
+    anyMountedWorktreeHasLayout,
+    getEffectiveLayoutForWorktree,
     parkedTerminalWorktreeIds,
-    pendingStartupByTabId,
-    tabsByWorktree,
-    terminalParkingEnabled,
-    workspaceSessionReady,
-    workspaceSurfaces
-  ])
-  // Why: symmetric with the cold-parking effect's unmount cleanup — when the
-  // terminal host unmounts, no reconciliation effect will run again, so
-  // dispose every remaining parked watcher here (overlay-layer children have
-  // already disposed theirs by the time this parent cleanup runs).
-  useEffect(() => () => disposeAllParkedTerminalWatchers(), [])
+    forceParkedTerminalWorktreeIds
+  })
 
-  return { parkedTerminalWorktreeIds }
+  return { parkedTerminalWorktreeIds, forceParkedTerminalWorktreeIds }
 }

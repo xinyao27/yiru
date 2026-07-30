@@ -31,6 +31,7 @@ import { buildStartupCommandSubmission } from '../shared/startup-command-submiss
 import { applyTerminalGitCredentialPromptGuard } from '../shared/terminal/git-credential-guard'
 import { isTuiAgent } from '../shared/tui-agent/config'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
+import { PtyReplayBuffer } from './pty-replay-buffer'
 import {
   resolveDefaultShell,
   resolveDefaultCwd,
@@ -53,7 +54,8 @@ type ManagedPty = {
   id: string
   pty: IPty
   initialCwd: string
-  buffered: string
+  /** Why: rebuilding a rolling 100 KB string copied the full window on every PTY write. */
+  buffered: PtyReplayBuffer
   /** Timer for SIGKILL fallback after a graceful SIGTERM shutdown. */
   killTimer?: ReturnType<typeof setTimeout>
   /** True once disposeManagedPty has run. Prevents double-dispose (onExit + an
@@ -473,10 +475,7 @@ export class PtyHandler {
   }
 
   private appendReplayBuffer(managed: ManagedPty, data: string): void {
-    managed.buffered += data
-    if (managed.buffered.length > REPLAY_BUFFER_MAX) {
-      managed.buffered = managed.buffered.slice(-REPLAY_BUFFER_MAX)
-    }
+    managed.buffered.append(data)
   }
 
   private releaseStartupCommand(managed: ManagedPty): void {
@@ -666,11 +665,18 @@ export class PtyHandler {
 
   private flushPendingOutput(): void {
     this.outputFlushTimer = null
-    let writes = 0
-    for (const [id, pending] of Array.from(this.pendingOutputByPty.entries())) {
-      if (writes >= PTY_OUTPUT_FLUSH_MAX_WRITES) {
+    // Why: a drain consumes at most two entries, so copying the whole pending
+    // map on every tick scales allocation with unrelated PTY sessions.
+    const pendingEntries = this.pendingOutputByPty[Symbol.iterator]()
+    const batch: [string, PendingPtyOutput][] = []
+    while (batch.length < PTY_OUTPUT_FLUSH_MAX_WRITES) {
+      const next = pendingEntries.next()
+      if (next.done === true) {
         break
       }
+      batch.push(next.value)
+    }
+    for (const [id, pending] of batch) {
       this.pendingOutputByPty.delete(id)
       const chunk = pending.data.slice(0, PTY_OUTPUT_FLUSH_CHUNK_CHARS)
       const remaining = pending.data.slice(PTY_OUTPUT_FLUSH_CHUNK_CHARS)
@@ -678,9 +684,8 @@ export class PtyHandler {
         this.pendingOutputByPty.set(id, { data: remaining })
       }
       this.dispatcher.notify('pty.data', { id, data: chunk })
-      writes++
     }
-    if (this.pendingOutputByPty.size > 0 && writes > 0) {
+    if (this.pendingOutputByPty.size > 0 && batch.length > 0) {
       // Why: relay-side output can arrive as a large single PTY chunk. Yield
       // between slices so client input and control frames can interleave.
       this.scheduleOutputFlush(PTY_OUTPUT_DRAIN_CONTINUE_MS)
@@ -897,7 +902,7 @@ export class PtyHandler {
       id,
       pty: term,
       initialCwd: cwd,
-      buffered: '',
+      buffered: new PtyReplayBuffer(REPLAY_BUFFER_MAX),
       paneKey,
       tabId,
       ...(attachIdentity.paneKey || attachIdentity.tabId ? { attachIdentity } : {}),
@@ -995,16 +1000,17 @@ export class PtyHandler {
     // not cause duplication. Keeping the buffer intact means a second app
     // restart still replays the full terminal history instead of only output
     // generated since the previous attach.
-    if (managed.buffered) {
+    const replay = managed.buffered.read()
+    if (replay) {
       // Why: relay batching may still hold bytes that are already included in
       // the full replay buffer. Drop that pending notification before attach
       // so reconnect/suppressed replay cannot render the same bytes twice.
       this.pendingOutputByPty.delete(id)
       this.clearOutputFlushTimerIfIdle()
       if (params.suppressReplayNotification) {
-        return { replay: managed.buffered }
+        return { replay }
       }
-      this.dispatcher.notify('pty.replay', { id, data: managed.buffered })
+      this.dispatcher.notify('pty.replay', { id, data: replay })
     }
     return {}
   }
@@ -1328,7 +1334,7 @@ export class PtyHandler {
       id: entry.id,
       pty: term,
       initialCwd: entry.cwd,
-      buffered: '',
+      buffered: new PtyReplayBuffer(REPLAY_BUFFER_MAX),
       paneKey: entry.paneKey,
       tabId: entry.tabId,
       attachIdentity: entry.attachIdentity,

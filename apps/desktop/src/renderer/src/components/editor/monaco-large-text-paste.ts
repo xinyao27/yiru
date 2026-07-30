@@ -1,3 +1,4 @@
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
 import type { editor } from 'monaco-editor'
 
 import {
@@ -157,10 +158,6 @@ function setCollapsedSelection(monacoEditor: MonacoPasteEditor, position: Positi
     endLineNumber: position.lineNumber,
     endColumn: position.column
   })
-}
-
-function yieldToEventLoop(): Promise<void> {
-  return new Promise((resolve) => globalThis.setTimeout(resolve, 0))
 }
 
 async function insertMonacoTextInChunks(

@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/react'
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
 import { toast } from 'sonner'
 
 import { translate } from '../../../i18n/i18n'
@@ -86,10 +87,6 @@ function getNextChunkBoundary(text: string, startIndex: number, maxBytes: number
   }
 
   return index
-}
-
-function yieldToEventLoop(): Promise<void> {
-  return new Promise((resolve) => globalThis.setTimeout(resolve, 0))
 }
 
 function isEditorAvailable(

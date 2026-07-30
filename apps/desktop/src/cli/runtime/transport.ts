@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { createConnection } from 'node:net'
 
+import type { RuntimeOrchestrationEnvelope } from '@yiru/runtime-protocol/rpc-envelope'
+
 import { findTransport, type RuntimeMetadata } from '../../shared/runtime-bootstrap'
 import type {
   RuntimeMethodContract,
@@ -14,19 +16,22 @@ export function sendRequest<TContract extends RuntimeMethodContract>(
   metadata: RuntimeMetadata,
   contract: TContract,
   params: RuntimeMethodParams<TContract>,
-  timeoutMs: number
+  timeoutMs: number,
+  envelope?: RuntimeOrchestrationEnvelope
 ): Promise<RuntimeRpcResponse<RuntimeMethodResult<TContract>>>
 export function sendRequest<TResult>(
   metadata: RuntimeMetadata,
   method: string,
   params: unknown,
-  timeoutMs: number
+  timeoutMs: number,
+  envelope?: RuntimeOrchestrationEnvelope
 ): Promise<RuntimeRpcResponse<TResult>>
 export async function sendRequest<TResult>(
   metadata: RuntimeMetadata,
   contract: string | RuntimeMethodContract,
   params: unknown,
-  timeoutMs: number
+  timeoutMs: number,
+  envelope?: RuntimeOrchestrationEnvelope
 ): Promise<RuntimeRpcResponse<TResult>> {
   const method = typeof contract === 'string' ? contract : contract.name
   return await new Promise((resolve, reject) => {
@@ -195,7 +200,10 @@ export async function sendRequest<TResult>(
           id: requestId,
           authToken: metadata.authToken,
           method,
-          params
+          params,
+          orchestrationCapability: envelope?.orchestrationCapability,
+          orchestrationContractVersion: envelope?.orchestrationContractVersion,
+          orchestrationRequestId: envelope?.orchestrationRequestId
         })}\n`
       )
     })

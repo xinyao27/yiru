@@ -130,6 +130,16 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     // the composed prompt after startup to keep the hosted session alive.
     promptInjectionMode: 'stdin-after-start'
   },
+  trae: {
+    // Why: the unrelated bytedance/trae-agent package owns `trae-cli`; only
+    // TRAE CN's CLI ships the unambiguous `traecli` executable.
+    detectCmd: 'traecli',
+    launchCmd: 'traecli',
+    expectedProcess: 'traecli',
+    promptInjectionMode: 'argv',
+    // Why: Cobra otherwise treats prompts beginning with a flag or subcommand as CLI syntax.
+    argvPromptSeparator: '--'
+  },
   opencode: {
     detectCmd: 'opencode',
     launchCmd: 'opencode',

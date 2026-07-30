@@ -145,7 +145,11 @@ import type {
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
 } from '../shared/shell-open-types'
-import type { SkillFreshnessInventory } from '../shared/skill-freshness'
+import type {
+  SkillFreshnessInventory,
+  SkillUpdateRun,
+  SkillUpdateStartResult
+} from '../shared/skill-freshness'
 import type { SkillDiscoveryResult, SkillDiscoveryTarget } from '../shared/skills'
 import type {
   SpeechErrorEvent,
@@ -154,6 +158,11 @@ import type {
   SpeechModelState,
   SpeechTranscriptEvent
 } from '../shared/speech-types'
+import {
+  admitSshConnectionState,
+  admitSshConnectionStateForAuthorityReconciliation,
+  admitSshDetectedPorts
+} from '../shared/ssh-retained-payload-admission'
 import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type {
@@ -553,6 +562,8 @@ const api = {
   repos: {
     list: () => ipcRenderer.invoke('repos:list'),
 
+    listForExecutionHost: (args) => ipcRenderer.invoke('repos:listForExecutionHost', args),
+
     add: (args) => ipcRenderer.invoke('repos:add', args),
 
     addRemote: (args) => ipcRenderer.invoke('repos:addRemote', args),
@@ -686,6 +697,10 @@ const api = {
 
     listDetected: (args) => ipcRenderer.invoke('worktrees:listDetected', args),
 
+    listDetectedForHost: (args) => ipcRenderer.invoke('worktrees:listDetected', args),
+
+    cancelListDetected: (args) => ipcRenderer.invoke('worktrees:cancelListDetected', args),
+
     listAll: () => ipcRenderer.invoke('worktrees:listAll'),
 
     create: (args) => ipcRenderer.invoke('worktrees:create', args),
@@ -717,6 +732,8 @@ const api = {
     updateMeta: (args) => ipcRenderer.invoke('worktrees:updateMeta', args),
 
     listLineage: () => ipcRenderer.invoke('worktrees:listLineage'),
+
+    listLineageForHost: (args) => ipcRenderer.invoke('worktrees:listLineageForHost', args),
 
     updateLineage: (args) => ipcRenderer.invoke('worktrees:updateLineage', args),
 
@@ -1891,7 +1908,18 @@ const api = {
     discover: (target?: SkillDiscoveryTarget): Promise<SkillDiscoveryResult> =>
       ipcRenderer.invoke('skills:discover', target),
     freshnessInventory: (): Promise<SkillFreshnessInventory> =>
-      ipcRenderer.invoke('skills:freshnessInventory')
+      ipcRenderer.invoke('skills:freshnessInventory'),
+    startUpdateRun: (names: string[]): Promise<SkillUpdateStartResult> =>
+      ipcRenderer.invoke('skills:startUpdateRun', names),
+    cancelUpdateRun: (): Promise<void> => ipcRenderer.invoke('skills:cancelUpdateRun'),
+    acknowledgeUpdateRun: (): Promise<void> => ipcRenderer.invoke('skills:acknowledgeUpdateRun'),
+    getUpdateRun: (): Promise<SkillUpdateRun> => ipcRenderer.invoke('skills:getUpdateRun'),
+    onUpdateRun: (callback: (run: SkillUpdateRun) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, run: SkillUpdateRun): void =>
+        callback(run)
+      ipcRenderer.on('skills:updateRun', listener)
+      return () => ipcRenderer.removeListener('skills:updateRun', listener)
+    }
   },
 
   pet: {
@@ -3871,8 +3899,11 @@ const api = {
     importConfig: (args?: { reAdopt?: boolean }): Promise<SshConfigImportResult> =>
       ipcRenderer.invoke('ssh:importConfig', args),
 
-    connect: (args: { targetId: string }): Promise<SshConnectionState | null> =>
-      ipcRenderer.invoke('ssh:connect', args),
+    connect: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
+      admitSshConnectionStateForAuthorityReconciliation(
+        await ipcRenderer.invoke('ssh:connect', args),
+        args.targetId
+      ),
 
     disconnect: (args: { targetId: string }): Promise<void> =>
       ipcRenderer.invoke('ssh:disconnect', args),
@@ -3883,8 +3914,11 @@ const api = {
     resetRelay: (args: { targetId: string }): Promise<void> =>
       ipcRenderer.invoke('ssh:resetRelay', args),
 
-    getState: (args: { targetId: string }): Promise<SshConnectionState | null> =>
-      ipcRenderer.invoke('ssh:getState', args),
+    getState: async (args: { targetId: string }): Promise<SshConnectionState | null> =>
+      admitSshConnectionStateForAuthorityReconciliation(
+        await ipcRenderer.invoke('ssh:getState', args),
+        args.targetId
+      ),
 
     needsPassphrasePrompt: (args: { targetId: string }): Promise<boolean> =>
       ipcRenderer.invoke('ssh:needsPassphrasePrompt', args),
@@ -3892,15 +3926,31 @@ const api = {
     testConnection: (args: {
       targetId: string
     }): Promise<{ success: boolean; error?: string; state?: SshConnectionState }> =>
-      ipcRenderer.invoke('ssh:testConnection', args),
+      ipcRenderer.invoke('ssh:testConnection', args).then((result: unknown) => {
+        if (!result || typeof result !== 'object') {
+          return { success: false }
+        }
+        const retained = result as Record<string, unknown>
+        const state = admitSshConnectionState(retained.state, args.targetId)
+        return {
+          success: retained.success === true,
+          ...(typeof retained.error === 'string' ? { error: retained.error } : {}),
+          ...(state ? { state } : {})
+        }
+      }),
 
     onStateChanged: (
       callback: (data: { targetId: string; state: SshConnectionState }) => void
     ): (() => void) => {
       const listener = (
         _event: Electron.IpcRendererEvent,
-        data: { targetId: string; state: SshConnectionState }
-      ) => callback(data)
+        data: { targetId: string; state: unknown }
+      ) => {
+        const state = admitSshConnectionStateForAuthorityReconciliation(data.state, data.targetId)
+        if (state) {
+          callback({ targetId: data.targetId, state })
+        }
+      }
       ipcRenderer.on('ssh:state-changed', listener)
       return () => ipcRenderer.removeListener('ssh:state-changed', listener)
     },
@@ -3928,8 +3978,8 @@ const api = {
     listPortForwards: (args?: { targetId?: string }): Promise<PortForwardEntry[]> =>
       ipcRenderer.invoke('ssh:listPortForwards', args),
 
-    listDetectedPorts: (args: { targetId: string }): Promise<EnrichedDetectedPort[]> =>
-      ipcRenderer.invoke('ssh:listDetectedPorts', args),
+    listDetectedPorts: async (args: { targetId: string }): Promise<EnrichedDetectedPort[]> =>
+      admitSshDetectedPorts(await ipcRenderer.invoke('ssh:listDetectedPorts', args)),
 
     onPortForwardsChanged: (
       callback: (data: { targetId: string; forwards: PortForwardEntry[] }) => void
@@ -3947,8 +3997,8 @@ const api = {
     ): (() => void) => {
       const handler = (
         _event: Electron.IpcRendererEvent,
-        data: { targetId: string; ports: EnrichedDetectedPort[] }
-      ) => callback(data)
+        data: { targetId: string; ports: unknown }
+      ) => callback({ targetId: data.targetId, ports: admitSshDetectedPorts(data.ports) })
       ipcRenderer.on('ssh:detected-ports-changed', handler)
       return () => ipcRenderer.removeListener('ssh:detected-ports-changed', handler)
     },

@@ -1182,6 +1182,9 @@ export type YiruHooks = {
   defaultTabs?: YiruDefaultTabTemplate[] // Terminal tabs to create once for a new worktree
   environmentRecipes?: YiruVmRecipe[] // Project-scoped per-workspace environment recipes
   environmentRecipeDiagnostics?: YiruVmRecipeDiagnostic[] // Non-fatal validation issues from environmentRecipes
+  worktree?: {
+    sharedDirectories: string[]
+  }
 }
 
 export type YiruDefaultTabTemplate = {
@@ -1328,6 +1331,13 @@ export type CreateWorktreeResult = {
   workspaceLineage?: WorkspaceLineage | null
   warnings?: WorktreeLineageWarning[]
   setup?: WorktreeSetupLaunch
+  setupReceipt?: {
+    requested: 'run' | 'skip' | 'inherit'
+    hookFound: boolean
+    startupPolicy: 'wait-for-setup' | 'start-immediately'
+    state: 'not_configured' | 'skipped' | 'running' | 'spawn_failed'
+    terminalHandle?: string
+  }
   defaultTabs?: WorktreeDefaultTabsLaunch
   warning?: string
   initialBaseStatus?: WorktreeBaseStatusEvent
@@ -1894,6 +1904,8 @@ export type GlobalSettings = {
    *  Defaults to true; `false` disables parking entirely.
    *  See docs/reference/terminal-hidden-view-parking.md. */
   terminalHiddenViewParking?: boolean
+  terminalSshViewParking?: boolean
+  terminalHiddenWorktreeRetentionBudget?: boolean
   /** Kill switch for main-process terminal side-effect authority: when true
    *  (default), local-daemon/SSH PTY title/bell/agent facts are consumed from
    *  the `pty:sideEffect` channel and renderer byte parsers stay unregistered

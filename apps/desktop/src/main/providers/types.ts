@@ -3,7 +3,6 @@ import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-l
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
 import type { GitHistoryOptions, GitHistoryResult } from '../../shared/git/history'
-import type { TerminalGitHubPRLink } from '../../shared/terminal/github-pr-link-detector'
 import type {
   DirEntry,
   FsChangeEvent,
@@ -27,38 +26,16 @@ import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace/s
 import type { CoworkingVerifiedRemoteFilesystem } from './coworking-verified-filesystem-types'
 import type { IGitMutationProvider } from './git-provider-mutation-contract'
 import type { GitProviderStatusOptions } from './git-provider-status-options'
+import type { PtyBackgroundStreamEvent, PtyProviderBufferSnapshot } from './pty-background-stream'
 
 export type { GitProviderMutationOptions } from './git-provider-mutation-contract'
+export type {
+  PtyBackgroundStreamEvent,
+  PtyProviderBufferSnapshot,
+  PtyTransientFact
+} from './pty-background-stream'
 
 // ─── PTY Provider ───────────────────────────────────────────────────
-
-/** Notification-bearing fact a thinning transport detected while it held
- *  scan authority for a backgrounded PTY (see onBackgroundStreamEvent). */
-export type PtyTransientFact =
-  | { kind: 'bell' }
-  | { kind: 'command-finished'; exitCode: number | null }
-  | { kind: 'pr-link'; link: TerminalGitHubPRLink }
-  | { kind: '2031-subscribe' }
-
-export type PtyBackgroundStreamEvent =
-  | { id: string; kind: 'backgroundMarker'; background: boolean; scanSeedAnsi?: string }
-  | { id: string; kind: 'dataGap'; droppedChars: number; sequenceChars?: number }
-  | { id: string; kind: 'transientFact'; fact: PtyTransientFact }
-
-export type PtyProviderBufferSnapshot = {
-  data: string
-  /** Authoritative normal buffer captured beside an alternate-screen frame. */
-  scrollbackAnsi?: string
-  cols: number
-  rows: number
-  cwd?: string | null
-  lastTitle?: string
-  seq: number
-  source: 'headless'
-  oscLinks?: TerminalOscLinkRange[]
-  alternateScreen?: boolean
-  pendingEscapeTailAnsi?: string
-}
 
 export type PtySpawnOptions = {
   cols: number
@@ -172,6 +149,8 @@ export type IPtyProvider = {
   supportsGitCredentialGuardHost?: (sessionId?: string) => boolean
   attach(id: string): Promise<void>
   hasPty?: (id: string) => boolean
+  /** Why: restored hook state is safe to reap only after the provider proves this exact PTY absent. */
+  probePtyLiveness?: (id: string) => Promise<boolean | null>
   write(id: string, data: string): void
   resize(id: string, cols: number, rows: number): void
   /**

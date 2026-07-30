@@ -51,6 +51,12 @@ export function getParkedTerminalWatcherTabIds(): string[] {
   return Array.from(parkedWatchersByTabId.keys())
 }
 
+// Why: child mount effects run before the host disposes the prior parked
+// watcher, so this identifies a reveal remount without delaying normal reconnects.
+export function isTerminalTabParked(tabId: string): boolean {
+  return (parkedWatchersByTabId.get(tabId)?.disposersByPtyId.size ?? 0) > 0
+}
+
 export function disposeParkedTabWatchers(tabId: string): void {
   const entry = parkedWatchersByTabId.get(tabId)
   if (!entry) {

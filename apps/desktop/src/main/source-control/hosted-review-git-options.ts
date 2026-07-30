@@ -6,6 +6,7 @@ export type HostedReviewLocalGitOptions = {
 export type HostedReviewExecutionOptions = {
   localGitExecOptions?: HostedReviewLocalGitOptions
   signal?: AbortSignal
+  sharedLinkPaths?: readonly string[]
 }
 
 export function getHostedReviewLocalGitOptions(
