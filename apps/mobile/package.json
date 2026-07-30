@@ -75,6 +75,7 @@
     "expo-secure-store": "catalog:mobile",
     "expo-status-bar": "catalog:mobile",
     "expo-thinking-orbs": "catalog:mobile",
+    "expo-widgets": "catalog:mobile",
     "katex": "catalog:",
     "lowlight": "catalog:mobile",
     "phosphor-react-native": "catalog:mobile",

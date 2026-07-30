@@ -23,6 +23,8 @@ type HostWorktreeInfo = {
   hostId: string
   totalWorktrees: number
   activeCount: number
+  activeWorktrees?: WorktreeSummary[]
+  attentionCount?: number
   lastActiveWorktree: WorktreeSummary | null
 }
 
