@@ -3,15 +3,15 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { Stack, useRouter } from 'expo-router'
-import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { View, type TextStyle, type ViewStyle } from 'react-native'
 import { Uniwind, useCSSVariable, useResolveClassNames, useUniwind } from 'uniwind'
 
 import { IconContext } from '@/components/uniwind-icons'
 import { SafeAreaListener, SafeAreaProvider } from '@/components/uniwind-native-components'
 
+import { MobileThemeProvider } from '../src/appearance/theme-preference'
 import { MobileGlassAvailabilityProvider } from '../src/components/glass/availability'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { MobileLoaderStyleProvider } from '../src/loading/loader-style-context'
@@ -27,11 +27,6 @@ function resolveCssColor(value: string | number | undefined, fallback: string): 
   return typeof value === 'string' ? value : fallback
 }
 
-// Why: keeps the native splash screen visible until the React tree is mounted
-// and ready to render. Without this the user sees a blank white/black frame
-// between the native splash and the first React paint.
-SplashScreen.preventAutoHideAsync()
-
 // Why: without this, expo-notifications silently drops notifications when
 // the app is in the foreground. Setting all three to true makes iOS/Android
 // display the banner, play the sound, and show the badge even while the
@@ -46,7 +41,15 @@ Notifications.setNotificationHandler({
   })
 })
 
-export default function RootLayout() {
+export default function RootLayout(): React.JSX.Element {
+  return (
+    <MobileThemeProvider>
+      <ThemedRootLayout />
+    </MobileThemeProvider>
+  )
+}
+
+function ThemedRootLayout(): React.JSX.Element {
   const router = useRouter()
   const handledNotificationIdsRef = useRef<Set<string>>(new Set())
   const { theme } = useUniwind()
@@ -198,14 +201,6 @@ export default function RootLayout() {
     }
   }, [router])
 
-  // Why: hide the native splash only once the navigation Stack has been laid
-  // out — this is the earliest moment the user will see actual app content.
-  // Previously the splash hid when a placeholder View rendered, leaving a
-  // grey gap before the real screen appeared.
-  const onNavigatorLayout = useCallback(async () => {
-    await SplashScreen.hideAsync()
-  }, [])
-
   return (
     <SafeAreaProvider>
       <SafeAreaListener
@@ -219,7 +214,7 @@ export default function RootLayout() {
             <RpcClientProvider
               createClientOverride={__DEV__ ? createMobileUiLabRpcClient : undefined}
             >
-              <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
+              <View className="bg-background flex-1">
                 <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
                 <MobileGlassAvailabilityProvider>
                   <ThemeProvider value={navigationTheme}>

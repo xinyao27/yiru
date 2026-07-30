@@ -87,7 +87,7 @@ export function ContributionCharts({
                 {formatMetricValue(point.value, metric)}
               </Text>
               <View
-                className="bg-chart-1 w-full"
+                className="bg-muted-foreground w-full"
                 style={{
                   height: `${barHeight(
                     point.value,
@@ -105,7 +105,7 @@ export function ContributionCharts({
 }
 
 function AreaPlot({ points }: { points: number[] }): React.JSX.Element {
-  const [chartValue, borderValue] = useCSSVariable(['--color-chart-1', '--color-border'])
+  const [chartValue, borderValue] = useCSSVariable(['--color-muted-foreground', '--color-border'])
   const chartColor = resolveCssString(chartValue)
   const borderColor = resolveCssString(borderValue)
   const coordinates = chartCoordinates(points)

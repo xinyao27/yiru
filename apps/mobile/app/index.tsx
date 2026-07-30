@@ -30,13 +30,12 @@ import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { MobileHostCard } from '../src/components/host-card'
+import { refreshHomeStatsForHost } from '../src/home/stats-refresh'
 import {
   getHomeStatsByHost,
   hydrateHomeStatsByHost,
-  subscribeHomeStatsByHost,
-  updateHomeStatsByHost
+  subscribeHomeStatsByHost
 } from '../src/home/stats-state'
-import { parseRuntimeStatsSummary } from '../src/home/stats-summary'
 import { translate } from '../src/i18n/translate'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
@@ -94,27 +93,6 @@ function clientKey(client: RpcClient): number {
     clientIdentities.set(client, id)
   }
   return id
-}
-
-function fetchStats(client: RpcClient, hostId: string, disposed: () => boolean) {
-  client
-    .sendRequest('stats.summary')
-    .then((response) => {
-      if (disposed()) {
-        return
-      }
-      if (response.ok) {
-        const summary = parseRuntimeStatsSummary(response.result)
-        if (!summary) {
-          return
-        }
-        updateHomeStatsByHost((previous) => ({
-          ...previous,
-          [hostId]: summary
-        }))
-      }
-    })
-    .catch(() => {})
 }
 
 function fetchWorktreeInfo(
@@ -344,7 +322,7 @@ export default function HomeScreen() {
       })
       for (const entry of allClientsRef.current) {
         if (entry.client.getState() === 'connected') {
-          fetchStats(entry.client, entry.hostId, () => stale)
+          void refreshHomeStatsForHost(entry.client, entry.hostId, () => stale)
           fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => stale)
           fetchAccountsSnapshot(entry.client, entry.hostId, setAccountsByHost, () => stale)
         }
@@ -458,7 +436,7 @@ export default function HomeScreen() {
           }
           if (!statsFetched) {
             statsFetched = true
-            fetchStats(entry.client, entry.hostId, () => false)
+            void refreshHomeStatsForHost(entry.client, entry.hostId)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
           }
         } else {

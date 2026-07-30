@@ -2251,8 +2251,10 @@ export class YiruRuntimeService {
     }
   }
 
-  async getStatsSummary(): Promise<StatsSummary | null> {
-    return this.stats ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined) : null
+  async getStatsSummary(refreshUsage = false): Promise<StatsSummary | null> {
+    return this.stats
+      ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined, refreshUsage)
+      : null
   }
 
   getMemorySnapshot(): Promise<MemorySnapshot> {

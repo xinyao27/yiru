@@ -3,9 +3,17 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 
 import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 
+import {
+  MOBILE_THEME_MODES,
+  type MobileThemeMode,
+  useMobileTheme
+} from '../src/appearance/theme-preference'
 import { MobileContentSection } from '../src/components/content-section'
+import { MobileGlassSegmentedControl } from '../src/components/glass/segmented-control'
+import type { MobileGlassSegmentOption } from '../src/components/glass/segmented-control-props'
 import { LoadingIndicator } from '../src/components/loading-indicator'
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
+import { translate } from '../src/i18n/translate'
 import {
   getMobileLoaderStyleLabel,
   MOBILE_LOADER_STYLES,
@@ -14,9 +22,18 @@ import {
 import { useMobileLoaderStyle } from '../src/loading/loader-style-context'
 
 export default function AppearanceSettingsScreen(): React.JSX.Element {
-  const [pickerOpen, setPickerOpen] = useState(false)
+  const [loaderPickerOpen, setLoaderPickerOpen] = useState(false)
+  const { themeMode, setThemeMode } = useMobileTheme()
   const { loaderStyle, setLoaderStyle } = useMobileLoaderStyle()
-  const options = useMemo<PickerOption<MobileLoaderStyle>[]>(
+  const themeOptions = useMemo<MobileGlassSegmentOption<MobileThemeMode>[]>(
+    () =>
+      MOBILE_THEME_MODES.map((mode) => ({
+        value: mode,
+        label: getThemeModeLabel(mode)
+      })),
+    []
+  )
+  const loaderOptions = useMemo<PickerOption<MobileLoaderStyle>[]>(
     () =>
       MOBILE_LOADER_STYLES.map((style) => ({
         value: style,
@@ -30,22 +47,46 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
     <View className="bg-background flex-1 px-4 pt-4">
       <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
         <Text className="text-muted-foreground mb-1 px-1 text-xs font-semibold tracking-wide">
-          LOADING
+          {translate('mobile.appearance.theme.section', 'THEME')}
         </Text>
         <Text className="text-muted-foreground px-1 text-xs leading-5">
-          Choose the animation shown while agents are working on this device.
+          {translate(
+            'mobile.appearance.theme.description',
+            'Choose how Yiru looks on this device.'
+          )}
+        </Text>
+        <View className="mt-3">
+          <MobileGlassSegmentedControl
+            accessibilityLabel={translate('mobile.appearance.theme.label', 'Theme')}
+            onChange={setThemeMode}
+            options={themeOptions}
+            value={themeMode}
+          />
+        </View>
+
+        <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
+          {translate('mobile.appearance.loading.section', 'LOADING')}
+        </Text>
+        <Text className="text-muted-foreground px-1 text-xs leading-5">
+          {translate(
+            'mobile.appearance.loading.description',
+            'Choose the animation shown while agents are working on this device.'
+          )}
         </Text>
         <MobileContentSection className="mt-2">
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={translate('mobile.appearance.loader.label', 'Loader')}
             className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
-            onPress={() => setPickerOpen(true)}
+            onPress={() => setLoaderPickerOpen(true)}
           >
             <View className="w-5 items-center">
               <LoadingIndicator size={20} />
             </View>
             <View className="flex-1">
-              <Text className="text-foreground text-sm font-medium">Loader</Text>
+              <Text className="text-foreground text-sm font-medium">
+                {translate('mobile.appearance.loader.label', 'Loader')}
+              </Text>
               <Text className="text-muted-foreground mt-1 text-xs">
                 {getMobileLoaderStyleLabel(loaderStyle)}
               </Text>
@@ -58,13 +99,24 @@ export default function AppearanceSettingsScreen(): React.JSX.Element {
       </ScrollView>
 
       <PickerModal<MobileLoaderStyle>
-        visible={pickerOpen}
-        title="Loader"
-        options={options}
+        visible={loaderPickerOpen}
+        title={translate('mobile.appearance.loader.label', 'Loader')}
+        options={loaderOptions}
         selected={loaderStyle}
         onSelect={setLoaderStyle}
-        onClose={() => setPickerOpen(false)}
+        onClose={() => setLoaderPickerOpen(false)}
       />
     </View>
   )
+}
+
+function getThemeModeLabel(mode: MobileThemeMode): string {
+  switch (mode) {
+    case 'system':
+      return translate('mobile.appearance.theme.system.label', 'System')
+    case 'light':
+      return translate('mobile.appearance.theme.light.label', 'Light')
+    case 'dark':
+      return translate('mobile.appearance.theme.dark.label', 'Dark')
+  }
 }

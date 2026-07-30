@@ -78,14 +78,6 @@
       "expo-router",
       "./plugins/android-respect-rotation-lock.cjs",
       [
-        "expo-splash-screen",
-        {
-          "image": "./assets/splash-icon.png",
-          "imageWidth": 280,
-          "backgroundColor": "#000000"
-        }
-      ],
-      [
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",

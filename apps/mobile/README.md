@@ -165,5 +165,5 @@ apps/mobile/
 ├── src/
 │   ├── terminal/          # Terminal WebView and xterm bridge
 │   └── transport/         # WebSocket RPC client
-└── assets/                # App icons and splash screen
+└── assets/                # App icons and other bundled images
 ```

@@ -215,7 +215,6 @@ writePng(join(mobileAssetsDir, 'wordmark.png'), resizeImage(uiMask, 512, 320))
 writePng(join(mobileAssetsDir, 'icon.png'), mobileIcon)
 writePng(join(mobileAssetsDir, 'adaptive-icon.png'), adaptiveWordmark)
 writePng(join(mobileAssetsDir, 'adaptive-icon-monochrome.png'), adaptiveMask)
-writePng(join(mobileAssetsDir, 'splash-icon.png'), squareWordmark)
 writePng(join(mobileAssetsDir, 'notification-icon.png'), fitOnCanvas(adaptiveMask, 96, 96, 5))
 
 const favicon = resizeImage(largeClassicIcon, 48, 48)

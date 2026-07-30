@@ -24,14 +24,15 @@ export type StatsUsageStores = {
 
 export async function buildStatsSummary(
   stats: StatsCollector,
-  usageStores?: StatsUsageStores
+  usageStores?: StatsUsageStores,
+  refreshUsage = false
 ): Promise<StatsSummary> {
   const activitySummary = stats.getSummary()
   if (usageStores) {
     try {
       return {
         ...activitySummary,
-        ...(await buildUsageStats(usageStores))
+        ...(await buildUsageStats(usageStores, refreshUsage))
       }
     } catch (error) {
       console.error('[stats] Failed to refresh attributed usage:', error)
@@ -60,7 +61,8 @@ export async function buildStatsSummary(
 }
 
 async function buildUsageStats(
-  usageStores: StatsUsageStores
+  usageStores: StatsUsageStores,
+  refreshUsage: boolean
 ): Promise<
   Pick<
     StatsSummary,
@@ -74,9 +76,9 @@ async function buildUsageStats(
   >
 > {
   await Promise.all([
-    usageStores.claude.refresh(false),
-    usageStores.codex.refresh(false),
-    usageStores.openCode.refresh(false)
+    usageStores.claude.refresh(refreshUsage),
+    usageStores.codex.refresh(refreshUsage),
+    usageStores.openCode.refresh(refreshUsage)
   ])
   const usage = buildUsageValueSnapshot({
     claude: usageStores.claude.getSnapshot('yiru', 'all'),

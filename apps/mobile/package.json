@@ -73,7 +73,6 @@
     "expo-notifications": "catalog:mobile",
     "expo-router": "catalog:mobile",
     "expo-secure-store": "catalog:mobile",
-    "expo-splash-screen": "catalog:mobile",
     "expo-status-bar": "catalog:mobile",
     "expo-thinking-orbs": "catalog:mobile",
     "katex": "catalog:",

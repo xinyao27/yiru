@@ -48,4 +48,4 @@ for tile in 06 07 09 10 12; do
     --out "$ONBOARDING_ASSETS_DIR/tile-$tile.gif" >/dev/null
 done
 
-echo "Generated Yiru app, mobile, tray, onboarding, favicon, splash, and development assets."
+echo "Generated Yiru app, mobile, tray, onboarding, favicon, and development assets."
