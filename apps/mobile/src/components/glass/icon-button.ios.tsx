@@ -4,6 +4,7 @@ import { MobileSwiftUiGlassAccessoryButton } from './swift-ui.ios'
 function systemImageForIcon(
   icon: MobileGlassIconName
 ):
+  | 'person.badge.plus'
   | 'arrow.clockwise'
   | 'arrow.up.right.square'
   | 'checkmark'
@@ -16,6 +17,7 @@ function systemImageForIcon(
   | 'chart.bar.xaxis'
   | 'ellipsis'
   | 'gearshape'
+  | 'minus'
   | 'play'
   | 'plus'
   | 'sidebar.left'
@@ -23,6 +25,8 @@ function systemImageForIcon(
   | 'trash'
   | 'xmark' {
   switch (icon) {
+    case 'add-person':
+      return 'person.badge.plus'
     case 'back':
       return 'chevron.left'
     case 'check':
@@ -43,6 +47,8 @@ function systemImageForIcon(
       return 'pencil'
     case 'insights':
       return 'chart.bar.xaxis'
+    case 'minus':
+      return 'minus'
     case 'more':
       return 'ellipsis'
     case 'play':

@@ -24,6 +24,7 @@ import { useResponsiveLayout } from '../layout/responsive-layout'
 // Why: mount-before-commit logic is anchor-agnostic, so the X-axis drawer reuses
 // the exact same gate as BottomDrawer rather than duplicating it.
 import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
+import { MobileGlassSurface } from './glass/surface'
 import { resolveRightDrawerPanelWidth } from './right-drawer-panel-width'
 
 const DISMISS_THRESHOLD = 80
@@ -186,7 +187,7 @@ function MountedRightDrawer({
         <View className="flex-1 flex-row justify-end" pointerEvents="box-none">
           <GestureDetector gesture={panGesture}>
             <Animated.View
-              className="border-l-hairline border-l-border bg-background h-full overflow-hidden rounded-l-3xl px-3"
+              className="h-full overflow-hidden rounded-l-3xl px-3"
               style={[
                 {
                   width: panelWidth,
@@ -197,6 +198,12 @@ function MountedRightDrawer({
                 drawerStyle
               ]}
             >
+              <MobileGlassSurface
+                className="absolute inset-0 rounded-l-3xl"
+                fallbackClassName="border-0 border-l-hairline border-l-border bg-background"
+                isFunctional
+                pointerEvents="none"
+              />
               <GestureDetector gesture={scrollGesture}>
                 <Animated.ScrollView
                   bounces={false}

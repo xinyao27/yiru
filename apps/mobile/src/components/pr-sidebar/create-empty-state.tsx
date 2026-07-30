@@ -21,6 +21,7 @@ import { useMobileCommitFailureRecovery } from '../../source-control/use-commit-
 import type { RpcClient } from '../../transport/rpc-client'
 import type { ConnectionState } from '../../transport/types'
 import { MobileContentSection } from '../content-section'
+import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { openMobilePrUrl } from '../pr-compose-sheet'
@@ -181,7 +182,7 @@ export function PrSidebarCreateEmptyState({
           <GitPullRequestArrow size={14} colorClassName="accent-muted-foreground" />
           <Text className="text-foreground text-xs font-semibold">Pull request</Text>
         </View>
-        <View className="flex-row items-center gap-1">
+        <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
           <MobileGlassIconButton
             accessibilityLabel="Refresh pull request"
             icon="refresh"
@@ -200,7 +201,7 @@ export function PrSidebarCreateEmptyState({
               size="small"
             />
           )}
-        </View>
+        </MobileGlassGroup>
       </View>
       <View className="gap-2 p-3">
         <Text className="text-foreground text-sm font-bold">

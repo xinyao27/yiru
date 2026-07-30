@@ -2,6 +2,7 @@ import { Stack } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Text, View, type LayoutChangeEvent } from 'react-native'
 
+import { MobileGlassGroup } from '@/components/glass/group'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 
@@ -69,7 +70,7 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
             Platform.OS === 'ios'
               ? undefined
               : () => (
-                  <View className="flex-row items-center gap-2">
+                  <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                     {showPRTrigger ? (
                       <MobileGlassIconButton
                         accessibilityLabel="Open pull request review"
@@ -82,7 +83,7 @@ export function MobileDiffReviewScreenView({ controller }: Props) {
                       icon="more"
                       onPress={() => controller.setShowOverflow(true)}
                     />
-                  </View>
+                  </MobileGlassGroup>
                 )
         }}
       />

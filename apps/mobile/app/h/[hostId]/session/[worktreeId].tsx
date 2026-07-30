@@ -37,10 +37,9 @@ import {
   DotsThree as MoreHorizontal,
   Plus,
   ArrowClockwise as RefreshCw,
-  TerminalWindow as SquareTerminal,
-  X
+  TerminalWindow as SquareTerminal
 } from '@/components/uniwind-icons'
-import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { cn } from '@/style/class-names'
 
 import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/capability'
@@ -56,6 +55,7 @@ import {
   type CustomKey
 } from '../../../../src/components/custom-key-modal'
 import { MobileGlassGroup } from '../../../../src/components/glass/group'
+import { MobileGlassHeader } from '../../../../src/components/glass/header'
 import { MobileGlassIconButton } from '../../../../src/components/glass/icon-button'
 import { MobileGlassSurface } from '../../../../src/components/glass/surface'
 import { MobileGlassTextButton } from '../../../../src/components/glass/text-button'
@@ -475,7 +475,7 @@ function DiffLineRow({
         </View>
       ) : null}
       {isCommenting ? (
-        <MobileGlassSurface className="mt-1 mr-2 ml-11 gap-2 rounded-xl p-2">
+        <MobileGlassSurface className="mt-1 mr-2 ml-11 gap-2 rounded-xl p-2" isFunctional>
           <TextInput
             className="text-foreground mr-0 h-20 min-h-20 flex-1 px-3 py-2 font-mono text-sm"
             value={commentDraft}
@@ -487,7 +487,7 @@ function DiffLineRow({
             textAlignVertical="top"
             autoFocus
           />
-          <View className="flex-row justify-end gap-1">
+          <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
             <MobileGlassTextButton
               disabled={commentsBusy}
               label="Cancel"
@@ -505,7 +505,7 @@ function DiffLineRow({
               }}
               size="small"
             />
-          </View>
+          </MobileGlassGroup>
         </MobileGlassSurface>
       ) : null}
     </View>
@@ -4494,7 +4494,7 @@ export default function SessionScreen() {
       ) : null}
       <View className="flex-1">
         {!useNativeSessionHeader ? (
-          <SafeAreaView className="border-b-border bg-background border-b" edges={['top']}>
+          <MobileGlassHeader includesTopInset>
             <View className="min-h-15 flex-row items-center gap-2 px-3 py-1">
               <MobileSessionHeaderIconButton
                 accessibilityLabel="Back to worktrees"
@@ -4523,51 +4523,55 @@ export default function SessionScreen() {
                   </Text>
                 </Pressable>
               </View>
-              {!isFloatingWorkspaceRoute ? (
-                <MobileSessionHeaderIconButton
-                  active={activePanel === 'files'}
-                  accessibilityLabel="Open file explorer"
-                  icon={Folder}
-                  onPress={() => handlePanelTap('files')}
-                />
-              ) : null}
-              {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
-                <MobileSessionHeaderIconButton
-                  active={activePanel === 'sourceControl'}
-                  accessibilityLabel="Open source control"
-                  icon={GitMerge}
-                  onPress={() => handlePanelTap('sourceControl')}
-                />
-              )}
-              {showHeaderMoreButton ? (
-                <MobileSessionHeaderIconButton
-                  active={activePanel === 'pr'}
-                  accessibilityLabel="More session actions"
-                  icon={MoreHorizontal}
-                  onPress={() => setShowHeaderMoreActions(true)}
-                />
-              ) : null}
+              <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
+                {!isFloatingWorkspaceRoute ? (
+                  <MobileSessionHeaderIconButton
+                    active={activePanel === 'files'}
+                    accessibilityLabel="Open file explorer"
+                    icon={Folder}
+                    onPress={() => handlePanelTap('files')}
+                  />
+                ) : null}
+                {!isFolderWorkspaceRoute && !isFloatingWorkspaceRoute && (
+                  <MobileSessionHeaderIconButton
+                    active={activePanel === 'sourceControl'}
+                    accessibilityLabel="Open source control"
+                    icon={GitMerge}
+                    onPress={() => handlePanelTap('sourceControl')}
+                  />
+                )}
+                {showHeaderMoreButton ? (
+                  <MobileSessionHeaderIconButton
+                    active={activePanel === 'pr'}
+                    accessibilityLabel="More session actions"
+                    icon={MoreHorizontal}
+                    onPress={() => setShowHeaderMoreActions(true)}
+                  />
+                ) : null}
+              </MobileGlassGroup>
             </View>
-          </SafeAreaView>
+          </MobileGlassHeader>
         ) : null}
 
         {useNativeSessionHeader && connState !== 'connected' ? (
-          <Pressable
-            accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
-            accessibilityRole={showConnectionRetry ? 'button' : undefined}
-            className="border-hairline border-border bg-card active:bg-accent mx-3 mt-2 flex-row items-center gap-2 rounded-xl px-3 py-2"
-            disabled={!showConnectionRetry}
-            onPress={() => {
-              if (hostId) {
-                void forceReconnectHost(hostId)
-              }
-            }}
-          >
-            <StatusDot state={connState} />
-            <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
-              {terminalSummary}
-            </Text>
-          </Pressable>
+          <MobileGlassSurface className="mx-3 mt-2 overflow-hidden rounded-xl" isFunctional>
+            <Pressable
+              accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
+              accessibilityRole={showConnectionRetry ? 'button' : undefined}
+              className="active:bg-accent flex-row items-center gap-2 rounded-xl px-3 py-2"
+              disabled={!showConnectionRetry}
+              onPress={() => {
+                if (hostId) {
+                  void forceReconnectHost(hostId)
+                }
+              }}
+            >
+              <StatusDot state={connState} />
+              <Text className="text-muted-foreground flex-1 text-xs" numberOfLines={1}>
+                {terminalSummary}
+              </Text>
+            </Pressable>
+          </MobileGlassSurface>
         ) : null}
 
         {visibleTabs.length > 0 ? (
@@ -4605,14 +4609,12 @@ export default function SessionScreen() {
               <MobileGlassSurface className="mx-3 mt-2 flex-row items-start gap-2 rounded-xl px-3 py-2">
                 <AlertTriangle size={16} colorClassName="accent-amber-500" />
                 <Text className="text-foreground flex-1 text-xs leading-4">{createWarning}</Text>
-                <Pressable
-                  className="-mt-1 h-6 w-6 items-center justify-center"
-                  onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
+                <MobileGlassIconButton
                   accessibilityLabel="Dismiss workspace creation warning"
-                  hitSlop={8}
-                >
-                  <X size={16} colorClassName="accent-muted-foreground" />
-                </Pressable>
+                  icon="close"
+                  onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
+                  size="small"
+                />
               </MobileGlassSurface>
             ) : null}
 
@@ -4800,7 +4802,7 @@ export default function SessionScreen() {
                 ]}
               >
                 {/* Accessory keys */}
-                <View className="flex-row items-center gap-2">
+                <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                   {/* Why: a fixed, always-visible escape hatch from the open
                   keyboard. Kept outside the horizontal ScrollView so it does
                   not scroll away, and out of the terminal-byte shortcut path so
@@ -4904,7 +4906,7 @@ export default function SessionScreen() {
                       accessibilityLabel="Add custom shortcut"
                     />
                   </ScrollView>
-                </View>
+                </MobileGlassGroup>
 
                 {/* Input bar */}
                 <MobileTerminalInputBar

@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 
 import { MobileContentSection } from '../../components/content-section'
+import { MobileGlassGroup } from '../../components/glass/group'
 import { MobileGlassIconButton } from '../../components/glass/icon-button'
 import { MobileGlassSurface } from '../../components/glass/surface'
 import { MobileGlassTextButton } from '../../components/glass/text-button'
@@ -137,7 +138,7 @@ export function MobileNativeChatQuestion({
         />
       ) : null}
 
-      <View className="flex-row items-end gap-2">
+      <MobileGlassGroup className="flex-row items-end gap-2" spacing={8}>
         <MobileGlassSurface
           className="max-h-30 min-h-10 flex-1 overflow-hidden rounded-xl"
           isInteractive
@@ -161,7 +162,7 @@ export function MobileNativeChatQuestion({
           onPress={() => void submitFreeText()}
           size="regular"
         />
-      </View>
+      </MobileGlassGroup>
     </MobileContentSection>
   )
 }

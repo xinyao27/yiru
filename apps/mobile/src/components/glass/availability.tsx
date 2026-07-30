@@ -44,10 +44,6 @@ export function MobileGlassAvailabilityProvider({
   )
 }
 
-export function MobileGlassFallbackScope({ children }: MobileGlassScopeProps): React.JSX.Element {
-  return <MobileGlassAvailabilityContext value={false}>{children}</MobileGlassAvailabilityContext>
-}
-
 export function useMobileGlassAvailable(): boolean {
   return useContext(MobileGlassAvailabilityContext)
 }

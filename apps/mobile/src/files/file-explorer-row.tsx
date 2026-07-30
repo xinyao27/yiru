@@ -12,6 +12,7 @@ import {
 import { cn } from '@/style/class-names'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
 
+import { MobileGlassTextButton } from '../components/glass/text-button'
 import { triggerSelection } from '../platform/haptics'
 import { fileExplorerStyles as styles } from './file-explorer-styles'
 import { canPreviewMobileFileRow } from './file-preview-navigation'
@@ -47,19 +48,15 @@ export function MobileFileExplorerRow(props: Props) {
         <Text className="text-destructive min-w-0 flex-1 text-xs" numberOfLines={1}>
           {item.message || 'Unable to load folder'}
         </Text>
-        <Pressable
-          className={cn(
-            'min-h-7 items-center justify-center border-hairline border-border px-3',
-            styles.rowPressedActive
-          )}
+        <MobileGlassTextButton
+          accessibilityLabel={`Retry loading ${item.relativePath}`}
+          label="Retry"
           onPress={() => {
             triggerSelection()
             onRetryDirectory(item.relativePath)
           }}
-          accessibilityLabel={`Retry loading ${item.relativePath}`}
-        >
-          <Text className="text-foreground text-xs font-semibold">Retry</Text>
-        </Pressable>
+          size="small"
+        />
       </View>
     )
   }

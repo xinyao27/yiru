@@ -36,7 +36,6 @@ export const mobilePrSidebarStyles = {
 
   // Trailing control area in a reviewer row (add/remove button or spinner).
   rowTrailing: cn('min-h-8 min-w-8 items-center justify-center rounded-full'),
-  iconButton: cn('min-h-8 min-w-8 items-center justify-center rounded-full'),
 
   pickerStateArea: cn('py-4 items-center gap-2')
 } as const

@@ -47,6 +47,7 @@ import { useLastVisitedWorktreeRepoId } from '../worktree/use-last-visited-workt
 import { MobileAgentIcon } from './agent-icon'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 import { BottomDrawerModalHost } from './bottom-drawer-modal-host'
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassPressable } from './glass/pressable'
 import { MobileGlassSurface } from './glass/surface'
 import { MobileGlassTextButton } from './glass/text-button'
@@ -953,7 +954,7 @@ function NewWorktreeModalContent({
                     </View>
                     <View className="border-border bg-secondary rounded-2xl border p-3">
                       {setupRunPolicy === 'ask' ? (
-                        <View className="mb-2 flex-row gap-2">
+                        <MobileGlassGroup className="mb-2 flex-row gap-2" spacing={8}>
                           <MobileGlassPressable
                             className="flex-1 rounded-full"
                             contentClassName="min-h-8 items-center justify-center rounded-full px-3"
@@ -974,7 +975,7 @@ function NewWorktreeModalContent({
                           >
                             <Text className="text-foreground text-sm">Skip</Text>
                           </MobileGlassPressable>
-                        </View>
+                        </MobileGlassGroup>
                       ) : (
                         <View className="mb-2 flex-row items-center justify-between">
                           <Text className="text-muted-foreground text-xs">Run setup command</Text>

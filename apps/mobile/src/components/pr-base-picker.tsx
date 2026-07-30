@@ -105,7 +105,7 @@ export function MobilePrBasePicker({
         <ChevronDown size={14} colorClassName="accent-muted-foreground" />
       </MobileGlassSurface>
       {focused && results.length > 0 ? (
-        <MobileGlassSurface className="mt-1 overflow-hidden rounded-xl">
+        <MobileGlassSurface className="mt-1 overflow-hidden rounded-xl" isFunctional>
           {results.map((ref) => (
             <Pressable
               key={ref}

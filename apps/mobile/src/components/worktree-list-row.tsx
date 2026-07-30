@@ -15,6 +15,7 @@ import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { triggerMediumImpact } from '../platform/haptics'
 import { AgentSpinner } from './agent-spinner'
+import { MobileGlassPressable } from './glass/pressable'
 import { MobileRepoIcon } from './repo-icon'
 import { WorktreeAgentList } from './worktree-agent-list'
 import { WorktreeMetaGlyphs, prStateColorClasses } from './worktree-meta-glyphs'
@@ -164,8 +165,9 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
           <WorktreeAgentList agents={item.agents} now={now} unvisited={item.unread} />
         ) : null}
         {lineageChildCount > 0 && onToggleLineage ? (
-          <Pressable
-            className="bg-secondary mt-1 flex-row items-center gap-1 self-start rounded-full px-2 py-1"
+          <MobileGlassPressable
+            className="mt-1 self-start rounded-full"
+            contentClassName="flex-row items-center gap-1 rounded-full px-2 py-1"
             onPress={(event) => {
               event.stopPropagation()
               onToggleLineage(item)
@@ -180,7 +182,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             <Text className="text-muted-foreground text-xs">
               {lineageChildCount} {lineageChildCount === 1 ? 'child' : 'children'}
             </Text>
-          </Pressable>
+          </MobileGlassPressable>
         ) : null}
       </View>
 

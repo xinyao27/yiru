@@ -1,6 +1,7 @@
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
 
 import { MobileContentSection } from './content-section'
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassTextButton } from './glass/text-button'
 
 // Why: auth-failed is no longer necessarily terminal (issue #5200) — a
@@ -23,11 +24,11 @@ export function AuthFailedBanner({
       <Text className="text-destructive mb-2 text-xs">
         Authentication failed — try reconnecting first; if it keeps failing, re-pair from desktop.
       </Text>
-      <View className="flex-row gap-4">
+      <MobileGlassGroup className="flex-row gap-2" spacing={8}>
         {canRetry && <MobileGlassTextButton label="Retry" onPress={onRetry} size="small" />}
         <MobileGlassTextButton label="Re-pair" onPress={onRepair} size="small" />
         <MobileGlassTextButton isDestructive label="Remove" onPress={onRemove} size="small" />
-      </View>
+      </MobileGlassGroup>
     </MobileContentSection>
   )
 }

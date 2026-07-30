@@ -6,6 +6,7 @@ import type { MobilePrActions } from '../../session/pr/use-actions'
 import { unlinkMobilePr } from '../../source-control/pr-link'
 import type { RpcClient } from '../../transport/rpc-client'
 import { ConfirmModal } from '../confirm-modal'
+import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { resolveMobilePrMergeMethod, resolvePrActionAvailability } from './pr-actions-state'
 import { canShowMobilePRAutoMergeControl } from './pr-auto-merge-availability'
@@ -153,7 +154,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
       ) : null}
 
       {showSecondary ? (
-        <View className="flex-row items-stretch gap-2">
+        <MobileGlassGroup className="flex-row items-stretch gap-2" spacing={8}>
           {avail.canClose || avail.canReopen ? (
             stateBusy ? (
               <ActivityIndicator colorClassName="accent-muted-foreground" />
@@ -187,7 +188,7 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
               />
             )
           ) : null}
-        </View>
+        </MobileGlassGroup>
       ) : null}
 
       {actionError ? (

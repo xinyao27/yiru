@@ -756,7 +756,7 @@ export default function HomeScreen() {
               {/* ─── Quick actions ─── */}
               <View className="gap-2">
                 <SectionHeading>Quick Actions</SectionHeading>
-                <View className="flex-row gap-2 px-2">
+                <MobileGlassGroup className="flex-row gap-2 px-2" spacing={8}>
                   <MobileGlassTextButton
                     label="Pair Desktop"
                     onPress={() => router.push('/pair-scan')}
@@ -771,7 +771,7 @@ export default function HomeScreen() {
                       }
                     }}
                   />
-                </View>
+                </MobileGlassGroup>
               </View>
 
               {/* ─── Account usage ─── */}

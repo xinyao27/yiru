@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { View, Text, TextInput, type KeyboardTypeOptions } from 'react-native'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassSurface } from './glass/surface'
 import { MobileGlassTextButton } from './glass/text-button'
 
@@ -81,7 +82,7 @@ export function TextInputModal({
         />
       </MobileGlassSurface>
 
-      <View className="mt-3 flex-row justify-end gap-2">
+      <MobileGlassGroup className="mt-3 flex-row justify-end gap-2" spacing={8}>
         <MobileGlassTextButton label="Cancel" onPress={onCancel} />
         <MobileGlassTextButton
           disabled={!canSubmit}
@@ -89,7 +90,7 @@ export function TextInputModal({
           label={submitLabel}
           onPress={handleSubmit}
         />
-      </View>
+      </MobileGlassGroup>
     </BottomDrawer>
   )
 }

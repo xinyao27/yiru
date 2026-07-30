@@ -5,6 +5,7 @@ import { ActivityIndicator, BackHandler, ScrollView, Text, View } from 'react-na
 import { BellRinging as BellRing } from '@/components/uniwind-icons'
 import { SafeAreaView } from '@/components/uniwind-native-components'
 
+import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassSurface } from '../src/components/glass/surface'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { YiruLogo } from '../src/components/yiru-logo'
@@ -84,35 +85,36 @@ export default function NotificationOptInScreen() {
               {error}
             </Text>
           ) : null}
-          {busyChoice === 'enable' ? (
-            <View className="min-h-11 items-center justify-center">
-              <ActivityIndicator colorClassName="accent-primary-foreground" />
-            </View>
-          ) : (
-            <MobileGlassTextButton
-              accessibilityLabel="Enable agent notifications"
-              disabled={busyChoice !== null}
-              isFullWidth
-              isProminent
-              label="Enable notifications"
-              onPress={() => void choose('enable')}
-              size="large"
-            />
-          )}
-          {busyChoice === 'skip' ? (
-            <View className="mt-2 min-h-11 items-center justify-center">
-              <ActivityIndicator colorClassName="accent-muted-foreground" />
-            </View>
-          ) : (
-            <MobileGlassTextButton
-              className="mt-2"
-              disabled={busyChoice !== null}
-              isFullWidth
-              label="Not now"
-              onPress={() => void choose('skip')}
-              size="large"
-            />
-          )}
+          <MobileGlassGroup className="gap-2" spacing={8}>
+            {busyChoice === 'enable' ? (
+              <View className="min-h-11 items-center justify-center">
+                <ActivityIndicator colorClassName="accent-primary-foreground" />
+              </View>
+            ) : (
+              <MobileGlassTextButton
+                accessibilityLabel="Enable agent notifications"
+                disabled={busyChoice !== null}
+                isFullWidth
+                isProminent
+                label="Enable notifications"
+                onPress={() => void choose('enable')}
+                size="large"
+              />
+            )}
+            {busyChoice === 'skip' ? (
+              <View className="min-h-11 items-center justify-center">
+                <ActivityIndicator colorClassName="accent-muted-foreground" />
+              </View>
+            ) : (
+              <MobileGlassTextButton
+                disabled={busyChoice !== null}
+                isFullWidth
+                label="Not now"
+                onPress={() => void choose('skip')}
+                size="large"
+              />
+            )}
+          </MobileGlassGroup>
           <Text className="text-muted-foreground mt-2 text-center text-xs leading-5">
             You can change this any time in Settings.
           </Text>

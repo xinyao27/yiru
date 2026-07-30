@@ -1,5 +1,6 @@
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
 
+import { MobileGlassGroup } from '../../components/glass/group'
 import { MobileGlassPressable } from '../../components/glass/pressable'
 import type { MobileChatPermission } from './permission'
 
@@ -15,7 +16,7 @@ export function MobileNativeChatPermissionActions({
   onRespond
 }: MobileNativeChatPermissionActionsProps): React.JSX.Element {
   return (
-    <View className="flex-row flex-wrap gap-2">
+    <MobileGlassGroup className="flex-row flex-wrap gap-2" spacing={8}>
       {options.map((option, index) => (
         <MobileGlassPressable
           key={`${option.send}:${option.label}`}
@@ -29,6 +30,6 @@ export function MobileNativeChatPermissionActions({
           <Text className="text-foreground text-sm font-semibold">{option.label}</Text>
         </MobileGlassPressable>
       ))}
-    </View>
+    </MobileGlassGroup>
   )
 }

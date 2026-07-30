@@ -29,6 +29,7 @@ import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
 import { MobileContentSection } from '../../../src/components/content-section'
+import { MobileGlassGroup } from '../../../src/components/glass/group'
 import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
@@ -1074,9 +1075,7 @@ export function HostScreen({
         <View className="mb-3 flex-row items-center justify-between px-1">
           <Text className="text-foreground text-sm">Filter</Text>
           {activeFilterCount > 0 && (
-            <Pressable onPress={clearFilters}>
-              <Text className="text-muted-foreground text-xs">Clear filters</Text>
-            </Pressable>
+            <MobileGlassTextButton label="Clear filters" onPress={clearFilters} size="small" />
           )}
         </View>
 
@@ -1148,7 +1147,7 @@ export function HostScreen({
                 Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
               </Text>
             </View>
-            <View className="flex-row gap-2">
+            <MobileGlassGroup className="flex-row gap-2" spacing={8}>
               <MobileGlassTextButton
                 className="flex-1"
                 isFullWidth
@@ -1168,7 +1167,7 @@ export function HostScreen({
                   setActionTarget(null)
                 }}
               />
-            </View>
+            </MobileGlassGroup>
           </View>
         ) : (
           <ActionSheetContent

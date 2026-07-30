@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { ConnectionLog } from '../src/components/connection-log'
+import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
@@ -167,7 +168,7 @@ export default function PairConfirmScreen() {
             <Text className="text-muted-foreground mb-6 max-w-lg self-center text-center text-sm leading-5">
               You opened a pairing link from your desktop. Confirm to add it to your hosts.
             </Text>
-            <View className="w-full max-w-sm gap-2 self-center">
+            <MobileGlassGroup className="w-full max-w-sm gap-2 self-center" spacing={8}>
               <MobileGlassTextButton
                 isFullWidth
                 isProminent
@@ -176,7 +177,7 @@ export default function PairConfirmScreen() {
                 size="large"
               />
               <MobileGlassTextButton isFullWidth label="Cancel" onPress={cancel} size="large" />
-            </View>
+            </MobileGlassGroup>
           </>
         )}
 

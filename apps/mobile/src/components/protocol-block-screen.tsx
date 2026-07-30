@@ -4,6 +4,7 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import { router } from 'expo-router'
 import { Linking, Platform, Text, View } from 'react-native'
 
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassSurface } from './glass/surface'
 import { MobileGlassTextButton } from './glass/text-button'
 
@@ -35,26 +36,27 @@ export function ProtocolBlockScreen({ verdict }: Props) {
         <Text className="text-muted-foreground mb-4 text-sm leading-5">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
             updates continue to use the repository release page. */}
-        <MobileGlassTextButton
-          className="mb-2"
-          isFullWidth
-          isProminent
-          label={primaryAction.label}
-          onPress={() => {
-            void Linking.openURL(primaryAction.url)
-          }}
-          size="large"
-        />
-        <MobileGlassTextButton
-          isFullWidth
-          label="Back to hosts"
-          onPress={() => {
-            // Why: route back to the host list so the user can pair a
-            // different host instead of getting trapped on this screen.
-            router.replace('/')
-          }}
-          size="large"
-        />
+        <MobileGlassGroup className="gap-2" spacing={8}>
+          <MobileGlassTextButton
+            isFullWidth
+            isProminent
+            label={primaryAction.label}
+            onPress={() => {
+              void Linking.openURL(primaryAction.url)
+            }}
+            size="large"
+          />
+          <MobileGlassTextButton
+            isFullWidth
+            label="Back to hosts"
+            onPress={() => {
+              // Why: route back to the host list so the user can pair a
+              // different host instead of getting trapped on this screen.
+              router.replace('/')
+            }}
+            size="large"
+          />
+        </MobileGlassGroup>
         <Text className="text-muted-foreground mt-3 text-xs leading-5">{recoveryNote}</Text>
       </MobileGlassSurface>
     </View>

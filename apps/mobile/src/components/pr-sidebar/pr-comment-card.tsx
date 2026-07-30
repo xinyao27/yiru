@@ -6,6 +6,7 @@ import { cn } from '@/style/class-names'
 
 import { isResolvableComment } from '../../session/pr/comment-actions'
 import { MobileContentSection } from '../content-section'
+import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'
 import { MobileGlassTextButton } from '../glass/text-button'
 import { CommentMarkdown } from './comment-markdown'
@@ -129,7 +130,7 @@ export const PRCommentCard = memo(function PRCommentCard({
         <Reactions reactions={comment.reactions} />
       </View>
       {actions ? (
-        <View className="flex-row gap-2 px-3 pt-1 pb-2">
+        <MobileGlassGroup className="flex-row gap-2 px-3 pt-1 pb-2" spacing={8}>
           <MobileGlassTextButton
             accessibilityLabel="Reply to comment"
             disabled={replyBusy}
@@ -146,7 +147,7 @@ export const PRCommentCard = memo(function PRCommentCard({
               size="small"
             />
           ) : null}
-        </View>
+        </MobileGlassGroup>
       ) : null}
       {replyOpen && actions ? (
         <View className="px-3 pb-3">

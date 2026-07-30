@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native'
 
+import { MobileGlassGroup } from '@/components/glass/group'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 
 type Props = {
@@ -38,23 +39,25 @@ export function MobileSourceControlHeader({
           {worktreeLabel}
         </Text>
       </View>
-      {onOpenPrWeb ? (
+      <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
+        {onOpenPrWeb ? (
+          <MobileGlassIconButton
+            accessibilityLabel={
+              prNumber != null
+                ? `Open pull request #${prNumber} on the web`
+                : 'Open pull request on the web'
+            }
+            icon="external"
+            onPress={onOpenPrWeb}
+          />
+        ) : null}
         <MobileGlassIconButton
-          accessibilityLabel={
-            prNumber != null
-              ? `Open pull request #${prNumber} on the web`
-              : 'Open pull request on the web'
-          }
-          icon="external"
-          onPress={onOpenPrWeb}
+          accessibilityLabel="Refresh source control"
+          disabled={ioBusy}
+          icon="refresh"
+          onPress={onRefresh}
         />
-      ) : null}
-      <MobileGlassIconButton
-        accessibilityLabel="Refresh source control"
-        disabled={ioBusy}
-        icon="refresh"
-        onPress={onRefresh}
-      />
+      </MobileGlassGroup>
     </View>
   )
 }

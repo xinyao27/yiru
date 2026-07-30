@@ -2,6 +2,8 @@ import { Stack } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
+import { MobileGlassGroup } from '@/components/glass/group'
+import { MobileGlassHeader } from '@/components/glass/header'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassTextButton } from '@/components/glass/text-button'
 import { cn } from '@/style/class-names'
@@ -336,7 +338,7 @@ export function MobileSourceControlPanel({
               Platform.OS === 'ios'
                 ? undefined
                 : () => (
-                    <View className="flex-row items-center gap-2">
+                    <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
                       {prWebUrl ? (
                         <MobileGlassIconButton
                           accessibilityLabel="Open pull request on the web"
@@ -350,7 +352,7 @@ export function MobileSourceControlPanel({
                         icon="refresh"
                         onPress={onRefresh}
                       />
-                    </View>
+                    </MobileGlassGroup>
                   )
           }}
         />
@@ -375,7 +377,7 @@ export function MobileSourceControlPanel({
           />
         </Stack.Toolbar>
       ) : null}
-      {embedded ? <View className="bg-background">{header}</View> : null}
+      {embedded ? <MobileGlassHeader>{header}</MobileGlassHeader> : null}
 
       <MobileSourceControlSegments active={activeTab} onSelect={selectTab} />
 

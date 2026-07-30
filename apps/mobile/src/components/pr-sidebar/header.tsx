@@ -8,6 +8,7 @@ import { cn } from '@/style/class-names'
 import { canEditPRTitle } from '../../session/pr/title-edit'
 import type { MobilePrTitleAction } from '../../session/pr/use-title-action'
 import { MobileContentSection } from '../content-section'
+import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'
 import { MobileGlassSurface } from '../glass/surface'
 import { MobileGlassTextButton } from '../glass/text-button'
@@ -154,7 +155,7 @@ function PRTitle({
         {titleAction.error ? (
           <Text className="text-destructive text-xs">{titleAction.error}</Text>
         ) : null}
-        <View className="flex-row justify-end gap-2">
+        <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
           <MobileGlassTextButton
             accessibilityLabel="Cancel editing title"
             disabled={titleAction.saving}
@@ -173,7 +174,7 @@ function PRTitle({
               size="regular"
             />
           )}
-        </View>
+        </MobileGlassGroup>
       </View>
     )
   }

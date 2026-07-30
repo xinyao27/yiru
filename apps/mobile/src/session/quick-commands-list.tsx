@@ -7,7 +7,9 @@ import { cn } from '@/style/class-names'
 
 import { MobileAgentIcon } from '../components/agent-icon'
 import { MobileContentSection } from '../components/content-section'
+import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassIconButton } from '../components/glass/icon-button'
+import { MobileGlassPressable } from '../components/glass/pressable'
 import { MobileSearchField } from '../components/search-field'
 import {
   getQuickCommandDisplayPreview,
@@ -97,12 +99,10 @@ export function QuickCommandsList(props: ListProps) {
           onDelete={onDelete}
         />
       ) : null}
-      <Pressable
+      <MobileGlassPressable
         accessibilityRole="button"
-        className={cn(
-          'mt-1 min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-3 active:bg-accent',
-          (disabled || !canAdd) && 'opacity-40'
-        )}
+        className="mt-1 rounded-xl"
+        contentClassName="min-h-11 flex-row items-center gap-2 rounded-xl px-3 py-3"
         disabled={disabled || !canAdd}
         onPress={onAdd}
       >
@@ -110,7 +110,7 @@ export function QuickCommandsList(props: ListProps) {
         <Text className="text-foreground text-sm">
           {canAdd ? 'New quick command' : 'Quick command limit reached'}
         </Text>
-      </Pressable>
+      </MobileGlassPressable>
     </View>
   )
 }
@@ -202,14 +202,14 @@ function QuickCommandRow({
           </Text>
         </View>
       </Pressable>
-      <MobileGlassIconButton
-        accessibilityLabel={`Edit ${command.label}`}
-        disabled={disabled}
-        icon="edit"
-        onPress={() => onEdit(command)}
-        size="small"
-      />
-      <View className="mr-2">
+      <MobileGlassGroup className="mr-2 flex-row gap-2" spacing={8}>
+        <MobileGlassIconButton
+          accessibilityLabel={`Edit ${command.label}`}
+          disabled={disabled}
+          icon="edit"
+          onPress={() => onEdit(command)}
+          size="small"
+        />
         <MobileGlassIconButton
           accessibilityLabel={`Delete ${command.label}`}
           disabled={disabled}
@@ -218,7 +218,7 @@ function QuickCommandRow({
           onPress={() => onDelete(command)}
           size="small"
         />
-      </View>
+      </MobileGlassGroup>
     </View>
   )
 }
