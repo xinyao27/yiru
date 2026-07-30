@@ -9,6 +9,7 @@ import { LoadingIndicator } from '../../loading-indicator'
 import { getBrokenChecks } from '../../pr-checks-fix-prompt'
 import { Button } from '../../ui/button'
 import { Input } from '../../ui/input'
+import { ScrollArea } from '../../ui/scroll-area'
 import HostedReviewActions from '../hosted-review-actions'
 import { SourceControlAgentActionDialog } from '../source-control/agent-action-dialog'
 import {
@@ -100,7 +101,7 @@ export function ChecksPanelReviewView({
     settings?.openLinksInApp === true &&
     !settings.activeRuntimeEnvironmentId
   return (
-    <div ref={setChecksPanelContentRef} className="scrollbar-sleek flex-1 overflow-auto">
+    <ScrollArea className="h-full min-h-0" viewportRef={setChecksPanelContentRef}>
       {/* Hosted review header */}
       <div className="border-border space-y-2.5 border-b px-3 py-3">
         {/* Review number + state badge + refresh + open link */}
@@ -320,6 +321,6 @@ export function ChecksPanelReviewView({
           }
         }}
       />
-    </div>
+    </ScrollArea>
   )
 }
