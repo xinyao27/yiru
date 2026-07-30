@@ -104,11 +104,22 @@ function getCanonicalParentPath(path: string): string {
   return separatorIndex < 0 ? '' : pathWithoutTrailingSlash.slice(0, separatorIndex + 1)
 }
 
+function isDirectoryTarget(target: SourceControlPierreTarget | undefined): boolean {
+  return target?.kind === 'directory' || (target?.kind === 'uncommitted' && target.isSubmodule)
+}
+
 function countVisibleRows(data: SourceControlPierreTreeData): number {
   const expandedPaths = new Set(data.expandedPaths)
-  let count = 0
+  const directChildCountByParent = new Map<string, number>()
   for (const path of data.targetByCanonicalPath.keys()) {
-    let ancestorPath = getCanonicalParentPath(path)
+    const parentPath = getCanonicalParentPath(path)
+    directChildCountByParent.set(parentPath, (directChildCountByParent.get(parentPath) ?? 0) + 1)
+  }
+
+  let count = 0
+  for (const [path, target] of data.targetByCanonicalPath) {
+    const parentPath = getCanonicalParentPath(path)
+    let ancestorPath = parentPath
     let isVisible = true
     while (ancestorPath) {
       if (!expandedPaths.has(ancestorPath)) {
@@ -117,7 +128,15 @@ function countVisibleRows(data: SourceControlPierreTreeData): number {
       }
       ancestorPath = getCanonicalParentPath(ancestorPath)
     }
-    if (isVisible) {
+    if (!isVisible) {
+      continue
+    }
+
+    const isFlattenedContinuation =
+      isDirectoryTarget(target) &&
+      isDirectoryTarget(data.targetByCanonicalPath.get(parentPath)) &&
+      directChildCountByParent.get(parentPath) === 1
+    if (!isFlattenedContinuation) {
       count += 1
     }
   }
@@ -169,7 +188,7 @@ function SourceControlPierreTree({
   )
   const { model } = useFileTree({
     paths: data.paths,
-    flattenEmptyDirectories: false,
+    flattenEmptyDirectories: true,
     initialExpansion: 'closed',
     initialExpandedPaths: data.expandedPaths,
     initialSelectedPaths: selectedCanonicalPaths,
