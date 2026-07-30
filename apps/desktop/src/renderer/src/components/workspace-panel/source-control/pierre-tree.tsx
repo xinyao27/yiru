@@ -22,6 +22,19 @@ import { getSubmoduleExpansionKey } from './submodule-expansion'
 const SOURCE_CONTROL_PIERRE_TREE_MAX_VISIBLE_ROWS = 16
 const SOURCE_CONTROL_PIERRE_TREE_ROW_HEIGHT_PX = 26
 
+const SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS = `${PIERRE_FILE_TREE_UNSAFE_CSS}
+  :host {
+    --trees-context-menu-trigger-inline-offset: calc(
+      var(--trees-padding-inline) + var(--trees-item-padding-x) -
+        var(--trees-focus-ring-width) + var(--trees-git-lane-width)
+    );
+  }
+  /* Why: keep the stable git status at the trailing edge instead of letting
+     the transient context-menu action push it inward. */
+  [data-item-section="action"] { order: 1; }
+  [data-item-section="git"] { order: 2; }
+`
+
 function findTreeItemPath(event: React.SyntheticEvent<HTMLElement>): string | null {
   const eventPath = event.nativeEvent.composedPath()
   if (
@@ -104,43 +117,43 @@ function getCanonicalParentPath(path: string): string {
   return separatorIndex < 0 ? '' : pathWithoutTrailingSlash.slice(0, separatorIndex + 1)
 }
 
-function isDirectoryTarget(target: SourceControlPierreTarget | undefined): boolean {
-  return target?.kind === 'directory' || (target?.kind === 'uncommitted' && target.isSubmodule)
-}
-
 function countVisibleRows(data: SourceControlPierreTreeData): number {
-  const expandedPaths = new Set(data.expandedPaths)
-  const directChildCountByParent = new Map<string, number>()
+  const childrenByParent = new Map<string, string[]>()
   for (const path of data.targetByCanonicalPath.keys()) {
     const parentPath = getCanonicalParentPath(path)
-    directChildCountByParent.set(parentPath, (directChildCountByParent.get(parentPath) ?? 0) + 1)
+    const siblings = childrenByParent.get(parentPath)
+    if (siblings) {
+      siblings.push(path)
+    } else {
+      childrenByParent.set(parentPath, [path])
+    }
   }
+  const expandedPaths = new Set(data.expandedPaths)
 
-  let count = 0
-  for (const [path, target] of data.targetByCanonicalPath) {
-    const parentPath = getCanonicalParentPath(path)
-    let ancestorPath = parentPath
-    let isVisible = true
-    while (ancestorPath) {
-      if (!expandedPaths.has(ancestorPath)) {
-        isVisible = false
-        break
-      }
-      ancestorPath = getCanonicalParentPath(ancestorPath)
-    }
-    if (!isVisible) {
-      continue
-    }
-
-    const isFlattenedContinuation =
-      isDirectoryTarget(target) &&
-      isDirectoryTarget(data.targetByCanonicalPath.get(parentPath)) &&
-      directChildCountByParent.get(parentPath) === 1
-    if (!isFlattenedContinuation) {
+  const countChildren = (parentPath: string): number => {
+    let count = 0
+    for (const childPath of childrenByParent.get(parentPath) ?? []) {
       count += 1
+      if (!childPath.endsWith('/')) {
+        continue
+      }
+
+      // Why: Pierre projects a sole-directory chain as one row whose terminal
+      // directory owns expansion, but its public React model does not expose the visible count.
+      let terminalPath = childPath
+      let children = childrenByParent.get(terminalPath) ?? []
+      while (children.length === 1 && children[0]?.endsWith('/')) {
+        terminalPath = children[0]
+        children = childrenByParent.get(terminalPath) ?? []
+      }
+      if (expandedPaths.has(terminalPath)) {
+        count += countChildren(terminalPath)
+      }
     }
+    return count
   }
-  return count
+
+  return countChildren('')
 }
 
 function openTarget(
@@ -218,7 +231,7 @@ function SourceControlPierreTree({
         callbacksRef.current.data.targetByCanonicalPath.get(item.path),
         callbacksRef.current.controller
       ),
-    unsafeCSS: PIERRE_FILE_TREE_UNSAFE_CSS
+    unsafeCSS: SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS
   })
 
   useLayoutEffect(() => {

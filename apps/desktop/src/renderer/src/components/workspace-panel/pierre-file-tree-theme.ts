@@ -26,17 +26,7 @@ export const PIERRE_FILE_TREE_STYLE = {
 // Why: rows and native rename fields live inside Pierre's Shadow DOM, so
 // app-level radius and state rules need a narrow library-side bridge.
 export const PIERRE_FILE_TREE_UNSAFE_CSS = `
-  :host {
-    --trees-context-menu-trigger-inline-offset: calc(
-      var(--trees-padding-inline) + var(--trees-item-padding-x) -
-        var(--trees-focus-ring-width) + var(--trees-git-lane-width)
-    );
-  }
   * { border-radius: 0 !important; }
-  /* Why: keep the stable git status at the trailing edge instead of letting
-     the transient context-menu action push it inward. */
-  [data-item-section="action"] { order: 1; }
-  [data-item-section="git"] { order: 2; }
   [data-item-git-status] > [data-item-section="icon"],
   [data-item-git-status] > [data-item-section="icon"] > :not([data-icon-name="file-tree-icon-chevron"]) {
     color: var(--trees-fg-muted) !important;
