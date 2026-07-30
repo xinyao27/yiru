@@ -21,7 +21,7 @@ function ScrollArea({
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
-      className={cn('relative', className)}
+      className={cn('relative isolate', className)}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
@@ -52,7 +52,7 @@ function ScrollBar({
       data-slot="scroll-area-scrollbar"
       orientation={orientation}
       className={cn(
-        'flex touch-none p-px transition-colors select-none bg-transparent',
+        'z-20 flex touch-none bg-transparent p-px transition-colors select-none',
         orientation === 'vertical' && 'h-full w-3 py-2 border-l border-l-transparent',
         orientation === 'horizontal' && 'h-3 px-2 flex-col border-t border-t-transparent',
         className
