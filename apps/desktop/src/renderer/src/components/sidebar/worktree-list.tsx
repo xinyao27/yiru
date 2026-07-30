@@ -42,6 +42,7 @@ import {
   getFolderWorkspacePathStatusTitle
 } from '@/components/sidebar/folder-workspace-path-status'
 import { useFolderWorkspacePathStatusCacheExpiryTick } from '@/components/sidebar/folder-workspace-path-status-cache-expiry'
+import { LegendListScrollArea } from '@/components/sidebar/list-scroll-area'
 import { deriveRunningAgentSendTargets } from '@/components/sidebar/running-agent-targets'
 import {
   SCROLL_TO_CURRENT_WORKSPACE_REVEAL_REQUEST_EVENT,
@@ -181,7 +182,6 @@ import {
   sidebarHasActiveFilters
 } from './visible-worktrees'
 import {
-  estimateWorkspaceSidebarRowSize,
   getWorkspaceSidebarRowKey,
   projectWorkspaceSidebarRows,
   COWORKING_REMOTE_WORKTREES_HEADER_KEY,
@@ -332,6 +332,9 @@ const WORKTREE_SIDEBAR_SCROLL_STYLE: React.CSSProperties = {
   height: '100%',
   overflowX: 'hidden',
   overflowAnchor: 'none'
+}
+const LEGEND_LIST_SCROLL_AREA_PROPS = {
+  renderScrollComponent: LegendListScrollArea
 }
 
 export function resolvePendingSidebarReveal(args: {
@@ -1263,7 +1266,7 @@ function getWorktreeDragIndexes(rows: readonly HostSectionRow[]): {
 }
 
 type LegendListScrollHandle = {
-  getScrollableNode: () => HTMLElement
+  getScrollableNode: () => HTMLElement | null
 }
 
 function isLegendListScrollHandle(value: unknown): value is LegendListScrollHandle {
@@ -1281,14 +1284,6 @@ function getLegendListScrollElement(value: unknown): HTMLDivElement | null {
   }
   const element = isLegendListScrollHandle(value) ? value.getScrollableNode() : null
   return element instanceof HTMLDivElement ? element : null
-}
-
-function getLegendListRowType(row: WorkspaceSidebarProjectedRow): string {
-  return row.kind === 'local' ? `local:${row.row.type}` : row.kind
-}
-
-function areIndexListsEqual(current: readonly number[], next: readonly number[]): boolean {
-  return current.length === next.length && current.every((value, index) => value === next[index])
 }
 
 function WorkspaceRail({ leftPx }: { leftPx: number }): React.JSX.Element {
@@ -1456,9 +1451,8 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
       })
   }, [])
   const legendListRef = useRef<LegendListRef>(null)
-  const [visibleWorkspaceRowIndexes, setVisibleWorkspaceRowIndexes] = useState<readonly number[]>(
-    []
-  )
+  const visibleWorkspaceRowIndexesRef = useRef<readonly number[]>([])
+  const reportVisibleRowsRef = useRef<(indexes: readonly number[]) => void>(() => {})
   const [dragOverStatus, setDragOverStatus] = useState<WorkspaceStatus | null>(null)
   const [pinDragOver, setPinDragOver] = useState(false)
   const [nativeLineageDropTargetId, setNativeLineageDropTargetId] = useState<string | null>(null)
@@ -2029,39 +2023,6 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
       getFolderWorkspacePathStatusCacheKey,
       getFreshFolderWorkspacePathStatus
     ]
-  )
-  const getLegendListFixedItemSize = useCallback(
-    (projected: WorkspaceSidebarProjectedRow, index: number): number | undefined => {
-      if (
-        projected.kind === 'local' &&
-        (projected.row.type === 'item' ||
-          projected.row.type === 'lineage-group' ||
-          projected.row.type === 'folder-workspace')
-      ) {
-        return undefined
-      }
-      return estimateWorkspaceSidebarRowSize({
-        rows: workspaceSidebarRows,
-        localRows: renderRows,
-        index,
-        firstLocalHeaderIndex: firstHeaderIndex,
-        activeStickyHeaderIndex: null
-      })
-    },
-    [firstHeaderIndex, renderRows, workspaceSidebarRows]
-  )
-  const handleViewableItemsChanged = useCallback(
-    (info: OnViewableItemsChangedInfo<WorkspaceSidebarProjectedRow>) => {
-      const next = info.viewableItems.map((item) => item.index).sort((left, right) => left - right)
-      setVisibleWorkspaceRowIndexes((current) =>
-        areIndexListsEqual(current, next) ? current : next
-      )
-    },
-    []
-  )
-  const visibleVirtualItems = useMemo(
-    () => visibleWorkspaceRowIndexes.map((index) => ({ index })),
-    [visibleWorkspaceRowIndexes]
   )
   const markScrollMovement = useCallback(() => {
     const container = scrollRef.current
@@ -3573,70 +3534,91 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
     ]
   )
 
-  useEffect(() => {
-    if (document.visibilityState !== 'visible') {
-      lastVisibleRefreshKeyRef.current = '__document_hidden__'
-      return
-    }
-    const currentWorktree = currentWorktreeId ? (worktreeMap.get(currentWorktreeId) ?? null) : null
-    // Why: this visible reporter feeds the GitHub coordinator; GitLab-only MR
-    // panels refresh through hosted-review paths instead.
-    const sidebarWorktreeHasGitHubReview =
-      currentWorktree !== null &&
-      ((currentWorktree.linkedGitLabMR ?? null) === null ||
-        (currentWorktree.linkedPR ?? null) !== null)
-    const shouldTrackSidebarWorktree = rightSidebarShowsPR && sidebarWorktreeHasGitHubReview
-    const shouldTrackVisibleRows = groupBy === 'pr-status' || cardProps.includes('status')
-    if (!shouldTrackVisibleRows && !shouldTrackSidebarWorktree) {
-      if (lastVisibleRefreshKeyRef.current !== '__hidden__') {
-        lastVisibleRefreshKeyRef.current = '__hidden__'
-        reportVisibleGitHubPRRefreshCandidates([], Date.now())
+  const reportVisibleRows = useCallback(
+    (visibleIndexes: readonly number[]) => {
+      if (document.visibilityState !== 'visible') {
+        lastVisibleRefreshKeyRef.current = '__document_hidden__'
+        return
       }
-      return
-    }
-    if (!scrollRef.current) {
-      return
-    }
-    const visibleRows = visibleVirtualItems
-      .map((item) => workspaceSidebarRows[item.index])
-      .map((projected) => (projected?.kind === 'local' ? projected.row : undefined))
-      .filter((row): row is WorktreeItemRow => row?.type === 'item')
-      .filter((row) => row.repo?.kind === 'git' && !row.worktree.isBare && row.worktree.branch)
-    const visibleWorktreeIds = new Set(visibleRows.map((row) => row.worktree.id))
-    if (
-      shouldTrackSidebarWorktree &&
-      currentWorktree &&
-      !currentWorktree.isBare &&
-      currentWorktree.branch
-    ) {
-      visibleWorktreeIds.add(currentWorktree.id)
-    }
-    const visibleIdentity = visibleRows
-      .map((row) => `${row.worktree.id}:${row.worktree.branch}:${row.worktree.linkedPR ?? ''}`)
-      .join('|')
-    const sidebarIdentity =
-      shouldTrackSidebarWorktree && currentWorktree
-        ? `${currentWorktree.id}:${currentWorktree.branch}:${currentWorktree.linkedPR ?? ''}`
-        : ''
-    const key = `${visibleIdentity}:${sidebarIdentity}:${sshConnectedGeneration}:${prVisibleRefreshGeneration}:${cardProps.join(',')}`
-    if (!key || key === lastVisibleRefreshKeyRef.current) {
-      return
-    }
-    lastVisibleRefreshKeyRef.current = key
-    reportVisibleGitHubPRRefreshCandidates(Array.from(visibleWorktreeIds), Date.now())
-  }, [
-    cardProps,
-    currentWorktreeId,
-    documentVisibilityRevision,
-    groupBy,
-    workspaceSidebarRows,
-    reportVisibleGitHubPRRefreshCandidates,
-    prVisibleRefreshGeneration,
-    rightSidebarShowsPR,
-    sshConnectedGeneration,
-    visibleVirtualItems,
-    worktreeMap
-  ])
+      const currentWorktree = currentWorktreeId
+        ? (worktreeMap.get(currentWorktreeId) ?? null)
+        : null
+      // Why: this visible reporter feeds the GitHub coordinator; GitLab-only MR
+      // panels refresh through hosted-review paths instead.
+      const sidebarWorktreeHasGitHubReview =
+        currentWorktree !== null &&
+        ((currentWorktree.linkedGitLabMR ?? null) === null ||
+          (currentWorktree.linkedPR ?? null) !== null)
+      const shouldTrackSidebarWorktree = rightSidebarShowsPR && sidebarWorktreeHasGitHubReview
+      const shouldTrackVisibleRows = groupBy === 'pr-status' || cardProps.includes('status')
+      if (!shouldTrackVisibleRows && !shouldTrackSidebarWorktree) {
+        if (lastVisibleRefreshKeyRef.current !== '__hidden__') {
+          lastVisibleRefreshKeyRef.current = '__hidden__'
+          reportVisibleGitHubPRRefreshCandidates([], Date.now())
+        }
+        return
+      }
+      if (!scrollRef.current) {
+        return
+      }
+      const visibleRows = visibleIndexes
+        .map((index) => workspaceSidebarRows[index])
+        .map((projected) => (projected?.kind === 'local' ? projected.row : undefined))
+        .filter((row): row is WorktreeItemRow => row?.type === 'item')
+        .filter((row) => row.repo?.kind === 'git' && !row.worktree.isBare && row.worktree.branch)
+      const visibleWorktreeIds = new Set(visibleRows.map((row) => row.worktree.id))
+      if (
+        shouldTrackSidebarWorktree &&
+        currentWorktree &&
+        !currentWorktree.isBare &&
+        currentWorktree.branch
+      ) {
+        visibleWorktreeIds.add(currentWorktree.id)
+      }
+      const visibleIdentity = visibleRows
+        .map((row) => `${row.worktree.id}:${row.worktree.branch}:${row.worktree.linkedPR ?? ''}`)
+        .join('|')
+      const sidebarIdentity =
+        shouldTrackSidebarWorktree && currentWorktree
+          ? `${currentWorktree.id}:${currentWorktree.branch}:${currentWorktree.linkedPR ?? ''}`
+          : ''
+      const key = `${visibleIdentity}:${sidebarIdentity}:${sshConnectedGeneration}:${prVisibleRefreshGeneration}:${cardProps.join(',')}`
+      if (!key || key === lastVisibleRefreshKeyRef.current) {
+        return
+      }
+      lastVisibleRefreshKeyRef.current = key
+      reportVisibleGitHubPRRefreshCandidates(Array.from(visibleWorktreeIds), Date.now())
+    },
+    [
+      cardProps,
+      currentWorktreeId,
+      groupBy,
+      workspaceSidebarRows,
+      reportVisibleGitHubPRRefreshCandidates,
+      prVisibleRefreshGeneration,
+      rightSidebarShowsPR,
+      sshConnectedGeneration,
+      worktreeMap
+    ]
+  )
+  reportVisibleRowsRef.current = reportVisibleRows
+
+  const handleViewableItemsChanged = useCallback(
+    (info: OnViewableItemsChangedInfo<WorkspaceSidebarProjectedRow>) => {
+      const indexes = info.viewableItems
+        .map((item) => item.index)
+        .sort((left, right) => left - right)
+      visibleWorkspaceRowIndexesRef.current = indexes
+      reportVisibleRowsRef.current(indexes)
+    },
+    []
+  )
+
+  useEffect(() => {
+    reportVisibleRows(visibleWorkspaceRowIndexesRef.current)
+  }, [documentVisibilityRevision, reportVisibleRows])
+
+  const visibleVirtualItems = visibleWorkspaceRowIndexesRef.current.map((index) => ({ index }))
 
   const activeDescendantId = getActiveDescendantOptionId({
     activeWorktreeId,
@@ -3890,14 +3872,11 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
         />
       ) : null}
       <LegendList<WorkspaceSidebarProjectedRow>
+        {...LEGEND_LIST_SCROLL_AREA_PROPS}
         ref={legendListRef}
         refScrollView={setLegendListScrollRootRef}
         data={workspaceSidebarRows}
         keyExtractor={getWorkspaceSidebarRowKey}
-        getItemType={getLegendListRowType}
-        getFixedItemSize={getLegendListFixedItemSize}
-        estimatedItemSize={64}
-        drawDistance={640}
         initialScrollOffset={scrollOffsetRef.current}
         maintainVisibleContentPosition={false}
         stickyHeaderIndices={stickyHeaderIndexes}
@@ -5057,7 +5036,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
         aria-activedescendant={activeDescendantId}
         tabIndex={0}
         data-worktree-sidebar=""
-        className="scrollbar-sleek worktree-sidebar-scrollbar h-full overflow-x-hidden"
+        className="h-full overflow-x-hidden"
         contentContainerStyle={WORKTREE_SIDEBAR_CONTENT_STYLE}
         style={WORKTREE_SIDEBAR_SCROLL_STYLE}
         onKeyDown={handleContainerKeyDown}
