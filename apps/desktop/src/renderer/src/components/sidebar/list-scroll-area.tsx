@@ -91,21 +91,22 @@ export function LegendListScrollArea({
   const contentOffsetX = contentOffset?.x
   const contentOffsetY = contentOffset?.y
   const viewportStyle = React.useMemo<React.CSSProperties>(
-    () => ({
-      ...flattenStyle(style),
-      overflowAnchor: maintainVisibleContentPosition ? 'none' : undefined
-    }),
+    () =>
+      maintainVisibleContentPosition
+        ? { ...flattenStyle(style), overflowAnchor: 'none' }
+        : flattenStyle(style),
     [maintainVisibleContentPosition, style]
   )
-  const contentStyle = React.useMemo<React.CSSProperties>(
-    () => ({
+  const contentStyle = React.useMemo<React.CSSProperties>(() => {
+    const resolvedStyle = {
       display: 'block',
       minHeight: '100%',
-      ...flattenStyle(contentContainerStyle),
-      overflowAnchor: maintainVisibleContentPosition ? 'none' : undefined
-    }),
-    [contentContainerStyle, maintainVisibleContentPosition]
-  )
+      ...flattenStyle(contentContainerStyle)
+    } satisfies React.CSSProperties
+    return maintainVisibleContentPosition
+      ? { ...resolvedStyle, overflowAnchor: 'none' }
+      : resolvedStyle
+  }, [contentContainerStyle, maintainVisibleContentPosition])
 
   const emitScroll = React.useCallback(() => {
     const viewport = viewportRef.current
