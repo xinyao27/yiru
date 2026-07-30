@@ -48,6 +48,7 @@ import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycl
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'
 import type { ConnectionState, HostProfile } from '../src/transport/types'
+import { scheduleWidgetSnapshotUpdate } from '../src/widgets/snapshot-sync'
 import { repoColor } from '../src/worktree/repo-color'
 import { pickResumeWorktree } from '../src/worktree/resume-worktree'
 
@@ -77,6 +78,8 @@ type HostWorktreeInfo = {
   hostId: string
   totalWorktrees: number
   activeCount: number
+  activeWorktrees?: WorktreeSummary[]
+  attentionCount?: number
   lastActiveWorktree: WorktreeSummary | null
 }
 
@@ -119,6 +122,8 @@ function fetchWorktreeInfo(
           hostId,
           totalWorktrees: 0,
           activeCount: 0,
+          activeWorktrees: [],
+          attentionCount: 0,
           lastActiveWorktree: null
         }
       }
@@ -141,12 +146,21 @@ function fetchWorktreeInfo(
         const active = worktrees.filter((w) => w.status && activeStatuses.has(w.status))
         // Mirror the desktop's focused workspace (see pickResumeWorktree).
         const lastActive = pickResumeWorktree(worktrees)
+        const orderedActive =
+          lastActive && active.some((worktree) => worktree.worktreeId === lastActive.worktreeId)
+            ? [
+                lastActive,
+                ...active.filter((worktree) => worktree.worktreeId !== lastActive.worktreeId)
+              ]
+            : active
         setInfo((prev) => ({
           ...prev,
           [hostId]: {
             hostId,
             totalWorktrees: worktrees.length,
             activeCount: active.length,
+            activeWorktrees: orderedActive.slice(0, 2),
+            attentionCount: active.filter((worktree) => worktree.status === 'permission').length,
             lastActiveWorktree: lastActive
           }
         }))
@@ -273,6 +287,13 @@ export default function HomeScreen() {
   // next cold-start has fresh seed data. The cache module debounces writes
   // internally so a flurry of streamed updates doesn't hammer disk.
   useEffect(() => {
+    const snapshot = {
+      worktreeInfo,
+      accountsByHost,
+      statsByHost,
+      savedAt: Date.now()
+    }
+    scheduleWidgetSnapshotUpdate(snapshot)
     if (
       Object.keys(worktreeInfo).length === 0 &&
       Object.keys(accountsByHost).length === 0 &&
@@ -280,12 +301,7 @@ export default function HomeScreen() {
     ) {
       return
     }
-    saveHomeSnapshot({
-      worktreeInfo,
-      accountsByHost,
-      statsByHost,
-      savedAt: Date.now()
-    })
+    saveHomeSnapshot(snapshot)
   }, [worktreeInfo, accountsByHost, statsByHost])
 
   useFocusEffect(

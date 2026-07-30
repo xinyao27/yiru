@@ -110,6 +110,72 @@
             "usesCleartextTraffic": true
           }
         }
+      ],
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.xinyao27.yiru.mobile",
+          "widgets": [
+            {
+              "name": "ProviderUsageWidget",
+              "displayName": "ChatGPT Usage",
+              "description": "Shows remaining ChatGPT subscription quota.",
+              "contentMarginsDisabled": true,
+              "supportedFamilies": ["systemSmall"],
+              "configuration": {
+                "title": "Provider",
+                "description": "Choose the subscription to show.",
+                "parameters": {
+                  "provider": {
+                    "title": "Provider",
+                    "type": "enum",
+                    "values": [
+                      { "name": "ChatGPT", "value": "codex" },
+                      { "name": "Claude", "value": "claude" }
+                    ],
+                    "default": "codex"
+                  }
+                }
+              }
+            },
+            {
+              "name": "ClaudeUsageWidget",
+              "displayName": "Claude Usage",
+              "description": "Shows remaining Claude subscription quota.",
+              "contentMarginsDisabled": true,
+              "supportedFamilies": ["systemSmall"],
+              "configuration": {
+                "title": "Provider",
+                "description": "Choose the subscription to show.",
+                "parameters": {
+                  "provider": {
+                    "title": "Provider",
+                    "type": "enum",
+                    "values": [
+                      { "name": "ChatGPT", "value": "codex" },
+                      { "name": "Claude", "value": "claude" }
+                    ],
+                    "default": "claude"
+                  }
+                }
+              }
+            },
+            {
+              "name": "WorkspaceStatusWidget",
+              "displayName": "Running Workspaces",
+              "description": "Shows the status of workspaces that are currently running.",
+              "contentMarginsDisabled": true,
+              "supportedFamilies": ["systemSmall"]
+            },
+            {
+              "name": "TokenUsageWidget",
+              "displayName": "Token Usage",
+              "description": "Shows cumulative token usage for today and this week.",
+              "contentMarginsDisabled": true,
+              "supportedFamilies": ["systemSmall"]
+            }
+          ]
+        }
       ]
     ]
   }
