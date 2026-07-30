@@ -790,6 +790,8 @@ export type UISlice = {
   setBrowserKagiSessionLink: (link: string | null) => void
 }
 
+const FIXED_WORKSPACE_GROUP_BY: UISlice['groupBy'] = 'repo'
+
 export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get) => ({
   sidebarOpen: true,
   sidebarWidth: 280,
@@ -1995,7 +1997,9 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         rightSidebarOpen: typeof ui.rightSidebarOpen === 'boolean' ? ui.rightSidebarOpen : true,
         rightSidebarTab: rightSidebarRoute.rightSidebarTab,
         rightSidebarExplorerView: rightSidebarRoute.rightSidebarExplorerView,
-        groupBy: (ui.groupBy as UISlice['groupBy'] | 'parent') === 'parent' ? 'repo' : ui.groupBy,
+        // Why: Project -> Workspace is the single list hierarchy on every client;
+        // ignore legacy persisted grouping modes instead of reviving the old switcher.
+        groupBy: FIXED_WORKSPACE_GROUP_BY,
         sortBy,
         // Why: main-process getUI() already normalized this to a valid value
         // (defaulting to 'manual'); read it through without migrating sortBy.

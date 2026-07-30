@@ -132,7 +132,6 @@ import {
 import { useGitStatusPolling } from '../components/workspace-panel/use-git-status-polling'
 import { YiruProfileSwitcher } from '../components/yiru-profiles/yiru-profile-switcher'
 import { useShortcutLabel } from '../hooks/use-shortcut-label'
-import type { VirtualizedScrollAnchor } from '../hooks/use-virtualized-scroll-anchor'
 import { isEditableTarget } from '../lib/editable-target'
 import { getSystemPrefersDark } from '../lib/terminal-theme'
 import { registerUpdaterBeforeUnloadBypass } from '../lib/updater-beforeunload'
@@ -542,7 +541,6 @@ function App(): React.JSX.Element {
   // active workspace is slept/deleted. Keep virtualized scroll memory above
   // that remount so the left workspace list doesn't restart at scrollTop 0.
   const worktreeSidebarScrollOffsetRef = useRef(0)
-  const worktreeSidebarScrollAnchorRef = useRef<VirtualizedScrollAnchor>(null)
   const floatingVisibleTabCount = useAppStore(selectFloatingVisibleTabCount)
   const hasFloatingAssistantTab = useAppStore((state) =>
     (state.unifiedTabsByWorktree[FLOATING_TERMINAL_WORKTREE_ID] ?? []).some(
@@ -2482,7 +2480,6 @@ function App(): React.JSX.Element {
                             >
                               <Sidebar
                                 worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
-                                worktreeScrollAnchorRef={worktreeSidebarScrollAnchorRef}
                                 appearanceStyle={leftSidebarStyle}
                               />
                             </RecoverableRenderErrorBoundary>
@@ -2504,7 +2501,6 @@ function App(): React.JSX.Element {
                         >
                           <Sidebar
                             worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
-                            worktreeScrollAnchorRef={worktreeSidebarScrollAnchorRef}
                             appearanceStyle={leftSidebarStyle}
                           />
                         </RecoverableRenderErrorBoundary>

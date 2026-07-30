@@ -2,33 +2,6 @@ import { translate } from '@/i18n/i18n'
 
 import type { WorktreeCardProperty } from '../../../../shared/types'
 
-export const GROUP_BY_OPTIONS = [
-  {
-    id: 'none',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.c2c7a45cda', 'None')
-    }
-  },
-  {
-    id: 'workspace-status',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.e029a2d775', 'Status')
-    }
-  },
-  {
-    id: 'pr-status',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.0f9b959b31', 'PR')
-    }
-  },
-  {
-    id: 'repo',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.2170d553cf', 'Project')
-    }
-  }
-] as const
-
 export type WorktreeCardPropertyOption = {
   id: string
   properties: readonly WorktreeCardProperty[]

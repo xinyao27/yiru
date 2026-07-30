@@ -1,77 +1,27 @@
-import { Pressable, Text, View } from 'react-native'
+import { View } from 'react-native'
 
 import {
-  Funnel as Filter,
-  MagnifyingGlass as Search,
   Plus,
-  SlidersHorizontal,
   SidebarSimple as Sidebar,
-  Stack as Layers,
   TerminalWindow,
   UserCircle,
-  X,
   type Icon
 } from '@/components/uniwind-icons'
-import { cn } from '@/style/class-names'
 
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassPressable } from '../components/glass/pressable'
-import { MobileGlassSurface } from '../components/glass/surface'
 import { MobileGlassTextButton } from '../components/glass/text-button'
+import { MobileSearchField } from '../components/search-field'
 
 type MobileWorkspaceListToolbarProps = {
-  activeFilterCount: number
   canUseHost: boolean
   embedded: boolean
   floatingWorkspaceEnabled: boolean
-  groupLabel: string
-  showSearch: boolean
-  sortLabel: string
+  search: string
   onAccounts: () => void
-  onFilter: () => void
   onFloatingWorkspace: () => void
-  onGroup: () => void
   onNewWorkspace: () => void
-  onSearch: () => void
-  onSort: () => void
-}
-
-type ToolbarButtonProps = {
-  accessibilityLabel: string
-  active?: boolean
-  disabled?: boolean
-  icon: Icon
-  label: string
-  onPress: () => void
-}
-
-function ToolbarButton({
-  accessibilityLabel,
-  active = false,
-  disabled = false,
-  icon: Icon,
-  label,
-  onPress
-}: ToolbarButtonProps): React.JSX.Element {
-  return (
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      className={cn(
-        'min-h-9 flex-1 flex-row items-center justify-center gap-2 px-2',
-        active && 'bg-accent',
-        disabled && 'opacity-40'
-      )}
-      disabled={disabled}
-      hitSlop={4}
-      onPress={onPress}
-    >
-      <Icon size={18} colorClassName="accent-muted-foreground" />
-      <Text className="text-muted-foreground text-sm" numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
-  )
+  onSearchChange: (value: string) => void
 }
 
 type ToolbarIconButtonProps = {
@@ -107,10 +57,8 @@ type MobileWorkspaceListHeaderActionsProps = {
   embedded: boolean
   onHideSidebar?: () => void
   onReconnect: () => void
-  showSearch: boolean
   showReconnect: boolean
   onAccounts: () => void
-  onSearch: () => void
 }
 
 export function MobileWorkspaceListHeaderActions({
@@ -119,9 +67,7 @@ export function MobileWorkspaceListHeaderActions({
   onHideSidebar,
   onReconnect,
   showReconnect,
-  showSearch,
-  onAccounts,
-  onSearch
+  onAccounts
 }: MobileWorkspaceListHeaderActionsProps): React.JSX.Element {
   return (
     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
@@ -132,13 +78,6 @@ export function MobileWorkspaceListHeaderActions({
           disabled={!canUseHost}
           icon={UserCircle}
           onPress={onAccounts}
-        />
-      ) : null}
-      {!embedded ? (
-        <ToolbarIconButton
-          accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
-          icon={showSearch ? X : Search}
-          onPress={onSearch}
         />
       ) : null}
       {embedded && onHideSidebar ? (
@@ -153,20 +92,14 @@ export function MobileWorkspaceListHeaderActions({
 }
 
 export function MobileWorkspaceListToolbar({
-  activeFilterCount,
   canUseHost,
   embedded,
   floatingWorkspaceEnabled,
-  groupLabel,
-  showSearch,
-  sortLabel,
+  search,
   onAccounts,
-  onFilter,
   onFloatingWorkspace,
-  onGroup,
   onNewWorkspace,
-  onSearch,
-  onSort
+  onSearchChange
 }: MobileWorkspaceListToolbarProps): React.JSX.Element {
   const primaryControls = (
     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
@@ -178,31 +111,14 @@ export function MobileWorkspaceListToolbar({
           onPress={onFloatingWorkspace}
         />
       ) : null}
-      <MobileGlassSurface className="flex-1 overflow-hidden rounded-full" isFunctional>
-        <View className="flex-row items-center">
-          <ToolbarButton
-            accessibilityLabel={`Filter workspaces${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
-            active={activeFilterCount > 0}
-            icon={Filter}
-            label={`Filter${activeFilterCount > 0 ? ` ${activeFilterCount}` : ''}`}
-            onPress={onFilter}
-          />
-          <View className="bg-border w-hairline h-5" />
-          <ToolbarButton
-            accessibilityLabel={`Sort by ${sortLabel}`}
-            icon={SlidersHorizontal}
-            label={sortLabel}
-            onPress={onSort}
-          />
-          <View className="bg-border w-hairline h-5" />
-          <ToolbarButton
-            accessibilityLabel={`Group by ${groupLabel}`}
-            icon={Layers}
-            label={groupLabel}
-            onPress={onGroup}
-          />
-        </View>
-      </MobileGlassSurface>
+      <View className="flex-1">
+        <MobileSearchField
+          value={search}
+          onChangeText={onSearchChange}
+          placeholder="Search workspaces…"
+          accessibilityLabel="Search workspaces"
+        />
+      </View>
       {!embedded && floatingWorkspaceEnabled ? (
         <ToolbarIconButton
           accessibilityLabel="Floating Workspace"
@@ -233,11 +149,6 @@ export function MobileWorkspaceListToolbar({
           disabled={!canUseHost}
           icon={Plus}
           onPress={onNewWorkspace}
-        />
-        <ToolbarIconButton
-          accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
-          icon={showSearch ? X : Search}
-          onPress={onSearch}
         />
       </MobileGlassGroup>
     </View>

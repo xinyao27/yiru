@@ -4,7 +4,6 @@ import React, { useEffect } from 'react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useSidebarResize } from '@/hooks/use-sidebar-resize'
-import type { VirtualizedScrollAnchor } from '@/hooks/use-virtualized-scroll-anchor'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import { useAppStore } from '@/store'
@@ -33,15 +32,10 @@ export const WORKTREE_SIDEBAR_RESIZE_HANDLE_LINE_CLASS_NAME =
 
 type SidebarProps = {
   worktreeScrollOffsetRef: React.MutableRefObject<number>
-  worktreeScrollAnchorRef: React.MutableRefObject<VirtualizedScrollAnchor>
   appearanceStyle?: React.CSSProperties
 }
 
-function Sidebar({
-  worktreeScrollOffsetRef,
-  worktreeScrollAnchorRef,
-  appearanceStyle
-}: SidebarProps): React.JSX.Element {
+function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): React.JSX.Element {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
   const sidebarWidth = useAppStore((s) => s.sidebarWidth)
   const setSidebarWidth = useAppStore((s) => s.setSidebarWidth)
@@ -126,10 +120,7 @@ function Sidebar({
               <SidebarNav />
               <SidebarHeader />
 
-              <WorktreeList
-                scrollOffsetRef={worktreeScrollOffsetRef}
-                scrollAnchorRef={worktreeScrollAnchorRef}
-              />
+              <WorktreeList scrollOffsetRef={worktreeScrollOffsetRef} />
 
               <SetupScriptPromptCard />
 

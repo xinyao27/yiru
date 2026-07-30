@@ -1,10 +1,10 @@
 import { AgentStateDot, type AgentDotState } from '@/components/agent-state-dot'
+import { UnreadStatusIndicator } from '@/components/unread-status-indicator'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
 
 import type { TerminalTab, TuiAgent } from '../../../../shared/types'
-import { FilledBellIcon } from '../sidebar/worktree-card/helpers'
 import { ShellIcon } from './shell-icons'
 import { TAB_LEADING_ICON_CLASSES } from './tab-chrome-classes'
 import type { TerminalTabActivityStatus } from './terminal-tab-activity-status'
@@ -79,7 +79,7 @@ export function TerminalTabLeadingIcon({
         )}
         className="mr-2 inline-flex shrink-0 items-center gap-1"
       >
-        <FilledBellIcon className="size-3.5 text-amber-500" />
+        <UnreadStatusIndicator />
         {agent ? <TerminalTabAgentIdentityIcon agent={agent} isActive={isActive} /> : null}
       </span>
     )

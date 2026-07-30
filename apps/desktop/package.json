@@ -101,6 +101,7 @@
     "@electron-toolkit/tsconfig": "catalog:",
     "@electron/asar": "catalog:",
     "@electron/rebuild": "catalog:",
+    "@legendapp/list": "catalog:",
     "@monaco-editor/react": "catalog:",
     "@pierre/diffs": "catalog:",
     "@pierre/trees": "catalog:",

@@ -1295,12 +1295,6 @@ export function buildRows(options: BuildRowsOptions): Row[] {
                   ? [key.slice('repo:'.length)]
                   : []
           for (const repoId of repoIds) {
-            const candidate = importedWorktreesByRepo.get(repoId)
-            if (candidate) {
-              result.push(buildImportedWorktreesCardRow(candidate, 'repo-group'))
-            }
-          }
-          for (const repoId of repoIds) {
             const candidate = newExternalWorktreesInboxByRepo.get(repoId)
             if (candidate) {
               result.push(buildNewExternalWorktreesInboxRow(candidate))

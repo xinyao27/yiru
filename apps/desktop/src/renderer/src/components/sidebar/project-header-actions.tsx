@@ -14,15 +14,25 @@ export const PROJECT_HEADER_ACTIONS_CLASS_NAME = cn(
   'has-[button[data-state=open]]:pointer-events-auto has-[button[data-state=open]]:opacity-100'
 )
 
-export function ProjectHeaderActions({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>): React.JSX.Element {
+type ProjectHeaderActionsProps = React.HTMLAttributes<HTMLDivElement> & {
+  trailingAction?: React.ReactNode
+}
+
+export function ProjectHeaderActions(props: ProjectHeaderActionsProps): React.JSX.Element {
+  const { trailingAction, className, ...restProps } = props
+
   return (
-    <div
-      data-repo-header-actions=""
-      className={cn(PROJECT_HEADER_ACTIONS_CLASS_NAME, className)}
-      {...props}
-    />
+    <>
+      {trailingAction}
+      <div
+        data-repo-header-actions=""
+        className={cn(
+          PROJECT_HEADER_ACTIONS_CLASS_NAME,
+          trailingAction && 'can-hover:right-9',
+          className
+        )}
+        {...restProps}
+      />
+    </>
   )
 }

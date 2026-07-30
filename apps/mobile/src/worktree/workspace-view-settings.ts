@@ -22,33 +22,7 @@ export type WorkspaceViewSettings = {
   workspaceStatuses?: WorkspaceStatusDefinition[]
 }
 
-const GROUP_TO_DESKTOP: Record<MobileGroupMode, NonNullable<WorkspaceViewSettings['groupBy']>> = {
-  none: 'none',
-  workspaceStatus: 'workspace-status',
-  repo: 'repo',
-  prStatus: 'pr-status'
-}
-
-const GROUP_FROM_DESKTOP: Record<NonNullable<WorkspaceViewSettings['groupBy']>, MobileGroupMode> = {
-  none: 'none',
-  'workspace-status': 'workspaceStatus',
-  repo: 'repo',
-  'pr-status': 'prStatus'
-}
-
 const SORT_VALUES: readonly MobileSortMode[] = ['smart', 'name', 'recent', 'repo', 'manual']
-
-export function groupModeToDesktop(
-  mode: MobileGroupMode
-): NonNullable<WorkspaceViewSettings['groupBy']> {
-  return GROUP_TO_DESKTOP[mode]
-}
-
-export function groupModeFromDesktop(
-  groupBy: WorkspaceViewSettings['groupBy']
-): MobileGroupMode | null {
-  return groupBy ? (GROUP_FROM_DESKTOP[groupBy] ?? null) : null
-}
 
 export function sortModeFromDesktop(
   sortBy: WorkspaceViewSettings['sortBy']
@@ -72,7 +46,6 @@ export function applyDesktopViewSettings(
   current: MobileViewState,
   settings: WorkspaceViewSettings
 ): MobileViewState {
-  const groupMode = groupModeFromDesktop(settings.groupBy)
   const sortMode = sortModeFromDesktop(settings.sortBy)
   // Why: a partially hydrated desktop settings payload may carry an empty
   // status catalog; mobile must keep renderable groups instead of hiding rows.
@@ -80,7 +53,9 @@ export function applyDesktopViewSettings(
     ? coerceMobileWorkspaceStatuses(settings.workspaceStatuses)
     : current.workspaceStatuses
   const next: MobileViewState = {
-    groupMode: groupMode ?? current.groupMode,
+    // Why: Project -> Workspace is the one list hierarchy on desktop and mobile;
+    // legacy synced grouping values must not restore the retired switcher.
+    groupMode: 'repo',
     sortMode: sortMode ?? current.sortMode,
     hideSleeping: settings.hideSleepingWorkspaces ?? current.hideSleeping,
     hideDefaultBranch: settings.hideDefaultBranchWorkspace ?? current.hideDefaultBranch,

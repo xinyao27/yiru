@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -19,7 +18,6 @@ import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 
 import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
-import { SidebarGroupByToggle } from './group-by-toggle'
 import { getSidebarHostVisibilityLabel, shouldShowHostScopeControls } from './host-options'
 import { SidebarHostScopeMenuSection } from './host-scope-menu-section'
 import SidebarRepositoryFilterSection from './repository-filter-section'
@@ -39,8 +37,6 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
   const setVisibleWorkspaceHostIds = useAppStore((s) => s.setVisibleWorkspaceHostIds)
   const sortBy = useAppStore((s) => s.sortBy)
   const setSortBy = useAppStore((s) => s.setSortBy)
-  const groupBy = useAppStore((s) => s.groupBy)
-  const setGroupBy = useAppStore((s) => s.setGroupBy)
   const projectOrderBy = useAppStore((s) => s.projectOrderBy)
   const setProjectOrderBy = useAppStore((s) => s.setProjectOrderBy)
 
@@ -144,14 +140,6 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
           />
         )}
 
-        <DropdownMenuLabel>
-          {translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.dc0bb670bc', 'Group by')}
-        </DropdownMenuLabel>
-        <div className="px-2 pt-0.5 pb-1">
-          <SidebarGroupByToggle groupBy={groupBy} setGroupBy={setGroupBy} />
-        </div>
-
-        <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <span className="flex flex-1 items-center justify-between">
@@ -198,51 +186,47 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
-        {/* Why: project order only has a visible effect when grouping by
-            project; hide it in none/status/PR modes to avoid a dead control. */}
-        {groupBy === 'repo' && (
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <span className="flex flex-1 items-center justify-between">
-                <span>
-                  {translate(
-                    'auto.components.sidebar.SidebarWorkspaceOptionsMenu.09faabd875',
-                    'Project order'
-                  )}
-                </span>
-                <span className="text-muted-foreground text-[11px] font-medium">
-                  {projectOrderLabel}
-                </span>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <span className="flex flex-1 items-center justify-between">
+              <span>
+                {translate(
+                  'auto.components.sidebar.SidebarWorkspaceOptionsMenu.09faabd875',
+                  'Project order'
+                )}
               </span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-44">
-              <DropdownMenuRadioGroup
-                value={projectOrderBy}
-                onValueChange={(v) => setProjectOrderBy(v as typeof projectOrderBy)}
-              >
-                {PROJECT_ORDER_OPTIONS.map((opt) => (
-                  <Tooltip key={opt.id}>
-                    <TooltipTrigger
-                      render={
-                        <DropdownMenuRadioItem
-                          value={opt.id}
-                          // Keep the menu open so people can compare order modes.
-                          onClick={(e) => e.preventDefault()}
-                          closeOnClick={false}
-                        >
-                          {opt.label}
-                        </DropdownMenuRadioItem>
-                      }
-                    />
-                    <TooltipContent side="right" sideOffset={6}>
-                      {opt.description}
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-        )}
+              <span className="text-muted-foreground text-[11px] font-medium">
+                {projectOrderLabel}
+              </span>
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-44">
+            <DropdownMenuRadioGroup
+              value={projectOrderBy}
+              onValueChange={(v) => setProjectOrderBy(v as typeof projectOrderBy)}
+            >
+              {PROJECT_ORDER_OPTIONS.map((opt) => (
+                <Tooltip key={opt.id}>
+                  <TooltipTrigger
+                    render={
+                      <DropdownMenuRadioItem
+                        value={opt.id}
+                        // Keep the menu open so people can compare order modes.
+                        onClick={(e) => e.preventDefault()}
+                        closeOnClick={false}
+                      >
+                        {opt.label}
+                      </DropdownMenuRadioItem>
+                    }
+                  />
+                  <TooltipContent side="right" sideOffset={6}>
+                    {opt.description}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <WorktreeCardDisplayMenuSection />
 

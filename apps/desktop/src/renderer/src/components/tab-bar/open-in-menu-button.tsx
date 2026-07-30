@@ -122,11 +122,11 @@ export function TabBarOpenInMenuButton({
                 onClick={() => openEntry(preferredEntry)}
               >
                 {preferredEntry.target === 'file-manager' ? (
-                  <FolderOpen className="size-3.5" />
+                  <FolderOpen />
                 ) : (
                   <OpenInApplicationIcon
                     application={{ command: preferredEntry.command ?? '' }}
-                    size={14}
+                    size={16}
                   />
                 )}
               </Button>
@@ -148,8 +148,7 @@ export function TabBarOpenInMenuButton({
                     className="text-muted-foreground border-0"
                     aria-label={chooseLabel}
                   >
-                    {/* Why: the compact chooser affordance is intentionally quieter than menu icons. */}
-                    <CaretDown className="size-3" weight="regular" />
+                    <CaretDown weight="regular" />
                   </Button>
                 }
               />
