@@ -1940,8 +1940,10 @@ const api = {
       webContentsId: number
     }): Promise<boolean> => ipcRenderer.invoke('browser:registerGuest', args),
 
-    unregisterGuest: (args: { browserPageId: string }): Promise<void> =>
-      ipcRenderer.invoke('browser:unregisterGuest', args),
+    unregisterGuest: (args: {
+      browserPageId: string
+      expectedWebContentsId?: number
+    }): Promise<void> => ipcRenderer.invoke('browser:unregisterGuest', args),
 
     openDevTools: (args: { browserPageId: string }): Promise<boolean> =>
       ipcRenderer.invoke('browser:openDevTools', args),

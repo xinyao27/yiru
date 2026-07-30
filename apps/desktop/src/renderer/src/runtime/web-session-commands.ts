@@ -67,6 +67,7 @@ export async function createWebSessionTerminalCommand(args: {
 }
 
 export async function createWebSessionBrowserTabCommand(args: {
+  browserPageId?: string
   environmentId: string
   worktreeId: string
   url?: string
@@ -78,6 +79,7 @@ export async function createWebSessionBrowserTabCommand(args: {
       selector: args.environmentId,
       method: 'browser.tabCreate',
       params: {
+        browserPageId: args.browserPageId,
         worktree: toRuntimeWorktreeSelector(args.worktreeId),
         url: args.url,
         profileId: args.profileId ?? undefined,

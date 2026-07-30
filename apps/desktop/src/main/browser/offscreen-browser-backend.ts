@@ -3,6 +3,10 @@ import { randomUUID } from 'node:crypto'
 import { BrowserWindow } from 'electron'
 
 import { YIRU_BROWSER_GUEST_WEB_PREFERENCES } from '../../shared/browser/guest-web-preferences'
+import {
+  buildSessionStoragePersistenceScript,
+  YIRU_PERSIST_SESSION_STORAGE_EXPRESSION
+} from '../../shared/browser/session-storage-persistence'
 import { YIRU_BROWSER_PARTITION } from '../../shared/constants'
 import type { BrowserBackend, BrowserBackendCreateTab } from './backend'
 import type { BrowserManager } from './manager'
@@ -18,6 +22,7 @@ import { browserSessionRegistry } from './session-registry'
 const DEFAULT_VIEWPORT_WIDTH = 1280
 const DEFAULT_VIEWPORT_HEIGHT = 800
 const LOAD_TIMEOUT_MS = 30_000
+const SESSION_STORAGE_PERSIST_TIMEOUT_MS = 200
 
 export class OffscreenBrowserBackend implements BrowserBackend {
   private readonly windowsByPageId = new Map<string, BrowserWindow>()
@@ -25,7 +30,14 @@ export class OffscreenBrowserBackend implements BrowserBackend {
   constructor(private readonly browserManager: BrowserManager) {}
 
   async createTab(params: BrowserBackendCreateTab): Promise<{ browserPageId: string }> {
-    const browserPageId = randomUUID()
+    const browserPageId = params.browserPageId ?? randomUUID()
+    const existingWindow = this.windowsByPageId.get(browserPageId)
+    if (existingWindow && !existingWindow.isDestroyed()) {
+      throw new Error('Browser page already exists.')
+    }
+    if (existingWindow) {
+      this.windowsByPageId.delete(browserPageId)
+    }
     // Why: profiles map to Electron partitions; using the profile's partition
     // makes cookies/storage persist in the same SQLite DB the desktop path uses.
     const profile = params.profileId
@@ -49,27 +61,31 @@ export class OffscreenBrowserBackend implements BrowserBackend {
     })
 
     this.windowsByPageId.set(browserPageId, win)
+    const webContentsId = win.webContents.id
 
     // Why: if the offscreen window is destroyed out from under us (crash, app
     // teardown), drop the registry entry so commands fail cleanly instead of
     // resolving a dead WebContents.
     win.webContents.once('destroyed', () => {
-      this.windowsByPageId.delete(browserPageId)
-      this.browserManager.unregisterGuest(browserPageId)
+      if (this.windowsByPageId.get(browserPageId) === win) {
+        this.windowsByPageId.delete(browserPageId)
+      }
+      this.browserManager.unregisterGuest(browserPageId, webContentsId)
     })
 
-    // Why: register the guest and return immediately so the new tab appears
-    // without waiting for the page to finish loading. Previously createTab
-    // awaited the full navigation, so clicking "New Browser Tab" did nothing for
-    // up to a second on real URLs. The page loads asynchronously and streams
-    // once it paints; a failed load leaves the (usable) tab open, matching how a
-    // normal browser tab survives a failed navigation.
-    this.browserManager.registerOffscreenGuest({
+    // Why: only the pre-document script registration is awaited; navigation
+    // remains asynchronous so a slow or failed site does not delay tab creation.
+    const registered = await this.browserManager.registerOffscreenGuest({
       browserPageId,
       worktreeId: params.worktreeId,
       sessionProfileId: profile?.id ?? null,
-      webContentsId: win.webContents.id
+      webContentsId
     })
+    if (!registered) {
+      this.windowsByPageId.delete(browserPageId)
+      win.destroy()
+      throw new Error('Could not initialize browser page persistence.')
+    }
 
     const url = params.url || 'about:blank'
     void this.loadUrl(win, url).catch((error) => {
@@ -84,8 +100,12 @@ export class OffscreenBrowserBackend implements BrowserBackend {
 
   async closeTab(browserPageId: string): Promise<void> {
     const win = this.windowsByPageId.get(browserPageId)
+    const webContentsId = win && !win.isDestroyed() ? win.webContents.id : undefined
     this.windowsByPageId.delete(browserPageId)
-    this.browserManager.unregisterGuest(browserPageId)
+    if (win && !win.isDestroyed()) {
+      await this.persistSessionStorageBeforeClose(browserPageId, win)
+    }
+    this.browserManager.unregisterGuest(browserPageId, webContentsId)
     if (win && !win.isDestroyed()) {
       win.destroy()
     }
@@ -96,14 +116,47 @@ export class OffscreenBrowserBackend implements BrowserBackend {
     return win && !win.isDestroyed() ? win.webContents.id : null
   }
 
-  destroyAll(): void {
-    for (const [pageId, win] of this.windowsByPageId) {
-      this.browserManager.unregisterGuest(pageId)
-      if (!win.isDestroyed()) {
-        win.destroy()
+  async destroyAll(): Promise<void> {
+    const windows = [...this.windowsByPageId]
+    this.windowsByPageId.clear()
+    await Promise.allSettled(
+      windows.map(async ([pageId, win]) => {
+        const webContentsId = win.webContents.id
+        if (!win.isDestroyed()) {
+          await this.persistSessionStorageBeforeClose(pageId, win)
+        }
+        this.browserManager.unregisterGuest(pageId, webContentsId)
+        if (!win.isDestroyed()) {
+          win.destroy()
+        }
+      })
+    )
+  }
+
+  private async persistSessionStorageBeforeClose(
+    browserPageId: string,
+    win: BrowserWindow
+  ): Promise<void> {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    const timeout = new Promise<void>((resolve) => {
+      timeoutId = setTimeout(resolve, SESSION_STORAGE_PERSIST_TIMEOUT_MS)
+    })
+    try {
+      await Promise.race([
+        win.webContents
+          .executeJavaScript(
+            `${buildSessionStoragePersistenceScript(browserPageId, false)};${YIRU_PERSIST_SESSION_STORAGE_EXPRESSION}`
+          )
+          .then(() => {}),
+        timeout
+      ])
+    } catch {
+      // Why: a crashed offscreen page has no remaining storage to snapshot.
+    } finally {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId)
       }
     }
-    this.windowsByPageId.clear()
   }
 
   private async loadUrl(win: BrowserWindow, url: string): Promise<void> {

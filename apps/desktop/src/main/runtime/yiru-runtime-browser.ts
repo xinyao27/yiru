@@ -1371,6 +1371,7 @@ export class RuntimeBrowserCommands {
   }
 
   async browserTabCreate(params: {
+    browserPageId?: string
     url?: string
     worktree?: string
     profileId?: string
@@ -1403,7 +1404,8 @@ export class RuntimeBrowserCommands {
         worktreeId,
         params.profileId,
         params.activate,
-        params.targetGroupId
+        params.targetGroupId,
+        params.browserPageId
       )
     }
     const { browserPageId } = await this.createBrowserTabInRenderer(
@@ -1817,9 +1819,15 @@ export class RuntimeBrowserCommands {
     worktreeId?: string,
     profileId?: string,
     activate?: boolean,
-    targetGroupId?: string
+    targetGroupId?: string,
+    requestedBrowserPageId?: string
   ): Promise<{ browserPageId: string }> {
-    const { browserPageId } = await offscreen.createTab({ url, worktreeId, profileId })
+    const { browserPageId } = await offscreen.createTab({
+      browserPageId: requestedBrowserPageId,
+      url,
+      worktreeId,
+      profileId
+    })
     const bridge = this.host.getAgentBrowserBridge()
     const wcId = bridge?.getRegisteredTabs(worktreeId).get(browserPageId)
     if (bridge && wcId != null) {

@@ -25,6 +25,7 @@ import type {
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
 } from '../../shared/browser/guest-events'
+import { buildSessionStoragePersistenceScript } from '../../shared/browser/session-storage-persistence'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
@@ -251,6 +252,14 @@ export class BrowserManager {
   private readonly policyAttachedGuestIds = new Set<number>()
   private readonly offscreenGuestIds = new Set<number>()
   private readonly policyCleanupByGuestId = new Map<number, () => void>()
+  private readonly guestDocumentScriptInstallers = new Map<
+    number,
+    (browserPageId?: string) => Promise<void>
+  >()
+  private readonly guestRegistrationAttemptByTabId = new Map<
+    string,
+    { token: symbol; webContentsId: number }
+  >()
   private readonly clickedLinkFrameNameByGuestId = new Map<number, string>()
   private readonly loadErrorsByGuestId = new Map<number, BrowserLoadError>()
   // Why: did-start-navigation optimistically hides the overlay, but an aborted
@@ -300,54 +309,74 @@ export class BrowserManager {
   }
 
   // Why: Page.addScriptToEvaluateOnNewDocument (via the CDP debugger) is the
-  // only reliable way to run JS before page scripts on every navigation.
-  // The previous approach — executeJavaScript on did-start-navigation — ran
-  // on the OLD page context during navigation, so overrides were never
-  // present when the new page's Turnstile script executed.
+  // only reliable way to install guest behavior before page scripts on every
+  // navigation. The previous did-start-navigation approach ran in the old page.
   //
   // Returns a cleanup function that removes the detach listener and prevents
   // further re-attach attempts.
-  private injectAntiDetection(guest: Electron.WebContents): () => void {
+  private injectGuestDocumentScripts(guest: Electron.WebContents): () => void {
     let disposed = false
     let reattachTimer: ReturnType<typeof setTimeout> | null = null
+    let browserPageId: string | null = null
+    let hasInstalledAntiDetection = false
+    let installedSessionStoragePageId: string | null = null
+    let installChain = Promise.resolve()
 
-    const attach = (): void => {
+    const runInstall = async (): Promise<void> => {
       if (disposed || guest.isDestroyed()) {
         return
       }
-      try {
-        if (!guest.debugger.isAttached()) {
-          guest.debugger.attach('1.3')
-        }
-        void guest.debugger
-          .sendCommand('Page.enable', {})
-          .then(() =>
-            guest.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
-              source: ANTI_DETECTION_SCRIPT
-            })
-          )
-          .catch(() => {})
-      } catch {
-        /* best-effort — debugger may be unavailable */
+      if (!guest.debugger.isAttached()) {
+        guest.debugger.attach('1.3')
+      }
+      await guest.debugger.sendCommand('Page.enable', {})
+      if (!hasInstalledAntiDetection) {
+        await guest.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
+          source: ANTI_DETECTION_SCRIPT
+        })
+        hasInstalledAntiDetection = true
+      }
+      if (browserPageId && installedSessionStoragePageId !== browserPageId) {
+        await guest.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
+          source: buildSessionStoragePersistenceScript(browserPageId)
+        })
+        installedSessionStoragePageId = browserPageId
       }
     }
 
-    // Why: the CDP proxy and bridge detach the debugger when they stop,
-    // which removes addScriptToEvaluateOnNewDocument injections. Re-attach
-    // so manual browsing retains anti-detection overrides after agent
-    // sessions end. The 500ms delay avoids racing with the proxy/bridge if
-    // it is mid-restart (detach → re-attach).
+    const install = (nextBrowserPageId?: string): Promise<void> => {
+      if (nextBrowserPageId) {
+        browserPageId = nextBrowserPageId
+      }
+      const operation = installChain.then(runInstall, runInstall)
+      installChain = operation.catch(() => {})
+      return operation
+    }
+    this.guestDocumentScriptInstallers.set(guest.id, install)
+
+    const scheduleInstall = (): void => {
+      if (disposed || guest.isDestroyed() || reattachTimer !== null) {
+        return
+      }
+      reattachTimer = setTimeout(() => {
+        reattachTimer = null
+        void install().catch(() => scheduleInstall())
+      }, 500)
+    }
+
+    // Why: the CDP proxy and bridge detach the debugger when they stop, which
+    // removes new-document scripts. Re-attach so manual browsing keeps both
+    // session persistence and anti-detection behavior after agent sessions end.
     const onDetach = (): void => {
       if (!disposed && !guest.isDestroyed() && reattachTimer === null) {
-        reattachTimer = setTimeout(() => {
-          reattachTimer = null
-          attach()
-        }, 500)
+        hasInstalledAntiDetection = false
+        installedSessionStoragePageId = null
+        scheduleInstall()
       }
     }
 
     try {
-      attach()
+      void install().catch(() => scheduleInstall())
       guest.debugger.on('detach', onDetach)
     } catch {
       /* best-effort */
@@ -355,6 +384,7 @@ export class BrowserManager {
 
     return () => {
       disposed = true
+      this.guestDocumentScriptInstallers.delete(guest.id)
       if (reattachTimer !== null) {
         clearTimeout(reattachTimer)
         reattachTimer = null
@@ -670,11 +700,9 @@ export class BrowserManager {
     }
     let clickedLinkRoutingActive = Boolean(clickedLinkFrameName)
 
-    // Why: Cloudflare Turnstile and similar bot detectors probe browser APIs
-    // (navigator.webdriver, plugins, window.chrome) that differ in Electron
-    // webviews vs real Chrome. Inject overrides on every page load so manual
-    // browsing passes challenges even without the CDP debugger attached.
-    const disposeAntiDetection = this.injectAntiDetection(guest)
+    // Why: anti-detection can install at attach time, while the sessionStorage
+    // script waits for renderer registration to supply the stable page id.
+    const disposeGuestDocumentScripts = this.injectGuestDocumentScripts(guest)
 
     // Why: background throttling must be disabled so agent-driven screenshots
     // (Page.captureScreenshot via CDP proxy) can capture frames even when the
@@ -952,7 +980,7 @@ export class BrowserManager {
     // guest surface is torn down, preventing the callbacks from preventing GC of
     // the underlying WebContents wrapper.
     this.policyCleanupByGuestId.set(guest.id, () => {
-      disposeAntiDetection()
+      disposeGuestDocumentScripts()
       try {
         guest.off('destroyed', handleDestroyed)
         guest.off('did-create-window', handleDidCreateWindow)
@@ -1048,7 +1076,7 @@ export class BrowserManager {
     this.cancelPendingDownloadsForGuest(guestWebContentsId)
   }
 
-  registerGuest({
+  async registerGuest({
     browserPageId,
     browserTabId: legacyBrowserTabId,
     workspaceId,
@@ -1056,7 +1084,7 @@ export class BrowserManager {
     sessionProfileId,
     webContentsId,
     rendererWebContentsId
-  }: BrowserGuestRegistration): boolean {
+  }: BrowserGuestRegistration): Promise<boolean> {
     const browserTabId = browserPageId ?? legacyBrowserTabId
     if (!browserTabId) {
       return false
@@ -1093,6 +1121,38 @@ export class BrowserManager {
       return false
     }
 
+    const registrationToken = Symbol(browserTabId)
+    this.guestRegistrationAttemptByTabId.set(browserTabId, {
+      token: registrationToken,
+      webContentsId
+    })
+    const clearRegistrationAttempt = (): void => {
+      if (this.guestRegistrationAttemptByTabId.get(browserTabId)?.token === registrationToken) {
+        this.guestRegistrationAttemptByTabId.delete(browserTabId)
+      }
+    }
+
+    const installGuestDocumentScripts = this.guestDocumentScriptInstallers.get(webContentsId)
+    if (!installGuestDocumentScripts) {
+      clearRegistrationAttempt()
+      return false
+    }
+    try {
+      // Why: the first real navigation is held in the renderer until this
+      // resolves, so restoration runs before any site script can read storage.
+      await installGuestDocumentScripts(browserTabId)
+    } catch {
+      clearRegistrationAttempt()
+      return false
+    }
+    if (
+      guest.isDestroyed() ||
+      this.guestRegistrationAttemptByTabId.get(browserTabId)?.token !== registrationToken
+    ) {
+      clearRegistrationAttempt()
+      return false
+    }
+
     const previousWebContentsId = this.webContentsIdByTabId.get(browserTabId)
     if (previousWebContentsId !== undefined && previousWebContentsId !== webContentsId) {
       this.retireStaleGuestWebContents(previousWebContentsId)
@@ -1117,10 +1177,16 @@ export class BrowserManager {
     this.flushPendingPermissionEvents(browserTabId, webContentsId)
     this.flushPendingPopupEvents(browserTabId, webContentsId)
     this.flushPendingDownloadRequests(browserTabId, webContentsId)
+    clearRegistrationAttempt()
     return true
   }
 
-  unregisterGuest(browserTabId: string): void {
+  unregisterGuest(browserTabId: string, expectedWebContentsId?: number): boolean {
+    const registeredWebContentsId = this.webContentsIdByTabId.get(browserTabId)
+    if (expectedWebContentsId !== undefined && registeredWebContentsId !== expectedWebContentsId) {
+      this.cleanupGuestPolicyAttachment(expectedWebContentsId)
+      return false
+    }
     // Why: unregistering a guest while a grab is active means the guest is
     // being torn down. Cancel the grab so the renderer gets a clean signal
     // instead of a dangling Promise.
@@ -1166,6 +1232,10 @@ export class BrowserManager {
       this.tabIdByWebContentsId.delete(wcId)
     }
     this.webContentsIdByTabId.delete(browserTabId)
+    const registrationAttempt = this.guestRegistrationAttemptByTabId.get(browserTabId)
+    if (!registrationAttempt || registrationAttempt.webContentsId === wcId) {
+      this.guestRegistrationAttemptByTabId.delete(browserTabId)
+    }
     this.rendererWebContentsIdByTabId.delete(browserTabId)
     this.workspaceIdByPageId.delete(browserTabId)
     this.sessionProfileIdByPageId.delete(browserTabId)
@@ -1174,6 +1244,16 @@ export class BrowserManager {
     // retain a resolved promise keyed to a destroyed guest.
     this.viewportOpsByTabId.delete(browserTabId)
     this.annotationViewportBridgeOpsByTabId.delete(browserTabId)
+    return true
+  }
+
+  cancelPendingGuestRegistration(browserTabId: string, webContentsId: number): boolean {
+    const attempt = this.guestRegistrationAttemptByTabId.get(browserTabId)
+    if (attempt?.webContentsId !== webContentsId) {
+      return false
+    }
+    this.guestRegistrationAttemptByTabId.delete(browserTabId)
+    return true
   }
 
   // Why: headless yiru serve has no renderer window to mount a <webview>, so its
@@ -1181,7 +1261,7 @@ export class BrowserManager {
   // registers such a page into the same resolution maps the bridge/screencast/
   // input handlers read, but skips the webview-only guards and the renderer setup
   // (context menu, grab shortcut, etc.) that assume a renderer-hosted guest.
-  registerOffscreenGuest({
+  async registerOffscreenGuest({
     browserPageId,
     worktreeId,
     sessionProfileId,
@@ -1191,15 +1271,27 @@ export class BrowserManager {
     worktreeId?: string
     sessionProfileId?: string | null
     webContentsId: number
-  }): void {
+  }): Promise<boolean> {
     const guest = webContents.fromId(webContentsId)
     if (!guest || guest.isDestroyed()) {
-      return
+      return false
     }
     // Why: offscreen pages have no renderer webview listeners, so main owns
     // their load-failure lifecycle for remote browser chrome.
     this.offscreenGuestIds.add(webContentsId)
     this.attachGuestPolicies(guest)
+    const installGuestDocumentScripts = this.guestDocumentScriptInstallers.get(webContentsId)
+    if (!installGuestDocumentScripts) {
+      return false
+    }
+    try {
+      await installGuestDocumentScripts(browserPageId)
+    } catch {
+      return false
+    }
+    if (guest.isDestroyed()) {
+      return false
+    }
     const previousWebContentsId = this.webContentsIdByTabId.get(browserPageId)
     if (previousWebContentsId !== undefined && previousWebContentsId !== webContentsId) {
       this.retireStaleGuestWebContents(previousWebContentsId)
@@ -1211,6 +1303,7 @@ export class BrowserManager {
       this.worktreeIdByTabId.set(browserPageId, worktreeId)
     }
     this.certificateTrustController?.onGuestRegistered(webContentsId, browserPageId)
+    return true
   }
 
   unregisterAll(): void {
@@ -1234,6 +1327,7 @@ export class BrowserManager {
     }
     this.policyCleanupByGuestId.clear()
     this.clickedLinkFrameNameByGuestId.clear()
+    this.guestRegistrationAttemptByTabId.clear()
     this.tabIdByWebContentsId.clear()
     this.popupOwnerContextByGuestId.clear()
     this.worktreeIdByTabId.clear()
@@ -1526,7 +1620,7 @@ export class BrowserManager {
   // Why: Electron <webview> guests do not expose Chrome DevTools' device
   // toolbar (Cmd+Shift+M) to the embedding app, so viewport emulation must be
   // driven through CDP directly. We reuse the debugger attachment that
-  // injectAntiDetection already established and never detach it here — doing
+  // injectGuestDocumentScripts already established and never detach it here — doing
   // so would clear Page.addScriptToEvaluateOnNewDocument and other per-guest
   // overrides. Passing override=null clears emulation.
   async setViewportOverride(

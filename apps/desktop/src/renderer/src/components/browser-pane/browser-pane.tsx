@@ -83,7 +83,8 @@ import {
 import {
   destroyPersistentWebview,
   moveFocusToRendererBeforeWebviewDetach,
-  registeredWebContentsIds
+  registeredWebContentsIds,
+  waitForPendingWebviewDestruction
 } from '@/runtime/browser-webview-registry'
 import {
   isRemoteRuntimeFileOperation,
@@ -183,6 +184,7 @@ import {
   getRemoteBrowserKeyboardShortcut,
   getRemoteBrowserKeypressKey
 } from './remote-browser-keyboard'
+import { waitForPendingRemoteBrowserPageClose } from './state'
 import { useGrabMode } from './use-grab-mode'
 
 type BrowserTabPageState = Partial<
@@ -1417,13 +1419,17 @@ function RemoteBrowserPagePane({
       }
       const target = { kind: 'environment' as const, environmentId: token.environmentId }
       const createRemotePage = async (): Promise<string | null> => {
+        await waitForPendingRemoteBrowserPageClose(browserTab.id)
+        if (!isCurrentRemoteOperationToken(token)) {
+          return null
+        }
         const currentUrl = currentBrowserTabUrlRef.current
         const initialUrl =
           currentUrl === YIRU_BROWSER_BLANK_URL ? 'about:blank' : currentUrl || 'about:blank'
         const created = await callRuntimeRpc<{ browserPageId: string }>(
           target,
           'browser.tabCreate',
-          { worktree: runtimeWorktree, url: initialUrl },
+          { browserPageId: browserTab.id, worktree: runtimeWorktree, url: initialUrl },
           { timeoutMs: 30_000, suppressFeatureInteraction: true }
         )
         if (!isCurrentRemoteOperationToken(token)) {
@@ -2866,6 +2872,9 @@ function BrowserPagePane({
   // the webview to an intermediate redirect URL — which would restart the
   // redirect chain and cause an infinite loop.
   const lastKnownWebviewUrlRef = useRef<string | null>(null)
+  // Why: URL synchronization runs in a separate effect and must not bypass the
+  // pre-document script registration while a newly attached guest is pending.
+  const initialNavigationPendingWebviewRef = useRef<Electron.WebviewTag | null>(null)
   const onUpdatePageStateRef = useRef(onUpdatePageState)
   const onSetUrlRef = useRef(onSetUrl)
   const addBrowserHistoryEntry = useAppStore((s) => s.addBrowserHistoryEntry)
@@ -3744,6 +3753,11 @@ function BrowserPagePane({
     container = ensuredWebview.container
     const webview = ensuredWebview.webview
     const needsInitialNavigation = ensuredWebview.created
+    if (needsInitialNavigation) {
+      initialNavigationPendingWebviewRef.current = webview
+    } else if (initialNavigationPendingWebviewRef.current !== webview) {
+      initialNavigationPendingWebviewRef.current = null
+    }
     let needsInitialDefaultZoom = ensuredWebview.created
 
     if (!ensuredWebview.created) {
@@ -3816,18 +3830,45 @@ function BrowserPagePane({
       return promise
     }
 
+    let hasStartedInitialNavigation = !needsInitialNavigation
+    const startInitialNavigation = (): void => {
+      if (
+        hasStartedInitialNavigation ||
+        initialNavigationPendingWebviewRef.current !== webview ||
+        !webview.isConnected
+      ) {
+        return
+      }
+      hasStartedInitialNavigation = true
+      initialNavigationPendingWebviewRef.current = null
+      // Why: listeners and the pre-document session restore must both be ready
+      // before the first real URL can execute any site JavaScript.
+      const initialUrl =
+        normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
+      trackNextLoadingEventRef.current = initialUrl !== YIRU_BROWSER_BLANK_URL
+      lastKnownWebviewUrlRef.current = initialUrl
+      webview.src = initialUrl
+    }
+
+    const finishGuestRegistration = (registered: boolean): void => {
+      if (registered) {
+        void waitForPendingWebviewDestruction().then(startInitialNavigation)
+      }
+      syncBrowserAnnotationViewportBridge()
+    }
+
     const handleDidAttach = (): void => {
       // Why: certificate failures can happen before dom-ready. Register at
       // attach so main can map the initial failure to this page; dom-ready below
       // remains an idempotent fallback for attach-policy races.
-      void registerGuest().finally(() => syncBrowserAnnotationViewportBridge())
+      void registerGuest().then(finishGuestRegistration)
     }
 
     const handleDomReady = (): void => {
       const queuedAnnotationViewportBridgeSync =
         registeredWebContentsIds.get(browserTab.id) !== webview.getWebContentsId()
       if (queuedAnnotationViewportBridgeSync) {
-        void registerGuest().finally(() => syncBrowserAnnotationViewportBridge())
+        void registerGuest().then(finishGuestRegistration)
       }
       syncNavigationState(webview)
       if (keepAddressBarFocusRef.current) {
@@ -4067,18 +4108,6 @@ function BrowserPagePane({
     webview.addEventListener('did-fail-load', handleFailLoad)
     webview.addEventListener('console-message', handleAnnotationViewportMessage)
 
-    if (needsInitialNavigation) {
-      // Why: connection-refused localhost tabs can fail before Electron wires up
-      // event delivery if src is assigned too early. Attach listeners first so
-      // Yiru never misses the initial did-fail-load signal for a new tab.
-      // Only non-blank initial tabs should light up Yiru's loading indicator.
-      const initialUrl =
-        normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
-      trackNextLoadingEventRef.current = initialUrl !== YIRU_BROWSER_BLANK_URL
-      lastKnownWebviewUrlRef.current = initialUrl
-      webview.src = initialUrl
-    }
-
     return () => {
       webview.removeEventListener('did-attach', handleDidAttach)
       webview.removeEventListener('dom-ready', handleDomReady)
@@ -4162,6 +4191,9 @@ function BrowserPagePane({
   useEffect(() => {
     const webview = webviewRef.current
     if (!webview) {
+      return
+    }
+    if (initialNavigationPendingWebviewRef.current === webview) {
       return
     }
     const normalizedUrl = normalizeBrowserNavigationUrl(browserTab.url)

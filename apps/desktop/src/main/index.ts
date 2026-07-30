@@ -2594,7 +2594,8 @@ app.on('will-quit', (e) => {
   runtime?.getAgentBrowserBridge()?.destroyAllSessions()
   // Why: headless offscreen browser windows are main-process owned; tear them
   // down explicitly on quit alongside the other browser/session shutdowns.
-  runtime?.getOffscreenBrowserBackend()?.destroyAll?.()
+  const offscreenBrowserShutdown =
+    runtime?.getOffscreenBrowserBackend()?.destroyAll?.() ?? Promise.resolve()
   browserManager.setBrowserGuestStateChangedListener(null)
   const emulatorShutdown = runtime?.getEmulatorBridge()?.destroyAllSessions() ?? Promise.resolve()
   const fridayShutdown = friday?.dispose() ?? Promise.resolve()
@@ -2662,7 +2663,8 @@ app.on('will-quit', (e) => {
       coworkingStop,
       watcherShutdown,
       emulatorShutdown,
-      fridayShutdown
+      fridayShutdown,
+      offscreenBrowserShutdown
     ])
       .then(() => shutdownTelemetry())
       .then(() => shutdownObservability())

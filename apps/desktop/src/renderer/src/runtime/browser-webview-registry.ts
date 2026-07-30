@@ -1,3 +1,7 @@
+import {
+  buildSessionStoragePersistenceScript,
+  YIRU_PERSIST_SESSION_STORAGE_EXPRESSION
+} from '../../../shared/browser/session-storage-persistence'
 import { clearLiveBrowserUrl } from './browser-live-url'
 import { removeBrowserPageViewport } from './browser-page-viewport'
 
@@ -16,6 +20,8 @@ let dragListenersAttached = false
 let nativeDragPassthroughRelease: (() => void) | null = null
 const dragPassthroughTokens = new Set<symbol>()
 const dragPassthroughPreviousPointerEvents = new Map<Electron.WebviewTag, string>()
+const webviewDestruction = new Map<Electron.WebviewTag, Promise<void>>()
+const SESSION_STORAGE_PERSIST_TIMEOUT_MS = 200
 
 type DragListenerRegistry = {
   dragstart: () => void
@@ -185,6 +191,36 @@ export function moveFocusToRendererBeforeWebviewDetach(webview: Electron.Webview
   moveFocusToRendererIfWebviewOwnsFocus(webview)
 }
 
+export async function waitForPendingWebviewDestruction(): Promise<void> {
+  await Promise.allSettled(webviewDestruction.values())
+}
+
+async function persistSessionStorageBeforeDetach(
+  browserTabId: string,
+  webview: Electron.WebviewTag
+): Promise<void> {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  const timeout = new Promise<void>((resolve) => {
+    timeoutId = setTimeout(resolve, SESSION_STORAGE_PERSIST_TIMEOUT_MS)
+  })
+  try {
+    await Promise.race([
+      webview
+        .executeJavaScript(
+          `${buildSessionStoragePersistenceScript(browserTabId, false)};${YIRU_PERSIST_SESSION_STORAGE_EXPRESSION}`
+        )
+        .then(() => {}),
+      timeout
+    ])
+  } catch {
+    // Why: the guest may already be gone during app teardown.
+  } finally {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
+
 export function destroyPersistentWebview(browserTabId: string): void {
   const webview = webviewRegistry.get(browserTabId)
   if (!webview) {
@@ -195,11 +231,41 @@ export function destroyPersistentWebview(browserTabId: string): void {
     clearLiveBrowserUrl(browserTabId)
     return
   }
-  void window.api.browser.unregisterGuest({ browserPageId: browserTabId })
+  if (webviewDestruction.has(webview)) {
+    return
+  }
   moveFocusToRendererBeforeWebviewDetach(webview)
-  webview.remove()
+  let expectedWebContentsId: number | null = null
+  try {
+    expectedWebContentsId = webview.getWebContentsId()
+  } catch {
+    // Why: a guest closed before attachment never acquired a main registration.
+  }
+  webview.style.display = 'none'
   unregisterPersistentWebview(browserTabId)
-  removeBrowserPageViewport(browserTabId)
   registeredWebContentsIds.delete(browserTabId)
   clearLiveBrowserUrl(browserTabId)
+  // Why: removing a webview destroys sessionStorage immediately. Give the
+  // pre-document bridge one bounded turn to capture this page's final state.
+  const destruction = persistSessionStorageBeforeDetach(browserTabId, webview)
+    .then(() => {
+      if (expectedWebContentsId === null) {
+        return
+      }
+      return window.api.browser.unregisterGuest({
+        browserPageId: browserTabId,
+        expectedWebContentsId
+      })
+    })
+    .catch(() => false)
+    .then(() => {
+      webview.remove()
+      if (!webviewRegistry.has(browserTabId)) {
+        removeBrowserPageViewport(browserTabId)
+      }
+    })
+    .finally(() => {
+      webviewDestruction.delete(webview)
+    })
+  webviewDestruction.set(webview, destruction)
 }

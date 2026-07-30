@@ -113,6 +113,7 @@ export const TabSwitch = BrowserTarget.extend({
 )
 
 export const TabCreate = z.object({
+  browserPageId: OptionalString,
   url: OptionalString,
   worktree: OptionalString,
   profileId: OptionalString,
