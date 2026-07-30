@@ -157,7 +157,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
           <Text
             className={cn(
               'shrink text-base leading-5',
-              item.unread ? 'text-foreground font-semibold' : 'text-foreground/80',
+              item.unread ? 'text-foreground' : 'text-foreground/80',
               isReadOnly && 'opacity-50'
             )}
             numberOfLines={1}

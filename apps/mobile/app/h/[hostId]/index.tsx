@@ -916,10 +916,7 @@ export function HostScreen({
                   ) : null}
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text
-                    className="text-foreground shrink text-base leading-none font-semibold"
-                    numberOfLines={1}
-                  >
+                  <Text className="text-foreground shrink text-base leading-none" numberOfLines={1}>
                     {section.title}
                   </Text>
                 </View>

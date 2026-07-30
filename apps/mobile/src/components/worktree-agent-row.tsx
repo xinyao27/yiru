@@ -36,7 +36,7 @@ export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
       <Text
         className={cn(
           'flex-1 text-sm leading-4 text-muted-foreground',
-          unvisited && 'text-foreground font-semibold'
+          unvisited && 'text-foreground'
         )}
         numberOfLines={1}
       >
