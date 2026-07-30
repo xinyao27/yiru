@@ -22,8 +22,8 @@ export function SourceControlSectionHeader({
 }): React.JSX.Element {
   // Why: local and projected Source Control sections must keep one hover and disclosure surface.
   return (
-    <div className="pt-3 pr-3 pb-1 pl-1">
-      <div className="group/section hover:bg-accent hover:text-accent-foreground flex items-center pr-1">
+    <div className="pt-3 pb-1">
+      <div className="group/section hover:bg-accent hover:text-accent-foreground flex items-center pr-2 pl-0.5">
         <Button
           variant="ghost"
           size="xs"
@@ -34,11 +34,11 @@ export function SourceControlSectionHeader({
           <ChevronDown
             weight="regular"
             className={cn(
-              'text-muted-foreground group-hover/section:text-accent-foreground size-3.5 shrink-0 transition-transform',
+              'text-muted-foreground group-hover/section:text-accent-foreground size-4 shrink-0 transition-transform',
               isCollapsed && '-rotate-90'
             )}
           />
-          <span>{label}</span>
+          <span className="ml-0.5">{label}</span>
           <span className="text-[11px] font-medium tabular-nums">{count}</span>
           {conflictCount > 0 ? (
             <span className="text-destructive/80 text-[11px] font-medium">
