@@ -333,6 +333,8 @@ const WORKTREE_SIDEBAR_SCROLL_STYLE: React.CSSProperties = {
   overflowX: 'hidden',
   overflowAnchor: 'none'
 }
+// Why: LegendList 3.3.3 supports this documented Web API at runtime but omits it from
+// the React entrypoint's prop override, so spreading keeps the remaining props type-checked.
 const LEGEND_LIST_SCROLL_AREA_PROPS = {
   renderScrollComponent: LegendListScrollArea
 }
