@@ -1,12 +1,16 @@
 import type { StateCreator } from 'zustand'
 
-import type { RateLimitRuntimeTarget, RateLimitState } from '../../../../shared/rate-limit-types'
+import type {
+  CursorRateLimitRefreshContext,
+  RateLimitRuntimeTarget,
+  RateLimitState
+} from '../../../../shared/rate-limit-types'
 import type { AppState } from '../types'
 
 export type RateLimitSlice = {
   rateLimits: RateLimitState
   fetchRateLimits: () => Promise<void>
-  refreshRateLimits: () => Promise<void>
+  refreshRateLimits: (cursorContext?: CursorRateLimitRefreshContext) => Promise<void>
   refreshGrokRateLimits: () => Promise<void>
   refreshClaudeRateLimitsForTarget: (target: RateLimitRuntimeTarget) => Promise<void>
   refreshCodexRateLimitsForTarget: (target: RateLimitRuntimeTarget) => Promise<void>
@@ -20,6 +24,7 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
   rateLimits: {
     claude: null,
     codex: null,
+    cursor: null,
     gemini: null,
     opencodeGo: null,
     kimi: null,
@@ -43,9 +48,9 @@ export const createRateLimitSlice: StateCreator<AppState, [], [], RateLimitSlice
     }
   },
 
-  refreshRateLimits: async () => {
+  refreshRateLimits: async (cursorContext) => {
     try {
-      const state = await window.api.rateLimits.refresh()
+      const state = await window.api.rateLimits.refresh(cursorContext)
       set({ rateLimits: state })
     } catch (error) {
       console.error('Failed to refresh rate limits:', error)

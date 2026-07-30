@@ -13,6 +13,7 @@ import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'ele
 
 import { resolveEnvironment } from '../shared/runtime-environment-store'
 import { getPreferredPairingOffer } from '../shared/runtime-environments'
+import { CURSOR_USAGE_GET_CONTRACT } from '../shared/runtime-method-contracts/provider-usage-contracts'
 import {
   HEADLESS_RUNTIME_WINDOW_ID,
   type RuntimeDesktopWindowStatus
@@ -147,6 +148,8 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { RateLimitService } from './rate-limits/service'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import { parseCursorRateLimitsResponse } from './runtime/cursor-usage/client'
+import { resolveCursorUsageRuntimeTarget } from './runtime/cursor-usage/target'
 import { callRuntimeEnvironment } from './runtime/environment-transport-routing'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
 import { registerMobileHandlers } from './runtime/mobile'
@@ -162,6 +165,7 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
+import { getActiveMultiplexer } from './ssh/ssh'
 import { StarNagService } from './star-nag/service'
 import { maybeRedirectAppImageCliLaunch } from './startup/appimage-cli-redirect'
 import {
@@ -1913,6 +1917,9 @@ app.whenReady().then(async () => {
       // settings writes, so every macOS toggle updates the native item live.
       syncMacMenuBarIcon(settings.showMenuBarIcon !== false)
     }
+    if ('activeRuntimeEnvironmentId' in updates || 'localWindowsRuntimeDefault' in updates) {
+      void rateLimits?.refresh()
+    }
   })
   // Why: must run before ClaudeRuntimeAuthService's constructor sync — a Claude
   // CLI that survived the restart inside the daemon still holds the current
@@ -2017,6 +2024,49 @@ app.whenReady().then(async () => {
   )
   rateLimits.setCodexFetchTarget(getInitialCodexRateLimitTarget(store.getSettings()))
   rateLimits.setClaudeFetchTarget(getInitialClaudeRateLimitTarget(store.getSettings()))
+  rateLimits.setCursorRateLimitTargetResolver((context) =>
+    resolveCursorUsageRuntimeTarget(store!, context, process.platform)
+  )
+  rateLimits.setRemoteCursorUsageFetcher(async (environmentId, signal) => {
+    if (signal?.aborted) {
+      throw new Error('Rate-limit fetch aborted')
+    }
+    const response = await callRuntimeEnvironment(
+      app.getPath('userData'),
+      environmentId,
+      CURSOR_USAGE_GET_CONTRACT,
+      undefined,
+      40_000
+    )
+    if (signal?.aborted) {
+      throw new Error('Rate-limit fetch aborted')
+    }
+    if (response.ok === false) {
+      throw new Error(response.error.message)
+    }
+    return response.result
+  })
+  rateLimits.setSshCursorUsageFetcher(async (connectionId, signal) => {
+    if (signal?.aborted) {
+      throw new Error('Rate-limit fetch aborted')
+    }
+    const multiplexer = getActiveMultiplexer(connectionId)
+    if (!multiplexer || multiplexer.isDisposed()) {
+      throw new Error('SSH runtime is unavailable')
+    }
+    const result: unknown = await multiplexer.request('usage.cursor', undefined, {
+      signal,
+      timeoutMs: 40_000
+    })
+    if (signal?.aborted) {
+      throw new Error('Rate-limit fetch aborted')
+    }
+    const cursorRateLimits = parseCursorRateLimitsResponse(result)
+    if (!cursorRateLimits) {
+      throw new Error('SSH runtime returned invalid Cursor usage data')
+    }
+    return cursorRateLimits
+  })
   rateLimits.setClaudeAuthPreparationResolver((target) =>
     claudeRuntimeAuth!.prepareForRateLimitFetch(target)
   )

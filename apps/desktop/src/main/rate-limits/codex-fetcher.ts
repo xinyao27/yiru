@@ -18,8 +18,16 @@ import {
   buildWslLoginShellCommand,
   escapeWslShCommandForWindows
 } from '../../shared/wsl-login-shell-command'
-import { resolveCodexCommand } from '../codex/cli/command'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
+import { resolveCodexCommand } from '../runtime/cli-command'
+import {
+  cleanupHiddenRateLimitPty,
+  registerHiddenRateLimitPty
+} from '../runtime/hidden-pty-cleanup'
+import {
+  getHiddenRateLimitWslCwdSetupCommands,
+  resolveHiddenRateLimitPtyCwd
+} from '../runtime/hidden-rate-limit-pty-cwd'
 import { getCmdExePath, getSpawnArgsForWindows } from '../win32-utils'
 import {
   createAuthFilesystemOperation,
@@ -33,11 +41,6 @@ import {
   type CodexRpcRateLimits,
   type CodexRpcRateWindow
 } from './codex-rate-limit-window-classification'
-import { cleanupHiddenRateLimitPty, registerHiddenRateLimitPty } from './hidden-pty-cleanup'
-import {
-  getHiddenRateLimitWslCwdSetupCommands,
-  resolveHiddenRateLimitPtyCwd
-} from './hidden-rate-limit-pty-cwd'
 
 const RPC_TIMEOUT_MS = 10_000
 const WSL_RPC_TIMEOUT_MS = 25_000

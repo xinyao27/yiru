@@ -8,9 +8,10 @@ import type { BrowserWindow } from 'electron'
 import type { NetworkProxySettings } from '../../shared/network-proxy'
 import type {
   CodexRateLimitResetResult,
-  RateLimitState,
+  CursorRateLimitRefreshContext,
+  InactiveAccountUsage,
   ProviderRateLimits,
-  InactiveAccountUsage
+  RateLimitState
 } from '../../shared/rate-limit-types'
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import {
@@ -24,6 +25,12 @@ import {
   type NormalizedCodexAccountSelectionTarget
 } from '../codex/accounts/runtime-selection'
 import { hasMiniMaxSessionCookie } from '../minimax/cookie-store'
+import {
+  fetchCursorUsageForRuntime,
+  type RemoteCursorUsageFetcher,
+  type SshCursorUsageFetcher
+} from '../runtime/cursor-usage/client'
+import type { CursorUsageRuntimeTarget } from '../runtime/cursor-usage/target'
 import { fetchClaudeRateLimits, fetchManagedAccountUsage } from './claude-fetcher'
 import type { InactiveClaudeAccountInfo } from './claude-fetcher'
 import { consumeCodexRateLimitResetCredit, fetchCodexRateLimits } from './codex-fetcher'
@@ -61,6 +68,9 @@ type MiniMaxResolvedConfig = {
 }
 
 type GeminiCliOAuthEnabledResolver = () => boolean
+type CursorRateLimitTargetResolver = (
+  context: CursorRateLimitRefreshContext | null
+) => CursorUsageRuntimeTarget
 type ActiveRateLimitProvider = ProviderRateLimits['provider']
 type ActiveProviderState = {
   provider: ActiveRateLimitProvider
@@ -102,6 +112,7 @@ const DEFERRED_STARTUP_ACTIVE_REFRESH_MS = 1000
 type InternalRateLimitState = {
   claude: ProviderRateLimits | null
   codex: ProviderRateLimits | null
+  cursor: ProviderRateLimits | null
   gemini: ProviderRateLimits | null
   opencodeGo: ProviderRateLimits | null
   kimi: ProviderRateLimits | null
@@ -115,6 +126,19 @@ function normalizePollingInterval(ms: number): number {
     return DEFAULT_POLL_MS
   }
   return Math.min(MAX_POLL_MS, Math.max(MIN_POLL_MS, ms))
+}
+
+function getCursorTargetKey(target: CursorUsageRuntimeTarget): string {
+  if (target.runtime === 'host') {
+    return 'host'
+  }
+  if (target.runtime === 'wsl') {
+    return `wsl:${target.wslDistro ?? ''}`
+  }
+  if (target.runtime === 'ssh') {
+    return `ssh:${target.connectionId}`
+  }
+  return `environment:${target.environmentId}`
 }
 
 function isSystemDefaultClaudeAuth(
@@ -137,6 +161,7 @@ export class RateLimitService {
   private state: InternalRateLimitState = {
     claude: null,
     codex: null,
+    cursor: null,
     gemini: null,
     opencodeGo: null,
     kimi: null,
@@ -153,6 +178,7 @@ export class RateLimitService {
   private lastActiveFailureRetryAtByProvider: Record<ActiveRateLimitProvider, number> = {
     claude: 0,
     codex: 0,
+    cursor: 0,
     gemini: 0,
     'opencode-go': 0,
     kimi: 0,
@@ -165,6 +191,7 @@ export class RateLimitService {
   private activeFailureStreakByProvider: Record<ActiveRateLimitProvider, number> = {
     claude: 0,
     codex: 0,
+    cursor: 0,
     gemini: 0,
     'opencode-go': 0,
     kimi: 0,
@@ -183,6 +210,7 @@ export class RateLimitService {
   private fetchIdleResolvers: (() => void)[] = []
   private codexFetchGeneration = 0
   private claudeFetchGeneration = 0
+  private cursorFetchGeneration = 0
   private opencodeFetchGeneration = 0
   private minimaxFetchGeneration = 0
   private lastOpencodeConfigHash = ''
@@ -200,6 +228,13 @@ export class RateLimitService {
   private openCodeGoConfigResolver: (() => OpenCodeGoRateLimitConfig) | null = null
   private miniMaxConfigResolver: (() => MiniMaxRateLimitConfig) | null = null
   private geminiCliOAuthEnabledResolver: GeminiCliOAuthEnabledResolver | null = null
+  private cursorRateLimitRefreshContext: CursorRateLimitRefreshContext | null = null
+  private cursorFetchTarget: CursorUsageRuntimeTarget = { runtime: 'host' }
+  private cursorRateLimitTargetResolver: CursorRateLimitTargetResolver = () => ({
+    runtime: 'host'
+  })
+  private remoteCursorUsageFetcher: RemoteCursorUsageFetcher | undefined
+  private sshCursorUsageFetcher: SshCursorUsageFetcher | undefined
   private inactiveClaudeAccountsResolver: (() => InactiveClaudeAccountInfo[]) | null = null
   private inactiveCodexAccountsResolver: (() => InactiveCodexAccountInfo[]) | null = null
   private networkProxySettingsResolver: (() => NetworkProxySettings) | null = null
@@ -248,6 +283,18 @@ export class RateLimitService {
 
   setGeminiCliOAuthEnabledResolver(resolver: GeminiCliOAuthEnabledResolver): void {
     this.geminiCliOAuthEnabledResolver = resolver
+  }
+
+  setCursorRateLimitTargetResolver(resolver: CursorRateLimitTargetResolver): void {
+    this.cursorRateLimitTargetResolver = resolver
+  }
+
+  setRemoteCursorUsageFetcher(fetcher: RemoteCursorUsageFetcher): void {
+    this.remoteCursorUsageFetcher = fetcher
+  }
+
+  setSshCursorUsageFetcher(fetcher: SshCursorUsageFetcher): void {
+    this.sshCursorUsageFetcher = fetcher
   }
 
   setNetworkProxySettingsResolver(resolver: () => NetworkProxySettings): void {
@@ -340,13 +387,33 @@ export class RateLimitService {
     }
   }
 
-  async refresh(): Promise<RateLimitState> {
+  async refresh(cursorContext?: CursorRateLimitRefreshContext): Promise<RateLimitState> {
     // Why: the explicit refresh button is a user-directed recovery action.
     // Debouncing it behind the background poll throttle makes the UI feel
     // broken after wake/focus transitions because the click can no-op even
     // though the user is asking for a fresh read right now.
+    if (cursorContext) {
+      this.setCursorRefreshContext(cursorContext)
+    }
     await this.fetchAll({ force: true })
     return this.getState()
+  }
+
+  private setCursorRefreshContext(context: CursorRateLimitRefreshContext): void {
+    this.cursorRateLimitRefreshContext = context
+    const nextTarget = this.cursorRateLimitTargetResolver(context)
+    if (getCursorTargetKey(nextTarget) === getCursorTargetKey(this.cursorFetchTarget)) {
+      return
+    }
+    this.cursorFetchTarget = nextTarget
+    this.cursorFetchGeneration += 1
+    this.activeFailureStreakByProvider.cursor = 0
+    // Why: a target change is an identity change. Clear the prior host's quota
+    // before queuing work so an in-flight fetch cannot leave it visible.
+    this.updateState({
+      ...this.state,
+      cursor: this.withFetchingStatus(null, 'cursor')
+    })
   }
 
   async refreshIfStale(): Promise<RateLimitState> {
@@ -771,6 +838,7 @@ export class RateLimitService {
     const byProvider: Record<ActiveRateLimitProvider, ProviderRateLimits | null> = {
       claude: this.state.claude,
       codex: this.state.codex,
+      cursor: this.state.cursor,
       gemini: this.state.gemini,
       'opencode-go': this.state.opencodeGo,
       kimi: this.state.kimi,
@@ -1316,6 +1384,7 @@ export class RateLimitService {
     provider:
       | 'claude'
       | 'codex'
+      | 'cursor'
       | 'gemini'
       | 'opencode-go'
       | 'kimi'
@@ -1358,6 +1427,15 @@ export class RateLimitService {
     const codexHomePath = this.codexHomePathResolver?.(codexTarget) ?? null
     const codexProvenance = this.getCodexProvenance(codexTarget, codexHomePath)
     const codexGeneration = this.codexFetchGeneration
+    const cursorTarget = this.cursorRateLimitTargetResolver(this.cursorRateLimitRefreshContext)
+    const cursorTargetChanged =
+      getCursorTargetKey(cursorTarget) !== getCursorTargetKey(this.cursorFetchTarget)
+    if (cursorTargetChanged) {
+      this.cursorFetchTarget = cursorTarget
+      this.cursorFetchGeneration += 1
+      this.activeFailureStreakByProvider.cursor = 0
+    }
+    const cursorGeneration = this.cursorFetchGeneration
     const previousState = this.state
     const openCodeGoConfig = this.openCodeGoConfigResolver?.()
     const cookie = openCodeGoConfig?.sessionCookie ?? ''
@@ -1397,6 +1475,7 @@ export class RateLimitService {
       ...previousState,
       claude: this.withFetchingStatus(previousState.claude, 'claude'),
       codex: this.withFetchingStatus(previousState.codex, 'codex'),
+      cursor: this.withFetchingStatus(cursorTargetChanged ? null : previousState.cursor, 'cursor'),
       gemini: this.withFetchingStatus(previousState.gemini, 'gemini'),
       opencodeGo: opencodeConfigChanged
         ? this.withFetchingStatus(null, 'opencode-go')
@@ -1420,32 +1499,45 @@ export class RateLimitService {
       (reason) => ({ status: 'rejected', reason }) as const
     )
 
-    const [claudeResult, codexResult, geminiResult, opencodeGoResult, kimiResult, miniMaxResult] =
-      await Promise.allSettled([
-        fetchClaudeRateLimits({
-          authPreparation: claudeAuthPreparation,
-          allowPtyFallback: this.shouldAllowClaudePtyFallback(claudeAuthPreparation),
-          allowUsagePanelSupplement: this.shouldAllowClaudeUsagePanelSupplement(),
-          networkProxySettings: this.networkProxySettingsResolver?.(),
+    const [
+      claudeResult,
+      codexResult,
+      cursorResult,
+      geminiResult,
+      opencodeGoResult,
+      kimiResult,
+      miniMaxResult
+    ] = await Promise.allSettled([
+      fetchClaudeRateLimits({
+        authPreparation: claudeAuthPreparation,
+        allowPtyFallback: this.shouldAllowClaudePtyFallback(claudeAuthPreparation),
+        allowUsagePanelSupplement: this.shouldAllowClaudeUsagePanelSupplement(),
+        networkProxySettings: this.networkProxySettingsResolver?.(),
+        signal
+      }),
+      missingWslCodexHome ??
+        fetchCodexRateLimits({
+          codexHomePath,
+          allowPtyFallback: this.shouldAllowCodexPtyFallback(),
           signal
         }),
-        missingWslCodexHome ??
-          fetchCodexRateLimits({
-            codexHomePath,
-            allowPtyFallback: this.shouldAllowCodexPtyFallback(),
-            signal
-          }),
-        fetchGeminiRateLimits(geminiCliOAuthEnabled),
-        fetchOpenCodeGoRateLimits(cookie, workspaceIdOverride || undefined),
-        fetchKimiRateLimits(),
-        miniMaxConfigResult.error
-          ? Promise.resolve(this.getMiniMaxCredentialError(miniMaxConfigResult.error))
-          : fetchMiniMaxRateLimits({
-              cookie: miniMaxCookie,
-              groupId: miniMaxGroupId,
-              models: miniMaxModels
-            })
-      ])
+      fetchCursorUsageForRuntime({
+        signal,
+        target: cursorTarget,
+        remoteFetcher: this.remoteCursorUsageFetcher,
+        sshFetcher: this.sshCursorUsageFetcher
+      }),
+      fetchGeminiRateLimits(geminiCliOAuthEnabled),
+      fetchOpenCodeGoRateLimits(cookie, workspaceIdOverride || undefined),
+      fetchKimiRateLimits(),
+      miniMaxConfigResult.error
+        ? Promise.resolve(this.getMiniMaxCredentialError(miniMaxConfigResult.error))
+        : fetchMiniMaxRateLimits({
+            cookie: miniMaxCookie,
+            groupId: miniMaxGroupId,
+            models: miniMaxModels
+          })
+    ])
 
     if (signal.aborted) {
       return
@@ -1474,6 +1566,19 @@ export class RateLimitService {
             updatedAt: Date.now(),
             error:
               codexResult.reason instanceof Error ? codexResult.reason.message : 'Unknown error',
+            status: 'error'
+          } satisfies ProviderRateLimits)
+
+    const cursor =
+      cursorResult.status === 'fulfilled'
+        ? cursorResult.value
+        : ({
+            provider: 'cursor',
+            session: null,
+            weekly: null,
+            updatedAt: Date.now(),
+            error:
+              cursorResult.reason instanceof Error ? cursorResult.reason.message : 'Unknown error',
             status: 'error'
           } satisfies ProviderRateLimits)
 
@@ -1554,6 +1659,12 @@ export class RateLimitService {
       claudeGeneration === this.claudeFetchGeneration &&
       claudeProvenance === latestClaudeProvenance &&
       this.isSameClaudeTarget(claudeTarget, this.claudeFetchTarget)
+    const latestCursorTarget = this.cursorRateLimitTargetResolver(
+      this.cursorRateLimitRefreshContext
+    )
+    const shouldApplyCursor =
+      cursorGeneration === this.cursorFetchGeneration &&
+      getCursorTargetKey(cursorTarget) === getCursorTargetKey(latestCursorTarget)
     const shouldApplyOpencode = opencodeGeneration === this.opencodeFetchGeneration
     const shouldApplyMiniMax = miniMaxGeneration === this.minimaxFetchGeneration
 
@@ -1562,6 +1673,9 @@ export class RateLimitService {
     }
     if (shouldApplyCodex) {
       this.trackActiveFailureStreak('codex', codex)
+    }
+    if (shouldApplyCursor) {
+      this.trackActiveFailureStreak('cursor', cursor)
     }
     this.trackActiveFailureStreak('gemini', gemini)
     this.trackActiveFailureStreak('antigravity', antigravity)
@@ -1585,6 +1699,11 @@ export class RateLimitService {
       codex: shouldApplyCodex
         ? this.applyStalePolicy(codex, previousState.codex)
         : this.state.codex,
+      cursor: shouldApplyCursor
+        ? cursorTargetChanged
+          ? cursor
+          : this.applyStalePolicy(cursor, previousState.cursor)
+        : this.state.cursor,
       gemini: this.applyStalePolicy(gemini, previousState.gemini),
       opencodeGo: shouldApplyOpencode
         ? opencodeConfigChanged

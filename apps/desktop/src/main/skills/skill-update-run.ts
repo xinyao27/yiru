@@ -6,8 +6,8 @@ import {
   type SkillUpdateRun,
   type SkillUpdateStartResult
 } from '../../shared/skill-freshness'
-import { resolveCliCommand } from '../codex/cli/command'
 import { killWithDescendantSweep } from '../pty-descendant-termination'
+import { resolveCliCommand } from '../runtime/cli-command'
 import { getSpawnArgsForWindows } from '../win32-utils'
 
 // Why: `skills update` prints ANSI colour and \r + erase-line progress. We show

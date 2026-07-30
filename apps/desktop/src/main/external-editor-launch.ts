@@ -4,7 +4,7 @@ import { basename, posix, win32 } from 'node:path'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 
 import { isVsCodeLauncherExecutable } from '../shared/vscode-remote-ssh-launcher'
-import { resolveCliCommand } from './codex/cli/command'
+import { resolveCliCommand } from './runtime/cli-command'
 import { getCmdExePath } from './win32-utils'
 
 export const EXTERNAL_EDITOR_CLI_COMMAND = 'code'

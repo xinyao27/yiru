@@ -10,7 +10,7 @@ const { execFileSyncMock, resolveCodexCommandMock } = vi.hoisted(() => ({
 
 vi.mock('node:child_process', () => ({ execFileSync: execFileSyncMock }))
 
-vi.mock('./cli/command', () => ({
+vi.mock('../runtime/cli-command', () => ({
   resolveCodexCommand: resolveCodexCommandMock
 }))
 

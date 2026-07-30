@@ -114,6 +114,7 @@ import type {
 } from '../shared/pty-renderer-delivery-health'
 import type {
   CodexRateLimitResetResult,
+  CursorRateLimitRefreshContext,
   GrokAccountStatus,
   RateLimitRuntimeTarget,
   RateLimitState
@@ -3795,7 +3796,8 @@ const api = {
 
   rateLimits: {
     get: (): Promise<RateLimitState> => ipcRenderer.invoke('rateLimits:get'),
-    refresh: (): Promise<RateLimitState> => ipcRenderer.invoke('rateLimits:refresh'),
+    refresh: (cursorContext?: CursorRateLimitRefreshContext): Promise<RateLimitState> =>
+      ipcRenderer.invoke('rateLimits:refresh', cursorContext),
     refreshCodexForTarget: (target: RateLimitRuntimeTarget): Promise<RateLimitState> =>
       ipcRenderer.invoke('rateLimits:refreshCodexForTarget', target),
     consumeCodexResetCredit: (): Promise<CodexRateLimitResetResult> =>

@@ -3,6 +3,13 @@ import type { StatusBarItem } from './types'
 export const DEFAULT_STATUS_BAR_ITEMS: StatusBarItem[] = [
   'claude',
   'codex',
+  'cursor',
+  'gemini',
+  'antigravity',
+  'opencode-go',
+  'kimi',
+  'minimax',
+  'grok',
   'ssh',
   'resource-usage',
   'ports'
@@ -22,8 +29,16 @@ const LEGACY_DEFAULT_STATUS_BAR_ITEMS: readonly StatusBarItem[] = [
   'ports'
 ]
 
+const PRE_CURSOR_DEFAULT_STATUS_BAR_ITEMS: readonly StatusBarItem[] = [
+  'claude',
+  'codex',
+  'ssh',
+  'resource-usage',
+  'ports'
+]
+
 // Why: persisted UI state predates the consolidated resource-usage item and
-// the quieter provider defaults, so hydration needs one shared normalization.
+// the current provider roster, so hydration needs one shared normalization.
 export function normalizeStatusBarItems(items: readonly string[] | undefined): StatusBarItem[] {
   const source = items ?? DEFAULT_STATUS_BAR_ITEMS
   const normalized: string[] = []
@@ -39,6 +54,14 @@ export function normalizeStatusBarItems(items: readonly string[] | undefined): S
   if (
     normalized.length === LEGACY_DEFAULT_STATUS_BAR_ITEMS.length &&
     normalized.every((item) => LEGACY_DEFAULT_STATUS_BAR_ITEMS.includes(item as StatusBarItem))
+  ) {
+    return [...DEFAULT_STATUS_BAR_ITEMS]
+  }
+  // Why: Cursor usage shipped after the compact provider defaults. Upgrade
+  // that exact default set so existing users receive every configured, detected meter.
+  if (
+    normalized.length === PRE_CURSOR_DEFAULT_STATUS_BAR_ITEMS.length &&
+    normalized.every((item) => PRE_CURSOR_DEFAULT_STATUS_BAR_ITEMS.includes(item as StatusBarItem))
   ) {
     return [...DEFAULT_STATUS_BAR_ITEMS]
   }

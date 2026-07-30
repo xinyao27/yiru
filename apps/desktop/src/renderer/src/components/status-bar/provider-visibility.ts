@@ -22,6 +22,7 @@ export type UsageProviderSettings = Pick<
 type UsageProviderSnapshots = {
   claude: ProviderRateLimits | null
   codex: ProviderRateLimits | null
+  cursor: ProviderRateLimits | null
   gemini: ProviderRateLimits | null
   opencodeGo: ProviderRateLimits | null
   kimi: ProviderRateLimits | null
@@ -158,6 +159,7 @@ export function isUsageEmptyState(
   if (
     isProviderSnapshotPending(providers.claude) ||
     isProviderSnapshotPending(providers.codex) ||
+    isProviderSnapshotPending(providers.cursor) ||
     isProviderSnapshotPending(providers.gemini) ||
     isProviderSnapshotPending(providers.opencodeGo) ||
     isProviderSnapshotPending(providers.kimi) ||
@@ -171,6 +173,7 @@ export function isUsageEmptyState(
     !hasUsageProviderSettings(settings) &&
     !isProviderConfigured(providers.claude) &&
     !isProviderConfigured(providers.codex) &&
+    !isProviderConfigured(providers.cursor) &&
     !isProviderConfigured(providers.gemini) &&
     !isProviderConfigured(providers.opencodeGo) &&
     !isProviderConfigured(providers.kimi) &&

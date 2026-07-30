@@ -1,12 +1,12 @@
 import { dirname, join } from 'node:path'
 
+import { resolveCodexCommand } from '../runtime/cli-command'
 import { getSpawnArgsForWindows } from '../win32-utils'
 import {
   isCodexAppServerUnsupportedError,
   runCodexAppServerSession,
   type CodexAppServerInvocation
 } from './app-server-session'
-import { resolveCodexCommand } from './cli/command'
 import { getCodexSessionBackfillStateDirPath } from './home-paths'
 import { resolveCodexSessionBackfillPaths } from './session-backfill'
 import {

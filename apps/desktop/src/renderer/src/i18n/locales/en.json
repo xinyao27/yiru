@@ -53,7 +53,8 @@
         "resourceUsageToggleDescription": "Show the Resource Manager. Click it for CPU, memory, sessions, daemon controls, and workspace disk scans.",
         "portsToggleDescription": "Show live workspace ports. Click it for workspace-scoped ports and external listeners.",
         "antigravityToggleDescription": "Show Antigravity subscription usage for the active workspace.",
-        "grokToggleDescription": "Show Grok subscription credit usage when signed in via Grok CLI."
+        "grokToggleDescription": "Show Grok subscription credit usage when signed in via Grok CLI.",
+        "cursorToggleDescription": "Show Cursor plan usage reported by Cursor Agent."
       },
       "menuBarIcon": {
         "title": "Show Menu Bar Icon",
@@ -2007,7 +2008,8 @@
             "antigravityUsage": "Antigravity Usage",
             "antigravityUsageDetails": "Open Antigravity usage details",
             "grokUsageAria": "Open Grok usage details",
-            "grokUsageMenu": "Grok Usage"
+            "grokUsageMenu": "Grok Usage",
+            "cursorUsage": "Cursor Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "Connect an account",
@@ -6505,7 +6507,9 @@
             "showPinnedWorktreesInGroups": {
               "title": "Also show pinned worktrees in their original lists",
               "description": "Pinned worktrees stay in Pinned and also appear in All, Project, Status, and Review."
-            }
+            },
+            "cursorUsage": "Cursor Usage",
+            "cursorUsageDescription": "Show Cursor plan usage in the status bar."
           }
         },
         "auto": {

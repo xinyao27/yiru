@@ -5,14 +5,17 @@ make the lifecycle harder to audit. */
 import type { ProviderRateLimits, RateLimitWindow } from '../../shared/rate-limit-types'
 import { applyClaudeEnvPatch } from '../claude/accounts/environment'
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
-import { resolveClaudeCommand } from '../codex/cli/command'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
-import { extractClaudePtyResetMetadata } from './claude-pty-reset-parser'
-import { cleanupHiddenRateLimitPty, registerHiddenRateLimitPty } from './hidden-pty-cleanup'
+import { resolveClaudeCommand } from '../runtime/cli-command'
+import {
+  cleanupHiddenRateLimitPty,
+  registerHiddenRateLimitPty
+} from '../runtime/hidden-pty-cleanup'
 import {
   getHiddenRateLimitWslCwdSetupCommands,
   resolveHiddenRateLimitPtyCwd
-} from './hidden-rate-limit-pty-cwd'
+} from '../runtime/hidden-rate-limit-pty-cwd'
+import { extractClaudePtyResetMetadata } from './claude-pty-reset-parser'
 
 const PTY_TIMEOUT_MS = 25_000
 const MAX_OUTPUT_LENGTH = 100_000 // 100KB buffer limit

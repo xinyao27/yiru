@@ -9,6 +9,7 @@ import type { StatusBarItem, TuiAgent } from '../../../../shared/types'
 const CLI_GATED_ITEMS: ReadonlySet<StatusBarItem> = new Set([
   'claude',
   'codex',
+  'cursor',
   'gemini',
   'kimi',
   'antigravity',

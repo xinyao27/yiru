@@ -42,9 +42,9 @@ import {
 import { renderSourceControlActionCommandTemplate } from '../../shared/source-control/ai-actions'
 import type { SourceControlAiOperation } from '../../shared/source-control/ai-types'
 import type { GlobalSettings, Repo, TuiAgent } from '../../shared/types'
-import { resolveCliCommand } from '../codex/cli/command'
 import { wslAwareSpawn } from '../git/runner'
 import { withMacTailscaleDnsHint } from '../network/macos-tailscale-dns-diagnostic'
+import { resolveCliCommand } from '../runtime/cli-command'
 import {
   getSpawnArgsForWindows,
   UnsafeWindowsBatchArgumentsError,
