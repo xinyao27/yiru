@@ -238,7 +238,7 @@ function normalizeHydratedVisibleWorkspaceHostIds(ui: PersistedUIState): Visible
   return legacyScope === 'all' ? null : [legacyScope]
 }
 
-const MIN_SIDEBAR_WIDTH = 220
+const MIN_SIDEBAR_WIDTH = 240
 const MAX_LEFT_SIDEBAR_WIDTH = 500
 // Why: the right sidebar drag-resize is window-relative (see right-sidebar
 // component), so persisted widths can legitimately be well above the old 500px

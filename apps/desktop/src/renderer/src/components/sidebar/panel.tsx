@@ -21,7 +21,7 @@ const WorktreeVisibilityDialog = lazyWithRetry(() => import('./worktree-visibili
 const YiruYamlTrustDialog = lazyWithRetry(() => import('./yiru-yaml-trust-dialog'))
 const ForgetSshWorkspaceDialog = lazyWithRetry(() => import('./forget-ssh-workspace-dialog'))
 
-const MIN_WIDTH = 220
+const MIN_WIDTH = 240
 const MAX_WIDTH = 500
 // Why: straddle the content seam and extend through the sibling titlebar so the
 // visible sidebar has one uninterrupted drag target; the header is a drag region.
