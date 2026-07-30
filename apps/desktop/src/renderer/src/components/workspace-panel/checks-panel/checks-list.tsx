@@ -14,7 +14,6 @@ import { useActiveWorktree } from '../../../store/selectors'
 import { LoadingIndicator } from '../../loading-indicator'
 import { Button } from '../../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
-import { useCheckDetailsResize } from '../check-details-resize'
 import { CHECK_COLOR, CHECK_ICON } from '../check-status-presentation'
 import { CheckRunDetails } from './check-run-details'
 import {
@@ -60,12 +59,6 @@ export function ChecksList({
   )
   const detailsContextRef = useRef(checkDetailsContextKey)
   const autoExpandedContextRef = useRef<string | null>(null)
-  // Why: expanded check details already sit inside the sidebar scroller; keeping
-  // the list scroller too creates nested scrollbars around CI annotations.
-  const shouldConstrainCheckList = checksExpanded && expandedCheckKeys.size === 0
-  const { detailsHeight, handleResizeStart } = useCheckDetailsResize(
-    shouldConstrainCheckList && checks.length > 0
-  )
   detailsContextRef.current = checkDetailsContextKey
   const sorted = React.useMemo(
     () =>
@@ -283,10 +276,7 @@ export function ChecksList({
         </div>
       ) : !checksExpanded ? null : (
         <>
-          <div
-            className={cn('py-1', shouldConstrainCheckList && 'overflow-y-auto scrollbar-sleek')}
-            style={shouldConstrainCheckList ? { maxHeight: detailsHeight } : undefined}
-          >
+          <div className="py-1">
             {rows.map((row) => {
               const check = row.check
               const conclusion = check.conclusion ?? 'pending'
@@ -364,20 +354,6 @@ export function ChecksList({
               )
             })}
           </div>
-          {shouldConstrainCheckList && (
-            <div
-              role="separator"
-              aria-orientation="horizontal"
-              title={translate(
-                'auto.components.right.sidebar.checks.panel.content.7f793b571d',
-                'Drag to resize checks'
-              )}
-              className="group border-border flex h-2 cursor-row-resize items-center border-b"
-              onMouseDown={handleResizeStart}
-            >
-              <div className="group-hover:bg-ring/40 h-px w-full bg-transparent transition-colors" />
-            </div>
-          )}
           {checks.length >= 100 && (
             <div className="border-border text-muted-foreground border-b px-3 py-1.5 text-[10px]">
               {translate(
