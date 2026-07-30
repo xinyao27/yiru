@@ -2,11 +2,7 @@ import type { PRCheckDetail } from '@yiru/workbench-model/review'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
 
-import {
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  ArrowSquareOut as ExternalLink
-} from '@/components/uniwind-icons'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { fetchPRCheckDetails, type GitHubPrRepoSlug } from '../../session/github-pr-rpc'
@@ -213,15 +209,15 @@ export function PRChecksSection({ checks, client, worktreeId, prRepo, actions, t
                 {checkStatusLabel(check)}
               </Text>
               {url ? (
-                <Pressable
-                  className={styles.rowTrailing}
-                  onPress={() => void Linking.openURL(url).catch(() => {})}
-                  hitSlop={6}
-                  accessibilityRole="button"
+                <MobileGlassIconButton
                   accessibilityLabel={`Open ${check.name} on the web`}
-                >
-                  <ExternalLink size={13} colorClassName="accent-muted-foreground" />
-                </Pressable>
+                  icon="external"
+                  onPress={(event) => {
+                    event.stopPropagation()
+                    void Linking.openURL(url).catch(() => {})
+                  }}
+                  size="small"
+                />
               ) : null}
             </Pressable>
             {isOpen ? <PRCheckDetailView entry={detailCache[key]} /> : null}

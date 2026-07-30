@@ -229,7 +229,7 @@ export function SmartWorkspaceSourceDrawer({
           <Text className="text-muted-foreground text-xs">
             This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
           </Text>
-          <View className="flex-row justify-end gap-2">
+          <MobileGlassGroup className="flex-row justify-end gap-2" spacing={8}>
             <MobileGlassTextButton label="Cancel" onPress={dismissCrossRepoPrompt} size="small" />
             <MobileGlassTextButton
               isProminent
@@ -237,7 +237,7 @@ export function SmartWorkspaceSourceDrawer({
               onPress={() => void handleAcceptCrossRepo()}
               size="small"
             />
-          </View>
+          </MobileGlassGroup>
         </MobileContentSection>
       ) : null}
 

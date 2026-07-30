@@ -24,6 +24,7 @@ import {
 } from '../../source-control/pr-create'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { RpcSuccess } from '../../transport/types'
+import { MobileGlassGroup } from '../glass/group'
 import { MobileGlassIconButton } from '../glass/icon-button'
 import { MobileGlassPressable } from '../glass/pressable'
 import { MobileGlassSurface } from '../glass/surface'
@@ -173,7 +174,7 @@ export function MobilePrComposeForm({
           <ReviewIcon size={14} colorClassName="accent-muted-foreground" />
           <Text className="text-foreground text-sm font-bold">New {copy.reviewLabel}</Text>
         </View>
-        <View className="flex-row items-center gap-1">
+        <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
           <MobileGlassPressable
             accessibilityLabel={`Generate ${copy.reviewLabel} details with AI`}
             accessibilityRole="button"
@@ -198,7 +199,7 @@ export function MobilePrComposeForm({
             onPress={onCancel}
             size="small"
           />
-        </View>
+        </MobileGlassGroup>
       </View>
 
       {head ? (
@@ -263,7 +264,10 @@ export function MobilePrComposeForm({
         </View>
       </View>
 
-      <MobileGlassSurface className="min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2">
+      <MobileGlassSurface
+        className="min-h-9 flex-row items-center justify-between gap-2 rounded-xl px-2"
+        isFunctional
+      >
         <Text className="text-foreground text-xs">Create as draft</Text>
         <Switch
           value={draft}

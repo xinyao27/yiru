@@ -109,12 +109,14 @@ function ResizeHandle({
   )
 
   return (
+    // Why: keep the flex item seam-sized so adjacent titlebar borders meet it;
+    // the transparent ::before box preserves a forgiving resize target.
     <div
       className={cn(
-        "relative shrink-0 bg-transparent after:absolute after:bg-[var(--tab-group-split-divider)] after:transition-colors after:duration-100 after:ease-[ease] after:content-[''] hover:after:bg-[var(--tab-group-split-divider-strong)]",
+        "relative z-10 shrink-0 bg-transparent before:absolute before:content-[''] after:absolute after:inset-0 after:bg-[var(--tab-group-split-divider)] after:transition-colors after:duration-100 after:ease-[ease] after:content-[''] hover:after:bg-[var(--tab-group-split-divider-strong)]",
         isHorizontal
-          ? 'w-1.5 cursor-col-resize after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2'
-          : 'h-1.5 cursor-row-resize after:inset-x-0 after:top-1/2 after:h-px after:-translate-y-1/2',
+          ? 'w-px cursor-col-resize before:-inset-x-0.5 before:inset-y-0'
+          : 'h-px cursor-row-resize before:inset-x-0 before:-inset-y-0.5',
         dragging && 'after:bg-[var(--tab-group-split-divider-strong)]'
       )}
       onPointerDown={onPointerDown}

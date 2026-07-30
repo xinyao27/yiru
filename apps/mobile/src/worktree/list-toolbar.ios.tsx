@@ -1,5 +1,6 @@
 import { Button, ControlGroup, Host, HStack, VStack } from '@expo/ui/swift-ui'
 import {
+  buttonBorderShape,
   controlSize,
   disabled as disabledModifier,
   frame,
@@ -8,9 +9,11 @@ import {
 import { useMemo } from 'react'
 import { useUniwind } from 'uniwind'
 
+import { useMobileGlassAvailable } from '../components/glass/availability'
 import {
   MobileSwiftUiGlassGroup,
-  MobileSwiftUiGlassCircleButton
+  MobileSwiftUiGlassCircleButton,
+  mobileSwiftUiGlassButtonStyle
 } from '../components/glass/swift-ui.ios'
 
 type MobileWorkspaceListToolbarProps = {
@@ -32,36 +35,68 @@ type MobileWorkspaceListToolbarProps = {
 
 type MobileWorkspaceListHeaderActionsProps = {
   canUseHost: boolean
+  embedded: boolean
+  onHideSidebar?: () => void
+  onReconnect: () => void
   showSearch: boolean
+  showReconnect: boolean
   onAccounts: () => void
   onSearch: () => void
 }
 
 export function MobileWorkspaceListHeaderActions({
   canUseHost,
+  embedded,
+  onHideSidebar,
+  onReconnect,
+  showReconnect,
   showSearch,
   onAccounts,
   onSearch
 }: MobileWorkspaceListHeaderActionsProps): React.JSX.Element {
+  const isGlassAvailable = useMobileGlassAvailable()
   const { theme } = useUniwind()
+  const reconnectModifiers = useMemo<ViewModifier[]>(
+    () => [
+      controlSize('regular'),
+      mobileSwiftUiGlassButtonStyle(isGlassAvailable),
+      buttonBorderShape('capsule')
+    ],
+    [isGlassAvailable]
+  )
 
   return (
     <Host colorScheme={theme} matchContents style={{ backgroundColor: 'transparent' }}>
       <MobileSwiftUiGlassGroup spacing={8}>
         <HStack spacing={8}>
-          <MobileSwiftUiGlassCircleButton
-            disabled={!canUseHost}
-            label="Accounts"
-            size="regular"
-            systemImage="person.crop.circle"
-            onPress={onAccounts}
-          />
-          <MobileSwiftUiGlassCircleButton
-            label={showSearch ? 'Close search' : 'Search workspaces'}
-            size="regular"
-            systemImage={showSearch ? 'xmark' : 'magnifyingglass'}
-            onPress={onSearch}
-          />
+          {showReconnect ? (
+            <Button label="Reconnect" modifiers={reconnectModifiers} onPress={onReconnect} />
+          ) : null}
+          {!embedded && !showReconnect ? (
+            <MobileSwiftUiGlassCircleButton
+              disabled={!canUseHost}
+              label="Accounts"
+              size="regular"
+              systemImage="person.crop.circle"
+              onPress={onAccounts}
+            />
+          ) : null}
+          {!embedded ? (
+            <MobileSwiftUiGlassCircleButton
+              label={showSearch ? 'Close search' : 'Search workspaces'}
+              size="regular"
+              systemImage={showSearch ? 'xmark' : 'magnifyingglass'}
+              onPress={onSearch}
+            />
+          ) : null}
+          {embedded && onHideSidebar ? (
+            <MobileSwiftUiGlassCircleButton
+              label="Hide sidebar"
+              size="regular"
+              systemImage="sidebar.left"
+              onPress={onHideSidebar}
+            />
+          ) : null}
         </HStack>
       </MobileSwiftUiGlassGroup>
     </Host>

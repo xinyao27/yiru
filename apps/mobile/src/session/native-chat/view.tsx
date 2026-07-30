@@ -6,13 +6,13 @@ import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  Pressable,
   Text,
   View
 } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
 import { MobileGlassIconButton } from '../../components/glass/icon-button'
+import { MobileGlassTextButton } from '../../components/glass/text-button'
 import { GestureDetector, GestureHandlerRootView } from '../../components/uniwind-native-components'
 import { useSafeAreaInsets } from '../../components/uniwind-native-components'
 import { resolveCssNumber } from '../../style/resolve-css-variable'
@@ -302,19 +302,14 @@ export function MobileNativeChatView({
               }}
               ListHeaderComponent={
                 hasMore ? (
-                  <Pressable
-                    className="min-h-9 items-center justify-center py-3"
-                    onPress={onLoadEarlier}
-                    disabled={loadingEarlier}
-                  >
-                    {loadingEarlier ? (
-                      <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
-                    ) : (
-                      <Text className="text-muted-foreground text-xs font-semibold">
-                        Load earlier messages
-                      </Text>
-                    )}
-                  </Pressable>
+                  <View className="items-center py-3">
+                    <MobileGlassTextButton
+                      disabled={loadingEarlier}
+                      label="Load earlier messages"
+                      onPress={() => onLoadEarlier?.()}
+                      size="small"
+                    />
+                  </View>
                 ) : null
               }
               ListEmptyComponent={

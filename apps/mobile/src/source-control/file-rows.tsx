@@ -1,12 +1,9 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import type { SectionListRenderItem } from 'react-native'
 
-import {
-  CaretRight as ChevronRight,
-  Minus,
-  Plus,
-  Trash as Trash2
-} from '@/components/uniwind-icons'
+import { MobileGlassGroup } from '@/components/glass/group'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
+import { CaretRight as ChevronRight } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
 import { formatMobileBranchEntryMeta } from './branch-entry-format'
@@ -82,56 +79,44 @@ export function makeRenderFileRow(
             <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
           </View>
         ) : item.area === 'staged' ? (
-          <Pressable
-            className={cn(
-              styles.iconButton,
-              ioBusy && styles.iconButtonDisabled,
-              'active:bg-accent'
-            )}
-            disabled={ioBusy}
-            onPress={() =>
-              void runGitAction(item.unstageActionId, 'git.unstage', { filePath: item.path })
-            }
-            hitSlop={8}
+          <MobileGlassIconButton
             accessibilityLabel={`Unstage ${item.path}`}
-          >
-            <Minus size={16} colorClassName="accent-muted-foreground" />
-          </Pressable>
+            disabled={ioBusy}
+            icon="minus"
+            onPress={(event) => {
+              event.stopPropagation()
+              void runGitAction(item.unstageActionId, 'git.unstage', { filePath: item.path })
+            }}
+            size="small"
+          />
         ) : item.canStage || item.canDiscard ? (
-          <View className="flex-row items-center gap-1">
+          <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
             {item.canStage ? (
-              <Pressable
-                className={cn(
-                  styles.iconButton,
-                  ioBusy && styles.iconButtonDisabled,
-                  'active:bg-accent'
-                )}
-                disabled={ioBusy}
-                onPress={() =>
-                  void runGitAction(item.stageActionId, 'git.stage', { filePath: item.path })
-                }
-                hitSlop={8}
+              <MobileGlassIconButton
                 accessibilityLabel={`Stage ${item.path}`}
-              >
-                <Plus size={16} colorClassName="accent-muted-foreground" />
-              </Pressable>
+                disabled={ioBusy}
+                icon="plus"
+                onPress={(event) => {
+                  event.stopPropagation()
+                  void runGitAction(item.stageActionId, 'git.stage', { filePath: item.path })
+                }}
+                size="small"
+              />
             ) : null}
             {item.canDiscard ? (
-              <Pressable
-                className={cn(
-                  styles.iconButton,
-                  ioBusy && styles.iconButtonDisabled,
-                  'active:bg-accent'
-                )}
-                disabled={ioBusy}
-                onPress={() => setDiscardTarget(item)}
-                hitSlop={8}
+              <MobileGlassIconButton
                 accessibilityLabel={`Discard ${item.path}`}
-              >
-                <Trash2 size={16} colorClassName="accent-destructive" />
-              </Pressable>
+                disabled={ioBusy}
+                icon="delete"
+                isDestructive
+                onPress={(event) => {
+                  event.stopPropagation()
+                  setDiscardTarget(item)
+                }}
+                size="small"
+              />
             ) : null}
-          </View>
+          </MobileGlassGroup>
         ) : null}
         {!rowBusy && item.canOpen && !hasInlineActions ? (
           <View className="w-5 items-center">

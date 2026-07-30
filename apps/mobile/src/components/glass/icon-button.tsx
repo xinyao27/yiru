@@ -13,10 +13,12 @@ import {
   FloppyDisk,
   Gear,
   ListChecks,
+  Minus,
   Play,
   Plus,
   SidebarSimple,
   Trash,
+  UserPlus,
   X,
   type Icon
 } from '../uniwind-icons'
@@ -25,6 +27,8 @@ import { MobileGlassPressable } from './pressable'
 
 function iconForName(name: MobileGlassIconName): Icon {
   switch (name) {
+    case 'add-person':
+      return UserPlus
     case 'back':
       return CaretLeft
     case 'check':
@@ -45,6 +49,8 @@ function iconForName(name: MobileGlassIconName): Icon {
       return Pencil
     case 'insights':
       return ChartBar
+    case 'minus':
+      return Minus
     case 'more':
       return DotsThree
     case 'play':

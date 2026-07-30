@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, TextInput, Switch } from 'react-native'
 
 import { MobileContentSection } from '@/components/content-section'
+import { MobileGlassGroup } from '@/components/glass/group'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassPressable } from '@/components/glass/pressable'
 import { MobileGlassSurface } from '@/components/glass/surface'
@@ -278,7 +279,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
             <Text className="text-muted-foreground mb-2 pl-1 text-xs tracking-wider uppercase">
               Modifiers
             </Text>
-            <View className="flex-row gap-2">
+            <MobileGlassGroup className="flex-row gap-2" spacing={8}>
               {SHORTCUT_MODIFIERS.map((modifier) => {
                 const selected = shortcutModifiers.includes(modifier.id)
                 return (
@@ -304,7 +305,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   </MobileGlassPressable>
                 )
               })}
-            </View>
+            </MobileGlassGroup>
           </View>
 
           <View className="mt-3">
@@ -350,7 +351,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
               <Text className="text-muted-foreground mb-1 pl-1 text-xs tracking-wider uppercase">
                 {group.title}
               </Text>
-              <View className="-mx-1 flex-row flex-wrap">
+              <MobileGlassGroup className="-mx-1 flex-row flex-wrap" spacing={8}>
                 {group.ids.map((id) => {
                   const key = SPECIAL_KEY_BY_ID[id]
                   if (!key) {
@@ -373,7 +374,7 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                     </View>
                   )
                 })}
-              </View>
+              </MobileGlassGroup>
             </View>
           ))}
         </View>

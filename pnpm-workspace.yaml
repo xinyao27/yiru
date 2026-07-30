@@ -85,7 +85,6 @@ catalog:
   expo-notifications: ^57.0.6
   expo-router: ^57.0.7
   expo-secure-store: ^57.0.1
-  expo-splash-screen: ^57.0.4
   expo-status-bar: ^57.0.1
   html-to-image: ^1.11.13
   i18next: ^26.3.6
@@ -200,7 +199,6 @@ catalogs:
     expo-notifications: 57.0.7
     expo-router: 57.0.8
     expo-secure-store: 57.0.1
-    expo-splash-screen: 57.0.5
     expo-status-bar: 57.0.1
     expo-thinking-orbs: 0.1.0
     lowlight: 3.3.0

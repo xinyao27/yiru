@@ -213,7 +213,7 @@ export function QuickCommandEditorForm({
         ) : null}
       </View>
       {error ? <Text className="text-destructive mt-1 text-xs">{error}</Text> : null}
-      <View className="mt-2 flex-row gap-2">
+      <MobileGlassGroup className="mt-2 flex-row gap-2" spacing={8}>
         <MobileGlassTextButton
           className="flex-1"
           isFullWidth
@@ -230,7 +230,7 @@ export function QuickCommandEditorForm({
           onPress={onSave}
           size="large"
         />
-      </View>
+      </MobileGlassGroup>
     </View>
   )
 }

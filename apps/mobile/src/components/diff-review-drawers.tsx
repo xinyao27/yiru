@@ -19,6 +19,7 @@ import { ActionSheetModal } from './action-sheet-modal'
 import { BottomDrawer } from './bottom-drawer'
 import { ConfirmModal } from './confirm-modal'
 import { mobileDiffReviewStyles as styles } from './diff-review-screen-styles'
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassIconButton } from './glass/icon-button'
 import { MobileGlassSurface } from './glass/surface'
 import { MobileGlassTextButton } from './glass/text-button'
@@ -207,12 +208,12 @@ function NoteComposerDrawer({ controller }: Props) {
             accessibilityLabel={composerLabel(composer)}
           />
         </MobileGlassSurface>
-        <View className={styles.drawerButtonRow}>
+        <MobileGlassGroup className={styles.drawerButtonRow} spacing={8}>
           {composer?.mode === 'edit' ? (
             <DeleteNoteButton onPress={controller.deleteComment} />
           ) : null}
           <SaveNoteButton controller={controller} composer={composer} />
-        </View>
+        </MobileGlassGroup>
       </KeyboardAvoidingView>
     </BottomDrawer>
   )
@@ -271,7 +272,7 @@ function CompletionDrawer({ controller }: Props) {
         {mobileReviewCountLabel(controller.queue.length, 'file', 'files')} reviewed,{' '}
         {mobileReviewCountLabel(noteCount, 'note', 'notes')}
       </Text>
-      <View className={styles.drawerButtonRow}>
+      <MobileGlassGroup className={styles.drawerButtonRow} spacing={8}>
         <MobileGlassTextButton
           disabled={controller.reviewedUnstagedCount === 0}
           label="Stage Reviewed"
@@ -287,7 +288,7 @@ function CompletionDrawer({ controller }: Props) {
           accessibilityLabel="Send notes to agent"
           size="regular"
         />
-      </View>
+      </MobileGlassGroup>
     </BottomDrawer>
   )
 }

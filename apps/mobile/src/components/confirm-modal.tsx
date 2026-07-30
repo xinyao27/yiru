@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native'
 
 import { BottomDrawer } from './bottom-drawer'
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
@@ -32,7 +33,7 @@ export function ConfirmModal({
           <Text className="text-muted-foreground mt-1 text-sm leading-5">{message}</Text>
         ) : null}
       </View>
-      <View className="flex-row gap-2">
+      <MobileGlassGroup className="flex-row gap-2" spacing={8}>
         <MobileGlassTextButton
           className="flex-1"
           isFullWidth
@@ -50,7 +51,7 @@ export function ConfirmModal({
             onCancel()
           }}
         />
-      </View>
+      </MobileGlassGroup>
     </BottomDrawer>
   )
 }

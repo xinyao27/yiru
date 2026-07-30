@@ -1,8 +1,8 @@
 import type { GitHubWorkItemDetails } from '@yiru/workbench-model/review'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 
-import { UserPlus, X } from '@/components/uniwind-icons'
+import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { cn } from '@/style/class-names'
 
 import { isPrSidebarDetailsPlaceholder } from '../../session/pr/sidebar-state'
@@ -59,14 +59,12 @@ export function PRReviewersSection({ details, actions, client, worktreeId }: Pro
   }, [authoritativeRows, details])
 
   const addButton = (
-    <Pressable
-      className={styles.iconButton}
-      onPress={() => setPickerOpen(true)}
-      accessibilityRole="button"
+    <MobileGlassIconButton
       accessibilityLabel="Add or remove reviewers"
-    >
-      <UserPlus size={16} colorClassName="accent-muted-foreground" />
-    </Pressable>
+      icon="add-person"
+      onPress={() => setPickerOpen(true)}
+      size="small"
+    />
   )
 
   return (
@@ -97,19 +95,19 @@ export function PRReviewersSection({ details, actions, client, worktreeId }: Pro
               <Text className={cn(styles.rowStatus, 'text-muted-foreground')}>
                 {row.stateLabel}
               </Text>
-              <Pressable
-                className={styles.rowTrailing}
-                onPress={() => actions.removeReviewer(row.login)}
-                disabled={busy}
-                accessibilityRole="button"
-                accessibilityLabel={`Remove ${row.login}`}
-              >
-                {busy ? (
+              {busy ? (
+                <View className={styles.rowTrailing}>
                   <ActivityIndicator colorClassName="accent-muted-foreground" />
-                ) : (
-                  <X size={14} colorClassName="accent-muted-foreground" />
-                )}
-              </Pressable>
+                </View>
+              ) : (
+                <MobileGlassIconButton
+                  accessibilityLabel={`Remove ${row.login}`}
+                  icon="close"
+                  isDestructive
+                  onPress={() => actions.removeReviewer(row.login)}
+                  size="small"
+                />
+              )}
             </View>
           )
         })

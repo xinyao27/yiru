@@ -2,9 +2,8 @@ import { Stack } from 'expo-router'
 import { type ReactNode, useMemo } from 'react'
 import { Platform, Text, View } from 'react-native'
 
+import { MobileGlassHeader } from '../components/glass/header'
 import { MobileGlassIconButton } from '../components/glass/icon-button'
-import { MobileGlassTextButton } from '../components/glass/text-button'
-import { SafeAreaView } from '../components/uniwind-native-components'
 import { MobileWorkspaceListHeaderActions } from './list-toolbar'
 
 type MobileWorkspaceListChromeProps = {
@@ -80,7 +79,7 @@ export function MobileWorkspaceListChrome({
   }
 
   return (
-    <SafeAreaView className="bg-background" edges={['top']}>
+    <MobileGlassHeader includesTopInset>
       <View className="gap-2 px-3 pt-1 pb-2">
         <View className="min-h-10 flex-row items-center gap-2">
           <MobileGlassIconButton accessibilityLabel="Back to hosts" icon="back" onPress={onBack} />
@@ -89,25 +88,19 @@ export function MobileWorkspaceListChrome({
               {hostName || 'Host'}
             </Text>
           </View>
-          {showReconnect ? <MobileGlassTextButton label="Reconnect" onPress={onReconnect} /> : null}
-          {!embedded ? (
-            <MobileWorkspaceListHeaderActions
-              canUseHost={canUseHost}
-              showSearch={showSearch}
-              onAccounts={onAccounts}
-              onSearch={onSearch}
-            />
-          ) : null}
-          {embedded && onHideSidebar ? (
-            <MobileGlassIconButton
-              accessibilityLabel="Hide sidebar"
-              icon="sidebar"
-              onPress={onHideSidebar}
-            />
-          ) : null}
+          <MobileWorkspaceListHeaderActions
+            canUseHost={canUseHost}
+            embedded={embedded}
+            showReconnect={showReconnect}
+            showSearch={showSearch}
+            onAccounts={onAccounts}
+            onHideSidebar={onHideSidebar}
+            onReconnect={onReconnect}
+            onSearch={onSearch}
+          />
         </View>
         {children}
       </View>
-    </SafeAreaView>
+    </MobileGlassHeader>
   )
 }

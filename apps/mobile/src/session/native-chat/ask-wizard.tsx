@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 
+import { MobileGlassGroup } from '../../components/glass/group'
 import { MobileGlassPressable } from '../../components/glass/pressable'
 import { MobileGlassSurface } from '../../components/glass/surface'
 import { MobileGlassTextButton } from '../../components/glass/text-button'
@@ -95,38 +96,40 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
   const otherSelected = (selections[index] ?? []).includes(OTHER)
 
   return (
-    <MobileGlassSurface className="max-h-96 overflow-hidden rounded-t-3xl">
+    <MobileGlassSurface className="max-h-96 overflow-hidden rounded-t-3xl" isFunctional>
       {total > 1 ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="border-b-hairline border-b-border grow-0 pt-2"
-          contentContainerClassName="px-2 gap-1 items-center"
-          keyboardShouldPersistTaps="always"
-        >
-          {prompt.questions.map((qq, questionIndex) => (
-            <MobileGlassPressable
-              key={`${qq.header}:${qq.question}`}
-              className="rounded-full"
-              contentClassName="min-h-8 flex-row items-center gap-1 rounded-full px-3 py-1"
-              onPress={() => setIndex(questionIndex)}
-              tintColorClassName={questionIndex === index ? 'accent-primary' : undefined}
-            >
-              <Text
-                className={cn(
-                  'text-muted-foreground text-xs',
-                  questionIndex === index && 'text-foreground'
-                )}
-                numberOfLines={1}
+        <MobileGlassGroup spacing={8}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="border-b-hairline border-b-border grow-0 pt-2"
+            contentContainerClassName="px-2 gap-2 items-center"
+            keyboardShouldPersistTaps="always"
+          >
+            {prompt.questions.map((qq, questionIndex) => (
+              <MobileGlassPressable
+                key={`${qq.header}:${qq.question}`}
+                className="rounded-full"
+                contentClassName="min-h-8 flex-row items-center gap-1 rounded-full px-3 py-1"
+                onPress={() => setIndex(questionIndex)}
+                tintColorClassName={questionIndex === index ? 'accent-primary' : undefined}
               >
-                {qq.header || `Step ${questionIndex + 1}`}
-              </Text>
-              {isAnswered(questionIndex) ? (
-                <Check size={11} colorClassName="accent-green-500" />
-              ) : null}
-            </MobileGlassPressable>
-          ))}
-        </ScrollView>
+                <Text
+                  className={cn(
+                    'text-muted-foreground text-xs',
+                    questionIndex === index && 'text-foreground'
+                  )}
+                  numberOfLines={1}
+                >
+                  {qq.header || `Step ${questionIndex + 1}`}
+                </Text>
+                {isAnswered(questionIndex) ? (
+                  <Check size={11} colorClassName="accent-green-500" />
+                ) : null}
+              </MobileGlassPressable>
+            ))}
+          </ScrollView>
+        </MobileGlassGroup>
       ) : null}
 
       <ScrollView className="px-3" keyboardShouldPersistTaps="always">
@@ -162,7 +165,10 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
         ) : null}
       </ScrollView>
 
-      <View className="border-t-hairline border-t-border flex-row items-center justify-between gap-2 p-3">
+      <MobileGlassGroup
+        className="border-t-hairline border-t-border flex-row items-center justify-between gap-2 p-3"
+        spacing={8}
+      >
         <MobileGlassTextButton
           disabled={submitting}
           label="Cancel"
@@ -192,7 +198,7 @@ export function MobileNativeChatAsk({ prompt, onAnswer, onCancel }: Props): Reac
           onPress={() => void advance()}
           size="small"
         />
-      </View>
+      </MobileGlassGroup>
     </MobileGlassSurface>
   )
 }

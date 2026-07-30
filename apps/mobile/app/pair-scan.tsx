@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 import { resolveCssNumber } from '@/style/resolve-css-variable'
 
 import { ConnectionLog } from '../src/components/connection-log'
+import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { TextInputModal } from '../src/components/text-input-modal'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
@@ -231,18 +232,19 @@ export default function PairScanScreen() {
               ? 'Scan the QR code from Yiru on your desktop, or paste the pairing code instead.'
               : 'Enable camera access in Settings, or paste the pairing code instead.'}
           </Text>
-          <MobileGlassTextButton
-            isProminent
-            label={canAskAgain ? 'Continue' : 'Open Settings'}
-            onPress={canAskAgain ? requestPermission : () => void Linking.openSettings()}
-            size="large"
-          />
-          <MobileGlassTextButton
-            className="mt-2"
-            label="Paste code instead"
-            onPress={() => setPasteVisible(true)}
-            size="large"
-          />
+          <MobileGlassGroup className="gap-2" spacing={8}>
+            <MobileGlassTextButton
+              isProminent
+              label={canAskAgain ? 'Continue' : 'Open Settings'}
+              onPress={canAskAgain ? requestPermission : () => void Linking.openSettings()}
+              size="large"
+            />
+            <MobileGlassTextButton
+              label="Paste code instead"
+              onPress={() => setPasteVisible(true)}
+              size="large"
+            />
+          </MobileGlassGroup>
         </View>
         <TextInputModal
           visible={pasteVisible}
@@ -319,7 +321,7 @@ export default function PairScanScreen() {
               <ConnectionLog entries={logs} title="Pairing log" />
             </View>
           )}
-          <View className="items-center gap-2">
+          <MobileGlassGroup className="items-center gap-2" spacing={8}>
             <MobileGlassTextButton isProminent label="Try Again" onPress={retry} size="large" />
             <MobileGlassTextButton
               label="Paste code instead"
@@ -329,7 +331,7 @@ export default function PairScanScreen() {
               }}
               size="large"
             />
-          </View>
+          </MobileGlassGroup>
         </View>
       )}
 

@@ -1,6 +1,7 @@
 import type { PressableProps } from 'react-native'
 
 export type MobileGlassIconName =
+  | 'add-person'
   | 'back'
   | 'check'
   | 'checks'
@@ -11,6 +12,7 @@ export type MobileGlassIconName =
   | 'edit'
   | 'external'
   | 'insights'
+  | 'minus'
   | 'more'
   | 'play'
   | 'plus'

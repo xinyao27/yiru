@@ -17,7 +17,5 @@ export const listStyles = {
   fileTextBlock: cn('flex-1 min-w-0'),
   filePath: cn('text-foreground text-sm'),
   filePathDisabled: cn('text-muted-foreground'),
-  fileMeta: cn('text-muted-foreground text-xs mt-1'),
-  iconButton: cn('w-8 h-8 items-center justify-center'),
-  iconButtonDisabled: cn('opacity-50')
+  fileMeta: cn('text-muted-foreground text-xs mt-1')
 } as const

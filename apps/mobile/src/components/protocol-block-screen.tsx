@@ -4,7 +4,8 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import { router } from 'expo-router'
 import { Linking, Platform, Text, View } from 'react-native'
 
-import { MobileGlassSurface } from './glass/surface'
+import { MobileContentSection } from './content-section'
+import { MobileGlassGroup } from './glass/group'
 import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
@@ -30,33 +31,34 @@ export function ProtocolBlockScreen({ verdict }: Props) {
 
   return (
     <View className="bg-background flex-1 justify-center px-4">
-      <MobileGlassSurface className="rounded-3xl p-4">
+      <MobileContentSection className="rounded-3xl p-4">
         <Text className="text-foreground mb-2 text-sm font-bold">{title}</Text>
         <Text className="text-muted-foreground mb-4 text-sm leading-5">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
             updates continue to use the repository release page. */}
-        <MobileGlassTextButton
-          className="mb-2"
-          isFullWidth
-          isProminent
-          label={primaryAction.label}
-          onPress={() => {
-            void Linking.openURL(primaryAction.url)
-          }}
-          size="large"
-        />
-        <MobileGlassTextButton
-          isFullWidth
-          label="Back to hosts"
-          onPress={() => {
-            // Why: route back to the host list so the user can pair a
-            // different host instead of getting trapped on this screen.
-            router.replace('/')
-          }}
-          size="large"
-        />
+        <MobileGlassGroup className="gap-2" spacing={8}>
+          <MobileGlassTextButton
+            isFullWidth
+            isProminent
+            label={primaryAction.label}
+            onPress={() => {
+              void Linking.openURL(primaryAction.url)
+            }}
+            size="large"
+          />
+          <MobileGlassTextButton
+            isFullWidth
+            label="Back to hosts"
+            onPress={() => {
+              // Why: route back to the host list so the user can pair a
+              // different host instead of getting trapped on this screen.
+              router.replace('/')
+            }}
+            size="large"
+          />
+        </MobileGlassGroup>
         <Text className="text-muted-foreground mt-3 text-xs leading-5">{recoveryNote}</Text>
-      </MobileGlassSurface>
+      </MobileContentSection>
     </View>
   )
 }

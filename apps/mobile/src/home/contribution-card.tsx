@@ -15,9 +15,9 @@ import {
 } from './chart-data'
 
 const INTENSITY_CLASS: Record<ContributionCalendarDay['intensity'], string> = {
-  0: 'border-border bg-muted',
-  1: 'border-border bg-muted-foreground/20',
-  2: 'border-border bg-muted-foreground/35',
+  0: 'border-border/60 bg-muted/40',
+  1: 'border-border/70 bg-muted-foreground/20',
+  2: 'border-border/80 bg-muted-foreground/35',
   3: 'border-border bg-muted-foreground/55',
   4: 'border-border bg-foreground/80'
 }

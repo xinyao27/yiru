@@ -42,7 +42,11 @@ export function MobileUiLabGlassCatalog(): React.JSX.Element {
           />
         </MobileGlassGroup>
       </View>
-      <MobileGlassSurface className="mt-2 overflow-hidden rounded-2xl px-3 py-3" forceFallback>
+      <MobileGlassSurface
+        className="mt-2 overflow-hidden rounded-2xl px-3 py-3"
+        forceFallback
+        isFunctional
+      >
         <Text className="text-foreground text-xs font-semibold">Opaque fallback preview</Text>
       </MobileGlassSurface>
     </View>

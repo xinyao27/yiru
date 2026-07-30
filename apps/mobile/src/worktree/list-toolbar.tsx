@@ -5,6 +5,7 @@ import {
   MagnifyingGlass as Search,
   Plus,
   SlidersHorizontal,
+  SidebarSimple as Sidebar,
   Stack as Layers,
   TerminalWindow,
   UserCircle,
@@ -16,6 +17,7 @@ import { cn } from '@/style/class-names'
 import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassPressable } from '../components/glass/pressable'
 import { MobileGlassSurface } from '../components/glass/surface'
+import { MobileGlassTextButton } from '../components/glass/text-button'
 
 type MobileWorkspaceListToolbarProps = {
   activeFilterCount: number
@@ -102,30 +104,50 @@ function ToolbarIconButton({
 
 type MobileWorkspaceListHeaderActionsProps = {
   canUseHost: boolean
+  embedded: boolean
+  onHideSidebar?: () => void
+  onReconnect: () => void
   showSearch: boolean
+  showReconnect: boolean
   onAccounts: () => void
   onSearch: () => void
 }
 
 export function MobileWorkspaceListHeaderActions({
   canUseHost,
+  embedded,
+  onHideSidebar,
+  onReconnect,
+  showReconnect,
   showSearch,
   onAccounts,
   onSearch
 }: MobileWorkspaceListHeaderActionsProps): React.JSX.Element {
   return (
     <MobileGlassGroup className="flex-row items-center gap-2" spacing={8}>
-      <ToolbarIconButton
-        accessibilityLabel="Accounts"
-        disabled={!canUseHost}
-        icon={UserCircle}
-        onPress={onAccounts}
-      />
-      <ToolbarIconButton
-        accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
-        icon={showSearch ? X : Search}
-        onPress={onSearch}
-      />
+      {showReconnect ? <MobileGlassTextButton label="Reconnect" onPress={onReconnect} /> : null}
+      {!embedded && !showReconnect ? (
+        <ToolbarIconButton
+          accessibilityLabel="Accounts"
+          disabled={!canUseHost}
+          icon={UserCircle}
+          onPress={onAccounts}
+        />
+      ) : null}
+      {!embedded ? (
+        <ToolbarIconButton
+          accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
+          icon={showSearch ? X : Search}
+          onPress={onSearch}
+        />
+      ) : null}
+      {embedded && onHideSidebar ? (
+        <ToolbarIconButton
+          accessibilityLabel="Hide sidebar"
+          icon={Sidebar}
+          onPress={onHideSidebar}
+        />
+      ) : null}
     </MobileGlassGroup>
   )
 }

@@ -16,10 +16,10 @@ import {
   setTerminalAccessoryBuiltInVisible,
   type TerminalAccessoryLayout
 } from '../terminal/accessory-layout'
+import { MobileContentSection } from './content-section'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
 import { MobileGlassIconButton } from './glass/icon-button'
-import { MobileGlassSurface } from './glass/surface'
 
 // Why: DragReorderList absolutely positions rows, so every row in a
 // reorderable section must share one fixed height.
@@ -224,7 +224,7 @@ export function TerminalShortcutSettings({
         Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on
         the terminal shortcut bar.
       </Text>
-      <MobileGlassSurface className={cn(styles.section, styles.sectionTopGap)}>
+      <MobileContentSection className={cn(styles.section, styles.sectionTopGap)}>
         <DragReorderList
           items={orderedAccessoryKeys}
           itemKey={(shortcutKey) => shortcutKey.id}
@@ -250,10 +250,10 @@ export function TerminalShortcutSettings({
             </Text>
           </View>
         </Pressable>
-      </MobileGlassSurface>
+      </MobileContentSection>
 
       <Text className={cn(styles.groupHeading, styles.groupTopGap)}>CUSTOM SHORTCUTS</Text>
-      <MobileGlassSurface className={cn(styles.section, styles.sectionTopGap)}>
+      <MobileContentSection className={cn(styles.section, styles.sectionTopGap)}>
         {customKeys.length === 0 ? (
           <>
             <View className="items-center justify-center p-3">
@@ -307,7 +307,7 @@ export function TerminalShortcutSettings({
             <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </View>
         </Pressable>
-      </MobileGlassSurface>
+      </MobileContentSection>
 
       <CustomKeyModal
         visible={showCustomKeyModal}

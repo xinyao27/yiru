@@ -18,6 +18,7 @@ import {
 
 import { cn } from '@/style/class-names'
 
+import { MobileGlassGroup } from '../components/glass/group'
 import { MobileGlassSurface } from '../components/glass/surface'
 import { MobileGlassTextButton } from '../components/glass/text-button'
 import type {
@@ -1167,7 +1168,7 @@ export function MobileBrowserPane({
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
             {error ? (
-              <MobileGlassSurface className="overflow-hidden rounded-xl px-3 py-2">
+              <MobileGlassSurface className="overflow-hidden rounded-xl px-3 py-2" isFunctional>
                 <Text className="text-foreground text-center text-xs">{error}</Text>
               </MobileGlassSurface>
             ) : null}
@@ -1175,10 +1176,10 @@ export function MobileBrowserPane({
         ) : null}
         {dialog ? (
           <View className="bg-modal-backdrop absolute inset-0 z-30 items-center justify-center p-6">
-            <MobileGlassSurface className="w-full max-w-sm rounded-3xl p-4">
+            <MobileGlassSurface className="w-full max-w-sm rounded-3xl p-4" isFunctional>
               <Text className="text-foreground text-sm font-semibold">Browser Dialog</Text>
               <Text className="text-muted-foreground mt-2 text-sm leading-5">{dialog.message}</Text>
-              <View className="mt-4 flex-row justify-end gap-2">
+              <MobileGlassGroup className="mt-4 flex-row justify-end gap-2" spacing={8}>
                 {dialog.dialogType !== 'alert' ? (
                   <MobileGlassTextButton
                     label="Cancel"
@@ -1190,7 +1191,7 @@ export function MobileBrowserPane({
                   label="OK"
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
                 />
-              </View>
+              </MobileGlassGroup>
             </MobileGlassSurface>
           </View>
         ) : null}

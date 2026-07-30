@@ -2,6 +2,7 @@ import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Text, View, type ListRenderItem } from 'react-native'
 
+import { MobileGlassHeader } from '@/components/glass/header'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassTextButton } from '@/components/glass/text-button'
 
@@ -333,7 +334,7 @@ export function MobileFileExplorerPanel(props: {
   return (
     <View className="bg-background flex-1">
       <Stack.Screen options={{ title: `Files · ${worktreeLabel}` }} />
-      {embedded ? <View className={styles.header}>{headerBar}</View> : null}
+      {embedded ? <MobileGlassHeader>{headerBar}</MobileGlassHeader> : null}
       {body}
     </View>
   )

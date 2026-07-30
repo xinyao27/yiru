@@ -29,6 +29,7 @@ import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
 import { MobileContentSection } from '../../../src/components/content-section'
+import { MobileGlassGroup } from '../../../src/components/glass/group'
 import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
@@ -977,6 +978,7 @@ export function HostScreen({
             if (!section.title) {
               return null
             }
+            const isFirstSection = sections[0]?.key === section.key
             const isCollapsed = collapsedGroups.has(section.key)
             const rawSection = rawSections.find((s) => s.key === section.key)
             const count = rawSection?.data.length ?? 0
@@ -989,6 +991,9 @@ export function HostScreen({
                 className="mx-3 mt-3 min-h-9 flex-row items-center gap-2 px-2"
                 onPress={() => toggleCollapsed(section.key)}
               >
+                {!isFirstSection ? (
+                  <View className="bg-border h-hairline absolute top-0 right-2 left-2" />
+                ) : null}
                 <View className="h-9 w-5 items-center justify-center">
                   {section.icon === 'pin' ? (
                     <Pin size={16} colorClassName="accent-muted-foreground" />
@@ -1074,9 +1079,7 @@ export function HostScreen({
         <View className="mb-3 flex-row items-center justify-between px-1">
           <Text className="text-foreground text-sm">Filter</Text>
           {activeFilterCount > 0 && (
-            <Pressable onPress={clearFilters}>
-              <Text className="text-muted-foreground text-xs">Clear filters</Text>
-            </Pressable>
+            <MobileGlassTextButton label="Clear filters" onPress={clearFilters} size="small" />
           )}
         </View>
 
@@ -1148,7 +1151,7 @@ export function HostScreen({
                 Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
               </Text>
             </View>
-            <View className="flex-row gap-2">
+            <MobileGlassGroup className="flex-row gap-2" spacing={8}>
               <MobileGlassTextButton
                 className="flex-1"
                 isFullWidth
@@ -1168,7 +1171,7 @@ export function HostScreen({
                   setActionTarget(null)
                 }}
               />
-            </View>
+            </MobileGlassGroup>
           </View>
         ) : (
           <ActionSheetContent

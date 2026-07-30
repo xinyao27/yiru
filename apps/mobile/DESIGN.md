@@ -15,7 +15,7 @@ quiet, and spatially obvious:
 
 - neutral surfaces; color communicates state rather than decoration;
 - system geometry and typography instead of desktop UI scaled down;
-- Liquid Glass for navigation and controls, never as content decoration;
+- Liquid Glass for every eligible navigation and control surface, never as content decoration;
 - compact information with touch-comfortable controls;
 - stable alignment across headers, lists, forms, and toolbars;
 - motion only when it explains navigation, disclosure, or progress.
@@ -90,23 +90,56 @@ and hit slop; feature call sites do not override them.
 - Tabs navigate between peer views. Filters, sort controls, and commands are buttons, not tabs.
 - Icon-only actions have an accessibility label; their position and diameter remain stable when
   state changes.
+- A standalone command never uses a bare `Pressable`. Use the shared Glass icon, text, or custom
+  pressable control; reserve bare pressables for transparent content rows, high-density inline
+  affordances intrinsic to those rows, and interactions nested inside an existing Glass surface.
 
 ## 5. Liquid Glass
 
-Liquid Glass is a functional layer above content. Use it for headers, tab rails, toolbars, grouped
-controls, floating actions, and composers.
+Liquid Glass is the default functional layer above content. Comprehensive adoption means every
+eligible header, tab rail, toolbar, grouped control, floating action, sheet, drawer, input shell,
+and composer uses native Glass on supported iOS versions. Missing Glass on eligible chrome is a
+design defect, not a discretionary styling choice.
 
-Do not use Glass for scrolling rows, messages, settings sections, terminal/editor surfaces, diffs,
-errors, or decorative cards. Native Glass supplies its own edge and interaction state: do not add a
-border, nested background, opacity wash, or shadow. The shared wrapper owns the opaque fallback for
-unsupported platforms and Reduce Transparency.
+### Global scope
 
-`MobileGlassSurface` only activates native material for an interactive control or an explicitly
-functional control container. Content grouping uses `MobileContentSection`; omitting the functional
-opt-in must remain an opaque semantic surface.
+- `MobileGlassAvailabilityProvider` is mounted once at the app root. Feature code never probes the
+  OS version, reimplements Reduce Transparency, or forces a semantic fallback.
+- Glass must remain in the same native window as the content it samples. Full-window iOS overlays
+  use `FullWindowOverlay`; transparent native `Modal` windows are forbidden around Glass. Shared
+  drawers own this boundary so their callers receive Glass automatically.
+- Prefer Expo Router native headers, `Stack.Toolbar`, native menus, and Expo UI SwiftUI controls;
+  they receive system Liquid Glass without feature-level material code.
+- Unsupported platforms and Reduce Transparency use the shared opaque semantic fallback. Layout,
+  hierarchy, action prominence, and accessibility remain identical across both paths.
 
-Use prominent Glass only for the primary action or current selection. Ordinary controls use the
-regular treatment.
+### Local scope
+
+- A custom header uses `MobileGlassHeader`. A functional container uses `MobileGlassSurface` with
+  `isFunctional`; a tappable or focusable surface uses `isInteractive`.
+- `MobileGlassSurface` requires one of those intents explicitly at compile time. Content grouping
+  uses `MobileContentSection`; omitting the intent is not an opaque-card shortcut.
+- Standalone actions use `MobileGlassIconButton`, `MobileGlassTextButton`, or
+  `MobileGlassPressable`. Do not recreate Glass with blur, opacity, a border, or a background class.
+- Two or more controls with the same task scope always live in one `MobileGlassGroup` with an 8pt
+  visual gap and container spacing. Native SwiftUI implementations use one `Host` and one
+  `GlassEffectContainer`, not a row of independent hosts.
+- Apply Glass at the feature boundary that owns the complete control cluster. Do not make every
+  child accept material props and do not nest one Glass group inside another.
+- Use prominent Glass only for the primary action or current selection. Ordinary controls use the
+  regular treatment.
+
+### Content plane
+
+Scrolling rows, messages, settings sections, terminal/editor surfaces, diffs, error copy, and
+decorative cards remain semantic content behind the Glass layer. Standalone control chrome that
+acts on that content still uses Glass; row-wide selection/disclosure and high-density inline
+affordances remain direct content interactions. Content grouping uses `MobileContentSection`;
+control code that renders a `MobileGlassSurface` without `isFunctional` or `isInteractive` is
+almost always a bug.
+
+Native Glass supplies its own edge and interaction state. Never add a border, nested background,
+opacity wash, or shadow to the active Glass path.
 
 ## 6. Lists and alignment
 
@@ -142,11 +175,13 @@ Before finishing a mobile visual change, check:
 
 1. Does the screen use the shared header, back control, and semantic background?
 2. Are all controls using the 32/36/44pt system and a 44pt hit region?
-3. Is Glass limited to navigation and control chrome, with the shared fallback?
+3. Does every eligible navigation and control surface use shared Glass, with no bare standalone
+   command or feature-owned fallback?
 4. Do neighboring headers and rows share fixed leading/content/trailing columns?
 5. Are spacing values from the 4pt scale, with 8pt as the default sibling gap?
 6. Does state remain understandable without color alone?
 7. Does it work with long labels, large text, Reduce Transparency, and Reduce Motion? Switch the
    mounted screen light → dark and resume it after a backgrounded appearance change; header, safe
    area, and content must update together.
-8. Has the result been inspected in UI Lab or the iOS Simulator rather than inferred from TSX?
+8. Do overlays stay in the current iOS window so Glass can sample the screen behind them?
+9. Has the result been inspected in UI Lab or the iOS Simulator rather than inferred from TSX?
