@@ -186,7 +186,7 @@ export function registerBrowserHandlers(): void {
 
   ipcMain.handle(
     'browser:registerGuest',
-    (
+    async (
       event,
       args: {
         browserPageId: string
@@ -204,7 +204,7 @@ export function registerBrowserHandlers(): void {
       // with a new webContentsId. The bridge must destroy the old session's
       // proxy (its webContents is gone) and let the next command recreate it.
       const previousWcId = browserManager.getGuestWebContentsId(args.browserPageId)
-      const registered = browserManager.registerGuest({
+      const registered = await browserManager.registerGuest({
         ...args,
         rendererWebContentsId: event.sender.id
       })
@@ -227,19 +227,28 @@ export function registerBrowserHandlers(): void {
     }
   )
 
-  ipcMain.handle('browser:unregisterGuest', (event, args: { browserPageId: string }) => {
-    if (!isTrustedBrowserRenderer(event.sender)) {
-      return false
+  ipcMain.handle(
+    'browser:unregisterGuest',
+    (event, args: { browserPageId: string; expectedWebContentsId?: number }) => {
+      if (!isTrustedBrowserRenderer(event.sender)) {
+        return false
+      }
+      // Why: notify bridge before unregistering so it can destroy the session
+      // process and proxy. Must happen before unregisterGuest clears the mapping.
+      const wcId = browserManager.getGuestWebContentsId(args.browserPageId)
+      if (args.expectedWebContentsId !== undefined && wcId !== args.expectedWebContentsId) {
+        return browserManager.cancelPendingGuestRegistration(
+          args.browserPageId,
+          args.expectedWebContentsId
+        )
+      }
+      if (wcId !== null && agentBrowserBridgeRef) {
+        agentBrowserBridgeRef.onTabClosed(wcId)
+      }
+      browserManager.unregisterGuest(args.browserPageId)
+      return true
     }
-    // Why: notify bridge before unregistering so it can destroy the session
-    // process and proxy. Must happen before unregisterGuest clears the mapping.
-    const wcId = browserManager.getGuestWebContentsId(args.browserPageId)
-    if (wcId !== null && agentBrowserBridgeRef) {
-      agentBrowserBridgeRef.onTabClosed(wcId)
-    }
-    browserManager.unregisterGuest(args.browserPageId)
-    return true
-  })
+  )
 
   ipcMain.handle(
     'browser:proceedCertificate',

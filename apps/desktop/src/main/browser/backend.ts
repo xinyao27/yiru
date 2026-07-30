@@ -7,6 +7,7 @@
 // isolates the only step that actually differs: tab creation and teardown.
 
 export type BrowserBackendCreateTab = {
+  browserPageId?: string
   url: string
   worktreeId?: string
   profileId?: string
@@ -19,5 +20,5 @@ export type BrowserBackend = {
   closeTab(browserPageId: string): Promise<void>
   /** Tear down every page this backend owns (process shutdown). Optional —
    *  renderer-hosted backends are torn down with their window. */
-  destroyAll?(): void
+  destroyAll?(): Promise<void> | void
 }
