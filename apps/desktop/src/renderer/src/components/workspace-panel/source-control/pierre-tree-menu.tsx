@@ -1,0 +1,162 @@
+import { Minus, Trash, Plus, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
+
+import { translate } from '../../../i18n/i18n'
+import { joinPath } from '../../../lib/path'
+import { ContextMenuItem } from '../../ui/context-menu'
+import type { SourceControlController } from './controller'
+import { getSourceControlDirectoryActionPaths } from './directory-action-paths'
+import { canDiscardStatusEntry, canStageStatusEntry, canUnstageStatusEntry } from './entry-actions'
+import { SourceControlEntryMenuContent } from './entry-context-menu'
+import type { SourceControlPierreTarget } from './pierre-tree-data'
+
+function getUncommittedActions(
+  controller: SourceControlController,
+  target: Extract<SourceControlPierreTarget, { kind: 'uncommitted' }>
+): React.JSX.Element | null {
+  const { entry } = target
+  const canDiscard = canDiscardStatusEntry(entry)
+  const canStage = canStageStatusEntry(entry)
+  const canUnstage = canUnstageStatusEntry(entry)
+  if (!canDiscard && !canStage && !canUnstage) {
+    return null
+  }
+
+  return (
+    <>
+      {canDiscard ? (
+        <ContextMenuItem
+          variant="destructive"
+          onClick={() => controller.requestDiscardEntry(entry)}
+        >
+          {entry.area === 'untracked' ? <Trash /> : <Undo2 weight="regular" />}
+          {entry.area === 'untracked'
+            ? translate(
+                'auto.components.right.sidebar.SourceControl.11463f7a98',
+                'Delete untracked file'
+              )
+            : entry.status === 'deleted'
+              ? translate('auto.components.right.sidebar.SourceControl.989f3d5e34', 'Restore file')
+              : translate(
+                  'auto.components.right.sidebar.SourceControl.d54dd48b0b',
+                  'Discard changes'
+                )}
+        </ContextMenuItem>
+      ) : null}
+      {canStage ? (
+        <ContextMenuItem onClick={() => void controller.handleStage(entry.path)}>
+          <Plus />
+          {translate('auto.components.right.sidebar.SourceControl.8cde1a2fb0', 'Stage')}
+        </ContextMenuItem>
+      ) : null}
+      {canUnstage ? (
+        <ContextMenuItem onClick={() => void controller.handleUnstage(entry.path)}>
+          <Minus />
+          {translate('auto.components.right.sidebar.SourceControl.df5040e3c3', 'Unstage')}
+        </ContextMenuItem>
+      ) : null}
+    </>
+  )
+}
+
+function getDirectoryActions(
+  controller: SourceControlController,
+  target: Extract<SourceControlPierreTarget, { kind: 'directory' }>
+): React.JSX.Element | null {
+  const node = target.node
+  if (!node || controller.normalizedFilter) {
+    return null
+  }
+  const actionPaths = getSourceControlDirectoryActionPaths(node)
+  const canStage = actionPaths.stagePaths.length > 0
+  const canUnstage = actionPaths.unstagePaths.length > 0
+  const canDiscard = actionPaths.discardPaths.length > 0
+  if (!canDiscard && !canStage && !canUnstage) {
+    return null
+  }
+
+  return (
+    <>
+      {canDiscard ? (
+        <ContextMenuItem
+          variant="destructive"
+          disabled={controller.isExecutingBulk}
+          onClick={() =>
+            controller.setPendingDiscard({
+              kind: 'area',
+              area: node.area,
+              paths: actionPaths.discardPaths
+            })
+          }
+        >
+          {node.area === 'untracked' ? <Trash /> : <Undo2 weight="regular" />}
+          {node.area === 'untracked'
+            ? translate(
+                'auto.components.right.sidebar.SourceControl.9b367363b6',
+                'Delete untracked in folder'
+              )
+            : translate('auto.components.right.sidebar.SourceControl.6d7f2a47e5', 'Discard folder')}
+        </ContextMenuItem>
+      ) : null}
+      {canStage ? (
+        <ContextMenuItem
+          disabled={controller.isExecutingBulk}
+          onClick={() => void controller.handleStageAllPaths(actionPaths.stagePaths)}
+        >
+          <Plus />
+          {translate('auto.components.right.sidebar.SourceControl.bfe9011a0e', 'Stage folder')}
+        </ContextMenuItem>
+      ) : null}
+      {canUnstage ? (
+        <ContextMenuItem
+          disabled={controller.isExecutingBulk}
+          onClick={() => void controller.handleUnstagePaths(actionPaths.unstagePaths)}
+        >
+          <Minus />
+          {translate('auto.components.right.sidebar.SourceControl.ab31221779', 'Unstage folder')}
+        </ContextMenuItem>
+      ) : null}
+    </>
+  )
+}
+
+export function SourceControlPierreTreeMenu({
+  controller,
+  target
+}: {
+  controller: SourceControlController
+  target: SourceControlPierreTarget
+}): React.JSX.Element | null {
+  const activeWorktree = controller.activeWorktree
+  const worktreePath = controller.worktreePath
+  if (!activeWorktree || !worktreePath || target.kind === 'placeholder') {
+    return null
+  }
+
+  const relativePath = target.kind === 'directory' ? target.relativePath : target.entry.path
+  const onView =
+    target.kind === 'uncommitted'
+      ? target.isSubmodule
+        ? undefined
+        : () => controller.handleOpenDiff(target.entry)
+      : target.kind === 'branch'
+        ? () => controller.openCommittedDiff(target.entry)
+        : undefined
+  const leadingActions =
+    target.kind === 'uncommitted'
+      ? getUncommittedActions(controller, target)
+      : target.kind === 'directory'
+        ? getDirectoryActions(controller, target)
+        : undefined
+
+  return (
+    <SourceControlEntryMenuContent
+      currentWorktreeId={activeWorktree.id}
+      absolutePath={joinPath(worktreePath, relativePath)}
+      connectionId={controller.activeConnectionId}
+      onView={onView}
+      onRevealInExplorer={controller.revealInExplorer}
+      leadingActions={leadingActions}
+      ownsFileTreeMenu
+    />
+  )
+}

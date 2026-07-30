@@ -25,7 +25,6 @@ import {
   buildGitStatusSourceControlTree,
   buildSourceControlTree,
   applyGitStatusEntryAreasToSourceControlTree,
-  compactSourceControlTree,
   flattenSourceControlTree,
   namespaceSourceControlTreeDirectoryKeys
 } from '../tree'
@@ -140,9 +139,7 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     const roots: Partial<Record<SourceControlDisplaySectionId, GitStatusSourceControlTreeNode[]>> =
       {}
     for (const section of displaySections) {
-      const sectionRoots = compactSourceControlTree(
-        buildGitStatusSourceControlTree(section.area, section.items)
-      )
+      const sectionRoots = buildGitStatusSourceControlTree(section.area, section.items)
       roots[section.id] =
         section.id === 'conflicts'
           ? applyGitStatusEntryAreasToSourceControlTree(
@@ -187,12 +184,8 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     return rows
   }, [displaySections, expandedSubmoduleKeys, submoduleStatusByKey])
   const branchTreeRoots = useMemo(
-    () => compactSourceControlTree(buildSourceControlTree('branch', filteredBranchEntries)),
+    () => buildSourceControlTree('branch', filteredBranchEntries),
     [filteredBranchEntries]
-  )
-  const visibleBranchTreeRows = useMemo(
-    () => flattenSourceControlTree(branchTreeRoots, collapsedTreeDirs),
-    [branchTreeRoots, collapsedTreeDirs]
   )
   const visibleFileRowKeys = useMemo(() => {
     const keys = new Set<string>()
@@ -267,7 +260,6 @@ export function useSourceControlFileModel(scope: SourceControlHostedReviewStateC
     visibleTreeRowsBySection,
     visibleListRowsBySection,
     branchTreeRoots,
-    visibleBranchTreeRows,
     visibleFileRowKeys,
     isExecutingBulk,
     setIsExecutingBulk,

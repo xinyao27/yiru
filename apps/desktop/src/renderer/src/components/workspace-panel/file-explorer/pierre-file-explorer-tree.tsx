@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, u
 
 import { translate } from '../../../i18n/i18n'
 import { basename, normalizeRelativePath } from '../../../lib/path'
+import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from '../pierre-file-tree-theme'
 import { usePierreFileTreeDragPayload } from '../use-pierre-file-tree-drag-payload'
 import { usePierreFileTreeFlash } from '../use-pierre-file-tree-flash'
 import { usePierreFileTreeNativeDrop } from '../use-pierre-file-tree-native-drop'
@@ -18,7 +19,6 @@ import {
   NEW_FILE_NAME,
   NEW_FOLDER_NAME
 } from './pierre-file-tree-data'
-import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from './pierre-file-tree-theme'
 import type { InlineInput } from './row'
 
 export type { PierreFileExplorerTreeHandle } from './pierre-file-explorer-tree-contract'

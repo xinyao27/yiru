@@ -1,7 +1,6 @@
 import type { SourceControlController } from './controller'
-import { getSourceControlDirectoryActionPaths } from './directory-action-paths'
-import { SourceControlTreeDirectoryRow } from './directory-rows'
 import { SubmodulePlaceholderRow } from './entry-details'
+import { SourceControlPierreUncommittedTree } from './pierre-tree'
 import type { SourceControlDisplaySectionId } from './section-order'
 import { getSubmoduleExpansionKey, isExpandableSubmoduleEntry } from './submodule-expansion'
 import { UncommittedEntryRow } from './uncommitted-entry-row'
@@ -18,25 +17,17 @@ export function SourceControlUncommittedFileList({
     activeConnectionId,
     activeOpenRowKeys,
     activeWorktree,
-    collapsedTreeDirs,
     diffCommentCountByPath,
     expandedSubmoduleKeys,
     fileListScrollElement,
     handleOpenDiff,
     handleStage,
-    handleStageAllPaths,
     handleUnstage,
-    handleUnstagePaths,
-    isExecutingBulk,
-    normalizedFilter,
     requestDiscardEntry,
     revealInExplorer,
-    setPendingDiscard,
     sourceControlViewMode,
     toggleSubmodule,
-    toggleTreeDir,
     visibleListRowsBySection,
-    visibleTreeRowsBySection,
     worktreePath
   } = controller
   if (!activeWorktree || !worktreePath) {
@@ -45,68 +36,7 @@ export function SourceControlUncommittedFileList({
   const currentWorktreeId = activeWorktree.id
 
   if (sourceControlViewMode === 'tree') {
-    return (
-      <SourceControlVirtualFileList
-        rows={visibleTreeRowsBySection[sectionId] ?? []}
-        scrollElement={fileListScrollElement}
-        getRowKey={(node) => node.key}
-        renderRow={(node) => {
-          if (node.type === 'submodule-placeholder') {
-            return (
-              <SubmodulePlaceholderRow
-                key={node.key}
-                depth={node.depth}
-                state={node.state}
-                message={node.message}
-              />
-            )
-          }
-          if (node.type === 'directory') {
-            return (
-              <SourceControlTreeDirectoryRow
-                key={node.key}
-                node={node}
-                actionPaths={getSourceControlDirectoryActionPaths(node)}
-                hideBulkActions={Boolean(normalizedFilter)}
-                isExecutingBulk={isExecutingBulk}
-                isCollapsed={collapsedTreeDirs.has(node.key)}
-                onToggle={() => toggleTreeDir(node.key)}
-                onRequestDiscardPaths={(area, paths) =>
-                  setPendingDiscard({ kind: 'area', area, paths })
-                }
-                onStagePaths={handleStageAllPaths}
-                onUnstagePaths={handleUnstagePaths}
-              />
-            )
-          }
-          const isSubmoduleExpandable = isExpandableSubmoduleEntry(node.entry)
-          return (
-            <UncommittedEntryRow
-              key={node.key}
-              entry={node.entry}
-              currentWorktreeId={currentWorktreeId}
-              worktreePath={worktreePath}
-              depth={node.depth}
-              isOpenFile={activeOpenRowKeys.has(node.key)}
-              onRevealInExplorer={revealInExplorer}
-              connectionId={activeConnectionId}
-              onOpen={handleOpenDiff}
-              onStage={handleStage}
-              onUnstage={handleUnstage}
-              onDiscard={requestDiscardEntry}
-              commentCount={diffCommentCountByPath.get(node.entry.path) ?? 0}
-              showPathHint={false}
-              isSubmoduleExpanded={
-                isSubmoduleExpandable
-                  ? expandedSubmoduleKeys.has(getSubmoduleExpansionKey(node.entry))
-                  : undefined
-              }
-              onToggleSubmodule={isSubmoduleExpandable ? toggleSubmodule : undefined}
-            />
-          )
-        }}
-      />
-    )
+    return <SourceControlPierreUncommittedTree controller={controller} sectionId={sectionId} />
   }
 
   return (

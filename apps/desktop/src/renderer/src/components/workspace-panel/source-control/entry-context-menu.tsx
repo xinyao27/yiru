@@ -35,14 +35,29 @@ type SourceControlEntryContextMenuProps = {
   children: React.ReactElement
 }
 
-export function SourceControlEntryContextMenu({
+type SourceControlEntryMenuContentProps = Omit<SourceControlEntryContextMenuProps, 'children'> & {
+  leadingActions?: React.ReactNode
+  ownsFileTreeMenu?: boolean
+}
+
+function stopRightButtonMenuSelection(event: React.PointerEvent): void {
+  if (event.button !== 2) {
+    return
+  }
+  // Why: a right-button release can otherwise select the first menu item.
+  event.preventDefault()
+  event.stopPropagation()
+}
+
+export function SourceControlEntryMenuContent({
   currentWorktreeId,
   absolutePath,
   connectionId,
   onView,
   onRevealInExplorer,
-  children
-}: SourceControlEntryContextMenuProps): React.JSX.Element {
+  leadingActions,
+  ownsFileTreeMenu = false
+}: SourceControlEntryMenuContentProps): React.JSX.Element {
   const openInApplications = useAppStore((s) => s.settings?.openInApplications ?? [])
   const runtimeEnvironmentId = useAppStore((s) =>
     getRuntimeEnvironmentIdForWorktree(s, currentWorktreeId)
@@ -85,74 +100,104 @@ export function SourceControlEntryContextMenu({
   )
 
   return (
+    <ContextMenuContent
+      data-file-tree-context-menu-root={ownsFileTreeMenu ? 'true' : undefined}
+      className="w-52"
+      finalFocus={ownsFileTreeMenu ? false : undefined}
+      onPointerUpCapture={ownsFileTreeMenu ? stopRightButtonMenuSelection : undefined}
+    >
+      {leadingActions ? (
+        <>
+          {leadingActions}
+          <ContextMenuSeparator />
+        </>
+      ) : null}
+      <ContextMenuItem onClick={onView} disabled={!onView}>
+        <Eye className="size-3.5" />
+        {translate(
+          'auto.components.right.sidebar.SourceControlEntryContextMenu.a1f2c8d901',
+          'View'
+        )}
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={handleCopyPath} disabled={!absolutePath}>
+        <Copy className="size-3.5" />
+        {translate('auto.components.right.sidebar.FileExplorerRow.b5d436aa30', 'Copy Path')}
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuSub>
+        <ContextMenuSubTrigger disabled={!absolutePath}>
+          <FolderOpen className="size-3.5" />
+          {translate('auto.components.sidebar.WorktreeOpenInMenu.8009ab69a6', 'Open in')}
+        </ContextMenuSubTrigger>
+        <ContextMenuSubContent className="w-52">
+          {openInEntries.map((entry) => {
+            const availability = getOpenInEntryAvailability(entry, {
+              connectionId,
+              runtimeEnvironmentId,
+              runtimeRemoteSshSupport
+            })
+            return (
+              <ContextMenuItem
+                key={entry.id}
+                onClick={() => handleOpenInExternal(entry.target, entry.command)}
+                disabled={!absolutePath || availability.disabled}
+              >
+                {entry.target === 'file-manager' ? (
+                  <FolderOpen className="size-3.5" />
+                ) : entry.command ? (
+                  <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
+                ) : (
+                  <ExternalLink weight="regular" className="size-3.5" />
+                )}
+                <span className="min-w-0 truncate">{entry.label}</span>
+                {availability.metadata ? (
+                  <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                    {availability.metadata}
+                  </span>
+                ) : null}
+              </ContextMenuItem>
+            )
+          })}
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={openOpenInAppsSettings}>
+            {translate(
+              'auto.components.sidebar.WorktreeOpenInMenu.1417fd8380',
+              'Customize apps...'
+            )}
+          </ContextMenuItem>
+        </ContextMenuSubContent>
+      </ContextMenuSub>
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={handleRevealInYiruExplorer} disabled={!absolutePath}>
+        <FolderOpen className="size-3.5" />
+        {translate(
+          'auto.components.right.sidebar.SourceControl.cc05b2d088',
+          'Open in File Explorer'
+        )}
+      </ContextMenuItem>
+    </ContextMenuContent>
+  )
+}
+
+export function SourceControlEntryContextMenu({
+  currentWorktreeId,
+  absolutePath,
+  connectionId,
+  onView,
+  onRevealInExplorer,
+  children
+}: SourceControlEntryContextMenuProps): React.JSX.Element {
+  return (
     <ContextMenu>
       <ContextMenuTrigger render={children} />
-      <ContextMenuContent className="w-52">
-        <ContextMenuItem onClick={onView} disabled={!onView}>
-          <Eye className="size-3.5" />
-          {translate(
-            'auto.components.right.sidebar.SourceControlEntryContextMenu.a1f2c8d901',
-            'View'
-          )}
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleCopyPath} disabled={!absolutePath}>
-          <Copy className="size-3.5" />
-          {translate('auto.components.right.sidebar.FileExplorerRow.b5d436aa30', 'Copy Path')}
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuSub>
-          <ContextMenuSubTrigger disabled={!absolutePath}>
-            <FolderOpen className="size-3.5" />
-            {translate('auto.components.sidebar.WorktreeOpenInMenu.8009ab69a6', 'Open in')}
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent className="w-52">
-            {openInEntries.map((entry) => {
-              const availability = getOpenInEntryAvailability(entry, {
-                connectionId,
-                runtimeEnvironmentId,
-                runtimeRemoteSshSupport
-              })
-              return (
-                <ContextMenuItem
-                  key={entry.id}
-                  onClick={() => handleOpenInExternal(entry.target, entry.command)}
-                  disabled={!absolutePath || availability.disabled}
-                >
-                  {entry.target === 'file-manager' ? (
-                    <FolderOpen className="size-3.5" />
-                  ) : entry.command ? (
-                    <OpenInApplicationIcon application={{ command: entry.command }} size={14} />
-                  ) : (
-                    <ExternalLink weight="regular" className="size-3.5" />
-                  )}
-                  <span className="min-w-0 truncate">{entry.label}</span>
-                  {availability.metadata ? (
-                    <span className="text-muted-foreground ml-auto shrink-0 text-xs">
-                      {availability.metadata}
-                    </span>
-                  ) : null}
-                </ContextMenuItem>
-              )
-            })}
-            <ContextMenuSeparator />
-            <ContextMenuItem onClick={openOpenInAppsSettings}>
-              {translate(
-                'auto.components.sidebar.WorktreeOpenInMenu.1417fd8380',
-                'Customize apps...'
-              )}
-            </ContextMenuItem>
-          </ContextMenuSubContent>
-        </ContextMenuSub>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleRevealInYiruExplorer} disabled={!absolutePath}>
-          <FolderOpen className="size-3.5" />
-          {translate(
-            'auto.components.right.sidebar.SourceControl.cc05b2d088',
-            'Open in File Explorer'
-          )}
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <SourceControlEntryMenuContent
+        currentWorktreeId={currentWorktreeId}
+        absolutePath={absolutePath}
+        connectionId={connectionId}
+        onView={onView}
+        onRevealInExplorer={onRevealInExplorer}
+      />
     </ContextMenu>
   )
 }

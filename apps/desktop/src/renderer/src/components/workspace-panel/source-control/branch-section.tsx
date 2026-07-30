@@ -1,10 +1,8 @@
-import React from 'react'
-
 import { translate } from '../../../i18n/i18n'
 import { Button } from '../../ui/button'
 import { BranchEntryRow } from './branch-entry-row'
 import type { SourceControlController } from './controller'
-import { SourceControlBranchTreeDirectoryRow } from './directory-rows'
+import { SourceControlPierreBranchTree } from './pierre-tree'
 import { SourceControlSectionHeader as SectionHeader } from './section-header'
 import { SourceControlVirtualFileList } from './virtual-file-list'
 
@@ -12,7 +10,7 @@ type SourceControlBranchSectionProps = {
   controller: SourceControlController
 }
 
-function SourceControlBranchSection({
+export function SourceControlBranchSection({
   controller
 }: SourceControlBranchSectionProps): React.JSX.Element | null {
   const {
@@ -21,7 +19,6 @@ function SourceControlBranchSection({
     activeWorktreeId,
     branchSummary,
     collapsedSections,
-    collapsedTreeDirs,
     diffCommentCountByPath,
     fileListScrollElement,
     filteredBranchEntries,
@@ -30,8 +27,6 @@ function SourceControlBranchSection({
     revealInExplorer,
     sourceControlViewMode,
     toggleSection,
-    toggleTreeDir,
-    visibleBranchTreeRows,
     worktreePath
   } = controller
 
@@ -74,34 +69,7 @@ function SourceControlBranchSection({
         }
       />
       {isCollapsed ? null : sourceControlViewMode === 'tree' ? (
-        <SourceControlVirtualFileList
-          rows={visibleBranchTreeRows}
-          scrollElement={fileListScrollElement}
-          getRowKey={(node) => node.key}
-          renderRow={(node) =>
-            node.type === 'directory' ? (
-              <SourceControlBranchTreeDirectoryRow
-                key={node.key}
-                node={node}
-                isCollapsed={collapsedTreeDirs.has(node.key)}
-                onToggle={() => toggleTreeDir(node.key)}
-              />
-            ) : (
-              <BranchEntryRow
-                key={node.key}
-                entry={node.entry}
-                currentWorktreeId={currentWorktreeId}
-                worktreePath={worktreePath}
-                depth={node.depth}
-                onRevealInExplorer={revealInExplorer}
-                connectionId={activeConnectionId}
-                onOpen={(event) => openCommittedDiff(node.entry, event)}
-                commentCount={diffCommentCountByPath.get(node.entry.path) ?? 0}
-                showPathHint={false}
-              />
-            )
-          }
-        />
+        <SourceControlPierreBranchTree controller={controller} />
       ) : (
         <SourceControlVirtualFileList
           rows={filteredBranchEntries}
@@ -124,43 +92,3 @@ function SourceControlBranchSection({
     </div>
   )
 }
-
-// Why: `controller` is rebuilt every render by the 21-hook chain in
-// source-control-controller.tsx (each layer spreads the previous scope), so
-// a default shallow compare on the prop never bails. Compare only the
-// fields this component actually reads — verified against the destructure
-// and JSX above, and confirmed this component never forwards the whole
-// `controller` to a child (each child gets specific extracted props) — so a
-// missed field can't silently show stale branch data downstream either. If
-// a future edit reads a new field off `controller` here, add it below too.
-function areSourceControlBranchSectionPropsEqual(
-  prev: SourceControlBranchSectionProps,
-  next: SourceControlBranchSectionProps
-): boolean {
-  const a = prev.controller
-  const b = next.controller
-  return (
-    a.activeConnectionId === b.activeConnectionId &&
-    a.activeWorktree === b.activeWorktree &&
-    a.activeWorktreeId === b.activeWorktreeId &&
-    a.branchSummary === b.branchSummary &&
-    a.collapsedSections === b.collapsedSections &&
-    a.collapsedTreeDirs === b.collapsedTreeDirs &&
-    a.diffCommentCountByPath === b.diffCommentCountByPath &&
-    a.fileListScrollElement === b.fileListScrollElement &&
-    a.filteredBranchEntries === b.filteredBranchEntries &&
-    a.openBranchAllDiffs === b.openBranchAllDiffs &&
-    a.openCommittedDiff === b.openCommittedDiff &&
-    a.revealInExplorer === b.revealInExplorer &&
-    a.sourceControlViewMode === b.sourceControlViewMode &&
-    a.toggleSection === b.toggleSection &&
-    a.toggleTreeDir === b.toggleTreeDir &&
-    a.visibleBranchTreeRows === b.visibleBranchTreeRows &&
-    a.worktreePath === b.worktreePath
-  )
-}
-
-export const SourceControlBranchSectionMemo = React.memo(
-  SourceControlBranchSection,
-  areSourceControlBranchSectionPropsEqual
-)

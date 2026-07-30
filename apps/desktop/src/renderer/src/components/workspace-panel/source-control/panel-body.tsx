@@ -1,4 +1,4 @@
-import { SourceControlBranchSectionMemo } from './branch-section'
+import { SourceControlBranchSection } from './branch-section'
 import { CompareUnavailable } from './compare-summary'
 import type { SourceControlController } from './controller'
 import { shouldShowSourceControlCompareUnavailableCard } from './header-toolbar'
@@ -61,7 +61,7 @@ export function SourceControlPanelBody({
           onRetry={() => void refreshBranchCompare()}
         />
       ) : null}
-      <SourceControlBranchSectionMemo controller={controller} />
+      <SourceControlBranchSection controller={controller} />
       <SourceControlHistorySectionMemo controller={controller} />
     </div>
   )
