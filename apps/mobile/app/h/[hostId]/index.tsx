@@ -900,7 +900,7 @@ export function HostScreen({
                       pointerEvents="none"
                       className="absolute inset-x-0 top-8 bottom-0 items-center"
                     >
-                      <View className="bg-border w-hairline h-full" />
+                      <View className="bg-muted-foreground/60 w-hairline h-full" />
                     </View>
                   ) : null}
                   {section.icon === 'pin' ? (

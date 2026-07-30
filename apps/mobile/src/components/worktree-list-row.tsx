@@ -121,7 +121,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
     >
       {nestedUnderProject ? (
         <View className="-my-1.5 w-5 items-center self-stretch">
-          <View className="bg-border w-hairline flex-1" />
+          <View className="bg-muted-foreground/60 w-hairline flex-1" />
         </View>
       ) : null}
 
