@@ -202,7 +202,7 @@ const largeClassicIcon = readPng(join(resourcesDir, 'build', 'icon.png'))
 const cleanWordmark = removeMagentaSpill(readPng(join(brandDir, 'yiru-wordmark.png')))
 writePng(join(brandDir, 'yiru-wordmark.png'), cleanWordmark)
 
-const adaptiveWordmark = fitOnCanvas(cleanWordmark, 1024, 1024, 200)
+const adaptiveWordmark = fitOnCanvas(cleanWordmark, 1024, 1024, 140)
 const adaptiveMask = createMask(adaptiveWordmark, [255, 255, 255])
 const squareWordmark = fitOnCanvas(cleanWordmark, 1024, 1024, 112)
 const blackSquareMask = createMask(squareWordmark, [0, 0, 0])
