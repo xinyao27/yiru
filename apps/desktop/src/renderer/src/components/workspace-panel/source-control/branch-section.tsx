@@ -27,6 +27,7 @@ export function SourceControlBranchSection({
     revealInExplorer,
     sourceControlViewMode,
     toggleSection,
+    workspacePanelTabId,
     worktreePath
   } = controller
 
@@ -60,7 +61,9 @@ export function SourceControlBranchSection({
             onClick={(event) => {
               event.stopPropagation()
               if (activeWorktreeId) {
-                openBranchAllDiffs(activeWorktreeId, worktreePath, branchSummary)
+                openBranchAllDiffs(activeWorktreeId, worktreePath, branchSummary, undefined, {
+                  workspacePanelTabId
+                })
               }
             }}
           >

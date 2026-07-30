@@ -35,6 +35,7 @@ function SourceControlUncommittedSections({
     requestDiscardAllInArea,
     toggleSection,
     unfilteredDisplaySectionsById,
+    workspacePanelTabId,
     worktreePath
   } = controller
 
@@ -138,7 +139,8 @@ function SourceControlUncommittedSections({
                             activeWorktreeId,
                             worktreePath,
                             sectionViewAction.entries,
-                            'live-summary'
+                            'live-summary',
+                            { workspacePanelTabId }
                           )
                         } else {
                           openAllDiffs(
@@ -146,7 +148,8 @@ function SourceControlUncommittedSections({
                             worktreePath,
                             undefined,
                             sectionViewAction.area,
-                            sectionViewAction.entries
+                            sectionViewAction.entries,
+                            { workspacePanelTabId }
                           )
                         }
                       }}

@@ -118,7 +118,8 @@ export function useGitHistoryCommitActions({
           cached.summary,
           cached.entries,
           item.subject,
-          item.message
+          item.message,
+          { workspacePanelTabId }
         )
       } catch (error) {
         toast.error(
@@ -131,7 +132,7 @@ export function useGitHistoryCommitActions({
         )
       }
     },
-    [activeWorktreeId, loadCommitFiles, openCommitAllDiffs, worktreePath]
+    [activeWorktreeId, loadCommitFiles, openCommitAllDiffs, workspacePanelTabId, worktreePath]
   )
 
   const openCommitFile = useCallback(

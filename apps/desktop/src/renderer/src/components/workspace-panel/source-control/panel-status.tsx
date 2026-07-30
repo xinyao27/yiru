@@ -27,6 +27,7 @@ export function SourceControlPanelStatus({
     repositoryHuge,
     sourceControlAiActionsVisible,
     unresolvedConflictReviewEntries,
+    workspacePanelTabId,
     worktreePath
   } = controller
 
@@ -48,7 +49,8 @@ export function SourceControlPanelStatus({
                   activeWorktreeId,
                   worktreePath,
                   unresolvedConflictReviewEntries,
-                  'live-summary'
+                  'live-summary',
+                  { workspacePanelTabId }
                 )
               }
             }}
