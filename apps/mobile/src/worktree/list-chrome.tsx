@@ -15,9 +15,7 @@ type MobileWorkspaceListChromeProps = {
   onBack: () => void
   onHideSidebar?: () => void
   onReconnect: () => void
-  onSearch: () => void
   showReconnect: boolean
-  showSearch: boolean
 }
 
 export function MobileWorkspaceListChrome({
@@ -29,9 +27,7 @@ export function MobileWorkspaceListChrome({
   onBack,
   onHideSidebar,
   onReconnect,
-  onSearch,
-  showReconnect,
-  showSearch
+  showReconnect
 }: MobileWorkspaceListChromeProps): React.JSX.Element {
   const nativeHeaderOptions = useMemo(
     () => ({
@@ -67,11 +63,6 @@ export function MobileWorkspaceListChrome({
             icon="person.crop.circle"
             onPress={onAccounts}
           />
-          <Stack.Toolbar.Button
-            accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
-            icon={showSearch ? 'xmark' : 'magnifyingglass'}
-            onPress={onSearch}
-          />
         </Stack.Toolbar>
         <View className="px-3 py-2">{children}</View>
       </>
@@ -92,11 +83,9 @@ export function MobileWorkspaceListChrome({
             canUseHost={canUseHost}
             embedded={embedded}
             showReconnect={showReconnect}
-            showSearch={showSearch}
             onAccounts={onAccounts}
             onHideSidebar={onHideSidebar}
             onReconnect={onReconnect}
-            onSearch={onSearch}
           />
         </View>
         {children}

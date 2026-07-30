@@ -16,8 +16,7 @@ import {
   PushPin as Pin,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  Moon,
-  Check
+  Moon
 } from '@/components/uniwind-icons'
 import { cn } from '@/style/class-names'
 
@@ -28,15 +27,12 @@ import { ActionSheetContent } from '../../../src/components/action-sheet-modal'
 import { AuthFailedBanner } from '../../../src/components/auth-failed-banner'
 import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
-import { MobileContentSection } from '../../../src/components/content-section'
 import { MobileGlassGroup } from '../../../src/components/glass/group'
 import { MobileGlassTextButton } from '../../../src/components/glass/text-button'
 import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
-import { PickerModal } from '../../../src/components/picker-modal'
 import { ProtocolBlockScreen } from '../../../src/components/protocol-block-screen'
 import { MobileRepoIcon } from '../../../src/components/repo-icon'
-import { MobileSearchField } from '../../../src/components/search-field'
 import { WorkspaceDetailPlaceholder } from '../../../src/components/workspace-detail-placeholder'
 import { WorktreeListRow } from '../../../src/components/worktree-list-row'
 import { useActiveWorktreeScroll } from '../../../src/hooks/use-active-worktree-scroll'
@@ -76,7 +72,6 @@ import { MobileWorkspaceListToolbar } from '../../../src/worktree/list-toolbar'
 import { repoColor } from '../../../src/worktree/repo-color'
 import { useWorkspaceSections } from '../../../src/worktree/use-workspace-sections'
 import { getMobileWorkspaceLineageGroupKey } from '../../../src/worktree/workspace-lineage'
-import { WORKSPACE_SORT_OPTIONS as SORT_OPTIONS } from '../../../src/worktree/workspace-list-picker-options'
 import {
   getWorktreeStatus,
   isWorktreePinned,
@@ -160,7 +155,6 @@ export function HostScreen({
   const [error, setError] = useState('')
   const [lastKnownWorktrees, setLastKnownWorktrees] = useState<Worktree[]>(initialCache ?? [])
   const [search, setSearch] = useState('')
-  const [showSearch, setShowSearch] = useState(false)
   const [sortMode, setSortMode] = useState<MobileSortMode>('recent')
   const [filters, setFilters] = useState<FilterState>({
     filterRepoIds: new Set(),
@@ -175,8 +169,6 @@ export function HostScreen({
   // repo ids (desktop's PersistedUIState), but the section headers/rows key on
   // displayName, so we bridge the two here.
   const [repoIdsByName, setRepoIdsByName] = useState<Map<string, string>>(new Map())
-  const [showSortPicker, setShowSortPicker] = useState(false)
-  const [showFilterModal, setShowFilterModal] = useState(false)
   const [actionTarget, setActionTarget] = useState<Worktree | null>(null)
   const { hostCapabilities, floatingWorkspaceEnabled, compatVerdict } = useHostStatusGates({
     hostId,
@@ -701,10 +693,6 @@ export function HostScreen({
     }
   }, [forceReconnectHost, hostId])
 
-  const toggleSearch = useCallback(() => {
-    setShowSearch((current) => !current)
-  }, [])
-
   const openFloatingWorkspace = useCallback(() => {
     // Why: the sentinel has no worktree record; session.tabs.list hydrates its host-owned tabs.
     navigateFromHostList(floatingWorkspaceSessionPath(hostId))
@@ -730,38 +718,6 @@ export function HostScreen({
     [client, connState, hostId, navigateFromHostList]
   )
 
-  const handleSortChange = useCallback(
-    (value: MobileSortMode) => {
-      persistViewSettings({ sortMode: value })
-    },
-    [persistViewSettings]
-  )
-
-  const toggleHideSleeping = useCallback(() => {
-    persistViewSettings({ hideSleeping: !viewStateRef.current.hideSleeping })
-  }, [persistViewSettings])
-
-  const toggleHideDefaultBranch = useCallback(() => {
-    persistViewSettings({ hideDefaultBranch: !viewStateRef.current.hideDefaultBranch })
-  }, [persistViewSettings])
-
-  const toggleRepoFilter = useCallback(
-    (repoId: string) => {
-      const next = new Set(viewStateRef.current.filterRepoIds)
-      if (next.has(repoId)) {
-        next.delete(repoId)
-      } else {
-        next.add(repoId)
-      }
-      persistViewSettings({ filterRepoIds: [...next] })
-    },
-    [persistViewSettings]
-  )
-
-  const clearFilters = useCallback(() => {
-    persistViewSettings({ hideSleeping: false, hideDefaultBranch: false, filterRepoIds: [] })
-  }, [persistViewSettings])
-
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (filters.hideSleeping) {
@@ -773,9 +729,6 @@ export function HostScreen({
     count += filters.filterRepoIds.size
     return count
   }, [filters])
-  const selectedSortLabel =
-    SORT_OPTIONS.find((option) => option.value === sortMode)?.label ?? 'Recent'
-
   const displayWorktrees = useMemo(() => {
     const base =
       connState === 'disconnected' || connState === 'reconnecting' || connState === 'auth-failed'
@@ -810,7 +763,7 @@ export function HostScreen({
     },
     [persistViewSettings]
   )
-  const { sections, rawSections, uniqueRepos, uniqueRepoColors } = useWorkspaceSections({
+  const { sections, rawSections, uniqueRepoColors } = useWorkspaceSections({
     displayWorktrees,
     sortMode,
     filters,
@@ -859,23 +812,17 @@ export function HostScreen({
         onBack={leaveHost}
         onHideSidebar={onHideSidebar}
         onReconnect={reconnectHost}
-        onSearch={toggleSearch}
         showReconnect={showReconnectButton}
-        showSearch={showSearch}
       >
         <MobileWorkspaceListToolbar
-          activeFilterCount={activeFilterCount}
           canUseHost={connState === 'connected'}
           embedded={embedded}
           floatingWorkspaceEnabled={floatingWorkspaceEnabled}
-          showSearch={showSearch}
-          sortLabel={selectedSortLabel}
+          search={search}
           onAccounts={openAccounts}
-          onFilter={() => setShowFilterModal(true)}
           onFloatingWorkspace={openFloatingWorkspace}
           onNewWorkspace={openNewWorktreeModal}
-          onSearch={toggleSearch}
-          onSort={() => setShowSortPicker(true)}
+          onSearchChange={setSearch}
         />
       </MobileWorkspaceListChrome>
 
@@ -887,22 +834,6 @@ export function HostScreen({
           onRepair={() => router.push('/pair-scan')}
           onRemove={() => setConfirmRemoveHost(true)}
         />
-      )}
-
-      {/* Search bar */}
-      {showSearch && (
-        <View className="px-3 pb-2">
-          <MobileSearchField
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search worktrees…"
-            autoFocus
-            // Why: new key each open remounts focus effect if the field stays mounted
-            // across rapid toggles; pairs with delayed focus so the keyboard appears.
-            focusKey={showSearch}
-            accessibilityLabel="Search worktrees"
-          />
-        </View>
       )}
 
       {/* Loading state */}
@@ -1037,75 +968,6 @@ export function HostScreen({
       {!embedded && (
         <NewWorkspaceFab onPress={openNewWorktreeModal} disabled={connState !== 'connected'} />
       )}
-
-      <PickerModal
-        visible={showSortPicker}
-        title="Sort By"
-        options={SORT_OPTIONS}
-        selected={sortMode}
-        onSelect={handleSortChange}
-        onClose={() => setShowSortPicker(false)}
-      />
-
-      <BottomDrawer visible={showFilterModal} onClose={() => setShowFilterModal(false)}>
-        <View className="mb-3 flex-row items-center justify-between px-1">
-          <Text className="text-foreground text-sm">Filter</Text>
-          {activeFilterCount > 0 && (
-            <MobileGlassTextButton label="Clear filters" onPress={clearFilters} size="small" />
-          )}
-        </View>
-
-        <Text className="text-muted-foreground mb-1 px-1 text-sm">Workspaces</Text>
-        <MobileContentSection className="mb-3">
-          <Pressable className="flex-row items-center gap-2 px-3 py-3" onPress={toggleHideSleeping}>
-            <Text className="text-foreground flex-1 text-sm">Hide sleeping</Text>
-            <View className="w-5 items-center">
-              {filters.hideSleeping ? <Check size={14} colorClassName="accent-foreground" /> : null}
-            </View>
-          </Pressable>
-          <View className="bg-border h-hairline mx-3" />
-          <Pressable
-            className="flex-row items-center gap-2 px-3 py-3"
-            onPress={toggleHideDefaultBranch}
-          >
-            <Text className="text-foreground flex-1 text-sm">Hide default branch</Text>
-            <View className="w-5 items-center">
-              {filters.hideDefaultBranch ? (
-                <Check size={14} colorClassName="accent-foreground" />
-              ) : null}
-            </View>
-          </Pressable>
-        </MobileContentSection>
-
-        {uniqueRepos.length > 1 && (
-          <>
-            <Text className="text-muted-foreground mb-1 px-1 text-sm">Repositories</Text>
-            <MobileContentSection className="mb-3">
-              {uniqueRepos.map((repo, i) => (
-                <View key={repo.id}>
-                  {i > 0 && <View className="bg-border h-hairline mx-3" />}
-                  <Pressable
-                    className="flex-row items-center gap-2 px-3 py-3"
-                    onPress={() => toggleRepoFilter(repo.id)}
-                  >
-                    <View className="w-5 items-center">
-                      <View className="h-2 w-2" style={[{ backgroundColor: repo.color }]} />
-                    </View>
-                    <Text className="text-foreground flex-1 text-sm" numberOfLines={1}>
-                      {repo.name}
-                    </Text>
-                    <View className="w-5 items-center">
-                      {filters.filterRepoIds.has(repo.id) ? (
-                        <Check size={14} colorClassName="accent-foreground" />
-                      ) : null}
-                    </View>
-                  </Pressable>
-                </View>
-              ))}
-            </MobileContentSection>
-          </>
-        )}
-      </BottomDrawer>
 
       {/* Worktree long-press action sheet (inline confirm to avoid double-Modal lag) */}
       <BottomDrawer
