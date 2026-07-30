@@ -64,10 +64,10 @@ function WorkspaceLeadingStatus(props: WorkspaceLeadingStatusProps): React.JSX.E
   }
   if (linkedPR) {
     const colors = prStateColorClasses(linkedPR.state)
-    return <GitPullRequest size={13} colorClassName={colors.accent} />
+    return <GitPullRequest size={16} colorClassName={colors.accent} />
   }
   if (branch.trim()) {
-    return <GitMerge size={13} colorClassName="accent-muted-foreground" />
+    return <GitMerge size={16} colorClassName="accent-muted-foreground" />
   }
   return <AgentSpinner status={status} />
 }
@@ -110,11 +110,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
 
   return (
     <Pressable
-      className={cn(
-        'flex-row items-start gap-1.5 py-1.5 pr-2 pl-2.5',
-        'active:bg-accent',
-        item.isActive && 'bg-accent'
-      )}
+      className="active:bg-accent flex-row items-start gap-1.5 py-1.5 pr-2 pl-2.5"
       style={
         lineageDepth > 0 && !nestedUnderProject
           ? { paddingLeft: spacing4 * (lineageDepth + 1) }
@@ -155,12 +151,12 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
         <View className="min-h-5 flex-row items-center gap-1.5">
           {!hideRepo ? (
             <View className="border-border bg-accent h-4 w-4 items-center justify-center border">
-              <MobileRepoIcon repoIcon={repoIcon} size={12} color={repoColor} />
+              <MobileRepoIcon repoIcon={repoIcon} size={14} color={repoColor} />
             </View>
           ) : null}
           <Text
             className={cn(
-              'shrink text-[13px] leading-5',
+              'shrink text-base leading-5',
               item.unread ? 'text-foreground font-semibold' : 'text-foreground/80',
               isReadOnly && 'opacity-50'
             )}
@@ -175,7 +171,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
           />
         </View>
         <View className="min-h-4 flex-row items-center gap-1">
-          <Text className="text-muted-foreground shrink text-[11px] leading-none" numberOfLines={1}>
+          <Text className="text-muted-foreground shrink text-sm leading-4" numberOfLines={1}>
             {metaText}
           </Text>
         </View>
@@ -209,7 +205,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       <View className="w-5 items-center">
         {item.unread ? (
           <View className="h-5 items-center justify-center">
-            <BellSimple size={14} colorClassName="accent-amber-500" weight="fill" />
+            <BellSimple size={16} colorClassName="accent-amber-500" weight="fill" />
           </View>
         ) : null}
       </View>

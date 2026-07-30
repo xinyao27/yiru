@@ -18,7 +18,7 @@ type Props = {
   unvisited: boolean
 }
 
-// One inline agent row: state dot → identity → last message/prompt → time ago.
+// One inline agent row: identity → last message/prompt → time ago → state dot.
 // Mirrors desktop DashboardAgentRow's compact in-card layout.
 export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
   const dotState = agentDotState(agent, now)
@@ -32,17 +32,17 @@ export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
     >
       {/* Agent identity logo (Claude/Codex/…), matching the desktop sidebar's
           agent icons instead of a two-letter text code. */}
-      {agent.agentType ? <MobileAgentIcon agentId={agent.agentType} size={13} /> : null}
+      {agent.agentType ? <MobileAgentIcon agentId={agent.agentType} size={16} /> : null}
       <Text
         className={cn(
-          'flex-1 text-[11px] leading-none text-muted-foreground',
+          'flex-1 text-sm leading-4 text-muted-foreground',
           unvisited && 'text-foreground font-semibold'
         )}
         numberOfLines={1}
       >
         {label}
       </Text>
-      <Text className="text-muted-foreground text-[10px] leading-none">{ts}</Text>
+      <Text className="text-muted-foreground text-xs leading-4">{ts}</Text>
       <AgentStateDot state={dotState} />
     </View>
   )

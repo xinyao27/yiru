@@ -905,19 +905,19 @@ export function HostScreen({
                     </View>
                   ) : null}
                   {section.icon === 'pin' ? (
-                    <Pin size={12} colorClassName="accent-muted-foreground" />
+                    <Pin size={16} colorClassName="accent-muted-foreground" />
                   ) : null}
                   {isProjectSection ? (
                     <MobileRepoIcon
                       repoIcon={repoSectionIcon}
-                      size={16}
+                      size={20}
                       color={repoSectionColor ?? undefined}
                     />
                   ) : null}
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text
-                    className="text-foreground shrink text-[13px] leading-none font-semibold"
+                    className="text-foreground shrink text-base leading-none font-semibold"
                     numberOfLines={1}
                   >
                     {section.title}
@@ -925,9 +925,9 @@ export function HostScreen({
                 </View>
                 <View className="h-9 w-5 items-center justify-center">
                   {isCollapsed ? (
-                    <ChevronRight size={12} colorClassName="accent-muted-foreground" />
+                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
                   ) : (
-                    <ChevronDown size={12} colorClassName="accent-muted-foreground" />
+                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
                   )}
                 </View>
               </Pressable>

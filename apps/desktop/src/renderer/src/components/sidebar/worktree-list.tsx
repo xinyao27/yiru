@@ -32,6 +32,7 @@ import {
 import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
+import { shallow } from 'zustand/shallow'
 
 import { CoworkingProjectVisibilityDialog } from '@/components/coworking/worktree-visibility-dialog'
 import { LoadingIndicator } from '@/components/loading-indicator'
@@ -1092,34 +1093,37 @@ function findPreferredRenderRowIndexForWorktree(
   return fallbackIndex
 }
 
-function getActiveDescendantOptionId(args: {
+type ActiveDescendantInput = {
   activeWorktreeId: string | null
   primaryActiveRowKey?: string
   workspaceRows: readonly WorkspaceSidebarProjectedRow[]
-  virtualItems: readonly { index: number }[]
-}): string | undefined {
+}
+
+function getActiveDescendantOptionId(
+  args: ActiveDescendantInput & { visibleIndexes: readonly number[] }
+): string | undefined {
   if (args.activeWorktreeId === null) {
     return undefined
   }
   if (args.primaryActiveRowKey) {
     const primaryOptionId = getWorktreeOptionId(args.primaryActiveRowKey)
-    for (const item of args.virtualItems) {
-      const projected = args.workspaceRows[item.index]
+    for (const index of args.visibleIndexes) {
+      const projected = args.workspaceRows[index]
       const row = projected?.kind === 'local' ? projected.row : undefined
       if (row && getRenderRowOptionId(row, args.activeWorktreeId) === primaryOptionId) {
         return primaryOptionId
       }
     }
   }
-  for (const item of args.virtualItems) {
-    const projected = args.workspaceRows[item.index]
+  for (const index of args.visibleIndexes) {
+    const projected = args.workspaceRows[index]
     const row = projected?.kind === 'local' ? projected.row : undefined
     if (row && renderRowContainsNaturalWorktree(row, args.activeWorktreeId)) {
       return getRenderRowOptionId(row, args.activeWorktreeId)
     }
   }
-  for (const item of args.virtualItems) {
-    const projected = args.workspaceRows[item.index]
+  for (const index of args.visibleIndexes) {
+    const projected = args.workspaceRows[index]
     const row = projected?.kind === 'local' ? projected.row : undefined
     if (row && renderRowContainsWorktree(row, args.activeWorktreeId)) {
       return getRenderRowOptionId(row, args.activeWorktreeId)
@@ -1286,6 +1290,41 @@ function getLegendListScrollElement(value: unknown): HTMLDivElement | null {
   }
   const element = isLegendListScrollHandle(value) ? value.getScrollableNode() : null
   return element instanceof HTMLDivElement ? element : null
+}
+
+function getLegendListRowType(row: WorkspaceSidebarProjectedRow): string {
+  return row.kind === 'local' ? `local:${row.row.type}` : row.kind
+}
+
+function areWorkspaceSidebarRowsEqual(
+  previous: WorkspaceSidebarProjectedRow,
+  current: WorkspaceSidebarProjectedRow
+): boolean {
+  if (previous.kind !== current.kind || previous.key !== current.key) {
+    return false
+  }
+  switch (previous.kind) {
+    case 'local':
+      return (
+        current.kind === 'local' &&
+        previous.localIndex === current.localIndex &&
+        shallow(previous.row, current.row)
+      )
+    case 'coworking':
+      return (
+        current.kind === 'coworking' &&
+        previous.localProjectHeaderKey === current.localProjectHeaderKey &&
+        shallow(previous.row, current.row)
+      )
+    case 'coworking-remote-worktrees-header':
+      return (
+        current.kind === 'coworking-remote-worktrees-header' &&
+        previous.worktreeCount === current.worktreeCount &&
+        previous.collapsed === current.collapsed
+      )
+    case 'coworking-windows-firewall':
+      return current.kind === 'coworking-windows-firewall'
+  }
 }
 
 function WorkspaceRail({ leftPx }: { leftPx: number }): React.JSX.Element {
@@ -3536,6 +3575,17 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
     ]
   )
 
+  const activeDescendantInput = {
+    activeWorktreeId,
+    primaryActiveRowKey:
+      primaryActiveWorktreeRow?.worktreeId === activeWorktreeId
+        ? primaryActiveWorktreeRow.rowKey
+        : undefined,
+    workspaceRows: workspaceSidebarRows
+  } satisfies ActiveDescendantInput
+  const activeDescendantInputRef = useRef(activeDescendantInput)
+  activeDescendantInputRef.current = activeDescendantInput
+
   const reportVisibleRows = useCallback(
     (visibleIndexes: readonly number[]) => {
       if (document.visibilityState !== 'visible') {
@@ -3612,6 +3662,16 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
         .sort((left, right) => left - right)
       visibleWorkspaceRowIndexesRef.current = indexes
       reportVisibleRowsRef.current(indexes)
+      const activeDescendantId = getActiveDescendantOptionId({
+        ...activeDescendantInputRef.current,
+        visibleIndexes: indexes
+      })
+      const container = scrollRef.current
+      if (activeDescendantId) {
+        container?.setAttribute('aria-activedescendant', activeDescendantId)
+      } else {
+        container?.removeAttribute('aria-activedescendant')
+      }
     },
     []
   )
@@ -3620,16 +3680,9 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
     reportVisibleRows(visibleWorkspaceRowIndexesRef.current)
   }, [documentVisibilityRevision, reportVisibleRows])
 
-  const visibleVirtualItems = visibleWorkspaceRowIndexesRef.current.map((index) => ({ index }))
-
   const activeDescendantId = getActiveDescendantOptionId({
-    activeWorktreeId,
-    primaryActiveRowKey:
-      primaryActiveWorktreeRow?.worktreeId === activeWorktreeId
-        ? primaryActiveWorktreeRow.rowKey
-        : undefined,
-    workspaceRows: workspaceSidebarRows,
-    virtualItems: visibleVirtualItems
+    ...activeDescendantInput,
+    visibleIndexes: visibleWorkspaceRowIndexesRef.current
   })
 
   const hasWorkspaceDropTargets = useMemo(
@@ -3879,6 +3932,8 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
         refScrollView={setLegendListScrollRootRef}
         data={workspaceSidebarRows}
         keyExtractor={getWorkspaceSidebarRowKey}
+        getItemType={getLegendListRowType}
+        itemsAreEqual={areWorkspaceSidebarRowsEqual}
         initialScrollOffset={scrollOffsetRef.current}
         maintainVisibleContentPosition={false}
         stickyHeaderIndices={stickyHeaderIndexes}
