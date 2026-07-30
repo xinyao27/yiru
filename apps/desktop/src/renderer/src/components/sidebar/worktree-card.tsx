@@ -68,7 +68,7 @@ import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
 import { WorktreeCardStatusSlot } from './worktree-card/status-slot'
 import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card/surface'
 import { getWorktreeCardTitleDisplay } from './worktree-card/title-display'
-import WorktreeContextMenu from './worktree-context-menu'
+import { WorktreeContextMenu } from './worktree-context-menu/menu'
 import {
   getFlushWorktreeCardPaddingLeft,
   getWorktreeCardParentContentMarginLeft

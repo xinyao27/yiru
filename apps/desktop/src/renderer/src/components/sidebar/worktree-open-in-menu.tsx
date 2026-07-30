@@ -2,12 +2,13 @@ import { FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/reac
 import React, { useCallback } from 'react'
 
 import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger
-} from '@/components/ui/dropdown-menu'
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger
+} from '@/components/ui/context-menu'
+import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 import { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
 import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
@@ -27,6 +28,7 @@ type WorktreeOpenInMenuItemsProps = {
   disabled?: boolean
   labelPrefix?: string
   onEntryOpen?: (entry: OpenInMenuEntry) => void
+  menuKind?: 'context' | 'dropdown'
 }
 
 export type OpenInMenuEntry = {
@@ -107,7 +109,8 @@ export function WorktreeOpenInMenuItems({
   runtimeEnvironmentId,
   disabled,
   labelPrefix = '',
-  onEntryOpen
+  onEntryOpen,
+  menuKind = 'dropdown'
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   const openInWorktreePath = useOpenInWorktreePath({
     worktreePath,
@@ -127,16 +130,13 @@ export function WorktreeOpenInMenuItems({
           runtimeEnvironmentId,
           runtimeRemoteSshSupport
         })
-        return (
-          <DropdownMenuItem
-            key={entry.preferenceKey}
-            onClick={(event) => {
-              stopMenuPropagation(event)
-              onEntryOpen?.(entry)
-              void openInWorktreePath(entry.target, entry.command)
-            }}
-            disabled={disabled || availability.disabled}
-          >
+        const handleClick = (event: React.MouseEvent): void => {
+          stopMenuPropagation(event)
+          onEntryOpen?.(entry)
+          void openInWorktreePath(entry.target, entry.command)
+        }
+        const content = (
+          <>
             {entry.target === 'file-manager' ? (
               <FolderOpen className="size-3.5" />
             ) : entry.command ? (
@@ -153,6 +153,26 @@ export function WorktreeOpenInMenuItems({
                 {availability.metadata}
               </span>
             ) : null}
+          </>
+        )
+        if (menuKind === 'context') {
+          return (
+            <ContextMenuItem
+              key={entry.preferenceKey}
+              onClick={handleClick}
+              disabled={disabled || availability.disabled}
+            >
+              {content}
+            </ContextMenuItem>
+          )
+        }
+        return (
+          <DropdownMenuItem
+            key={entry.preferenceKey}
+            onClick={handleClick}
+            disabled={disabled || availability.disabled}
+          >
+            {content}
           </DropdownMenuItem>
         )
       })}
@@ -165,7 +185,8 @@ export function WorktreeOpenInMenuContent({
   connectionId,
   runtimeEnvironmentId,
   disabled,
-  onEntryOpen
+  onEntryOpen,
+  menuKind = 'dropdown'
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   return (
     <>
@@ -175,22 +196,29 @@ export function WorktreeOpenInMenuContent({
         runtimeEnvironmentId={runtimeEnvironmentId}
         disabled={disabled}
         onEntryOpen={onEntryOpen}
+        menuKind={menuKind}
       />
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        onClick={(event) => {
-          stopMenuPropagation(event)
-          openOpenInAppsSettings()
-        }}
-        disabled={disabled}
-      >
-        {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}
-      </DropdownMenuItem>
+      {menuKind === 'context' ? <ContextMenuSeparator /> : <DropdownMenuSeparator />}
+      {menuKind === 'context' ? (
+        <ContextMenuItem onClick={openOpenInAppsSettings} disabled={disabled}>
+          {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}
+        </ContextMenuItem>
+      ) : (
+        <DropdownMenuItem
+          onClick={(event) => {
+            stopMenuPropagation(event)
+            openOpenInAppsSettings()
+          }}
+          disabled={disabled}
+        >
+          {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}
+        </DropdownMenuItem>
+      )}
     </>
   )
 }
 
-export function WorktreeOpenInSubMenu({
+export function WorktreeOpenInContextSubMenu({
   worktreePath,
   connectionId,
   runtimeEnvironmentId,
@@ -198,12 +226,12 @@ export function WorktreeOpenInSubMenu({
   onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger disabled={disabled}>
+    <ContextMenuSub>
+      <ContextMenuSubTrigger disabled={disabled}>
         <FolderOpen className="size-3.5" />
         {translate('auto.components.sidebar.WorktreeOpenInMenu.8009ab69a6', 'Open in')}
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent
+      </ContextMenuSubTrigger>
+      <ContextMenuSubContent
         className="w-52"
         onClick={stopMenuPropagation}
         onPointerDown={stopMenuPropagation}
@@ -214,8 +242,9 @@ export function WorktreeOpenInSubMenu({
           runtimeEnvironmentId={runtimeEnvironmentId}
           disabled={disabled}
           onEntryOpen={onEntryOpen}
+          menuKind="context"
         />
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+      </ContextMenuSubContent>
+    </ContextMenuSub>
   )
 }

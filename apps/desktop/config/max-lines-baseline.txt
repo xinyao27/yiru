@@ -149,7 +149,6 @@ inline apps/desktop/src/renderer/src/components/settings/page.tsx
 inline apps/desktop/src/renderer/src/components/settings/use-navigation-metadata.ts
 inline apps/desktop/src/renderer/src/components/sidebar/remote-file-browser.tsx
 inline apps/desktop/src/renderer/src/components/sidebar/worktree-card.tsx
-inline apps/desktop/src/renderer/src/components/sidebar/worktree-context-menu.tsx
 inline apps/desktop/src/renderer/src/components/sidebar/worktree-list-groups.ts
 inline apps/desktop/src/renderer/src/components/sidebar/worktree-list.tsx
 inline apps/desktop/src/renderer/src/components/stats/usage-overview-model.ts

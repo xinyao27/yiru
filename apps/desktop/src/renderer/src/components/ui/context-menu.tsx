@@ -4,7 +4,8 @@ import * as React from 'react'
 
 import {
   floatingSurfaceClass,
-  floatingSurfaceMotionClass
+  floatingSurfaceMotionClass,
+  pointerAnchoredSurfaceMotionClass
 } from '@/components/ui/floating-surface-styles'
 import {
   menuItemClass,
@@ -110,7 +111,7 @@ function ContextMenuContent({ className, style, ...props }: ContextMenuPrimitive
           data-slot="context-menu-content"
           className={cn(
             floatingSurfaceClass,
-            floatingSurfaceMotionClass,
+            pointerAnchoredSurfaceMotionClass,
             'z-[70] max-h-(--available-height) min-w-[11rem] overflow-x-hidden overflow-y-auto p-1 scrollbar-sleek',
             className
           )}

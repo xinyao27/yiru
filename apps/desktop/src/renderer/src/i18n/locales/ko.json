@@ -3158,7 +3158,15 @@
           "deleteWorktree": "작업 트리 삭제",
           "makeCoworkingPrivate": "비공개로 전환",
           "makeCoworkingPublic": "공개로 전환",
-          "coworkingPrivateFailed": "이 worktree를 비공개로 전환할 수 없습니다."
+          "coworkingPrivateFailed": "이 worktree를 비공개로 전환할 수 없습니다.",
+          "create": "만들기",
+          "newGroupName": "{{name}} 그룹",
+          "sleep": "절전",
+          "sleepOneWorkspace": "워크스페이스 1개 절전",
+          "sleepWorkspaces": "워크스페이스 {{count}}개 절전",
+          "deleteSelected": "선택 항목 삭제",
+          "deleteOneWorkspace": "워크스페이스 1개 삭제",
+          "deleteWorkspaces": "워크스페이스 {{count}}개 삭제"
         },
         "WorktreeList": {
           "d880ea0744": "그룹을 만들고 이 프로젝트를 그룹으로 이동하세요.",

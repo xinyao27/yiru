@@ -3158,7 +3158,15 @@
           "deleteWorktree": "ワークツリーを削除",
           "makeCoworkingPrivate": "非公開にする",
           "makeCoworkingPublic": "公開する",
-          "coworkingPrivateFailed": "この worktree を非公開にできませんでした。"
+          "coworkingPrivateFailed": "この worktree を非公開にできませんでした。",
+          "create": "作成",
+          "newGroupName": "{{name}} グループ",
+          "sleep": "スリープ",
+          "sleepOneWorkspace": "1 個のワークスペースをスリープ",
+          "sleepWorkspaces": "{{count}} 個のワークスペースをスリープ",
+          "deleteSelected": "選択項目を削除",
+          "deleteOneWorkspace": "1 個のワークスペースを削除",
+          "deleteWorkspaces": "{{count}} 個のワークスペースを削除"
         },
         "WorktreeList": {
           "d880ea0744": "グループを作成し、このプロジェクトをそのグループに移動します。",

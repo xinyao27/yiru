@@ -3223,7 +3223,15 @@
           "deleteWorktree": "Delete Worktree",
           "makeCoworkingPrivate": "Make private",
           "makeCoworkingPublic": "Make public",
-          "coworkingPrivateFailed": "Could not make this worktree private."
+          "coworkingPrivateFailed": "Could not make this worktree private.",
+          "create": "Create",
+          "newGroupName": "{{name}} group",
+          "sleep": "Sleep",
+          "sleepOneWorkspace": "Sleep 1 Workspace",
+          "sleepWorkspaces": "Sleep {{count}} Workspaces",
+          "deleteSelected": "Delete Selected",
+          "deleteOneWorkspace": "Delete 1 Workspace",
+          "deleteWorkspaces": "Delete {{count}} Workspaces"
         },
         "WorktreeList": {
           "7a8b9c0d1e": "Update required",
