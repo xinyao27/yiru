@@ -3169,7 +3169,14 @@
           "sleepWorkspaces": "休眠 {{count}} 个工作区",
           "deleteSelected": "删除所选",
           "deleteOneWorkspace": "删除 1 个工作区",
-          "deleteWorkspaces": "删除 {{count}} 个工作区"
+          "deleteWorkspaces": "删除 {{count}} 个工作区",
+          "debugLogs": "调试日志",
+          "viewDebugLogs": "查看日志",
+          "clearDebugLogs": "清理日志",
+          "noDebugLogs": "此 worktree 中没有调试日志。",
+          "debugLogsCleared": "调试日志已清理。",
+          "viewDebugLogsFailed": "无法读取调试日志。",
+          "clearDebugLogsFailed": "无法清理调试日志。"
         },
         "WorktreeList": {
           "d880ea0744": "创建一个组并将该项目移入其中。",

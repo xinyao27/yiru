@@ -3169,7 +3169,14 @@
           "sleepWorkspaces": "{{count}} 個のワークスペースをスリープ",
           "deleteSelected": "選択項目を削除",
           "deleteOneWorkspace": "1 個のワークスペースを削除",
-          "deleteWorkspaces": "{{count}} 個のワークスペースを削除"
+          "deleteWorkspaces": "{{count}} 個のワークスペースを削除",
+          "debugLogs": "デバッグログ",
+          "viewDebugLogs": "ログを表示",
+          "clearDebugLogs": "ログをクリア",
+          "noDebugLogs": "この worktree にデバッグログはありません。",
+          "debugLogsCleared": "デバッグログをクリアしました。",
+          "viewDebugLogsFailed": "デバッグログを読み取れませんでした。",
+          "clearDebugLogsFailed": "デバッグログをクリアできませんでした。"
         },
         "WorktreeList": {
           "d880ea0744": "グループを作成し、このプロジェクトをそのグループに移動します。",

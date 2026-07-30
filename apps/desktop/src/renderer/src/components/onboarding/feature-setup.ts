@@ -1,6 +1,7 @@
 import {
   COMPUTER_USE_SKILL_NAME,
   YIRU_CLI_SKILL_NAME,
+  YIRU_DEBUG_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME,
   buildAgentFeatureSkillInstallCommand
 } from '@/lib/agent-feature-install-commands'
@@ -109,7 +110,9 @@ export function buildOnboardingFeatureSetupSkillCommand(
   if (skillNames.length === 0) {
     return null
   }
-  return buildAgentFeatureSkillInstallCommand(skillNames)
+  // Why: debug mode has no feature toggle of its own — it applies to every
+  // agent, so it rides along with whichever skills the user chose to install.
+  return buildAgentFeatureSkillInstallCommand([...skillNames, YIRU_DEBUG_SKILL_NAME])
 }
 
 export function onboardingFeatureSetupTelemetryFeature(

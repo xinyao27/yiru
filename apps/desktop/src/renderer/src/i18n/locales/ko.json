@@ -3169,7 +3169,14 @@
           "sleepWorkspaces": "워크스페이스 {{count}}개 절전",
           "deleteSelected": "선택 항목 삭제",
           "deleteOneWorkspace": "워크스페이스 1개 삭제",
-          "deleteWorkspaces": "워크스페이스 {{count}}개 삭제"
+          "deleteWorkspaces": "워크스페이스 {{count}}개 삭제",
+          "debugLogs": "디버그 로그",
+          "viewDebugLogs": "로그 보기",
+          "clearDebugLogs": "로그 지우기",
+          "noDebugLogs": "이 worktree에 디버그 로그가 없습니다.",
+          "debugLogsCleared": "디버그 로그를 지웠습니다.",
+          "viewDebugLogsFailed": "디버그 로그를 읽을 수 없습니다.",
+          "clearDebugLogsFailed": "디버그 로그를 지울 수 없습니다."
         },
         "WorktreeList": {
           "d880ea0744": "그룹을 만들고 이 프로젝트를 그룹으로 이동하세요.",

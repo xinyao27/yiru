@@ -3188,7 +3188,14 @@
           "sleepWorkspaces": "Suspender {{count}} espacios de trabajo",
           "deleteSelected": "Eliminar seleccionados",
           "deleteOneWorkspace": "Eliminar 1 espacio de trabajo",
-          "deleteWorkspaces": "Eliminar {{count}} espacios de trabajo"
+          "deleteWorkspaces": "Eliminar {{count}} espacios de trabajo",
+          "debugLogs": "Registros de depuración",
+          "viewDebugLogs": "Ver registros",
+          "clearDebugLogs": "Borrar registros",
+          "noDebugLogs": "No hay registros de depuración en este worktree.",
+          "debugLogsCleared": "Registros de depuración borrados.",
+          "viewDebugLogsFailed": "No se pudieron leer los registros de depuración.",
+          "clearDebugLogsFailed": "No se pudieron borrar los registros de depuración."
         },
         "WorktreeList": {
           "d880ea0744": "Crea un grupo y mueve este proyecto a él.",

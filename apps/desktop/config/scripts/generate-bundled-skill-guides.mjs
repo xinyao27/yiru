@@ -11,6 +11,7 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..')
 const CANONICAL_GUIDE_NAMES = [
   'computer-use',
   'yiru-cli',
+  'yiru-debug',
   'yiru-emulator',
   'yiru-emulator-android',
   'yiru-per-workspace-env',
@@ -22,6 +23,7 @@ const CANONICAL_GUIDE_NAMES = [
 const GUIDE_ALIASES = {
   'computer-use': [],
   'yiru-cli': [],
+  'yiru-debug': [],
   'yiru-emulator': [],
   'yiru-emulator-android': [],
   'yiru-per-workspace-env': [],
