@@ -1,5 +1,6 @@
 import { MobileGlassPressable } from '@/components/glass/pressable'
 import { ArrowSquareRight } from '@/components/uniwind-icons'
+import { translate } from '@/i18n/translate'
 
 type QuickCommandsTabButtonProps = {
   disabled: boolean
@@ -12,7 +13,7 @@ export function QuickCommandsTabButton({
 }: QuickCommandsTabButtonProps): React.JSX.Element {
   return (
     <MobileGlassPressable
-      accessibilityLabel="Quick commands"
+      accessibilityLabel={translate('mobile.session.quickCommands', 'Quick commands')}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       className="rounded-full"

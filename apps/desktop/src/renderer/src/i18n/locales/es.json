@@ -3179,7 +3179,15 @@
           "deleteWorktree": "Eliminar worktree",
           "makeCoworkingPrivate": "Hacer privado",
           "makeCoworkingPublic": "Hacer público",
-          "coworkingPrivateFailed": "No se pudo hacer privado este worktree."
+          "coworkingPrivateFailed": "No se pudo hacer privado este worktree.",
+          "create": "Crear",
+          "newGroupName": "Grupo de {{name}}",
+          "sleep": "Suspender",
+          "sleepOneWorkspace": "Suspender 1 espacio de trabajo",
+          "sleepWorkspaces": "Suspender {{count}} espacios de trabajo",
+          "deleteSelected": "Eliminar seleccionados",
+          "deleteOneWorkspace": "Eliminar 1 espacio de trabajo",
+          "deleteWorkspaces": "Eliminar {{count}} espacios de trabajo"
         },
         "WorktreeList": {
           "d880ea0744": "Crea un grupo y mueve este proyecto a él.",

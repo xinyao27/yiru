@@ -3160,7 +3160,15 @@
           "deleteWorktree": "删除工作树",
           "makeCoworkingPrivate": "设为私有",
           "makeCoworkingPublic": "设为公开",
-          "coworkingPrivateFailed": "无法将此 worktree 设为私有。"
+          "coworkingPrivateFailed": "无法将此 worktree 设为私有。",
+          "create": "创建",
+          "newGroupName": "{{name}} 组",
+          "sleep": "休眠",
+          "sleepOneWorkspace": "休眠 1 个工作区",
+          "sleepWorkspaces": "休眠 {{count}} 个工作区",
+          "deleteSelected": "删除所选",
+          "deleteOneWorkspace": "删除 1 个工作区",
+          "deleteWorkspaces": "删除 {{count}} 个工作区"
         },
         "WorktreeList": {
           "d880ea0744": "创建一个组并将该项目移入其中。",

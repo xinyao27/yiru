@@ -22,7 +22,7 @@ import { SelectedTextCopyMenu } from '../../selected-text-copy-menu'
 import { Button } from '../../ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../ui/hover-card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
-import { WORKTREE_NATIVE_CONTEXT_MENU_ATTR } from '../worktree-context-menu'
+import { WORKTREE_NATIVE_CONTEXT_MENU_ATTR } from '../worktree-context-menu/opening-policy'
 import { WorktreeCardDetailSection, WorktreeCardDetailSectionContent } from './detail-section'
 
 type WorktreeCardPortsProps = {
