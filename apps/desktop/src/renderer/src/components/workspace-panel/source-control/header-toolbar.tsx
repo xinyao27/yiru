@@ -36,7 +36,6 @@ type SourceControlHeaderToolbarProps = {
   isCreatePrIntentInFlight: boolean
   isCreatingPr: boolean
   onCreatePrHeaderClick: () => void
-  onOpenHostedReviewInChecks: () => void
   sourceControlViewMode: SourceControlViewMode
   viewModeToggleDisabled: boolean
   onToggleViewMode: () => void
@@ -53,11 +52,9 @@ type SourceControlHeaderToolbarProps = {
 
 function HostedReviewToolbarLink({
   review,
-  onOpenHostedReviewInChecks,
   compact
 }: {
   review: HostedReviewInfo
-  onOpenHostedReviewInChecks: () => void
   compact?: boolean
 }): React.JSX.Element {
   return (
@@ -68,10 +65,7 @@ function HostedReviewToolbarLink({
       )}
     >
       <HostedReviewIcon review={review} className="size-3 shrink-0" />
-      <HostedReviewHeaderLink
-        review={review}
-        onOpenHostedReviewInChecks={onOpenHostedReviewInChecks}
-      />
+      <HostedReviewHeaderLink review={review} />
     </div>
   )
 }
@@ -143,7 +137,6 @@ export function SourceControlHeaderToolbar({
   isCreatePrIntentInFlight,
   isCreatingPr,
   onCreatePrHeaderClick,
-  onOpenHostedReviewInChecks,
   sourceControlViewMode,
   viewModeToggleDisabled,
   onToggleViewMode,
@@ -207,10 +200,7 @@ export function SourceControlHeaderToolbar({
         {showCollapsedToolbar ? (
           <>
             {hostedReview ? (
-              <HostedReviewToolbarLink
-                review={hostedReview}
-                onOpenHostedReviewInChecks={onOpenHostedReviewInChecks}
-              />
+              <HostedReviewToolbarLink review={hostedReview} />
             ) : visibleCreatePrHeaderAction ? (
               <CreatePrHeaderButton
                 action={visibleCreatePrHeaderAction}

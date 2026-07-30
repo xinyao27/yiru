@@ -272,13 +272,6 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
       updateWorktreeMeta
     ]
   )
-  const openHostedReviewInChecks = useCallback(() => {
-    openWorkspacePanelTab({
-      panel: 'source-control',
-      worktreeId: activeWorktreeId,
-      sourceControlView: 'review'
-    })
-  }, [activeWorktreeId])
   const handleBranchChangedByPullRequestGeneration = useCallback(async (): Promise<void> => {
     // Why: AI PR detail generation may rebase before summarizing; if HEAD moved,
     // refresh status before letting the user submit the generated draft.
@@ -292,7 +285,6 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
     handleAbortOperationForConflict,
     runCompoundCommitAction,
     handlePullRequestCreated,
-    openHostedReviewInChecks,
     handleBranchChangedByPullRequestGeneration
   }
 }

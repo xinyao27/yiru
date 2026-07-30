@@ -2,7 +2,6 @@ import { GitMerge } from '@phosphor-icons/react'
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import React from 'react'
 
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 
 import { PullRequestIcon } from './checks-panel/content'
@@ -36,34 +35,13 @@ function hostedReviewLabel(review: HostedReviewInfo): string {
 }
 
 export function HostedReviewHeaderLink({
-  review,
-  onOpenHostedReviewInChecks
+  review
 }: {
   review: HostedReviewInfo
-  onOpenHostedReviewInChecks: () => void
 }): React.JSX.Element {
   const label = hostedReviewLabel(review)
   const className =
     'shrink-0 border-0 bg-transparent p-0 text-left font-medium leading-none text-foreground underline decoration-border underline-offset-2 opacity-80 hover:text-foreground hover:decoration-foreground'
-
-  if (review.provider === 'github' || review.provider === 'gitlab') {
-    return (
-      <Button
-        variant="ghost"
-        size="xs"
-        type="button"
-        className={cn('p-0 h-auto w-auto focus-visible:bg-accent', className)}
-        onClick={(e) => {
-          e.stopPropagation()
-          // Why: GitHub PR and GitLab MR details live in the Review view; keep
-          // the workspace workflow in-app instead of opening the browser.
-          onOpenHostedReviewInChecks()
-        }}
-      >
-        {label}
-      </Button>
-    )
-  }
 
   return (
     <a

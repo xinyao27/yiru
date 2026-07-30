@@ -51,7 +51,6 @@ export function SourceControlPanelHeader({
     isCreatingPr,
     isVisible,
     manualReviewUrl,
-    openHostedReviewInChecks,
     prGenerating,
     refreshBranchCompare,
     remoteStatus,
@@ -79,7 +78,6 @@ export function SourceControlPanelHeader({
         isCreatePrIntentInFlight={isCreatePrIntentInFlight}
         isCreatingPr={isCreatingPr || prGenerating}
         onCreatePrHeaderClick={handleCreatePrHeaderClick}
-        onOpenHostedReviewInChecks={openHostedReviewInChecks}
         sourceControlViewMode={sourceControlViewMode}
         viewModeToggleDisabled={settings === null}
         onToggleViewMode={handleToggleSourceControlViewMode}
