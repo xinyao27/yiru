@@ -7,6 +7,7 @@ import type {
   PtySpawnResult
 } from '../providers/types'
 import type { DaemonPtyAdapter } from './pty-adapter'
+import { probePtyOwners } from './pty-liveness-probe'
 
 export class DaemonPtyRouter implements IPtyProvider {
   private current: DaemonPtyAdapter
@@ -77,6 +78,10 @@ export class DaemonPtyRouter implements IPtyProvider {
       return routed.hasPty(id)
     }
     return this.current.hasPty(id) || this.legacy.some((adapter) => adapter.hasPty(id))
+  }
+
+  async probePtyLiveness(id: string): Promise<boolean | null> {
+    return await probePtyOwners(id, this.sessionAdapters.get(id), this.allAdapters())
   }
 
   write(id: string, data: string): void {

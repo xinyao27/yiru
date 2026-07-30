@@ -8,6 +8,7 @@ import type {
 } from '../providers/types'
 import { shutdownDegradedFallbackSessions } from './degraded-daemon-fallback-shutdown'
 import type { DaemonPtyAdapter } from './pty-adapter'
+import { probePtyOwners } from './pty-liveness-probe'
 
 type ManagedPtyProvider = IPtyProvider & {
   disconnectOnly?: () => Promise<void>
@@ -86,10 +87,11 @@ export class DegradedDaemonPtyProvider implements IPtyProvider {
 
   hasPty(id: string): boolean {
     const mapped = this.sessionProviders.get(id)
-    if (mapped) {
-      return mapped.hasPty?.(id) ?? true
-    }
-    return this.findProviderForExistingSession(id) !== null
+    return mapped ? (mapped.hasPty?.(id) ?? true) : this.findProviderForExistingSession(id) !== null
+  }
+
+  async probePtyLiveness(id: string): Promise<boolean | null> {
+    return await probePtyOwners(id, this.sessionProviders.get(id), this.allDaemonAdapters())
   }
 
   write(id: string, data: string): void {

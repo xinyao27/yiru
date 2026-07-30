@@ -40,6 +40,7 @@ export type LocalPtySessionMetadata = {
 
 export type PtyConnectResult = {
   id: string
+  isReattach?: boolean
   /** The requested session exited while it had no primary pane handler. Its
    *  buffered final data/exit were delivered, so callers must not fresh-spawn. */
   exitedBeforeAttach?: boolean

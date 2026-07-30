@@ -128,14 +128,17 @@ function stripTerminalControl(data: string): string {
   }
   const withoutAnsi = data.replace(ANSI_ESCAPE_RE, '').replace(INCOMPLETE_ANSI_ESCAPE_RE, '')
   let output = ''
+  let runStart = 0
   for (let index = 0; index < withoutAnsi.length; index += 1) {
     const code = withoutAnsi.charCodeAt(index)
     if ((code <= 0x1f && code !== 0x0a && code !== 0x0d) || (code >= 0x7f && code <= 0x9f)) {
-      continue
+      if (index > runStart) {
+        output += withoutAnsi.slice(runStart, index)
+      }
+      runStart = index + 1
     }
-    output += withoutAnsi[index]
   }
-  return output
+  return runStart === 0 ? withoutAnsi : output + withoutAnsi.slice(runStart)
 }
 
 function terminalControlMayAffectText(data: string): boolean {
@@ -250,11 +253,14 @@ function isIdlePromptText(context: StatusScanContext): boolean {
 
 export function createCommandCodeOutputStatusDetector(args: {
   startupCommand?: string | null
+  /** Why: a parked watcher starts after the banner left the buffer, so it needs live-turn continuity. */
+  inFlightTurn?: { prompt: string } | null
   onWorking: (prompt: string) => void
   onDone?: (prompt: string) => void
 }): CommandCodeOutputStatusDetector {
-  let hasSeenCommandCodeUi = isCommandCodeLaunchCommand(args.startupCommand)
-  let lastSubmittedPrompt = ''
+  let hasSeenCommandCodeUi =
+    isCommandCodeLaunchCommand(args.startupCommand) || Boolean(args.inFlightTurn)
+  let lastSubmittedPrompt = args.inFlightTurn?.prompt ?? ''
   let recentRawText = ''
 
   return {

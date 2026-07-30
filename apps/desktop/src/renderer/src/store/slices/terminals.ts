@@ -16,6 +16,7 @@ import type { StateCreator } from 'zustand'
 import { getFolderWorkspaceConnectionId } from '@/components/editor/folder-workspace-connection'
 import type { NativeChatLaunchPrompt } from '@/components/native-chat/launch-prompt'
 import { hasWorktreeSleepIntent } from '@/components/sidebar/worktree-sleep-intent'
+import { recordTerminalInputActivity } from '@/components/terminal-pane/input-activity-coalescing'
 import {
   normalizeTerminalLayoutSnapshot,
   resolvePtyBoundActiveLeafId
@@ -132,6 +133,7 @@ import {
   type TerminalTabCloseReason,
   type TerminalTabRetirementPlan
 } from './terminal-tab-retirement'
+import { buildByIdIndex, buildWorktreeByIdIndex } from './worktree-by-id-index'
 
 function getNextTerminalOrdinal(tabs: TerminalTab[]): number {
   const usedOrdinals = new Set<number>()
@@ -948,12 +950,30 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     if (!paneKey || !Number.isFinite(timestamp)) {
       return
     }
-    set((s) => ({
-      lastTerminalInputAtByPaneKey: {
-        ...s.lastTerminalInputAtByPaneKey,
-        [paneKey]: timestamp
+    recordTerminalInputActivity({
+      paneKey,
+      timestamp,
+      forceWrite: get().lastTerminalInputAtByPaneKey[paneKey] === undefined,
+      commit: {
+        insert: (key, at) =>
+          set((s) => ({
+            lastTerminalInputAtByPaneKey: { ...s.lastTerminalInputAtByPaneKey, [key]: at }
+          })),
+        refreshExisting: (entries) =>
+          set((s) => {
+            let next: Record<string, number> | null = null
+            for (const [key, at] of entries) {
+              const current = s.lastTerminalInputAtByPaneKey[key]
+              if (current === undefined || current >= at) {
+                continue
+              }
+              next ??= { ...s.lastTerminalInputAtByPaneKey }
+              next[key] = at
+            }
+            return next ? { lastTerminalInputAtByPaneKey: next } : {}
+          })
       }
-    }))
+    })
   },
 
   setCacheTimerStartedAt: (key, ts) => {
@@ -3309,11 +3329,12 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         runtimeHostIdByWorkspaceSessionKey: options?.runtimeHostIdByWorkspaceSessionKey ?? {},
         worktreesByRepo: s.worktreesByRepo
       })
-      const validWorktreeIds = new Set(
-        Object.values(runtimeSessionPlaceholders.worktreesByRepo)
-          .flat()
-          .map((worktree) => worktree.id)
+      const placeholderWorktrees = Object.values(runtimeSessionPlaceholders.worktreesByRepo).flat()
+      const placeholderWorktreeById = buildWorktreeByIdIndex(
+        runtimeSessionPlaceholders.worktreesByRepo
       )
+      const placeholderRepoById = buildByIdIndex(runtimeSessionPlaceholders.repos)
+      const validWorktreeIds = new Set(placeholderWorktrees.map((worktree) => worktree.id))
       const knownRepoIds = new Set(runtimeSessionPlaceholders.repos.map((r) => r.id))
       const repoIdsWithLoadedWorktrees = new Set(
         Object.entries(runtimeSessionPlaceholders.worktreesByRepo)
@@ -3396,11 +3417,9 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
           .filter(([, tabs]) => tabs.length > 0)
       )
 
-      const validTabIds = new Set(
-        Object.values(tabsByWorktree)
-          .flat()
-          .map((tab) => tab.id)
-      )
+      const allTabs = Object.values(tabsByWorktree).flat()
+      const tabById = buildByIdIndex(allTabs)
+      const validTabIds = new Set(allTabs.map((tab) => tab.id))
       const sleepingAgentSessionsByPaneKey = Object.fromEntries(
         Object.entries(session.sleepingAgentSessionsByPaneKey ?? {}).filter(([, record]) =>
           validWorktreeIds.has(record.worktreeId)
@@ -3477,12 +3496,8 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       // createOrAttach RPC, triggering reattach instead of a fresh spawn.
       const pendingReconnectPtyIdByTabId: Record<string, string> = {}
       for (const worktreeId of pendingReconnectWorktreeIds) {
-        const worktree = Object.values(runtimeSessionPlaceholders.worktreesByRepo)
-          .flat()
-          .find((entry) => entry.id === worktreeId)
-        const repo = worktree
-          ? runtimeSessionPlaceholders.repos.find((entry) => entry.id === worktree.repoId)
-          : null
+        const worktree = placeholderWorktreeById.get(worktreeId)
+        const repo = worktree ? placeholderRepoById.get(worktree.repoId) : null
         if (repo?.connectionId) {
           continue
         }
@@ -3582,7 +3597,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       if (activeWorktreeId) {
         nextEverActivated.add(activeWorktreeId)
       }
-
       return {
         activeRepoId,
         activeWorktreeId,
@@ -3616,11 +3630,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         // pair.
         worktreeNavHistory: activeWorktreeId ? [activeWorktreeId] : [],
         worktreeNavHistoryIndex: activeWorktreeId ? 0 : -1,
-        ptyIdsByTabId: Object.fromEntries(
-          Object.values(tabsByWorktree)
-            .flat()
-            .map((tab) => [tab.id, []] as const)
-        ),
+        ptyIdsByTabId: Object.fromEntries(allTabs.map((tab) => [tab.id, []] as const)),
         // Why: with the daemon backend, ptyIds are daemon session IDs that
         // survive app restart. Preserve ptyIdsByLeafId so that
         // reconnectPersistedTerminals can reattach each split-pane leaf
@@ -3632,9 +3642,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
               // Why: old sessions can contain renderer-local pane:1-style leaf
               // ids. Normalize during hydration before runtime/mobile surfaces read them.
               const normalized = normalizeTerminalLayoutSnapshot(layout).snapshot
-              const tab = Object.values(tabsByWorktree)
-                .flat()
-                .find((entry) => entry.id === tabId)
+              const tab = tabById.get(tabId)
               const sanitized = tab ? sanitizeTerminalLayoutPaneTitles(normalized, tab) : normalized
               const activeLeafId = sanitized.root
                 ? resolvePtyBoundActiveLeafId({
@@ -3694,12 +3702,12 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     // ptyId as a sentinel so connectPanePty knows to reattach.
     let reconnectedTabsByWorktree: Record<string, TerminalTab[]> | null = null
     let reconnectedPtyIdsByTabId: Record<string, string[]> | null = null
+    const worktreeById = buildWorktreeByIdIndex(get().worktreesByRepo)
+    const repoById = buildByIdIndex(get().repos)
     for (const worktreeId of ids) {
       const tabs = tabsByWorktree[worktreeId] ?? []
-      const worktree = Object.values(get().worktreesByRepo)
-        .flat()
-        .find((entry) => entry.id === worktreeId)
-      const repo = worktree ? get().repos.find((entry) => entry.id === worktree.repoId) : null
+      const worktree = worktreeById.get(worktreeId)
+      const repo = worktree ? (repoById.get(worktree.repoId) ?? null) : null
       // Why: SSH-backed tabs were previously always skipped because the SSH
       // connection wasn't re-established on startup. Now that we auto-reconnect
       // SSH targets before this loop runs, we allow deferred reattach when the
@@ -3792,15 +3800,13 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         )
       : {}
     for (const worktreeId of ids) {
-      const worktree = Object.values(get().worktreesByRepo)
-        .flat()
-        .find((entry) => entry.id === worktreeId)
+      const worktree = worktreeById.get(worktreeId)
       // Why: SSH worktrees aren't in worktreesByRepo at cold start (relay
       // discovery needs the connection). Fall back to the repo id embedded in
       // the composite worktree id so their sessions still reach the deferred
       // map — otherwise panes fresh-spawn into a missing PTY provider.
       const repoId = worktree?.repoId ?? getRepoIdFromWorktreeId(worktreeId)
-      const repo = repoId ? get().repos.find((entry) => entry.id === repoId) : null
+      const repo = repoId ? (repoById.get(repoId) ?? null) : null
       const connectionId = options?.directSshAuthority.targetId ?? repo?.connectionId
       if (!connectionId) {
         continue

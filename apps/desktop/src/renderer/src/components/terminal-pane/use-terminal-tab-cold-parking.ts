@@ -10,9 +10,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { TerminalTab } from '../../../../shared/types'
 import { useAppStore } from '../../store'
+import { getTerminalTabColdParkRecheckDelayMs } from './cold-park-deadlines'
+import { selectEvictionExemptTerminalTabIds } from './eviction-exempt-tabs'
 import {
-  getTerminalTabColdParkRecheckDelayMs,
   selectColdParkedTerminalTabs,
+  TERMINAL_TAB_COLD_PARK_DELAY_MS,
   type TerminalTabColdParkCandidate
 } from './terminal-hidden-view-parking'
 import {
@@ -45,6 +47,7 @@ export function useTerminalTabColdParking(args: {
   isWorktreeActive: boolean
   /** Worktree-level park verdict from terminal-workspace.tsx. */
   coldParkTerminalPanes: boolean
+  forceParkTerminalPanes: boolean
   /** Hidden-measuring startup probe from terminal-workspace.tsx — the panes must stay
    *  mounted for their first xterm fit, mirroring the worktree-level guard. */
   shouldMeasureHiddenWorktree: boolean
@@ -58,6 +61,7 @@ export function useTerminalTabColdParking(args: {
     assignments,
     isWorktreeActive,
     coldParkTerminalPanes,
+    forceParkTerminalPanes,
     shouldMeasureHiddenWorktree,
     activationDeferredMountTabIds
   } = args
@@ -65,7 +69,20 @@ export function useTerminalTabColdParking(args: {
   const terminalParkingEnabled = useAppStore(
     (state) => state.settings?.terminalHiddenViewParking !== false
   )
+  const terminalSshParkingEnabled = useAppStore(
+    (state) => state.settings?.terminalSshViewParking !== false
+  )
+  const terminalLayoutsByTabId = useAppStore((state) => state.terminalLayoutsByTabId)
+  const evictionExemptTerminalTabIds = useMemo(
+    () =>
+      forceParkTerminalPanes
+        ? selectEvictionExemptTerminalTabIds(worktreeId, terminalTabs, terminalLayoutsByTabId)
+        : new Set<string>(),
+    [forceParkTerminalPanes, terminalLayoutsByTabId, terminalTabs, worktreeId]
+  )
   const terminalTabHiddenSinceRef = useRef(new Map<string, number>())
+  const wasMeasuringHiddenWorktreeRef = useRef(false)
+  const measureParkCooldownUntilRef = useRef<number | null>(null)
   const terminalTabParkingTimersRef = useRef(new Map<string, number>())
   const [terminalTabParkingRevision, setTerminalTabParkingRevision] = useState(0)
   const [coldParkedTerminalTabIds, setColdParkedTerminalTabIds] = useState<ReadonlySet<string>>(
@@ -100,14 +117,29 @@ export function useTerminalTabColdParking(args: {
       }
     }
 
+    if (shouldMeasureHiddenWorktree) {
+      wasMeasuringHiddenWorktreeRef.current = true
+    } else {
+      if (wasMeasuringHiddenWorktreeRef.current) {
+        measureParkCooldownUntilRef.current = nowMs + TERMINAL_TAB_COLD_PARK_DELAY_MS
+      }
+      wasMeasuringHiddenWorktreeRef.current = false
+    }
+    if (isWorktreeActive) {
+      measureParkCooldownUntilRef.current = null
+    }
+
     const candidates: TerminalTabColdParkCandidate[] = terminalTabs.map((terminalTab) => {
       const assignment = assignments.get(terminalTab.id)
       const isVisible = Boolean(isWorktreeActive && assignment && assignment.isActiveInGroup)
-      // Why: hidden-measuring counts as visibility — the startup probe needs
-      // mounted panes, so the hidden clock must not run during it.
-      if (isVisible || shouldMeasureHiddenWorktree) {
+      // Why: measuring pauses the verdict but preserves an existing hidden
+      // clock; resetting it on each short background probe defeats the TTL.
+      if (isVisible) {
         terminalTabHiddenSinceRef.current.delete(terminalTab.id)
-      } else if (!terminalTabHiddenSinceRef.current.has(terminalTab.id)) {
+      } else if (
+        !shouldMeasureHiddenWorktree &&
+        !terminalTabHiddenSinceRef.current.has(terminalTab.id)
+      ) {
         terminalTabHiddenSinceRef.current.set(terminalTab.id, nowMs)
       }
       return {
@@ -124,7 +156,9 @@ export function useTerminalTabColdParking(args: {
       terminalTabs: candidates,
       pendingStartupByTabId,
       parkingEnabled: terminalParkingEnabled,
-      nowMs
+      nowMs,
+      parkCooldownUntilMs: measureParkCooldownUntilRef.current,
+      restorePolicy: { sshParkingEnabled: terminalSshParkingEnabled }
     })
     // Why: a tab the byte watchers cannot cover (no capture, no layout
     // snapshot, legacy leaf ids) must never park — it would go silent for
@@ -150,7 +184,8 @@ export function useTerminalTabColdParking(args: {
       const delayMs = getTerminalTabColdParkRecheckDelayMs({
         parkingEnabled: terminalParkingEnabled,
         hiddenSinceMs: candidate.hiddenSinceMs,
-        nowMs
+        nowMs,
+        parkCooldownUntilMs: measureParkCooldownUntilRef.current
       })
       if (delayMs !== null && delayMs > 0) {
         const tabId = candidate.id
@@ -167,6 +202,7 @@ export function useTerminalTabColdParking(args: {
     pendingStartupByTabId,
     shouldMeasureHiddenWorktree,
     terminalParkingEnabled,
+    terminalSshParkingEnabled,
     terminalTabParkingRevision,
     terminalTabs,
     worktreeId
@@ -180,7 +216,9 @@ export function useTerminalTabColdParking(args: {
       const assignment = assignments.get(terminalTab.id)
       const isVisible = Boolean(isWorktreeActive && assignment && assignment.isActiveInGroup)
       if (
-        (coldParkTerminalPanes || (!isVisible && coldParkedTerminalTabIds.has(terminalTab.id))) &&
+        ((coldParkTerminalPanes &&
+          (!forceParkTerminalPanes || !evictionExemptTerminalTabIds.has(terminalTab.id))) ||
+          (!isVisible && coldParkedTerminalTabIds.has(terminalTab.id))) &&
         // Why: the hidden-measuring startup probe needs mounted panes; gate
         // here too so the reveal lands in the same render that starts it.
         !shouldMeasureHiddenWorktree
@@ -202,6 +240,8 @@ export function useTerminalTabColdParking(args: {
     assignments,
     coldParkTerminalPanes,
     coldParkedTerminalTabIds,
+    evictionExemptTerminalTabIds,
+    forceParkTerminalPanes,
     activationDeferredMountTabIds,
     isWorktreeActive,
     shouldMeasureHiddenWorktree,

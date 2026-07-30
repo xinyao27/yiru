@@ -5,6 +5,8 @@ import { homedir } from 'node:os'
 import { join, basename } from 'node:path'
 import { createInterface } from 'node:readline'
 
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+
 import type { Repo } from '../../../shared/types'
 import { priceClaudeUsage } from './pricing'
 import type {
@@ -133,10 +135,6 @@ function getSortedWorktreeEntries(
   )
   sortedWorktreeEntriesByLookup.set(worktreeLookup, sorted)
   return sorted
-}
-
-async function yieldToEventLoop(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 0))
 }
 
 async function walkJsonlFiles(dirPath: string): Promise<string[]> {

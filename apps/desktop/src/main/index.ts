@@ -10,7 +10,6 @@ import { electronApp, is } from '@electron-toolkit/utils'
 import type { AgentStatusState } from '@yiru/workbench-model/agent'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type Tray } from 'electron'
-import * as QRCode from 'qrcode'
 
 import { resolveEnvironment } from '../shared/runtime-environment-store'
 import { getPreferredPairingOffer } from '../shared/runtime-environments'
@@ -39,6 +38,12 @@ import {
   removeManagedAgentHooks
 } from './agent-hooks/managed-agent-hook-controls'
 import { setMigrationUnsupportedPtyListener } from './agent-hooks/migration-unsupported-pty-state'
+import {
+  indexPersistedPaneKeyPtyIds,
+  isLocalExecutionHost,
+  resolveAgentWorkspaceExecutionHostId,
+  sweepRestoredSubagentsWithoutLiveAgent
+} from './agent-hooks/restored-subagent-liveness-sweep'
 import { agentHookServer } from './agent-hooks/server'
 import { wslHookRelayManager } from './agent-hooks/wsl-hook-relay-manager'
 import { applyAppIcon } from './app-icon'
@@ -96,7 +101,12 @@ import {
   type ExpectedTeardownScope
 } from './crash-reporting/process-gone-classification'
 import { recordProcessGoneCrash as recordProcessGoneCrashEvent } from './crash-reporting/process-gone-recorder'
-import { initDaemonPtyProvider, disconnectDaemon, shutdownDaemon } from './daemon/init'
+import {
+  initDaemonPtyProvider,
+  disconnectDaemon,
+  getDaemonProvider,
+  shutdownDaemon
+} from './daemon/init'
 import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe'
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/bridge'
@@ -734,6 +744,42 @@ ipcMain.handle(
   }
 )
 
+// Why: a PTY that dies while Yiru is down cannot clear its persisted hook state.
+async function reapRestoredSubagentsWithoutLiveAgent(): Promise<void> {
+  const currentStore = store
+  if (!currentStore) {
+    return
+  }
+  const provider = getDaemonProvider()
+  if (!provider) {
+    return
+  }
+  const persistedPtyIdByPaneKey = indexPersistedPaneKeyPtyIds(
+    currentStore.getWorkspaceSession().terminalLayoutsByTabId ?? {}
+  )
+  await sweepRestoredSubagentsWithoutLiveAgent({
+    probeLiveLocalPty: (ptyId) => provider.probePtyLiveness(ptyId),
+    isLocalExecutionHost: (worktreeId) =>
+      isLocalExecutionHost(
+        resolveAgentWorkspaceExecutionHostId(worktreeId, {
+          getRepo: (repoId) => currentStore.getRepo(repoId),
+          getWorktreeMeta: (resolvedWorktreeId) => currentStore.getWorktreeMeta(resolvedWorktreeId),
+          getFolderWorkspace: (folderWorkspaceId) =>
+            currentStore.getFolderWorkspace(folderWorkspaceId),
+          getProjectGroups: () => currentStore.getProjectGroups()
+        })
+      ),
+    getBoundPtyIdForPaneKey: getPtyIdForPaneKey,
+    getPersistedPtyIdForPaneKey: (paneKey) => persistedPtyIdByPaneKey.get(paneKey),
+    reap: (isLocalHost, isLocalPaneAgentLive, isLocalPaneLivenessEvidenceCurrent) =>
+      agentHookServer.reapRestoredClaudeSubagentsWithoutLiveAgent(
+        isLocalHost,
+        isLocalPaneAgentLive,
+        isLocalPaneLivenessEvidenceCurrent
+      )
+  })
+}
+
 function startTerminalRuntimeStartupServices(): Promise<void> {
   logStartupMilestone('first-window-startup-services-start')
   const startupServices = startFirstWindowStartupServices({
@@ -786,6 +832,9 @@ function startTerminalRuntimeStartupServices(): Promise<void> {
   })
   void localPtyStartupReady.then(() => {
     logStartupMilestone('local-pty-startup-ready')
+    void reapRestoredSubagentsWithoutLiveAgent().catch((error) => {
+      console.warn('[agent-hooks] restored-subagent liveness probe failed:', error)
+    })
   })
   return firstWindowStartupServicesReady
 }
@@ -1515,6 +1564,8 @@ function getBundledWebClientRoot(): string | undefined {
 }
 
 async function renderTerminalPairingQr(pairingUrl: string): Promise<string | null> {
+  // Why: mobile pairing is optional, so avoid parsing qrcode on every launch.
+  const QRCode = await import('qrcode')
   try {
     return await QRCode.toString(pairingUrl, { type: 'terminal', small: true })
   } catch {

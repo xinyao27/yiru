@@ -29,7 +29,10 @@ import {
 } from './close-identity'
 import { startParkedTerminalByteWatcher } from './parked-terminal-byte-watcher'
 import { subscribeToPtyExit } from './pty/dispatcher'
-import { isSnapshotBackedTerminalPty } from './terminal-hidden-view-parking'
+import {
+  isParkRestorableTerminalPty,
+  type TerminalParkRestorePolicy
+} from './terminal-hidden-view-parking'
 import { detachTerminalLayoutLeaf } from './terminal-layout-leaf-detach'
 
 // Why: re-exported so park wiring keeps one import surface; the registry
@@ -49,6 +52,12 @@ export type ParkableTerminalTabModel = Pick<TerminalTab, 'id' | 'ptyId'>
 export type ParkedTerminalPtyEligibility = (ptyId: string) => boolean
 
 const allowSnapshotBackedPty = (): boolean => true
+
+function parkRestorePolicyFromState(state: {
+  settings: { terminalSshViewParking?: boolean } | null
+}): TerminalParkRestorePolicy {
+  return { sshParkingEnabled: state.settings?.terminalSshViewParking !== false }
+}
 
 type ParkedPaneFallbackState = {
   terminalLayoutsByTabId: ReturnType<typeof useAppStore.getState>['terminalLayoutsByTabId']
@@ -84,7 +93,7 @@ export function fallbackParkedPaneCandidates(
 // Why: unmount captures and layout fallbacks must resolve identically for the
 // watcher start path and the park-eligibility coverage check, or a tab could
 // pass the check and then start with different (uncoverable) candidates.
-function resolveParkedTerminalPaneCandidates(
+export function resolveParkedTerminalPaneCandidates(
   tab: ParkableTerminalTabModel,
   state: ParkedPaneFallbackState
 ): ParkedTerminalPaneCapture[] {
@@ -112,14 +121,16 @@ export function canWatcherCoverParkedTerminalTab(
   // view has never mounted; ordinary parking can reattach a previously mounted v19 view.
   isPtyEligible: ParkedTerminalPtyEligibility = allowSnapshotBackedPty
 ): boolean {
-  const panes = resolveParkedTerminalPaneCandidates(tab, useAppStore.getState())
+  const state = useAppStore.getState()
+  const panes = resolveParkedTerminalPaneCandidates(tab, state)
+  const restorePolicy = parkRestorePolicyFromState(state)
   return (
     panes.length > 0 &&
     panes.every(
       (pane) =>
         pane.ptyId !== null &&
         isTerminalLeafId(pane.leafId) &&
-        isSnapshotBackedTerminalPty(pane.ptyId, worktreeId) &&
+        isParkRestorableTerminalPty(pane.ptyId, worktreeId, restorePolicy) &&
         isPtyEligible(pane.ptyId)
     )
   )
@@ -132,6 +143,7 @@ function startParkedTabWatchers(
 ): void {
   const state = useAppStore.getState()
   const panes = resolveParkedTerminalPaneCandidates(tab, state)
+  const restorePolicy = parkRestorePolicyFromState(state)
   const disposersByPtyId = new Map<string, () => void>()
   const paneIdByPtyId = new Map<string, number>()
   for (const pane of panes) {
@@ -144,7 +156,7 @@ function startParkedTabWatchers(
       !ptyId ||
       disposersByPtyId.has(ptyId) ||
       !isTerminalLeafId(pane.leafId) ||
-      !isSnapshotBackedTerminalPty(ptyId, worktreeId)
+      !isParkRestorableTerminalPty(ptyId, worktreeId, restorePolicy)
     ) {
       continue
     }

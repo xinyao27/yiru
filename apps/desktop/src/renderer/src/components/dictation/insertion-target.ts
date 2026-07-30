@@ -1,3 +1,5 @@
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+
 import {
   TEXT_CONTROL_PASTE_CHUNK_MAX_BYTES,
   TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,
@@ -179,8 +181,4 @@ function getNextDictationChunkBoundary(text: string, startIndex: number, maxByte
   }
 
   return index
-}
-
-function yieldToEventLoop(): Promise<void> {
-  return new Promise((resolve) => globalThis.setTimeout(resolve, 0))
 }

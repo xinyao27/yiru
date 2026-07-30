@@ -1,9 +1,13 @@
 import type { GitStatusEntry } from '../../../../../shared/types'
 
+// Why: resolving a collator for every O(n log n) comparison dominates large
+// changed-file projections.
+export const sourceControlPathCollator = new Intl.Collator(undefined, { numeric: true })
+
 export function compareGitStatusEntries(a: GitStatusEntry, b: GitStatusEntry): number {
   return (
     getConflictSortRank(a) - getConflictSortRank(b) ||
-    a.path.localeCompare(b.path, undefined, { numeric: true })
+    sourceControlPathCollator.compare(a.path, b.path)
   )
 }
 

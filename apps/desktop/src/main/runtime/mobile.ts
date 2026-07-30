@@ -1,7 +1,6 @@
 import { networkInterfaces } from 'node:os'
 
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
-import QRCode from 'qrcode'
 
 import type { RuntimeAccessGrant } from '../../shared/runtime-access-grants'
 import { isTailnetIPv4Address } from '../../shared/tailnet-address'
@@ -111,6 +110,8 @@ export function registerMobileHandlers(
         return { available: false as const }
       }
 
+      // Why: pairing is the only consumer, so keep qrcode off the launch path.
+      const { default: QRCode } = await import('qrcode')
       const qrDataUrl = await QRCode.toDataURL(offer.pairingUrl, {
         errorCorrectionLevel: 'M',
         margin: 2,

@@ -5,6 +5,7 @@ import * as path from 'node:path'
 
 import { isBinaryBuffer } from '../../shared/binary-buffer'
 import type { CommitMessageDraftContext } from '../../shared/commit-message/generation'
+import { readBranchCompareHead } from '../../shared/git/branch-compare-head'
 import { createGitConfigSnapshotRunner } from '../../shared/git/config-snapshot-runner'
 import { decodeGitCQuotedPath } from '../../shared/git/cquoted-path'
 import {
@@ -58,7 +59,7 @@ import {
 import type { GitRuntimeOptions } from './runtime-options'
 import { gitOptionsForWorktree } from './runtime-options'
 import { StatusPorcelainParser } from './status-porcelain-parser'
-import { hasWorktreeBaseCommitRef } from './worktree-base-ref-probe'
+import { resolveWorktreeBaseCommitOid } from './worktree-base-ref-probe'
 
 const MAX_GIT_SHOW_BYTES = 10 * 1024 * 1024
 const MAX_STAGED_COMMIT_CONTEXT_BYTES = MAX_GIT_SHOW_BYTES
@@ -1382,22 +1383,37 @@ export async function getBranchCompare(
     status: 'loading'
   }
 
-  const compareRef = await resolveCompareRef(worktreePath, options)
+  const reusableProbedOidByRef = new Map<string, string>()
+  const { compareRef, headOidResult, baseOidResult } = await readBranchCompareHead({
+    readCompareRef: () => resolveCompareRef(worktreePath, options),
+    resolveBaseRef: () =>
+      resolveWorktreeAddBaseRef(baseRef, async (qualifiedRef) => {
+        const oid = await resolveWorktreeBaseCommitOid(worktreePath, qualifiedRef, options)
+        // Why: remote-tracking refs can point at annotated tags; preserve their
+        // raw oid semantics and reuse only branch refs whose probe already peeled.
+        if (oid !== null && qualifiedRef.startsWith('refs/heads/')) {
+          reusableProbedOidByRef.set(qualifiedRef, oid)
+        }
+        return oid !== null
+      }),
+    readHeadOid: () => resolveRefOid(worktreePath, 'HEAD', options),
+    readBaseOid: (ref) => {
+      const reusableOid = reusableProbedOidByRef.get(ref)
+      return reusableOid === undefined
+        ? resolveRefOid(worktreePath, ref, options)
+        : Promise.resolve(reusableOid)
+    }
+  })
   summary.compareRef = compareRef
-  // Why: short remote display refs like "origin/main" can collide with a local
-  // branch of the same name. Compare against the proven remote-tracking ref.
-  const resolvedBaseRef = await resolveWorktreeAddBaseRef(baseRef, (qualifiedRef) =>
-    hasWorktreeBaseCommitRef(worktreePath, qualifiedRef, options)
-  )
 
   let headOid = ''
   let baseOid = ''
-  try {
-    headOid = await resolveRefOid(worktreePath, 'HEAD', options)
+  if (headOidResult.ok) {
+    headOid = headOidResult.oid
     summary.headOid = headOid
-  } catch {
-    try {
-      baseOid = await resolveRefOid(worktreePath, resolvedBaseRef, options)
+  } else {
+    if (baseOidResult.ok) {
+      baseOid = baseOidResult.oid
       summary.baseOid = baseOid
       // Why: new remote worktrees can be on an unborn branch until the first
       // commit. There are no committed branch changes yet; surfacing this as a
@@ -1406,9 +1422,6 @@ export async function getBranchCompare(
       summary.commitsAhead = 0
       summary.status = 'ready'
       return { summary, entries: [] }
-    } catch {
-      // Preserve the existing unborn-head message when even the base is not
-      // resolvable; callers cannot compare or present a useful empty state.
     }
     summary.status = 'unborn-head'
     summary.errorMessage =
@@ -1416,10 +1429,10 @@ export async function getBranchCompare(
     return { summary, entries: [] }
   }
 
-  try {
-    baseOid = await resolveRefOid(worktreePath, resolvedBaseRef, options)
+  if (baseOidResult.ok) {
+    baseOid = baseOidResult.oid
     summary.baseOid = baseOid
-  } catch {
+  } else {
     summary.status = 'invalid-base'
     summary.errorMessage = `Base ref ${baseRef} could not be resolved in this repository.`
     return { summary, entries: [] }

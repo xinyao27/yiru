@@ -4,6 +4,8 @@ import { readdir, realpath, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, isAbsolute, join, posix, win32 } from 'node:path'
 
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+
 import type { Repo } from '../../../shared/types'
 import Database from '../../sqlite/sync-database'
 import { canonicalizeUsageWorktreePaths } from '../../usage-worktree-canonicalizer'
@@ -127,10 +129,6 @@ export async function getProcessedDatabaseInfo(
     mtimeMs: dbStat.mtimeMs,
     size: dbStat.size
   }
-}
-
-async function yieldToEventLoop(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 0))
 }
 
 function getProjectJoin(db: Database.Database): string {

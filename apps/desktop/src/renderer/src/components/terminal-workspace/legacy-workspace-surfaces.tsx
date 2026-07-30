@@ -14,6 +14,7 @@ import type {
 import BrowserPane from '../browser-pane/browser-pane'
 import CodexRestartChip from '../codex-restart-chip'
 import type { OpenFile } from '../editor/state'
+import { selectEvictionExemptTerminalTabIds } from '../terminal-pane/eviction-exempt-tabs'
 import TerminalPane from '../terminal-pane/terminal-pane'
 import { shouldMountBackgroundWorktreeTab } from '../terminal/background-terminal-worktree-mount'
 
@@ -26,6 +27,7 @@ type LegacyWorkspaceSurfacesProps = {
   mountedWorktreeIdsRef: RefObject<Set<string>>
   measurableBackgroundWorktreeIdsRef: RefObject<Set<string>>
   parkedTerminalWorktreeIds: ReadonlySet<string>
+  forceParkedTerminalWorktreeIds: ReadonlySet<string>
   backgroundMountTabIdsByWorktreeRef: RefObject<Map<string, ReadonlySet<string>>>
   activeView: TopLevelView
   activeWorktreeId: string | null
@@ -51,6 +53,7 @@ export function LegacyWorkspaceSurfaces({
   mountedWorktreeIdsRef,
   measurableBackgroundWorktreeIdsRef,
   parkedTerminalWorktreeIds,
+  forceParkedTerminalWorktreeIds,
   backgroundMountTabIdsByWorktreeRef,
   activeView,
   activeWorktreeId,
@@ -89,6 +92,10 @@ export function LegacyWorkspaceSurfaces({
               !isVisible &&
               !shouldMeasureHiddenWorktree &&
               parkedTerminalWorktreeIds.has(workspace.id)
+            const terminalTabs = tabsByWorktree[workspace.id] ?? []
+            const evictionExemptTerminalTabIds = forceParkedTerminalWorktreeIds.has(workspace.id)
+              ? selectEvictionExemptTerminalTabIds(workspace.id, terminalTabs)
+              : null
             return (
               <div
                 key={workspace.id}
@@ -102,7 +109,7 @@ export function LegacyWorkspaceSurfaces({
                 aria-hidden={!isVisible}
               >
                 <CodexRestartChip isVisible={isVisible} worktreeId={workspace.id} />
-                {(tabsByWorktree[workspace.id] ?? [])
+                {terminalTabs
                   .filter((tab) =>
                     shouldMountBackgroundWorktreeTab(
                       backgroundMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null,
@@ -112,7 +119,7 @@ export function LegacyWorkspaceSurfaces({
                   .map((tab) => {
                     const isActiveTerminalTab =
                       isVisible && tab.id === activeTabId && activeTabType === 'terminal'
-                    if (shouldColdParkTerminalPanes) {
+                    if (shouldColdParkTerminalPanes && !evictionExemptTerminalTabIds?.has(tab.id)) {
                       return null
                     }
                     return (

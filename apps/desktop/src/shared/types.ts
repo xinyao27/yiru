@@ -1904,6 +1904,8 @@ export type GlobalSettings = {
    *  Defaults to true; `false` disables parking entirely.
    *  See docs/reference/terminal-hidden-view-parking.md. */
   terminalHiddenViewParking?: boolean
+  terminalSshViewParking?: boolean
+  terminalHiddenWorktreeRetentionBudget?: boolean
   /** Kill switch for main-process terminal side-effect authority: when true
    *  (default), local-daemon/SSH PTY title/bell/agent facts are consumed from
    *  the `pty:sideEffect` channel and renderer byte parsers stay unregistered

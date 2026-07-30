@@ -1,3 +1,5 @@
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
   iterateTerminalInputChunks
@@ -28,16 +30,12 @@ export type PtyInputWriteQueueDeps = {
   yieldBetweenWrites?: () => Promise<void>
 }
 
-function defaultYieldBetweenWrites(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0))
-}
-
 function isCoalescibleText(text: string): boolean {
   return text.length <= TERMINAL_INPUT_COALESCE_MAX_CODE_UNITS
 }
 
 export function createPtyInputWriteQueue(deps: PtyInputWriteQueueDeps): PtyInputWriteQueue {
-  const yieldBetweenWrites = deps.yieldBetweenWrites ?? defaultYieldBetweenWrites
+  const yieldBetweenWrites = deps.yieldBetweenWrites ?? yieldToEventLoop
   let pending: PendingPtyInputWrite[] = []
   let drainPromise: Promise<void> | null = null
 

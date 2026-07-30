@@ -274,13 +274,26 @@ async function consumeCompleteJsonlLines(args: {
 }): Promise<JsonlReadResult> {
   let consumedThrough = args.start
   let bytesRead = 0
-  let remainder: Buffer | null = null
+  // Why: repeatedly concatenating a huge unterminated JSONL record makes the
+  // carry quadratic. Keep pieces and join once when a newline arrives.
+  let remainderParts: Buffer[] = []
+  let remainderLength = 0
 
   const stream = createReadStream(args.path, { start: args.start, signal: args.signal })
   for await (const chunk of stream as AsyncIterable<Buffer>) {
     args.signal?.throwIfAborted()
     bytesRead += chunk.length
-    const data = remainder ? Buffer.concat([remainder, chunk]) : chunk
+    if (!chunk.includes(NEWLINE_BYTE)) {
+      remainderParts.push(chunk)
+      remainderLength += chunk.length
+      continue
+    }
+    const data =
+      remainderLength > 0
+        ? Buffer.concat([...remainderParts, chunk], remainderLength + chunk.length)
+        : chunk
+    remainderParts = []
+    remainderLength = 0
     let lineStart = 0
     let newlineIndex = data.indexOf(NEWLINE_BYTE, lineStart)
     while (newlineIndex !== -1) {
@@ -294,14 +307,18 @@ async function consumeCompleteJsonlLines(args: {
     }
     consumedThrough += lineStart
     // Copy the tail so retaining it doesn't pin the whole chunk buffer.
-    remainder = lineStart < data.length ? Buffer.from(data.subarray(lineStart)) : null
+    if (lineStart < data.length) {
+      remainderParts = [Buffer.from(data.subarray(lineStart))]
+      remainderLength = data.length - lineStart
+    }
   }
 
   args.signal?.throwIfAborted()
 
   return {
     consumedThrough,
-    trailingPartialLine: remainder && remainder.length > 0 ? remainder.toString('utf-8') : null,
+    trailingPartialLine:
+      remainderLength > 0 ? Buffer.concat(remainderParts, remainderLength).toString('utf-8') : null,
     bytesRead
   }
 }

@@ -164,7 +164,7 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
     workspaceSurfaces
   })
 
-  const { parkedTerminalWorktreeIds } = useTerminalColdParking({
+  const { parkedTerminalWorktreeIds, forceParkedTerminalWorktreeIds } = useTerminalColdParking({
     workspaceSurfaces,
     mountedWorktreeIdsRef,
     measurableBackgroundWorktreeIdsRef,
@@ -376,6 +376,7 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
                   isVisible={isVisible}
                   shouldMeasureHiddenWorktree={shouldMeasureHiddenWorktree}
                   shouldColdParkTerminalPanes={shouldColdParkTerminalPanes}
+                  forceParkTerminalPanes={forceParkedTerminalWorktreeIds.has(workspace.id)}
                   backgroundMountTabIds={
                     backgroundMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null
                   }
@@ -394,6 +395,7 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
           mountedWorktreeIdsRef={mountedWorktreeIdsRef}
           measurableBackgroundWorktreeIdsRef={measurableBackgroundWorktreeIdsRef}
           parkedTerminalWorktreeIds={parkedTerminalWorktreeIds}
+          forceParkedTerminalWorktreeIds={forceParkedTerminalWorktreeIds}
           backgroundMountTabIdsByWorktreeRef={backgroundMountTabIdsByWorktreeRef}
           activeView={activeView}
           activeWorktreeId={activeWorktreeId}

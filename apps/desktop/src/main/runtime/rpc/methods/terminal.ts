@@ -1,6 +1,5 @@
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 import { isTerminalQueryReply } from '@yiru/runtime-protocol/terminal-query-reply'
-import { measureClipboardTextByteLength } from '@yiru/workbench-model/ui'
 /* oxlint-disable max-lines -- Why: terminal RPC methods are co-located for discoverability; splitting would scatter related handlers across files. */
 import { z } from 'zod'
 
@@ -42,9 +41,18 @@ import {
   defineStreamingMethod,
   type RpcAnyMethod
 } from '../core'
+import {
+  iterateTerminalOutputFrameChunks,
+  type TerminalOutputFrameChunk,
+  type TerminalOutputMeta
+} from '../terminal-output-frame-chunks'
+import {
+  measureTerminalStreamByteLength,
+  terminalStreamByteLength,
+  terminalStreamByteLengthExceeds
+} from '../terminal-stream-byte-length'
 
 const REQUESTED_SNAPSHOT_BYTE_BUDGET = 2 * 1024 * 1024
-const TERMINAL_STREAM_CHUNK_BYTES = 48 * 1024
 const TERMINAL_OUTPUT_FLUSH_MS = 5
 // Why: output batches become binary stream payloads; byte size is the transport cost.
 const TERMINAL_OUTPUT_BATCH_MAX_BYTES = 64 * 1024
@@ -144,13 +152,6 @@ type TerminalOutputChunk = {
   meta?: TerminalOutputMeta
 }
 
-type TerminalOutputMeta = { seq?: number; rawLength?: number; cwd?: string }
-
-type TerminalOutputFrameChunk = {
-  bytes: Uint8Array<ArrayBufferLike>
-  seq?: number
-}
-
 function createTerminalOutputBatcher(onFlush: (data: string, meta?: TerminalOutputMeta) => void): {
   push: (data: string, meta?: TerminalOutputMeta) => void
   flush: () => void
@@ -227,75 +228,6 @@ function createTerminalOutputBatcher(onFlush: (data: string, meta?: TerminalOutp
       chunks = []
       bytes = 0
     }
-  }
-}
-
-function* iterateTerminalOutputFrameChunks(
-  data: string,
-  meta?: TerminalOutputMeta
-): Generator<TerminalOutputFrameChunk> {
-  if (!terminalStreamByteLengthExceeds(data, TERMINAL_STREAM_CHUNK_BYTES)) {
-    yield { bytes: encodeTerminalStreamText(data), seq: meta?.seq }
-    return
-  }
-  const rawLength = meta?.rawLength ?? data.length
-  const canPreserveChunkSeq = typeof meta?.seq === 'number' && rawLength === data.length
-  const shouldDelayFinalSeq = !canPreserveChunkSeq && typeof meta?.seq === 'number'
-  const startSeq = canPreserveChunkSeq ? meta.seq! - rawLength : undefined
-  let chunk = ''
-  let chunkBytes = 0
-  let chunkStartOffset = 0
-  let offset = 0
-  let delayedChunk: { text: string; seq?: number } | null = null
-
-  const takeChunk = (): { text: string; seq?: number } | null => {
-    if (!chunk) {
-      return null
-    }
-    const chunkSeq = canPreserveChunkSeq ? startSeq! + chunkStartOffset + chunk.length : undefined
-    const current = { text: chunk, seq: chunkSeq }
-    chunk = ''
-    chunkBytes = 0
-    chunkStartOffset = offset
-    return current
-  }
-
-  for (const part of data) {
-    const partBytes = terminalStreamByteLength(part)
-    if (chunkBytes > 0 && chunkBytes + partBytes > TERMINAL_STREAM_CHUNK_BYTES) {
-      const nextChunk = takeChunk()
-      if (nextChunk) {
-        if (shouldDelayFinalSeq) {
-          if (delayedChunk) {
-            yield { bytes: encodeTerminalStreamText(delayedChunk.text) }
-          }
-          delayedChunk = nextChunk
-        } else {
-          yield { bytes: encodeTerminalStreamText(nextChunk.text), seq: nextChunk.seq }
-        }
-      }
-    }
-    chunk += part
-    chunkBytes += partBytes
-    offset += part.length
-  }
-  const finalChunk = takeChunk()
-  if (shouldDelayFinalSeq) {
-    // Why: if a future caller reports rawLength that cannot be mapped back to
-    // UTF-16 offsets, only the final frame can safely carry the high-water mark.
-    if (finalChunk) {
-      if (delayedChunk) {
-        yield { bytes: encodeTerminalStreamText(delayedChunk.text) }
-      }
-      delayedChunk = finalChunk
-    }
-    if (delayedChunk) {
-      yield { bytes: encodeTerminalStreamText(delayedChunk.text), seq: meta.seq }
-    }
-    return
-  }
-  if (finalChunk) {
-    yield { bytes: encodeTerminalStreamText(finalChunk.text), seq: finalChunk.seq }
   }
 }
 
@@ -538,13 +470,6 @@ function trimPendingOutputToBudget(
   return { bytes: pendingOutputBytes, overflowed: omittedChunkCount > 0 }
 }
 
-function measureTerminalStreamByteLength(
-  data: string,
-  options: { stopAfterBytes?: number } = {}
-): { byteLength: number; exceededLimit: boolean } {
-  return measureClipboardTextByteLength(data, options)
-}
-
 function trimPendingOutputCoveredBySnapshot(
   pendingOutput: TerminalOutputChunk[],
   snapshotSeq: number | undefined
@@ -580,14 +505,6 @@ function trimPendingOutputCoveredBySnapshot(
     bytes += slicedBytes
   }
   return { chunks, bytes }
-}
-
-function terminalStreamByteLength(data: string): number {
-  return measureTerminalStreamByteLength(data).byteLength
-}
-
-function terminalStreamByteLengthExceeds(data: string, maxBytes: number): boolean {
-  return measureTerminalStreamByteLength(data, { stopAfterBytes: maxBytes }).exceededLimit
 }
 
 function* iterateTerminalStreamTextPayloads(data: string): Generator<Uint8Array<ArrayBufferLike>> {

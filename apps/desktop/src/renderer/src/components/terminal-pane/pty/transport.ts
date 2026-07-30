@@ -73,6 +73,10 @@ const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
 const SSH_PTY_CONNECTION_MISMATCH_MARKER = 'belongs to SSH connection'
 const STALE_TITLE_TIMEOUT = 3000 // ms before stale working title is cleared
 const MAX_PTY_SIDE_EFFECTS_PER_DRAIN = 64
+// Why: background timer throttling can drain only ~64 effects/s while agent
+// output queues hundreds/s; bound the compact-fact backlog for long hidden runs.
+const MAX_PENDING_PTY_SIDE_EFFECTS = 512
+const MAX_EVICTED_AGENT_STATUS_PAYLOAD_CARRY = 16
 
 // Why: onAgentStatus callback added to IpcPtyTransportOptions in pty-dispatcher
 // so the OSC 9999 status payloads can be forwarded to the store.
@@ -222,6 +226,34 @@ export function createPtyOutputProcessor({
     sideEffectDrainTimer = setTimeout(drainPtySideEffects, 0)
   }
 
+  function evictOldestPendingSideEffectsIfFull(): void {
+    while (pendingSideEffects.length - pendingSideEffectIndex >= MAX_PENDING_PTY_SIDE_EFFECTS) {
+      const evicted = pendingSideEffects[pendingSideEffectIndex]
+      if (!evicted) {
+        return
+      }
+      pendingSideEffectIndex += 1
+      pendingWorkingTitleSideEffects -= countWorkingTitles(evicted.titles)
+      if (pendingWorkingTitleSideEffects < 0) {
+        pendingWorkingTitleSideEffects = 0
+      }
+      const survivor = pendingSideEffects[pendingSideEffectIndex]
+      if (survivor) {
+        if (evicted.containsBell) {
+          survivor.containsBell = true
+        }
+        if (evicted.payloads.length > 0) {
+          const merged = evicted.payloads.concat(survivor.payloads)
+          survivor.payloads =
+            merged.length > MAX_EVICTED_AGENT_STATUS_PAYLOAD_CARRY
+              ? merged.slice(-MAX_EVICTED_AGENT_STATUS_PAYLOAD_CARRY)
+              : merged
+        }
+      }
+      compactPendingSideEffectsIfNeeded()
+    }
+  }
+
   function enqueuePtySideEffect(next: PendingPtySideEffect): void {
     const workingTitleCount = countWorkingTitles(next.titles)
     const prior = pendingSideEffects.at(-1)
@@ -241,6 +273,7 @@ export function createPtyOutputProcessor({
       pendingWorkingTitleSideEffects += workingTitleCount
       return
     }
+    evictOldestPendingSideEffectsIfFull()
     pendingSideEffects.push(next)
     pendingWorkingTitleSideEffects += workingTitleCount
   }
@@ -813,6 +846,7 @@ export function createIpcPtyTransport(opts: IpcPtyTransportOptions = {}): PtyTra
         if (spawnResult.isReattach || spawnResult.coldRestore || spawnResult.sessionExpired) {
           return {
             id: spawnResult.id,
+            ...(spawnResult.isReattach ? { isReattach: true } : {}),
             ...(resultLaunchAgent ? { launchAgent: resultLaunchAgent } : {}),
             ...(spawnResult.launchConfig ? { launchConfig: spawnResult.launchConfig } : {}),
             snapshot: spawnResult.snapshot,

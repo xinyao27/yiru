@@ -100,6 +100,7 @@ import { parseOsc7 } from './parse-osc7'
 import { connectPanePty } from './pty/connection'
 import type { PtyTransport } from './pty/transport'
 import { isPaneReplaying, type ReplayingPanesRef } from './replay-guard'
+import { canReleaseReplayedScrollbackFromStore } from './replayed-scrollback-release'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { seedStartupSessionRestoredBanner } from './session-restored-banner-pane-state'
 import { recordCreatedTerminalPaneSplit } from './split-completion'
@@ -1531,13 +1532,23 @@ export function useTerminalPaneLifecycle({
       replayingPanesRef,
       restoredViewportBlankingPanesRef
     )
-    if (restoredBuffers && initialLayoutRef.current.scrollbackRefsByLeafId) {
+    const hasScrollbackRefs = Boolean(initialLayoutRef.current.scrollbackRefsByLeafId)
+    if (
+      restoredBuffers &&
+      canReleaseReplayedScrollbackFromStore({
+        hasScrollbackRefs,
+        worktreeId,
+        repos: useAppStore.getState().repos
+      })
+    ) {
       const layoutWithoutRestoredBuffers = { ...initialLayoutRef.current }
       delete layoutWithoutRestoredBuffers.buffersByLeafId
-      initialLayoutRef.current = layoutWithoutRestoredBuffers
+      if (hasScrollbackRefs) {
+        initialLayoutRef.current = layoutWithoutRestoredBuffers
+      }
       if (initialLayoutHadBuffers) {
-        // Why: raw replay bytes belong only to this mount. Drop legacy hydrated
-        // copies from Zustand so normal session writes stay ref-only.
+        // Why: xterm owns these replayed bytes now; refs can rehydrate them and
+        // remote worktrees capture a fresh copy on the next force-park.
         useAppStore.getState().setTabLayout(tabId, layoutWithoutRestoredBuffers)
       }
     }

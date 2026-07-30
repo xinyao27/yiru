@@ -1,3 +1,5 @@
+import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+
 import type { GlobalSettings } from '../../../../../shared/types'
 import {
   BRACKETED_PASTE_END,
@@ -159,7 +161,7 @@ async function isSanitizedDraftPasteOverLimit(content: string, maxBytes: number)
       index += 1
     }
     if (index >= nextYieldAt) {
-      await yieldToAgentDraftPastePreflight()
+      await yieldToEventLoop()
       nextYieldAt = index + AGENT_DRAFT_PASTE_PREFLIGHT_YIELD_CODE_UNITS
     }
   }
@@ -185,10 +187,6 @@ function getUtf8ByteLengthForCodePoint(codePoint: number): number {
     return 3
   }
   return 4
-}
-
-function yieldToAgentDraftPastePreflight(): Promise<void> {
-  return new Promise((resolve) => globalThis.setTimeout(resolve, 0))
 }
 
 async function writeAgentDraftPtyInput(

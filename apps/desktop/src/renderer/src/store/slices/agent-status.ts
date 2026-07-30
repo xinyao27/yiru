@@ -22,6 +22,7 @@ import {
 import type { StateCreator } from 'zustand'
 
 import { isCompletedAgentWithLiveRecoveryRecord } from '@/components/settings/completed-agent-live-recovery-record'
+import { readLastTerminalInputAt } from '@/components/terminal-pane/input-activity-coalescing'
 import {
   getAgentRowGeneratedTitleText,
   getYiruDispatchTaskId,
@@ -539,7 +540,7 @@ function isValidManualSleepLiveAgentEntry(
   if (entry.interrupted === true || entry.state === 'done') {
     return false
   }
-  const lastInputAt = state.lastTerminalInputAtByPaneKey[entry.paneKey]
+  const lastInputAt = readLastTerminalInputAt(state.lastTerminalInputAtByPaneKey, entry.paneKey)
   if (
     typeof lastInputAt === 'number' &&
     Number.isFinite(lastInputAt) &&

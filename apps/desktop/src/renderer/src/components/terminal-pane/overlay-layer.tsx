@@ -272,6 +272,7 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
   worktreePath,
   isWorktreeActive,
   coldParkTerminalPanes = false,
+  forceParkTerminalPanes = false,
   shouldMeasureHiddenWorktree = false,
   backgroundMountTabIds = null,
   activationDeferredMountTabIds = null
@@ -280,6 +281,7 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
   worktreePath: string
   isWorktreeActive: boolean
   coldParkTerminalPanes?: boolean
+  forceParkTerminalPanes?: boolean
   shouldMeasureHiddenWorktree?: boolean
   /** Non-null for targeted background mounts: only these terminal tabs get a
    *  TerminalPane, so waking one slept agent does not connect every saved tab. */
@@ -353,6 +355,7 @@ const TerminalPaneOverlayLayer = memo(function TerminalPaneOverlayLayer({
     assignments,
     isWorktreeActive,
     coldParkTerminalPanes,
+    forceParkTerminalPanes,
     shouldMeasureHiddenWorktree,
     activationDeferredMountTabIds
   })

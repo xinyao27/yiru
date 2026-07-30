@@ -472,6 +472,18 @@ export class DaemonPtyAdapter implements IPtyProvider {
     return this.activeSessionIds.has(id)
   }
 
+  async probePtyLiveness(id: string): Promise<boolean | null> {
+    try {
+      const result = await this.client.request<{ size: { cols: number; rows: number } | null }>(
+        'getSize',
+        { sessionId: id }
+      )
+      return result.size !== null
+    } catch {
+      return null
+    }
+  }
+
   write(id: string, data: string): void {
     this.markSessionDirty(id)
     this.client.notify('write', { sessionId: id, data })
