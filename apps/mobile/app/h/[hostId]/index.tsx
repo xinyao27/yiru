@@ -763,7 +763,7 @@ export function HostScreen({
     },
     [persistViewSettings]
   )
-  const { sections, uniqueRepoColors } = useWorkspaceSections({
+  const { sections } = useWorkspaceSections({
     displayWorktrees,
     sortMode,
     filters,
@@ -886,7 +886,6 @@ export function HostScreen({
             }
             const isCollapsed = collapsedGroups.has(section.key)
             const isProjectSection = section.icon !== 'pin'
-            const repoSectionColor = isProjectSection ? uniqueRepoColors.get(section.title) : null
             const repoSectionIcon = isProjectSection ? repoIconsByName.get(section.title) : null
             const hasVisibleWorkspaces = isProjectSection && section.data.length > 0
             return (
@@ -908,11 +907,7 @@ export function HostScreen({
                     <Pin size={16} colorClassName="accent-muted-foreground" />
                   ) : null}
                   {isProjectSection ? (
-                    <MobileRepoIcon
-                      repoIcon={repoSectionIcon}
-                      size={20}
-                      color={repoSectionColor ?? undefined}
-                    />
+                    <MobileRepoIcon repoIcon={repoSectionIcon} size={20} />
                   ) : null}
                 </View>
                 <View className="min-w-0 flex-1">
@@ -946,7 +941,6 @@ export function HostScreen({
               isReadOnly={isReadOnly}
               now={now}
               status={getWorktreeStatus(item)}
-              repoColor={uniqueRepoColors.get(item.repo) ?? repoColor(item.repo)}
               repoIcon={repoIconsByName.get(item.repo) ?? null}
               hideRepo={section.icon !== 'pin'}
               nestedUnderProject={section.icon !== 'pin'}

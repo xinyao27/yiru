@@ -20,12 +20,6 @@ import { MobileRepoIcon } from './repo-icon'
 import { WorktreeAgentList } from './worktree-agent-list'
 import { WorktreeMetaGlyphs, prStateColorClasses } from './worktree-meta-glyphs'
 
-// Strip the refs/heads/ prefix for display, matching the desktop sidebar
-// (WorktreeCardHelpers.formatBranchName).
-function displayBranch(branch: string): string {
-  return branch.replace(/^refs\/heads\//, '')
-}
-
 // Minimal row shape needed for rendering — a structural subset of the screen's
 // Worktree so this component stays decoupled from the screen's local type.
 export type WorktreeListRowItem = {
@@ -76,7 +70,6 @@ type Props<T extends WorktreeListRowItem> = {
   item: T
   isReadOnly: boolean
   now: number
-  repoColor: string
   repoIcon?: RepoIcon | null
   // When the list is already grouped under this repo's section header, the row
   // omits its own repo icon+name to avoid the redundant "📁 yiru" on every row.
@@ -92,7 +85,6 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   item,
   isReadOnly,
   now,
-  repoColor,
   repoIcon,
   hideRepo = false,
   nestedUnderProject = false,
@@ -103,8 +95,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
 }: Props<T>) {
   const spacing4 = resolveCssNumber(useCSSVariable('--spacing-4'))
   const isFolderWorkspace = item.workspaceKind === 'folder-workspace'
-  const folderMeta = item.comment?.trim() || item.path || 'Folder'
-  const metaText = isFolderWorkspace ? folderMeta : displayBranch(item.branch)
+  const folderMeta = isFolderWorkspace ? item.comment?.trim() || item.path || 'Folder' : null
   const lineageDepth = Math.max(0, item.lineageDepth ?? 0)
   const lineageChildCount = item.lineageChildCount ?? 0
 
@@ -149,11 +140,7 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
 
       <View className="min-w-0 flex-1">
         <View className="min-h-5 flex-row items-center gap-1.5">
-          {!hideRepo ? (
-            <View className="border-border bg-accent h-4 w-4 items-center justify-center border">
-              <MobileRepoIcon repoIcon={repoIcon} size={14} color={repoColor} />
-            </View>
-          ) : null}
+          {!hideRepo ? <MobileRepoIcon repoIcon={repoIcon} size={16} /> : null}
           <Text
             className={cn(
               'shrink text-base leading-5',
@@ -170,11 +157,13 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             linkedGitLabMR={item.linkedGitLabMR}
           />
         </View>
-        <View className="min-h-4 flex-row items-center gap-1">
-          <Text className="text-muted-foreground shrink text-sm leading-4" numberOfLines={1}>
-            {metaText}
-          </Text>
-        </View>
+        {folderMeta ? (
+          <View className="min-h-4 flex-row items-center gap-1">
+            <Text className="text-muted-foreground shrink text-sm leading-4" numberOfLines={1}>
+              {folderMeta}
+            </Text>
+          </View>
+        ) : null}
         {/* Only agents get a secondary activity line, matching desktop. A plain
             terminal's shell-output tail is intentionally not surfaced here. */}
         {item.agents && item.agents.length > 0 ? (
