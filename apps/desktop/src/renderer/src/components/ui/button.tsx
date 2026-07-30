@@ -77,9 +77,9 @@ const buttonVariants = cva(
         'icon-sm': 'size-8',
         'icon-lg': 'size-10',
         // Why: titlebar controls share the row height while retaining compact horizontal rhythm.
-        'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-3.5",
-        'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-3.5",
-        'icon-titlebar-wide': "h-full w-9 [&_svg:not([class*='size-'])]:size-3.5"
+        'icon-titlebar': "h-full w-7 [&_svg:not([class*='size-'])]:size-4",
+        'icon-titlebar-compact': "h-full w-6 [&_svg:not([class*='size-'])]:size-4",
+        'icon-titlebar-wide': "h-full w-9 [&_svg:not([class*='size-'])]:size-4"
       }
     },
     defaultVariants: {
