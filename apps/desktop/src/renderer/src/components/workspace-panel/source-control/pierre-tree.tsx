@@ -1,19 +1,21 @@
-import { CONTEXT_MENU_TRIGGER_TYPE, type FileTreeRowDecoration } from '@pierre/trees'
+import { CONTEXT_MENU_TRIGGER_TYPE } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef } from 'react'
 
-import { translate } from '../../../i18n/i18n'
 import { joinPath } from '../../../lib/path'
 import { WORKSPACE_FILE_PATH_MIME } from '../../../lib/workspace-file-drag'
 import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from '../pierre-file-tree-theme'
 import type { SourceControlController } from './controller'
-import { SUBMODULE_WORKTREE_ONLY_LABEL } from './panel-constants'
 import {
   buildBranchPierreTreeData,
   buildUncommittedPierreTreeData,
   type SourceControlPierreTarget,
   type SourceControlPierreTreeData
 } from './pierre-tree-data'
+import {
+  getSourceControlPierreRowDecoration,
+  observeSourceControlPierreDecorations
+} from './pierre-tree-decoration'
 import { SourceControlPierreTreeMenu } from './pierre-tree-menu'
 import type { SourceControlDisplaySectionId } from './section-order'
 import { toPermanentSourceControlRowOpenEvent } from './split-open'
@@ -27,6 +29,21 @@ const SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS = `${PIERRE_FILE_TREE_UNSAFE_CSS}
   [data-file-tree-virtualized-scroll="true"] {
     overflow: visible !important;
     scrollbar-gutter: auto !important;
+  }
+  [data-item-section="decoration"] + [data-item-section="git"] {
+    margin-left: -2px;
+  }
+  [data-yiru-source-control-decoration] {
+    gap: 4px;
+  }
+  [data-yiru-source-control-decoration-part="added"] {
+    color: var(--trees-git-added-color);
+  }
+  [data-yiru-source-control-decoration-part="removed"] {
+    color: var(--trees-git-deleted-color);
+  }
+  [data-yiru-source-control-decoration-part="copied"] {
+    color: var(--git-decoration-copied);
   }
 `
 
@@ -46,64 +63,6 @@ function findTreeItemPath(event: React.SyntheticEvent<HTMLElement>): string | nu
     (entry): entry is HTMLElement => entry instanceof HTMLElement && entry.dataset.type === 'item'
   )
   return row?.dataset.itemPath ?? null
-}
-
-function getEntryDecoration(
-  target: Extract<SourceControlPierreTarget, { kind: 'uncommitted' | 'branch' }>,
-  commentCount: number
-): FileTreeRowDecoration | null {
-  const parts: string[] = []
-  if (target.kind === 'uncommitted' && target.entry.conflictStatus) {
-    parts.push(
-      target.entry.conflictStatus === 'unresolved'
-        ? translate('auto.components.right.sidebar.SourceControl.31f6d46278', 'Unresolved')
-        : translate('auto.components.right.sidebar.SourceControl.2c417432b7', 'Resolved locally')
-    )
-  }
-  if (
-    target.kind === 'uncommitted' &&
-    target.entry.submoduleRoot === undefined &&
-    target.entry.submodule?.commitChanged === false &&
-    (target.entry.submodule.trackedChanges || target.entry.submodule.untrackedChanges)
-  ) {
-    parts.push(SUBMODULE_WORKTREE_ONLY_LABEL)
-  }
-  if (commentCount > 0) {
-    parts.push(
-      translate(
-        'auto.components.right.sidebar.SourceControl.657e0c90ad',
-        '{{value0}} note{{value1}}',
-        { value0: commentCount, value1: commentCount === 1 ? '' : 's' }
-      )
-    )
-  }
-  if (typeof target.entry.added === 'number' && target.entry.added > 0) {
-    parts.push(`+${target.entry.added}`)
-  }
-  if (typeof target.entry.removed === 'number' && target.entry.removed > 0) {
-    parts.push(`-${target.entry.removed}`)
-  }
-  if (target.entry.status === 'copied') {
-    parts.push('C')
-  }
-  const text = parts.join('  ')
-  return text ? { text, title: parts.join(' · ') } : null
-}
-
-function getRowDecoration(
-  target: SourceControlPierreTarget | undefined,
-  controller: SourceControlController
-): FileTreeRowDecoration | null {
-  if (!target) {
-    return null
-  }
-  if (target.kind === 'placeholder') {
-    return { text: '', title: target.message }
-  }
-  if (target.kind === 'directory') {
-    return null
-  }
-  return getEntryDecoration(target, controller.diffCommentCountByPath.get(target.entry.path) ?? 0)
 }
 
 function getCanonicalParentPath(path: string): string {
@@ -164,6 +123,7 @@ function SourceControlPierreTree({
   data: SourceControlPierreTreeData
   selectedRowKeys: ReadonlySet<string>
 }): React.JSX.Element {
+  const treeHostId = useId()
   const callbacksRef = useRef({ controller, data })
   callbacksRef.current = { controller, data }
   const resettingRef = useRef(false)
@@ -203,7 +163,7 @@ function SourceControlPierreTree({
       canDrop: () => false
     },
     renderRowDecoration: ({ item }) =>
-      getRowDecoration(
+      getSourceControlPierreRowDecoration(
         callbacksRef.current.data.targetByCanonicalPath.get(item.path),
         callbacksRef.current.controller
       ),
@@ -218,6 +178,14 @@ function SourceControlPierreTree({
   useLayoutEffect(() => {
     model.setGitStatus(data.gitStatus)
   }, [data.gitStatus, model])
+
+  useLayoutEffect(() => {
+    const host = document.getElementById(treeHostId)
+    if (!(host instanceof HTMLElement)) {
+      return
+    }
+    return observeSourceControlPierreDecorations(host, data, controller)
+  }, [controller, data, treeHostId])
 
   useLayoutEffect(() => {
     const selectedPaths = new Set(selectedCanonicalPaths)
@@ -268,6 +236,7 @@ function SourceControlPierreTree({
 
   return (
     <FileTree
+      id={treeHostId}
       model={model}
       className="yiru-pierre-file-tree bg-sidebar block w-full"
       style={{ ...PIERRE_FILE_TREE_STYLE, height }}
