@@ -763,7 +763,7 @@ export function HostScreen({
     },
     [persistViewSettings]
   )
-  const { sections, rawSections, uniqueRepoColors } = useWorkspaceSections({
+  const { sections, uniqueRepoColors } = useWorkspaceSections({
     displayWorktrees,
     sortMode,
     filters,
@@ -885,8 +885,6 @@ export function HostScreen({
               return null
             }
             const isCollapsed = collapsedGroups.has(section.key)
-            const rawSection = rawSections.find((s) => s.key === section.key)
-            const count = rawSection?.data.length ?? 0
             const isProjectSection = section.icon !== 'pin'
             const repoSectionColor = isProjectSection ? uniqueRepoColors.get(section.title) : null
             const repoSectionIcon = isProjectSection ? repoIconsByName.get(section.title) : null
@@ -894,7 +892,7 @@ export function HostScreen({
             return (
               <Pressable
                 accessibilityRole="button"
-                className="mx-3 mt-3 min-h-11 flex-row items-center gap-2 px-2"
+                className="active:bg-accent mt-1 h-11 flex-row items-center gap-1.5 pr-2 pl-2.5"
                 onPress={() => toggleCollapsed(section.key)}
               >
                 <View className="relative h-11 w-5 items-center justify-center">
@@ -907,27 +905,29 @@ export function HostScreen({
                     </View>
                   ) : null}
                   {section.icon === 'pin' ? (
-                    <Pin size={16} colorClassName="accent-muted-foreground" />
+                    <Pin size={12} colorClassName="accent-muted-foreground" />
                   ) : null}
                   {isProjectSection ? (
                     <MobileRepoIcon
                       repoIcon={repoSectionIcon}
-                      size={20}
+                      size={16}
                       color={repoSectionColor ?? undefined}
                     />
                   ) : null}
                 </View>
-                <View className="min-w-0 flex-1 flex-row items-center gap-1">
-                  <Text className="text-foreground shrink text-sm" numberOfLines={1}>
+                <View className="min-w-0 flex-1">
+                  <Text
+                    className="text-foreground shrink text-[13px] leading-none font-semibold"
+                    numberOfLines={1}
+                  >
                     {section.title}
                   </Text>
-                  <Text className="text-muted-foreground text-sm">{count}</Text>
                 </View>
                 <View className="h-9 w-5 items-center justify-center">
                   {isCollapsed ? (
-                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+                    <ChevronRight size={12} colorClassName="accent-muted-foreground" />
                   ) : (
-                    <ChevronDown size={16} colorClassName="accent-muted-foreground" />
+                    <ChevronDown size={12} colorClassName="accent-muted-foreground" />
                   )}
                 </View>
               </Pressable>
@@ -943,7 +943,7 @@ export function HostScreen({
               colorsClassName="accent-muted-foreground"
             />
           }
-          renderItem={({ item, index, section }) => (
+          renderItem={({ item, section }) => (
             <WorktreeListRow
               item={item}
               isReadOnly={isReadOnly}
@@ -953,7 +953,6 @@ export function HostScreen({
               repoIcon={repoIconsByName.get(item.repo) ?? null}
               hideRepo={section.icon !== 'pin'}
               nestedUnderProject={section.icon !== 'pin'}
-              isLastProjectWorkspace={index === section.data.length - 1}
               onPress={openWorktreeSession}
               onLongPress={item.workspaceKind === 'folder-workspace' ? undefined : setActionTarget}
               onToggleLineage={(row) =>

@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native'
 import { useCSSVariable } from 'uniwind'
 
 import {
-  Bell,
+  BellSimple,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   GitMerge,
@@ -50,6 +50,28 @@ export type WorktreeListRowItem = {
 
 type WorktreeRollupStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 
+type WorkspaceLeadingStatusProps = {
+  branch: string
+  linkedPR: WorktreeListRowItem['linkedPR']
+  status: WorktreeRollupStatus
+}
+
+function WorkspaceLeadingStatus(props: WorkspaceLeadingStatusProps): React.JSX.Element {
+  const { branch, linkedPR, status } = props
+
+  if (status === 'working' || status === 'permission') {
+    return <AgentSpinner status={status} />
+  }
+  if (linkedPR) {
+    const colors = prStateColorClasses(linkedPR.state)
+    return <GitPullRequest size={13} colorClassName={colors.accent} />
+  }
+  if (branch.trim()) {
+    return <GitMerge size={13} colorClassName="accent-muted-foreground" />
+  }
+  return <AgentSpinner status={status} />
+}
+
 type Props<T extends WorktreeListRowItem> = {
   item: T
   isReadOnly: boolean
@@ -60,7 +82,6 @@ type Props<T extends WorktreeListRowItem> = {
   // omits its own repo icon+name to avoid the redundant "📁 yiru" on every row.
   hideRepo?: boolean
   nestedUnderProject?: boolean
-  isLastProjectWorkspace?: boolean
   status: WorktreeRollupStatus
   onPress: (item: T) => void
   onLongPress?: (item: T) => void
@@ -75,7 +96,6 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   repoIcon,
   hideRepo = false,
   nestedUnderProject = false,
-  isLastProjectWorkspace = false,
   status,
   onPress,
   onLongPress,
@@ -87,11 +107,14 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   const metaText = isFolderWorkspace ? folderMeta : displayBranch(item.branch)
   const lineageDepth = Math.max(0, item.lineageDepth ?? 0)
   const lineageChildCount = item.lineageChildCount ?? 0
-  const linkedPrColors = item.linkedPR ? prStateColorClasses(item.linkedPR.state) : null
 
   return (
     <Pressable
-      className={cn('mx-3 flex-row items-start gap-2 rounded-xl px-2 py-3', 'active:bg-accent')}
+      className={cn(
+        'flex-row items-start gap-1.5 py-1.5 pr-2 pl-2.5',
+        'active:bg-accent',
+        item.isActive && 'bg-accent'
+      )}
       style={
         lineageDepth > 0 && !nestedUnderProject
           ? { paddingLeft: spacing4 * (lineageDepth + 1) }
@@ -110,8 +133,8 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       delayLongPress={400}
     >
       {nestedUnderProject ? (
-        <View className="-my-3 w-5 items-center self-stretch">
-          <View className={cn('bg-border w-hairline', isLastProjectWorkspace ? 'h-6' : 'flex-1')} />
+        <View className="-my-1.5 w-5 items-center self-stretch">
+          <View className="bg-border w-hairline flex-1" />
         </View>
       ) : null}
 
@@ -123,57 +146,36 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
             : undefined
         }
       >
-        <View className="h-6 items-center justify-center">
-          <AgentSpinner status={status} />
+        <View className="h-5 items-center justify-center">
+          <WorkspaceLeadingStatus branch={item.branch} linkedPR={item.linkedPR} status={status} />
         </View>
       </View>
 
       <View className="min-w-0 flex-1">
-        <View className="min-h-6 flex-row items-center gap-2">
+        <View className="min-h-5 flex-row items-center gap-1.5">
+          {!hideRepo ? (
+            <View className="border-border bg-accent h-4 w-4 items-center justify-center border">
+              <MobileRepoIcon repoIcon={repoIcon} size={12} color={repoColor} />
+            </View>
+          ) : null}
           <Text
-            className={cn('text-foreground shrink text-base', isReadOnly && 'opacity-50')}
+            className={cn(
+              'shrink text-[13px] leading-5',
+              item.unread ? 'text-foreground font-semibold' : 'text-foreground/80',
+              isReadOnly && 'opacity-50'
+            )}
             numberOfLines={1}
           >
             {item.displayName || item.repo}
           </Text>
-          {item.linkedPR && (
-            <View className="bg-secondary flex-row items-center gap-1 rounded-full px-2 py-1">
-              <GitPullRequest size={14} colorClassName={linkedPrColors?.accent} />
-              <Text className={cn('text-muted-foreground text-sm', linkedPrColors?.text)}>
-                #{item.linkedPR.number}
-              </Text>
-            </View>
-          )}
-          {isFolderWorkspace && (
-            <View className="bg-secondary rounded-full px-2 py-1">
-              <Text className="text-muted-foreground text-xs">Folder</Text>
-            </View>
-          )}
           <WorktreeMetaGlyphs
             comment={item.comment}
             linkedPR={item.linkedPR?.number}
             linkedGitLabMR={item.linkedGitLabMR}
           />
         </View>
-        <View className="min-h-5 flex-row items-center gap-1">
-          {lineageDepth > 0 && (
-            <View className="bg-secondary flex-row items-center gap-1 rounded-full px-2 py-1">
-              <GitMerge size={14} colorClassName="accent-muted-foreground" />
-              <Text className="text-muted-foreground text-xs">Child</Text>
-            </View>
-          )}
-          {/* Repo glyph+name only when not already grouped under this repo;
-              MobileRepoIcon falls back to a Folder (matching desktop's default)
-              rather than a bare colored dot. */}
-          {!hideRepo && (
-            <>
-              <MobileRepoIcon repoIcon={repoIcon} size={14} color={repoColor} />
-              <Text className="text-muted-foreground max-w-24 text-sm" numberOfLines={1}>
-                {item.repo}
-              </Text>
-            </>
-          )}
-          <Text className="text-muted-foreground shrink text-sm" numberOfLines={1}>
+        <View className="min-h-4 flex-row items-center gap-1">
+          <Text className="text-muted-foreground shrink text-[11px] leading-none" numberOfLines={1}>
             {metaText}
           </Text>
         </View>
@@ -206,13 +208,8 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
 
       <View className="w-5 items-center">
         {item.unread ? (
-          <View className="h-6 items-center justify-center">
-            <Bell size={14} colorClassName="accent-amber-500" weight="fill" />
-          </View>
-        ) : null}
-        {item.liveTerminalCount > 0 ? (
           <View className="h-5 items-center justify-center">
-            <Text className="text-muted-foreground text-sm">{item.liveTerminalCount}</Text>
+            <BellSimple size={14} colorClassName="accent-amber-500" weight="fill" />
           </View>
         ) : null}
       </View>

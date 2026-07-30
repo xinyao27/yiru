@@ -24,6 +24,7 @@ export const ArrowsInLineVertical = withMobileIcon(Phosphor.ArrowsInLineVertical
 export const ArrowsOutLineVertical = withMobileIcon(Phosphor.ArrowsOutLineVertical)
 export const Bell = withMobileIcon(Phosphor.Bell)
 export const BellRinging = withMobileIcon(Phosphor.BellRinging)
+export const BellSimple = withMobileIcon(Phosphor.BellSimple)
 export const BracketsCurly = withMobileIcon(Phosphor.BracketsCurly)
 export const Briefcase = withMobileIcon(Phosphor.Briefcase)
 export const Buildings = withMobileIcon(Phosphor.Buildings)
