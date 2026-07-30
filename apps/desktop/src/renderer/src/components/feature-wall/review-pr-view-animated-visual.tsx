@@ -157,19 +157,21 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
 
         <div className="ravpr-card" data-pr-view-card>
           <SidebarTabs active="source-control" />
-          <div className="border-border flex h-7 shrink-0 border-y text-xs font-medium">
-            <span className="text-muted-foreground flex flex-1 items-center justify-center">
-              {translate(
-                'auto.components.workspace.panel.source.control.workspace.panel.changes',
-                'Changes'
-              )}
-            </span>
-            <span className="border-foreground text-foreground flex flex-1 items-center justify-center border-b-2">
-              {translate(
-                'auto.components.workspace.panel.source.control.workspace.panel.review',
-                'Review'
-              )}
-            </span>
+          <div className="border-border shrink-0 border-y p-1.5">
+            <div className="bg-muted flex h-7 p-0.5 text-xs font-medium">
+              <span className="text-muted-foreground flex flex-1 items-center justify-center">
+                {translate(
+                  'auto.components.workspace.panel.source.control.workspace.panel.changes',
+                  'Changes'
+                )}
+              </span>
+              <span className="bg-background text-foreground flex flex-1 items-center justify-center">
+                {translate(
+                  'auto.components.workspace.panel.source.control.workspace.panel.review',
+                  'Review'
+                )}
+              </span>
+            </div>
           </div>
           <div className="ravpr-body">
             <div className="ravpr-number-row">

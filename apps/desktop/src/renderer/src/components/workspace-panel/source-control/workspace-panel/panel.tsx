@@ -48,9 +48,8 @@ export default function SourceControlWorkspacePanel({
 
   return (
     <Tabs value={view} onValueChange={handleViewChange} className="h-full min-h-0 gap-0">
-      <div className="border-border shrink-0 border-b px-2">
+      <div className="border-border shrink-0 border-b p-2">
         <TabsList
-          variant="line"
           size="dense"
           className="w-full"
           aria-label={translate(
