@@ -8,6 +8,7 @@ const binaryPath = path.join(packagePath, '.build', 'release', 'yiru-computer-us
 const appPath = path.join(packagePath, '.build', 'release', 'Yiru Computer Use.app')
 const appExecutablePath = path.join(appPath, 'Contents', 'MacOS', 'yiru-computer-use-macos')
 const appIconPath = path.join(appPath, 'Contents', 'Resources', 'AppIcon.icns')
+const computerUseIconPath = path.join(packagePath, 'resources', 'app-icon.icns')
 const entitlementsPath = path.join(
   repoRoot,
   'resources',
@@ -41,7 +42,7 @@ function createHelperApp() {
   mkdirSync(path.dirname(appExecutablePath), { recursive: true })
   mkdirSync(path.join(appPath, 'Contents', 'Resources'), { recursive: true })
   copyFileSync(binaryPath, appExecutablePath)
-  copyFileSync(path.join(repoRoot, 'resources', 'build', 'icon.icns'), appIconPath)
+  copyFileSync(computerUseIconPath, appIconPath)
   chmodSync(appExecutablePath, 0o755)
   writeFileSync(path.join(appPath, 'Contents', 'Info.plist'), infoPlist(), 'utf8')
   const signer = spawnSync('codesign', codesignArgs(signingIdentity, appPath), { stdio: 'inherit' })
