@@ -161,7 +161,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             render={
               <Button
                 variant="ghost"
-                size="icon-xs"
+                size="icon-sm"
                 type="button"
                 aria-label={translate(
                   'auto.components.sidebar.SidebarSettingsHelpMenu.a428c25998',
@@ -170,7 +170,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                 className="text-muted-foreground"
                 onClick={openSettingsPage}
               >
-                <Settings className="size-3.5" />
+                <Settings className="size-4" />
               </Button>
             }
           />
@@ -196,7 +196,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                   render={
                     <Button
                       variant="ghost"
-                      size="icon-xs"
+                      size="icon-sm"
                       type="button"
                       aria-label={translate(
                         'auto.components.sidebar.SidebarSettingsHelpMenu.2991a0106c',
@@ -206,7 +206,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                       onPointerDown={(event) => revealAdminOptions(event.altKey)}
                       onClick={(event) => revealAdminOptions(event.altKey)}
                     >
-                      <CircleHelp className="size-3.5" />
+                      <CircleHelp className="size-4" />
                     </Button>
                   }
                 />

@@ -38,9 +38,10 @@ function revealCompactAgentCard(agentListRoot: HTMLElement | null): void {
   revealElementInScrollContainer(sidebarElement, worktreeOptionElement, 'auto')
 }
 
-type Props = {
+type WorktreeCardAgentsProps = {
   worktreeId: string
   agents?: DashboardAgentRowData[]
+  hasLeadingStatusIcon?: boolean
   /** Controls spacing from the card body above. Passed in so the parent can
    *  decide whether a divider is appropriate — e.g. suppressed when the card
    *  chrome already provides visual separation. */
@@ -55,11 +56,8 @@ type Props = {
  * Reuses useWorktreeAgentRows + DashboardAgentRow so row layout and the
  * derivation stay consistent with the inline agent activity on each card.
  */
-const WorktreeCardAgents = React.memo(function WorktreeCardAgents({
-  worktreeId,
-  agents: precomputedAgents,
-  className
-}: Props) {
+const WorktreeCardAgents = React.memo(function WorktreeCardAgents(props: WorktreeCardAgentsProps) {
+  const { worktreeId, agents: precomputedAgents, hasLeadingStatusIcon = false, className } = props
   const selectedAgents = useWorktreeAgentRows(worktreeId, precomputedAgents === undefined)
   const agents = precomputedAgents ?? selectedAgents
   if (agents.length === 0) {
@@ -68,20 +66,27 @@ const WorktreeCardAgents = React.memo(function WorktreeCardAgents({
   // Why: gate the 30s tick behind non-empty rows by mounting the inner body
   // only when there's something to show. The setInterval lives in the inner
   // component's useNow, so idle worktrees don't pay per-card timer cost.
-  return <WorktreeCardAgentsBody worktreeId={worktreeId} agents={agents} className={className} />
+  return (
+    <WorktreeCardAgentsBody
+      worktreeId={worktreeId}
+      agents={agents}
+      hasLeadingStatusIcon={hasLeadingStatusIcon}
+      className={className}
+    />
+  )
 })
 
-type BodyProps = {
+type WorktreeCardAgentsBodyProps = {
   worktreeId: string
   agents: DashboardAgentRowData[]
+  hasLeadingStatusIcon: boolean
   className?: string
 }
 
-const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
-  worktreeId,
-  agents,
-  className
-}: BodyProps) {
+const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody(
+  props: WorktreeCardAgentsBodyProps
+) {
+  const { worktreeId, agents, hasLeadingStatusIcon, className } = props
   const agentActivityDisplayMode =
     useAppStore((s) => s.agentActivityDisplayMode) ?? DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE
   const dropAgentStatus = useAppStore((s) => s.dropAgentStatus)
@@ -430,7 +435,11 @@ const WorktreeCardAgentsBody = React.memo(function WorktreeCardAgentsBody({
     return (
       <div
         ref={compactAgentListRootRef}
-        className={cn('-ms-2 mt-1 flex w-[calc(100%+0.5rem)] flex-col gap-0.5', className)}
+        className={cn(
+          'mt-1 flex flex-col gap-0.5',
+          hasLeadingStatusIcon ? '-ms-6 w-[calc(100%+1.5rem)]' : '-ms-2 w-[calc(100%+0.5rem)]',
+          className
+        )}
         onClick={stopBubble}
         onDoubleClick={stopBubble}
         onMouseDown={stopBubble}

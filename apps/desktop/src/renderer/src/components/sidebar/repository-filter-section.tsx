@@ -11,6 +11,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'
 import { searchRepos } from '@/lib/repo-search'
 import { useAppStore } from '@/store'
@@ -169,45 +170,47 @@ const SidebarRepositoryFilterSection = React.memo(function SidebarRepositoryFilt
           wrapperClassName="mx-1 border border-border/70 px-2"
           iconClassName="h-3.5 w-3.5"
         />
-        <CommandList className="max-h-40 py-1">
-          <CommandEmpty className="py-4 text-[11px]">
-            {hasRepoFilter
-              ? translate(
-                  'auto.components.sidebar.SidebarRepositoryFilterSection.bbbc6e8e3b',
-                  'No unselected projects match'
-                )
-              : translate(
-                  'auto.components.sidebar.SidebarRepositoryFilterSection.4815c70605',
-                  'No projects match'
-                )}
-          </CommandEmpty>
-          {availableRepos.map((repo) => (
-            <CommandItem
-              key={repo.id}
-              value={repo.id}
-              keywords={[repo.displayName, repo.path]}
-              onSelect={() => handleSelectRepo(repo.id)}
-              className="data-[selected=true]:bg-accent mx-1 my-0.5 items-center gap-2 px-2 py-1 text-[12px] leading-5 font-medium"
-            >
-              <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
-                <RepoBadgeLabel
-                  name={repo.displayName}
-                  color={repo.badgeColor}
-                  className="max-w-full"
-                />
-                {repo.connectionId && (
-                  <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
-                    <Server className="size-2.5" />
-                    {translate(
-                      'auto.components.sidebar.SidebarRepositoryFilterSection.2656053db4',
-                      'SSH'
-                    )}
-                  </span>
-                )}
-              </span>
-            </CommandItem>
-          ))}
-        </CommandList>
+        <ScrollArea className="h-40">
+          <CommandList className="max-h-none overflow-y-visible py-1">
+            <CommandEmpty className="py-4 text-[11px]">
+              {hasRepoFilter
+                ? translate(
+                    'auto.components.sidebar.SidebarRepositoryFilterSection.bbbc6e8e3b',
+                    'No unselected projects match'
+                  )
+                : translate(
+                    'auto.components.sidebar.SidebarRepositoryFilterSection.4815c70605',
+                    'No projects match'
+                  )}
+            </CommandEmpty>
+            {availableRepos.map((repo) => (
+              <CommandItem
+                key={repo.id}
+                value={repo.id}
+                keywords={[repo.displayName, repo.path]}
+                onSelect={() => handleSelectRepo(repo.id)}
+                className="data-[selected=true]:bg-accent mx-1 my-0.5 items-center gap-2 px-2 py-1 text-[12px] leading-5 font-medium"
+              >
+                <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
+                  <RepoBadgeLabel
+                    name={repo.displayName}
+                    color={repo.badgeColor}
+                    className="max-w-full"
+                  />
+                  {repo.connectionId && (
+                    <span className="bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-0.5 px-1 py-0.5 text-[9px] leading-none font-medium">
+                      <Server className="size-2.5" />
+                      {translate(
+                        'auto.components.sidebar.SidebarRepositoryFilterSection.2656053db4',
+                        'SSH'
+                      )}
+                    </span>
+                  )}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandList>
+        </ScrollArea>
       </Command>
     </>
   )

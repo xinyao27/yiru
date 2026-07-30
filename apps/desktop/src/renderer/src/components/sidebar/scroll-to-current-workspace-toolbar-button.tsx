@@ -12,8 +12,8 @@ export function ScrollToCurrentWorkspaceToolbarButton(): React.JSX.Element {
       <TooltipTrigger
         render={
           <Button
-            variant="ghost"
-            size="icon-xs"
+            variant="quiet"
+            size="icon-sm"
             type="button"
             aria-label={translate(
               'auto.components.sidebar.ScrollToCurrentWorkspaceToolbarButton.23989bb663',
@@ -21,7 +21,7 @@ export function ScrollToCurrentWorkspaceToolbarButton(): React.JSX.Element {
             )}
             onClick={requestScrollToCurrentWorkspaceReveal}
           >
-            <Crosshair className="size-3.5" />
+            <Crosshair className="size-4" />
           </Button>
         }
       />

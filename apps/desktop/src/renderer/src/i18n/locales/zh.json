@@ -3075,7 +3075,8 @@
           "automationCreated": "由自动化创建",
           "branchIdentity": "分支",
           "branchFolderPathIdentity": "分支或文件夹路径",
-          "ef18787206": "已排队删除"
+          "ef18787206": "已排队删除",
+          "unreadActivity": "Unread"
         },
         "WorktreeCardAgents": {
           "1b0a156717": "Agent"
@@ -3635,6 +3636,19 @@
           "3db0a2a593": "Cancel",
           "61d6f612cf": "Saving...",
           "2174f17011": "Save"
+        },
+        "DiscoveredWorktreesAlert": {
+          "statusOne": "Review 1 discovered worktree for {{value0}}",
+          "statusMany": "Review {{value0}} discovered worktrees for {{value1}}",
+          "descriptionOne": "Git found 1 worktree created outside Yiru. It is currently hidden from the workspace list.",
+          "descriptionMany": "Git found {{value0}} worktrees created outside Yiru. They are currently hidden from the workspace list.",
+          "title": "Discovered worktrees",
+          "moreOne": "1 more hidden worktree",
+          "moreMany": "{{value0}} more hidden worktrees",
+          "recoveryHint": "Keeping them hidden dismisses this notice. You can show them later from the project menu.",
+          "error": "Could not update discovered worktrees. Try again.",
+          "keepHidden": "Keep hidden",
+          "show": "Show in workspace list"
         }
       },
       "coworking": {

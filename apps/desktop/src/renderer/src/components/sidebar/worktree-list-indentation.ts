@@ -6,9 +6,9 @@ const PROJECT_WORKTREE_CARD_EXTRA_INDENT = 2
 // content pullback to that margin preserves the existing inner anchor.
 export const WORKTREE_CARD_SURFACE_MARGIN = 0
 export const FLUSH_CARD_CONTENT_PULLBACK = WORKTREE_CARD_SURFACE_MARGIN
-// Why: cards reserve a fixed status lane inside the padded content box; pull
-// the box back so title/meta text stay on the tree step.
-export const STATUS_LANE_EXTRA_PULLBACK = 6
+// Why: a trailing workspace status icon should not shift the title away from
+// the leading tree anchor that the former status column established.
+const STATUS_ICON_TITLE_ANCHOR_PULLBACK_PX = 6
 // Why: even at zero indent, flush-card content should not sit against the sidebar edge.
 export const FLUSH_CARD_MIN_CONTENT_INSET = 2
 // Why: pre-refactor level-1 lineage used the grouped card content step; keep
@@ -49,10 +49,24 @@ export function getWorktreeCardContentIndent(args: {
   return (groupSteps + clampDepth(args.lineageDepth)) * SIDEBAR_TREE_INDENT + projectCardIndent
 }
 
+export function getProjectWorktreeCardContentIndent(args: {
+  groupDepth: number
+  lineageDepth: number
+}): number {
+  // Why: the direct workspace icon aligns with its Project label, one tree step
+  // beyond the generic grouped-row anchor.
+  return (
+    getWorktreeCardContentIndent({
+      isGrouped: true,
+      groupDepth: args.groupDepth,
+      lineageDepth: args.lineageDepth
+    }) + SIDEBAR_TREE_INDENT
+  )
+}
+
 // Why: remote worktrees flatten into the same visual tier as a direct
 // worktree child of a Project, and their session rows share this anchor.
-export const DIRECT_PROJECT_WORKTREE_CONTENT_INDENT = getWorktreeCardContentIndent({
-  isGrouped: true,
+export const DIRECT_PROJECT_WORKTREE_CONTENT_INDENT = getProjectWorktreeCardContentIndent({
   groupDepth: 0,
   lineageDepth: 0
 })
@@ -66,7 +80,7 @@ export function getFolderBackedRepoWorktreeCardContentIndent(args: {
   return (
     getProjectGroupHeaderPaddingLeft(args.groupDepth) +
     PROJECT_GROUP_HEADER_BASE_PADDING +
-    clampDepth(args.lineageDepth) * SIDEBAR_TREE_INDENT
+    (clampDepth(args.lineageDepth) + 1) * SIDEBAR_TREE_INDENT
   )
 }
 
@@ -170,16 +184,17 @@ export function getWorktreeCardSurfaceInset(args: {
 
 export function getFlushWorktreeCardPaddingLeft(
   contentIndent: number,
-  applyStatusLaneOffset = false
+  preserveStatusIconTitleAnchor = false
 ): string {
   const pullback =
-    FLUSH_CARD_CONTENT_PULLBACK + (applyStatusLaneOffset ? STATUS_LANE_EXTRA_PULLBACK : 0)
+    FLUSH_CARD_CONTENT_PULLBACK +
+    (preserveStatusIconTitleAnchor ? STATUS_ICON_TITLE_ANCHOR_PULLBACK_PX : 0)
   return contentIndent > 0
     ? `max(${FLUSH_CARD_MIN_CONTENT_INSET}px, calc(${contentIndent}px - ${pullback}px))`
     : `${FLUSH_CARD_MIN_CONTENT_INSET}px`
 }
 
-export function getWorktreeCardParentContentMarginLeft(contentIndent: number): number {
+export function getWorktreeCardLeadingStatusMarginLeft(contentIndent: number): number {
   if (contentIndent <= 0) {
     return 0
   }
@@ -188,20 +203,19 @@ export function getWorktreeCardParentContentMarginLeft(contentIndent: number): n
     FLUSH_CARD_MIN_CONTENT_INSET,
     contentIndent - FLUSH_CARD_CONTENT_PULLBACK
   )
-  const statusLaneInnerPadding = Math.max(
+  const statusInnerPadding = Math.max(
     FLUSH_CARD_MIN_CONTENT_INSET,
-    contentIndent - FLUSH_CARD_CONTENT_PULLBACK - STATUS_LANE_EXTRA_PULLBACK
+    contentIndent - FLUSH_CARD_CONTENT_PULLBACK - STATUS_ICON_TITLE_ANCHOR_PULLBACK_PX
   )
-  const paddingShift = baseInnerPadding - statusLaneInnerPadding
-  const remainingShift = STATUS_LANE_EXTRA_PULLBACK - paddingShift
+  const paddingShift = baseInnerPadding - statusInnerPadding
+  const remainingShift = STATUS_ICON_TITLE_ANCHOR_PULLBACK_PX - paddingShift
   if (remainingShift <= 0) {
     return 0
   }
 
-  // Why: shallow rows hit the flush-card padding floor; finish the status-lane
-  // offset with margin, but never pull content past the card's inner edge.
-  const rawMargin = -remainingShift
-  return Math.max(-statusLaneInnerPadding, rawMargin)
+  // Why: shallow rows hit the flush-card padding floor; finish the status
+  // alignment with margin without pulling content past the card's inner edge.
+  return Math.max(-statusInnerPadding, -remainingShift)
 }
 
 export function getLineageNestedRowGeometry(): {

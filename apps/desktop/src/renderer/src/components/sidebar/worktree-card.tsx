@@ -20,6 +20,7 @@ import { activateWorktreeFromSidebar } from '@/components/sidebar/worktree-activ
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { UnreadStatusIndicator } from '@/components/unread-status-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { recordRendererCrashBreadcrumb } from '@/lib/crash-diagnostics'
@@ -71,7 +72,7 @@ import { getWorktreeCardTitleDisplay } from './worktree-card/title-display'
 import { WorktreeContextMenu } from './worktree-context-menu/menu'
 import {
   getFlushWorktreeCardPaddingLeft,
-  getWorktreeCardParentContentMarginLeft
+  getWorktreeCardLeadingStatusMarginLeft
 } from './worktree-list-indentation'
 import { WorktreeTitleInlineRename } from './worktree-title-inline-rename'
 
@@ -826,12 +827,12 @@ const WorktreeCard = React.memo(function WorktreeCard({
     []
   )
 
-  // Why: unread is part of the left status lane, so the Status display toggle
-  // owns both the dot/PR slot and unread emphasis. The persisted
+  // Why: unread is part of the workspace status cue, so the Status display
+  // toggle owns both the trailing icon and unread emphasis. The persisted
   // `worktree.isUnread` flag is unchanged; only the rendering changes.
   const showUnreadEmphasis = showStatus && worktree.isUnread
   const hoverReview = prDisplay
-  const statusLaneReview = statusPrDisplay ?? hoverReview
+  const workspaceStatusReview = statusPrDisplay ?? hoverReview
   const hoverComment = worktree.comment
   const metaAutomationProvenance = showAutomation ? worktree.automationProvenance : null
   const metaComment = showComment ? hoverComment : null
@@ -895,9 +896,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
   // carrying a persistent rebase chip while preserving other interruption cues.
   const showConflictOperationBadge =
     !!conflictOperation && conflictOperation !== 'unknown' && conflictOperation !== 'rebase'
-  // Why: unread is represented by the passive status-lane overlay; changing
-  // read state remains available from the card context menu.
-  const showCombinedStatusSlot = showStatus
+  // Why: the leading slot owns branch/review/activity identity; unread is a
+  // separate trailing bell so neither meaning obscures the other.
+  const hasLeadingStatusIcon = showStatus
   const showTitleRowIndicators = hasDetails || hasPorts
   const hasMetaRow = Boolean(
     showHostContextBadge ||
@@ -931,16 +932,13 @@ const WorktreeCard = React.memo(function WorktreeCard({
     : undefined
   // Why: sidebar rows need a small surface inset, while their content remains
   // aligned with the pre-inset layout and the repo header hierarchy.
-  const applyStatusLaneOffset = showCombinedStatusSlot
   const cardPaddingLeft = flushSurface
-    ? getFlushWorktreeCardPaddingLeft(contentIndent, applyStatusLaneOffset)
+    ? getFlushWorktreeCardPaddingLeft(contentIndent, hasLeadingStatusIcon)
     : contentIndent > 0
       ? `calc(0.125rem + ${contentIndent}px)`
       : null
   const parentContentMarginLeft =
-    flushSurface && applyStatusLaneOffset
-      ? getWorktreeCardParentContentMarginLeft(contentIndent)
-      : 0
+    flushSurface && hasLeadingStatusIcon ? getWorktreeCardLeadingStatusMarginLeft(contentIndent) : 0
   const cardStyle = cardPaddingLeft ? { paddingLeft: cardPaddingLeft } : undefined
   const detailsAndPortsContent =
     hasDetails || hasPorts ? (
@@ -978,7 +976,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
       }
       data-worktree-card-parent-content=""
     >
-      {showCombinedStatusSlot ? (
+      {hasLeadingStatusIcon ? (
         <div
           className={cn(
             'mr-1 flex w-5 shrink-0 items-center justify-center',
@@ -989,8 +987,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           <WorktreeCardStatusSlot
             worktreeId={worktree.id}
             showStatus={showStatus}
-            isUnread={worktree.isUnread}
-            prDisplay={statusLaneReview}
+            prDisplay={workspaceStatusReview}
             hasBranchIdentity={Boolean(branchIdentityDisplay)}
           />
         </div>
@@ -1085,8 +1082,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
               </RepoIdentityChip>
             )}
 
-            {/* Why: unread alert lives in the left status lane; weight plus dimmed
-                 read titles carry scan contrast in the title row. */}
+            {/* Why: unread remains visible in the trailing status icon; weight
+                 plus dimmed read titles carry scan contrast in the title row. */}
             <WorktreeTitleInlineRename
               displayName={visibleCardTitle}
               disabled={isDeleting || affiliateListMode}
@@ -1232,6 +1229,27 @@ const WorktreeCard = React.memo(function WorktreeCard({
               )}
             </div>
           )}
+
+          {showUnreadEmphasis ? (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span
+                    className="ml-auto inline-flex shrink-0 items-center justify-center"
+                    data-worktree-unread-indicator=""
+                  >
+                    <UnreadStatusIndicator />
+                    <span className="sr-only">
+                      {translate('auto.components.sidebar.WorktreeCard.unreadActivity', 'Unread')}
+                    </span>
+                  </span>
+                }
+              />
+              <TooltipContent side="right" sideOffset={8}>
+                {translate('auto.components.sidebar.WorktreeCard.unreadActivity', 'Unread')}
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
         </div>
 
         {hasMetaRow && (
@@ -1313,6 +1331,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           <WorktreeCardAgents
             worktreeId={worktree.id}
             agents={agentActivityDisplayMode === 'compact' ? compactInlineAgentRows : undefined}
+            hasLeadingStatusIcon={hasLeadingStatusIcon}
             className={
               hasMetaRow || remoteBranchConflict || coworkingControlGrants.length > 0
                 ? 'mt-0'

@@ -70,7 +70,10 @@ const SidebarNav = React.memo(function SidebarNav() {
         aria-current={homeActive ? 'page' : undefined}
         className={getSelectableControlStateClasses(homeActive)}
       >
-        <House className="size-4 shrink-0" strokeWidth={1.75} />
+        <House
+          className={cn('size-4 shrink-0', !homeActive && 'text-sidebar-foreground/30')}
+          strokeWidth={1.75}
+        />
         <span className="flex-1">
           {translate('auto.components.sidebar.SidebarNav.home', 'Home')}
         </span>

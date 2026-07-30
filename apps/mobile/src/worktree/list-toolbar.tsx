@@ -6,7 +6,6 @@ import {
   Plus,
   SlidersHorizontal,
   SidebarSimple as Sidebar,
-  Stack as Layers,
   TerminalWindow,
   UserCircle,
   X,
@@ -24,13 +23,11 @@ type MobileWorkspaceListToolbarProps = {
   canUseHost: boolean
   embedded: boolean
   floatingWorkspaceEnabled: boolean
-  groupLabel: string
   showSearch: boolean
   sortLabel: string
   onAccounts: () => void
   onFilter: () => void
   onFloatingWorkspace: () => void
-  onGroup: () => void
   onNewWorkspace: () => void
   onSearch: () => void
   onSort: () => void
@@ -157,13 +154,11 @@ export function MobileWorkspaceListToolbar({
   canUseHost,
   embedded,
   floatingWorkspaceEnabled,
-  groupLabel,
   showSearch,
   sortLabel,
   onAccounts,
   onFilter,
   onFloatingWorkspace,
-  onGroup,
   onNewWorkspace,
   onSearch,
   onSort
@@ -193,13 +188,6 @@ export function MobileWorkspaceListToolbar({
             icon={SlidersHorizontal}
             label={sortLabel}
             onPress={onSort}
-          />
-          <View className="bg-border w-hairline h-5" />
-          <ToolbarButton
-            accessibilityLabel={`Group by ${groupLabel}`}
-            icon={Layers}
-            label={groupLabel}
-            onPress={onGroup}
           />
         </View>
       </MobileGlassSurface>

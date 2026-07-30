@@ -59,6 +59,8 @@ type Props<T extends WorktreeListRowItem> = {
   // When the list is already grouped under this repo's section header, the row
   // omits its own repo icon+name to avoid the redundant "📁 yiru" on every row.
   hideRepo?: boolean
+  nestedUnderProject?: boolean
+  isLastProjectWorkspace?: boolean
   status: WorktreeRollupStatus
   onPress: (item: T) => void
   onLongPress?: (item: T) => void
@@ -72,6 +74,8 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   repoColor,
   repoIcon,
   hideRepo = false,
+  nestedUnderProject = false,
+  isLastProjectWorkspace = false,
   status,
   onPress,
   onLongPress,
@@ -88,7 +92,11 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
   return (
     <Pressable
       className={cn('mx-3 flex-row items-start gap-2 rounded-xl px-2 py-3', 'active:bg-accent')}
-      style={lineageDepth > 0 ? { paddingLeft: spacing4 * (lineageDepth + 1) } : undefined}
+      style={
+        lineageDepth > 0 && !nestedUnderProject
+          ? { paddingLeft: spacing4 * (lineageDepth + 1) }
+          : undefined
+      }
       disabled={isReadOnly}
       onPress={() => onPress(item)}
       onLongPress={
@@ -101,12 +109,22 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
       }
       delayLongPress={400}
     >
-      <View className="w-5">
+      {nestedUnderProject ? (
+        <View className="-my-3 w-5 items-center self-stretch">
+          <View className={cn('bg-border w-hairline', isLastProjectWorkspace ? 'h-6' : 'flex-1')} />
+        </View>
+      ) : null}
+
+      <View
+        className="w-5"
+        style={
+          lineageDepth > 0 && nestedUnderProject
+            ? { marginLeft: spacing4 * lineageDepth }
+            : undefined
+        }
+      >
         <View className="h-6 items-center justify-center">
           <AgentSpinner status={status} />
-        </View>
-        <View className="h-5 items-center justify-center">
-          {item.unread ? <Bell size={14} colorClassName="accent-amber-500" /> : null}
         </View>
       </View>
 
@@ -186,11 +204,18 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
         ) : null}
       </View>
 
-      {item.liveTerminalCount > 0 && (
-        <View className="h-6 w-5 items-center justify-center">
-          <Text className="text-muted-foreground text-sm">{item.liveTerminalCount}</Text>
-        </View>
-      )}
+      <View className="w-5 items-center">
+        {item.unread ? (
+          <View className="h-6 items-center justify-center">
+            <Bell size={14} colorClassName="accent-amber-500" weight="fill" />
+          </View>
+        ) : null}
+        {item.liveTerminalCount > 0 ? (
+          <View className="h-5 items-center justify-center">
+            <Text className="text-muted-foreground text-sm">{item.liveTerminalCount}</Text>
+          </View>
+        ) : null}
+      </View>
     </Pressable>
   )
 }

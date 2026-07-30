@@ -2,6 +2,8 @@ import React from 'react'
 
 import { cn } from '@/lib/class-names'
 
+import { ProjectWorkspaceRailStart } from './project-workspace-rail'
+
 type SidebarProjectHeaderIconProps = React.HTMLAttributes<HTMLDivElement> & {
   'data-repo-header-drag-handle'?: string
   'data-project-group-header-drag-handle'?: string
@@ -14,6 +16,7 @@ type SidebarProjectHeaderProps = React.HTMLAttributes<HTMLDivElement> & {
   iconProps?: SidebarProjectHeaderIconProps
   label: React.ReactNode
   labelAfter?: React.ReactNode
+  hasWorkspaceRail?: boolean
 }
 
 export const SidebarProjectHeader = React.forwardRef<HTMLDivElement, SidebarProjectHeaderProps>(
@@ -25,6 +28,7 @@ export const SidebarProjectHeader = React.forwardRef<HTMLDivElement, SidebarProj
       iconProps,
       label,
       labelAfter,
+      hasWorkspaceRail = false,
       children,
       className,
       style,
@@ -44,6 +48,7 @@ export const SidebarProjectHeader = React.forwardRef<HTMLDivElement, SidebarProj
         style={{ ...style, paddingLeft }}
         {...props}
       >
+        {hasWorkspaceRail ? <ProjectWorkspaceRailStart paddingLeftPx={paddingLeft} /> : null}
         {icon ? (
           <div
             className={cn(

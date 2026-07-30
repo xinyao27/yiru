@@ -11,6 +11,7 @@ catalog:
   '@electron/asar': ^3.4.1
   '@electron/rebuild': ^4.2.0
   '@floating-ui/dom': 1.7.6
+  '@legendapp/list': 3.3.3
   '@monaco-editor/react': ^4.7.0
   '@noble/hashes': 1.8.0
   '@parcel/watcher': ^2.5.6
