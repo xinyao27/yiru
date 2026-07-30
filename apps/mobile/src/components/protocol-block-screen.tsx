@@ -4,8 +4,8 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import { router } from 'expo-router'
 import { Linking, Platform, Text, View } from 'react-native'
 
+import { MobileContentSection } from './content-section'
 import { MobileGlassGroup } from './glass/group'
-import { MobileGlassSurface } from './glass/surface'
 import { MobileGlassTextButton } from './glass/text-button'
 
 type Props = {
@@ -31,7 +31,7 @@ export function ProtocolBlockScreen({ verdict }: Props) {
 
   return (
     <View className="bg-background flex-1 justify-center px-4">
-      <MobileGlassSurface className="rounded-3xl p-4">
+      <MobileContentSection className="rounded-3xl p-4">
         <Text className="text-foreground mb-2 text-sm font-bold">{title}</Text>
         <Text className="text-muted-foreground mb-4 text-sm leading-5">{body}</Text>
         {/* Why: mobile update channels differ by platform, while desktop
@@ -58,7 +58,7 @@ export function ProtocolBlockScreen({ verdict }: Props) {
           />
         </MobileGlassGroup>
         <Text className="text-muted-foreground mt-3 text-xs leading-5">{recoveryNote}</Text>
-      </MobileGlassSurface>
+      </MobileContentSection>
     </View>
   )
 }

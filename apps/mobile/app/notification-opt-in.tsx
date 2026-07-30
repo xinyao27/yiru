@@ -6,7 +6,6 @@ import { BellRinging as BellRing } from '@/components/uniwind-icons'
 import { SafeAreaView } from '@/components/uniwind-native-components'
 
 import { MobileGlassGroup } from '../src/components/glass/group'
-import { MobileGlassSurface } from '../src/components/glass/surface'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { ensureNotificationPermissions } from '../src/notifications/notifications'
@@ -62,9 +61,9 @@ export default function NotificationOptInScreen() {
         </View>
 
         <View className="grow items-center justify-center py-6">
-          <MobileGlassSurface className="mb-6 h-16 w-16 items-center justify-center rounded-3xl">
+          <View className="mb-6 h-16 w-16 items-center justify-center">
             <BellRing size={30} colorClassName="accent-foreground" />
-          </MobileGlassSurface>
+          </View>
           <Text className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
             Notifications
           </Text>

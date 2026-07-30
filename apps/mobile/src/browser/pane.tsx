@@ -1168,7 +1168,7 @@ export function MobileBrowserPane({
               <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
             {error ? (
-              <MobileGlassSurface className="overflow-hidden rounded-xl px-3 py-2">
+              <MobileGlassSurface className="overflow-hidden rounded-xl px-3 py-2" isFunctional>
                 <Text className="text-foreground text-center text-xs">{error}</Text>
               </MobileGlassSurface>
             ) : null}

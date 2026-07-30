@@ -23,7 +23,7 @@ function MobileSessionTabLabel({
   active
 }: Pick<MobileSessionTabButtonProps, 'tab' | 'active'>) {
   const agentId = tab.type === 'terminal' ? resolveMobileTerminalTabAgentId(tab) : null
-  const iconColorClassName = active ? 'accent-primary-foreground' : 'accent-muted-foreground'
+  const iconColorClassName = active ? 'accent-foreground' : 'accent-muted-foreground'
   return (
     <View className="max-w-full flex-row items-center gap-1">
       {tab.type === 'browser' ? <Globe size={16} colorClassName={iconColorClassName} /> : null}
@@ -33,7 +33,7 @@ function MobileSessionTabLabel({
       <Text
         className={
           active
-            ? 'text-primary-foreground shrink text-sm font-semibold'
+            ? 'text-foreground shrink text-sm font-semibold'
             : 'text-muted-foreground shrink text-sm'
         }
         numberOfLines={1}
@@ -54,7 +54,7 @@ export function MobileSessionTabButton({
   return (
     <MobileGlassSurface
       className="overflow-hidden rounded-full"
-      fallbackClassName={active ? 'border-transparent bg-primary' : undefined}
+      fallbackClassName={active ? 'border-ring bg-accent' : undefined}
       isInteractive
       onLayout={onLayout}
       tintColorClassName={active ? 'accent-primary' : undefined}

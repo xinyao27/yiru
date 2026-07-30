@@ -117,6 +117,8 @@ design defect, not a discretionary styling choice.
 
 - A custom header uses `MobileGlassHeader`. A functional container uses `MobileGlassSurface` with
   `isFunctional`; a tappable or focusable surface uses `isInteractive`.
+- `MobileGlassSurface` requires one of those intents explicitly at compile time. Content grouping
+  uses `MobileContentSection`; omitting the intent is not an opaque-card shortcut.
 - Standalone actions use `MobileGlassIconButton`, `MobileGlassTextButton`, or
   `MobileGlassPressable`. Do not recreate Glass with blur, opacity, a border, or a background class.
 - Two or more controls with the same task scope always live in one `MobileGlassGroup` with an 8pt

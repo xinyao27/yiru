@@ -3,9 +3,9 @@ import { Stack, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Platform, Text, View } from 'react-native'
 
+import { MobileContentSection } from '@/components/content-section'
 import { MobileGlassIconButton } from '@/components/glass/icon-button'
 import { MobileGlassSegmentedControl } from '@/components/glass/segmented-control'
-import { MobileGlassSurface } from '@/components/glass/surface'
 import { MobileGlassTextButton } from '@/components/glass/text-button'
 
 import { triggerError, triggerSuccess } from '../platform/haptics'
@@ -290,16 +290,16 @@ export function MobileAgentSessionHistoryPanel({
             <MobileAgentHistorySearchControl onChangeText={setQuery} value={query} />
           </View>
           {issues.length > 0 ? (
-            <MobileGlassSurface className="mx-3 mt-2 rounded-xl p-2">
+            <MobileContentSection className="mx-3 mt-2 rounded-xl p-2">
               <Text className="text-xs text-amber-500">
                 {issues.length} {issues.length === 1 ? 'transcript' : 'transcripts'} skipped
               </Text>
-            </MobileGlassSurface>
+            </MobileContentSection>
           ) : null}
           {resumeMessage ? (
-            <MobileGlassSurface className="mx-3 mt-2 rounded-xl p-2">
+            <MobileContentSection className="mx-3 mt-2 rounded-xl p-2">
               <Text className="text-muted-foreground text-xs">{resumeMessage}</Text>
-            </MobileGlassSurface>
+            </MobileContentSection>
           ) : null}
           {sections.length === 0 ? (
             <View className={styles.state}>

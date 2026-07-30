@@ -13,7 +13,7 @@ import { useMobilePrTitleAction, type MobilePrTitleAction } from '../session/pr/
 import type { MobileGitStatusResult } from '../source-control/git-status'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
-import { MobileGlassSurface } from './glass/surface'
+import { MobileContentSection } from './content-section'
 import { MobileGlassTextButton } from './glass/text-button'
 import { prSidebarRenderBranch } from './pr-sidebar-presentation'
 import { PrSidebarCreateEmptyState } from './pr-sidebar/create-empty-state'
@@ -291,7 +291,7 @@ function PrSidebarSections({
   // duplicate blocks (badge row, title, branches, then another action band).
   return (
     <>
-      <MobileGlassSurface className={styles.section}>
+      <MobileContentSection className={styles.section}>
         <View className={styles.sectionBody}>
           <PRSidebarHeader
             pr={data.pr}
@@ -308,7 +308,7 @@ function PrSidebarSections({
             onUnlinked={refetch}
           />
         </View>
-      </MobileGlassSurface>
+      </MobileContentSection>
       {/* Own titled section when present; null otherwise (no empty chrome). */}
       <PRConflictingFilesSection pr={data.pr} triage={conflictsTriage} />
       <PRReviewersSection

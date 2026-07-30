@@ -7,18 +7,34 @@ import { useMobileGlassAvailable } from './availability'
 
 const UniwindGlassView = withUniwind(GlassView)
 
-type MobileGlassSurfaceProps = Omit<
+type MobileGlassSurfaceBaseProps = Omit<
   GlassViewProps,
   'colorScheme' | 'glassEffectStyle' | 'isInteractive' | 'ref' | 'tintColor'
 > & {
   className?: string
   fallbackClassName?: string
-  forceFallback?: boolean
-  isFunctional?: boolean
-  isInteractive?: boolean
   tintColor?: string
   tintColorClassName?: string
 }
+
+type MobileGlassSurfaceIntentProps =
+  | {
+      forceFallback: true
+      isFunctional?: boolean
+      isInteractive?: boolean
+    }
+  | {
+      forceFallback?: false
+      isFunctional: true
+      isInteractive?: boolean
+    }
+  | {
+      forceFallback?: false
+      isFunctional?: boolean
+      isInteractive: boolean
+    }
+
+type MobileGlassSurfaceProps = MobileGlassSurfaceBaseProps & MobileGlassSurfaceIntentProps
 
 export function MobileGlassSurface({
   className,

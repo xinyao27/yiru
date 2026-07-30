@@ -2,16 +2,14 @@ import { View, Text } from 'react-native'
 
 import { TerminalWindow as SquareTerminal } from '@/components/uniwind-icons'
 
-import { MobileGlassSurface } from './glass/surface'
-
 // Empty detail pane shown beside the worktree-list sidebar on wide
 // tablet/foldable layouts until the user opens a workspace.
 export function WorkspaceDetailPlaceholder() {
   return (
     <View className="bg-background flex-1 items-center justify-center px-6">
-      <MobileGlassSurface className="mb-4 h-14 w-14 items-center justify-center rounded-3xl">
+      <View className="mb-4 h-14 w-14 items-center justify-center">
         <SquareTerminal size={28} colorClassName="accent-muted-foreground" />
-      </MobileGlassSurface>
+      </View>
       <Text className="text-foreground mb-1 text-sm font-semibold">No workspace open</Text>
       <Text className="text-muted-foreground max-w-80 text-center text-xs">
         Pick a workspace from the sidebar to open its terminal here.

@@ -48,6 +48,7 @@ import { normalizeBrowserUrl } from '../../../../src/browser/url'
 import { ActionSheetModal } from '../../../../src/components/action-sheet-modal'
 import { MobileAgentIcon } from '../../../../src/components/agent-icon'
 import { ConfirmModal } from '../../../../src/components/confirm-modal'
+import { MobileContentSection } from '../../../../src/components/content-section'
 import {
   CustomKeyModal,
   loadCustomKeys,
@@ -327,7 +328,10 @@ function MarkdownReader({
           ]}
         >
           {statusText ? (
-            <MobileGlassSurface className="max-w-full self-end overflow-hidden rounded-xl px-2 py-1">
+            <MobileGlassSurface
+              className="max-w-full self-end overflow-hidden rounded-xl px-2 py-1"
+              isFunctional
+            >
               <Text
                 className={cn(
                   'text-muted-foreground text-xs',
@@ -455,7 +459,7 @@ function DiffLineRow({
       {comments.length > 0 ? (
         <View className="mt-1 mr-2 ml-11 gap-1">
           {comments.map((comment) => (
-            <MobileGlassSurface key={comment.id} className="rounded-xl px-2 py-1">
+            <MobileContentSection key={comment.id} className="rounded-xl px-2 py-1">
               <View className="mb-1 flex-row items-center gap-1">
                 <MessageSquare size={12} colorClassName="accent-muted-foreground" />
                 <Text className="text-muted-foreground flex-1 text-xs font-semibold">
@@ -470,7 +474,7 @@ function DiffLineRow({
                 />
               </View>
               <Text className="text-foreground text-xs leading-5">{comment.body}</Text>
-            </MobileGlassSurface>
+            </MobileContentSection>
           ))}
         </View>
       ) : null}
@@ -4606,7 +4610,10 @@ export default function SessionScreen() {
         <View className="flex-1 flex-row" onLayout={handleSessionContentRowLayout}>
           <View className="min-w-0 flex-1">
             {createWarning ? (
-              <MobileGlassSurface className="mx-3 mt-2 flex-row items-start gap-2 rounded-xl px-3 py-2">
+              <MobileGlassSurface
+                className="mx-3 mt-2 flex-row items-start gap-2 rounded-xl px-3 py-2"
+                isFunctional
+              >
                 <AlertTriangle size={16} colorClassName="accent-amber-500" />
                 <Text className="text-foreground flex-1 text-xs leading-4">{createWarning}</Text>
                 <MobileGlassIconButton
