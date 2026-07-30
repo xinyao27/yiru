@@ -29,25 +29,27 @@ type ToolbarIconButtonProps = {
   disabled?: boolean
   icon: Icon
   onPress: () => void
+  size?: 'large' | 'regular'
 }
 
 function ToolbarIconButton({
   accessibilityLabel,
   disabled = false,
   icon: Icon,
-  onPress
+  onPress,
+  size = 'regular'
 }: ToolbarIconButtonProps): React.JSX.Element {
   return (
     <MobileGlassPressable
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
-      className="h-9 w-9 rounded-full"
+      className={size === 'large' ? 'h-11 w-11 rounded-full' : 'h-9 w-9 rounded-full'}
       contentClassName="h-full w-full items-center justify-center rounded-full"
       disabled={disabled}
       hitSlop={4}
       onPress={onPress}
     >
-      <Icon size={18} colorClassName="accent-muted-foreground" />
+      <Icon size={size === 'large' ? 20 : 18} colorClassName="accent-muted-foreground" />
     </MobileGlassPressable>
   )
 }
@@ -109,6 +111,7 @@ export function MobileWorkspaceListToolbar({
           disabled={!canUseHost}
           icon={TerminalWindow}
           onPress={onFloatingWorkspace}
+          size="large"
         />
       ) : null}
       <View className="flex-1">
@@ -125,6 +128,7 @@ export function MobileWorkspaceListToolbar({
           disabled={!canUseHost}
           icon={TerminalWindow}
           onPress={onFloatingWorkspace}
+          size="large"
         />
       ) : null}
     </MobileGlassGroup>

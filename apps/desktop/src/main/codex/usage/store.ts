@@ -18,13 +18,19 @@ import type {
 } from '../../../shared/codex-usage-types'
 import type { Store } from '../../persistence'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '../../usage-worktree-metadata'
+import { migrateCodexUsageEventKey } from './event-key'
 import { priceCodexAggregateUsage } from './pricing'
 import { createWorktreeRefs, scanCodexUsageFiles } from './scanner'
-import type { CodexUsagePersistedState } from './types'
+import type {
+  CodexUsageDailyAggregate,
+  CodexUsagePersistedFile,
+  CodexUsagePersistedState,
+  CodexUsageSession
+} from './types'
 
-// Why: v6 persists request-level value so full-request long-context pricing is
-// selected before daily/model aggregation. Older aggregates cannot recover it.
-const SCHEMA_VERSION = 6
+// Why: v7 restores the v5 ownership identity so v5/v6 can migrate without
+// discarding their token snapshot or rescanning the complete rollout history.
+const SCHEMA_VERSION = 7
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 
@@ -58,6 +64,9 @@ function getDefaultState(): CodexUsagePersistedState {
 }
 
 export function normalizePersistedState(state: CodexUsagePersistedState): CodexUsagePersistedState {
+  if (state.schemaVersion === 5 || state.schemaVersion === 6) {
+    return migratePersistedState(state)
+  }
   if (state.schemaVersion !== SCHEMA_VERSION) {
     // Why: schema changes affect dedupe, attribution, or request-level pricing.
     // Reusing an older cache would silently serve wrong analytics until a
@@ -83,6 +92,78 @@ export function normalizePersistedState(state: CodexUsagePersistedState): CodexU
       ...session,
       locationModelBreakdown: session.locationModelBreakdown ?? []
     }))
+  }
+}
+
+function migratePersistedState(state: CodexUsagePersistedState): CodexUsagePersistedState {
+  const migratedFiles = state.processedFiles.flatMap((file) => {
+    const migrated = migratePersistedFile(file, state.schemaVersion)
+    return migrated ? [migrated] : []
+  })
+  return {
+    ...state,
+    schemaVersion: SCHEMA_VERSION,
+    processedFiles: migratedFiles,
+    sessions: state.sessions.map(normalizeSession),
+    dailyAggregates: state.dailyAggregates.map(normalizeDailyAggregate),
+    scanState: {
+      ...state.scanState,
+      enabled: true
+    }
+  }
+}
+
+function migratePersistedFile(
+  file: CodexUsagePersistedFile,
+  schemaVersion: number
+): CodexUsagePersistedFile | null {
+  if (schemaVersion === 5) {
+    return {
+      ...file,
+      sessions: file.sessions.map(normalizeSession),
+      dailyAggregates: file.dailyAggregates.map(normalizeDailyAggregate)
+    }
+  }
+  const ownedEventKeys: string[] = []
+  for (const eventKey of file.ownedEventKeys) {
+    const migrated = migrateCodexUsageEventKey(eventKey, schemaVersion)
+    if (!migrated) {
+      return null
+    }
+    ownedEventKeys.push(migrated)
+  }
+  return {
+    ...file,
+    sessions: file.sessions.map(normalizeSession),
+    dailyAggregates: file.dailyAggregates.map(normalizeDailyAggregate),
+    ownedEventKeys
+  }
+}
+
+function normalizeSession(session: CodexUsageSession): CodexUsageSession {
+  return {
+    ...session,
+    locationModelBreakdown: session.locationModelBreakdown ?? []
+  }
+}
+
+function normalizeDailyAggregate(aggregate: CodexUsageDailyAggregate): CodexUsageDailyAggregate {
+  if (
+    (typeof aggregate.estimatedCostUsd === 'number' || aggregate.estimatedCostUsd === null) &&
+    typeof aggregate.unpricedTokens === 'number'
+  ) {
+    return aggregate
+  }
+  const estimatedCostUsd = priceCodexAggregateUsage(
+    aggregate.model,
+    aggregate.inputTokens,
+    aggregate.cachedInputTokens,
+    aggregate.outputTokens
+  )
+  return {
+    ...aggregate,
+    estimatedCostUsd,
+    unpricedTokens: estimatedCostUsd === null ? aggregate.totalTokens : 0
   }
 }
 

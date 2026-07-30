@@ -45,6 +45,10 @@ const RUBBER_BAND_FACTOR = 0.25
 const SHOW_DURATION = 180
 export const BOTTOM_DRAWER_HIDE_DURATION_MS = 150
 const TOP_SCROLL_EPSILON = 1
+const BOTTOM_DRAWER_GLASS_APPEARANCE = {
+  fallbackClassName: 'bg-popover',
+  tintColorClassName: 'accent-popover'
+}
 
 type Props = {
   visible: boolean
@@ -324,6 +328,7 @@ function MountedBottomDrawer({
             ]}
           >
             <MobileGlassSurface
+              {...BOTTOM_DRAWER_GLASS_APPEARANCE}
               className="absolute inset-0 rounded-t-3xl"
               isFunctional
               pointerEvents="none"
@@ -389,6 +394,7 @@ function MountedBottomDrawer({
               </>
             )}
             <MobileGlassSurface
+              {...BOTTOM_DRAWER_GLASS_APPEARANCE}
               className="absolute top-full right-0 left-0 h-screen"
               isFunctional
               pointerEvents="none"

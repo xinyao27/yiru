@@ -26,6 +26,7 @@ import {
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import { ConfirmModal } from '../src/components/confirm-modal'
+import { MobileContentSection } from '../src/components/content-section'
 import { MobileGlassGroup } from '../src/components/glass/group'
 import { MobileGlassIconButton } from '../src/components/glass/icon-button'
 import { MobileGlassTextButton } from '../src/components/glass/text-button'
@@ -602,7 +603,7 @@ export default function HomeScreen() {
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
             accessibilityLabel={translate('mobile.home.openInsights', 'Open activity insights')}
-            icon="chart.bar.xaxis"
+            icon="chart.line.uptrend.xyaxis"
             onPress={() => router.push('/activity-insights')}
           />
           <Stack.Toolbar.Button
@@ -690,20 +691,22 @@ export default function HomeScreen() {
               endpoint: item.endpoint
             })
             return (
-              <MobileHostCard
-                host={item}
-                state={state}
-                verdict={verdict}
-                path={hostPaths[item.id] ?? 'lan'}
-                worktreeCounts={
-                  info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
-                }
-                onPress={() => router.push(`/h/${item.id}`)}
-                onLongPress={() => {
-                  triggerMediumImpact()
-                  setActionTarget(item)
-                }}
-              />
+              <MobileContentSection>
+                <MobileHostCard
+                  host={item}
+                  state={state}
+                  verdict={verdict}
+                  path={hostPaths[item.id] ?? 'lan'}
+                  worktreeCounts={
+                    info ? { total: info.totalWorktrees, active: info.activeCount } : undefined
+                  }
+                  onPress={() => router.push(`/h/${item.id}`)}
+                  onLongPress={() => {
+                    triggerMediumImpact()
+                    setActionTarget(item)
+                  }}
+                />
+              </MobileContentSection>
             )
           }}
           ListFooterComponent={
@@ -712,68 +715,72 @@ export default function HomeScreen() {
               {resumeWorktree ? (
                 <View className="gap-2">
                   <SectionHeading>Resume</SectionHeading>
-                  <Pressable
-                    accessibilityRole="button"
-                    className="active:bg-accent flex-row items-center gap-2 rounded-xl px-2 py-3"
-                    onPress={() =>
-                      router.push(
-                        `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
-                      )
-                    }
-                  >
-                    <View className="h-8 w-5 items-center justify-center">
-                      <Terminal size={20} colorClassName="accent-muted-foreground" />
-                    </View>
-                    <View className="min-w-0 flex-1">
-                      <Text className="text-foreground" numberOfLines={1}>
-                        {resumeWorktree.worktree.displayName}
-                      </Text>
-                      <View className="mt-1 flex-row items-center gap-2">
-                        <View
-                          className="h-2 w-2"
-                          style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
-                        />
-                        <Text className="text-muted-foreground flex-1" numberOfLines={1}>
-                          {resumeWorktree.worktree.repo}
-                          {'  ·  '}
-                          {resumeWorktree.worktree.branch}
-                        </Text>
+                  <MobileContentSection>
+                    <Pressable
+                      accessibilityRole="button"
+                      className="active:bg-accent flex-row items-center gap-2 px-3 py-3"
+                      onPress={() =>
+                        router.push(
+                          `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
+                        )
+                      }
+                    >
+                      <View className="h-8 w-5 items-center justify-center">
+                        <Terminal size={20} colorClassName="accent-muted-foreground" />
                       </View>
-                    </View>
-                    <View className="h-6 w-5 items-center justify-center">
-                      <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-                    </View>
-                  </Pressable>
+                      <View className="min-w-0 flex-1">
+                        <Text className="text-foreground" numberOfLines={1}>
+                          {resumeWorktree.worktree.displayName}
+                        </Text>
+                        <View className="mt-1 flex-row items-center gap-2">
+                          <View
+                            className="h-2 w-2"
+                            style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
+                          />
+                          <Text className="text-muted-foreground flex-1" numberOfLines={1}>
+                            {resumeWorktree.worktree.repo}
+                            {'  ·  '}
+                            {resumeWorktree.worktree.branch}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="h-6 w-5 items-center justify-center">
+                        <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                      </View>
+                    </Pressable>
+                  </MobileContentSection>
                 </View>
               ) : null}
 
               {/* ─── Quick actions ─── */}
               <View className="gap-2">
                 <SectionHeading>Quick Actions</SectionHeading>
-                <MobileGlassGroup className="flex-row gap-2 px-2" spacing={8}>
-                  <MobileGlassTextButton
-                    label="Pair Desktop"
-                    onPress={() => router.push('/pair-scan')}
-                  />
-                  <MobileGlassTextButton
-                    disabled={!primaryConnectedHost}
-                    isProminent
-                    label="New Workspace"
-                    onPress={() => {
-                      if (primaryConnectedHost) {
-                        router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
-                      }
-                    }}
-                  />
-                </MobileGlassGroup>
+                <MobileContentSection className="p-3">
+                  <MobileGlassGroup className="flex-row gap-2" spacing={8}>
+                    <MobileGlassTextButton
+                      label="Pair Desktop"
+                      onPress={() => router.push('/pair-scan')}
+                    />
+                    <MobileGlassTextButton
+                      disabled={!primaryConnectedHost}
+                      isProminent
+                      label="New Workspace"
+                      onPress={() => {
+                        if (primaryConnectedHost) {
+                          router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
+                        }
+                      }}
+                    />
+                  </MobileGlassGroup>
+                </MobileContentSection>
               </View>
 
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
                 <View className="gap-2">
                   <SectionHeading>Account usage</SectionHeading>
-                  <View className="gap-2">
-                    {accountsHosts.map(({ host, snapshot }) => {
+                  <MobileContentSection>
+                    {accountsHosts.map(({ host, snapshot }, index) => {
                       const claudeActiveId = snapshot.claude.activeAccountId
                       const claudeActive =
                         snapshot.claude.accounts.find((a) => a.id === claudeActiveId) ?? null
@@ -785,7 +792,10 @@ export default function HomeScreen() {
                         <Pressable
                           key={host.id}
                           accessibilityRole="button"
-                          className="active:bg-accent gap-3 rounded-xl px-2 py-3"
+                          className={cn(
+                            'active:bg-accent gap-3 px-3 py-3',
+                            index > 0 && 'border-t-hairline border-border'
+                          )}
                           onPress={() => router.push(`/h/${host.id}/accounts`)}
                         >
                           {showHostName ? (
@@ -846,7 +856,7 @@ export default function HomeScreen() {
                         </Pressable>
                       )
                     })}
-                  </View>
+                  </MobileContentSection>
                 </View>
               ) : null}
             </View>
@@ -936,7 +946,7 @@ function CardGap() {
 
 function SectionHeading({ children }: { children: string }): React.JSX.Element {
   return (
-    <Text className="text-muted-foreground px-2 font-semibold tracking-wide uppercase">
+    <Text className="text-muted-foreground px-1 text-xs font-semibold tracking-wide uppercase">
       {children}
     </Text>
   )
