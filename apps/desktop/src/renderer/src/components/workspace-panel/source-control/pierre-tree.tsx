@@ -318,10 +318,10 @@ function SourceControlPierreTree({
         )
         event.dataTransfer.effectAllowed = 'copy'
       }}
-      renderContextMenu={(item) => {
+      renderContextMenu={(item, context) => {
         const target = data.targetByCanonicalPath.get(item.path)
         return target ? (
-          <SourceControlPierreTreeMenu controller={controller} target={target} />
+          <SourceControlPierreTreeMenu controller={controller} target={target} context={context} />
         ) : null
       }}
     />

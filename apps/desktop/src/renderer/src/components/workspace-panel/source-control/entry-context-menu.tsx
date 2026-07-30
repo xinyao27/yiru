@@ -36,8 +36,10 @@ type SourceControlEntryContextMenuProps = {
 }
 
 type SourceControlEntryMenuContentProps = Omit<SourceControlEntryContextMenuProps, 'children'> & {
+  contentRef?: React.Ref<HTMLDivElement>
   leadingActions?: React.ReactNode
   ownsFileTreeMenu?: boolean
+  positionerAnchor?: Element | null
 }
 
 function stopRightButtonMenuSelection(event: React.PointerEvent): void {
@@ -55,8 +57,10 @@ export function SourceControlEntryMenuContent({
   connectionId,
   onView,
   onRevealInExplorer,
+  contentRef,
   leadingActions,
-  ownsFileTreeMenu = false
+  ownsFileTreeMenu = false,
+  positionerAnchor
 }: SourceControlEntryMenuContentProps): React.JSX.Element {
   const openInApplications = useAppStore((s) => s.settings?.openInApplications ?? [])
   const runtimeEnvironmentId = useAppStore((s) =>
@@ -101,9 +105,13 @@ export function SourceControlEntryMenuContent({
 
   return (
     <ContextMenuContent
+      ref={contentRef}
       data-file-tree-context-menu-root={ownsFileTreeMenu ? 'true' : undefined}
       className="w-52"
       finalFocus={ownsFileTreeMenu ? false : undefined}
+      anchor={positionerAnchor}
+      side={positionerAnchor ? 'bottom' : undefined}
+      align={positionerAnchor ? 'start' : undefined}
       onPointerUpCapture={ownsFileTreeMenu ? stopRightButtonMenuSelection : undefined}
     >
       {leadingActions ? (

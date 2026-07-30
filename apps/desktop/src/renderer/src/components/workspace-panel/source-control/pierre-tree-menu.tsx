@@ -1,8 +1,10 @@
 import { Minus, Trash, Plus, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
+import type { ContextMenuOpenContext } from '@pierre/trees'
+import { useEffect, useRef } from 'react'
 
 import { translate } from '../../../i18n/i18n'
 import { joinPath } from '../../../lib/path'
-import { ContextMenuItem } from '../../ui/context-menu'
+import { ContextMenu, ContextMenuItem } from '../../ui/context-menu'
 import type { SourceControlController } from './controller'
 import { getSourceControlDirectoryActionPaths } from './directory-action-paths'
 import { canDiscardStatusEntry, canStageStatusEntry, canUnstageStatusEntry } from './entry-actions'
@@ -119,15 +121,36 @@ function getDirectoryActions(
   )
 }
 
-export function SourceControlPierreTreeMenu({
-  controller,
-  target
-}: {
+type SourceControlPierreTreeMenuProps = {
   controller: SourceControlController
   target: SourceControlPierreTarget
-}): React.JSX.Element | null {
+  context: ContextMenuOpenContext
+}
+
+function focusFirstAvailableMenuItem(content: HTMLDivElement | null): void {
+  content
+    ?.querySelector<HTMLElement>('[data-slot="context-menu-item"]:not([data-disabled])')
+    ?.focus()
+}
+
+export function SourceControlPierreTreeMenu({
+  controller,
+  target,
+  context
+}: SourceControlPierreTreeMenuProps): React.JSX.Element | null {
+  const contentRef = useRef<HTMLDivElement>(null)
   const activeWorktree = controller.activeWorktree
   const worktreePath = controller.worktreePath
+
+  useEffect(() => {
+    // Why: Pierre owns the external context-menu trigger, so Base UI cannot
+    // infer which menu item should receive keyboard focus when its portal opens.
+    const frameId = window.requestAnimationFrame(() => {
+      focusFirstAvailableMenuItem(contentRef.current)
+    })
+    return () => window.cancelAnimationFrame(frameId)
+  }, [context.anchorElement])
+
   if (!activeWorktree || !worktreePath || target.kind === 'placeholder') {
     return null
   }
@@ -149,14 +172,25 @@ export function SourceControlPierreTreeMenu({
         : undefined
 
   return (
-    <SourceControlEntryMenuContent
-      currentWorktreeId={activeWorktree.id}
-      absolutePath={joinPath(worktreePath, relativePath)}
-      connectionId={controller.activeConnectionId}
-      onView={onView}
-      onRevealInExplorer={controller.revealInExplorer}
-      leadingActions={leadingActions}
-      ownsFileTreeMenu
-    />
+    <ContextMenu
+      defaultOpen
+      onOpenChange={(open) => {
+        if (!open) {
+          context.close()
+        }
+      }}
+    >
+      <SourceControlEntryMenuContent
+        contentRef={contentRef}
+        currentWorktreeId={activeWorktree.id}
+        absolutePath={joinPath(worktreePath, relativePath)}
+        connectionId={controller.activeConnectionId}
+        onView={onView}
+        onRevealInExplorer={controller.revealInExplorer}
+        leadingActions={leadingActions}
+        ownsFileTreeMenu
+        positionerAnchor={context.anchorElement}
+      />
+    </ContextMenu>
   )
 }

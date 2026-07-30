@@ -103,10 +103,25 @@ function ContextMenuSubContent({
 
 // Main content stays pointer-anchored: do NOT force side/align here or every
 // right-click menu mispositions. Only the Positioner wrapper is added.
-function ContextMenuContent({ className, style, ...props }: ContextMenuPrimitive.Popup.Props) {
+type ContextMenuContentProps = ContextMenuPrimitive.Popup.Props &
+  Pick<ContextMenuPrimitive.Positioner.Props, 'anchor' | 'side' | 'align'>
+
+function ContextMenuContent({
+  className,
+  style,
+  anchor,
+  side,
+  align,
+  ...props
+}: ContextMenuContentProps) {
   return (
     <ContextMenuPrimitive.Portal>
-      <ContextMenuPrimitive.Positioner className="isolate z-[70] outline-none">
+      <ContextMenuPrimitive.Positioner
+        className="isolate z-[70] outline-none"
+        anchor={anchor}
+        side={side}
+        align={align}
+      >
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-content"
           className={cn(
