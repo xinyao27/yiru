@@ -60,7 +60,7 @@ function HostedReviewToolbarLink({
   return (
     <div
       className={cn(
-        'flex min-w-0 items-center gap-1 text-[11.5px] leading-none',
+        'flex min-w-0 items-center gap-1 text-xs leading-none',
         compact ? 'max-w-[72px] shrink-0' : 'flex-1'
       )}
     >
@@ -218,11 +218,11 @@ export function SourceControlHeaderToolbar({
             <Button
               type="button"
               variant="outline"
-              size="icon-xs"
+              size="icon-toolbar"
               data-testid="source-control-filter-toggle"
               className={cn(
                 RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
-                'relative size-7',
+                'relative',
                 normalizedFilter && 'bg-muted'
               )}
               onClick={expandFilter}
@@ -271,8 +271,7 @@ export function SourceControlHeaderToolbar({
             <Button
               type="button"
               variant="ghost"
-              size="icon-xs"
-              className="size-7"
+              size="icon-toolbar"
               aria-label={translate(
                 'auto.components.right.sidebar.SourceControl.d4f8c2a901',
                 'Clear and close filter'

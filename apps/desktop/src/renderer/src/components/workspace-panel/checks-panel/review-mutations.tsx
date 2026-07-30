@@ -191,7 +191,7 @@ export function useChecksPanelReviewMutations(context: useChecksPanelAgentAction
 
   // Open hosted review in browser
   const handleOpenPR = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (activeReview?.url) {
         // Why: route through openHttpLink so PR/MR links honor the "open links
         // in app" setting; Shift+Cmd/Ctrl keeps the terminal-link escape hatch.

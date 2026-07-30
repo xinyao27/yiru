@@ -29,7 +29,7 @@ type ChecksPanelReviewHeaderProps = {
   canUnlinkPullRequest: boolean
   showSystemBrowserHint: boolean
   onRefresh: () => void
-  onOpenReview: (event: React.MouseEvent<HTMLButtonElement>) => void
+  onOpenReview: (event: React.MouseEvent<HTMLAnchorElement>) => void
   onUnlinkPullRequest: () => void
   onLinkAnotherPullRequest: () => void
 }
@@ -58,21 +58,22 @@ export function ChecksPanelReviewHeader({
     : openTitle
 
   return (
-    <div className="flex items-center gap-2">
-      <ReviewIcon className="text-muted-foreground size-4 shrink-0" />
-      <Button
-        variant="outline"
-        size="xs"
-        type="button"
-        className="decoration-border hover:text-foreground hover:decoration-foreground h-auto px-0.5 text-[12px] font-semibold underline underline-offset-2"
+    <div className="flex min-w-0 items-center gap-1 text-xs leading-none">
+      <ReviewIcon className="text-muted-foreground size-3 shrink-0" />
+      <a
+        href={review.url}
+        className="decoration-border text-foreground hover:decoration-foreground focus-visible:bg-accent shrink-0 font-medium underline underline-offset-2 opacity-80 outline-none"
         title={title}
-        onClick={onOpenReview}
+        onClick={(event) => {
+          event.preventDefault()
+          onOpenReview(event)
+        }}
       >
         {reviewNumberLabel}
-      </Button>
+      </a>
       <span
         className={cn(
-          'text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 border',
+          'border px-1.5 py-0.5 text-[9px] font-semibold tracking-wider uppercase',
           prStateColor(review.state)
         )}
       >
@@ -85,7 +86,7 @@ export function ChecksPanelReviewHeader({
             <Button
               type="button"
               variant="outline"
-              size="icon-xs"
+              size="icon-toolbar"
               className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
               aria-label={translate(
                 'auto.components.right.sidebar.ChecksPanel.7f4489f370',
@@ -108,26 +109,33 @@ export function ChecksPanelReviewHeader({
       </Tooltip>
       {showPullRequestMenu && (
         <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-xs"
-                aria-label={translate(
-                  'auto.components.right.sidebar.ChecksPanel.653c105ecc',
-                  'More PR actions'
-                )}
-                title={translate(
-                  'auto.components.right.sidebar.ChecksPanel.653c105ecc',
-                  'More PR actions'
-                )}
-                className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
-              >
-                <Ellipsis className="size-3.5" />
-              </Button>
-            }
-          />
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span className="inline-flex shrink-0">
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon-toolbar"
+                        aria-label={translate(
+                          'auto.components.right.sidebar.ChecksPanel.653c105ecc',
+                          'More PR actions'
+                        )}
+                        className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
+                      >
+                        <Ellipsis className="size-3.5" />
+                      </Button>
+                    }
+                  />
+                </span>
+              }
+            />
+            <TooltipContent side="bottom" sideOffset={6}>
+              {translate('auto.components.right.sidebar.ChecksPanel.653c105ecc', 'More PR actions')}
+            </TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-44">
             <DropdownMenuItem disabled={!canUnlinkPullRequest} onClick={onUnlinkPullRequest}>
               <Unlink className="size-3.5" />

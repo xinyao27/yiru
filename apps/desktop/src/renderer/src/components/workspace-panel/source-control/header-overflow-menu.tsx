@@ -56,8 +56,8 @@ export function SourceControlHeaderOverflowMenu({
                   <Button
                     type="button"
                     variant="outline"
-                    size="icon-xs"
-                    className={`${RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME} size-7`}
+                    size="icon-toolbar"
+                    className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
                     aria-label={translate(
                       'auto.components.right.sidebar.SourceControl.f71c4a8d90',
                       'More source control actions'

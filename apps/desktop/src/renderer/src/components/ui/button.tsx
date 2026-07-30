@@ -72,6 +72,7 @@ const buttonVariants = cva(
         lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
         icon: 'size-9',
         'icon-xs': "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        'icon-toolbar': "size-7 [&_svg:not([class*='size-'])]:size-3.5",
         'icon-status-bar': "h-full w-5 [&_svg:not([class*='size-'])]:size-3",
         'icon-status-bar-wide': "h-full w-6 [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
