@@ -68,7 +68,14 @@ jobs:
         run: npx expo prebuild --platform android --no-install
 
       - name: Build Android release APK
-        run: cd android && ./gradlew assembleRelease
+        # Why: Expo SDK 57's release graph exhausts the generated project's
+        # 512 MiB metaspace limit before packaging the universal APK.
+        run: |
+          cd android
+          ./gradlew \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g" \
+            assembleRelease \
+            --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
