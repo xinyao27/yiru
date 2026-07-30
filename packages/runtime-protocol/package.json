@@ -92,8 +92,7 @@
     "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
     "fmt": "pnpm --workspace-root exec vp fmt packages/runtime-protocol",
     "lint": "pnpm --workspace-root exec vp lint packages/runtime-protocol --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "pnpm --workspace-root exec vp test packages/runtime-protocol"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@yiru/workbench-model": "catalog:",

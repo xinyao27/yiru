@@ -65,8 +65,7 @@
     "build": "tsc -p tsconfig.build.json && node build-esm.mjs",
     "fmt": "pnpm --workspace-root exec vp fmt packages/workbench-model",
     "lint": "pnpm --workspace-root exec vp lint packages/workbench-model --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "pnpm --workspace-root exec vp test packages/workbench-model"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",

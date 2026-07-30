@@ -51,7 +51,6 @@
     "check": "vp check --fix && pnpm run typecheck && pnpm --filter yiru run verify:repository-contracts",
     "lint": "vp lint --fix",
     "fmt": "vp fmt",
-    "test": "vp test",
     "up": "taze major -Ir",
     "prepare": "vp config"
   },
