@@ -978,6 +978,7 @@ export function HostScreen({
             if (!section.title) {
               return null
             }
+            const isFirstSection = sections[0]?.key === section.key
             const isCollapsed = collapsedGroups.has(section.key)
             const rawSection = rawSections.find((s) => s.key === section.key)
             const count = rawSection?.data.length ?? 0
@@ -990,6 +991,9 @@ export function HostScreen({
                 className="mx-3 mt-3 min-h-9 flex-row items-center gap-2 px-2"
                 onPress={() => toggleCollapsed(section.key)}
               >
+                {!isFirstSection ? (
+                  <View className="bg-border h-hairline absolute top-0 right-2 left-2" />
+                ) : null}
                 <View className="h-9 w-5 items-center justify-center">
                   {section.icon === 'pin' ? (
                     <Pin size={16} colorClassName="accent-muted-foreground" />
